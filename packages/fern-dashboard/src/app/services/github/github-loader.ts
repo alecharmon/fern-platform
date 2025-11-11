@@ -11,7 +11,6 @@ import type {
 import type { Octokit } from "@octokit/core";
 import yaml from "js-yaml";
 import { unstable_cache } from "next/cache";
-import pLimit from "p-limit";
 import z from "zod";
 import type { DocsUrl } from "@/utils/types";
 import { getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
@@ -39,8 +38,6 @@ interface DocsYmlConfig {
 export class GitHubLoader implements GitLoader {
     private getOctokitInstance: () => Promise<Octokit | null>;
     private octokit: Octokit | null = null;
-    private inFlightRequests: Map<string, Promise<any>> = new Map<string, Promise<any>>();
-    private concurrencyLimit = pLimit(8); // Bounded concurrency for parallel file fetching
 
     constructor(githubUrl: string) {
         this.getOctokitInstance = async () => {
@@ -96,12 +93,14 @@ export class GitHubLoader implements GitLoader {
     }
 
     /**
-     * Helper function to get the content of a file from a GitHub repository.
+     * Fetches the content of a file from a GitHub repository.
      *
-     * Optimizations implemented:
-     * 1. Fetches raw content directly (Accept: application/vnd.github.v3.raw) - no base64 decoding
-     * 2. Uses bounded concurrency (p-limit) for parallel fetching
-     * 3. Aggressive caching with Next.js unstable_cache, ETags, and commit SHA for stable cache keys
+     * - Resolves the ref to a commit SHA for stable cache keys
+     * - Fetches raw file content directly (Accept: application/vnd.github.v3.raw) to avoid base64 decoding
+     * - Caches aggressively using Next.js unstable_cache with commit SHA-based keys (1 year revalidation)
+     * - Stores ETag headers from GitHub API responses
+     *
+     * @returns The file content as a string, or null if the file cannot be fetched
      */
     private async getFileContent(owner: string, repo: string, ref: string, path: string): Promise<string | null> {
         const commitSha = await this.resolveRefToSha(owner, repo, ref);
@@ -114,43 +113,41 @@ export class GitHubLoader implements GitLoader {
 
         return unstable_cache(
             async () => {
-                return this.concurrencyLimit(async () => {
-                    try {
-                        const octokit = await this.getOctokit();
-                        if (!octokit) {
-                            console.error("Failed to get Octokit instance");
-                            return null;
-                        }
-
-                        const getCached = unstable_cache(
-                            async () => {
-                                const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-                                    owner,
-                                    repo,
-                                    path,
-                                    ref: commitSha,
-                                    headers: { accept: "application/vnd.github.v3.raw" }
-                                });
-
-                                const content = response.data as unknown as string;
-                                const etag = response.headers.etag ?? "";
-
-                                return { content, etag };
-                            },
-                            ["github-file", owner, repo, path, commitSha],
-                            {
-                                revalidate: 60 * 60 * 24 * 365,
-                                tags: [tag]
-                            }
-                        );
-
-                        const cached = await getCached();
-                        return cached?.content ?? null;
-                    } catch (error) {
-                        console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
+                try {
+                    const octokit = await this.getOctokit();
+                    if (!octokit) {
+                        console.error("Failed to get Octokit instance");
                         return null;
                     }
-                });
+
+                    const getCached = unstable_cache(
+                        async () => {
+                            const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+                                owner,
+                                repo,
+                                path,
+                                ref: commitSha,
+                                headers: { accept: "application/vnd.github.v3.raw" }
+                            });
+
+                            const content = response.data as unknown as string;
+                            const etag = response.headers.etag ?? "";
+
+                            return { content, etag };
+                        },
+                        ["github-file", owner, repo, path, commitSha],
+                        {
+                            revalidate: 60 * 60 * 24 * 365,
+                            tags: [tag]
+                        }
+                    );
+
+                    const cached = await getCached();
+                    return cached?.content ?? null;
+                } catch (error) {
+                    console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
+                    return null;
+                }
             },
             [`github-file-${owner}-${repo}-${commitSha}-${path}`],
             {
