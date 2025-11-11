@@ -12,6 +12,7 @@ export interface SidebarApiPackageNodeProps {
     className?: string;
     children: ReactNode;
     renderOptions: SidebarRenderOptions;
+    lang: string;
 }
 
 export function SidebarApiPackageNode({
@@ -20,7 +21,8 @@ export function SidebarApiPackageNode({
     depth,
     className,
     children,
-    renderOptions
+    renderOptions,
+    lang
 }: SidebarApiPackageNodeProps): ReactNode {
     if (React.Children.count(children) === 0 && FernNavigation.hasMarkdown(node)) {
         return (
@@ -40,7 +42,7 @@ export function SidebarApiPackageNode({
     }
 
     if (node.type === "apiReference" && node.hideTitle) {
-        return <SidebarGroupApiReferenceNode node={node} depth={depth} renderOptions={renderOptions} />;
+        return <SidebarGroupApiReferenceNode node={node} depth={depth} renderOptions={renderOptions} lang={lang} />;
     }
 
     return (

@@ -10,16 +10,18 @@ import { SidebarVariantedNode } from "./SidebarVariantedNode";
 
 export function SidebarRootChild({
     node,
-    renderOptions
+    renderOptions,
+    lang
 }: {
     node: FernNavigation.SidebarRootChild | FernNavigation.ApiPackageNode;
     renderOptions: SidebarRenderOptions;
+    lang: string;
 }) {
     const forceClientRender = renderOptions.forceClientRender ?? false;
 
     switch (node.type) {
         case "sidebarGroup":
-            return <SidebarGroupNode node={node} renderOptions={renderOptions} />;
+            return <SidebarGroupNode node={node} renderOptions={renderOptions} lang={lang} />;
         case "apiReference":
         case "apiPackage":
             return (
@@ -27,6 +29,7 @@ export function SidebarRootChild({
                     node={node}
                     icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
                     renderOptions={renderOptions}
+                    lang={lang}
                 />
             );
         case "section":
@@ -35,10 +38,11 @@ export function SidebarRootChild({
                     node={node}
                     icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
                     renderOptions={renderOptions}
+                    lang={lang}
                 />
             );
         case "varianted":
-            return <SidebarVariantedNode node={node} depth={0} renderOptions={renderOptions} />;
+            return <SidebarVariantedNode node={node} depth={0} renderOptions={renderOptions} lang={lang} />;
         default:
             throw new UnreachableCaseError(node);
     }

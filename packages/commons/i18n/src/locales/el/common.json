@@ -249,7 +249,9 @@
     "sectionTwo": "Ενότητα Δύο",
     "next": "Επόμενο",
     "previous": "Προηγούμενο",
-    "onThisPage": "Σε αυτήν τη σελίδα"
+    "onThisPage": "Σε αυτήν τη σελίδα",
+    "lastUpdated": "Τελευταία ενημέρωση",
+    "changelog": "Αλλαγές"
   },
   "documentation": {
     "documentation": "Τεκμηρίωση",

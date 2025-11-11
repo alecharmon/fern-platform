@@ -249,7 +249,9 @@
     "sectionTwo": "セクション2",
     "next": "次へ",
     "previous": "前へ",
-    "onThisPage": "このページ内"
+    "onThisPage": "このページ内",
+    "lastUpdated": "最終更新日",
+    "changelog": "変更履歴"
   },
   "documentation": {
     "documentation": "ドキュメント",

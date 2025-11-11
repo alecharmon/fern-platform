@@ -249,7 +249,9 @@
     "sectionTwo": "Seksjon to",
     "next": "Neste",
     "previous": "Forrige",
-    "onThisPage": "På denne siden"
+    "onThisPage": "På denne siden",
+    "lastUpdated": "Sist oppdatert",
+    "changelog": "Endringslogg"
   },
   "documentation": {
     "documentation": "Dokumentasjon",

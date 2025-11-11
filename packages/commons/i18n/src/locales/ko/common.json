@@ -249,7 +249,9 @@
     "sectionTwo": "섹션 2",
     "next": "다음",
     "previous": "이전",
-    "onThisPage": "이 페이지에서"
+    "onThisPage": "이 페이지에서",
+    "lastUpdated": "마지막 업데이트",
+    "changelog": "변경 로그"
   },
   "documentation": {
     "documentation": "문서",

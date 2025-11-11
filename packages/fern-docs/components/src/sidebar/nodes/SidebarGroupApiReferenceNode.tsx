@@ -9,12 +9,14 @@ interface SidebarGroupApiReferenceNodeProps {
     node: FernNavigation.ApiReferenceNode;
     depth: number;
     renderOptions: SidebarRenderOptions;
+    lang: string;
 }
 
 export function SidebarGroupApiReferenceNode({
     node,
     depth,
-    renderOptions
+    renderOptions,
+    lang
 }: SidebarGroupApiReferenceNodeProps): ReactNode {
     const shallow = false;
 
@@ -28,6 +30,7 @@ export function SidebarGroupApiReferenceNode({
                             depth={depth}
                             shallow={shallow}
                             renderOptions={renderOptions}
+                            lang={lang}
                         />
                     </li>
                 ))}

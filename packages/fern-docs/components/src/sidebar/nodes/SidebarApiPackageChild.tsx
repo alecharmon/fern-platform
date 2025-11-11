@@ -16,9 +16,16 @@ interface SidebarApiPackageChild {
     depth: number;
     shallow: boolean;
     renderOptions: SidebarRenderOptions;
+    lang: string;
 }
 
-export function SidebarApiPackageChild({ node, depth, shallow, renderOptions }: SidebarApiPackageChild): ReactNode {
+export function SidebarApiPackageChild({
+    node,
+    depth,
+    shallow,
+    renderOptions,
+    lang
+}: SidebarApiPackageChild): ReactNode {
     const forceClientRender = renderOptions.forceClientRender ?? false;
     const files = renderOptions.files;
 
@@ -56,6 +63,7 @@ export function SidebarApiPackageChild({ node, depth, shallow, renderOptions }: 
                     depth={depth}
                     icon={processIcon({ node, forceClientRender, files })}
                     renderOptions={renderOptions}
+                    lang={lang}
                 >
                     {node.children.map((node: FernNavigation.ApiPackageChild) => (
                         <SidebarApiPackageChild
@@ -64,6 +72,7 @@ export function SidebarApiPackageChild({ node, depth, shallow, renderOptions }: 
                             depth={depth + 1}
                             shallow={shallow}
                             renderOptions={renderOptions}
+                            lang={lang}
                         />
                     ))}
                 </SidebarApiPackageNode>
@@ -74,6 +83,7 @@ export function SidebarApiPackageChild({ node, depth, shallow, renderOptions }: 
                     node={node}
                     depth={depth}
                     icon={processIcon({ node, forceClientRender, files })}
+                    lang={lang}
                 />
             );
         default:

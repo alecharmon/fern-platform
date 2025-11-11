@@ -19,9 +19,16 @@ interface SidebarNavigationChildProps {
     root?: boolean;
     renderOptions: SidebarRenderOptions;
     files?: Record<string, FileData>;
+    lang: string;
 }
 
-export function SidebarNavigationChild({ node, depth, root, renderOptions }: SidebarNavigationChildProps): ReactNode {
+export function SidebarNavigationChild({
+    node,
+    depth,
+    root,
+    renderOptions,
+    lang
+}: SidebarNavigationChildProps): ReactNode {
     const forceClientRender = renderOptions.forceClientRender ?? false;
     switch (node.type) {
         case "apiReference":
@@ -31,6 +38,7 @@ export function SidebarNavigationChild({ node, depth, root, renderOptions }: Sid
                     depth={depth}
                     icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
                     renderOptions={renderOptions}
+                    lang={lang}
                 >
                     {node.children.map((node: FernNavigation.ApiPackageChild) => (
                         <SidebarApiPackageChild
@@ -39,6 +47,7 @@ export function SidebarNavigationChild({ node, depth, root, renderOptions }: Sid
                             depth={depth + 1}
                             shallow={false}
                             renderOptions={renderOptions}
+                            lang={lang}
                         />
                     ))}
                 </SidebarApiPackageNode>
@@ -60,6 +69,7 @@ export function SidebarNavigationChild({ node, depth, root, renderOptions }: Sid
                             node={node}
                             depth={depth + 1}
                             renderOptions={renderOptions}
+                            lang={lang}
                         />
                     ))}
                 </SidebarSectionNode>
@@ -87,10 +97,11 @@ export function SidebarNavigationChild({ node, depth, root, renderOptions }: Sid
                     node={node}
                     depth={depth}
                     icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
+                    lang={lang}
                 />
             );
         case "varianted":
-            return <SidebarVariantedNode node={node} depth={depth} renderOptions={renderOptions} />;
+            return <SidebarVariantedNode node={node} depth={depth} renderOptions={renderOptions} lang={lang} />;
         default:
             throw new UnreachableCaseError(node);
     }

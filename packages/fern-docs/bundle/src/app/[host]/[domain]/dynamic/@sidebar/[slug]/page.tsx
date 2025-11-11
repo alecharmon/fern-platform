@@ -64,6 +64,7 @@ export default async function SidebarPage({
     const tabs = getTabs(found, root, slug, showHiddenNodes, authState.authed ? (authState.user.roles ?? []) : []);
 
     const files = await loader.getFiles();
+    const lang = await loader.getLanguage();
 
     return (
         <>
@@ -83,6 +84,7 @@ export default async function SidebarPage({
                         currentVariantId: found.currentVariant?.variantId,
                         files
                     }}
+                    lang={lang}
                 />
             )}
         </>

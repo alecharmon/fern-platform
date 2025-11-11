@@ -52,12 +52,14 @@ export async function SidebarRootNode({
     root,
     visibleNodeIds,
     loader,
-    renderOptions
+    renderOptions,
+    lang
 }: {
     root: FernNavigation.SidebarRootNode | undefined;
     visibleNodeIds: FernNavigation.NodeId[] | undefined;
     loader: DocsLoader;
     renderOptions?: SidebarRenderOptions;
+    lang: string;
 }) {
     const authState = await loader.getAuthState();
     const edgeFlags = await loader.getEdgeFlags();
@@ -103,6 +105,7 @@ export async function SidebarRootNode({
                 variantImages,
                 files: renderOptions?.files
             }}
+            lang={lang}
         />
     );
 }

@@ -249,7 +249,9 @@
     "sectionTwo": "Раздел второй",
     "next": "Следующий",
     "previous": "Предыдущий",
-    "onThisPage": "На этой странице"
+    "onThisPage": "На этой странице",
+    "lastUpdated": "Последнее обновление",
+    "changelog": "История изменений"
   },
   "documentation": {
     "documentation": "Документация",

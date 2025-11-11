@@ -249,7 +249,9 @@
     "sectionTwo": "İkinci bölüm",
     "next": "İleri",
     "previous": "Geri",
-    "onThisPage": "Bu sayfada"
+    "onThisPage": "Bu sayfada",
+    "lastUpdated": "Son güncelleme",
+    "changelog": "Değişiklikler"
   },
   "documentation": {
     "documentation": "Dokümantasyon",

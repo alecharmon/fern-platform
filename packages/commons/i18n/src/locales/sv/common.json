@@ -249,7 +249,9 @@
     "sectionTwo": "Avsnitt två",
     "next": "Nästa",
     "previous": "Föregående",
-    "onThisPage": "På denna sida"
+    "onThisPage": "På denna sida",
+    "lastUpdated": "Senast uppdaterad",
+    "changelog": "Ändringslogg"
   },
   "documentation": {
     "documentation": "Dokumentation",

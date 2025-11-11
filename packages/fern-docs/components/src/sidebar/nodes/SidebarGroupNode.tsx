@@ -8,14 +8,15 @@ interface SidebarGroupNodeProps {
     node: FernNavigation.SidebarGroupNode;
     renderOptions: SidebarRenderOptions;
     files?: Record<string, FileData>;
+    lang: string;
 }
 
-export function SidebarGroupNode({ node, renderOptions }: SidebarGroupNodeProps): ReactNode {
+export function SidebarGroupNode({ node, renderOptions, lang }: SidebarGroupNodeProps): ReactNode {
     return (
         <ul className="fern-sidebar-group">
             {node.children.map((child) => (
                 <li key={child.id}>
-                    <SidebarNavigationChild node={child} depth={1} root renderOptions={renderOptions} />
+                    <SidebarNavigationChild node={child} depth={1} root renderOptions={renderOptions} lang={lang} />
                 </li>
             ))}
         </ul>

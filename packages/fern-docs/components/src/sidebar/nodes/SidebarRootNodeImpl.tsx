@@ -15,13 +15,15 @@ export function SidebarRootNodeImpl({
     visibleNodeIds,
     authState,
     edgeFlags,
-    renderOptions
+    renderOptions,
+    lang
 }: {
     root: FernNavigation.SidebarRootNode | undefined;
     visibleNodeIds: FernNavigation.NodeId[] | undefined;
     authState: AuthState;
     edgeFlags: EdgeFlags;
     renderOptions?: SidebarRenderOptions;
+    lang: string;
 }) {
     const forceClientRender = renderOptions?.forceClientRender ?? false;
     const wrapSectionNode = renderOptions?.wrapSectionNode;
@@ -89,6 +91,7 @@ export function SidebarRootNodeImpl({
                                     currentVariantId,
                                     files: renderOptions?.files
                                 }}
+                                lang={lang}
                             />
                         </li>
                     ))}

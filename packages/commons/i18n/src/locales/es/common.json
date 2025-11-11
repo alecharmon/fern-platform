@@ -249,7 +249,9 @@
     "sectionTwo": "Sección dos",
     "next": "Siguiente",
     "previous": "Anterior",
-    "onThisPage": "En esta página"
+    "onThisPage": "En esta página",
+    "lastUpdated": "Última actualización",
+    "changelog": "Cambios"
   },
   "documentation": {
     "documentation": "Documentación",

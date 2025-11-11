@@ -260,6 +260,8 @@ export type Translations = {
         next: string;
         previous: string;
         onThisPage: string;
+        lastUpdated: string;
+        changelog: string;
     };
 
     documentation: {

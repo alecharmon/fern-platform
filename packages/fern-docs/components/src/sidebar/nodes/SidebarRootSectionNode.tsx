@@ -13,6 +13,7 @@ interface SidebarRootSectionNodeProps {
     className?: string;
     renderOptions: SidebarRenderOptions;
     files?: Record<string, FileData>;
+    lang: string;
 }
 
 export function SidebarRootSectionNode({
@@ -20,7 +21,8 @@ export function SidebarRootSectionNode({
     icon,
     className,
     renderOptions,
-    files
+    files,
+    lang
 }: SidebarRootSectionNodeProps): ReactNode {
     // If the node has no children, it is a page node.
     if (node.children.length === 0 && FernNavigation.hasMarkdown(node)) {
@@ -40,7 +42,13 @@ export function SidebarRootSectionNode({
             <ul className="fern-sidebar-group">
                 {node.children.map((child) => (
                     <li key={child.id}>
-                        <SidebarNavigationChild node={child} depth={1} renderOptions={renderOptions} files={files} />
+                        <SidebarNavigationChild
+                            node={child}
+                            depth={1}
+                            renderOptions={renderOptions}
+                            files={files}
+                            lang={lang}
+                        />
                     </li>
                 ))}
             </ul>

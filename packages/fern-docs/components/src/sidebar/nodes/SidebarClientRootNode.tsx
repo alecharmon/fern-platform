@@ -10,12 +10,14 @@ export function SidebarClientRootNode({
     root,
     visibleNodeIds,
     loaderData,
-    renderOptions
+    renderOptions,
+    lang = "en"
 }: {
     root: FernNavigation.SidebarRootNode | undefined;
     visibleNodeIds: FernNavigation.NodeId[] | undefined;
     loaderData: DangerousTransmittableDocsLoaderData;
     renderOptions?: SidebarRenderOptions;
+    lang?: string;
 }) {
     const forceClientRender = renderOptions?.forceClientRender ?? true;
     const wrapSectionNode = renderOptions?.wrapSectionNode;
@@ -33,6 +35,7 @@ export function SidebarClientRootNode({
             authState={authState}
             edgeFlags={edgeFlags}
             renderOptions={{ forceClientRender, wrapSectionNode, wrapPageNode, files }}
+            lang={lang}
         />
     );
 }

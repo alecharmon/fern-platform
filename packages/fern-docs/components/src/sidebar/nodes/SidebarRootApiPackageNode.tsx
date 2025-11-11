@@ -12,9 +12,16 @@ export interface SidebarRootApiPackageNodeProps {
     icon: React.ReactNode;
     className?: string;
     renderOptions: SidebarRenderOptions;
+    lang: string;
 }
 
-export function SidebarRootApiPackageNode({ node, icon, className, renderOptions }: SidebarRootApiPackageNodeProps) {
+export function SidebarRootApiPackageNode({
+    node,
+    icon,
+    className,
+    renderOptions,
+    lang
+}: SidebarRootApiPackageNodeProps) {
     const shallow = false;
 
     if (node.children.length === 0 && FernNavigation.hasMarkdown(node)) {
@@ -52,6 +59,7 @@ export function SidebarRootApiPackageNode({ node, icon, className, renderOptions
                             depth={1}
                             shallow={shallow}
                             renderOptions={renderOptions}
+                            lang={lang}
                         />
                     </li>
                 ))}
@@ -62,6 +70,7 @@ export function SidebarRootApiPackageNode({ node, icon, className, renderOptions
                             depth={1}
                             shallow={shallow}
                             renderOptions={renderOptions}
+                            lang={lang}
                         />
                     </li>
                 )}

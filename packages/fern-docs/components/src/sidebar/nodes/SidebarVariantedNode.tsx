@@ -21,9 +21,10 @@ interface SidebarVariantedNodeProps {
     node: FernNavigation.VariantedNode;
     depth: number;
     renderOptions: SidebarRenderOptions;
+    lang: string;
 }
 
-export function SidebarVariantedNode({ node, depth, renderOptions }: SidebarVariantedNodeProps): ReactNode {
+export function SidebarVariantedNode({ node, depth, renderOptions, lang }: SidebarVariantedNodeProps): ReactNode {
     const forceClientRender = renderOptions.forceClientRender ?? false;
     const clientVariantId = useCurrentVariantId();
     const [isOpen, setIsOpen] = useState(false);
@@ -152,7 +153,9 @@ export function SidebarVariantedNode({ node, depth, renderOptions }: SidebarVari
                     // We need to determine if this should be rendered as a root child or navigation child
                     // Based on the discriminated union, VariantChild includes SidebarGroup which is a root-level item
                     if (child.type === "sidebarGroup") {
-                        return <SidebarRootChild key={child.id} node={child} renderOptions={renderOptions} />;
+                        return (
+                            <SidebarRootChild key={child.id} node={child} renderOptions={renderOptions} lang={lang} />
+                        );
                     }
 
                     // All other types are NavigationChild types
@@ -162,6 +165,7 @@ export function SidebarVariantedNode({ node, depth, renderOptions }: SidebarVari
                             node={child}
                             depth={depth + 1}
                             renderOptions={renderOptions}
+                            lang={lang}
                         />
                     );
                 })}

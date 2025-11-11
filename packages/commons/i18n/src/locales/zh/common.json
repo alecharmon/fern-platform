@@ -249,7 +249,9 @@
     "sectionTwo": "第二节",
     "next": "下一个",
     "previous": "上一个",
-    "onThisPage": "在本页"
+    "onThisPage": "在本页",
+    "lastUpdated": "最后更新",
+    "changelog": "变更日志"
   },
   "documentation": {
     "documentation": "文档",
