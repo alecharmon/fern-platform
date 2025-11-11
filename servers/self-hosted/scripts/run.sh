@@ -156,7 +156,7 @@ export MEILI_HTTP_ADDR=0.0.0.0:7700
 log "Starting MeiliSearch..."
 # Change to /tmp so MeiliSearch's default data directory (./data.ms) is created there
 cd /tmp
-/meilisearch --master-key="fern123!" 2>&1 | add_timestamps > /tmp/meilisearch.log &
+/meilisearch --master-key="fern123!" > /tmp/meilisearch.log 2>&1 &
 meili_pid=$!
 log "MeiliSearch PID: $meili_pid"
 
@@ -187,7 +187,7 @@ export MEILISEARCH_URL="http://localhost:7700"
 
 # -----------  Start MINIO setup  -----------
 log "Starting MinIO server..."
-minio server ${MINIO_VOLUMES} --console-address ":9001" 2>&1 | add_timestamps > /var/log/minio.log &
+minio server ${MINIO_VOLUMES} --console-address ":9001" > /tmp/minio.log 2>&1 &
 minio_pid=$!
 log "MinIO PID: $minio_pid"
 
@@ -230,7 +230,7 @@ NEXT_PUBLIC_FILES_ORIGIN="http://localhost:9000/${MINIO_BUCKET_NAME}"
 # -----------  End MINIO setup  -----------
 
 log "Starting FDR server..."
-node /fdr/server.cjs 2>&1 | add_timestamps &
+node /fdr/server.cjs > /tmp/fdr.log 2>&1 &
 fdr_pid=$!
 log "FDR server PID: $fdr_pid"
 
@@ -274,7 +274,8 @@ NEXT_DISABLE_CACHE=1 \
 NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700" \
 NEXT_PUBLIC_MEILISEARCH_API_KEY="fern123!" \
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
-node server.js 2>&1 | add_timestamps & docs_pid=$!
+node server.js > /tmp/nextjs.log 2>&1 &
+docs_pid=$!
 if [ $? -ne 0 ]; then
     log "Warning: Failed to start docs server (server.js), continuing anyway."
 else
@@ -282,6 +283,43 @@ else
 fi
 
 # --------------  Finish nextapp --------------
+
+# --------------  Save PIDs for health checks --------------
+PID_FILE="/tmp/fern-services.json"
+log "Saving service PIDs to $PID_FILE for health checks..."
+
+# Get last PID for postgres (the parent/main process)
+postgres_main_pid=$(echo "$postgres_pid" | tr ' ' '\n' | tail -1)
+
+# Create JSON file with PIDs using jq
+jq -n \
+  --arg postgres "${postgres_main_pid:-0}" \
+  --arg meili "${meili_pid:-0}" \
+  --arg minio "${minio_pid:-0}" \
+  --arg fdr "${fdr_pid:-0}" \
+  --arg docs "${docs_pid:-0}" \
+  '{
+    postgres_pid: ($postgres | tonumber),
+    meili_pid: ($meili | tonumber),
+    minio_pid: ($minio | tonumber),
+    fdr_pid: ($fdr | tonumber),
+    docs_pid: ($docs | tonumber)
+  }' > "$PID_FILE"
+
+log "PIDs saved to $PID_FILE"
+log "PID file contents:"
+cat "$PID_FILE" | while IFS= read -r line; do log "  $line"; done
+
+# --------------  Start health check server --------------
+log "Starting health check server on port 8081..."
+HEALTH_CHECK_PORT=8081 node /scripts/health-server.js > /tmp/health-server.log 2>&1 &
+health_server_pid=$!
+log "Health check server PID: $health_server_pid"
+
+log "Health check endpoints available at:"
+log "  - http://localhost:8081/liveness  - Check if processes are alive"
+log "  - http://localhost:8081/readiness - Check if services are ready"
+log "  - http://localhost:8081/health    - Legacy health endpoint"
 
 log "Calling /api/fern-docs/search/v2/reindex/meilisearch route..."
 # Try to reindex search, but don't block startup if it fails

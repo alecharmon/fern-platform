@@ -4,8 +4,7 @@ import type { FernConfigJsonErrors } from "@fern-api/docs-loader";
 
 import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
 import type { DocsUrl } from "@/utils/types";
-
-import { GitHubLoader } from "../../github/github-loader";
+import { getCachedGitHubLoader } from "../../github/cachedGitHubLoader";
 
 export type GetFernVersionFromRepoError =
     | { type: "MALFORMED_GITHUB_URL"; url: string }
@@ -28,7 +27,7 @@ export async function getFernVersionFromRepo(
         };
     }
 
-    const loader = new GitHubLoader(githubUrl);
+    const loader = await getCachedGitHubLoader(githubUrl);
     const fernConfigResult = await loader.getFernConfigJson(owner, repo, docsUrl);
 
     if (fernConfigResult.type !== "ok") {

@@ -4,14 +4,14 @@ import yaml from "js-yaml";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { GithubCommitableFile } from "@/app/services/github/types";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
-
 import postCreatePr from "../api/post-git-create-pr/handler";
 import type { Auth0OrgName } from "../services/auth0/types";
 import createBranchIfNotExists from "../services/dal/github/createBranchIfNotExists";
 import { withGithubAuth } from "../services/dal/github/middleware";
 import postGitCommit from "../services/dal/github/postGitCommit";
-import { GitHubLoader } from "../services/github/github-loader";
+import { getCachedGitHubLoader } from "../services/github/cachedGitHubLoader";
 
 interface RedirectConfig {
     source: string;
@@ -38,7 +38,7 @@ export async function createRedirectPrAction(
     prNumber?: number;
 }> {
     const session = await getCurrentSession();
-    const decodedDocsUrl = decodeURIComponent(docsUrl);
+    const site = parseDocsUrlParam({ docsUrl });
     if (session == null) {
         return { success: false, error: "No session found" };
     }
@@ -87,7 +87,7 @@ export async function createRedirectPrAction(
                     repo,
                     branch: branchName,
                     baseBranch,
-                    site: decodedDocsUrl,
+                    site,
                     orgName
                 });
 
@@ -98,8 +98,8 @@ export async function createRedirectPrAction(
                     };
                 }
 
-                const githubLoader = new GitHubLoader(validatedGithubUrl);
-                const docsYmlResult = await githubLoader.getDocsYml(owner, repo, decodedDocsUrl, baseBranch);
+                const githubLoader = await getCachedGitHubLoader(validatedGithubUrl);
+                const docsYmlResult = await githubLoader.getDocsYml(owner, repo, site, baseBranch);
 
                 if (docsYmlResult.type !== "ok") {
                     return { success: false, error: "Failed to fetch docs.yml" };
@@ -159,7 +159,7 @@ export async function createRedirectPrAction(
                     updatedDocsYml = docsYmlContent.trimEnd() + "\n\nredirects:\n" + newRedirect + "\n";
                 }
 
-                const projectResult = await githubLoader.getFernProjectBySite(owner, repo, decodedDocsUrl);
+                const projectResult = await githubLoader.getFernProjectBySite(owner, repo, site);
                 if (projectResult.type !== "ok") {
                     return { success: false, error: "Failed to locate docs.yml path" };
                 }
@@ -183,7 +183,7 @@ export async function createRedirectPrAction(
                     message: commitMessage,
                     files,
                     orgName,
-                    site: decodedDocsUrl
+                    site
                 });
 
                 if (!commitResult.success) {

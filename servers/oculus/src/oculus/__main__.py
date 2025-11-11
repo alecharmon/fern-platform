@@ -194,12 +194,6 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
         print(f"Hint: Run 'oculus generate --suite {args.suite}' first", file=sys.stderr)
         return 1
 
-    answers_dir = suite_path / "answers" / args.run_id
-    if not answers_dir.exists() or not any(answers_dir.glob("*.json")):
-        print(f"Error: No answers found in {answers_dir}", file=sys.stderr)
-        print(f"Hint: Run 'oculus answer --suite {args.suite} --run-id {args.run_id}' first", file=sys.stderr)
-        return 1
-
     try:
         runner = EvaluationRunner(
             suite_name=args.suite,
@@ -213,6 +207,11 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
             generator_config=suite_config.generator_config,
         )
 
+        if not runner.answers_dir.exists() or not any(runner.answers_dir.glob("*.json")):
+            print(f"Error: No answers found in {runner.answers_dir}", file=sys.stderr)
+            print(f"Hint: Run 'oculus answer --suite {args.suite} --run-id {args.run_id}' first", file=sys.stderr)
+            return 1
+
         print(f"\n{'='*60}")
         print(f"Evaluating answers: {runner.run_id}")
         print(f"Suite: {args.suite}")
@@ -225,7 +224,7 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
         print(f"Total questions: {len(questions)}\n")
 
         print("Loading answers...")
-        answer_files = sorted(answers_dir.glob("*.json"), key=lambda f: f.stem)
+        answer_files = sorted(runner.answers_dir.glob("*.json"), key=lambda f: f.stem)
         answers = [Answer(**load_json(f)) for f in answer_files]
         print(f"Total answers: {len(answers)}\n")
 
@@ -249,7 +248,7 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
             metrics=metrics,
         )
 
-        results_path = suite_path / f"results_{runner.run_id}.json"
+        results_path = runner.results_dir / f"results_{runner.run_id}.json"
         save_json(results_path, run_result.model_dump())
         print(f"Saved results to {results_path}\n")
 

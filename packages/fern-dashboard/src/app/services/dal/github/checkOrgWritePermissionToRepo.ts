@@ -4,8 +4,8 @@ import type { FernConfigJsonErrors } from "@fern-api/docs-loader";
 
 import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
-
-import { GitHubLoader } from "../../github/github-loader";
+import type { DocsUrl } from "@/utils/types";
+import { getCachedGitHubLoader } from "../../github/cachedGitHubLoader";
 
 export type CheckOrgWritePermissionToRepoError =
     | { type: "MALFORMED_GITHUB_URL"; url: string }
@@ -26,7 +26,7 @@ export type CheckOrgWritePermissionToRepoResult =
  */
 export async function checkOrgWritePermissionToRepo(
     orgName: string,
-    site: string,
+    site: DocsUrl,
     githubUrl: string
 ): Promise<CheckOrgWritePermissionToRepoResult> {
     const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
@@ -55,7 +55,7 @@ export async function checkOrgWritePermissionToRepo(
         );
     }
 
-    const githubLoader = new GitHubLoader(githubUrl);
+    const githubLoader = await getCachedGitHubLoader(githubUrl);
 
     // Use the helper function to fetch fern.config.json from the repo
     const fernConfigResult = await githubLoader.getFernConfigJson(owner, repo, site);

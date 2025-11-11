@@ -32,7 +32,8 @@ export async function runRouteForCohere({
     embeddingModel,
     turbopufferNamespace,
     languageModel,
-    userIsAuthed
+    userIsAuthed,
+    skipSaveQuery
 }: {
     domain: string;
     chatSource: string;
@@ -46,6 +47,7 @@ export async function runRouteForCohere({
     turbopufferNamespace: string;
     languageModel: LanguageModel;
     userIsAuthed: boolean;
+    skipSaveQuery?: boolean;
 }): Promise<Response | TurbopufferAuthError> {
     const start = Date.now();
 
@@ -174,22 +176,24 @@ export async function runRouteForCohere({
                         baseUrl: getFaiOrigin(),
                         token: fernToken_admin()
                     });
-                    try {
-                        await faiClient.query.createQuery({
-                            domain,
-                            body: {
-                                query_id: assistantQueryId,
-                                conversation_id: conversationId,
+                    if (!skipSaveQuery) {
+                        try {
+                            await faiClient.query.createQuery({
                                 domain,
-                                text: responseText,
-                                role: "ASSISTANT",
-                                source: chatSource.toUpperCase(),
-                                created_at: new Date(end).toISOString(),
-                                time_to_first_token: timeToFirstToken
-                            }
-                        });
-                    } catch (error) {
-                        console.log("Error creating assistant query", error);
+                                body: {
+                                    query_id: assistantQueryId,
+                                    conversation_id: conversationId,
+                                    domain,
+                                    text: responseText,
+                                    role: "ASSISTANT",
+                                    source: chatSource.toUpperCase(),
+                                    created_at: new Date(end).toISOString(),
+                                    time_to_first_token: timeToFirstToken
+                                }
+                            });
+                        } catch (error) {
+                            console.log("Error creating assistant query", error);
+                        }
                     }
                     track("ask_ai", {
                         languageModel: languageModel.valueOf().toString(),

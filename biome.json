@@ -24,6 +24,7 @@
       "!**/lib",
       "!**/node_modules",
       "!**/openapi.json",
+      "!**/out",
       "!**/*.{yaml,yml}",
       "!.eslintrc.js",
       "!packages/fai-sdk/src",

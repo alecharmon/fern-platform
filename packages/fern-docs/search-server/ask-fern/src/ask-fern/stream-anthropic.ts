@@ -47,7 +47,8 @@ export async function runRouteForAnthropic({
     turbopufferNamespace,
     languageModel,
     documentUrls,
-    userIsAuthed
+    userIsAuthed,
+    skipSaveQuery
 }: {
     domain: string;
     chatSource: string;
@@ -62,6 +63,7 @@ export async function runRouteForAnthropic({
     languageModel: LanguageModel;
     documentUrls?: string[];
     userIsAuthed: boolean;
+    skipSaveQuery?: boolean;
 }): Promise<Response | TurbopufferAuthError> {
     const faiClient = new FernAIClient({
         baseUrl: getFaiOrigin(),
@@ -316,22 +318,24 @@ export async function runRouteForAnthropic({
                 },
                 onFinish: async (e) => {
                     const end = Date.now();
-                    try {
-                        await faiClient.query.createQuery({
-                            domain,
-                            body: {
-                                query_id: assistantQueryId,
-                                conversation_id: conversationId,
+                    if (!skipSaveQuery) {
+                        try {
+                            await faiClient.query.createQuery({
                                 domain,
-                                text: responseText,
-                                role: "ASSISTANT",
-                                source: chatSource.toUpperCase(),
-                                created_at: new Date(end).toISOString(),
-                                time_to_first_token: timeToFirstToken
-                            }
-                        });
-                    } catch (error) {
-                        console.log("Error creating assistant query", error);
+                                body: {
+                                    query_id: assistantQueryId,
+                                    conversation_id: conversationId,
+                                    domain,
+                                    text: responseText,
+                                    role: "ASSISTANT",
+                                    source: chatSource.toUpperCase(),
+                                    created_at: new Date(end).toISOString(),
+                                    time_to_first_token: timeToFirstToken
+                                }
+                            });
+                        } catch (error) {
+                            console.log("Error creating assistant query", error);
+                        }
                     }
                     const { activeLanguageModel, activeModelProvider } = getModelUsageInfo(languageModel);
                     track("ask_ai", {

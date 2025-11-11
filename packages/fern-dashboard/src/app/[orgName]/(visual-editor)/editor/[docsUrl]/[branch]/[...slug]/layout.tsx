@@ -53,10 +53,7 @@ export default async function VisualEditorPreviewLayout({
 }>) {
     const { orgName, docsUrl, branch } = await params;
 
-    const { session } = await assertAuthAndFetchGithubUrl({
-        orgName,
-        docsUrl: parseDocsUrlParam({ docsUrl })
-    });
+    const { session } = await assertAuthAndFetchGithubUrl(orgName, parseDocsUrlParam({ docsUrl }));
     const host = await getHostFromHeaders();
 
     // Use cached loader to prevent duplicate creation across parallel routes

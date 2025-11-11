@@ -3,12 +3,12 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
+import { PublishToGitHubButton } from "@/components/docs-page/PublishToGitHubButton";
 import { VisualEditorLoadingCard } from "@/components/docs-page/visual-editor-section/VisualEditorLoadingCard";
 import { VisualEditorSection } from "@/components/docs-page/visual-editor-section/VisualEditorSection";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
@@ -35,14 +35,23 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
         notFound();
     }
 
-    // Start expensive operations in parallel without awaiting
-    Promise.all([
-        getDocsGithubUrl(docsUrl, session.accessToken),
-        getGitHubAuthState(docsUrl, session.accessToken, orgName, session)
-    ]);
+    // Get GitHub URL to determine source repo owner
+    const githubUrlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
+
+    // Extract owner from GitHub URL (e.g., "https://github.com/owner/repo" -> "owner")
+    let sourceRepoOwner: string | undefined;
+    if (githubUrlResult.success) {
+        const match = githubUrlResult.githubUrl?.match(/github\.com\/([^/]+)/);
+        sourceRepoOwner = match?.[1];
+    }
 
     return (
         <div className="flex w-full flex-col gap-4">
+            <PublishToGitHubButton
+                docsUrl={docsUrl}
+                docsSiteName={currentDocsSite.title ?? "Docs"}
+                sourceRepoOwner={sourceRepoOwner}
+            />
             <DocsSiteOverviewCard docsUrl={docsUrl} docsSite={currentDocsSite} orgName={orgName} />
             <Suspense fallback={<VisualEditorLoadingCard />}>
                 <VisualEditorSection docsUrl={docsUrl} session={session} orgName={orgName} />

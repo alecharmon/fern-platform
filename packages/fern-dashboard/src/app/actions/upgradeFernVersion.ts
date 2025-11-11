@@ -10,7 +10,7 @@ import createBranchIfNotExists from "../services/dal/github/createBranchIfNotExi
 import { withGithubAuth } from "../services/dal/github/middleware";
 import postGitCommit from "../services/dal/github/postGitCommit";
 import { getUpgradePrBranchName } from "../services/dal/github/request-utils";
-import { GitHubLoader } from "../services/github/github-loader";
+import { getCachedGitHubLoader } from "../services/github/cachedGitHubLoader";
 
 export async function upgradeFernVersionAction(
     orgName: Auth0OrgName,
@@ -83,7 +83,7 @@ export async function upgradeFernVersionAction(
                 // Step 2: Get current fern.config.json content and update the version
 
                 // Get current fern.config.json content
-                const githubLoader = new GitHubLoader(validatedGithubUrl);
+                const githubLoader = await getCachedGitHubLoader(validatedGithubUrl);
                 const fernConfigResult = await githubLoader.getFernConfigJson(owner, repo, docsUrl);
 
                 if (fernConfigResult.type !== "ok") {

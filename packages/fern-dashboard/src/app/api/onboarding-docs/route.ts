@@ -2,15 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
-import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
-
-import handler, { type OnboardingDocsRequest } from "./handler";
-
-export declare namespace createOnboardingDocs {
-    export type Request = z.infer<typeof CreateOnboardingDocsRequest>;
-    export type Response = z.infer<typeof CreateOnboardingDocsResponse>;
-}
 
 const CreateOnboardingDocsRequest = z.object({
     orgName: z.string().min(1),
@@ -30,32 +22,18 @@ const CreateOnboardingDocsRequest = z.object({
             assetUrl: z.string().url()
         })
     ),
-    createGithubRepo: z.boolean().optional().default(true)
+    sessionId: z.string()
 });
 
-const CreateOnboardingDocsResponse = z.object({
-    url: z.string(),
-    message: z.string(),
-    cliOutput: z.string(),
-    fernDocsDownloadUrl: z.string(),
-    githubRepoUrl: z.string().optional()
-});
-
+// This endpoint now only handles the streaming case
+// The actual work is done by /api/onboarding-docs/stream
 export const POST = withZodValidation(
     CreateOnboardingDocsRequest,
-    async (req: NextRequest, validatedBody: z.infer<typeof CreateOnboardingDocsRequest>) => {
-        const session = await getCurrentSession();
-
-        // Use the session's access token as FERN_TOKEN if available
-        const fernToken = session?.accessToken;
-
-        const result = await handler(validatedBody as OnboardingDocsRequest, fernToken, validatedBody.createGithubRepo);
-
-        if (result.errorResponse != null) {
-            return result.errorResponse;
-        }
-
-        const validatedResult = CreateOnboardingDocsResponse.parse(result.data);
-        return NextResponse.json(validatedResult);
+    async (_req: NextRequest, validatedBody: z.infer<typeof CreateOnboardingDocsRequest>) => {
+        return NextResponse.json({
+            streaming: true,
+            sessionId: validatedBody.sessionId,
+            message: "Documentation generation started. Check the stream for progress."
+        });
     }
 );

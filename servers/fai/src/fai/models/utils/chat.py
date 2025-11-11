@@ -12,7 +12,7 @@ class ChatMode(str, Enum):
 
 
 def format_record(record: Row | Any) -> str:
-    document = getattr(record, "chunk", "")
+    document = getattr(record, "document", "")
     url = getattr(record, "url", "")
 
     if url:

@@ -24,6 +24,14 @@ function UploadForm({
     isLoading?: boolean;
     error?: string | null;
 }) {
+    // Convert docs site name to URL-friendly format
+    const nameToUrl = (name: string): string => {
+        return name
+            .toLowerCase()
+            .replace(/\s+/g, "-") // Replace spaces with hyphens
+            .replace(/[^a-z0-9-]/g, ""); // Remove any non-alphanumeric characters except hyphens
+    };
+
     const isFormValid =
         wizardFormData.docsSiteUrlAvailable === true &&
         wizardFormData.docsSiteName.length > 0 &&
@@ -54,25 +62,30 @@ function UploadForm({
                                             type="text"
                                             placeholder="myorg.com"
                                             value={wizardFormData.docsSiteName}
-                                            onChange={(e) =>
+                                            onChange={(e) => {
+                                                const newName = e.target.value;
                                                 setWizardFormData({
                                                     ...wizardFormData,
-                                                    docsSiteName: e.target.value
-                                                })
-                                            }
+                                                    docsSiteName: newName,
+                                                    // Always auto-update URL based on name
+                                                    docsSiteUrl: nameToUrl(newName),
+                                                    // Reset availability when URL changes
+                                                    docsSiteUrlAvailable: null
+                                                });
+                                            }}
                                             className="w-full"
                                         />
                                     </div>
 
                                     <DocsUrl
                                         value={wizardFormData.docsSiteUrl}
-                                        onChange={(url, available) =>
+                                        onChange={(url, available) => {
                                             setWizardFormData({
                                                 ...wizardFormData,
                                                 docsSiteUrl: url,
                                                 docsSiteUrlAvailable: available
-                                            })
-                                        }
+                                            });
+                                        }}
                                     />
 
                                     <OpenAPISpecs
@@ -87,22 +100,22 @@ function UploadForm({
 
                                     <UploadImage
                                         label="Favicon"
-                                        description="Upload a 32 x 32 pixel ICO, PNG, GIF, or JPG to display in browser tabs."
+                                        description="Supported formats: ICO, PNG, GIF"
                                         imageUrl={wizardFormData.faviconUrl}
                                         onImageUpload={(url) =>
                                             setWizardFormData({ ...wizardFormData, faviconUrl: url })
                                         }
                                         size="small"
-                                        accept="image/x-icon,image/png,image/gif,image/jpeg"
+                                        accept="image/x-icon,image/png,image/gif"
                                     />
 
                                     <UploadImage
                                         label="Logo"
-                                        description="This will be used as the main logo on the top-left corner of the Docs site."
+                                        description="Supported formats: PNG, GIF, SVG"
                                         imageUrl={wizardFormData.logoUrl}
                                         onImageUpload={(url) => setWizardFormData({ ...wizardFormData, logoUrl: url })}
                                         size="large"
-                                        accept="image/*"
+                                        accept="image/png,image/gif,image/svg+xml"
                                     />
 
                                     <ColorPicker

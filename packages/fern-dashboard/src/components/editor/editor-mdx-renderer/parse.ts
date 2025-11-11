@@ -74,6 +74,11 @@ function replaceUnsupportedComponents(node: MdastNodes): MdastNodes {
                     type: "mdxJsxAttribute",
                     name: "componentName",
                     value: node.name || "unknown"
+                },
+                {
+                    type: "mdxJsxAttribute",
+                    name: "mdx",
+                    value: node.type === "mdxJsxFlowElement" ? astToMDX(node) : ""
                 }
             ],
             children: []

@@ -23,6 +23,7 @@ RUN log "Cleaning up fern directory..." && \
 RUN log "Running turbo prune..." && \
     turbo prune @fern-docs/bundle --docker 2>&1 | add-timestamps
 
+ARG CACHEBUST=1
 COPY servers/self-hosted/scripts /scripts
 
 # -----------  Start Postgres setup  -----------
@@ -191,7 +192,7 @@ RUN log "Configuring permissions for non-root execution..." && \
     # Create additional temp directories for services
     mkdir -p /tmp/fdr /tmp/nextapp /tmp/postgresql /tmp/minio-data /tmp/.next && chmod -R 777 /tmp/fdr /tmp/nextapp /tmp/postgresql /tmp/minio-data /tmp/.next && \
     # Make scripts executable by all
-    chmod +x /scripts/*.sh && \
+    chmod +x /scripts/*.sh /scripts/*.js && \
     # Ensure /etc/hosts can be modified (for local domain mapping)
     # Note: This won't work with readOnlyRootFilesystem, but won't break the container
     chmod 666 /etc/hosts 2>/dev/null || true

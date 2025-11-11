@@ -38,7 +38,7 @@ import { Table } from "./html-table";
 import { Icon } from "./icon/Icon";
 import { If } from "./if";
 import { Json } from "./json";
-import { Markdown } from "./Markdown";
+// import { Markdown } from "./Markdown";
 import { Mermaid } from "./mermaid";
 import { ParamField } from "./parameters/ParamField";
 import { EndpointRequestSnippet } from "./snippets/EndpointRequestSnippet";
@@ -79,7 +79,7 @@ const FERN_COMPONENTS = {
     Icon,
     If,
     Json,
-    Markdown,
+    // Markdown,
     Mermaid,
     ParamField,
     Step,
@@ -104,9 +104,9 @@ const FERN_COMPONENTS = {
 const INTERNAL_COMPONENTS = {
     ErrorBoundary,
     ElevenLabsWaveform,
-    UnsupportedContentPlaceholder: ({ componentName }: { componentName?: string }) => (
+    UnsupportedContentPlaceholder: ({ componentName, mdx }: { componentName?: string; mdx?: string }) => (
         <UnsupportedContentDisplayOnly>
-            {componentName ? `Unsupported markdown tag: ${componentName}` : "Unsupported markdown"}
+            {mdx ? mdx : componentName ? `Unsupported markdown tag: ${componentName}` : "Unsupported markdown"}
         </UnsupportedContentDisplayOnly>
     ),
 

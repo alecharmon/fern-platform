@@ -5,7 +5,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { getValidationErrorMessage } from "@/utils/errors";
-
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
+import type { DocsUrl } from "@/utils/types";
 import { getOwnerAndRepoFromGithubUrl } from "../../github/github";
 import { assertUserHasOrganizationAccess } from "../organization";
 import type { GithubIdentificationSchemeType, RepoIdentifier } from "./types";
@@ -14,7 +15,7 @@ import { type GithubRepoValidationError, validateGithubRepoAccess } from "./vali
 export interface ParsedRepoData {
     owner: string;
     repo: string;
-    site: string;
+    site: DocsUrl;
     githubUrl: string;
 }
 
@@ -69,7 +70,11 @@ export async function withGithubAuth<T>(
                 repo = parsed.repo;
 
                 // Validate GitHub access
-                const validation = await validateGithubRepoAccess(orgName, repoData.site, identifier);
+                const validation = await validateGithubRepoAccess(
+                    orgName,
+                    parseDocsUrlParam({ docsUrl: repoData.site }),
+                    identifier
+                );
 
                 if (!validation.ok) {
                     authResult = {
@@ -86,7 +91,7 @@ export async function withGithubAuth<T>(
                         value: {
                             owner,
                             repo,
-                            site: repoData.site,
+                            site: parseDocsUrlParam({ docsUrl: repoData.site }),
                             githubUrl
                         }
                     };
@@ -100,7 +105,11 @@ export async function withGithubAuth<T>(
             identifier = { type: "owner-repo", owner, repo };
 
             // Validate GitHub access
-            const validation = await validateGithubRepoAccess(orgName, repoData.site, identifier);
+            const validation = await validateGithubRepoAccess(
+                orgName,
+                parseDocsUrlParam({ docsUrl: repoData.site }),
+                identifier
+            );
 
             if (!validation.ok) {
                 authResult = {
@@ -117,7 +126,7 @@ export async function withGithubAuth<T>(
                     value: {
                         owner,
                         repo,
-                        site: repoData.site,
+                        site: parseDocsUrlParam({ docsUrl: repoData.site }),
                         githubUrl
                     }
                 };

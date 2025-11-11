@@ -14,14 +14,6 @@ import { VEPreviewImage } from "../VEPreviewImage";
 import { VisualEditorCard } from "./VisualEditorCard";
 import { VisualEditorValidationErrorHandler } from "./VisualEditorValidationErrorHandler";
 
-// Errors that show a compact warning in the header with VEPreviewImage below
-const _HEADER_WARNING_ERRORS: Set<GithubRepoValidationError["type"]> = new Set([
-    "REPO_NOT_CONNECTED",
-    "FERN_BOT_NOT_INSTALLED",
-    "FERN_CONFIG_JSON_ORG_MISMATCH",
-    "MULTIPLE_PROJECTS_WITH_SITE"
-]);
-
 export function VisualEditorContent({
     docsUrl,
     session,

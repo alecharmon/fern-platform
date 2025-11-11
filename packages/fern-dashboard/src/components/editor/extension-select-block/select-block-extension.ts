@@ -9,6 +9,7 @@ import { Extension } from "@tiptap/core";
  */
 export const SelectBlockExtension = Extension.create({
     name: "selectBlock",
+    priority: 1000,
 
     addStorage() {
         return {

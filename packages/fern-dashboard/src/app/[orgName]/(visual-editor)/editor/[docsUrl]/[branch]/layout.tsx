@@ -8,7 +8,7 @@ import { getGithubSourceMetadata } from "@/app/actions/getGithubSourceMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
-import { GitHubLoader } from "@/app/services/github/github-loader";
+import { getCachedGitHubLoader } from "@/app/services/github/cachedGitHubLoader";
 import { BranchInitializer } from "@/components/editor/BranchInitializer";
 import { ClientNavigationProvider } from "@/components/editor/ClientNavigationProvider";
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
@@ -43,10 +43,7 @@ export default async function EditorLayout({
 
     await getAuthenticatedSessionOrRedirect(orgName);
 
-    const { githubUrl, session } = await assertAuthAndFetchGithubUrl({
-        orgName,
-        docsUrl
-    });
+    const { githubUrl, session } = await assertAuthAndFetchGithubUrl(orgName, docsUrl);
 
     const sourceRepo = await getGithubSourceMetadata({
         githubUrl,
@@ -58,7 +55,7 @@ export default async function EditorLayout({
     }
 
     // TODO: lazy load this so we don't block the initial server render?
-    const githubLoader = new GitHubLoader(githubUrl);
+    const githubLoader = await getCachedGitHubLoader(githubUrl);
 
     // Use the repo's default branch by passing preferDefaultBranch=true
     const docsYmlAndReferences = await githubLoader.getDocsYmlAndReferences(

@@ -37,8 +37,6 @@ def get_suite_paths(suite_name: str, base_path: Path) -> dict[str, Path]:
         "suite": suite_path,
         "endpoints": suite_path / "endpoints",
         "questions": suite_path / "questions",
-        "answers": suite_path / "answers",
-        "evals": suite_path / "evals",
     }
 
 

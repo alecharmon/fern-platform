@@ -1,7 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
-import { fernToken_admin, openaiApiKey } from "@fern-api/docs-server/env-variables";
+import { fernToken_admin, getFaiOrigin, openaiApiKey } from "@fern-api/docs-server/env-variables";
 import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
@@ -58,7 +58,8 @@ export async function POST(req: NextRequest) {
     }
 
     const faiClient = getFaiClient({
-        token: fernToken_admin()
+        token: fernToken_admin(),
+        baseUrl: getFaiOrigin()
     });
 
     const isAskAiEnabled = (await faiClient.settings.getDocsSettings({ domain })).ask_ai_enabled;
@@ -75,7 +76,8 @@ export async function POST(req: NextRequest) {
         filters,
         conversationId,
         queryId,
-        documentUrls
+        documentUrls,
+        skipSaveQuery
     }: {
         url: string;
         messages: UIMessage[];
@@ -84,6 +86,7 @@ export async function POST(req: NextRequest) {
         conversationId: string;
         queryId: string;
         documentUrls: string[];
+        skipSaveQuery?: boolean;
     } = await req.json();
 
     const lastUserMessage = getLastUserMessage(messages);
@@ -102,22 +105,24 @@ export async function POST(req: NextRequest) {
     const openai = createOpenAI({ apiKey: openaiApiKey() });
     const embeddingModel = openai.embedding("text-embedding-3-large");
 
-    try {
-        await faiClient.query.createQuery({
-            domain,
-            body: {
+    if (!skipSaveQuery) {
+        try {
+            await faiClient.query.createQuery({
                 domain,
-                text: lastUserMessage,
-                role: "USER",
-                source: chatSource.toUpperCase(),
-                created_at: createdAt.toISOString(),
-                time_to_first_token: undefined,
-                query_id: queryId,
-                conversation_id: conversationId
-            }
-        });
-    } catch (error) {
-        console.log("Error creating query", error);
+                body: {
+                    domain,
+                    text: lastUserMessage,
+                    role: "USER",
+                    source: chatSource.toUpperCase(),
+                    created_at: createdAt.toISOString(),
+                    time_to_first_token: undefined,
+                    query_id: queryId,
+                    conversation_id: conversationId
+                }
+            });
+        } catch (error) {
+            console.error("Error creating query", error);
+        }
     }
 
     const queryIndexName = getQueryIndexName();
@@ -137,7 +142,8 @@ export async function POST(req: NextRequest) {
             turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
             languageModel,
             documentUrls,
-            userIsAuthed: authState.authed
+            userIsAuthed: authState.authed,
+            skipSaveQuery
         });
     } else if (modelProvider === "cohere") {
         result = await runRouteForCohere({
@@ -152,7 +158,8 @@ export async function POST(req: NextRequest) {
             embeddingModel,
             turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
             languageModel,
-            userIsAuthed: authState.authed
+            userIsAuthed: authState.authed,
+            skipSaveQuery
         });
     } else {
         return NextResponse.json(`Invalid model provider: ${modelProvider}`, {

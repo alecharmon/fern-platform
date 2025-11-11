@@ -11,9 +11,8 @@ import type {
 import type { Octokit } from "@octokit/core";
 import yaml from "js-yaml";
 import { unstable_cache } from "next/cache";
-import pLimit from "p-limit";
 import z from "zod";
-
+import type { DocsUrl } from "@/utils/types";
 import { getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
 import { getOwnerAndRepoFromGithubUrl } from "./github";
 
@@ -39,8 +38,6 @@ interface DocsYmlConfig {
 export class GitHubLoader implements GitLoader {
     private getOctokitInstance: () => Promise<Octokit | null>;
     private octokit: Octokit | null = null;
-    private inFlightRequests: Map<string, Promise<any>> = new Map<string, Promise<any>>();
-    private concurrencyLimit = pLimit(8); // Bounded concurrency for parallel file fetching
 
     constructor(githubUrl: string) {
         this.getOctokitInstance = async () => {
@@ -54,20 +51,6 @@ export class GitHubLoader implements GitLoader {
         };
     }
 
-    private async deduplicateRequest<T>(key: string, fn: () => Promise<T>): Promise<T> {
-        const existing = this.inFlightRequests.get(key);
-        if (existing) {
-            return existing;
-        }
-
-        const promise = fn().finally(() => {
-            this.inFlightRequests.delete(key);
-        });
-
-        this.inFlightRequests.set(key, promise);
-        return promise;
-    }
-
     async getOctokit() {
         if (this.octokit == null) {
             this.octokit = await this.getOctokitInstance();
@@ -75,41 +58,49 @@ export class GitHubLoader implements GitLoader {
         return this.octokit;
     }
 
-    /**
-     * Helper function to resolve a ref to a commit SHA for stable caching.
-     */
-    private async resolveRefToSha(owner: string, repo: string, ref: string): Promise<string | null> {
-        const cacheKey = `github-ref-${owner}-${repo}-${ref}`;
-
-        return this.deduplicateRequest(cacheKey, async () => {
-            try {
+    private async getCommitRef(owner: string, repo: string, ref: string): Promise<string | null> {
+        return unstable_cache(
+            async () => {
                 const octokit = await this.getOctokit();
                 if (!octokit) {
                     console.error("Failed to get Octokit instance");
                     return null;
                 }
-
                 const response = await octokit.request("GET /repos/{owner}/{repo}/commits/{ref}", {
                     owner,
                     repo,
                     ref
                 });
-
                 return response.data.sha;
-            } catch (error) {
-                console.error(`Failed to resolve ref ${ref} from ${owner}/${repo}:`, error);
-                return null;
+            },
+            [`github-commit-ref-${owner}-${repo}-${ref}`],
+            {
+                tags: [`github-commit-ref-${owner}-${repo}-${ref}`]
             }
-        });
+        )();
     }
 
     /**
-     * Helper function to get the content of a file from a GitHub repository.
+     * Helper function to resolve a ref to a commit SHA for stable caching.
+     */
+    private async resolveRefToSha(owner: string, repo: string, ref: string): Promise<string | null> {
+        try {
+            return await this.getCommitRef(owner, repo, ref);
+        } catch (error) {
+            console.error(`Failed to resolve ref ${ref} from ${owner}/${repo}:`, error);
+            return null;
+        }
+    }
+
+    /**
+     * Fetches the content of a file from a GitHub repository.
      *
-     * Optimizations implemented:
-     * 1. Fetches raw content directly (Accept: application/vnd.github.v3.raw) - no base64 decoding
-     * 2. Uses bounded concurrency (p-limit) for parallel fetching
-     * 3. Aggressive caching with Next.js unstable_cache, ETags, and commit SHA for stable cache keys
+     * - Resolves the ref to a commit SHA for stable cache keys
+     * - Fetches raw file content directly (Accept: application/vnd.github.v3.raw) to avoid base64 decoding
+     * - Caches aggressively using Next.js unstable_cache with commit SHA-based keys (1 year revalidation)
+     * - Stores ETag headers from GitHub API responses
+     *
+     * @returns The file content as a string, or null if the file cannot be fetched
      */
     private async getFileContent(owner: string, repo: string, ref: string, path: string): Promise<string | null> {
         const commitSha = await this.resolveRefToSha(owner, repo, ref);
@@ -118,11 +109,10 @@ export class GitHubLoader implements GitLoader {
             return null;
         }
 
-        const cacheKey = `github-file-${owner}-${repo}-${commitSha}-${path}`;
         const tag = `github-file:${owner}/${repo}:${path}`;
 
-        return this.deduplicateRequest(cacheKey, async () => {
-            return this.concurrencyLimit(async () => {
+        return unstable_cache(
+            async () => {
                 try {
                     const octokit = await this.getOctokit();
                     if (!octokit) {
@@ -158,8 +148,13 @@ export class GitHubLoader implements GitLoader {
                     console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
                     return null;
                 }
-            });
-        });
+            },
+            [`github-file-${owner}-${repo}-${commitSha}-${path}`],
+            {
+                revalidate: 60 * 60 * 24 * 365,
+                tags: [tag]
+            }
+        )();
     }
 
     /**
@@ -227,35 +222,64 @@ export class GitHubLoader implements GitLoader {
     }
 
     private async getRepository(owner: string, repo: string) {
-        const cacheKey = `github-repo-${owner}-${repo}`;
-
-        return this.deduplicateRequest(cacheKey, async () => {
-            const octokit = await this.getOctokit();
-            if (!octokit) {
-                throw new Error("Failed to get Octokit instance");
-            }
-
-            try {
-                const repositoryResponse = await octokit.request("GET /repos/{owner}/{repo}", {
-                    owner,
-                    repo
-                });
-
-                return repositoryResponse;
-            } catch (error: any) {
-                if (error?.status === 404) {
-                    return null;
+        return unstable_cache(
+            async () => {
+                const octokit = await this.getOctokit();
+                if (!octokit) {
+                    throw new Error("Failed to get Octokit instance");
                 }
 
-                throw error;
+                try {
+                    const repositoryResponse = await octokit.request("GET /repos/{owner}/{repo}", {
+                        owner,
+                        repo
+                    });
+
+                    return repositoryResponse;
+                } catch (error: any) {
+                    if (error?.status === 404) {
+                        return null;
+                    }
+
+                    throw error; // Don't cache this failure, so throw to skip cache
+                }
+            },
+            [`github-repo-${owner}-${repo}`],
+            {
+                revalidate: 60 * 60 * 24, // 1 day
+                tags: [`github-repo-${owner}-${repo}`]
             }
-        });
+        )();
+    }
+
+    private async getTree(owner: string, repo: string, defaultBranch: string) {
+        return unstable_cache(
+            async () => {
+                const octokit = await this.getOctokit();
+                if (!octokit) {
+                    throw new Error("Failed to get Octokit instance");
+                }
+
+                const treeResponse = await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
+                    owner,
+                    repo,
+                    tree_sha: defaultBranch,
+                    recursive: "true"
+                });
+
+                return treeResponse;
+            },
+            [`github-tree-${owner}-${repo}-${defaultBranch}`],
+            {
+                tags: [`github-tree-${owner}-${repo}-${defaultBranch}`]
+            }
+        )();
     }
     /**
      * Finds a Fern project by site URL using tree searching methodology.
      * Returns the paths to both docs.yml and fern.config.json for the matching project.
      */
-    async getFernProjectBySite(owner: string, repo: string, site: string): Promise<GetFernProjectResult> {
+    async getFernProjectBySite(owner: string, repo: string, site: DocsUrl): Promise<GetFernProjectResult> {
         const octokit = await this.getOctokit();
         if (!octokit) {
             throw new Error("Failed to get Octokit instance");
@@ -272,16 +296,7 @@ export class GitHubLoader implements GitLoader {
         }
 
         const defaultBranch = repository.data.default_branch;
-
-        const cacheKey = `github-tree-${owner}-${repo}-${defaultBranch}`;
-        const treeResponse = await this.deduplicateRequest(cacheKey, async () => {
-            return await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
-                owner,
-                repo,
-                tree_sha: defaultBranch,
-                recursive: "true"
-            });
-        });
+        const treeResponse = await this.getTree(owner, repo, defaultBranch);
 
         // Find all fern.config.json files
         const fernConfigPaths = treeResponse.data.tree
@@ -336,6 +351,7 @@ export class GitHubLoader implements GitLoader {
 
             if (docsYmlContent && project) {
                 const urls = this.parseUrlsFromDocsYml(docsYmlContent);
+                console.debug(`[getFernProjectBySite] Found URLs: ${urls}`);
                 allFoundSites.push(...urls);
 
                 if (!firstDocsYmlPath && urls.length > 0) {
@@ -344,10 +360,14 @@ export class GitHubLoader implements GitLoader {
 
                 const strippedUrls = urls.map(stripAndSanitizeUrl);
 
+                console.debug(`[getFernProjectBySite] Stripped URLs: ${strippedUrls}`);
+
                 const strippedSite = stripAndSanitizeUrl(site);
+                console.debug(`[getFernProjectBySite] Stripped site: ${strippedSite}`);
 
                 // Check if any URL matches the site
                 if (strippedUrls.includes(strippedSite)) {
+                    console.debug(`[getFernProjectBySite] Matching project found: ${project.docsYmlPath}`);
                     matchingProjects.push(project);
                 }
             }
@@ -377,6 +397,11 @@ export class GitHubLoader implements GitLoader {
                 }
             };
         } else {
+            console.debug(`[getFernProjectBySite] No matching Fern project found for site: ${site}`, {
+                allFoundSites,
+                firstDocsYmlPath,
+                defaultBranch
+            });
             return {
                 type: "error",
                 error: {
@@ -393,7 +418,7 @@ export class GitHubLoader implements GitLoader {
     async getDocsYml(
         owner: string,
         repo: string,
-        site: string,
+        site: DocsUrl,
         ref: string = "main",
         preferDefaultBranch: boolean = false
     ): Promise<GetDocsYmlResult> {
@@ -429,7 +454,7 @@ export class GitHubLoader implements GitLoader {
     async getDocsYmlAndReferences(
         owner: string,
         repo: string,
-        site: string,
+        site: DocsUrl,
         ref: string = "main",
         preferDefaultBranch: boolean = false
     ): Promise<GetDocsYmlAndReferencesResult> {
@@ -498,7 +523,7 @@ export class GitHubLoader implements GitLoader {
         };
     }
 
-    async getFernConfigJson(owner: string, repo: string, site: string): Promise<GetFernConfigJsonResult> {
+    async getFernConfigJson(owner: string, repo: string, site: DocsUrl): Promise<GetFernConfigJsonResult> {
         const projectResult = await this.getFernProjectBySite(owner, repo, site);
         if (projectResult.type === "error") {
             return {

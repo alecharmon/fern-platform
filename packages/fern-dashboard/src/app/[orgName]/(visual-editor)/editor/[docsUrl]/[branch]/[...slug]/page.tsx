@@ -39,10 +39,7 @@ export default async function Page({
     const { orgName, docsUrl, branch, slug } = await params;
     const host = await getHostFromHeaders();
 
-    const { session } = await assertAuthAndFetchGithubUrl({
-        orgName,
-        docsUrl: parseDocsUrlParam({ docsUrl })
-    });
+    const { session } = await assertAuthAndFetchGithubUrl(orgName, parseDocsUrlParam({ docsUrl }));
 
     // Use cached loader - this will reuse the loader created in layout.tsx
     const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);

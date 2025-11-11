@@ -316,7 +316,8 @@ const DesktopAskAIChat = ({
             url: window.location.href,
             conversationId,
             queryId,
-            filters
+            filters,
+            source: "CHAT"
         };
     }, [body, conversationId, queryId, filters, window.location.href]);
 

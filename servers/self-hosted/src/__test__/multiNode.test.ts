@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
+import { execa } from "execa";
 import path from "path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { MULTINODE_INSTANCES, MULTINODE_PROJECT_NAME, setup, teardown } from "./setupMultinodeDocs";
 import {
-    getContainerId,
     testDocsUIAccessible,
     testDocsUIElements,
     testExternalCallsBlocked,
@@ -16,7 +16,14 @@ import {
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 async function getMultinodeContainerId(serviceName: string) {
-    return await getContainerId(`name=${MULTINODE_PROJECT_NAME}-${serviceName}`);
+    const containerName = `${MULTINODE_PROJECT_NAME}-${serviceName}`;
+    // Use docker ps with exact container name
+    const { stdout: containerId } = await execa("docker", ["ps", "-q", "--filter", `name=^${containerName}$`]);
+    const trimmedId = containerId.trim();
+    if (!trimmedId) {
+        throw new Error(`No container found with name: ${containerName}`);
+    }
+    return trimmedId;
 }
 
 // Setup multi-node containers before tests
