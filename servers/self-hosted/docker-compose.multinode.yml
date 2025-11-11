@@ -7,6 +7,7 @@ services:
       - fern-network
     ports:
       - "8080:8080"
+      - "8181:8081"
       - "9000:9000"
       - "9001:9001"
       - "5434:5432"
@@ -16,7 +17,7 @@ services:
     environment:
       - RUN_MODE=server
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/readiness"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,7 +28,8 @@ services:
     networks:
       - fern-network
     ports:
-      - "8081:8080"
+      - "8082:8080"
+      - "8182:8081"
       - "9002:9000"
       - "9003:9001"
       - "5435:5432"
@@ -37,7 +39,7 @@ services:
     environment:
       - RUN_MODE=server
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/readiness"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -48,7 +50,8 @@ services:
     networks:
       - fern-network
     ports:
-      - "8082:8080"
+      - "8083:8080"
+      - "8183:8081"
       - "9004:9000"
       - "9005:9001"
       - "5436:5432"
@@ -58,7 +61,7 @@ services:
     environment:
       - RUN_MODE=server
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/readiness"]
       interval: 10s
       timeout: 5s
       retries: 5

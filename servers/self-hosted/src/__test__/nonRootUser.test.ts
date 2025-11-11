@@ -257,15 +257,16 @@ describe("Self-hosted container with security restrictions", () => {
             console.log("\n=== DIAGNOSTIC TEST ===");
             console.log("Running container with restrictions to capture detailed startup...\n");
 
+            let containerId: string | undefined;
             try {
-                // Run with restrictions and capture output
-                const result = await execa(
+                // Start container in detached mode to capture logs without timing out
+                const { stdout: containerIdOutput } = await execa(
                     "docker",
                     [
                         "run",
                         "--name",
                         `${RESTRICTED_CONTAINER_NAME}-diagnostic`,
-                        "--rm",
+                        "-d",
                         "--network",
                         FERN_NETWORK_NAME,
                         "--user",
@@ -279,32 +280,45 @@ describe("Self-hosted container with security restrictions", () => {
                         SELF_HOSTED_IMAGE_TAG_NAME
                     ],
                     {
-                        timeout: 60000,
-                        reject: false,
-                        all: true // Capture combined stdout and stderr
+                        timeout: 5000
                     }
                 );
 
-                console.log("Exit code:", result.exitCode);
+                containerId = containerIdOutput.trim();
+                console.log("Container started with ID:", containerId);
+
+                // Wait for services to initialize
+                console.log("Waiting for services to initialize...");
+                await new Promise((resolve) => setTimeout(resolve, 25000)); // Wait 25 seconds
+
+                // Get container logs
+                const { stdout: logs } = await execa("docker", ["logs", containerId], {
+                    reject: false
+                });
+
                 console.log("\n--- Full output ---");
-                console.log(result.all);
+                console.log(logs);
                 console.log("--- End output ---\n");
 
-                // Container should succeed with our new implementation
-                // If exitCode is undefined, it means the container is still running (which is expected)
-                // We should check that the container started successfully by looking at the logs
-                if (result.exitCode === undefined) {
-                    // Container is still running, which is expected for our test
-                    expect(result.all).toContain("All services started. Tailing logs to keep the container running.");
-                } else {
-                    // Container exited, check it was successful
-                    expect(result.exitCode).toBe(0);
-                }
+                // Check for successful startup indicators
+                expect(logs).toContain("PostgreSQL started successfully");
+                expect(logs).toContain("All services started. Tailing logs to keep the container running.");
+
+                console.log("✓ Container successfully started with full security restrictions");
             } catch (error: any) {
-                console.log("Exit code:", error.exitCode);
-                console.log("\n--- Full error output ---");
-                console.log(error.all || error.stderr || error.stdout || error.message);
-                console.log("--- End error output ---\n");
+                console.log("Error:", error.message);
+
+                // Try to get logs even if something failed
+                if (containerId) {
+                    try {
+                        const { stdout: logs } = await execa("docker", ["logs", containerId], {
+                            reject: false
+                        });
+                        console.log("\n--- Container logs ---");
+                        console.log(logs);
+                        console.log("--- End logs ---\n");
+                    } catch {}
+                }
 
                 // Re-throw to fail the test
                 throw error;

@@ -62,6 +62,9 @@ jobs:
       - name: Check dependency deduplication
         run: pnpm dedupe --check
 
+      - name: Check esbuild version
+        run: bash scripts/check-esbuild-version.sh
+
       - name: Format YAML
         run: pnpm format:yaml:check
 
