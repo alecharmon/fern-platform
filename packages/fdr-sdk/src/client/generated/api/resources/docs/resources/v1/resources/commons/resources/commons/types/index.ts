@@ -27,6 +27,7 @@ export * from "./ClearBitConfig.js";
 export * from "./HeapConfig.js";
 export * from "./DocsLayoutConfig.js";
 export * from "./DocsThemeConfig.js";
+export * from "./FooterNavConfig.js";
 export * from "./DocsSidebarConfig.js";
 export * from "./DocsBodyConfig.js";
 export * from "./DocsTabsConfig.js";

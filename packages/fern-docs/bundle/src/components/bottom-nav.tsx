@@ -11,10 +11,12 @@ import { BottomNavigationClient } from "./bottom-nav-client";
 export function BottomNavigation({
     neighbors,
     serialize,
-    lang
+    lang,
+    footerNavStyle = "default"
 }: {
     serialize: MdxSerializer;
     lang: string;
+    footerNavStyle?: "default" | "minimal";
     neighbors: {
         prev?: {
             title: string;
@@ -32,6 +34,18 @@ export function BottomNavigation({
         return <Separator />;
     }
 
+    const prevTitle = neighbors.prev && (
+        <React.Suspense fallback={neighbors.prev.title}>
+            <MdxServerComponent serialize={serialize} mdx={neighbors.prev.title} />
+        </React.Suspense>
+    );
+
+    const prevExcerpt = neighbors.prev && (
+        <React.Suspense fallback={neighbors.prev.excerpt}>
+            <MdxServerComponent serialize={serialize} mdx={neighbors.prev.excerpt} />
+        </React.Suspense>
+    );
+
     const nextTitle = neighbors.next && (
         <React.Suspense fallback={neighbors.next.title}>
             <MdxServerComponent serialize={serialize} mdx={neighbors.next.title} />
@@ -46,7 +60,15 @@ export function BottomNavigation({
 
     return (
         <BottomNavigationClient
-            prev={neighbors.prev ? { href: neighbors.prev.href } : undefined}
+            prev={
+                neighbors.prev
+                    ? {
+                          title: prevTitle,
+                          excerpt: prevExcerpt,
+                          href: neighbors.prev.href
+                      }
+                    : undefined
+            }
             next={
                 neighbors.next
                     ? {
@@ -57,6 +79,7 @@ export function BottomNavigation({
                     : undefined
             }
             lang={lang}
+            footerNavStyle={footerNavStyle}
         />
     );
 }

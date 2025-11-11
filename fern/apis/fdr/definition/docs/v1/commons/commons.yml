@@ -214,7 +214,13 @@ types:
       sidebar: optional<DocsSidebarConfig>
       body: optional<DocsBodyConfig>
       tabs: optional<DocsTabsConfig>
+      footerNav: optional<FooterNavConfig>
       page-actions: optional<DocsPageActionsConfig>
+      
+  FooterNavConfig:
+    enum:
+      - default
+      - minimal
       
   DocsSidebarConfig:
     enum:

@@ -44,7 +44,12 @@ export async function DocsMainContent({
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
 }) {
-    const bottomNavigation = neighbors && <BottomNavigation neighbors={neighbors} serialize={serialize} lang={lang} />;
+    const config = await loader.getConfig();
+    const footerNavStyle = config.theme?.footerNav ?? "default";
+
+    const bottomNavigation = neighbors && (
+        <BottomNavigation neighbors={neighbors} serialize={serialize} lang={lang} footerNavStyle={footerNavStyle} />
+    );
 
     if (node.type === "changelog") {
         // only render full page mode for changelog tabs

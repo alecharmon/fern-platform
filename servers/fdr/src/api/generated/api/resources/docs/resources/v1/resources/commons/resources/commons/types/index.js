@@ -27,6 +27,7 @@ export * from "./ClearBitConfig";
 export * from "./HeapConfig";
 export * from "./DocsLayoutConfig";
 export * from "./DocsThemeConfig";
+export * from "./FooterNavConfig";
 export * from "./DocsSidebarConfig";
 export * from "./DocsBodyConfig";
 export * from "./DocsTabsConfig";

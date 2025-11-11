@@ -10,4 +10,68 @@
       @apply bg-card-solid hover:border-(color:--accent-a9) border-card-border relative flex h-16 min-w-0 flex-1 shrink items-center justify-end gap-4 overflow-clip border px-3 transition-all hover:transition-none;
     }
   }
+
+  .fern-footer-nav--simple {
+    @apply bg-transparent p-0 -m-2;
+
+    justify-content: space-between;
+    
+    .fern-footer-prev {
+      @apply bg-transparent border-0 h-auto flex-col items-start justify-start gap-2 p-2 overflow-visible;
+
+      flex: none;
+      border-radius: var(--radius);
+
+      span:first-child span {
+        @apply text-(color:--grayscale-a11);
+      }
+
+      span:first-child svg {
+        @apply text-(color:--grayscale-a9);
+
+        transition: transform 0.2s ease;
+      }
+
+      &:hover {
+        span:first-child span {
+          @apply text-(color:--grayscale-a12);
+        }
+
+        span:first-child svg {
+          @apply text-(color:--grayscale-a12);
+
+          transform: translateX(-4px);
+        }
+      }
+    }
+    
+    .fern-footer-next {
+      @apply bg-transparent border-0 h-auto flex-col items-end justify-end gap-2 p-2 overflow-visible;
+
+      flex: none;
+      border-radius: var(--radius);
+
+      span:first-child span {
+        @apply text-(color:--grayscale-a11);
+      }
+
+      span:first-child svg {
+        @apply text-(color:--grayscale-a9);
+
+        transition: transform 0.2s ease;
+      }
+
+      &:hover {
+        span:first-child span {
+          @apply text-(color:--grayscale-a12);
+        }
+
+        span:first-child svg {
+          @apply text-(color:--grayscale-a12);
+
+          transform: translateX(4px);
+        }
+      }
+    }
+  }
 }

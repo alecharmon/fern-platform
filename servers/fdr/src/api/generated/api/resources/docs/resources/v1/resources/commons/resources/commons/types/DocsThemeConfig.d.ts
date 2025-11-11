@@ -6,5 +6,6 @@ export interface DocsThemeConfig {
     sidebar: FernRegistry.docs.v1.commons.DocsSidebarConfig | undefined;
     body: FernRegistry.docs.v1.commons.DocsBodyConfig | undefined;
     tabs: FernRegistry.docs.v1.commons.DocsTabsConfig | undefined;
+    footerNav: FernRegistry.docs.v1.commons.FooterNavConfig | undefined;
     "page-actions": FernRegistry.docs.v1.commons.DocsPageActionsConfig | undefined;
 }
