@@ -3,7 +3,7 @@ import "server-only";
 import type { FernConfigJsonErrors } from "@fern-api/docs-loader";
 
 import { getValidationErrorMessage, throwDigestibleError } from "@/utils/errors";
-
+import type { DocsUrl } from "@/utils/types";
 import { checkOrgWritePermissionToRepo } from "./checkOrgWritePermissionToRepo";
 import type { RepoIdentifier } from "./types";
 
@@ -22,9 +22,9 @@ export type GithubRepoValidationResult = { ok: true } | { ok: false; error: Gith
 const githubValidationCache = new Map<string, { data: GithubRepoValidationResult; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-function getCacheKey(orgName: string, identifier: RepoIdentifier): string {
+function getCacheKey(orgName: string, site: DocsUrl, identifier: RepoIdentifier): string {
     const repoKey = identifier.type === "url" ? identifier.githubUrl : `${identifier.owner}/${identifier.repo}`;
-    return `${orgName}:${repoKey}`;
+    return `${orgName}:${site}:${repoKey}`;
 }
 
 function deriveGithubUrl(identifier: RepoIdentifier): string {
@@ -36,11 +36,11 @@ function deriveGithubUrl(identifier: RepoIdentifier): string {
 
 export const validateGithubRepoAccess = async (
     orgName: string,
-    site: string,
+    site: DocsUrl,
     identifier: RepoIdentifier,
     skipCache: boolean = false
 ): Promise<GithubRepoValidationResult> => {
-    const cacheKey = getCacheKey(orgName, identifier);
+    const cacheKey = getCacheKey(orgName, site, identifier);
     const cached = githubValidationCache.get(cacheKey);
 
     // Return cached result if still fresh
@@ -88,7 +88,7 @@ export const validateGithubRepoAccess = async (
  *
  * @throws {DigestibleError} if the organization does not have required access
  */
-export async function assertGithubAccess(orgName: string, site: string, identifier: RepoIdentifier): Promise<void> {
+export async function assertGithubAccess(orgName: string, site: DocsUrl, identifier: RepoIdentifier): Promise<void> {
     const validation = await validateGithubRepoAccess(orgName, site, identifier);
 
     if (!validation.ok) {
@@ -97,7 +97,7 @@ export async function assertGithubAccess(orgName: string, site: string, identifi
     }
 }
 
-export async function assertGithubAccessByUrl(orgName: string, site: string, githubUrl: string): Promise<void> {
+export async function assertGithubAccessByUrl(orgName: string, site: DocsUrl, githubUrl: string): Promise<void> {
     const identifier: RepoIdentifier = { type: "url", githubUrl };
     await assertGithubAccess(orgName, site, identifier);
 }

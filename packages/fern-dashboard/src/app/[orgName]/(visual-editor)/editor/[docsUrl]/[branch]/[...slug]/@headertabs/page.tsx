@@ -5,10 +5,8 @@ import { HeaderTabsList } from "@fern-docs/components/HeaderTabsList";
 import { getRootAliasAwareNavigationSlug } from "@fern-docs/components/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
-import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 
 export default async function HeaderTabsPage({
@@ -16,17 +14,13 @@ export default async function HeaderTabsPage({
 }: {
     params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl; slug: string; branch: string }>;
 }) {
-    const { orgName, docsUrl, slug, branch } = await params;
+    const { docsUrl, slug, branch } = await params;
     const session = await getCurrentSession();
     if (session == null) {
         return null;
     }
+
     const host = await getHostFromHeaders();
-    await assertAuthAndFetchGithubUrl({
-        orgName,
-        docsUrl: parseDocsUrlParam({ docsUrl })
-    });
-    // Use cached loader - this will reuse the loader created in layout.tsx
     const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);
     const layout = await loader.getLayout();
 
@@ -34,11 +28,13 @@ export default async function HeaderTabsPage({
         return null;
     }
 
-    const root = await loader.getRoot();
+    const [root, authState, edgeFlags] = await Promise.all([
+        loader.getRoot(),
+        loader.getAuthState(),
+        loader.getEdgeFlags()
+    ]);
 
-    const authState = await loader.getAuthState();
-
-    const showAuthenticatedNodes = (await loader.getEdgeFlags()).isAuthenticatedPagesDiscoverable;
+    const showAuthenticatedNodes = edgeFlags.isAuthenticatedPagesDiscoverable;
 
     const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);
     const foundNode = FernNavigation.utils.findNode(root, navigationSlug);

@@ -6,7 +6,7 @@ import { orgNameValidator } from "@/app/api/utils/validators";
 import { withGithubAuthNextRoute } from "@/app/services/dal/github/middleware";
 import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
-import { GitHubLoader } from "@/app/services/github/github-loader";
+import { getCachedGitHubLoader } from "@/app/services/github/cachedGitHubLoader";
 
 const GetDocsYmlRequest = GithubIdentificationScheme.and(
     z.object({
@@ -22,7 +22,7 @@ export const POST = withZodValidation(
 
         return withGithubAuthNextRoute(req, orgName, repoData, async ({ owner, repo, site, githubUrl }) => {
             // Create GitHubLoader instance
-            const gitLoader = new GitHubLoader(githubUrl);
+            const gitLoader = await getCachedGitHubLoader(githubUrl);
 
             // Get the docs.yml file
             const docsYmlContent = await gitLoader.getDocsYml(owner, repo, site, branch);

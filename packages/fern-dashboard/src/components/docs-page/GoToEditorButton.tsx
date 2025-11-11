@@ -43,15 +43,18 @@ export function GoToEditorButton({
     }, [orgName, docsUrl, newBranchName]);
 
     useEffect(() => {
-        void preloadEditorData({
-            docsUrl: encodeURIComponent(docsUrl) as EncodedDocsUrl,
-            host: window.location.host,
-            branch: newBranchName
-        }).catch((error) => {
-            // Log error but don't block navigation
-            console.error("Failed to preload editor data:", error);
-        });
-    }, [docsUrl, newBranchName]);
+        if (!disabled) {
+            console.debug("[GoToEditorButton] Preloading editor data for", docsUrl, newBranchName);
+            void preloadEditorData({
+                docsUrl: encodeURIComponent(docsUrl) as EncodedDocsUrl,
+                host: window.location.host,
+                branch: newBranchName
+            }).catch((error) => {
+                // Log error but don't block navigation
+                console.error("Failed to preload editor data:", error);
+            });
+        }
+    }, [disabled, docsUrl, newBranchName]);
 
     const handleClick = () => {
         setIsLoading(true);
@@ -69,7 +72,12 @@ export function GoToEditorButton({
                 >
                     <span className="pointer-events-auto">
                         <Button disabled={isLoading || disabled || isValidatingSource} asChild={!disabled}>
-                            <Link className="flex flex-row items-center gap-1" href={editorSlug} onClick={handleClick}>
+                            <Link
+                                className="flex flex-row items-center gap-1"
+                                href={editorSlug}
+                                onClick={handleClick}
+                                prefetch={!disabled}
+                            >
                                 {isLoading ? (
                                     <Loader2 className="animate-spin" />
                                 ) : (
