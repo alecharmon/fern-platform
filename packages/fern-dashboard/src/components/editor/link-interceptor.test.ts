@@ -130,7 +130,7 @@ describe("getInterceptedLink", () => {
             expect(result).toBeUndefined();
         });
 
-        it("should return undefined for links that already contain /editor/", () => {
+        it("should return undefined for links that already contain correct /editor/ path with branch", () => {
             const link = createMockLink("/test-org/editor/test-docs/main/page");
             const target = createMockTarget(link);
             const event = createMockEvent(target);
@@ -138,6 +138,29 @@ describe("getInterceptedLink", () => {
             const result = getInterceptedLink(event, defaultMetadata);
 
             expect(result).toBeUndefined();
+        });
+
+        it("should fix editor links that are missing the branch", () => {
+            const link = createMockLink("/test-org/editor/test-docs/core/documentation");
+            const target = createMockTarget(link);
+            const event = createMockEvent(target);
+
+            const result = getInterceptedLink(event, defaultMetadata);
+
+            expect(result).toBe("/test-org/editor/test-docs/main/core/documentation");
+            expect(mockPreventDefault).toHaveBeenCalled();
+        });
+
+        it("should fix editor links with different org/docs but missing branch", () => {
+            const link = createMockLink("/other-org/editor/other-docs/some/page");
+            const target = createMockTarget(link);
+            const event = createMockEvent(target);
+
+            const result = getInterceptedLink(event, defaultMetadata);
+
+            // Should use current org/docs/branch from metadata
+            expect(result).toBe("/test-org/editor/test-docs/main/some/page");
+            expect(mockPreventDefault).toHaveBeenCalled();
         });
     });
 
@@ -293,6 +316,94 @@ describe("getInterceptedLink", () => {
             const result = getInterceptedLink(event, defaultMetadata);
 
             expect(result).toBe("/test-org/editor/test-docs/main/api/endpoints/with%20spaces");
+        });
+    });
+
+    describe("relative paths", () => {
+        beforeEach(() => {
+            // Mock window.location.pathname for relative path tests
+            Object.defineProperty(window, "location", {
+                value: {
+                    pathname: "/test-org/editor/test-docs/main/connect/home"
+                },
+                writable: true
+            });
+        });
+
+        it("should resolve ../ relative path", () => {
+            const link = createMockLink("../core/documentation/getting-started/quickstart");
+            const target = createMockTarget(link);
+            const event = createMockEvent(target);
+
+            const result = getInterceptedLink(event, defaultMetadata);
+
+            expect(result).toBe("/test-org/editor/test-docs/main/core/documentation/getting-started/quickstart");
+        });
+
+        it("should resolve ./ relative path", () => {
+            const link = createMockLink("./subpage");
+            const target = createMockTarget(link);
+            const event = createMockEvent(target);
+
+            const result = getInterceptedLink(event, defaultMetadata);
+
+            expect(result).toBe("/test-org/editor/test-docs/main/connect/subpage");
+        });
+
+        it("should resolve multiple ../ in path", () => {
+            Object.defineProperty(window, "location", {
+                value: {
+                    pathname: "/test-org/editor/test-docs/main/a/b/c/d"
+                },
+                writable: true
+            });
+
+            const link = createMockLink("../../other/page");
+            const target = createMockTarget(link);
+            const event = createMockEvent(target);
+
+            const result = getInterceptedLink(event, defaultMetadata);
+
+            // From a/b/c/d with ../../other/page:
+            // 1. Remove current "file" (d) -> a/b/c
+            // 2. Go up one (..) -> a/b
+            // 3. Go up one (..) -> a
+            // 4. Add other/page -> a/other/page
+            expect(result).toBe("/test-org/editor/test-docs/main/a/other/page");
+        });
+
+        it("should handle relative path from root level", () => {
+            Object.defineProperty(window, "location", {
+                value: {
+                    pathname: "/test-org/editor/test-docs/main/home"
+                },
+                writable: true
+            });
+
+            const link = createMockLink("../documentation");
+            const target = createMockTarget(link);
+            const event = createMockEvent(target);
+
+            const result = getInterceptedLink(event, defaultMetadata);
+
+            expect(result).toBe("/test-org/editor/test-docs/main/documentation");
+        });
+
+        it("should handle mixed relative path with ./ and ../", () => {
+            Object.defineProperty(window, "location", {
+                value: {
+                    pathname: "/test-org/editor/test-docs/main/api/endpoints"
+                },
+                writable: true
+            });
+
+            const link = createMockLink(".././../docs/guide");
+            const target = createMockTarget(link);
+            const event = createMockEvent(target);
+
+            const result = getInterceptedLink(event, defaultMetadata);
+
+            expect(result).toBe("/test-org/editor/test-docs/main/docs/guide");
         });
     });
 });

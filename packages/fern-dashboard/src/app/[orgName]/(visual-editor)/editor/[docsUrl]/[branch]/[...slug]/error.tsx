@@ -3,7 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
-import { UnsupportedContent } from "@/components/editor/UnsupportedContent";
+import { UnsupportedContentDisplayOnly } from "@/components/editor/UnsupportedContent";
 import type { ERROR_DIGEST_KEYS } from "@/utils/errors";
 
 export default function Error({ error }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -22,9 +22,9 @@ export default function Error({ error }: { error: Error & { digest?: string }; r
     return (
         <div className="w-content-width mx-auto mt-12">
             <div>
-                <UnsupportedContent>
+                <UnsupportedContentDisplayOnly>
                     This file contains markdown that is not yet readable by the editor.
-                </UnsupportedContent>
+                </UnsupportedContentDisplayOnly>
             </div>
         </div>
     );
