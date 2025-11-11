@@ -116,6 +116,7 @@ export function CodeBlock(props: {
                                     className={cn("fern-expand-button z-20")}
                                     content={code}
                                     language={language}
+                                    lang={lang}
                                 />
                             )}
                             <CodeBlockFeedbackButton className="z-20" code={code} language={language} lang={lang} />
@@ -149,6 +150,7 @@ export function CodeBlock(props: {
             feedbackButton={
                 <CodeBlockFeedbackButton className="fern-feedback-button" code={code} language={language} lang={lang} />
             }
+            lang={lang}
         >
             <FernSyntaxHighlighter
                 {...toSyntaxHighlighterProps({

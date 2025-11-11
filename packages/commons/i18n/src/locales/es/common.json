@@ -97,7 +97,10 @@
     "closeSearch": "Cerrar búsqueda",
     "searchOurDocumentation": "Busca en nuestra documentación.",
     "filters": "Filtros",
-    "theme": "Tema"
+    "theme": "Tema",
+    "or": "[ES] TODO: or",
+    "toGoToRootSearch": "[ES] TODO: toGoToRootSearch",
+    "toGoBack": "[ES] TODO: toGoBack"
   },
   "apiReference": {
     "apiReference": "Referencia de API",
@@ -144,7 +147,12 @@
     "format": "format",
     "optional": "Opcional",
     "statusLower": "estado",
-    "timeLower": "tiempo"
+    "timeLower": "tiempo",
+    "selectAVariant": "Selecciona una variante...",
+    "noMessages": "Sin mensajes...",
+    "or": "o",
+    "toGoToRootSearch": "para ir a la búsqueda raíz",
+    "toGoBack": "para volver"
   },
   "playground": {
     "cannotSendToLocalhost": "No se pueden enviar solicitudes a localhost",

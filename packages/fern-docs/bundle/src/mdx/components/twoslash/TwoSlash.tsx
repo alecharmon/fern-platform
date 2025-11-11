@@ -1,3 +1,4 @@
+//eslint-i18n-disable
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { useMDXComponents } from "@mdx-js/react";
 import React, { useMemo, useRef } from "react";

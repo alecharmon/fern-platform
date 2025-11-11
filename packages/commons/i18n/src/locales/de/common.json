@@ -97,7 +97,10 @@
     "closeSearch": "Suche schließen",
     "searchOurDocumentation": "Durchsuchen Sie unsere Dokumentation.",
     "filters": "Filtern",
-    "theme": "Design"
+    "theme": "Design",
+    "or": "oder",
+    "toGoToRootSearch": "zurück zur Startsuche",
+    "toGoBack": "zurück"
   },
   "apiReference": {
     "apiReference": "API-Referenz",
@@ -144,7 +147,9 @@
     "format": "Format",
     "optional": "Optional",
     "statusLower": "Status",
-    "timeLower": "Zeit"
+    "timeLower": "Zeit",
+    "selectAVariant": "Eine Variante auswählen...",
+    "noMessages": "Keine Nachrichten..."
   },
   "playground": {
     "cannotSendToLocalhost": "Anfragen an localhost können nicht gesendet werden",

@@ -97,7 +97,10 @@
     "closeSearch": "Aramayı kapat",
     "searchOurDocumentation": "Dokümantasyonumuzu arayın.",
     "filters": "Filtreler",
-    "theme": "Temalar"
+    "theme": "Temalar",
+    "or": "veya",
+    "toGoToRootSearch": "root aramaya git",
+    "toGoBack": "geri git"
   },
   "apiReference": {
     "apiReference": "API Referansı",
@@ -144,7 +147,9 @@
     "format": "format",
     "optional": "İsteğe bağlı",
     "statusLower": "durum",
-    "timeLower": "zaman"
+    "timeLower": "zaman",
+    "selectAVariant": "Bir varyant seçin...",
+    "noMessages": "Mesaj yok..."
   },
   "playground": {
     "cannotSendToLocalhost": "Localhost'a istek gönderilemez",

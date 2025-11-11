@@ -97,7 +97,10 @@
     "closeSearch": "検索を閉じる",
     "searchOurDocumentation": "ドキュメントを検索する。",
     "filters": "フィルター",
-    "theme": "テーマ"
+    "theme": "テーマ",
+    "or": "または",
+    "toGoToRootSearch": "ルート検索に移動",
+    "toGoBack": "戻る"
   },
   "apiReference": {
     "apiReference": "APIリファレンス",
@@ -144,7 +147,9 @@
     "format": "形式",
     "optional": "オプション",
     "statusLower": "ステータス",
-    "timeLower": "時間"
+    "timeLower": "時間",
+    "selectAVariant": "バリアントを選択...",
+    "noMessages": "メッセージがありません..."
   },
   "playground": {
     "cannotSendToLocalhost": "localhostにリクエストを送信できません",

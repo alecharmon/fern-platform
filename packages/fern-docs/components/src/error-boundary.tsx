@@ -1,3 +1,4 @@
+/*eslint i18next/no-literal-string: off */
 "use client";
 
 import { RefreshCcw } from "lucide-react";

@@ -149,7 +149,7 @@ export const SearchV2 = React.memo(function SearchV2({
 
     const children = (
         <>
-            <DefaultDesktopBackButton />
+            <DefaultDesktopBackButton lang={lang} />
             <CommandGroupFilters lang={lang} />
             <CommandEmpty lang={lang} />
             <CommandSearchHits onSelect={handleNavigate} prefetch={(path) => router.prefetch(path)} domain={domain} />

@@ -11,10 +11,11 @@ export declare namespace ExpandCodeButton {
         className?: string;
         language?: string;
         content?: string | (() => string | Promise<string>);
+        lang: string;
     }
 }
 
-export const ExpandCodeButton: React.FC<ExpandCodeButton.Props> = ({ className, content, language }) => {
+export const ExpandCodeButton: React.FC<ExpandCodeButton.Props> = ({ className, content, language, lang }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     if (content == null) {
@@ -35,7 +36,7 @@ export const ExpandCodeButton: React.FC<ExpandCodeButton.Props> = ({ className, 
             >
                 <Expand />
             </Button>
-            <ExpandCodeModal code={content} language={language} open={isOpen} onOpenChange={setIsOpen} />
+            <ExpandCodeModal code={content} language={language} open={isOpen} onOpenChange={setIsOpen} lang={lang} />
         </>
     );
 };

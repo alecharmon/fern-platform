@@ -97,7 +97,10 @@
     "closeSearch": "Fermer la recherche",
     "searchOurDocumentation": "Recherchez dans notre documentation.",
     "filters": "Filtres",
-    "theme": "Thème"
+    "theme": "Thème",
+    "or": "ou",
+    "toGoToRootSearch": "pour aller à la recherche racine",
+    "toGoBack": "pour aller en arrière"
   },
   "apiReference": {
     "apiReference": "Référence API",
@@ -144,7 +147,9 @@
     "format": "format",
     "optional": "Optionnel",
     "statusLower": "statut",
-    "timeLower": "temps"
+    "timeLower": "temps",
+    "selectAVariant": "Sélectionnez une variante...",
+    "noMessages": "Aucun message..."
   },
   "playground": {
     "cannotSendToLocalhost": "Impossible d'envoyer des requêtes à localhost",

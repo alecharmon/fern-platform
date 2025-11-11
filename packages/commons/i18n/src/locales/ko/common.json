@@ -97,7 +97,10 @@
     "closeSearch": "검색 닫기",
     "searchOurDocumentation": "문서를 검색하세요.",
     "filters": "필터",
-    "theme": "테마"
+    "theme": "테마",
+    "or": "또는",
+    "toGoToRootSearch": "루트 검색으로 이동",
+    "toGoBack": "뒤로 이동"
   },
   "apiReference": {
     "apiReference": "API 레퍼런스",
@@ -144,7 +147,9 @@
     "format": "형식",
     "optional": "선택 사항",
     "statusLower": "상태",
-    "timeLower": "시간"
+    "timeLower": "시간",
+    "selectAVariant": "변형 선택...",
+    "noMessages": "메시지가 없습니다..."
   },
   "playground": {
     "cannotSendToLocalhost": "localhost로 요청을 보낼 수 없습니다",

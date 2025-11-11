@@ -146,7 +146,8 @@ DesktopCommandInputSearch.displayName = "DesktopCommandInputSearch";
 function DesktopBackButton({
     pop,
     clear,
-    showAdditionalCommand
+    showAdditionalCommand,
+    lang
 }: {
     pop: () => void;
     clear: () => void;
@@ -155,15 +156,16 @@ function DesktopBackButton({
      * if true, the text says `Del` to go back or `Ctrl` `Del` to go to root search
      */
     showAdditionalCommand?: boolean;
+    lang: string;
 }): React.ReactNode {
     const shortcut = usePlatformKbdShortcut();
 
     const additionalCommand = showAdditionalCommand && shortcut && (
         <>
-            <span> or </span>
+            <span>{t(lang).search.or}</span>
             <Kbd className="mx-1">{shortcut}</Kbd>
             <Kbd className="me-1">Del</Kbd>
-            <span> to go to root search</span>
+            <span>{t(lang).search.toGoToRootSearch}</span>
         </>
     );
 
@@ -206,7 +208,7 @@ function DesktopBackButton({
                         <TooltipContent className="shrink-0">
                             <p>
                                 <Kbd className="me-1">Del</Kbd>
-                                <span> to go back</span>
+                                <span>{" "}{t(lang).search.toGoBack}</span>
                                 {additionalCommand}
                             </p>
                         </TooltipContent>
@@ -217,14 +219,14 @@ function DesktopBackButton({
     );
 }
 
-const DefaultDesktopBackButton = (): ReactNode => {
+const DefaultDesktopBackButton = ({ lang }: { lang: string }): ReactNode => {
     const { filters, popFilter, clearFilters } = useFacetFilters();
 
     if (filters.length === 0) {
         return false;
     }
 
-    return <DesktopBackButton pop={popFilter} clear={clearFilters} />;
+    return <DesktopBackButton pop={popFilter} clear={clearFilters} lang={lang} />;
 };
 
 const DesktopCommandAfterInput = afterInput.In;

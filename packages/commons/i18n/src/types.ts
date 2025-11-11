@@ -100,6 +100,8 @@ export type Translations = {
         searchOurDocumentation: string;
         filters: string;
         theme: string;
+        toGoToRootSearch: string;
+        toGoBack: string;
     };
 
     apiReference: {
@@ -148,6 +150,8 @@ export type Translations = {
         optional: string;
         statusLower: string;
         timeLower: string;
+        selectAVariant: string;
+        noMessages: string;
     };
 
     playground: {

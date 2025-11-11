@@ -3,6 +3,8 @@
 import { X } from "lucide-react";
 import React, { useState } from "react";
 
+import { t } from "@fern-docs/i18n";
+
 import { CopyToClipboardButton } from "./CopyToClipboardButton";
 import { Button } from "./FernButtonV2";
 import { FernSyntaxHighlighter } from "./syntax-highlighter/FernSyntaxHighlighter";
@@ -14,6 +16,7 @@ export declare namespace ExpandCodeModal {
         title?: string;
         open?: boolean;
         onOpenChange?: (open: boolean) => void;
+        lang: string;
     }
 }
 
@@ -21,7 +24,8 @@ export const ExpandCodeModal: React.FC<ExpandCodeModal.Props> = ({
     code,
     language = "plaintext",
     open,
-    onOpenChange
+    onOpenChange,
+    lang
 }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [codeContent, setCodeContent] = useState<string>("");
@@ -70,7 +74,7 @@ export const ExpandCodeModal: React.FC<ExpandCodeModal.Props> = ({
                 <div className="flex-1 overflow-scroll">
                     {isLoading ? (
                         <div className="flex h-32 items-center justify-center">
-                            <div className="text-muted-foreground text-sm">Loading...</div>
+                            <div className="text-muted-foreground text-sm">{t(lang).apiReference.loading}</div>
                         </div>
                     ) : (
                         <div>

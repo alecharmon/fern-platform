@@ -97,7 +97,10 @@
     "closeSearch": "Lukk søk",
     "searchOurDocumentation": "Søk i vår dokumentasjon.",
     "filters": "Filtre",
-    "theme": "Tema"
+    "theme": "Tema",
+    "or": "eller",
+    "toGoToRootSearch": "for å gå til root søk",
+    "toGoBack": "for å gå tilbake"
   },
   "apiReference": {
     "apiReference": "API-referanse",
@@ -144,7 +147,9 @@
     "format": "format",
     "optional": "Valgfri",
     "statusLower": "status",
-    "timeLower": "tid"
+    "timeLower": "tid",
+    "selectAVariant": "Velg en variant...",
+    "noMessages": "Ingen meldinger..."
   },
   "playground": {
     "cannotSendToLocalhost": "Kan ikke sende forespørsler til localhost",

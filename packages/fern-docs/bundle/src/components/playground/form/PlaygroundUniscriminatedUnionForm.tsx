@@ -91,7 +91,7 @@ export const PlaygroundUniscriminatedUnionForm = memo<PlaygroundUniscriminatedUn
                             selectedOption != null ? (
                                 <span className="font-mono">{selectedOption.label ?? selectedOption.value}</span>
                             ) : (
-                                <span className="text-(color:--grayscale-a11)">Select a variant...</span>
+                                <span className="text-(color:--grayscale-a11)">{t(lang).common.selectAVariant}</span>
                             )
                         }
                         rightIcon={<ChevronDown className="size-icon" />}

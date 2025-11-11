@@ -43,7 +43,7 @@ export const WebSocketMessages: FC<WebSocketMessagesProps> = ({ messages, virtua
                 <div className="absolute inset-0 flex size-full items-center justify-center">
                     <div className="flex flex-col items-center space-y-4">
                         {/* <WifiOff className="text-(color:--grayscale-a11)" size={28} /> */}
-                        <h4 className="m-0">No messages...</h4>
+                        <h4 className="m-0">{t(lang).common.noMessages}</h4>
                     </div>
                 </div>
             )}

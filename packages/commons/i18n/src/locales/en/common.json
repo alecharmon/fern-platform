@@ -97,7 +97,10 @@
     "closeSearch": "Close search",
     "searchOurDocumentation": "Search our documentation.",
     "filters": "Filters",
-    "theme": "Theme"
+    "theme": "Theme",
+    "or": "or",
+    "toGoToRootSearch": "to go to root search",
+    "toGoBack": "to go back"
   },
   "apiReference": {
     "apiReference": "API Reference",
@@ -144,7 +147,9 @@
     "format": "format",
     "optional": "Optional",
     "statusLower": "status",
-    "timeLower": "time"
+    "timeLower": "time",
+    "selectAVariant": "Select a variant...",
+    "noMessages": "No messages..."
   },
   "playground": {
     "cannotSendToLocalhost": "Cannot send requests to localhost",

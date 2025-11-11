@@ -97,7 +97,10 @@
     "closeSearch": "Закрыть поиск",
     "searchOurDocumentation": "Поиск по нашей документации.",
     "filters": "Фильтры",
-    "theme": "Тема"
+    "theme": "Тема",
+    "or": "или",
+    "toGoToRootSearch": "для перехода к корневому поиску",
+    "toGoBack": "для возврата"
   },
   "apiReference": {
     "apiReference": "Справочник API",
@@ -144,7 +147,9 @@
     "format": "format",
     "optional": "Опциональный",
     "statusLower": "статус",
-    "timeLower": "время"
+    "timeLower": "время",
+    "selectAVariant": "Выберите вариант...",
+    "noMessages": "Нет сообщений..."
   },
   "playground": {
     "cannotSendToLocalhost": "Невозможно отправить запросы на localhost",

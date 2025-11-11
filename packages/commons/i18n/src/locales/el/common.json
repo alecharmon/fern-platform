@@ -97,7 +97,10 @@
     "closeSearch": "Κλείσιμο αναζήτησης",
     "searchOurDocumentation": "Αναζητήστε στην τεκμηρίωσή μας.",
     "filters": "Φίλτρα",
-    "theme": "Θέμα"
+    "theme": "Θέμα",
+    "or": "ή",
+    "toGoToRootSearch": "για να μεταβείτε στην αναζήτηση root",
+    "toGoBack": "να γυρίσω πίσω"
   },
   "apiReference": {
     "apiReference": "Αναφορά API",
@@ -144,7 +147,9 @@
     "format": "Μορφή",
     "optional": "Προαιρετικό",
     "statusLower": "κατάσταση",
-    "timeLower": "χρόνος"
+    "timeLower": "χρόνος",
+    "selectAVariant": "Επιλέξτε μια παραλλαγή...",
+    "noMessages": "Χωρίς μηνύματα..."
   },
   "playground": {
     "cannotSendToLocalhost": "Δεν είναι δυνατή η αποστολή αιτημάτων στο localhost",

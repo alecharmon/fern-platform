@@ -97,7 +97,10 @@
     "closeSearch": "Stäng sökning",
     "searchOurDocumentation": "Sök i vår dokumentation.",
     "filters": "Filter",
-    "theme": "Tema"
+    "theme": "Tema",
+    "or": "eller",
+    "toGoToRootSearch": "för att gå till root sök",
+    "toGoBack": "för att gå tillbaka"
   },
   "apiReference": {
     "apiReference": "API-referens",
@@ -144,7 +147,9 @@
     "format": "format",
     "optional": "Valfri",
     "statusLower": "status",
-    "timeLower": "tid"
+    "timeLower": "tid",
+    "selectAVariant": "Välj en variant...",
+    "noMessages": "Inga meddelanden..."
   },
   "playground": {
     "cannotSendToLocalhost": "Kan inte skicka förfrågningar till localhost",

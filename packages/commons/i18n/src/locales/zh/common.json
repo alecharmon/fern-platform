@@ -97,7 +97,10 @@
     "closeSearch": "关闭搜索",
     "searchOurDocumentation": "搜索我们的文档。",
     "filters": "筛选器",
-    "theme": "主题"
+    "theme": "主题",
+    "or": "或",
+    "toGoToRootSearch": "前往根搜索",
+    "toGoBack": "返回"
   },
   "apiReference": {
     "apiReference": "API 参考",
@@ -144,7 +147,9 @@
     "format": "格式",
     "optional": "可选",
     "statusLower": "状态",
-    "timeLower": "时间"
+    "timeLower": "时间",
+    "selectAVariant": "选择一个变体...",
+    "noMessages": "没有消息..."
   },
   "playground": {
     "cannotSendToLocalhost": "无法向 localhost 发送请求",
