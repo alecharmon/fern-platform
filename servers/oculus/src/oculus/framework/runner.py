@@ -61,6 +61,7 @@ class EvaluationRunner:
         max_workers: int = 16,
         num_questions_generation: int | None = None,
         generator_config: "GeneratorConfig | None" = None,
+        results_base_path: Path | None = None,
     ):
         self.suite_name = suite_name
         self.suite_path = suite_path
@@ -72,12 +73,14 @@ class EvaluationRunner:
         self.num_questions_generation = num_questions_generation
         self.generator_config = generator_config
 
+        self.results_base_path = results_base_path or (suite_path.parent.parent / "results")
+
         self.questions_dir = suite_path / "questions"
-        self.answers_dir = suite_path / "answers" / self.run_id
-        self.evals_dir = suite_path / "evals" / self.run_id
+        self.results_dir = self.results_base_path / suite_name
+        self.answers_dir = self.results_dir / "answers" / self.run_id
 
         self.answers_dir.mkdir(parents=True, exist_ok=True)
-        self.evals_dir.mkdir(parents=True, exist_ok=True)
+        self.results_dir.mkdir(parents=True, exist_ok=True)
 
     def generate_and_save_questions(self) -> None:
         if not self.generators:
@@ -232,27 +235,7 @@ class EvaluationRunner:
     ) -> list[Evaluation]:
         question_map = {q.question: q for q in questions}
         evaluations = []
-        pending_answers = []
-
-        for i, answer in enumerate(answers):
-            slug = answer.metadata.get("slug", f"question_{i}")
-            sanitized_slug = slug.replace("/", "_").replace("\\", "_")
-            eval_path = self.evals_dir / f"{sanitized_slug}.json"
-
-            if skip_existing and eval_path.exists():
-                try:
-                    eval_data = load_json(eval_path)
-                    evaluations.append((i, Evaluation(**eval_data)))
-                    continue
-                except Exception as e:
-                    print(f"Warning: Failed to load existing evaluation {eval_path}: {e}")
-
-            pending_answers.append((i, answer))
-
-        if not pending_answers:
-            print(f"All {len(answers)} evaluations already exist, skipping")
-            evaluations.sort(key=lambda x: x[0])
-            return [evaluation for _, evaluation in evaluations]
+        pending_answers = [(i, answer) for i, answer in enumerate(answers)]
 
         print(f"Evaluating {len(pending_answers)} answers with evaluators: {self.evaluators}...")
 
@@ -350,9 +333,6 @@ class EvaluationRunner:
                 completed += 1
 
                 slug = evaluation.metadata.get("slug", f"question_{idx}")
-                sanitized_slug = slug.replace("/", "_").replace("\\", "_")
-                eval_path = self.evals_dir / f"{sanitized_slug}.json"
-                save_json(eval_path, evaluation.model_dump())
                 print(f"Progress: {completed}/{total} - Evaluated slug: {slug}")
 
         print(f"Evaluated {len(pending_answers)} answers")
@@ -408,7 +388,7 @@ class EvaluationRunner:
             metrics=metrics,
         )
 
-        results_path = self.suite_path / f"results_{self.run_id}.json"
+        results_path = self.results_dir / f"results_{self.run_id}.json"
         save_json(results_path, run_result.model_dump())
         print(f"Saved results to {results_path}\n")
 
