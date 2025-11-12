@@ -122,6 +122,8 @@ app.listen(PORT, () => {
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`\nAvailable endpoints:`);
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
+    console.log(`  POST http://localhost:${PORT}/v2/registry/ai/enhance-example`);
+    // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  POST http://localhost:${PORT}/v2/registry/docs/load-docs-for-url`);
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  POST http://localhost:${PORT}/v2/registry/docs/metadata-for-url`);

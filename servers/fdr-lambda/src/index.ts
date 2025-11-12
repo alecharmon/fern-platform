@@ -9,6 +9,7 @@ import {
     UnauthorizedError,
     UserNotInOrgError
 } from "./errors";
+import { type EnhanceExampleRequest, enhanceExample } from "./services/enhanceExample";
 import { ensureDocsInS3 } from "./services/ensureDocsInS3";
 import { getDocsForUrl } from "./services/getDocsForUrl";
 import { getEndpointById } from "./services/getEndpointById";
@@ -114,6 +115,199 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     const method = event.httpMethod;
 
     try {
+        // Route: POST /v2/registry/ai/enhance-example
+        if ((path === "/v2/registry/ai/enhance-example" || path === "/ai/enhance-example") && method === "POST") {
+            console.log(`[Handler] ai/enhance-example endpoint called, requestId: ${context.awsRequestId}`);
+
+            try {
+                const body: EnhanceExampleRequest = JSON.parse(event.body || "{}");
+                console.log(
+                    `[Handler] Parsed request body, method: ${body.method}, path: ${body.endpointPath}, orgId: ${body.organizationId}`
+                );
+
+                if (!body.method || !body.endpointPath || !body.organizationId) {
+                    return {
+                        statusCode: 400,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        },
+                        body: JSON.stringify({
+                            error: "ValidationError",
+                            message: "Missing required fields: method, endpointPath, and organizationId",
+                            requestId: context.awsRequestId
+                        })
+                    };
+                }
+
+                // Extract Authorization header (case-insensitive)
+                // const authHeader =
+                //     event.headers?.Authorization ||
+                //     event.headers?.authorization ||
+                //     event.headers?.["x-fern-token"] ||
+                //     event.headers?.["X-Fern-Token"];
+
+                // await checkUserBelongsToOrg({
+                //     authHeader,
+                //     orgId: body.organizationId
+                // });
+
+                console.log(
+                    `[Handler] Auth validated for org: ${body.organizationId}, calling enhanceExample for ${body.method} ${body.endpointPath}`
+                );
+                const enhancedResponse = await enhanceExample(body, context.awsRequestId);
+                console.log(`[Handler] enhanceExample completed successfully`);
+
+                return {
+                    statusCode: 200,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify(enhancedResponse)
+                };
+            } catch (error: unknown) {
+                if (error && typeof error === "object" && "name" in error) {
+                    const errorName = (error as { name: string }).name;
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+
+                    if (errorName === "UnauthorizedError") {
+                        return {
+                            statusCode: 401,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            body: JSON.stringify({
+                                error: "UnauthorizedError",
+                                message: errorMessage,
+                                requestId: context.awsRequestId
+                            })
+                        };
+                    }
+
+                    if (errorName === "UserNotInOrgError") {
+                        return {
+                            statusCode: 403,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            body: JSON.stringify({
+                                error: "UserNotInOrgError",
+                                message: errorMessage,
+                                requestId: context.awsRequestId
+                            })
+                        };
+                    }
+
+                    if (errorName === "OpenAITimeout") {
+                        return {
+                            statusCode: 504,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            body: JSON.stringify({
+                                error: "OpenAITimeout",
+                                message: errorMessage,
+                                requestId: context.awsRequestId
+                            })
+                        };
+                    }
+
+                    if (errorName === "OpenAIRateLimited") {
+                        return {
+                            statusCode: 429,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            body: JSON.stringify({
+                                error: "OpenAIRateLimited",
+                                message: errorMessage,
+                                requestId: context.awsRequestId
+                            })
+                        };
+                    }
+
+                    if (errorName === "OpenAIInvalidRequest") {
+                        return {
+                            statusCode: 400,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            body: JSON.stringify({
+                                error: "OpenAIInvalidRequest",
+                                message: errorMessage,
+                                requestId: context.awsRequestId
+                            })
+                        };
+                    }
+
+                    if (errorName === "OpenAIServerError" || errorName === "OpenAIResponseParseError") {
+                        return {
+                            statusCode: 502,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            body: JSON.stringify({
+                                error: errorName,
+                                message: errorMessage,
+                                requestId: context.awsRequestId
+                            })
+                        };
+                    }
+
+                    if (errorName === "ConfigError") {
+                        return {
+                            statusCode: 500,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            body: JSON.stringify({
+                                error: "ConfigError",
+                                message: errorMessage,
+                                requestId: context.awsRequestId
+                            })
+                        };
+                    }
+
+                    if (errorName === "UnavailableError") {
+                        return {
+                            statusCode: 503,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            body: JSON.stringify({
+                                error: "UnavailableError",
+                                message: errorMessage,
+                                requestId: context.awsRequestId
+                            })
+                        };
+                    }
+                }
+
+                console.error(`[Handler] Unhandled error in ai/enhance-example:`, error);
+                return {
+                    statusCode: 500,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        error: "InternalError",
+                        message: error instanceof Error ? error.message : "An unexpected error occurred",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+        }
+
         // Route: POST /v2/registry/docs/metadata-for-url or POST /metadata-for-url
         if ((path === "/v2/registry/docs/metadata-for-url" || path === "/metadata-for-url") && method === "POST") {
             const body: GetMetadataForUrlRequest = JSON.parse(event.body || "{}");
