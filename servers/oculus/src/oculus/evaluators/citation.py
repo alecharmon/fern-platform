@@ -42,11 +42,12 @@ def check_citations_match(
 
 @register_evaluator("citation")
 def evaluate_citation(
-    expected_citations: list[str] | None = None,
     actual_sources: list[dict[str, str | None]] | None = None,
     **kwargs: Any,
 ) -> BinaryEvaluationResult | None:
-    if not expected_citations or not actual_sources:
+    expected_citations = kwargs.get("criteria")
+
+    if not expected_citations or len(expected_citations) == 0 or not actual_sources:
         return None
 
     normalized_urls_set = {normalize_url(url) for s in actual_sources if (url := s.get("url")) and isinstance(url, str)}

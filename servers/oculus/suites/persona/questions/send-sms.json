@@ -7,8 +7,10 @@
       "slug": "send-sms",
       "domain": "persona-demo-docs.docs.buildwithfern.com"
     },
-    "expected_citations": [
-      "https://help.withpersona.com/articles/19Lpb01dayUoovielLfTZd/",
-      "https://help.withpersona.com/articles/7DbcO4qiCbn4aY0Oc5iO8W/"
-    ]
+    "criteria": {
+      "citation": [
+        "https://help.withpersona.com/articles/19Lpb01dayUoovielLfTZd/",
+        "https://help.withpersona.com/articles/7DbcO4qiCbn4aY0Oc5iO8W/"
+      ]
+    }
   }

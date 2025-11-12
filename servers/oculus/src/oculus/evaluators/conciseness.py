@@ -28,7 +28,7 @@ Rate on a scale of 1-5:
 3 - Acceptable: answers question but with notable irrelevant content or excessive length
 2 - Poor: significantly verbose or includes confusing irrelevant details
 1 - Very poor: mostly irrelevant or so verbose it's hard to extract the answer
-
+{criteria_section}
 Provide:
 - conciseness_score (1-5)
 - reasoning (1-2 sentences)"""
@@ -38,13 +38,24 @@ def evaluate_answer_conciseness(
     question: str,
     answer: str,
     model: str = "claude-sonnet-4-5-20250929",
+    criteria: list[str] | None = None,
 ) -> ConcisenessEvaluationResponse | None:
+    if criteria and len(criteria) > 0:
+        criteria_text = "\n".join(f"- {c}" for c in criteria)
+        criteria_section = (
+            f"\n\nIMPORTANT: The answer must also meet ALL of the following required criteria to score "
+            f"well:\n{criteria_text}\n"
+        )
+    else:
+        criteria_section = ""
+
     return generate_with_claude(
         response_type=ConcisenessEvaluationResponse,
         prompt_template=CONCISENESS_EVALUATION_PROMPT_TEMPLATE,
         model=model,
         question=question,
         answer=answer,
+        criteria_section=criteria_section,
     )
 
 
@@ -56,7 +67,8 @@ def evaluate_conciseness(
     model: str = "claude-sonnet-4-5-20250929",
     **kwargs: Any,
 ) -> ScaledEvaluationResult | None:
-    response = evaluate_answer_conciseness(question, answer, model)
+    criteria = kwargs.get("criteria")
+    response = evaluate_answer_conciseness(question, answer, model, criteria=criteria)
 
     if not response:
         return None

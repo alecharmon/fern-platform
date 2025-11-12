@@ -263,16 +263,23 @@ class EvaluationRunner:
                     continue
 
                 try:
-                    # Parse sources for citation evaluator
                     actual_sources = _parse_sources_from_answer(answer)
+
+                    evaluator_criteria = None
+                    if (
+                        question_obj.criteria
+                        and evaluator_name in question_obj.criteria
+                        and len(question_obj.criteria[evaluator_name]) > 0
+                    ):
+                        evaluator_criteria = question_obj.criteria[evaluator_name]
 
                     eval_result: EvaluationResult | None = evaluator_fn(
                         question=answer.question,
                         answer=answer.answer,
                         ground_truth=question_obj.ground_truth,
                         model=judge_model,
-                        expected_citations=question_obj.expected_citations,
                         actual_sources=actual_sources,
+                        criteria=evaluator_criteria,
                     )
 
                     if eval_result:

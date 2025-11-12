@@ -7,8 +7,10 @@
       "slug": "graph-query-field",
       "domain": "persona-demo-docs.docs.buildwithfern.com"
     },
-    "expected_citations": [
+    "criteria": {
+      "citation": [
       "https://docs.withpersona.com/running-graph-queries",
       "https://help.withpersona.com/articles/7DbcO4qiCbn4aY0Oc5iO8W/"
-    ]
+      ]
+    }
   }

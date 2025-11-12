@@ -7,8 +7,12 @@
     "slug": "integrate-voice-to-voice-react",
     "domain": "hume-discord-ai.docs.buildwithfern.com"
   },
-  "expected_citations": [
-    "https://github.com/HumeAI/hume-react-sdk/blob/main/packages/react/README.md",
-    "https://hume-discord-ai.docs.buildwithfern.com/docs/speech-to-speech-evi/configuration/voice"
-  ]
+  "criteria": {
+    "citation": [
+      "https://github.com/HumeAI/hume-react-sdk/blob/main/packages/react/README.md"
+    ],
+    "correctness": [
+      "The answer must contain all three of the following steps: 1) Installing the @humeai/voice-react package, 2) Setting up the VoiceProvider wrapper, 3) Using the useVoice hook."
+    ]
+  }
 }

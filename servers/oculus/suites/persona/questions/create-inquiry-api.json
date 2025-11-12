@@ -7,7 +7,9 @@
       "slug": "create-inquiry-api",
       "domain": "persona-demo-docs.docs.buildwithfern.com"
     },
-    "expected_citations": [
-      "https://docs.withpersona.com/api-quickstart-tutorial"
-    ]
+    "criteria": {
+      "citation": [
+        "https://docs.withpersona.com/api-quickstart-tutorial"
+      ]
+    }
   }

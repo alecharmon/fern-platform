@@ -26,27 +26,43 @@ Rate the coherence on a scale of 1-3 based on:
 - Clear progression of ideas
 - Absence of contradictions
 - Appropriate transitions between concepts
-
-3 - Excellent: Clear, logical structure with smooth flow
-2 - Acceptable: Understandable but somewhat disjointed
-1 - Poor: Incoherent, contradictory, or nonsensical
+{criteria_section}
+{rating_scale}
 
 Provide:
-- coherence_score (1-3)
-- reasoning (1-2 sentences)"""
+- score (1-3)
+- reason (1-2 sentences)"""
 
 
 def evaluate_answer_coherence(
     question: str,
     answer: str,
     model: str = "claude-sonnet-4-5-20250929",
+    criteria: list[str] | None = None,
 ) -> CoherenceEvaluationResponse | None:
+    if criteria and len(criteria) > 0:
+        criteria_text = "\n".join(f"- {c}" for c in criteria)
+        criteria_section = (
+            f"\n\nIMPORTANT: The answer must also meet ALL of the following required criteria to score "
+            f"well:\n{criteria_text}\n"
+        )
+        rating_scale = """3 - Excellent: Clear, logical structure with smooth flow and meets all criteria
+2 - Acceptable: Understandable but somewhat disjointed or missing some criteria
+1 - Poor: Incoherent, contradictory, nonsensical, or fails to meet criteria"""
+    else:
+        criteria_section = ""
+        rating_scale = """3 - Excellent: Clear, logical structure with smooth flow
+2 - Acceptable: Understandable but somewhat disjointed
+1 - Poor: Incoherent, contradictory, or nonsensical"""
+
     return generate_with_claude(
         response_type=CoherenceEvaluationResponse,
         prompt_template=COHERENCE_EVALUATION_PROMPT_TEMPLATE,
         model=model,
         question=question,
         answer=answer,
+        criteria_section=criteria_section,
+        rating_scale=rating_scale,
     )
 
 
@@ -58,7 +74,8 @@ def evaluate_coherence(
     model: str = "claude-sonnet-4-5-20250929",
     **kwargs: Any,
 ) -> ScaledEvaluationResult | None:
-    response = evaluate_answer_coherence(question, answer, model)
+    criteria = kwargs.get("criteria")
+    response = evaluate_answer_coherence(question, answer, model, criteria=criteria)
 
     if not response:
         return None

@@ -7,7 +7,9 @@
     "slug": "reduce-noise-echo-react-sdk",
     "domain": "hume-discord-ai.docs.buildwithfern.com"
   },
-  "expected_citations": [
-    "https://github.com/HumeAI/hume-react-sdk/blob/main/packages/react/README.md"
-  ]
+  "criteria": {
+    "citation": [
+      "https://github.com/HumeAI/hume-react-sdk/blob/main/packages/react/README.md"
+    ]
+  }
 }

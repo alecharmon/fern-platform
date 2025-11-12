@@ -32,7 +32,7 @@ class Question(BaseModel):
     question: str
     ground_truth: str
     metadata: dict[str, str] = Field(default_factory=dict)
-    expected_citations: list[str] | None = None
+    criteria: dict[str, list[str]] | None = None
 
 
 class Answer(BaseModel):

@@ -7,7 +7,9 @@
       "slug": "inquiries-verifications",
       "domain": "persona-demo-docs.docs.buildwithfern.com"
     },
-    "expected_citations": [
-      "https://help.withpersona.com/articles/14hgKH7lZo9b6ja7tRJobW/"
-    ]
+    "criteria": {
+      "citation": [
+        "https://help.withpersona.com/articles/14hgKH7lZo9b6ja7tRJobW/"
+      ]
+    }
   }

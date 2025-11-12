@@ -7,7 +7,9 @@
       "slug": "inquiry-name",
       "domain": "persona-demo-docs.docs.buildwithfern.com"
     },
-    "expected_citations": [
+    "criteria": {
+      "citation": [
       "https://docs.withpersona.com/api-reference/inquiries/create-an-inquiry"
-    ]
+      ]
+    }
   }

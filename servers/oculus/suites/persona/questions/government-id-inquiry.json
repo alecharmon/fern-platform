@@ -7,7 +7,9 @@
       "slug": "government-id-inquiry",
       "domain": "persona-demo-docs.docs.buildwithfern.com"
     },
-    "expected_citations": [
-      "https://help.withpersona.com/articles/1dS7AaCL1XdfSivBVZhrOt/"
-    ]
+    "criteria": {
+      "citation": [
+        "https://help.withpersona.com/articles/1dS7AaCL1XdfSivBVZhrOt/"
+      ]
+    }
   }
