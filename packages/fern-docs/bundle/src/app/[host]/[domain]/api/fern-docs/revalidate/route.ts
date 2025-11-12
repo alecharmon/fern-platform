@@ -49,7 +49,309 @@ class RevalidationError extends Error {
     }
 }
 
+interface RevalidationController {
+    log(message: string): void;
+}
+
 export const maxDuration = 800; // 13 minutes timeout
+
+async function performRevalidation(params: {
+    host: string;
+    domain: string;
+    origin: string;
+    controller: RevalidationController;
+    doReindex: boolean;
+    doRegenerate: boolean;
+    cdnUri: string | undefined;
+    authHeader: string | null;
+    start: number;
+}): Promise<void> {
+    const { host, domain, origin, controller, doReindex, doRegenerate, cdnUri, authHeader, start } = params;
+
+    try {
+        await kv.del(domain);
+    } catch (e) {
+        console.debug("Attempted to delete key", domain, "but failed with", e);
+    }
+
+    const deploymentId = getEnv().VERCEL_DEPLOYMENT_ID ?? "development";
+    const oldSuggestionsKey = `docs:${deploymentId}:${domain}:suggestions`;
+    try {
+        await kv.del(oldSuggestionsKey);
+    } catch (e) {
+        console.debug("Attempted to delete old suggestions key", oldSuggestionsKey, "but failed with", e);
+    }
+
+    if (cdnUri) {
+        waitUntil(kv.sadd(`${cdnUri}:domains`, domain));
+    }
+
+    controller.log(`revalidating:${domain}\n`);
+
+    const loadWithUrlPromise = loadWithUrl(domain);
+
+    const [docs, edgeFlags, metadata, authConfig] = await Promise.all([
+        loadWithUrlPromise,
+        getEdgeFlags(domain),
+        getMetadataFromResponse(withoutStaging(domain), loadWithUrlPromise),
+        getAuthEdgeConfig(domain)
+    ]);
+
+    let reindexPromise: Promise<void> | undefined;
+    if (doReindex) {
+        reindexPromise = reindex(docs, host, domain, maxDuration)
+            .then((services) => {
+                controller.log(`reindex-queued:services=${services.join(",")}\n`);
+            })
+            .catch((e: unknown) => {
+                console.error(`[revalidate:reindex] ${JSON.stringify(e)}`);
+                controller.log(`reindex-failed:error=${escapeRegExp(String(e))}\n`);
+            });
+    }
+
+    const cacheEndpoints = [
+        { path: "/api/fern-docs/llms-full.txt", name: "llms-full" },
+        { path: "/api/fern-docs/favicon.ico", name: "api-favicon" },
+        { path: "/favicon.ico", name: "base-favicon" }
+    ];
+
+    const cachePromises = cacheEndpoints.map(({ path, name }) =>
+        fetch(`${origin}${path}`, {
+            method: "HEAD",
+            headers: { [HEADER_X_FERN_HOST]: domain },
+            signal: AbortSignal.timeout(600_000)
+        })
+            .then(() => {
+                controller.log(`${name}-revalidated\n`);
+            })
+            .catch((e: unknown) => {
+                console.error(`[revalidate:${name}-revalidate] error: ${JSON.stringify(e)}`);
+                controller.log(`${name}-revalidate-failed:error=${escapeRegExp(String(e))}\n`);
+            })
+    );
+
+    const root = convertResponseToRootNode(docs, edgeFlags);
+    let staticRoot = root;
+
+    if (staticRoot && authConfig) {
+        staticRoot = pruneWithAuthState(
+            {
+                authed: false,
+                authorizationUrl: undefined,
+                partner: undefined,
+                ok: true
+            },
+            authConfig,
+            staticRoot
+        );
+    }
+
+    try {
+        const keys: Record<string, unknown> = {};
+
+        keys[CACHE_KEY_METADATA] = metadata;
+
+        if (root != null) {
+            keys[CACHE_KEY_ROOT] = root;
+        }
+
+        const { navigation, root: _, ...config } = docs.definition.config;
+        keys[CACHE_KEY_CONFIG] = config;
+
+        Object.entries(docs.definition.pages).forEach(([id, page]) => {
+            keys[createPageCacheKey({ pageId: id })] = page;
+        });
+
+        Object.values(docs.definition.apisV2).forEach((api) => {
+            const prunedApi = createPrunedApi(api);
+            prunedApi.forEach((value, key) => {
+                keys[`api:${key}`] = value;
+            });
+        });
+
+        Object.values(docs.definition.apis).forEach((api) => {
+            const prunedApi = createPrunedApi(ApiDefinitionV1ToLatest.from(api).migrate());
+            prunedApi.forEach((value, key) => {
+                keys[`api:${key}`] = value;
+            });
+        });
+
+        keys[CACHE_KEY_FILES] = mapValues(docs.definition.filesV2, (file) => {
+            if (file.type === "url") {
+                return {
+                    src:
+                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                            ? file.url.replace(getFileCDN(), `${metadata.basePath ?? ""}/_files`)
+                            : file.url
+                };
+            } else if (file.type === "image") {
+                return {
+                    src:
+                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                            ? file.url.replace(getFileCDN(), `${metadata.basePath ?? ""}/_files`)
+                            : file.url,
+                    width: file.width,
+                    height: file.height,
+                    blurDataURL: file.blurDataUrl,
+                    alt: file.alt
+                };
+            }
+            throw new UnreachableCaseError(file);
+        });
+
+        keys[CACHE_KEY_MDX_BUNDLER_FILES] = docs.definition.jsFiles ?? {};
+
+        const promises = [];
+
+        for (const [key, value] of Object.entries(keys)) {
+            promises.push(kv.hset(domain, { [key]: value }));
+        }
+
+        const results = await Promise.allSettled(promises);
+
+        results.forEach((result, index) => {
+            if (result.status === "rejected") {
+                console.error(`Failed to set kv key ${Object.keys(keys)[index]}: ${result.reason}`);
+            }
+        });
+
+        controller.log(`revalidate-kv-keys-set:${Object.keys(keys).length}\n`);
+    } catch (e) {
+        console.error(`[revalidate:start] ${JSON.stringify(e)}`);
+        controller.log(`revalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
+    }
+
+    if (doRegenerate) {
+        const collector = FernNavigation.NodeCollector.collect(staticRoot);
+
+        controller.log(`revalidate-queued:urls=${collector.slugs.length}\n`);
+
+        const queue = new ResilientQueue<string>({
+            processItem: async (slug: string, attempt: number) => {
+                const url = withDefaultProtocol(`${domain}${slugToHref(slug)}`);
+
+                revalidatePath(`/${host}/${domain}/static/${encodeURIComponent(slugToHref(slug))}`, "page");
+
+                const startTime = performance.now();
+
+                try {
+                    const res = await fetch(`${origin}${slugToHref(slug)}`, {
+                        method: "HEAD",
+                        headers: { [HEADER_X_FERN_HOST]: domain },
+                        signal: AbortSignal.timeout(600_000)
+                    });
+
+                    const endTime = performance.now();
+
+                    track("revalidate_page_stats", {
+                        url,
+                        domain,
+                        durationMs: endTime - startTime,
+                        status: res?.status ?? null,
+                        ok: res?.ok ?? false,
+                        attempt
+                    });
+
+                    if (!res?.ok) {
+                        track("revalidate_page_error_res_not_ok", {
+                            url,
+                            domain,
+                            status: res?.status ?? null,
+                            error: `Failed to revalidate ${url}. Status code: ${res?.status}`,
+                            attempt
+                        });
+                        throw new RevalidationError(
+                            `Failed to revalidate ${url}. Status code: ${res?.status}`,
+                            url,
+                            res?.status
+                        );
+                    }
+
+                    controller.log(`revalidated:${url}\n`);
+                } catch (e) {
+                    console.error(
+                        `[revalidate:page-revalidate] error: url=${url}; attempt=${attempt}; error=${JSON.stringify((e as Error)?.message)}`
+                    );
+
+                    if (!(e instanceof RevalidationError)) {
+                        const errorMessage = String(e);
+                        const errorDetails: any = {};
+
+                        if (e && typeof e === "object" && "cause" in e && e.cause !== undefined) {
+                            errorDetails.cause = e.cause;
+                        }
+
+                        track("revalidate_page_error_unexpected", {
+                            url,
+                            domain,
+                            error: errorMessage,
+                            errorDetails,
+                            attempt
+                        });
+                    }
+
+                    throw e;
+                }
+            },
+            maxRetries: 3,
+            initialConcurrency: 50,
+            maxConcurrency: 150,
+            minConcurrency: 5,
+            errorRateThreshold: 0.2,
+            backoffBaseMs: 1000,
+            onProgress: (stats) => {
+                controller.log(
+                    `revalidate-progress:completed=${stats.completed}/${stats.total};` +
+                        `failed=${stats.failed};inFlight=${stats.inFlight};` +
+                        `concurrency=${stats.currentConcurrency};errorRate=${(stats.errorRate * 100).toFixed(1)}%\n`
+                );
+            }
+        });
+
+        const result = await queue.process(collector.staticPageSlugs);
+
+        if (result.failed > 0) {
+            console.error(`[revalidate] ${result.failed} pages failed permanently after ${3} retries`);
+            track("revalidate_pages_failed_permanently", {
+                domain,
+                failedCount: result.failed,
+                totalCount: result.total
+            });
+        }
+
+        controller.log(
+            `revalidate-pages-finished:total=${result.total};` +
+                `completed=${result.completed};failed=${result.failed}\n`
+        );
+    }
+
+    if (
+        authHeader != null &&
+        process.env.NEXT_PUBLIC_DASHBOARD_URL != null &&
+        process.env.NEXT_PUBLIC_DASHBOARD_URL !== ""
+    ) {
+        try {
+            await fetch(new URL("/api/generate-homepage-images", process.env.NEXT_PUBLIC_DASHBOARD_URL), {
+                method: "POST",
+                headers: {
+                    authorization: authHeader
+                },
+                body: JSON.stringify({
+                    url: `${docs.baseUrl.domain.replace(/\/$/, "")}${docs.baseUrl.basePath ?? ""}`
+                }),
+                signal: AbortSignal.timeout(600_000)
+            });
+        } catch (e) {
+            console.error(`[revalidate:homepage-image-revalidate] error: ${JSON.stringify(e)}`);
+        }
+    }
+
+    await reindexPromise;
+    await Promise.all(cachePromises);
+
+    const end = performance.now();
+    controller.log(`revalidate-finished:${end - start}ms\n`);
+}
 
 export async function GET(
     req: NextRequest,
@@ -68,323 +370,80 @@ export async function GET(
     // delay to ensure invalidation propagates before cache is accessed
     await new Promise((resolve) => setTimeout(resolve, 500));
 
+    const fromDeploymentPromoted = req.nextUrl.searchParams.get("fromDeploymentPromoted") === "true";
+
+    if (fromDeploymentPromoted) {
+        const controller: RevalidationController = {
+            log: (message: string) => console.log(message)
+        };
+
+        try {
+            const metadata = await getMetadataFromResponse(withoutStaging(domain), loadWithUrl(domain));
+            const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
+            const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
+
+            await performRevalidation({
+                host,
+                domain,
+                origin: req.nextUrl.origin,
+                controller,
+                doReindex,
+                doRegenerate,
+                cdnUri,
+                authHeader: req.headers.get("authorization"),
+                start
+            });
+
+            return new NextResponse("OK", { status: 200 });
+        } catch (e) {
+            console.error(`[revalidate] ${JSON.stringify(e)}`);
+
+            if (e instanceof RevalidationError) {
+                track("revalidate_intentional_failure", {
+                    url: e.url,
+                    domain,
+                    status: e.status,
+                    error: e.message
+                });
+            } else {
+                track("revalidate_unexpected_error", {
+                    domain,
+                    error: String(e)
+                });
+            }
+
+            return new NextResponse("Internal Server Error", { status: 500 });
+        }
+    }
+
     const stream = new ReadableStream({
         async start(controller) {
             const c = createSafeStreamController(controller, "[revalidate]");
 
             try {
-                try {
-                    await kv.del(domain);
-                } catch (e) {
-                    console.debug("Attempted to delete key", domain, "but failed with", e);
-                }
+                const streamController: RevalidationController = {
+                    log: (message: string) => c.enqueue(message)
+                };
 
-                const deploymentId = getEnv().VERCEL_DEPLOYMENT_ID ?? "development";
-                const oldSuggestionsKey = `docs:${deploymentId}:${domain}:suggestions`;
-                try {
-                    await kv.del(oldSuggestionsKey);
-                } catch (e) {
-                    console.debug("Attempted to delete old suggestions key", oldSuggestionsKey, "but failed with", e);
-                }
+                const metadata = await getMetadataFromResponse(withoutStaging(domain), loadWithUrl(domain));
+                const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
+                const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
 
-                // note: adds to "domain" for deployment-promoted webhook
-                if (cdnUri) {
-                    waitUntil(kv.sadd(`${cdnUri}:domains`, domain));
-                }
-
-                c.enqueue(`revalidating:${domain}\n`);
-
-                const loadWithUrlPromise = loadWithUrl(domain);
-
-                const [docs, edgeFlags, metadata, authConfig] = await Promise.all([
-                    loadWithUrlPromise,
-                    getEdgeFlags(domain),
-                    getMetadataFromResponse(withoutStaging(domain), loadWithUrlPromise),
-                    getAuthEdgeConfig(domain)
-                ]);
-
-                let reindexPromise: Promise<void> | undefined;
-                if (
-                    !metadata.isPreview &&
-                    // reindex unless explicitly disabled
-                    req.nextUrl.searchParams.get("reindex") !== "false"
-                ) {
-                    reindexPromise = reindex(docs, host, domain, maxDuration)
-                        .then((services) => {
-                            c.enqueue(`reindex-queued:services=${services.join(",")}\n`);
-                        })
-                        .catch((e: unknown) => {
-                            console.error(`[revalidate:reindex] ${JSON.stringify(e)}`);
-                            c.enqueue(`reindex-failed:error=${escapeRegExp(String(e))}\n`);
-                        });
-                }
-
-                // Revalidate cache endpoints
-                const cacheEndpoints = [
-                    { path: "/api/fern-docs/llms-full.txt", name: "llms-full" },
-                    { path: "/api/fern-docs/favicon.ico", name: "api-favicon" },
-                    { path: "/favicon.ico", name: "base-favicon" }
-                ];
-
-                const cachePromises = cacheEndpoints.map(({ path, name }) =>
-                    fetch(`${req.nextUrl.origin}${path}`, {
-                        method: "HEAD",
-                        headers: { [HEADER_X_FERN_HOST]: domain },
-                        signal: AbortSignal.timeout(600_000)
-                    })
-                        .then(() => {
-                            c.enqueue(`${name}-revalidated\n`);
-                        })
-                        .catch((e: unknown) => {
-                            console.error(`[revalidate:${name}-revalidate] error: ${JSON.stringify(e)}`);
-                            c.enqueue(`${name}-revalidate-failed:error=${escapeRegExp(String(e))}\n`);
-                        })
-                );
-
-                const root = convertResponseToRootNode(docs, edgeFlags);
-                let staticRoot = root;
-
-                // maybe prune the root node if we have an auth config
-                if (staticRoot && authConfig) {
-                    staticRoot = pruneWithAuthState(
-                        {
-                            authed: false,
-                            authorizationUrl: undefined,
-                            partner: undefined,
-                            ok: true
-                        },
-                        authConfig,
-                        staticRoot
-                    );
-                }
-
-                try {
-                    const keys: Record<string, unknown> = {};
-
-                    keys[CACHE_KEY_METADATA] = metadata;
-
-                    if (root != null) {
-                        keys[CACHE_KEY_ROOT] = root;
-                    }
-
-                    const { navigation, root: _, ...config } = docs.definition.config;
-                    keys[CACHE_KEY_CONFIG] = config;
-
-                    Object.entries(docs.definition.pages).forEach(([id, page]) => {
-                        keys[createPageCacheKey({ pageId: id })] = page;
-                    });
-
-                    Object.values(docs.definition.apisV2).forEach((api) => {
-                        const prunedApi = createPrunedApi(api);
-                        prunedApi.forEach((value, key) => {
-                            keys[`api:${key}`] = value;
-                        });
-                    });
-
-                    Object.values(docs.definition.apis).forEach((api) => {
-                        const prunedApi = createPrunedApi(ApiDefinitionV1ToLatest.from(api).migrate());
-                        prunedApi.forEach((value, key) => {
-                            keys[`api:${key}`] = value;
-                        });
-                    });
-
-                    keys[CACHE_KEY_FILES] = mapValues(docs.definition.filesV2, (file) => {
-                        if (file.type === "url") {
-                            return {
-                                src:
-                                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                                        ? file.url.replace(getFileCDN(), `${metadata.basePath ?? ""}/_files`)
-                                        : file.url
-                            };
-                        } else if (file.type === "image") {
-                            return {
-                                src:
-                                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                                        ? file.url.replace(getFileCDN(), `${metadata.basePath ?? ""}/_files`)
-                                        : file.url,
-                                width: file.width,
-                                height: file.height,
-                                blurDataURL: file.blurDataUrl,
-                                alt: file.alt
-                            };
-                        }
-                        throw new UnreachableCaseError(file);
-                    });
-
-                    keys[CACHE_KEY_MDX_BUNDLER_FILES] = docs.definition.jsFiles ?? {};
-
-                    const promises = [];
-
-                    for (const [key, value] of Object.entries(keys)) {
-                        promises.push(kv.hset(domain, { [key]: value }));
-                    }
-
-                    const results = await Promise.allSettled(promises);
-
-                    results.forEach((result, index) => {
-                        if (result.status === "rejected") {
-                            console.error(`Failed to set kv key ${Object.keys(keys)[index]}: ${result.reason}`);
-                        }
-                    });
-
-                    c.enqueue(`revalidate-kv-keys-set:${Object.keys(keys).length}\n`);
-                } catch (e) {
-                    console.error(`[revalidate:start] ${JSON.stringify(e)}`);
-                    c.enqueue(`revalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
-                }
-
-                if (!metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false") {
-                    const collector = FernNavigation.NodeCollector.collect(staticRoot);
-
-                    c.enqueue(`revalidate-queued:urls=${collector.slugs.length}\n`);
-
-                    // Use ResilientQueue for adaptive concurrency and retry logic
-                    const queue = new ResilientQueue<string>({
-                        processItem: async (slug: string, attempt: number) => {
-                            const url = withDefaultProtocol(`${domain}${slugToHref(slug)}`);
-
-                            // Force revalidate the static page
-                            revalidatePath(`/${host}/${domain}/static/${encodeURIComponent(slugToHref(slug))}`, "page");
-
-                            const startTime = performance.now();
-
-                            try {
-                                const res = await fetch(`${req.nextUrl.origin}${slugToHref(slug)}`, {
-                                    method: "HEAD",
-                                    headers: { [HEADER_X_FERN_HOST]: domain },
-                                    signal: AbortSignal.timeout(600_000)
-                                });
-
-                                const endTime = performance.now();
-
-                                track("revalidate_page_stats", {
-                                    url,
-                                    domain,
-                                    durationMs: endTime - startTime,
-                                    status: res?.status ?? null,
-                                    ok: res?.ok ?? false,
-                                    attempt
-                                });
-
-                                if (!res?.ok) {
-                                    track("revalidate_page_error_res_not_ok", {
-                                        url,
-                                        domain,
-                                        status: res?.status ?? null,
-                                        error: `Failed to revalidate ${url}. Status code: ${res?.status}`,
-                                        attempt
-                                    });
-                                    throw new RevalidationError(
-                                        `Failed to revalidate ${url}. Status code: ${res?.status}`,
-                                        url,
-                                        res?.status
-                                    );
-                                }
-
-                                c.enqueue(`revalidated:${url}\n`);
-                            } catch (e) {
-                                console.error(
-                                    `[revalidate:page-revalidate] error: url=${url}; attempt=${attempt}; error=${JSON.stringify((e as Error)?.message)}`
-                                );
-
-                                // Check if this is an intentional revalidation error or an unexpected error
-                                if (!(e instanceof RevalidationError)) {
-                                    // This is an unexpected error
-                                    const errorMessage = String(e);
-                                    const errorDetails: any = {};
-
-                                    if (e && typeof e === "object" && "cause" in e && e.cause !== undefined) {
-                                        errorDetails.cause = e.cause;
-                                    }
-
-                                    track("revalidate_page_error_unexpected", {
-                                        url,
-                                        domain,
-                                        error: errorMessage,
-                                        errorDetails,
-                                        attempt
-                                    });
-                                }
-
-                                // Re-throw to let queue handle retry
-                                throw e;
-                            }
-                        },
-                        maxRetries: 3,
-                        initialConcurrency: 50,
-                        maxConcurrency: 150,
-                        minConcurrency: 5,
-                        errorRateThreshold: 0.2,
-                        backoffBaseMs: 1000,
-                        onProgress: (stats) => {
-                            c.enqueue(
-                                `revalidate-progress:completed=${stats.completed}/${stats.total};` +
-                                    `failed=${stats.failed};inFlight=${stats.inFlight};` +
-                                    `concurrency=${stats.currentConcurrency};errorRate=${(stats.errorRate * 100).toFixed(1)}%\n`
-                            );
-                        }
-                    });
-
-                    const result = await queue.process(collector.staticPageSlugs);
-
-                    // Log permanently failed pages
-                    if (result.failed > 0) {
-                        console.error(`[revalidate] ${result.failed} pages failed permanently after ${3} retries`);
-                        track("revalidate_pages_failed_permanently", {
-                            domain,
-                            failedCount: result.failed,
-                            totalCount: result.total
-                        });
-                    }
-
-                    c.enqueue(
-                        `revalidate-pages-finished:total=${result.total};` +
-                            `completed=${result.completed};failed=${result.failed}\n`
-                    );
-                }
-
-                // update homepage images for dashboard
-                const authHeader = req.headers.get("authorization");
-                if (authHeader == null) {
-                    console.warn("Did not generate homepage images because no auth header present on request");
-                } else if (
-                    process.env.NEXT_PUBLIC_DASHBOARD_URL == null ||
-                    process.env.NEXT_PUBLIC_DASHBOARD_URL === ""
-                ) {
-                    console.warn(
-                        "Did not generate homepage images because NEXT_PUBLIC_DASHBOARD_URL is not defined in the environment"
-                    );
-                } else {
-                    try {
-                        await fetch(new URL("/api/generate-homepage-images", process.env.NEXT_PUBLIC_DASHBOARD_URL), {
-                            method: "POST",
-                            headers: {
-                                authorization: authHeader
-                            },
-                            body: JSON.stringify({
-                                url: `${docs.baseUrl.domain.replace(/\/$/, "")}${docs.baseUrl.basePath ?? ""}`
-                            }),
-                            signal: AbortSignal.timeout(600_000)
-                        });
-                    } catch (e) {
-                        console.error(`[revalidate:homepage-image-revalidate] error: ${JSON.stringify(e)}`);
-                    }
-                }
-
-                // finish reindexing before returning
-                await reindexPromise;
-                // finish revalidating cache endpoints before returning
-                await Promise.all(cachePromises);
-
-                const end = performance.now();
-                console.log(`Reindex took ${end - start}ms`);
-                c.enqueue(`revalidate-finished:${end - start}ms\n`);
+                await performRevalidation({
+                    host,
+                    domain,
+                    origin: req.nextUrl.origin,
+                    controller: streamController,
+                    doReindex,
+                    doRegenerate,
+                    cdnUri,
+                    authHeader: req.headers.get("authorization"),
+                    start
+                });
             } catch (e) {
                 console.error(`[revalidate] ${JSON.stringify(e)}`);
 
-                // Check if this is an intentional revalidation error or an unexpected error
                 if (e instanceof RevalidationError) {
-                    // This is an intentional "Failed to revalidate" error - track it as such
                     track("revalidate_intentional_failure", {
                         url: e.url,
                         domain,
@@ -392,7 +451,6 @@ export async function GET(
                         error: e.message
                     });
                 } else {
-                    // This is an unexpected error
                     track("revalidate_unexpected_error", {
                         domain,
                         error: String(e)
