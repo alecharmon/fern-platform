@@ -1,6 +1,8 @@
 import "server-only";
 
 import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
+import { getValidationErrorMessage } from "@/utils/errors";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { getDocsUrlMetadata } from "../utils/getDocsUrlMetadata";
 
 export interface ValidateGithubRepoAccessRequest {
@@ -53,7 +55,7 @@ export default async function handler({
 
     const result = await validateGithubRepoAccess(
         orgName,
-        url,
+        parseDocsUrlParam({ docsUrl: url }),
         { type: "url", githubUrl },
         true // skip cache for immediate feedback
     );
@@ -73,22 +75,7 @@ export default async function handler({
         appInstalled: !isFernBotNotInstalled,
         error: {
             type: errorType,
-            message: getErrorMessage(result.error.type)
+            message: getValidationErrorMessage(result.error)
         }
     };
-}
-
-function getErrorMessage(errorType: string): string {
-    switch (errorType) {
-        case "FERN_BOT_NOT_INSTALLED":
-            return "Fern GitHub App is not installed or doesn't have access to this repository";
-        case "FERN_CONFIG_JSON_ORG_MISMATCH":
-            return "The fern.config.json organization doesn't match your current organization";
-        case "MALFORMED_GITHUB_URL":
-            return "Invalid GitHub URL format";
-        case "REPO_NOT_CONNECTED":
-            return "Repository is not connected";
-        default:
-            return "Unable to verify repository access";
-    }
 }

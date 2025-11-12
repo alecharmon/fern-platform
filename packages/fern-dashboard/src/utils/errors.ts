@@ -66,7 +66,7 @@ export function getValidationErrorMessage(error: GithubRepoValidationError): str
             return ERROR_DIGEST_MESSAGES.REPO_NOT_FOUND;
         case "SITE_NOT_FOUND": {
             if (error.foundSites && error.foundSites.length > 0) {
-                return "Your repository is only configured for the following domain(s):";
+                return "Your repository is not configured for the site you're trying to access. Please check your docs.yml and ensure your site is listed.";
             }
             return ERROR_DIGEST_MESSAGES.SITE_NOT_FOUND;
         }
