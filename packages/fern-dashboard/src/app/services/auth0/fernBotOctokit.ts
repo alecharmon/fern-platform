@@ -148,9 +148,9 @@ export async function getFernBotInstallationIdForOrg(owner: string): Promise<Get
         });
         const installation = response.data;
 
-        // Cache the installation ID for 10 days
+        // Cache the installation ID for 1 day
         try {
-            await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 * 10 });
+            await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 });
         } catch (error) {
             // If cache fails, continue - we still have the installation ID
             console.warn("Failed to write to Redis cache for org installation ID", error);
@@ -166,9 +166,9 @@ export async function getFernBotInstallationIdForOrg(owner: string): Promise<Get
                 });
                 const installation = response.data;
 
-                // Cache the installation ID for 10 days
+                // Cache the installation ID for 1 day
                 try {
-                    await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 * 10 });
+                    await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 });
                 } catch (error) {
                     console.warn("Failed to write to Redis cache for user installation ID", error);
                 }
@@ -251,9 +251,9 @@ export const getFernBotInstallationId = cache(
             });
             const installation = response.data;
 
-            // Cache the installation ID for 10 days
+            // Cache the installation ID for 1 day
             try {
-                await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 * 10 });
+                await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 });
             } catch (error) {
                 // If cache fails, continue - we still have the installation ID
                 console.warn("Failed to write to Redis cache for installation ID", error);

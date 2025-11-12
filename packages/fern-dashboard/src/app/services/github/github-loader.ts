@@ -247,6 +247,7 @@ export class GitHubLoader implements GitLoader {
 
                     return repositoryResponse;
                 } catch (error: any) {
+                    console.error("Failed to get repository", error);
                     if (error?.status === 404) {
                         return null;
                     }
