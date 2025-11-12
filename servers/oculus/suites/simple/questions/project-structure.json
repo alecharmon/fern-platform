@@ -7,5 +7,14 @@
     "slug": "project-structure",
     "domain": "buildwithfern.com",
     "cited_context": "Use this approach when each API should generate its own independent set of SDKs.\n\n```bash\nfern/\n  \u251c\u2500 fern.config.json\n  \u2514\u2500 apis/\n    \u251c\u2500 user-api/\n    \u2502   \u251c\u2500 generators.yml        # Configures user-api SDKs\n    \u2502   \u2514\u2500 openapi.yml\n    \u2514\u2500 payments-api/\n        \u251c\u2500 generators.yml        # Configures payments-api SDKs  \n        \u2514\u2500 openapi.yml\n```\n\nEach API must have its own `generators.yml` file:\n\n```yaml title=\"apis/user-api/generators.yml\"\napi:\n  specs:\n    - openapi: openapi.yml\ngroups:\n  ts-sdk:\n    generators:\n      - name: fernapi/fern-typescript-sdk\n        github:\n          repository: company/user-api-typescript\n```"
+  },
+  "criteria": {
+    "correctness": [
+      "The answer must mention organizing each API into a separate subdirectory of the `fern/apis/` folder.",
+      "The answer must mention that each API must have its own `generators.yml` file."
+    ],
+    "citation": [
+      "https://buildwithfern.com/learn/api-definitions/overview/project-structure"
+    ]
   }
 }
