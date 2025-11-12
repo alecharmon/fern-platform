@@ -6,23 +6,6 @@ const FONT_MONO = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liber
 const FONT_SANS =
     "ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'";
 
-function scopeInlineCss(css: string, scopeSelector: string): string {
-    if (!css.trim()) {
-        return css;
-    }
-
-    const hasTopLevelAtRules = /^\s*@(import|media|layer|theme|supports|keyframes|font-face)/m.test(css);
-    const hasRootSelector = /^\s*:root\s*\{/m.test(css);
-
-    if (hasTopLevelAtRules || hasRootSelector) {
-        return css;
-    }
-
-    return `${scopeSelector} {
-        ${css}
-    }`;
-}
-
 // todo: remove domain-specific styling
 
 export function GlobalStyles({
@@ -290,7 +273,11 @@ export function GlobalStyles({
         ${fonts.additionalCss}
 
         ${
-            inlineCssScopeSelector ? scopeInlineCss(inlineCss.join("\n"), inlineCssScopeSelector) : inlineCss.join("\n")
+            inlineCssScopeSelector
+                ? `${inlineCssScopeSelector} {
+        ${inlineCss.join("\n")}
+    }`
+                : inlineCss.join("\n")
         } `}
         </style>
     );
