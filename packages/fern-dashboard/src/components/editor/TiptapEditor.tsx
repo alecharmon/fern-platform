@@ -2,7 +2,7 @@
 
 import CodeBlock from "@tiptap/extension-code-block";
 import Link from "@tiptap/extension-link";
-import Mathematics from "@tiptap/extension-mathematics";
+import { BlockMath, InlineMath } from "@tiptap/extension-mathematics";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Table, TableHeader, TableKit, TableRow } from "@tiptap/extension-table";
 import {
@@ -26,6 +26,7 @@ import { FVEAttributesExtension } from "./extension-fve-attributes";
 import { MarkdownPasteExtension } from "./extension-markdown-paste";
 import { SelectBlockExtension } from "./extension-select-block/select-block-extension";
 import FloatingMenu from "./FloatingMenu";
+import { BlockMathNodeView, InlineMathNodeView } from "./MathNodeView";
 import NodeHoverHandle from "./NodeHoverHandle";
 import TableNodeView from "./TableNodeView";
 import TextBubbleMenu from "./TextBubbleMenu";
@@ -74,7 +75,20 @@ const extensions = [
             class: "fern-mdx-link"
         }
     }),
-    Mathematics.configure({
+    InlineMath.extend({
+        addNodeView() {
+            return ReactNodeViewRenderer(InlineMathNodeView);
+        }
+    }).configure({
+        katexOptions: {
+            throwOnError: false
+        }
+    }),
+    BlockMath.extend({
+        addNodeView() {
+            return ReactNodeViewRenderer(BlockMathNodeView);
+        }
+    }).configure({
         katexOptions: {
             throwOnError: false
         }

@@ -125,6 +125,11 @@ export default function TextBubbleMenu() {
                     return false;
                 }
 
+                // Don't show the bubble menu for inline math nodes
+                if (editor.isActive("inlineMath") || editor.isActive("mathInline")) {
+                    return false;
+                }
+
                 // Check if we have an active selection
                 return editor.isFocused && !selection.empty;
             }}
