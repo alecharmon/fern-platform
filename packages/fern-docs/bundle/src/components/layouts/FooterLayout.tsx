@@ -28,7 +28,7 @@ export function FooterLayout({
             hideNavLinks={hideNavLinks}
             className={className}
             feedback={<div>{!hideFeedback && <Feedback pathname={pathname} lang={lang} />}</div>}
-            builtWithFern={<BuiltWithFern className="mx-auto mt-12 w-fit" />}
+            builtWithFern={<BuiltWithFern className="mx-auto mt-12 w-fit" lang={lang} />}
         />
     );
 }

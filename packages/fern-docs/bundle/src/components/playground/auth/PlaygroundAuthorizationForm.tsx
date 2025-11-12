@@ -39,9 +39,11 @@ export const PlaygroundAuthorizationForm: FC<PlaygroundAuthorizationFormProps> =
                 ),
                 oAuth: (oAuth) => {
                     if ("endpoint" in context) {
-                        return visitDiscriminatedUnion(oAuth.value, "type")._visit({
+                        return visitDiscriminatedUnion(oAuth.value, "type")._visit<ReactElement<any> | false>({
                             clientCredentials: (clientCredentials) =>
-                                visitDiscriminatedUnion(clientCredentials.value, "type")._visit({
+                                visitDiscriminatedUnion(clientCredentials.value, "type")._visit<
+                                    ReactElement<any> | false
+                                >({
                                     referencedEndpoint: (referencedEndpoint) => (
                                         <FoundOAuthReferencedEndpointForm
                                             context={oauthReferencedContext || context}

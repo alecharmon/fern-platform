@@ -80,7 +80,9 @@ export async function ExplorerContent({
                                 globalHeaders,
                                 auths: authSchemes.filter((a) => a.type !== "oAuth"),
                                 authsWithKeys: [], // OAuth referenced endpoints don't need authsWithKeys
-                                types
+                                types,
+                                authOptions: [],
+                                authOptionEntries: []
                             };
                         }
                     } catch (e) {

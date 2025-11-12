@@ -29,7 +29,7 @@ const PlaygroundAuthorizationFormCardCtx = React.createContext<{
     resetForm: () => void;
     apiKey: string | null;
     authIndex: number;
-    auth: APIV1Read.ApiAuth | null;
+    auth: APIV1Read.ApiAuth | undefined;
     totalAuthCount: number;
     allAuths: APIV1Read.ApiAuth[];
 }>({
@@ -39,7 +39,7 @@ const PlaygroundAuthorizationFormCardCtx = React.createContext<{
     resetForm: noop,
     apiKey: null,
     authIndex: 0,
-    auth: null,
+    auth: undefined,
     totalAuthCount: 1,
     allAuths: []
 });
@@ -55,7 +55,7 @@ export function PlaygroundAuthorizationFormCardRoot({
 }: {
     children: React.ReactNode;
     authIndex?: number;
-    auth: APIV1Read.ApiAuth;
+    auth?: APIV1Read.ApiAuth;
     totalAuthCount?: number;
     allAuthTypes?: string[];
     allAuths?: APIV1Read.ApiAuth[];
@@ -75,10 +75,10 @@ export function PlaygroundAuthorizationFormCardRoot({
     const handleResetAuth = () => {
         const schemesToReset = authGroupSchemes.length > 0 ? authGroupSchemes : [auth];
 
-        const hasBearer = schemesToReset.some((scheme) => scheme.type === "bearerAuth");
-        const hasBasic = schemesToReset.some((scheme) => scheme.type === "basicAuth");
-        const hasHeader = schemesToReset.some((scheme) => scheme.type === "header");
-        const hasOAuth = schemesToReset.some((scheme) => scheme.type === "oAuth");
+        const hasBearer = schemesToReset.some((scheme) => scheme?.type === "bearerAuth");
+        const hasBasic = schemesToReset.some((scheme) => scheme?.type === "basicAuth");
+        const hasHeader = schemesToReset.some((scheme) => scheme?.type === "header");
+        const hasOAuth = schemesToReset.some((scheme) => scheme?.type === "oAuth");
 
         if (hasBearer) {
             setBearerAuthAtom({ token: resolvedState?.auth?.bearer_token ?? apiKey ?? "" });

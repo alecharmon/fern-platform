@@ -358,4 +358,11 @@ export type Translations = {
         readOnly: string;
         writeOnly: string;
     };
+
+    tooltips: {
+        copyPageMarkdown: string;
+        askQuestion: string;
+        viewMarkdown: string;
+        openClaude: string;
+    };
 };

@@ -339,5 +339,11 @@
   "accessModifiers": {
     "readOnly": "ΜΟΝΟ_ΑΝΑΓΝΩΣΗ",
     "writeOnly": "ΜΟΝΟ_ΕΓΓΡΑΦΗ"
+  },
+  "tooltips": {
+    "copyPageMarkdown": "Αντιγραφή αυτής της σελίδας ως Markdown για LLMs",
+    "askQuestion": "Ζητήστε μια ερώτηση για αυτήν τη σελίδα",
+    "viewMarkdown": "Προβολή αυτής της σελίδας ως απλό κείμενο",
+    "openClaude": "Ζητήστε ερωτήσεις για αυτήν τη σελίδα"
   }
 }

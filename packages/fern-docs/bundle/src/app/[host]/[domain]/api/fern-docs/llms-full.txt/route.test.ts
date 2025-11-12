@@ -26,18 +26,22 @@ vi.mock("@fern-api/fdr-sdk", () => ({
         traverseDF: vi.fn(),
         hasMetadata: vi.fn(),
         isPage: vi.fn(),
-        getPageId: vi.fn()
+        getPageId: vi.fn(),
+        PageId: (value: string) => value as any,
+        NodeId: (value: string) => value as any,
+        Slug: (value: string) => value as any
     }
 }));
 
 vi.mock("@fern-api/fdr-sdk/traversers", () => ({
-    CONTINUE: "CONTINUE",
-    SKIP: "SKIP"
+    CONTINUE: true,
+    SKIP: "skip"
 }));
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { track } from "@fern-api/docs-server/analytics/posthog";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import { SKIP } from "@fern-api/fdr-sdk/traversers";
 import { cookies } from "next/headers";
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
@@ -166,13 +170,21 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
             }
         };
 
-        const mockPage = {
+        const mockPage: FernNavigation.PageNode = {
             type: "page",
             title: "Test Page",
-            slug: "test-page",
+            slug: FernNavigation.Slug("test-page"),
             authed: false,
             hidden: false,
-            id: "page-1"
+            id: FernNavigation.NodeId("page-1"),
+            pageId: FernNavigation.PageId("page-1.mdx"),
+            canonicalSlug: undefined,
+            icon: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            availability: undefined,
+            noindex: undefined
         };
 
         mockGetSectionRoot.mockReturnValue(mockRoot as any);
@@ -186,13 +198,14 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
         mockIsPage.mockImplementation((node: any) => {
             return node.type === "page";
         });
-        mockGetPageId.mockReturnValue("page-1");
+        mockGetPageId.mockReturnValue(FernNavigation.PageId("page-1"));
         mockGetMarkdownForPath.mockResolvedValue({
-            content: "# Test Page Content"
-        } as any);
+            content: "# Test Page Content",
+            contentType: "markdown"
+        });
 
         mockTraverseDF.mockImplementation((root, callback) => {
-            const result = callback(mockPage as any, []);
+            const result = callback(mockPage, []);
             return result;
         });
 
@@ -317,22 +330,38 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
             }
         };
 
-        const mockPageV1 = {
+        const mockPageV1: FernNavigation.PageNode = {
             type: "page",
             title: "V1 Page",
-            slug: "v1/page",
+            slug: FernNavigation.Slug("v1/page"),
             authed: false,
             hidden: false,
-            id: "page-v1"
+            id: FernNavigation.NodeId("page-v1"),
+            pageId: FernNavigation.PageId("page-v1.mdx"),
+            canonicalSlug: undefined,
+            icon: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            availability: undefined,
+            noindex: undefined
         };
 
-        const mockPageV2 = {
+        const mockPageV2: FernNavigation.PageNode = {
             type: "page",
             title: "V2 Page",
-            slug: "v2/page",
+            slug: FernNavigation.Slug("v2/page"),
             authed: false,
             hidden: false,
-            id: "page-v2"
+            id: FernNavigation.NodeId("page-v2"),
+            pageId: FernNavigation.PageId("page-v2.mdx"),
+            canonicalSlug: undefined,
+            icon: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            availability: undefined,
+            noindex: undefined
         };
 
         mockGetSectionRoot.mockReturnValue(mockRoot as any);
@@ -352,17 +381,17 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
             const versionedNode = (root as any).child;
             for (const versionNode of versionedNode.children) {
                 const result = callback(versionNode, [root, versionedNode]);
-                if (result === "SKIP") {
+                if (result === SKIP) {
                     continue;
                 }
                 if (versionNode.id === "version-v2") {
                     const pageResult = callback(mockPageV2, [root, versionedNode, versionNode]);
-                    if (pageResult !== "SKIP") {
+                    if (pageResult !== SKIP) {
                         collectedPages.push(mockPageV2);
                     }
                 } else if (versionNode.id === "version-v1") {
                     const pageResult = callback(mockPageV1, [root, versionedNode, versionNode]);
-                    if (pageResult !== "SKIP") {
+                    if (pageResult !== SKIP) {
                         collectedPages.push(mockPageV1);
                     }
                 }
@@ -372,7 +401,8 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
         mockGetPageId.mockImplementation((node: any) => node.id);
         mockGetMarkdownForPath.mockImplementation(async (node: any) => {
             return {
-                content: `# ${node.title} Content`
+                content: `# ${node.title} Content`,
+                contentType: "markdown"
             };
         });
 

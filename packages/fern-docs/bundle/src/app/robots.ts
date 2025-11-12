@@ -34,7 +34,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     }
 
     const normalizedHost = domain.toLowerCase().split(":")[0];
-    if (normalizedHost.endsWith(".ferndocs.com") && !FERN_DOCS_ORIGINS.includes(normalizedHost)) {
+    if (normalizedHost?.endsWith(".ferndocs.com") && !FERN_DOCS_ORIGINS.includes(normalizedHost)) {
         return {
             rules: {
                 userAgent: "*",

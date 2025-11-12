@@ -342,5 +342,11 @@
   "accessModifiers": {
     "readOnly": "SOLO_LECTURA",
     "writeOnly": "SOLO_ESCRITURA"
+  },
+  "tooltips": {
+    "copyPageMarkdown": "Copiar esta página como Markdown para LLMs",
+    "askQuestion": "Hacer una pregunta sobre esta página",
+    "viewMarkdown": "Ver esta página como texto plano",
+    "openClaude": "Hacer preguntas sobre esta página"
   }
 }

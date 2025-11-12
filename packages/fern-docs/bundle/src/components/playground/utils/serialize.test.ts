@@ -30,7 +30,8 @@ describe("serializeFormStateBody", () => {
                     availability: undefined,
                     valueShape: STRING_VALUE_SHAPE,
                     exploded: true,
-                    contentType: "application/json"
+                    contentType: "application/json",
+                    propertyAccess: undefined
                 }
             ],
             description: undefined,
@@ -75,7 +76,8 @@ describe("serializeFormStateBody", () => {
                     exploded: true,
                     contentType: "application/json",
                     description: undefined,
-                    availability: undefined
+                    availability: undefined,
+                    propertyAccess: undefined
                 }
             ],
             description: undefined,

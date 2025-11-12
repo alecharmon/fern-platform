@@ -11,7 +11,7 @@ import { trackInternal } from "./analytics";
 
 const HideBuiltWithFernContext = createContext(false);
 
-export const BuiltWithFern: React.FC<{ className?: string }> = ({ className }) => {
+export const BuiltWithFern: React.FC<{ className?: string; lang: string }> = ({ className, lang }) => {
     const domain = useDomain();
     const isWhitelabeled = useIsWhitelabeled();
     const hideBuiltWithFern = useContext(HideBuiltWithFernContext);
@@ -61,6 +61,7 @@ export const BuiltWithFern: React.FC<{ className?: string }> = ({ className }) =
                 utmMedium="docs"
                 utmSource={domain}
                 className={className}
+                lang={lang}
             />
             <BuiltWithFernWatcher component={component} />
         </>

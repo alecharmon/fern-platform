@@ -81,8 +81,8 @@ export const PlaygroundEndpoint = ({
         }
 
         return {
-            authSchemes: selectedEntry.schemes,
-            authKeys: selectedEntry.schemeIds.map((id) => String(id))
+            authSchemes: selectedEntry?.schemes,
+            authKeys: selectedEntry?.schemeIds.map((id) => String(id))
         };
     }, [context.authsWithKeys, context.authOptionEntries, selectedAuthType]);
 
@@ -129,9 +129,9 @@ export const PlaygroundEndpoint = ({
             let authHeaders: Record<string, string> = {};
             const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
 
-            for (let i = 0; i < authSchemes.length; i++) {
-                const auth = authSchemes[i];
-                const authKey = authKeys[i];
+            for (let i = 0; i < (authSchemes?.length ?? 0); i++) {
+                const auth = authSchemes?.[i];
+                const authKey = authKeys?.[i];
                 const headers = buildAuthHeaders(
                     auth,
                     authState,

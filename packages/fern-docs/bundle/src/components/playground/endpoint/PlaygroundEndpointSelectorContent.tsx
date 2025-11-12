@@ -120,7 +120,7 @@ export const PlaygroundEndpointSelectorContent = forwardRef<HTMLDivElement, Play
                         <div className="!h-6"></div>
                     </FernScrollArea>
                     <div className="border-border-default bg-background border-t px-6 py-4">
-                        <BuiltWithFern />
+                        <BuiltWithFern lang={lang} />
                     </div>
                 </div>
             </FernTooltipProvider>

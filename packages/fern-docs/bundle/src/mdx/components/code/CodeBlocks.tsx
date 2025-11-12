@@ -4,9 +4,15 @@ import { CodeGroup } from "./CodeGroup";
 /**
  * @deprecated Use `CodeGroup` instead.
  */
-export function CodeBlocks({ items }: { items: React.ComponentPropsWithoutRef<typeof CodeBlock>[] }) {
+export function CodeBlocks({
+    items,
+    lang = "en"
+}: {
+    items: React.ComponentPropsWithoutRef<typeof CodeBlock>[];
+    lang?: string;
+}) {
     return (
-        <CodeGroup>
+        <CodeGroup lang={lang}>
             {items.map((item) => (
                 <CodeBlock key={item.title} {...item} />
             ))}

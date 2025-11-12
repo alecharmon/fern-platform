@@ -5,8 +5,12 @@ import {
 } from "@fern-docs/components/syntax-highlighter";
 import type { FC } from "react";
 
-export const CodeBlock: FC<FernSyntaxHighlighterProps> = ({ className, ...props }) => (
-    <CodeBlockWithClipboardButton code={props.code} className={className} lang={props.lang ?? "en"}>
+interface CodeBlockProps extends FernSyntaxHighlighterProps {
+    lang?: string;
+}
+
+export const CodeBlock: FC<CodeBlockProps> = ({ className, lang, ...props }) => (
+    <CodeBlockWithClipboardButton code={props.code} className={className} lang={lang ?? "en"}>
         <FernSyntaxHighlighter {...props} />
     </CodeBlockWithClipboardButton>
 );

@@ -100,7 +100,7 @@ export class PlaygroundCodeSnippetResolver {
                 ? selectedAuthSchemes
                 : selectedAuth
                   ? [selectedAuth]
-                  : this.context.auths.length > 0
+                  : this.context.auths.length > 0 && this.context.auths[0] != null
                     ? [this.context.auths[0]]
                     : [];
 

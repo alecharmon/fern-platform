@@ -58,10 +58,10 @@ export const PlaygroundRequestPreview: FC<PlaygroundRequestPreviewProps> = ({ co
         }
 
         return {
-            selectedAuth: selectedEntry.schemes[0],
-            authKey: String(selectedEntry.schemeIds[0]),
-            selectedAuthSchemes: selectedEntry.schemes,
-            selectedAuthKeys: selectedEntry.schemeIds.map((id) => String(id))
+            selectedAuth: selectedEntry?.schemes[0],
+            authKey: String(selectedEntry?.schemeIds[0]),
+            selectedAuthSchemes: selectedEntry?.schemes,
+            selectedAuthKeys: selectedEntry?.schemeIds?.map((id) => String(id))
         };
     }, [context.authOptionEntries, context.authsWithKeys, selectedAuthType]);
 

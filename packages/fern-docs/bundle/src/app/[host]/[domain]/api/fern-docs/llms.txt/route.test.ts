@@ -28,6 +28,7 @@ vi.mock("@/server/getMarkdownForPath", () => ({
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { track } from "@fern-api/docs-server/analytics/posthog";
+import { DEFAULT_EDGE_FLAGS } from "@fern-api/docs-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { getSectionRoot } from "@/server/getSectionRoot";
@@ -45,8 +46,8 @@ describe("llms.txt route - authed root behavior", () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        mockGetAuthEdgeConfig.mockResolvedValue({});
-        mockGetEdgeFlags.mockResolvedValue({ isLlmsTxtDisabled: false });
+        mockGetAuthEdgeConfig.mockResolvedValue(undefined);
+        mockGetEdgeFlags.mockResolvedValue({ ...DEFAULT_EDGE_FLAGS, isLlmsTxtDisabled: false });
         mockCookies.mockResolvedValue({
             get: vi.fn().mockReturnValue(undefined)
         } as any);

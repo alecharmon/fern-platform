@@ -56,7 +56,7 @@ describe("ResilientQueue", () => {
         const processed: number[] = [];
 
         const queue = new ResilientQueue({
-            processItem: async (item) => {
+            processItem: async (item: number) => {
                 processed.push(item);
             }
         });
@@ -75,7 +75,7 @@ describe("ResilientQueue", () => {
         const processed: number[] = [];
 
         const queue = new ResilientQueue({
-            processItem: async (item, attempt) => {
+            processItem: async (item: number, attempt: number) => {
                 const currentAttempts = attempts.get(item) || 0;
                 attempts.set(item, currentAttempts + 1);
 
@@ -277,7 +277,7 @@ describe("ResilientQueue", () => {
 
         // Final update should show all work complete
         const finalUpdate = progressUpdates[progressUpdates.length - 1];
-        expect(finalUpdate?.completed + finalUpdate?.failed).toBe(5);
+        expect((finalUpdate?.completed ?? 0) + (finalUpdate?.failed ?? 0)).toBe(5);
     });
 
     it("should handle empty input", async () => {

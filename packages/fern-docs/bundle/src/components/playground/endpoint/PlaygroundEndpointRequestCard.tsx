@@ -108,10 +108,10 @@ export function PlaygroundEndpointRequestCard({
         }
 
         return {
-            selectedAuth: selectedEntry.schemes[0],
-            authKey: String(selectedEntry.schemeIds[0]),
-            selectedAuthSchemes: selectedEntry.schemes,
-            selectedAuthKeys: selectedEntry.schemeIds.map((id) => String(id))
+            selectedAuth: selectedEntry?.schemes[0],
+            authKey: String(selectedEntry?.schemeIds[0]),
+            selectedAuthSchemes: selectedEntry?.schemes,
+            selectedAuthKeys: selectedEntry?.schemeIds.map((id) => String(id))
         };
     }, [context.authOptionEntries, context.authsWithKeys, selectedAuthType]);
 

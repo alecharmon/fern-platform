@@ -136,22 +136,22 @@ export function PlaygroundCardTriggerManual({
     const dropdownOptions = authEntries.map((entry, entryIndex) => {
         const displays = authDisplays[entryIndex];
 
-        if (displays.length === 1) {
+        if (displays?.length === 1) {
             const display = displays[0];
-            const needsQualifier = (nameCounts.get(display.name) || 0) > 1;
-            const label = needsQualifier ? `${display.name} (${display.typeShorthand})` : display.name;
+            const needsQualifier = display?.name ? (nameCounts.get(display?.name) ?? 0) > 1 : false;
+            const label = needsQualifier ? `${display?.name} (${display?.typeShorthand})` : display?.name;
 
             return {
                 type: "value" as const,
                 label,
-                helperText: linkifyText(display.description),
+                helperText: linkifyText(display?.description ?? ""),
                 value: entry.key
             };
         }
 
         const label = (
             <div key={entry.key} className="flex flex-col gap-0.5">
-                {displays.map((display, i) => {
+                {displays?.map((display, i) => {
                     const needsQualifier = (nameCounts.get(display.name) || 0) > 1;
                     const name = needsQualifier ? `${display.name} (${display.typeShorthand})` : display.name;
                     return <div key={i}>{name}</div>;
@@ -161,7 +161,7 @@ export function PlaygroundCardTriggerManual({
 
         const helperText = (
             <div key={`${entry.key}-helper`} className="flex flex-col gap-1">
-                {displays.map((display, i) => (
+                {displays?.map((display, i) => (
                     <div key={i}>{linkifyText(display.description)}</div>
                 ))}
             </div>

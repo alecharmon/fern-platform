@@ -339,5 +339,11 @@
   "accessModifiers": {
     "readOnly": "READ_ONLY",
     "writeOnly": "WRITE_ONLY"
+  },
+  "tooltips": {
+    "copyPageMarkdown": "このページをLLM用のMarkdownとしてコピー",
+    "askQuestion": "このページについて質問する",
+    "viewMarkdown": "このページをプレーンテキストとして表示",
+    "openClaude": "このページについて質問する"
   }
 }

@@ -61,19 +61,25 @@ describe("findSimilarPaths", () => {
 
     it("should return paths sorted by similarity score", () => {
         const results = findSimilarPaths("/api/user", mockPaths);
-        expect(results[0].score).toBeGreaterThanOrEqual(results[1].score);
-        expect(results[1].score).toBeGreaterThanOrEqual(results[2].score);
+        const [first, second, third] = results;
+        expect(first).toBeDefined();
+        expect(second).toBeDefined();
+        expect(third).toBeDefined();
+        if (first && second && third) {
+            expect(first.score).toBeGreaterThanOrEqual(second.score);
+            expect(second.score).toBeGreaterThanOrEqual(third.score);
+        }
     });
 
     it("should return exact match as top result", () => {
         const results = findSimilarPaths("/api/users", mockPaths);
-        expect(results[0].slug).toBe("/api/users");
-        expect(results[0].score).toBe(1);
+        expect(results[0]?.slug).toBe("/api/users");
+        expect(results[0]?.score).toBe(1);
     });
 
     it("should return very similar paths at the top", () => {
         const results = findSimilarPaths("/api/userz", mockPaths);
-        expect(["/api/users", "/api/user"]).toContain(results[0].slug);
+        expect(["/api/users", "/api/user"]).toContain(results[0]?.slug);
     });
 
     it("should respect custom limit", () => {
@@ -123,10 +129,10 @@ describe("findSimilarPaths", () => {
         const results = findSimilarPaths("/api/users-v1", pathsWithDuplicates, 2);
         expect(results).toHaveLength(2);
         // Should include the first occurrence with the matching href
-        expect(results[0].href).toBe("/api/users");
-        expect(results[0].slug).toBe("/api/users-v1");
+        expect(results[0]?.href).toBe("/api/users");
+        expect(results[0]?.slug).toBe("/api/users-v1");
         // Second result should be different
-        expect(results[1].href).not.toBe("/api/users");
+        expect(results[1]?.href).not.toBe("/api/users");
     });
 });
 
@@ -151,22 +157,22 @@ describe("elevenlabs.io/docs test cases", () => {
     it("should suggest quickstart for /quick-start typo", () => {
         const results = findSimilarPaths("/quick-start", elevenLabsPaths);
         expect(results).toHaveLength(3);
-        expect(results[0].slug).toBe("/quickstart");
+        expect(results[0]?.slug).toBe("/quickstart");
     });
 
     it("should suggest text-to-speech for /api/text-to-speech path", () => {
         const results = findSimilarPaths("/api/text-to-speech", elevenLabsPaths);
-        expect(results[0].slug).toBe("/api-reference/text-to-speech");
+        expect(results[0]?.slug).toBe("/api-reference/text-to-speech");
     });
 
     it("should suggest models for /model typo", () => {
         const results = findSimilarPaths("/model", elevenLabsPaths);
-        expect(results[0].slug).toBe("/models");
+        expect(results[0]?.slug).toBe("/models");
     });
 
     it("should suggest websockets for /api-reference/websocket typo", () => {
         const results = findSimilarPaths("/api-reference/websocket", elevenLabsPaths);
-        expect(results[0].slug).toBe("/api-reference/websockets");
+        expect(results[0]?.slug).toBe("/api-reference/websockets");
     });
 
     it("should always return 3 suggestions even for random paths", () => {

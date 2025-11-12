@@ -339,5 +339,11 @@
   "accessModifiers": {
     "readOnly": "READ_ONLY",
     "writeOnly": "WRITE_ONLY"
+  },
+  "tooltips": {
+    "copyPageMarkdown": "Copiar esta página como Markdown para LLMs",
+    "askQuestion": "Fazer uma pergunta sobre esta página",
+    "viewMarkdown": "Ver esta página como texto simples",
+    "openClaude": "Fazer perguntas sobre esta página"
   }
 }

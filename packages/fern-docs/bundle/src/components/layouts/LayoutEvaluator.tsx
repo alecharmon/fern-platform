@@ -117,7 +117,7 @@ export async function LayoutEvaluator({
                     ) : undefined
                 }
                 footer={footer}
-                builtWithFern={<BuiltWithFern className="mx-auto my-8 w-fit" />}
+                builtWithFern={<BuiltWithFern className="mx-auto my-8 w-fit" lang={lang} />}
                 lang={lang}
             >
                 {serializationError ? (

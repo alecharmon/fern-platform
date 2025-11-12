@@ -113,3 +113,26 @@ jobs:
         run: pnpm --filter=@fern-platform/fdr test:local
         env:
           CI: true
+
+  typecheck-bundle:
+    needs: check-platform-changes
+    if: needs.check-platform-changes.outputs.platform_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Compile dependencies
+        run: pnpm turbo compile
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+
+      - name: Type check bundle (excluding search-ui)
+        run: |
+          cd packages/fern-docs/bundle
+          chmod +x scripts/tsc-check.sh
+          ./scripts/tsc-check.sh

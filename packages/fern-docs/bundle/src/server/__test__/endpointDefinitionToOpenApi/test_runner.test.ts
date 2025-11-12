@@ -49,13 +49,13 @@ describe("OpenAPI endpoint snapshots", () => {
                 const formatter = new OpenApiYamlFormatter();
                 generatedYaml = formatter.generateYamlFromWebhook(testCase.webhook_input, {
                     types: testCase.type_definitions || {}
-                });
+                } as any);
             } else if ("websocket_input" in testCase) {
                 // WebSocket test case
                 const formatter = new AsyncApiYamlFormatter();
                 generatedYaml = formatter.generateYamlFromWebSocket(testCase.websocket_input, {
                     types: testCase.type_definitions || {}
-                });
+                } as any);
             } else {
                 // Endpoint test case (default)
                 const formatter = new OpenApiYamlFormatter();

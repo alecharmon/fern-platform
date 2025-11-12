@@ -109,6 +109,12 @@ export function EndpointAuthSection({
         );
     }
 
+    // At this point, we know hasAuths is true (checked at line 86), which means auths is defined and has length > 0
+    // This check is for TypeScript's benefit to narrow the type
+    if (!auths) {
+        return null;
+    }
+
     return (
         <EndpointSection title={t(lang).apiReference.authentication}>
             <FernCollapseWithButtonUncontrolled

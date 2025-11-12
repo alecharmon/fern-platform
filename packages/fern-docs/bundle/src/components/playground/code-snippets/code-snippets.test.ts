@@ -93,7 +93,8 @@ describe("PlaygroundCodeSnippetBuilder", () => {
                     }
                 },
                 description: undefined,
-                availability: undefined
+                availability: undefined,
+                propertyAccess: undefined
             }
         ],
         queryParameters: undefined,
@@ -105,7 +106,9 @@ describe("PlaygroundCodeSnippetBuilder", () => {
         snippetTemplates: undefined,
         description: undefined,
         responseHeaders: undefined,
-        namespace: undefined
+        namespace: undefined,
+        multiAuth: undefined,
+        includeInApiExplorer: true
     };
 
     const formState: PlaygroundEndpointRequestFormState = {
@@ -134,7 +137,10 @@ describe("PlaygroundCodeSnippetBuilder", () => {
         endpoint,
         auths: [],
         types: {},
-        globalHeaders: []
+        globalHeaders: [],
+        authsWithKeys: [],
+        authOptions: [],
+        authOptionEntries: []
     };
 
     const multipartFormState: PlaygroundEndpointRequestFormState = {

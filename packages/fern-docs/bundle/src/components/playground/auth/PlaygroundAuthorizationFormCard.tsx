@@ -84,15 +84,17 @@ export function PlaygroundAuthorizationFormCard({
             allAuths={allAuths}
             authGroupSchemes={selectedAuthEntry.schemes}
         >
-            <PlaygroundAuthorizationCardTrigger
-                key="trigger"
-                context={context}
-                auth={firstAuth}
-                oauthReferencedContext={oauthReferencedContext}
-                disabled={disabled}
-                lang={lang}
-                allAuths={allAuths}
-            />
+            {firstAuth && (
+                <PlaygroundAuthorizationCardTrigger
+                    key="trigger"
+                    context={context}
+                    auth={firstAuth}
+                    oauthReferencedContext={oauthReferencedContext}
+                    disabled={disabled}
+                    lang={lang}
+                    allAuths={allAuths}
+                />
+            )}
             <PlaygroundAuthorizationFormCardContent key="content">
                 <div className="fern-dropdown max-h-full">
                     {selectedAuthEntry.schemes.map((auth, index) => {
@@ -147,7 +149,7 @@ export function PlaygroundAuthorizationFormCard({
                         );
                     })}
                     <div className="flex justify-end gap-2 p-4 pt-2">
-                        {firstAuth.type !== "oAuth" && <PlaygroundAuthorizationFormCardCloseButton lang={lang} />}
+                        {firstAuth?.type !== "oAuth" && <PlaygroundAuthorizationFormCardCloseButton lang={lang} />}
                         <PlaygroundAuthorizationFormCardResetButton lang={lang} />
                     </div>
                 </div>

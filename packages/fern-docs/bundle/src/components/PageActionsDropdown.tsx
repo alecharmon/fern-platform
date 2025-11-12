@@ -143,7 +143,7 @@ export function PageActionsDropdown({
                             void handleCopyPage();
                         }}
                         className={baseClassName}
-                        title={t(lang).tooltips?.copyPageMarkdown ?? "Copy this page as Markdown for LLMs"}
+                        title={t(lang).tooltips.copyPageMarkdown}
                     >
                         {getIcon(value)}
                         {showCopied ? t(lang).buttons.copied : t(lang).buttons.copyPage}
@@ -157,7 +157,7 @@ export function PageActionsDropdown({
                         key={value}
                         onClick={handleAskAI}
                         className={baseClassName}
-                        title={t(lang).tooltips?.askQuestion ?? "Ask a question about this page"}
+                        title={t(lang).tooltips.askQuestion}
                     >
                         {getIcon(value)}
                         {label}
@@ -179,7 +179,7 @@ export function PageActionsDropdown({
                             });
                         }}
                         className={baseClassName}
-                        title={t(lang).tooltips?.viewMarkdown ?? "View this page as plain text"}
+                        title={t(lang).tooltips.viewMarkdown}
                     >
                         {getIcon(value)}
                         {label}
@@ -201,7 +201,7 @@ export function PageActionsDropdown({
                             });
                         }}
                         className={baseClassName}
-                        title={t(lang).tooltips?.openClaude ?? "Ask questions about this page"}
+                        title={t(lang).tooltips.openClaude}
                     >
                         {getIcon(value)}
                         {label}
@@ -223,7 +223,7 @@ export function PageActionsDropdown({
                             });
                         }}
                         className={baseClassName}
-                        title={label}
+                        title={typeof label === "string" ? label : undefined}
                     >
                         {getIcon(value)}
                         {label}
@@ -241,7 +241,7 @@ export function PageActionsDropdown({
                         });
                     }}
                     className={baseClassName}
-                    title={label}
+                    title={typeof label === "string" ? label : undefined}
                 >
                     {getIcon(value)}
                     {label}

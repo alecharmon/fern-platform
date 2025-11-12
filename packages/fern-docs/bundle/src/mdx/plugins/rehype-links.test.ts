@@ -50,7 +50,8 @@ describe("rehypeLinks", () => {
         icon: undefined,
         hidden: undefined,
         authed: undefined,
-        orphaned: undefined
+        orphaned: undefined,
+        availability: undefined
     };
 
     const versionedPageNode: FernNavigation.PageNode = {
@@ -66,7 +67,8 @@ describe("rehypeLinks", () => {
         icon: undefined,
         hidden: undefined,
         authed: undefined,
-        orphaned: undefined
+        orphaned: undefined,
+        availability: undefined
     };
 
     beforeEach(() => {

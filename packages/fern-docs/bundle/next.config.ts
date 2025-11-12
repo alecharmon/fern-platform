@@ -112,7 +112,12 @@ const nextConfig: NextConfig = {
     outputFileTracingRoot: isStandalone ? path.join(__dirname, "../../..") : undefined,
 
     // speed up build
-    typescript: { ignoreBuildErrors: true },
+    typescript: {
+        // TODO: Re-enable once search-ui TypeScript errors are fixed
+        // Currently ignoring because search-ui has ~19 TypeScript errors that we don't want to block builds
+        // The bundle package itself should have no TypeScript errors (verified via pnpm tsc --noEmit in bundle dir)
+        ignoreBuildErrors: true
+    },
     eslint: { ignoreDuringBuilds: true },
 
     skipMiddlewareUrlNormalize: true,

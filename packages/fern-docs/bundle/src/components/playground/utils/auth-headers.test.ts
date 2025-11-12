@@ -3,7 +3,7 @@ import { buildAuthHeaders } from "./auth-headers";
 describe("auth-headers", () => {
     it("should construct proper basic auth encoding", () => {
         const header = buildAuthHeaders(
-            { type: "basicAuth", usernameName: "", passwordName: "" },
+            { type: "basicAuth", usernameName: "", passwordName: "", description: "" },
             { basicAuth: { username: "abc", password: "def" } },
             { redacted: false }
         );
@@ -18,7 +18,7 @@ describe("auth-headers", () => {
 
     it("should construct obfuscate auth encoding when redacted", () => {
         const header = buildAuthHeaders(
-            { type: "basicAuth", usernameName: "", passwordName: "" },
+            { type: "basicAuth", usernameName: "", passwordName: "", description: "" },
             { basicAuth: { username: "abc", password: "def" } },
             { redacted: true }
         );
