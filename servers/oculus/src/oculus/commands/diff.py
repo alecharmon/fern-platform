@@ -8,7 +8,7 @@ from pathlib import Path
 from oculus.framework.models import Answer, Evaluation, EvaluationRun, Question, SuiteConfig
 from oculus.framework.runner import EvaluationRunner
 from oculus.integrations.base import create_answer_function
-from oculus.integrations.factory import create_integration, get_default_integration_type
+from oculus.integrations.factory import create_integration
 from oculus.utils.diff_utils import (
     DiffMetadata,
     calculate_diff_summary,
@@ -231,10 +231,8 @@ def _load_baseline_data(
 def _get_integration_type(args: argparse.Namespace, suite_config: SuiteConfig) -> str:
     if hasattr(args, "integration") and args.integration:
         return str(args.integration)
-    elif suite_config.integration:
-        return suite_config.integration
     else:
-        return get_default_integration_type()
+        return suite_config.integration
 
 
 def _print_diff_header(args: argparse.Namespace, suite_config: SuiteConfig, diff_id: str, num_questions: int) -> None:
