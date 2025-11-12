@@ -12,6 +12,7 @@ import oculus.evaluators.conciseness  # noqa: F401
 import oculus.evaluators.correctness  # noqa: F401
 import oculus.generators.endpoints  # noqa: F401
 import oculus.generators.markdown  # noqa: F401
+from oculus.commands.diff import diff_evaluation_command
 from oculus.framework.models import (
     Answer,
     EvaluationRun,
@@ -526,6 +527,57 @@ Examples:
         "--github-output", action="store_true", help="Generate GitHub-formatted output (requires --output-dir)"
     )
 
+    diff_parser = subparsers.add_parser(
+        "diff",
+        help="Generate fresh answers and compare against most recent run",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  oculus diff --suite payroc
+  oculus diff --suite payroc --questions 1,2,3
+  oculus diff --suite payroc --questions 01-test-ach-transaction-retrieve-batch,02-gain-access-sandbox
+  oculus diff --suite payroc --model command-a-03-2025
+        """,
+    )
+    diff_parser.add_argument("--suite", type=str, required=True, help="Name of the evaluation suite")
+    diff_parser.add_argument("--suite-path", type=Path, default=None, help="Base path to suites directory")
+    diff_parser.add_argument(
+        "--questions",
+        type=str,
+        default=None,
+        help="Comma-separated question indices (1-based) or slugs (default: all questions)",
+    )
+    diff_parser.add_argument(
+        "--model",
+        type=str,
+        default="claude-4-sonnet-20250514",
+        choices=["claude-4-sonnet-20250514", "command-a-03-2025"],
+        help="Model to use for new answer generation",
+    )
+    diff_parser.add_argument(
+        "--judge-model", type=str, default="claude-sonnet-4-5-20250929", help="Claude model for judging"
+    )
+    diff_parser.add_argument(
+        "--integration",
+        type=str,
+        default=None,
+        choices=["fai-local", "fai-http", "vercel-http"],
+        help="Integration type (defaults to suite config or fai-local)",
+    )
+    diff_parser.add_argument("--max-workers", type=int, default=16, help="Number of parallel workers")
+    diff_parser.add_argument("--diff-id", type=str, default=None, help="Unique diff identifier (default: timestamp)")
+    diff_parser.add_argument(
+        "--baseline",
+        action="store_true",
+        help="Compare against baseline run instead of ground truth (default: compare to ground truth)",
+    )
+    diff_parser.add_argument(
+        "--baseline-run",
+        type=str,
+        default=None,
+        help="Specific baseline run to compare against (default: most recent, requires --baseline)",
+    )
+
     args = parser.parse_args()
 
     if args.command == "generate":
@@ -536,6 +588,8 @@ Examples:
         return evaluate_answers_command(args)
     elif args.command == "run":
         return run_evaluation(args)
+    elif args.command == "diff":
+        return diff_evaluation_command(args)
     else:
         parser.print_help()
         return 1

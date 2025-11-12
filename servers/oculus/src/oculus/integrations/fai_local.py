@@ -70,14 +70,15 @@ class FAILocalIntegration:
             {
                 "slug": getattr(result, "slug", ""),
                 "title": getattr(result, "title", ""),
-                "content": getattr(result, "content", ""),
+                "content": getattr(result, "chunk", ""),
                 "score": getattr(result, "score", 0.0),
+                "url": getattr(result, "url", None),
             }
             for result in query_results
         ]
 
         if self.model == "command-a-03-2025":
-            output_turns, _ = await get_cohere_response(
+            output_turns, citations = await get_cohere_response(
                 self.system_prompt,
                 self.model,
                 messages,
@@ -85,7 +86,7 @@ class FAILocalIntegration:
                 rag_records,
             )
         elif self.model == "claude-4-sonnet-20250514":
-            output_turns, _ = await get_anthropic_response(
+            output_turns, citations = await get_anthropic_response(
                 self.system_prompt, self.model, messages, self.domain, rag_records
             )
         else:
@@ -97,11 +98,28 @@ class FAILocalIntegration:
         else:
             answer_text = "ERROR: No response generated"
 
+        used_sources: list[SourceMetadata] = []
+        for citation in citations:
+            for result in query_results:
+                formatted = format_record(result)
+                if formatted in citation or citation in formatted:
+                    used_sources.append(
+                        {
+                            "slug": getattr(result, "slug", None),
+                            "title": getattr(result, "title", None),
+                            "url": getattr(result, "url", None),
+                        }
+                    )
+                    break
+
+        if not used_sources:
+            used_sources = sources
+
         response_time_ms = (time.time() - start_time) * 1000
         metadata: AnswerMetadata = {
             "integration_type": "fai-local",
             "model": self.model,
-            "sources": sources,
+            "sources": used_sources,
             "fai_local_retrieved_documents": json.dumps(retrieved_docs, indent=2),
             "response_time_ms": response_time_ms,
         }
