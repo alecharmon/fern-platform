@@ -66,7 +66,7 @@ import { trackCustomComponents } from "./track-custom-components";
 gracefulify(fs);
 
 const TWOSLASH_TIMEOUT = 240_000;
-const SERIALIZATION_TIMEOUT = 10_000;
+const SERIALIZATION_TIMEOUT = 20_000;
 
 // Create KV cache instance for TwoSlash code transformation caching
 const kvCache = createKvCache(isDocsDev());
@@ -288,7 +288,7 @@ async function serializeMdxImpl(
     for (const source of sources) {
         try {
             const timeoutPromise = new Promise<never>((_, reject) =>
-                setTimeout(() => reject(new Error("BundleMDX timed out after 5 seconds")), 5_000)
+                setTimeout(() => reject(new Error("BundleMDX timed out after 10 seconds")), 10_000)
             );
 
             bundled = await Promise.race([bundleMDX(createBundleConfig(source)), timeoutPromise]);
