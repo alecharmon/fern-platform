@@ -145,15 +145,6 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
         notFound();
     }
 
-    const response = await provideRegistryService().docs.v2.read.getDocsForUrl({
-        url: FdrAPI.Url(domainWithoutStaging)
-    });
-    if (response.ok) {
-        return response.body;
-    }
-    console.error("Failed to load docs", {
-        cause: response.error
-    });
     notFound();
 };
 
