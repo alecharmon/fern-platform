@@ -3,12 +3,12 @@
 import SparklesIcon from "@heroicons/react/24/outline/SparklesIcon";
 import { ExternalLink, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
-
+import { checkVersionUpgradeAction } from "@/app/actions/checkVersionUpgrade";
 import { upgradeFernVersionAction } from "@/app/actions/upgradeFernVersion";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { useBackgroundPoller } from "@/hooks/useBackgroundPoller";
 import type { DocsUrl } from "@/utils/types";
 import { cn } from "@/utils/utils";
-
 import { ErrorUpgradeFernCliVersionToast } from "../editor/EditorToasts";
 import { Button } from "../ui/button";
 
@@ -46,6 +46,20 @@ export function UpgradeFernButton({
     const [currentPr, setCurrentPr] = useState(existingPr);
     const [textOpacity, setTextOpacity] = useState(1);
 
+    // Polling configuration: only starts when user manually clicks upgrade
+    // Relies on visibility change events to detect upgrades when user returns to dashboard
+    const { startPolling } = useBackgroundPoller(
+        async () => {
+            const result = await checkVersionUpgradeAction(githubUrl, docsUrl, baseBranch, latestVersion);
+            return result.upgraded; // Return true to stop polling
+        },
+        {
+            autoStart: false, // Don't auto-start to minimize GitHub API usage
+            pollingInterval: 60 * 1000, // 60 seconds - less frequent polling
+            maxPollingTime: 30 * 60 * 1000 // 30 minutes max
+        }
+    );
+
     const smoothTransitionStep = (newStep: string, delay: number) => {
         setTimeout(() => {
             setTextOpacity(0);
@@ -81,6 +95,9 @@ export function UpgradeFernButton({
                     prUrl: result.prUrl,
                     prNumber: result.prNumber
                 });
+
+                // Start polling to detect when the PR is merged
+                startPolling();
 
                 // Open the PR in a new tab
                 window.open(result.prUrl, "_blank", "noopener,noreferrer");

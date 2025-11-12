@@ -10,7 +10,7 @@ import type {
 } from "@fern-api/docs-loader";
 import type { Octokit } from "@octokit/core";
 import yaml from "js-yaml";
-import { unstable_cache } from "next/cache";
+import { revalidateTag, unstable_cache } from "next/cache";
 import z from "zod";
 import type { DocsUrl } from "@/utils/types";
 import { getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
@@ -58,6 +58,15 @@ export class GitHubLoader implements GitLoader {
         return this.octokit;
     }
 
+    /**
+     * Fetches the latest commit SHA for a given ref (branch/tag).
+     *
+     * Cached with a 5-minute revalidation period for normal browsing.
+     * Relies on visibility change events to invalidate cache when user returns to dashboard,
+     * minimizing GitHub API usage while still providing fresh data when it matters.
+     *
+     * Cache can be invalidated via revalidateTag using `github-commit-ref-${owner}-${repo}-${ref}`
+     */
     private async getCommitRef(owner: string, repo: string, ref: string): Promise<string | null> {
         return unstable_cache(
             async () => {
@@ -75,7 +84,8 @@ export class GitHubLoader implements GitLoader {
             },
             [`github-commit-ref-${owner}-${repo}-${ref}`],
             {
-                tags: [`github-commit-ref-${owner}-${repo}-${ref}`]
+                revalidate: 60 * 5, // 5 minutes - good for normal browsing, rely on visibility change for freshness
+                tags: [`github-commit-ref-${owner}-${repo}-${ref}`, `github-repo-${owner}-${repo}`]
             }
         )();
     }
@@ -595,4 +605,25 @@ function stripAndSanitizeUrl(str: string): string {
     const withoutProtocol = str.replace(/^https?:\/\//i, "");
     const lowercased = withoutProtocol.toLowerCase();
     return lowercased.replace(/[^a-z0-9\s\-_.,!?@#$%^&*()+=[\]{};:'"<>/\\|`~%]/g, "");
+}
+
+/**
+ * Invalidates the commit ref cache for a specific branch.
+ * This should be called when:
+ * - A PR is merged to the branch
+ * - The branch HEAD is updated
+ * - getFernVersionFromRepo detects a version change
+ *
+ * This will force the next call to getCommitRef to fetch the latest commit SHA from GitHub.
+ */
+export function invalidateCommitRefCache(owner: string, repo: string, ref: string): void {
+    revalidateTag(`github-commit-ref-${owner}-${repo}-${ref}`);
+}
+
+/**
+ * Invalidates all GitHub-related caches for a repository.
+ * Use this when you want to force a complete refresh of all cached data.
+ */
+export function invalidateRepoCache(owner: string, repo: string): void {
+    revalidateTag(`github-repo-${owner}-${repo}`);
 }
