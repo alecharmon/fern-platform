@@ -25,6 +25,7 @@ export interface HogQLQueryResponse<T = unknown> {
 export interface AnalyticsConfig {
     userId: string;
     baseSiteUrl: string;
+    additionalDomains?: string[];
 }
 
 export interface AnalyticsMetrics {

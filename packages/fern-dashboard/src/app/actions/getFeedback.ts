@@ -96,52 +96,49 @@ function getBaseDomain(rawUrl: string) {
     return baseDomain;
 }
 
-async function verifyDomainAccess(params: {
-    url: string;
-    token: string;
-    userId: string;
-    orgName?: string;
-}): Promise<boolean> {
-    const { url, token, userId, orgName } = params;
-    const decodedUrl = decodeURIComponent(url);
+async function verifyDomainAccessAndGetSite(docsUrl: string) {
+    const session = await getCurrentSessionOrThrow();
+    const token = session.accessToken;
+    const userId = session.user.sub;
+
+    const decodedUrl = decodeURIComponent(docsUrl);
     const baseDomain = getBaseDomain(decodedUrl);
 
     const cacheKeyParams = JSON.stringify({
-        userId,
-        orgName: orgName ?? "unknown"
+        userId
     });
     const cacheKey = RedisCacheKey.webAnalytics("verify-access", baseDomain, cacheKeyParams);
 
     const cachedResult = await VERIFY_ACCESS_CACHE.get(cacheKey, async () => {
-        let resolvedOrgName = orgName;
+        const docsMetadata = await getDocsUrlMetadata({
+            url: decodedUrl,
+            token: fernToken_admin() ?? token
+        });
 
-        if (!resolvedOrgName) {
-            const docsMetadata = await getDocsUrlMetadata({
-                url: decodedUrl,
-                token: fernToken_admin() ?? token
-            });
-
-            if (!docsMetadata.ok || !docsMetadata.body.org) {
-                throw new Error(`Invalid docs URL`);
-            }
-            resolvedOrgName = docsMetadata.body.org;
+        if (!docsMetadata.ok || !docsMetadata.body.org) {
+            throw new Error(`Invalid docs URL`);
         }
 
         const orgSites = await getDocsSitesForOrg({
             token,
             // @ts-expect-error - OrgId vs Auth0OrgName type mismatch
-            orgName: resolvedOrgName
+            orgName: docsMetadata.body.org
         });
 
         if (!orgSites.ok) {
             throw new Error("Failed to fetch organization sites");
         }
 
-        const hasAccess = orgSites.docsSites.some((site) => site.mainUrl.domain === baseDomain);
-        return { metrics: { visitors: hasAccess ? 1 : 0, pageViews: 0, sessions: 0 } };
+        const docsSite = orgSites.docsSites.find((site) => site.urls.some((siteUrl) => siteUrl.domain === baseDomain));
+
+        if (!docsSite) {
+            throw new Error("You don't have access to analytics for this docs site");
+        }
+
+        return { docsSite };
     });
 
-    return (cachedResult.metrics?.visitors ?? 0) > 0;
+    return cachedResult.docsSite!;
 }
 
 function getCacheKey(
@@ -177,25 +174,21 @@ function getCacheKey(
 export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedbackResponse> {
     const validated = GetFeedbackSchema.parse(request);
 
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
+
     const session = await getCurrentSessionOrThrow();
     const userId = session.user.sub;
-    const token = session.accessToken;
-
-    const hasAccess = await verifyDomainAccess({
-        url: validated.docsUrl,
-        token,
-        userId
-    });
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
 
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
     const baseDomain = getBaseDomain(validated.docsUrl);
+
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     const page = validated.page || 1;
     const pageSize = validated.pageSize || 100;
 
-    const cacheKey = getCacheKey(baseDomain, {
+    const cacheKey = getCacheKey(allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         page,
@@ -205,7 +198,8 @@ export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedb
     const cachedData = await FEEDBACK_CACHE.get(cacheKey, async () => {
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         const offset = (page - 1) * pageSize;
@@ -237,7 +231,18 @@ export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedb
 }
 
 export async function clearFeedbackCache(docsUrl: string): Promise<void> {
-    const baseDomain = getBaseDomain(docsUrl);
-    const pattern = RedisCacheKey.webAnalytics("feedback", baseDomain, "*");
-    await redisDelPattern(pattern);
+    const docsSite = await verifyDomainAccessAndGetSite(docsUrl);
+
+    const allDomains = docsSite.urls.map((url) => url.domain);
+
+    for (const domain of allDomains) {
+        const feedbackPattern = RedisCacheKey.webAnalytics("feedback", domain, "*");
+        await redisDelPattern(feedbackPattern);
+
+        const verifyAccessPattern = RedisCacheKey.webAnalytics("verify-access", domain, "*");
+        await redisDelPattern(verifyAccessPattern);
+    }
+
+    const joinedDomainsPattern = RedisCacheKey.webAnalytics("feedback", allDomains.sort().join(","), "*");
+    await redisDelPattern(joinedDomainsPattern);
 }

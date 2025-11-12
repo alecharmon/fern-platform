@@ -24,7 +24,8 @@ export class AnalyticsService {
     constructor(config: AnalyticsConfig & { projectId?: string; apiUrl?: string }) {
         this.config = {
             userId: config.userId,
-            baseSiteUrl: this.normalizeUrl(config.baseSiteUrl)
+            baseSiteUrl: this.normalizeUrl(config.baseSiteUrl),
+            additionalDomains: config.additionalDomains?.map((domain) => this.normalizeUrl(domain))
         };
 
         // Create client internally
@@ -44,6 +45,7 @@ export class AnalyticsService {
      */
     async getMetrics(options: MetricsOptions = {}): Promise<AnalyticsMetrics> {
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         const query = `
       SELECT 
@@ -53,7 +55,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         ${whereClause}
     `;
 
@@ -110,6 +112,7 @@ export class AnalyticsService {
     async getPageViewsTimeSeries(options: TimeSeriesOptions = {}): Promise<TimeSeriesData[]> {
         const { groupBy } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         const { selectClause, groupByClause } = this.getSelectAndGroupByClause("pageviews", groupBy);
 
@@ -118,7 +121,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         ${whereClause}
       ${groupByClause}
       ORDER BY date
@@ -161,6 +164,7 @@ export class AnalyticsService {
     async getVisitorsTimeSeries(options: TimeSeriesOptions = {}): Promise<TimeSeriesData[]> {
         const { groupBy } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         let selectClause: string;
         let groupByClause: string;
@@ -184,7 +188,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         ${whereClause}
       ${groupByClause}
       ORDER BY date
@@ -231,13 +235,14 @@ export class AnalyticsService {
     ): Promise<{ path: string; visitors: number; views: number }[]> {
         const { limit = 10, orderBy = "views", order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         const query = `
       SELECT properties.$pathname as path, uniq(distinct_id) as visitors, count(*) as views
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         ${whereClause}
       GROUP BY properties.$pathname
       ORDER BY ${orderBy} ${order.toUpperCase()}
@@ -267,6 +272,7 @@ export class AnalyticsService {
     ): Promise<{ country: string; visitors: number; views: number }[]> {
         const { limit = 10, orderBy = "visitors", order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         const query = `
       SELECT 
@@ -276,7 +282,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         AND properties.$geoip_country_code IS NOT NULL
         AND properties.$geoip_country_code != ''
         ${whereClause}
@@ -309,6 +315,7 @@ export class AnalyticsService {
     ): Promise<{ channel: string; visitors: number; views: number }[]> {
         const { limit = 10, orderBy = "visitors", order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         // PostHog's official channel type calculation logic (posthog doesn't seem to offer the channel data directly via HogQL)
         // See: https://posthog.com/docs/data/channel-type
@@ -449,7 +456,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         ${whereClause}
       GROUP BY channel
       ORDER BY ${orderBy} ${order.toUpperCase()}
@@ -480,6 +487,7 @@ export class AnalyticsService {
     ): Promise<{ domain: string; visitors: number; views: number }[]> {
         const { limit = 10, orderBy = "visitors", order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         // Extract root domain (removes all subdomains including www)
         // This regex extracts the last two parts of the domain (e.g., example.com from sub.example.com)
@@ -495,7 +503,7 @@ export class AnalyticsService {
       FROM events 
       WHERE 
         event = '$pageview' 
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         AND properties.$referring_domain IS NOT NULL
         AND properties.$referring_domain != ''
         AND properties.$referring_domain != '$direct'
@@ -529,6 +537,7 @@ export class AnalyticsService {
     ): Promise<{ deviceType: string; visitors: number; views: number }[]> {
         const { limit = 10, orderBy = "visitors", order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         // Valid device types to filter for
         // const validDeviceTypes = [
@@ -550,7 +559,7 @@ export class AnalyticsService {
       FROM events
       WHERE
         event = '$pageview'
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         AND properties.$device_type IS NOT NULL
         AND properties.$device_type != ''
         -- Filter out malicious SQL injection attempts (case-insensitive)
@@ -690,6 +699,7 @@ export class AnalyticsService {
     ): Promise<{ path: string; count: number }[]> {
         const { limit = 20, order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         const query = `
       SELECT
@@ -698,7 +708,7 @@ export class AnalyticsService {
       FROM events
       WHERE
         event = 'not_found'
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         AND properties.pathname IS NOT NULL
         AND properties.pathname != ''
         ${whereClause}
@@ -795,6 +805,7 @@ export class AnalyticsService {
     > {
         const { limit = 100, offset = 0 } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const hostFilter = this.buildHostFilterClause();
 
         const pageFeedbackQuery = `
       SELECT
@@ -827,7 +838,7 @@ export class AnalyticsService {
       FROM events
       WHERE
         event = 'feedback_submitted'
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         ${whereClause}
     `;
 
@@ -862,7 +873,7 @@ export class AnalyticsService {
       FROM events
       WHERE
         event = 'code_block_feedback_submitted'
-        AND (properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')
+        AND ${hostFilter}
         ${whereClause}
     `;
 
@@ -912,6 +923,23 @@ export class AnalyticsService {
             .replace(/^https?:\/\//, "")
             .replace(/^www\./, "")
             .replace(/\/$/, "");
+    }
+
+    /**
+     * Build host filter clause that includes all domains (baseSiteUrl + additionalDomains)
+     */
+    private buildHostFilterClause(): string {
+        const allDomains = [this.config.baseSiteUrl];
+        if (this.config.additionalDomains && this.config.additionalDomains.length > 0) {
+            allDomains.push(...this.config.additionalDomains);
+        }
+
+        const conditions = allDomains.flatMap((domain) => [
+            `properties.$host = '${domain}'`,
+            `properties.$host = 'www.${domain}'`
+        ]);
+
+        return `(${conditions.join(" OR ")})`;
     }
 
     /**

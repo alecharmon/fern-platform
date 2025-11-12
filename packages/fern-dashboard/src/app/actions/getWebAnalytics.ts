@@ -32,6 +32,10 @@ const DEFAULT_DATE_RANGE: DateRangeOptions = {
 // Cache web analytics for 1 hour (3600 seconds)
 const WEB_ANALYTICS_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, { ttlInSeconds: 3600 });
 
+const VERIFY_ACCESS_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, {
+    ttlInSeconds: 600
+});
+
 // Helper to generate a deterministic cache key from request parameters
 function getCacheKey(endpoint: string, domain: string, params: CacheKeyParams): string {
     const dateRange = params.dateRange;
@@ -145,35 +149,50 @@ function getBaseDomain(rawUrl: string) {
     return baseDomain;
 }
 
-async function verifyDomainAccess(url: string) {
+async function verifyDomainAccessAndGetSite(url: string) {
     const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
 
     // Decode the URL (handles %2F -> /)
     const decodedUrl = decodeURIComponent(url);
-
-    const docsMetadata = await getDocsUrlMetadata({
-        url: decodedUrl,
-        token: fernToken_admin() ?? session.accessToken
-    });
     const baseDomain = getBaseDomain(decodedUrl);
-    // Get all organizations the user has access to
-    if (!docsMetadata.ok || !docsMetadata.body.org) {
-        throw new Error(`Invalid docs URL`);
-    }
 
-    // Verify user has access to this org's docs
-    const orgSites = await getDocsSitesForOrg({
-        token: session.accessToken,
-
-        // @ts-expect-error - OrgId vs Auth0OrgName type mismatch
-        orgName: docsMetadata.body.org
+    const cacheKeyParams = JSON.stringify({
+        userId
     });
-    if (!orgSites.ok) {
-        throw new Error("Failed to fetch organization sites");
-    }
-    const hasAccess = orgSites.docsSites.some((site) => site.mainUrl.domain === baseDomain);
+    const cacheKey = RedisCacheKey.webAnalytics("verify-access", baseDomain, cacheKeyParams);
 
-    return hasAccess;
+    const cachedResult = await VERIFY_ACCESS_CACHE.get(cacheKey, async () => {
+        const docsMetadata = await getDocsUrlMetadata({
+            url: decodedUrl,
+            token: fernToken_admin() ?? session.accessToken
+        });
+
+        // Get all organizations the user has access to
+        if (!docsMetadata.ok || !docsMetadata.body.org) {
+            throw new Error(`Invalid docs URL`);
+        }
+
+        // Verify user has access to this org's docs
+        const orgSites = await getDocsSitesForOrg({
+            token: session.accessToken,
+
+            // @ts-expect-error - OrgId vs Auth0OrgName type mismatch
+            orgName: docsMetadata.body.org
+        });
+        if (!orgSites.ok) {
+            throw new Error("Failed to fetch organization sites");
+        }
+        const docsSite = orgSites.docsSites.find((site) => site.urls.some((siteUrl) => siteUrl.domain === baseDomain));
+
+        if (!docsSite) {
+            throw new Error("You don't have access to analytics for this docs site");
+        }
+
+        return { docsSite };
+    });
+
+    return cachedResult.docsSite!;
 }
 
 /**
@@ -184,10 +203,7 @@ export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<
     // Validate input
     const validated = GetWebAnalyticsSchema.parse(request);
 
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -197,8 +213,11 @@ export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    // Generate cache key
-    const cacheKey = getCacheKey("metrics", baseDomain, {
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
+    // Generate cache key using all domains
+    const cacheKey = getCacheKey("metrics", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy
@@ -206,13 +225,14 @@ export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<
 
     // Use cache
     const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
+        // Initialize PostHog analytics service with all domains
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
-        // Fetch metrics from PostHog
+        // Fetch metrics from PostHog (now includes all domains)
         const metrics = await analytics.getMetrics({
             dateRange,
             includeInternal: validated.includeInternal
@@ -243,11 +263,7 @@ export async function getPageViewsByDay(
     // Validate input
     const validated = GetWebAnalyticsSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -257,8 +273,11 @@ export async function getPageViewsByDay(
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("pageViewsByDay", baseDomain, {
+    const cacheKey = getCacheKey("pageViewsByDay", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy
@@ -269,7 +288,8 @@ export async function getPageViewsByDay(
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch page views time series from PostHog
@@ -294,11 +314,7 @@ export async function getVisitorsByDay(
     // Validate input
     const validated = GetWebAnalyticsSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -309,8 +325,11 @@ export async function getVisitorsByDay(
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("visitorsByDay", baseDomain, {
+    const cacheKey = getCacheKey("visitorsByDay", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy
@@ -321,7 +340,8 @@ export async function getVisitorsByDay(
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch visitors time series from PostHog
@@ -346,11 +366,7 @@ export async function getTopPages(
     // Validate input
     const validated = TableRequestSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -361,8 +377,11 @@ export async function getTopPages(
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("topPages", baseDomain, {
+    const cacheKey = getCacheKey("topPages", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
@@ -376,7 +395,8 @@ export async function getTopPages(
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch top pages from PostHog
@@ -404,11 +424,7 @@ export async function getTopCountries(request: TableRequest): Promise<{
     // Validate input
     const validated = TableRequestSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -418,8 +434,11 @@ export async function getTopCountries(request: TableRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("topCountries", baseDomain, {
+    const cacheKey = getCacheKey("topCountries", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
@@ -433,7 +452,8 @@ export async function getTopCountries(request: TableRequest): Promise<{
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch top countries from PostHog
@@ -461,11 +481,7 @@ export async function getLLMFileViews(request: LLMFileViewsRequest): Promise<{
     // Validate input
     const validated = LLMFileViewsRequestSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -476,8 +492,11 @@ export async function getLLMFileViews(request: LLMFileViewsRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("llmFileViews", baseDomain, {
+    const cacheKey = getCacheKey("llmFileViews", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
@@ -491,7 +510,8 @@ export async function getLLMFileViews(request: LLMFileViewsRequest): Promise<{
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch LLM file views from PostHog
@@ -519,11 +539,7 @@ export async function getChannels(request: TableRequest): Promise<{
     // Validate input
     const validated = TableRequestSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -534,8 +550,11 @@ export async function getChannels(request: TableRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("channels", baseDomain, {
+    const cacheKey = getCacheKey("channels", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
@@ -549,7 +568,8 @@ export async function getChannels(request: TableRequest): Promise<{
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch channels from PostHog
@@ -577,11 +597,7 @@ export async function getDeviceTypes(request: TableRequest): Promise<{
     // Validate input
     const validated = TableRequestSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -592,8 +608,11 @@ export async function getDeviceTypes(request: TableRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("deviceTypes", baseDomain, {
+    const cacheKey = getCacheKey("deviceTypes", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
@@ -607,7 +626,8 @@ export async function getDeviceTypes(request: TableRequest): Promise<{
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch device types from PostHog
@@ -635,11 +655,7 @@ export async function getReferringDomains(request: TableRequest): Promise<{
     // Validate input
     const validated = TableRequestSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -650,8 +666,11 @@ export async function getReferringDomains(request: TableRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("referringDomains", baseDomain, {
+    const cacheKey = getCacheKey("referringDomains", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
@@ -665,7 +684,8 @@ export async function getReferringDomains(request: TableRequest): Promise<{
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch referring domains from PostHog
@@ -691,11 +711,7 @@ export async function get404Pages(request: TableRequest): Promise<{ pages404: { 
     // Validate input
     const validated = TableRequestSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -706,8 +722,11 @@ export async function get404Pages(request: TableRequest): Promise<{ pages404: { 
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("404Pages", baseDomain, {
+    const cacheKey = getCacheKey("404Pages", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
@@ -720,7 +739,8 @@ export async function get404Pages(request: TableRequest): Promise<{ pages404: { 
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch 404 pages from PostHog
@@ -753,11 +773,7 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
     // Validate input
     const validated = TableRequestSchema.parse(request);
 
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     // Get current session
     const session = await getCurrentSessionOrThrow();
@@ -768,8 +784,11 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
 
     const baseDomain = getBaseDomain(validated.docsUrl);
 
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
     // Generate cache key
-    const cacheKey = getCacheKey("apiExplorerRequests", baseDomain, {
+    const cacheKey = getCacheKey("apiExplorerRequests", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
@@ -782,7 +801,8 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
         // Initialize PostHog analytics service
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         // Fetch API Explorer requests from PostHog
@@ -803,17 +823,18 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
  * This invalidates all cached analytics data, forcing fresh fetches from PostHog
  */
 export async function clearWebAnalyticsCache(docsUrl: string): Promise<{ success: boolean }> {
-    // Verify access using the composable function
-    const hasAccess = await verifyDomainAccess(docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
+    const docsSite = await verifyDomainAccessAndGetSite(docsUrl);
+
+    const allDomains = docsSite.urls.map((url) => url.domain);
+
+    for (const domain of allDomains) {
+        await redisDelPattern(`web-analytics-*-${domain}-*`);
+
+        const verifyAccessPattern = RedisCacheKey.webAnalytics("verify-access", domain, "*");
+        await redisDelPattern(verifyAccessPattern);
     }
 
-    const baseDomain = getBaseDomain(docsUrl);
-
-    // Clear all analytics cache keys for this domain by pattern
-    // Pattern matches: web-analytics-*-{domain}-*
-    await redisDelPattern(`web-analytics-*-${baseDomain}-*`);
+    await redisDelPattern(`web-analytics-*-${allDomains.sort().join(",")}-*`);
 
     return { success: true };
 }
@@ -826,10 +847,7 @@ export async function getLLMBotTrafficByProvider(request: TableRequest): Promise
 }> {
     const validated = TableRequestSchema.parse(request);
 
-    const hasAccess = await verifyDomainAccess(validated.docsUrl);
-    if (!hasAccess) {
-        throw new Error("You don't have access to analytics for this docs site");
-    }
+    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
 
     const session = await getCurrentSessionOrThrow();
     const userId = session.user.sub;
@@ -837,7 +855,10 @@ export async function getLLMBotTrafficByProvider(request: TableRequest): Promise
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
     const baseDomain = getBaseDomain(validated.docsUrl);
 
-    const cacheKey = getCacheKey("llmBotProviders", baseDomain, {
+    const allDomains = docsSite.urls.map((url) => url.domain);
+    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+
+    const cacheKey = getCacheKey("llmBotProviders", allDomains.sort().join(","), {
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy,
@@ -848,7 +869,8 @@ export async function getLLMBotTrafficByProvider(request: TableRequest): Promise
     const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain
+            baseSiteUrl: baseDomain,
+            additionalDomains
         });
 
         const providers = await analytics.getLLMBotTrafficByProvider({
