@@ -12,9 +12,6 @@
     "correctness": [
       "The answer must mention organizing each API into a separate subdirectory of the `fern/apis/` folder.",
       "The answer must mention that each API must have its own `generators.yml` file."
-    ],
-    "citation": [
-      "https://buildwithfern.com/learn/api-definitions/overview/project-structure"
     ]
   }
 }
