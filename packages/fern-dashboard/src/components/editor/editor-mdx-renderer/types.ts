@@ -48,4 +48,10 @@ export interface TerminalElement {
     originalMdx: string;
 }
 
-export type ParsedMarkdownElement = JSXElement | TerminalElement;
+export interface UnsupportedComponent {
+    type: "unsupportedElement";
+    name: string;
+    originalMdx: string;
+}
+
+export type ParsedMarkdownElement = JSXElement | TerminalElement | UnsupportedComponent;

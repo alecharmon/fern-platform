@@ -8,7 +8,7 @@ import FernEditorMDXRenderer from "@/components/editor/editor-mdx-renderer/FernE
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
 import type { EncodedDocsUrl } from "@/utils/types";
-import { UnsupportedContent } from "../UnsupportedContent";
+import { UnsupportedContentDisplayOnly } from "../UnsupportedContent";
 
 export const CustomElementNodeView = (props: NodeViewProps) => {
     const { node, updateAttributes, editor, getPos } = props;
@@ -63,7 +63,7 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
         <ErrorBoundary
             fallback={
                 <NodeViewWrapper>
-                    <UnsupportedContent>{mdx}</UnsupportedContent>
+                    <UnsupportedContentDisplayOnly>{mdx}</UnsupportedContentDisplayOnly>
                 </NodeViewWrapper>
             }
         >

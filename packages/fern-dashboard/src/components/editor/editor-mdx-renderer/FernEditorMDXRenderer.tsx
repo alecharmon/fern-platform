@@ -18,7 +18,7 @@ import TiptapEditor from "@/components/editor/TiptapEditor";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
-import { UnsupportedContentDisplayOnly } from "../UnsupportedContent";
+import { UnsupportedContent, UnsupportedContentDisplayOnly } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
 import { boundaryElements, parseMDX } from "./parse";
 import type { AttributeValue, JSXElement, ParsedMarkdownElement } from "./types";
@@ -391,6 +391,9 @@ interface ParsedElementRendererProps {
 // Separate the two rendering paths to avoid conditional hook calls
 const ParsedElementRenderer = React.memo(
     ({ element, index, onUpdate, newlyCreated, docsUrl, branch }: ParsedElementRendererProps) => {
+        if (element.type === "unsupportedElement") {
+            return <UnsupportedContent>Unsupported markdown tag: {element.name}</UnsupportedContent>;
+        }
         if (element.type === "terminalElement") {
             return <MDXRenderer mdx={element.originalMdx} docsUrl={docsUrl} branch={branch} />;
         }
@@ -424,6 +427,8 @@ const FernEditorMDXRendererInternal = ({
         const initialMap = new Map<number, string>();
         parsed.forEach((element, index) => {
             if (element.type === "terminalElement") {
+                initialMap.set(index, element.originalMdx);
+            } else if (element.type === "unsupportedElement") {
                 initialMap.set(index, element.originalMdx);
             } else {
                 // For JSX elements, start with the parent MDX with <InterceptedChildren /> replaced with children

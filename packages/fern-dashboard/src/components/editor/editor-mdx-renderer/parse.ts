@@ -59,52 +59,9 @@ function isComponentSupported(componentName: string | null | undefined): boolean
     return Object.hasOwn(MDX_COMPONENTS, componentName);
 }
 
-/**
- * Replace unsupported components in the AST with a placeholder
- */
-function replaceUnsupportedComponents(node: MdastNodes): MdastNodes {
-    // Check if this node is an unsupported component
-    if ((node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement") && !isComponentSupported(node.name)) {
-        // Replace with a placeholder that shows what component was unsupported
-        return {
-            type: "mdxJsxFlowElement",
-            name: "UnsupportedContentPlaceholder",
-            attributes: [
-                {
-                    type: "mdxJsxAttribute",
-                    name: "componentName",
-                    value: node.name || "unknown"
-                },
-                {
-                    type: "mdxJsxAttribute",
-                    name: "mdx",
-                    value: node.type === "mdxJsxFlowElement" ? astToMDX(node) : ""
-                }
-            ],
-            children: []
-        };
-    }
-
-    // Recursively process children
-    if ("children" in node && node.children && Array.isArray(node.children)) {
-        return {
-            ...node,
-            children: node.children.map((child) => replaceUnsupportedComponents(child)) as any
-        };
-    }
-
-    return node;
-}
-
 export function parseMDX(mdx: string): ParsedMarkdownElement[] {
     // Parse MDX to AST using mdxToAST
     const { mdast } = mdxToAST(mdx);
-
-    // Replace unsupported components before processing
-    const processedMdast = {
-        ...mdast,
-        children: mdast.children.map((child) => replaceUnsupportedComponents(child))
-    };
 
     const result: ParsedMarkdownElement[] = [];
 
@@ -139,6 +96,18 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
         if (isBoundaryElement) {
             return {
                 type: "terminalElement",
+                originalMdx: astToMDX(node)
+            };
+        }
+
+        // Check if this is an unsupported element - if so, return it as an unsupported element type
+        const isUnsupportedComponent =
+            node.type === "mdxJsxFlowElement" && node.name != null && !isComponentSupported(node.name);
+
+        if (isUnsupportedComponent) {
+            return {
+                type: "unsupportedElement",
+                name: node.name || "unknown",
                 originalMdx: astToMDX(node)
             };
         }
@@ -234,7 +203,7 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
     }
 
     // Start traversing from the root's children
-    const rootNode = processedMdast;
+    const rootNode = { ...mdast };
     for (const child of rootNode.children) {
         const element = traverse(child);
         // Handle case where traverse returns multiple elements (e.g., paragraph with only images)

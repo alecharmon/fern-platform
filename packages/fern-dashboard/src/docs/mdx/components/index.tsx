@@ -4,7 +4,6 @@ import type { MDXComponents } from "@fern-docs/mdx";
 import dynamic from "next/dynamic";
 import type { ComponentProps } from "react";
 
-import { UnsupportedContentDisplayOnly } from "@/components/editor/UnsupportedContent";
 import { ErrorBoundary, ErrorBoundaryFallback } from "@/docs/components/error-boundary";
 import { Embed } from "@/editor/components/Embed";
 
@@ -104,11 +103,6 @@ const FERN_COMPONENTS = {
 const INTERNAL_COMPONENTS = {
     ErrorBoundary,
     ElevenLabsWaveform,
-    UnsupportedContentPlaceholder: ({ componentName, mdx }: { componentName?: string; mdx?: string }) => (
-        <UnsupportedContentDisplayOnly>
-            {mdx ? mdx : componentName ? `Unsupported markdown tag: ${componentName}` : "Unsupported markdown"}
-        </UnsupportedContentDisplayOnly>
-    ),
 
     /**
      * deprecated but kept for backwards compatibility
