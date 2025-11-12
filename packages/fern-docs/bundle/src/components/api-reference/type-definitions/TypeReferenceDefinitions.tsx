@@ -55,13 +55,17 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
     types,
     location,
     additionalProperties,
-    lang
+    lang,
+    exclude,
+    excludeDeprecated
 }: {
     shape: ApiDefinition.TypeShapeOrReference;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang: string;
+    exclude?: string[];
+    excludeDeprecated?: boolean;
 }) {
     switch (shape.type) {
         case "id":
@@ -73,7 +77,14 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         properties: [...(additionalProperties ?? []), ...(newTypeShape.properties ?? [])]
                     };
                     return (
-                        <TypeReferenceDefinitions shape={updatedShape} types={types} location={location} lang={lang} />
+                        <TypeReferenceDefinitions
+                            shape={updatedShape}
+                            types={types}
+                            location={location}
+                            lang={lang}
+                            exclude={exclude}
+                            excludeDeprecated={excludeDeprecated}
+                        />
                     );
                 }
             }
@@ -90,6 +101,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    exclude={exclude}
+                    excludeDeprecated={excludeDeprecated}
                 />
             );
         case "list":
@@ -102,6 +115,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        exclude={exclude}
+                        excludeDeprecated={excludeDeprecated}
                     />
                 </TypeDefinitionPathPart>
             );
@@ -114,6 +129,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        exclude={exclude}
+                        excludeDeprecated={excludeDeprecated}
                     />
                     <TypeReferenceDefinitions
                         shape={shape.valueShape}
@@ -121,6 +138,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        exclude={exclude}
+                        excludeDeprecated={excludeDeprecated}
                     />
                 </TypeDefinitionPathPart>
             );
@@ -135,6 +154,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    exclude={exclude}
+                    excludeDeprecated={excludeDeprecated}
                 />
             );
         }
@@ -147,6 +168,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    exclude={exclude}
+                    excludeDeprecated={excludeDeprecated}
                 />
             );
         }

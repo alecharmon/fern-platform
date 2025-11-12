@@ -19,6 +19,8 @@ export declare namespace InternalTypeDefinition {
         location?: PropertyLocation;
         additionalProperties?: ApiDefinition.ObjectProperty[];
         lang: string;
+        exclude?: string[];
+        excludeDeprecated?: boolean;
     }
 }
 
@@ -27,7 +29,9 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     types,
     location,
     additionalProperties,
-    lang
+    lang,
+    exclude,
+    excludeDeprecated
 }: {
     shape:
         | ApiDefinition.TypeShape.Enum
@@ -39,6 +43,8 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang: string;
+    exclude?: string[];
+    excludeDeprecated?: boolean;
 }) {
     switch (shape.type) {
         case "enum": {
@@ -97,7 +103,11 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
             const properties = ApiDefinition.unwrapObjectType(shape, types).properties;
 
             const filteredProperties = filterDuplicateObjectProperties(
-                filterObjectPropertiesByAccess(properties, location)
+                filterObjectPropertiesByExclude(
+                    filterObjectPropertiesByAccess(properties, location),
+                    exclude,
+                    excludeDeprecated
+                )
             );
 
             if (filteredProperties.length === 0) {
@@ -150,6 +160,22 @@ const filterObjectPropertiesByAccess = (
             return property.propertyAccess !== "READ_ONLY";
         } else if (location === "response") {
             return property.propertyAccess !== "WRITE_ONLY";
+        }
+        return true;
+    });
+};
+
+const filterObjectPropertiesByExclude = (
+    properties: ApiDefinition.ObjectProperty[],
+    exclude: string[] | undefined,
+    excludeDeprecated: boolean | undefined
+) => {
+    return properties.filter((property) => {
+        if (exclude?.includes(property.key)) {
+            return false;
+        }
+        if (excludeDeprecated && property.availability === "Deprecated") {
+            return false;
         }
         return true;
     });

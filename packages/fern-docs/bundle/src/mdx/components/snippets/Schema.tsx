@@ -14,9 +14,11 @@ type SchemaProps = {
     types?: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     lang?: string;
     className?: string;
+    exclude?: string[];
+    excludeDeprecated?: boolean;
 };
 
-export function Schema({ typeDefinition, types, lang, className }: SchemaProps) {
+export function Schema({ typeDefinition, types, lang, className, exclude, excludeDeprecated }: SchemaProps) {
     const currentSlug = useCurrentSlug();
 
     if (typeDefinition == null || types == null) {
@@ -31,7 +33,13 @@ export function Schema({ typeDefinition, types, lang, className }: SchemaProps) 
                 <TypeDefinitionAnchorPart part={schemaName}>
                     <SectionContainer>
                         <div className={className}>
-                            <TypeReferenceDefinitions shape={typeDefinition.shape} types={types} lang={lang ?? "en"} />
+                            <TypeReferenceDefinitions
+                                shape={typeDefinition.shape}
+                                types={types}
+                                lang={lang ?? "en"}
+                                exclude={exclude}
+                                excludeDeprecated={excludeDeprecated}
+                            />
                         </div>
                     </SectionContainer>
                 </TypeDefinitionAnchorPart>
