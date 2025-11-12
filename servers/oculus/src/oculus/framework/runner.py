@@ -355,6 +355,7 @@ class EvaluationRunner:
         model_name: str = "fai",
         judge_model: str = "claude-sonnet-4-5-20250929",
         skip_existing: bool = True,
+        questions: list[Question] | None = None,
     ) -> EvaluationRun:
         print(f"\n{'='*60}")
         print(f"Starting evaluation run: {self.run_id}")
@@ -363,8 +364,11 @@ class EvaluationRunner:
         print(f"{'='*60}\n")
 
         print("Stage 1: Loading questions...")
-        questions = self.load_questions()
-        print(f"Total questions: {len(questions)}\n")
+        if questions is None:
+            questions = self.load_questions()
+            print(f"Total questions: {len(questions)}\n")
+        else:
+            print(f"Using provided questions: {len(questions)}\n")
 
         print("Stage 2: Generating answers...")
         answers = self.generate_answers(

@@ -21,6 +21,7 @@ from oculus.framework.models import (
 from oculus.framework.runner import EvaluationRunner
 from oculus.integrations.base import create_answer_function
 from oculus.integrations.factory import create_integration
+from oculus.utils.diff_utils import parse_question_ids
 from oculus.utils.file_utils import (
     load_json,
     save_json,
@@ -140,8 +141,16 @@ def generate_answers_command(args: argparse.Namespace) -> int:
         print(f"{'='*60}\n")
 
         print("Loading questions...")
-        questions = runner.load_questions()
-        print(f"Total questions: {len(questions)}\n")
+        all_questions = runner.load_questions()
+
+        if args.questions:
+            all_question_files = sorted(questions_dir.glob("*.json"), key=lambda f: f.stem)
+            question_ids = parse_question_ids(args.questions, all_question_files)
+            questions = [q for q in all_questions if q.metadata.get("slug") in question_ids]
+            print(f"Filtered to {len(questions)} questions (from {len(all_questions)} total)\n")
+        else:
+            questions = all_questions
+            print(f"Total questions: {len(questions)}\n")
 
         print("Generating answers...")
         runner.generate_answers(
@@ -228,11 +237,22 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
         print(f"{'='*60}\n")
 
         print("Loading questions...")
-        questions = runner.load_questions()
-        print(f"Total questions: {len(questions)}\n")
+        all_questions = runner.load_questions()
+        all_question_files = sorted(questions_dir.glob("*.json"), key=lambda f: f.stem)
+
+        if args.questions:
+            question_ids = parse_question_ids(args.questions, all_question_files)
+            question_ids_set = set(question_ids)
+            questions = [q for q in all_questions if q.metadata.get("slug") in question_ids_set]
+            print(f"Filtered to {len(questions)} questions (from {len(all_questions)} total)\n")
+        else:
+            questions = all_questions
+            question_ids_set = {f.stem for f in all_question_files}
+            print(f"Total questions: {len(questions)}\n")
 
         print("Loading answers...")
-        answer_files = sorted(runner.answers_dir.glob("*.json"), key=lambda f: f.stem)
+        all_answer_files = sorted(runner.answers_dir.glob("*.json"), key=lambda f: f.stem)
+        answer_files = [f for f in all_answer_files if f.stem in question_ids_set]
         answers = [Answer(**load_json(f)) for f in answer_files]
         print(f"Total answers: {len(answers)}\n")
 
@@ -346,11 +366,19 @@ def run_evaluation(args: argparse.Namespace) -> int:
             generator_config=suite_config.generator_config,
         )
 
+        filtered_questions = None
+        if args.questions:
+            all_questions = runner.load_questions()
+            all_question_files = sorted(questions_dir.glob("*.json"), key=lambda f: f.stem)
+            question_ids = parse_question_ids(args.questions, all_question_files)
+            filtered_questions = [q for q in all_questions if q.metadata.get("slug") in question_ids]
+
         result = runner.run(
             answer_fn=answer_fn,
             model_name=args.model,
             judge_model=args.judge_model,
             skip_existing=not args.no_skip_existing,
+            questions=filtered_questions,
         )
 
         if args.output_dir:
@@ -445,6 +473,12 @@ Examples:
     answer_parser.add_argument("--suite-path", type=Path, default=None, help="Base path to suites directory")
     answer_parser.add_argument("--run-id", type=str, default=None, help="Unique run identifier")
     answer_parser.add_argument(
+        "--questions",
+        type=str,
+        default=None,
+        help="Comma-separated question indices (1-based) or slugs (default: all questions)",
+    )
+    answer_parser.add_argument(
         "--integration",
         type=str,
         default=None,
@@ -477,6 +511,12 @@ Examples:
         "--run-id", type=str, required=True, help="Unique run identifier for answers to evaluate"
     )
     evaluate_parser.add_argument(
+        "--questions",
+        type=str,
+        default=None,
+        help="Comma-separated question indices (1-based) or slugs (default: all questions)",
+    )
+    evaluate_parser.add_argument(
         "--judge-model", type=str, default="claude-sonnet-4-5-20250929", help="Claude model for judging"
     )
     evaluate_parser.add_argument("--max-workers", type=int, default=16, help="Number of parallel workers")
@@ -500,6 +540,12 @@ Examples:
     run_parser.add_argument("--suite", type=str, required=True, help="Name of the evaluation suite")
     run_parser.add_argument("--suite-path", type=Path, default=None, help="Base path to suites directory")
     run_parser.add_argument("--run-id", type=str, default=None, help="Unique run identifier")
+    run_parser.add_argument(
+        "--questions",
+        type=str,
+        default=None,
+        help="Comma-separated question indices (1-based) or slugs (default: all questions)",
+    )
     run_parser.add_argument(
         "--integration",
         type=str,
