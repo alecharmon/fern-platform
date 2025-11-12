@@ -24,15 +24,13 @@ import z from "zod";
 import {
     convertTpufRecordsToDocuments,
     createChatSystemPrompt,
-    getTurbopufferNamespace,
     isAuthError,
     type TurbopufferAuthError,
     type TurbopufferRecord
 } from "../index";
-import { getCodeIndexName } from "../turbopuffer/utils/get-turbopuffer-namespace";
 import { estimateTokens, estimateTokensFromArray } from "../utils/estimate-tokens";
 import { runQueryTurbopuffer } from "./run-query-turbopuffer";
-import { MAX_QUERY_ATTEMPTS, TOP_K, TOP_K_CODE } from "./stream-constants";
+import { MAX_QUERY_ATTEMPTS, TOP_K } from "./stream-constants";
 
 export async function runRouteForAnthropic({
     domain,
@@ -147,9 +145,8 @@ export async function runRouteForAnthropic({
 
     const initialSearchResultTokens = estimateTokensFromArray(systemPromptDocuments);
     let toolCallResultTokens = 0;
-    const toolCallDocumentCounts: { documentationSearch: number; codeSearch: number } = {
-        documentationSearch: 0,
-        codeSearch: 0
+    const toolCallDocumentCounts: { documentationSearch: number } = {
+        documentationSearch: 0
     };
 
     const assistantQueryId = crypto.randomUUID();
@@ -238,48 +235,6 @@ export async function runRouteForAnthropic({
                             }
                             return response;
                         }
-                    }),
-                    codeSearch: tool({
-                        description: "Search code snippets for the user's query with semantic search and bm25",
-                        inputSchema: z.object({
-                            query: z.string()
-                        }),
-                        async execute({ query }) {
-                            numToolCalls++;
-                            const result = await runQueryTurbopuffer(query, {
-                                embeddingModel,
-                                namespace: getTurbopufferNamespace(domain, getCodeIndexName()),
-                                topK: TOP_K_CODE,
-                                documentIdsToIgnore: documentIdsToIgnore,
-                                filters,
-                                explodedRoles,
-                                userIsAuthed
-                            });
-
-                            if (isAuthError(result)) {
-                                return [
-                                    {
-                                        error: "unauthorized",
-                                        message: result.message,
-                                        requiresAuth: true
-                                    }
-                                ];
-                            }
-
-                            return result.map((hit) => {
-                                const document =
-                                    hit.attributes.document.length > 20000
-                                        ? hit.attributes.document.slice(0, 20000)
-                                        : hit.attributes.document;
-
-                                toolCallResultTokens += estimateTokens(document);
-                                toolCallDocumentCounts.codeSearch++;
-                                return {
-                                    ...hit.attributes,
-                                    document
-                                };
-                            });
-                        }
                     })
                 },
                 onChunk: (chunk) => {
@@ -352,7 +307,6 @@ export async function runRouteForAnthropic({
                         estimatedToolCallResultTokens: toolCallResultTokens,
                         numInitialSearchResults: searchResults.length,
                         numDocumentationSearchResults: toolCallDocumentCounts.documentationSearch,
-                        numCodeSearchResults: toolCallDocumentCounts.codeSearch,
                         ...e.usage
                     });
                     e.warnings?.forEach((warning) => {
