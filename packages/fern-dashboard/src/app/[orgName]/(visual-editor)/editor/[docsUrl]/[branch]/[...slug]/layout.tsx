@@ -96,7 +96,7 @@ export default async function VisualEditorPreviewLayout({
                             dark={colors.dark}
                             inlineCss={config.css?.inline}
                             inlineCssScopeSelector="#preview-container, [data-testid=product-dropdown-content], [data-testid=version-dropdown-content]"
-                            scopeSelector="#preview-container @theme"
+                            scopeSelector="#preview-container"
                             lightSelector=".light #preview-container"
                             darkSelector=".dark #preview-container"
                         />

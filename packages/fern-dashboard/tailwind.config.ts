@@ -1,3 +1,4 @@
+import containerQueries from "@tailwindcss/container-queries";
 import typography from "@tailwindcss/typography";
 import type { Config } from "tailwindcss";
 
@@ -112,7 +113,7 @@ const config: Config = {
             }
         }
     },
-    plugins: [typography, require("@tailwindcss/container-queries")],
+    plugins: [typography, containerQueries],
     future: {
         hoverOnlyWhenSupported: true
     }

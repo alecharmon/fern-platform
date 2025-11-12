@@ -114,6 +114,10 @@
 
   --fern-green-300: #dbfdd3;
   --fern-border: var(--gray-500);
+
+  /* editor toolbar heights */
+  --header-toolbar-height: 54px;
+  --header-toolbar-height-mobile: 108px;
 }
 
 .dark {
