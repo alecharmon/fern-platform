@@ -20,12 +20,15 @@ from oculus.framework.models import (
 )
 from oculus.framework.runner import EvaluationRunner
 from oculus.integrations.base import create_answer_function
-from oculus.integrations.factory import create_integration, get_default_integration_type
+from oculus.integrations.factory import create_integration
 from oculus.utils.file_utils import (
     load_json,
     save_json,
 )
-from oculus.utils.github_formatter import format_github_job_summary, format_github_summary
+from oculus.utils.github_formatter import (
+    format_github_job_summary,
+    format_github_summary,
+)
 
 load_dotenv()
 
@@ -106,13 +109,10 @@ def generate_answers_command(args: argparse.Namespace) -> int:
         return 1
 
     try:
-        integration_type = None
         if hasattr(args, "integration") and args.integration:
             integration_type = args.integration
-        elif suite_config.integration:
-            integration_type = suite_config.integration
         else:
-            integration_type = get_default_integration_type()
+            integration_type = suite_config.integration
 
         print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
         integration = create_integration(
@@ -323,13 +323,10 @@ def run_evaluation(args: argparse.Namespace) -> int:
         return 1
 
     try:
-        integration_type = None
         if hasattr(args, "integration") and args.integration:
             integration_type = args.integration
-        elif suite_config.integration:
-            integration_type = suite_config.integration
         else:
-            integration_type = get_default_integration_type()
+            integration_type = suite_config.integration
 
         print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
         integration = create_integration(
@@ -452,7 +449,7 @@ Examples:
         type=str,
         default=None,
         choices=["fai-local", "fai-http", "vercel-http"],
-        help="Integration type (defaults to OCULUS_INTEGRATION env var or fai-local)",
+        help="Integration type (defaults to suite config)",
     )
     answer_parser.add_argument(
         "--model",
@@ -508,7 +505,7 @@ Examples:
         type=str,
         default=None,
         choices=["fai-local", "fai-http", "vercel-http"],
-        help="Integration type (defaults to OCULUS_INTEGRATION env var or fai-local)",
+        help="Integration type (defaults to suite config)",
     )
     run_parser.add_argument(
         "--model",

@@ -8,12 +8,8 @@ from oculus.integrations.vercel_http import VercelHTTPIntegration
 INTEGRATION_TYPES = ["fai-local", "fai-http", "vercel-http"]
 
 
-def get_default_integration_type() -> str:
-    return os.environ.get("OCULUS_INTEGRATION", "fai-local")
-
-
 def create_integration(
-    integration_type: str | None = None,
+    integration_type: str,
     domain: str = "",
     model: str = "claude-4-sonnet-20250514",
     system_prompt: str | None = None,
@@ -24,7 +20,6 @@ def create_integration(
 
     Args:
         integration_type: Type of integration ("fai-local", "fai-http", "vercel-http")
-                         If None, uses OCULUS_INTEGRATION env var or defaults to "fai-local"
         domain: Documentation domain
         model: Model to use for generation
         system_prompt: Optional system prompt override
@@ -37,15 +32,10 @@ def create_integration(
         ValueError: If integration_type is not supported
 
     Environment Variables:
-        OCULUS_INTEGRATION: Default integration type (if integration_type not specified)
         FAI_URL: Base URL for FAI service (for fai-http)
         FERN_TOKEN: Auth token for FAI (for fai-http)
         VERCEL_URL: Base URL for Vercel docs site (for vercel-http, required)
     """
-    # Use default if not specified
-    if integration_type is None:
-        integration_type = get_default_integration_type()
-
     integration_type = integration_type.lower()
 
     if integration_type == "fai-local":

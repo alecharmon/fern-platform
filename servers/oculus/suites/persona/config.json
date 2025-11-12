@@ -1,5 +1,6 @@
 {
     "domain": "persona-demo-docs.docs.buildwithfern.com",
+    "integration": "fai-local",
     "evaluators": ["correctness", "coherence", "conciseness", "citation"]
   }
   

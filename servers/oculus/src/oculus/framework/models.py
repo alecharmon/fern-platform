@@ -19,11 +19,11 @@ class SuiteConfig(BaseModel):
     """Configuration for an evaluation suite."""
 
     domain: str
+    integration: Literal["fai-local", "fai-http", "vercel-http"]
     generators: list[str] = Field(default_factory=list)
     evaluators: list[str] = Field(default_factory=list)
     num_questions_generation: int | None = None
     generator_config: GeneratorConfig | None = None
-    integration: Literal["fai-local", "fai-http", "vercel-http"] | None = None
 
 
 class Question(BaseModel):

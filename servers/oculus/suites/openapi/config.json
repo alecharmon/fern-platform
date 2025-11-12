@@ -1,5 +1,6 @@
 {
   "domain": "elevenlabs.io",
+  "integration": "fai-local",
   "generators": ["openapi"],
   "evaluators": ["correctness"],
   "num_questions_generation": 50,

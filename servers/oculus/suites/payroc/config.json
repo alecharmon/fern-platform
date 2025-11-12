@@ -1,6 +1,5 @@
 {
   "domain": "payroc-ask-fern.docs.buildwithfern.com",
-  "evaluators": ["correctness"],
   "integration": "fai-local",
-  "rewrite_query": true
+  "evaluators": ["correctness"],
 }

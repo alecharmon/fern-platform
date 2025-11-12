@@ -1,4 +1,5 @@
 {
   "domain": "hume-discord-ai.docs.buildwithfern.com",
+  "integration": "fai-local",
   "evaluators": ["correctness", "citation"]
 }
