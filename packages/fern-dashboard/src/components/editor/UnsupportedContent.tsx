@@ -20,3 +20,11 @@ export const UnsupportedContentDisplayOnly = ({ children }: { children: React.Re
         </div>
     );
 };
+
+export const UnsupportedContentInline = ({ tagName }: { tagName?: string }) => {
+    return (
+        <span className="inline-flex min-w-fit items-center rounded-md bg-gray-300/50 px-2 py-1 text-xs">
+            {tagName ? `Unsupported tag: ${tagName}` : "Unsupported tag"}
+        </span>
+    );
+};

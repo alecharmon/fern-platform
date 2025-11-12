@@ -22,6 +22,7 @@ import { useEditor } from "@/providers/EditorContext";
 import { cn } from "@/utils/utils";
 import { createCodeBlockComponent } from "./extension-code-block/CodeBlockComponent";
 import CustomElement from "./extension-custom-element";
+import { InlineCustomElement } from "./extension-custom-element/inline-custom-element";
 import { FVEAttributesExtension } from "./extension-fve-attributes";
 import { MarkdownPasteExtension } from "./extension-markdown-paste";
 import { SelectBlockExtension } from "./extension-select-block/select-block-extension";
@@ -99,6 +100,7 @@ const extensions = [
     MarkdownPasteExtension,
     SelectBlockExtension,
     CustomElement,
+    InlineCustomElement,
     Placeholder.configure({
         placeholder: "Write or press `/` for components",
         emptyEditorClass: "is-empty",

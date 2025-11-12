@@ -125,6 +125,11 @@ export default function TextBubbleMenu() {
                     return false;
                 }
 
+                // Don't show the bubble menu for inline custom elements (e.g., unsupported inline tags)
+                if (editor.isActive("custom-inline-element-v2")) {
+                    return false;
+                }
+
                 // Don't show the bubble menu for inline math nodes
                 if (editor.isActive("inlineMath") || editor.isActive("mathInline")) {
                     return false;

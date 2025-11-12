@@ -18,7 +18,7 @@ import TiptapEditor from "@/components/editor/TiptapEditor";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
-import { UnsupportedContent, UnsupportedContentDisplayOnly } from "../UnsupportedContent";
+import { UnsupportedContent, UnsupportedContentDisplayOnly, UnsupportedContentInline } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
 import { boundaryElements, parseMDX } from "./parse";
 import type { AttributeValue, JSXElement, ParsedMarkdownElement } from "./types";
@@ -107,6 +107,7 @@ interface FernEditorMDXRendererProps {
     newlyCreated?: boolean;
     docsUrl?: EncodedDocsUrl;
     branch?: string;
+    inline?: boolean;
 }
 
 // Bundling state types
@@ -136,6 +137,7 @@ interface TerminalMDXRendererProps {
     components: ReturnType<typeof useMDXComponents>;
     docsUrl?: EncodedDocsUrl;
     branch?: string;
+    inline?: boolean;
 }
 
 const TerminalMDXRenderer = React.memo(({ code, components }: TerminalMDXRendererProps) => {
@@ -162,11 +164,15 @@ interface MDXRendererProps {
     docsUrl?: EncodedDocsUrl;
     branch?: string;
     skipWrapper?: boolean;
+    inline?: boolean;
 }
 
-const CustomErrorFallback = ({ mdx }: { mdx: string }) => {
-    const displayMessage = !mdx.includes("<InterceptedChildren />") ? mdx : "Unsupported markdown";
+const CustomErrorFallback = ({ mdx, inline }: { mdx: string; inline?: boolean }) => {
+    if (inline) {
+        return <UnsupportedContentInline />;
+    }
 
+    const displayMessage = !mdx.includes("<InterceptedChildren />") ? mdx : "Unsupported markdown";
     return <UnsupportedContentDisplayOnly>{displayMessage}</UnsupportedContentDisplayOnly>;
 };
 
@@ -198,7 +204,7 @@ function isBoundaryElement(mdx: string): boolean {
     });
 }
 
-const MDXRenderer = React.memo(({ mdx, docsUrl, branch, skipWrapper = false }: MDXRendererProps) => {
+const MDXRenderer = React.memo(({ mdx, docsUrl, branch, skipWrapper = false, inline = false }: MDXRendererProps) => {
     const [state, setState] = useState<MDXRendererState>({
         type: "BUNDLING"
     });
@@ -234,17 +240,20 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch, skipWrapper = false }: M
         }
 
         if (state.type === "ERROR") {
-            const displayMessage = !mdx.includes("<InterceptedChildren />") ? mdx : "Unsupported markdown";
+            if (inline) {
+                return <UnsupportedContentInline />;
+            }
 
+            const displayMessage = !mdx.includes("<InterceptedChildren />") ? mdx : "Unsupported markdown";
             return <UnsupportedContentDisplayOnly>{displayMessage}</UnsupportedContentDisplayOnly>;
         }
 
         return (
-            <ErrorBoundary fallback={<CustomErrorFallback mdx={mdx} />}>
+            <ErrorBoundary fallback={<CustomErrorFallback mdx={mdx} inline={inline} />}>
                 <TerminalMDXRenderer code={state.code} components={components} />
             </ErrorBoundary>
         );
-    }, [state, mdx, components]);
+    }, [state, mdx, components, inline]);
 
     if (isBoundary && !skipWrapper) {
         // Only wrap with CustomElementHoverWrapper if it's a boundary element and wrapper is not skipped
@@ -394,6 +403,10 @@ interface ParsedElementRendererProps {
 const ParsedElementRenderer = React.memo(
     ({ element, index, onUpdate, newlyCreated, docsUrl, branch, skipWrapper = false }: ParsedElementRendererProps) => {
         if (element.type === "unsupportedElement") {
+            // Use inline component for inline elements, block component for others
+            if (element.isInline) {
+                return <UnsupportedContentInline tagName={element.name} />;
+            }
             return <UnsupportedContent>Unsupported markdown tag: {element.name}</UnsupportedContent>;
         }
         if (element.type === "terminalElement") {
@@ -456,10 +469,11 @@ const FernEditorMDXRendererInternal = ({
     onUpdate,
     newlyCreated,
     docsUrl,
-    branch
+    branch,
+    inline = false
 }: FernEditorMDXRendererProps) => {
     const deleteCounter = useRef(0);
-    const parsed = useMemo(() => parseMDX(mdx), [mdx]);
+    const parsed = useMemo(() => parseMDX(mdx, inline), [mdx, inline]);
 
     // Keep track of the MDX for each element
     const elementMdxMap = useMemo(() => {
@@ -544,7 +558,14 @@ function applyIndentation(mdx: string, indentLevel: number): string {
         .join("\n")
         .trim();
 }
-const FernEditorMDXRenderer = ({ mdx, onUpdate, newlyCreated, docsUrl, branch }: FernEditorMDXRendererProps) => {
+const FernEditorMDXRenderer = ({
+    mdx,
+    onUpdate,
+    newlyCreated,
+    docsUrl,
+    branch,
+    inline
+}: FernEditorMDXRendererProps) => {
     return (
         <FernEditorMDXRendererInternal
             mdx={mdx}
@@ -552,6 +573,7 @@ const FernEditorMDXRenderer = ({ mdx, onUpdate, newlyCreated, docsUrl, branch }:
             newlyCreated={newlyCreated}
             docsUrl={docsUrl}
             branch={branch}
+            inline={inline}
         />
     );
 };

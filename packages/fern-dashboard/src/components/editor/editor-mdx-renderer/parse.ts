@@ -80,14 +80,17 @@ function containsUnsupportedComponent(node: MdastNodes): boolean {
     return false;
 }
 
-export function parseMDX(mdx: string): ParsedMarkdownElement[] {
+export function parseMDX(mdx: string, inlineContext = false): ParsedMarkdownElement[] {
     // Parse MDX to AST using mdxToAST
     const { mdast } = mdxToAST(mdx);
 
     const result: ParsedMarkdownElement[] = [];
 
     // Function to traverse the AST and extract parent-child relationships
-    function traverse(node: MdastNodes): ParsedMarkdownElement | ParsedMarkdownElement[] {
+    function traverse(
+        node: MdastNodes,
+        isInlineParagraphContext = false
+    ): ParsedMarkdownElement | ParsedMarkdownElement[] {
         if (node.type === "paragraph" && node.children && Array.isArray(node.children)) {
             const hasOnlyImages = node.children.every(
                 (child) => child.type === "image" || child.type === "imageReference"
@@ -108,17 +111,44 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
                     }
                 })) as any;
             }
+
+            // Check if paragraph contains unsupported inline JSX elements
+            const hasUnsupportedInlineElements = node.children.some(
+                (child) => child.type === "mdxJsxTextElement" && child.name != null && !isComponentSupported(child.name)
+            );
+
+            // If paragraph contains unsupported elements, traverse children with inline context
+            if (hasUnsupportedInlineElements) {
+                const results: ParsedMarkdownElement[] = [];
+                for (const child of node.children) {
+                    if (child.type === "mdxJsxTextElement" && child.name != null) {
+                        const childResult = traverse(child as any, true);
+                        if (Array.isArray(childResult)) {
+                            results.push(...childResult);
+                        } else {
+                            results.push(childResult);
+                        }
+                    }
+                }
+                // If we found unsupported inline elements, return them
+                if (results.length > 0) {
+                    return results;
+                }
+            }
         }
 
         // Check if this is an unsupported element - if so, return it as an unsupported element type
         const isUnsupportedComponent =
-            node.type === "mdxJsxFlowElement" && node.name != null && !isComponentSupported(node.name);
+            (node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement") &&
+            node.name != null &&
+            !isComponentSupported(node.name);
 
         if (isUnsupportedComponent) {
             return {
                 type: "unsupportedElement",
                 name: node.name || "unknown",
-                originalMdx: astToMDX(node)
+                originalMdx: astToMDX(node),
+                isInline: node.type === "mdxJsxTextElement" || isInlineParagraphContext || inlineContext
             };
         }
 

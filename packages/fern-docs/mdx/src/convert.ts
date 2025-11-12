@@ -22,6 +22,7 @@ import { gfm } from "micromark-extension-gfm";
 import { math } from "micromark-extension-math";
 import { mdxjs } from "micromark-extension-mdxjs";
 import { visit } from "unist-util-visit";
+import { isInlineComponent } from "./inline-allowlist";
 
 // Options for how yaml is written to the frontmatter
 const FRONTMATTER_YAML_OPTIONS: yaml.DumpOptions = {
@@ -296,6 +297,16 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
         }
 
         const { content } = getNodeContent(node, rootContent);
+
+        // mdxJsxTextElement nodes are inline by definition, or check the allowlist
+        const shouldBeInline = type === "mdxJsxTextElement" || isInlineComponent(name);
+
+        if (shouldBeInline) {
+            return mdxUnsupportedInlineCustomElementNodev2(
+                generateContentHash(positionStart, positionEnd, content),
+                content
+            );
+        }
 
         return mdxUnsupportedCustomElementNodev2(generateContentHash(positionStart, positionEnd, content), content);
     }
@@ -585,7 +596,8 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
             tfoot: baseElementHandler,
 
             // Custom elements
-            ["custom-element-v2"]: customElementv2Handler
+            ["custom-element-v2"]: customElementv2Handler,
+            ["custom-inline-element-v2"]: customElementv2Handler
         } as any
     });
 
@@ -900,6 +912,19 @@ function mdxUnsupportedCustomElementNodev2(id: string, originalMdxContent: strin
         type: "element" as const,
         tagName: "custom-element-v2",
         // These data attributes help the client to handle the custom element
+        properties: {
+            "fve-data-id": id,
+            "fve-mdx-b64": Buffer.from(originalMdxContent, "utf-8").toString("base64")
+        },
+        children: []
+    };
+}
+
+// Create node for an inline custom element
+function mdxUnsupportedInlineCustomElementNodev2(id: string, originalMdxContent: string) {
+    return {
+        type: "element" as const,
+        tagName: "custom-inline-element-v2",
         properties: {
             "fve-data-id": id,
             "fve-mdx-b64": Buffer.from(originalMdxContent, "utf-8").toString("base64")

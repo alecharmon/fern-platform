@@ -30,7 +30,7 @@ describe("mdxToHtml and htmlToMdx", () => {
 
     it("mdxToHtml: with custom element", () => {
         const result = mdxToHtml(mdxWithCustom);
-        expect(result.html).toContain("custom-element-v2");
+        expect(result.html).toContain("custom-inline-element-v2");
         expect(result.frontmatter).toMatchInlineSnapshot(`null`);
     });
 

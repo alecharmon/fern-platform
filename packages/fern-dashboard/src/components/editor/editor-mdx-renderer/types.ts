@@ -53,6 +53,7 @@ export interface UnsupportedComponent {
     type: "unsupportedElement";
     name: string;
     originalMdx: string;
+    isInline?: boolean;
 }
 
 export type ParsedMarkdownElement = JSXElement | TerminalElement | UnsupportedComponent;
