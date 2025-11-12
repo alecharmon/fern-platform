@@ -192,7 +192,16 @@ export const createEditableDocsLoader = async ({
     forceRevalidate?: boolean;
     branchName?: string;
 }) => {
-    const domain = decodeURIComponent(encodedDocsUrl);
+    const decodedUrl = decodeURIComponent(encodedDocsUrl);
+    // Strip any paths off the domain (e.g., "domain.com/subpath" -> "domain.com")
+    let domain: string;
+    try {
+        const url = new URL(decodedUrl.startsWith("http") ? decodedUrl : `https://${decodedUrl}`);
+        domain = url.hostname;
+    } catch {
+        // Fallback: if URL parsing fails, split by '/' and take the first part
+        domain = decodedUrl.split("/")[0] || decodedUrl;
+    }
     const docsLoader = await createCachedDocsLoader(host, encodeDocsLoaderDomain(domain, branchName), fernToken, {
         returnRawMarkdown: true,
         cacheConfig: {
