@@ -39,7 +39,7 @@ const NodeHoverWrapper = ({ name, children, icon, actions, enableHoverBridge = t
             {enableHoverBridge && <div className="absolute -top-14 right-0 w-64 h-16 z-10" />}
 
             {/* Hover outline - only visible on group hover */}
-            <div className="pointer-events-none absolute -inset-2 hidden rounded-lg border-2 border-[var(--fern-border)] border-dashed group-hover:block" />
+            <div className="pointer-events-none absolute -inset-2 -inset-x-3 hidden rounded-lg border-2 border-[var(--fern-border)] border-dashed group-hover:block" />
 
             <div
                 className={`absolute right-0 -top-13 z-10 items-center gap-2 ${isActive ? "flex" : "hidden"} group-hover:flex`}

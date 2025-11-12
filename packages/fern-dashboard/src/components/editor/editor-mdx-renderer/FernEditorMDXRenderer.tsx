@@ -161,6 +161,7 @@ interface MDXRendererProps {
     mdx: string;
     docsUrl?: EncodedDocsUrl;
     branch?: string;
+    skipWrapper?: boolean;
 }
 
 const CustomErrorFallback = ({ mdx }: { mdx: string }) => {
@@ -197,7 +198,7 @@ function isBoundaryElement(mdx: string): boolean {
     });
 }
 
-const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
+const MDXRenderer = React.memo(({ mdx, docsUrl, branch, skipWrapper = false }: MDXRendererProps) => {
     const [state, setState] = useState<MDXRendererState>({
         type: "BUNDLING"
     });
@@ -245,8 +246,8 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch }: MDXRendererProps) => {
         );
     }, [state, mdx, components]);
 
-    if (isBoundary) {
-        // Only wrap with CustomElementHoverWrapper if it's a boundary element
+    if (isBoundary && !skipWrapper) {
+        // Only wrap with CustomElementHoverWrapper if it's a boundary element and wrapper is not skipped
         return <CustomElementHoverWrapper>{content}</CustomElementHoverWrapper>;
     }
     return content;
@@ -386,16 +387,54 @@ interface ParsedElementRendererProps {
     newlyCreated?: boolean;
     docsUrl?: EncodedDocsUrl;
     branch?: string;
+    skipWrapper?: boolean;
 }
 
 // Separate the two rendering paths to avoid conditional hook calls
 const ParsedElementRenderer = React.memo(
-    ({ element, index, onUpdate, newlyCreated, docsUrl, branch }: ParsedElementRendererProps) => {
+    ({ element, index, onUpdate, newlyCreated, docsUrl, branch, skipWrapper = false }: ParsedElementRendererProps) => {
         if (element.type === "unsupportedElement") {
             return <UnsupportedContent>Unsupported markdown tag: {element.name}</UnsupportedContent>;
         }
         if (element.type === "terminalElement") {
-            return <MDXRenderer mdx={element.originalMdx} docsUrl={docsUrl} branch={branch} />;
+            // If terminal element has children, it's a boundary element with unsupported content
+            // We need to render the boundary element wrapper AND inject the parsed children inside it
+            if (element.children && element.children.length > 0) {
+                const childrenContent = (
+                    <EditorComponentChildrenProvider
+                        appendChildrenMdx={() => {}}
+                        providedChildren={
+                            <>
+                                {element.children.map((child, childIndex) => (
+                                    <ParsedElementRenderer
+                                        key={`${child.type}_${childIndex}`}
+                                        index={childIndex}
+                                        element={child}
+                                        onUpdate={onUpdate}
+                                        newlyCreated={newlyCreated}
+                                        docsUrl={docsUrl}
+                                        branch={branch}
+                                        skipWrapper={true}
+                                    />
+                                ))}
+                            </>
+                        }
+                    >
+                        <MDXRenderer mdx={element.originalMdx} docsUrl={docsUrl} branch={branch} skipWrapper={true} />
+                    </EditorComponentChildrenProvider>
+                );
+
+                // Only wrap with hover wrapper if skipWrapper is false
+                if (skipWrapper) {
+                    return childrenContent;
+                }
+
+                return <CustomElementHoverWrapper>{childrenContent}</CustomElementHoverWrapper>;
+            }
+            // Regular terminal element without children
+            return (
+                <MDXRenderer mdx={element.originalMdx} docsUrl={docsUrl} branch={branch} skipWrapper={skipWrapper} />
+            );
         }
 
         return (

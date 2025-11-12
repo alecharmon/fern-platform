@@ -59,6 +59,27 @@ function isComponentSupported(componentName: string | null | undefined): boolean
     return Object.hasOwn(MDX_COMPONENTS, componentName);
 }
 
+/**
+ * Recursively check if a node or any of its children contain unsupported components
+ */
+function containsUnsupportedComponent(node: MdastNodes): boolean {
+    // Check if this node itself is an unsupported component
+    if (node.type === "mdxJsxFlowElement" && node.name != null && !isComponentSupported(node.name)) {
+        return true;
+    }
+
+    // Recursively check children
+    if ("children" in node && node.children && Array.isArray(node.children)) {
+        for (const child of node.children) {
+            if (containsUnsupportedComponent(child)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 export function parseMDX(mdx: string): ParsedMarkdownElement[] {
     // Parse MDX to AST using mdxToAST
     const { mdast } = mdxToAST(mdx);
@@ -89,17 +110,6 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
             }
         }
 
-        // Check if this is a boundary element - if so, treat it and all children as terminal
-        const isBoundaryElement =
-            node.type === "mdxJsxFlowElement" && node.name != null && boundaryElements.includes(node.name);
-
-        if (isBoundaryElement) {
-            return {
-                type: "terminalElement",
-                originalMdx: astToMDX(node)
-            };
-        }
-
         // Check if this is an unsupported element - if so, return it as an unsupported element type
         const isUnsupportedComponent =
             node.type === "mdxJsxFlowElement" && node.name != null && !isComponentSupported(node.name);
@@ -108,6 +118,55 @@ export function parseMDX(mdx: string): ParsedMarkdownElement[] {
             return {
                 type: "unsupportedElement",
                 name: node.name || "unknown",
+                originalMdx: astToMDX(node)
+            };
+        }
+
+        // Check if this is a boundary element
+        const isBoundaryElement =
+            node.type === "mdxJsxFlowElement" && node.name != null && boundaryElements.includes(node.name);
+
+        if (isBoundaryElement) {
+            // Before treating as terminal, check if it contains any unsupported components
+            // If it does, we need to recursively parse its children to properly mark unsupported content
+            if (containsUnsupportedComponent(node)) {
+                // Parse children to find and mark unsupported elements
+                const childElements: ParsedMarkdownElement[] = [];
+                if (node.children && Array.isArray(node.children)) {
+                    for (const child of node.children) {
+                        const childElement = traverse(child);
+                        if (Array.isArray(childElement)) {
+                            childElements.push(...childElement);
+                        } else {
+                            childElements.push(childElement);
+                        }
+                    }
+                }
+
+                // Create a modified version of the node with <InterceptedChildren /> placeholder
+                const modifiedNode: MdastNodes = {
+                    ...node,
+                    children: [
+                        {
+                            type: "mdxJsxFlowElement",
+                            name: "InterceptedChildren",
+                            attributes: [],
+                            children: []
+                        }
+                    ]
+                };
+
+                // Return a terminal element with parsed children and modified MDX
+                return {
+                    type: "terminalElement",
+                    originalMdx: astToMDX(modifiedNode),
+                    children: childElements
+                };
+            }
+
+            // Otherwise, treat it and all children as terminal
+            return {
+                type: "terminalElement",
                 originalMdx: astToMDX(node)
             };
         }

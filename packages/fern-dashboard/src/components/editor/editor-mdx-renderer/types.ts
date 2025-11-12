@@ -46,6 +46,7 @@ export interface JSXElement {
 export interface TerminalElement {
     type: "terminalElement";
     originalMdx: string;
+    children?: ParsedMarkdownElement[];
 }
 
 export interface UnsupportedComponent {
