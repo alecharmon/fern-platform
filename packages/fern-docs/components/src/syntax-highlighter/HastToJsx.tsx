@@ -308,6 +308,9 @@ function wrapTextWithLinks(element: React.ReactElement<TokenProps>, links: Recor
                 target="_self"
                 rel="noopener noreferrer"
                 className="fern-code-link"
+                onClick={(e) => {
+                    e.stopPropagation();
+                }}
             >
                 {matchedElements}
             </a>
