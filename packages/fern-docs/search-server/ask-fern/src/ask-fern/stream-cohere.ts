@@ -72,17 +72,16 @@ export async function runRouteForCohere({
         };
     });
 
-    const systemPrompt = createChatSystemPrompt({
+    const systemMessages = createChatSystemPrompt({
         modelProvider: "cohere",
         domain,
-        date: new Date().toDateString(),
         documents: "",
         promptTemplate,
         availableTools: []
     });
 
     const documents = convertTpufRecordToCitation(searchResults);
-    const modelMessages: ModelMessage[] = messages
+    const userMessages: ModelMessage[] = messages
         .map((message: UIMessage) => {
             if (message.role === "user") {
                 return {
@@ -106,6 +105,8 @@ export async function runRouteForCohere({
         })
         .filter(isNonNullish) as ModelMessage[];
 
+    const modelMessages = [...systemMessages, ...userMessages];
+
     let timeToFirstToken: number | undefined = undefined;
     let responseText = "";
 
@@ -125,7 +126,6 @@ export async function runRouteForCohere({
 
             const result = streamText({
                 model: languageModel,
-                system: systemPrompt,
                 messages: modelMessages,
                 maxRetries: 3,
                 stopWhen: stepCountIs(10),

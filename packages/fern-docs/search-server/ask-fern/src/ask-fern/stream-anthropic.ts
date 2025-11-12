@@ -87,7 +87,7 @@ export async function runRouteForAnthropic({
         }
         cleanedMessages.push(message);
     }
-    const modelMessages: ModelMessage[] = convertToModelMessages(cleanedMessages);
+    let modelMessages: ModelMessage[] = convertToModelMessages(cleanedMessages);
 
     const start = Date.now();
 
@@ -104,7 +104,6 @@ export async function runRouteForAnthropic({
         userIsAuthed
     });
 
-    // If there's an auth error, return it immediately instead of passing through the LLM
     if (isAuthError(turbopufferResults)) {
         return turbopufferResults;
     }
@@ -129,14 +128,15 @@ export async function runRouteForAnthropic({
 
     const systemPromptDocuments = convertTpufRecordsToDocuments(searchResults);
 
-    const systemPrompt = createChatSystemPrompt({
+    const systemMessages = createChatSystemPrompt({
         modelProvider: "anthropic",
         domain,
-        date: new Date().toDateString(),
         documents: systemPromptDocuments.join("\n\n"),
         promptTemplate,
         availableTools: ["documentationSearch"]
     });
+
+    modelMessages = [...systemMessages, ...modelMessages];
 
     const documentIdsToIgnore: string[] = [];
     const urlsToIgnore: string[] = searchResultSources.map((source) => source.url);
@@ -167,7 +167,6 @@ export async function runRouteForAnthropic({
 
             const result = streamText({
                 model: languageModel,
-                system: systemPrompt,
                 messages: modelMessages,
                 maxRetries: 3,
                 stopWhen: stepCountIs(10),
