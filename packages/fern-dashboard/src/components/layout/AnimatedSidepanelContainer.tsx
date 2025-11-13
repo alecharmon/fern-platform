@@ -12,7 +12,8 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
     const [hasContent, setHasContent] = React.useState(false);
     // Initialize to true to avoid SSR/window access; update on mount
     const [isMobile, setIsMobile] = React.useState<boolean>(true);
-    const { clear } = useSidepanel();
+    const { clear, content } = useSidepanel();
+    const hasContextContent = content != null;
 
     const checkHasContent = React.useCallback(() => {
         const node = contentRef.current;
@@ -86,7 +87,7 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
     }, []);
 
     if (isMobile) {
-        const show = hasContent;
+        const show = hasContextContent || hasContent;
         return (
             <>
                 <div
@@ -119,11 +120,12 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
     }
 
     // Desktop/tablet: slide-out container with width transition
+    const show = hasContextContent || hasContent;
     return (
         <div
             ref={containerRef}
-            className={cn("sidepanel-container overflow-hidden transition-[width] duration-300", hasContent && "pr-2")}
-            style={{ width: hasContent ? "var(--sidepanel-max-width, 32rem)" : 0 }}
+            className={cn("sidepanel-container overflow-hidden transition-[width] duration-300", show && "pr-2")}
+            style={{ width: show ? "var(--sidepanel-max-width, 32rem)" : 0 }}
         >
             <div ref={contentRef} className="h-full w-full">
                 {children}

@@ -32,7 +32,7 @@ interface ConversationsCardProps {
     onBarClick?: (barIndex: number) => void;
     queries: FernAI.Query[];
     baseDocsUrl: string;
-    onSelectConversation: (conversation: FernAI.Conversation) => void;
+    onSelectConversation: (conversation: FernAI.Conversation | null) => void;
     selectedConversation: FernAI.Conversation | null;
     totalPages: number;
     currentPage: number;

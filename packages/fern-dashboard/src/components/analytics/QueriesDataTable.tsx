@@ -21,7 +21,7 @@ interface QueriesDataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     baseDocsUrl: string;
-    onSelectConversation: (conversation: FernAI.Conversation) => void;
+    onSelectConversation: (conversation: FernAI.Conversation | null) => void;
     selectedConversation: FernAI.Conversation | null;
     onExport: () => void;
     isExporting?: boolean;
@@ -46,11 +46,23 @@ export function QueriesDataTable<TData, TValue>({
 
     function onClickRow(row: Row<TData>) {
         return async () => {
-            const conversation = await getConversation({
-                domain: baseDocsUrl,
-                conversationId: (row.original as ConversationRow).conversation_id
-            });
-            onSelectConversation(conversation);
+            const convoId = (row.original as ConversationRow).conversation_id;
+            try {
+                onSelectConversation({
+                    conversation_id: convoId,
+                    created_at: (row.original as ConversationRow).created_at,
+                    turns: []
+                } as FernAI.Conversation);
+
+                const conversation = await getConversation({
+                    domain: baseDocsUrl,
+                    conversationId: convoId
+                });
+                onSelectConversation(conversation);
+            } catch (err) {
+                console.error("Failed to load conversation", { err, domain: baseDocsUrl, conversationId: convoId });
+                onSelectConversation(null);
+            }
         };
     }
 
