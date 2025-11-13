@@ -14,6 +14,7 @@ from fai.models.api.chat_api import (
     PostChatCompletionRequest,
     PostChatCompletionResponse,
 )
+from fai.models.enums.language_models import LanguageModel
 from fai.models.types.chat_types import ChatMessage
 from fai.models.utils.chat import format_record
 from fai.settings import LOGGER
@@ -21,7 +22,13 @@ from fai.utils.chat.response.anthropic import get_anthropic_response
 from fai.utils.chat.response.cohere import get_cohere_response
 from fai.utils.chat.retrieve.retrieve import retrieve
 
-SUPPORTED_MODELS = ["claude-4-sonnet-20250514", "command-a-03-2025"]
+SUPPORTED_COHERE_MODELS = [LanguageModel.command_a]
+SUPPORTED_ANTHROPIC_MODELS = [
+    LanguageModel.claude_haiku_4_5,
+    LanguageModel.claude_sonnet_4_5,
+    LanguageModel.claude_sonnet_4,
+]
+DEFAULT_MODEL = LanguageModel.claude_sonnet_4
 
 
 @fai_app.post(
@@ -43,17 +50,14 @@ async def post_chat_completion(
             rag_records.extend([format_record(result) for result in query_results])
 
         maybe_system_prompt = request.system_prompt
-        model = request.model or "claude-4-sonnet-20250514"
+        model = request.model or DEFAULT_MODEL
 
-        if model not in SUPPORTED_MODELS:
-            raise ValueError(f"Model {model} not supported")
-
-        if model == "command-a-03-2025":
+        if model in SUPPORTED_COHERE_MODELS:
             output_turns, citations = await get_cohere_response(
                 maybe_system_prompt, model, messages, domain, rag_records
             )
 
-        elif model == "claude-4-sonnet-20250514":
+        elif model in SUPPORTED_ANTHROPIC_MODELS:
             output_turns, citations = await get_anthropic_response(
                 maybe_system_prompt, model, messages, domain, rag_records
             )
