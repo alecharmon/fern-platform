@@ -45,7 +45,7 @@ function authSchemeToDisplay(auth: ApiDefinition.AuthScheme, lang: string): Auth
                     ? `Header authentication of the form \`${value.prefix} <token>\``
                     : t(lang).authTypes.apiKey),
             availability: undefined,
-            typeShorthand: value.prefix || "string"
+            typeShorthand: ""
         }),
         oAuth: (value) =>
             visitDiscriminatedUnion(value.value, "type")._visit({
@@ -139,7 +139,10 @@ export function PlaygroundCardTriggerManual({
         if (displays?.length === 1) {
             const display = displays[0];
             const needsQualifier = display?.name ? (nameCounts.get(display?.name) ?? 0) > 1 : false;
-            const label = needsQualifier ? `${display?.name} (${display?.typeShorthand})` : display?.name;
+            const label =
+                needsQualifier && display?.typeShorthand
+                    ? `${display?.name} (${display?.typeShorthand})`
+                    : display?.name;
 
             return {
                 type: "value" as const,
@@ -153,7 +156,10 @@ export function PlaygroundCardTriggerManual({
             <div key={entry.key} className="flex flex-col gap-0.5">
                 {displays?.map((display, i) => {
                     const needsQualifier = (nameCounts.get(display.name) || 0) > 1;
-                    const name = needsQualifier ? `${display.name} (${display.typeShorthand})` : display.name;
+                    const name =
+                        needsQualifier && display.typeShorthand
+                            ? `${display.name} (${display.typeShorthand})`
+                            : display.name;
                     return <div key={i}>{name}</div>;
                 })}
             </div>

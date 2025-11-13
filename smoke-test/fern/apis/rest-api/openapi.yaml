@@ -130,6 +130,8 @@ paths:
         - basicAuth: []
         - webhook_signature: []
         - api_key: []
+        - webhook_signature: []
+          api_key: []
       requestBody:
         description: Details of the plant to add
         required: true

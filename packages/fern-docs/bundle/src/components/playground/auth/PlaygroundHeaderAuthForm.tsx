@@ -17,6 +17,11 @@ export function getHeaderStorageKey(authKey: string, headerName: string): string
     return `${authKey}:${headerName}`;
 }
 
+function isGenericApiKeyLabel(nameOverride: string): boolean {
+    const normalized = nameOverride.toLowerCase().replace(/[\s_-]/g, "");
+    return normalized === "apikey";
+}
+
 function headerAtom(authKey: string, headerName: string) {
     const storageKey = getHeaderStorageKey(authKey, headerName);
     return atom(
@@ -73,10 +78,15 @@ export function PlaygroundHeaderAuthForm({
         useMemoOne(() => isHeaderResettableAtom(authKey, header.headerWireValue), [authKey, header.headerWireValue])
     );
 
+    const displayLabel =
+        header.nameOverride && !isGenericApiKeyLabel(header.nameOverride)
+            ? header.nameOverride
+            : header.headerWireValue;
+
     return (
         <li className="-mx-4 space-y-2 p-4">
             <label className="inline-flex flex-wrap items-baseline">
-                <span className="font-mono text-sm">{header.nameOverride ?? header.headerWireValue}</span>
+                <span className="font-mono text-sm">{displayLabel}</span>
             </label>
             <div>
                 <PasswordInputGroup
