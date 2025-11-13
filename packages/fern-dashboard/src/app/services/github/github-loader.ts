@@ -20,7 +20,7 @@ import { getOwnerAndRepoFromGithubUrl } from "./github";
 interface DocsYmlConfig {
     instances?: {
         url: string;
-        ["custom-domain"]?: string;
+        ["custom-domain"]?: string | string[];
     }[];
     products?: {
         path?: string;
@@ -179,18 +179,28 @@ export class GitHubLoader implements GitLoader {
 
             return config.instances
                 .filter(
-                    (instance): instance is { url: string } =>
+                    (instance): instance is { url: string; "custom-domain"?: string | string[] } =>
                         typeof instance === "object" &&
                         instance != null &&
                         "url" in instance &&
                         typeof instance.url === "string"
                 )
                 .flatMap((instance) => {
-                    if ("custom-domain" in instance && typeof instance["custom-domain"] === "string") {
-                        return [instance.url, instance["custom-domain"]];
+                    const urls: string[] = [instance.url];
+
+                    if ("custom-domain" in instance && instance["custom-domain"]) {
+                        const customDomain = instance["custom-domain"];
+
+                        // Handle both string and array formats
+                        if (typeof customDomain === "string") {
+                            urls.push(customDomain);
+                        } else if (Array.isArray(customDomain)) {
+                            // Filter out non-string values and add all custom domains
+                            urls.push(...customDomain.filter((domain): domain is string => typeof domain === "string"));
+                        }
                     }
 
-                    return [instance.url];
+                    return urls;
                 });
         } catch (error) {
             console.error("Failed to parse YAML content:", error);
