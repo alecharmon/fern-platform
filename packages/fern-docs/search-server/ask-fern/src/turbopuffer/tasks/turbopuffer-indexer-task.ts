@@ -76,10 +76,17 @@ export async function turbopufferUpsertTask({
     console.log("Vectorized turbopuffer records for domain: ", domain);
 
     if (deleteExisting) {
-        await ns.deleteAll();
+        try {
+            await ns.deleteAll();
+            console.log("Deleted existing records for domain: ", domain);
+        } catch (error) {
+            console.error(
+                "Skipping namespace deletion for domain: ",
+                domain,
+                error instanceof Error ? "error: " + error.message : "error: " + String(error)
+            );
+        }
     }
-
-    console.log("Deleted existing records for domain: ", domain);
 
     try {
         let i = 0;
