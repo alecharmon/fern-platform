@@ -376,8 +376,13 @@ export class NavigationStore {
     }
 
     /** Resolves initial page data from dependencies */
-    resolveInitialPageData(deps: PageDataDependencies): ResolvedPageData {
-        return resolvePageData(this._latestSnapshot, deps);
+    resolveInitialPageData(deps: PageDataDependencies): ResolvedPageData | null {
+        try {
+            return resolvePageData(this._latestSnapshot, deps);
+        } catch (error) {
+            console.error("[resolveInitialPageData] Failed to resolve initial page data:", error);
+            return null;
+        }
     }
 
     /** Ensures page entry exists in registry (creates or updates it) */

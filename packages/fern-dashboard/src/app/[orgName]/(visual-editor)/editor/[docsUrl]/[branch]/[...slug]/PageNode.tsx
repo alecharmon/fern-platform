@@ -9,12 +9,12 @@ import {
     useDerivedFoundNode,
     useNavigation
 } from "@fern-docs/components/navigation";
+import NotFoundContent from "@fern-docs/components/not-found/NotFoundContent";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { CSSProvider } from "@/components/editor/extension-custom-element/CSSContext";
-import { UnsupportedContent } from "@/components/editor/UnsupportedContent";
+import { UnsupportedContentDisplayOnly } from "@/components/editor/UnsupportedContent";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
-
 import PageContents from "./PageContents";
 
 export declare namespace PageNode {
@@ -39,18 +39,20 @@ export default function PageNode(props: PageNode.Props) {
 
     // Store initial page data in a ref so we don't re-resolve it on every render
     const initialPageDataRef = useRef<ResolvedPageData | null>(null);
+    const didRegisterPage = useRef(false);
+
     const { foundNode, hydrated } = useDerivedFoundNode({
         initialFoundNode: pageDataDeps ? initialPageDataRef.current?.foundNode : fallbackFoundNode,
         fallbackFoundNode,
         serializableRootNode
     });
 
-    const initialPageData =
-        hydrated && !initialPageDataRef.current
+    const initialPageData = useMemo(() => {
+        return hydrated && !initialPageDataRef.current
             ? (initialPageDataRef.current = resolveInitialPageData(pageDataDeps))
             : initialPageDataRef.current;
+    }, [hydrated, resolveInitialPageData, pageDataDeps]);
 
-    const didRegisterPage = useRef(false);
     useEffect(() => {
         if (didRegisterPage.current) {
             return;
@@ -63,9 +65,10 @@ export default function PageNode(props: PageNode.Props) {
         }
     }, [initialPageData, registerPage, setCurrentFilename]);
 
+    // Handle not found case
     if (!initialPageData || !foundNode) {
-        // TODO: show a loading state
-        return null;
+        console.error("[PageNode] Page was not able to be resolved:", { initialPageData, foundNode });
+        return <NotFoundContent lang="en" className="max-w-full not-prose -my-12" disableSuggestions />;
     }
 
     // foundNode from useDerivedFoundNode already includes fallbackFoundNode merge logic
@@ -73,11 +76,11 @@ export default function PageNode(props: PageNode.Props) {
 
     if (!SUPPORTED_NODE_TYPES.has(foundNode.node.type)) {
         return (
-            <UnsupportedContent>
+            <UnsupportedContentDisplayOnly>
                 This page type is not visible in Fern Editor: &ldquo;
                 {foundNode.node.type}
                 &rdquo;
-            </UnsupportedContent>
+            </UnsupportedContentDisplayOnly>
         );
     }
 

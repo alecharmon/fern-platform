@@ -62,13 +62,16 @@ export default function PageSidebar({
                 : initialPageDataRef.current;
 
         if (!initialPageData || !foundNode) {
-            // TODO: show a loading state
+            console.error("[PageSidebar] Initial page data was not able to be resolved:", {
+                initialPageData,
+                foundNode
+            });
             return null;
         }
     }
 
     if (!foundNode) {
-        // TODO: show a loading state or error
+        console.error("[PageSidebar] Found node was not able to be resolved:", { foundNode });
         return null;
     }
 
