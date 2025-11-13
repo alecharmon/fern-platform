@@ -6,8 +6,10 @@ import type {
     DocsYmlFilePath,
     NavigationSlug,
     NavigationSnapshot,
+    PageContainerWithTraversalContext,
     PageDataDependencies,
     ResolvedPageData,
+    RootLevelContainerWithTraversalContext,
     SectionAncestorMetadata,
     SectionNodeWithTraversalContext,
     SerializableFoundNode,
@@ -203,7 +205,7 @@ export function extractDocsYmlFilePathFromFoundNode(
 // ----------------------------------------------------------------------------
 
 /** Gets a flat list of all sections from a section node */
-export function getAllSectionsFromSectionNode(
+function getAllSectionsFromSectionNode(
     sectionNode: SectionNodeWithTraversalContext
 ): SectionNodeWithTraversalContext[] {
     const result: SectionNodeWithTraversalContext[] = [];
@@ -228,7 +230,7 @@ export function getAllSectionsFromSectionNode(
 }
 
 /** Gets a flat list of all sections from a sidebar root node */
-export function getAllSectionsFromSidebarRootNode(
+function getAllSectionsFromSidebarRootNode(
     sidebarRootNode: FernNavigation.SidebarRootNode
 ): SectionNodeWithTraversalContext[] {
     const result: SectionNodeWithTraversalContext[] = [];
@@ -283,6 +285,66 @@ export function getAllSectionsFromSidebarRootNode(
             result.push(...sections, ...sections.flatMap((section) => getAllSectionsFromSectionNode(section)));
         }
     }
+    return result;
+}
+
+/**
+ * Gets a flat list of all containers (sections + root-level containers) that can hold pages
+ * @param sidebarRootNode - The sidebar root node
+ * @param currentTabSlug - The slug of the current tab (used for root-level container slugs)
+ * @returns Array of both sections and root-level containers that can contain pages
+ */
+export function getAllPageContainersFromSidebarRootNode(
+    sidebarRootNode: FernNavigation.SidebarRootNode,
+    currentTabSlug?: string
+): PageContainerWithTraversalContext[] {
+    const result: PageContainerWithTraversalContext[] = [];
+
+    // First, get all sections using the existing function
+    const sections = getAllSectionsFromSidebarRootNode(sidebarRootNode);
+    result.push(...sections);
+
+    // Add exactly one root-level container representing "No section"
+    // This ensures the dropdown always shows exactly one "No section" option
+    const rootSectionPath: SectionAncestorMetadata[] = [
+        {
+            id: sidebarRootNode.id,
+            type: sidebarRootNode.type,
+            title: null
+        }
+    ];
+
+    // Find all sidebarGroups at the root level
+    const sidebarGroups = sidebarRootNode.children.filter((child) => child.type === "sidebarGroup");
+
+    // Use the last sidebarGroup if any exist (pages should append to the end)
+    // Otherwise, use the sidebarRoot itself as the target
+    const lastSidebarGroup = sidebarGroups[sidebarGroups.length - 1];
+    const targetId = lastSidebarGroup?.id ?? sidebarRootNode.id;
+    const targetType = lastSidebarGroup ? "sidebarGroup" : "sidebarRoot";
+    const targetChildren = lastSidebarGroup?.children ?? sidebarRootNode.children;
+
+    const rootContainer: RootLevelContainerWithTraversalContext = {
+        type: targetType,
+        id: targetId,
+        title: null,
+        slug: currentTabSlug || "", // Use the current tab slug as the base
+        sectionPath:
+            targetType === "sidebarGroup"
+                ? [
+                      ...rootSectionPath,
+                      {
+                          id: targetId,
+                          type: "sidebarGroup",
+                          title: null
+                      }
+                  ]
+                : rootSectionPath,
+        isRootLevel: true,
+        children: targetChildren
+    };
+    result.push(rootContainer);
+
     return result;
 }
 

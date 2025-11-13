@@ -66,6 +66,300 @@ describe("NavigationStore - rootNode management", () => {
         expect(store.rootNode).toEqual(rootNode);
     });
 
+    it("should insert root-level page at end of container in YAML", async () => {
+        // Create a navigation tree with:
+        // - sidebarRoot
+        //   - sidebarGroup (root-level container)
+        //     - page: Introduction
+        //   - apiReference: API Reference
+        const rootNode: FernNavigation.RootNode = {
+            type: "root",
+            id: "root" as FernNavigation.NodeId,
+            version: "v2",
+            title: "Root",
+            slug: "root" as FernNavigation.Slug,
+            canonicalSlug: undefined,
+            icon: undefined,
+            hidden: undefined,
+            authed: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            pointsTo: undefined,
+            roles: undefined,
+            child: {
+                type: "unversioned",
+                id: "unversioned" as FernNavigation.NodeId,
+                landingPage: undefined,
+                child: {
+                    type: "sidebarRoot",
+                    id: "sidebar-root" as FernNavigation.NodeId,
+                    children: [
+                        {
+                            type: "sidebarGroup",
+                            id: "sidebar-group-1" as FernNavigation.NodeId,
+                            children: [
+                                {
+                                    type: "page",
+                                    id: "intro-page-node" as FernNavigation.NodeId,
+                                    pageId: "pages/introduction.mdx" as FernNavigation.PageId,
+                                    title: "Introduction",
+                                    slug: "introduction" as FernNavigation.Slug,
+                                    canonicalSlug: undefined,
+                                    icon: undefined,
+                                    hidden: undefined,
+                                    authed: undefined,
+                                    viewers: undefined,
+                                    orphaned: undefined,
+                                    noindex: undefined,
+                                    featureFlags: undefined,
+                                    availability: undefined
+                                }
+                            ]
+                        },
+                        {
+                            type: "apiReference",
+                            id: "api-package-1" as FernNavigation.NodeId,
+                            title: "API Reference",
+                            slug: "api-reference" as FernNavigation.Slug,
+                            canonicalSlug: undefined,
+                            icon: undefined,
+                            hidden: undefined,
+                            authed: undefined,
+                            viewers: undefined,
+                            orphaned: undefined,
+                            featureFlags: undefined,
+                            availability: undefined,
+                            pointsTo: undefined,
+                            children: [],
+                            playground: undefined,
+                            apiDefinitionId: "api-def-1" as FernNavigation.ApiDefinitionId,
+                            overviewPageId: undefined,
+                            noindex: undefined,
+                            paginated: undefined,
+                            showErrors: undefined,
+                            hideTitle: undefined,
+                            changelog: undefined,
+                            postmanCollectionUrl: undefined
+                        }
+                    ]
+                }
+            }
+        };
+
+        const docsYmlContent = `navigation:
+  - page: Introduction
+    path: ./pages/introduction.mdx
+  - api: API Reference
+`;
+
+        store.setRootNode(rootNode);
+        await store.hydrate({
+            storage: _createNavigationMemoryStorage(),
+            latestDocsYmlAndReferences: new Map([["docs.yml", docsYmlContent]])
+        });
+
+        // Create a new page at root level (in the sidebarGroup)
+        const filename = "pages/new-page.mdx";
+        const initialMdx = "---\ntitle: New Page\nslug: new-page\n---\n\n# New Page";
+
+        const baseFoundNode: any = {
+            type: "found",
+            node: rootNode,
+            parents: [],
+            sidebar: rootNode.child.type === "unversioned" ? rootNode.child.child : undefined,
+            tabs: [],
+            currentTab: undefined,
+            currentVersion: undefined,
+            currentProduct: undefined,
+            currentVariant: undefined,
+            isCurrentVersionDefault: false,
+            isCurrentProductDefault: false
+        };
+
+        // Target section path points to the sidebarGroup (root-level container)
+        const targetSectionPath = [
+            {
+                id: "sidebar-root" as FernNavigation.NodeId,
+                type: "sidebarRoot" as const,
+                title: null
+            },
+            {
+                id: "sidebar-group-1" as FernNavigation.NodeId,
+                type: "sidebarGroup" as const,
+                title: null
+            }
+        ];
+
+        store.createClientPage(filename, {
+            source: "client",
+            filename,
+            initialMdx,
+            baseFoundNode,
+            targetSectionPath
+        });
+
+        // Get the generated YAML
+        const files = store.files;
+        const docsYmlUpdated = files.changed["docs.yml"];
+
+        expect(docsYmlUpdated).toBeDefined();
+        expect(docsYmlUpdated).toContain("New Page");
+
+        // The new page should appear at the end (after Introduction, before API Reference)
+        const introIndex = docsYmlUpdated!.indexOf("Introduction");
+        const newPageIndex = docsYmlUpdated!.indexOf("New Page");
+        const apiRefIndex = docsYmlUpdated!.indexOf("API Reference");
+
+        expect(introIndex).toBeLessThan(newPageIndex);
+        expect(newPageIndex).toBeLessThan(apiRefIndex);
+    });
+
+    it("should insert root-level page at end when API ref is child of sidebarGroup", async () => {
+        // When API Reference is a CHILD of the sidebarGroup (not a sibling),
+        // new pages should be appended to the end, after the API reference
+        const rootNode: FernNavigation.RootNode = {
+            type: "root",
+            id: "root" as FernNavigation.NodeId,
+            version: "v2",
+            title: "Root",
+            slug: "root" as FernNavigation.Slug,
+            canonicalSlug: undefined,
+            icon: undefined,
+            hidden: undefined,
+            authed: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            pointsTo: undefined,
+            roles: undefined,
+            child: {
+                type: "unversioned",
+                id: "unversioned" as FernNavigation.NodeId,
+                landingPage: undefined,
+                child: {
+                    type: "sidebarRoot",
+                    id: "sidebar-root" as FernNavigation.NodeId,
+                    children: [
+                        {
+                            type: "sidebarGroup",
+                            id: "sidebar-group-1" as FernNavigation.NodeId,
+                            children: [
+                                {
+                                    type: "page",
+                                    id: "intro-page-node" as FernNavigation.NodeId,
+                                    pageId: "pages/introduction.mdx" as FernNavigation.PageId,
+                                    title: "Introduction",
+                                    slug: "introduction" as FernNavigation.Slug,
+                                    canonicalSlug: undefined,
+                                    icon: undefined,
+                                    hidden: undefined,
+                                    authed: undefined,
+                                    viewers: undefined,
+                                    orphaned: undefined,
+                                    noindex: undefined,
+                                    featureFlags: undefined,
+                                    availability: undefined
+                                },
+                                {
+                                    type: "apiReference",
+                                    id: "api-package-1" as FernNavigation.NodeId,
+                                    title: "API Reference",
+                                    slug: "api-reference" as FernNavigation.Slug,
+                                    canonicalSlug: undefined,
+                                    icon: undefined,
+                                    hidden: undefined,
+                                    authed: undefined,
+                                    viewers: undefined,
+                                    orphaned: undefined,
+                                    featureFlags: undefined,
+                                    availability: undefined,
+                                    pointsTo: undefined,
+                                    children: [],
+                                    playground: undefined,
+                                    apiDefinitionId: "api-def-1" as FernNavigation.ApiDefinitionId,
+                                    overviewPageId: undefined,
+                                    noindex: undefined,
+                                    paginated: undefined,
+                                    showErrors: undefined,
+                                    hideTitle: undefined,
+                                    changelog: undefined,
+                                    postmanCollectionUrl: undefined
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        };
+
+        const docsYmlContent = `navigation:
+  - page: Introduction
+    path: ./pages/introduction.mdx
+  - api: API Reference
+`;
+
+        store.setRootNode(rootNode);
+        await store.hydrate({
+            storage: _createNavigationMemoryStorage(),
+            latestDocsYmlAndReferences: new Map([["docs.yml", docsYmlContent]])
+        });
+
+        // Create a new page at root level (in the sidebarGroup), which should go at the end
+        const filename = "pages/new-page.mdx";
+        const initialMdx = "---\ntitle: New Page\nslug: new-page\n---\n\n# New Page";
+
+        const baseFoundNode: any = {
+            type: "found",
+            node: rootNode,
+            parents: [],
+            sidebar: rootNode.child.type === "unversioned" ? rootNode.child.child : undefined,
+            tabs: [],
+            currentTab: undefined,
+            currentVersion: undefined,
+            currentProduct: undefined,
+            currentVariant: undefined,
+            isCurrentVersionDefault: false,
+            isCurrentProductDefault: false
+        };
+
+        const targetSectionPath = [
+            {
+                id: "sidebar-root" as FernNavigation.NodeId,
+                type: "sidebarRoot" as const,
+                title: null
+            },
+            {
+                id: "sidebar-group-1" as FernNavigation.NodeId,
+                type: "sidebarGroup" as const,
+                title: null
+            }
+        ];
+
+        store.createClientPage(filename, {
+            source: "client",
+            filename,
+            initialMdx,
+            baseFoundNode,
+            targetSectionPath
+        });
+
+        // Get the generated YAML
+        const files = store.files;
+        const docsYmlUpdated = files.changed["docs.yml"];
+
+        expect(docsYmlUpdated).toBeDefined();
+        expect(docsYmlUpdated).toContain("New Page");
+
+        // The new page should appear at the end (after Introduction and API Reference)
+        const introIndex = docsYmlUpdated!.indexOf("Introduction");
+        const apiRefIndex = docsYmlUpdated!.indexOf("API Reference");
+        const newPageIndex = docsYmlUpdated!.indexOf("New Page");
+
+        expect(introIndex).toBeLessThan(apiRefIndex);
+        expect(apiRefIndex).toBeLessThan(newPageIndex);
+    });
+
     it("should persist rootNode in snapshot", () => {
         const rootNode = createTestRootNode();
 

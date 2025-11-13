@@ -60,6 +60,26 @@ export interface SectionNodeWithTraversalContext extends FernNavigation.SectionN
     /** Path from sidebar root to target section node, including the target itself */
     sectionPath: SectionAncestorMetadata[];
 }
+
+/** Root-level container (sidebarGroup or sidebarRoot) with contextual metadata */
+export interface RootLevelContainerWithTraversalContext {
+    type: "sidebarGroup" | "sidebarRoot";
+    id: FernNavigation.NodeId;
+    title: null; // Root-level containers don't have titles
+    slug: string; // Derived from the current tab or context
+    /** Path from sidebar root to this container */
+    sectionPath: SectionAncestorMetadata[];
+    /** Marker to indicate this is a root-level container */
+    isRootLevel: true;
+    /** Children nodes from the original container (needed for duplicate slug validation) */
+    children: FernNavigation.NavigationChild[] | FernNavigation.SidebarRootChild[];
+}
+
+/** Union type representing both sections and root-level containers that can hold pages */
+export type PageContainerWithTraversalContext =
+    | SectionNodeWithTraversalContext
+    | RootLevelContainerWithTraversalContext;
+
 // PAGES
 // ----------------------------------------------------------------------------
 

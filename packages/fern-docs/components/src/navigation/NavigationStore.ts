@@ -1,5 +1,6 @@
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { type ChangedNodes, type Frontmatter, htmlToMdx, mdxToHtml } from "@fern-docs/mdx";
+import * as yaml from "js-yaml";
 import {
     computeStateHash,
     type FilenameToContent,
@@ -9,6 +10,8 @@ import {
 } from "./commitUtils";
 import { createNavigationBufferedIndexedDBStorage, type NavigationStorage } from "./NavigationStorage";
 import {
+    calculateInsertionIndex,
+    extractParentSectionId,
     findPageByPageId,
     findSectionById,
     findSectionTitleById,
@@ -390,7 +393,7 @@ export class NavigationStore {
         const existing = this._pageRegistry[pageData.filename];
 
         // Extract parent section ID from foundNode parents
-        const parentSectionId = this._extractParentSectionId(pageData.foundNode);
+        const parentSectionId = extractParentSectionId(pageData.foundNode);
 
         if (existing) {
             this._updatePageEntry(pageData.filename, {
@@ -464,8 +467,16 @@ export class NavigationStore {
         const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(deps.baseFoundNode, this._slugToDocsYmlFilePath);
 
         // Calculate insertion index from RootNode order before injecting
-        const insertionIndex =
-            this._rootNode && targetSectionId ? this._calculateInsertionIndex(targetSectionId) : undefined;
+        // Try stored rootNode first, fall back to live sidebar from baseFoundNode if rootNode is stale/unavailable
+        let insertionIndex: number | undefined = undefined;
+        if (this._rootNode && targetSectionId) {
+            insertionIndex = calculateInsertionIndex(this._rootNode, targetSectionId);
+        }
+
+        // If we couldn't find the container in rootNode (stale), fall back to live sidebar
+        if (insertionIndex === undefined && deps.baseFoundNode.sidebar && targetSectionId) {
+            insertionIndex = calculateInsertionIndex(deps.baseFoundNode.sidebar, targetSectionId);
+        }
 
         // Create a new Map to trigger React re-renders (useSyncExternalStore uses shallow comparison)
         this._navigationChanges = new Map(this._navigationChanges);
@@ -674,7 +685,7 @@ export class NavigationStore {
                 const pageId = (entry.pageData.foundNode.node as FernNavigation.PageNode).pageId;
                 const insertionIndex =
                     this._rootNode && entry.parentSectionId
-                        ? this._calculateInsertionIndex(entry.parentSectionId, pageId)
+                        ? calculateInsertionIndex(this._rootNode, entry.parentSectionId, pageId)
                         : undefined;
 
                 // Create a new Map to trigger React re-renders
@@ -951,16 +962,6 @@ export class NavigationStore {
         this._setStorageAndNotify();
     }
 
-    /** Extracts the parent section ID from a found node's parents */
-    private _extractParentSectionId(foundNode: SerializableFoundNode): FernNavigation.NodeId | undefined {
-        // Find the closest section parent in the parents array
-        const sectionParent = foundNode.parents
-            .slice()
-            .reverse()
-            .find((parent) => parent.type === "section");
-        return sectionParent?.id;
-    }
-
     /** Extracts the section title from the current rootNode by section ID (always returns current/renamed title) */
     private _extractSectionTitleFromRootNode(sectionId?: FernNavigation.NodeId): string | null {
         if (!sectionId || !this._rootNode) {
@@ -991,33 +992,50 @@ export class NavigationStore {
         return `./${absolutePath}`;
     }
 
-    /** Extracts the tab slug from found node */
+    /**
+     * Extracts the tab identifier from found node by looking it up in the docs.yml tabs configuration.
+     * The tab identifier is the KEY used in the tabs section of docs.yml (e.g., "guides", "API Reference")
+     */
     private _extractTabSlug(foundNode: SerializableFoundNode): string | undefined {
-        return foundNode.currentTab?.slug;
-    }
-
-    /** Calculates the insertion index for a new page within a section (appends after all children) */
-    private _calculateInsertionIndex(
-        sectionId: FernNavigation.NodeId,
-        excludePageId?: FernNavigation.PageId
-    ): number | undefined {
-        if (!this._rootNode) {
+        const currentTab = foundNode.currentTab;
+        if (!currentTab) {
             return undefined;
         }
 
-        const section = findSectionById(this._rootNode, sectionId);
-        if (!section) {
-            return undefined;
+        // The tab identifier must match the KEY from the tabs section in docs.yml.
+        // We need to look this up because the key can be either:
+        // - lowercase (e.g., "guides" for a tab with title "Guides")
+        // - match the title exactly (e.g., "API Reference" for a tab with title "API Reference")
+
+        // Try to find the tab identifier by looking at existing navigation items in docs.yml
+        if (this._docsYmlBaseContent) {
+            for (const [_, ymlContent] of this._docsYmlBaseContent) {
+                try {
+                    const parsed = yaml.load(ymlContent) as any;
+                    if (parsed?.navigation && Array.isArray(parsed.navigation)) {
+                        // Look for navigation items with matching tab slugs or titles
+                        for (const navItem of parsed.navigation) {
+                            if (navItem?.tab) {
+                                // Check if this tab's slug matches (for versioned paths like "platform/v-2/guides")
+                                // Extract the last segment from the current tab's slug
+                                const tabSlugSegment = currentTab.slug.split("/").pop();
+                                const navTabSegment = navItem.tab.split("/").pop();
+
+                                // If the slug segments match, this is our tab identifier
+                                if (tabSlugSegment === navTabSegment || navItem.tab === currentTab.title) {
+                                    return navItem.tab;
+                                }
+                            }
+                        }
+                    }
+                } catch {
+                    // Ignore parse errors and continue
+                }
+            }
         }
 
-        // Count all children, but exclude the specified page if it's already in the tree
-        // (This happens when unmarking a client page for deletion - it's still in rootNode)
-        if (excludePageId) {
-            return section.section.children.filter(
-                (child) => !(child.type === "page" && (child as FernNavigation.PageNode).pageId === excludePageId)
-            ).length;
-        }
-
-        return section.section.children.length;
+        // Fallback: If we can't find it in the YAML, use the slug's last segment
+        // This handles the case where the docs.yml hasn't been written yet
+        return currentTab.slug.split("/").pop() || currentTab.slug;
     }
 }

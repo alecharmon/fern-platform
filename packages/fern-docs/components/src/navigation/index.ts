@@ -11,7 +11,7 @@ export {
     createMdxFrontmatter,
     extractDocsYmlFilePathFromFoundNode,
     extractLiveSidebarFromRootNode,
-    getAllSectionsFromSidebarRootNode,
+    getAllPageContainersFromSidebarRootNode,
     getClientPageDefaultFilename
 } from "./pageUtils";
 export {
