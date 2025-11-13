@@ -42,8 +42,12 @@ export async function backfillSnippets(
         endpoints: await Promise.all(
             Object.entries(apiDefinition.endpoints).map(async ([id, endpoint]) => {
                 let dynamicGenerators: Record<string, any> = {};
-                if (dynamicIr) {
-                    dynamicGenerators = createSnippetGenerators({ endpoint, dynamicIr });
+                try {
+                    if (dynamicIr) {
+                        dynamicGenerators = createSnippetGenerators({ endpoint, dynamicIr });
+                    }
+                } catch (error) {
+                    console.log("[backfill] error creating dynamic snippet generators:", error);
                 }
 
                 return [
