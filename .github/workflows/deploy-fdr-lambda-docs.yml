@@ -1,0 +1,92 @@
+name: Deploy FDR Lambda Docs
+
+on:
+  push:
+    branches:
+      - app
+    paths:
+      - "servers/fdr-lambda-docs/**"
+      - ".github/workflows/deploy-fdr-lambda-docs.yml"
+
+env:
+  PACKAGE_NAME: "@fern-platform/fdr-lambda-docs"
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: "buildwithfern"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  deploy:
+    runs-on: Seed
+    environment: Fern Prod
+    strategy:
+      matrix:
+        concurrency: [1]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Has changed
+        id: has-changed
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/kenny/fdr-lambda-docs" ]]; then
+            echo "RESULT=true" >> $GITHUB_OUTPUT
+            echo "Deploying from kenny/fdr-lambda-docs branch - skipping turbo-ignore"
+          else
+            npx turbo-ignore ${{ env.PACKAGE_NAME }} || echo "RESULT=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Tests
+        if: steps.has-changed.outputs.RESULT == 'true'
+        run: |
+          pnpm --filter=${{ env.PACKAGE_NAME }} test
+
+      - name: Build Lambda
+        if: steps.has-changed.outputs.RESULT == 'true'
+        run: |
+          pnpm --filter=${{ env.PACKAGE_NAME }} build
+
+      - name: Package Lambda
+        if: steps.has-changed.outputs.RESULT == 'true'
+        run: |
+          pnpm --filter=${{ env.PACKAGE_NAME }} package
+
+      - name: Setup AWS CLI
+        if: steps.has-changed.outputs.RESULT == 'true'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to Lambda
+        if: steps.has-changed.outputs.RESULT == 'true'
+        run: |
+          cd servers/fdr-lambda-docs
+          aws lambda update-function-code \
+            --function-name fdr-lambda-docs \
+            --zip-file fileb://lambda.zip
+
+      - name: Wait for Lambda Update
+        if: steps.has-changed.outputs.RESULT == 'true'
+        run: |
+          aws lambda wait function-updated \
+            --function-name fdr-lambda-docs
+
+      - name: Update Environment Variables
+        if: steps.has-changed.outputs.RESULT == 'true'
+        run: |
+          aws lambda update-function-configuration \
+            --function-name fdr-lambda-docs \
+            --environment Variables={OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}}
+
+      - name: Output
+        if: steps.has-changed.outputs.RESULT == 'true'
+        run: |
+          echo "Lambda function 'fdr-lambda-docs' updated successfully"
+          FUNCTION_URL=$(aws lambda get-function-url-config --function-name fdr-lambda-docs --query 'FunctionUrl' --output text)
+          echo "Function URL: $FUNCTION_URL"

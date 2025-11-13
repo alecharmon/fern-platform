@@ -1,5 +1,5 @@
 {
-  "name": "@fern-platform/fdr-lambda",
+  "name": "@fern-platform/fdr-lambda-docs",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,29 +7,22 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist lambda.zip",
-    "deploy": "pnpm package && aws lambda update-function-code --function-name fdr-lambda --zip-file fileb://lambda.js",
+    "deploy:lambda": "pnpm package && aws lambda update-function-code --function-name fdr-lambda-docs --zip-file fileb://lambda.zip",
     "dev": "tsup --watch",
     "dev:server": "tsx src/dev-server.ts --watch",
-    "package": "pnpm build && cp dist/index.js lambda.js",
+    "package": "pnpm build && cd dist && zip -r ../lambda.zip . && cd ..",
     "test": "vitest --run --globals",
     "test:watch": "vitest --globals"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.744.0",
-    "@aws-sdk/s3-request-presigner": "^3.744.0",
-    "@fern-api/fdr-lambda-sdk": "workspace:*",
-    "@fern-api/fdr-sdk": "workspace:*",
-    "@fern-api/venus-api-sdk": "^0.19.5",
-    "@prisma/client": "5.13.0",
-    "@types/aws-lambda": "^8.10.143"
+    "@types/aws-lambda": "^8.10.143",
+    "openai": "6.8.1"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/express": "^5.0.0",
     "@types/node": "^22.0.0",
-    "@types/pg": "^8.11.0",
     "express": "^5.0.0",
-    "pg": "^8.11.3",
     "tsup": "catalog:",
     "tsx": "^4.7.1",
     "typescript": "catalog:",

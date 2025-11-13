@@ -1,0 +1,7 @@
+dist/
+node_modules/
+lambda.zip
+lambda.js
+*.log
+.env
+.env.local

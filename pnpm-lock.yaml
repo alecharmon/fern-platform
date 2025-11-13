@@ -3522,9 +3522,6 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.143
         version: 8.10.153
-      openai:
-        specifier: ^4.77.0
-        version: 4.104.0(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.49)
     devDependencies:
       '@fern-platform/configs':
         specifier: workspace:*
@@ -3558,6 +3555,71 @@ importers:
         version: 3.2.4(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.4.2)(jsdom@24.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(less@4.2.0)(lightningcss@1.30.1)(msw@2.10.3(@types/node@22.18.8)(typescript@5.7.3))(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.0)
 
   servers/fdr-lambda-deploy:
+    dependencies:
+      '@fern-fern/fern-cloud-sdk':
+        specifier: ^0.0.305
+        version: 0.0.305
+      aws-cdk-lib:
+        specifier: ^2.215.0
+        version: 2.215.0(constructs@10.3.0)
+      constructs:
+        specifier: ^10.3.0
+        version: 10.3.0
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+    devDependencies:
+      '@fern-platform/configs':
+        specifier: workspace:*
+        version: link:../../packages/configs
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.18.8
+      aws-cdk:
+        specifier: ^2.1029.1
+        version: 2.1029.1
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.2(@swc/core@1.13.5)(@types/node@22.18.8)(typescript@5.7.3)
+      typescript:
+        specifier: ^5
+        version: 5.7.3
+
+  servers/fdr-lambda-docs:
+    dependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.143
+        version: 8.10.153
+      openai:
+        specifier: 6.8.1
+        version: 6.8.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.49)
+    devDependencies:
+      '@fern-platform/configs':
+        specifier: workspace:*
+        version: link:../../packages/configs
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.3
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.18.8
+      express:
+        specifier: ^5.0.0
+        version: 5.1.0
+      tsup:
+        specifier: 'catalog:'
+        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+      tsx:
+        specifier: ^4.7.1
+        version: 4.20.6
+      typescript:
+        specifier: ^5
+        version: 5.7.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.18.8)(jiti@2.4.2)(jsdom@24.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(less@4.2.0)(lightningcss@1.30.1)(msw@2.10.3(@types/node@22.18.8)(typescript@5.7.3))(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.0)
+
+  servers/fdr-lambda-docs-deploy:
     dependencies:
       '@fern-fern/fern-cloud-sdk':
         specifier: ^0.0.305
@@ -15089,9 +15151,6 @@ packages:
       typescript: ^5
       webpack: 5.98.0
 
-  form-data-encoder@1.7.2:
-    resolution: {integrity: sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==}
-
   form-data@4.0.4:
     resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
     engines: {node: '>= 6'}
@@ -18038,12 +18097,12 @@ packages:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
     engines: {node: '>=12'}
 
-  openai@4.104.0:
-    resolution: {integrity: sha512-p99EFNsA/yX6UhVO93f5kJsDRLAg+CTA2RBqdHK4RtK8u5IJw32Hyb2dTGKbnnFmnuoBv5r7Z2CURI9sGZpSuA==}
+  openai@6.8.1:
+    resolution: {integrity: sha512-ACifslrVgf+maMz9vqwMP4+v9qvx5Yzssydizks8n+YUJ6YwUoxj51sKRQ8HYMfR6wgKLSIlaI108ZwCk+8yig==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
-      zod: ^3.23.8
+      zod: ^3.25 || ^4.0
     peerDependenciesMeta:
       ws:
         optional: true
@@ -38287,8 +38346,6 @@ snapshots:
       typescript: 5.7.3
       webpack: 5.98.0(@swc/core@1.13.5)(esbuild@0.25.9)
 
-  form-data-encoder@1.7.2: {}
-
   form-data@4.0.4:
     dependencies:
       asynckit: 0.4.0
@@ -42142,20 +42199,10 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openai@4.104.0(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.49):
-    dependencies:
-      '@types/node': 22.18.8
-      '@types/node-fetch': 2.6.9
-      abort-controller: 3.0.0
-      agentkeepalive: 4.6.0
-      form-data-encoder: 1.7.2
-      formdata-node: 4.4.1
-      node-fetch: 2.7.0
+  openai@6.8.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.49):
     optionalDependencies:
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       zod: 3.25.49
-    transitivePeerDependencies:
-      - encoding
 
   openapi-fetch@0.13.8:
     dependencies:
