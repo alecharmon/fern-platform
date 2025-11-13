@@ -5,6 +5,7 @@ export * from "./turbopuffer";
 export { createCohereSystemPrompt } from "./utils/cohere-system-prompt";
 export { createChatSystemPrompt } from "./utils/create-chat-system-prompt";
 export { getLanguageModel } from "./utils/get-model-from-config";
+export { measureAsync } from "./utils/measure-async";
 export {
     type Suggestions,
     SuggestionsSchema
