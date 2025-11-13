@@ -31,7 +31,17 @@ export const rehypeLang: Unified.Plugin<[{ loader: DocsLoader }?], Hast.Root> = 
     const loader = opts.loader;
 
     return async (ast: Hast.Root) => {
-        const promises: Promise<void>[] = [];
+        let lang: string | undefined;
+        try {
+            lang = await loader.getLanguage();
+        } catch (e) {
+            console.error("[rehype-lang] Error loading language", e);
+            return; // Exit early if we can't get the language
+        }
+
+        if (!lang) {
+            return; // No language to inject, exit early
+        }
 
         visit(ast, (node) => {
             if (!isMdxJsxElementHast(node)) {
@@ -40,27 +50,10 @@ export const rehypeLang: Unified.Plugin<[{ loader: DocsLoader }?], Hast.Root> = 
 
             // Check if this component should receive the lang prop
             if (node.name && COMPONENTS_WITH_LANG.includes(node.name as any)) {
-                promises.push(
-                    (async () => {
-                        try {
-                            const lang = await loader.getLanguage();
-
-                            if (lang) {
-                                node.attributes.push(unknownToMdxJsxAttribute("lang", lang));
-                            }
-                        } catch (e) {
-                            console.error(`[rehype-lang] Error loading language for ${node.name} component`, e);
-                        }
-                    })()
-                );
+                node.attributes.push(unknownToMdxJsxAttribute("lang", lang));
             }
 
             return CONTINUE;
         });
-
-        if (promises.length > 0) {
-            // wait for all promises to resolve before proceeding
-            await Promise.all(promises);
-        }
     };
 };

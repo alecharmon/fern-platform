@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         try {
             await batchQueue({
                 queueName: `domain-promoted.${VERCEL_DEPLOYMENT_ID}`,
-                parallelism: 5, // slow down the rate of requests to better balance the load on Vercel
+                parallelism: 10, // QStash plan has a queue parallelism limit of 10
                 endpoint: "/api/fern-docs/revalidate?reindex=false&fromDeploymentPromoted=true",
                 requests: metadatas.map((metadata) => ({
                     host: metadata.domain,
