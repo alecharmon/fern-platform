@@ -1,6 +1,6 @@
 import type { FacetFilter } from "@fern-docs/search-keyword";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
-
+import { measureAsync } from "../../utils/measure-async";
 import type { TurbopufferRecord } from "../types";
 import { buildQueryFilters } from "./query-filters";
 import { reciprocalRankFusion } from "./reciprocal-rank-fusion";
@@ -11,7 +11,21 @@ export interface TurbopufferAuthError {
     requiresAuth: true;
 }
 
+export interface TurbopufferQueryMetrics {
+    durationMs: number;
+    mode: "semantic" | "bm25" | "hybrid";
+    numResults: number;
+    semanticQueryDurationMs?: number;
+    bm25QueryDurationMs?: number;
+    embeddingDurationMs?: number;
+}
+
 export type TurbopufferQueryResult = TurbopufferRecord[] | TurbopufferAuthError;
+
+export interface TurbopufferQueryResultWithMetrics {
+    result: TurbopufferQueryResult;
+    metrics: TurbopufferQueryMetrics;
+}
 
 export function isAuthError(result: TurbopufferQueryResult): result is TurbopufferAuthError {
     return Array.isArray(result) === false && "error" in result && result.error === "unauthorized";
@@ -42,7 +56,9 @@ interface SemanticSearchOptions {
 
 export async function queryTurbopuffer(
     query: string,
-    {
+    options: SemanticSearchOptions
+): Promise<TurbopufferQueryResultWithMetrics> {
+    const {
         vectorizer,
         namespace,
         apiKey,
@@ -54,15 +70,15 @@ export async function queryTurbopuffer(
         urlsToIgnore = [],
         documentUrls,
         userIsAuthed
-    }: SemanticSearchOptions
-): Promise<TurbopufferQueryResult> {
+    } = options;
+
+    const startTime = Date.now();
+
     const tpuf = new Turbopuffer({
         apiKey,
         baseUrl: "https://gcp-us-east4.turbopuffer.com"
     });
     const ns = tpuf.namespace(namespace);
-
-    const vector = await vectorizer(query);
 
     const queryFilters = buildQueryFilters({
         filters: filters ?? [],
@@ -78,35 +94,61 @@ export async function queryTurbopuffer(
             filters: queryFilters,
             include_attributes: true
         });
-        return results as unknown as TurbopufferRecord[];
+        const resultArray = results as unknown as TurbopufferRecord[];
+        return {
+            result: resultArray,
+            metrics: {
+                durationMs: Date.now() - startTime,
+                mode,
+                numResults: results.length
+            }
+        };
     }
 
-    const semanticResults =
+    const [vector, embeddingDurationMs] = await measureAsync(() => vectorizer(query));
+
+    const [semanticResults, semanticQueryDurationMs] =
         mode !== "bm25"
-            ? await ns.query({
-                  vector,
-                  distance_metric: "cosine_distance",
-                  top_k: topK,
-                  include_attributes: true,
-                  filters: queryFilters
-              })
-            : [];
+            ? await measureAsync(() =>
+                  ns.query({
+                      vector,
+                      distance_metric: "cosine_distance",
+                      top_k: topK,
+                      include_attributes: true,
+                      filters: queryFilters
+                  })
+              )
+            : [[], undefined];
 
-    const bm25Results =
+    const [bm25Results, bm25QueryDurationMs] =
         mode !== "semantic" && query.length < 1024
-            ? await ns.query({
-                  top_k: topK,
-                  include_attributes: true,
-                  filters: queryFilters,
-                  rank_by: [
-                      "Sum",
-                      [
-                          ["title", "BM25", query],
-                          ["keywords", "BM25", query]
+            ? await measureAsync(() =>
+                  ns.query({
+                      top_k: topK,
+                      include_attributes: true,
+                      filters: queryFilters,
+                      rank_by: [
+                          "Sum",
+                          [
+                              ["title", "BM25", query],
+                              ["keywords", "BM25", query]
+                          ]
                       ]
-                  ]
-              })
-            : [];
+                  })
+              )
+            : [[], undefined];
 
-    return reciprocalRankFusion(semanticResults, bm25Results) as unknown as TurbopufferRecord[];
+    const result = reciprocalRankFusion(semanticResults, bm25Results) as unknown as TurbopufferRecord[];
+
+    return {
+        result,
+        metrics: {
+            durationMs: Date.now() - startTime,
+            mode,
+            numResults: result.length,
+            semanticQueryDurationMs,
+            bm25QueryDurationMs,
+            embeddingDurationMs
+        }
+    };
 }

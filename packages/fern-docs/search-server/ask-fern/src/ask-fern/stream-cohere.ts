@@ -33,7 +33,8 @@ export async function runRouteForCohere({
     turbopufferNamespace,
     languageModel,
     userIsAuthed,
-    skipSaveQuery
+    skipSaveQuery,
+    routeMetrics
 }: {
     domain: string;
     chatSource: string;
@@ -48,10 +49,17 @@ export async function runRouteForCohere({
     languageModel: LanguageModel;
     userIsAuthed: boolean;
     skipSaveQuery?: boolean;
+    routeMetrics?: {
+        authDurationMs: number;
+        loaderDurationMs: number;
+        settingsFetchDurationMs: number;
+        configLoadDurationMs: number;
+        queryCreationDurationMs: number;
+    };
 }): Promise<Response | TurbopufferAuthError> {
     const start = Date.now();
 
-    const searchResults = await runQueryTurbopuffer(lastUserMessage, {
+    const { result: searchResults, metrics: initialTurbopufferMetrics } = await runQueryTurbopuffer(lastUserMessage, {
         embeddingModel,
         namespace: turbopufferNamespace,
         topK: 3,
@@ -199,10 +207,19 @@ export async function runRouteForCohere({
                         languageModel: languageModel.valueOf().toString(),
                         embeddingModel: embeddingModel.valueOf().toString(),
                         durationMs: end - start,
+                        timeToFirstToken,
                         domain,
                         namespace: turbopufferNamespace,
                         numToolCalls: e.toolCalls.length,
                         finishReason: e.finishReason,
+                        numInitialSearchResults: searchResults.length,
+                        initialTurbopufferDurationMs: initialTurbopufferMetrics.durationMs,
+                        initialTurbopufferMode: initialTurbopufferMetrics.mode,
+                        initialTurbopufferNumResults: initialTurbopufferMetrics.numResults,
+                        initialTurbopufferSemanticDurationMs: initialTurbopufferMetrics.semanticQueryDurationMs,
+                        initialTurbopufferBm25DurationMs: initialTurbopufferMetrics.bm25QueryDurationMs,
+                        initialTurbopufferEmbeddingDurationMs: initialTurbopufferMetrics.embeddingDurationMs,
+                        ...(routeMetrics || {}),
                         ...e.usage
                     });
                     e.warnings?.forEach((warning) => {

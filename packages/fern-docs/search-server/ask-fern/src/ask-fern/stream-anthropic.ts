@@ -26,6 +26,7 @@ import {
     createChatSystemPrompt,
     isAuthError,
     type TurbopufferAuthError,
+    type TurbopufferQueryMetrics,
     type TurbopufferRecord
 } from "../index";
 import { estimateTokens, estimateTokensFromArray } from "../utils/estimate-tokens";
@@ -46,7 +47,8 @@ export async function runRouteForAnthropic({
     languageModel,
     documentUrls,
     userIsAuthed,
-    skipSaveQuery
+    skipSaveQuery,
+    routeMetrics
 }: {
     domain: string;
     chatSource: string;
@@ -62,6 +64,13 @@ export async function runRouteForAnthropic({
     documentUrls?: string[];
     userIsAuthed: boolean;
     skipSaveQuery?: boolean;
+    routeMetrics?: {
+        authDurationMs: number;
+        loaderDurationMs: number;
+        settingsFetchDurationMs: number;
+        configLoadDurationMs: number;
+        queryCreationDurationMs: number;
+    };
 }): Promise<Response | TurbopufferAuthError> {
     const faiClient = new FernAIClient({
         baseUrl: getFaiOrigin(),
@@ -94,15 +103,18 @@ export async function runRouteForAnthropic({
     const searchResultURLs = new Set<string>();
     const searchResults: TurbopufferRecord[] = [];
 
-    const turbopufferResults = await runQueryTurbopuffer(lastUserMessage, {
-        embeddingModel,
-        namespace: turbopufferNamespace,
-        topK: 3,
-        filters,
-        documentUrls,
-        explodedRoles,
-        userIsAuthed
-    });
+    const { result: turbopufferResults, metrics: initialTurbopufferMetrics } = await runQueryTurbopuffer(
+        lastUserMessage,
+        {
+            embeddingModel,
+            namespace: turbopufferNamespace,
+            topK: 3,
+            filters,
+            documentUrls,
+            explodedRoles,
+            userIsAuthed
+        }
+    );
 
     if (isAuthError(turbopufferResults)) {
         return turbopufferResults;
@@ -149,6 +161,8 @@ export async function runRouteForAnthropic({
         documentationSearch: 0
     };
 
+    const toolCallMetrics: TurbopufferQueryMetrics[] = [];
+
     const assistantQueryId = crypto.randomUUID();
 
     const uiMessageStream = createUIMessageStream({
@@ -185,7 +199,7 @@ export async function runRouteForAnthropic({
                             numToolCalls++;
                             const response = [];
                             for (let i = 0; i < MAX_QUERY_ATTEMPTS; i++) {
-                                const result = await runQueryTurbopuffer(query, {
+                                const { result, metrics } = await runQueryTurbopuffer(query, {
                                     embeddingModel,
                                     namespace: turbopufferNamespace,
                                     topK: TOP_K,
@@ -195,6 +209,8 @@ export async function runRouteForAnthropic({
                                     explodedRoles,
                                     userIsAuthed
                                 });
+
+                                toolCallMetrics.push(metrics);
 
                                 if (isAuthError(result)) {
                                     return [
@@ -292,6 +308,12 @@ export async function runRouteForAnthropic({
                         }
                     }
                     const { activeLanguageModel, activeModelProvider } = getModelUsageInfo(languageModel);
+
+                    const totalToolCallDurationMs = toolCallMetrics.reduce((sum, m) => sum + m.durationMs, 0);
+                    const totalToolCallResults = toolCallMetrics.reduce((sum, m) => sum + m.numResults, 0);
+                    const avgToolCallDurationMs =
+                        toolCallMetrics.length > 0 ? totalToolCallDurationMs / toolCallMetrics.length : 0;
+
                     track("ask_ai", {
                         languageModel: activeLanguageModel,
                         provider: activeModelProvider,
@@ -306,6 +328,17 @@ export async function runRouteForAnthropic({
                         estimatedToolCallResultTokens: toolCallResultTokens,
                         numInitialSearchResults: searchResults.length,
                         numDocumentationSearchResults: toolCallDocumentCounts.documentationSearch,
+                        initialTurbopufferDurationMs: initialTurbopufferMetrics.durationMs,
+                        initialTurbopufferMode: initialTurbopufferMetrics.mode,
+                        initialTurbopufferNumResults: initialTurbopufferMetrics.numResults,
+                        initialTurbopufferSemanticDurationMs: initialTurbopufferMetrics.semanticQueryDurationMs,
+                        initialTurbopufferBm25DurationMs: initialTurbopufferMetrics.bm25QueryDurationMs,
+                        initialTurbopufferEmbeddingDurationMs: initialTurbopufferMetrics.embeddingDurationMs,
+                        toolCallTurbopufferTotalDurationMs: totalToolCallDurationMs,
+                        toolCallTurbopufferAvgDurationMs: avgToolCallDurationMs,
+                        toolCallTurbopufferTotalResults: totalToolCallResults,
+                        numTurbopufferToolCalls: toolCallMetrics.length,
+                        ...(routeMetrics || {}),
                         ...e.usage
                     });
                     e.warnings?.forEach((warning) => {

@@ -3,7 +3,7 @@ import type { FacetFilter } from "@fern-docs/search-keyword";
 import type { EmbeddingModel } from "ai";
 import { embed } from "ai";
 
-import { isAuthError, queryTurbopuffer, type TurbopufferQueryResult } from "../turbopuffer";
+import { isAuthError, queryTurbopuffer, type TurbopufferQueryResultWithMetrics } from "../turbopuffer";
 import { TOP_K } from "./stream-constants";
 
 export async function runQueryTurbopuffer(
@@ -19,12 +19,19 @@ export async function runQueryTurbopuffer(
         explodedRoles: string[];
         userIsAuthed: boolean;
     }
-): Promise<TurbopufferQueryResult> {
+): Promise<TurbopufferQueryResultWithMetrics> {
     if (query == null || query.trimStart().length === 0) {
-        return [];
+        return {
+            result: [],
+            metrics: {
+                durationMs: 0,
+                mode: "hybrid",
+                numResults: 0
+            }
+        };
     }
 
-    const results = await queryTurbopuffer(query, {
+    const { result, metrics } = await queryTurbopuffer(query, {
         namespace: opts.namespace,
         apiKey: turbopufferApiKey(),
         topK: opts.topK ?? TOP_K,
@@ -43,12 +50,12 @@ export async function runQueryTurbopuffer(
         userIsAuthed: opts.userIsAuthed
     });
 
-    if (isAuthError(results)) {
-        return results;
+    if (isAuthError(result)) {
+        return { result, metrics };
     }
 
-    if (results.length === 0 && !opts.userIsAuthed) {
-        const publicContentCheck = await queryTurbopuffer(query, {
+    if (result.length === 0 && !opts.userIsAuthed) {
+        const { result: publicContentCheck } = await queryTurbopuffer(query, {
             namespace: opts.namespace,
             apiKey: turbopufferApiKey(),
             topK: 1,
@@ -61,18 +68,21 @@ export async function runQueryTurbopuffer(
             },
             filters: opts.filters,
             explodedRoles: opts.explodedRoles,
-            userIsAuthed: false // check for any public content where authed=false
+            userIsAuthed: false
         });
 
         if (!isAuthError(publicContentCheck) && publicContentCheck.length === 0) {
             return {
-                error: "unauthorized",
-                message:
-                    "Sorry, I cannot help you with that question because it requires authentication. Please log in.",
-                requiresAuth: true
+                result: {
+                    error: "unauthorized",
+                    message:
+                        "Sorry, I cannot help you with that question because it requires authentication. Please log in.",
+                    requiresAuth: true
+                },
+                metrics
             };
         }
     }
 
-    return results;
+    return { result, metrics };
 }

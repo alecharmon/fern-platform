@@ -10,6 +10,7 @@ import {
     getLanguageModel,
     getQueryIndexName,
     getTurbopufferNamespace,
+    measureAsync,
     runRouteForAnthropic,
     runRouteForCohere,
     type TurbopufferAuthError
@@ -35,8 +36,10 @@ export async function POST(req: NextRequest) {
     const host = req.nextUrl.host;
     const domain = getDocsDomainEdge(req);
 
-    const { getAuthState } = await createGetAuthStateEdge(req);
-    const authState = await getAuthState(req.nextUrl.pathname);
+    const [authState, authDurationMs] = await measureAsync(async () => {
+        const { getAuthState } = await createGetAuthStateEdge(req);
+        return getAuthState(req.nextUrl.pathname);
+    });
     // if (!authState.ok) {
     //     return NextResponse.json("Unauthorized", { status: 401 });
     // }
@@ -44,8 +47,11 @@ export async function POST(req: NextRequest) {
     const roles = authState.authed ? (authState.user.roles ?? []) : [];
     const explodedRoles = createDelimitedRolesetCombinations({ roleset: roles });
 
-    const loader = await createCachedDocsLoader(host, domain);
-    const metadata = await getDocsUrlMetadata(domain);
+    const [{ loader, metadata }, loaderDurationMs] = await measureAsync(async () => {
+        const loader = await createCachedDocsLoader(host, domain);
+        const metadata = await getDocsUrlMetadata(domain);
+        return { loader, metadata };
+    });
 
     if (metadata == null) {
         return NextResponse.json("Not found", { status: 404 });
@@ -62,7 +68,9 @@ export async function POST(req: NextRequest) {
         baseUrl: getFaiOrigin()
     });
 
-    const isAskAiEnabled = (await faiClient.settings.getDocsSettings({ domain })).ask_ai_enabled;
+    const [isAskAiEnabled, settingsFetchDurationMs] = await measureAsync(
+        async () => (await faiClient.settings.getDocsSettings({ domain })).ask_ai_enabled
+    );
 
     if (!isAskAiEnabled) {
         return NextResponse.json("Ask AI is not enabled for this domain", {
@@ -96,7 +104,8 @@ export async function POST(req: NextRequest) {
         });
     }
 
-    const config = await loader.getConfig();
+    const [config, configLoadDurationMs] = await measureAsync(() => loader.getConfig());
+
     const chatSource = source ?? "CHAT";
 
     const modelId = config.aiChatConfig?.model ?? "claude-3.5";
@@ -105,21 +114,25 @@ export async function POST(req: NextRequest) {
     const openai = createOpenAI({ apiKey: openaiApiKey() });
     const embeddingModel = openai.embedding("text-embedding-3-large");
 
+    let queryCreationDurationMs = 0;
     if (!skipSaveQuery) {
         try {
-            await faiClient.query.createQuery({
-                domain,
-                body: {
+            const [, duration] = await measureAsync(() =>
+                faiClient.query.createQuery({
                     domain,
-                    text: lastUserMessage,
-                    role: "USER",
-                    source: chatSource.toUpperCase(),
-                    created_at: createdAt.toISOString(),
-                    time_to_first_token: undefined,
-                    query_id: queryId,
-                    conversation_id: conversationId
-                }
-            });
+                    body: {
+                        domain,
+                        text: lastUserMessage,
+                        role: "USER",
+                        source: chatSource.toUpperCase(),
+                        created_at: createdAt.toISOString(),
+                        time_to_first_token: undefined,
+                        query_id: queryId,
+                        conversation_id: conversationId
+                    }
+                })
+            );
+            queryCreationDurationMs = duration;
         } catch (error) {
             console.error("Error creating query", error);
         }
@@ -127,6 +140,14 @@ export async function POST(req: NextRequest) {
 
     const queryIndexName = getQueryIndexName();
     let result: Response | TurbopufferAuthError;
+
+    const routeMetrics = {
+        authDurationMs,
+        loaderDurationMs,
+        settingsFetchDurationMs,
+        configLoadDurationMs,
+        queryCreationDurationMs
+    };
 
     if (modelProvider === "bedrock") {
         result = await runRouteForAnthropic({
@@ -143,7 +164,8 @@ export async function POST(req: NextRequest) {
             languageModel,
             documentUrls,
             userIsAuthed: authState.authed,
-            skipSaveQuery
+            skipSaveQuery,
+            routeMetrics
         });
     } else if (modelProvider === "cohere") {
         result = await runRouteForCohere({
@@ -159,7 +181,8 @@ export async function POST(req: NextRequest) {
             turbopufferNamespace: getTurbopufferNamespace(domain, queryIndexName),
             languageModel,
             userIsAuthed: authState.authed,
-            skipSaveQuery
+            skipSaveQuery,
+            routeMetrics
         });
     } else {
         return NextResponse.json(`Invalid model provider: ${modelProvider}`, {
