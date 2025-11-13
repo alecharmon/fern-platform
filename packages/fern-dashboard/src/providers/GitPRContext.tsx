@@ -68,6 +68,9 @@ export function GitPRProvider({
 
     const fetchPrFromBranch = useCallback(async () => {
         if (!owner || !repo || !branch) {
+            // Set loading to false and status to draft for missing params
+            setIsLoading(false);
+            setPrStatus("draft");
             return;
         }
 
@@ -107,10 +110,13 @@ export function GitPRProvider({
             }
         } catch (err) {
             if (err instanceof Error && err.message.includes("No associated PRs found")) {
+                console.debug("[fetchPrFromBranch] No associated PRs found for branch:", branch);
                 // If no PRs are found, we'll pretend it's a draft PR because the first commit will open a draft PR
                 setPrStatus("draft");
             } else {
-                console.error("Error fetching PR for branch:", err);
+                console.error("[fetchPrFromBranch] Error fetching PR for branch:", err);
+                // Fallback to draft status on any error to prevent infinite loading
+                setPrStatus("draft");
             }
         } finally {
             setIsLoading(false);
