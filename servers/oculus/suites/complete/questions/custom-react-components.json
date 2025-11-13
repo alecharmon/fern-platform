@@ -1,0 +1,12 @@
+{
+  "question": "How do I add custom React components to my Fern documentation?",
+  "ground_truth": "To add custom React components to Fern documentation, you need to: 1) Create a components folder with your React components in .ts, .tsx, .js or .mdx files, 2) Import and use the components in your Markdown guides, and 3) Specify the components directory in your docs.yml file under experimental.mdx-components. This feature is only available for Pro and Enterprise plans.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "custom-react-components",
+    "domain": "buildwithfern.com",
+    "cited_context": "You can extend Fern's built-in component library by adding your own custom React components. This allows you to create unique, interactive elements that match your documentation needs. Create a React component: Let's start by creating a components folder where you can define your react components. Note that the react components can be defined in .ts, .tsx, .js or .mdx files. Use the component in your docs: Once you've written the component, you can start leveraging it in your Markdown guides. Specify your components directory in docs.yml: Add your components directory to docs.yml so that the Fern CLI can scan your components directory and upload them to the server."
+  },
+  "criteria": null
+}

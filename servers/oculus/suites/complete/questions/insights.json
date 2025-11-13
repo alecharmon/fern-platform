@@ -1,0 +1,12 @@
+{
+  "question": "How do I access documentation insights and improvement recommendations from Fern?",
+  "ground_truth": "Fern provides insights by analyzing Ask Fern query patterns to identify documentation gaps and generate improvement suggestions. After collecting query data for a month, Fern processes query-response pairs through specialized models to extract common themes and provide actionable recommendations. This feature is currently in development and not generally available - you need to email support@buildwithfern.com to get started. Once available, insights are delivered as a monthly report directly by the Fern team.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "insights",
+    "domain": "buildwithfern.com",
+    "cited_context": "Fern analyzes Ask Fern query patterns to surface actionable recommendations for improving your documentation. After collecting sufficient query data over a month, Fern processes this through specialized models that analyze query-response pairs to identify documentation gaps, extract common themes, and generate specific suggestions for enhancing your docs. This feature is currently not yet generally available. Please email us at support@buildwithfern.com to get started. Insights are currently provided as a monthly report delivered directly by the Fern team."
+  },
+  "criteria": null
+}

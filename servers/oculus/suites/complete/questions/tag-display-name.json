@@ -1,0 +1,12 @@
+{
+  "question": "How can I customize the display names of tags in my API Reference documentation?",
+  "ground_truth": "You can customize tag display names in your API Reference using the `x-displayName` extension in your OpenAPI specification. This allows you to control how section names appear in your generated documentation, including capitalization and creating user-friendly names. You can set display names directly in your spec file or in an overrides file. For example, you can change a tag named \"task\" to display as \"Tasks\" or \"billing-and-payments\" to display as \"Billing and Payments\". Alternatively, you can rename sections directly in your `docs.yml` file.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "tag-display-name",
+    "domain": "buildwithfern.com",
+    "cited_context": "By default, tag names from your OpenAPI specification become section names in your API Reference. Use the `x-displayName` extension to control how these section names display in your generated documentation. This is helpful for controlling capitalization and creating user-friendly names. You can set display names directly in your spec or in an overrides file."
+  },
+  "criteria": null
+}

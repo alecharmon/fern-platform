@@ -1,0 +1,12 @@
+{
+  "question": "How can I override the default retry limit when making a specific request to get a movie in the TypeScript SDK?",
+  "ground_truth": "You can override the retry limit on a per-request basis by passing a maxRetries option in the request configuration. For example: client.movie.get(\"tt0111161\", { maxRetries: 3 }) will override the default retry limit to 3 for that specific request.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "retries-with-backoff",
+    "domain": "buildwithfern.com",
+    "cited_context": "It's also possible to override the retry limit on a per-request basis.\n\nTypeScript:\n```ts\nclient.movie.get(\"tt0111161\", {\n  maxRetries: 3 // overrides the default retry limit to 3\n});\n```"
+  },
+  "criteria": null
+}

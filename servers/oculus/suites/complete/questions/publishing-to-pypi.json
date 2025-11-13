@@ -1,0 +1,12 @@
+{
+  "question": "How do I configure the Python SDK generator to publish to PyPI instead of saving locally?",
+  "ground_truth": "To configure the Python SDK generator to publish to PyPI instead of saving locally, you need to change the output location in your generators.yml file from 'local-file-system' (the default) to 'pypi'. This tells Fern to publish your package directly to the PyPI registry.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-to-pypi",
+    "domain": "buildwithfern.com",
+    "cited_context": "In the `group` for your Python SDK, change the output location in from `local-file-system` (the default) to `pypi` to indicate that Fern should publish your package directly to the PyPi registry:\n\n```yaml title=\"generators.yml\" {{6-7}}\ngroups: \n  python-sdk:\n    generators:\n      - name: fernapi/fern-python-sdk\n        version: 4.36.1\n        output:\n          location: pypi\n```"
+  },
+  "criteria": null
+}

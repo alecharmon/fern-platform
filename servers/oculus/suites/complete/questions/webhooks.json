@@ -1,0 +1,12 @@
+{
+  "question": "How do I define the HTTP headers that will be sent with a webhook in Fern?",
+  "ground_truth": "In Fern, you define webhook headers by adding a `headers` section under your webhook definition. Each header is specified with its name as the key, and you must define its type (e.g., `type: string`). You can also add documentation for each header using the `docs` field. For example: `X-Signature-Primary: type: string docs: An HMAC signature of the payload`",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "webhooks",
+    "domain": "buildwithfern.com",
+    "cited_context": "Each webhook defines: 1. **Method**: The HTTP Method that the webhook will use (either `GET` or `POST`) 2. **Headers**: The headers that the webhook will send 3. **Payload**: The schema of the webhook payload. In the webhook definition example, headers are defined as: `headers: X-Signature-Primary: type: string docs: An HMAC signature of the payload`"
+  },
+  "criteria": null
+}

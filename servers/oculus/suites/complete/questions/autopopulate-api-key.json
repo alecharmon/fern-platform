@@ -1,0 +1,12 @@
+{
+  "question": "How can I enable automatic API key population in Fern's API Explorer for my users?",
+  "ground_truth": "You can enable automatic API key population in Fern's API Explorer using either JWT or OAuth authentication flows. With JWT, users authenticate through your system which sets a fern_token cookie containing their API key. With OAuth, Fern initiates an OAuth handshake with your provider to retrieve and populate the API key. This feature is only available for Pro and Enterprise plans.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "autopopulate-api-key",
+    "domain": "buildwithfern.com",
+    "cited_context": "Fern can integrate with your authentication flow, allowing users to login and have their API key automatically populated with the click of a button. API key injection can work in two different ways depending on your company's authentication setup: JWT or OAuth. JWT Flow: You handle the entire auth flow and just give Fern a JWT cookie. OAuth Flow: You give Fern access, and Fern directly initiates the OAuth handshake process. This feature is available only for the Pro and Enterprise plans."
+  },
+  "criteria": null
+}

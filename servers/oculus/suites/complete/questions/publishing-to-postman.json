@@ -1,0 +1,12 @@
+{
+  "question": "How can I configure Fern to publish my Postman collection directly to a Postman workspace instead of saving it locally?",
+  "ground_truth": "To publish your Postman collection directly to a Postman workspace instead of saving it locally, you need to change the output location in your generators.yml file from 'local-file-system' to 'postman'. This configuration tells Fern to publish your collection directly to Postman workspaces rather than generating it as a local file.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-to-postman",
+    "domain": "buildwithfern.com",
+    "cited_context": "In the `group` for your Postman collection, change the output location from `local-file-system` (the default) to `postman` to indicate that Fern should publish your collection directly to Postman:\n\n```yaml\ngroups: \n  postman: # Group name for your Postman collection\n    generators:\n      - name: fernapi/fern-postman\n        version: 0.4.2\n        output:\n          location: postman\n```"
+  },
+  "criteria": null
+}

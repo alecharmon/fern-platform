@@ -1,0 +1,12 @@
+{
+  "question": "How does Fern help reduce token consumption when AI bots access my documentation?",
+  "ground_truth": "When Fern detects an LLM bot accessing your documentation, it automatically serves Markdown instead of HTML, reducing token consumption by 90% or more.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "llms-txt",
+    "domain": "buildwithfern.com",
+    "cited_context": "When Fern detects an LLM bot accessing your documentation, it automatically serves Markdown instead of HTML, reducing token consumption by 90%+."
+  },
+  "criteria": null
+}

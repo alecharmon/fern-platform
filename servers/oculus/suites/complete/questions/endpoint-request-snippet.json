@@ -1,0 +1,12 @@
+{
+  "question": "How do I reference a specific example named \"ExampleWithMarkley\" when using the EndpointRequestSnippet component?",
+  "ground_truth": "To reference a specific example named \"ExampleWithMarkley\" when using the EndpointRequestSnippet component, use the example prop like this: `<EndpointRequestSnippet endpoint=\"PUT /pet\" example=\"ExampleWithMarkley\" />`. If the example includes a summary or docs field, use that for the example prop instead of the example name.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "endpoint-request-snippet",
+    "domain": "buildwithfern.com",
+    "cited_context": "### Directly reference the example\n\n```jsx Markdown {{3}}\n  <EndpointRequestSnippet \n    endpoint=\"PUT /pet\" \n    example=\"ExampleWithMarkley\"\n  />\n```\n\n<Note title=\"Referencing examples\">\n  If the example includes a `summary` or `docs` field, use that for the `example` prop. If not summary is set, use the example name. \n</Note>"
+  },
+  "criteria": null
+}

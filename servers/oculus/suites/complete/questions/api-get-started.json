@@ -1,0 +1,12 @@
+{
+  "question": "How do I authenticate requests to the Fern API?",
+  "ground_truth": "To authenticate requests to the Fern API, you need to use a bearer token. You can generate this token using the CLI command `fern token`. The tokens do not expire once generated.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "api-get-started",
+    "domain": "buildwithfern.com",
+    "cited_context": "Fern API requests require a bearer token for authentication. Use the CLI command [`fern token`](/learn/cli-api/cli-reference/commands#fern-token) to generate a bearer token. Tokens do not expire."
+  },
+  "criteria": null
+}

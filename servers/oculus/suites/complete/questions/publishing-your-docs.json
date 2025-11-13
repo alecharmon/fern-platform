@@ -1,0 +1,12 @@
+{
+  "question": "How do I automate the publishing of my documentation using GitHub Actions?",
+  "ground_truth": "To automate documentation publishing with GitHub Actions, you need to: 1) Generate a token using `fern token` command, 2) Add this token as a repository secret called `FERN_TOKEN`, and 3) Create a GitHub Actions workflow that runs on pushes to the main branch and executes `fern generate --docs` with the token as an environment variable.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-your-docs",
+    "domain": "buildwithfern.com",
+    "cited_context": "### Usage in GitHub Actions\nTo automate the publishing process, you can use a GitHub Action workflow to publish your docs when a push is made to the `main` branch. \n\n<Steps>\n<Step title=\"Generate token\">\n\nUse `fern token` to generate a token for authenticating the Fern CLI in CI/CD environments. The token is specific to your organization defined in [`fern.config.json`](/learn/sdks/overview/project-structure#fernconfigjson) and doesn't expire.\n\n<CodeBlock title=\"terminal\">\n```bash\nfern token\n```\n</CodeBlock>\n</Step>\n<Step title=\"Add token as a secret\">\nAdd the token as a [repository secret](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository) called `FERN_TOKEN`.\n</Step>\n<Step title=\"Create workflow\">\nCreate a Publish Docs workflow ([example](https://github.com/fern-api/docs/blob/main/.github/workflows/publish-docs.yml)), and reference the secret."
+  },
+  "criteria": null
+}

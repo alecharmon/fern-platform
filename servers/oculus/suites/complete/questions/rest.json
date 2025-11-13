@@ -1,0 +1,12 @@
+{
+  "question": "How do I add request and response examples to a REST endpoint in Fern?",
+  "ground_truth": "To add examples to a REST endpoint in Fern, use the `examples` key under the endpoint definition. Each example can include path parameters and response data. For instance, you can specify path-parameters and response body values that demonstrate how the endpoint should work.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "rest",
+    "domain": "buildwithfern.com",
+    "cited_context": "You can provide examples of requests and responses by using the `examples` key. The example shows a getUser endpoint with an examples section that includes path-parameters (userId: alice-user-id) and a response body containing userId: alice-user-id and name: Alice."
+  },
+  "criteria": null
+}

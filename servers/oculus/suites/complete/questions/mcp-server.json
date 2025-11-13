@@ -1,0 +1,12 @@
+{
+  "question": "How do I connect my Fern documentation's MCP server to Cursor?",
+  "ground_truth": "To connect your Fern documentation's MCP server to Cursor, go to the Page actions on any page of your documentation site and select \"Connect to Cursor\". When Cursor opens, the server URL will be automatically populated, and you can click \"Install\" to complete the connection.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "mcp-server",
+    "domain": "buildwithfern.com",
+    "cited_context": "To connect to your MCP server:\n\n<AccordionGroup>\n<Accordion title=\"Connect MCP server to Cursor\">\n\n1. Under the **Page actions** on any page on your site, select **Connect to Cursor**.\n1. When Cursor opens, the server URL will be automatically populated. Click **Install** to connect the MCP."
+  },
+  "criteria": null
+}

@@ -1,0 +1,12 @@
+{
+  "question": "What identity providers are supported for Fern's SSO integration?",
+  "ground_truth": "Fern supports SSO integration with any identity provider that implements SAML 2.0 (compatible with providers like Okta, OneLogin, Azure AD) and OIDC/OpenID Connect (works with Google Workspace, Auth0, and other OIDC-compliant providers).",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "sso",
+    "domain": "buildwithfern.com",
+    "cited_context": "## Supported identity providers\n\nFern supports SSO integration with any identity provider that implements industry-standard protocols:\n\n- **SAML 2.0**: Compatible with providers like Okta, OneLogin, Azure AD, and others\n- **OIDC (OpenID Connect)**: Works with Google Workspace, Auth0, and other OIDC-compliant providers"
+  },
+  "criteria": null
+}

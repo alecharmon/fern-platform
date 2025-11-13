@@ -1,0 +1,12 @@
+{
+  "question": "How do I generate SDKs for only a specific API when my project has multiple API definitions?",
+  "ground_truth": "Use the `--api` option with the `fern generate` command, specifying the API name that matches the directory name in your `fern/apis/` folder. For example: `fern generate --api payments-api` will generate SDKs for only the \"payments-api\".",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "global-options",
+    "domain": "buildwithfern.com",
+    "cited_context": "Use the `--api` option to target a specific API. This is particularly useful when your project contains multiple API definitions. The API name should match the directory name in your `fern/apis/` folder.\n\n```bash\n# Generate SDKs for only the \"payments-api\"\nfern generate --api payments-api\n```"
+  },
+  "criteria": null
+}

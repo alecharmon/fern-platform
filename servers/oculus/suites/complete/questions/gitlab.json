@@ -1,0 +1,12 @@
+{
+  "question": "How do I add a Fern token to my GitLab repository for hosting documentation?",
+  "ground_truth": "To add a Fern token to your GitLab repository, log into GitLab, navigate to your repository's Settings > CI/CD, scroll to the Variables section, select Expand > Add variable, add your key and value, deselect \"Protect variable\", and then click \"Save changes\".",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "gitlab",
+    "domain": "buildwithfern.com",
+    "cited_context": "## Add a token to GitLab\n<Steps>\n### Log in\nLog into [GitLab](https://gitlab.com/users/sign_in).\n### Navigate to CI/CD in settings\nClick on the **Settings** tab in your repository. Then, click on **CI/CD**. \n### Add variable\nScroll to the **Variables** section and select **Expand** > **Add variable**. Add your key and value, _deselect_ **Protect variable**, and then click **Save changes**. \n</Steps>"
+  },
+  "criteria": null
+}

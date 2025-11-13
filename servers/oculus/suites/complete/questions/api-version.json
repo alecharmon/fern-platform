@@ -1,0 +1,12 @@
+{
+  "question": "How do I configure API versioning with a custom header in my OpenAPI specification?",
+  "ground_truth": "You can configure API versioning using the `x-fern-version` extension in your OpenAPI specification. To set up a custom header like `X-API-Version`, define the version scheme under `x-fern-version` with the header name, default version, and list of supported versions. For example, you would specify `header: X-API-Version`, `default: \"2.0.0\"`, and list the available versions under the `values` field.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "api-version",
+    "domain": "buildwithfern.com",
+    "cited_context": "You can define your API version scheme, such as a `X-API-Version` header. The supported versions and default value are specified like so:\n\n```yaml title=\"openapi.yaml\"\nx-fern-version:\n  version:\n    header: X-API-Version\n    default: \"2.0.0\"\n    values:\n      - \"1.0.0\"\n      - \"2.0.0\"\n      - \"latest\"\npaths: ...\n```"
+  },
+  "criteria": null
+}

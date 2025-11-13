@@ -1,0 +1,12 @@
+{
+  "question": "How do I reference a specific example when using the EndpointResponseSnippet component?",
+  "ground_truth": "To reference a specific example when using the EndpointResponseSnippet component, you need to first set the example name in your API specification (either OpenAPI or Fern Definition), then use the 'example' attribute in the component with the example name. For instance: <EndpointResponseSnippet endpoint=\"GET /pet/{{petId}}\" example=\"ExampleWithMarkley\" />",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "endpoint-response-snippet",
+    "domain": "buildwithfern.com",
+    "cited_context": "### Directly reference the example\n\n```jsx Markdown {{3}}\n  <EndpointResponseSnippet \n    endpoint=\"GET /pet/{{petId}}\" \n    example=\"ExampleWithMarkley\"\n  />\n```"
+  },
+  "criteria": null
+}

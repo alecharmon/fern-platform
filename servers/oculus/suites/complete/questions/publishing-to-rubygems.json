@@ -1,0 +1,12 @@
+{
+  "question": "How do I configure the clientClassName option when publishing a Ruby SDK to RubyGems?",
+  "ground_truth": "The clientClassName option controls the name of the generated client that customers use to import your SDK. You configure it in the generators.yml file under the config section, and it must be in PascalCase format. For example: `clientClassName: YourClientName`.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-to-rubygems",
+    "domain": "buildwithfern.com",
+    "cited_context": "Configure `clientClassName`\n\nThe `clientClassName` option controls the name of the generated client. This is the name customers use to import your SDK (`import {{ your-client-name }} from 'your-package-name';`). \n\n```yaml {{9-10}}\ngroups: \n  ruby-sdk:\n    generators:\n      - name: fernapi/fern-ruby-sdk\n        version: 1.0.0-rc34\n        output:\n          location: rubygems\n          package-name: your-package-name\n        config:\n          clientClassName: YourClientName # must be PascalCase\n```"
+  },
+  "criteria": null
+}

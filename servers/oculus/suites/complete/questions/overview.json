@@ -1,0 +1,12 @@
+{
+  "question": "How do I configure header-based API versioning in the api.yml file?",
+  "ground_truth": "To configure header-based API versioning in the api.yml file, you need to add a version section that specifies the header name (like X-API-Version), the default version, and a list of supported version values.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "overview",
+    "domain": "buildwithfern.com",
+    "cited_context": "You can define your header-based API versioning scheme, such as an `X-API-Version`. The supported versions and default value are specified like so:\n\n```yaml\nversion:\n  header: X-API-Version\n  default: \"2.0.0\"\n  values:\n    - \"1.0.0\"\n    - \"2.0.0\"\n    - \"latest\"\n```"
+  },
+  "criteria": null
+}

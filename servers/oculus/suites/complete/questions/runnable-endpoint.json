@@ -1,0 +1,12 @@
+{
+  "question": "How do I specify which example to pre-fill in the RunnableEndpoint component form?",
+  "ground_truth": "You can pre-fill the form with a specific example by using the `example` property. Set it to the name of the example you want to use, like `<RunnableEndpoint endpoint=\"GET /api/users/{{id}}\" example=\"example-name\" />`. If not specified, the first example is used by default.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "runnable-endpoint",
+    "domain": "buildwithfern.com",
+    "cited_context": "Pre-fill the form with a specific example by name. If not specified, the first example is used by default."
+  },
+  "criteria": null
+}

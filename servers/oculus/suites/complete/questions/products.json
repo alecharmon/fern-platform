@@ -1,0 +1,12 @@
+{
+  "question": "How can I add versioning to a product in Fern's product switching feature?",
+  "ground_truth": "To add versioning to a product in Fern, create a `versions` folder inside the product folder. Each version has its own `.yml` file defining its navigation structure. In `docs.yml`, add a `versions` list to the product configuration with `display-name` and `path` for each version. The first version in the list becomes the default with unversioned paths, while others use versioned paths. You can optionally set availability status (deprecated, ga, stable, beta) for each version.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "products",
+    "domain": "buildwithfern.com",
+    "cited_context": "### Add versioning to your products\n\nYou can optionally add versions to your internal products. Versioned and unversioned products can live next to each other in your site. Versions are not supported for external products.\n\n<Note>For standalone versioning without products, see our [Versioning guide](/docs/configuration/versions).</Note>\n\nIn the below example, Product A is **unversioned** and Product B is **versioned**:\n\n<Steps>\n<Step title=\"Define your versions\">\nCreate a `versions` folder inside of folder of the product you want to version. \n\nEach version of a single product has its own `yml` file. To specify the contents of each version, add a `.yml` file to the `versions` folder to define the navigational structure of that version.\n</Step>\n<Step title=\"Add your version configuration\">\n\nDefine a version in the top-level `docs.yml` by adding an item to the `versions` list and specifying the `display-name` and `path`.\n\n<Note title=\"Default versions\">\n  Versions appear in the version dropdown in the order listed in `versions`. The first version in your `versions` list is your default version. This version uses unversioned paths like `/docs/getting-started`, while other versions use versioned paths like `/docs/getting-started/v2`.\n</Note>\n</Step>\n<Step title=\"Indicate availability\">\n\nYou can optionally set the availability status for each version. Options are `deprecated`, `ga`, `stable`, and `beta`.\n</Step>\n</Steps>"
+  },
+  "criteria": null
+}

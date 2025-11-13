@@ -1,0 +1,12 @@
+{
+  "question": "How can I preview my documentation changes locally using Fern?",
+  "ground_truth": "To preview documentation changes locally using Fern, first install the Fern CLI using npm (npm i -g fern-api) or yarn (yarn global add fern-api). Then navigate to the docs directory where the fern folder is located and run the command 'fern docs dev'. This will start a local preview server at http://localhost:3000. You can also use a custom port by adding the --port flag, such as 'fern docs dev --port 3002'.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "preview-changes-locally",
+    "domain": "buildwithfern.com",
+    "cited_context": "Fern enables you to view changes to your documentation in a locally hosted environment. Follow these steps to install and run the Fern CLI: **Step 1**: Install the Fern CLI: npm i -g fern-api or yarn global add fern-api. **Step 2**: Navigate to the docs directory (where the `fern` folder is located) and execute the following command: fern docs dev. A local preview of your documentation will be available at `http://localhost:3000`. By default, Fern uses port 3000. You can customize the port on which Fern runs by using the `--port` flag. For example, to run Fern on port 3002, use this command: fern docs dev --port 3002."
+  },
+  "criteria": null
+}

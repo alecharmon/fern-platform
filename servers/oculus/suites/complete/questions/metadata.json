@@ -1,0 +1,12 @@
+{
+  "question": "How do I prevent a specific documentation page from being indexed by search engines?",
+  "ground_truth": "To prevent a specific documentation page from being indexed by search engines, set the `noindex` property to `true` in the page's frontmatter. This will tell search engines not to index that particular page.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "metadata",
+    "domain": "buildwithfern.com",
+    "cited_context": "Configure SEO metadata in your page's frontmatter to control how individual pages appear in search results and social media shares. These settings override site-wide settings.\n\nnoindex: If set to `true`, the page will not be indexed by search engines."
+  },
+  "criteria": null
+}

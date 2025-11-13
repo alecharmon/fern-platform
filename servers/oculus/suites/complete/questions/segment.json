@@ -1,0 +1,12 @@
+{
+  "question": "How do I add Segment analytics tracking to my Fern Docs?",
+  "ground_truth": "To add Segment analytics to Fern Docs, you need to add your Segment writeKey to the docs.yml file. First, get your writeKey from your Segment account by going to your workspace, selecting the source you want to track, clicking on the Settings tab, and copying the Write Key from the API Keys section. Then, add it to your docs.yml file under the analytics section with the format: analytics: segment: write-key: ${{SEGMENT_WRITE_KEY}}.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "segment",
+    "domain": "buildwithfern.com",
+    "cited_context": "To add Segment to your Docs, you need to add the Segment writeKey to your `docs.yml` file. In your `docs.yml` file, add the Segment writeKey: ```yaml analytics: segment: write-key: ${{SEGMENT_WRITE_KEY}} # scans environment variable ```"
+  },
+  "criteria": null
+}

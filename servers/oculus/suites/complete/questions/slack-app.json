@@ -1,0 +1,12 @@
+{
+  "question": "How do I install the Ask Fern Slack app in my organization's workspace?",
+  "ground_truth": "To install the Ask Fern Slack app, you must be a Slack admin. First, get your unique install link using the API explorer or cURL request with your Fern token and domain. Then follow the install URL to authorize the app in Slack by selecting your workspace and clicking Allow. Finally, add the bot to your customer channels where you want it to respond to questions.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "slack-app",
+    "domain": "buildwithfern.com",
+    "cited_context": "To install Ask Fern in your organization's Slack workspace, you must be a Slack admin. Use the API explorer to get a unique Slack installation link for your organization. Provide: Your Fern token, Your domain without protocol or path. You can alternatively use this cURL request: curl -G https://fai.buildwithfern.com/slack/get-install -H \"Authorization: Bearer <YOUR_FERN_TOKEN>\" --data-urlencode domain=<YOUR_DOMAIN>. Follow the URL returned in the install_url response field. You'll be redirected to Slack to authorize the Ask Fern app. Select the workspace where you want to add Ask Fern and click Allow. Once you've installed it in your workspace, add the bot to customer Slack channels to give it access."
+  },
+  "criteria": null
+}

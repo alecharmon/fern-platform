@@ -1,0 +1,12 @@
+{
+  "question": "How can I control which languages appear in the HTTP snippet selector?",
+  "ground_truth": "To control which languages appear in the HTTP snippet selector, use the `settings.http-snippets` configuration in your `docs.yml` file. You can either disable all HTTP snippets except curl by setting it to `false`, or enable specific languages by providing a list of language names like `python` and `ruby`.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "http-snippets",
+    "domain": "buildwithfern.com",
+    "cited_context": "All documentation sites include HTTP snippets by default. To control which languages appear in the HTTP snippet selector, use the `settings.http-snippets` configuration in your `docs.yml` file.\n\n```yaml\n# Disable all HTTP snippets except curl\nsettings:\n  http-snippets: false\n\n# Enable only specific languages (in addition to curl)\nsettings:\n  http-snippets:\n    - python\n    - ruby\n```"
+  },
+  "criteria": null
+}

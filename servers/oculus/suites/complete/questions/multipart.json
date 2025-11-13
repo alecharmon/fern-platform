@@ -1,0 +1,12 @@
+{
+  "question": "How do I define an endpoint that accepts multiple file uploads in Fern?",
+  "ground_truth": "To define an endpoint that accepts multiple file uploads in Fern, you need to specify the request body property as `list<file>`. In your endpoint definition, set the body properties to include a field with type `list<file>`, such as `files: list<file>`. This indicates that the endpoint supports uploading multiple files in a single multipart request.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "multipart",
+    "domain": "buildwithfern.com",
+    "cited_context": "If your endpoint supports a list of files, then your request body must indicate such. In the endpoint definition, set the body properties to include `files: list<file>` to support multiple file uploads."
+  },
+  "criteria": null
+}

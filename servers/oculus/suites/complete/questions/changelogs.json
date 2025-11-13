@@ -1,0 +1,12 @@
+{
+  "question": "How do I create a changelog entry with tags in my documentation?",
+  "ground_truth": "To create a changelog entry with tags, create a Markdown file (.md or .mdx) in your changelog folder with a date-based filename (e.g., 2024-07-31.mdx). Add tags in the frontmatter as an array of strings like this: ---tags: [\"plants-api\", \"breaking-change\", \"inventory-management\"]---. The tags help users filter and find relevant updates in your changelog.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "changelogs",
+    "domain": "buildwithfern.com",
+    "cited_context": "Create a new changelog entry by writing a Markdown file. You can use `.md` or `.mdx` files. The benefit of using `.mdx` is that you can leverage the built-in component library within an entry.\n\n```mdx\n---\ntags: [\"plants-api\", \"breaking-change\", \"inventory-management\"]\n---\n\n## Summary\n\nIn the latest release, we've added endpoints to create a new Plant.\n```\n\nAdd tags to changelog entries to help users filter and find relevant updates. Tags are defined in the frontmatter of your changelog entry as an array of strings:\n\n```mdx\n---\ntags: [\"plants-api\", \"breaking-change\", \"inventory-management\"]\n---\n```"
+  },
+  "criteria": null
+}

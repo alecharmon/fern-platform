@@ -1,0 +1,12 @@
+{
+  "question": "How do I configure OIDC authentication for publishing my TypeScript SDK to npm?",
+  "ground_truth": "To configure OIDC authentication for publishing your TypeScript SDK to npm, you need to: 1) Add `token: OIDC` to the `output` section in your generators.yml file, 2) Generate your SDK to create the GitHub Actions workflow with OIDC configuration, and 3) Authorize your repository on npmjs.com by adding a trusted publisher with your GitHub repository details and workflow filename (ci.yml).",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-to-npm",
+    "domain": "buildwithfern.com",
+    "cited_context": "OIDC-based publishing (also known as \"trusted publishing\") is the most secure way to publish. With OIDC, you don't need to manage authentication tokens - npmjs trusts your GitHub repository to publish directly.\n\n<Steps>\n\t<Step title=\"Add OIDC to generators.yml\">\n\n\tAdd `token: OIDC` to the `output` section:\n\n\t```yaml title=\"generators.yml\" {{9}}\n\tgroups:\n\t  ts-sdk:\n\t\tgenerators:\n\t\t  - name: fernapi/fern-typescript-sdk\n\t\t\tversion: 3.29.0  # Must be 3.12.3 or later\n\t\t\toutput:\n\t\t\t  location: npm\n\t\t\t  package-name: your-package-name\n\t\t\t  token: OIDC\n\t\tconfig:\n\t\t  namespaceExport: YourClientName\n\t\tgithub:\n\t\t  repository: your-org/your-repository\n\t\t  mode: push\n\t\t  branch: your-branch-name\n\t```\n\n\t</Step>\n\n\t<Step title=\"Generate your SDK\">\n\n\tGenerate your SDK to create the GitHub Actions workflow with OIDC configuration:\n\n\t```bash\n\tfern generate --group ts-sdk\n\t```\n\n\tThis creates a `.github/workflows/ci.yml` file that's configured to use OIDC for npmjs publishing.\n\n\t</Step>\n\n\t<Step title=\"Authorize your repository on npmjs.com\">\n\n\tConfigure trusted publishing on npmjs.com to allow your GitHub repository to publish:\n\n\t1. Navigate to your package settings on npmjs.com\n\t1. Find the **Trusted Publisher** section and click **Add trusted publisher**\n\t1. Select **GitHub Actions** as your provider\n\t1. Fill in:\n\t\t- **Organization or user**: Your GitHub username or organization\n\t\t- **Repository**: Your TypeScript SDK repository name (e.g., `your-org/your-repository`)\n\t\t- **Workflow filename**: `ci.yml`\n\t\t- **Environment name**: Leave blank\n\n\t</Step>\n</Steps>"
+  },
+  "criteria": null
+}

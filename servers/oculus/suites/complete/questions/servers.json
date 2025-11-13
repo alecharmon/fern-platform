@@ -1,0 +1,12 @@
+{
+  "question": "How can I configure a gRPC server to use TLS with mutual authentication in production?",
+  "ground_truth": "To configure a gRPC server with TLS and mutual authentication, you need to load TLS certificates (private key, certificate chain, and root certificates), create server credentials using `ssl_server_credentials()` with `require_client_auth=True` for mutual TLS, create the server with a thread pool executor, add your services to the server, and then add a secure port using `server.add_secure_port()` with the credentials. The server will listen on the specified secure port (typically 443) and require clients to present valid certificates for authentication.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "servers",
+    "domain": "buildwithfern.com",
+    "cited_context": "Configure TLS for secure production deployments:\n\n```python title=\"secure_server.py\"\nimport grpc\nfrom grpc import ssl_server_credentials\n\ndef create_secure_server():\n    # Load TLS certificates\n    with open('server-key.pem', 'rb') as f:\n        private_key = f.read()\n    with open('server-cert.pem', 'rb') as f:\n        certificate_chain = f.read()\n    with open('ca-cert.pem', 'rb') as f:\n        root_certificates = f.read()\n    \n    # Create server credentials\n    server_credentials = ssl_server_credentials(\n        [(private_key, certificate_chain)],\n        root_certificates=root_certificates,\n        require_client_auth=True  # Mutual TLS\n    )\n    \n    server = grpc.server(futures.ThreadPoolExecutor(max_workers=50))\n    \n    # Add services\n    user_service_pb2_grpc.add_UserServiceServicer_to_server(\n        UserServiceServicer(), server\n    )\n    \n    # Listen on secure port\n    server.add_secure_port('[::]:443', server_credentials)\n    \n    return server\n```"
+  },
+  "criteria": null
+}

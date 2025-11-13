@@ -1,0 +1,12 @@
+{
+  "question": "How do I enable Ask Fern in both my documentation and Slack?",
+  "ground_truth": "To enable Ask Fern in both your documentation and Slack, add the `ai-search` configuration to your `docs.yml` file with both `docs` and `slack` in the location list:\n\n```yaml\nai-search:\n  location:\n    - docs\n    - slack\n```\n\nAfter enabling, Ask Fern needs to index your content before the side panel appears on your site, which typically takes a few minutes.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "setup",
+    "domain": "buildwithfern.com",
+    "cited_context": "Enable Ask Fern by adding the `ai-search` configuration to your `docs.yml` file:\n\n```yaml docs.yml\nai-search:\n  location:\n    - docs\n    - slack\n```\n\nAfter you enable Ask Fern, it needs to index your content before the side panel can appear on your site. This typically takes a few minutes, though sites with extensive custom components may take longer.\n\nSpecifies where Ask Fern will be available. Options: \n- `docs` enables Ask Fern on your documentation site\n- `slack` enables Ask Fern in Slack\n- `discord` enables Ask Fern in Discord\n\nMost users should enable Ask Fern for both `docs` and either `slack` or `discord`."
+  },
+  "criteria": null
+}

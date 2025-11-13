@@ -1,0 +1,12 @@
+{
+  "question": "How can I install Fern CLI locally as a project dependency instead of globally?",
+  "ground_truth": "To install Fern CLI locally as a project dependency, run `npm install fern-api` to add it to your project dependencies, then update your `fern.config.json` file to set the version to `*` to use the locally installed version, and run Fern commands through your package manager using `npm fern` followed by the command (e.g., `npm fern check`, `npm fern generate`).",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "cli-get-started",
+    "domain": "buildwithfern.com",
+    "cited_context": "If you're experiencing network delays with the global installation, working in an environment with limited internet connectivity, or prefer to manage Fern as a project dependency, you can install the CLI locally:\n\nAdd `fern-api` to your project dependencies:\n\n```bash\nnpm install fern-api\n```\n\nIn your `fern.config.json`, set the version to `*` to use your locally installed version:\n\n```json fern.config.json\n{\n  \"organization\": \"your-org\",\n  \"version\": \"*\"\n}\n```\n\nUse your package manager to run Fern commands:\n\n```bash\nnpm fern check        # Validate API definition\nnpm fern --version    # Check CLI version\nnpm fern generate     # Generate outputs\n```"
+  },
+  "criteria": null
+}

@@ -1,0 +1,12 @@
+{
+  "question": "How do I create a direct link to a table in my documentation?",
+  "ground_truth": "To create a direct link to a table, wrap the table with the `<Anchor>` tag and assign it a custom anchor ID. For example, `<Anchor id=\"api-endpoints\">` followed by your table content and closing `</Anchor>` tag. You can then link to it using the hash symbol in URLs like `#api-endpoints`.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "anchor",
+    "domain": "buildwithfern.com",
+    "cited_context": "The `<Anchor>` component creates direct links to specific content like paragraphs, tables, and code blocks. Wrap your content with the `<Anchor>` tag and assign it a custom anchor ID, which you can link to in URLs using the hash symbol. Example: `<Anchor id=\"api-endpoints\">` followed by table content and `</Anchor>`. You can link directly to the [API endpoints table](#api-endpoints)."
+  },
+  "criteria": null
+}

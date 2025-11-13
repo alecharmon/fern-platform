@@ -1,0 +1,12 @@
+{
+  "question": "How do I add an API Reference to my Fern documentation?",
+  "ground_truth": "To add an API Reference to your Fern documentation, run `fern init --openapi /path/to/openapi.yml` to create an `openapi.yml` file in your project, then reference it in your `docs.yml` file by adding `- api: \"API Reference\"` under the navigation section.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "quickstart",
+    "domain": "buildwithfern.com",
+    "cited_context": "Add an API Reference by adding an OpenAPI Specification to your project. `fern init --openapi /path/to/openapi.yml` This will create an `openapi.yml` file in your project. You can reference this file in your `docs.yml` file by adding an api block. `navigation: - api: \"API Reference\"`"
+  },
+  "criteria": null
+}

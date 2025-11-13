@@ -1,0 +1,12 @@
+{
+  "question": "How do I set up automated documentation updates when a new release is created in my feature repository?",
+  "ground_truth": "To set up automated documentation updates, you need to configure two GitHub Actions workflows. First, add a notify-docs-repo.yml workflow to your feature repository that triggers on release creation and sends a notification to your documentation repository using the GitHub API. Second, add an auto-merge-on-release.yml workflow to your documentation repository that listens for the notification and automatically merges approved PRs with matching dependency labels when the corresponding feature is released.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "orchestrate-docs-releases",
+    "domain": "buildwithfern.com",
+    "cited_context": "Fern Docs supports orchestrating documentation releases based on releases from other repositories. This requires two GitHub Actions: one in the feature repository and one in the documentation repository. Add this GitHub Action workflow to the repository where features are released. When a new release is created with the specified tag pattern, this workflow will send a notification to your documentation repository, triggering the auto-merge process. Add this GitHub Action workflow to your documentation repository to auto-merge PRs when features are released."
+  },
+  "criteria": null
+}

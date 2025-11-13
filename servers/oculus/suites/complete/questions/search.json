@@ -1,0 +1,12 @@
+{
+  "question": "How do I integrate Fern's documentation search into my own application?",
+  "ground_truth": "To integrate Fern's documentation search into your own application, you need to request Algolia credentials from the Fern team. These credentials will allow you to query the same search index that powers your documentation site. Once you have the credentials (application ID and index name), you can make requests to Algolia's API to search your documentation. It's important to keep these credentials secure and avoid exposing them in client-side code - consider implementing a backend proxy for the Algolia requests.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "search",
+    "domain": "buildwithfern.com",
+    "cited_context": "If you need to integrate Fern's documentation search into your own application or dashboard, you can request Algolia credentials directly from the Fern team. These credentials will allow you to query the same search index that powers your documentation site's search functionality. Once you have your credentials, you can make requests to Algolia's API to search your documentation. Contact the Fern team to get your specific application ID and index name. Credentials are provided on a per-customer basis to maintain security. Keep your Algolia credentials secure and avoid exposing them in client-side code. Consider implementing a backend proxy to make the Algolia requests."
+  },
+  "criteria": null
+}

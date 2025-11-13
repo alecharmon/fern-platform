@@ -1,0 +1,12 @@
+{
+  "question": "How can I highlight specific lines in a code block?",
+  "ground_truth": "To highlight specific lines in a code block, place a numeric range inside `{{}}` after the language identifier. The range is inclusive and can be a single number, a comma-separated list of numbers, or ranges. For example, `{{2-4, 6}}` will highlight lines 2 through 4 and line 6.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "code-blocks",
+    "domain": "buildwithfern.com",
+    "cited_context": "### Line highlighting\n\nHighlight specific lines in your code snippet by placing a numeric range inside `{{}}`\nafter the language identifier. The range is inclusive and can be a single number, a comma-separated list of numbers, or ranges.\n\n````markdown Markdown\n```javascript {{2-4, 6}}\nconsole.log(\"Line 1\");\nconsole.log(\"Line 2\");\nconsole.log(\"Line 3\");\nconsole.log(\"Line 4\");\nconsole.log(\"Line 5\");\nconsole.log(\"Line 6\");\n```\n````"
+  },
+  "criteria": null
+}

@@ -1,0 +1,12 @@
+{
+  "question": "How do I create a new plant entry using the Python SDK?",
+  "ground_truth": "To create a new plant entry using the Python SDK, use the `create_plant` method with the following signature: `def create_plant(name: str, species: str, description: Optional[str] = None, care_level: Optional[str] = None) -> Plant`. The method requires two parameters: `name` (the common name of the plant) and `species` (the scientific species name), with optional parameters for `description` and `care_level`.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "demo",
+    "domain": "buildwithfern.com",
+    "cited_context": "### create_plant\n\nPython method for creating a new plant entry.\n\n**Signature:**\n```python\ndef create_plant(\n    name: str,\n    species: str,\n    description: Optional[str] = None,\n    care_level: Optional[str] = None\n) -> Plant\n```"
+  },
+  "criteria": null
+}

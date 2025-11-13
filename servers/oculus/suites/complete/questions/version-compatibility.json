@@ -1,0 +1,12 @@
+{
+  "question": "What are the required assemblies I need to manually add to my Unity project when using Fern's .NET SDK?",
+  "ground_truth": "When using Fern's .NET SDK with Unity, you need to manually add the following assemblies: Microsoft.Bcl.AsyncInterfaces (10.0.0-preview.6.25358.103), OneOf (3.0.271), OneOf.Extended (3.0.271), System.Buffers (4.6.1), System.IO.Pipelines (10.0.0-preview.6.25358.103), System.Memory (4.6.3), System.Runtime.CompilerServices.Unsafe (6.1.2), System.Text.Encodings.Web (10.0.0-preview.6.25358.103), System.Text.Json (10.0.0-preview.6.25358.103), System.Threading.Tasks.Extensions (4.6.3), and portable.system.datetimeonly (9.0.0).",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "version-compatibility",
+    "domain": "buildwithfern.com",
+    "cited_context": "Unity doesn't support NuGet packages, so you must manually download and add these assemblies to your Unity project:\n\n| Assembly | NuGet Package |\n|----------|---------------|\n| Microsoft.Bcl.AsyncInterfaces | [10.0.0-preview.6.25358.103](https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/10.0.0-preview.6.25358.103) |\n| OneOf | [3.0.271](https://www.nuget.org/packages/OneOf/3.0.271) |\n| OneOf.Extended | [3.0.271](https://www.nuget.org/packages/OneOf.Extended/3.0.271) |\n| System.Buffers | [4.6.1](https://www.nuget.org/packages/System.Buffers/4.6.1) |\n| System.IO.Pipelines | [10.0.0-preview.6.25358.103](https://www.nuget.org/packages/System.IO.Pipelines/10.0.0-preview.6.25358.103) |\n| System.Memory | [4.6.3](https://www.nuget.org/packages/System.Memory/4.6.3) |\n| System.Runtime.CompilerServices.Unsafe | [6.1.2](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.1.2) |\n| System.Text.Encodings.Web | [10.0.0-preview.6.25358.103](https://www.nuget.org/packages/System.Text.Encodings.Web/10.0.0-preview.6.25358.103) |\n| System.Text.Json | [10.0.0-preview.6.25358.103](https://www.nuget.org/packages/System.Text.Json/10.0.0-preview.6.25358.103) |\n| System.Threading.Tasks.Extensions | [4.6.3](https://www.nuget.org/packages/System.Threading.Tasks.Extensions/4.6.3) |\n| portable.system.datetimeonly | [9.0.0](https://www.nuget.org/packages/portable.system.datetimeonly/9.0.0) |"
+  },
+  "criteria": null
+}

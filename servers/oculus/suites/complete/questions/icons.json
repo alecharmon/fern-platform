@@ -1,0 +1,12 @@
+{
+  "question": "How can I display a large warning icon with custom color using the Icon component?",
+  "ground_truth": "You can display a large warning icon with custom color using the Icon component by combining the size and color properties. For example: `<Icon icon=\"warning\" size=\"7\" color=\"#FF0000\" />` where size=\"7\" makes it large and color=\"#FF0000\" would make it red. The size parameter works in 0.25rem increments, so 7 would be 1.75rem.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "icons",
+    "domain": "buildwithfern.com",
+    "cited_context": "### Sizes\n\n<div className=\"highlight-frame\">\n  <div className=\"highlight-frame-content\">\n  <div><Icon icon=\"warning\" size=\"7\" /> Large icon</div>\n  </div>\n</div>\n\n```jsx Markdown\n<Icon icon=\"warning\" size=\"7\" /> Large icon\n```\n\n### Colors\n\n<div className=\"highlight-frame\">\n  <div className=\"highlight-frame-content\">\n  <div><Icon icon=\"check\" color=\"#22C55E\" /> Colored icon</div>\n  </div>\n</div>\n\n```jsx Markdown\n<div><Icon icon=\"check\" color=\"#22C55E\" /> Colored icon</div>\n```\n\n<ParamField path=\"color\" type=\"string\">\n  Icon color (hex, RGB, or color name)\n</ParamField>\n\n<ParamField path=\"size\" type=\"number\">\n  Size in 0.25rem increments (e.g., 4 = 1rem)\n</ParamField>"
+  },
+  "criteria": null
+}

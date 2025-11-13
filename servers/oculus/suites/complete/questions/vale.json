@@ -1,0 +1,12 @@
+{
+  "question": "How do I disable Vale checking for a specific section of text in an MDX file?",
+  "ground_truth": "To disable Vale checking in an MDX file, wrap the Vale HTML-style comment within an MDX-styled comment like this: `{{/* <!-- vale off --> */}}`. To re-enable Vale checking, use `{{/* <!-- vale on --> */}}`.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "vale",
+    "domain": "buildwithfern.com",
+    "cited_context": "To use Vale's HTML-style comments (`<!-- comment -->`) in an MDX file, wrap within an MDX-styled comment (`{{/* comment */}}`). For example:\n- **disable Vale**: `{{/* <!-- vale off --> */}}`\n- **enable Vale**: `{{/* <!-- vale on --> */}}`"
+  },
+  "criteria": null
+}

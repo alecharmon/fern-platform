@@ -1,0 +1,12 @@
+{
+  "question": "How do I add custom billing information for enterprise customers to Ask Fern?",
+  "ground_truth": "You can add custom billing information for enterprise customers using the guidance API. Create a guidance document with context texts that match billing-related queries (like \"What billing options are available for enterprise customers with 10-50 seats?\") and a document text containing your prescribed response (such as \"Please reach out to support@yourcompany.com for more information.\"). The guidance will override default RAG responses when users ask matching questions.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "guidance",
+    "domain": "buildwithfern.com",
+    "cited_context": "Guidance documents consist of a list of `context` texts and a `document` text. The `context` texts will be indexed to match against user queries. The `document` text will used as a prescribed response to the user query. Below is an example of a guidance document that can be uploaded via the `guidance` API: {\"context\": [\"What billing options are available for enterprise customers with 10-50 seats?\", \"How do I upgrade the number of seats for my enterprise plan?\"], \"document\": \"Please reach out to support@yourcompany.com for more information.\"} Ask Fern prioritizes guidance response over other document responses, allowing you to override the default RAG responses."
+  },
+  "criteria": null
+}

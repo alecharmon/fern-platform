@@ -1,0 +1,12 @@
+{
+  "question": "How do I define SDK variables in my OpenAPI specification that can be used across multiple endpoints?",
+  "ground_truth": "To define SDK variables in your OpenAPI specification, use the `x-fern-sdk-variables` extension at the document level to declare the variables with their type and description. Then, mark specific path parameters as SDK variables by adding `x-fern-sdk-variable` to the parameter definition with the corresponding variable name. These variables are set once during SDK client initialization and automatically used in path parameters across all endpoint calls.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "sdk-variables",
+    "domain": "buildwithfern.com",
+    "cited_context": "Define variables at the document level using `x-fern-sdk-variables`, then mark path parameters as variables using `x-fern-sdk-variable`:\n\n```yaml\nx-fern-sdk-variables:\n  gardenId:\n    type: string\n    description: The unique identifier for your garden\n  zoneId:\n    type: string\n    description: The zone within the garden\n\npaths:\n  /gardens/{gardenId}/zones/{zoneId}/plants:\n    get:\n      operationId: list_plants_in_zone\n      parameters:\n        - name: gardenId\n          in: path\n          required: true\n          x-fern-sdk-variable: gardenId\n          schema:\n            type: string\n```"
+  },
+  "criteria": null
+}

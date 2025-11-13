@@ -1,0 +1,12 @@
+{
+  "question": "What programming languages does Fern support for SDK generation?",
+  "ground_truth": "Fern supports SDK generation for TypeScript, Python, Go, Java, C#, PHP, Ruby, and Swift.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "welcome",
+    "domain": "buildwithfern.com",
+    "cited_context": "From the \"SDKs Card\" section, under \"Language Icons\": \"Get started with: TypeScript, Python, Go, Java, C#, PHP, Ruby, Swift\" - these are shown as clickable language icons with links to their respective quickstart guides at paths like \"/sdks/generators/typescript/quickstart\", \"/sdks/generators/python/quickstart\", etc."
+  },
+  "criteria": null
+}

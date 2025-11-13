@@ -1,0 +1,12 @@
+{
+  "question": "How do I display all API endpoints on separate pages instead of on one long page?",
+  "ground_truth": "To display all API endpoints on separate pages instead of on one long page, set the `paginated` property to `true` in your API Reference configuration. By default, endpoints are displayed on one single, long page.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "generate-api-ref",
+    "domain": "buildwithfern.com",
+    "cited_context": "| `paginated`      | Display all endpoints on separate pages (by default, endpoints are displayed on one single, long page)  |"
+  },
+  "criteria": null
+}

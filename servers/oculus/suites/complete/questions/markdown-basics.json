@@ -1,0 +1,12 @@
+{
+  "question": "How do I link to another page within my Fern documentation site using Markdown?",
+  "ground_truth": "To link to another page within your Fern documentation site, use a relative URL that begins with a `/` character. This routes to the url defined in your docs.yml file. For example, to link to https://example-docs.buildwithfern.com/overview/introduction, you would write the link in Markdown as [Introduction](/learn/overview/introduction).",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "markdown-basics",
+    "domain": "buildwithfern.com",
+    "cited_context": "### Link format\nUse a `/` character to begin a relative URL to another page on your docs site. This routes to the `url` defined in your `docs.yml` file, such as `example-docs.buildwithfern.com`. For example, if you want to link to `https://example-docs.buildwithfern.com/overview/introduction`, you can write the link in Markdown as follows:\n\n```mdx\nRead the [Introduction](/learn/overview/introduction).\n```"
+  },
+  "criteria": null
+}

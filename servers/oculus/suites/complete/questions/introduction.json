@@ -1,0 +1,12 @@
+{
+  "question": "How can I install a company's MCP server in my AI client?",
+  "ground_truth": "To install a company's MCP server in your AI client, you need to add a configuration snippet to your AI client's configuration. The configuration includes a JSON object that specifies the MCP server with the company name, command set to \"npx\", and args containing \"-y\" and the package name in the format \"<your-company>-mcp-server@latest\".",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "introduction",
+    "domain": "buildwithfern.com",
+    "cited_context": "Developers can install your MCP server by adding a configuration snippet to their AI client:\n\n```json\n{{\n  \"mcpServers\": {{\n    \"<your-company>\": {{\n      \"command\": \"npx\",\n      \"args\": [ \"-y\", \"<your-company>-mcp-server@latest\" ]\n    }}\n  }}\n}}\n```"
+  },
+  "criteria": null
+}

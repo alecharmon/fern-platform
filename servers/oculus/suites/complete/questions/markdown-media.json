@@ -1,0 +1,12 @@
+{
+  "question": "How can I embed a YouTube video in my Fern documentation?",
+  "ground_truth": "To embed a YouTube video in Fern documentation, use an iframe element with camelCase attributes since .mdx files use JSX syntax. For example: <iframe src=\"https://www.youtube.com/embed/[video-id]\" width=\"100%\" height=\"450px\" frameBorder=\"0\" allowFullScreen></iframe>. Note that attributes must be written in camelCase (e.g., allowFullScreen instead of allowfullscreen).",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "markdown-media",
+    "domain": "buildwithfern.com",
+    "cited_context": "### Embed YouTube or Loom videos\n\nYou can embed videos from YouTube, Loom, Vimeo, and other streaming platforms using an `<iframe>` element.\n\n<Warning>\n  `.mdx` files use JSX syntax, not pure HTML. Attributes for HTML elements like `<video>` and `<iframe>` that are embedded in `.mdx` pages must be written in `camelCase` rather than lowercase. For example, use `autoPlay` instead of `autoplay`.\n</Warning>\n\n<Tabs>\n  <Tab title=\"Rendered Loom video\">\n  <iframe\n    src=\"https://www.loom.com/embed/2e7f038de6894c69bf9c0d2525b0ad7f?sid=8bb327d2-8ba6-413c-a832-8d80282ad527\"\n    width=\"100%\"\n    height=\"450px\"\n    frameBorder=\"0\"\n    allowFullScreen\n  ></iframe>\n  </Tab>\n  <Tab title=\"Loom video syntax\">\n    ```mdx\n    <iframe\n      src=\"https://www.loom.com/embed/2e7f038de6894c69bf9c0d2525b0ad7f?sid=8bb327d2-8ba6-413c-a832-8d80282ad527\"\n      width=\"100%\"\n      height=\"450px\"\n      frameBorder=\"0\"\n      allowFullScreen\n    ></iframe>\n    ```\n  </Tab>\n</Tabs>"
+  },
+  "criteria": null
+}

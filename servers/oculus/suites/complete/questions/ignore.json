@@ -1,0 +1,12 @@
+{
+  "question": "How can I prevent certain methods from being included in SDK generation from my OpenRPC specification?",
+  "ground_truth": "You can use the `x-fern-ignore` extension to exclude specific methods or schemas from SDK generation. Simply add `x-fern-ignore: true` to any method you want to skip, such as internal debugging methods or experimental features that aren't ready for public use.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "ignore",
+    "domain": "buildwithfern.com",
+    "cited_context": "Use `x-fern-ignore` to exclude specific methods or schemas from SDK generation. The example shows methods like `debug.internalMethod` and `test.experimentalFeature` with `x-fern-ignore: true` to prevent them from being included in the generated SDK."
+  },
+  "criteria": null
+}

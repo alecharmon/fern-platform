@@ -1,0 +1,12 @@
+{
+  "question": "How do I use parameters in a reusable snippet and reference them in my documentation?",
+  "ground_truth": "To use parameters in a reusable snippet, define them with quadruple curly braces like {{{{parameter}}}} in your snippet file. When referencing the snippet in your documentation, pass the parameter values as attributes in the Markdown component like <Markdown src=\"/snippets/watering-schedule.mdx\" plant=\"peace lily\" interval=\"3\">.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "reusable-markdown",
+    "domain": "buildwithfern.com",
+    "cited_context": "Optionally, you can use parameters in your snippet:\n```mdx title=\"snippets/watering-schedule.mdx\"\n<Warning>Remember to water your {{{{plant}}}} every {{{{interval}}}} days.</Warning>\n```\n\nTo use a snippet in your documentation, reference it by its file path (including the `.mdx` extension). If you used one or more parameters in your snippet, pass them in the snippet reference:\n\n```jsx\n<Markdown src=\"/snippets/watering-schedule.mdx\" plant=\"peace lily\" interval=\"3\">\n```"
+  },
+  "criteria": null
+}

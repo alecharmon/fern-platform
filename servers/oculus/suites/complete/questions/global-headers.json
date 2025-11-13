@@ -1,0 +1,12 @@
+{
+  "question": "How can I configure a custom API key header name to be used globally across all SDK endpoints?",
+  "ground_truth": "You can configure a custom API key header name using the `x-fern-global-headers` extension in your OpenAPI spec. Add a header entry with the original header name (e.g., `custom_api_key`) and alias it using the `name` property (e.g., `api_key`). This will generate SDK client constructors that accept the aliased parameter name.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "global-headers",
+    "domain": "buildwithfern.com",
+    "cited_context": "To configure global headers, Fern will automatically pull out headers that are used in every request, or the majority of requests, and mark them as global. In order to label additional headers as global, or to alias the names of global headers, you can leverage the `x-fern-global-headers` extension:\n\n```yaml title=\"openapi.yml\"\nx-fern-global-headers:\n  - header: custom_api_key\n    name: api_key\n  - header: userpool_id\n    optional: true\n```\n\nyields the following client:\n\n```python\nimport os\n\nclass Client:\n\n  def __init__(self, *, apiKey: str, userpoolId: typing.Optional[str])\n```"
+  },
+  "criteria": null
+}

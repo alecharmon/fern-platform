@@ -1,0 +1,12 @@
+{
+  "question": "How can I configure the navbar links in my Fern documentation site?",
+  "ground_truth": "You can configure navbar links in the `docs.yml` file using the `navbar-links` configuration. Navbar links support multiple types including minimal, filled, github, and dropdown. Each link can include text, href, icons, and other styling options. For dropdown links, you can specify nested items with their own text, href, and icons.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "site-level-settings",
+    "domain": "buildwithfern.com",
+    "cited_context": "```yaml docs.yml\nnavbar-links:\n  - type: minimal\n    text: Contact support\n    href: https://example.com/support\n    icon: fa-solid fa-headset\n  - type: filled\n    text: Login\n    href: https://example.com/login\n    rounded: false\n    icon: ./assets/icons/login-icon.svg\n  - type: github\n    value: https://github.com/example-company/fern\n  - type: dropdown\n    text: Resources\n    icon: fa-solid fa-book\n    links:\n      - text: Documentation\n        href: https://example.com/docs\n        icon: fa-regular fa-file-lines\n      - text: API Reference\n        href: https://example.com/api\n        icon: fa-regular fa-code\n      - text: Tutorials\n        href: https://example.com/tutorials\n        icon: fa-regular fa-graduation-cap\n```"
+  },
+  "criteria": null
+}

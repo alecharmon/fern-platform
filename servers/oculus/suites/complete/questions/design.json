@@ -1,0 +1,12 @@
+{
+  "question": "Where can I find documentation about the Ruby SDK design principles while this page is being developed?",
+  "ground_truth": "While the Ruby SDK design page is still a work in progress, you can refer to the previous documentation at https://buildwithfern.com/learn/sdks/introduction/overview for information about the SDK design principles and philosophy.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "design",
+    "domain": "buildwithfern.com",
+    "cited_context": "This page is a WIP, please refer to our previous [documentation](https://buildwithfern.com/learn/sdks/introduction/overview)."
+  },
+  "criteria": null
+}

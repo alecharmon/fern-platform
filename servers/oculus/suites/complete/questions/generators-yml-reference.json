@@ -1,0 +1,12 @@
+{
+  "question": "How can I configure OAuth authentication with a refresh token endpoint in generators.yml?",
+  "ground_truth": "To configure OAuth authentication with a refresh token endpoint in generators.yml, you need to define an OAuth auth scheme with both get-token and refresh-token configurations. In the auth-schemes section, create a scheme with scheme: oauth and type: client-credentials. Configure the get-token section with the endpoint that exchanges client credentials for an access token, and the refresh-token section with the endpoint that exchanges a refresh token for a new access token. When refresh-token is configured, the SDK automatically uses this endpoint to renew expired tokens without re-sending credentials.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "generators-yml-reference",
+    "domain": "buildwithfern.com",
+    "cited_context": "Configure OAuth 2.0 client credentials authentication. Optionally configure a `refresh-token` endpoint for token renewal without re-authentication. \n\n```yaml title=\"generators.yml\" maxLines=10\nauth-schemes:\n  my-oauth: # User-defined scheme name\n    scheme: oauth\n    type: client-credentials\n    scopes:\n      - \"read:users\"\n      - \"write:users\"\n    client-id-env: \"OAUTH_CLIENT_ID\" # SDK will auto-scan this environment variable\n    client-secret-env: \"OAUTH_CLIENT_SECRET\" # SDK will auto-scan this environment variable\n    token-prefix: \"Bearer\"\n    token-header: \"Authorization\"\n    get-token:\n      endpoint: \"auth.get_token\"\n      request-properties:\n        client-id: \"clientId\"\n        client-secret: \"clientSecret\"\n        scopes: \"scope\"\n      response-properties:\n        access-token: \"access_token\"\n        expires-in: \"expires_in\"\n        refresh-token: \"refresh_token\"\n    refresh-token:\n      endpoint: \"auth.refresh_token\"\n      request-properties:\n        refresh-token: \"refreshToken\"\n      response-properties:\n        access-token: \"access_token\"\n        expires-in: \"expires_in\"\n        refresh-token: \"refresh_token\"\n```\n\n#### `refresh-token`\n\nSpecifies the endpoint that exchanges a refresh token for a new access token. When configured, the SDK automatically uses this endpoint to renew expired tokens without re-sending credentials. If not configured, the SDK will re-authenticate using `get-token` when tokens expire."
+  },
+  "criteria": null
+}

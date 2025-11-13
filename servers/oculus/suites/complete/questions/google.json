@@ -1,0 +1,12 @@
+{
+  "question": "How do I add Google Analytics 4 tracking to my Fern Docs?",
+  "ground_truth": "To add Google Analytics 4 tracking to your Fern Docs, open your docs.yml file and add your Google Analytics 4 property ID (in the format G-XXXXXXXXXX) under the analytics.ga4.measurement-id key. You can either hardcode the ID or use an environment variable. After configuration, it may take 24-48 hours for traffic data to appear in Google Analytics.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "google",
+    "domain": "buildwithfern.com",
+    "cited_context": "Fern supports integrating with both Google Analytics 4 and Google Tag Manager. To integrate Google Analytics 4, ensure you have a property ID in the format G-XXXXXXXXXX. Open your docs.yml file and add your Google Analytics 4 property ID under the measurement-id key. Example configuration: analytics: ga4: measurement-id: G-12345678. You can optionally add the ID as an environment variable: analytics: ga4: measurement-id: ${{GA4_MEASUREMENT_ID}}. Verify data in Google Analytics. Note that it may take 24\u201348 hours for website traffic data to start appearing."
+  },
+  "criteria": null
+}
