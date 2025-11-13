@@ -6,6 +6,8 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
+import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
+import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 
@@ -32,12 +34,21 @@ export async function DocsNavbarItems({ orgName }: { orgName: Auth0OrgName }) {
     const docsSites: FdrAPI.dashboard.DocsSite[] = response.docsSites;
     const firstDocsSite: FdrAPI.dashboard.DocsSite | undefined = docsSites[0];
 
+    const isCreateDocsNewSiteEnabled = await isFeatureFlagEnabledForUser(
+        PosthogFeatureFlag.ENABLE_CREATE_DOCS_NEW_SITE,
+        session?.user.sub,
+        orgName
+    );
+
     return (
         <>
             <DocsNavbarItem
                 hrefForActualLinking={
                     firstDocsSite != null ? `/docs/${constructDocsUrlParam(getDocsSiteUrl(firstDocsSite))}` : undefined
                 }
+                docsSites={docsSites}
+                orgName={orgName}
+                isCreateDocsNewSiteEnabled={isCreateDocsNewSiteEnabled}
             />
             <DocsNavbarSubItems docsSites={docsSites} orgName={orgName} />
         </>
