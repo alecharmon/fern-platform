@@ -12,14 +12,13 @@
   }
 
   .fern-footer-nav--simple {
-    @apply bg-transparent p-0 -m-2;
+    @apply bg-transparent p-0 m-0 gap-2;
 
     justify-content: space-between;
     
     .fern-footer-prev {
-      @apply bg-transparent border-0 h-auto flex-col items-start justify-start gap-2 p-2 overflow-visible;
+      @apply bg-transparent border-0 h-auto flex-col items-start justify-start gap-2 p-2 overflow-hidden flex-1 min-w-0;
 
-      flex: none;
       border-radius: var(--radius);
 
       span:first-child span {
@@ -46,9 +45,8 @@
     }
     
     .fern-footer-next {
-      @apply bg-transparent border-0 h-auto flex-col items-end justify-end gap-2 p-2 overflow-visible;
+      @apply bg-transparent border-0 h-auto flex-col items-end justify-end gap-2 p-2 overflow-hidden flex-1 min-w-0;
 
-      flex: none;
       border-radius: var(--radius);
 
       span:first-child span {
