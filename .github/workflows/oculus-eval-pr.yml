@@ -32,62 +32,50 @@ jobs:
       deployments: read
 
     steps:
-      - name: Check if comment trigger
-        if: github.event_name == 'issue_comment'
-        id: check_comment
+      - name: Evaluate if workflow should run
+        id: eval_gate
         uses: actions/github-script@v7
         with:
           script: |
-            const comment = context.payload.comment.body.toLowerCase().trim();
-            const isPR = !!context.payload.issue.pull_request;
+            let prNumber, prSha, shouldRun = false;
 
-            if (!isPR) {
-              console.log('Comment is on an issue, not a PR. Skipping.');
-              core.setOutput('should_run', 'false');
-              return;
-            }
-
-            if (!comment.includes('/run evals')) {
-              console.log('Comment does not contain "/run evals". Skipping.');
-              core.setOutput('should_run', 'false');
-              return;
-            }
-
-            console.log('Comment contains "/run evals" on a PR. Proceeding with eval.');
-            core.setOutput('should_run', 'true');
-
-            await github.rest.reactions.createForIssueComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: context.payload.comment.id,
-              content: 'rocket'
-            });
-
-      - name: Exit if comment doesn't trigger workflow
-        if: github.event_name == 'issue_comment' && steps.check_comment.outputs.should_run != 'true'
-        run: |
-          echo "Workflow not triggered by comment. Exiting."
-          exit 0
-
-      - name: Get PR details
-        id: pr
-        uses: actions/github-script@v7
-        with:
-          script: |
-            let prNumber, prSha;
-
+            // For pull_request events, path filter already applied, so always run
             if (context.eventName === 'pull_request') {
               prNumber = context.payload.pull_request.number;
               prSha = context.payload.pull_request.head.sha;
-            } else if (context.eventName === 'issue_comment') {
-              prNumber = context.payload.issue.number;
-              const { data: pr } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber
-              });
-              prSha = pr.head.sha;
-            } else if (context.eventName === 'workflow_dispatch') {
+              shouldRun = true;
+              console.log('Triggered by pull_request event with path filter. Running eval.');
+            } 
+            // For issue_comment events, check if comment contains "/run evals"
+            else if (context.eventName === 'issue_comment') {
+              const comment = context.payload.comment.body.toLowerCase().trim();
+              const isPR = !!context.payload.issue.pull_request;
+
+              if (!isPR) {
+                console.log('Comment is on an issue, not a PR. Skipping.');
+              } else if (!comment.includes('/run evals')) {
+                console.log('Comment does not contain "/run evals". Skipping.');
+              } else {
+                prNumber = context.payload.issue.number;
+                const { data: pr } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber
+                });
+                prSha = pr.head.sha;
+                shouldRun = true;
+                console.log('Comment contains "/run evals" on a PR. Running eval.');
+                
+                await github.rest.reactions.createForIssueComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: context.payload.comment.id,
+                  content: 'rocket'
+                });
+              }
+            }
+            // For workflow_dispatch events, always run
+            else if (context.eventName === 'workflow_dispatch') {
               prNumber = parseInt('${{ github.event.inputs.pr_number }}');
               const { data: pr } = await github.rest.pulls.get({
                 owner: context.repo.owner,
@@ -95,20 +83,25 @@ jobs:
                 pull_number: prNumber
               });
               prSha = pr.head.sha;
+              shouldRun = true;
+              console.log('Manually triggered via workflow_dispatch. Running eval.');
             } else {
               throw new Error('Unsupported event type');
             }
 
-            core.setOutput('number', prNumber);
-            core.setOutput('sha', prSha);
-            console.log(`PR #${prNumber}, SHA: ${prSha}`);
+            core.setOutput('should_run', shouldRun ? 'true' : 'false');
+            core.setOutput('number', prNumber || '');
+            core.setOutput('sha', prSha || '');
+            console.log(`PR #${prNumber}, SHA: ${prSha}, should_run: ${shouldRun}`);
 
       - name: Checkout code
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.pr.outputs.sha }}
+          ref: ${{ steps.eval_gate.outputs.sha }}
 
       - name: Wait for prod.ferndocs.com Deployment
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
         id: vercel-preview
         uses: actions/github-script@v7
         with:
@@ -123,11 +116,11 @@ jobs:
               const { data: deployments } = await github.rest.repos.listDeployments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                sha: '${{ steps.pr.outputs.sha }}',
+                sha: '${{ steps.eval_gate.outputs.sha }}',
                 per_page: 100
               });
 
-              console.log(`Found ${deployments.length} deployment(s) for SHA ${{ steps.pr.outputs.sha }}`);
+              console.log(`Found ${deployments.length} deployment(s) for SHA ${{ steps.eval_gate.outputs.sha }}`);
 
               // Log all environments for debugging
               if (deployments.length > 0) {
@@ -185,26 +178,31 @@ jobs:
             throw new Error('Timeout waiting for prod.ferndocs.com deployment after 10 minutes');
 
       - name: Setup Python
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install Poetry
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
         run: |
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Oculus dependencies
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
         working-directory: servers/oculus
         run: poetry install
 
       - name: Setup FAI dependencies
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
         working-directory: servers/fai
         run: |
           poetry install
           echo "PYTHONPATH=$PWD/src:$PYTHONPATH" >> $GITHUB_ENV
 
       - name: Run Oculus evaluation
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
         working-directory: servers/oculus
         env:
           VERCEL_URL: ${{ steps.vercel-preview.outputs.url }}
@@ -214,28 +212,28 @@ jobs:
           mkdir -p results
           poetry run oculus run \
             --suite simple \
-            --run-id pr-${{ steps.pr.outputs.number }}-${{ github.run_id }} \
+            --run-id pr-${{ steps.eval_gate.outputs.number }}-${{ github.run_id }} \
             --integration vercel-http \
             --output-dir ./results \
             --github-output
 
       - name: Upload results artifact
-        if: always()
+        if: ${{ always() && steps.eval_gate.outputs.should_run == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: oculus-results-pr-${{ steps.pr.outputs.number }}
+          name: oculus-results-pr-${{ steps.eval_gate.outputs.number }}
           path: servers/oculus/results/
           retention-days: 90
 
       - name: Comment PR with results
-        if: always()
+        if: ${{ always() && steps.eval_gate.outputs.should_run == 'true' }}
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
             const resultsDir = 'servers/oculus/results';
-            const prNumber = parseInt('${{ steps.pr.outputs.number }}');
+            const prNumber = parseInt('${{ steps.eval_gate.outputs.number }}');
             const runId = `pr-${prNumber}-${{ github.run_id }}`;
             const summaryPath = path.join(resultsDir, `github_summary_${runId}.md`);
 
