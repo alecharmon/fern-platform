@@ -110,7 +110,7 @@ export function PageActionsDropdown({
             const { value, label, href } = option;
 
             const baseClassName =
-                "px-2 py-1 rounded-2 text-(color:--grayscale-a11) whitespace-nowrap hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors flex items-center gap-1.5";
+                "px-2 py-1 rounded-2 text-(color:--grayscale-a11) whitespace-nowrap hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors flex items-center gap-1.5 cursor-pointer";
 
             const getIcon = (optionValue: string) => {
                 switch (optionValue) {
@@ -328,7 +328,7 @@ export function PageActionsDropdown({
                         >
                             <button
                                 aria-label={t(lang).buttons.moreActions}
-                                className="px-2 py-1 rounded-2 text-(color:--grayscale-a11) hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors flex items-center gap-1"
+                                className="px-2 py-1 rounded-2 text-(color:--grayscale-a11) hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors flex items-center gap-1 cursor-pointer"
                             >
                                 <span>{t(lang).buttons.moreActions}</span>
                                 <ChevronDown className="size-icon" />
