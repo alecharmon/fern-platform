@@ -23,6 +23,7 @@ interface MaybeEnvironmentDropdownProps {
     isEditingEnvironment: useBooleanState.Return;
     apiDefinitionId?: FdrAPI.ApiDefinitionId;
     lang: string;
+    readonly?: string[];
 }
 
 export function MaybeEnvironmentDropdown({
@@ -35,7 +36,8 @@ export function MaybeEnvironmentDropdown({
     editable,
     isEditingEnvironment,
     apiDefinitionId,
-    lang
+    lang,
+    readonly
 }: MaybeEnvironmentDropdownProps): ReactElement<any> | null {
     const idFromContext = useApiDefinitionIdFromContext();
     const id = apiDefinitionId ?? idFromContext;
@@ -71,6 +73,8 @@ export function MaybeEnvironmentDropdown({
             ? `${url.host}${url.pathname}`
             : url.host
         : "";
+
+    const isEnvironmentReadonly = readonly?.includes("environment") ?? false;
 
     return (
         <>
@@ -125,7 +129,7 @@ export function MaybeEnvironmentDropdown({
             ) : (
                 <FernTooltip content={<span>{t(lang).playground.doubleClickToEdit}</span>}>
                     <span className="max-sm:hidden" style={{ pointerEvents: "auto" }}>
-                        {options && options.length > 1 ? (
+                        {options && options.length > 1 && !isEnvironmentReadonly ? (
                             <FernDropdown
                                 key="selectedEnvironment-selector"
                                 options={options.map((env) => ({
@@ -166,7 +170,7 @@ export function MaybeEnvironmentDropdown({
                             </FernDropdown>
                         ) : (
                             <span key="url" className="whitespace-nowrap font-mono max-sm:hidden">
-                                {editable ? (
+                                {editable && !isEnvironmentReadonly ? (
                                     <span
                                         className={cn(
                                             urlTextStyle,

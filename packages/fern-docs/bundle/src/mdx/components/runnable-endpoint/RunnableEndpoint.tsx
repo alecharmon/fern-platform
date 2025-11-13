@@ -1,6 +1,6 @@
 "use client";
 
-import type { AuthScheme, EndpointDefinition, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { AuthScheme, EndpointDefinition, EnvironmentId, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { unwrapObjectType, unwrapReference } from "@fern-api/fdr-sdk/api-definition";
 import { cn } from "@fern-docs/components/cn";
 import { FernCard } from "@fern-docs/components/FernCard";
@@ -73,6 +73,12 @@ interface RunnableEndpointProps {
      * @internal the rehype-runnable-endpoint plugin will set this
      */
     lang?: string;
+
+    /**
+     * Optional default environment ID to use instead of the one specified in the API configuration.
+     * This allows overriding the default environment on a per-endpoint basis.
+     */
+    defaultEnvironment?: string;
 }
 
 export function RunnableEndpoint({
@@ -85,7 +91,8 @@ export function RunnableEndpoint({
     className,
     readonly,
     disableProxy,
-    lang
+    lang,
+    defaultEnvironment
 }: RunnableEndpointProps) {
     const endpointSlug = useCurrentSlug(endpointSlugs);
 
@@ -105,6 +112,7 @@ export function RunnableEndpoint({
             readonly={readonly}
             disableProxy={disableProxy}
             lang={lang ?? "en"}
+            defaultEnvironment={defaultEnvironment}
         />
     );
 }
@@ -134,7 +142,8 @@ function RunnableEndpointInternal({
     className,
     readonly,
     disableProxy,
-    lang
+    lang,
+    defaultEnvironment
 }: {
     endpoint: EndpointDefinition;
     types: Record<string, TypeDefinition>;
@@ -146,9 +155,20 @@ function RunnableEndpointInternal({
     readonly?: string[];
     disableProxy?: boolean;
     lang: string;
+    defaultEnvironment?: string;
 }) {
     const [formExpanded, setFormExpanded] = useState(true);
     const [responseExpanded, setResponseExpanded] = useState(true);
+
+    const endpointWithDefaultEnv = useMemo<EndpointDefinition>(() => {
+        if (defaultEnvironment != null) {
+            return {
+                ...endpoint,
+                defaultEnvironment: defaultEnvironment as EnvironmentId
+            };
+        }
+        return endpoint;
+    }, [endpoint, defaultEnvironment]);
 
     // Use custom hooks for form state management
     const {
@@ -169,8 +189,8 @@ function RunnableEndpointInternal({
         example
     });
 
-    // Get base URL for the endpoint
-    const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint);
+    // Get base URL for the endpoint (using the endpoint with overridden defaultEnvironment)
+    const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpointWithDefaultEnv);
 
     // Use custom hook for sending requests
     const { response, sendRequest, clearResponse } = useSendRequest({
@@ -241,6 +261,7 @@ function RunnableEndpointInternal({
                         onExampleChange={handleExampleChange}
                         endpointSlug={endpointSlug}
                         lang={lang}
+                        readonly={readonly}
                     />
 
                     {/* Collapsible Form Section */}

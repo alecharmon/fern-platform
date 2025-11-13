@@ -27,12 +27,25 @@ export declare namespace EndpointUrl {
         large?: boolean;
         className?: string;
         lang: string;
+        readonly?: string[];
     }>;
 }
 
 // TODO: this component needs a refresh
 export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<EndpointUrl.Props>>(function EndpointUrl(
-    { path, method, baseUrl, environmentId, large, className, showEnvironment, hideCopyButton, options, lang },
+    {
+        path,
+        method,
+        baseUrl,
+        environmentId,
+        large,
+        className,
+        showEnvironment,
+        hideCopyButton,
+        options,
+        lang,
+        readonly
+    },
     forwardedRef
 ) {
     const ref = useRef<HTMLDivElement>(null);
@@ -147,6 +160,7 @@ export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<En
                                                 isEditingEnvironment={isEditingEnvironment}
                                                 editable
                                                 lang={lang}
+                                                readonly={readonly}
                                             />
                                         </span>
                                     )}

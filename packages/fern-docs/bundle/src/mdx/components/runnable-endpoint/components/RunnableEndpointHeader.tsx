@@ -21,6 +21,7 @@ interface RunnableEndpointHeaderProps {
     onExampleChange: (value: string) => void;
     endpointSlug?: string;
     lang: string;
+    readonly?: string[];
 }
 
 export function RunnableEndpointHeader({
@@ -34,7 +35,8 @@ export function RunnableEndpointHeader({
     selectedExampleIndex,
     onExampleChange,
     endpointSlug,
-    lang
+    lang,
+    readonly
 }: RunnableEndpointHeaderProps) {
     return (
         <div className="border-border-default flex w-full items-center justify-between border-b bg-tag-default px-3 py-2">
@@ -61,6 +63,7 @@ export function RunnableEndpointHeader({
                         showEnvironment={true}
                         hideCopyButton={false}
                         lang={lang}
+                        readonly={readonly}
                     />
                 </div>
             </div>
