@@ -216,7 +216,7 @@
       "workerd"
     ],
     "overrides": {
-      "vite": "^6.1.6",
+      "vite": "^6.4.1",
       "webpack-bundle-analyzer>ws": "^7.5.10",
       "@walletconnect/logger": "3.0.0"
     }
