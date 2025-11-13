@@ -172,17 +172,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     onClick={(e) => {
                         e.stopPropagation();
                     }}
-                    tryIt={
-                        <>
-                            {node != null && (
-                                <PlaygroundButtonTray
-                                    state={node}
-                                    lang={lang}
-                                    // example={selectedExample?.exampleCall}
-                                />
-                            )}
-                        </>
-                    }
+                    tryIt={<>{node != null && <PlaygroundButtonTray state={node} endpoint={endpoint} lang={lang} />}</>}
                     languageDropdown={
                         <>
                             {languages.length > 1 && (

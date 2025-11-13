@@ -127,7 +127,11 @@ export async function WebSocketContent({
                     <div className="not-prose grid grid-rows-[repeat(auto-fit,minmax(0,min-content))] gap-6">
                         <TitledExample
                             title={t(lang).apiReference.handshake}
-                            tryIt={node != null ? <PlaygroundButtonTray state={node} lang={lang} /> : undefined}
+                            tryIt={
+                                node != null ? (
+                                    <PlaygroundButtonTray state={node} endpoint={channel} lang={lang} />
+                                ) : undefined
+                            }
                             disableClipboard={true}
                             lang={lang}
                         >

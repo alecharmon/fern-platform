@@ -1,6 +1,7 @@
 "use client";
 
 import { conformExplorerRoute } from "@fern-api/docs-utils";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { cn } from "@fern-docs/components/cn";
 import { ButtonLink } from "@fern-docs/components/FernLinkButton";
@@ -8,14 +9,46 @@ import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTool
 import { t } from "@fern-docs/i18n";
 import { Play } from "lucide-react";
 import type { FC } from "react";
-import { usePlaygroundSettings } from "../hooks/usePlaygroundSettings";
+
+function isEndpointDefinition(
+    endpoint: ApiDefinition.EndpointDefinition | ApiDefinition.WebSocketChannel | undefined
+): endpoint is ApiDefinition.EndpointDefinition {
+    return !!endpoint && "method" in endpoint;
+}
+
+function shouldShowPlayground(
+    state: FernNavigation.NavigationNodeApiLeaf,
+    endpoint?: ApiDefinition.EndpointDefinition | ApiDefinition.WebSocketChannel
+): boolean {
+    if (state.type === "webhook" || state.type === "grpc") {
+        return false;
+    }
+
+    if (state.type === "endpoint") {
+        if (!isEndpointDefinition(endpoint)) {
+            return true;
+        }
+        return endpoint.includeInApiExplorer ?? true;
+    }
+
+    if (state.type === "webSocket") {
+        return true;
+    }
+
+    return true;
+}
 
 export const PlaygroundButton: FC<{
     state: FernNavigation.NavigationNodeApiLeaf;
+    endpoint?: ApiDefinition.EndpointDefinition | ApiDefinition.WebSocketChannel;
     className?: string;
     lang: string;
-}> = ({ state, className, lang }) => {
-    const settings = usePlaygroundSettings(state.id);
+}> = ({ state, endpoint, className, lang }) => {
+    if (!shouldShowPlayground(state, endpoint)) {
+        return null;
+    }
+
+    const playgroundSettings = state.type === "endpoint" || state.type === "webSocket" ? state.playground : undefined;
 
     return (
         <FernTooltipProvider>
@@ -32,12 +65,12 @@ export const PlaygroundButton: FC<{
                 <ButtonLink
                     id={`playground-button:${state.slug}`}
                     aria-description={
-                        settings?.button?.href
+                        playgroundSettings?.button?.href
                             ? t(lang).apiReference.opensApiExplorerNewTab
                             : t(lang).apiReference.opensApiExplorer
                     }
-                    href={settings?.button?.href ?? conformExplorerRoute(state.slug)}
-                    target={settings?.button?.href ? "_blank" : undefined}
+                    href={playgroundSettings?.button?.href ?? conformExplorerRoute(state.slug)}
+                    target={playgroundSettings?.button?.href ? "_blank" : undefined}
                     variant="default"
                     size="xs"
                     className={cn("font-mono [&_svg]:size-3", className)}

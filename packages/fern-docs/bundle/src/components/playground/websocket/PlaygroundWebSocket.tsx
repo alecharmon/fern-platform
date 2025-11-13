@@ -16,7 +16,6 @@ import {
     usePlaygroundWebsocketFormState
 } from "@/state/playground";
 
-import { usePlaygroundSettings } from "../../hooks/usePlaygroundSettings";
 import { PlaygroundEndpointPath } from "../endpoint/PlaygroundEndpointPath";
 import { useWebsocketMessages } from "../hooks/useWebsocketMessages";
 import { buildAuthHeaders, getAuthKey } from "../utils";
@@ -34,7 +33,7 @@ interface PlaygroundWebSocketProps {
 
 export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, authForm, lang }) => {
     const [formState, setFormState] = usePlaygroundWebsocketFormState(context);
-    const websocketMessageLimit = usePlaygroundSettings(context.node.id)?.["limit-websocket-messages-per-connection"];
+    const websocketMessageLimit = context.node.playground?.["limit-websocket-messages-per-connection"];
     const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
 
     // Determine which auth to use based on the selected auth type, and get its key
@@ -100,7 +99,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
         }
     }, [activeSessionMessageCount, pushMessage, websocketMessageLimit, lang]);
 
-    const settings = usePlaygroundSettings();
+    const settings = context.node.playground;
 
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(context.channel, context.node.apiDefinitionId);
 

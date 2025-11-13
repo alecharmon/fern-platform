@@ -22,7 +22,6 @@ import {
 } from "@/state/playground";
 
 import { track } from "../../analytics";
-import { usePlaygroundSettings } from "../../hooks/usePlaygroundSettings";
 import { executeProxyRest } from "../fetch-utils/executeProxyRest";
 import { executeProxyStream } from "../fetch-utils/executeProxyStream";
 import type { ProxyRequest } from "../types";
@@ -272,7 +271,7 @@ export const PlaygroundEndpoint = ({
         }
     }, [endpoint, node.title, node.slug, authSchemes, authKeys, formState, baseUrl, setOAuthValue, isDisableProxy]);
 
-    const settings = usePlaygroundSettings();
+    const settings = node.playground;
 
     return (
         <FernTooltipProvider>
