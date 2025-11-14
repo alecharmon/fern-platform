@@ -38,6 +38,13 @@
     &:not(.multiline) {
       .fern-button-text {
         @apply truncate;
+
+        &:has([data-badge-type="status-code"]) {
+          overflow: visible;
+          text-overflow: clip;
+          white-space: nowrap;
+          min-width: max-content;
+        }
       }
     }
 

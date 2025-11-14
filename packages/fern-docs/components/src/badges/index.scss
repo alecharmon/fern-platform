@@ -52,6 +52,13 @@
       text-transform: uppercase;
     }
 
+    &[data-badge-type="status-code"] {
+      flex: 0 0 auto;
+      min-width: max-content;
+      overflow: visible;
+      text-overflow: clip;
+    }
+
     &.small[data-http-method="PATCH"],
     &.small[data-http-method="TRACE"] {
       letter-spacing: -0.025em;

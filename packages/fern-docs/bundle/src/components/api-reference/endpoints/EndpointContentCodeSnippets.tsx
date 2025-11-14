@@ -97,7 +97,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                 getExampleId={getExampleId}
             />
         ) : (
-            <span className="text-(color:--grayscale-a11) line-clamp-1 text-sm">{getExampleId(selectedExample)}</span>
+            <span className="text-(color:--grayscale-a11) text-sm min-w-0">{getExampleId(selectedExample)}</span>
         );
 
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint, node.apiDefinitionId);
@@ -283,9 +283,13 @@ export const EndpointContentCodeSnippets = memo(UnmemoizedEndpointContentCodeSni
 
 export function renderResponseTitle(title: string, statusCode: number | string, hideTitle?: boolean) {
     return (
-        <span className="inline-flex items-center gap-2">
+        <span className="inline-flex items-center gap-2 whitespace-nowrap">
             <StatusCodeBadge statusCode={statusCode} />
-            {!hideTitle && <span className={`text-intent-${statusCodeToIntent(String(statusCode))}`}>{title}</span>}
+            {!hideTitle && (
+                <span className={cn("truncate max-w-full", `text-intent-${statusCodeToIntent(String(statusCode))}`)}>
+                    {title}
+                </span>
+            )}
         </span>
     );
 }
