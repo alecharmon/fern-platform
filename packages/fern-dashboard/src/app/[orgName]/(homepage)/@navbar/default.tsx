@@ -1,9 +1,6 @@
-import { Suspense } from "react";
-
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
-import { DocsNavbarItem } from "@/components/navbar/DocsNavbarItem";
 import { DocsNavbarItems } from "@/components/navbar/DocsNavbarItems";
 import { NavbarCollapseToggle } from "@/components/navbar/NavbarCollapseToggle";
 import { NavbarItem } from "@/components/navbar/NavbarItem";
@@ -23,15 +20,14 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
     try {
         await assertUserHasOrganizationAccess(session.accessToken, orgName);
     } catch (_) {
+        console.warn("[Navbar] User does not have access to organization: ", orgName);
         return null;
     }
 
     return (
         <NavbarWrapper>
             <NavbarWithOverflow>
-                <Suspense fallback={<DocsNavbarItem />}>
-                    <DocsNavbarItems orgName={orgName} />
-                </Suspense>
+                <DocsNavbarItems orgName={orgName} />
                 <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_SDKS_PAGE} orgName={orgName}>
                     <NavbarItem title="SDKs" iconType="sdks" href="/sdks" />
                 </FeatureFlaggedServerSide>

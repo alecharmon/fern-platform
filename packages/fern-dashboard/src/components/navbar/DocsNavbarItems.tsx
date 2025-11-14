@@ -12,7 +12,11 @@ import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 
 import { DocsNavbarItem } from "./DocsNavbarItem";
-import { DocsNavbarSubItems } from "./DocsNavbarSubItems";
+
+export interface DocsSiteData {
+    url: string;
+    urlParam: string;
+}
 
 export async function DocsNavbarItems({ orgName }: { orgName: Auth0OrgName }) {
     const session = await getCurrentSession();
@@ -32,7 +36,6 @@ export async function DocsNavbarItems({ orgName }: { orgName: Auth0OrgName }) {
     }
 
     const docsSites: FdrAPI.dashboard.DocsSite[] = response.docsSites;
-    const firstDocsSite: FdrAPI.dashboard.DocsSite | undefined = docsSites[0];
 
     const isCreateDocsNewSiteEnabled = await isFeatureFlagEnabledForUser(
         PosthogFeatureFlag.ENABLE_CREATE_DOCS_NEW_SITE,
@@ -40,17 +43,23 @@ export async function DocsNavbarItems({ orgName }: { orgName: Auth0OrgName }) {
         orgName
     );
 
+    // Transform docs sites to simple data structure for client
+    const docsSitesData: DocsSiteData[] = docsSites.map((docsSite) => {
+        const url = getDocsSiteUrl(docsSite);
+        return {
+            url,
+            urlParam: constructDocsUrlParam(url)
+        };
+    });
+
+    const firstDocsSiteUrlParam = docsSitesData[0]?.urlParam;
+
     return (
-        <>
-            <DocsNavbarItem
-                hrefForActualLinking={
-                    firstDocsSite != null ? `/docs/${constructDocsUrlParam(getDocsSiteUrl(firstDocsSite))}` : undefined
-                }
-                docsSites={docsSites}
-                orgName={orgName}
-                isCreateDocsNewSiteEnabled={isCreateDocsNewSiteEnabled}
-            />
-            <DocsNavbarSubItems docsSites={docsSites} orgName={orgName} />
-        </>
+        <DocsNavbarItem
+            firstDocsSiteUrlParam={firstDocsSiteUrlParam}
+            docsSitesData={docsSitesData}
+            orgName={orgName}
+            isCreateDocsNewSiteEnabled={isCreateDocsNewSiteEnabled ?? false}
+        />
     );
 }
