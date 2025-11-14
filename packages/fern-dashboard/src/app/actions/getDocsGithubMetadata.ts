@@ -3,6 +3,7 @@
 import { fernToken_admin } from "@fern-api/docs-server";
 
 import type { GithubAuthState } from "@/components/docs-page/GithubSourceClient";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { type Auth0SessionData, getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
@@ -11,7 +12,12 @@ import { getDocsGithubUrl } from "../services/dal/github/getDocsGithubUrl";
 import { validateGithubRepoAccess } from "../services/dal/github/validators";
 import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
 
-async function getMetadata(encodedDocsUrl: DocsUrl, session: Auth0SessionData, orgName: Auth0OrgName, docsUrl: string) {
+async function getMetadata(
+    encodedDocsUrl: EncodedDocsUrl,
+    session: Auth0SessionData,
+    orgName: Auth0OrgName,
+    docsUrl: DocsUrl
+) {
     let githubAuthState: GithubAuthState = {
         validationResult: {
             ok: false,
@@ -94,7 +100,7 @@ export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<{
 }> {
     try {
         const session = await getCurrentSessionOrThrow();
-        const decodedUrl = decodeURIComponent(docsUrl);
+        const decodedUrl = parseDocsUrlParam({ docsUrl });
         const docsMetadata = await getDocsUrlMetadata({
             url: decodedUrl,
             token: fernToken_admin() ?? session.accessToken
