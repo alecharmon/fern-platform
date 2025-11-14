@@ -1,4 +1,4 @@
-import { postToSlack, track } from "@fern-api/docs-server";
+import { track } from "@fern-api/docs-server";
 import { fernToken_admin, getFaiOrigin } from "@fern-api/docs-server/env-variables";
 import { FernAIClient } from "@fern-api/fai-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
@@ -173,10 +173,6 @@ export async function runRouteForCohere({
 
                     const msg = `encountered a ${errorKind} for query '${lastUserMessage}: ${JSON.stringify(error)}'`;
                     console.error(msg);
-                    postToSlack(
-                        "#search-notifs",
-                        `:rotating_light: [${domain}] [source: ${chatSource}] [languageModel: ${JSON.stringify(languageModel)}] [conversationId: ${conversationId}] \`Ask AI\` encountered a ${errorKind}`
-                    );
                 },
                 onFinish: async (e) => {
                     const end = Date.now();
