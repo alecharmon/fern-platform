@@ -367,6 +367,11 @@ export async function GET(
     const { host, domain } = await props.params;
     revalidateTag(domain);
 
+    const shouldRegenerateParam = req.nextUrl.searchParams.get("regenerate");
+    if (shouldRegenerateParam !== "false") {
+        revalidateTag(`${domain}:mdx`);
+    }
+
     // delay to ensure invalidation propagates before cache is accessed
     await new Promise((resolve) => setTimeout(resolve, 500));
 

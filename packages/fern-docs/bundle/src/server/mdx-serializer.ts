@@ -182,7 +182,7 @@ export function createCachedMdxSerializer(
                 }
             },
             [domain, content, cacheSeed()],
-            { tags: [domain, "serializeMdx"] }
+            { tags: [`${domain}:mdx`, "serializeMdx"] }
         );
 
         try {
