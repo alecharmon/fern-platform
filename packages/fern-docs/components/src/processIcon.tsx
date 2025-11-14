@@ -27,7 +27,7 @@ export const processIcon = ({
     forceClientRender,
     files
 }: ProcessIconOptions): ReactNode | undefined => {
-    if (!hasMetadata(node) && node.type !== "link") {
+    if (!hasMetadata(node) && node.type !== "link" && node.type !== "productLink") {
         return undefined;
     }
 
