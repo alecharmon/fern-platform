@@ -4,6 +4,7 @@
 import * as FernRegistry from "../../../../../../../../../index";
 export interface NavbarLinkMetadata extends FernRegistry.docs.v1.commons.WithPermissions {
     url: FernRegistry.Url;
+    target: FernRegistry.LinkTarget | undefined;
     text: string | undefined;
     icon: string | undefined;
     rightIcon: string | undefined;

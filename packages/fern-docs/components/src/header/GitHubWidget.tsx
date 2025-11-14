@@ -31,7 +31,17 @@ function GitHubStat({
     );
 }
 
-export function GitHubWidget({ repo, className, id }: { repo: string; className?: string; id?: string }) {
+export function GitHubWidget({
+    repo,
+    className,
+    id,
+    target
+}: {
+    repo: string;
+    className?: string;
+    id?: string;
+    target?: string;
+}) {
     const href = `https://api.github.com/repos/${repo}`;
     preload(href, { as: "fetch", crossOrigin: "anonymous" });
 
@@ -64,6 +74,7 @@ export function GitHubWidget({ repo, className, id }: { repo: string; className?
             id={id}
             className={cn("h-10", className)}
             scroll={true}
+            target={target}
         >
             <div className="font-medium">{repo}</div>
             <div className="flex gap-2 text-xs">

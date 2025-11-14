@@ -178,7 +178,8 @@ export class NavigationConfigConverter {
                                 type: "link",
                                 title: tab.title,
                                 url: FernNavigation.V1.Url(tab.url),
-                                icon: tab.icon
+                                icon: tab.icon,
+                                target: tab.target
                             }));
                         } else if (tab.type === "changelog") {
                             const slug = parentSlug.apply(tab);
@@ -300,7 +301,8 @@ export class NavigationConfigConverter {
                     type: "link",
                     title: link.title,
                     url: FernNavigation.V1.Url(link.url),
-                    icon: link.icon
+                    icon: link.icon,
+                    target: link.target
                 })),
             section: (section) =>
                 this.#idgen.with(section.urlSlug, (id) => {

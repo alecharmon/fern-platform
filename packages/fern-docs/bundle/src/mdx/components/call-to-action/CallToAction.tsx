@@ -22,6 +22,7 @@ export declare namespace CallToAction {
         buttonIcon?: string;
         buttonIconSize?: number;
         className?: string;
+        target?: string;
     }
 }
 
@@ -39,7 +40,8 @@ export const CallToAction: React.FC<CallToAction.Props> = ({
     buttonPosition = "right",
     buttonIcon,
     buttonIconSize = 8,
-    className
+    className,
+    target = "_blank"
 }) => {
     if (isNaN(iconSize)) {
         iconSize = 8;
@@ -96,7 +98,7 @@ export const CallToAction: React.FC<CallToAction.Props> = ({
             <div className="w-full h-full flex items-center justify-center">
                 <FernLinkButton
                     href={new URL(href)}
-                    target="_blank"
+                    target={target}
                     rightIcon={buttonIcon}
                     variant="filled"
                     intent="primary"

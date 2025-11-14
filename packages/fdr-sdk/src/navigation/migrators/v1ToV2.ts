@@ -253,7 +253,8 @@ export class FernNavigationV1ToLatest {
             id: FernNavigation.NodeId(node.id),
             title: node.title,
             url: node.url,
-            icon: node.icon
+            icon: node.icon,
+            target: node.target
         };
         return latest;
     };
@@ -369,6 +370,7 @@ export class FernNavigationV1ToLatest {
             id: FernNavigation.NodeId(node.id),
             title: node.title,
             href: node.href,
+            target: node.target,
             default: node.default,
             productId: FernNavigation.ProductId(node.productId),
             subtitle: node.subtitle,

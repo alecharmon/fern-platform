@@ -13,6 +13,7 @@ export * from "./TypeId";
 export * from "./PageId";
 export * from "./FileId";
 export * from "./Url";
+export * from "./LinkTarget";
 export * from "./JqString";
 export * from "./PropertyKey";
 export * from "./RoleId";

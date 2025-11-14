@@ -150,6 +150,7 @@ types:
       title: string
       icon: optional<string>
       url: commons.Url
+      target: optional<commons.LinkTarget>
 
   # nodes with metadata
 
@@ -202,6 +203,9 @@ types:
       href:
         type: commons.Url
         docs: External URL that this product links to
+      target:
+        type: optional<commons.LinkTarget>
+        docs: Target attribute for the link (e.g., blank to open in new tab)
       subtitle:
         type: string
         docs: Couple words for what the product is

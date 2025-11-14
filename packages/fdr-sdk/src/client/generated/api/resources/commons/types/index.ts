@@ -13,6 +13,7 @@ export * from "./TypeId.js";
 export * from "./PageId.js";
 export * from "./FileId.js";
 export * from "./Url.js";
+export * from "./LinkTarget.js";
 export * from "./JqString.js";
 export * from "./PropertyKey.js";
 export * from "./RoleId.js";

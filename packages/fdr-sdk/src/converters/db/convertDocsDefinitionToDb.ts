@@ -277,7 +277,8 @@ export function transformNavigationItemForDb(writeShape: DocsV1Write.NavigationI
                 type: "link",
                 title: writeShape.title,
                 icon: writeShape.icon,
-                url: writeShape.url
+                url: writeShape.url,
+                target: writeShape.target
             };
         case "changelog":
             return { type: "changelog", ...toChangelogDb(writeShape) };

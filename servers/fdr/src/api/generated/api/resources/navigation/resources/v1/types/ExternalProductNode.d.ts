@@ -10,6 +10,8 @@ export interface ExternalProductNode extends FernRegistry.navigation.v1.WithNode
     title: string;
     /** External URL that this product links to */
     href: FernRegistry.Url;
+    /** Target attribute for the link (e.g., blank to open in new tab) */
+    target: FernRegistry.LinkTarget | undefined;
     /** Couple words for what the product is */
     subtitle: string;
     icon: string | undefined;

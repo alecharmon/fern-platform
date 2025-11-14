@@ -214,6 +214,7 @@ types:
       title: string
       icon: optional<string>
       url: rootCommons.Url
+      target: optional<rootCommons.LinkTarget>
 
   UnversionedUntabbedNavigationConfig:
     properties:
@@ -259,6 +260,7 @@ types:
       title: string
       icon: optional<string>
       url: rootCommons.Url
+      target: optional<rootCommons.LinkTarget>
 
   ApiSection:
     availability: deprecated

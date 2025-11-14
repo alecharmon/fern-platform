@@ -15,6 +15,7 @@ export interface ProductDropdownItem {
     subtitle?: string;
     slug?: string;
     href?: string;
+    target?: string;
     defaultSlug?: string;
     icon?: React.ReactNode;
     image?: React.ReactNode;
@@ -48,7 +49,7 @@ export function ProductDropdownClient({
     return (
         <FernDropdown
             value={currentProductId}
-            options={products.map(({ icon, image, productId, title, slug, subtitle, defaultSlug, href }) => {
+            options={products.map(({ icon, image, productId, title, slug, subtitle, defaultSlug, href, target }) => {
                 const productHref =
                     href ??
                     slugToHref(
@@ -66,6 +67,7 @@ export function ProductDropdownClient({
                     subtitle,
                     value: productId,
                     href: productHref,
+                    target,
                     dense: !isDesktop || useDenseLayout,
                     icon,
                     image

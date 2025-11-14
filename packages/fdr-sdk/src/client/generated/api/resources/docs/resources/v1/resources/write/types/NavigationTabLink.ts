@@ -8,4 +8,5 @@ export interface NavigationTabLink {
     title: string;
     icon: string | undefined;
     url: FernRegistry.Url;
+    target: FernRegistry.LinkTarget | undefined;
 }

@@ -6,4 +6,5 @@ export interface LinkMetadata {
     title: string;
     icon: string | undefined;
     url: FernRegistry.Url;
+    target: FernRegistry.LinkTarget | undefined;
 }

@@ -22,6 +22,7 @@ export async function NavbarLinks({ loader }: { loader: DocsLoader }) {
             navbarLinks.push({
                 type: "github",
                 href: link.url,
+                target: link.target,
                 className: undefined,
                 id: undefined
             });
@@ -30,6 +31,7 @@ export async function NavbarLinks({ loader }: { loader: DocsLoader }) {
                 type: "dropdown",
                 links: link.links.map((subLink) => ({
                     href: subLink.url,
+                    target: subLink.target,
                     text: subLink.text,
                     icon: subLink.icon,
                     rightIcon: subLink.rightIcon,
@@ -49,6 +51,7 @@ export async function NavbarLinks({ loader }: { loader: DocsLoader }) {
             navbarLinks.push({
                 type: link.type,
                 href: link.url,
+                target: link.target,
                 text: link.text,
                 icon: link.icon,
                 rightIcon: link.rightIcon,
@@ -84,7 +87,16 @@ function HeaderNavbarLink({
 }) {
     if (navbarLink.type === "github") {
         const repo = getGitHubRepo(navbarLink.href);
-        return repo && <GitHubWidget repo={repo} className={navbarLink.className} id={navbarLink.id} />;
+        return (
+            repo && (
+                <GitHubWidget
+                    repo={repo}
+                    className={navbarLink.className}
+                    id={navbarLink.id}
+                    target={navbarLink.target}
+                />
+            )
+        );
     }
 
     if (navbarLink.type === "dropdown") {
@@ -95,6 +107,7 @@ function HeaderNavbarLink({
                     label: link.text,
                     value: link.href,
                     href: link.href,
+                    target: link.target,
                     icon: processNavbarIcon({ icon: link.icon, files }),
                     rightElement: processNavbarIcon({ icon: link.rightIcon, files })
                 }))}
@@ -144,6 +157,7 @@ function HeaderNavbarLink({
             }
             rounded={navbarLink.rounded}
             scroll={true}
+            target={navbarLink.target}
         >
             {navbarLink.text}
         </FernLinkButton>

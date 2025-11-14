@@ -23,6 +23,7 @@ export declare namespace Button {
         intent?: "none" | "primary" | "success" | "warning" | "danger";
         text?: ReactNode;
         href?: string;
+        target?: string;
     }
 }
 
@@ -32,6 +33,7 @@ export function Button({
     small,
     large,
     href,
+    target,
     className,
     ...props
 }: Button.Props): ReactElement<any> {
@@ -47,6 +49,7 @@ export function Button({
                     variant={variant}
                     size={size}
                     className={cn(className, "not-prose")}
+                    target={target}
                 />
             </DisableFernAnchor>
         );

@@ -41,6 +41,13 @@ types:
 
   Url: string
 
+  LinkTarget:
+    enum:
+      - blank
+      - self
+      - parent
+      - top
+
   JqString: string
 
   PropertyKey: string

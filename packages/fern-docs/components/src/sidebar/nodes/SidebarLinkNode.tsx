@@ -27,6 +27,7 @@ export function SidebarLinkNode({ node, icon, depth, className }: SidebarLinkNod
             title={node.title}
             rightElement={<ExternalLink />}
             href={node.url}
+            target={node.target}
             selected={selected}
         />
     );

@@ -36,6 +36,7 @@ export function SidebarTabsList({
                                 tab.type === "link" ? tab.url : slugToHref(hasRedirect(tab) ? tab.pointsTo : tab.slug)
                             }
                             scroll={true}
+                            target={tab.type === "link" ? tab.target : undefined}
                         >
                             <span
                                 className={cn(

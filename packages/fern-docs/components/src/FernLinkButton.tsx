@@ -50,6 +50,7 @@ export const FernLinkButton = forwardRef<HTMLAnchorElement, FernLinkButtonProps>
                     : undefined
             }
             href={String(props.href)}
+            target={props.target}
         >
             {createElement(ButtonContent, { ...props, className: "" })}
         </FernLink>

@@ -48,6 +48,7 @@ export async function ProductDropdown({
             title: product.title,
             slug: product.type === "product" ? (product.slug ?? product.pointsTo) : undefined,
             href: product.type === "productLink" ? product.href : undefined,
+            target: product.type === "productLink" ? product.target : undefined,
             defaultSlug: product.default && product.type === "product" ? slug : undefined,
             icon: processIcon({ node: product, files }),
             subtitle: product.subtitle,

@@ -4,6 +4,7 @@ export interface DefaultNavbarLink extends BaseNavbarLink {
 
 export interface BaseNavbarLink {
     href: string;
+    target: string | undefined;
     text: string | undefined;
     icon: string | undefined;
     rightIcon: string | undefined;
@@ -16,6 +17,7 @@ export interface BaseNavbarLink {
 export interface GithubNavbarLink {
     type: "github";
     href: string;
+    target: string | undefined;
     className: string | undefined;
     id: string | undefined;
 }

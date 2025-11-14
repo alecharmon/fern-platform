@@ -12,9 +12,17 @@ import { FernSelectionItem } from "./FernSelectionItem";
  * @param highlighted: whether the item is highlighted
  * @returns the rendered product item
  */
-export function FernProductItem({ option, dense = false }: { option: FernDropdown.ProductOption; dense?: boolean }) {
+export function FernProductItem({
+    option,
+    dense = false,
+    target
+}: {
+    option: FernDropdown.ProductOption;
+    dense?: boolean;
+    target?: string;
+}) {
     return (
-        <a href={option.href}>
+        <a href={option.href} target={target}>
             <div className={cn("fern-product-item", option.className)}>
                 <FernSelectionItem
                     image={option.image}

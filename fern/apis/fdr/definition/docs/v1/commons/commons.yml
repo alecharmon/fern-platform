@@ -373,6 +373,7 @@ types:
       - WithPermissions
     properties:
       url: rootCommons.Url
+      target: optional<rootCommons.LinkTarget>
       text: optional<string>
       icon: optional<string>
       rightIcon: optional<string>
@@ -383,6 +384,7 @@ types:
       - WithPermissions
     properties:
       url: rootCommons.Url # github repo url
+      target: optional<rootCommons.LinkTarget>
       
   WithPermissions:
     properties:

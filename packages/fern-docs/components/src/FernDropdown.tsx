@@ -42,6 +42,7 @@ export declare namespace FernDropdown {
         className?: string;
         labelClassName?: string;
         href?: string;
+        target?: string;
         dense?: boolean;
     }
 
@@ -57,6 +58,7 @@ export declare namespace FernDropdown {
         className?: string;
         labelClassName?: string;
         href?: string;
+        target?: string;
     }
     export interface SeparatorOption {
         type: "separator";
@@ -260,7 +262,12 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
                                                 maxHelperTextWidth={maxHelperTextWidth}
                                             />
                                         ) : option.type === "product" ? (
-                                            <FernProductItem key={option.id} option={option} dense={option.dense} />
+                                            <FernProductItem
+                                                key={option.id}
+                                                option={option}
+                                                dense={option.dense}
+                                                target={option.target}
+                                            />
                                         ) : option.type === "auth" ? (
                                             <FernDropdownItemAuth key={option.key} option={option} />
                                         ) : option.type === "separator" ? (
@@ -388,6 +395,7 @@ function FernDropdownItemValue({
                         {
                             ref: option.value === value ? activeRef : undefined,
                             href: option.href,
+                            target: option.target,
                             className: cn("fern-dropdown-item", option.className)
                         } as any,
                         renderButtonContent()

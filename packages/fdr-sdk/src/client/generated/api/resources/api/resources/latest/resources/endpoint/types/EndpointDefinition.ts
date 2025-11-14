@@ -13,6 +13,10 @@ export interface EndpointDefinition
     path: FernRegistry.api.latest.PathPart[];
     displayName: string | undefined;
     operationId: string | undefined;
+    /**
+     * Legacy field. List of auth scheme IDs that apply to this endpoint (flattened set).
+     * Empty list means no auth required. Use multiAuth for precise OR-of-AND semantics.
+     */
     auth: FernRegistry.AuthSchemeId[] | undefined;
     multiAuth: FernRegistry.MultipleAuthType[] | undefined;
     defaultEnvironment: FernRegistry.EnvironmentId | undefined;

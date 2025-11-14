@@ -7,4 +7,5 @@ export interface LinkNode extends FernRegistry.navigation.v1.WithNodeId {
     title: string;
     icon: string | undefined;
     url: FernRegistry.Url;
+    target: FernRegistry.LinkTarget | undefined;
 }

@@ -4,4 +4,5 @@
 import * as FernRegistry from "../../../../../../../../../index";
 export interface NavbarGithubMetadata extends FernRegistry.docs.v1.commons.WithPermissions {
     url: FernRegistry.Url;
+    target: FernRegistry.LinkTarget | undefined;
 }

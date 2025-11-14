@@ -25,6 +25,7 @@ export function HeaderTabsList({
                         href={tab.type === "link" ? tab.url : slugToHref(hasRedirect(tab) ? tab.pointsTo : tab.slug)}
                         scroll={true}
                         id={tab.id}
+                        target={tab.type === "link" ? tab.target : undefined}
                     >
                         {tab.type !== "link" && tab.authed ? <Lock /> : processIcon({ node: tab, files })}
                         <span className="truncate">{tab.title}</span>
