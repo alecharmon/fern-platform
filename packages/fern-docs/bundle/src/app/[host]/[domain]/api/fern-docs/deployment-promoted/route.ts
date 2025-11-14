@@ -52,7 +52,15 @@ export async function POST(request: NextRequest) {
                             !domain.endsWith(`.${FERN_DOCS_DEV_BUILDWITHFERN_COM}`)
                     )
                     .map(withoutStaging)
-            );
+            ).sort((a, b) => {
+                if (a === "alchemy.com") {
+                    return -1;
+                }
+                if (b === "alchemy.com") {
+                    return 1;
+                }
+                return 0;
+            });
         } catch (err) {
             console.error(`[deployment-promoted:${request.url}] Error retrieving domains from kv:`, err);
             throw err;
