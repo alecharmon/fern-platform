@@ -60,10 +60,14 @@ export class GitHubLoader implements GitLoader {
     private repo: string;
 
     constructor(
-        params: { githubUrl: string } | { owner: string; repo: string },
+        params: string | { githubUrl: string } | { owner: string; repo: string },
         authMode: GitHubAuthMode = "fern-bot"
     ) {
-        if ("githubUrl" in params) {
+        if (typeof params === "string") {
+            const parsed = getOwnerAndRepoFromGithubUrl(params);
+            this.owner = parsed.owner ?? "";
+            this.repo = parsed.repo ?? "";
+        } else if ("githubUrl" in params) {
             const parsed = getOwnerAndRepoFromGithubUrl(params.githubUrl);
             this.owner = parsed.owner ?? "";
             this.repo = parsed.repo ?? "";
