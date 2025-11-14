@@ -1,11 +1,11 @@
 {
   "question": "Does Fern support automatic retries for failed API requests?",
-  "ground_truth": "Yes, Fern SDKs include automatic retries for failed requests with exponential backoff.",
+  "ground_truth": "Yes, Fern SDKs include automatic retries for failed requests with exponential backoff. This feature is available only for the Pro and Enterprise plans.",
   "metadata": {
     "category": "markdown",
     "source": "markdown_generator",
     "slug": "capabilities",
     "domain": "buildwithfern.com",
-    "cited_context": "Retries with backoff - Automatically retry failed requests with exponential backoff"
+    "cited_context": "Retries with backoff - Automatically retry failed requests with exponential backoff. This feature is available only for the Pro and Enterprise plans. To get started, reach out to support@buildwithfern.com"
   }
 }
