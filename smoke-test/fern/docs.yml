@@ -27,6 +27,9 @@ tabs:
   events-api:
     display-name: Events API
     icon: bolt
+  grpc-api:
+    display-name: gRPC API
+    icon: code
   changelog:
     display-name: Changelog
     icon: clock
@@ -60,6 +63,10 @@ navigation:
     layout:
       - api: Events API
         api-name: events-api
+  - tab: grpc-api
+    layout:
+      - api: gRPC API
+        api-name: grpc-api
   - tab: changelog
 navbar-links:
   - type: minimal
