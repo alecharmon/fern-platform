@@ -132,7 +132,7 @@ RUN log "Setting up Next.js app..." && \
     cd /nextapp && \
     node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));" && \
     # Install esbuild globally to ensure it's available everywhere
-    npm i -g esbuild@0.25.9 2>&1 | add-timestamps && \
+    npm i -g esbuild@0.27.0 2>&1 | add-timestamps && \
     # Ensure Next.js cache directory exists and is writable for restricted mode
     mkdir -p /nextapp/packages/fern-docs/bundle/.next/cache && \
     chmod -R 777 /nextapp/packages/fern-docs/bundle/.next && \

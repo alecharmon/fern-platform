@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-EXPECTED_VERSION="0.25.9"
+EXPECTED_VERSION="0.27.0"
 PACKAGE_JSON="packages/fern-docs/bundle/package.json"
 
 echo "Checking esbuild version in $PACKAGE_JSON..."

@@ -41,10 +41,10 @@ async function copyModules(destPath) {
     try {
         if (isWindows) {
             await execAsync(
-                `copy node_modules/.pnpm/esbuild@0.25.9 ${destPath}\\ && copy node_modules/.pnpm/@esbuild+* ${destPath}\\`
+                `copy node_modules/.pnpm/esbuild@0.27.0 ${destPath}\\ && copy node_modules/.pnpm/@esbuild+* ${destPath}\\`
             );
         } else {
-            await execAsync(`cp -r node_modules/.pnpm/esbuild@0.25.9 node_modules/.pnpm/@esbuild+* ${destPath}/`);
+            await execAsync(`cp -r node_modules/.pnpm/esbuild@0.27.0 node_modules/.pnpm/@esbuild+* ${destPath}/`);
         }
     } catch (error) {
         console.error("Error copying modules:", error.message);
