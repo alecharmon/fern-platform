@@ -51,15 +51,16 @@ async def post_chat_completion(
 
         maybe_system_prompt = request.system_prompt
         model = request.model or DEFAULT_MODEL
+        max_tokens = request.max_tokens
 
         if model in SUPPORTED_COHERE_MODELS:
             output_turns, citations = await get_cohere_response(
-                maybe_system_prompt, model, messages, domain, rag_records
+                maybe_system_prompt, model, messages, domain, rag_records, max_tokens=max_tokens
             )
 
         elif model in SUPPORTED_ANTHROPIC_MODELS:
             output_turns, citations = await get_anthropic_response(
-                maybe_system_prompt, model, messages, domain, rag_records
+                maybe_system_prompt, model, messages, domain, rag_records, max_tokens=max_tokens
             )
 
         output: PostChatCompletionResponse = PostChatCompletionResponse(

@@ -23,6 +23,7 @@ async def get_anthropic_response(
     domain: str,
     rag_records: list[str],
     mode: ChatMode = ChatMode.MARKDOWN,
+    max_tokens: int = 1000,
 ) -> tuple[list[dict[str, str]], list[str]]:
     async def _handle_anthropic_tool_use(tool_use: Any, domain: str) -> tuple[str, list[str]]:
         query = tool_use.input["query"]
@@ -47,7 +48,7 @@ async def get_anthropic_response(
                 system=system_prompt,
                 model=model,
                 messages=current_messages,
-                max_tokens=1000,
+                max_tokens=max_tokens,
                 tools=[SEARCH_TOOL_ANTHROPIC],
             )
 

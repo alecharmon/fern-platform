@@ -15,6 +15,7 @@ async def get_cohere_response(
     messages: list[dict[str, Any]],
     domain: str,
     rag_records: list[str],
+    max_tokens: int = 1000,
 ) -> tuple[list[dict[str, str]], list[str]]:
     async def _handle_cohere_tool_use(tool_use: Any, domain: str) -> tuple[str, list[str]]:
         args = tool_use.function.arguments
@@ -68,7 +69,7 @@ async def get_cohere_response(
         resp = await cohere_client.chat(
             model=model,
             messages=cohere_messages,
-            max_tokens=1000,
+            max_tokens=max_tokens,
             temperature=0.2,
             tools=[SEARCH_TOOL_COHERE],
         )
