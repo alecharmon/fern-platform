@@ -43,10 +43,14 @@ types:
 
   LinkTarget:
     enum:
-      - blank
-      - self
-      - parent
-      - top
+      - name: blank
+        value: _blank
+      - name: self
+        value: _self
+      - name: parent
+        value: _parent
+      - name: top
+        value: _top
 
   JqString: string
 
