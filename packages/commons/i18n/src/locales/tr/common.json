@@ -284,7 +284,7 @@
     "openInChatGPT": "ChatGPT'de aç",
     "openInClaude": "Claude'da aç",
     "developerFriendlyDocs": "API'niz için geliştirici dostu dokümantasyon",
-    "buildWith": "İle oluştur"
+    "builtWith": "İle oluşturuldu"
   },
   "environments": {
     "prod": "Prod",

@@ -284,7 +284,7 @@
     "openInChatGPT": "Abrir no ChatGPT",
     "openInClaude": "Abrir no Claude",
     "developerFriendlyDocs": "Documentação amigável para desenvolvedores da sua API",
-    "buildWith": "Construir com"
+    "builtWith": "Construído com"
   },
   "environments": {
     "prod": "Prod",

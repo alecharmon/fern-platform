@@ -284,7 +284,7 @@
     "openInChatGPT": "在 ChatGPT 中打开",
     "openInClaude": "在 Claude 中打开",
     "developerFriendlyDocs": "适合开发者的 API 文档",
-    "buildWith": "使用以下工具构建"
+    "builtWith": "使用以下工具构建完成"
   },
   "environments": {
     "prod": "生产",

@@ -284,7 +284,7 @@
     "openInChatGPT": "ChatGPTで開く",
     "openInClaude": "Claudeで開く",
     "developerFriendlyDocs": "APIの開発者向けドキュメント",
-    "buildWith": "で構築"
+    "builtWith": "で構築済み"
   },
   "environments": {
     "prod": "本番",

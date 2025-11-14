@@ -284,7 +284,7 @@
     "openInChatGPT": "Άνοιγμα στο ChatGPT",
     "openInClaude": "Άνοιγμα στο Claude",
     "developerFriendlyDocs": "Φιλική προς τους προγραμματιστές τεκμηρίωση για το API σας",
-    "buildWith": "Δημιουργία με"
+    "builtWith": "Δημιουργήθηκε με"
   },
   "environments": {
     "prod": "Παραγωγή",

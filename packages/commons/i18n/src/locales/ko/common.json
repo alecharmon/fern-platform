@@ -284,7 +284,7 @@
     "openInChatGPT": "ChatGPT에서 열기",
     "openInClaude": "Claude에서 열기",
     "developerFriendlyDocs": "API를 위한 개발자 친화적 문서",
-    "buildWith": "구축 도구"
+    "builtWith": "구축됨"
   },
   "environments": {
     "prod": "운영",

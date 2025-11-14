@@ -42,7 +42,7 @@ export const BuiltWithFern = forwardRef<HTMLAnchorElement, BuiltWithFernProps>(
                         onPointerMove={composeEventHandlers(props.onPointerMove, onPointerMove)}
                     >
                         <span className="text-(color:--grayscale-a11) whitespace-nowrap text-xs">
-                            {t(lang).documentation.buildWith}
+                            {t(lang).documentation.builtWith}
                         </span>
                         <FernLogo
                             fill={isHovering ? FernLogoFill.Default : FernLogoFill.Muted}

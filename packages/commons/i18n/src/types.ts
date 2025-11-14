@@ -294,7 +294,7 @@ export type Translations = {
         openInChatGPT: string;
         openInClaude: string;
         developerFriendlyDocs: string;
-        buildWith: string;
+        builtWith: string;
     };
 
     environments: {
