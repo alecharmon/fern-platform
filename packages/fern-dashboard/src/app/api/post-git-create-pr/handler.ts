@@ -1,5 +1,8 @@
-import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
+import type { GitOperationError } from "@fern-api/docs-loader";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
+
+export type PostCreatePrErrors = GitOperationError | { type: "NOT_LOGGED_IN" };
 
 export default async function postCreatePr(request: {
     owner: string;
@@ -9,49 +12,47 @@ export default async function postCreatePr(request: {
     title: string;
     body?: string;
     draft?: boolean;
-}): Promise<{
-    success: boolean;
-    error?: string;
-    prUrl?: string;
-    prNumber?: number;
-    response?: any;
-}> {
+}): Promise<
+    | {
+          success: true;
+          prUrl: string;
+          prNumber: number;
+      }
+    | {
+          success: false;
+          error: PostCreatePrErrors;
+      }
+> {
+    // 1. Check user session
     const session = await getCurrentSession();
     if (session == null) {
-        return { success: false, error: "No session found" };
+        return { success: false, error: { type: "NOT_LOGGED_IN" } };
     }
 
-    const octokitResult = await getFernBotOctokitForRepo(request.owner, request.repo);
+    // 2. Get GitLoader instance
+    const loader = getGitLoaderByOwnerRepo(request.owner, request.repo);
 
-    if (!octokitResult.ok) {
-        throw new Error(`Failed to get GitHub client: ${octokitResult.error.type}`);
-    }
+    // 3. Perform git operation
+    const result = await loader.createPullRequest?.({
+        owner: request.owner,
+        repo: request.repo,
+        head: request.head,
+        base: request.base,
+        title: request.title,
+        body: request.body,
+        draft: request.draft
+    });
 
-    const octokit = octokitResult.octokit;
-
-    try {
-        // Create the pull request
-        const response = await octokit.request("POST /repos/{owner}/{repo}/pulls", {
-            owner: request.owner,
-            repo: request.repo,
-            head: request.head,
-            base: request.base,
-            title: request.title,
-            body: request.body,
-            draft: request.draft || false
-        });
-
-        return {
-            success: true,
-            prUrl: response.data.html_url,
-            prNumber: response.data.number,
-            response
-        };
-    } catch (error) {
-        console.error("Failed to create pull request", error);
+    if (!result) {
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Unknown error occurred"
+            error: { type: "UNKNOWN_ERROR", message: "createPullRequest method not available on loader" }
         };
+    }
+
+    if (result.type === "ok") {
+        return { success: true, prUrl: result.prUrl, prNumber: result.prNumber };
+    } else {
+        return { success: false, error: result.error };
     }
 }

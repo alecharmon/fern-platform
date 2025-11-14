@@ -1,16 +1,30 @@
+// Re-export GitLoader types for convenience
+export type {
+    CreateBranchRequest,
+    CreateBranchResult,
+    CreateCommitRequest,
+    CreateCommitResult,
+    CreatePullRequestRequest,
+    CreatePullRequestResult,
+    CreateRepositoryRequest,
+    CreateRepositoryResult,
+    GitAccessError,
+    GitCommitableFile,
+    GitOperationError,
+    RepositoryFile,
+    UpdatePullRequestRequest,
+    UpdatePullRequestResult,
+    UpdatePullRequestStatusRequest,
+    UpdatePullRequestStatusResult,
+    ValidateAccessRequest,
+    ValidateAccessResult
+} from "@fern-api/docs-loader";
+
+// GitHub-specific file mode type
 export type GITHUB_FILE_MODE = "100644" | "100755" | "040000" | "160000" | "120000";
-export type GithubCommitableFile =
-    | {
-          path: string;
-          delete: true;
-          mode?: GITHUB_FILE_MODE;
-      }
-    | {
-          path: string;
-          content: string;
-          mode?: GITHUB_FILE_MODE;
-          delete?: false;
-      };
+
+// For backward compatibility
+export type { GitCommitableFile as GithubCommitableFile } from "@fern-api/docs-loader";
 
 export type GithubRepo = {
     name: string;

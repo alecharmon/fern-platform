@@ -1,12 +1,18 @@
 "use server";
 
-import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
+import type { GitAccessError, GitOperationError } from "@fern-api/docs-loader";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
+import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
 import type { DocsUrl } from "@/utils/types";
 
 import { assertUserHasOrganizationAccess } from "../organization";
+
+export type CreateBranchErrors =
+    | GitAccessError
+    | GitOperationError
+    | { type: "NOT_LOGGED_IN" }
+    | { type: "ORG_ACCESS_DENIED"; message: string };
 
 export default async function createBranchIfNotExists(request: {
     owner: string;
@@ -19,96 +25,65 @@ export default async function createBranchIfNotExists(request: {
     | {
           success: true;
           baseSha: string;
-          response: any;
+          alreadyExists: boolean;
       }
     | {
           success: false;
-          error: string;
+          error: CreateBranchErrors;
       }
 > {
+    // 1. Check user session
     const session = await getCurrentSession();
     if (session == null) {
-        return { success: false, error: "No session found" };
+        return { success: false, error: { type: "NOT_LOGGED_IN" } };
     }
 
+    // 2. Check org membership
     try {
         await assertUserHasOrganizationAccess(session.accessToken, request.orgName);
-    } catch (_) {
+    } catch (error) {
         return {
             success: false,
-            error: "User is not a member of the specified organization"
+            error: {
+                type: "ORG_ACCESS_DENIED",
+                message: error instanceof Error ? error.message : "User is not a member of the organization"
+            }
         };
     }
 
-    const result = await validateGithubRepoAccess(request.orgName, request.site, {
-        type: "owner-repo",
+    // 3. Get GitLoader instance
+    const loader = getGitLoaderByOwnerRepo(request.owner, request.repo);
+
+    // 4. Validate repository access
+    const accessResult = await loader.validateAccess?.({
         owner: request.owner,
-        repo: request.repo
+        repo: request.repo,
+        site: request.site,
+        orgName: request.orgName
     });
 
-    if (!result.ok) {
-        return { success: false, error: result.error.type };
+    if (accessResult?.type === "error") {
+        return { success: false, error: accessResult.error };
     }
 
-    const octokitResult = await getFernBotOctokitForRepo(request.owner, request.repo);
+    // 5. Perform git operation
+    const result = await loader.createBranch?.({
+        owner: request.owner,
+        repo: request.repo,
+        branch: request.branch,
+        baseBranch: request.baseBranch
+    });
 
-    if (!octokitResult.ok) {
-        throw new Error(`Failed to get GitHub client: ${octokitResult.error.type}`);
-    }
-
-    const octokit = octokitResult.octokit;
-
-    try {
-        // Check if the branch already exists
-        try {
-            const existingBranchResponse = await octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", {
-                owner: request.owner,
-                repo: request.repo,
-                ref: `heads/${request.branch}`
-            });
-
-            // Branch exists, return success with existing branch data
-            return {
-                success: true,
-                baseSha: existingBranchResponse.data.object.sha,
-                response: existingBranchResponse
-            };
-        } catch (branchCheckError: any) {
-            // Branch doesn't exist (404), continue to create it
-            if (branchCheckError.status !== 404) {
-                throw branchCheckError;
-            }
-        }
-
-        // Get the latest commit SHA on base branch
-        const {
-            data: {
-                object: { sha: baseSha }
-            }
-        } = await octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", {
-            owner: request.owner,
-            repo: request.repo,
-            ref: `heads/${request.baseBranch}`
-        });
-
-        // Create the new branch
-        const response = await octokit.request("POST /repos/{owner}/{repo}/git/refs", {
-            owner: request.owner,
-            repo: request.repo,
-            ref: `refs/heads/${request.branch}`,
-            sha: baseSha
-        });
-
-        return {
-            success: true,
-            baseSha,
-            response
-        };
-    } catch (error) {
-        console.error("[createBranchIfNotExists] Failed to create branch:", error);
+    if (!result) {
         return {
             success: false,
-            error: `Unknown error occurred: ${error}` // TODO: Add error message
+            error: { type: "UNKNOWN_ERROR", message: "createBranch method not available on loader" }
         };
+    }
+
+    if (result.type === "ok") {
+        return { success: true, baseSha: result.baseSha, alreadyExists: result.alreadyExists };
+    } else {
+        return { success: false, error: result.error };
     }
 }

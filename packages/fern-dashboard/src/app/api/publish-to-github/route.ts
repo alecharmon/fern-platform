@@ -24,9 +24,9 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const validatedBody = requestSchema.parse(body);
 
-        const result = await handler(validatedBody);
+        const result = await handler(validatedBody as Parameters<typeof handler>[0]);
 
-        if (result.error) {
+        if ("error" in result) {
             return NextResponse.json({ error: result.error }, { status: 400 });
         }
 

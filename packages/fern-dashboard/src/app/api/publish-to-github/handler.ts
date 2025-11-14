@@ -1,17 +1,17 @@
 "use server";
 
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import type { RepositoryFile } from "@fern-api/docs-loader";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
 import { Readable } from "stream";
 import { finished } from "stream/promises";
 import unzipper from "unzipper";
-
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import postGitRepository, { type RepositoryFile } from "@/app/services/dal/github/postGitRepository";
+import postGitRepository from "@/app/services/dal/github/postGitRepository";
 
-interface PublishToGithubRequest {
+export interface PublishToGithubRequest {
     orgName: Auth0OrgName;
     docsSiteUrl: string;
     docsSiteName: string;
@@ -107,7 +107,7 @@ export default async function handler(data: PublishToGithubRequest): Promise<
             throw new Error("GitHub repository owner not configured");
         }
 
-        // Create GitHub repository
+        // Create GitHub repository using postGitRepository which handles org auth
         const githubResult = await postGitRepository({
             orgName: data.orgName,
             owner: demoCreationBotOwner,

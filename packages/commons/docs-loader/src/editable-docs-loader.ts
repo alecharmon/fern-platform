@@ -165,9 +165,11 @@ export interface FernProject {
 }
 
 /**
- * The GitLoader is used to get docs.yml and other files from a remote git repository.
+ * The GitLoader is used to get docs.yml and other files from a remote git repository,
+ * as well as perform write operations like creating commits, branches, and pull requests.
  */
 export interface GitLoader {
+    // Read operations
     getFernProjectBySite(owner: string, repo: string, site: string): Promise<GetFernProjectResult>;
     getDocsYml(owner: string, repo: string, site: string, ref?: string): Promise<GetDocsYmlResult>;
     getDocsYmlAndReferences(
@@ -177,7 +179,119 @@ export interface GitLoader {
         ref?: string
     ): Promise<GetDocsYmlAndReferencesResult>;
     getFernConfigJson(owner: string, repo: string, site: string): Promise<GetFernConfigJsonResult>;
+
+    // Authorization
+    validateAccess(request: ValidateAccessRequest): Promise<ValidateAccessResult>;
+
+    // Write operations
+    createCommit?(request: CreateCommitRequest): Promise<CreateCommitResult>;
+    createBranch?(request: CreateBranchRequest): Promise<CreateBranchResult>;
+    createPullRequest?(request: CreatePullRequestRequest): Promise<CreatePullRequestResult>;
+    updatePullRequest?(request: UpdatePullRequestRequest): Promise<UpdatePullRequestResult>;
+    updatePullRequestStatus?(request: UpdatePullRequestStatusRequest): Promise<UpdatePullRequestStatusResult>;
+    createRepository?(request: CreateRepositoryRequest): Promise<CreateRepositoryResult>;
 }
+
+// Authorization types
+export interface ValidateAccessRequest {
+    owner: string;
+    repo: string;
+    site: string;
+    orgName: string;
+}
+
+export type ValidateAccessResult = { type: "ok" } | { type: "error"; error: GitAccessError };
+
+export type GitAccessError =
+    | { type: "BOT_NOT_INSTALLED"; owner: string; repo: string }
+    | { type: "CONFIG_ORG_MISMATCH"; expected: string; actual: string }
+    | { type: "CONFIG_MISSING" }
+    | { type: "CONFIG_MALFORMED"; message: string }
+    | { type: "UNEXPECTED_ERROR"; message: string };
+
+// Write operation request types
+export interface CreateCommitRequest {
+    owner: string;
+    repo: string;
+    branch: string;
+    message: string;
+    files: GitCommitableFile[];
+}
+
+export interface CreateBranchRequest {
+    owner: string;
+    repo: string;
+    branch: string;
+    baseBranch: string;
+}
+
+export interface CreatePullRequestRequest {
+    owner: string;
+    repo: string;
+    head: string;
+    base: string;
+    title: string;
+    body?: string;
+    draft?: boolean;
+}
+
+export interface UpdatePullRequestRequest {
+    owner: string;
+    repo: string;
+    prNumber: number;
+    title?: string;
+    body?: string;
+}
+
+export interface UpdatePullRequestStatusRequest {
+    owner: string;
+    repo: string;
+    branch: string;
+    status: "open" | "draft";
+    baseBranch?: string;
+}
+
+export interface CreateRepositoryRequest {
+    owner: string;
+    repoName: string;
+    description?: string;
+    isPrivate?: boolean;
+    files: RepositoryFile[];
+}
+
+export interface RepositoryFile {
+    path: string;
+    content: string;
+}
+
+export type GitCommitableFile = { path: string; delete: true } | { path: string; content: string; delete?: false };
+
+// Write operation result types
+export type GitOperationError =
+    | { type: "OPERATION_FAILED"; message: string }
+    | { type: "RESOURCE_NOT_FOUND"; message: string }
+    | { type: "RESOURCE_ALREADY_EXISTS"; message: string }
+    | { type: "UNKNOWN_ERROR"; message: string };
+
+export type CreateCommitResult = { type: "ok"; commitSha: string } | { type: "error"; error: GitOperationError };
+
+export type CreateBranchResult =
+    | { type: "ok"; baseSha: string; alreadyExists: boolean }
+    | { type: "error"; error: GitOperationError };
+
+export type CreatePullRequestResult =
+    | { type: "ok"; prUrl: string; prNumber: number }
+    | { type: "error"; error: GitOperationError };
+
+export type UpdatePullRequestResult = { type: "ok" } | { type: "error"; error: GitOperationError };
+
+export type UpdatePullRequestStatusResult =
+    | { type: "ok"; status: "open" | "draft"; prNumber: number; prUrl: string }
+    | { type: "error"; error: GitOperationError };
+
+export type CreateRepositoryResult =
+    | { type: "ok"; repoUrl: string; htmlUrl: string }
+    | { type: "error"; error: GitOperationError };
 
 export const createEditableDocsLoader = async ({
     host,

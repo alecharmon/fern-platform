@@ -1,20 +1,36 @@
 import "server-only";
 
 import type {
+    CreateBranchRequest,
+    CreateBranchResult,
+    CreateCommitRequest,
+    CreateCommitResult,
+    CreatePullRequestRequest,
+    CreatePullRequestResult,
+    CreateRepositoryRequest,
+    CreateRepositoryResult,
     FernProject,
     GetDocsYmlAndReferencesResult,
     GetDocsYmlResult,
     GetFernConfigJsonResult,
     GetFernProjectResult,
-    GitLoader
+    GitLoader,
+    UpdatePullRequestRequest,
+    UpdatePullRequestResult,
+    UpdatePullRequestStatusRequest,
+    UpdatePullRequestStatusResult,
+    ValidateAccessRequest,
+    ValidateAccessResult
 } from "@fern-api/docs-loader";
 import type { Octokit } from "@octokit/core";
 import yaml from "js-yaml";
 import { revalidateTag, unstable_cache } from "next/cache";
 import z from "zod";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
-import { getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
+import { getDemoCreationBotOctokit, getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
 import { getOwnerAndRepoFromGithubUrl } from "./github";
+import type { GITHUB_FILE_MODE } from "./types";
 
 // Types and interfaces
 interface DocsYmlConfig {
@@ -32,22 +48,42 @@ interface DocsYmlConfig {
     }[];
 }
 
+export type GitHubAuthMode = "fern-bot" | "demo-creation-bot";
+
 /**
- * The GitHubLoader is used to get files from a remote GitHub repository.
+ * The GitHubLoader is used to read from and write to a remote GitHub repository.
  */
 export class GitHubLoader implements GitLoader {
     private getOctokitInstance: () => Promise<Octokit | null>;
     private octokit: Octokit | null = null;
+    private owner: string;
+    private repo: string;
 
-    constructor(githubUrl: string) {
+    constructor(
+        params: { githubUrl: string } | { owner: string; repo: string },
+        authMode: GitHubAuthMode = "fern-bot"
+    ) {
+        if ("githubUrl" in params) {
+            const parsed = getOwnerAndRepoFromGithubUrl(params.githubUrl);
+            this.owner = parsed.owner ?? "";
+            this.repo = parsed.repo ?? "";
+        } else {
+            this.owner = params.owner;
+            this.repo = params.repo;
+        }
+
         this.getOctokitInstance = async () => {
-            const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
-            if (!owner || !repo) {
+            if (!this.owner || !this.repo) {
                 return null;
             }
 
-            const result = await getFernBotOctokitForRepo(owner, repo);
-            return result.ok ? result.octokit : null;
+            if (authMode === "demo-creation-bot") {
+                const result = getDemoCreationBotOctokit();
+                return result.ok ? result.octokit : null;
+            } else {
+                const result = await getFernBotOctokitForRepo(this.owner, this.repo);
+                return result.ok ? result.octokit : null;
+            }
         };
     }
 
@@ -599,6 +635,733 @@ export class GitHubLoader implements GitLoader {
                 pathToFernConfigJson
             }
         };
+    }
+
+    /**
+     * Validates that the bot has access to the repository and that the
+     * fern.config.json organization matches the expected organization.
+     */
+    async validateAccess(request: ValidateAccessRequest): Promise<ValidateAccessResult> {
+        // Check if bot is installed
+        const octokit = await this.getOctokit();
+        if (!octokit) {
+            return {
+                type: "error",
+                error: {
+                    type: "BOT_NOT_INSTALLED",
+                    owner: request.owner,
+                    repo: request.repo
+                }
+            };
+        }
+
+        // Get fern.config.json from the repository
+        const site = parseDocsUrlParam({ docsUrl: request.site });
+        const fernConfigResult = await this.getFernConfigJson(request.owner, request.repo, site);
+
+        if (fernConfigResult.type === "error") {
+            // Map fern config errors to access errors
+            const fernError = fernConfigResult.error;
+            switch (fernError.type) {
+                case "FERN_CONFIG_JSON_MISSING":
+                    return {
+                        type: "error",
+                        error: { type: "CONFIG_MISSING" }
+                    };
+                case "FERN_CONFIG_JSON_MALFORMED":
+                    return {
+                        type: "error",
+                        error: {
+                            type: "CONFIG_MALFORMED",
+                            message: fernError.parsingErrorMessage
+                        }
+                    };
+                default:
+                    return {
+                        type: "error",
+                        error: {
+                            type: "UNEXPECTED_ERROR",
+                            message: `Failed to fetch config: ${fernError.type}`
+                        }
+                    };
+            }
+        }
+
+        const fernConfig = fernConfigResult.result;
+
+        // Verify organization matches
+        if (fernConfig.organization !== request.orgName) {
+            return {
+                type: "error",
+                error: {
+                    type: "CONFIG_ORG_MISMATCH",
+                    expected: request.orgName,
+                    actual: fernConfig.organization
+                }
+            };
+        }
+
+        return { type: "ok" };
+    }
+
+    /**
+     * Creates a commit on a branch with the specified files.
+     * Supports file additions, modifications, and deletions.
+     */
+    async createCommit(request: CreateCommitRequest): Promise<CreateCommitResult> {
+        const octokit = await this.getOctokit();
+        if (!octokit) {
+            return {
+                type: "error",
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitHub client"
+                }
+            };
+        }
+
+        try {
+            // Get the current branch SHA
+            let baseSha: string;
+            try {
+                const refResponse = await octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", {
+                    owner: request.owner,
+                    repo: request.repo,
+                    ref: `heads/${request.branch}`
+                });
+
+                if (!refResponse.data.object?.sha) {
+                    throw new Error("Retrieved branch SHA is null");
+                }
+                baseSha = refResponse.data.object.sha;
+            } catch (error) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "RESOURCE_NOT_FOUND",
+                        message: `Branch ${request.branch} not found: ${error instanceof Error ? error.message : "Unknown error"}`
+                    }
+                };
+            }
+
+            // Get the current tree SHA
+            let baseTreeSha: string;
+            try {
+                const commitResponse = await octokit.request("GET /repos/{owner}/{repo}/git/commits/{commit_sha}", {
+                    owner: request.owner,
+                    repo: request.repo,
+                    commit_sha: baseSha
+                });
+
+                if (!commitResponse.data.tree?.sha) {
+                    throw new Error("Retrieved tree SHA is null");
+                }
+                baseTreeSha = commitResponse.data.tree.sha;
+            } catch (error) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "OPERATION_FAILED",
+                        message: `Failed to get tree: ${error instanceof Error ? error.message : "Unknown error"}`
+                    }
+                };
+            }
+
+            // If there are files to delete, get the existing files in the base tree
+            const hasFilesToDelete = request.files.some((file) => file.delete);
+            let existingFiles: Set<string> = new Set();
+
+            if (hasFilesToDelete) {
+                try {
+                    const baseTreeResponse = await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
+                        owner: request.owner,
+                        repo: request.repo,
+                        tree_sha: baseTreeSha,
+                        recursive: "true"
+                    });
+                    if (!baseTreeResponse.data.tree) {
+                        throw new Error("Retrieved file tree is null");
+                    }
+                    existingFiles = new Set(
+                        baseTreeResponse.data.tree.filter((item) => item.type === "blob").map((item) => item.path) || []
+                    );
+                } catch (error) {
+                    return {
+                        type: "error",
+                        error: {
+                            type: "OPERATION_FAILED",
+                            message: `Failed to get file tree: ${error instanceof Error ? error.message : "Unknown error"}`
+                        }
+                    };
+                }
+            }
+
+            // Create the tree with file changes
+            const tree = request.files
+                .map((file) => {
+                    if (file.delete) {
+                        // Only include deletion entries for files that actually exist
+                        if (!existingFiles.has(file.path)) {
+                            console.warn(`File ${file.path} does not exist in the base tree, skipping deletion`);
+                            return null;
+                        }
+                        return {
+                            path: file.path,
+                            mode: "100644" as GITHUB_FILE_MODE,
+                            type: "blob" as const,
+                            sha: null
+                        };
+                    } else {
+                        if (file.content == null) {
+                            throw new Error(`File ${file.path} has no content`);
+                        }
+                        return {
+                            path: file.path,
+                            mode: "100644" as GITHUB_FILE_MODE,
+                            type: "blob" as const,
+                            content: file.content
+                        };
+                    }
+                })
+                .filter((item) => item != null);
+
+            // Create new tree
+            let newTreeSha: string;
+            try {
+                const treeResponse = await octokit.request("POST /repos/{owner}/{repo}/git/trees", {
+                    owner: request.owner,
+                    repo: request.repo,
+                    base_tree: baseTreeSha,
+                    tree
+                });
+                newTreeSha = treeResponse.data.sha;
+                if (!newTreeSha) {
+                    throw new Error("Retrieved tree SHA is null");
+                }
+            } catch (error) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "OPERATION_FAILED",
+                        message: `Failed to create tree: ${error instanceof Error ? error.message : "Unknown error"}`
+                    }
+                };
+            }
+
+            // Create commit
+            let commitSha: string;
+            try {
+                const response = await octokit.request("POST /repos/{owner}/{repo}/git/commits", {
+                    owner: request.owner,
+                    repo: request.repo,
+                    message: request.message,
+                    tree: newTreeSha,
+                    parents: [baseSha]
+                });
+                commitSha = response.data.sha;
+                if (!commitSha) {
+                    throw new Error("Retrieved commit SHA is null");
+                }
+            } catch (error) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "OPERATION_FAILED",
+                        message: `Failed to create commit: ${error instanceof Error ? error.message : "Unknown error"}`
+                    }
+                };
+            }
+
+            // Update branch reference
+            try {
+                await octokit.request("PATCH /repos/{owner}/{repo}/git/refs/{ref}", {
+                    owner: request.owner,
+                    repo: request.repo,
+                    ref: `heads/${request.branch}`,
+                    sha: commitSha
+                });
+
+                return {
+                    type: "ok",
+                    commitSha
+                };
+            } catch (error) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "OPERATION_FAILED",
+                        message: `Failed to update branch: ${error instanceof Error ? error.message : "Unknown error"}`
+                    }
+                };
+            }
+        } catch (error) {
+            console.error("Failed to create commit", error);
+            return {
+                type: "error",
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: error instanceof Error ? error.message : "Unknown error occurred"
+                }
+            };
+        }
+    }
+
+    /**
+     * Creates a new branch from a base branch, or returns success if the branch already exists.
+     */
+    async createBranch(request: CreateBranchRequest): Promise<CreateBranchResult> {
+        const octokit = await this.getOctokit();
+        if (!octokit) {
+            return {
+                type: "error",
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitHub client"
+                }
+            };
+        }
+
+        try {
+            // Check if the branch already exists
+            try {
+                const existingBranchResponse = await octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", {
+                    owner: request.owner,
+                    repo: request.repo,
+                    ref: `heads/${request.branch}`
+                });
+
+                return {
+                    type: "ok",
+                    baseSha: existingBranchResponse.data.object.sha,
+                    alreadyExists: true
+                };
+            } catch (branchCheckError: any) {
+                if (branchCheckError.status !== 404) {
+                    throw branchCheckError;
+                }
+            }
+
+            // Get the latest commit SHA on base branch
+            const {
+                data: {
+                    object: { sha: baseSha }
+                }
+            } = await octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", {
+                owner: request.owner,
+                repo: request.repo,
+                ref: `heads/${request.baseBranch}`
+            });
+
+            // Create the new branch
+            await octokit.request("POST /repos/{owner}/{repo}/git/refs", {
+                owner: request.owner,
+                repo: request.repo,
+                ref: `refs/heads/${request.branch}`,
+                sha: baseSha
+            });
+
+            return {
+                type: "ok",
+                baseSha,
+                alreadyExists: false
+            };
+        } catch (error) {
+            console.error("Failed to create branch", error);
+            return {
+                type: "error",
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: error instanceof Error ? error.message : "Unknown error occurred"
+                }
+            };
+        }
+    }
+
+    /**
+     * Creates a pull request.
+     */
+    async createPullRequest(request: CreatePullRequestRequest): Promise<CreatePullRequestResult> {
+        const octokit = await this.getOctokit();
+        if (!octokit) {
+            return {
+                type: "error",
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitHub client"
+                }
+            };
+        }
+
+        try {
+            const response = await octokit.request("POST /repos/{owner}/{repo}/pulls", {
+                owner: request.owner,
+                repo: request.repo,
+                head: request.head,
+                base: request.base,
+                title: request.title,
+                body: request.body,
+                draft: request.draft || false
+            });
+
+            return {
+                type: "ok",
+                prUrl: response.data.html_url,
+                prNumber: response.data.number
+            };
+        } catch (error) {
+            console.error("Failed to create pull request", error);
+            return {
+                type: "error",
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: error instanceof Error ? error.message : "Unknown error occurred"
+                }
+            };
+        }
+    }
+
+    /**
+     * Updates a pull request's title and/or body.
+     */
+    async updatePullRequest(request: UpdatePullRequestRequest): Promise<UpdatePullRequestResult> {
+        const octokit = await this.getOctokit();
+        if (!octokit) {
+            return {
+                type: "error",
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitHub client"
+                }
+            };
+        }
+
+        try {
+            await octokit.request("PATCH /repos/{owner}/{repo}/pulls/{pull_number}", {
+                owner: request.owner,
+                repo: request.repo,
+                pull_number: request.prNumber,
+                title: request.title,
+                body: request.body
+            });
+
+            return { type: "ok" };
+        } catch (error) {
+            console.error("Failed to update pull request", error);
+            return {
+                type: "error",
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: error instanceof Error ? error.message : "Unknown error occurred"
+                }
+            };
+        }
+    }
+
+    /**
+     * Updates a pull request's status (converts between draft and ready for review).
+     */
+    async updatePullRequestStatus(request: UpdatePullRequestStatusRequest): Promise<UpdatePullRequestStatusResult> {
+        const octokit = await this.getOctokit();
+        if (!octokit) {
+            return {
+                type: "error",
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitHub client"
+                }
+            };
+        }
+
+        try {
+            // Find PR for the branch
+            const response = await octokit.request("GET /repos/{owner}/{repo}/pulls", {
+                owner: request.owner,
+                repo: request.repo,
+                head: `${request.owner}:${request.branch}`,
+                base: request.baseBranch,
+                state: "all"
+            });
+
+            if (response.data.length === 0) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "RESOURCE_NOT_FOUND",
+                        message: "No PR found for this branch"
+                    }
+                };
+            }
+
+            const openPrs = response.data.filter((pr) => pr.state === "open");
+            const pr = openPrs[0] || response.data[0];
+
+            if (!pr?.node_id) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "RESOURCE_NOT_FOUND",
+                        message: "No PR found for this branch"
+                    }
+                };
+            }
+
+            // Update PR status using GraphQL mutations
+            if (request.status === "open") {
+                const mutation = `mutation MarkPullRequestReadyForReview($pullRequestId: ID!) {
+                    markPullRequestReadyForReview(input: { pullRequestId: $pullRequestId }) {
+                        clientMutationId
+                    }
+                }`;
+
+                await octokit.graphql(mutation, {
+                    pullRequestId: pr.node_id
+                });
+
+                return {
+                    type: "ok",
+                    status: "open",
+                    prNumber: pr.number,
+                    prUrl: pr.html_url
+                };
+            } else if (request.status === "draft") {
+                const mutation = `mutation ConvertPullRequestToDraft($pullRequestId: ID!) {
+                    convertPullRequestToDraft(input: { pullRequestId: $pullRequestId }) {
+                        pullRequest {
+                            id
+                            isDraft
+                        }
+                    }
+                }`;
+
+                await octokit.graphql(mutation, {
+                    pullRequestId: pr.node_id
+                });
+
+                return {
+                    type: "ok",
+                    status: "draft",
+                    prNumber: pr.number,
+                    prUrl: pr.html_url
+                };
+            }
+
+            return {
+                type: "error",
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: `Invalid status: ${request.status}`
+                }
+            };
+        } catch (error) {
+            console.error("Failed to update pull request status", error);
+            return {
+                type: "error",
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: error instanceof Error ? error.message : "Unknown error occurred"
+                }
+            };
+        }
+    }
+
+    /**
+     * Creates a new GitHub repository with initial files.
+     */
+    async createRepository(request: CreateRepositoryRequest): Promise<CreateRepositoryResult> {
+        const octokit = await this.getOctokit();
+        if (!octokit) {
+            return {
+                type: "error",
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitHub client"
+                }
+            };
+        }
+
+        try {
+            // Determine if owner is user or org
+            let ownerType: "user" | "org";
+            try {
+                const ownerResponse = await octokit.request("GET /users/{username}", {
+                    username: request.owner
+                });
+                ownerType = ownerResponse.data.type === "Organization" ? "org" : "user";
+            } catch (error) {
+                console.warn("Failed to determine owner type, assuming user:", error);
+                ownerType = "user";
+            }
+
+            // Create repository
+            let repoUrl: string;
+            let htmlUrl: string;
+            try {
+                let createRepoResponse;
+                if (ownerType === "org") {
+                    createRepoResponse = await octokit.request("POST /orgs/{org}/repos", {
+                        org: request.owner,
+                        name: request.repoName,
+                        description: request.description || "Fern documentation",
+                        private: request.isPrivate ?? true,
+                        auto_init: true
+                    });
+                } else {
+                    createRepoResponse = await octokit.request("POST /user/repos", {
+                        name: request.repoName,
+                        description: request.description || "Fern documentation",
+                        private: request.isPrivate ?? true,
+                        auto_init: true
+                    });
+                }
+
+                repoUrl = createRepoResponse.data.clone_url;
+                htmlUrl = createRepoResponse.data.html_url;
+
+                if (!repoUrl || !htmlUrl) {
+                    throw new Error("Failed to get repository URLs from response");
+                }
+            } catch (error) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "OPERATION_FAILED",
+                        message: `Failed to create repository: ${error instanceof Error ? error.message : "Unknown error"}`
+                    }
+                };
+            }
+
+            // Wait for repository initialization and get base tree SHA
+            let baseTreeSha: string | undefined;
+            let retries = 10;
+            while (retries > 0) {
+                try {
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+                    const mainBranchResponse = await octokit.request("GET /repos/{owner}/{repo}/git/refs/{ref}", {
+                        owner: request.owner,
+                        repo: request.repoName,
+                        ref: "heads/main"
+                    });
+                    const mainCommitSha = mainBranchResponse.data.object.sha;
+
+                    const commitResponse = await octokit.request("GET /repos/{owner}/{repo}/git/commits/{commit_sha}", {
+                        owner: request.owner,
+                        repo: request.repoName,
+                        commit_sha: mainCommitSha
+                    });
+                    baseTreeSha = commitResponse.data.tree.sha;
+                    break;
+                } catch (error) {
+                    retries--;
+                    if (retries === 0) {
+                        console.error("Failed to get base tree after all retries:", error);
+                        throw new Error("Repository initialization timeout");
+                    }
+                    console.log(`Waiting for repo to initialize... (${retries} retries left)`);
+                }
+            }
+
+            // Create tree with files
+            const tree = request.files.map((file) => ({
+                path: file.path,
+                mode: "100644" as GITHUB_FILE_MODE,
+                type: "blob" as const,
+                content: file.content
+            }));
+
+            let treeSha: string;
+            try {
+                const treeResponse = await octokit.request("POST /repos/{owner}/{repo}/git/trees", {
+                    owner: request.owner,
+                    repo: request.repoName,
+                    tree,
+                    base_tree: baseTreeSha
+                });
+                treeSha = treeResponse.data.sha;
+                if (!treeSha) {
+                    throw new Error("Retrieved tree SHA is null");
+                }
+            } catch (error: any) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "OPERATION_FAILED",
+                        message: `Failed to create tree: ${error instanceof Error ? error.message : "Unknown error"}`
+                    }
+                };
+            }
+
+            // Get parent commit SHA
+            let parentCommitSha: string | undefined;
+            try {
+                const mainBranchResponse = await octokit.request("GET /repos/{owner}/{repo}/git/refs/{ref}", {
+                    owner: request.owner,
+                    repo: request.repoName,
+                    ref: "heads/main"
+                });
+                parentCommitSha = mainBranchResponse.data.object.sha;
+            } catch (_error) {
+                console.warn("No parent commit found, creating initial commit");
+            }
+
+            // Create commit
+            let commitSha: string;
+            try {
+                const commitResponse = await octokit.request("POST /repos/{owner}/{repo}/git/commits", {
+                    owner: request.owner,
+                    repo: request.repoName,
+                    message: "Add Fern documentation",
+                    tree: treeSha,
+                    parents: parentCommitSha ? [parentCommitSha] : []
+                });
+                commitSha = commitResponse.data.sha;
+                if (!commitSha) {
+                    throw new Error("Retrieved commit SHA is null");
+                }
+            } catch (error) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "OPERATION_FAILED",
+                        message: `Failed to create commit: ${error instanceof Error ? error.message : "Unknown error"}`
+                    }
+                };
+            }
+
+            // Update main branch
+            try {
+                await octokit.request("PATCH /repos/{owner}/{repo}/git/refs/{ref}", {
+                    owner: request.owner,
+                    repo: request.repoName,
+                    ref: "heads/main",
+                    sha: commitSha,
+                    force: true
+                });
+
+                return {
+                    type: "ok",
+                    repoUrl,
+                    htmlUrl
+                };
+            } catch (error) {
+                return {
+                    type: "error",
+                    error: {
+                        type: "OPERATION_FAILED",
+                        message: `Failed to update branch: ${error instanceof Error ? error.message : "Unknown error"}`
+                    }
+                };
+            }
+        } catch (error) {
+            console.error("Failed to create repository", error);
+            return {
+                type: "error",
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: error instanceof Error ? error.message : "Unknown error occurred"
+                }
+            };
+        }
     }
 }
 

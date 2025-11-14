@@ -2,7 +2,7 @@
 
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import createBranchIfNotExists from "@/app/services/dal/github/createBranchIfNotExists";
+import createBranchIfNotExists, { type CreateBranchErrors } from "@/app/services/dal/github/createBranchIfNotExists";
 import type { DocsUrl } from "@/utils/types";
 
 interface CreateBranchParams {
@@ -18,11 +18,11 @@ type CreateBranchResult =
     | {
           success: true;
           baseSha: string;
-          response: any;
+          alreadyExists: boolean;
       }
     | {
           success: false;
-          error: string;
+          error: CreateBranchErrors;
       };
 
 export function useCreateBranchMutation(): UseMutationResult<CreateBranchResult, Error, CreateBranchParams> {

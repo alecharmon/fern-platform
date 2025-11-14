@@ -80,7 +80,7 @@ export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {})
             });
 
             // If commit fails because branch doesn't exist, try creating it first
-            if (!response.success && response.error.type === "FAILED_TO_GET_BRANCH_SHA") {
+            if (!response.success && response.error.type === "RESOURCE_NOT_FOUND") {
                 if (!baseBranch) {
                     ErrorNoBaseBranchToast();
                     return;
