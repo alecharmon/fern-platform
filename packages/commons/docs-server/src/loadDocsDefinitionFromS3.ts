@@ -9,6 +9,7 @@ import { cache } from "react";
 import { isDocsDev } from "./isDocsDev";
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
+import { parseJSONInWorker } from "./parseJSONInWorker";
 
 export const getSignedUrl = async ({ Bucket, Key, expiresIn }: { Bucket: string; Key: string; expiresIn: number }) => {
     if (isLocal() || isSelfHosted()) {
@@ -123,8 +124,35 @@ const uncachedLoadDocsDefinitionFromS3 = async (
 
         if (response.ok) {
             console.debug("Successfully loaded docs definition from S3: ", signedUrl);
-            const json = await response.json();
-            return json as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
+
+            // Get text first
+            const text = await response.text();
+
+            // Parse in worker thread to avoid blocking event loop
+            // For large JSON (>1MB), this prevents 4-17s blocking operations
+            let json: FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
+
+            if (text.length > 1024 * 1024) {
+                // 1MB threshold
+                console.log(
+                    `[JSON Parser] Using worker thread for large JSON (${(text.length / 1024 / 1024).toFixed(2)}MB)`
+                );
+                try {
+                    json = await parseJSONInWorker<FdrAPI.docs.v2.read.LoadDocsForUrlResponse>(text);
+                } catch (workerError) {
+                    console.warn(`[JSON Parser] Worker failed, falling back to main thread:`, workerError);
+                    // Fallback to main thread with yield
+                    await new Promise((resolve) => setImmediate(resolve));
+                    json = JSON.parse(text);
+                }
+            } else {
+                // For smaller JSON, just yield before parsing
+                await new Promise((resolve) => setImmediate(resolve));
+                json = JSON.parse(text);
+            }
+
+            console.timeEnd(`[eventLoop] [parse JSON from S3] ${domain}`);
+            return json;
         }
         throw new Error(
             `Failed to load docs definition from S3. Status: ${response.status}. Error: ${await response.text()}`
