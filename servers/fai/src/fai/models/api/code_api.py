@@ -45,7 +45,7 @@ class CreateCodeRecordRequest(BaseModel):
     )
     authed: bool | None = Field(
         default=None,
-        description="Whether the code is authed. If true, the code will be retrievable by all users.",
+        description="Whether the code is auth gated. If false, the code record will be retrievable by all users.",
     )
 
 

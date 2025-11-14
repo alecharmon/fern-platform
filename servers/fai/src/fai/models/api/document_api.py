@@ -45,7 +45,7 @@ class CreateDocumentRequest(BaseModel):
     )
     authed: bool | None = Field(
         default=None,
-        description="Whether the document is authed. If true, the document will be retrievable by all users.",
+        description="Whether the document is auth gated. If false, the document will be retrievable by all users.",
     )
 
 
