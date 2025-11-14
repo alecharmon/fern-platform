@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createKvCache } from "@fern-api/docs-loader";
+import { MDX_PIPELINE_VERSION } from "@fern-api/docs-server";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isDocsDev } from "@fern-api/docs-server/isDocsDev";
 import { postToSlack } from "@fern-api/docs-server/slack";
@@ -39,6 +40,7 @@ import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import remarkSmartypants from "remark-smartypants";
 import remarkSqueezeParagraphs from "remark-squeeze-paragraphs";
 import { noop } from "ts-essentials";
+import { MDX_COMPONENTS } from "../components";
 import { getMDXExport } from "../get-mdx-export";
 import { rehypeAccordionNestedHeaders } from "../plugins/rehype-accordion-nested-headers";
 import { rehypeAccordions } from "../plugins/rehype-accordions";
@@ -336,7 +338,7 @@ async function serializeMdxImpl(
     return { code: bundled.code, frontmatter, jsxElements, styles, engine: "esbuild" };
 }
 
-// const MDX_SEMANTIC_VERSION = "1";
+const MDX_SEMANTIC_VERSION = "1-" + MDX_PIPELINE_VERSION + "-" + Object.keys(MDX_COMPONENTS).length;
 
 export async function serializeMdx(
     content: string | undefined,
@@ -347,24 +349,24 @@ export async function serializeMdx(
         return undefined;
     }
 
-    // // Create cache key from content and options
-    // const cacheKey = createMdxCacheKey(content, options);
+    // Create cache key from content and options
+    const cacheKey = createMdxCacheKey(content, options);
 
-    // // Try to get from cache first
-    // try {
-    //     const cached = await kvCache.get<{ value: SerializeMdxResponse; version: string }>(
-    //         "mdx:" + domain,
-    //         "serialize",
-    //         cacheKey
-    //     );
+    // Try to get from cache first
+    try {
+        const cached = await kvCache.get<{ value: SerializeMdxResponse; version: string }>(
+            "mdx:" + domain,
+            "serialize",
+            cacheKey
+        );
 
-    //     if (cached && cached.version === MDX_SEMANTIC_VERSION) {
-    //         console.debug(`[serializeMdx] Cache hit for key ${cacheKey}`);
-    //         return cached.value;
-    //     }
-    // } catch (error) {
-    //     console.warn(`[serializeMdx] Cache get failed for key ${cacheKey}`, error);
-    // }
+        if (cached && cached.version === MDX_SEMANTIC_VERSION) {
+            console.debug(`[serializeMdx] Cache hit for key ${cacheKey}`);
+            return cached.value;
+        }
+    } catch (error) {
+        console.warn(`[serializeMdx] Cache get failed for key ${cacheKey}`, error);
+    }
 
     // Cache miss - perform serialization
     const abortController = new AbortController();
@@ -388,19 +390,19 @@ export async function serializeMdx(
             (result) => {
                 clearTimeout(timeoutId);
 
-                // // Cache the result (7 days TTL)
-                // try {
-                //     kvCache.set(
-                //         domain ?? "mdx",
-                //         "serialize",
-                //         { value: result, version: MDX_SEMANTIC_VERSION, createdAt: new Date().toISOString() },
-                //         60 * 60 * 24 * 7, // 7 days
-                //         cacheKey
-                //     );
-                //     console.debug(`[serializeMdx] Cached result for key ${cacheKey}`);
-                // } catch (error) {
-                //     console.warn(`[serializeMdx] Cache set failed for key ${cacheKey}`, error);
-                // }
+                // Cache the result (7 days TTL)
+                try {
+                    kvCache.set(
+                        domain ?? "mdx",
+                        "serialize",
+                        { value: result, version: MDX_SEMANTIC_VERSION, createdAt: new Date().toISOString() },
+                        60 * 60 * 24 * 7, // 7 days
+                        cacheKey
+                    );
+                    console.debug(`[serializeMdx] Cached result for key ${cacheKey}`);
+                } catch (error) {
+                    console.warn(`[serializeMdx] Cache set failed for key ${cacheKey}`, error);
+                }
 
                 resolve(result);
             },
@@ -413,29 +415,29 @@ export async function serializeMdx(
     });
 }
 
-// function createMdxCacheKey(content: string, options?: Parameters<typeof serializeMdxImpl>[1]): string {
-//     // Hash content and relevant options together
-//     const hash = createHash("sha256");
-//     hash.update(content);
+function createMdxCacheKey(content: string, options?: Parameters<typeof serializeMdxImpl>[1]): string {
+    // Hash content and relevant options together
+    const hash = createHash("sha256");
+    hash.update(content);
 
-//     // Include options that affect the output
-//     if (options) {
-//         if (options.toc !== undefined) {
-//             hash.update(`toc:${options.toc}`);
-//         }
-//         if (options.filename) {
-//             hash.update(`filename:${options.filename}`);
-//         }
-//         if (options.org) {
-//             hash.update(`org:${options.org}`);
-//         }
-//         if (options.domain) {
-//             hash.update(`domain:${options.domain}`);
-//         }
-//     }
+    // Include options that affect the output
+    if (options) {
+        if (options.toc !== undefined) {
+            hash.update(`toc:${options.toc}`);
+        }
+        if (options.filename) {
+            hash.update(`filename:${options.filename}`);
+        }
+        if (options.org) {
+            hash.update(`org:${options.org}`);
+        }
+        if (options.domain) {
+            hash.update(`domain:${options.domain}`);
+        }
+    }
 
-//     return hash.digest("hex");
-// }
+    return hash.digest("hex");
+}
 
 function rehypeLog() {
     return (_tree: Hast.Root) => {
@@ -482,7 +484,6 @@ export async function processTwoslashBlocks(content: string): Promise<string> {
     }
 
     if (twoslashBlocks.length === 0) {
-        console.timeEnd(`[eventLoop] [processTwoslashBlocks full]`);
         return content;
     }
 

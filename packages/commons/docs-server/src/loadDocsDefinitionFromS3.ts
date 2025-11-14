@@ -151,7 +151,6 @@ const uncachedLoadDocsDefinitionFromS3 = async (
                 json = JSON.parse(text);
             }
 
-            console.timeEnd(`[eventLoop] [parse JSON from S3] ${domain}`);
             return json;
         }
         throw new Error(
