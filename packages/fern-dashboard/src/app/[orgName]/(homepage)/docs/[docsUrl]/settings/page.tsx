@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { isFernEmployee } from "@/app/services/auth0/management";
@@ -22,18 +21,9 @@ export default async function Page({
 
     const session = await getAuthenticatedSessionOrRedirect(orgName);
     const isEmployee = await isFernEmployee(session.user.sub);
-    if (!isEmployee) {
-        redirect(`/${orgName}/docs/${docsUrl}`);
-    }
 
     return (
         <div className="flex flex-1 flex-col items-center gap-4">
-            <SettingsCard
-                title="Archive site"
-                description="This will hide the site from the dashboard, but any deployed domains will remain live."
-                button={<ArchiveSiteButton docsUrl={docsUrl} orgName={orgName} />}
-            />
-
             <SettingsCard
                 title="Ask AI"
                 description="This will turn on or turn off AI search for this documentation site."
@@ -46,11 +36,20 @@ export default async function Page({
                     </Suspense>
                 }
             />
-            <SettingsCard
-                title="Delete docs site"
-                description="This is a destructive action and cannot be reversed."
-                button={<DeleteDocsSiteButton docsUrl={docsUrl} orgName={orgName} />}
-            />
+            {isEmployee && (
+                <>
+                    <SettingsCard
+                        title="Archive site"
+                        description="This will hide the site from the dashboard, but any deployed domains will remain live."
+                        button={<ArchiveSiteButton docsUrl={docsUrl} orgName={orgName} />}
+                    />
+                    <SettingsCard
+                        title="Delete docs site"
+                        description="This is a destructive action and cannot be reversed."
+                        button={<DeleteDocsSiteButton docsUrl={docsUrl} orgName={orgName} />}
+                    />
+                </>
+            )}
         </div>
     );
 }
