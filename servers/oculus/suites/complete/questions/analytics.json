@@ -1,0 +1,20 @@
+{
+    "question": "How can I export my Ask Fern conversation data?",
+    "ground_truth": "You can export Ask Fern conversation data to CSV format from the Ask Fern tab in the Fern Dashboard. This allows you to identify trends and optimize your documentation strategy.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "analytics",
+      "domain": "buildwithfern.com",
+      "cited_context": "The Ask Fern tab of the Fern Dashboard displays queries and conversations per day on your documentation site. You can view data by week, month, year, or all-time periods.\n\n Drill down into individual conversations to see the exact user queries and Ask Fern responses, helping you understand how users interact with your documentation.\n\nQuery and conversation analytics on Fern Dashboard\n\nYou can also export data to CSV format to identify trends and optimize your documentation strategy."
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/ask-fern/features/analytics"
+        ],
+        "correctness": [
+          "The answer must mention the `Ask Fern` tab in the Fern Dashboard.",
+          "The answer must mention the `CSV` format."
+        ]
+      }
+  }
