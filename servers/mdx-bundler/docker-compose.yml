@@ -1,4 +1,3 @@
-version: "3.8" # optional since v1.27.0
 services:
   mdx-bundler:
     image: mdx-bundler:local
