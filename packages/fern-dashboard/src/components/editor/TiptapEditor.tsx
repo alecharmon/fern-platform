@@ -5,6 +5,8 @@ import Link from "@tiptap/extension-link";
 import { BlockMath, InlineMath } from "@tiptap/extension-mathematics";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Table, TableHeader, TableKit, TableRow } from "@tiptap/extension-table";
+import TaskItem from "@tiptap/extension-task-item";
+import TaskList from "@tiptap/extension-task-list";
 import {
     EditorProvider,
     type EditorProviderProps,
@@ -52,7 +54,9 @@ const dataAttributeNodeTypes = [
     "horizontalRule",
     "bulletList",
     "orderedList",
-    "listItem"
+    "listItem",
+    "taskList",
+    "taskItem"
 ];
 
 // Configure Tiptap extensions
@@ -75,6 +79,10 @@ const extensions = [
         HTMLAttributes: {
             class: "fern-mdx-link"
         }
+    }),
+    TaskList,
+    TaskItem.configure({
+        nested: true
     }),
     InlineMath.extend({
         addNodeView() {

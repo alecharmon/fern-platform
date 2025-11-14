@@ -234,7 +234,8 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
             name,
             state,
             node,
-            parents
+            parents,
+            rootContent
         );
     }
 
@@ -412,12 +413,6 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
         // Handle image-upload and video-upload custom elements separately
         if (dataType === "image-upload" || dataType === "video-upload") {
             return { type: "html", value: `<div data-type="${dataType}" />` } as any;
-        }
-
-        // Never use encoded mdx attribute for list elements (ul, ol, li) - always regenerate from structure
-        // This prevents issues with bullet markers being duplicated or mismatched
-        if (element.tagName === "ul" || element.tagName === "ol" || element.tagName === "li") {
-            return getToMdastDefaultHandler(element.tagName as any)(state, element);
         }
 
         // If a node has not been changed, we use the original MDX content
@@ -862,7 +857,8 @@ function mdxBaseElementNode(
     __: string | undefined,
     state: ToHastState,
     node: any,
-    parents?: MdastParents
+    parents?: MdastParents,
+    rootContent?: string
 ) {
     const defaultNode = getToHastDefaultHandler(type)(state, node, parents);
     switch (typeof defaultNode) {
@@ -872,12 +868,33 @@ function mdxBaseElementNode(
                 return defaultNode;
             } else if (defaultNode.type === "element") {
                 // Expects defaultNode: Element
+                const additionalProperties: Record<string, any> = {
+                    "fve-data-id": id,
+                    "fve-mdx-b64": Buffer.from(content, "utf-8").toString("base64")
+                };
+
+                // Special handling for task lists: preserve checked property
+                if (type === "listItem" && node.checked !== null && node.checked !== undefined) {
+                    additionalProperties["data-checked"] = node.checked ? "true" : "false";
+                    additionalProperties["data-type"] = "taskItem";
+                }
+
+                // Special handling for lists containing task items
+                if (type === "list" && node.children && Array.isArray(node.children)) {
+                    const hasTaskItems = node.children.some(
+                        (child: any) =>
+                            child.type === "listItem" && child.checked !== null && child.checked !== undefined
+                    );
+                    if (hasTaskItems) {
+                        additionalProperties["data-type"] = "taskList";
+                    }
+                }
+
                 return {
                     ...defaultNode,
                     properties: {
                         ...defaultNode.properties,
-                        "fve-data-id": id,
-                        "fve-mdx-b64": Buffer.from(content, "utf-8").toString("base64")
+                        ...additionalProperties
                     }
                 };
             } else if (defaultNode.type === "comment" || defaultNode.type === "text" || defaultNode.type === "raw") {

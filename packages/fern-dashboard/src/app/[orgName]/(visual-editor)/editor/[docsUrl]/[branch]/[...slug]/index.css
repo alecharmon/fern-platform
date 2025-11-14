@@ -172,4 +172,24 @@
   .ProseMirror > .react-renderer:first-child > [data-node-view-wrapper] {
     @apply mt-0;
   }
+
+  .ProseMirror ul[data-type="taskList"],
+  .ProseMirror ol[data-type="taskList"] {
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .ProseMirror ul[data-type="taskList"] > li,
+  .ProseMirror li[data-type="taskItem"] {
+    list-style: none !important;
+    position: relative;
+    padding-left: 2em;
+  }
+
+  .ProseMirror ul[data-type="taskList"] > li > label,
+  .ProseMirror li[data-type="taskItem"] > label {
+    position: absolute;
+    left: 0;
+    user-select: none;
+  }
 }
