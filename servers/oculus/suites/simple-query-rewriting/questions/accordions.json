@@ -1,0 +1,11 @@
+{
+  "question": "How can I make an accordion section display expanded by default when the page loads?",
+  "ground_truth": "To make an accordion section display expanded by default when the page loads, use the `defaultOpen` property set to `true`. For example: `<Accordion title=\"Section 1\" defaultOpen={true}>Content</Accordion>`. This property is useful for highlighting important information or frequently accessed content.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "accordions",
+    "domain": "buildwithfern.com",
+    "cited_context": "The `defaultOpen` property controls whether the accordion should be open when the page loads. If not specified, the accordion will be collapsed by default. Use the `defaultOpen` property to have specific accordions expanded by default when the page loads. This is useful for highlighting important information or frequently accessed content."
+  }
+}

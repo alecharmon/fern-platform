@@ -18,12 +18,14 @@ class FAIHTTPIntegration:
         system_prompt: str | None = None,
         fai_url: str | None = None,
         fern_token: str | None = None,
+        rewrite_query: bool = False,
     ):
         self.domain = domain
         self.model = model
         self.system_prompt = system_prompt
         self.fai_url = fai_url or os.environ.get("FAI_URL", "https://fai.buildwithfern.com")
         self.fern_token = fern_token or os.environ.get("FERN_TOKEN")
+        self.rewrite_query = rewrite_query
 
         if not self.fern_token:
             raise ValueError("FERN_TOKEN is required for FAI HTTP integration")
@@ -35,6 +37,7 @@ class FAIHTTPIntegration:
             payload = {
                 "messages": [{"role": "user", "content": question}],
                 "model": self.model,
+                "rewrite_query": self.rewrite_query,
             }
 
             if self.system_prompt:

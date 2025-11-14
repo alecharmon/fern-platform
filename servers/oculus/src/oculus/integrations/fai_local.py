@@ -33,10 +33,17 @@ def _setup_fai_env() -> None:
 class FAILocalIntegration:
     """Integration that calls FAI functions directly (in-process)."""
 
-    def __init__(self, domain: str, model: str = "claude-4-sonnet-20250514", system_prompt: str | None = None):
+    def __init__(
+        self,
+        domain: str,
+        model: str = "claude-4-sonnet-20250514",
+        system_prompt: str | None = None,
+        rewrite_query: bool = False,
+    ):
         self.domain = domain
         self.model = model
         self.system_prompt = system_prompt
+        self.rewrite_query = rewrite_query
         _setup_fai_env()
 
     async def _generate_answer_async(self, question: str) -> tuple[str, AnswerMetadata]:
@@ -44,7 +51,8 @@ class FAILocalIntegration:
 
         try:
             from fai.models.types.chat_types import ChatMessage
-            from fai.models.utils.chat import format_record
+            from fai.models.utils.chat import deduplicate_retrieved_sources, format_record
+            from fai.utils.chat.query_rewriter import rewrite_query
             from fai.utils.chat.response.anthropic import get_anthropic_response
             from fai.utils.chat.response.cohere import get_cohere_response
             from fai.utils.chat.retrieve.retrieve import retrieve
@@ -54,7 +62,14 @@ class FAILocalIntegration:
         message = ChatMessage(role="user", content=question)
         messages = [message.to_dict()]
 
-        query_results = await retrieve(question, self.domain)
+        sub_queries: list[str] | None = None
+        if self.rewrite_query:
+            sub_queries = await rewrite_query(question)
+            query_results_list = await asyncio.gather(*[retrieve(sub_query, self.domain) for sub_query in sub_queries])
+            query_results = deduplicate_retrieved_sources(query_results_list)
+        else:
+            query_results = await retrieve(question, self.domain)
+
         rag_records = [format_record(result) for result in query_results]
 
         sources: list[SourceMetadata] = [
@@ -123,6 +138,9 @@ class FAILocalIntegration:
             "fai_local_retrieved_documents": json.dumps(retrieved_docs, indent=2),
             "response_time_ms": response_time_ms,
         }
+
+        if sub_queries:
+            metadata["subqueries"] = json.dumps(sub_queries)
 
         return answer_text, metadata
 

@@ -1,0 +1,11 @@
+{
+  "question": "How can I customize the client class name when generating a Swift SDK with Fern?",
+  "ground_truth": "You can customize the client class name by setting the `clientClassName` configuration option in your `generators.yml` file. This allows you to specify a custom name for the generated client class that users will instantiate when using your SDK.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "configuration",
+    "domain": "buildwithfern.com",
+    "cited_context": "You can customize the behavior of the Swift SDK generator in `generators.yml` by setting the `clientClassName` configuration option. The `clientClassName` parameter is a string that defines \"The name of the generated client class. This allows you to customize the class name that users will instantiate when using your SDK.\""
+  }
+}

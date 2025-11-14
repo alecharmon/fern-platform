@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any
 
 from fastapi import Depends
@@ -16,8 +17,12 @@ from fai.models.api.chat_api import (
 )
 from fai.models.enums.language_models import LanguageModel
 from fai.models.types.chat_types import ChatMessage
-from fai.models.utils.chat import format_record
+from fai.models.utils.chat import (
+    deduplicate_retrieved_sources,
+    format_record,
+)
 from fai.settings import LOGGER
+from fai.utils.chat.query_rewriter import rewrite_query
 from fai.utils.chat.response.anthropic import get_anthropic_response
 from fai.utils.chat.response.cohere import get_cohere_response
 from fai.utils.chat.retrieve.retrieve import retrieve
@@ -46,8 +51,22 @@ async def post_chat_completion(
 
         rag_records: list[str] = []
         if last_user_message:
-            query_results: list[Row] = await retrieve(last_user_message["content"], domain)
-            rag_records.extend([format_record(result) for result in query_results])
+            query_content = last_user_message["content"]
+
+            if request.rewrite_query:
+                LOGGER.info(f"Query rewriting enabled for domain {domain}")
+                sub_queries = await rewrite_query(query_content)
+                LOGGER.info(f"Decomposed query into {len(sub_queries)} sub-queries")
+                for index, sub_query in enumerate(sub_queries):
+                    LOGGER.info(f"SUBQUERY {index + 1}: {sub_query}")
+
+                query_results_list = await asyncio.gather(*[retrieve(sub_query, domain) for sub_query in sub_queries])
+
+                deduplicated_rows = deduplicate_retrieved_sources(query_results_list)
+                rag_records.extend([format_record(row) for row in deduplicated_rows])
+            else:
+                query_results: list[Row] = await retrieve(query_content, domain)
+                rag_records.extend([format_record(result) for result in query_results])
 
         maybe_system_prompt = request.system_prompt
         model = request.model or DEFAULT_MODEL

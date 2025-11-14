@@ -115,9 +115,18 @@ def generate_answers_command(args: argparse.Namespace) -> int:
         else:
             integration_type = suite_config.integration
 
+        rewrite_query = suite_config.rewrite_query if integration_type in ["fai-local", "fai-http"] else False
+
         print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
+        if suite_config.rewrite_query and integration_type not in ["fai-local", "fai-http"]:
+            print(
+                f"Warning: Query rewriting not available for {integration_type} integration "
+                f"(only supported for fai-local and fai-http)"
+            )
+        if rewrite_query:
+            print("Query rewriting: ENABLED")
         integration = create_integration(
-            integration_type=integration_type, domain=suite_config.domain, model=args.model
+            integration_type=integration_type, domain=suite_config.domain, model=args.model, rewrite_query=rewrite_query
         )
         answer_fn = create_answer_function(integration)
 
@@ -348,9 +357,18 @@ def run_evaluation(args: argparse.Namespace) -> int:
         else:
             integration_type = suite_config.integration
 
+        rewrite_query = suite_config.rewrite_query if integration_type in ["fai-local", "fai-http"] else False
+
         print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
+        if suite_config.rewrite_query and integration_type not in ["fai-local", "fai-http"]:
+            print(
+                f"Warning: Query rewriting not available for {integration_type} integration "
+                f"(only supported for fai-local and fai-http)"
+            )
+        if rewrite_query:
+            print("Query rewriting: ENABLED")
         integration = create_integration(
-            integration_type=integration_type, domain=suite_config.domain, model=args.model
+            integration_type=integration_type, domain=suite_config.domain, model=args.model, rewrite_query=rewrite_query
         )
         answer_fn = create_answer_function(integration)
 

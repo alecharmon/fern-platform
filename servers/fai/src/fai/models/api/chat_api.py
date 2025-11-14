@@ -19,6 +19,9 @@ class PostChatCompletionRequest(BaseModel):
     )
     system_prompt: str | None = Field(default=None, description="The system prompt to use for the chat completion")
     messages: list[ChatMessage] = Field(description="The messages to use for the chat completion")
+    rewrite_query: bool | None = Field(
+        default=False, description="Whether to rewrite the query using query decomposition"
+    )
 
 
 class PostChatCompletionResponse(BaseModel):

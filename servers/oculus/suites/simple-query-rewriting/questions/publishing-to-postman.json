@@ -1,0 +1,11 @@
+{
+  "question": "How do I configure Fern to publish my Postman collection to an existing collection in my workspace?",
+  "ground_truth": "To publish to an existing Postman collection, you need to specify three key configurations in your generators.yml file: the workspace-id, collection-id, and collection-name. First, get your workspace ID from the Postman URL or by making a GET request to https://api.getpostman.com/workspaces. Then, get your collection ID and name from the collection URL or by making a GET request to https://api.getpostman.com/collections. Finally, add these values to your generators.yml under the output and config sections, along with your Postman API key.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-to-postman",
+    "domain": "buildwithfern.com",
+    "cited_context": "To publish to a existing collection, specify the workspace ID, existing collection ID, and name of the existing collection. You can get your workspace ID by navigating to your workspace and either: Copying the ID from the URL: https://user-name.postman.co/workspace/workspace-name~WORKSPACE-ID/request/create or Making a GET request to https://api.getpostman.com/workspaces. You can get your collection name and ID by navigating to your workspace and either: Copying the ID from the URL: https://user-name.postman.co/workspace/workspace-name~workspace-id/collection/COLLECTION-ID or Making a GET request to https://api.getpostman.com/collections."
+  }
+}

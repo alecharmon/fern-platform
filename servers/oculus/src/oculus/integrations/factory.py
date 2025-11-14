@@ -13,6 +13,7 @@ def create_integration(
     domain: str = "",
     model: str = "claude-4-sonnet-20250514",
     system_prompt: str | None = None,
+    rewrite_query: bool = False,
     **kwargs: object,
 ) -> AnswerIntegration:
     """
@@ -23,6 +24,7 @@ def create_integration(
         domain: Documentation domain
         model: Model to use for generation
         system_prompt: Optional system prompt override
+        rewrite_query: Enable query rewriting for FAI integrations (default: False)
         **kwargs: Additional integration-specific arguments
 
     Returns:
@@ -39,7 +41,7 @@ def create_integration(
     integration_type = integration_type.lower()
 
     if integration_type == "fai-local":
-        return FAILocalIntegration(domain=domain, model=model, system_prompt=system_prompt)
+        return FAILocalIntegration(domain=domain, model=model, system_prompt=system_prompt, rewrite_query=rewrite_query)
 
     elif integration_type == "fai-http":
         fai_url_kwarg = kwargs.get("fai_url")
@@ -52,6 +54,7 @@ def create_integration(
             system_prompt=system_prompt,
             fai_url=fai_url,
             fern_token=fern_token,
+            rewrite_query=rewrite_query,
         )
 
     elif integration_type == "vercel-http":

@@ -1,0 +1,11 @@
+{
+  "question": "How do I migrate from token-based authentication to OIDC when publishing my TypeScript SDK to npm?",
+  "ground_truth": "To migrate from token-based to OIDC authentication, you should first configure trusted publishing on npmjs.com by adding your GitHub repository as a trusted publisher. Then, update your generators.yml file by changing the output.token field from ${{NPM_TOKEN}} to OIDC and ensure you're using Fern TypeScript SDK generator version 3.12.3 or later. Finally, regenerate your SDK to update the CI workflow with OIDC permissions and remove the NPM_TOKEN secret from your GitHub repository.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-to-npm",
+    "domain": "buildwithfern.com",
+    "cited_context": "If you're using token-based authentication and need to migrate to OIDC, follow these steps:\n\n### Why migrate to OIDC\n\nnpmjs is implementing trusted publishing to remove security risks associated with long-lived tokens, which can be:\n\n- Exposed in logs or configuration files\n- Compromised and used persistently until manually revoked\n- Difficult to manage and rotate\n\nOIDC-based publishing uses short-lived, cryptographically signed tokens that are specific to your workflow and can't be extracted or reused.\n\n### Prerequisites\n\nBefore migrating, ensure you have:\n\n- A package published to [npmjs.org](https://npmjs.org)\n- A GitHub repository with GitHub Actions configured\n- Access to your package settings on [npmjs.com](https://npmjs.com)\n- Fern CLI version `0.94.0` or later (for local generation)"
+  }
+}

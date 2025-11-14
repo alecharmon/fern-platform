@@ -1,0 +1,11 @@
+{
+  "question": "How can I customize the introduction text that appears at the beginning of my SDK's README file?",
+  "ground_truth": "To customize the introduction text at the beginning of your SDK's README, you can set the `introduction` field in the `readme` section of your `generators.yml` file. For example: `introduction: \"Welcome to our API\"`. This custom text will appear at the beginning of the generated README file.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "configure-readme",
+    "domain": "buildwithfern.com",
+    "cited_context": "By default, Fern generates the README automatically with usage examples and API details. Although each SDK has its own README, the content can be configured globally through the `readme` section in the `generators.yml` file. The `introduction` field is described as \"Custom introduction text that appears at the beginning of the README\" and is an optional string parameter."
+  }
+}

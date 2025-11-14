@@ -65,7 +65,7 @@ def start() -> None:
         host="0.0.0.0",
         port=8080,
         server_header=False,
-        reload=False,
+        reload=True,
         reload_dirs=["src"],
     )
 

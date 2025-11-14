@@ -1,0 +1,11 @@
+{
+  "question": "How can I override the URL path for a specific page in my documentation?",
+  "ground_truth": "You can override the URL path for a page using the `slug` frontmatter property. When you set `slug` in the frontmatter (e.g., `slug: email`), it overrides the full URL path from the root of your docs site, regardless of the page's location in the navigation structure. This takes precedence over any slug defined in docs.yml.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "frontmatter",
+    "domain": "buildwithfern.com",
+    "cited_context": "## Slug\n\n<ParamField path=\"slug\" type=\"string\" required={{false}}>\n  Overrides the full URL path for the page, starting from the root of your docs site. This takes precedence over any slug defined in docs.yml.\n</ParamField>\n\nFor example, if you set `slug: email` in frontmatter, the page will be available at `/email` regardless of its location in the navigation structure.\n\nThere are two ways to set a page's URL slug:\n\n1. Using `slug` in docs.yml, which is relative to the page's location in the navigation:\n<CodeBlock title='docs.yml'>\n```yaml\nnavigation:\n  - tab: overview\n    layout:\n      - section: Support\n        contents:\n          - page: Email Us\n            path: ./pages/email-us.mdx\n            slug: email  # Results in /overview/support/email\n```\n</CodeBlock>\n\n2. Using `slug` in frontmatter, which overrides everything and sets the absolute path from the root:\n<CodeBlock title='email-us.mdx'>\n```mdx\n---\nslug: email  # Results in /email (ignores navigation structure)\n---\n```\n</CodeBlock>\n\nThe key difference is:\n- A slug in docs.yml is relative to the page's location in the navigation structure\n- A slug in frontmatter is absolute and ignores the navigation structure completely"
+  }
+}

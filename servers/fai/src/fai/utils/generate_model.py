@@ -84,3 +84,42 @@ async def generate_anthropic_generic_async(
                 await asyncio.sleep(0.5)
                 tries += 1
         return None
+
+
+async def generate_cached_anthropic_generic_async(
+    response_type: type[T],
+    system_prompt: str,
+    user_prompt: str,
+    model: str,
+    **kwargs: Any,
+) -> T | None:
+    async with AsyncAnthropic() as anthropic_client:
+        formatted_prompt = user_prompt.format(**kwargs)
+        tools = [
+            {
+                "name": "build_response_result",
+                "description": "Build the structured response object.",
+                "input_schema": response_type.model_json_schema(),
+            }
+        ]
+        tries = 0
+        while tries < 3:
+            try:
+                response = await anthropic_client.messages.create(
+                    model=model,
+                    max_tokens=1000,
+                    temperature=0.0,
+                    system=[{"type": "text", "text": system_prompt, "cache_control": {"type": "ephemeral"}}],
+                    messages=[{"role": "user", "content": formatted_prompt}],
+                    tools=tools,  # type: ignore
+                    tool_choice={"type": "tool", "name": "build_response_result"},  # type: ignore
+                )
+
+                function_call = response.content[0].input
+                parsed_response = response_type(**function_call)
+                return parsed_response
+
+            except Exception:
+                await asyncio.sleep(0.5)
+                tries += 1
+        return None

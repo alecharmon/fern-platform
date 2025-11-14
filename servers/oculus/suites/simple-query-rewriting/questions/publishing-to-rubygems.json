@@ -1,0 +1,11 @@
+{
+  "question": "How do I configure the output location in generators.yml to publish my Ruby SDK to RubyGems?",
+  "ground_truth": "To configure the output location for publishing to RubyGems, you need to change the output location in generators.yml from 'local-file-system' (the default) to 'rubygems'. This should be done under the 'output' section with 'location: rubygems'.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-to-rubygems",
+    "domain": "buildwithfern.com",
+    "cited_context": "Next, change the output location in `generators.yml` from `local-file-system` (the default) to `pypi` to indicate that Fern should publish your package directly to the PyPI registry:\n\n```yaml {{6-7}}\ngroups: \n  ruby-sdk:\n    generators:\n      - name: fernapi/fern-ruby-sdk\n        version: 1.0.0-rc31\n        output:\n          location: rubygems\n```"
+  }
+}

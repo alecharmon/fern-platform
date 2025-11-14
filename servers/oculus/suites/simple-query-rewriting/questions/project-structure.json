@@ -1,0 +1,11 @@
+{
+  "question": "How do I configure Fern to generate separate SDKs for multiple APIs?",
+  "ground_truth": "To generate separate SDKs for each API, organize your APIs in subdirectories under a `fern/apis/` folder, with each API having its own `generators.yml` file. For example, create `fern/apis/user-api/` and `fern/apis/payments-api/` directories, each containing their own `generators.yml` and API specification files. Each `generators.yml` configures the SDK generation for that specific API independently.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "project-structure",
+    "domain": "buildwithfern.com",
+    "cited_context": "Use this approach when each API should generate its own independent set of SDKs.\n\n```bash\nfern/\n  \u251c\u2500 fern.config.json\n  \u2514\u2500 apis/\n    \u251c\u2500 user-api/\n    \u2502   \u251c\u2500 generators.yml        # Configures user-api SDKs\n    \u2502   \u2514\u2500 openapi.yml\n    \u2514\u2500 payments-api/\n        \u251c\u2500 generators.yml        # Configures payments-api SDKs  \n        \u2514\u2500 openapi.yml\n```\n\nEach API must have its own `generators.yml` file:\n\n```yaml title=\"apis/user-api/generators.yml\"\napi:\n  specs:\n    - openapi: openapi.yml\ngroups:\n  ts-sdk:\n    generators:\n      - name: fernapi/fern-typescript-sdk\n        github:\n          repository: company/user-api-typescript\n```"
+  }
+}

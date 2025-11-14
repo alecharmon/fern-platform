@@ -24,6 +24,7 @@ class SuiteConfig(BaseModel):
     evaluators: list[str] = Field(default_factory=list)
     num_questions_generation: int | None = None
     generator_config: GeneratorConfig | None = None
+    rewrite_query: bool = False
 
 
 class Question(BaseModel):

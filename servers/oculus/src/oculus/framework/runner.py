@@ -82,6 +82,115 @@ class EvaluationRunner:
         self.answers_dir.mkdir(parents=True, exist_ok=True)
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
+    def _extract_subqueries(self, answer: Answer) -> list[str] | None:
+        subqueries_str = (
+            answer.metadata.get("subqueries")
+            or answer.metadata.get("rewritten_queries")
+            or answer.metadata.get("query_decomposition")
+        )
+        if not subqueries_str:
+            return None
+
+        try:
+            subqueries = json.loads(subqueries_str)
+            if isinstance(subqueries, list):
+                return subqueries
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+        return None
+
+    def _extract_source_urls(self, answer: Answer) -> list[str] | None:
+        sources_str = answer.metadata.get("sources")
+        if not sources_str:
+            return None
+
+        try:
+            sources = json.loads(sources_str)
+            if isinstance(sources, list):
+                urls = [s.get("url") for s in sources if s.get("url")]
+                return urls if urls else None
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+        return None
+
+    def _serialize_answer(self, answer: Answer) -> dict[str, Any]:
+        result = answer.model_dump()
+
+        subqueries = self._extract_subqueries(answer)
+        if subqueries:
+            result["subqueries"] = subqueries
+            for key in ["subqueries", "rewritten_queries", "query_decomposition"]:
+                result["metadata"].pop(key, None)
+
+        source_urls = self._extract_source_urls(answer)
+        if source_urls:
+            result["source_urls"] = source_urls
+            result["metadata"].pop("sources", None)
+
+        for key in list(result["metadata"].keys()):
+            if key.endswith("_retrieved_documents"):
+                try:
+                    docs = json.loads(result["metadata"][key])
+                    if isinstance(docs, list):
+                        urls = [doc.get("url") for doc in docs if doc.get("url")]
+                        if urls:
+                            result["metadata"][f"{key.replace('_retrieved_documents', '')}_retrieved_urls"] = urls
+                        result["metadata"].pop(key)
+                except (json.JSONDecodeError, TypeError):
+                    pass
+
+        return result
+
+    def _serialize_evaluation_run(self, run: EvaluationRun) -> dict[str, Any]:
+        """Serialize evaluation run with cleaned up metadata in evaluations."""
+        result = run.model_dump()
+
+        for eval_result in result["results"]:
+            metadata = eval_result.get("metadata", {})
+
+            subqueries_str = (
+                metadata.get("subqueries")
+                or metadata.get("rewritten_queries")
+                or metadata.get("query_decomposition")
+            )
+            if subqueries_str:
+                try:
+                    subqueries = json.loads(subqueries_str)
+                    if isinstance(subqueries, list):
+                        eval_result["subqueries"] = subqueries
+                        for key in ["subqueries", "rewritten_queries", "query_decomposition"]:
+                            metadata.pop(key, None)
+                except (json.JSONDecodeError, TypeError):
+                    pass
+
+            sources_str = metadata.get("sources")
+            if sources_str:
+                try:
+                    sources = json.loads(sources_str)
+                    if isinstance(sources, list):
+                        urls = [s.get("url") for s in sources if s.get("url")]
+                        if urls:
+                            eval_result["source_urls"] = urls
+                        metadata.pop("sources", None)
+                except (json.JSONDecodeError, TypeError):
+                    pass
+
+            for key in list(metadata.keys()):
+                if key.endswith("_retrieved_documents"):
+                    try:
+                        docs = json.loads(metadata[key])
+                        if isinstance(docs, list):
+                            urls = [doc.get("url") for doc in docs if doc.get("url")]
+                            if urls:
+                                metadata[f"{key.replace('_retrieved_documents', '')}_retrieved_urls"] = urls
+                            metadata.pop(key)
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+
+        return result
+
     def generate_and_save_questions(self) -> None:
         if not self.generators:
             print("No generators configured")
@@ -219,7 +328,7 @@ class EvaluationRunner:
                 slug = answer.metadata.get("slug", f"question_{idx}")
                 sanitized_slug = slug.replace("/", "_").replace("\\", "_")
                 answer_path = self.answers_dir / f"{sanitized_slug}.json"
-                save_json(answer_path, answer.model_dump())
+                save_json(answer_path, self._serialize_answer(answer))
                 print(f"Progress: {completed}/{total} - Generated answer for slug: {slug}")
 
         print(f"Generated {len(pending_questions)} answers")
@@ -400,7 +509,7 @@ class EvaluationRunner:
         )
 
         results_path = self.results_dir / f"results_{self.run_id}.json"
-        save_json(results_path, run_result.model_dump())
+        save_json(results_path, self._serialize_evaluation_run(run_result))
         print(f"Saved results to {results_path}\n")
 
         print(f"{'='*60}")

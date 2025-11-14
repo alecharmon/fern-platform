@@ -73,6 +73,10 @@ oculus diff --suite payroc --baseline --baseline-run 20251111_163859
 - `--output-dir`: Directory to save results and GitHub-formatted outputs
 - `--github-output`: Generate GitHub-formatted markdown outputs (requires `--output-dir`)
 
+**Suite Config Options:**
+- `integration`: Integration type to use (overridden by CLI `--integration` flag)
+- `rewrite_query`: Enable query rewriting for better retrieval (only for `fai-local` and `fai-http` integrations)
+
 ## GitHub Integration
 
 Oculus can generate GitHub-friendly markdown outputs for use in workflows, PR comments, and job summaries:

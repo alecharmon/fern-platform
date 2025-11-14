@@ -1,6 +1,5 @@
 """Utilities for generating diffs between evaluation runs."""
 
-import difflib
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -48,17 +47,6 @@ def parse_question_ids(question_arg: str, all_question_files: list[Path]) -> lis
     return ids
 
 
-def create_text_diff(baseline: str, new: str, baseline_id: str, new_id: str) -> str:
-    baseline_lines = baseline.splitlines(keepends=True)
-    new_lines = new.splitlines(keepends=True)
-
-    diff = difflib.unified_diff(
-        baseline_lines, new_lines, fromfile=f"Baseline ({baseline_id})", tofile=f"New ({new_id})", lineterm=""
-    )
-
-    return "".join(diff)
-
-
 def format_correctness_change(baseline_correct: bool, new_correct: bool) -> str:
     if baseline_correct and new_correct:
         return "✅ → ✅ (unchanged)"
@@ -81,17 +69,6 @@ def format_response_time_change(baseline_ms: float, new_ms: float) -> str:
         return f"🟢 {diff_sec:.2f}s faster"
     else:
         return f"🔴 +{diff_sec:.2f}s slower"
-
-
-def extract_sources(answer: Answer) -> list[str]:
-    import json
-
-    sources_str = answer.metadata.get("sources", "[]")
-    try:
-        sources = json.loads(sources_str)
-        return [s.get("title", "Unknown") for s in sources]
-    except Exception:
-        return []
 
 
 def extract_retrieved_documents(answer: Answer) -> list[dict[str, str | float]] | None:
@@ -139,9 +116,6 @@ def generate_diff_markdown(
 
     baseline_response_time = float(baseline_answer.metadata.get("response_time_ms", 0))
     new_response_time = float(new_answer.metadata.get("response_time_ms", 0))
-
-    baseline_sources = extract_sources(baseline_answer)
-    new_sources = extract_sources(new_answer)
 
     baseline_retrieved_docs = extract_retrieved_documents(baseline_answer)
     new_retrieved_docs = extract_retrieved_documents(new_answer)
@@ -196,7 +170,6 @@ def generate_diff_markdown(
     baseline_ans_len = len(baseline_answer.answer)
     new_ans_len = len(new_answer.answer)
     ans_len_change = new_ans_len - baseline_ans_len
-    sources_change = len(new_sources) - len(baseline_sources)
     baseline_retrieved = len(baseline_retrieved_docs) if baseline_retrieved_docs else 0
     new_retrieved = len(new_retrieved_docs) if new_retrieved_docs else 0
     retrieved_change = new_retrieved - baseline_retrieved
@@ -220,13 +193,23 @@ def generate_diff_markdown(
 | **Model** | {baseline_answer.model} | {new_answer.model} | {model_change} |
 | **Response Time** | {baseline_response_time/1000:.2f}s | {new_response_time/1000:.2f}s | {response_time_change} |
 | **Answer Length** | {baseline_ans_len} chars | {new_ans_len} chars | {ans_len_change:+d} chars |
-| **Sources Count** | {len(baseline_sources)} | {len(new_sources)} | {sources_change:+d} |
 | **Retrieved Docs** | {baseline_retrieved} | {new_retrieved} | {retrieved_change:+d} |
 | **Subqueries** | {baseline_subq} | {new_subq} | {subq_change:+d} |
 
 ---
 
-## Baseline Answer (Run: {baseline_run_id})
+# New Answer (Generated: {diff_id})
+
+**Status:** {"✅ CORRECT" if new_correct else "❌ INCORRECT"}
+
+{new_answer.answer}
+
+**Evaluator: Correctness**
+> {new_correctness_reason}
+
+---
+
+# Baseline Answer (Run: {baseline_run_id})
 
 **Status:** {"✅ CORRECT" if baseline_correct else "❌ INCORRECT"}
 
@@ -242,17 +225,6 @@ def generate_diff_markdown(
 
 ---
 
-## New Answer (Generated: {diff_id})
-
-**Status:** {"✅ CORRECT" if new_correct else "❌ INCORRECT"}
-
-{new_answer.answer}
-
-**Evaluator: Correctness**
-> {new_correctness_reason}
-
----
-
 ## Ground Truth
 
 <details>
@@ -261,35 +233,7 @@ def generate_diff_markdown(
 {question.ground_truth}
 
 </details>
-
----
-
-## Sources Comparison
-
-### Baseline Sources
-{chr(10).join(f"{i+1}. {s}" for i, s in enumerate(baseline_sources)) if baseline_sources else "No sources"}
-
-### New Sources
-{chr(10).join(f"{i+1}. {s}" for i, s in enumerate(new_sources)) if new_sources else "No sources"}
 {retrieved_docs_section}{subqueries_section}
----
-
-## Metadata
-
-<details>
-<summary>View Full Metadata</summary>
-
-### Baseline
-```json
-{baseline_answer.metadata}
-```
-
-### New
-```json
-{new_answer.metadata}
-```
-
-</details>
 """
 
     return md
@@ -333,7 +277,6 @@ def generate_diff_markdown_ground_truth(
 ) -> str:
     is_correct = new_eval.is_correct
     response_time = float(new_answer.metadata.get("response_time_ms", 0))
-    sources = extract_sources(new_answer)
     retrieved_docs = extract_retrieved_documents(new_answer)
     subqueries = extract_subqueries(new_answer)
 
@@ -380,7 +323,6 @@ def generate_diff_markdown_ground_truth(
 | **Response Time** | {response_time/1000:.2f}s |
 | **Answer Length** | {len(new_answer.answer)} chars |
 | **Ground Truth Length** | {len(question.ground_truth)} chars |
-| **Sources Count** | {len(sources)} |
 | **Retrieved Docs** | {len(retrieved_docs) if retrieved_docs else 0} |
 | **Subqueries** | {len(subqueries) if subqueries else 0} |
 
@@ -400,25 +342,7 @@ def generate_diff_markdown_ground_truth(
 ## Ground Truth
 
 {question.ground_truth}
-
----
-
-## Sources
-
-{chr(10).join(f"{i+1}. {s}" for i, s in enumerate(sources)) if sources else "No sources"}
 {retrieved_docs_section}{subqueries_section}
----
-
-## Metadata
-
-<details>
-<summary>View Full Metadata</summary>
-
-```json
-{new_answer.metadata}
-```
-
-</details>
 """
 
     return md

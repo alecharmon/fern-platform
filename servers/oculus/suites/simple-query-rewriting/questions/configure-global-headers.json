@@ -1,0 +1,11 @@
+{
+  "question": "How can I configure global headers in my Fern SDK using OpenAPI?",
+  "ground_truth": "You can configure global headers in Fern SDKs using OpenAPI in two ways: Method 1 is to use the OpenAPI Spec Extension by adding the `x-fern-global-headers` extension directly to your OpenAPI spec, where you can label headers as global and optionally alias their names. Method 2 is to configure headers in the `api` block of your `generators.yml` file. Both methods allow you to specify required and optional headers, and they produce the same client code where headers are passed as constructor parameters.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "configure-global-headers",
+    "domain": "buildwithfern.com",
+    "cited_context": "For OpenAPI specifications, you can configure global headers in two ways:\n\n#### Method 1: OpenAPI Spec Extension\n\nAdd global headers directly to your OpenAPI spec using the `x-fern-global-headers` extension to label additional headers as global or to alias the names of global headers:\n\n```yaml title=\"openapi.yml\"\nx-fern-global-headers:\n  - header: custom_api_key\n    name: api_key\n  - header: userpool_id\n    optional: true\n```\n\n#### Method 2: `generators.yml` Configuration\n\nAlternatively, you can add headers to the `api` block in your `generators.yml` file:\n\n```yaml title=\"generators.yml\"\napi:\n  - openapi: ./path/to/openapi\n    headers: \n      custom_api_key:\n        name: api_key\n        type: string\n      userpool_id:\n        name: userpool_id\n        type: optional<string>\n```"
+  }
+}

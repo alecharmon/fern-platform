@@ -1,0 +1,11 @@
+{
+  "question": "How do I configure the generators.yml file to publish my Java SDK directly to Maven Central?",
+  "ground_truth": "To configure generators.yml to publish your Java SDK directly to Maven Central, you need to: 1) Change the output location from 'local-file-system' to 'maven', 2) Add 'publish-to: central' under config to indicate the new Maven Central Portal as the target, 3) Add your repository location under the 'github' field, 4) Configure your Maven coordinate (groupId:artifactId), 5) Add authentication tokens using environment variables for username and password, and 6) Configure GPG signature credentials including keyId, password, and secretKey.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "publishing-to-maven-central",
+    "domain": "buildwithfern.com",
+    "cited_context": "In the `group` for your Java SDK, change the output location in `generators.yml` from `local-file-system` (the default) to `maven` to indicate that Fern should publish your package directly to the Maven Central registry. Then, add `publish-to: central` to indicate that the publish target is the new Maven Central Portal (Sonatype). Add the path to the GitHub repository containing your Java SDK. Add the namespace you just verified in Maven Central to the `coordinate` field. This specifies how your Java SDK will be published and referenced in the Maven Central respository. Add `username: ${{MAVEN_USERNAME}}` and `password: ${{MAVEN_PASSWORD}}` to `generators.yml` to tell Fern to use the `MAVEN_USERNAME` and `MAVEN_PASSWORD` environment variable for authentication when publishing to the Maven Central registry. Add the `keyId`, `password`, and `secretKey` from the previous step to `generators.yml`."
+  }
+}
