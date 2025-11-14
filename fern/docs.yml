@@ -24,11 +24,20 @@ navigation:
     display-errors: true
 
 colors:
-  accentPrimary:
-    dark: "#ADFF8C"
-    light: "#418326"
+  accent-primary:
+    dark: "#70E155"
+    light: "#008700"
   background:
-    dark: "#000000"
+    dark: "#111113"
+    light: "#FFFFFF"
+  border: 
+    dark: "#393A40"
+    light: "#E0E1E6"
+  header-background:
+    dark: "#111113"
+    light: "#FFFFFF"
+  card-background:
+    dark: "#222325"
     light: "#FFFFFF"
 
 logo:
@@ -36,4 +45,4 @@ logo:
   dark: ./docs/images/logo-white.svg
   height: 30
 
-favicon: ./docs/images/favicon.ico
+favicon: ./docs/images/favicon_32.png
