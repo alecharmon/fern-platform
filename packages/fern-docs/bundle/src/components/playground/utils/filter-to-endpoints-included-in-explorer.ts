@@ -10,38 +10,43 @@ export async function filterToEndpointsIncludedInExplorer(
     loader: Awaited<ReturnType<typeof createCachedDocsLoader>>,
     apiGroups: ApiGroup[]
 ): Promise<ApiGroup[]> {
-    const cache = new Map<string, Promise<ApiDefinition.ApiDefinition>>();
+    const keyFor = (item: FernNavigation.NavigationNodeApiLeaf) => `${String(item.apiDefinitionId)}:${String(item.id)}`;
 
-    const filteredApiGroups = await Promise.all(
-        apiGroups.map(async (group) => {
-            const filteredItems = await Promise.all(
-                group.items.map(async (item) => {
-                    if (item.type === "endpoint") {
-                        const cacheKey = `${String(item.apiDefinitionId)}:${String(item.id)}`;
-                        let apiPromise = cache.get(cacheKey);
+    const promiseByKey = new Map<string, Promise<ApiDefinition.ApiDefinition>>();
+    for (const group of apiGroups) {
+        for (const item of group.items) {
+            if (item.type !== "endpoint") {
+                continue;
+            }
+            const key = keyFor(item);
+            if (!promiseByKey.has(key)) {
+                promiseByKey.set(key, loader.getPrunedApi(item.apiDefinitionId, createPruneKey(item)));
+            }
+        }
+    }
 
-                        if (!apiPromise) {
-                            apiPromise = loader.getPrunedApi(item.apiDefinitionId, createPruneKey(item));
-                            cache.set(cacheKey, apiPromise);
-                        }
+    const entries = Array.from(promiseByKey.entries());
+    const resolved = await Promise.all(entries.map(([, p]) => p));
+    const apiByKey = new Map<string, ApiDefinition.ApiDefinition>(entries.map(([k], i) => [k, resolved[i]!]));
 
-                        const api = await apiPromise;
-                        const ctx = ApiDefinition.createEndpointContext(item, api);
-
-                        if (ctx?.endpoint.includeInApiExplorer === false) {
-                            return null;
-                        }
-                    }
-                    return item;
-                })
-            );
-
-            return {
-                ...group,
-                items: filteredItems.filter((item): item is FernNavigation.NavigationNodeApiLeaf => item !== null)
-            };
+    const filtered = apiGroups
+        .map((group) => {
+            const kept: FernNavigation.NavigationNodeApiLeaf[] = [];
+            for (const item of group.items) {
+                if (item.type !== "endpoint") {
+                    kept.push(item);
+                    continue;
+                }
+                const api = apiByKey.get(keyFor(item));
+                const ctx = api ? ApiDefinition.createEndpointContext(item, api) : undefined;
+                if (ctx?.endpoint.includeInApiExplorer === false) {
+                    continue;
+                }
+                kept.push(item);
+            }
+            return { ...group, items: kept };
         })
-    );
+        .filter((g) => g.items.length > 0);
 
-    return filteredApiGroups.filter((group) => group.items.length > 0);
+    return filtered;
 }
