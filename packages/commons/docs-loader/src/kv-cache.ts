@@ -86,23 +86,47 @@ class UpstashKvCache implements KvCache {
 
         // If there's already an in-flight request, wait for it
         if (this.inFlightRequests.has(requestKey)) {
+            const waitStart = Date.now();
             console.debug(`[Upstash] Waiting for in-flight request - domain: ${domainKey}, key: ${finalKey}`);
-            return this.inFlightRequests.get(requestKey) as Promise<T | null>;
+            const result = (await this.inFlightRequests.get(requestKey)) as Promise<T | null>;
+            const waitDuration = Date.now() - waitStart;
+            console.debug(
+                `[Upstash] In-flight request completed after ${waitDuration}ms - domain: ${domainKey}, key: ${finalKey}`
+            );
+            return result;
         }
 
         console.debug(`[Upstash] GET operation - domain: ${domainKey}, key: ${finalKey}`);
 
         // Create the request promise
         const requestPromise = (async () => {
+            const acquireStart = Date.now();
+            console.debug(`[Upstash] GET acquire start - domain: ${domainKey}, key: ${finalKey}`);
             await this.getMonitor.acquire();
+            const acquireDuration = Date.now() - acquireStart;
+            console.debug(`[Upstash] GET acquired in ${acquireDuration}ms - domain: ${domainKey}, key: ${finalKey}`);
+
             const start = Date.now();
             try {
                 // Check if the key has expired
                 const ttlKey = `${domainKey}:ttl:${finalKey}`;
+                const ttlStart = Date.now();
+                console.debug(`[Upstash] GET ttl start - domain: ${domainKey}, key: ${ttlKey}`);
                 const expiration = await kv.get<number>(ttlKey);
+                const ttlDuration = Date.now() - ttlStart;
+                console.debug(
+                    `[Upstash] GET ttl done in ${ttlDuration}ms - domain: ${domainKey}, key: ${ttlKey}, value: ${expiration}`
+                );
+
+                if (ttlDuration > 2000) {
+                    console.warn(
+                        `[Upstash] GET slow ttl check took ${ttlDuration}ms - domain: ${domainKey}, key: ${finalKey}`
+                    );
+                }
 
                 if (expiration && Date.now() > expiration) {
                     // Key has expired, delete it
+                    console.debug(`[Upstash] GET deleting expired key - domain: ${domainKey}, key: ${finalKey}`);
                     await kv.hdel(domainKey, finalKey);
                     await kv.del(ttlKey);
                     const duration = Date.now() - start;
@@ -112,13 +136,22 @@ class UpstashKvCache implements KvCache {
                     return null;
                 }
 
+                const hgetStart = Date.now();
+                console.debug(`[Upstash] GET hget start - domain: ${domainKey}, key: ${finalKey}`);
                 const result = await kv.hget<T>(domainKey, finalKey);
+                const hgetDuration = Date.now() - hgetStart;
                 const duration = Date.now() - start;
                 const isHit = result != null;
 
                 console.debug(
-                    `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
+                    `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, hget: ${hgetDuration}ms, total: ${duration}ms`
                 );
+
+                if (hgetDuration > 2000) {
+                    console.warn(
+                        `[Upstash] GET slow hget took ${hgetDuration}ms - domain: ${domainKey}, key: ${finalKey}`
+                    );
+                }
 
                 return result;
             } catch (error) {
@@ -130,6 +163,7 @@ class UpstashKvCache implements KvCache {
                 return null;
             } finally {
                 this.getMonitor.release();
+                console.debug(`[Upstash] GET released semaphore - domain: ${domainKey}, key: ${finalKey}`);
             }
         })();
 

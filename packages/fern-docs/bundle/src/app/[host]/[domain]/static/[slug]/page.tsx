@@ -17,11 +17,25 @@ export default async function StaticPage({
     params: Promise<{ host: string; domain: string; slug: string }>;
 }) {
     const { host, domain, slug } = await params;
+    const rid = `${domain}-${slug}-${Date.now().toString(36).slice(-5)}`;
+    console.log(`[ROUTE:${rid}] StaticPage start - domain: ${domain}, slug: ${slug}`);
+
     if (slug === "index.html") {
+        console.log(`[ROUTE:${rid}] Returning RootPage for index.html`);
         return <RootPage />;
     }
+
+    const loaderStart = Date.now();
     const loader = await createCachedDocsLoader(host, domain);
-    return <SharedPage loader={loader} slug={slugjoin(slug)} />;
+    const loaderDuration = Date.now() - loaderStart;
+    console.log(`[ROUTE:${rid}] createCachedDocsLoader done in ${loaderDuration}ms`);
+
+    const sharedPageStart = Date.now();
+    const result = await (<SharedPage loader={loader} slug={slugjoin(slug)} />);
+    const sharedPageDuration = Date.now() - sharedPageStart;
+    console.log(`[ROUTE:${rid}] SharedPage done in ${sharedPageDuration}ms`);
+
+    return result;
 }
 
 export async function generateMetadata({
