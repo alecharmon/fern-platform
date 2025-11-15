@@ -10,6 +10,7 @@ export async function GET(
     const { host, domain } = await props.params;
 
     const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
+    const isPreview = process.env.VERCEL_ENV === "preview";
 
     try {
         const loader = await createCachedDocsLoader(host, domain, fernToken);
@@ -19,6 +20,9 @@ export async function GET(
             const faviconUrl = files[config.favicon]?.src;
 
             if (!faviconUrl) {
+                if (isPreview) {
+                    return new NextResponse(null, { status: 204 });
+                }
                 return new NextResponse(null, { status: 404 });
             }
 
@@ -50,9 +54,15 @@ export async function GET(
             }
         }
 
+        if (isPreview) {
+            return new NextResponse(null, { status: 204 });
+        }
         return new NextResponse(null, { status: 404 });
     } catch (error) {
         console.error(`[favicon:${domain}] Error serving favicon:`, error);
+        if (isPreview) {
+            return new NextResponse(null, { status: 204 });
+        }
         return new NextResponse(null, { status: 404 });
     }
 }

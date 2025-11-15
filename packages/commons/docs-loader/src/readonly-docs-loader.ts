@@ -144,8 +144,15 @@ const DEFAULT_CACHE_CONFIG: Required<CacheConfig> = {
 
 function assertDocsDomain(domainKey: string) {
     const domain = deriveDomainFromDomainKey(domainKey);
-    if (FERN_DOCS_ORIGINS.includes(domain) || domain.endsWith(".vercel.app")) {
-        console.error(`[assertDocsDomain:${domain}] Found unexpected domain`);
+    const isPreview = process.env.VERCEL_ENV === "preview";
+
+    if (FERN_DOCS_ORIGINS.includes(domain)) {
+        console.error(`[assertDocsDomain:${domain}] Found unexpected domain (FERN_DOCS_ORIGINS)`);
+        notFound();
+    }
+
+    if (!isPreview && domain.endsWith(".vercel.app")) {
+        console.error(`[assertDocsDomain:${domain}] Found unexpected domain (.vercel.app in production)`);
         notFound();
     }
 }

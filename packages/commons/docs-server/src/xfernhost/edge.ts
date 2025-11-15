@@ -26,7 +26,7 @@ export function getDocsDomainEdge(req: NextRequest): string {
 
     for (let host of hosts) {
         host = cleanHost(host);
-        if (host != null) {
+        if (host != null && !host.endsWith(".vercel.app")) {
             return host;
         }
     }
