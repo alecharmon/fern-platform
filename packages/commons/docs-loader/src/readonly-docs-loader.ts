@@ -1187,7 +1187,7 @@ export type CachedDocsLoader = DocsLoader & {
  * The expectation is that moving forward, we'll update the underlying API to be more cache-friendly
  * in a piece-meal fashion, and eventually remove all use of loadWithUrl.
  */
-export const createCachedDocsLoader = async (
+const createCachedDocsLoaderImpl = async (
     host: string,
     domainKey: string,
     fern_token?: string,
@@ -1269,6 +1269,13 @@ export const createCachedDocsLoader = async (
         isAskAiEnabledForDocs: () => getAskAiEnabledForDocs(config)(domainKey)
     };
 };
+
+/**
+ * Request-level memoized version of createCachedDocsLoader.
+ * This ensures that all parallel routes within a single request share the same loader instance,
+ * dramatically reducing duplicate Upstash KV calls.
+ */
+export const createCachedDocsLoader = cache(createCachedDocsLoaderImpl);
 
 function toOklch(color: object | undefined): string | undefined {
     if (!color || !isPlainObject(color)) {
