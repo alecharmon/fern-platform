@@ -127,48 +127,20 @@ class UpstashKvCache implements KvCache {
 
             const start = Date.now();
             try {
-                // Check if the key has expired
-                const ttlKey = `${domainKey}:ttl:${finalKey}`;
-                const ttlStart = Date.now();
-                console.debug(`[Upstash] GET ttl start - domain: ${domainKey}, key: ${ttlKey}`);
-                const expiration = await kv.get<number>(ttlKey);
-                const ttlDuration = Date.now() - ttlStart;
-                console.debug(
-                    `[Upstash] GET ttl done in ${ttlDuration}ms - domain: ${domainKey}, key: ${ttlKey}, value: ${expiration}`
-                );
-
-                if (ttlDuration > 2000) {
-                    console.warn(
-                        `[Upstash] GET slow ttl check took ${ttlDuration}ms - domain: ${domainKey}, key: ${finalKey}`
-                    );
-                }
-
-                if (expiration && Date.now() > expiration) {
-                    // Key has expired, delete it
-                    console.debug(`[Upstash] GET deleting expired key - domain: ${domainKey}, key: ${finalKey}`);
-                    await kv.hdel(domainKey, finalKey);
-                    await kv.del(ttlKey);
-                    const duration = Date.now() - start;
-                    console.debug(
-                        `[Upstash] GET expired - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
-                    );
-                    return null;
-                }
-
-                const hgetStart = Date.now();
-                console.debug(`[Upstash] GET hget start - domain: ${domainKey}, key: ${finalKey}`);
-                const result = await kv.hget<T>(domainKey, finalKey);
-                const hgetDuration = Date.now() - hgetStart;
+                const getStart = Date.now();
+                console.debug(`[Upstash] GET start - domain: ${domainKey}, key: ${finalKey}`);
+                const result = await kv.get<T>(requestKey);
+                const getDuration = Date.now() - getStart;
                 const duration = Date.now() - start;
                 const isHit = result != null;
 
                 console.debug(
-                    `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, hget: ${hgetDuration}ms, total: ${duration}ms`
+                    `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, get: ${getDuration}ms, total: ${duration}ms`
                 );
 
-                if (hgetDuration > 2000) {
+                if (getDuration > 2000) {
                     console.warn(
-                        `[Upstash] GET slow hget took ${hgetDuration}ms - domain: ${domainKey}, key: ${finalKey}`
+                        `[Upstash] GET slow get took ${getDuration}ms - domain: ${domainKey}, key: ${finalKey}`
                     );
                 }
 
@@ -349,6 +321,7 @@ class UpstashKvCache implements KvCache {
         }
 
         const finalKey = cacheKeySuffix ? `${key}:${cacheKeySuffix}` : key;
+        const requestKey = `${domainKey}:${finalKey}`;
 
         console.debug(`[Upstash] SET operation - domain: ${domainKey}, key: ${finalKey}, ttl: ${ttl || "none"}`);
 
@@ -357,12 +330,9 @@ class UpstashKvCache implements KvCache {
             const start = Date.now();
             try {
                 if (ttl && ttl > 0) {
-                    await kv.hset(domainKey, { [finalKey]: value });
-                    // Set expiration for the hash field (note: Redis doesn't support per-field TTL in hashes)
-                    // So we'll use a separate key for TTL tracking
-                    await kv.setex(`${domainKey}:ttl:${finalKey}`, ttl, Date.now() + ttl * 1000);
+                    await kv.setex(requestKey, ttl, value);
                 } else {
-                    await kv.hset(domainKey, { [finalKey]: value });
+                    await kv.set(requestKey, value);
                 }
                 const duration = Date.now() - start;
                 console.debug(
@@ -382,19 +352,12 @@ class UpstashKvCache implements KvCache {
         }
 
         try {
-            // Clear KV cache for domainKey
-            const keys = await kv.hkeys(domainKey);
+            const keys = await kv.keys(`${domainKey}:*`);
             if (keys.length > 0) {
-                await kv.hdel(domainKey, ...keys);
+                await kv.del(...keys);
             }
 
-            // Clear TTL tracking keys
-            const ttlKeys = await kv.keys(`${domainKey}:ttl:*`);
-            if (ttlKeys.length > 0) {
-                await kv.del(...ttlKeys);
-            }
-
-            console.debug(`KV cache cleared for domainKey: ${domainKey}`);
+            console.debug(`KV cache cleared for domainKey: ${domainKey} (${keys.length} keys)`);
         } catch (error) {
             console.error(`Failed to clear KV cache for domainKey ${domainKey}:`, error);
         }
