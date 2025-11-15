@@ -122,7 +122,15 @@ export function createCachedMdxSerializer(
                                 `[serializeMdx] NextMdxRemote succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${nextMdxEndTime - nextMdxStartTime}ms, total: ${nextMdxEndTime - startTime}ms`
                             );
                             return result;
-                        } catch (_nextMdxError) {
+                        } catch (nextMdxError) {
+                            console.error(
+                                `[serializeMdx] NextMdxRemote failed for domain: ${domain}, filename: ${filename || "unknown"}, content length: ${content.length}`,
+                                nextMdxError
+                            );
+                            console.error(
+                                `[serializeMdx] NextMdxRemote error stack for domain: ${domain}, filename: ${filename || "unknown"}:`,
+                                nextMdxError instanceof Error ? nextMdxError.stack : "No stack trace available"
+                            );
                             try {
                                 const fallbackStartTime = Date.now();
                                 console.log(
@@ -147,7 +155,14 @@ export function createCachedMdxSerializer(
                                 );
                                 return result;
                             } catch (fallbackError) {
-                                console.error("[serializeMdx] Both engines failed serializing mdx", fallbackError);
+                                console.error(
+                                    `[serializeMdx] Both engines failed serializing mdx for domain: ${domain}, filename: ${filename || "unknown"}, content length: ${content.length}`,
+                                    { nextMdxError, fallbackError }
+                                );
+                                console.error(
+                                    `[serializeMdx] Fallback error stack for domain: ${domain}, filename: ${filename || "unknown"}:`,
+                                    fallbackError instanceof Error ? fallbackError.stack : "No stack trace available"
+                                );
 
                                 return undefined;
                             }
@@ -177,7 +192,14 @@ export function createCachedMdxSerializer(
                         return result;
                     }
                 } catch (error) {
-                    console.error("Error serializing mdx", error);
+                    console.error(
+                        `[serializeMdx] Error serializing mdx for domain: ${domain}, filename: ${filename || "unknown"}, content length: ${content.length}`,
+                        error
+                    );
+                    console.error(
+                        `[serializeMdx] Error stack for domain: ${domain}, filename: ${filename || "unknown"}:`,
+                        error instanceof Error ? error.stack : "No stack trace available"
+                    );
 
                     // Instead of returning raw content, throw the error to be handled by the caller
                     throw error;
