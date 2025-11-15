@@ -55,7 +55,7 @@ import { visualEditorStorage } from "@fern-api/visual-editor-server";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { createHash } from "crypto";
 import { mapValues } from "es-toolkit";
-import { unstable_cache, unstable_cacheTag } from "next/cache";
+import { unstable_cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
@@ -336,82 +336,79 @@ const getApi = async (domainKey: string, id: string) => {
     return ApiDefinitionV1ToLatest.from(v1).migrate();
 };
 
-const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<CacheConfig>) =>
-    unstable_cache(
-        async (id: string, ...nodes: PruningNodeType[]): Promise<ApiDefinition.ApiDefinition> => {
-            // if there is only one node, and it's an endpoint, try to load from cache
-            const kvGetStart = Date.now();
-            try {
-                if (nodes.length === 1 && nodes[0]) {
-                    const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
-                    console.debug(
-                        `[DocsLoader] createGetPrunedApiCached kvGet start - domain: ${domainKey}, key: ${key}, apiId: ${id}`
-                    );
-                    const cached = await kvGet<ApiDefinition.ApiDefinition>(domainKey, key, cacheConfig.cacheKeySuffix);
-                    const kvGetDuration = Date.now() - kvGetStart;
-                    console.debug(
-                        `[DocsLoader] createGetPrunedApiCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, key: ${key}`
-                    );
-                    if (cached != null) {
-                        console.debug(
-                            `[DocsLoader] createGetPrunedApiCached cache hit, backfilling snippets - domain: ${domainKey}, key: ${key}`
-                        );
-                        const metadata = await getMetadata(cacheConfig)(domainKey);
-                        const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
-                        const settings = await getSettings(cacheConfig)(domainKey);
-                        const flags = {
-                            httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
-                            alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
-                        };
-                        return await backfillSnippets(cached, dynamicIr, flags);
-                    }
-                    console.debug(
-                        `[DocsLoader] createGetPrunedApiCached cache miss, falling back to uncached - domain: ${domainKey}, key: ${key}`
-                    );
-                }
-            } catch (error) {
-                const kvGetDuration = Date.now() - kvGetStart;
-                console.warn(
-                    `Failed to get pruned api for ${domainKey}:${id} in ${kvGetDuration}ms, fallback to uncached`,
-                    error
-                );
-            }
-
-            const getApiStart = Date.now();
-            console.debug(`[DocsLoader] createGetPrunedApiCached getApi start - domain: ${domainKey}, apiId: ${id}`);
-            const api = await getApi(domainKey, id);
-            const getApiDuration = Date.now() - getApiStart;
-            console.debug(
-                `[DocsLoader] createGetPrunedApiCached getApi done in ${getApiDuration}ms - domain: ${domainKey}, apiId: ${id}`
-            );
-
-            const pruned = prune(api, ...nodes);
-            for (const endpointK of Object.keys(pruned.endpoints)) {
-                if (pruned.endpoints[EndpointId(endpointK)]?.environments?.length === 0) {
-                    console.debug(`${endpointK} has empty environments, adding default URL.`);
-                    pruned.endpoints[EndpointId(endpointK)]?.environments?.push({
-                        id: "Default" as EnvironmentId,
-                        baseUrl: "https://host.com"
-                    });
-                }
-            }
-            // if there is only one node, and it's an endpoint, try to cache the result
+const createGetPrunedApiCached =
+    (domainKey: string, cacheConfig: Required<CacheConfig>) =>
+    async (id: string, ...nodes: PruningNodeType[]): Promise<ApiDefinition.ApiDefinition> => {
+        // if there is only one node, and it's an endpoint, try to load from cache
+        const kvGetStart = Date.now();
+        try {
             if (nodes.length === 1 && nodes[0]) {
                 const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
-                kvSet(domainKey, key, pruned, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+                console.debug(
+                    `[DocsLoader] createGetPrunedApiCached kvGet start - domain: ${domainKey}, key: ${key}, apiId: ${id}`
+                );
+                const cached = await kvGet<ApiDefinition.ApiDefinition>(domainKey, key, cacheConfig.cacheKeySuffix);
+                const kvGetDuration = Date.now() - kvGetStart;
+                console.debug(
+                    `[DocsLoader] createGetPrunedApiCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, key: ${key}`
+                );
+                if (cached != null) {
+                    console.debug(
+                        `[DocsLoader] createGetPrunedApiCached cache hit, backfilling snippets - domain: ${domainKey}, key: ${key}`
+                    );
+                    const metadata = await getMetadata(cacheConfig)(domainKey);
+                    const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
+                    const settings = await getSettings(cacheConfig)(domainKey);
+                    const flags = {
+                        httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
+                        alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
+                    };
+                    return await backfillSnippets(cached, dynamicIr, flags);
+                }
+                console.debug(
+                    `[DocsLoader] createGetPrunedApiCached cache miss, falling back to uncached - domain: ${domainKey}, key: ${key}`
+                );
             }
-            const metadata = await getMetadata(cacheConfig)(domainKey);
-            const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
-            const settings = await getSettings(cacheConfig)(domainKey);
-            const flags = {
-                httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
-                alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
-            };
-            return backfillSnippets(pruned, dynamicIr, flags);
-        },
-        [domainKey, cacheConfig.cacheKeySuffix],
-        { tags: [domainKey, "api"] }
-    );
+        } catch (error) {
+            const kvGetDuration = Date.now() - kvGetStart;
+            console.warn(
+                `Failed to get pruned api for ${domainKey}:${id} in ${kvGetDuration}ms, fallback to uncached`,
+                error
+            );
+        }
+
+        const getApiStart = Date.now();
+        console.debug(`[DocsLoader] createGetPrunedApiCached getApi start - domain: ${domainKey}, apiId: ${id}`);
+        const api = await getApi(domainKey, id);
+        const getApiDuration = Date.now() - getApiStart;
+        console.debug(
+            `[DocsLoader] createGetPrunedApiCached getApi done in ${getApiDuration}ms - domain: ${domainKey}, apiId: ${id}`
+        );
+
+        const pruned = prune(api, ...nodes);
+        for (const endpointK of Object.keys(pruned.endpoints)) {
+            if (pruned.endpoints[EndpointId(endpointK)]?.environments?.length === 0) {
+                console.debug(`${endpointK} has empty environments, adding default URL.`);
+                pruned.endpoints[EndpointId(endpointK)]?.environments?.push({
+                    id: "Default" as EnvironmentId,
+                    baseUrl: "https://host.com"
+                });
+            }
+        }
+        // if there is only one node, and it's an endpoint, try to cache the result
+        if (nodes.length === 1 && nodes[0]) {
+            const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
+            kvSet(domainKey, key, pruned, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        }
+        const metadata = await getMetadata(cacheConfig)(domainKey);
+        const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
+        const settings = await getSettings(cacheConfig)(domainKey);
+        const flags = {
+            httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
+            alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
+        };
+        return backfillSnippets(pruned, dynamicIr, flags);
+    };
 
 export function createEndpointCacheKey(pruneType: PruningNodeType) {
     switch (pruneType.type) {
@@ -564,50 +561,33 @@ const unsafe_getFullRoot = async (domainKey: string) => {
 
 const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
-        return await unstable_cache(
-            async (domainKey: string) => {
-                const kvGetStart = Date.now();
-                console.debug(
-                    `[DocsLoader] unsafe_getRootCached kvGet start - domain: ${domainKey}, key: ${CACHE_KEY_ROOT}`
-                );
-                try {
-                    const cached = await kvGet<FernNavigation.RootNode>(
-                        domainKey,
-                        CACHE_KEY_ROOT,
-                        cacheConfig.cacheKeySuffix
-                    );
-                    const kvGetDuration = Date.now() - kvGetStart;
-                    console.debug(
-                        `[DocsLoader] unsafe_getRootCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}`
-                    );
-                    if (cached != null) {
-                        return cached;
-                    }
-                } catch (error) {
-                    const kvGetDuration = Date.now() - kvGetStart;
-                    console.warn(
-                        `Failed to get full root for ${domainKey} in ${kvGetDuration}ms, fallback to uncached`,
-                        error
-                    );
-                }
+        const kvGetStart = Date.now();
+        console.debug(`[DocsLoader] unsafe_getRootCached kvGet start - domain: ${domainKey}, key: ${CACHE_KEY_ROOT}`);
+        try {
+            const cached = await kvGet<FernNavigation.RootNode>(domainKey, CACHE_KEY_ROOT, cacheConfig.cacheKeySuffix);
+            const kvGetDuration = Date.now() - kvGetStart;
+            console.debug(`[DocsLoader] unsafe_getRootCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}`);
+            if (cached != null) {
+                return cached;
+            }
+        } catch (error) {
+            const kvGetDuration = Date.now() - kvGetStart;
+            console.warn(`Failed to get full root for ${domainKey} in ${kvGetDuration}ms, fallback to uncached`, error);
+        }
 
-                // Get fresh data
-                const loadStart = Date.now();
-                console.debug(`[DocsLoader] unsafe_getRootCached unsafe_getFullRoot start - domain: ${domainKey}`);
-                const root = await unsafe_getFullRoot(domainKey);
-                const loadDuration = Date.now() - loadStart;
-                console.debug(
-                    `[DocsLoader] unsafe_getRootCached unsafe_getFullRoot done in ${loadDuration}ms - domain: ${domainKey}`
-                );
+        // Get fresh data
+        const loadStart = Date.now();
+        console.debug(`[DocsLoader] unsafe_getRootCached unsafe_getFullRoot start - domain: ${domainKey}`);
+        const root = await unsafe_getFullRoot(domainKey);
+        const loadDuration = Date.now() - loadStart;
+        console.debug(
+            `[DocsLoader] unsafe_getRootCached unsafe_getFullRoot done in ${loadDuration}ms - domain: ${domainKey}`
+        );
 
-                // Cache the result
-                kvSet(domainKey, CACHE_KEY_ROOT, root, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        // Cache the result
+        kvSet(domainKey, CACHE_KEY_ROOT, root, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
 
-                return root;
-            },
-            ["unsafe_getRoot", domainKey, cacheConfig.cacheKeySuffix],
-            { tags: [domainKey, "unsafe_getRoot"] }
-        )(domainKey);
+        return root;
     });
 
 const getRoot = async (
@@ -626,12 +606,7 @@ const getRoot = async (
 
 const getRootCached = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string, authState: AuthState, authConfig: AuthEdgeConfig | undefined) => {
-        return await unstable_cache(
-            (domainKey: string, authState: AuthState, authConfig: AuthEdgeConfig | undefined) =>
-                getRoot(domainKey, authState, authConfig, cacheConfig),
-            [domainKey, cacheConfig.cacheKeySuffix],
-            { tags: [domainKey, "getRoot"] }
-        )(domainKey, authState, authConfig);
+        return getRoot(domainKey, authState, authConfig, cacheConfig);
     });
 
 const getNavigationNode = (cacheConfig: Required<CacheConfig>) =>
@@ -1264,13 +1239,8 @@ export const createCachedDocsLoader = async (
                 cacheConfig: config
             })
         ),
-        getEndpointByLocator: cache(
-            unstable_cache(
-                (method: HttpMethod, path: string, example?: string) =>
-                    getEndpointByLocator(domainKey, method, path, example),
-                [domainKey, config.cacheKeySuffix],
-                { tags: [domainKey, "endpointByLocator"] }
-            )
+        getEndpointByLocator: cache((method: HttpMethod, path: string, example?: string) =>
+            getEndpointByLocator(domainKey, method, path, example)
         ),
         getRoot: async () => getRootCached(config)(domainKey, await getAuthState(), await authConfig),
         getNavigationNode: async (id: string) =>
