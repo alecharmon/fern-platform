@@ -10,6 +10,7 @@ import { after } from "next/server";
  */
 export interface KvCache {
     get<T>(domainKey: string, key: string, cacheKeySuffix?: string): Promise<T | null>;
+    mget(domainKey: string, keys: string[], cacheKeySuffix?: string): Promise<Map<string, unknown>>;
     set(domainKey: string, key: string, value: unknown, ttl?: number, cacheKeySuffix?: string): void;
     clear(domainKey: string): Promise<void>;
 }
@@ -38,6 +39,23 @@ class InMemoryKvCache implements KvCache {
 
         console.debug(`[InMemory] GET hit - domain: ${domainKey}, key: ${finalKey}`);
         return entry.value as T;
+    }
+
+    async mget(domainKey: string, keys: string[], cacheKeySuffix?: string): Promise<Map<string, unknown>> {
+        const result = new Map<string, unknown>();
+        const now = Date.now();
+
+        for (const key of keys) {
+            const finalKey = this.buildKey(domainKey, key, cacheKeySuffix);
+            const entry = this.cache.get(finalKey);
+
+            if (entry && (!entry.expiration || now <= entry.expiration)) {
+                result.set(key, entry.value);
+            }
+        }
+
+        console.debug(`[InMemory] MGET - domain: ${domainKey}, requested: ${keys.length}, found: ${result.size}`);
+        return result;
     }
 
     set(domainKey: string, key: string, value: unknown, ttl?: number, cacheKeySuffix?: string): void {
@@ -75,6 +93,7 @@ class UpstashKvCache implements KvCache {
     private setMonitor = new Semaphore(10);
     private getMonitor = new Semaphore(10);
     private inFlightRequests = new Map<string, Promise<any>>();
+    private inFlightBatchRequests = new Map<string, Promise<Map<string, unknown>>>();
 
     async get<T>(domainKey: string, key: string, cacheKeySuffix?: string): Promise<T | null> {
         if (isLocal() || isSelfHosted()) {
@@ -172,6 +191,150 @@ class UpstashKvCache implements KvCache {
         requestPromise
             .finally(() => {
                 this.inFlightRequests.delete(requestKey);
+            })
+            .catch(() => {
+                // Errors are already handled in the main promise, this is just for cleanup
+            });
+
+        return requestPromise;
+    }
+
+    async mget(domainKey: string, keys: string[], cacheKeySuffix?: string): Promise<Map<string, unknown>> {
+        if (isLocal() || isSelfHosted()) {
+            return new Map();
+        }
+
+        if (keys.length === 0) {
+            return new Map();
+        }
+
+        const batchKey = `${domainKey}:${keys.join(",")}:${cacheKeySuffix || ""}`;
+
+        // If there's already an in-flight batch request for these exact keys, wait for it
+        if (this.inFlightBatchRequests.has(batchKey)) {
+            const waitStart = Date.now();
+            console.debug(`[Upstash] Waiting for in-flight batch request - domain: ${domainKey}, keys: ${keys.length}`);
+            const result = await this.inFlightBatchRequests.get(batchKey)!;
+            const waitDuration = Date.now() - waitStart;
+            console.debug(
+                `[Upstash] In-flight batch request completed after ${waitDuration}ms - domain: ${domainKey}, keys: ${keys.length}`
+            );
+            return result;
+        }
+
+        console.debug(`[Upstash] MGET operation - domain: ${domainKey}, keys: ${keys.length}`);
+
+        // Create the batch request promise
+        const requestPromise = (async () => {
+            const acquireStart = Date.now();
+            console.debug(`[Upstash] MGET acquire start - domain: ${domainKey}, keys: ${keys.length}`);
+            await this.getMonitor.acquire();
+            const acquireDuration = Date.now() - acquireStart;
+            console.debug(
+                `[Upstash] MGET acquired in ${acquireDuration}ms - domain: ${domainKey}, keys: ${keys.length}`
+            );
+
+            const start = Date.now();
+            try {
+                const finalKeys = keys.map((key) => (cacheKeySuffix ? `${key}:${cacheKeySuffix}` : key));
+
+                const pipeline = kv.pipeline();
+
+                for (const finalKey of finalKeys) {
+                    const ttlKey = `${domainKey}:ttl:${finalKey}`;
+                    pipeline.get<number>(ttlKey);
+                }
+
+                for (const finalKey of finalKeys) {
+                    pipeline.hget(domainKey, finalKey);
+                }
+
+                const pipelineStart = Date.now();
+                console.debug(`[Upstash] MGET pipeline start - domain: ${domainKey}, keys: ${keys.length}`);
+                const results = await pipeline.exec();
+                const pipelineDuration = Date.now() - pipelineStart;
+                console.debug(
+                    `[Upstash] MGET pipeline done in ${pipelineDuration}ms - domain: ${domainKey}, keys: ${keys.length}`
+                );
+
+                if (pipelineDuration > 2000) {
+                    console.warn(
+                        `[Upstash] MGET slow pipeline took ${pipelineDuration}ms - domain: ${domainKey}, keys: ${keys.length}`
+                    );
+                }
+
+                const resultMap = new Map<string, unknown>();
+                const now = Date.now();
+                const keysToDelete: string[] = [];
+
+                const halfLength = results.length / 2;
+                for (let i = 0; i < halfLength; i++) {
+                    const ttlResult = results[i];
+                    const valueResult = results[i + halfLength];
+                    const originalKey = keys[i];
+                    const finalKey = finalKeys[i];
+
+                    if (!originalKey || !finalKey) {
+                        continue;
+                    }
+
+                    // Check if key has expired
+                    if (ttlResult && typeof ttlResult === "number" && now > ttlResult) {
+                        // Key has expired, mark for deletion
+                        keysToDelete.push(finalKey);
+                        continue;
+                    }
+
+                    if (valueResult != null) {
+                        resultMap.set(originalKey, valueResult);
+                    }
+                }
+
+                if (keysToDelete.length > 0) {
+                    after(async () => {
+                        try {
+                            const deletePipeline = kv.pipeline();
+                            for (const finalKey of keysToDelete) {
+                                deletePipeline.hdel(domainKey, finalKey);
+                                deletePipeline.del(`${domainKey}:ttl:${finalKey}`);
+                            }
+                            await deletePipeline.exec();
+                            console.debug(
+                                `[Upstash] MGET cleaned up ${keysToDelete.length} expired keys - domain: ${domainKey}`
+                            );
+                        } catch (error) {
+                            console.warn(
+                                `[Upstash] MGET failed to clean up expired keys - domain: ${domainKey}`,
+                                error
+                            );
+                        }
+                    });
+                }
+
+                const duration = Date.now() - start;
+                console.debug(
+                    `[Upstash] MGET completed - domain: ${domainKey}, requested: ${keys.length}, found: ${resultMap.size}, total: ${duration}ms`
+                );
+
+                return resultMap;
+            } catch (error) {
+                const duration = Date.now() - start;
+                console.warn(
+                    `[Upstash] MGET failed - domain: ${domainKey}, keys: ${keys.length}, duration: ${duration}ms`,
+                    error
+                );
+                return new Map();
+            } finally {
+                this.getMonitor.release();
+                console.debug(`[Upstash] MGET released semaphore - domain: ${domainKey}, keys: ${keys.length}`);
+            }
+        })();
+
+        // Store the promise and remove it when done
+        this.inFlightBatchRequests.set(batchKey, requestPromise);
+        requestPromise
+            .finally(() => {
+                this.inFlightBatchRequests.delete(batchKey);
             })
             .catch(() => {
                 // Errors are already handled in the main promise, this is just for cleanup

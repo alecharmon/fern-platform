@@ -158,6 +158,56 @@ async function kvGet<T>(domainKey: string, key: string, cacheKeySuffix?: string)
     return kvCache.get<T>(domainKey, key, cacheKeySuffix);
 }
 
+async function kvMget(domainKey: string, keys: string[], cacheKeySuffix?: string): Promise<Map<string, unknown>> {
+    return kvCache.mget(domainKey, keys, cacheKeySuffix);
+}
+
+export async function batchGetCommonMetadata(
+    domainKey: string,
+    cacheConfig: Required<CacheConfig>
+): Promise<{
+    metadata: DocsMetadata | null;
+    config: Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root"> | null;
+    root: FernNavigation.RootNode | null;
+    files: Record<string, FileData> | null;
+    colors: { light: FernColorTheme | undefined; dark: FernColorTheme | undefined } | null;
+    logoUrls: { light?: FileData; dark?: FileData } | null;
+    fonts: FernFonts | null;
+    mdxBundlerFiles: Record<string, string> | null;
+    askAiEnabled: boolean | null;
+}> {
+    const keys = [
+        CACHE_KEY_METADATA,
+        CACHE_KEY_CONFIG,
+        CACHE_KEY_ROOT,
+        CACHE_KEY_FILES,
+        CACHE_KEY_COLORS,
+        CACHE_KEY_LOGO_URLS,
+        CACHE_KEY_FONTS,
+        CACHE_KEY_MDX_BUNDLER_FILES,
+        CACHE_KEY_ASK_AI_ENABLED
+    ];
+
+    const results = await kvMget(domainKey, keys, cacheConfig.cacheKeySuffix);
+
+    return {
+        metadata: (results.get(CACHE_KEY_METADATA) as DocsMetadata) ?? null,
+        config:
+            (results.get(CACHE_KEY_CONFIG) as Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">) ?? null,
+        root: (results.get(CACHE_KEY_ROOT) as FernNavigation.RootNode) ?? null,
+        files: (results.get(CACHE_KEY_FILES) as Record<string, FileData>) ?? null,
+        colors:
+            (results.get(CACHE_KEY_COLORS) as {
+                light: FernColorTheme | undefined;
+                dark: FernColorTheme | undefined;
+            }) ?? null,
+        logoUrls: (results.get(CACHE_KEY_LOGO_URLS) as { light?: FileData; dark?: FileData }) ?? null,
+        fonts: (results.get(CACHE_KEY_FONTS) as FernFonts) ?? null,
+        mdxBundlerFiles: (results.get(CACHE_KEY_MDX_BUNDLER_FILES) as Record<string, string>) ?? null,
+        askAiEnabled: (results.get(CACHE_KEY_ASK_AI_ENABLED) as boolean) ?? null
+    };
+}
+
 // In-memory cache for config to reduce Upstash calls
 interface InMemoryCacheEntry<T> {
     value: T;
@@ -1202,6 +1252,8 @@ const createCachedDocsLoaderImpl = async (
         await clearKvCache(domainKey);
     }
 
+    const prefetchPromise = batchGetCommonMetadata(domainKey, config);
+
     const authConfig = options?.skipAuth ? Promise.resolve(undefined) : getAuthConfig(domainKey);
     const metadata = getMetadata(config)(withoutStaging(domainKey));
 
@@ -1227,9 +1279,18 @@ const createCachedDocsLoaderImpl = async (
         domain: deriveDomainFromDomainKey(domainKey),
         fern_token,
         getAuthConfig: () => authConfig,
-        getMetadata: () => metadata,
-        getFiles: () => getFiles(config)(domainKey),
-        getMdxBundlerFiles: () => getMdxBundlerFiles(config)(domainKey),
+        getMetadata: async () => {
+            const prefetched = await prefetchPromise;
+            return prefetched.metadata ?? (await metadata);
+        },
+        getFiles: async () => {
+            const prefetched = await prefetchPromise;
+            return prefetched.files ?? (await getFiles(config)(domainKey));
+        },
+        getMdxBundlerFiles: async () => {
+            const prefetched = await prefetchPromise;
+            return prefetched.mdxBundlerFiles ?? (await getMdxBundlerFiles(config)(domainKey));
+        },
         getPrunedApi: cache(createGetPrunedApiCached(domainKey, config)),
         getEndpointById: cache((apiDefinitionId: string, endpointId: EndpointId) =>
             getEndpointById({
@@ -1245,15 +1306,39 @@ const createCachedDocsLoaderImpl = async (
         getRoot: async () => getRootCached(config)(domainKey, await getAuthState(), await authConfig),
         getNavigationNode: async (id: string) =>
             getNavigationNode(config)(domainKey, id, await getAuthState(), await authConfig),
-        unsafe_getFullRoot: () => unsafe_getRootCached(config)(domainKey),
-        getConfig: () => getConfig(config)(domainKey),
+        unsafe_getFullRoot: async () => {
+            const prefetched = await prefetchPromise;
+            return prefetched.root ?? (await unsafe_getRootCached(config)(domainKey));
+        },
+        getConfig: async () => {
+            const prefetched = await prefetchPromise;
+            if (prefetched.config != null) {
+                if (!isLocal()) {
+                    const cacheKey = config.cacheKeySuffix
+                        ? `${domainKey}:config:${config.cacheKeySuffix}`
+                        : `${domainKey}:config`;
+                    setInMemoryCache(cacheKey, prefetched.config);
+                }
+                return prefetched.config;
+            }
+            return await getConfig(config)(domainKey);
+        },
         getPage: (pageId) => getPage(config)(domainKey, pageId, options?.returnRawMarkdown),
-        getColors: () => getColors(config)(domainKey),
-        getLogoUrls: () => getLogoUrls(config)(domainKey),
+        getColors: async () => {
+            const prefetched = await prefetchPromise;
+            return prefetched.colors ?? (await getColors(config)(domainKey));
+        },
+        getLogoUrls: async () => {
+            const prefetched = await prefetchPromise;
+            return prefetched.logoUrls ?? (await getLogoUrls(config)(domainKey));
+        },
         getLayout: () => getLayout(config)(domainKey),
         getSettings: () => getSettings(config)(domainKey),
         getLanguage: () => getLanguage(config)(domainKey),
-        getFonts: () => getFonts(config)(domainKey),
+        getFonts: async () => {
+            const prefetched = await prefetchPromise;
+            return prefetched.fonts ?? (await getFonts(config)(domainKey));
+        },
         getAuthState,
         getEdgeFlags: () => cachedGetEdgeFlags(domainKey),
         getBaseUrl: async () => {
@@ -1266,7 +1351,10 @@ const createCachedDocsLoaderImpl = async (
         },
         getTypes: () => getTypes()(domainKey),
         clearKvCache: () => clearKvCache(domainKey),
-        isAskAiEnabledForDocs: () => getAskAiEnabledForDocs(config)(domainKey)
+        isAskAiEnabledForDocs: async () => {
+            const prefetched = await prefetchPromise;
+            return prefetched.askAiEnabled ?? (await getAskAiEnabledForDocs(config)(domainKey));
+        }
     };
 };
 
