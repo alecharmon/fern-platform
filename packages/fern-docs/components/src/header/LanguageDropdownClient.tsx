@@ -3,6 +3,7 @@
 import { useIsDesktop } from "@fern-ui/react-commons";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { cn } from "../cn";
 import { FernDropdown } from "../FernDropdown";
 
 export interface LanguageDropdownItem {
@@ -42,12 +43,12 @@ function FlagIcon({ src }: { src: string | undefined }) {
 
 export function LanguageDropdownClient({
     languages,
-    useDenseLayout = false,
-    lang
+    lang,
+    disabled = false
 }: {
     languages: LanguageDropdownItem[];
-    useDenseLayout?: boolean;
     lang: string;
+    disabled?: boolean;
 }) {
     const isDesktop = useIsDesktop();
     const [currentLanguage, setCurrentLanguage] = useState<string>(lang);
@@ -60,6 +61,7 @@ export function LanguageDropdownClient({
 
     return (
         <FernDropdown
+            disabled={disabled}
             value={currentLanguage}
             options={languages.map(({ language, label, slug }) => {
                 const flagSrc = FLAG_SVGS[language];
@@ -91,7 +93,7 @@ export function LanguageDropdownClient({
             }}
             lang={lang}
         >
-            <div className="language-dropdown-trigger h-9" data-testid="language-dropdown">
+            <div className={cn("language-dropdown-trigger h-9")} data-testid="language-dropdown">
                 <div className="inline-flex items-center gap-2">
                     <FlagIcon src={FLAG_SVGS[currentLanguageItem.language]} />
                     <p className="language-item-title w-fit">{currentLanguageItem.label}</p>

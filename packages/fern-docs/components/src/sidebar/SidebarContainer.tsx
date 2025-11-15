@@ -43,7 +43,6 @@ export const SidebarContainer = React.memo(function SidebarContainer({
                 logo={logo}
                 productSelect={productSelect}
                 versionSelect={versionSelect}
-                languageSelect={languageSelect}
                 showSearchBar={showSearchBar}
                 searchBar={searchBar}
                 showHeaderInSidebar={showHeaderInSidebar}

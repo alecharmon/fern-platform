@@ -18,9 +18,6 @@ export default async function LanguageSelectPage({
     const loader = await createCachedDocsLoader(host, domain, await getFernToken());
     const lang = await loader.getLanguage();
 
-    const layout = await loader.getLayout();
-    const useDenseLayout = layout.isHeaderDisabled;
-
     // Get the node to extract the clean slug
     const root = await loader.getRoot();
 
@@ -29,7 +26,7 @@ export default async function LanguageSelectPage({
 
     const nodeSlug = found.type === "found" ? found.node.slug : slug;
 
-    return <LanguageDropdown loader={loader} useDenseLayout={useDenseLayout} nodeSlug={nodeSlug} lang={lang} />;
+    return <LanguageDropdown loader={loader} nodeSlug={nodeSlug} lang={lang} />;
 }
 
 function stripLanguagePrefix(slug: string) {

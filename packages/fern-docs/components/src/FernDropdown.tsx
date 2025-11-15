@@ -89,6 +89,7 @@ export declare namespace FernDropdown {
         searchable?: boolean;
         lang: string;
         maxHelperTextWidth?: number; // max width for helper text in pixels
+        disabled?: boolean;
     }
 }
 
@@ -113,7 +114,8 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
             radioGroupProps = {},
             searchable = false,
             lang,
-            maxHelperTextWidth
+            maxHelperTextWidth,
+            disabled = false
         },
         ref
     ): ReactElement => {
@@ -292,7 +294,12 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
 
         return (
             <DropdownMenu.Root onOpenChange={handleOpenChange} open={isOpen} modal={false} defaultOpen={defaultOpen}>
-                <DropdownMenu.Trigger asChild={triggerAsChild} ref={ref} className={className}>
+                <DropdownMenu.Trigger
+                    asChild={triggerAsChild}
+                    ref={ref}
+                    className={cn(className, disabled && "opacity-50")}
+                    disabled={disabled}
+                >
                     {children}
                 </DropdownMenu.Trigger>
                 {usePortal ? (

@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import { isLocal } from "../util/isLocal";
 import { LanguageDropdownClient, type LanguageDropdownItem } from "./LanguageDropdownClient";
 
 export declare namespace LanguageDropdown {
@@ -13,12 +14,10 @@ export declare namespace LanguageDropdown {
  */
 export async function LanguageDropdown({
     loader,
-    useDenseLayout = false,
     nodeSlug,
     lang
 }: {
     loader: DocsLoader;
-    useDenseLayout?: boolean;
     nodeSlug?: string;
     lang: string;
 }) {
@@ -36,7 +35,7 @@ export async function LanguageDropdown({
         slug: removedLanguagePrefix ? `/${language}/${removedLanguagePrefix}` : `/${language}`
     }));
 
-    return <LanguageDropdownClient languages={languageOptions} useDenseLayout={useDenseLayout} lang={lang} />;
+    return <LanguageDropdownClient languages={languageOptions} lang={lang} disabled={isLocal()} />;
 }
 
 /**
