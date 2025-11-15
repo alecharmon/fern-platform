@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Markdown } from "@/mdx/components/Markdown";
 import { MdxContent } from "@/mdx/components/MdxContent";
 import type { MdxSerializer } from "@/server/mdx-serializer";
+import { MdxSerializationError } from "@/server/mdx-serializer";
 
 import ChangelogPageClient from "./ChangelogPageClient";
 
@@ -23,7 +24,8 @@ export default async function ChangelogPage({
     nodeId,
     breadcrumb,
     isFullPage,
-    lang
+    lang,
+    throwOnSerializationError = false
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -31,6 +33,7 @@ export default async function ChangelogPage({
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     isFullPage: boolean;
     lang: string;
+    throwOnSerializationError?: boolean;
 }) {
     const node = await loader.getNavigationNode(nodeId);
     const configLayout = await loader.getLayout();
@@ -85,13 +88,20 @@ export default async function ChangelogPage({
                     breadcrumb={breadcrumb}
                     tags={allTags}
                     lang={lang}
+                    throwOnSerializationError={throwOnSerializationError}
                 />
             }
             entries={Object.fromEntries(
                 entries.map((entry) => {
                     return [
                         entry.pageId,
-                        <ChangelogPageEntry key={entry.pageId} loader={loader} node={entry} serialize={serialize} />
+                        <ChangelogPageEntry
+                            key={entry.pageId}
+                            loader={loader}
+                            node={entry}
+                            serialize={serialize}
+                            throwOnSerializationError={throwOnSerializationError}
+                        />
                     ] as const;
                 })
             )}
@@ -110,7 +120,8 @@ export async function ChangelogPageOverview({
     showRssFeedButton = true,
     tags,
     showBackIcon = false,
-    lang
+    lang,
+    throwOnSerializationError = false
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -120,6 +131,7 @@ export async function ChangelogPageOverview({
     tags: string[] | undefined;
     showBackIcon?: boolean;
     lang: string;
+    throwOnSerializationError?: boolean;
 }) {
     const page = node.overviewPageId != null ? await loader.getPage(node.overviewPageId) : undefined;
     const config = await loader.getConfig();
@@ -135,6 +147,9 @@ export async function ChangelogPageOverview({
     } catch (error) {
         console.error("[ChangelogPageOverview] MDX serialization failed:", error);
         serializationError = error instanceof Error ? error : new Error(String(error));
+        if (throwOnSerializationError && error instanceof MdxSerializationError) {
+            throw error;
+        }
     }
 
     return (
@@ -169,11 +184,13 @@ export async function ChangelogPageOverview({
 export async function ChangelogPageEntry({
     loader,
     serialize,
-    node
+    node,
+    throwOnSerializationError = false
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
     node: FernNavigation.ChangelogEntryNode;
+    throwOnSerializationError?: boolean;
 }) {
     const page = await loader.getPage(node.pageId);
 
@@ -188,6 +205,9 @@ export async function ChangelogPageEntry({
     } catch (error) {
         console.error("[ChangelogPageEntry] MDX serialization failed:", error);
         serializationError = error instanceof Error ? error : new Error(String(error));
+        if (throwOnSerializationError && error instanceof MdxSerializationError) {
+            throw error;
+        }
     }
 
     let title: Awaited<ReturnType<MdxSerializer>> | undefined;

@@ -11,7 +11,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { MdxAside } from "@/mdx/bundler/component";
 import { MdxContent } from "@/mdx/components/MdxContent";
 import type { MdxSerializer } from "@/server/mdx-serializer";
-
+import { MdxSerializationError } from "@/server/mdx-serializer";
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
 import { BuiltWithFern } from "../built-with-fern";
 import { MdxErrorPanel } from "../mdx-error-panel";
@@ -27,7 +27,8 @@ export async function LayoutEvaluator({
     breadcrumb,
     bottomNavigation,
     slug,
-    availability
+    availability,
+    throwOnSerializationError = false
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -37,6 +38,7 @@ export async function LayoutEvaluator({
     bottomNavigation?: React.ReactNode;
     slug: string;
     availability?: Availability;
+    throwOnSerializationError?: boolean;
 }) {
     const { filename, markdown, editThisPageUrl } = await loader.getPage(pageId);
 
@@ -52,6 +54,9 @@ export async function LayoutEvaluator({
     } catch (error) {
         console.error("[LayoutEvaluator] MDX serialization failed:", error);
         serializationError = error instanceof Error ? error : new Error(String(error));
+        if (throwOnSerializationError && error instanceof MdxSerializationError) {
+            throw error;
+        }
     }
 
     const exports = getMDXExport(mdx);
