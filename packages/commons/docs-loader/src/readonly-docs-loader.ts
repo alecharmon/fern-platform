@@ -98,7 +98,7 @@ const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrl
             .then(() => {
                 console.log(`[loadWithUrl] FDR snapshot stored for ${domain}:${branchName}`);
             })
-            .catch((error: unknown) => {
+            .catch((error) => {
                 console.error(`[loadWithUrl] Failed to store FDR snapshot for ${domain}:${branchName}`, error);
             });
         return response;
@@ -614,25 +614,22 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
             searchText: settings?.searchText ?? undefined,
             useJavascriptAsTypescript: settings?.useJavascriptAsTypescript ?? false,
             disableExplorerProxy: settings?.disableExplorerProxy ?? false,
-            // Localization support removed - always return "en"
-            language: "en" as const // settings?.language ?? "en"
+            language: settings?.language ?? "en"
         };
     });
 
-const getLanguage = (_cacheConfig: Required<CacheConfig>) =>
-    cache(async (_domainKey: string) => {
-        // Localization support removed - always return "en"
-        // "use cache";
-        // unstable_cacheTag(domainKey, "getLanguage");
+const getLanguage = (cacheConfig: Required<CacheConfig>) =>
+    cache(async (domainKey: string) => {
+        "use cache";
+        unstable_cacheTag(domainKey, "getLanguage");
 
-        // const config = await getConfig(cacheConfig)(domainKey);
-        // if (!config) {
-        //     console.error("Could not find config for domainKey", domainKey);
-        //     notFound();
-        // }
+        const config = await getConfig(cacheConfig)(domainKey);
+        if (!config) {
+            console.error("Could not find config for domainKey", domainKey);
+            notFound();
+        }
 
-        // return config.settings?.language ?? "en";
-        return "en";
+        return config.settings?.language ?? "en";
     });
 
 const getConfig = (cacheConfig: Required<CacheConfig>) =>
