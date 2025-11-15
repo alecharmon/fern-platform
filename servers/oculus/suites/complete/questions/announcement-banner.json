@@ -1,0 +1,22 @@
+
+{
+    "question": "How can I add an announcement banner to my documentation site to highlight new features?",
+    "ground_truth": "To add an announcement banner to your docs site, configure it in your docs.yml file with an announcement section containing a message field. The banner will appear at the top of your docs site and supports both Markdown and HTML formatting. After a user dismisses the banner, it will reappear when you update the announcement. You can also customize the banner's style using custom CSS.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "announcement-banner",
+      "domain": "buildwithfern.com",
+      "cited_context": "An announcement banner is a great way to draw attention to new features and product launches. When configured, the announcement bar appears at the top of your docs site. After the user dismisses the bar, it will reappear the next time you update the announcement. Markdown and HTML is supported in the announcement message. You can include links, images, and other formatting. Custom CSS can be used to customize the style of the announcement."
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/docs/customization/announcement-banner"
+        ],
+        "correctness": [
+          "The answer must mention configuring the announcement banner in the `docs.yml` file.",
+          "The answer should mention that Markdown and HTML is supported in the announcement message.",
+          "The answer should indicate that the announcement banner will reappear the next time you update the announcement."
+        ]
+      }
+  }
