@@ -315,7 +315,6 @@ export default async function SharedPage({
                 neighbors={neighbors}
                 breadcrumb={found.breadcrumb}
                 lang={lang}
-                throwOnSerializationError={throwOnSerializationError}
             />
         </FeedbackPopoverProvider>
     );

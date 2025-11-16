@@ -22,8 +22,7 @@ export async function DocsMainContent({
     parents,
     lang,
     neighbors,
-    breadcrumb,
-    throwOnSerializationError = false
+    breadcrumb
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -44,7 +43,6 @@ export async function DocsMainContent({
     };
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
-    throwOnSerializationError?: boolean;
 }) {
     const config = await loader.getConfig();
     const footerNavStyle = config.theme?.footerNav ?? "default";
@@ -67,7 +65,6 @@ export async function DocsMainContent({
                 breadcrumb={breadcrumb}
                 isFullPage={changelogType === "tabbed" && !isSidebarFixed}
                 lang={lang}
-                throwOnSerializationError={throwOnSerializationError}
             />
         );
     }
@@ -133,7 +130,6 @@ export async function DocsMainContent({
                 bottomNavigation={bottomNavigation}
                 slug={node.slug}
                 availability={node.type === "page" || node.type === "section" ? node.availability : undefined}
-                throwOnSerializationError={throwOnSerializationError}
             />
         );
     }
