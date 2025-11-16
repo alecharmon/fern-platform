@@ -48,9 +48,7 @@ export type MdxSerializer = (
     | undefined
 >;
 
-// Reduce concurrency to prevent CPU thrashing with MDX serialization
-// 20 concurrent serializations is more reasonable for CPU-bound work
-const monitor = new Semaphore(10);
+const monitor = new Semaphore(20);
 
 export function createCachedMdxSerializer(
     loader: CachedDocsLoader,
