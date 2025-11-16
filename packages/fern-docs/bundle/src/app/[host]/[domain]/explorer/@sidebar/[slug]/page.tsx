@@ -7,7 +7,6 @@ import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 
 import { getFernToken } from "@/app/fern-token";
 import { PlaygroundEndpointSelectorContent } from "@/components/playground/endpoint/PlaygroundEndpointSelectorContent";
-import { filterToEndpointsIncludedInExplorer } from "@/components/playground/utils/filter-to-endpoints-included-in-explorer";
 import { flattenApiSection } from "@/components/playground/utils/flatten-apis";
 
 export default async function EndpointSelectorPage({
@@ -65,7 +64,6 @@ export default async function EndpointSelectorPage({
     }
 
     const apiGroups = flattenApiSection(scopedNode);
-    const filteredApiGroups = await filterToEndpointsIncludedInExplorer(loader, apiGroups);
 
-    return <PlaygroundEndpointSelectorContent apiGroups={filteredApiGroups} className="h-full" lang={lang} />;
+    return <PlaygroundEndpointSelectorContent apiGroups={apiGroups} className="h-full" lang={lang} />;
 }
