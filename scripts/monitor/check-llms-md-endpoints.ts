@@ -42,8 +42,7 @@ const MONITORED_SITES: MonitoredSite[] = [
     { domain: "buildwithfern.com/learn", name: "Fern Docs" },
     { domain: "elevenlabs.io/docs", name: "ElevenLabs" },
     { domain: "openrouter.ai/docs", name: "OpenRouter" },
-    { domain: "docs.ada.cx/generative/home", name: "Ada" },
-    { domain: "docs.letta.com", name: "Letta" }
+    { domain: "docs.ada.cx/generative/home", name: "Ada" }
 ];
 
 const TIMEOUT_MS = 60000;
