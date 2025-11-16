@@ -24,15 +24,7 @@ import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 
 import { DocsMainContent } from "../app/[host]/[domain]/main";
 
-export default async function SharedPage({
-    loader,
-    slug,
-    throwOnSerializationError = false
-}: {
-    loader: CachedDocsLoader;
-    slug: Slug;
-    throwOnSerializationError?: boolean;
-}) {
+export default async function SharedPage({ loader, slug }: { loader: CachedDocsLoader; slug: Slug }) {
     if (slug.endsWith(".js")) {
         console.debug(`[SharedPage] returning early not found for ${slug}`);
         return notFound();

@@ -11,13 +11,6 @@ import { serializeMdx as internalSerializeMdx } from "@/mdx/bundler/serialize";
 import { serializeMdxImpl as internalSerializeNextMdxRemote } from "@/mdx/bundler/serializeWithNextMdxRemote";
 import type { RehypeLinksOptions } from "@/mdx/plugins/rehype-links";
 
-export class MdxSerializationError extends Error {
-    constructor(message: string, cause?: unknown) {
-        super(message, { cause });
-        this.name = "MdxSerializationError";
-    }
-}
-
 export type MdxSerializerOptions = {
     /**
      * The filename of the file being serialized.
@@ -171,10 +164,7 @@ export function createCachedMdxSerializer(
                                     fallbackError instanceof Error ? fallbackError.stack : "No stack trace available"
                                 );
 
-                                throw new MdxSerializationError(
-                                    `Both MDX engines failed for ${filename || "unknown"}`,
-                                    fallbackError
-                                );
+                                return undefined;
                             }
                         }
                     } else {
@@ -211,10 +201,8 @@ export function createCachedMdxSerializer(
                         error instanceof Error ? error.stack : "No stack trace available"
                     );
 
-                    if (error instanceof MdxSerializationError) {
-                        throw error;
-                    }
-                    throw new MdxSerializationError(`MDX serialization failed for ${filename || "unknown"}`, error);
+                    // Instead of returning raw content, throw the error to be handled by the caller
+                    throw error;
                 }
             },
             [domain, content, cacheSeed()],
