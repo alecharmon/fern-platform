@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createKvCache } from "@fern-api/docs-loader";
+import { track } from "@fern-api/docs-server";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isDocsDev } from "@fern-api/docs-server/isDocsDev";
 import { postToSlack } from "@fern-api/docs-server/slack";
@@ -89,7 +90,8 @@ async function serializeMdxImpl(
         toc = false,
         replaceHref,
         org,
-        domain
+        domain,
+        slug
     }: {
         loader?: Partial<Pick<DocsLoader, "getFiles" | "getMdxBundlerFiles">>;
         scope?: Record<string, unknown>;
@@ -98,6 +100,7 @@ async function serializeMdxImpl(
         replaceHref?: RehypeLinksOptions["replaceHref"];
         org?: string;
         domain?: string;
+        slug?: string;
     } = {},
     domainFallback: string
 ): Promise<SerializeMdxResponse> {
@@ -353,6 +356,16 @@ export function serializeMdx(
             if (!signal.aborted) {
                 abortController.abort();
                 console.error(`Serialize MDX timed out after ${serializeTimeout / 1000} seconds`);
+
+                track("mdx_serialization_timeout", {
+                    domain: domain ?? "unknown",
+                    slug: options?.slug,
+                    filename: options?.filename,
+                    contentLength: content.length,
+                    timeoutSeconds: serializeTimeout / 1000,
+                    hasTwoslash: content.includes("twoslash")
+                });
+
                 reject(new Error("Serialize MDX timed out"));
             }
         }, serializeTimeout);

@@ -145,7 +145,8 @@ export function createCachedMdxSerializer(
                                     },
                                     replaceHref,
                                     org: metadata.org,
-                                    domain: metadata.domain
+                                    domain: metadata.domain,
+                                    slug: options.slug
                                 });
                                 const fallbackEndTime = Date.now();
                                 console.log(
@@ -181,7 +182,8 @@ export function createCachedMdxSerializer(
                             },
                             replaceHref,
                             org: metadata.org,
-                            domain: metadata.domain
+                            domain: metadata.domain,
+                            slug: options.slug
                         });
                         const regularEndTime = Date.now();
                         console.log(
