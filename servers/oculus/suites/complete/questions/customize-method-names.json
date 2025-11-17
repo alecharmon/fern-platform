@@ -1,0 +1,21 @@
+{
+    "question": "How can I configure my SDK to have nested method names like client.admin.users.create() instead of a flat structure?",
+    "ground_truth": "To configure nested method names in your SDK, you can use the `x-fern-sdk-group-name` extension with multiple values in your OpenAPI specification. For example, to create `client.admin.users.create()`, you would add `x-fern-sdk-group-name: [admin, users]` and `x-fern-sdk-method-name: create` to your endpoint definition. The SDK will preserve the order of group names and automatically handle appropriate casing for each language (camelCase for TypeScript, snake_case for Python, PascalCase for Go, etc.).",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "customize-method-names",
+      "domain": "buildwithfern.com",
+      "cited_context": "If you add more than one `x-fern-sdk-group-name` extension, then the generated SDK will nest group names. The generated SDK method preserves the order of group names. In the example below, Fern will generate a method called `client.users.notifications.send()`: `x-fern-sdk-group-name: - users - notifications x-fern-sdk-method-name: send`"
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/sdks/deep-dives/customize-method-names"
+        ],
+        "correctness": [
+          "The answer must mention the `x-fern-sdk-group-name` extension.",
+          "The answer must mention the `x-fern-sdk-method-name` extension.",
+          "The answer should include a code example of how to implement nested method names."
+        ]
+    }
+  }
