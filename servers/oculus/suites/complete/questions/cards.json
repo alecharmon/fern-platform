@@ -1,0 +1,21 @@
+{
+    "question": "How can I display multiple cards in a grid layout with 2 columns?",
+    "ground_truth": "To display multiple cards in a grid layout with 2 columns, use the `<CardGroup>` component with the `cols` property set to 2. Wrap your individual `<Card>` components inside the `<CardGroup>`. For example: `<CardGroup cols={2}><Card>...</Card><Card>...</Card></CardGroup>`",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "cards",
+      "domain": "buildwithfern.com",
+      "cited_context": "You can use individual cards or arrange multiple cards in a responsive grid layout using the `<CardGroup>` component. Card groups are useful for organizing feature lists, navigation options, or step-by-step guides. ### `<CardGroup>` properties <ParamField path=\"cols\" type=\"number\" required={false} default=\"2\"> The number of columns to display in the grid </ParamField>"
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/docs/writing-content/components/cards"
+        ],
+        "correctness": [
+          "The answer must mention the `<CardGroup>` component.",
+          "The answer must mention the `cols` property.",
+          "The answer should contain a code example of how to use the `<CardGroup>` component."
+        ]
+    }
+  }
