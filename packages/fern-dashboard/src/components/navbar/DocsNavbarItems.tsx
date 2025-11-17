@@ -6,8 +6,6 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
-import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
-import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 
@@ -37,12 +35,6 @@ export async function DocsNavbarItems({ orgName }: { orgName: Auth0OrgName }) {
 
     const docsSites: FdrAPI.dashboard.DocsSite[] = response.docsSites;
 
-    const isCreateDocsNewSiteEnabled = await isFeatureFlagEnabledForUser(
-        PosthogFeatureFlag.ENABLE_CREATE_DOCS_NEW_SITE,
-        session?.user.sub,
-        orgName
-    );
-
     // Transform docs sites to simple data structure for client
     const docsSitesData: DocsSiteData[] = docsSites.map((docsSite) => {
         const url = getDocsSiteUrl(docsSite);
@@ -59,7 +51,7 @@ export async function DocsNavbarItems({ orgName }: { orgName: Auth0OrgName }) {
             firstDocsSiteUrlParam={firstDocsSiteUrlParam}
             docsSitesData={docsSitesData}
             orgName={orgName}
-            isCreateDocsNewSiteEnabled={isCreateDocsNewSiteEnabled ?? false}
+            isCreateDocsNewSiteEnabled={true}
         />
     );
 }

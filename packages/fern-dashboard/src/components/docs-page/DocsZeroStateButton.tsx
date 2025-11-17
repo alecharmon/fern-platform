@@ -2,8 +2,6 @@ import "server-only";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
-import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
 
 import { DocsZeroStateButtonClient } from "./DocsZeroStateButtonClient";
 
@@ -22,12 +20,5 @@ export async function DocsZeroStateButton({ orgName }: DocsZeroStateButtonProps)
         return <DocsZeroStateButtonClient useInternalWizard={false} />;
     }
 
-    // Check feature flag server-side
-    const isCreateDocsNewSiteEnabled = await isFeatureFlagEnabledForUser(
-        PosthogFeatureFlag.ENABLE_CREATE_DOCS_NEW_SITE,
-        session.user.sub,
-        orgName
-    );
-
-    return <DocsZeroStateButtonClient useInternalWizard={!!isCreateDocsNewSiteEnabled} />;
+    return <DocsZeroStateButtonClient useInternalWizard={true} />;
 }
