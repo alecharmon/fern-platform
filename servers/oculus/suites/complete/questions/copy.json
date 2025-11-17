@@ -1,0 +1,20 @@
+{
+    "question": "How can I display simplified text but copy the full command when using the Copy component?",
+    "ground_truth": "You can use the `clipboard` prop to display one value while copying a different value to the clipboard. For example, you can display \"npm install\" to users but copy \"npm install -g bamboo-leaf-cli\" when they click the copy button.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "copy",
+      "domain": "buildwithfern.com",
+      "cited_context": "Use the `clipboard` prop to display one value while copying a different value to the clipboard. This is useful when you want to simplify commands, versions, or URLs for readability while copying complete values. For example, you can display \"npm install\" to users but copy \"npm install -g bamboo-leaf-cli\" when they click the copy button."
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/docs/writing-content/components/copy"
+        ],
+        "correctness": [
+          "The answer must mention the `clipboard` prop.",
+          "The answer should include a code example of how to use the `clipboard` prop."
+        ]
+    }
+  }
