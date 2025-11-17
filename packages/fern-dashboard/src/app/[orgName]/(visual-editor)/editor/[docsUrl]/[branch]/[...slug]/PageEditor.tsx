@@ -7,7 +7,6 @@ import type { Editor, EditorEvents } from "@tiptap/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import TiptapEditor from "@/components/editor/TiptapEditor";
-import { hasChangedContentInTransaction } from "@/components/editor/utils";
 
 export declare namespace PageEditor {
     export interface Props {
@@ -20,8 +19,10 @@ export declare namespace PageEditor {
 // SEE: https://tiptap.dev/docs/editor/getting-started/install/react
 export default function PageEditor({ className, filename, initialHtml }: PageEditor.Props) {
     const editorRef = useRef<Editor | null>(null);
-    const allowNormalUpdateBecauseChangesExist = useRef(false);
     const latestTiptapHtml = useRef<string>(initialHtml || "");
+    // Track node IDs that have ever been changed during this editing session
+    // Once a node is marked as changed, it stays changed to avoid reverting edits
+    const dirtyNodeIds = useRef<Set<string>>(new Set());
     const [saveCounter, setSaveCounter] = useState(0);
 
     const { updatePageHtml, subscribePageSaveEvent, subscribeNestedEditorUpdate } = useNavigation();
@@ -31,21 +32,21 @@ export default function PageEditor({ className, filename, initialHtml }: PageEdi
         (html: string, transaction?: Transaction) => {
             const changedNodes = getChangedNodesFromHtml(latestTiptapHtml.current, html);
 
-            // Recompute allowNormalUpdateBecauseChangesExist if we haven't detected changed nodes yet
-            if (!allowNormalUpdateBecauseChangesExist.current && transaction) {
-                // changedNodes only tracks changes to nodes that exist in original HTML
-                const hasChangedNodes = Object.values(changedNodes).some((value) => value);
+            // Mark any changed nodes as permanently dirty for this session
+            Object.entries(changedNodes).forEach(([nodeId, isChanged]) => {
+                if (isChanged) {
+                    dirtyNodeIds.current.add(nodeId);
+                }
+            });
 
-                // Check if net-new changes were added in the transaction
-                const hasNewContent = hasChangedContentInTransaction(transaction);
+            // Merge the current changes with the accumulated dirty nodes
+            // A node is considered changed if it's changed in this update OR was changed before
+            const accumulatedChangedNodes = { ...changedNodes };
+            dirtyNodeIds.current.forEach((nodeId) => {
+                accumulatedChangedNodes[nodeId] = true;
+            });
 
-                allowNormalUpdateBecauseChangesExist.current = hasChangedNodes || hasNewContent;
-            }
-
-            // Only update the page HTML if we have detected changed nodes or new content
-            if (allowNormalUpdateBecauseChangesExist.current) {
-                updatePageHtml(filename, html, changedNodes);
-            }
+            updatePageHtml(filename, html, accumulatedChangedNodes);
             latestTiptapHtml.current = html;
         },
         [filename, updatePageHtml]
@@ -55,9 +56,6 @@ export default function PageEditor({ className, filename, initialHtml }: PageEdi
     useEffect(() => {
         const unsubscribe = subscribePageSaveEvent((event) => {
             if (event.filename === filename) {
-                // Always allow update when the page is saved from Dev Mode
-                allowNormalUpdateBecauseChangesExist.current = true;
-
                 // Update latestTiptapHtml before setSaveCounter so new editor mounts with correct initialContent
                 latestTiptapHtml.current = event.html;
                 setSaveCounter((c) => c + 1);
@@ -65,7 +63,6 @@ export default function PageEditor({ className, filename, initialHtml }: PageEdi
         });
 
         return () => {
-            allowNormalUpdateBecauseChangesExist.current = false;
             unsubscribe();
         };
     }, [filename, subscribePageSaveEvent]);

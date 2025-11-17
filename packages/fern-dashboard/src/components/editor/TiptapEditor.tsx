@@ -19,6 +19,7 @@ import { useEffect, useMemo, useRef } from "react";
 
 import "@/components/editor/tiptap-node/node-focus/node-focus.scss";
 import "./drag-cursor.css";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useEditor } from "@/providers/EditorContext";
 import { cn } from "@/utils/utils";
@@ -214,6 +215,16 @@ export default function TiptapEditor({
     // Generate a unique ID for this editor instance to prevent cross-editor drag-and-drop
     const editorId = useMemo(() => Math.random().toString(36).slice(2), []);
 
+    // Debounce updates for performance (100ms delay, 300ms max wait)
+    // Shorter delays ensure better sync between editor and dev mode
+    const { debouncedCallback: debouncedOnUpdate, flush } = useDebounce(
+        (props: Parameters<NonNullable<EditorProviderProps["onUpdate"]>>[0]) => {
+            onUpdate?.(props);
+        },
+        100,
+        300
+    );
+
     const handleUpdate: EditorProviderProps["onUpdate"] = (props) => {
         // Skip the first update event as it's always just processing the initial content
         if (skipFirstUpdateRef.current) {
@@ -221,7 +232,7 @@ export default function TiptapEditor({
             return;
         }
 
-        onUpdate?.(props);
+        debouncedOnUpdate(props);
     };
 
     return (
@@ -308,6 +319,10 @@ export default function TiptapEditor({
             immediatelyRender={false}
             onCreate={onCreate}
             onUpdate={handleUpdate}
+            onBlur={() => {
+                // Flush pending updates before blur to ensure nothing is lost
+                flush();
+            }}
             onFocus={({ editor }) => {
                 // Clear selection from all other ProseMirror editors when this editor is focused
                 const allEditors = document.querySelectorAll(".ProseMirror");

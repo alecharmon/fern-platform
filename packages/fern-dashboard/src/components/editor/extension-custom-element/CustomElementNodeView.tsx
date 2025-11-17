@@ -53,9 +53,13 @@ export const CustomElementNodeView = (props: NodeViewProps) => {
             "fve-newly-created": false
         });
 
-        // Emit nested editor update event to notify PageEditor
+        // Emit nested editor update event after attribute update is applied
+        // Use requestAnimationFrame to ensure TipTap has applied the transaction to its state
+        // PageEditor will then read the full HTML from the top-level editor
         if (currentFilename) {
-            emitNestedEditorUpdate({ filename: currentFilename, transaction });
+            requestAnimationFrame(() => {
+                emitNestedEditorUpdate({ filename: currentFilename, transaction });
+            });
         }
     };
 

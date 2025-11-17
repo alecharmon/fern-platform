@@ -415,9 +415,13 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
             return { type: "html", value: `<div data-type="${dataType}" />` } as any;
         }
 
+        // Skip MDX preservation for list items (li) to avoid stale preservation when parent list changes
+        const isListItem = element.tagName === "li" || element.tagName === "ul" || element.tagName === "ol";
+
         // If a node has not been changed, we use the original MDX content
         // BUT only if it doesn't have children with their own encoded mdx attribute (to avoid duplication)
         if (
+            !isListItem &&
             changedNodes != null &&
             typeof element.properties?.["fve-mdx-b64"] === "string" &&
             typeof element.properties?.["fve-data-id"] === "string" &&

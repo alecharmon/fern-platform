@@ -16,7 +16,6 @@ import { EditorComponentProvider } from "@/components/editor/editor-component/Ed
 import { CustomElementHoverWrapper } from "@/components/editor/NodeHoverWrapper";
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
-import { useDebounce } from "@/hooks/useDebounce";
 import type { EncodedDocsUrl } from "@/utils/types";
 import { UnsupportedContent, UnsupportedContentDisplayOnly, UnsupportedContentInline } from "../UnsupportedContent";
 import { cachedBundleMDX } from "./cache";
@@ -272,8 +271,11 @@ interface JSXElementRendererProps {
 }
 
 const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, branch }: JSXElementRendererProps) => {
-    // Debounce the onUpdate callback for TiptapEditor updates (500ms delay)
-    const debouncedOnUpdate = useDebounce(onUpdate, 500);
+    // Ref to hold the nested TipTap editor instance for programmatic updates
+    const nestedEditorRef = useRef<any>(null);
+
+    // Track the last MDX we sent via onUpdate to detect if richTextHtml change is from our own typing
+    const lastEmittedMdxRef = useRef<string>("");
 
     const {
         value: { name, keyedAttributes, expressionAttributes, children: jsxChildren }
@@ -296,6 +298,36 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
         return null;
     }, [jsxChildren]);
 
+    // Sync editor content when richTextHtml changes externally (e.g., via appendChildrenMdx)
+    // but NOT when the change is from user typing in this editor
+    useEffect(() => {
+        if (nestedEditorRef.current && richTextHtml != null && jsxChildren.type === "RICH_TEXT") {
+            // Check if this change came from our own onUpdate
+            const currentMdx = jsxChildren.childrenMdx;
+            const isOwnChange = currentMdx === lastEmittedMdxRef.current;
+
+            if (isOwnChange) {
+                // This change is from our own typing, don't sync back to avoid cursor issues
+                return;
+            }
+
+            // Don't sync if this editor or any of its descendants currently has focus
+            // This prevents stealing focus while user is typing elsewhere
+            if (nestedEditorRef.current.isFocused) {
+                return;
+            }
+
+            const currentHtml = nestedEditorRef.current.getHTML();
+            // Only update if content actually changed to avoid unnecessary updates
+            if (currentHtml !== richTextHtml) {
+                // Use queueMicrotask to avoid flushSync error when called during React render
+                queueMicrotask(() => {
+                    nestedEditorRef.current?.commands.setContent(richTextHtml, false);
+                });
+            }
+        }
+    }, [richTextHtml, jsxChildren]);
+
     const children = useMemo(() => {
         if (jsxChildren.type === "RICH_TEXT" && richTextHtml != null) {
             return (
@@ -304,12 +336,21 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
                     initialContent={richTextHtml}
                     disableDragging={element.value.contentDraggingDisabled}
                     className="px-4"
+                    onCreate={({ editor }) => {
+                        // Store editor instance for programmatic content updates
+                        nestedEditorRef.current = editor;
+                    }}
                     onUpdate={({ editor, transaction }) => {
                         const html = editor.getHTML();
                         const mdx = htmlToMdx(html);
                         const indentedMdx = applyIndentation(mdx.mdx, 1);
                         const finalMdx = buildMdxElement(name, keyedAttributes, expressionAttributes, indentedMdx);
-                        debouncedOnUpdate(finalMdx, transaction);
+
+                        // Store the un-indented version to match what will be extracted during parsing
+                        lastEmittedMdxRef.current = mdx.mdx;
+
+                        // TipTapEditor handles debouncing, we just call onUpdate directly
+                        onUpdate(finalMdx, transaction);
                     }}
                 />
             );
@@ -335,7 +376,6 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
         name,
         keyedAttributes,
         expressionAttributes,
-        debouncedOnUpdate,
         docsUrl,
         branch,
         onUpdate
