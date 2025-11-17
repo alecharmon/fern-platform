@@ -52,6 +52,7 @@ export const PlaygroundEndpointSelectorContent = forwardRef<HTMLDivElement, Play
                     (node): node is FernNavigation.EndpointNode | FernNavigation.WebSocketNode =>
                         node.type === "endpoint" || node.type === "webSocket"
                 )
+                .filter((node) => !node.playground?.hidden)
                 .filter((node) => matchesEndpoint(filterValue, apiGroup, node));
             if (apiLeafNodes.length === 0) {
                 return null;

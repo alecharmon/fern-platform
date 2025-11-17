@@ -12,4 +12,6 @@ export interface PlaygroundSettings {
     environments: FernRegistry.EnvironmentId[] | undefined;
     button: FernRegistry.navigation.v1.PlaygroundButtonSettings | undefined;
     "limit-websocket-messages-per-connection": number | undefined;
+    /** If true, the endpoint will be hidden from the playground UI. */
+    hidden: boolean | undefined;
 }

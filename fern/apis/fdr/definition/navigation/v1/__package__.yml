@@ -347,6 +347,10 @@ types:
           If not provided, all environments are allowed. And if the provided list is empty, the playground should be disabled.
       button: optional<PlaygroundButtonSettings>
       limit-websocket-messages-per-connection: optional<integer>
+      hidden: 
+        type: optional<boolean>
+        docs: If true, the endpoint will be hidden from the playground UI.
+
 
   PlaygroundButtonSettings:
     properties:
