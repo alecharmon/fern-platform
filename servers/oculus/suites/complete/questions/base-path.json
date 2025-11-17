@@ -1,0 +1,20 @@
+{
+    "question": "How do I configure a custom base path for my generated SDK client?",
+    "ground_truth": "To configure a custom base path for generated SDK clients, add the `x-fern-base-path` extension to the `info` section of your OpenRPC configuration file. For example, setting `x-fern-base-path: /api/v1/rpc` will configure the SDK to use `/api/v1/rpc` as the base path.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "base-path",
+      "domain": "buildwithfern.com",
+      "cited_context": "Configure base paths for generated SDK clients using `x-fern-base-path` extension. Configure base paths for generated SDK clients: ```yaml title=\"openrpc.yml\" {{3-4}} info: title: My JSON-RPC API version: 1.0.0 x-fern-base-path: /api/v1/rpc description: JSON-RPC API with custom base path ```"
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/api-definitions/openrpc/extensions/base-path"
+        ],
+        "correctness": [
+          "The answer must mention the `x-fern-base-path` extension.",
+          "The answer should contain a code example of how to use the `x-fern-base-path` extension."
+        ]
+      }
+  }
