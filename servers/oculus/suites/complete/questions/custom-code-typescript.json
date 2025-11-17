@@ -1,0 +1,21 @@
+{
+    "question": "How can I add custom code to my Typescript SDK?",
+    "ground_truth": "You can extend your Typescript SDK with custom code and utilities. To add custom code, you should: 1. Create a new file and add your custom logic, 2. Add your file to .fernignore, and 3. Consume the helper in your code. Fern also allows you to add custom methods to the SDK itself (e.g. client.my_method() ) by inheriting the Fern generated client and then extending it. To add custom methods to the SDK itself, you should 1. Import the Fern generated client from ../client and alias it to FernClient. Next, extend FernClient and add whatever methods you want, 2. Update your index.ts file to export the extended client instead of the generated client, then 3. Add both the wrapper directory and index.ts to .fernignore.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "custom-code",
+      "domain": "buildwithfern.com",
+      "cited_context": "You can extend your Typescript SDK with custom code and utilities. To add custom code, you should: 1. Create a new file and add your custom logic, 2. Add your file to .fernignore, and 3. Consume the helper in your code. Fern also allows you to add custom methods to the SDK itself (e.g. client.my_method() ) by inheriting the Fern generated client and then extending it. To add custom methods to the SDK itself, you should 1. Import the Fern generated client from ../client and alias it to FernClient. Next, extend FernClient and add whatever methods you want, 2. Update your index.ts file to export the extended client instead of the generated client, then 3. Add both the wrapper directory and index.ts to .fernignore."
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/sdks/generators/typescript/custom-code"
+        ],
+        "correctness": [
+          "The answer should mention that you can add both custom code and custom methods to the SDK itself.",
+          "The answer should include instructions on how to add custom code to the SDK.",
+          "The answer should include instructions on how to add custom methods to the SDK itself."
+        ]
+    }
+  }
