@@ -1,0 +1,21 @@
+{
+    "question": "How does the API Explorer handle authentication when multiple authentication schemes are configured?",
+    "ground_truth": "When multiple authentication schemes are available in the OpenAPI spec, the API Explorer automatically displays them in a dropdown menu, allowing users to select and configure their preferred authentication method before sending requests. Once authentication credentials are set, they persist throughout the entire exploration session and are stored client-side using cookies.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "api-explorer",
+      "domain": "buildwithfern.com",
+      "cited_context": "The API Explorer supports all authentication schemes configured in your OpenAPI spec, including multiple authentication schemes. When multiple schemes are available, the API Explorer automatically displays them in a dropdown menu, allowing users to select and configure their preferred authentication method before sending requests. Once a user sets their authentication credentials, their credentials persist throughout their entire exploration session. Authentication credentials are only stored client-side using cookies. No sensitive user information is collected or stored."
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/docs/api-references/api-explorer/overview"
+        ],
+        "correctness": [
+          "The answer should indicate that the API Explorer supports all authentication schemes configured in the OpenAPI spec.",
+          "The answer should mention that user credentials are stored client-side using cookies.",
+          "The answer should mention that no sensitive user information is collected or stored."
+        ]
+      }
+  }
