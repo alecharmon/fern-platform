@@ -1,0 +1,20 @@
+{
+    "question": "What are the available intent options for the Badge component?",
+    "ground_truth": "The available intent options for the Badge component are: success, note, tip, warning, error, info, launch, and check.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "badges",
+      "domain": "buildwithfern.com",
+      "cited_context": "The semantic color of the badge. Available options: `success`, `note`, `tip`, `warning`, `error`, `info`, `launch`, `check`"
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/docs/writing-content/components/badges"
+        ],
+        "correctness": [
+          "The answer must mention the available intent options for the `Badge` component.",
+          "The answer must include all eight intent options."
+        ]
+      }
+  }
