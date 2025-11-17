@@ -1,0 +1,20 @@
+{
+    "question": "How do I specify a custom filename when someone downloads a PDF using the Download component?",
+    "ground_truth": "You can specify a custom filename for downloads by using the `filename` property on the `<Download>` component. This optional property allows you to set the filename that will be used when the asset is downloaded. If not provided, the downloaded file will use the same name as the original asset. For example: `<Download filename=\"my-document.pdf\" url=\"/assets/document.pdf\">Download PDF</Download>` will download the file with the filename \"my-document.pdf\".",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "download",
+      "domain": "buildwithfern.com",
+      "cited_context": "The Download component has a `filename` property (type: string) that allows you to specify \"The filename to use for the downloaded asset. If not provided, the filename will be the same as the asset's name.\""
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/docs/writing-content/components/download"
+        ],
+        "correctness": [
+          "The answer must mention the `filename` property on the `<Download>` component.",
+          "The answer should include a code example of how to use the `filename` property on the `<Download>` component."
+        ]
+    }
+  }
