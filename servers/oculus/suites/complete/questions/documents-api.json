@@ -1,0 +1,21 @@
+
+{
+    "question": "How do I add custom content to Ask Fern?",
+    "ground_truth": "You can add custom content to Ask Fern by using the Documents API. This allows you to extend Ask Fern's knowledge beyond core documentation to include materials like internal FAQs, help desk tickets, knowledge base articles, marketing sites, and research papers. The uploaded documents will be indexed and made available as context when Ask Fern responds to user questions, with URLs included as citations when the content is referenced.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "documents",
+      "domain": "buildwithfern.com",
+      "cited_context": "You can extend Ask Fern's knowledge beyond your core documentation by indexing additional custom content. Adding materials such as internal FAQs, help desk tickets, knowledge base articles, marketing sites, research papers, and other resources helps Ask Fern provide more complete answers to developers. The Documents API lets you upload, update, and delete custom documents that Ask Fern can reference when responding to user questions. To get started, upload a document, title, and URL via the Documents API."
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/ask-fern/configuration/documents"
+        ],
+        "correctness": [
+          "The answer must mention the Documents API.",
+          "The answer should include an example payload for the Documents API."
+        ]
+    }
+  }
