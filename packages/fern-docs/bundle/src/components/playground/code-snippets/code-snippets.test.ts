@@ -232,4 +232,94 @@ describe("PlaygroundCodeSnippetBuilder", () => {
             new PythonRequestSnippetBuilder(context, multipartFormStateWithoutFiles, {}, undefined, false).build()
         ).toMatchSnapshot();
     });
+
+    it("should render python with form-urlencoded content type", () => {
+        const formUrlencodedState: PlaygroundEndpointRequestFormState = {
+            type: "endpoint",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            pathParameters: {
+                test: "hello@example"
+            },
+            queryParameters: {},
+            body: {
+                type: "json",
+                value: {
+                    username: "john_doe",
+                    password: "s3cret"
+                }
+            }
+        };
+        expect(
+            new PythonRequestSnippetBuilder(context, formUrlencodedState, {}, undefined, false).build()
+        ).toMatchSnapshot();
+    });
+
+    it("should render typescript with form-urlencoded content type", () => {
+        const formUrlencodedState: PlaygroundEndpointRequestFormState = {
+            type: "endpoint",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            pathParameters: {
+                test: "hello@example"
+            },
+            queryParameters: {},
+            body: {
+                type: "json",
+                value: {
+                    username: "john_doe",
+                    password: "s3cret"
+                }
+            }
+        };
+        expect(
+            new TypescriptFetchSnippetBuilder(context, formUrlencodedState, {}, undefined, false).build()
+        ).toMatchSnapshot();
+    });
+
+    it("should render python with form-urlencoded content type and empty body", () => {
+        const formUrlencodedStateEmpty: PlaygroundEndpointRequestFormState = {
+            type: "endpoint",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            pathParameters: {
+                test: "hello@example"
+            },
+            queryParameters: {},
+            body: {
+                type: "json",
+                value: {}
+            }
+        };
+        expect(
+            new PythonRequestSnippetBuilder(context, formUrlencodedStateEmpty, {}, undefined, false).build()
+        ).toMatchSnapshot();
+    });
+
+    it("should render python with form-urlencoded content type and undefined body", () => {
+        const formUrlencodedStateUndefined: PlaygroundEndpointRequestFormState = {
+            type: "endpoint",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            pathParameters: {
+                test: "hello@example"
+            },
+            queryParameters: {},
+            body: {
+                type: "json",
+                value: undefined
+            }
+        };
+        expect(
+            new PythonRequestSnippetBuilder(context, formUrlencodedStateUndefined, {}, undefined, false).build()
+        ).toMatchSnapshot();
+    });
 });

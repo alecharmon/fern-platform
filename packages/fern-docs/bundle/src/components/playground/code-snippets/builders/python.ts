@@ -1,4 +1,4 @@
-import { isNonNullish, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { isNonNullish, unknownToString, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
 import { PlaygroundFormDataEntryValue } from "../../types";
 import { buildPath, buildUrlWithQueryParams, indentAfter } from "./common";
@@ -12,10 +12,19 @@ interface PythonRequestParams {
 
 export class PythonRequestSnippetBuilder extends PlaygroundCodeSnippetBuilder {
     #buildRequests({ json, data, files }: PythonRequestParams) {
+        // Remove Content-Type header when:
+        // - Using json= (requests sets application/json automatically)
+        // - Using files= (requests sets multipart/form-data with boundary automatically)
+        // Keep it for data= to make form-urlencoded explicit
+        const shouldRemoveContentType = json != null || files != null;
+        const headers = shouldRemoveContentType
+            ? { ...this.formState.headers, "Content-Type": undefined }
+            : this.formState.headers;
+
         return `# ${this.context.node.title} (${this.context.endpoint.method} ${buildPath(this.context.endpoint.path)})
 response = requests.${this.context.endpoint.method.toLowerCase()}(
   "${buildUrlWithQueryParams(this.url, this.formState.queryParameters)}",
-  headers=${indentAfter(JSON.stringify({ ...this.formState.headers, "Content-Type": undefined }, undefined, 2), 2, 0)},${json != null ? `\n  json=${indentAfter(json, 2, 0)},` : ""}${
+  headers=${indentAfter(JSON.stringify(headers, undefined, 2), 2, 0)},${json != null ? `\n  json=${indentAfter(json, 2, 0)},` : ""}${
       data != null ? `\n  data=${indentAfter(data, 2, 0)},` : ""
   }${files != null ? `\n  files=${indentAfter(files, 2, 0)},` : ""}
 )
@@ -33,6 +42,30 @@ print(response.json())`;
         return JSON.stringify(value);
     }
 
+    // Convert JavaScript value to Python literal syntax
+    #toPythonLiteral(value: unknown): string {
+        if (value === null || value === undefined) {
+            return "None";
+        }
+        if (typeof value === "boolean") {
+            return value ? "True" : "False";
+        }
+        if (typeof value === "string") {
+            return JSON.stringify(value);
+        }
+        if (typeof value === "number") {
+            return String(value);
+        }
+        if (Array.isArray(value)) {
+            return `[${value.map((v) => this.#toPythonLiteral(v)).join(", ")}]`;
+        }
+        if (typeof value === "object") {
+            const entries = Object.entries(value).map(([k, v]) => `${JSON.stringify(k)}: ${this.#toPythonLiteral(v)}`);
+            return `{\n  ${entries.join(",\n  ")}\n}`;
+        }
+        return String(value);
+    }
+
     public override build(): string {
         const imports = ["requests"];
 
@@ -43,9 +76,28 @@ ${this.#buildRequests({})}`;
         }
 
         return visitDiscriminatedUnion(this.formState.body, "type")._visit<string>({
-            json: ({ value }) => `${imports.map((pkg) => `import ${pkg}`).join("\n")}
+            json: ({ value }) => {
+                // Check if Content-Type is application/x-www-form-urlencoded
+                const isFormUrlEncoded = unknownToString(
+                    this.formState.headers["Content-Type"] ?? this.formState.headers["content-type"] ?? ""
+                )
+                    .toLowerCase()
+                    .includes("form-urlencoded");
 
-${this.#buildRequests({ json: JSON.stringify(this.maybeWrapJsonBody(value), undefined, 2) })}`,
+                if (isFormUrlEncoded) {
+                    // Use data= for form-urlencoded with Python dict syntax
+                    // Only include data if value is not null/undefined and not an empty object
+                    const hasData = value != null && (typeof value !== "object" || Object.keys(value).length > 0);
+                    return `${imports.map((pkg) => `import ${pkg}`).join("\n")}
+
+${this.#buildRequests({ data: hasData ? this.#toPythonLiteral(value) : undefined })}`;
+                }
+
+                // Use json= for application/json
+                return `${imports.map((pkg) => `import ${pkg}`).join("\n")}
+
+${this.#buildRequests({ json: JSON.stringify(this.maybeWrapJsonBody(value), undefined, 2) })}`;
+            },
             "form-data": ({ value }) => {
                 const singleFiles = Object.entries(value)
                     .filter((entry): entry is [string, PlaygroundFormDataEntryValue.SingleFile] =>

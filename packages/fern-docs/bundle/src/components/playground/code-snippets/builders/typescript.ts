@@ -1,4 +1,4 @@
-import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { unknownToString, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 
 import { buildPath, buildUrlWithQueryParams, indentAfter } from "./common";
 import { PlaygroundCodeSnippetBuilder } from "./types";
@@ -23,8 +23,23 @@ console.log(body);`;
 
         return visitDiscriminatedUnion(this.formState.body, "type")._visit<string>({
             "octet-stream": () => this.#buildFetch('document.querySelector("input[type=file]").files[0]'), // TODO: implement this
-            json: ({ value }) =>
-                this.#buildFetch(
+            json: ({ value }) => {
+                // Check if Content-Type is application/x-www-form-urlencoded
+                const isFormUrlEncoded = unknownToString(
+                    this.formState.headers["Content-Type"] ?? this.formState.headers["content-type"] ?? ""
+                )
+                    .toLowerCase()
+                    .includes("form-urlencoded");
+
+                if (isFormUrlEncoded && value != null) {
+                    // Use URLSearchParams for form-urlencoded
+                    return this.#buildFetch(
+                        indentAfter(`new URLSearchParams(${JSON.stringify(value, undefined, 2)})`, 2, 0)
+                    );
+                }
+
+                // Use JSON.stringify for application/json
+                return this.#buildFetch(
                     value != null
                         ? indentAfter(
                               `JSON.stringify(${JSON.stringify(this.maybeWrapJsonBody(value), undefined, 2)})`,
@@ -32,7 +47,8 @@ console.log(body);`;
                               0
                           )
                         : undefined
-                ),
+                );
+            },
             "form-data": ({ value }) => {
                 const file = Object.entries(value)
                     .filter(([, v]) => v.type === "file")

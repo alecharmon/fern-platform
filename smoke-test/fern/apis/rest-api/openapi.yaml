@@ -355,6 +355,53 @@ paths:
       responses:
         default:
           description: Successful logout
+  /auth/token:
+    post:
+      tags:
+        - user
+      summary: Obtain auth token (form-encoded)
+      description: |
+        Exchange credentials for a token using application/x-www-form-urlencoded.
+        This endpoint demonstrates form-encoded request bodies in the API Explorer.
+      operationId: getAuthToken
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: john_doe
+                password:
+                  type: string
+                  format: password
+                  example: s3cret
+              required:
+                - username
+                - password
+            examples:
+              loginForm:
+                summary: Login with form data
+                value:
+                  username: john_doe
+                  password: s3cret
+      responses:
+        "200":
+          description: Token response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAuthResponse"
+              examples:
+                success:
+                  summary: Successful token response
+                  value:
+                    token: abc123token
+                    expiresIn: 3600
+        "401":
+          description: Invalid credentials
   /user/{username}:
     get:
       tags:
