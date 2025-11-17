@@ -4,5 +4,5 @@
     "integration": "fai-local",
     "num_questions_generation": 150,
     "generators": ["markdown"],
-    "evaluators": ["correctness", "coherence", "conciseness"]
+    "evaluators": ["correctness", "citation"]
 }

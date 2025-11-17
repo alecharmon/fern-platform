@@ -1,0 +1,21 @@
+{
+    "question": "How can I add descriptions to enum values in OpenAPI using Fern?",
+    "ground_truth": "OpenAPI doesn't natively support adding descriptions to enum values. To add descriptions in Fern, you can use the `x-fern-enum` extension. This extension allows you to specify descriptions for each enum value, and these descriptions will propagate into the generated SDK and docs website. The `x-fern-enum` extension also supports a `name` field that allows you to customize the name of the enum in generated code, which is particularly useful for enums with symbolic characters.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "enums",
+      "domain": "buildwithfern.com",
+      "cited_context": "OpenAPI doesn't natively support adding descriptions to enum values. To do this in Fern you can use the `x-fern-enum` extension. In the example below, we've added some descriptions to enum values. These descriptions will propagate into the generated SDK and docs website. `x-fern-enum` also supports a `name` field that allows you to customize the name of the enum in code. This is particularly useful when you have enums that rely on symbolic characters that would otherwise cause generated code not to compile."
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/api-definitions/openapi/extensions/enum-descriptions-and-names"
+        ],
+        "correctness": [
+          "The answer must mention the `x-fern-enum` extension.",
+          "The answer must mention the `name` field in the `x-fern-enum` extension.",
+          "The answer should include a code example of how to use the `x-fern-enum` extension."
+        ]
+    }
+  }
