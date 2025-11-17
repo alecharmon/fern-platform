@@ -1,0 +1,20 @@
+{
+    "question": "How do I preview SDK changes locally before publishing them to package managers?",
+    "ground_truth": "You can use the `fern generate --preview` command to test SDK changes locally before publishing. This generates the SDK into a local `.preview/` folder, allows quick iteration on your Fern definition, and ensures no changes are published to package managers or GitHub.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "commands",
+      "domain": "buildwithfern.com",
+      "cited_context": "### preview\n\nUse `--preview` to test SDK changes locally before publishing. This is especially useful during development:\n- Generates SDK into a local `.preview/` folder\n- Allows quick iteration on your Fern definition\n- No changes are published to package managers or GitHub\n\n```bash\n# Preview all SDKs\nfern generate --preview\n\n# Preview specific SDK group\nfern generate --group python-sdk --preview\n```"
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/cli-api-reference/cli-reference/commands#fern-generate"
+        ],
+        "correctness": [
+          "The answer must mention the `fern generate --preview` command.",
+          "The answer must mention that the command generates the SDK into a local `.preview/` folder."
+        ]
+    }
+  }
