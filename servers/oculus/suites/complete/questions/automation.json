@@ -1,0 +1,22 @@
+
+{
+    "question": "How can I configure Fern to automatically generate SDKs when my Protocol Buffer files change in GitHub?",
+    "ground_truth": "You can use Fern's GitHub Action to automatically update SDKs and docs when Protocol Buffer files change by creating a workflow file at `.github/workflows/fern.yml`. The workflow should trigger on pushes to main branch when files in `proto/**/*.proto` or `fern/**/*.yml` paths change, run `fern check` on pull requests, and run `fern generate` on pushes to main branch using the `fern-api/action@v0` action with your FERN_TOKEN.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "automation",
+      "domain": "buildwithfern.com",
+      "cited_context": "Use Fern's GitHub Action to automatically update SDKs and docs when your Protocol Buffer files change:\n\n```yaml title=\".github/workflows/fern.yml\"\nname: Fern\n\non:\n  push:\n    branches:\n      - main\n    paths:\n      - 'proto/**/*.proto'\n      - 'fern/**/*.yml'\n  pull_request:\n    branches:\n      - main\n    paths:\n      - 'proto/**/*.proto'\n      - 'fern/**/*.yml'\n\njobs:\n  fern-check:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout repo\n        uses: actions/checkout@v4\n        \n      - name: Check gRPC spec\n        uses: fern-api/action@v0\n        with:\n          command: check\n        env:\n          FERN_TOKEN: ${{{{ secrets.FERN_TOKEN }}}}\n\n  fern-generate:\n    runs-on: ubuntu-latest\n    if: github.event_name == 'push' && github.ref == 'refs/heads/main'\n    steps:\n      - name: Checkout repo\n        uses: actions/checkout@v4\n        \n      - name: Generate SDKs and docs\n        uses: fern-api/action@v0\n        with:\n          command: generate\n        env:\n          FERN_TOKEN: ${{{{ secrets.FERN_TOKEN }}}}\n```"
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/api-definitions/grpc/sync-your-g-rpc-specification"
+        ],
+        "correctness": [
+          "The answer must mention using Fern's GitHub Action.",
+          "The answer should contain a code example of how to use Fern's GitHub Action.",
+          "The answer should indicate that the workflow should trigger on pushes to main branch when files in `proto/**/*.proto` or `fern/**/*.yml` paths change."
+        ]
+    }
+  }
