@@ -1,0 +1,20 @@
+{
+    "question": "How can I customize the class name that users will instantiate when using my Swift SDK?",
+    "ground_truth": "You can customize the class name that users will instantiate when using your Swift SDK by setting the `clientClassName` configuration option in your `generators.yml` file. For example, setting `clientClassName: YourClientName` will generate a client class with that name.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "configuration",
+      "domain": "buildwithfern.com",
+      "cited_context": "The name of the generated client class. This allows you to customize the class name that users will instantiate when using your SDK."
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/sdks/generators/swift/configuration"
+        ],
+        "correctness": [
+          "The answer must mention the `clientClassName` configuration option.",
+          "The answer should contain a code example of how to use the `clientClassName` configuration option."
+        ]
+    }
+  }
