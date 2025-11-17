@@ -136,6 +136,7 @@ export async function runRouteForCohere({
                 model: languageModel,
                 messages: modelMessages,
                 maxRetries: 3,
+                temperature: 0.0,
                 stopWhen: stepCountIs(10),
                 includeRawChunks: true,
                 onChunk: (chunk) => {

@@ -182,6 +182,7 @@ export async function runRouteForAnthropic({
             const result = streamText({
                 model: languageModel,
                 messages: modelMessages,
+                temperature: 0.0,
                 maxRetries: 3,
                 stopWhen: stepCountIs(10),
                 prepareStep: async () => {
