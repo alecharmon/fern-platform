@@ -6,8 +6,6 @@ on:
       - app
   pull_request:
     paths:
-      - "servers/fdr/**"
-      - "servers/mdx-bundler/**"
       - ".github/workflows/container-testing.yml"
 
   workflow_dispatch:
@@ -100,3 +98,56 @@ jobs:
           docker tag mdx-bundler:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/mdx-bundler-internal:$SANITIZED_BRANCH-${{ github.sha }}
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/mdx-bundler-internal:$SANITIZED_BRANCH-${{ github.sha }}
+
+  self-hosted:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 10
+    env:
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Update Engines
+        run: |
+          node -e 'const fs = require("fs"); const pkg = require("./package.json"); console.log("Before modification:", JSON.stringify(pkg.engines, null, 2)); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "9.15.9"; pkg.packageManager = "pnpm@9.15.9"; console.log("After modification:", JSON.stringify(pkg.engines, null, 2)); fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
+
+      - name: Install
+        uses: ./.github/actions/legacy-install
+
+      - name: Compile
+        run: pnpm compile
+
+      - name: Build FDR CJS
+        run: pnpm --filter @fern-platform/fdr build:tsup:cjs
+
+      - name: Build self-hosted bundle
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: pnpm docs:self-hosted-bundle:build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: pnpm --filter=@fern-platform/self-hosted docker:build
+
+      #- name: Standup test container
+      # Do some testing
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: "us-east-1"
+
+      - name: Push to ECR for scanning
+        run: |-
+          aws sts get-caller-identity
+          SANITIZED_BRANCH="${BRANCH_NAME//\//-}"
+          docker tag fern-self-hosted:latest 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/self-hosted-internal:$SANITIZED_BRANCH-${{ github.sha }}
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
+          docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/self-hosted-internal:$SANITIZED_BRANCH-${{ github.sha }}
