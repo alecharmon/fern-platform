@@ -13,10 +13,7 @@ import {
     stepCountIs,
     streamText,
     tool,
-    type UIDataTypes,
-    type UIMessage,
-    type UIMessagePart,
-    type UITools
+    type UIMessage
 } from "ai";
 import { FallbackModel } from "ai-fallback";
 import z from "zod";
@@ -77,26 +74,7 @@ export async function runRouteForAnthropic({
         token: fernToken_admin()
     });
 
-    /*
-    Anthropic's API has a bug (see: https://github.com/anthropics/claude-code/issues/473)
-    Where tool calls are not formatted properly, breaking messages that contain tool calls.
-    This is a manual fix - we simply filter out tool call responses.
-
-    Will file an issue with Vercel to fix this, but for now this is not blocking.
-  */
-
-    const cleanedMessages: UIMessage[] = [];
-    for (const message of messages) {
-        if (message.role === "assistant") {
-            message.parts = message.parts.filter((part: UIMessagePart<UIDataTypes, UITools>) => part.type === "text");
-            // Skip assistant messages with no text parts
-            if (message.parts.length === 0) {
-                continue;
-            }
-        }
-        cleanedMessages.push(message);
-    }
-    let modelMessages: ModelMessage[] = convertToModelMessages(cleanedMessages);
+    let modelMessages: ModelMessage[] = convertToModelMessages(messages);
 
     const start = Date.now();
 
