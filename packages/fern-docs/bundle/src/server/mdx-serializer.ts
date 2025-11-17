@@ -134,20 +134,24 @@ export function createCachedMdxSerializer(
                                 console.log(
                                     `[serializeMdx] NextMdxRemote failed, falling back to regular serialization for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${fallbackStartTime - startTime}ms`
                                 );
-                                const result = await internalSerializeMdx(content, {
-                                    filename,
-                                    loader,
-                                    toc,
-                                    scope: {
-                                        authed: authState.authed,
-                                        user: authState.authed ? authState.user : undefined,
-                                        ...scope
+                                const result = await internalSerializeMdx(
+                                    content,
+                                    {
+                                        filename,
+                                        loader,
+                                        toc,
+                                        scope: {
+                                            authed: authState.authed,
+                                            user: authState.authed ? authState.user : undefined,
+                                            ...scope
+                                        },
+                                        replaceHref,
+                                        org: metadata.org,
+                                        domain: metadata.domain,
+                                        slug: options.slug
                                     },
-                                    replaceHref,
-                                    org: metadata.org,
-                                    domain: metadata.domain,
-                                    slug: options.slug
-                                });
+                                    metadata.domain
+                                );
                                 const fallbackEndTime = Date.now();
                                 console.log(
                                     `[serializeMdx] fallback serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${fallbackEndTime - fallbackStartTime}ms, total: ${fallbackEndTime - startTime}ms`
@@ -171,20 +175,24 @@ export function createCachedMdxSerializer(
                         console.log(
                             `[serializeMdx] using regular serialization for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${regularStartTime - startTime}ms`
                         );
-                        const result = await internalSerializeMdx(content, {
-                            filename,
-                            loader,
-                            toc,
-                            scope: {
-                                authed: authState.authed,
-                                user: authState.authed ? authState.user : undefined,
-                                ...scope
+                        const result = await internalSerializeMdx(
+                            content,
+                            {
+                                filename,
+                                loader,
+                                toc,
+                                scope: {
+                                    authed: authState.authed,
+                                    user: authState.authed ? authState.user : undefined,
+                                    ...scope
+                                },
+                                replaceHref,
+                                org: metadata.org,
+                                domain: metadata.domain,
+                                slug: options.slug
                             },
-                            replaceHref,
-                            org: metadata.org,
-                            domain: metadata.domain,
-                            slug: options.slug
-                        });
+                            metadata.domain
+                        );
                         const regularEndTime = Date.now();
                         console.log(
                             `[serializeMdx] regular serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${regularEndTime - regularStartTime}ms, total: ${regularEndTime - startTime}ms`

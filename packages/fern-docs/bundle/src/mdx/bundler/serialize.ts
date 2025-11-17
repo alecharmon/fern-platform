@@ -358,7 +358,7 @@ export function serializeMdx(
                 console.error(`Serialize MDX timed out after ${serializeTimeout / 1000} seconds`);
 
                 track("mdx_serialization_timeout", {
-                    domain: domain ?? "unknown",
+                    domain: options?.domain ?? domain ?? "unknown",
                     slug: options?.slug,
                     filename: options?.filename,
                     contentLength: content.length,
