@@ -23,7 +23,7 @@ async def get_anthropic_response(
     domain: str,
     rag_records: list[str],
     mode: ChatMode = ChatMode.MARKDOWN,
-    max_tokens: int = 1000,
+    max_tokens: int = 3000,
 ) -> tuple[list[dict[str, str]], list[str]]:
     async def _handle_anthropic_tool_use(tool_use: Any, domain: str) -> tuple[str, list[str]]:
         query = tool_use.input["query"]
