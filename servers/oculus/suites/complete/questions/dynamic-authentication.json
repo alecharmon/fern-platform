@@ -1,0 +1,20 @@
+{
+    "question": "How can I implement automatic OAuth token refresh in my Fern-generated SDK?",
+    "ground_truth": "Fern-generated SDKs support automatic OAuth token refresh through language-specific approaches. In TypeScript, you can use custom fetcher middleware to inject authentication logic that refreshes tokens before each request. In Python, you can use method overrides to inject authentication logic for each API call. When implementing token refresh, it's recommended to cache tokens to avoid regenerating them on every request and refresh tokens slightly before they expire to avoid edge cases where a token expires during request processing.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "dynamic-authentication",
+      "domain": "buildwithfern.com",
+      "cited_context": "Your API may require dynamic authentication where credentials need to be generated or refreshed for each request, such as signing short-lived JWTs or rotating tokens. Fern-generated SDKs support this pattern through language-specific approaches.\n\nEach language has its own recommended approach for implementing dynamic authentication:\n- TypeScript: Use custom fetcher middleware to inject authentication logic in a single place for all requests. Supports JWT signing, OAuth token refresh, and more.\n- Python: Use method overrides to inject authentication logic for each API call. Supports JWT signing, OAuth token refresh, and more.\n\nCommon use cases - Dynamic authentication is useful for several scenarios:\n- OAuth token refresh: Automatically refresh expired access tokens before each request\n\nPerformance:\n- Token caching: Cache tokens to avoid regenerating them on every request, balancing security (shorter token lifetime) with performance (less frequent regeneration)\n- Grace period: Refresh tokens slightly before they expire to avoid edge cases where a token expires during request processing"
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/sdks/deep-dives/dynamic-authentication"
+        ],
+        "correctness": [
+          "The answer must mention the `custom fetcher middleware` in the TypeScript SDK.",
+          "The answer must mention the `method overrides` in the Python SDK."
+        ]
+    }
+  }
