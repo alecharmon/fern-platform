@@ -23,19 +23,31 @@ export default function NotFoundContent({
     tracker,
     actionButton,
     disableSuggestions = false,
-    className
+    className,
+    docsUrl,
+    slug,
+    hideSubtitle = false,
+    branch
 }: {
     lang: string;
     tracker?: React.ReactNode;
     actionButton?: React.ReactNode;
     disableSuggestions?: boolean;
     className?: string;
+    /** Optional docsUrl (for fern-dashboard context) */
+    docsUrl?: string;
+    /** Optional specific slug to use instead of parsing from pathname (for fern-dashboard context) */
+    slug?: string;
+    /** Optional branch (for fern-dashboard context) */
+    branch?: string;
+    /** Hide the "We have been notified" subtitle */
+    hideSubtitle?: boolean;
 }) {
     const pathname = usePathname();
     const [suggestedRoutes, setSuggestedRoutes] = useState<RouteSuggestion[]>([]);
     const [isLoading, setIsLoading] = useState(!disableSuggestions);
 
-    const requestedPath = parseServerSidePathname(pathname);
+    const requestedPath = slug ?? parseServerSidePathname(pathname);
 
     useEffect(() => {
         if (disableSuggestions) {
@@ -46,9 +58,16 @@ export default function NotFoundContent({
         async function loadSuggestions() {
             try {
                 setIsLoading(true);
-                const response = await fetch(
-                    `/api/fern-docs/route-suggestions?path=${encodeURIComponent(requestedPath)}`
-                );
+                // If docsUrl is provided (fern-dashboard context), pass it as a query parameter
+                // Otherwise, just pass the path (default behavior in fern-docs)
+                const params = new URLSearchParams({
+                    path: requestedPath,
+                    ...(docsUrl && { docsUrl }),
+                    ...(branch && { branch })
+                });
+                const apiUrl = `/api/fern-docs/route-suggestions?${params.toString()}`;
+
+                const response = await fetch(apiUrl);
                 if (response.ok) {
                     const suggestions = await response.json();
                     setSuggestedRoutes(suggestions);
@@ -67,7 +86,7 @@ export default function NotFoundContent({
         } else {
             setIsLoading(false);
         }
-    }, [requestedPath, disableSuggestions]);
+    }, [requestedPath, disableSuggestions, docsUrl, branch]);
 
     return (
         <>
@@ -82,7 +101,9 @@ export default function NotFoundContent({
                 <GradientExclamation />
                 <div className="flex flex-col text-center gap-2">
                     <h1>{t(lang).errors.pageNotFound}</h1>
-                    <p className="text-(color:--grayscale-a9)">{t(lang).feedback.weHaveBeenNotified}</p>
+                    {!hideSubtitle && (
+                        <p className="text-(color:--grayscale-a9)">{t(lang).feedback.weHaveBeenNotified}</p>
+                    )}
                 </div>
 
                 {isLoading && requestedPath && requestedPath !== "/" && (

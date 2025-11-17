@@ -96,9 +96,9 @@ export function calculatePathSimilarity(requestedPath: string, targetPath: strin
  */
 export function findSimilarPaths(
     requestedPath: string,
-    availablePaths: Array<{ slug: string; title: string; href: string; subtitle?: string }>,
+    availablePaths: { slug: string; title: string; href: string; subtitle?: string }[],
     limit = 3
-): Array<{ slug: string; title: string; href: string; score: number; subtitle?: string }> {
+): { slug: string; title: string; href: string; score: number; subtitle?: string }[] {
     const scoredPaths = availablePaths.map((path) => ({
         ...path,
         score: calculatePathSimilarity(requestedPath, path.slug)
@@ -107,7 +107,7 @@ export function findSimilarPaths(
     const sortedPaths = scoredPaths.sort((a, b) => b.score - a.score);
 
     const seenHrefs = new Set<string>();
-    const uniquePaths: Array<{ slug: string; title: string; href: string; score: number; subtitle?: string }> = [];
+    const uniquePaths: { slug: string; title: string; href: string; score: number; subtitle?: string }[] = [];
 
     for (const path of sortedPaths) {
         if (!seenHrefs.has(path.href)) {

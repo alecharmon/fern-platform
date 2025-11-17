@@ -1,6 +1,7 @@
 "use client";
 
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import {
     type ClientPageDataDependencies,
     type ResolvedPageData,
@@ -11,10 +12,12 @@ import {
 } from "@fern-docs/components/navigation";
 import NotFoundContent from "@fern-docs/components/not-found/NotFoundContent";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 import { CSSProvider } from "@/components/editor/extension-custom-element/CSSContext";
 import { UnsupportedContentDisplayOnly } from "@/components/editor/UnsupportedContent";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
+import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import PageContents from "./PageContents";
 
 export declare namespace PageNode {
@@ -36,6 +39,8 @@ export default function PageNode(props: PageNode.Props) {
 
     const { resolveInitialPageData, registerPage } = useNavigation();
     const { setCurrentFilename } = useCurrentPage();
+    const { docsUrl, branch } = useGitHubRepo();
+    const params = useParams<{ slug: string[] }>();
 
     // Store initial page data in a ref so we don't re-resolve it on every render
     const initialPageDataRef = useRef<ResolvedPageData | null>(null);
@@ -65,10 +70,28 @@ export default function PageNode(props: PageNode.Props) {
         }
     }, [initialPageData, registerPage, setCurrentFilename]);
 
-    // Handle not found case
+    // Show blank while navigation store is hydrating (loading UI shown elsewhere)
+    if (!hydrated) {
+        return null;
+    }
+
+    // Handle not found case (only after hydration)
     if (!initialPageData || !foundNode) {
         console.error("[PageNode] Page was not able to be resolved:", { initialPageData, foundNode });
-        return <NotFoundContent lang="en" className="max-w-full not-prose -my-12" disableSuggestions />;
+
+        // Use slugjoin to get the clean navigation slug from the route params
+        const slug = slugjoin(params.slug);
+
+        return (
+            <NotFoundContent
+                lang="en"
+                className="max-w-full not-prose -my-12"
+                docsUrl={docsUrl}
+                slug={slug}
+                branch={branch}
+                hideSubtitle={true}
+            />
+        );
     }
 
     // foundNode from useDerivedFoundNode already includes fallbackFoundNode merge logic
