@@ -1,0 +1,20 @@
+{
+    "question": "How do I mark a specific endpoint in OpenAPI to only be available to public consumers?",
+    "ground_truth": "To mark an endpoint in OpenAPI for only public consumers, add the `x-fern-audiences` extension with the value `- public` to the relevant endpoint. For example, for a POST /users/sendEmail endpoint, you would add `x-fern-audiences: - public` under the post operation definition.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "filter-your-endpoints-audiences",
+      "domain": "buildwithfern.com",
+      "cited_context": "To mark an endpoint with a particular audience, add the `x-fern-audiences` extension to the relevant endpoint. In the example below, the `POST /users/sendEmail` endpoint is only available to public consumers:\n\n```yaml title=\"openapi.yml\" {{4-5}}\npaths:\n  /users/sendEmail:\n    post:\n      x-fern-audiences:\n        - public\n      operationId: send_email\n```"
+    },
+    "criteria": {
+        "citation": [
+          "https://buildwithfern.com/learn/api-definitions/openapi/extensions/audiences"
+        ],
+        "correctness": [
+          "The answer must mention the `x-fern-audiences` extension.",
+          "The answer should include a code example of how to use the `x-fern-audiences` extension."
+        ]
+    }
+  }
