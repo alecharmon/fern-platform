@@ -1,0 +1,22 @@
+{
+    "question": "We want employees to use our company's existing login system to access the docs instead of separate passwords. We're using Okta for corporate auth. Will this work? What authentication standards does the system need to support?",
+    "ground_truth": "Fern supports single sign-on (SSO) integration with any identity provider that implements industry-standard authentication protocols, so your Okta setup will work. Specifically, Fern supports two protocols: 1) SAML 2.0 (Security Assertion Markup Language), which is compatible with enterprise identity providers like Okta, OneLogin, Azure Active Directory, and other SAML-compliant systems, and 2) OIDC/OpenID Connect, which works with Google Workspace, Auth0, and other OIDC-compliant providers. This protocol-based approach means Fern isn't limited to specific vendor integrations - as long as your identity provider implements one of these standard protocols (SAML 2.0 or OIDC), it will integrate with Fern's documentation platform. Most enterprise identity management systems like Okta support both protocols, giving you flexibility in configuration. The SSO integration allows your users to authenticate once with their corporate credentials and access your Fern documentation without separate login, improving security and user experience.",
+    "metadata": {
+      "category": "markdown",
+      "source": "markdown_generator",
+      "slug": "sso",
+      "domain": "buildwithfern.com",
+      "cited_context": "## Supported identity providers\n\nFern supports SSO integration with any identity provider that implements industry-standard protocols:\n\n- **SAML 2.0**: Compatible with providers like Okta, OneLogin, Azure AD, and others\n- **OIDC (OpenID Connect)**: Works with Google Workspace, Auth0, and other OIDC-compliant providers"
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/docs/authentication/sso"
+        ],
+        "correctness": [
+            "The answer must mention the SAML 2.0 protocol.",
+            "The answer must mention the OIDC (OpenID Connect) protocol.",
+            "The answer should mention that Fern works with any identity provider that implements these standard protocols.",
+            "The answer should provide examples of compatible identity providers (like Okta, OneLogin, Azure AD, Google Workspace, Auth0)."
+        ]
+    }
+  }
