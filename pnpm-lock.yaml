@@ -3305,8 +3305,8 @@ importers:
         specifier: ^0.0.305
         version: 0.0.305
       aws-cdk-lib:
-        specifier: 2.172.0
-        version: 2.172.0(constructs@10.3.0)
+        specifier: ^2.215.0
+        version: 2.215.0(constructs@10.3.0)
       constructs:
         specifier: ^10.0.0
         version: 10.3.0
@@ -3318,8 +3318,8 @@ importers:
         specifier: ^22.0.0
         version: 22.18.8
       aws-cdk:
-        specifier: 2.172.0
-        version: 2.172.0
+        specifier: ^2.1029.1
+        version: 2.1029.1
       typescript:
         specifier: ^5
         version: 5.7.3
@@ -4341,17 +4341,8 @@ packages:
   '@aws-cdk/asset-awscli-v1@2.2.242':
     resolution: {integrity: sha512-4c1bAy2ISzcdKXYS1k4HYZsNrgiwbiDzj36ybwFVxEWZXVAP0dimQTCaB9fxu7sWzEjw3d+eaw6Fon+QTfTIpQ==}
 
-  '@aws-cdk/asset-kubectl-v20@2.1.4':
-    resolution: {integrity: sha512-Ps2MkmjYgMyflagqQ4dgTElc7Vwpqj8spw8dQVFiSeaaMPsuDSNsPax3/HjuDuwqsmLdaCZc6umlxYLpL0kYDA==}
-
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.0':
     resolution: {integrity: sha512-7bY3J8GCVxLupn/kNmpPc5VJz8grx+4RKfnnJiO1LG+uxkZfANZG3RMHhE+qQxxwkyQ9/MfPtTpf748UhR425A==}
-
-  '@aws-cdk/cloud-assembly-schema@38.0.1':
-    resolution: {integrity: sha512-KvPe+NMWAulfNVwY7jenFhzhuLhLqJ/OPy5jx7wUstbjnYnjRVLpUHPU3yCjXFE0J8cuJVdx95BJ4rOs66Pi9w==}
-    bundledDependencies:
-      - jsonschema
-      - semver
 
   '@aws-cdk/cloud-assembly-schema@48.9.0':
     resolution: {integrity: sha512-wZsFnrLLzowYA26yfV6Xe7h6ZAYXZwsAQLLBowxhVdR5NcJIeCWI0dAavNdrUdZgiEbYU4rkUX3AXYI+nC6FTA==}
@@ -12558,24 +12549,6 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  aws-cdk-lib@2.172.0:
-    resolution: {integrity: sha512-SbFn2FyKhsHQpS7M3qeMWnRKtBHELkY3rmejk07cPlJ/BCJk/af8eKyeiNEEB0AZSfIeP4ImZCLNy9JS34mlPw==}
-    engines: {node: '>= 14.15.0'}
-    peerDependencies:
-      constructs: ^10.0.0
-    bundledDependencies:
-      - '@balena/dockerignore'
-      - case
-      - fs-extra
-      - ignore
-      - jsonschema
-      - minimatch
-      - punycode
-      - semver
-      - table
-      - yaml
-      - mime-types
-
   aws-cdk-lib@2.215.0:
     resolution: {integrity: sha512-DvRiUEsZSc4voeqfkYGrjP0f4NJ1u94JvbVCUQ+Fci4rf25xLRSEVPzyaH9Tf7V38i0Otts1+u7seunqe+R19g==}
     engines: {node: '>= 18.0.0'}
@@ -12597,11 +12570,6 @@ packages:
   aws-cdk@2.1029.1:
     resolution: {integrity: sha512-etMnV7xwm1pBKOXl5zZKtNRt7ZIMocEe+GrZHVVp6oHsXqpPDi7iyPm7HR3CV1xe9yFjs3hZiHDebg+ONpccuw==}
     engines: {node: '>= 18.0.0'}
-    hasBin: true
-
-  aws-cdk@2.172.0:
-    resolution: {integrity: sha512-kacztcAl12F6zlBqKCuzCZmj4vrbMhzgDAxBB4T7fXR2amQyuu6W0nWcGWWvASXeBJcw2DJ6ulpfV4wuc9dksw==}
-    engines: {node: '>= 14.15.0'}
     hasBin: true
 
   aws4@1.13.2:
@@ -15444,9 +15412,8 @@ packages:
   glob-to-regexp@0.4.1:
     resolution: {integrity: sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==}
 
-  glob@10.3.14:
-    resolution: {integrity: sha512-4fkAqu93xe9Mk7le9v0y3VrPDqLKHarNi2s4Pv7f2yOvfhWfhc7hRPHC/JyqMqb8B/Dt/eGS4n7ykwf3fOsl8g==}
-    engines: {node: '>=16 || 14 >=14.17'}
+  glob@10.5.0:
+    resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
     hasBin: true
 
   glob@7.2.3:
@@ -16379,9 +16346,8 @@ packages:
     peerDependencies:
       react: 19.0.0
 
-  jackspeak@2.3.6:
-    resolution: {integrity: sha512-N3yCS/NegsOBokc8GAdM8UcmfsKiSS8cipheD/nivzr700H+nsMOxJjQnvwOcRYVuFkdH0wGUvW2WbXGmrZGbQ==}
-    engines: {node: '>=14'}
+  jackspeak@3.4.3:
+    resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
 
   jake@10.9.2:
     resolution: {integrity: sha512-2P4SQ0HrLQ+fw6llpLnOaGAvN2Zu6778SJMrCUwns4fOoG9ayrTiZk3VV8sCPkVZF8ab0zksVpS8FDY5pRCNBA==}
@@ -18332,6 +18298,9 @@ packages:
     resolution: {integrity: sha512-5NPgf87AT2STgwa2ntRMr45jTKrYBGkVU36yT0ig/n/GMAa3oPqhZfIQ2kMEimReg0+t9kZViDVZ83qfVUlckg==}
     engines: {node: '>= 14'}
 
+  package-json-from-dist@1.0.1:
+    resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
+
   package-json@10.0.0:
     resolution: {integrity: sha512-w34pqp733w35nElGG6eH1OnDnHEWud4uxruQ2nKzY/Uy0uOJmWFdjDcAC+xAD4goVuBZStwaAEBS21BANv83HQ==}
     engines: {node: '>=18'}
@@ -18430,9 +18399,9 @@ packages:
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
 
-  path-scurry@1.11.0:
-    resolution: {integrity: sha512-LNHTaVkzaYaLGlO+0u3rQTz7QrHTFOuKyba9JMTQutkmtNew8dw8wOD7mTU/5fCPZzCWpfW0XnQKzY61P0aTaw==}
-    engines: {node: '>=16 || 14 >=14.17'}
+  path-scurry@1.11.1:
+    resolution: {integrity: sha512-Xa4Nw17FS9ApQFJ9umLiJS4orGjm7ZzwUrwamcGQuHSzDyth9boKDaycYdDcZDuqYATXw4HFXgaqWTctW/v1HA==}
+    engines: {node: '>=16 || 14 >=14.18'}
 
   path-to-regexp@6.3.0:
     resolution: {integrity: sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==}
@@ -23073,11 +23042,7 @@ snapshots:
 
   '@aws-cdk/asset-awscli-v1@2.2.242': {}
 
-  '@aws-cdk/asset-kubectl-v20@2.1.4': {}
-
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.0': {}
-
-  '@aws-cdk/cloud-assembly-schema@38.0.1': {}
 
   '@aws-cdk/cloud-assembly-schema@48.9.0': {}
 
@@ -26172,7 +26137,7 @@ snapshots:
 
   '@joshwooding/vite-plugin-react-docgen-typescript@0.6.1(typescript@5.7.3)(vite@6.4.1(@types/node@22.18.8)(jiti@2.4.2)(less@4.2.0)(lightningcss@1.30.1)(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.0))':
     dependencies:
-      glob: 10.3.14
+      glob: 10.5.0
       magic-string: 0.30.17
       react-docgen-typescript: 2.2.2(typescript@5.7.3)
       vite: 6.4.1(@types/node@22.18.8)(jiti@2.4.2)(less@4.2.0)(lightningcss@1.30.1)(sass@1.77.0)(stylus@0.62.0)(terser@5.39.0)(tsx@4.20.6)(yaml@2.8.0)
@@ -35314,7 +35279,7 @@ snapshots:
 
   archiver-utils@5.0.2:
     dependencies:
-      glob: 10.3.14
+      glob: 10.5.0
       graceful-fs: 4.2.11
       is-stream: 2.0.1
       lazystream: 1.0.1
@@ -35528,14 +35493,6 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  aws-cdk-lib@2.172.0(constructs@10.3.0):
-    dependencies:
-      '@aws-cdk/asset-awscli-v1': 2.2.242
-      '@aws-cdk/asset-kubectl-v20': 2.1.4
-      '@aws-cdk/asset-node-proxy-agent-v6': 2.1.0
-      '@aws-cdk/cloud-assembly-schema': 38.0.1
-      constructs: 10.3.0
-
   aws-cdk-lib@2.215.0(constructs@10.3.0):
     dependencies:
       '@aws-cdk/asset-awscli-v1': 2.2.242
@@ -35544,10 +35501,6 @@ snapshots:
       constructs: 10.3.0
 
   aws-cdk@2.1029.1:
-    optionalDependencies:
-      fsevents: 2.3.2
-
-  aws-cdk@2.172.0:
     optionalDependencies:
       fsevents: 2.3.2
 
@@ -38879,13 +38832,14 @@ snapshots:
 
   glob-to-regexp@0.4.1: {}
 
-  glob@10.3.14:
+  glob@10.5.0:
     dependencies:
       foreground-child: 3.1.1
-      jackspeak: 2.3.6
+      jackspeak: 3.4.3
       minimatch: 9.0.5
       minipass: 7.1.2
-      path-scurry: 1.11.0
+      package-json-from-dist: 1.0.1
+      path-scurry: 1.11.1
 
   glob@7.2.3:
     dependencies:
@@ -38901,7 +38855,7 @@ snapshots:
       fs.realpath: 1.0.0
       minimatch: 8.0.4
       minipass: 4.2.8
-      path-scurry: 1.11.0
+      path-scurry: 1.11.1
 
   global-modules@1.0.0:
     dependencies:
@@ -40010,7 +39964,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  jackspeak@2.3.6:
+  jackspeak@3.4.3:
     dependencies:
       '@isaacs/cliui': 8.0.2
     optionalDependencies:
@@ -42716,6 +42670,8 @@ snapshots:
       degenerator: 5.0.1
       netmask: 2.0.2
 
+  package-json-from-dist@1.0.1: {}
+
   package-json@10.0.0:
     dependencies:
       ky: 1.3.0
@@ -42818,7 +42774,7 @@ snapshots:
 
   path-parse@1.0.7: {}
 
-  path-scurry@1.11.0:
+  path-scurry@1.11.1:
     dependencies:
       lru-cache: 10.4.3
       minipass: 7.1.2
@@ -44433,7 +44389,7 @@ snapshots:
 
   rimraf@5.0.10:
     dependencies:
-      glob: 10.3.14
+      glob: 10.5.0
 
   ripemd160@2.0.1:
     dependencies:
@@ -45571,7 +45527,7 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.12
       commander: 4.1.1
-      glob: 10.3.14
+      glob: 10.5.0
       lines-and-columns: 1.2.4
       mz: 2.7.0
       pirates: 4.0.6
