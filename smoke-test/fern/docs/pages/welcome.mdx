@@ -51,6 +51,26 @@ Welcome to the Plant Store API docs! This site demonstrates how to use Fern to g
 ## Getting Started
 Here you'll find information about managing your plants, customers, and orders for your plant shop.
 
+## Role-Based Access Control Test
+
+This content is visible to roles of 'everyone' and 'admin'
+
+<If roles={["everyone", "admins"]}>
+  <Callout>
+    This content is visible to both everyone and admins.
+  </Callout>
+</If>
+
+And this is just for 'admin's and 'developer's:
+
+<If roles={["admin", "developer"]}>
+  <Callout>
+    This content is visible to both admins and developers.
+  </Callout>
+</If>
+
+
+Did you see the callout above?
 
 <CardGroup>
   <Card 

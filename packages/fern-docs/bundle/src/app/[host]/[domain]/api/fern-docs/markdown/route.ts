@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getMarkdownForPath, getPageNodeForPath } from "@/server/getMarkdownForPath";
+import { parseRolesFromAuthedParam } from "@/server/parseRoles";
 
 /**
  * This endpoint returns the markdown content of any page in the docs by adding `.md` or `.mdx` to the end of any docs page.
@@ -34,6 +35,10 @@ export async function GET(
     const slug = slugParam ?? path.replace(MARKDOWN_PATTERN, "");
     const cleanSlug = removeLeadingSlash(slug);
 
+    // Parse roles from authed query parameter
+    const authedParam = req.nextUrl.searchParams.get("authed");
+    const userRoles = parseRolesFromAuthedParam(authedParam);
+
     const loader = await createCachedDocsLoader(host, domain, fernToken);
     const node = getPageNodeForPath(await loader.getRoot(), cleanSlug);
 
@@ -47,7 +52,7 @@ export async function GET(
         return new NextResponse("User is not logged in", { status: 403 });
     }
 
-    const markdown = await getMarkdownForPath(node, loader);
+    const markdown = await getMarkdownForPath(node, loader, domain, userRoles);
     if (markdown == null) {
         console.error(`[${domain}] Markdown not found: ${path}`);
         notFound();

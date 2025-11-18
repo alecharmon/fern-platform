@@ -1,12 +1,21 @@
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { getFrontmatter, isMdxJsxElementHast, mdastToMarkdown, toTree, visit } from "@fern-docs/mdx";
 
-export function convertToLlmTxtMarkdown(markdown: string, nodeTitle: string, format: "mdx" | "md"): string {
+export function convertToLlmTxtMarkdown(
+    markdown: string,
+    nodeTitle: string,
+    format: "mdx" | "md",
+    userRoles: string[] = []
+): string {
     const { title, description, content } = getLlmTxtMetadata(markdown, nodeTitle);
     // TODO: add link-backs to the source of the content
     // TODO: parse the markdown content and delete any unnecessary content
 
-    return [`# ${title}`, description != null ? `> ${description}` : undefined, stripMdxFeatures(content, format)]
+    return [
+        `# ${title}`,
+        description != null ? `> ${description}` : undefined,
+        stripMdxFeatures(content, format, userRoles)
+    ]
         .filter(isNonNullish)
         .join("\n\n");
 }
@@ -16,8 +25,9 @@ export function convertToLlmTxtMarkdown(markdown: string, nodeTitle: string, for
  * - esm imports
  * - <style> and <script> tags
  * - img tags with data: urls
+ * - <If> tags when user doesn't have required roles
  */
-function stripMdxFeatures(markdown: string, format: "mdx" | "md"): string {
+function stripMdxFeatures(markdown: string, format: "mdx" | "md", userRoles: string[] = []): string {
     if (format !== "mdx") {
         return markdown;
     }
@@ -33,6 +43,46 @@ function stripMdxFeatures(markdown: string, format: "mdx" | "md"): string {
         }
 
         if (isMdxJsxElementHast(node)) {
+            // remove <If> tags when user doesn't have required roles
+            if (node.name === "If") {
+                const rolesAttr = node.attributes.find(
+                    (attr) => attr.type === "mdxJsxAttribute" && attr.name === "roles"
+                );
+
+                if (rolesAttr && rolesAttr.value != null) {
+                    let requiredRoles: string[] = [];
+
+                    // Handle array format: roles={["admin", "editor"]}
+                    if (typeof rolesAttr.value === "object" && "value" in rolesAttr.value) {
+                        const expressionValue = (rolesAttr.value as { value: unknown }).value;
+                        if (typeof expressionValue === "string") {
+                            try {
+                                const parsed = JSON.parse(expressionValue);
+                                if (Array.isArray(parsed)) {
+                                    requiredRoles = parsed.filter((r: unknown) => typeof r === "string");
+                                }
+                            } catch {
+                                // If parsing fails, skip this node
+                                console.error(`Failed to parse roles attribute: ${expressionValue}`);
+                            }
+                        }
+                    }
+
+                    const hasEveryoneRole = requiredRoles.includes("everyone");
+                    const hasRequiredRole = userRoles.some((role) => requiredRoles.includes(role));
+
+                    const shouldShowContent = hasEveryoneRole || hasRequiredRole;
+
+                    if (!shouldShowContent) {
+                        parent.children.splice(idx, 1);
+                        return idx;
+                    } else {
+                        parent.children.splice(idx, 1, ...node.children);
+                        return idx;
+                    }
+                }
+            }
+
             // remove <style> and <script> tags
             if (node.name === "style" || node.name === "script") {
                 parent.children.splice(idx, 1);

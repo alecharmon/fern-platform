@@ -222,7 +222,7 @@ export const middleware: NextMiddleware = async (request) => {
         const authState = await getAuthState(pathname);
 
         const rolesValue = authState.authed
-            ? `authed:${[...(authState.user.roles ?? ["no_role"])].sort().join(",")}`
+            ? `authed:${[...(authState.user.roles ?? ["everyone"])].sort().join(",")}`
             : "unauthed:everyone";
 
         if (shouldServeLlmsTxt) {

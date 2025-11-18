@@ -63,7 +63,8 @@ function generateWebSocketSections(
 export async function getMarkdownForPath(
     node: FernNavigation.NavigationNodePage,
     loader: DocsLoader,
-    domain?: string
+    domain?: string,
+    userRoles: string[] = []
 ): Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined> {
     if (FernNavigation.isApiLeaf(node)) {
         const apiDefinition = await loader.getPrunedApi(node.apiDefinitionId, createPruneKey(node));
@@ -113,7 +114,7 @@ export async function getMarkdownForPath(
     }
 
     return {
-        content: convertToLlmTxtMarkdown(page.markdown, node.title, pageId.endsWith(".mdx") ? "mdx" : "md"),
+        content: convertToLlmTxtMarkdown(page.markdown, node.title, pageId.endsWith(".mdx") ? "mdx" : "md", userRoles),
         contentType: pageId.endsWith(".mdx") ? "mdx" : "markdown"
     };
 }

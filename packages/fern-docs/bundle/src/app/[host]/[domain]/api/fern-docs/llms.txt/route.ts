@@ -12,6 +12,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
 import { getLlmTxtMetadata } from "@/server/llm-txt-md";
+import { parseRolesFromAuthedParam } from "@/server/parseRoles";
 
 /**
  * This endpoint follows the https://llmstxt.org/ specification for a LLM-friendly markdown-esque page listing all the pages in the docs.
@@ -51,6 +52,10 @@ export async function GET(
 
     const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
 
+    // Parse roles from authed query parameter
+    const authedParam = req.nextUrl.searchParams.get("authed");
+    const userRoles = parseRolesFromAuthedParam(authedParam);
+
     const userAgent = req.headers.get("user-agent");
     const acceptHeader = req.headers.get("accept");
     const possibleBot = !isLikelyBrowser(userAgent);
@@ -69,6 +74,7 @@ export async function GET(
                     domain,
                     path,
                     fernToken,
+                    userRoles,
                     (chunk: string) => {
                         contentLength += chunk.length;
                         controller.enqueue(encoder.encode(chunk));
@@ -123,6 +129,7 @@ async function getLlmsTxtStreaming(
     domain: string,
     path: string,
     fernToken: string | undefined,
+    userRoles: string[],
     onChunk: (chunk: string) => void
 ): Promise<{
     timingStats: {
@@ -173,7 +180,7 @@ async function getLlmsTxtStreaming(
     const landingPage = getLandingPage(root);
     const markdown =
         landingPage != null && !landingPage.authed && !landingPage.hidden
-            ? await getMarkdownForPath(landingPage, loader)
+            ? await getMarkdownForPath(landingPage, loader, domain, userRoles)
             : undefined;
 
     const header = markdown?.content ?? `# ${root.title}`;

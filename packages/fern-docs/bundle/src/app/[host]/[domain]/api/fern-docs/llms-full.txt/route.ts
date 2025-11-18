@@ -9,6 +9,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
+import { parseRolesFromAuthedParam } from "@/server/parseRoles";
 
 export const maxDuration = 800; // 13 minutes
 
@@ -21,6 +22,10 @@ export async function GET(
     const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? "");
 
     const fernToken = req.headers.get("FERN_TOKEN") ?? (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
+
+    // Parse roles from authed query parameter
+    const authedParam = req.nextUrl.searchParams.get("authed");
+    const userRoles = parseRolesFromAuthedParam(authedParam);
 
     const userAgent = req.headers.get("user-agent");
     const acceptHeader = req.headers.get("accept");
@@ -81,7 +86,7 @@ export async function GET(
 
                 for (const node of uniqueNodes) {
                     try {
-                        const markdown = await getMarkdownForPath(node, loader, domain);
+                        const markdown = await getMarkdownForPath(node, loader, domain, userRoles);
                         if (markdown != null) {
                             const content = markdown.content + "\n\n";
                             contentLength += content.length;
