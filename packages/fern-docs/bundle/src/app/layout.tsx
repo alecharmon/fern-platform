@@ -6,7 +6,6 @@ import { Providers } from "@fern-docs/components/providers/providers";
 import type { Metadata, Viewport } from "next/types";
 import { experimental_taintUniqueValue } from "react";
 
-import { AsyncStylesheet } from "@/components/AsyncStylesheet";
 import { ConsoleMessage } from "@/components/console-message";
 import { WebSocketRefresh } from "@/components/websocket-refresh";
 
@@ -56,8 +55,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
             <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
 
-            {/* Non-blocking KaTeX CSS loading */}
-            <AsyncStylesheet
+            {/* KaTeX CSS for LaTeX math rendering */}
+            <link
+                rel="preload"
+                as="style"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+                crossOrigin="anonymous"
+            />
+            <link
+                rel="stylesheet"
                 href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
                 crossOrigin="anonymous"
             />
