@@ -172,8 +172,24 @@ export async function runRouteForCohere({
                         errorKind = "NoSuchToolError";
                     }
 
-                    const msg = `encountered a ${errorKind} for query '${lastUserMessage}: ${JSON.stringify(error)}'`;
-                    console.error(msg);
+                    console.error(
+                        `Encountered a ${errorKind} for query '${lastUserMessage}: ${JSON.stringify(error)}'`
+                    );
+
+                    let errorString = JSON.stringify(error);
+                    if (errorString.length > 1000) {
+                        errorString = errorString.slice(0, 1000) + "...";
+                    }
+
+                    track("ask_ai_error", {
+                        domain,
+                        chatSource,
+                        languageModel: languageModel.valueOf().toString(),
+                        provider: "cohere",
+                        conversationId,
+                        errorKind,
+                        error: errorString
+                    });
                 },
                 onFinish: async (e) => {
                     const end = Date.now();

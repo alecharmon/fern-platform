@@ -1,4 +1,4 @@
-import { postToSlack, track } from "@fern-api/docs-server";
+import { track } from "@fern-api/docs-server";
 import { fernToken_admin, getFaiOrigin } from "@fern-api/docs-server/env-variables";
 import { FernAIClient } from "@fern-api/fai-sdk";
 import type { FacetFilter } from "@fern-docs/search-keyword";
@@ -260,10 +260,16 @@ export async function runRouteForAnthropic({
                     if (errorString.length > 1000) {
                         errorString = errorString.slice(0, 1000) + "...";
                     }
-                    postToSlack(
-                        "#search-notifs",
-                        `:rotating_light: [${domain}] [source: ${chatSource}] [languageModel: ${activeLanguageModel}] [provider: ${activeModelProvider}] [conversationId: ${conversationId}] \`Ask AI\` encountered a ${errorKind}: \`${errorString}\``
-                    );
+
+                    track("ask_ai_error", {
+                        domain,
+                        chatSource,
+                        languageModel: activeLanguageModel,
+                        provider: activeModelProvider,
+                        conversationId,
+                        errorKind,
+                        error: errorString
+                    });
                 },
                 onFinish: async (e) => {
                     const end = Date.now();
