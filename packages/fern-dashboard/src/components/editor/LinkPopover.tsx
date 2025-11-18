@@ -34,8 +34,10 @@ export function LinkPopover({ editor, onClose }: LinkPopover.Props) {
             return;
         }
 
+        const hasProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(url);
+
         // Add https:// if no protocol is specified
-        const finalUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
+        const finalUrl = hasProtocol ? url : `https://${url}`;
 
         editor.chain().focus().setLink({ href: finalUrl }).run();
         onClose();

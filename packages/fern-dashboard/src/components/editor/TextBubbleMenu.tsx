@@ -123,11 +123,12 @@ export default function TextBubbleMenu({ disableNodeTypeSwitching = false }: Tex
             options={{ placement: "top-start" }}
             shouldShow={({ editor, state: { selection } }) => {
                 // Don't show the bubble menu if the selection is an image or image upload
-                if (
-                    editor.isActive("custom-element-v2") ||
-                    editor.isActive("mediaUpload") ||
-                    editor.isActive("table")
-                ) {
+                if (editor.isActive("custom-element-v2") || editor.isActive("mediaUpload")) {
+                    return false;
+                }
+
+                // Don't show the bubble menu if the table itself is selected, but allow it in table cells
+                if (editor.isActive("table") && !editor.isActive("tableCell") && !editor.isActive("tableHeader")) {
                     return false;
                 }
 
