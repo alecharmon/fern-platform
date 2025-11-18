@@ -4,12 +4,11 @@ on:
   workflow_dispatch:
 
 env:
-  PACKAGE_NAME: "@fern-api/fdr-lambda-sdk"
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: "buildwithfern"
 
 permissions:
-  id-token: write # Required for OIDC
+  id-token: write
   contents: read
 
 jobs:
@@ -20,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 📥 Install
+      - name: Install
         uses: ./.github/actions/install
         with:
           registry-url: 'https://registry.npmjs.org'
@@ -28,18 +27,15 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
 
-      - name: 🧪 Build and test
-        run: pnpm turbo compile test --filter=${{ env.PACKAGE_NAME }}
+      - name: Build and test
+        run: pnpm turbo compile test --filter=@fern-api/fdr-lambda-sdk
 
       - name: Publish FDR Lambda SDK
         env:
           NODE_AUTH_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
         run: |
           git_version="$(scripts/fdr-version.sh)"
+
           cd packages/fdr-lambda-sdk
-          mv package.json package.json.tmp
-          version_replace="s/0.0.0/${git_version}/"
-          workspace_replace="s/workspace:*/^${git_version}/"
-          cat package.json.tmp | sed "${version_replace}" | sed "${workspace_replace}" > package.json
-          rm -rf package.json.tmp
-          npm publish --access public --tag latest
+          npm version "$git_version" --no-git-tag-version
+          pnpm publish --access public --tag latest --no-git-checks
