@@ -1,4 +1,7 @@
-from datetime import datetime
+from datetime import (
+    UTC,
+    datetime,
+)
 from typing import Literal
 
 import httpx
@@ -26,6 +29,7 @@ from fai.models.api.settings_api import (
     ToggleStatusResponse,
 )
 from fai.models.db.settings_db import SettingsDb
+from fai.models.types.reindex_callback_request_type import ReindexCallbackRequest
 from fai.models.types.upstash_callback_request_type import UpstashCallbackRequest
 from fai.settings import LOGGER
 
@@ -520,6 +524,45 @@ async def reindex_preview_callback(
         return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
 
 
+@fai_app.post(
+    "/settings/ask-ai/reindex-callback",
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def reindex_callback(
+    request: ReindexCallbackRequest,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+) -> JSONResponse:
+    """Handle callback from SQS reindexing worker when reindex completes."""
+    try:
+        LOGGER.info(f"Received reindex callback - status: {request.status}, messageId: {request.sourceMessageId}")
+
+        existing = await db.execute(
+            select(SettingsDb).where(SettingsDb.job_id == request.sourceMessageId, SettingsDb.domain == request.domain)
+        )
+        existing_record = existing.scalar_one_or_none()
+
+        if not existing_record:
+            LOGGER.warning(f"No settings record found for job_id {request.sourceMessageId}")
+            return JSONResponse(content={"success": True, "message": "No record to update"})
+
+        if request.status == "success":
+            LOGGER.info(f"Reindex completed successfully for domain {existing_record.domain}")
+            existing_record.job_id = None
+            existing_record.last_reindex_time = datetime.now(UTC)
+            background_tasks.add_task(revalidate_domain, existing_record.domain)
+        else:
+            LOGGER.error(f"Reindex failed for domain {existing_record.domain}")
+            existing_record.job_id = None
+
+        await db.commit()
+        return JSONResponse(content={"success": True, "domain": existing_record.domain, "status": request.status})
+
+    except Exception as e:
+        LOGGER.exception(f"Error handling reindex callback: {e}")
+        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+
 def get_token_from_auth_header(auth_header: str) -> str | None:
     if auth_header and auth_header.startswith("Bearer "):
         return auth_header[7:]
@@ -530,7 +573,7 @@ async def revalidate_domain(domain: str) -> None:
     LOGGER.info(f"Revalidating domain {domain}")
     async with httpx.AsyncClient(follow_redirects=True) as client:
         try:
-            await client.get(f"https://{domain}/api/fern-docs/revalidate")
+            await client.get(f"https://{domain}/api/fern-docs/revalidate?reindex=false")
             LOGGER.info(f"Revalidate request completed for {domain}")
         except Exception as e:
             LOGGER.warning(f"Revalidate request failed for {domain}: {e}")
