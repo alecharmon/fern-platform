@@ -1,6 +1,6 @@
 
 {
-    "domain": "buildwithfern.com",
+    "domain": "buildwithfern-eval",
     "integration": "fai-local",
     "num_questions_generation": 150,
     "generators": ["markdown"],
