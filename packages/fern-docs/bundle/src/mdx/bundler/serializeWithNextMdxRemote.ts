@@ -31,6 +31,7 @@ import { rehypeCards } from "../plugins/rehype-cards";
 import { rehypeExtractStyles } from "../plugins/rehype-extract-styles";
 import { rehypeFiles } from "../plugins/rehype-files";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
+import { rehypeLlmsFilter } from "../plugins/rehype-llms-filter";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
 import { rehypeParamField } from "../plugins/rehype-param-field";
 import { rehypeSteps } from "../plugins/rehype-steps";
@@ -68,6 +69,7 @@ function withDefaultMdxOptions(
         rehypeKatex,
         [rehypeFiles, { files }],
         rehypeMdxClassStyle,
+        rehypeLlmsFilter,
         rehypeCodeBlock,
         rehypeSteps,
         rehypeAccordions,

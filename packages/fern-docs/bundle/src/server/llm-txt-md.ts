@@ -26,6 +26,8 @@ export function convertToLlmTxtMarkdown(
  * - <style> and <script> tags
  * - img tags with data: urls
  * - <If> tags when user doesn't have required roles
+ * - <llms-ignore> tags (never shown to LLMs)
+ * - <llms-only> tags are unwrapped (content always shown to LLMs)
  */
 function stripMdxFeatures(markdown: string, format: "mdx" | "md", userRoles: string[] = []): string {
     if (format !== "mdx") {
@@ -43,6 +45,18 @@ function stripMdxFeatures(markdown: string, format: "mdx" | "md", userRoles: str
         }
 
         if (isMdxJsxElementHast(node)) {
+            // remove <llms-ignore> tags and their content (never show to LLMs)
+            if (node.name === "llms-ignore") {
+                parent.children.splice(idx, 1);
+                return idx;
+            }
+
+            // replace <llms-only> with its children (always show to LLMs)
+            if (node.name === "llms-only") {
+                parent.children.splice(idx, 1, ...node.children);
+                return idx;
+            }
+
             // remove <If> tags when user doesn't have required roles
             if (node.name === "If") {
                 const rolesAttr = node.attributes.find(

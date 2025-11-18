@@ -53,6 +53,7 @@ import { rehypeExtractStyles } from "../plugins/rehype-extract-styles";
 import { rehypeFiles } from "../plugins/rehype-files";
 import { rehypeLang } from "../plugins/rehype-lang";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
+import { rehypeLlmsFilter } from "../plugins/rehype-llms-filter";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
 import { rehypeParamField } from "../plugins/rehype-param-field";
 import { rehypeRunnableEndpoint } from "../plugins/rehype-runnable-endpoint";
@@ -182,6 +183,7 @@ async function serializeMdxImpl(
                 rehypeKatex,
                 [rehypeFiles, { files: remoteFiles }],
                 rehypeMdxClassStyle,
+                rehypeLlmsFilter,
                 rehypeCodeBlock,
                 rehypeSteps,
                 rehypeAccordions,

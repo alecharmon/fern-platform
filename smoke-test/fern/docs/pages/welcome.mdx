@@ -72,6 +72,44 @@ And this is just for 'admin's and 'developer's:
 
 Did you see the callout above?
 
+## LLM Content Visibility Tests
+
+<llms-only>
+  This content is ONLY visible to LLMs (in /llms.txt, /llms-full.txt, .md, .mdx endpoints).
+  It should NOT appear in the regular React UI.
+</llms-only>
+
+<llms-ignore>
+  <Callout intent="info">
+    This content is ONLY visible in the React UI.
+    It should NOT appear in LLM markdown outputs.
+  </Callout>
+</llms-ignore>
+
+You should see one callout above if viewing in React, or different text if accessing via LLM endpoints.
+
+### Nested Tags Test
+
+<llms-only>
+  <If roles={["everyone"]}>
+    This should be visible in LLM endpoints for everyone (llms-only wrapping If with everyone role).
+  </If>
+</llms-only>
+
+<llms-only>
+  <If roles={["admin", "developer"]}>
+    This should ONLY be visible in LLM endpoints for admins/developers (llms-only wrapping If with specific roles).
+  </If>
+</llms-only>
+
+<llms-ignore>
+  <If roles={["everyone"]}>
+    <Callout intent="success">
+      This should be visible in React for everyone (llms-ignore wrapping If with everyone role).
+    </Callout>
+  </If>
+</llms-ignore>
+
 <CardGroup>
   <Card 
     title="API Reference" 
