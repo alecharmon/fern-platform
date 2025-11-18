@@ -29,7 +29,8 @@
       "!.eslintrc.js",
       "!packages/fai-sdk/src",
       "!packages/fdr-lambda-sdk/src",
-      "!servers/oculus/suites/**/*"
+      "!servers/oculus/**/*",
+      "!**/.mypy_cache/**/*"
     ],
     "ignoreUnknown": true
   },

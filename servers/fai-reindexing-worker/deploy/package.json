@@ -1,0 +1,20 @@
+{
+  "name": "@fern-platform/fai-reindexing-worker-deploy",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cdk": "cdk"
+  },
+  "dependencies": {
+    "@fern-fern/fern-cloud-sdk": "^0.0.286",
+    "aws-cdk-lib": "2.172.0",
+    "constructs": "^10.0.0",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "aws-cdk": "2.172.0",
+    "typescript": "~5.7.2"
+  }
+}
