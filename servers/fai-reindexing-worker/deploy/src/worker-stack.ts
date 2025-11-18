@@ -121,7 +121,7 @@ export class FaiReindexingWorkerStack extends Stack {
             })
         );
 
-        new FargateService(this, "worker-service", {
+        const service = new FargateService(this, "worker-service", {
             serviceName: "fai-reindexing-worker",
             cluster,
             taskDefinition: workerTaskDefinition,
@@ -130,6 +130,21 @@ export class FaiReindexingWorkerStack extends Stack {
             assignPublicIp: true,
             enableECSManagedTags: true,
             enableExecuteCommand: environmentType !== EnvironmentType.Prod
+        });
+
+        const scaling = service.autoScaleTaskCount({
+            minCapacity: 1,
+            maxCapacity: 6
+        });
+
+        scaling.scaleToTrackCustomMetric("QueueDepthScaling", {
+            metric: reindexingQueue.metricApproximateNumberOfMessagesVisible({
+                statistic: "Average",
+                period: Duration.minutes(1)
+            }),
+            targetValue: 8,
+            scaleInCooldown: Duration.minutes(5),
+            scaleOutCooldown: Duration.minutes(1)
         });
     }
 }
