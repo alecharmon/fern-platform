@@ -8,13 +8,6 @@ on:
       - "servers/fai-lambda/**"
       - "servers/fai-lambda-deploy/**"
       - ".github/workflows/deploy-fai-lambda-dev.yml"
-  pull_request:
-    branches:
-      - app
-    paths:
-      - "servers/fai-lambda/**"
-      - "servers/fai-lambda-deploy/**"
-      - ".github/workflows/deploy-fai-lambda-dev.yml"
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -25,6 +18,9 @@ env:
   SCRIBE_GITHUB_TOKEN: ${{ secrets.FAI_SCRIBE_GITHUB_TOKEN }}
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+  TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
 
 jobs:
   check_changes:
@@ -32,6 +28,7 @@ jobs:
     outputs:
       fai_scribe_changed: ${{ steps.filter.outputs.fai_scribe }}
       fai_code_indexing_changed: ${{ steps.filter.outputs.fai_code_indexing }}
+      fai_chat_changed: ${{ steps.filter.outputs.fai_chat }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,6 +43,9 @@ jobs:
               - 'servers/fai-lambda-deploy/**'
             fai_code_indexing:
               - 'servers/fai-lambda/fai-code-indexing/**'
+              - 'servers/fai-lambda-deploy/**'
+            fai_chat:
+              - 'servers/fai-lambda/fai-chat/**'
               - 'servers/fai-lambda-deploy/**'
 
   deploy_fai_scribe_dev:
@@ -111,3 +111,35 @@ jobs:
           npm install -g aws-cdk
           cd servers/fai-lambda-deploy
           VERSION="${git_version}" pnpm --filter=@fern-platform/fai-lambda-deploy deploy:dev:code-indexing
+
+  deploy_fai_chat_dev:
+    needs: check_changes
+    if: needs.check_changes.outputs.fai_chat_changed == 'true'
+    runs-on: Seed
+    environment: Fern Dev
+    strategy:
+      matrix:
+        concurrency: [1]
+    env:
+      APPLICATION_ENVIRONMENT: dev
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: 💻 Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 🚀 Deploy FAI Chat
+        run: |
+          git_version="$(scripts/git-version.sh)"
+          npm install -g aws-cdk
+          cd servers/fai-lambda-deploy
+          VERSION="${git_version}" pnpm --filter=@fern-platform/fai-lambda-deploy deploy:dev:chat
