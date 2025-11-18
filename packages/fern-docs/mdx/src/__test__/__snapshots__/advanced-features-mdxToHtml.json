@@ -12,5 +12,6 @@
     "math": true,
     "comments": true
   },
-  "originalFrontmatter": "title: Advanced MDX Features Test\nsubtitle: A comprehensive test of unusual MDX features\ntags: \n  - test\n  - mdx\n  - advanced\n  - features\nmath: true\ncomments: true"
+  "originalFrontmatter": "title: Advanced MDX Features Test\nsubtitle: A comprehensive test of unusual MDX features\ntags: \n  - test\n  - mdx\n  - advanced\n  - features\nmath: true\ncomments: true",
+  "bulletStyle": "-"
 }

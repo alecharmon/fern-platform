@@ -3,5 +3,6 @@
   "frontmatter": {
     "title": "Complex"
   },
-  "originalFrontmatter": "title: Complex"
+  "originalFrontmatter": "title: Complex",
+  "bulletStyle": "-"
 }

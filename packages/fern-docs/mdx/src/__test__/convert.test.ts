@@ -524,3 +524,163 @@ describe("Ensure no list duplication", () => {
         }
     });
 });
+
+describe("Bullet list style preservation", () => {
+    const asteriskBulletList = `## Header
+* Bullet 1
+  * Bullet 1.1
+  * Bullet 1.2
+* Bullet 2`;
+
+    const hyphenBulletList = `## Header
+- Bullet 1
+  - Bullet 1.1
+  - Bullet 1.2
+- Bullet 2`;
+
+    it("should detect asterisk bullet style", () => {
+        const { bulletStyle } = mdxToHtml(asteriskBulletList);
+        expect(bulletStyle).toBe("*");
+    });
+
+    it("should detect hyphen bullet style", () => {
+        const { bulletStyle } = mdxToHtml(hyphenBulletList);
+        expect(bulletStyle).toBe("-");
+    });
+
+    it("should preserve asterisk bullet style in round-trip conversion", () => {
+        const { html, frontmatter, bulletStyle } = mdxToHtml(asteriskBulletList);
+        const mdxResult = htmlToMdx(html, { frontmatter, bulletStyle });
+
+        expect(mdxResult.mdx).toContain("* Bullet 1");
+        expect(mdxResult.mdx).toContain("* Bullet 1.1");
+        expect(mdxResult.mdx).toContain("* Bullet 1.2");
+        expect(mdxResult.mdx).toContain("* Bullet 2");
+        expect(mdxResult.mdx).not.toContain("- Bullet");
+    });
+
+    it("should preserve hyphen bullet style in round-trip conversion", () => {
+        const { html, frontmatter, bulletStyle } = mdxToHtml(hyphenBulletList);
+        const mdxResult = htmlToMdx(html, { frontmatter, bulletStyle });
+
+        expect(mdxResult.mdx).toContain("- Bullet 1");
+        expect(mdxResult.mdx).toContain("- Bullet 1.1");
+        expect(mdxResult.mdx).toContain("- Bullet 1.2");
+        expect(mdxResult.mdx).toContain("- Bullet 2");
+    });
+
+    it("should maintain asterisk style through multiple round-trips", () => {
+        let currentMdx = asteriskBulletList;
+
+        for (let i = 1; i <= 3; i++) {
+            const { html, frontmatter, bulletStyle } = mdxToHtml(currentMdx);
+            const result = htmlToMdx(html, { frontmatter, bulletStyle });
+            currentMdx = result.mdx;
+
+            expect(currentMdx).toContain("* Bullet 1");
+            expect(currentMdx).toContain("* Bullet 2");
+            expect(currentMdx).not.toContain("- Bullet");
+        }
+    });
+
+    it("should maintain hyphen style through multiple round-trips", () => {
+        let currentMdx = hyphenBulletList;
+
+        for (let i = 1; i <= 3; i++) {
+            const { html, frontmatter, bulletStyle } = mdxToHtml(currentMdx);
+            const result = htmlToMdx(html, { frontmatter, bulletStyle });
+            currentMdx = result.mdx;
+
+            expect(currentMdx).toContain("- Bullet 1");
+            expect(currentMdx).toContain("- Bullet 2");
+        }
+    });
+
+    it("should handle mixed content with asterisk bullets", () => {
+        const mixedContent = `# Title
+
+Some paragraph text.
+
+* First item
+* Second item
+  * Nested item
+
+More text here.`;
+
+        const { html, frontmatter, bulletStyle } = mdxToHtml(mixedContent);
+        expect(bulletStyle).toBe("*");
+
+        const mdxResult = htmlToMdx(html, { frontmatter, bulletStyle });
+        expect(mdxResult.mdx).toContain("* First item");
+        expect(mdxResult.mdx).toContain("* Second item");
+        expect(mdxResult.mdx).toContain("* Nested item");
+    });
+
+    it("should default to hyphen when no bullets are present", () => {
+        const noBullets = `# Title
+
+Just some text without any lists.`;
+
+        const { bulletStyle } = mdxToHtml(noBullets);
+        expect(bulletStyle).toBe("-");
+    });
+
+    it("should preserve asterisk style when adding/removing bullets in editor", () => {
+        const originalMdx = `# Document
+
+* Item 1
+* Item 2
+* Item 3`;
+
+        const { bulletStyle } = mdxToHtml(originalMdx);
+        expect(bulletStyle).toBe("*");
+
+        const modifiedMdx = `# Document
+
+* Item 1
+* Item 2
+* Item 3
+* Item 4`;
+
+        const { html: modifiedHtml, frontmatter: modifiedFrontmatter } = mdxToHtml(modifiedMdx);
+        const result = htmlToMdx(modifiedHtml, { frontmatter: modifiedFrontmatter, bulletStyle });
+
+        expect(result.mdx).toContain("* Item 1");
+        expect(result.mdx).toContain("* Item 2");
+        expect(result.mdx).toContain("* Item 3");
+        expect(result.mdx).toContain("* Item 4");
+    });
+
+    it("should detect asterisk bullet style correctly when frontmatter contains hyphen list items", () => {
+        const mdxWithFrontmatterAndAsterisks = `---
+tags:
+  - test
+  - feature
+---
+
+* Real bullet 1
+* Real bullet 2`;
+
+        const { bulletStyle } = mdxToHtml(mdxWithFrontmatterAndAsterisks);
+        expect(bulletStyle).toBe("*");
+    });
+
+    it("should preserve asterisk bullets in round-trip conversion with frontmatter containing hyphens", () => {
+        const mdxWithFrontmatterAndAsterisks = `---
+tags:
+  - test
+  - feature
+---
+
+* Real bullet 1
+* Real bullet 2`;
+
+        const { html, frontmatter, bulletStyle } = mdxToHtml(mdxWithFrontmatterAndAsterisks);
+        expect(bulletStyle).toBe("*");
+
+        const mdxResult = htmlToMdx(html, { frontmatter, bulletStyle });
+        expect(mdxResult.mdx).toContain("* Real bullet 1");
+        expect(mdxResult.mdx).toContain("* Real bullet 2");
+        expect(mdxResult.mdx).not.toContain("- Real bullet");
+    });
+});

@@ -369,10 +369,14 @@ export function resolveServerPageData(
     const resolvedFoundNode = serverEntry?.pageData.foundNode ?? deps.initialFoundNode;
 
     // If html is not available, regenerate html and frontmatter from mdx
+    let resolvedBulletStyle = serverEntry?.pageData.bulletStyle;
+    let resolvedOriginalFrontmatter = serverEntry?.pageData.originalFrontmatter;
     if (!resolvedHtml) {
         const result = mdxToHtml(resolvedMdx);
         resolvedFrontmatter = result.frontmatter;
         resolvedHtml = result.html;
+        resolvedBulletStyle = result.bulletStyle;
+        resolvedOriginalFrontmatter = result.originalFrontmatter;
     }
 
     return {
@@ -381,7 +385,9 @@ export function resolveServerPageData(
         mdx: resolvedMdx,
         frontmatter: resolvedFrontmatter,
         html: resolvedHtml,
-        foundNode: resolvedFoundNode
+        foundNode: resolvedFoundNode,
+        bulletStyle: resolvedBulletStyle,
+        originalFrontmatter: resolvedOriginalFrontmatter
     };
 }
 

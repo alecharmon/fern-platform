@@ -290,10 +290,13 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
         );
     }, [name, keyedAttributes, expressionAttributes, jsxChildren]);
 
-    // Compute children content for RICH_TEXT type
+    const bulletStyleRef = useRef<"*" | "-">("-");
+
     const richTextHtml = useMemo(() => {
         if (jsxChildren.type === "RICH_TEXT") {
-            return mdxToHtml(jsxChildren.childrenMdx).html;
+            const { html, bulletStyle } = mdxToHtml(jsxChildren.childrenMdx);
+            bulletStyleRef.current = bulletStyle ?? "-";
+            return html;
         }
         return null;
     }, [jsxChildren]);
@@ -342,7 +345,7 @@ const JSXElementRenderer = ({ element, index, onUpdate, newlyCreated, docsUrl, b
                     }}
                     onUpdate={({ editor, transaction }) => {
                         const html = editor.getHTML();
-                        const mdx = htmlToMdx(html);
+                        const mdx = htmlToMdx(html, { bulletStyle: bulletStyleRef.current });
                         const indentedMdx = applyIndentation(mdx.mdx, 1);
                         const finalMdx = buildMdxElement(name, keyedAttributes, expressionAttributes, indentedMdx);
 

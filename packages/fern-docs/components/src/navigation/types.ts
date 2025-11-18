@@ -123,6 +123,10 @@ export interface ResolvedPageData extends PageData {
     frontmatter: Frontmatter;
     html: string;
     foundNode: SerializableFoundNode;
+    /** Bullet style used in the original MDX content ("*" or "-") */
+    bulletStyle?: "*" | "-";
+    /** Original formatting of the frontmatter string */
+    originalFrontmatter?: string;
 }
 
 /** Page registry entry */

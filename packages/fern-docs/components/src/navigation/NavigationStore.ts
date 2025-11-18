@@ -415,7 +415,7 @@ export class NavigationStore {
 
     /** Creates a new client page */
     createClientPage(filename: PageFilename, deps: ClientPageDataWriteDependencies): void {
-        const { html, frontmatter } = mdxToHtml(deps.initialMdx);
+        const { html, frontmatter, bulletStyle, originalFrontmatter } = mdxToHtml(deps.initialMdx);
         const title = String(frontmatter?.title ?? "");
         const slug = FernNavigation.Slug(String(frontmatter?.slug ?? ""));
 
@@ -451,6 +451,8 @@ export class NavigationStore {
                 mdx: deps.initialMdx,
                 html: html,
                 frontmatter: frontmatter,
+                bulletStyle: bulletStyle,
+                originalFrontmatter: originalFrontmatter,
                 foundNode: {
                     ...deps.baseFoundNode,
                     node: newPageNode
@@ -517,7 +519,9 @@ export class NavigationStore {
     updatePageFrontmatter(filename: string, frontmatter: Partial<Frontmatter>): void {
         const { pageData } = this._getPageEntry(filename);
         const { mdx } = htmlToMdx(pageData.html, {
-            frontmatter: { ...pageData.frontmatter, ...frontmatter }
+            frontmatter: { ...pageData.frontmatter, ...frontmatter },
+            bulletStyle: pageData.bulletStyle,
+            originalFrontmatter: pageData.originalFrontmatter
         });
         this.updatePage(filename, { mdx });
     }
@@ -527,7 +531,9 @@ export class NavigationStore {
         const { pageData } = this._getPageEntry(filename);
         const { mdx } = htmlToMdx(html, {
             frontmatter: pageData.frontmatter,
-            changedNodes
+            changedNodes,
+            bulletStyle: pageData.bulletStyle,
+            originalFrontmatter: pageData.originalFrontmatter
         });
         this.updatePage(filename, { mdx });
     }
@@ -948,16 +954,28 @@ export class NavigationStore {
         const forceRecompute = !entry.pageData.html || entry.pageData.html.length === 0;
         const needsRecompute = shouldRecompute || forceRecompute;
 
-        const { html, frontmatter } = needsRecompute
+        const { html, frontmatter, bulletStyle, originalFrontmatter } = needsRecompute
             ? mdxToHtml(update.pageData?.mdx ?? entry.pageData.mdx ?? "", {
                   treatAsUnsupported: ["math"]
               })
-            : { html: entry.pageData.html, frontmatter: entry.pageData.frontmatter };
+            : {
+                  html: entry.pageData.html,
+                  frontmatter: entry.pageData.frontmatter,
+                  bulletStyle: entry.pageData.bulletStyle,
+                  originalFrontmatter: entry.pageData.originalFrontmatter
+              };
 
         this._pageRegistry[filename] = {
             ...entry,
             ...update,
-            pageData: { ...entry.pageData, ...update.pageData, html, frontmatter }
+            pageData: {
+                ...entry.pageData,
+                ...update.pageData,
+                html,
+                frontmatter,
+                bulletStyle,
+                originalFrontmatter
+            }
         };
         this._setStorageAndNotify();
     }

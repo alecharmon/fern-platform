@@ -135,6 +135,7 @@ export interface MdxToHtmlResponse {
     html: string;
     frontmatter: Frontmatter;
     originalFrontmatter?: string;
+    bulletStyle?: "*" | "-";
 }
 
 interface MdxToHtmlOptions {
@@ -187,12 +188,47 @@ export function astToMDX(mdast: Nodes, originalFrontmatter?: string): string {
     return mdxContent;
 }
 
+// Detect the bullet style used in the original MDX content
+function detectBulletStyle(content: string): "*" | "-" {
+    let scanContent = content;
+
+    if (content.trim().startsWith("---")) {
+        const lines = content.split("\n");
+        let endIndex = -1;
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            if (line && line.trim() === "---") {
+                endIndex = i;
+                break;
+            }
+        }
+        if (endIndex !== -1) {
+            scanContent = lines.slice(endIndex + 1).join("\n");
+        }
+    }
+
+    const lines = scanContent.split("\n");
+    for (const line of lines) {
+        const trimmed = line.trimStart();
+        if (trimmed.startsWith("* ")) {
+            return "*";
+        }
+        if (trimmed.startsWith("- ")) {
+            return "-";
+        }
+    }
+    return "-";
+}
+
 // Convert mdx to html, frontmatter, and original elements
 export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxToHtmlResponse {
     const { treatAsCustomElement = [], treatAsUnsupported = [] } = options ?? {};
 
     // Get mdast and frontmatter from mdx content
     const { mdast, frontmatter, originalFrontmatter } = mdxToAST(rootContent);
+
+    // Detect bullet style from original content
+    const bulletStyle = detectBulletStyle(rootContent);
 
     // Default handler for base elements
     function baseElementHandler(state: ToHastState, node: any, parents?: MdastParents) {
@@ -359,7 +395,7 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
     // Get html from hast
     const html = toHtml(hast);
 
-    return { html, frontmatter, originalFrontmatter };
+    return { html, frontmatter, originalFrontmatter, bulletStyle };
 }
 
 // Response from htmlToMdx
@@ -384,12 +420,16 @@ export interface HtmlToMdxOptions {
      * Changed nodes in the html
      */
     changedNodes?: ChangedNodes;
+    /**
+     * Bullet style to use for unordered lists ("*" or "-")
+     */
+    bulletStyle?: "*" | "-";
 }
 
 // Convert html to mdx
 // TODO: we might be able to further optimize by refactoring this and getChangedNodesFromHtml
 export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxResponse {
-    const { frontmatter, originalFrontmatter, changedFrontmatter, changedNodes } = options ?? {};
+    const { frontmatter, originalFrontmatter, changedFrontmatter, changedNodes, bulletStyle } = options ?? {};
 
     // Get hast from html
     const hast = fromHtml(html);
@@ -620,9 +660,7 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
             mathToMarkdown({ singleDollarTextMath: false }),
             gfmToMarkdown()
         ],
-        // TODO: float configurations up to make them more discoverable
-        // Use hyphen for unordered lists (more common in user content)
-        bullet: "-",
+        bullet: bulletStyle ?? "-",
         // Compact list formatting - don't add blank lines between items
         listItemIndent: "one"
     });
