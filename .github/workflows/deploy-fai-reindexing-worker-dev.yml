@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - app
+    tags-ignore:
+      - '**'
     paths:
       - 'servers/fai-reindexing-worker/**'
   workflow_call:
