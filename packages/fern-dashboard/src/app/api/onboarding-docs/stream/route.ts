@@ -298,7 +298,11 @@ export async function GET(req: NextRequest) {
                                 description: `Documentation for ${data.docsSiteName}`,
                                 isPrivate: true,
                                 files,
-                                site: normalizedDocsUrl
+                                site: normalizedDocsUrl,
+                                setFernToken: {
+                                    workingDir: tempDir,
+                                    fernToken: fernToken
+                                }
                             });
 
                             if (result.success) {
@@ -308,101 +312,14 @@ export async function GET(req: NextRequest) {
                                     timestamp: new Date().toISOString()
                                 });
 
-                                // Generate FERN_TOKEN and set as GitHub secret
-                                try {
+                                // Check if FERN_TOKEN was successfully generated and set
+                                if (result.fernToken) {
                                     sendEvent({
                                         type: "log",
-                                        message: "Generating FERN_TOKEN...",
+                                        message: "✓ FERN_TOKEN generated and set in repository",
                                         timestamp: new Date().toISOString()
                                     });
-
-                                    // Run `fern token` command to generate token
-                                    const tokenProcess = spawn("npx", ["fern-api", "token"], {
-                                        cwd: tempDir,
-                                        env
-                                    });
-
-                                    let tokenOutput = "";
-                                    tokenProcess.stdout.on("data", (data) => {
-                                        tokenOutput += data.toString();
-                                    });
-                                    tokenProcess.stderr.on("data", (data) => {
-                                        tokenOutput += data.toString();
-                                    });
-
-                                    await new Promise<void>((resolve, reject) => {
-                                        tokenProcess.on("close", (code) => {
-                                            if (code === 0) {
-                                                resolve();
-                                            } else {
-                                                reject(new Error(`fern token exited with code ${code}`));
-                                            }
-                                        });
-                                        tokenProcess.on("error", reject);
-                                        setTimeout(() => {
-                                            tokenProcess.kill();
-                                            reject(new Error("Token generation timeout"));
-                                        }, 30000);
-                                    });
-
-                                    // Parse token from output (format: "Generated a FERN_TOKEN for X: fern_...")
-                                    // Strip ANSI escape codes
-                                    const cleanOutput = tokenOutput.replace(/\x1b\[[0-9;]*m/g, "");
-                                    console.log("Token output:", cleanOutput);
-                                    const tokenMatch = cleanOutput.match(/fern_[a-zA-Z0-9]+/);
-                                    if (!tokenMatch) {
-                                        throw new Error(
-                                            `Failed to parse FERN_TOKEN from output. Output was: ${cleanOutput.substring(0, 200)}`
-                                        );
-                                    }
-                                    const fernToken = tokenMatch[0];
-
-                                    sendEvent({
-                                        type: "log",
-                                        message: "✓ Generated FERN_TOKEN",
-                                        timestamp: new Date().toISOString()
-                                    });
-
-                                    // Get the repo's public key for encrypting secrets
-                                    const { Octokit } = await import("@octokit/core");
-                                    const _sodium = (await import("libsodium-wrappers")).default;
-                                    await _sodium.ready;
-                                    const sodium = _sodium;
-
-                                    const octokit = new Octokit({
-                                        auth: process.env.FERN_DEMO_CREATION_BOT_TOKEN
-                                    });
-
-                                    const { data: publicKeyData } = await octokit.request(
-                                        "GET /repos/{owner}/{repo}/actions/secrets/public-key",
-                                        {
-                                            owner: demoCreationBotOwner,
-                                            repo: repoName
-                                        }
-                                    );
-
-                                    // Encrypt the token using libsodium's sealed box
-                                    const messageBytes = Buffer.from(fernToken);
-                                    const keyBytes = Buffer.from(publicKeyData.key, "base64");
-                                    const encryptedBytes = sodium.crypto_box_seal(messageBytes, keyBytes);
-                                    const encryptedValue = Buffer.from(encryptedBytes).toString("base64");
-
-                                    // Set the secret
-                                    await octokit.request("PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}", {
-                                        owner: demoCreationBotOwner,
-                                        repo: repoName,
-                                        secret_name: "FERN_TOKEN",
-                                        encrypted_value: encryptedValue,
-                                        key_id: publicKeyData.key_id
-                                    });
-
-                                    sendEvent({
-                                        type: "log",
-                                        message: "✓ Set FERN_TOKEN secret in repository",
-                                        timestamp: new Date().toISOString()
-                                    });
-                                } catch (error) {
-                                    console.error("Failed to set FERN_TOKEN secret:", error);
+                                } else {
                                     sendEvent({
                                         type: "log",
                                         message: "⚠ Failed to set FERN_TOKEN secret (non-critical)",
@@ -412,7 +329,8 @@ export async function GET(req: NextRequest) {
 
                                 return {
                                     success: true as const,
-                                    githubRepoUrl: result.htmlUrl
+                                    githubRepoUrl: result.htmlUrl,
+                                    fernToken: result.fernToken
                                 };
                             } else {
                                 sendEvent({
@@ -436,6 +354,7 @@ export async function GET(req: NextRequest) {
 
                 const { downloadUrl } = s3Result;
                 const githubRepoUrl = githubResult.githubRepoUrl;
+                const generatedFernToken = githubResult.fernToken;
 
                 if (downloadUrl) {
                     sendEvent({
@@ -446,14 +365,16 @@ export async function GET(req: NextRequest) {
                 }
 
                 // Link GitHub repo to docs site if created
-                if (githubRepoUrl && fernToken) {
+                // Use the generated token if available, otherwise fall back to the session token
+                const tokenToUse = generatedFernToken || fernToken;
+                if (githubRepoUrl && tokenToUse) {
                     try {
                         const postDocsGithubSourceHandler = (await import("@/app/api/post-docs-github-source/handler"))
                             .default;
 
                         await postDocsGithubSourceHandler({
                             url: normalizedDocsUrl,
-                            token: fernToken,
+                            token: tokenToUse,
                             githubUrl: githubRepoUrl
                         });
 

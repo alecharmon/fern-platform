@@ -20,11 +20,23 @@ export default async function postGitRepository(request: {
     isPrivate?: boolean;
     files: RepositoryFile[];
     site: string;
+    /**
+     * If provided, a FERN_TOKEN will be generated and set as a GitHub Actions secret
+     * after the repository is created. This requires a working directory with a Fern project.
+     */
+    setFernToken?: {
+        workingDir: string;
+        fernToken?: string;
+    };
 }): Promise<
     | {
           success: true;
           repoUrl: string;
           htmlUrl: string;
+          /**
+           * The generated FERN_TOKEN, if setFernToken was provided
+           */
+          fernToken?: string;
       }
     | {
           success: false;
@@ -70,7 +82,31 @@ export default async function postGitRepository(request: {
     }
 
     if (result.type === "ok") {
-        return { success: true, repoUrl: result.repoUrl, htmlUrl: result.htmlUrl };
+        let fernToken: string | undefined;
+
+        // If setFernToken is provided, generate and set the FERN_TOKEN secret
+        if (request.setFernToken) {
+            const { setFernTokenSecret } = await import("./setFernTokenSecret");
+
+            console.log("Generating and setting FERN_TOKEN for repository...");
+            const tokenResult = await setFernTokenSecret({
+                owner: request.owner,
+                repoName: request.repoName,
+                workingDir: request.setFernToken.workingDir,
+                fernToken: request.setFernToken.fernToken
+            });
+
+            if (tokenResult.success) {
+                fernToken = tokenResult.token;
+                console.log("✓ FERN_TOKEN generated and set successfully");
+            } else {
+                console.error("Failed to set FERN_TOKEN:", tokenResult.error);
+                // Don't fail the entire operation if token generation fails
+                // The repository was still created successfully
+            }
+        }
+
+        return { success: true, repoUrl: result.repoUrl, htmlUrl: result.htmlUrl, fernToken };
     } else {
         return { success: false, error: result.error };
     }
