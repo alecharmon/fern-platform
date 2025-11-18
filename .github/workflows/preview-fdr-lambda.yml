@@ -2,6 +2,7 @@ name: Preview FDR Lambda
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     paths:
       - "servers/fdr-lambda/**"
       - "servers/fdr-lambda-deploy/**"
@@ -28,6 +29,7 @@ env:
 jobs:
   preview_lambda:
     runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
     environment: Fern Dev
     strategy:
       matrix:
