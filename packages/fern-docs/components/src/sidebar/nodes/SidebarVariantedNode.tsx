@@ -16,6 +16,7 @@ import { useCurrentVariantId } from "../../state/navigation";
 import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarNavigationChild } from "./SidebarNavigationChild";
 import { SidebarRootChild } from "./SidebarRootChild";
+import { SidebarRootSectionNode } from "./SidebarRootSectionNode";
 
 interface SidebarVariantedNodeProps {
     node: FernNavigation.VariantedNode;
@@ -158,7 +159,20 @@ export function SidebarVariantedNode({ node, depth, renderOptions, lang }: Sideb
                         );
                     }
 
-                    // All other types are NavigationChild types
+                    if (depth === 0 && child.type === "section") {
+                        return (
+                            <SidebarRootSectionNode
+                                key={child.id}
+                                node={child}
+                                icon={processIcon({ node: child, forceClientRender, files: renderOptions.files })}
+                                renderOptions={renderOptions}
+                                files={renderOptions.files}
+                                lang={lang}
+                            />
+                        );
+                    }
+
+                    // All other types are NavigationChild types (or nested sections)
                     return (
                         <SidebarNavigationChild
                             key={child.id}
