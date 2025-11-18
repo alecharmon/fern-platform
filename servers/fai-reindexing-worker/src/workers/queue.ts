@@ -5,15 +5,27 @@ import { logger } from "../config/logger";
 import type { ReindexJobMessage } from "../types";
 import { processReindexJob } from "./reindex";
 
+const MAX_CONCURRENT_JOBS = 4;
+
 export async function pollSQSQueue(): Promise<void> {
-    logger.info("Starting SQS polling", { queueUrl: env.sqsQueueUrl });
+    logger.info("Starting SQS polling", {
+        queueUrl: env.sqsQueueUrl,
+        maxConcurrentJobs: MAX_CONCURRENT_JOBS
+    });
+
+    const activeJobs = new Set<Promise<void>>();
 
     while (true) {
         try {
+            if (activeJobs.size >= MAX_CONCURRENT_JOBS) {
+                await Promise.race(activeJobs);
+                continue;
+            }
+
             const response = await sqsClient.send(
                 new ReceiveMessageCommand({
                     QueueUrl: env.sqsQueueUrl,
-                    MaxNumberOfMessages: 1,
+                    MaxNumberOfMessages: MAX_CONCURRENT_JOBS - activeJobs.size,
                     WaitTimeSeconds: 20,
                     VisibilityTimeout: 1200
                 })
@@ -21,7 +33,10 @@ export async function pollSQSQueue(): Promise<void> {
 
             if (response.Messages && response.Messages.length > 0) {
                 for (const message of response.Messages) {
-                    await handleMessage(message);
+                    const job = handleMessage(message).finally(() => {
+                        activeJobs.delete(job);
+                    });
+                    activeJobs.add(job);
                 }
             } else {
                 await new Promise((resolve) => setTimeout(resolve, 1000));

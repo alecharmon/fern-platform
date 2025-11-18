@@ -84,8 +84,8 @@ export class FaiReindexingWorkerStack extends Stack {
         const { cluster, workerSg, logGroup, version, environmentType, reindexingQueue } = props;
 
         const workerTaskDefinition = new FargateTaskDefinition(this, "worker-task-def", {
-            cpu: 512,
-            memoryLimitMiB: 2048
+            cpu: 1024,
+            memoryLimitMiB: 4096
         });
 
         workerTaskDefinition.addContainer("fai-reindexing-worker", {
