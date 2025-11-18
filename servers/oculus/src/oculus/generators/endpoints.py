@@ -5,13 +5,10 @@ from oculus.framework.models import Question
 
 QUESTION_TEMPLATES = [
     "Tell me about the {method} {path} endpoint.",
-    "What does the {operationId} endpoint do?",
     "What are the parameters for the {method} {path} endpoint?",
     "What are available responses for the {method} {path} endpoint?",
     "What parameters are required for the {method} {path} endpoint?",
     "What parameters are optional for the {method} {path} endpoint?",
-    "Tell me about the {first_request_property} request body property for the {method} {path} endpoint.",
-    "Tell me about the {first_response_property} response property for the {method} {path} endpoint.",
 ]
 
 

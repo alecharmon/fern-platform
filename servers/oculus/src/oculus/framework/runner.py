@@ -136,7 +136,7 @@ class EvaluationRunner:
                     if isinstance(docs, list):
                         urls = [doc.get("url") for doc in docs if doc.get("url")]
                         if urls:
-                            result["metadata"][f"{key.replace('_retrieved_documents', '')}_retrieved_urls"] = urls
+                            result["metadata"][f"{key.replace('_retrieved_documents', '')}_retrieved_urls"] = json.dumps(urls)
                         result["metadata"].pop(key)
                 except (json.JSONDecodeError, TypeError):
                     pass
@@ -184,7 +184,7 @@ class EvaluationRunner:
                         if isinstance(docs, list):
                             urls = [doc.get("url") for doc in docs if doc.get("url")]
                             if urls:
-                                metadata[f"{key.replace('_retrieved_documents', '')}_retrieved_urls"] = urls
+                                metadata[f"{key.replace('_retrieved_documents', '')}_retrieved_urls"] = json.dumps(urls)
                             metadata.pop(key)
                     except (json.JSONDecodeError, TypeError):
                         pass
