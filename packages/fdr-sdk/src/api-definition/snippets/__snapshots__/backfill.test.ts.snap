@@ -61,24 +61,25 @@ public class Example
 import (
     client "github.com/fern-demo/cat-demo-go/v/client"
     option "github.com/fern-demo/cat-demo-go/v/option"
+    catGo "github.com/fern-demo/cat-demo-go/v"
     context "context"
-    v "github.com/fern-demo/cat-demo-go/v"
 )
 
-func do() () {
+func do() {
     client := client.NewClient(
         option.WithBaseURL(
             "https://api.example.com/v1",
         ),
     )
+    request := &catGo.CreateUserRequest{
+        Name: "John Doe",
+        Email: "john.doe@example.com",
+        Password: "securePassword123",
+        Role: catGo.CreateUserRequestRoleUser.Ptr(),
+    }
     client.Users.CreateUser(
         context.TODO(),
-        &v.CreateUserRequest{
-            Name: "John Doe",
-            Email: "john.doe@example.com",
-            Password: "securePassword123",
-            Role: v.CreateUserRequestRoleUser.Ptr(),
-        },
+        request,
     )
 }
 ",

@@ -3048,8 +3048,8 @@ importers:
         specifier: 61.4.0
         version: 61.4.0
       '@fern-api/go-dynamic-snippets':
-        specifier: 0.0.15
-        version: 0.0.15
+        specifier: 0.0.16
+        version: 0.0.16
       '@fern-api/java-dynamic-snippets':
         specifier: 0.0.4
         version: 0.0.4
@@ -5961,8 +5961,8 @@ packages:
   '@fern-api/dynamic-ir-sdk@61.4.0':
     resolution: {integrity: sha512-pJ8oswOmhVBi7I7OnFXndb2TqXMKweQby1/YmbJi8Usp/c+mFwEvnCYfvTvj6an34mG1k7HiS4ACZHtDp/SMJw==}
 
-  '@fern-api/go-dynamic-snippets@0.0.15':
-    resolution: {integrity: sha512-KIRV3z/fjKFGx+nFIg5bJOGrqoaTgPCVMB/lpZ5hql948kbEERfQMahX5WBDgbh8E2/p+P8kY/N1LWCMrVQyEQ==}
+  '@fern-api/go-dynamic-snippets@0.0.16':
+    resolution: {integrity: sha512-tGp1B3Mch4JJ/ABHvhMBelIQdFuJt6oO3TANT5xWgF1kFLKw1aiDNTbbS8zECPlF9GrV4kGnc5JhNfRJCVU8nw==}
 
   '@fern-api/java-dynamic-snippets@0.0.4':
     resolution: {integrity: sha512-qn4z51IeJSaA15ZPIpnvKrUeuPa+Q47EK3ZPYMZGT2Ilt5OyRqQBIL5X6grJ0iXPyMJrjRxxHOQrGuP5Y7hEUg==}
@@ -25504,7 +25504,7 @@ snapshots:
 
   '@fern-api/dynamic-ir-sdk@61.4.0': {}
 
-  '@fern-api/go-dynamic-snippets@0.0.15': {}
+  '@fern-api/go-dynamic-snippets@0.0.16': {}
 
   '@fern-api/java-dynamic-snippets@0.0.4': {}
 
