@@ -1,20 +1,20 @@
 {
-    "question": "How can I customize the introduction text that appears at the beginning of my SDK's README?",
-    "ground_truth": "You can customize the introduction text by adding the `introduction` field under the `readme` section in your `generators.yml` file. For example, set `introduction: \"Welcome to our API\"` to display custom introduction text at the beginning of the README.",
-    "metadata": {
-      "category": "markdown",
-      "source": "markdown_generator",
-      "slug": "configure-readme",
-      "domain": "buildwithfern.com",
-      "cited_context": "## Configuration options\n\n```yaml title=\"generators.yml\" maxLines=10\nreadme:\n  introduction: \"Welcome to our API\"\n```\n\n<ParamField path=\"introduction\" type=\"string\" required={{false}} toc={{true}}>\n  Custom introduction text that appears at the beginning of the README.\n</ParamField>"
-    },
-    "criteria": {
-        "citation": [
-          "https://buildwithfern.com/learn/sdks/deep-dives/readme"
-        ],
-        "correctness": [
-          "The answer must mention the `introduction` field in the `readme` section of the `generators.yml` file.",
-          "The answer should include a code example of how to use the `introduction` field."
-        ]
-    }
+  "question": "Can I change the welcome message at the top of generated library documentation? Can I use formatting like clickable links and bold text?",
+  "ground_truth": "You can customize the introduction text by adding the `introduction` field under the `readme` section in your `generators.yml` file. The introduction supports Markdown formatting, so you can include links, bold text, lists, and other markdown elements in your custom welcome message. For example: `introduction: \"Welcome to the **Acme API SDK**! This SDK provides easy access to our platform. Visit our [developer portal](https://dev.acme.com) for guides and examples.\"` This customized introduction with formatting will appear at the beginning of the generated README, replacing the generic default text with your branding and linking to your developer portal.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "configure-readme",
+    "domain": "buildwithfern.com",
+    "cited_context": "## Configuration options\n\n```yaml title=\"generators.yml\" maxLines=10\nreadme:\n  introduction: \"Welcome to our API\"\n```\n\n<ParamField path=\"introduction\" type=\"string\" required={{false}} toc={{true}}>\n  Custom introduction text that appears at the beginning of the README.\n</ParamField>"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/deep-dives/readme"
+    ],
+    "correctness": [
+      "The answer must mention the `introduction` field in the `readme` section of the `generators.yml` file.",
+      "The answer should include a code example of how to use the `introduction` field."
+    ]
   }
+}

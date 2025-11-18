@@ -1,12 +1,12 @@
 {
-    "question": "How can I make specific files or folders in a Files component stand out visually in my documentation?",
-    "ground_truth": "You can make files or folders stand out visually by using the `highlighted` property, which adds an accent background color to the item. Additionally, you can use the `comment` property to add explanatory text next to the file or folder name. For example, `<File name=\"README.md\" highlighted comment=\"Important file\" />` will highlight the README.md file and add a comment next to it.",
-    "metadata": {
-      "category": "markdown",
-      "source": "markdown_generator",
-      "slug": "files",
-      "domain": "buildwithfern.com",
-      "cited_context": "Use the `highlighted` property to highlight specific files or folders with an accent background color. Use the `comment` property to add explanatory text that appears next to an item. These properties are useful for drawing attention to important files or providing additional context, similar to how code blocks support line highlighting and inline comments."
-    },
-    "criteria": null
-  }
+  "question": "When showing a directory structure, how do I emphasize certain files and add explanatory notes? Can I do both at the same time? Does this work on directories too or only individual files?",
+  "ground_truth": "You can make files or folders stand out using two properties that work together: 1) The `highlighted` property adds an accent background color for visual emphasis, and 2) The `comment` property adds explanatory text that appears next to the item name. You can use both properties on the same file or folder simultaneously. For example: `<File name=\"README.md\" highlighted comment=\"Must be updated with your project details\" />` will both highlight the README.md file with a background color AND add the explanatory comment next to it. These properties work on both individual files (using `<File>`) and folders (using `<Folder>`), giving you flexibility to emphasize entire directories or specific configuration files. This is similar to how code blocks support line highlighting and inline comments, but for file/folder structures.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "files",
+    "domain": "buildwithfern.com",
+    "cited_context": "Use the `highlighted` property to highlight specific files or folders with an accent background color. Use the `comment` property to add explanatory text that appears next to an item. These properties are useful for drawing attention to important files or providing additional context, similar to how code blocks support line highlighting and inline comments."
+  },
+  "criteria": null
+}

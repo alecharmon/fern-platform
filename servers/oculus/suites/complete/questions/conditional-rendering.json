@@ -1,21 +1,21 @@
 {
-    "question": "How can I show different content in my documentation based on user roles?",
-    "ground_truth": "You can restrict specific content within your MDX pages to users with certain roles. This allows you to show different content to different user types on the same page. Use the `<If />` component to conditionally render content based on user roles: `<If roles={[\"beta-users\"]}>\n  <Callout>\n    This callout is only visible to beta users.\n  </Callout>\n</If>`",
-    "metadata": {
-      "category": "markdown",
-      "source": "markdown_generator",
-      "slug": "conditional-rendering",
-      "domain": "buildwithfern.com",
-      "cited_context": "You can restrict specific content within your MDX pages to users with certain roles. This allows you to show different content to different user types on the same page. Use the `<If />` component to conditionally render content based on user roles: `<If roles={[\"beta-users\"]}>\n  <Callout>\n    This callout is only visible to beta users.\n  </Callout>\n</If>`"
-    },
-    "criteria": {
-        "citation": [
-          "https://buildwithfern.com/learn/docs/authentication/rbac"
-        ],
-        "correctness": [
-          "The answer must mention the `<If />` component.",
-          "The answer must mention that the `<If />` component is used to conditionally render content based on user roles.",
-          "The answer should contain a code example of how to use the `<If />` component."
-        ]
-    }
+  "question": "How do I show certain content only to specific user types? Can I put complex stuff like code and highlighted boxes inside these restricted sections? Can I show to multiple user types at once?",
+  "ground_truth": "You can restrict specific content within your MDX pages to users with certain roles using the `<If />` component, which conditionally renders content based on user roles. For example: `<If roles={[\"beta-users\"]}><Callout>This callout is only visible to beta users.</Callout></If>`. The component is flexible - you can nest any content type inside it, including complex elements like code blocks, callouts, tables, images, and entire multi-paragraph sections. You can also specify multiple roles in the array like `roles={[\"beta-users\", \"internal\"]}`, which shows the content to users who have ANY of those roles (OR logic), allowing you to display content to both beta-users and internal users while keeping it hidden from public users. This allows you to show different content to different user types on the same page, with regular users never seeing that the conditional sections even exist.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "conditional-rendering",
+    "domain": "buildwithfern.com",
+    "cited_context": "You can restrict specific content within your MDX pages to users with certain roles. This allows you to show different content to different user types on the same page. Use the `<If />` component to conditionally render content based on user roles: `<If roles={[\"beta-users\"]}>\n  <Callout>\n    This callout is only visible to beta users.\n  </Callout>\n</If>`"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/authentication/rbac"
+    ],
+    "correctness": [
+      "The answer must mention the `<If />` component.",
+      "The answer must mention that the `<If />` component is used to conditionally render content based on user roles.",
+      "The answer should contain a code example of how to use the `<If />` component."
+    ]
   }
+}

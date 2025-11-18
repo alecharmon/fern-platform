@@ -1,21 +1,21 @@
 {
-    "question": "How can I display multiple cards in a grid layout with 2 columns?",
-    "ground_truth": "To display multiple cards in a grid layout with 2 columns, use the `<CardGroup>` component with the `cols` property set to 2. Wrap your individual `<Card>` components inside the `<CardGroup>`. For example: `<CardGroup cols={2}><Card>...</Card><Card>...</Card></CardGroup>`",
-    "metadata": {
-      "category": "markdown",
-      "source": "markdown_generator",
-      "slug": "cards",
-      "domain": "buildwithfern.com",
-      "cited_context": "You can use individual cards or arrange multiple cards in a responsive grid layout using the `<CardGroup>` component. Card groups are useful for organizing feature lists, navigation options, or step-by-step guides. ### `<CardGroup>` properties <ParamField path=\"cols\" type=\"number\" required={false} default=\"2\"> The number of columns to display in the grid </ParamField>"
-    },
-    "criteria": {
-        "citation": [
-          "https://buildwithfern.com/learn/docs/writing-content/components/cards"
-        ],
-        "correctness": [
-          "The answer must mention the `<CardGroup>` component.",
-          "The answer must mention the `cols` property.",
-          "The answer should contain a code example of how to use the `<CardGroup>` component."
-        ]
-    }
+  "question": "I want to display items in a 2-column grid. If I have 5 items, will it automatically wrap to a third row? What's the default if I don't specify columns?",
+  "ground_truth": "To display multiple cards in a controlled grid layout, use the `<CardGroup>` component with the `cols` property. Set `cols={2}` for exactly 2 columns: `<CardGroup cols={2}><Card>...</Card><Card>...</Card></CardGroup>`. If you have more cards than columns (like 5 products with 2 columns), the CardGroup will automatically wrap to additional rows - so you'd get 2 products in the first row, 2 in the second, and 1 in the third row. The default column count is 2 if you don't specify the `cols` property, but it's best practice to explicitly set it for clarity. The CardGroup provides responsive grid layout automatically while giving you control over the column structure.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "cards",
+    "domain": "buildwithfern.com",
+    "cited_context": "You can use individual cards or arrange multiple cards in a responsive grid layout using the `<CardGroup>` component. Card groups are useful for organizing feature lists, navigation options, or step-by-step guides. ### `<CardGroup>` properties <ParamField path=\"cols\" type=\"number\" required={false} default=\"2\"> The number of columns to display in the grid </ParamField>"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/writing-content/components/cards"
+    ],
+    "correctness": [
+      "The answer must mention the `<CardGroup>` component.",
+      "The answer must mention the `cols` property.",
+      "The answer should contain a code example of how to use the `<CardGroup>` component."
+    ]
   }
+}

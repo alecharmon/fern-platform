@@ -1,21 +1,21 @@
 {
-    "question": "How can I configure my Fern Definition to only show certain API endpoints to internal developers?",
-    "ground_truth": "To configure your Fern Definition to show certain API endpoints only to internal developers, you need to: 1) First define an 'internal' audience in your api.yml file under the audiences section, 2) Then add an 'audiences' field with '- internal' to the specific endpoints you want to restrict in your service definition files. This will ensure those endpoints are only accessible to consumers marked with the 'internal' audience.",
-    "metadata": {
-      "category": "markdown",
-      "source": "markdown_generator",
-      "slug": "audiences",
-      "domain": "buildwithfern.com",
-      "cited_context": "To use audiences in your Fern Definition, add them to `api.yml`. In the example below, we have created audiences for `internal`, `beta`, and `customer` groups:\n\n```yaml title='api.yml' {{2-5}}\nname: api \naudiences: \n  - internal \n  - beta \n  - customers\n```\n\nTo mark an endpoint for a particular consumer, add an `audience` with the relevant groups. In this example, the `sendEmail` endpoint is only available to internal consumers:\n\n```yaml title='user.yml' {{6-7}}\nservice:\n  base-path: /users\n  auth: true\n  endpoints:\n    sendEmail:\n      audiences:\n        - internal\n      path: /send-email\n      ...\n```"
-    },
-    "criteria": {
-        "citation": [
-          "https://buildwithfern.com/learn/sdks/deep-dives/audiences"
-        ],
-        "correctness": [
-          "The answer must mention the `audiences` section in the `api.yml` file.",
-          "The answer should contain a code example of how to use the `audiences` section.",
-          "The answer must mention that it is only available for Pro & Enterprise customers."
-        ]
-      }
+  "question": "Some endpoints should only be visible to certain users - like showing something to public and beta testers but hiding it from internal tools. Can I control this from one spec? Does it affect both the documentation and generated libraries? Is this a premium feature?",
+  "ground_truth": "Yes, you can use audiences to segment endpoint visibility from a single Fern Definition without duplication. First, define all your audiences (e.g., 'internal', 'beta', 'public') in the `audiences` section of your api.yml file. Then, tag individual endpoints with the appropriate audiences using the `audiences` field in your service definition files. For example, adding `audiences: [public, beta]` to an endpoint makes it visible only to public and beta consumers, while excluding it from internal builds. These audience restrictions apply to both generated SDKs and documentation - endpoints are filtered based on the target audience in both contexts, ensuring consistent visibility control. Important note: Audiences is a premium feature only available for Pro & Enterprise customers, so you'll need one of these plans to use this capability.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "audiences",
+    "domain": "buildwithfern.com",
+    "cited_context": "To use audiences in your Fern Definition, add them to `api.yml`. In the example below, we have created audiences for `internal`, `beta`, and `customer` groups:\n\n```yaml title='api.yml' {{2-5}}\nname: api \naudiences: \n  - internal \n  - beta \n  - customers\n```\n\nTo mark an endpoint for a particular consumer, add an `audience` with the relevant groups. In this example, the `sendEmail` endpoint is only available to internal consumers:\n\n```yaml title='user.yml' {{6-7}}\nservice:\n  base-path: /users\n  auth: true\n  endpoints:\n    sendEmail:\n      audiences:\n        - internal\n      path: /send-email\n      ...\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/deep-dives/audiences"
+    ],
+    "correctness": [
+      "The answer must mention the `audiences` section in the `api.yml` file.",
+      "The answer should contain a code example of how to use the `audiences` section.",
+      "The answer must mention that it is only available for Pro & Enterprise customers."
+    ]
   }
+}

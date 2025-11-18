@@ -1,21 +1,21 @@
 {
-    "question": "How can I benchmark Ask Fern's accuracy against my documentation?",
-    "ground_truth": "Fern provides an evaluation system that generates test questions from your documentation, runs them through both Ask Fern and competitor AI search solutions, then evaluates each answer against the original documentation for accuracy. You'll receive detailed performance metrics and comparative analysis. However, this feature is currently not generally available and requires contacting support@buildwithfern.com to get started.",
-    "metadata": {
-      "category": "markdown",
-      "source": "markdown_generator",
-      "slug": "evals",
-      "domain": "buildwithfern.com",
-      "cited_context": "Fern evaluates how accurately Ask Fern answers questions on your documentation site compared to competitor AI search solutions. Fern first generates evaluation questions from your documentation files, then runs those questions through both Ask Fern and competitor systems. Finally, Fern evaluates each answer against the original documentation for accuracy. You receive detailed performance metrics and comparative analysis. This feature is currently not yet generally available. Please email us at support@buildwithfern.com to get started."
-    },
-    "criteria": {
-        "citation": [
-          "https://buildwithfern.com/learn/ask-fern/features/evaluation"
-        ],
-        "correctness": [
-          "The answer should mention that Fern generates eval questions from documentation files.",
-          "The answer should mention that Fern evaluates each answer against the original documentation for accuracy.",
-          "The answer should mention that this feature is currently not generally available."
-        ]
-    }
+  "question": "How does AI chatbot benchmarking work? Are test questions based on real user queries or automatically created from the docs? Can I run comparisons myself or do you handle it?",
+  "ground_truth": "Fern provides a comprehensive evaluation system for measuring Ask Fern's accuracy compared to competitor AI search solutions. The system works by: 1) Generating evaluation questions directly from your documentation files (synthetically created based on the content structure and key concepts, not from user queries), 2) Running those questions through both Ask Fern and competitor AI search systems for comparative testing, and 3) Evaluating each answer against the original documentation for accuracy, providing detailed performance metrics and comparative analysis. This allows you to benchmark Ask Fern against competitors in a controlled, reproducible way. However, this feature is currently not generally available - it's offered as a managed service rather than self-serve. You need to email support@buildwithfern.com to get started, and Fern will help you set up and run the evaluation process.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "evals",
+    "domain": "buildwithfern.com",
+    "cited_context": "Fern evaluates how accurately Ask Fern answers questions on your documentation site compared to competitor AI search solutions. Fern first generates evaluation questions from your documentation files, then runs those questions through both Ask Fern and competitor systems. Finally, Fern evaluates each answer against the original documentation for accuracy. You receive detailed performance metrics and comparative analysis. This feature is currently not yet generally available. Please email us at support@buildwithfern.com to get started."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/ask-fern/features/evaluation"
+    ],
+    "correctness": [
+      "The answer should mention that Fern generates eval questions from documentation files.",
+      "The answer should mention that Fern evaluates each answer against the original documentation for accuracy.",
+      "The answer should mention that this feature is currently not generally available."
+    ]
   }
+}

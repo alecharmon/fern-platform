@@ -1,22 +1,22 @@
 {
-    "question": "How do I configure a global header that should be included in all API requests using OpenAPI?",
-    "ground_truth": "You can configure global headers in OpenAPI using two methods: 1) Add the x-fern-global-headers extension directly to your OpenAPI spec with the header configuration, or 2) Configure headers in the api block of your generators.yml file. Both methods allow you to specify header names, aliases, and whether they are optional.",
-    "metadata": {
-      "category": "markdown",
-      "source": "markdown_generator",
-      "slug": "configure-global-headers",
-      "domain": "buildwithfern.com",
-      "cited_context": "For OpenAPI specifications, you can configure global headers in two ways:\n\n#### Method 1: OpenAPI Spec Extension\n\nAdd global headers directly to your OpenAPI spec using the `x-fern-global-headers` extension to label additional headers as global or to alias the names of global headers:\n\n```yaml title=\"openapi.yml\"\nx-fern-global-headers:\n  - header: custom_api_key\n    name: api_key\n  - header: userpool_id\n    optional: true\n```\n\n#### Method 2: `generators.yml` Configuration\n\nAlternatively, you can add headers to the `api` block in your `generators.yml` file:\n\n```yaml title=\"generators.yml\"\napi:\n  - openapi: ./path/to/openapi\n    headers: \n      custom_api_key:\n        name: api_key\n        type: string\n      userpool_id:\n        name: userpool_id\n        type: optional<string>\n```"
-    },
-    "criteria": {
-        "citation": [
-          "https://buildwithfern.com/learn/sdks/deep-dives/global-headers"
-        ],
-        "correctness": [
-          "The answer must mention the `x-fern-global-headers` extension.",
-          "The answer must mention the `header` property in the api block of the generators.yml file.",
-          "The answer should include a code example of how to use the `x-fern-global-headers` extension.",
-          "The answer should include a code example of how to use the `api` block in the generators.yml file."
-        ]
-    }
+  "question": "We need to send two headers with every request - 'custom_api_key' (required) and 'userpool_id' (optional). How do I make libraries accept these once at setup and auto-include them? Can I use friendlier names like 'apiKey' instead of the actual header name?",
+  "ground_truth": "You can configure global headers using two approaches. Method 1 (recommended for your case): Add the `x-fern-global-headers` extension directly to your OpenAPI spec. This extension allows you to define headers with their properties including optional status and aliases. For example: `x-fern-global-headers: [{header: custom_api_key, name: api_key}, {header: userpool_id, optional: true}]`. The `header` field specifies the actual HTTP header name, `name` provides an alias for better SDK ergonomics (so 'custom_api_key' becomes 'apiKey' in the SDK), and `optional: true` marks headers as non-required. Method 2: Configure headers in the `api` block of your generators.yml file with similar syntax, specifying types like `string` or `optional<string>`. Both methods ensure the SDK accepts these headers once at client initialization and automatically includes them in all requests, but the OpenAPI extension keeps configuration closer to your spec.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "configure-global-headers",
+    "domain": "buildwithfern.com",
+    "cited_context": "For OpenAPI specifications, you can configure global headers in two ways:\n\n#### Method 1: OpenAPI Spec Extension\n\nAdd global headers directly to your OpenAPI spec using the `x-fern-global-headers` extension to label additional headers as global or to alias the names of global headers:\n\n```yaml title=\"openapi.yml\"\nx-fern-global-headers:\n  - header: custom_api_key\n    name: api_key\n  - header: userpool_id\n    optional: true\n```\n\n#### Method 2: `generators.yml` Configuration\n\nAlternatively, you can add headers to the `api` block in your `generators.yml` file:\n\n```yaml title=\"generators.yml\"\napi:\n  - openapi: ./path/to/openapi\n    headers: \n      custom_api_key:\n        name: api_key\n        type: string\n      userpool_id:\n        name: userpool_id\n        type: optional<string>\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/deep-dives/global-headers"
+    ],
+    "correctness": [
+      "The answer must mention the `x-fern-global-headers` extension.",
+      "The answer must mention the `header` property in the api block of the generators.yml file.",
+      "The answer should include a code example of how to use the `x-fern-global-headers` extension.",
+      "The answer should include a code example of how to use the `api` block in the generators.yml file."
+    ]
   }
+}

@@ -1,21 +1,21 @@
 {
-    "question": "How can I change the URL slug for a specific page in my Fern documentation?",
-    "ground_truth": "You can change the URL slug for a specific page in Fern documentation in two ways: 1) Set the `slug` property within the `navigation` object in your docs.yml file for that page, or 2) Override the page's slug by setting it in the frontmatter of the markdown file itself using the `slug` property.",
-    "metadata": {
-      "category": "markdown",
-      "source": "markdown_generator",
-      "slug": "configuring-slugs",
-      "domain": "buildwithfern.com",
-      "cited_context": "To modify the slug used for a page or section, you can set the `slug` within the `navigation` object. \n\n```yaml {{3, 6}}\nnavigation:\n  - section: Get Started\n    slug: start\n    contents: \n      - page: Welcome \n        slug: intro\n        path: ./docs/pages/welcome.mdx\n```\n\nIn the example above, the **Welcome** page would be hosted at `plantstore.docs.buildwithfern.com/start/intro`. \n\n#### Override a page's slug\nYou can set the exact slug of a page within its frontmatter. [You can read more about the frontmatter configuration here](/learn/docs/configuration/page-level-settings#slug). \n\n```yaml title=\"docs.yml\"\nnavigation:\n  - section: Get Started\n    slug: start\n    contents: \n      - page: Quick Start \n        path: ./docs/pages/quick-start.mdx\n```\n\nYou can set the slug in the frontmatter of `./docs/pages/quick-start.mdx` to `start-up`:\n\n```markdown title=\"quick-start.mdx\" {{2}}\n---\nslug: start-up\n---\n```\n\nThe page then becomes available at `plantstore.docs.buildwithfern.com/start-up`."
-    },
-    "criteria": {
-        "citation": [
-          "https://buildwithfern.com/learn/docs/seo/configuring-slugs"
-        ],
-        "correctness": [
-          "The answer must mention the `slug` property in the `navigation` object in the `docs.yml` file.",
-          "The answer must mention the `slug` property in the frontmatter of the markdown file.",
-          "The answer should include a code example of how to use the `slug` property in the `navigation` object in the `docs.yml` file."
-        ]
-    }
+  "question": "How do I control the URLs for pages and sections? If I define the URL in two places, which one wins? Do parent section URLs affect the URLs of pages inside them?",
+  "ground_truth": "You can control URL slugs at two levels: 1) Set the `slug` property in the `navigation` object in your docs.yml file for sections or pages, and 2) Override a page's slug in the frontmatter of the markdown file itself using the `slug` property. If you set slugs in both places for the same page, the frontmatter slug takes precedence over the docs.yml configuration, giving you page-level override capability. For sections, when you set a section slug (like `slug: start` for 'Get Started'), it affects the URL path - child pages inherit the section's slug as part of their path (e.g., a page in the 'Get Started' section would be at `/start/page-name`). However, a page can use a frontmatter slug to completely override its URL path, breaking out of the section hierarchy if needed (so you could have a page at `/start-up` even if it's in a different section).",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "configuring-slugs",
+    "domain": "buildwithfern.com",
+    "cited_context": "To modify the slug used for a page or section, you can set the `slug` within the `navigation` object. \n\n```yaml {{3, 6}}\nnavigation:\n  - section: Get Started\n    slug: start\n    contents: \n      - page: Welcome \n        slug: intro\n        path: ./docs/pages/welcome.mdx\n```\n\nIn the example above, the **Welcome** page would be hosted at `plantstore.docs.buildwithfern.com/start/intro`. \n\n#### Override a page's slug\nYou can set the exact slug of a page within its frontmatter. [You can read more about the frontmatter configuration here](/learn/docs/configuration/page-level-settings#slug). \n\n```yaml title=\"docs.yml\"\nnavigation:\n  - section: Get Started\n    slug: start\n    contents: \n      - page: Quick Start \n        path: ./docs/pages/quick-start.mdx\n```\n\nYou can set the slug in the frontmatter of `./docs/pages/quick-start.mdx` to `start-up`:\n\n```markdown title=\"quick-start.mdx\" {{2}}\n---\nslug: start-up\n---\n```\n\nThe page then becomes available at `plantstore.docs.buildwithfern.com/start-up`."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/seo/configuring-slugs"
+    ],
+    "correctness": [
+      "The answer must mention the `slug` property in the `navigation` object in the `docs.yml` file.",
+      "The answer must mention the `slug` property in the frontmatter of the markdown file.",
+      "The answer should include a code example of how to use the `slug` property in the `navigation` object in the `docs.yml` file."
+    ]
   }
+}

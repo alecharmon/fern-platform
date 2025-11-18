@@ -1,21 +1,21 @@
 {
-    "question": "How can I create a button with both a left and right icon in the Button component?",
-    "ground_truth": "To create a button with both a left and right icon, you can use the `icon` prop for the left icon and the `rightIcon` prop for the right icon. For example: `<Button icon=\"star\" rightIcon=\"arrow-right\">Favorite</Button>` will create a button with a star icon on the left and an arrow icon on the right.",
-    "metadata": {
-      "category": "markdown",
-      "source": "markdown_generator",
-      "slug": "button",
-      "domain": "buildwithfern.com",
-      "cited_context": "### With icons\n\n<div className=\"highlight-frame\">\n  <div className=\"highlight-frame-content\">\n    <div className=\"flex flex-wrap gap-2\">\n      <Button icon=\"download\">Download</Button>\n      <Button rightIcon=\"arrow-right\">Continue</Button>\n      <Button icon=\"star\" rightIcon=\"arrow-right\">Favorite</Button>\n    </div>\n  </div>\n</div>\n\n```jsx Markdown\n<Button icon=\"download\">Download</Button>\n<Button rightIcon=\"arrow-right\">Continue</Button>\n<Button icon=\"star\" rightIcon=\"arrow-right\">Favorite</Button>\n```"
-    },
-    "criteria": {
-        "citation": [
-          "https://buildwithfern.com/learn/docs/writing-content/components/button"
-        ],
-        "correctness": [
-          "The answer must mention the `icon` prop.",
-          "The answer must mention the `rightIcon` prop.",
-          "The answer should contain a code example of how to use both properties."
-        ]
-      }
+  "question": "Can I put different icons on both sides of a button - like an eye on the left and an arrow on the right? What properties control this and which icons are available?",
+  "ground_truth": "Yes, you can add icons to both ends of a button using the `icon` prop for the left side and the `rightIcon` prop for the right side. For example: `<Button icon=\"eye\" rightIcon=\"arrow-right\">Preview</Button>` creates a button with an eye icon on the left and an arrow icon on the right, flanking the text. You can mix and match any icon names - they don't have to be the same. The icon names reference Fern's built-in icon library, which includes common icons like 'download', 'arrow-right', 'star', 'eye', etc. You can use any available icon from this library for either prop, giving you flexibility to combine different icons to communicate the button's action effectively.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "button",
+    "domain": "buildwithfern.com",
+    "cited_context": "### With icons\n\n<div className=\"highlight-frame\">\n  <div className=\"highlight-frame-content\">\n    <div className=\"flex flex-wrap gap-2\">\n      <Button icon=\"download\">Download</Button>\n      <Button rightIcon=\"arrow-right\">Continue</Button>\n      <Button icon=\"star\" rightIcon=\"arrow-right\">Favorite</Button>\n    </div>\n  </div>\n</div>\n\n```jsx Markdown\n<Button icon=\"download\">Download</Button>\n<Button rightIcon=\"arrow-right\">Continue</Button>\n<Button icon=\"star\" rightIcon=\"arrow-right\">Favorite</Button>\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/writing-content/components/button"
+    ],
+    "correctness": [
+      "The answer must mention the `icon` prop.",
+      "The answer must mention the `rightIcon` prop.",
+      "The answer should contain a code example of how to use both properties."
+    ]
   }
+}
