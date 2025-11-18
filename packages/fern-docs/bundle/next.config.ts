@@ -180,7 +180,7 @@ const nextConfig: NextConfig = {
             },
             {
                 key: "Access-Control-Allow-Methods",
-                value: "POST, OPTIONS"
+                value: "GET, POST, OPTIONS"
             },
             {
                 key: "Access-Control-Allow-Headers",
@@ -231,6 +231,10 @@ const nextConfig: NextConfig = {
             {
                 source: "/:prefix*/api/fern-docs/auth/:path*",
                 headers: AccessControlHeaders
+            },
+            {
+                source: "/api/fern-docs/search/v2/:path*",
+                headers: searchV2Headers
             },
             {
                 source: "/:prefix*/api/fern-docs/search/v2/:path*",

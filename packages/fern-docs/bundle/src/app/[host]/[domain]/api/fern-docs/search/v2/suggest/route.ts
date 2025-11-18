@@ -18,6 +18,17 @@ import { getFaiClient } from "@/getFaiClient";
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
+export async function OPTIONS(_: NextRequest): Promise<NextResponse> {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*"
+        }
+    });
+}
+
 const CACHE_HIT_THRESHOLD_MS = 100;
 
 const BodySchema = z.object({

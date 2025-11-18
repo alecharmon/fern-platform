@@ -26,6 +26,17 @@ import { getFaiClient } from "@/getFaiClient";
 export const maxDuration = 60;
 export const revalidate = 0;
 
+export async function OPTIONS(_: NextRequest): Promise<NextResponse> {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*"
+        }
+    });
+}
+
 export async function POST(req: NextRequest) {
     if (isLocal() || isSelfHosted()) {
         return NextResponse.json("Ask Fern is not available in local preview mode or self-hosted mode", {
