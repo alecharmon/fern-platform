@@ -1,0 +1,16 @@
+{
+    "question": "Can you describe what Docs features were released on May 2, 2025?",
+    "ground_truth": "The 2025-05-02 release introduced the following changes:\n- feat(cli): using fern docs dev on the latest CLI will now better reflect the docs in production\n- feat(search): the search UX now uses infinite scroll and allows for searching based on breadcrumb paths\n- fix(ai): small bug fixes to the AI chat experience",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "docs-2025-05-02",
+        "domain": "buildwithfern.com",
+        "cited_context": "- feat(cli): using `fern docs dev` on the latest CLI will now better reflect the docs in production\n- feat(search): the search UX now uses infinite scroll and allows for searching based on breadcrumb paths\n- fix(ai): small bug fixes to the AI chat experience"
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/docs/changelog/2025/5/2"
+        ]
+    }
+}

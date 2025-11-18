@@ -1,0 +1,16 @@
+{
+    "question": "What streaming bug was fixed in the Go SDK on January 3, 2025?",
+    "ground_truth": "The January 3, 2025 Go SDK release version 0.35.1 fixed an issue where the delimiter length was included during stream data read even when the delimiter was missing, which led to a bufio.ErrAdvanceTooFar error.",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "go-sdk-2025-01-03",
+        "domain": "buildwithfern.com",
+        "cited_context": "## 0.35.1\n**`(fix):`** Fixes an issue where the delimiter length was included during stream data read, even when the delimiter was missing, leading to a `bufio.ErrAdvanceTooFar` error"
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/sdks/go/changelog/2025/1/3"
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "question": "What new features were added to the Go SDK on November 8, 2024?",
+    "ground_truth": "The November 8, 2024 Go SDK release included the following changes:\n- Version 0.30.0: Added support for nil-safe getter methods, allowing callers to more easily access nested properties by chaining together getter method calls instead of a long series of != nil checks.\n- Version 0.29.0: All SDKs now include an exported FileParam type that can be used to configure the Content-Type of file upload properties. Also fixed an issue where multipart/form-data lists were incorrectly serialized as JSON - they are now added as individual parts. Internally refactored file upload endpoint generation with the new core.MultipartWriter.",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "go-sdk-2024-11-08",
+        "domain": "buildwithfern.com",
+        "cited_context": "## 0.30.0\n**`(feat):`** Add support for nil-safe getter methods. Callers can more easily access nested properties by chaining together getter method calls instead of a long series of `!= nil` checks.\n\n## 0.29.0\n**`(feat):`** All SDKs now include an exported `FileParam` type that can be used to configure the `Content-Type` of file upload properties.\n\n**`(fix):`** Resolves an issue where multipart/form-data lists were incorrectly serialized as JSON. They are now added as individual parts.\n\n**`(internal):`** Refactor file upload endpoint generation with the new `core.MultipartWriter`. This significantly improves the aesthetics of the generated code."
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/sdks/go/changelog/2024/11/8"
+        ]
+    }
+}

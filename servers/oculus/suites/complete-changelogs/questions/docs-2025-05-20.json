@@ -1,0 +1,16 @@
+{
+    "question": "What Docs updates were made on May 20th, 2025?",
+    "ground_truth": "The 2025-05-20 release introduced the following changes:\n- feat: improvements to local preview mode, including support for custom javascript and bug fixes for reloading performance issues\n- minor bugfixes and improvements to AI search",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "docs-2025-05-20",
+        "domain": "buildwithfern.com",
+        "cited_context": "- feat: improvements to local preview mode, including support for custom javascript and bug fixes for reloading performance issues.\n- minor bugfixes and improvements to AI search"
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/docs/changelog/2025/5/20"
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "question": "What file upload capability was added to the PHP SDK on October 30, 2024?",
+    "ground_truth": "The October 30, 2024 PHP SDK release version 0.2.0 added support for multipart file uploads.",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "php-sdk-2024-10-30",
+        "domain": "buildwithfern.com",
+        "cited_context": "## 0.2.0\n**`(feat):`** Add support for multipart file uploads."
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/sdks/php/changelog/2024/10/30"
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "question": "What Docs improvements were made in the August 2024 release?",
+    "ground_truth": "The 2024-08-20 release introduced the following changes:\n- Anchor Link System: Redesigned anchor link handling for improved navigation within documentation pages.\n- WCAG Contrast Improvements: Enhanced color contrast throughout the documentation platform for better accessibility.\n- API Page Center Updates: Improved center element positioning and updates for API documentation pages.\n- Streaming Toggle Enhancement: Improved visibility and behavior of streaming response toggles in API playground.",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "docs-2024-08-20",
+        "domain": "buildwithfern.com",
+        "cited_context": "# August 2024\n\n## Anchor Link System\nRedesigned anchor link handling for improved navigation within documentation pages. Links now account for fixed headers and maintain proper scroll position when opened.\n\n## WCAG Contrast Improvements\nEnhanced color contrast throughout the documentation platform for better accessibility. All text and interactive elements now meet WCAG AA standards by default and warnings are shown for any elements that do not meet WCAG AA standards.\n\n## API Page Center Updates\nImproved center element positioning and updates for API documentation pages. Content now flows more naturally and maintains position during navigation.\n\n## Streaming Toggle Enhancement\nImproved visibility and behavior of streaming response toggles in API playground. Users can now better control and monitor streaming responses."
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/docs/changelog/2024/8/20"
+        ]
+    }
+}

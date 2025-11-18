@@ -1,0 +1,16 @@
+{
+    "question": "What was new in Docs on December 30, 2024?",
+    "ground_truth": "The 2024-12-30 release introduced the following changes:\n- Audio Streaming in API Explorer: Added support for streaming audio directly within the API Explorer.\n- Form Data Optimization: Enhanced handling of URL parameters and form data in edge functions.",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "docs-2024-12-30",
+        "domain": "buildwithfern.com",
+        "cited_context": "## Audio Streaming in API Explorer\nAdded support for streaming audio directly within the API Explorer. This feature enables testing audio endpoints without leaving the documentation. \n\nCheck it out live in ElevenLabs' [API Explorer](https://elevenlabs.io/docs/api-reference/text-to-speech/convert?playground=/docs/api-reference/text-to-speech/convert-as-stream) to let users test text-to-speech endpoints and hear the results instantly.\n\n## Form Data Optimization\nEnhanced handling of URL parameters and form data in edge functions. Documentation playground now handles complex data structures more efficiently.\n\n```typescript\nconst formConfig = {\n  encoding: 'application/x-www-form-urlencoded',\n  arrayFormat: 'brackets',\n  allowNullables: true,\n  sanitize: true,\n  maxDepth: 5\n}\n```"
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/docs/changelog/2024/12/30"
+        ]
+    }
+}

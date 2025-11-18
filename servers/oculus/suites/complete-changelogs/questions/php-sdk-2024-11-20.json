@@ -1,0 +1,16 @@
+{
+    "question": "What was fixed in the PHP SDK on November 20, 2024?",
+    "ground_truth": "The November 20, 2024 PHP SDK release version 0.2.1 fixed an issue by overriding escaped method names in the generated client.",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "php-sdk-2024-11-20",
+        "domain": "buildwithfern.com",
+        "cited_context": "## 0.2.1\n**`(fix):`** Override escaped method names in the generated client."
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/sdks/php/changelog/2024/11/20"
+        ]
+    }
+}

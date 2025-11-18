@@ -1,0 +1,16 @@
+{
+    "question": "Summarize the Fern Docs May 22, 2025 release",
+    "ground_truth": "The 2025-05-22 release introduced the following changes:\n- Improvements to 404 Pages: Themed 404 pages now use your theme colors, fonts, and buttons, with best-effort navigation state maintained on the page.",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "docs-2025-05-22",
+        "domain": "buildwithfern.com",
+        "cited_context": "## Improvements to 404 Pages\nWe now have themed 404 pages for your docs, using your theme colors, fonts, and buttons. We also maintain the best-effort\nnavigation state on this page using the 404 page URL, so that users can easily navigate back to your docs.\n\n<Frame>\n![404 Page](./404-page.png)\n</Frame>"
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/docs/changelog/2025/5/22"
+        ]
+    }
+}

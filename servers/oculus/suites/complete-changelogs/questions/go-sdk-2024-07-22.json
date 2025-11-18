@@ -1,0 +1,16 @@
+{
+    "question": "What error handling fix was released in the Go SDK changelog on July 22, 2024?",
+    "ground_truth": "The July 22, 2024 Go SDK release version 0.22.3 fixed an issue where APIs that specify the property-name error discrimination strategy would receive JSON decode errors instead of the server's error.",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "go-sdk-2024-07-22",
+        "domain": "buildwithfern.com",
+        "cited_context": "## 0.22.3\n**`(fix):`** Fix an issue where APIs that specify the `property-name` error discrimination strategy would receive JSON decode errors instead of the server's error."
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/sdks/go/changelog/2024/7/22"
+        ]
+    }
+}

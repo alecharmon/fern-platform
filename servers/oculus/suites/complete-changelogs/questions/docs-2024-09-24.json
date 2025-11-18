@@ -1,0 +1,16 @@
+{
+    "question": "List the Fern Docs changes from September 24, 2024",
+    "ground_truth": "The 2024-09-24 release introduced the following changes:\n- Environment Testing Interface: Created an editable playground environment system for testing API endpoints.",
+    "metadata": {
+        "category": "changelogs",
+        "source": "handwritten",
+        "slug": "docs-2024-09-24",
+        "domain": "buildwithfern.com",
+        "cited_context": "# September 2024\n\n## Environment Testing Interface\nCreated an editable playground environment system for testing API endpoints. Users can now switch between different API environments seamlessly within the documentation.\n\n```yaml openapi.yml\nservers:\n  - url: https://api.example.com\n    x-fern-server-name: Production\n  - url: https://sandbox.example.com\n    x-fern-server-name: Sandbox\n```"
+    },
+    "criteria": {
+        "citation": [
+            "https://buildwithfern.com/learn/docs/changelog/2024/9/24"
+        ]
+    }
+}
