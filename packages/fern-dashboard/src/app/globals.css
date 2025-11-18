@@ -754,13 +754,6 @@ why? who knows. thanks monaco:)
   }
 }
 
-code:not(.code-block) {
-  @apply ring-border text-primary rounded-md bg-gray-100 px-1 py-0.5 font-mono ring-1 ring-inset;
-  @apply text-[0.875em];
-
-  font-weight: inherit;
-}
-
 /* Resizable panels cursor */
 [data-resize-handle-state] {
   cursor: ew-resize !important;

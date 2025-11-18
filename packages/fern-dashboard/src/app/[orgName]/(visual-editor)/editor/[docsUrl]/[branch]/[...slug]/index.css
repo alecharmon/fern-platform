@@ -24,6 +24,12 @@
 
   transform: translateX(0%);
 
+  /* Typography tokens scoped to preview - use domain-specific theme colors */
+  --tw-prose-code: var(--accent-a11);
+  --tw-prose-code-bg: var(--accent-a3);
+  --tw-prose-links: var(--accent-a11);
+  --tw-prose-quote-borders: var(--accent-a6);
+
   .fern-background-image {
     overflow: hidden;
     position: absolute;
@@ -140,6 +146,12 @@
   code:not(.code-block)::before,
   code:not(.code-block)::after {
     content: "" !important;
+  }
+
+  /* Inline code styling scoped to preview - use domain-specific theme colors */
+  :where(.prose) :where(:not(pre) > code) {
+    color: var(--accent-a11);
+    background-color: var(--color-card-background);
   }
 
   /* Fix Step component padding and paragraph margins to match rendered docs */
