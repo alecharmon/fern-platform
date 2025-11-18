@@ -36,6 +36,7 @@ function toIdQuerySelector(id: string): string {
 export function useTableOfContentsObserver(ids: string[], setActiveId: (id: string | undefined) => void): () => void {
     const idToYRef = useRef<Record<string, number>>({});
     const root = useAtomValue(SCROLL_BODY_ATOM);
+    const rafIdRef = useRef<number | null>(null);
 
     /**
      * on every scroll event, measure the top Y position of each element and determine
@@ -130,15 +131,87 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
             return;
         }
         const observer = new ResizeObserver(measure);
-        root.addEventListener("scroll", measure);
+
+        // Throttle scroll handler with requestAnimationFrame to process once per frame
+        const handleScroll = () => {
+            if (rafIdRef.current == null) {
+                rafIdRef.current = requestAnimationFrame(() => {
+                    rafIdRef.current = null;
+                    take();
+                });
+            }
+        };
+
+        // Handle hash changes (e.g., when clicking TOC links) to scroll to anchors within the correct scroll container
+        const handleHashChange = () => {
+            const hash = window.location.hash.slice(1);
+            if (!hash || !ids.includes(hash)) {
+                return;
+            }
+
+            // Remeasure positions in case layout changed, then scroll to the target
+            fastdom.measure(() => {
+                const targetElement = document.getElementById(hash);
+                if (!targetElement) {
+                    return;
+                }
+
+                // Remeasure positions before scrolling
+                const scrollY = root instanceof Document ? window.scrollY : root.scrollTop;
+                const top = root instanceof Document ? 0 : root.getBoundingClientRect().top;
+                try {
+                    idToYRef.current = Array.from(
+                        document.querySelectorAll(
+                            ids
+                                .filter((id) => id.trim().length > 0)
+                                .map(toIdQuerySelector)
+                                .join(", ")
+                        )
+                    ).reduce<Record<string, number>>((prev, curr) => {
+                        prev[curr.id] = curr.getBoundingClientRect().top + scrollY - top;
+                        return prev;
+                    }, {});
+                } catch (e) {
+                    console.error("Error measuring table of contents on hash change", e);
+                }
+
+                // Scroll to the target element within the correct scroll container
+                fastdom.mutate(() => {
+                    if (root instanceof Document) {
+                        targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+                    } else {
+                        // For custom scroll containers, calculate the scroll position
+                        const containerRect = root.getBoundingClientRect();
+                        const targetRect = targetElement.getBoundingClientRect();
+                        const scrollTop = root.scrollTop + targetRect.top - containerRect.top;
+                        root.scrollTo({ top: scrollTop, behavior: "smooth" });
+                    }
+                });
+            });
+        };
+
+        // Use throttled handler for scroll events (reads cached positions) instead of 'measure' (expensive DOM queries)
+        root.addEventListener("scroll", handleScroll, { passive: true });
+        window.addEventListener("hashchange", handleHashChange);
         observer.observe(root instanceof Document ? document.body : root);
         window.addEventListener("resize", measure);
+
+        // Also handle initial hash on mount
+        if (window.location.hash) {
+            handleHashChange();
+        }
+
         return () => {
             observer.disconnect();
-            root.removeEventListener("scroll", measure);
+            root.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("hashchange", handleHashChange);
             window.removeEventListener("resize", measure);
+            if (rafIdRef.current != null) {
+                cancelAnimationFrame(rafIdRef.current);
+                rafIdRef.current = null;
+            }
         };
-    }, [measure, root]);
+    }, [measure, take, root, ids]);
 
     return measure;
 }
