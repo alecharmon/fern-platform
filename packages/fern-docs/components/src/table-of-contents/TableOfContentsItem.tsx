@@ -2,7 +2,7 @@
 
 import { memo, type ReactElement, useEffect, useRef } from "react";
 import { cn } from "../cn";
-import { FernLink } from "../FernLink";
+import { HashLink } from "./HashLink";
 
 export interface TableOfContentsItemProps {
     text: string;
@@ -23,7 +23,7 @@ export const TableOfContentsItem = memo<TableOfContentsItemProps>((props): React
 
     return (
         <li className="mb-2 last:mb-0" ref={ref} data-depth={depth}>
-            <FernLink
+            <HashLink
                 className={cn("block break-words text-sm transition-colors hover:transition-none", {
                     "text-(color:--grayscale-a11) hover:text-(color:--grayscale-a12)": !active,
                     "text-(color:--accent-a11) font-semibold tracking-tight": active
@@ -34,7 +34,7 @@ export const TableOfContentsItem = memo<TableOfContentsItemProps>((props): React
                 }}
             >
                 {text}
-            </FernLink>
+            </HashLink>
         </li>
     );
 });

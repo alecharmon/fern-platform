@@ -142,7 +142,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
             }
         };
 
-        // Handle hash changes (e.g., when clicking TOC links) to scroll to anchors within the correct scroll container
+        // Handle hash changes (e.g., when clicking TOC links or using browser back/forward)
         const handleHashChange = () => {
             const hash = window.location.hash.slice(1);
             if (!hash || !ids.includes(hash)) {
@@ -178,14 +178,19 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
                 // Scroll to the target element within the correct scroll container
                 fastdom.mutate(() => {
                     if (root instanceof Document) {
-                        targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+                        targetElement.scrollIntoView({ behavior: "instant" });
                     } else {
                         // For custom scroll containers, calculate the scroll position
                         const containerRect = root.getBoundingClientRect();
                         const targetRect = targetElement.getBoundingClientRect();
                         const scrollTop = root.scrollTop + targetRect.top - containerRect.top;
-                        root.scrollTo({ top: scrollTop, behavior: "smooth" });
+                        root.scrollTo({ top: scrollTop, behavior: "instant" });
                     }
+                });
+
+                // Update active ID after scroll
+                requestAnimationFrame(() => {
+                    take();
                 });
             });
         };
@@ -196,9 +201,16 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
         observer.observe(root instanceof Document ? document.body : root);
         window.addEventListener("resize", measure);
 
-        // Also handle initial hash on mount
-        if (window.location.hash) {
-            handleHashChange();
+        // Measure positions on initial mount
+        measure();
+
+        // Handle initial hash on page load (browser auto-scroll may not work with custom scroll containers)
+        const initialHash = window.location.hash.slice(1);
+        if (initialHash && ids.includes(initialHash)) {
+            // Wait for measurement to complete, then scroll to hash
+            requestAnimationFrame(() => {
+                handleHashChange();
+            });
         }
 
         return () => {
