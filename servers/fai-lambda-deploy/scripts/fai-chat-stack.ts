@@ -30,8 +30,13 @@ export class FaiChatStack extends Stack {
 
         const lambdaName = "fai-chat";
 
+        // Use unique log group name for preview deployments
+        const logGroupName = previewOptions?.isPreview
+            ? `/aws/lambda/${lambdaName}-preview-${previewOptions.prNumber}`
+            : `/aws/lambda/${lambdaName}-${environmentType.toLowerCase()}`;
+
         const logGroup = new LogGroup(this, "log-group", {
-            logGroupName: `/aws/lambda/${lambdaName}-${environmentType.toLowerCase()}`,
+            logGroupName,
             retention: RetentionDays.ONE_MONTH,
             removalPolicy: RemovalPolicy.DESTROY
         });
@@ -57,7 +62,10 @@ export class FaiChatStack extends Stack {
             allowAllOutbound: true
         });
 
-        const functionName = `${lambdaName}-${environmentType.toLowerCase()}`;
+        // Use unique function name for preview deployments
+        const functionName = previewOptions?.isPreview
+            ? `${lambdaName}-preview-${previewOptions.prNumber}`
+            : `${lambdaName}-${environmentType.toLowerCase()}`;
 
         const lambdaFunction = new lambda.DockerImageFunction(this, `${lambdaName}-lambda-function`, {
             functionName,

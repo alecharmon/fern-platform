@@ -2,6 +2,7 @@ name: Preview FAI Lambda
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     paths:
       - "servers/fai-lambda/fai-chat/**"
       - "servers/fai-lambda-deploy/**"
@@ -23,6 +24,7 @@ env:
 jobs:
   preview_chat_lambda:
     runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
     environment: Fern Dev
     strategy:
       matrix:
