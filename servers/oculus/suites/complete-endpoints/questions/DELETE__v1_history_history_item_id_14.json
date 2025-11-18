@@ -1,0 +1,12 @@
+{
+  "question": "What parameters are optional for the DELETE /v1/history/{history_item_id} endpoint?",
+  "ground_truth": "{\n  \"tags\": [\n    \"speech-history\"\n  ],\n  \"summary\": \"Delete History Item\",\n  \"description\": \"Delete a history item by its ID\",\n  \"operationId\": \"delete_speech_history_item\",\n  \"parameters\": [\n    {\n      \"name\": \"history_item_id\",\n      \"in\": \"path\",\n      \"required\": true,\n      \"schema\": {\n        \"type\": \"string\",\n        \"description\": \"History item ID to be used, you can use GET https://api.elevenlabs.io/v1/history to receive a list of history items and their IDs.\",\n        \"examples\": [\n          \"VW7YKqPnjY4h39yTbx2L\"\n        ],\n        \"title\": \"History Item Id\"\n      },\n      \"description\": \"History item ID to be used, you can use GET https://api.elevenlabs.io/v1/history to receive a list of history items and their IDs.\"\n    },\n    {\n      \"name\": \"xi-api-key\",\n      \"in\": \"header\",\n      \"required\": false,\n      \"schema\": {\n        \"anyOf\": [\n          {\n            \"type\": \"string\"\n          },\n          {\n            \"type\": \"null\"\n          }\n        ],\n        \"description\": \"Your API key. This is required by most endpoints to access our API programmatically. You can view your xi-api-key using the 'Profile' tab on the website.\",\n        \"title\": \"Xi-Api-Key\"\n      },\n      \"description\": \"Your API key. This is required by most endpoints to access our API programmatically. You can view your xi-api-key using the 'Profile' tab on the website.\"\n    }\n  ],\n  \"responses\": {\n    \"200\": {\n      \"description\": \"Successful Response\",\n      \"content\": {\n        \"application/json\": {\n          \"schema\": {\n            \"$ref\": \"#/components/schemas/DeleteHistoryItemResponse\"\n          }\n        }\n      }\n    },\n    \"422\": {\n      \"description\": \"Validation Error\",\n      \"content\": {\n        \"application/json\": {\n          \"schema\": {\n            \"$ref\": \"#/components/schemas/HTTPValidationError\"\n          }\n        }\n      }\n    }\n  },\n  \"x-fern-sdk-group-name\": \"history\",\n  \"x-fern-sdk-method-name\": \"delete\"\n}",
+  "metadata": {
+    "category": "api",
+    "source": "openapi_generator",
+    "method": "DELETE",
+    "path": "/v1/history/{history_item_id}",
+    "slug": "DELETE__v1_history_history_item_id_14"
+  },
+  "criteria": null
+}
