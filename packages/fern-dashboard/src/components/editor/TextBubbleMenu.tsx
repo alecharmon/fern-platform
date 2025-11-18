@@ -28,7 +28,13 @@ const NODE_TYPE_CONFIG: Record<NodeType, { icon: IconName; label: string }> = {
     heading4: { icon: "Heading4", label: "Heading 4" }
 };
 
-export default function TextBubbleMenu() {
+export declare namespace TextBubbleMenu {
+    export interface Props {
+        disableNodeTypeSwitching?: boolean;
+    }
+}
+
+export default function TextBubbleMenu({ disableNodeTypeSwitching = false }: TextBubbleMenu.Props = {}) {
     const { editor } = useCurrentEditor();
     const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
     const [headingDropdownOpen, setHeadingDropdownOpen] = useState(false);
@@ -140,50 +146,58 @@ export default function TextBubbleMenu() {
             }}
         >
             <div className="border-1 rounded-3 text-gray-1100 flex items-center gap-px border-gray-500 bg-white p-0.5 shadow-sm">
-                <Popover open={headingDropdownOpen} onOpenChange={setHeadingDropdownOpen}>
-                    <PopoverTrigger asChild>
-                        <button
-                            className="rounded-2 flex cursor-pointer items-center gap-1 p-1 transition-colors hover:bg-gray-300 hover:transition-none"
-                            onMouseDown={(e) => e.preventDefault()}
-                        >
-                            <div className="flex size-6 items-center justify-center">
-                                <Icon variant={currentConfig.icon} size={16} />
-                            </div>
-                            <Icon variant="ChevronDown" size={12} />
-                        </button>
-                    </PopoverTrigger>
-                    <PopoverPortal>
-                        <PopoverContent
-                            className="w-48 p-1"
-                            side="bottom"
-                            sideOffset={8}
-                            onOpenAutoFocus={(e) => e.preventDefault()}
-                            onCloseAutoFocus={(e) => e.preventDefault()}
-                        >
-                            <ButtonGroup className="gap-px">
-                                {(Object.keys(NODE_TYPE_CONFIG) as NodeType[]).map((nodeType) => {
-                                    const config = NODE_TYPE_CONFIG[nodeType];
-                                    const isActive = currentNodeType === nodeType;
+                {!disableNodeTypeSwitching && (
+                    <>
+                        <Popover open={headingDropdownOpen} onOpenChange={setHeadingDropdownOpen}>
+                            <PopoverTrigger asChild>
+                                <button
+                                    className="rounded-2 flex cursor-pointer items-center gap-1 p-1 transition-colors hover:bg-gray-300 hover:transition-none"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                >
+                                    <div className="flex size-6 items-center justify-center">
+                                        <Icon variant={currentConfig.icon} size={16} />
+                                    </div>
+                                    <Icon variant="ChevronDown" size={12} />
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverPortal>
+                                <PopoverContent
+                                    className="w-48 p-1"
+                                    side="bottom"
+                                    sideOffset={8}
+                                    onOpenAutoFocus={(e) => e.preventDefault()}
+                                    onCloseAutoFocus={(e) => e.preventDefault()}
+                                >
+                                    <ButtonGroup className="gap-px">
+                                        {(Object.keys(NODE_TYPE_CONFIG) as NodeType[]).map((nodeType) => {
+                                            const config = NODE_TYPE_CONFIG[nodeType];
+                                            const isActive = currentNodeType === nodeType;
 
-                                    return (
-                                        <Button
-                                            key={nodeType}
-                                            className="cursor-pointer"
-                                            data-style="ghost"
-                                            data-active-state={isActive ? "on" : "off"}
-                                            onClick={() => setNodeType(nodeType)}
-                                            onMouseDown={(e) => e.preventDefault()}
-                                        >
-                                            <Icon variant={config.icon} className="tiptap-button-icon" size={16} />
-                                            <div className="tiptap-button-text">{config.label}</div>
-                                        </Button>
-                                    );
-                                })}
-                            </ButtonGroup>
-                        </PopoverContent>
-                    </PopoverPortal>
-                </Popover>
-                <BubbleMenuSeparator />
+                                            return (
+                                                <Button
+                                                    key={nodeType}
+                                                    className="cursor-pointer"
+                                                    data-style="ghost"
+                                                    data-active-state={isActive ? "on" : "off"}
+                                                    onClick={() => setNodeType(nodeType)}
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                >
+                                                    <Icon
+                                                        variant={config.icon}
+                                                        className="tiptap-button-icon"
+                                                        size={16}
+                                                    />
+                                                    <div className="tiptap-button-text">{config.label}</div>
+                                                </Button>
+                                            );
+                                        })}
+                                    </ButtonGroup>
+                                </PopoverContent>
+                            </PopoverPortal>
+                        </Popover>
+                        <BubbleMenuSeparator />
+                    </>
+                )}
                 <BubbleMenuItem iconProps={{ variant: "Bold" }} onClick={menuItemClickHandler("toggleBold")} />
                 <BubbleMenuItem iconProps={{ variant: "Italic" }} onClick={menuItemClickHandler("toggleItalic")} />
                 <BubbleMenuItem
