@@ -57,7 +57,8 @@ const dataAttributeNodeTypes = [
     "orderedList",
     "listItem",
     "taskList",
-    "taskItem"
+    "taskItem",
+    "table"
 ];
 
 // Configure Tiptap extensions
@@ -117,7 +118,7 @@ const extensions = [
                 return `Header ${level}`;
             }
 
-            if (node.type.name === "bulletList" || node.type.name === "orderedList" || node.type.name === "taskItem") {
+            if (node.type.name === "bulletList" || node.type.name === "orderedList" || node.type.name === "taskList") {
                 return "List";
             }
 
