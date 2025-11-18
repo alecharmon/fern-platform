@@ -15,6 +15,7 @@
     "correctness": [
       "The answer must mention the `overrides` file.",
       "The answer must mention the `idempotencyKey` property.",
+      "The answer must mention that this feature is only available for Pro and Enterprise plans.",
       "The answer should include a code example of how to use the `idempotencyKey` property."
     ]
   }

@@ -14,9 +14,9 @@
     ],
     "correctness": [
       "The answer must mention the `availability` property in the `docs.yml` file.",
-      "The answer must mention the `beta` value for the `availability` property.",
-      "The answer should mention all endpoints within the marked section are automatically marked with that availability.",
-      "The answer should include a code example of how to use the `availability` property."
+      "The answer must list the available maturity levels: `stable`, `generally-available`, `in-development`, `pre-release`, `deprecated`, and `beta`.",
+      "The answer must mention that section-level availability can be overridden for individual endpoints.",
+      "The answer should mention all endpoints within the marked section are automatically marked with that availability."
     ]
   }
 }

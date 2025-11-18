@@ -16,7 +16,8 @@
       "The answer must mention creating a components folder with your React components in .ts, .tsx, .js or .mdx files.",
       "The answer must mention importing and using the components in your Markdown guides.",
       "The answer must mention specifying the components directory in your docs.yml file under experimental.mdx-components.",
-      "The answer should mention that this feature is only available for Pro and Enterprise plans."
+      "The answer must mention that React is provided by the Fern docs platform.",
+      "The answer must mention that this feature is only available for Pro and Enterprise plans."
     ]
   }
 }

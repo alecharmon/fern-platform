@@ -8,5 +8,15 @@
     "domain": "buildwithfern.com",
     "cited_context": "Use the `highlighted` property to highlight specific files or folders with an accent background color. Use the `comment` property to add explanatory text that appears next to an item. These properties are useful for drawing attention to important files or providing additional context, similar to how code blocks support line highlighting and inline comments."
   },
-  "criteria": null
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/writing-content/components/files"
+    ],
+    "correctness": [
+      "The answer must mention the `highlighted` property for files or folders.",
+      "The answer must mention the `comment` property for files or folders.",
+      "The answer should mention that both properties can be used together.",
+      "The answer should mention that these properties work on both files and folders."
+    ]
+  }
 }
