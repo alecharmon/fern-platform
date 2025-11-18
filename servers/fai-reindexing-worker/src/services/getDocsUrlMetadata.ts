@@ -1,6 +1,6 @@
+import { withoutStaging } from "@fern-api/docs-utils";
 import { FdrLambda, fdrLambdaClient } from "../config/clients";
 import { logger } from "../config/logger";
-import { withoutStaging } from "../utils/withoutStaging";
 
 /**
  * Fetch documentation metadata from FDR Lambda

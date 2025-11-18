@@ -11,6 +11,6 @@ export default defineConfig({
     bundle: true,
     splitting: false,
     dts: false,
-    noExternal: ["@fern-docs/search-utils"],
+    noExternal: ["@fern-docs/search-utils", "@fern-api/docs-utils", "@fern-api/ui-core-utils"],
     external: ["gray-matter"]
 });

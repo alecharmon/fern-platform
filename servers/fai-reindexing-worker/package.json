@@ -17,6 +17,8 @@
     "@fern-api/fdr-lambda-sdk": "workspace:*",
     "@fern-api/fai-sdk": "workspace:*",
     "@fern-docs/search-utils": "workspace:*",
+    "@fern-api/ui-core-utils": "workspace:*",
+    "@fern-api/docs-utils": "workspace:*",
     "@turbopuffer/turbopuffer": "^0.5.11",
     "@vercel/kv": "^3.0.0",
     "ai": "5.0.86",

@@ -1,4 +1,5 @@
 import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
+import { truncateToBytes } from "@fern-api/ui-core-utils";
 import {
     createDelimitedRolesetString,
     createViewersForNodes,
@@ -6,7 +7,6 @@ import {
     toDescription
 } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
-import { truncateToBytes } from "../../../utils/bytes";
 
 import type { TurbopufferRecord } from "../types";
 

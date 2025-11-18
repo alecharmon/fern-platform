@@ -3246,6 +3246,9 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.709.0
         version: 3.932.0
+      '@fern-api/docs-utils':
+        specifier: workspace:*
+        version: link:../../packages/commons/docs-utils
       '@fern-api/fai-sdk':
         specifier: workspace:*
         version: link:../../packages/fai-sdk
@@ -3255,6 +3258,9 @@ importers:
       '@fern-api/fdr-sdk':
         specifier: workspace:*
         version: link:../../packages/fdr-sdk
+      '@fern-api/ui-core-utils':
+        specifier: workspace:*
+        version: link:../../packages/commons/core-utils
       '@fern-docs/search-utils':
         specifier: workspace:*
         version: link:../../packages/fern-docs/search-server/utils

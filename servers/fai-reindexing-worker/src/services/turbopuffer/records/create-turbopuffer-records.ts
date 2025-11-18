@@ -1,7 +1,7 @@
+import { slugToHref } from "@fern-api/docs-utils";
 import { type ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { flatten } from "es-toolkit/array";
-import { slugToHref } from "../../../utils/slugToHref";
 
 import type { TurbopufferRecordWithoutVector } from "../types";
 import { createEndpointBaseRecordHttp } from "./create-endpoint-record-http";

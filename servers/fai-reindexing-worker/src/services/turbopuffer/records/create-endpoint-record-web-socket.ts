@@ -1,4 +1,5 @@
 import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
+import { truncateToBytes, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import {
     createDelimitedRolesetString,
     createViewersForNodes,
@@ -7,8 +8,6 @@ import {
 } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
 import { flatten } from "es-toolkit/array";
-import { truncateToBytes } from "../../../utils/bytes";
-import { withDefaultProtocol } from "../../../utils/withDefaultProtocol";
 
 import type { TurbopufferRecord } from "../types";
 

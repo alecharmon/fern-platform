@@ -1,7 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
+import { withoutStaging } from "@fern-api/docs-utils";
 import { env } from "../../config/env";
 import { createDomainLogger } from "../../config/logger";
-import { withoutStaging } from "../../utils/withoutStaging";
 import { turbopufferUpsertTask } from "../turbopuffer/turbopufferIndexerTask";
 import { getTurbopufferVectorizer } from "./getTurbopufferVectorizer";
 

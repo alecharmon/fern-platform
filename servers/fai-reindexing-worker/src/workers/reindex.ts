@@ -63,7 +63,7 @@ export async function processReindexJob(message: ReindexJobMessage): Promise<voi
         await setJobStatus(domain, {
             status: "failed",
             error: errorMessage,
-            started_at: new Date().toISOString()
+            completed_at: new Date().toISOString()
         });
 
         throw error;
