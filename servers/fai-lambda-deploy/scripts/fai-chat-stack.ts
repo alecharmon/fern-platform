@@ -2,7 +2,6 @@ import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk
 import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
@@ -52,16 +51,6 @@ export class FaiChatStack extends Stack {
             zoneName: environmentInfo.route53Info.hostedZoneName
         });
 
-        const vpc = ec2.Vpc.fromLookup(this, "vpc", {
-            vpcId: environmentInfo.vpcId
-        });
-
-        const lambdaSecurityGroup = new ec2.SecurityGroup(this, "lambda-security-group", {
-            vpc,
-            description: `Security group for ${lambdaName} Lambda function`,
-            allowAllOutbound: true
-        });
-
         // Use unique function name for preview deployments
         const functionName = previewOptions?.isPreview
             ? `${lambdaName}-preview-${previewOptions.prNumber}`
@@ -75,12 +64,6 @@ export class FaiChatStack extends Stack {
             timeout: Duration.minutes(15), // Max timeout for Lambda
             memorySize: 2048, // 2GB for chat/AI workloads
             logGroup,
-            vpc,
-            vpcSubnets: {
-                subnetType: ec2.SubnetType.PUBLIC
-            },
-            allowPublicSubnet: true,
-            securityGroups: [lambdaSecurityGroup],
             environment: {
                 ENVIRONMENT_TYPE: environmentType,
                 ANTHROPIC_API_KEY: getEnvironmentVariableOrThrow("ANTHROPIC_API_KEY"),
