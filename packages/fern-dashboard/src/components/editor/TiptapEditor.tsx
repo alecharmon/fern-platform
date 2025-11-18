@@ -111,9 +111,23 @@ const extensions = [
     CustomElement,
     InlineCustomElement,
     Placeholder.configure({
-        placeholder: "Write or press `/` for components",
+        placeholder: ({ node }) => {
+            if (node.type.name === "heading") {
+                const level = node.attrs.level || 1;
+                return `Header ${level}`;
+            }
+
+            if (node.type.name === "bulletList" || node.type.name === "orderedList" || node.type.name === "taskItem") {
+                return "List";
+            }
+
+            return "Write or press `/` for components";
+        },
         emptyEditorClass: "is-empty",
-        emptyNodeClass: "is-empty"
+        emptyNodeClass: "is-empty",
+        showOnlyCurrent: false,
+        includeChildren: true,
+        showOnlyWhenEditable: true
     }),
     CodeBlock.configure({ enableTabIndentation: true }).extend({
         addNodeView() {

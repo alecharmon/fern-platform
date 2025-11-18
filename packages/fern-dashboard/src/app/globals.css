@@ -462,9 +462,23 @@
   @apply text-gray-1100 hover:border-b-gray-1100 inline-flex min-w-0 max-w-full items-center gap-1 whitespace-nowrap border-b border-b-transparent;
 }
 
-.tiptap p.is-empty::before {
+.tiptap p.is-empty::before,
+.tiptap h1.is-empty::before,
+.tiptap h2.is-empty::before,
+.tiptap h3.is-empty::before,
+.tiptap h4.is-empty::before,
+.tiptap h5.is-empty::before,
+.tiptap h6.is-empty::before {
   @apply text-gray-800;
   content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap li p.is-empty::before {
+  @apply text-gray-800;
+  content: "List";
   float: left;
   height: 0;
   pointer-events: none;
