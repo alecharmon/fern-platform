@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/actions/install
 
       - name: Install Fern
-        run: npm install -g fern-api
+        run: npm install -g fern-api@0.121.2
 
       - name: Publish FAI SDK
         env:
@@ -42,7 +42,7 @@ jobs:
         uses: ./.github/actions/install
 
       - name: Install Fern
-        run: npm install -g fern-api
+        run: npm install -g fern-api@0.121.2
 
       - name: Publish FAI Java SDK
         env:
@@ -62,7 +62,7 @@ jobs:
         uses: ./.github/actions/install
 
       - name: Install Fern
-        run: npm install -g fern-api
+        run: npm install -g fern-api@0.121.2
 
       - name: Publish FAI Python SDK
         env:
