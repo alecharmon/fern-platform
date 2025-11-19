@@ -44,7 +44,7 @@ class EvaluatorResult(BaseModel):
 
     is_passing: bool
     reason: str
-    result_type: Literal["binary", "scaled"]
+    result_type: Literal["binary", "scaled", "numeric"]
 
 
 class BinaryEvaluatorResult(EvaluatorResult):
@@ -63,6 +63,13 @@ class ScaledEvaluatorResult(EvaluatorResult):
     passing_threshold: int
 
 
+class NumericEvaluatorResult(EvaluatorResult):
+    """Numeric result for statistical metrics from an evaluator."""
+
+    result_type: Literal["numeric"] = "numeric"
+    value: float
+
+
 class Evaluation(BaseModel):
     """Result of evaluating an answer against ground truth."""
 
@@ -71,7 +78,9 @@ class Evaluation(BaseModel):
     ground_truth: str
     is_correct: bool
     metadata: dict[str, str] = Field(default_factory=dict)
-    evaluator_results: dict[str, BinaryEvaluatorResult | ScaledEvaluatorResult] = Field(default_factory=dict)
+    evaluator_results: dict[str, BinaryEvaluatorResult | ScaledEvaluatorResult | NumericEvaluatorResult] = Field(
+        default_factory=dict
+    )
 
 
 class EvaluationRun(BaseModel):
@@ -92,3 +101,5 @@ class EvaluationMetrics(BaseModel):
     accuracy: float
     evaluator_pass_rates: dict[str, float] = Field(default_factory=dict)
     evaluator_avg_scores: dict[str, float] = Field(default_factory=dict)
+    evaluator_avg_values: dict[str, float] = Field(default_factory=dict)
+    evaluator_std_values: dict[str, float] = Field(default_factory=dict)

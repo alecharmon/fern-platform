@@ -6,6 +6,7 @@
     "complete-endpoints"
   ],
   "evaluators": [
-    "correctness"
+    "correctness",
+    "length"
   ]
 }

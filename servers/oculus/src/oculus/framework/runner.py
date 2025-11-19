@@ -8,6 +8,7 @@ from typing import Any
 from oculus.framework.evaluators import (
     BinaryEvaluationResult,
     EvaluationResult,
+    NumericEvaluationResult,
     ScaledEvaluationResult,
     get_evaluator,
 )
@@ -18,6 +19,7 @@ from oculus.framework.models import (
     Evaluation,
     EvaluationMetrics,
     EvaluationRun,
+    NumericEvaluatorResult,
     Question,
     ScaledEvaluatorResult,
 )
@@ -396,8 +398,9 @@ class EvaluationRunner:
                     metadata=answer.metadata,
                 )
 
-            # Convert EvaluationResult to structured EvaluatorResult
-            structured_evaluator_results: dict[str, BinaryEvaluatorResult | ScaledEvaluatorResult] = {}
+            structured_evaluator_results: dict[
+                str, BinaryEvaluatorResult | ScaledEvaluatorResult | NumericEvaluatorResult
+            ] = {}
             for evaluator_name, result in evaluator_results:
                 if isinstance(result, BinaryEvaluationResult):
                     structured_evaluator_results[evaluator_name] = BinaryEvaluatorResult(
@@ -412,6 +415,12 @@ class EvaluationRunner:
                         min_score=result.min_score,
                         max_score=result.max_score,
                         passing_threshold=result.passing_threshold,
+                    )
+                elif isinstance(result, NumericEvaluationResult):
+                    structured_evaluator_results[evaluator_name] = NumericEvaluatorResult(
+                        is_passing=result.is_passing(),
+                        reason=result.reason,
+                        value=result.value,
                     )
 
             return idx, Evaluation(

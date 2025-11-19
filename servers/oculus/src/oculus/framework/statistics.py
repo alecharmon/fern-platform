@@ -1,9 +1,11 @@
+import statistics
 from collections import defaultdict
 
 from oculus.framework.models import (
     Evaluation,
     EvaluationMetrics,
     EvaluationRun,
+    NumericEvaluatorResult,
     ScaledEvaluatorResult,
 )
 
@@ -15,6 +17,8 @@ def calculate_metrics(evaluations: list[Evaluation]) -> EvaluationMetrics:
 
     evaluator_pass_rates: dict[str, float] = {}
     evaluator_avg_scores: dict[str, float] = {}
+    evaluator_avg_values: dict[str, float] = {}
+    evaluator_std_values: dict[str, float] = {}
 
     evaluator_names: set[str] = set()
     for evaluation in evaluations:
@@ -33,12 +37,24 @@ def calculate_metrics(evaluations: list[Evaluation]) -> EvaluationMetrics:
                 avg_score = sum(r.score for r in scaled_results) / len(scaled_results)
                 evaluator_avg_scores[evaluator_name] = avg_score
 
+            numeric_results = [r for r in results_for_evaluator if isinstance(r, NumericEvaluatorResult)]
+            if numeric_results:
+                values = [r.value for r in numeric_results]
+                evaluator_avg_values[evaluator_name] = sum(values) / len(values)
+                # Only calculate std if we have more than one value
+                if len(values) > 1:
+                    evaluator_std_values[evaluator_name] = statistics.stdev(values)
+                else:
+                    evaluator_std_values[evaluator_name] = 0.0
+
     return EvaluationMetrics(
         total_questions=total_questions,
         total_correct=total_correct,
         accuracy=accuracy,
         evaluator_pass_rates=evaluator_pass_rates,
         evaluator_avg_scores=evaluator_avg_scores,
+        evaluator_avg_values=evaluator_avg_values,
+        evaluator_std_values=evaluator_std_values,
     )
 
 

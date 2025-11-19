@@ -4,6 +4,7 @@
     "complete-changelogs"
   ],
   "evaluators": [
-    "correctness"
+    "correctness",
+    "length"
   ]
 }

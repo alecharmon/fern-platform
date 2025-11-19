@@ -10,6 +10,7 @@ import oculus.evaluators.citation  # noqa: F401
 import oculus.evaluators.coherence  # noqa: F401
 import oculus.evaluators.conciseness  # noqa: F401
 import oculus.evaluators.correctness  # noqa: F401
+import oculus.evaluators.length  # noqa: F401
 import oculus.generators.endpoints  # noqa: F401
 import oculus.generators.markdown  # noqa: F401
 from oculus.commands.diff import diff_evaluation_command
@@ -276,6 +277,20 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
         print(f"Total Questions: {metrics.total_questions}")
         print(f"Total Correct: {metrics.total_correct}")
         print(f"Accuracy: {metrics.accuracy:.2%}")
+        if metrics.evaluator_pass_rates:
+            print("\nEvaluator Pass Rates:")
+            for evaluator, rate in sorted(metrics.evaluator_pass_rates.items()):
+                print(f"  {evaluator}: {rate:.2%}")
+        if metrics.evaluator_avg_scores:
+            print("\nEvaluator Average Scores:")
+            for evaluator, score in sorted(metrics.evaluator_avg_scores.items()):
+                print(f"  {evaluator}: {score:.2f}")
+        if metrics.evaluator_avg_values:
+            print("\nEvaluator Statistics:")
+            for evaluator in sorted(metrics.evaluator_avg_values.keys()):
+                avg = metrics.evaluator_avg_values[evaluator]
+                std = metrics.evaluator_std_values.get(evaluator, 0.0)
+                print(f"  {evaluator}: avg={avg:.2f}, std={std:.2f}")
         print(f"{'='*60}\n")
 
         return 0
@@ -440,6 +455,12 @@ def run_evaluation(args: argparse.Namespace) -> int:
             print("\nEvaluator Average Scores:")
             for evaluator, score in sorted(metrics.evaluator_avg_scores.items()):
                 print(f"  {evaluator}: {score:.2f}")
+        if metrics.evaluator_avg_values:
+            print("\nEvaluator Statistics:")
+            for evaluator in sorted(metrics.evaluator_avg_values.keys()):
+                avg = metrics.evaluator_avg_values[evaluator]
+                std = metrics.evaluator_std_values.get(evaluator, 0.0)
+                print(f"  {evaluator}: avg={avg:.2f}, std={std:.2f}")
 
         if len(suite_config.collections) > 1:
             print(f"\n{'-'*60}")

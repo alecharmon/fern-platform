@@ -42,6 +42,17 @@ class ScaledEvaluationResult(EvaluationResult):
         return self.score >= self.passing_threshold
 
 
+class NumericEvaluationResult(EvaluationResult):
+    """Numeric evaluation result for statistical metrics (e.g., token count, latency)."""
+
+    result_type: Literal["numeric"] = "numeric"
+    value: float
+
+    def is_passing(self) -> bool:
+        """Numeric evaluators always pass - they're for statistics only."""
+        return True
+
+
 class Evaluator(Protocol):
     """Protocol for answer evaluators."""
 

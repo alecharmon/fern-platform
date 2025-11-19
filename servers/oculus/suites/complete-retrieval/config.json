@@ -5,6 +5,7 @@
   ],
   "evaluators": [
     "correctness",
-    "citation"
+    "citation",
+    "length"
   ]
 }
