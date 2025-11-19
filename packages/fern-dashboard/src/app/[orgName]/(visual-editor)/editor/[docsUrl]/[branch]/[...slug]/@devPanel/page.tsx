@@ -10,9 +10,12 @@ import { useEffect, useRef, useState } from "react";
 import { WarningValidationToast } from "@/components/editor/EditorToasts";
 import { defineAppTheme } from "@/components/editor/theme-utils";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
+import { WrapWithKeyboardShortcut } from "@/components/ui/WrapWithKeyboardShortcut";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useDevMode } from "@/providers/DevModeProvider";
+import { isMac } from "@/utils/tiptap-utils";
 
 const MonacoEditor = dynamic(() => import("./editor"), {
     ssr: false
@@ -94,34 +97,44 @@ export default function DevPanel() {
         return null;
     }
 
+    const shortcutKey = isMac() ? "⌘" : "Ctrl";
+
     return (
-        <div className="flex h-full flex-col">
-            <div className="text-muted-foreground flex items-center justify-center gap-2 pb-3 pt-4">
-                <Code2 className="size-4" />
-                <h3 className="text-sm font-medium">Dev Mode</h3>
-            </div>
+        <WrapWithKeyboardShortcut shortcut="s" onShortcut={handleUpdate} disabled={saveDisabled}>
+            <div className="flex h-full flex-col">
+                <div className="text-muted-foreground flex items-center justify-center gap-2 pb-3 pt-4">
+                    <Code2 className="size-4" />
+                    <h3 className="text-sm font-medium">Dev Mode</h3>
+                </div>
 
-            <div className="border-1 rounded-b-none border-b-0 bg-background border-border relative flex flex-1 flex-col overflow-hidden rounded-2xl py-4 shadow-lg">
-                <MonacoEditor
-                    currentMarkdown={currentMarkdown}
-                    handleEditorDidMount={handleEditorDidMount}
-                    isEditingDisabled={isEditingDisabled}
-                />
-            </div>
+                <div className="border-1 rounded-b-none border-b-0 bg-background border-border relative flex flex-1 flex-col overflow-hidden rounded-2xl py-4 shadow-lg">
+                    <MonacoEditor
+                        currentMarkdown={currentMarkdown}
+                        handleEditorDidMount={handleEditorDidMount}
+                        isEditingDisabled={isEditingDisabled}
+                    />
+                </div>
 
-            {/* Reset/Update buttons - bottom */}
-            <div className="fixed bottom-4 left-4 right-4 z-50 flex items-center gap-2">
-                <div className="ml-auto flex gap-2">
-                    {hasUnsavedChanges && (
-                        <Button onClick={handleReset} variant="outline">
-                            Reset
+                {/* Reset/Update buttons - bottom */}
+                <div className="fixed bottom-4 w-fit right-4 z-50 flex items-center gap-2">
+                    <div className="flex gap-2">
+                        {hasUnsavedChanges && (
+                            <Button onClick={handleReset} variant="outline">
+                                Reset
+                            </Button>
+                        )}
+                        <Button onClick={handleUpdate} variant="default" disabled={saveDisabled} className="pr-2">
+                            <span>Update</span>
+                            <div className="flex gap-0.5">
+                                <Kbd className="py-0">
+                                    <span className={isMac() ? "text-base -mb-[2px]" : ""}>{shortcutKey}</span>
+                                </Kbd>
+                                <Kbd>S</Kbd>
+                            </div>
                         </Button>
-                    )}
-                    <Button onClick={handleUpdate} variant="default" disabled={saveDisabled}>
-                        Update
-                    </Button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </WrapWithKeyboardShortcut>
     );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { Button } from "../ui/button";
+import { Kbd } from "../ui/kbd";
 import { GithubLogo } from "./GithubLogo";
 import { GoogleLogo } from "./GoogleLogo";
 
@@ -88,9 +89,9 @@ export const GoogleLoginButton = ({
                         <span>Continue with Google</span>
                     </div>
                     {hasMounted && isLastUsed ? (
-                        <span className="justify-self-end px-2 py-0.5 text-xs font-medium text-white dark:text-[var(--gray-100)] bg-[var(--green-1200)] rounded-[4px]">
+                        <Kbd className="justify-self-end" useBodyFont>
                             last used
-                        </span>
+                        </Kbd>
                     ) : (
                         <div aria-hidden="true" />
                     )}
@@ -139,9 +140,9 @@ export const GithubLoginButton = ({
                         <span>Continue with GitHub</span>
                     </div>
                     {hasMounted && isLastUsed ? (
-                        <span className="justify-self-end px-2 py-0.5 text-xs font-medium text-white dark:text-[var(--gray-100)] bg-[var(--green-1200)] rounded-[4px]">
+                        <Kbd className="justify-self-end" useBodyFont>
                             last used
-                        </span>
+                        </Kbd>
                     ) : (
                         <div aria-hidden="true" />
                     )}
