@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  publish_fdr_lambda_sdk:
+  publish_typescript_sdk:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
       - name: Build and test
         run: pnpm turbo compile test --filter=@fern-api/fdr-lambda-sdk
 
-      - name: Publish FDR Lambda SDK
+      - name: Publish FDR Lambda TypeScript SDK
         env:
           NODE_AUTH_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
         run: |
@@ -39,3 +39,24 @@ jobs:
           cd packages/fdr-lambda-sdk
           npm version "$git_version" --no-git-tag-version
           pnpm publish --access public --tag latest --no-git-checks
+
+  publish_python_sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: Install Fern
+        run: npm install -g fern-api
+
+      - name: Publish FDR Lambda Python SDK
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          git_version="$(scripts/fdr-version.sh)"
+          fern generate --api fdr --group fdr-lambda-python-sdk --version ${git_version}

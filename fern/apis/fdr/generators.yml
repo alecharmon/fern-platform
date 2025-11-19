@@ -48,6 +48,22 @@ groups:
           useLegacyExports: false
           namespaceExport: FdrLambda
 
+  fdr-lambda-python-sdk:
+    audiences:
+      - fdr-lambda
+    generators:
+      - name: fernapi/fern-python-sdk
+        version: 1.4.0
+        output:
+          location: pypi
+          package-name: "fern-fdr-lambda-sdk"
+          token: ${PYPI_TOKEN}
+        config:
+          client_class_name: FdrLambdaClient
+          package_name: "fdr_lambda"
+          pydantic_config:
+            include_union_utils: true
+
   generators-sdk:
     audiences:
       - generators
