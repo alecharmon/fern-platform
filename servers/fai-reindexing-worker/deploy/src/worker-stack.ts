@@ -106,7 +106,10 @@ export class FaiReindexingWorkerStack extends Stack {
                 FAI_ORIGIN: getFaiOrigin(environmentType),
                 FDR_ORIGIN: getFdrOrigin(environmentType),
                 FDR_LAMBDA_ORIGIN: getFdrLambdaOrigin(environmentType),
-                FERN_DOCS_INDEX_NAME: "fern-docs"
+                FERN_DOCS_INDEX_NAME: "fern-docs",
+                ...(environmentType === EnvironmentType.Prod && {
+                    POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY")
+                })
             }
         });
 

@@ -4,6 +4,7 @@ import { env } from "../config/env";
 import { createDomainLogger } from "../config/logger";
 import { getDocsUrlMetadata } from "../services/getDocsUrlMetadata";
 import { setJobStatus } from "../services/kv";
+import { track } from "../services/posthog";
 import { syncToQueryIndex } from "../services/sync";
 import { runTurbopufferUpsertTask } from "../services/turbopuffer/turbopuffer";
 import type { ReindexJobMessage } from "../types";
@@ -19,6 +20,14 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         const metadata = await getDocsUrlMetadata(domain);
         if (!metadata) {
             log.error("Domain not found or invalid");
+            await track("ask_ai_turbopuffer_reindex", {
+                success: false,
+                domain,
+                sqsMessageId,
+                errorKind: "DomainNotFound",
+                error: "Domain not found or invalid",
+                durationMs: Date.now() - start
+            });
             await sendReindexCallback(domain, sqsMessageId, "failure", log);
             return;
         }
@@ -31,6 +40,14 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         const settings = await faiClient.settings.getDocsSettings({ domain });
         if (!settings.docs_enabled) {
             log.info("Ask AI is not enabled, skipping reindex");
+            await track("ask_ai_turbopuffer_reindex", {
+                success: false,
+                domain,
+                sqsMessageId,
+                errorKind: "AskAINotEnabled",
+                error: "Ask AI is not enabled for this domain",
+                durationMs: Date.now() - start
+            });
             await sendReindexCallback(domain, sqsMessageId, "failure", log);
             return;
         }
@@ -57,10 +74,23 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             job_id: jobId
         });
 
+        await track("ask_ai_turbopuffer_reindex", {
+            success: true,
+            domain,
+            durationMs,
+            numInserted,
+            jobId,
+            sqsMessageId,
+            deleteExisting
+        });
+
         await sendReindexCallback(domain, sqsMessageId, "success", log);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
+        const end = Date.now();
+        const durationMs = end - start;
+
         log.error("Reindex failed", {
             error: errorMessage,
             stack: errorStack
@@ -70,6 +100,20 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             status: "failed",
             error: errorMessage,
             completed_at: new Date().toISOString()
+        });
+
+        let errorString = errorMessage;
+        if (errorString.length > 1000) {
+            errorString = errorString.slice(0, 1000) + "...";
+        }
+
+        await track("ask_ai_turbopuffer_reindex", {
+            success: false,
+            domain,
+            sqsMessageId,
+            errorKind: "UnknownError",
+            error: errorString,
+            durationMs
         });
 
         await sendReindexCallback(domain, sqsMessageId, "failure", log);

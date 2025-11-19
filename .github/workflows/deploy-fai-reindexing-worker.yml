@@ -19,6 +19,7 @@ jobs:
       FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
       KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+      POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
 
     steps:
