@@ -15,7 +15,7 @@ export interface ReindexWebsiteRequest {
     domain_filter?: string;
     /** Path prefix to restrict crawling (e.g., '/docs'). If not provided, uses previous config. */
     path_filter?: string;
-    /** Regex pattern to filter URLs (e.g., `https://example\.com/(docs|api)/.*`). If not provided, uses previous config. */
+    /** Regex pattern to filter URLs (e.g., 'https://example\.com/(docs|api)/.*'). If not provided, uses previous config. */
     url_pattern?: string;
     /** Size of text chunks for splitting documents. If not provided, uses previous config. */
     chunk_size?: number;

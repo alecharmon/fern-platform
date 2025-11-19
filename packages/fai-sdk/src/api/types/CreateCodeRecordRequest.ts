@@ -17,6 +17,6 @@ export interface CreateCodeRecordRequest {
     product?: string;
     /** The keywords of the code. Adding keywords can improve code matching. */
     keywords?: string[];
-    /** Whether the code is authed. If true, the code will be retrievable by all users. */
+    /** Whether the code is auth gated. If false, the code record will be retrievable by all users. */
     authed?: boolean;
 }

@@ -1,7 +1,4 @@
-from datetime import (
-    UTC,
-    datetime,
-)
+from datetime import datetime
 from typing import Literal
 
 import httpx
@@ -341,12 +338,11 @@ async def toggle_ask_ai(
 )
 async def reindex_ask_ai(
     domain: str,
-    org_name: str,
+    org_name: str | None = None,  # noqa: ARG001
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> JSONResponse:
     """Manually trigger reindex for an already enabled Ask AI setup."""
-    LOGGER.info(f"Manual reindex triggered for domain {domain} and org_name {org_name}")
     try:
         stripped_domain = strip_domain(domain)
 

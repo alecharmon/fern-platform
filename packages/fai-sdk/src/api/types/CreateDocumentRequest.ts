@@ -17,6 +17,6 @@ export interface CreateDocumentRequest {
     product?: string;
     /** The keywords of the document. Adding keywords can improve document matching. */
     keywords?: string[];
-    /** Whether the document is authed. If true, the document will be retrievable by all users. */
+    /** Whether the document is auth gated. If false, the document will be retrievable by all users. */
     authed?: boolean;
 }

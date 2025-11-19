@@ -11,5 +11,5 @@
  */
 export interface ReindexAskAiRequest {
     domain: string;
-    org_name: string;
+    org_name?: string;
 }

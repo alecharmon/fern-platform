@@ -5,13 +5,12 @@
 /**
  * @example
  *     {
- *         session_id: "session_id",
  *         status: "status"
  *     }
  */
 export interface IndexingCallbackRequest {
     /** Session ID from the code indexing operation */
-    session_id: string;
+    session_id?: string;
     /** Status of indexing operation: 'success' or 'failed' */
     status: string;
 }

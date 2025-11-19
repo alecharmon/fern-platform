@@ -47,6 +47,7 @@ export * from "./GroupBy.js";
 export * from "./Guidance.js";
 export * from "./HttpValidationError.js";
 export * from "./HistogramAnalyticsBar.js";
+export * from "./IndexGithubRequest.js";
 export * from "./IndexGithubResponse.js";
 export * from "./IndexWebsiteResponse.js";
 export * from "./IndexingCallbackResponse.js";

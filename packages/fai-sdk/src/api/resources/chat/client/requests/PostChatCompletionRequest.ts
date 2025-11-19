@@ -16,8 +16,12 @@ import * as FernAI from "../../../../index.js";
 export interface PostChatCompletionRequest {
     /** The model to use for the chat completion */
     model?: FernAI.LanguageModel;
+    /** The maximum number of tokens to generate. Note: setting a token count lower than 2000 may result in incomplete responses. You can add a custom system prompt to control the verbosity of the response. */
+    max_tokens?: number;
     /** The system prompt to use for the chat completion */
     system_prompt?: string;
     /** The messages to use for the chat completion */
     messages: FernAI.ChatMessage[];
+    /** Whether to rewrite the query using query decomposition */
+    rewrite_query?: boolean;
 }

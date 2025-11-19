@@ -49,19 +49,111 @@ export class Sources {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.sources.indexGithubSourceRepos("domain", {
+     *     await client.sources.indexGithubSourceReposWithAgent("domain", {
      *         repo_urls: ["repo_urls"]
      *     })
      */
-    public indexGithubSourceRepos(
+    public indexGithubSourceReposWithAgent(
         domain: string,
         request: FernAI.IndexGithubRequest,
         requestOptions?: Sources.RequestOptions,
     ): core.HttpResponsePromise<FernAI.IndexGithubResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__indexGithubSourceRepos(domain, request, requestOptions));
+        return core.HttpResponsePromise.fromPromise(
+            this.__indexGithubSourceReposWithAgent(domain, request, requestOptions),
+        );
     }
 
-    private async __indexGithubSourceRepos(
+    private async __indexGithubSourceReposWithAgent(
+        domain: string,
+        request: FernAI.IndexGithubRequest,
+        requestOptions?: Sources.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.IndexGithubResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `sources/github/${encodeURIComponent(domain)}/index-with-agent`,
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.IndexGithubResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling POST /sources/github/{domain}/index-with-agent.",
+                );
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Start indexing markdown files from GitHub repositories for a domain.
+     *
+     * @param {string} domain
+     * @param {FernAI.IndexGithubRequest} request
+     * @param {Sources.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.sources.indexGithubSourceReposMarkdown("domain", {
+     *         repo_urls: ["repo_urls"]
+     *     })
+     */
+    public indexGithubSourceReposMarkdown(
+        domain: string,
+        request: FernAI.IndexGithubRequest,
+        requestOptions?: Sources.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.IndexGithubResponse> {
+        return core.HttpResponsePromise.fromPromise(
+            this.__indexGithubSourceReposMarkdown(domain, request, requestOptions),
+        );
+    }
+
+    private async __indexGithubSourceReposMarkdown(
         domain: string,
         request: FernAI.IndexGithubRequest,
         requestOptions?: Sources.RequestOptions,
@@ -136,7 +228,6 @@ export class Sources {
      *
      * @example
      *     await client.sources.indexingCallback("domain", {
-     *         session_id: "session_id",
      *         status: "status"
      *     })
      */
