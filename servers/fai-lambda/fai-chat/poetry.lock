@@ -806,6 +806,24 @@ pydantic-core = ">=2.18.2"
 typing_extensions = ">=4.0.0"
 
 [[package]]
+name = "fern-fdr-lambda-sdk"
+version = "0.140.3"
+description = ""
+optional = false
+python-versions = "<4.0,>=3.8"
+groups = ["main"]
+files = [
+    {file = "fern_fdr_lambda_sdk-0.140.3-py3-none-any.whl", hash = "sha256:e7f719874927639ee104f39db826b4cc15e9d1532f06c351fa1d3b03f41e8419"},
+    {file = "fern_fdr_lambda_sdk-0.140.3.tar.gz", hash = "sha256:35ec4e5321f65aedff10c7399a4e2646fe0979541ceaab45799e85282a66fa41"},
+]
+
+[package.dependencies]
+httpx = ">=0.21.2"
+pydantic = ">=1.9.2"
+pydantic-core = ">=2.18.2"
+typing_extensions = ">=4.0.0"
+
+[[package]]
 name = "filelock"
 version = "3.20.0"
 description = "A platform independent file lock."
@@ -3180,4 +3198,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "883957fbb700016f94dda476f05e09227a2274ba663f7933ba5596513f367ad5"
+content-hash = "c136c25f3b0a3dc6e2bc514b36605a5224ff43d5ad3755515d66fab844769d49"
