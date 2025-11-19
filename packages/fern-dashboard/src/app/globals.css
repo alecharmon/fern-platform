@@ -462,7 +462,7 @@
   @apply text-gray-1100 hover:border-b-gray-1100 inline-flex min-w-0 max-w-full items-center gap-1 whitespace-nowrap border-b border-b-transparent;
 }
 
-.tiptap p.is-empty::before,
+.tiptap p.is-empty:not(table *):not(td *):not(th *):not(li p)::before,
 .tiptap h1.is-empty::before,
 .tiptap h2.is-empty::before,
 .tiptap h3.is-empty::before,

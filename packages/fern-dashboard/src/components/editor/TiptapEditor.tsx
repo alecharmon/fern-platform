@@ -118,10 +118,6 @@ const extensions = [
                 return `Header ${level}`;
             }
 
-            if (node.type.name === "bulletList" || node.type.name === "orderedList" || node.type.name === "taskList") {
-                return "List";
-            }
-
             return "Write or press `/` for components";
         },
         emptyEditorClass: "is-empty",
