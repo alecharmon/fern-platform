@@ -796,3 +796,10 @@ why? who knows. thanks monaco:)
   pointer-events: none;
   z-index: -1;
 }
+
+code:not(.code-block):not(#preview-container *) {
+  @apply ring-border text-primary rounded-md bg-gray-100 px-1 py-0.5 font-mono ring-1 ring-inset;
+  @apply text-[0.875em];
+
+  font-weight: inherit;
+}
