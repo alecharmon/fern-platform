@@ -59,13 +59,16 @@ async def queue_reindex_sqs(domain: str, delete_existing: bool = True) -> str:
 async def get_docs_settings(
     domain: str,
     db: AsyncSession = Depends(get_db),
-) -> JSONResponse:
+) -> GetSettingsResponse:
     """Get settings for a domain and organization."""
     try:
         stripped_domain = strip_domain(domain)
 
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
         existing_record = existing.scalar_one_or_none()
+
+        if not existing_record:
+            return GetSettingsResponse(ask_ai_enabled=False, job_id=None)
 
         ask_ai_enabled = (
             existing_record is not None
@@ -74,9 +77,11 @@ async def get_docs_settings(
         )
         job_id = existing_record.job_id if existing_record else None
 
-        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled, job_id=job_id)))
+        return GetSettingsResponse(
+            ask_ai_enabled=ask_ai_enabled, job_id=job_id, docs_enabled=existing_record.docs_enabled
+        )
     except Exception:
-        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
+        return GetSettingsResponse(ask_ai_enabled=False, job_id=None, docs_enabled=existing_record.docs_enabled)
 
 
 @fai_app.get(
@@ -367,7 +372,7 @@ async def get_toggle_status(
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
-) -> JSONResponse:
+) -> ToggleStatusResponse:
     """Get the status of Ask AI toggle operation."""
     try:
         stripped_domain = strip_domain(domain)
@@ -376,64 +381,14 @@ async def get_toggle_status(
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:
-            return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="error", ask_ai_enabled=False)))
+            return ToggleStatusResponse(status="failed", ask_ai_enabled=False)
+
+        ask_ai_enabled = existing_record.last_reindex_time is not None
 
         if not existing_record.job_id:
-            ask_ai_enabled = existing_record.last_reindex_time is not None
-
-            return JSONResponse(
-                content=jsonable_encoder(
-                    ToggleStatusResponse(
-                        status="completed",
-                        ask_ai_enabled=ask_ai_enabled,
-                        last_reindex_time=(
-                            existing_record.last_reindex_time.isoformat() if existing_record.last_reindex_time else None
-                        ),
-                    )
-                )
-            )
-
-        async with httpx.AsyncClient(follow_redirects=True) as client:
-            response = await client.get(
-                f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/status?job_id={existing_record.job_id}"
-            )
-            if response.status_code == 200:
-                status_data = response.json()
-                job_status = status_data.get("status", None)
-
-                if job_status == "completed":
-                    existing_record.job_id = None
-                    existing_record.last_reindex_time = datetime.utcnow()
-                    background_tasks.add_task(revalidate_domain, domain)
-                elif job_status == "failed":
-                    existing_record.job_id = None
-                    existing_record.last_reindex_time = None
-
-                await db.commit()
-
-                return JSONResponse(
-                    content=jsonable_encoder(
-                        ToggleStatusResponse(
-                            status=job_status or "failed",
-                            ask_ai_enabled=True,
-                            last_reindex_time=(
-                                existing_record.last_reindex_time.isoformat()
-                                if existing_record.last_reindex_time
-                                else None
-                            ),
-                        )
-                    )
-                )
-            else:
-                LOGGER.error(f"Failed to get job status: {response.status_code}")
-                return JSONResponse(
-                    content=jsonable_encoder(
-                        ToggleStatusResponse(
-                            status="failed",
-                            ask_ai_enabled=True,
-                        )
-                    )
-                )
+            return ToggleStatusResponse(status="completed", ask_ai_enabled=ask_ai_enabled)
+        else:
+            return ToggleStatusResponse(status="in_progress", ask_ai_enabled=ask_ai_enabled)
 
     except Exception:
         LOGGER.exception("Failed to get toggle status")

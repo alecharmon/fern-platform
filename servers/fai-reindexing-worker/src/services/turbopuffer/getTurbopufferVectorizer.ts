@@ -118,8 +118,7 @@ export function getTurbopufferVectorizer(
         }
 
         logger.info(
-            "Completed: ${totalBatches} batches, ${embeddings.length} embeddings, ${totalRetries} rate limit retries",
-            { totalBatches, embeddingsLength: embeddings.length, totalRetries }
+            `Completed: ${totalBatches} batches, ${embeddings.length} embeddings, ${totalRetries} rate limit retries`
         );
 
         return embeddings;

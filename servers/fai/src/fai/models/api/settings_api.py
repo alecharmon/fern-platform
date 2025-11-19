@@ -12,8 +12,16 @@ class UpdateSettingsResponse(BaseModel):
 
 
 class GetSettingsResponse(BaseModel):
-    ask_ai_enabled: bool = Field(description="Whether Ask AI is enabled")
+    ask_ai_enabled: bool = Field(
+        description=(
+            "Whether Ask AI is enabled (requires one of docs, slack, or discord "
+            "to be enabled as well as the content to be indexed)"
+        )
+    )
     job_id: str | None = Field(None, description="Active job ID if reindexing is in progress")
+    docs_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for docs")
+    slack_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for slack")
+    discord_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for discord")
 
 
 class ToggleAskAiResponse(BaseModel):

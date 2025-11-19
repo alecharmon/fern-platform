@@ -3,8 +3,14 @@
  */
 
 export interface GetSettingsResponse {
-    /** Whether Ask AI is enabled */
+    /** Whether Ask AI is enabled (requires one of docs, slack, or discord to be enabled as well as the content to be indexed) */
     ask_ai_enabled: boolean;
     /** Active job ID if reindexing is in progress */
     job_id?: string;
+    /** Whether Ask AI is enabled for docs */
+    docs_enabled?: boolean;
+    /** Whether Ask AI is enabled for slack */
+    slack_enabled?: boolean;
+    /** Whether Ask AI is enabled for discord */
+    discord_enabled?: boolean;
 }
