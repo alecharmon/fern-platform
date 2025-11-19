@@ -12,7 +12,7 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
-import type { FeedbackEntry } from "@/app/actions/getFeedback";
+import type { FeedbackEntry, getFeedback } from "@/app/actions/getFeedback";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -36,6 +36,8 @@ interface FeedbackTableProps {
         hasMore: boolean;
     };
     onPageChange: (page: number) => void;
+    docsUrl: string;
+    getFeedbackAction: typeof getFeedback;
 }
 
 export function FeedbackTable({
@@ -46,7 +48,9 @@ export function FeedbackTable({
     setDateRange,
     onRowClick,
     pagination,
-    onPageChange
+    onPageChange,
+    docsUrl,
+    getFeedbackAction
 }: FeedbackTableProps) {
     const [isExporting, setIsExporting] = useState(false);
 
@@ -60,12 +64,88 @@ export function FeedbackTable({
         getFacetedUniqueValues: getFacetedUniqueValues()
     });
 
-    const handleExport = () => {
+    const handleExport = async () => {
         setIsExporting(true);
         try {
-            const allRows = table.getFilteredRowModel().rows;
-            const feedbackToExport = allRows.map((row) => row.original);
-            exportFeedbackToCSV(feedbackToExport, "feedback-export");
+            const allFeedback: FeedbackEntry[] = [];
+            let currentPage = 1;
+            const pageSize = 1000;
+            const maxPages = 100;
+
+            while (currentPage <= maxPages) {
+                const response = await getFeedbackAction({
+                    docsUrl,
+                    dateRange,
+                    page: currentPage,
+                    pageSize
+                });
+
+                const pageFeedback = response.feedback.filter((f) => f.feedbackType !== "code_block");
+                allFeedback.push(...pageFeedback);
+
+                if (!response.pagination.hasMore) {
+                    break;
+                }
+
+                currentPage++;
+            }
+
+            const columnFilters = table.getState().columnFilters;
+            let filteredFeedback = allFeedback;
+
+            for (const filter of columnFilters) {
+                const columnId = filter.id;
+                const filterValue = filter.value as string;
+
+                if (!filterValue) {
+                    continue;
+                }
+
+                filteredFeedback = filteredFeedback.filter((entry) => {
+                    if (columnId === "currentUrl") {
+                        return entry.currentUrl.toLowerCase().includes(filterValue.toLowerCase());
+                    }
+                    if (columnId === "wasHelpful") {
+                        if (filterValue.toLowerCase() === "true") {
+                            return entry.wasHelpful === true;
+                        }
+                        if (filterValue.toLowerCase() === "false") {
+                            return entry.wasHelpful === false;
+                        }
+                        return true;
+                    }
+                    if (columnId === "selection") {
+                        const cellValue = entry.selection.toLowerCase().replaceAll("-", " ");
+                        return cellValue.includes(filterValue.toLowerCase());
+                    }
+                    if (columnId === "channel") {
+                        let channel: string;
+                        if (entry.feedbackType === "code_block") {
+                            channel = "Code Block";
+                        } else {
+                            channel = entry.userFeedback?.startsWith("[Ask Fern]") ? "Ask Fern" : "Docs";
+                        }
+                        return channel.toLowerCase().includes(filterValue.toLowerCase());
+                    }
+                    if (columnId === "location") {
+                        return entry.location.toLowerCase().includes(filterValue.toLowerCase());
+                    }
+                    if (columnId === "date") {
+                        const date = new Date(entry.date);
+                        const formattedDate = date.toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric"
+                        });
+                        return formattedDate.toLowerCase().includes(filterValue.toLowerCase());
+                    }
+                    return true;
+                });
+            }
+
+            filteredFeedback.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+            exportFeedbackToCSV(filteredFeedback, "feedback-export");
         } catch (error) {
             console.error("Failed to export CSV:", error);
         } finally {
@@ -89,7 +169,7 @@ export function FeedbackTable({
                 table={table}
                 dateRange={dateRange}
                 setDateRange={setDateRange}
-                onExport={handleExport}
+                onExport={() => void handleExport()}
                 isExporting={isExporting}
             />
             <div className="max-h-[600px] min-h-[400px] overflow-y-auto">

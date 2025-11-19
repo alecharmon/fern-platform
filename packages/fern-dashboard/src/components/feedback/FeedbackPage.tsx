@@ -101,6 +101,8 @@ export function FeedbackPage({ docsUrl, initialData }: FeedbackPageProps) {
                             }
                         }
                         onPageChange={setAllFeedbackPage}
+                        docsUrl={docsUrl}
+                        getFeedbackAction={getFeedback}
                     />
                 </TabsContent>
                 <TabsContent value="code-issues">
@@ -119,6 +121,8 @@ export function FeedbackPage({ docsUrl, initialData }: FeedbackPageProps) {
                             }
                         }
                         onPageChange={setCodeIssuesPage}
+                        docsUrl={docsUrl}
+                        getFeedbackAction={getFeedback}
                     />
                 </TabsContent>
             </Tabs>
