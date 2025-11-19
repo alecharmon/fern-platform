@@ -353,8 +353,13 @@ async def reindex_ask_ai(
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
         existing_record = existing.scalar_one_or_none()
 
-        if not existing_record or existing_record.last_reindex_time is None:
-            return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
+        if not existing_record or (
+            not existing_record.docs_enabled
+            and not existing_record.slack_enabled
+            and not existing_record.discord_enabled
+        ):
+            LOGGER.warning(f"No enabled locations found for domain {stripped_domain}")
+            return ToggleAskAiResponse(success=False, ask_ai_enabled=False)
 
         if existing_record.job_id is not None:
             return JSONResponse(
