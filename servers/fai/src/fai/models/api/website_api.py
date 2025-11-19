@@ -18,7 +18,7 @@ class IndexWebsiteRequest(BaseModel):
     )
     url_pattern: str | None = Field(
         default=None,
-        description="Regex pattern to filter URLs (e.g., 'https://example\\.com/(docs|api)/.*').",
+        description="Regex pattern to filter URLs (e.g., `https://example\\.com/(docs|api)/.*`).",
     )
     chunk_size: int | None = Field(default=1000, description="Size of text chunks for splitting documents")
     chunk_overlap: int | None = Field(default=200, description="Overlap between consecutive chunks")
@@ -66,7 +66,7 @@ class ReindexWebsiteRequest(BaseModel):
     url_pattern: str | None = Field(
         default=None,
         description=(
-            "Regex pattern to filter URLs (e.g., 'https://example\\.com/(docs|api)/.*'). "
+            "Regex pattern to filter URLs (e.g., `https://example\\.com/(docs|api)/.*`). "
             "If not provided, uses previous config."
         ),
     )
