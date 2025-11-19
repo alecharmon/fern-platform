@@ -2,6 +2,7 @@ import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk
 import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
@@ -51,6 +52,20 @@ export class FaiChatStack extends Stack {
             zoneName: environmentInfo.route53Info.hostedZoneName
         });
 
+        // Look up the existing VPC from fai-scribe stack for NAT gateway access
+        const vpc = ec2.Vpc.fromLookup(this, "fai-scribe-vpc", {
+            tags: {
+                "aws:cloudformation:stack-name": `fai-scribe-${environmentType.toLowerCase()}`
+            }
+        });
+
+        // Security group for Lambda function
+        const lambdaSecurityGroup = new ec2.SecurityGroup(this, "lambda-security-group", {
+            vpc,
+            description: `Security group for ${lambdaName} Lambda function`,
+            allowAllOutbound: true
+        });
+
         // Use unique function name for preview deployments
         const functionName = previewOptions?.isPreview
             ? `${lambdaName}-preview-${previewOptions.prNumber}`
@@ -64,6 +79,11 @@ export class FaiChatStack extends Stack {
             timeout: Duration.minutes(15), // Max timeout for Lambda
             memorySize: 2048, // 2GB for chat/AI workloads
             logGroup,
+            vpc,
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+            },
+            securityGroups: [lambdaSecurityGroup],
             environment: {
                 ENVIRONMENT_TYPE: environmentType,
                 ANTHROPIC_API_KEY: getEnvironmentVariableOrThrow("ANTHROPIC_API_KEY"),
@@ -80,6 +100,15 @@ export class FaiChatStack extends Stack {
                 effect: iam.Effect.ALLOW,
                 actions: ["lambda:InvokeFunction"],
                 resources: [`arn:aws:lambda:us-east-1:985111089818:function:fai-code-indexing-*`]
+            })
+        );
+
+        // Grant Lambda permission to use AWS Bedrock Converse API
+        lambdaFunction.addToRolePolicy(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: ["bedrock:InvokeModel"],
+                resources: ["*"]
             })
         );
 
