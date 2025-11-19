@@ -19,6 +19,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         const metadata = await getDocsUrlMetadata(domain);
         if (!metadata) {
             log.error("Domain not found or invalid");
+            await sendReindexCallback(domain, sqsMessageId, "failure", log);
             return;
         }
 
@@ -28,8 +29,9 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         }
 
         const settings = await faiClient.settings.getDocsSettings({ domain });
-        if (!settings.ask_ai_enabled) {
+        if (!settings.docs_enabled) {
             log.info("Ask AI is not enabled, skipping reindex");
+            await sendReindexCallback(domain, sqsMessageId, "failure", log);
             return;
         }
 
