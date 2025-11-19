@@ -84,8 +84,8 @@ export class FaiReindexingWorkerStack extends Stack {
         const { cluster, workerSg, logGroup, version, environmentType, reindexingQueue } = props;
 
         const workerTaskDefinition = new FargateTaskDefinition(this, "worker-task-def", {
-            cpu: 1024,
-            memoryLimitMiB: 4096
+            cpu: 2048,
+            memoryLimitMiB: 8192
         });
 
         workerTaskDefinition.addContainer("fai-reindexing-worker", {
@@ -96,6 +96,7 @@ export class FaiReindexingWorkerStack extends Stack {
                 streamPrefix: "fai-reindexing-worker"
             }),
             environment: {
+                NODE_OPTIONS: "--max-old-space-size=7168",
                 SQS_QUEUE_URL: reindexingQueue.queueUrl,
                 OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
                 TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
@@ -143,11 +144,11 @@ export class FaiReindexingWorkerStack extends Stack {
         scaling.scaleToTrackCustomMetric("QueueDepthScaling", {
             metric: reindexingQueue.metricApproximateNumberOfMessagesVisible({
                 statistic: "Average",
-                period: Duration.minutes(1)
+                period: Duration.seconds(30)
             }),
-            targetValue: 8,
+            targetValue: 5,
             scaleInCooldown: Duration.minutes(5),
-            scaleOutCooldown: Duration.minutes(1)
+            scaleOutCooldown: Duration.seconds(30)
         });
     }
 }
