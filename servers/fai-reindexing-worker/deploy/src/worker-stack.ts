@@ -109,8 +109,11 @@ export class FaiReindexingWorkerStack extends Stack {
             }
         });
 
-        // Grant SQS permissions to the worker
         reindexingQueue.grantConsumeMessages(workerTaskDefinition.taskRole);
+
+        reindexingQueue.grantSendMessages(
+            iam.User.fromUserArn(this, "vercel-user", "arn:aws:iam::985111089818:user/vercel")
+        );
 
         // Grant Lambda invoke permissions (if needed for indexing)
         workerTaskDefinition.taskRole.addToPrincipalPolicy(

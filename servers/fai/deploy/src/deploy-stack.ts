@@ -36,6 +36,7 @@ export interface FernAiEnvVariables {
     KV_REST_API_READ_ONLY_TOKEN: string;
     KV_REST_API_URL: string;
     VENUS_URL: string;
+    FAI_REINDEXING_SQS_URL: string;
     [key: string]: string;
 }
 
@@ -182,6 +183,14 @@ export class FernAiDeployStack extends Stack {
                     "sqs:TagQueue"
                 ],
                 resources: [`arn:aws:sqs:us-east-1:985111089818:editing-session-*.fifo`]
+            })
+        );
+
+        fargateService.taskDefinition.taskRole.addToPrincipalPolicy(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: ["sqs:SendMessage"],
+                resources: [`arn:aws:sqs:us-east-1:985111089818:fai-reindexing-*`]
             })
         );
 

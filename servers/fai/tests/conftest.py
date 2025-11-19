@@ -41,6 +41,7 @@ TEST_KV_REST_API_TOKEN = "test-kv-token"
 TEST_KV_REST_API_READ_ONLY_TOKEN = "test-kv-readonly-token"
 TEST_KV_REST_API_URL = "test-kv-url"
 TEST_VENUS_URL = "test-venus-url"
+TEST_FAI_REINDEXING_SQS_URL = "test-reindexing-queue-url"
 ROUTES_PACKAGE_NAME = "fai.routes"
 
 
@@ -106,6 +107,7 @@ def setup_test_env(test_database_url: str) -> Any:
     os.environ["KV_REST_API_READ_ONLY_TOKEN"] = TEST_KV_REST_API_READ_ONLY_TOKEN
     os.environ["KV_REST_API_URL"] = TEST_KV_REST_API_URL
     os.environ["VENUS_URL"] = TEST_VENUS_URL
+    os.environ["FAI_REINDEXING_SQS_URL"] = TEST_FAI_REINDEXING_SQS_URL
     yield
 
     if original_url:

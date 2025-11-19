@@ -1,6 +1,9 @@
+import json
+import os
 from datetime import datetime
 from typing import Literal
 
+import aioboto3
 import httpx
 from fastapi import (
     BackgroundTasks,
@@ -31,33 +34,21 @@ from fai.models.types.upstash_callback_request_type import UpstashCallbackReques
 from fai.settings import LOGGER
 
 
-@fai_app.get(
-    "/settings/ask-ai",
-    response_model=GetSettingsResponse,
-    openapi_extra={"x-fern-audiences": ["internal"]},
-)
-async def get_settings(
-    domain: str,
-    db: AsyncSession = Depends(get_db),
-) -> JSONResponse:
-    """Get settings for a domain and organization."""
-    try:
-        stripped_domain = strip_domain(domain)
+async def queue_reindex_sqs(domain: str, delete_existing: bool = True) -> str:
+    queue_url = os.environ.get("FAI_REINDEXING_SQS_URL")
 
-        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
-        existing_record = existing.scalar_one_or_none()
+    if not queue_url:
+        raise ValueError("FAI_REINDEXING_SQS_URL environment variable not configured")
 
-        # TODO(sahil): remove this method after migrating + releasing fern-platform checks with get_docs_settings
-        ask_ai_enabled = (
-            existing_record is not None
-            and existing_record.last_reindex_time is not None
-            and existing_record.docs_enabled
+    session = aioboto3.Session()
+
+    async with session.client("sqs", region_name="us-east-1") as sqs:
+        response = await sqs.send_message(
+            QueueUrl=queue_url, MessageBody=json.dumps({"domain": domain, "deleteExisting": delete_existing})
         )
-        job_id = existing_record.job_id if existing_record else None
-
-        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled, job_id=job_id)))
-    except Exception:
-        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
+        message_id = response["MessageId"]
+        LOGGER.info(f"Successfully queued reindex for {domain}, MessageId: {message_id}")
+        return message_id
 
 
 @fai_app.get(
@@ -203,21 +194,14 @@ async def enable_ask_ai(
                 LOGGER.info(f"Created new record for domain {stripped_domain}")
 
             LOGGER.info(f"Starting reindex for domain {stripped_domain}")
-            async with httpx.AsyncClient(follow_redirects=True) as client:
-                response = await client.get(
-                    f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start?deleteExisting=true"
-                )
-                if response.status_code == 200:
-                    job_id = response.json().get("job_id", None)
-                    LOGGER.info(
-                        f"Successfully started turbopuffer reindex for domain {stripped_domain}, job_id: {job_id}"
-                    )
-                    existing_record.job_id = job_id
-                    await db.commit()
-                    results.append({"domain": domain, "success": True, "job_id": job_id})
-                else:
-                    LOGGER.error(f"Failed to start reindex for domain {stripped_domain}: {response.status_code}")
-                    results.append({"domain": domain, "success": False})
+            try:
+                job_id = await queue_reindex_sqs(domain, delete_existing=True)
+                existing_record.job_id = job_id
+                await db.commit()
+                results.append({"domain": domain, "success": True, "job_id": job_id})
+            except Exception as e:
+                LOGGER.error(f"Failed to queue reindex for domain {stripped_domain}: {e}")
+                results.append({"domain": domain, "success": False})
 
         except Exception as e:
             LOGGER.exception(f"Failed to enable Ask AI for domain {domain}: {e}")
@@ -267,22 +251,10 @@ async def toggle_ask_ai(
         else:
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
             try:
-                async with httpx.AsyncClient(follow_redirects=True) as client:
-                    response = await client.get(
-                        f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start?deleteExisting=true"
-                    )
-                    if response.status_code == 200:
-                        job_id = response.json().get("job_id", None)
-                        LOGGER.info(
-                            f"Successfully started turbopuffer reindex for domain {stripped_domain}, job_id: {job_id}"
-                        )
-                    else:
-                        LOGGER.error(f"Failed to start reindex for domain {stripped_domain}: {response.status_code}")
-                        return JSONResponse(
-                            content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False))
-                        )
+                job_id = await queue_reindex_sqs(domain, delete_existing=True)
+                LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
             except Exception as e:
-                LOGGER.error(f"Failed to start reindex for domain {stripped_domain}: {e}")
+                LOGGER.error(f"Failed to queue reindex for domain {stripped_domain}: {e}")
                 return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
 
             if existing_record:
@@ -341,7 +313,7 @@ async def reindex_ask_ai(
     org_name: str | None = None,  # noqa: ARG001
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
-) -> JSONResponse:
+) -> ToggleAskAiResponse:
     """Manually trigger reindex for an already enabled Ask AI setup."""
     try:
         stripped_domain = strip_domain(domain)
@@ -358,43 +330,31 @@ async def reindex_ask_ai(
             return ToggleAskAiResponse(success=False, ask_ai_enabled=False)
 
         if existing_record.job_id is not None:
-            return JSONResponse(
-                content=jsonable_encoder(
-                    ToggleAskAiResponse(success=True, job_id=existing_record.job_id, ask_ai_enabled=True)
-                )
+            return ToggleAskAiResponse(
+                success=True,
+                job_id=existing_record.job_id,
+                ask_ai_enabled=existing_record.last_reindex_time is not None,
             )
 
-        job_id = None
         try:
-            async with httpx.AsyncClient(follow_redirects=True) as client:
-                response = await client.get(
-                    f"https://{domain}/api/fern-docs/search/v2/reindex/turbopuffer/start?deleteExisting=true"
-                )
-                if response.status_code == 200:
-                    job_id = response.json().get("job_id", None)
-                    LOGGER.info(
-                        f"Successfully started turbopuffer reindex for domain {stripped_domain}, job_id: {job_id}"
-                    )
-                else:
-                    LOGGER.error(f"Failed to start manual reindex for domain {stripped_domain}: {response.status_code}")
-                    return JSONResponse(
-                        content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=True))
-                    )
+            job_id = await queue_reindex_sqs(domain, delete_existing=True)
         except Exception as e:
-            LOGGER.error(f"Failed to start manual reindex for domain {stripped_domain}: {e}")
-            return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=True)))
+            LOGGER.error(f"Failed to queue manual reindex for domain {stripped_domain}: {e}")
+            return ToggleAskAiResponse(success=False, ask_ai_enabled=existing_record.last_reindex_time is not None)
 
         existing_record.job_id = job_id
         await db.commit()
         LOGGER.info(f"Started manual reindex for domain {stripped_domain} with job_id: {job_id}")
 
-        return JSONResponse(
-            content=jsonable_encoder(ToggleAskAiResponse(success=True, job_id=job_id, ask_ai_enabled=True))
+        return ToggleAskAiResponse(
+            success=True,
+            job_id=job_id,
+            ask_ai_enabled=existing_record.last_reindex_time is not None,
         )
 
     except Exception:
         LOGGER.exception("Failed to start manual reindex")
-        return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=True)))
+        return ToggleAskAiResponse(success=False, ask_ai_enabled=False)
 
 
 @fai_app.get(
@@ -530,9 +490,7 @@ async def reindex_preview_callback(
     openapi_extra={"x-fern-audiences": ["internal"]},
 )
 async def reindex_callback(
-    request: ReindexCallbackRequest,
-    background_tasks: BackgroundTasks,
-    db: AsyncSession = Depends(get_db),
+    request: ReindexCallbackRequest, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)
 ) -> JSONResponse:
     """Handle callback from SQS reindexing worker when reindex completes."""
     try:

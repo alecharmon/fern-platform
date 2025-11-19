@@ -33,6 +33,7 @@ jobs:
       KV_REST_API_READ_ONLY_TOKEN: ${{ secrets.KV_REST_API_READ_ONLY_TOKEN }}
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
       VENUS_URL: ${{ secrets.VENUS_URL }}
+      FAI_REINDEXING_SQS_URL: ${{ secrets.FAI_REINDEXING_SQS_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -64,6 +65,7 @@ jobs:
           echo "KV_REST_API_URL=${{ env.KV_REST_API_URL }}" >> .env
           echo "VENUS_URL=${{ env.VENUS_URL }}" >> .env
           echo "FAI_LAMBDA_FUNCTION_NAME=${{ env.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
+          echo "FAI_REINDEXING_SQS_URL=${{ env.FAI_REINDEXING_SQS_URL }}" >> .env
       - name: Deploy to prod
         run: |
           git_version="$(scripts/fai-version.sh)"

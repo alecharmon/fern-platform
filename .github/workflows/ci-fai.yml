@@ -151,6 +151,7 @@ jobs:
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
       VENUS_URL: ${{ secrets.VENUS_URL }}
       FAI_LAMBDA_FUNCTION_NAME: ${{ secrets.FAI_LAMBDA_FUNCTION_NAME }}
+      FAI_REINDEXING_SQS_URL: ${{ secrets.FAI_REINDEXING_DEV_SQS_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -180,6 +181,7 @@ jobs:
           echo "SLACK_CLIENT_SECRET=${{ env.SLACK_CLIENT_SECRET }}" >> .env
           echo "SLACK_SIGNING_SECRET=${{ env.SLACK_SIGNING_SECRET }}" >> .env
           echo "VENUS_URL=${{ env.VENUS_URL }}" >> .env
+          echo "FAI_REINDEXING_SQS_URL=${{ env.FAI_REINDEXING_DEV_SQS_URL }}" >> .env
       - name: test
         run: |
           cd servers/fai

@@ -1,4 +1,6 @@
+import type { Logger } from "winston";
 import { faiClient } from "../config/clients";
+import { env } from "../config/env";
 import { createDomainLogger } from "../config/logger";
 import { getDocsUrlMetadata } from "../services/getDocsUrlMetadata";
 import { setJobStatus } from "../services/kv";
@@ -6,12 +8,12 @@ import { syncToQueryIndex } from "../services/sync";
 import { runTurbopufferUpsertTask } from "../services/turbopuffer/turbopuffer";
 import type { ReindexJobMessage } from "../types";
 
-export async function processReindexJob(message: ReindexJobMessage): Promise<void> {
+export async function processReindexJob(message: ReindexJobMessage, sqsMessageId: string): Promise<void> {
     const { domain, deleteExisting = true } = message;
     const log = createDomainLogger(domain);
     const start = Date.now();
 
-    log.info("Starting reindex job", { deleteExisting });
+    log.info("Starting reindex job", { sqsMessageId, deleteExisting });
 
     try {
         const metadata = await getDocsUrlMetadata(domain);
@@ -43,7 +45,7 @@ export async function processReindexJob(message: ReindexJobMessage): Promise<voi
         const end = Date.now();
         const durationMs = end - start;
 
-        log.info("Reindex completed", { durationMs, numInserted, jobId });
+        log.info("Reindex completed", { durationMs, numInserted, jobId, sqsMessageId });
 
         await setJobStatus(domain, {
             status: "completed",
@@ -52,6 +54,8 @@ export async function processReindexJob(message: ReindexJobMessage): Promise<voi
             num_inserted: numInserted,
             job_id: jobId
         });
+
+        await sendReindexCallback(domain, sqsMessageId, "success", log);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
@@ -66,6 +70,53 @@ export async function processReindexJob(message: ReindexJobMessage): Promise<voi
             completed_at: new Date().toISOString()
         });
 
+        await sendReindexCallback(domain, sqsMessageId, "failure", log);
+
         throw error;
+    }
+}
+
+/**
+ * Send callback to FAI server when reindex job completes or fails
+ */
+async function sendReindexCallback(
+    domain: string,
+    sqsMessageId: string,
+    status: "success" | "failure",
+    log: Logger
+): Promise<void> {
+    try {
+        const callbackUrl = `${env.faiOrigin}/settings/ask-ai/reindex-callback`;
+
+        const response = await fetch(callbackUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${env.fernToken}`
+            },
+            body: JSON.stringify({
+                status,
+                sourceMessageId: sqsMessageId,
+                domain
+            })
+        });
+
+        if (!response.ok) {
+            log.warn("Failed to send reindex callback to FAI", {
+                status: response.status,
+                statusText: response.statusText,
+                sqsMessageId
+            });
+        } else {
+            log.info("Successfully sent reindex callback to FAI", {
+                status,
+                sqsMessageId
+            });
+        }
+    } catch (error) {
+        log.error("Error sending reindex callback to FAI", {
+            error: error instanceof Error ? error.message : String(error),
+            sqsMessageId
+        });
     }
 }

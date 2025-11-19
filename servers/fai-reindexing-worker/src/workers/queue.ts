@@ -63,7 +63,7 @@ async function handleMessage(message: any): Promise<void> {
             return;
         }
 
-        await processReindexJob(jobMessage);
+        await processReindexJob(jobMessage, messageId);
 
         await deleteMessage(message.ReceiptHandle);
 

@@ -39,6 +39,7 @@ class Variables:
 
     FERN_TOKEN: str | None = os.environ.get("FERN_TOKEN")
     VENUS_URL: str | None = os.environ.get("VENUS_URL")
+    FAI_REINDEXING_SQS_URL: str | None = os.environ.get("FAI_REINDEXING_SQS_URL")
 
     @classmethod
     def validate_env_variables(cls) -> None:

@@ -1,7 +1,4 @@
-from unittest.mock import (
-    AsyncMock,
-    patch,
-)
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,18 +11,9 @@ from fai.models.db.settings_db import SettingsDb
 @pytest.mark.asyncio
 async def test_enable_ask_ai_success(test_client: TestClient, test_session: AsyncSession) -> None:
     """Test successfully enabling Ask AI for multiple domains."""
-    with patch("fai.routes.settings.httpx.AsyncClient") as mock_client:
-        # Mock successful reindex response
-        from unittest.mock import Mock
-
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json = Mock(return_value={"job_id": "test-job-123"})
-
-        mock_get = AsyncMock(return_value=mock_response)
-        mock_context = AsyncMock()
-        mock_context.__aenter__.return_value.get = mock_get
-        mock_client.return_value = mock_context
+    with patch("fai.routes.settings.queue_reindex_sqs") as mock_queue_reindex:
+        # Mock successful SQS queue response
+        mock_queue_reindex.return_value = "test-job-123"
 
         # Mock revalidate_domain background task
         with patch("fai.routes.settings.revalidate_domain"):
@@ -78,17 +66,9 @@ async def test_enable_ask_ai_updates_existing_record(test_client: TestClient, te
     test_session.add(existing_record)
     await test_session.commit()
 
-    with patch("fai.routes.settings.httpx.AsyncClient") as mock_client:
-        from unittest.mock import Mock
-
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json = Mock(return_value={"job_id": "new-job-456"})
-
-        mock_get = AsyncMock(return_value=mock_response)
-        mock_context = AsyncMock()
-        mock_context.__aenter__.return_value.get = mock_get
-        mock_client.return_value = mock_context
+    with patch("fai.routes.settings.queue_reindex_sqs") as mock_queue_reindex:
+        # Mock successful SQS queue response
+        mock_queue_reindex.return_value = "new-job-456"
 
         with patch("fai.routes.settings.revalidate_domain"):
             response = test_client.post(
@@ -134,17 +114,9 @@ async def test_enable_ask_ai_no_locations(test_client: TestClient, test_session:
 @pytest.mark.asyncio
 async def test_enable_ask_ai_reindex_fails(test_client: TestClient, test_session: AsyncSession) -> None:
     """Test that a failed reindex is handled gracefully."""
-    with patch("fai.routes.settings.httpx.AsyncClient") as mock_client:
-        # Mock failed reindex response
-        from unittest.mock import Mock
-
-        mock_response = Mock()
-        mock_response.status_code = 500
-
-        mock_get = AsyncMock(return_value=mock_response)
-        mock_context = AsyncMock()
-        mock_context.__aenter__.return_value.get = mock_get
-        mock_client.return_value = mock_context
+    with patch("fai.routes.settings.queue_reindex_sqs") as mock_queue_reindex:
+        # Mock failed SQS queue
+        mock_queue_reindex.side_effect = Exception("SQS connection failed")
 
         response = test_client.post(
             "/settings/ask-ai/enable",
@@ -166,21 +138,9 @@ async def test_enable_ask_ai_reindex_fails(test_client: TestClient, test_session
 @pytest.mark.asyncio
 async def test_enable_ask_ai_partial_success(test_client: TestClient, test_session: AsyncSession) -> None:
     """Test enabling Ask AI for multiple domains with partial success."""
-    with patch("fai.routes.settings.httpx.AsyncClient") as mock_client:
+    with patch("fai.routes.settings.queue_reindex_sqs") as mock_queue_reindex:
         # First domain succeeds, second fails
-        from unittest.mock import Mock
-
-        mock_success = Mock()
-        mock_success.status_code = 200
-        mock_success.json = Mock(return_value={"job_id": "test-job-123"})
-
-        mock_failure = Mock()
-        mock_failure.status_code = 500
-
-        mock_get = AsyncMock(side_effect=[mock_success, mock_failure])
-        mock_context = AsyncMock()
-        mock_context.__aenter__.return_value.get = mock_get
-        mock_client.return_value = mock_context
+        mock_queue_reindex.side_effect = ["test-job-123", Exception("SQS error")]
 
         with patch("fai.routes.settings.revalidate_domain"):
             response = test_client.post(
@@ -212,13 +172,10 @@ async def test_enable_ask_ai_partial_success(test_client: TestClient, test_sessi
 
 @pytest.mark.asyncio
 async def test_enable_ask_ai_http_exception(test_client: TestClient, test_session: AsyncSession) -> None:
-    """Test that HTTP exceptions are handled gracefully."""
-    with patch("fai.routes.settings.httpx.AsyncClient") as mock_client:
-        # Mock HTTP exception
-        mock_get = AsyncMock(side_effect=Exception("Network error"))
-        mock_context = AsyncMock()
-        mock_context.__aenter__.return_value.get = mock_get
-        mock_client.return_value = mock_context
+    """Test that SQS exceptions are handled gracefully."""
+    with patch("fai.routes.settings.queue_reindex_sqs") as mock_queue_reindex:
+        # Mock SQS exception
+        mock_queue_reindex.side_effect = Exception("Network error")
 
         response = test_client.post(
             "/settings/ask-ai/enable",
