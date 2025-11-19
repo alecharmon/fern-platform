@@ -57,17 +57,12 @@ COPY servers/fdr/prisma /prisma
 # -----------  End Postgres setup  -----------
 
 # ----------- Start MINIO setup  -----------
-# Install Go
-RUN log "Installing Go..." && \
-    apk add --no-cache go 2>&1 | add-timestamps
-
-# Set up Go environment
-ENV GOPATH=/go
-ENV PATH=$PATH:/go/bin
-
-# Install MinIO using go install
-RUN log "Installing MinIO via go install..." && \
-    go install -v github.com/minio/minio@RELEASE.2025-10-15T17-29-55Z 2>&1 | add-timestamps && \
+# Copy pre-built MinIO binary
+COPY servers/self-hosted/third-party/minio.gz /tmp/minio.gz
+RUN log "Installing MinIO from pre-built binary..." && \
+    gunzip /tmp/minio.gz && \
+    mv /tmp/minio /usr/local/bin/minio && \
+    chmod +x /usr/local/bin/minio && \
     adduser -D -s /bin/sh minio-user || true && \
     mkdir -p /data && \
     # Make data directory accessible to all users
@@ -83,7 +78,8 @@ ENV MINIO_VOLUMES="/data" \
     MINIO_ROOT_USER="minioadmin" \
     MINIO_ROOT_PASSWORD="minioadmin" \
     MINIO_USERNAME="minioadmin" \
-    MINIO_PASSWORD="minioadmin"
+    MINIO_PASSWORD="minioadmin" \
+    PATH=$PATH:/usr/local/bin
 
 # ----------- End MINIO setup  -----------
 
