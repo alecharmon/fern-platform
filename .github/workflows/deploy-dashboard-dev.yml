@@ -23,23 +23,12 @@ jobs:
         uses: ./.github/actions/install
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
-      - name: Install Prisma CLI
-        run: npm install --global prisma@latest
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Run Prisma Migrate
-        run: |
-          if [ -f .vercel/.env.production.local ]; then
-            export $(grep -v '^#' .vercel/.env.production.local | grep -v '^$' | xargs)
-            echo "Loaded environment variables for Prisma migration"
-          else
-            echo "Warning: No .vercel/.env.production.local file found"
-          fi
-          prisma migrate deploy --schema packages/fern-dashboard/server/prisma/schema.prisma
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Deploy Project Artifacts to Vercel
+      - name: Deploy Project to Vercel
         id: deploy
+        # Don't pass --prebuilt: it's not compatible with Skew Protection
+        # https://vercel.com/docs/cli/deploy#when-not-to-use---prebuilt
         run: |
-          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          url=$(vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "VERCEL_DEPLOYMENT_URL=$url" >> $GITHUB_OUTPUT
