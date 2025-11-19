@@ -554,7 +554,7 @@ async def reindex_callback(
         if request.status == "success":
             LOGGER.info(f"Reindex completed successfully for domain {existing_record.domain}")
             existing_record.job_id = None
-            existing_record.last_reindex_time = datetime.now(UTC)
+            existing_record.last_reindex_time = datetime.utcnow()
             background_tasks.add_task(revalidate_domain, existing_record.domain)
         else:
             LOGGER.error(f"Reindex failed for domain {existing_record.domain}")
