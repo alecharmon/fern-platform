@@ -1,0 +1,15 @@
+{
+  "question": "What self-hosted mode update was made to the Java SDK on May 20, 2025?",
+  "ground_truth": "The May 20, 2025 Java SDK release version 2.36.3 updated the generator to always commit changes in self-hosted mode, even if there are none, allowing users to verify that the generator actually ran and attempted to make a commit.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "java-sdk-2025-05-20",
+    "cited_context": "## 2.36.3\n**`(fix):`** Updates the generator to always commit changes, even if there are none, in self-hosted mode. This \nallows users to make sure that the generator actually ran and attempted to make a commit."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/java/changelog/2025/5/20"
+    ]
+  }
+}

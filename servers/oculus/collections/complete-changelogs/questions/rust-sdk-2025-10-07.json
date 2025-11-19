@@ -1,0 +1,15 @@
+{
+  "question": "What changes were made to the Rust SDK on October 7, 2025?",
+  "ground_truth": "The October 7, 2025 Rust SDK release included the following changes:\n- Version 0.6.0: Added recursive type detection and Box wrapping for structs.\n- Version 0.5.6: Refactored struct type name collision and disabled cursor pagination.\n- Version 0.5.5: Added new readme config fields to ReadmeConfigBuilder.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "rust-sdk-2025-10-07",
+    "cited_context": "## 0.6.0\n**`(feat):`** Add recursive type detection and Box wrapping for structs\n\n## 0.5.6\n**`(chore):`** refactor struct type name collision disable cursor pagination\n\n## 0.5.5\n**`(chore):`** Add new readme config fields to ReadmeConfigBuilder"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/rust/changelog/2025/10/7"
+    ]
+  }
+}

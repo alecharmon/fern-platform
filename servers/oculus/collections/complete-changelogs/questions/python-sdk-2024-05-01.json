@@ -1,0 +1,15 @@
+{
+  "question": "What fixes were included in the Python SDK on May 1, 2024?",
+  "ground_truth": "The May 1, 2024 Python SDK release included the following changes:\n- Version 1.5.1-rc5: Fixed snippet templates to generate the correct imports for object types.\n- Version 1.5.1-rc4: Fixed SDK to generate discriminated union snippet templates correctly.\n- Version 1.5.1-rc3: Union types leverage the fern aware base model to include JSON and Dict function overrides.\n- Version 1.5.1-rc2: Fixed vanilla pydantic base model to respect require_optional_fields.\n- Version 1.5.1-rc1: Improved formatting within snippet templates by stripping newlines and plumbing through indentation metadata.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "python-sdk-2024-05-01",
+    "cited_context": "## 1.5.1-rc5\n**`(fix):`** Snippet templates now generate the correct imports for object types.\n\n## 1.5.1-rc4\n**`(fix):`** The SDK now generates discriminated union snippet templates correctly.\n\n## 1.5.1-rc3\n**`(chore):`** Union types leverage the fern aware base model to include JSON and Dict function overrides.\n\n## 1.5.1-rc2\n**`(fix):`** The vanilla pydantic base model now respects the `require_optional_fields`\n\n### What's been fixed\n- The vanilla pydantic base model now respects the `require_optional_fields`, this became a regression in 1.5.1-rc0 when we started to inline union properties which leverages the vanilla base model.\n\n## 1.5.1-rc1\n**`(fix):`** Improve formatting within snippet templates.\n\n### What's been fixed\n- Address formatting issues with snippet templates, we now strip newlines off OG snippets as well as plumb through indentation metadata to places that were previously missing it."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/python/changelog/2024/5/1"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "question": "When I share documentation links, people have to scroll through the whole page to find the relevant table or code example. Can I make URLs that jump directly to specific content in the middle of a page, not just section titles?",
+  "ground_truth": "To create direct links to specific content elements like tables, code blocks, or paragraphs (not just headers), wrap the content with the `<Anchor>` component and assign it a custom anchor ID. For example: `<Anchor id=\"pricing-table\">[your table content here]</Anchor>`. You can then share links using the hash symbol format like `https://yoursite.docs.com/page#pricing-table`, which will jump directly to that content. This works for any content type - tables, code blocks, paragraphs, or other elements - giving you the flexibility to create stable deep links to arbitrary content blocks throughout your documentation, not just section headers.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "anchor",
+    "cited_context": "The `<Anchor>` component creates direct links to specific content like paragraphs, tables, and code blocks. Wrap your content with the `<Anchor>` tag and assign it a custom anchor ID, which you can link to in URLs using the hash symbol. Example: `<Anchor id=\"api-endpoints\">` followed by table content and `</Anchor>`. You can link directly to the [API endpoints table](#api-endpoints)."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/writing-content/components/anchor"
+    ],
+    "correctness": [
+      "The answer must mention the `<Anchor>` tag.",
+      "The answer must mention the `id` attribute.",
+      "The answer must mention using the hash symbol to link to the anchor.",
+      "The answer should contain a code example of how to use the `<Anchor>` tag."
+    ]
+  }
+}

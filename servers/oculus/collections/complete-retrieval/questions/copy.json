@@ -1,0 +1,19 @@
+{
+  "question": "Can I show users simple text like 'npm install' but have them copy the full command with all flags when they click? Does this work for multi-line stuff too?",
+  "ground_truth": "Yes, you can use the `clipboard` prop to display one value while copying a different value to the clipboard. This is useful for simplifying commands, versions, or URLs for readability while copying complete, working values. For example, you can display \"npm install\" to users visually but copy \"npm install -g bamboo-leaf-cli\" when they click the copy button. The clipboard prop works with both single-line and multi-line content - you can display simplified step labels but copy complete bash scripts or multi-line commands when users click copy. This allows you to maintain clean, readable documentation while ensuring users get executable, complete commands in their clipboard.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "copy",
+    "cited_context": "Use the `clipboard` prop to display one value while copying a different value to the clipboard. This is useful when you want to simplify commands, versions, or URLs for readability while copying complete values. For example, you can display \"npm install\" to users but copy \"npm install -g bamboo-leaf-cli\" when they click the copy button."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/writing-content/components/copy"
+    ],
+    "correctness": [
+      "The answer must mention the `clipboard` prop.",
+      "The answer should include a code example of how to use the `clipboard` prop."
+    ]
+  }
+}

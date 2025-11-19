@@ -1,0 +1,15 @@
+{
+  "question": "What datetime encoding improvements were made in the C# SDK on June 19, 2024?",
+  "ground_truth": "The June 19, 2024 C# SDK release included datetime encoding improvements:\n- Version 0.0.28: Fixed query and header parameters with optional datetimes to be encoded in ISO 8601 format before making requests.\n- Version 0.0.24: Fixed query and header parameters to be ISO 8601 encoded before making requests.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "csharp-sdk-2024-06-19",
+    "cited_context": "## 0.0.28\n**`(fix):`** Query and header parameters with optional datetimes are now encoded in ISO 8601 format before making requests.\n\n## 0.0.24\n**`(fix):`** Query and header parameters are now ISO 8601 encoded before making requests."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/csharp/changelog/2024/6/19"
+    ]
+  }
+}

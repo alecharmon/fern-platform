@@ -1,0 +1,19 @@
+{
+  "question": "Where can I see what people are asking the AI chatbot? I need to track which questions are most common, see the full conversations, check if usage is growing, and download everything for analysis in our data tools.",
+  "ground_truth": "You can access comprehensive Ask Fern analytics from the Ask Fern tab in the Fern Dashboard. The dashboard displays queries and conversations per day and allows you to view data across different time periods including week, month, year, or all-time views, which helps you track month-over-month growth. You can drill down into individual conversations to see exact user queries and Ask Fern responses, providing the context needed to understand how users interact with your documentation. For deeper analysis in your BI tools, you can export the data to CSV format, which enables you to identify trends, perform custom analysis, and optimize your documentation strategy based on actual user behavior patterns.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "analytics",
+    "cited_context": "The Ask Fern tab of the Fern Dashboard displays queries and conversations per day on your documentation site. You can view data by week, month, year, or all-time periods.\n\n Drill down into individual conversations to see the exact user queries and Ask Fern responses, helping you understand how users interact with your documentation.\n\nQuery and conversation analytics on Fern Dashboard\n\nYou can also export data to CSV format to identify trends and optimize your documentation strategy."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/ask-fern/features/analytics"
+    ],
+    "correctness": [
+      "The answer must mention the `Ask Fern` tab in the Fern Dashboard.",
+      "The answer must mention the `CSV` format."
+    ]
+  }
+}

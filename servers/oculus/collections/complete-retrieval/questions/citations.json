@@ -1,0 +1,18 @@
+{
+  "question": "When the AI answers questions, can users see where the information came from? If I upload extra content like FAQs, will those sources also show clickable links, or only the main docs?",
+  "ground_truth": "Fern's AI search (Ask Fern) includes comprehensive citations that link directly to source documentation, showing users exactly where information comes from and providing immediate context for verification. This addresses your legal team's traceability requirements by ensuring every answer is attributable to specific documentation. Citations reference specific documentation sections, allowing users to easily fact-check responses by clicking through to the original source material. Importantly, when Ask Fern references content from custom documents added via the Documents API (such as your internal FAQs or knowledge base articles), it includes the associated URL as a citation, allowing users to access that original source material as well. This means both your main documentation and any custom Documents API content will be properly cited, providing comprehensive source attribution across all content types.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "citations",
+    "cited_context": "Fern's AI search includes citations that link directly to source documentation, showing users where information comes from and providing immediate context. By referencing specific documentation sections, citations verify answer sources while enabling users to easily explore topics in greater depth. When Ask Fern references content from custom documents added via the Documents API, it includes the associated URL as a citation, allowing users to access the original source material."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/ask-fern/features/citations"
+    ],
+    "correctness": [
+      "The answer must mention that Fern's AI search includes citations with responses."
+    ]
+  }
+}

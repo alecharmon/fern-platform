@@ -1,0 +1,19 @@
+{
+  "question": "Error responses aren't showing up in the API documentation. How do I make them visible on endpoint pages? Is this configured once for everything or per endpoint? Does it work with any spec format?",
+  "ground_truth": "To enable error documentation on endpoint pages, add `display-errors: true` under the `api` navigation section in your `docs.yml` configuration file. This is a global setting that applies to the entire API reference - once enabled, error documentation will appear on all endpoint pages that have error responses defined. It works with both OpenAPI specifications (reading from the responses section with 4xx/5xx status codes) and Fern Definition formats (reading from the errors field in endpoint definitions). You cannot enable this per-endpoint; it's an all-or-nothing configuration for the API reference. Once enabled, the error information you've already defined in your spec will automatically display on each endpoint's documentation page, showing developers what error codes and response structures to expect.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "endpoint-errors",
+    "cited_context": "This configuration enables errors to show up on the endpoint pages of your documentation. Configuration: navigation: - api: API Reference display-errors: true #<--- add this line"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/api-references/endpoint-errors"
+    ],
+    "correctness": [
+      "The answer must mention the `display-errors: true` configuration.",
+      "The answer should include a code example of how to enable errors on endpoint pages."
+    ]
+  }
+}

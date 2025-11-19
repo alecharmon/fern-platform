@@ -1,0 +1,15 @@
+{
+  "question": "Tell me about the Fern Docs changes on April 20, 2024",
+  "ground_truth": "The 2024-04-20 release introduced the following changes:\n- Sidebar Navigation Enhancement: Improved sidebar padding and visual hierarchy with refined spacing and typography.\n- Base Path Configuration: Added flexible base path configuration for documentation routing.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "docs-2024-04-20",
+    "cited_context": "## Sidebar Navigation Enhancement\nImproved sidebar padding and visual hierarchy with refined spacing and typography. The documentation navigation now provides clearer visual structure and better readability.\n\n## Base Path Configuration\nAdded flexible base path configuration for documentation routing. Organizations can now host documentation under custom paths while maintaining proper navigation.\n\n```yaml docs.yml\ninstances:\n  - url: your-site.docs.buildwithfern.com\n    custom-domain: your-site.com/docs\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/changelog/2024/4/20"
+    ]
+  }
+}

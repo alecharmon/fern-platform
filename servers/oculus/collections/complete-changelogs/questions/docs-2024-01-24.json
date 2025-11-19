@@ -1,0 +1,15 @@
+{
+  "question": "What changes were introduced to Fern Docs in the 2024-01-24 release?",
+  "ground_truth": "The 2024-01-24 release introduced the following changes:\n- API Playground Launch: Enable interactive API testing directly in the documentation.\n- Enhanced Dark Mode: Multiple improvements to dark mode readability for syntax highlighting, dropdowns, and search results.\n- Mobile-Friendly Navigation: Comprehensive updates to mobile navigation experience with collapsible and scrolling.\n- Search Enhancements: Multiple improvements to the search experience.\n- Performance Optimization: Several performance improvements across the platform.\n- Moved FontAwesome to CDN \n- Improved search dialog loading\n- Optimized static props loading \n- Added polyfill DOM parser for server-side TOC rendering",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "docs-2024-01-24",
+    "cited_context": "## API Playground Launch\nEnable interactive API testing directly in the documentation.\n- Added full API request testing capability\n- Improved error handling and status code display\n- Added support for recursive property rendering\n\n## Enhanced Dark Mode\nMultiple improvements to dark mode readability for syntax highlighting, dropdowns, and search results.\n\n```css\n/* Dark mode improvements */\n[data-theme='dark'] {\n  --syntax-bg: #1a1a1a;\n  --dropdown-bg: #2d2d2d;\n  --search-highlight: #ffd700;\n}\n```\n\n## Mobile-Friendly Navigation\nComprehensive updates to mobile navigation experience with collapsible and scrolling.\n\n## Search Enhancements\nMultiple improvements to the search experience.\n- Default and configurable keyboard shortcuts (`Cmd+A`, `/`) for search\n- Improved search box sizing\n- Added auto-focus functionality\n\n## Performance Optimization\nSeveral performance improvements across the platform.\n- Moved FontAwesome to CDN \n- Improved search dialog loading\n- Optimized static props loading \n- Added polyfill DOM parser for server-side TOC rendering"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/changelog/2024/1/24"
+    ]
+  }
+}

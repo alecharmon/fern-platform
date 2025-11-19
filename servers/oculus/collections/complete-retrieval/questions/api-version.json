@@ -1,0 +1,22 @@
+{
+  "question": "We version our API using a custom header (X-API-Version) instead of in the URL. We have versions 1.0.0, 2.0.0, and 'latest', with 2.0.0 as the default. Do developers set this once when initializing the client or pass it with every request?",
+  "ground_truth": "You can configure header-based API versioning using the `x-fern-version` extension in your OpenAPI specification. Under `x-fern-version`, specify the version configuration: `header: X-API-Version` to define your custom header name, `default: \"2.0.0\"` to set the default version, and `values` as an array listing all supported versions including `[\"1.0.0\", \"2.0.0\", \"latest\"]`. This configuration enables the SDK to automatically handle version selection - SDK users can specify their desired version during client initialization rather than passing the header with every request. The SDK will default to version 2.0.0 if no version is specified, and it will automatically include the `X-API-Version` header in all requests with the selected version value, abstracting the header management from SDK users.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "api-version",
+    "cited_context": "You can define your API version scheme, such as a `X-API-Version` header. The supported versions and default value are specified like so:\n\n```yaml title=\"openapi.yaml\"\nx-fern-version:\n  version:\n    header: X-API-Version\n    default: \"2.0.0\"\n    values:\n      - \"1.0.0\"\n      - \"2.0.0\"\n      - \"latest\"\npaths: ...\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/api-definitions/openapi/extensions/api-version"
+    ],
+    "correctness": [
+      "The answer must mention the `x-fern-version` extension.",
+      "The answer must mention the `header` field in the `x-fern-version` extension.",
+      "The answer must mention the `default` field in the `x-fern-version` extension.",
+      "The answer must mention the `values` field in the `x-fern-version` extension.",
+      "The answer should include a code example of how to use the `x-fern-version` extension."
+    ]
+  }
+}

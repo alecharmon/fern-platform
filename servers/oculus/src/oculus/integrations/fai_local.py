@@ -3,7 +3,10 @@ import json
 import os
 import time
 
-from oculus.integrations.base import AnswerMetadata, SourceMetadata
+from oculus.integrations.base import (
+    AnswerMetadata,
+    SourceMetadata,
+)
 
 _FAI_ENV_VARS = {
     "COHERE_API_KEY": "dummy",
@@ -18,6 +21,7 @@ _FAI_ENV_VARS = {
     "DISCORD_OAUTH_URL": "",
     "KV_REST_API_TOKEN": "",
     "KV_REST_API_READ_ONLY_TOKEN": "",
+    "FAI_REINDEXING_SQS_URL": "",
     "KV_REST_API_URL": "",
     "FERN_TOKEN": "",
     "VENUS_URL": "",
@@ -51,7 +55,10 @@ class FAILocalIntegration:
 
         try:
             from fai.models.types.chat_types import ChatMessage
-            from fai.models.utils.chat import deduplicate_retrieved_sources, format_record
+            from fai.models.utils.chat import (
+                deduplicate_retrieved_sources,
+                format_record,
+            )
             from fai.utils.chat.query_rewriter import rewrite_query
             from fai.utils.chat.response.anthropic import get_anthropic_response
             from fai.utils.chat.response.cohere import get_cohere_response
@@ -145,17 +152,43 @@ class FAILocalIntegration:
         return answer_text, metadata
 
     def generate_answer(self, question: str) -> tuple[str, AnswerMetadata]:
-        try:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+        max_retries = 3
+        timeout = 120
+
+        for attempt in range(max_retries):
             try:
-                return loop.run_until_complete(self._generate_answer_async(question))
-            finally:
-                loop.close()
-        except Exception as e:
-            error_metadata: AnswerMetadata = {
-                "integration_type": "fai-local",
-                "model": self.model,
-                "sources": [],
-            }
-            return f"ERROR: {str(e)}", error_metadata
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    return loop.run_until_complete(
+                        asyncio.wait_for(self._generate_answer_async(question), timeout=timeout)
+                    )
+                finally:
+                    loop.close()
+            except asyncio.TimeoutError:
+                if attempt < max_retries - 1:
+                    print(f"Request timed out (attempt {attempt + 1}/{max_retries}), retrying...")
+                    continue
+                timeout_metadata: AnswerMetadata = {
+                    "integration_type": "fai-local",
+                    "model": self.model,
+                    "sources": [],
+                }
+                return f"ERROR: Request timed out after {max_retries} attempts", timeout_metadata
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    print(f"Error on attempt {attempt + 1}/{max_retries}: {e}, retrying...")
+                    continue
+                exception_metadata: AnswerMetadata = {
+                    "integration_type": "fai-local",
+                    "model": self.model,
+                    "sources": [],
+                }
+                return f"ERROR: {str(e)}", exception_metadata
+
+        final_metadata: AnswerMetadata = {
+            "integration_type": "fai-local",
+            "model": self.model,
+            "sources": [],
+        }
+        return "ERROR: Max retries exceeded", final_metadata

@@ -11,19 +11,17 @@ from oculus.framework.evaluators import (
     ScaledEvaluationResult,
     get_evaluator,
 )
-from oculus.framework.generators import get_generator
 from oculus.framework.models import (
     Answer,
     BinaryEvaluatorResult,
+    CollectionConfig,
     Evaluation,
     EvaluationMetrics,
     EvaluationRun,
-    GeneratorConfig,
     Question,
     ScaledEvaluatorResult,
 )
 from oculus.framework.statistics import calculate_metrics
-from oculus.utils.docs_definition import get_docs_definition_for_domain
 from oculus.utils.file_utils import (
     load_json,
     save_json,
@@ -54,33 +52,47 @@ class EvaluationRunner:
         self,
         suite_name: str,
         suite_path: Path,
-        domain: str,
-        generators: list[str] | None = None,
+        collections: list[str] | None = None,
         evaluators: list[str] | None = None,
         run_id: str | None = None,
         max_workers: int = 16,
-        num_questions_generation: int | None = None,
-        generator_config: "GeneratorConfig | None" = None,
+        collections_base_path: Path | None = None,
         results_base_path: Path | None = None,
     ):
         self.suite_name = suite_name
         self.suite_path = suite_path
-        self.domain = domain
-        self.generators = generators or []
+        self.collections = collections or []
         self.evaluators = evaluators or ["correctness"]
         self.run_id = run_id or datetime.now().strftime("%Y%m%d_%H%M%S")
         self.max_workers = max_workers
-        self.num_questions_generation = num_questions_generation
-        self.generator_config = generator_config
 
+        self.collections_base_path = collections_base_path or (suite_path.parent.parent / "collections")
         self.results_base_path = results_base_path or (suite_path.parent.parent / "results")
 
-        self.questions_dir = suite_path / "questions"
         self.results_dir = self.results_base_path / suite_name
         self.answers_dir = self.results_dir / "answers" / self.run_id
 
         self.answers_dir.mkdir(parents=True, exist_ok=True)
         self.results_dir.mkdir(parents=True, exist_ok=True)
+
+    def get_domains(self) -> set[str]:
+        """Get all unique domains from the suite's collections.
+
+        Returns a set of domain strings. Supports multi-domain suites.
+        """
+        if not self.collections:
+            raise ValueError(f"No collections configured for suite '{self.suite_name}'")
+
+        domains = set()
+        for collection_name in self.collections:
+            collection_config_path = self.collections_base_path / collection_name / "config.json"
+            if not collection_config_path.exists():
+                raise ValueError(f"Collection config not found: {collection_config_path}")
+
+            collection_config = CollectionConfig(**load_json(collection_config_path))
+            domains.add(collection_config.domain)
+
+        return domains
 
     def _extract_subqueries(self, answer: Answer) -> list[str] | None:
         subqueries_str = (
@@ -191,75 +203,49 @@ class EvaluationRunner:
 
         return result
 
-    def generate_and_save_questions(self) -> None:
-        if not self.generators:
-            print("No generators configured")
-            return
-
-        print(f"{'='*60}")
-        print("QUESTION GENERATION")
-        print(f"{'='*60}\n")
-        print(f"Suite: {self.suite_name}")
-        print(f"Domain: {self.domain}")
-        print(f"Generators: {self.generators}\n")
-
-        print(f"Fetching docs definition for domain: {self.domain}")
-        docs_definition = get_docs_definition_for_domain(self.domain)
-
+    def load_questions(self) -> list[Question]:
+        """Load questions from all configured collections."""
         all_questions: list[Question] = []
 
-        self.questions_dir.mkdir(parents=True, exist_ok=True)
-        for existing_file in self.questions_dir.glob("*.json"):
-            existing_file.unlink()
+        if not self.collections:
+            raise ValueError(f"No collections configured for suite '{self.suite_name}'")
 
-        for generator_name in self.generators:
-            print(f"\nRunning generator: {generator_name}")
-            generator_fn = get_generator(generator_name)
+        for collection_name in self.collections:
+            collection_base = self.collections_base_path / collection_name
 
-            if not generator_fn:
-                print(f"Warning: Generator '{generator_name}' not found, skipping")
+            collection_config_path = collection_base / "config.json"
+            if not collection_config_path.exists():
+                raise ValueError(f"Collection config not found: {collection_config_path}")
+
+            collection_config = CollectionConfig(**load_json(collection_config_path))
+
+            collection_questions_path = collection_base / "questions"
+            if not collection_questions_path.exists():
+                raise ValueError(f"Collection questions directory not found: {collection_questions_path}")
+
+            question_files = sorted(collection_questions_path.glob("*.json"), key=lambda f: f.stem)
+
+            if not question_files:
+                print(f"Warning: No questions found in collection '{collection_name}'")
                 continue
 
-            gen_config = None
-            if self.generator_config:
-                if generator_name == "openapi" and self.generator_config.openapi:
-                    gen_config = {"source_path": self.generator_config.openapi.source_path}
+            for question_file in question_files:
+                question_data = load_json(question_file)
+                question = Question(**question_data)
 
-            try:
-                kwargs: dict[str, Any] = {
-                    "questions_dir": self.questions_dir,
-                    "num_questions": self.num_questions_generation,
-                }
-                if gen_config:
-                    kwargs.update(gen_config)
+                if "domain" not in question.metadata:
+                    question.metadata["domain"] = collection_config.domain
 
-                questions = generator_fn(docs_definition, self.domain, **kwargs)
-                all_questions.extend(questions)
-                print(f"Generator '{generator_name}' produced {len(questions)} questions")
-            except TypeError:
-                questions = generator_fn(docs_definition, self.domain)
-                all_questions.extend(questions)
-                print(f"Generator '{generator_name}' produced {len(questions)} questions")
-            except Exception as e:
-                print(f"Error running generator '{generator_name}': {e}")
-                import traceback
+                question.metadata["collection"] = collection_name
 
-                traceback.print_exc()
-                continue
+                all_questions.append(question)
+
+            print(f"Loaded {len(question_files)} questions from collection '{collection_name}' (domain: {collection_config.domain})")
 
         if not all_questions:
-            print("\nNo questions generated")
-            return
+            raise ValueError(f"No questions loaded from any collections: {self.collections}")
 
-        print(f"\n{'='*60}")
-        print(f"Saved {len(all_questions)} questions to {self.questions_dir}")
-        print(f"{'='*60}\n")
-
-    def load_questions(self) -> list[Question]:
-        question_files = sorted(self.questions_dir.glob("*.json"), key=lambda f: f.stem)
-        if not question_files:
-            raise ValueError(f"No questions found in {self.questions_dir}")
-        return [Question(**load_json(f)) for f in question_files]
+        return all_questions
 
     def generate_answers(
         self,
@@ -458,68 +444,20 @@ class EvaluationRunner:
     def calculate_metrics(self, evaluations: list[Evaluation]) -> EvaluationMetrics:
         return calculate_metrics(evaluations)
 
-    def run(
-        self,
-        answer_fn: Callable[[str], tuple[str, dict[str, str]]],
-        model_name: str = "fai",
-        judge_model: str = "claude-sonnet-4-5-20250929",
-        skip_existing: bool = True,
-        questions: list[Question] | None = None,
-    ) -> EvaluationRun:
-        print(f"\n{'='*60}")
-        print(f"Starting evaluation run: {self.run_id}")
-        print(f"Suite: {self.suite_name}")
-        print(f"Domain: {self.domain}")
-        print(f"{'='*60}\n")
+    def calculate_metrics_by_collection(self, evaluations: list[Evaluation]) -> dict[str, EvaluationMetrics]:
+        """Calculate metrics grouped by collection.
 
-        print("Stage 1: Loading questions...")
-        if questions is None:
-            questions = self.load_questions()
-            print(f"Total questions: {len(questions)}\n")
-        else:
-            print(f"Using provided questions: {len(questions)}\n")
+        Returns a dict mapping collection name to its metrics.
+        """
+        from collections import defaultdict
 
-        print("Stage 2: Generating answers...")
-        answers = self.generate_answers(
-            questions=questions,
-            answer_fn=answer_fn,
-            model_name=model_name,
-            skip_existing=skip_existing,
-        )
-        print()
+        evals_by_collection = defaultdict(list)
+        for evaluation in evaluations:
+            collection = evaluation.metadata.get("collection", "unknown")
+            evals_by_collection[collection].append(evaluation)
 
-        print("Stage 3: Evaluating answers...")
-        evaluations = self.evaluate_answers(
-            questions=questions,
-            answers=answers,
-            judge_model=judge_model,
-            skip_existing=skip_existing,
-        )
-        print()
+        metrics_by_collection = {}
+        for collection, collection_evals in evals_by_collection.items():
+            metrics_by_collection[collection] = calculate_metrics(collection_evals)
 
-        print("Stage 4: Calculating metrics...")
-        metrics = self.calculate_metrics(evaluations)
-
-        run_result = EvaluationRun(
-            run_id=self.run_id,
-            timestamp=datetime.now().isoformat(),
-            suite=self.suite_name,
-            results=evaluations,
-            metrics=metrics,
-        )
-
-        results_path = self.results_dir / f"results_{self.run_id}.json"
-        save_json(results_path, self._serialize_evaluation_run(run_result))
-        print(f"Saved results to {results_path}\n")
-
-        print(f"{'='*60}")
-        print("EVALUATION SUMMARY")
-        print(f"{'='*60}")
-        print(f"Suite: {self.suite_name}")
-        print(f"Run ID: {self.run_id}")
-        print(f"Total Questions: {metrics.total_questions}")
-        print(f"Total Correct: {metrics.total_correct}")
-        print(f"Accuracy: {metrics.accuracy:.2%}")
-        print(f"{'='*60}\n")
-
-        return run_result
+        return metrics_by_collection

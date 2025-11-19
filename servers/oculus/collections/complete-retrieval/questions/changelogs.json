@@ -1,0 +1,19 @@
+{
+  "question": "How do I let users filter release notes by which product and what kind of change? Can I use custom widgets in the entries or just basic formatting? Should I name files with dates or version numbers?",
+  "ground_truth": "Create changelog entries as individual files in your changelog folder using date-based filenames (e.g., `2024-07-31.mdx` or `2024-07-31.md`) - date-based naming is recommended for chronological organization. You can use either `.md` for plain Markdown or `.mdx` for MDX files; the benefit of `.mdx` is that you can leverage Fern's built-in component library within changelog entries, allowing for richer formatting. Add tags in the frontmatter as an array of strings to make entries filterable: `---\ntags: [\"plants-api\", \"breaking-change\", \"inventory-management\"]\n---`. These tags enable users to filter changelog updates by product line (like plants-api, inventory-management) and change type (like breaking-change, feature, bug-fix), helping developers quickly find relevant updates for their specific integration without scrolling through unrelated changes.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "changelogs",
+    "cited_context": "Create a new changelog entry by writing a Markdown file. You can use `.md` or `.mdx` files. The benefit of using `.mdx` is that you can leverage the built-in component library within an entry.\n\n```mdx\n---\ntags: [\"plants-api\", \"breaking-change\", \"inventory-management\"]\n---\n\n## Summary\n\nIn the latest release, we've added endpoints to create a new Plant.\n```\n\nAdd tags to changelog entries to help users filter and find relevant updates. Tags are defined in the frontmatter of your changelog entry as an array of strings:\n\n```mdx\n---\ntags: [\"plants-api\", \"breaking-change\", \"inventory-management\"]\n---\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/customization/changelogs"
+    ],
+    "correctness": [
+      "The answer must mention creating a Markdown file with a date-based filename.",
+      "The answer must mention adding tags in the frontmatter as an array of strings."
+    ]
+  }
+}

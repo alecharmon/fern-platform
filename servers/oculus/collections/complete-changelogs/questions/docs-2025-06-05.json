@@ -1,0 +1,15 @@
+{
+  "question": "What major Docs features were introduced on June 5, 2025?",
+  "ground_truth": "The 2025-06-05 release introduced the following changes:\n- Introducing The Product Switcher: Organize your docs by product so developers can find what they need quickly. Features include optimized search with SEO-friendly structure, keyword and AI search functionality that works within and across products, and customization with versions and unique icons.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "docs-2025-06-05",
+    "cited_context": "## Introducing The Product Switcher\n\nOrganize your docs by product so developers can find what they need quickly. Perfect for companies with multiple APIs, each with their own references, guides, versions, and changelogs.\n\nFeatures:\n\n- **Optimized for Search**  with SEO-friendly structure.\n- **Keyword and AI Search** functionality works both within and across products.\n- **Customizable** to your products with versions and unique icons to reflect your brand identity.\n\n<Frame>\n![A dropdown of the available products](product-switcher.png)\n</Frame>\n\nTo add products to your docs, visit the [product switcher docs](/learn/docs/building-and-customizing-your-docs/product-switching) page to get started."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/changelog/2025/6/5"
+    ]
+  }
+}

@@ -31,71 +31,90 @@ class FAIHTTPIntegration:
             raise ValueError("FERN_TOKEN is required for FAI HTTP integration")
 
     def generate_answer(self, question: str) -> tuple[str, AnswerMetadata]:
-        start_time = time.time()
+        max_retries = 3
+        timeout = 120
 
-        try:
-            payload = {
-                "messages": [{"role": "user", "content": question}],
-                "model": self.model,
-                "rewrite_query": self.rewrite_query,
-            }
+        for attempt in range(max_retries):
+            start_time = time.time()
 
-            if self.system_prompt:
-                payload["system_prompt"] = self.system_prompt
+            try:
+                payload = {
+                    "messages": [{"role": "user", "content": question}],
+                    "model": self.model,
+                    "rewrite_query": self.rewrite_query,
+                }
 
-            response = requests.post(
-                f"{self.fai_url}/chat/{self.domain}",
-                headers={
-                    "Authorization": f"Bearer {self.fern_token}",
-                    "Content-Type": "application/json",
-                },
-                json=payload,
-                timeout=120,
-            )
+                if self.system_prompt:
+                    payload["system_prompt"] = self.system_prompt
 
-            response.raise_for_status()
-            data = response.json()
+                response = requests.post(
+                    f"{self.fai_url}/chat/{self.domain}",
+                    headers={
+                        "Authorization": f"Bearer {self.fern_token}",
+                        "Content-Type": "application/json",
+                    },
+                    json=payload,
+                    timeout=timeout,
+                )
 
-            turns = data.get("turns", [])
-            if not turns:
-                raise ValueError("No turns in response")
+                response.raise_for_status()
+                data = response.json()
 
-            answer_text = "\n\n".join([turn.get("content", "") for turn in turns if turn.get("role") == "assistant"])
+                turns = data.get("turns", [])
+                if not turns:
+                    raise ValueError("No turns in response")
 
-            citations = data.get("citations", [])
-            clean_citations = [
-                citation.removeprefix(CITATION_PREFIX).strip() if isinstance(citation, str) else citation
-                for citation in citations
-            ]
-            sources: list[SourceMetadata] = [
-                {"url": citation, "title": None, "slug": None} for citation in clean_citations
-            ]
+                answer_text = "\n\n".join(
+                    [turn.get("content", "") for turn in turns if turn.get("role") == "assistant"]
+                )
 
-            response_time_ms = (time.time() - start_time) * 1000
-            metadata: AnswerMetadata = {
-                "integration_type": "fai-http",
-                "model": self.model,
-                "sources": sources,
-                "fai_http_citations": clean_citations,
-                "response_time_ms": response_time_ms,
-            }
+                citations = data.get("citations", [])
+                clean_citations = [
+                    citation.removeprefix(CITATION_PREFIX).strip() if isinstance(citation, str) else citation
+                    for citation in citations
+                ]
+                sources: list[SourceMetadata] = [
+                    {"url": citation, "title": None, "slug": None} for citation in clean_citations
+                ]
 
-            return answer_text, metadata
+                response_time_ms = (time.time() - start_time) * 1000
+                metadata: AnswerMetadata = {
+                    "integration_type": "fai-http",
+                    "model": self.model,
+                    "sources": sources,
+                    "fai_http_citations": clean_citations,
+                    "response_time_ms": response_time_ms,
+                }
 
-        except requests.exceptions.RequestException as e:
-            error_metadata_req: AnswerMetadata = {
-                "integration_type": "fai-http",
-                "model": self.model,
-                "sources": [],
-                "response_time_ms": (time.time() - start_time) * 1000,
-            }
-            return f"ERROR: HTTP request failed: {str(e)}", error_metadata_req
+                return answer_text, metadata
 
-        except Exception as e:
-            error_metadata_gen: AnswerMetadata = {
-                "integration_type": "fai-http",
-                "model": self.model,
-                "sources": [],
-                "response_time_ms": (time.time() - start_time) * 1000,
-            }
-            return f"ERROR: {str(e)}", error_metadata_gen
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:
+                    print(f"HTTP request failed (attempt {attempt + 1}/{max_retries}): {e}, retrying...")
+                    continue
+                error_metadata_req: AnswerMetadata = {
+                    "integration_type": "fai-http",
+                    "model": self.model,
+                    "sources": [],
+                    "response_time_ms": (time.time() - start_time) * 1000,
+                }
+                return f"ERROR: HTTP request failed after {max_retries} attempts: {str(e)}", error_metadata_req
+
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    print(f"Error on attempt {attempt + 1}/{max_retries}: {e}, retrying...")
+                    continue
+                error_metadata_gen: AnswerMetadata = {
+                    "integration_type": "fai-http",
+                    "model": self.model,
+                    "sources": [],
+                    "response_time_ms": (time.time() - start_time) * 1000,
+                }
+                return f"ERROR: {str(e)}", error_metadata_gen
+
+        error_metadata: AnswerMetadata = {
+            "integration_type": "fai-http",
+            "model": self.model,
+            "sources": [],
+        }
+        return "ERROR: Max retries exceeded", error_metadata

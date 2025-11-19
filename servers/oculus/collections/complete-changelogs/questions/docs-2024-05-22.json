@@ -1,0 +1,15 @@
+{
+  "question": "What Docs updates came out on May 22nd, 2024?",
+  "ground_truth": "The 2024-05-22 release introduced the following changes:\n- Advanced Redirects: Implemented a powerful redirects system supporting pattern matching and parameter preservation.\n- API Authorization Handling: Enhanced API authorization handling in the documentation platform.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "docs-2024-05-22",
+    "cited_context": "## Advanced Redirects\nImplemented a powerful redirects system supporting pattern matching and parameter preservation. Teams can now manage documentation URL structure while maintaining backwards compatibility.\n\n```yaml\nredirects:\n  - source: /v1/api/*\n    destination: /v2/api/:splat\n    permanent: true\n  - source: /guides/:name\n    destination: /tutorials/:name\n```\n\n## API Authorization Handling\nEnhanced API authorization handling in the documentation platform. Developers can now test authenticated endpoints more easily with improved token management."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/changelog/2024/5/22"
+    ]
+  }
+}

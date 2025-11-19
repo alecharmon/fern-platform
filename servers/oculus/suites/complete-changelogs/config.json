@@ -1,5 +1,9 @@
 {
-    "domain": "buildwithfern-eval",
-    "integration": "fai-local",
-    "evaluators": ["correctness"]
+  "integration": "fai-local",
+  "collections": [
+    "complete-changelogs"
+  ],
+  "evaluators": [
+    "correctness"
+  ]
 }

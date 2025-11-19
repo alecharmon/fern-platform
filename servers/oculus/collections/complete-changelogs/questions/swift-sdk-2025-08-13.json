@@ -1,0 +1,15 @@
+{
+  "question": "What feature was added to the Swift SDK on August 13, 2025?",
+  "ground_truth": "The August 13, 2025 Swift SDK release version 0.4.0 added support for string literal types.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "swift-sdk-2025-08-13",
+    "cited_context": "## 0.4.0\n**`(feat):`** Added support for string literal types."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/swift/changelog/2025/8/13"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "question": "Can I build custom interactive widgets for the docs? Can they use state management and side effects? Do I need to install the framework myself or is it provided? Is this a premium feature?",
+  "ground_truth": "To add custom React components to Fern documentation: 1) Create a components folder (e.g., `fern/components/`) with your React components in `.ts`, `.tsx`, `.js`, or `.mdx` files, 2) Import and use the components in your MDX documentation pages just like built-in components (e.g., `<PricingCalculator />`), and 3) Specify the components directory path in your `docs.yml` file under `experimental.mdx-components`. Your components can use React hooks like `useState`, `useEffect`, and other standard React APIs - React is provided by the Fern docs platform, so you don't need to install it separately. This allows you to build fully interactive, stateful widgets like pricing calculators or API playgrounds. Important limitation: This is a premium feature available only for Pro and Enterprise plans, not on free or starter tiers.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "custom-react-components",
+    "cited_context": "You can extend Fern's built-in component library by adding your own custom React components. This allows you to create unique, interactive elements that match your documentation needs. Create a React component: Let's start by creating a components folder where you can define your react components. Note that the react components can be defined in .ts, .tsx, .js or .mdx files. Use the component in your docs: Once you've written the component, you can start leveraging it in your Markdown guides. Specify your components directory in docs.yml: Add your components directory to docs.yml so that the Fern CLI can scan your components directory and upload them to the server."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/writing-content/custom-react-components"
+    ],
+    "correctness": [
+      "The answer must mention creating a components folder with your React components in .ts, .tsx, .js or .mdx files.",
+      "The answer must mention importing and using the components in your Markdown guides.",
+      "The answer must mention specifying the components directory in your docs.yml file under experimental.mdx-components.",
+      "The answer must mention that React is provided by the Fern docs platform.",
+      "The answer must mention that this feature is only available for Pro and Enterprise plans."
+    ]
+  }
+}

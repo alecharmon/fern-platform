@@ -1,29 +1,23 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import (
+    BaseModel,
+    Field,
+)
 
 
-class OpenApiGeneratorConfig(BaseModel):
-    """Configuration for OpenAPI generator."""
+class CollectionConfig(BaseModel):
+    """Configuration for a question collection."""
 
-    source_path: str
-
-
-class GeneratorConfig(BaseModel):
-    """Configuration for all generators."""
-
-    openapi: OpenApiGeneratorConfig | None = None
+    domain: str
 
 
 class SuiteConfig(BaseModel):
     """Configuration for an evaluation suite."""
 
-    domain: str
     integration: Literal["fai-local", "fai-http", "vercel-http"]
-    generators: list[str] = Field(default_factory=list)
+    collections: list[str] = Field(default_factory=list)
     evaluators: list[str] = Field(default_factory=list)
-    num_questions_generation: int | None = None
-    generator_config: GeneratorConfig | None = None
     rewrite_query: bool = False
 
 

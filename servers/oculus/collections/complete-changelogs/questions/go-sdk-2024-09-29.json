@@ -1,0 +1,15 @@
+{
+  "question": "What streaming feature was released in the Go SDK on September 29, 2024?",
+  "ground_truth": "The September 29, 2024 Go SDK release version 0.27.0 added support for SSE (Server-Sent Events) streaming responses. The user-facing interface for streaming responses remains the same between standard HTTP streaming and SSE.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "go-sdk-2024-09-29",
+    "cited_context": "## 0.27.0\n**`(feat):`** Add support for SSE (Server-Sent Events) streaming responses. The user-facing interface for streaming responses remains the same between standard HTTP streaming and SSE."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/go/changelog/2024/9/29"
+    ]
+  }
+}

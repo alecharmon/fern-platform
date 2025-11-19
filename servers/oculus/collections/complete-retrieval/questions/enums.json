@@ -1,0 +1,20 @@
+{
+  "question": "Our API has status values like 'status:active' with special characters. How do I add descriptions and code-friendly names like 'StatusActive'? Do these friendly names change what goes over the wire or just what developers see in code?",
+  "ground_truth": "OpenAPI doesn't natively support adding descriptions to enum values. Use the `x-fern-enum` extension to add both descriptions and custom names. For each enum value, you can specify a `description` field (which will appear in generated SDK documentation and docs website) and a `name` field (which customizes how the enum appears in generated code). This is particularly useful for enum values with symbolic characters like 'status:active' - you can set the name to something code-safe like 'StatusActive' while keeping the original value for the API. Importantly, the custom names only affect the generated SDK code and documentation - the original enum values are still used over the wire in actual API requests/responses, preserving your API contract. So developers use clean, documented enum names in code (e.g., `Status.StatusActive`) which the SDK translates to the actual API value ('status:active') automatically.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "enums",
+    "cited_context": "OpenAPI doesn't natively support adding descriptions to enum values. To do this in Fern you can use the `x-fern-enum` extension. In the example below, we've added some descriptions to enum values. These descriptions will propagate into the generated SDK and docs website. `x-fern-enum` also supports a `name` field that allows you to customize the name of the enum in code. This is particularly useful when you have enums that rely on symbolic characters that would otherwise cause generated code not to compile."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/api-definitions/openapi/extensions/enum-descriptions-and-names"
+    ],
+    "correctness": [
+      "The answer must mention the `x-fern-enum` extension.",
+      "The answer must mention the `name` field in the `x-fern-enum` extension.",
+      "The answer should include a code example of how to use the `x-fern-enum` extension."
+    ]
+  }
+}

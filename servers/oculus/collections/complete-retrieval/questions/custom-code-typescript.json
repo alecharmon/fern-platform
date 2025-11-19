@@ -1,0 +1,20 @@
+{
+  "question": "I want to add my own helper methods (like `client.myHelper()`) to the generated library that don't get deleted when I regenerate. Do I need to extend the class or can I just export regular functions? How do I prevent files from being overwritten?",
+  "ground_truth": "You can extend your TypeScript SDK in two ways. For standalone utilities: 1) Create a new file with your custom helper functions, 2) Add the file to `.fernignore` (which tells Fern not to delete it during regeneration), and 3) Export and consume the helpers separately. For methods directly on the client instance (like `client.myHelper()`), you need to use inheritance: 1) Import the Fern-generated client from `../client` and alias it to `FernClient`, 2) Create a class that extends `FernClient` and add your custom methods, 3) Update your `index.ts` file to export the extended client instead of the generated one, and 4) Add both your wrapper file and the modified `index.ts` to `.fernignore`. The `.fernignore` file works like `.gitignore` - it tells Fern to preserve those files during regeneration rather than overwriting them. This ensures your custom code persists through SDK regeneration while still benefiting from Fern's code generation for the core API methods.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "custom-code",
+    "cited_context": "You can extend your Typescript SDK with custom code and utilities. To add custom code, you should: 1. Create a new file and add your custom logic, 2. Add your file to .fernignore, and 3. Consume the helper in your code. Fern also allows you to add custom methods to the SDK itself (e.g. client.myHelper() ) by inheriting the Fern generated client and then extending it. To add custom methods to the SDK itself, you should 1. Import the Fern generated client from ../client and alias it to FernClient. Next, extend FernClient and add whatever methods you want, 2. Update your index.ts file to export the extended client instead of the generated client, then 3. Add both the wrapper directory and index.ts to .fernignore."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/generators/typescript/custom-code"
+    ],
+    "correctness": [
+      "The answer should mention that you can add both custom code and custom methods to the SDK itself.",
+      "The answer should include instructions on how to add custom code to the SDK.",
+      "The answer should include instructions on how to add custom methods to the SDK itself."
+    ]
+  }
+}

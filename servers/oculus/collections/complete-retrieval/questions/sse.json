@@ -1,0 +1,21 @@
+{
+  "question": "My chat API sends responses in chunks as they're generated, with each piece containing some text. The output looks like multiple 'data:' lines with JSON. How do I configure this streaming behavior? What format declaration is needed?",
+  "ground_truth": "To configure an endpoint that returns server-sent events (SSE) in Fern, you need to use the `response-stream` property in your endpoint definition and explicitly set `format: sse`. Server-sent events are a standard HTTP streaming format where the server pushes data to clients in real-time using `data:` and `event:` keys. In your YAML configuration file (e.g., `chat.yml`), define the endpoint with a `response-stream` section that includes two key fields: `type` (pointing to your response type definition, like `Chat`) and `format: sse` (which tells Fern to generate code that handles SSE formatting). For example: `response-stream: {type: Chat, format: sse}`. You also need to define the response type structure with the properties that will be streamed (like `text: string` for chat messages). This configuration ensures that generated SDKs properly handle the streaming response format, parsing the SSE data chunks and deserializing them into typed objects. Without the `format: sse` declaration, Fern won't know to generate SSE-specific handling code.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "sse",
+    "cited_context": "If your API returns server-sent-events, with the `data` and `event` keys as seen below\n\n```json\ndata: {{ \"text\": \"Hi, I am a\" }}\ndata: {{ \"text\": \"chatbot. Do you have any\"}}\ndata: {{ \"text\": \"questions for me\"}}\n```\n\nthen make sure to include `format: sse`. \n\n```yaml title=\"chat.yml\" {{9}}\nservice:\n  base-path: /chat\n  endpoints:\n    stream:\n      method: POST\n      path: \"\"\n      response-stream:\n        type: Chat\n        format: sse\n\ntypes:\n  Chat:\n    properties:\n      text: string        \n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/api-definitions/openapi/endpoints/sses"
+    ],
+    "correctness": [
+      "The answer must mention the `response-stream` property.",
+      "The answer must mention the `format: sse` property.",
+      "The answer should include a code example of how to use the `response-stream` property.",
+      "The answer should include a code example of how to use the `format: sse` property."
+    ]
+  }
+}

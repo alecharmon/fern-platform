@@ -1,0 +1,19 @@
+{
+  "question": "Can I generate libraries to test locally before releasing them to package managers? If I have multiple languages configured, can I generate just one? Can I actually run and test these local versions or only look at the code?",
+  "ground_truth": "You can use `fern generate --preview` to test SDK changes locally before publishing. This generates SDKs into a local `.preview/` folder without publishing to package managers or GitHub, perfect for safe iteration. If you have multiple SDK groups configured, you can preview all of them with just `fern generate --preview`, or preview a specific SDK group using `fern generate --group python-sdk --preview` (replace 'python-sdk' with your group name). The previewed SDKs are fully functional - you can actually test and run them, not just inspect the code. For Python, you can install the SDK locally from the `.preview/` folder and import it in test scripts. This allows you to validate functionality, check generated method signatures, test integration, and ensure everything works correctly before publishing to PyPI, giving you confidence in your changes.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "commands",
+    "cited_context": "### preview\n\nUse `--preview` to test SDK changes locally before publishing. This is especially useful during development:\n- Generates SDK into a local `.preview/` folder\n- Allows quick iteration on your Fern definition\n- No changes are published to package managers or GitHub\n\n```bash\n# Preview all SDKs\nfern generate --preview\n\n# Preview specific SDK group\nfern generate --group python-sdk --preview\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/cli-api-reference/cli-reference/commands#fern-generate"
+    ],
+    "correctness": [
+      "The answer must mention the `fern generate --preview` command.",
+      "The answer must mention that the command generates the SDK into a local `.preview/` folder."
+    ]
+  }
+}

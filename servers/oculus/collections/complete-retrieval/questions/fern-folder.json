@@ -1,0 +1,20 @@
+{
+  "question": "My API spec is hosted at a URL. Can I initialize directly from that URL instead of downloading first? What does the --organization flag do? Does it keep fetching from the URL or make a local copy?",
+  "ground_truth": "To initialize a Fern project from a web-hosted OpenAPI specification, run: `fern init --openapi https://api.example.com/openapi.yml --organization <YourOrganization>`. The `--organization` flag is required - it sets your organization name in the generated `fern.config.json` file, which is necessary for SDK generation and publishing. Replace `<YourOrganization>` with your actual organization name. When you run this command, Fern downloads a copy of the OpenAPI spec from the URL and saves it locally in the created `fern` folder, along with generating configuration files like `fern.config.json` and `generators.yml`. The spec is not referenced dynamically - you get a local copy, which means if your spec changes at the URL, you'll need to update your local copy separately. This creates a stable, version-controlled snapshot of your API spec for SDK generation.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "fern-folder",
+    "cited_context": "Initialize the fern folder using your OpenAPI Specification. Fern can handle both JSON and YML formats for OpenAPI specifications and the `--openapi` flag accepts either format, so you can use whichever format your API spec is available in. Run one of the following commands based on your spec's location: Web-hosted file: `fern init --openapi https://api.example.com/openapi.yml --organization <YourOrganization>`. `--organization <YourOrganization>` configures your organization name in `fern.config.json`. This is required in order to successfully generate your SDK. This creates a `fern` folder in your current directory with the OpenAPI Specification."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/overview/quickstart"
+    ],
+    "correctness": [
+      "The answer must mention the `fern init --openapi` command.",
+      "The answer must mention the `--organization` flag.",
+      "The answer must mention the `--openapi` flag with the web-hosted OpenAPI specification URL."
+    ]
+  }
+}

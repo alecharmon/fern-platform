@@ -1,6 +1,10 @@
-
 {
-    "domain": "buildwithfern-eval",
-    "integration": "fai-local",
-    "evaluators": ["correctness", "citation"]
+  "integration": "fai-local",
+  "collections": [
+    "complete-retrieval"
+  ],
+  "evaluators": [
+    "correctness",
+    "citation"
+  ]
 }

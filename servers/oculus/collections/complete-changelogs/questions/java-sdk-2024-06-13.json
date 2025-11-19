@@ -1,0 +1,15 @@
+{
+  "question": "What pagination features were introduced in the Java SDK changelog on June 13, 2024?",
+  "ground_truth": "The June 13, 2024 Java SDK release version 0.10.1 added support for cursor and offset pagination. The update allows users to traverse through paginated objects using SyncPagingIterable, stream them, or manually call nextPage() to perform pagination. This feature makes it easy to iterate through paginated API responses with for loops, streams, or manual page control.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "java-sdk-2024-06-13",
+    "cited_context": "## 0.10.1\n**`(feat):`** Add support for cursor and offset pagination.\n\n### What's new\n- Add support for cursor and offset pagination.\n\nFor example, consider the following endpoint `/users` endpoint:\n\n```yaml\ntypes:\n  User:\n    properties:\n      name: string\n\n  ListUserResponse:\n    properties:\n      next: optional<string>\n      data: list<User>\n\nservice:\n  auth: false\n  base-path: /users\n  endpoints:\n    list:\n      path: \"\"\n      method: GET\n      pagination:\n        cursor: $request.starting_after\n        next_cursor: $response.next\n        results: $response.data\n      request:\n        name: ListUsersRequest\n        query-parameters:\n          starting_after: optional<string>\n      response: ListUsersResponse\n```\n\nThe generated `SyncPagingIterable<User>` can then be used to traverse through the `User` objects:\n\n```java\nfor (User user : client.users.list(...)) {\n    System.out.println(user);\n}\n```\n\nOr stream them:\n\n```java\nclient.users.list(...).streamItems().map(user -> ...);\n```\n\nOr statically calling `nextPage()` to perform the pagination manually:\n\n```java\nSyncPagingIterable<User> pager = client.users.list(...);\n// First page\nSystem.out.println(pager.getItems());\n// Second page\npager = pager.nextPage();\nSystem.out.println(pager.getItems());\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/java/changelog/2024/6/13"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "question": "Can I feed additional content like FAQs and help articles into the AI chatbot beyond the main documentation? Can I update or remove this content later, or is it permanent? When the AI uses these sources, will it show links?",
+  "ground_truth": "You can extend Ask Fern's knowledge beyond your core documentation using the Documents API, which allows you to upload custom content like internal FAQs, help desk tickets, knowledge base articles, marketing sites, and technical research papers. The Documents API supports full CRUD operations - you can upload new documents, update existing documents when content changes, and delete outdated documents, giving you ongoing control over the indexed content. Each document requires a title, content, and URL. When Ask Fern references content from these custom documents in its responses, it automatically includes the associated URL as a citation, allowing users to access and verify the original source material. This ensures transparency and traceability while expanding Ask Fern's knowledge base beyond your standard documentation to include all your valuable developer resources.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "documents",
+    "cited_context": "You can extend Ask Fern's knowledge beyond your core documentation by indexing additional custom content. Adding materials such as internal FAQs, help desk tickets, knowledge base articles, marketing sites, research papers, and other resources helps Ask Fern provide more complete answers to developers. The Documents API lets you upload, update, and delete custom documents that Ask Fern can reference when responding to user questions. To get started, upload a document, title, and URL via the Documents API."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/ask-fern/configuration/documents"
+    ],
+    "correctness": [
+      "The answer must mention the Documents API.",
+      "The answer should include an example payload for the Documents API."
+    ]
+  }
+}

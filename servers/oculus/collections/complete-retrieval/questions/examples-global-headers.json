@@ -1,0 +1,19 @@
+{
+  "question": "When writing examples for endpoints that need certain headers on every request, validation is failing. How do I include these always-required headers in my examples? Do I need all of them or just mandatory ones? Where do they go in the example structure?",
+  "ground_truth": "When you have global headers defined in your api.yml file, you must explicitly include them in your endpoint examples by adding a `headers` field within each example. The headers field goes at the same level as the request and response in your example structure. For example: `examples: [{headers: {X-App-Id: \"app_12345\"}, request: {...}, response: {...}}]`. You need to include the global headers that are relevant and required for that specific endpoint - if a global header is required (not optional), it must be included in the example. Optional global headers can be omitted if not relevant to the example scenario. This explicit inclusion in examples ensures the generated documentation and SDK examples show developers exactly what headers need to be sent, providing complete, working code samples.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "examples",
+    "cited_context": "### Examples with headers\n\nWhen you have [global headers defined in your `api.yml`](/api-definitions/ferndef/api-yml/global-headers#global-headers), you must include them in your examples:\n\n```yml {{15-16}}\nservice:\n  auth: true\n  base-path: \"\"\n  endpoints:\n    CreateShippingLabel:\n      docs: Create a new shipping label.\n      method: POST\n      path: /shipping\n      request: CreateShippingLabelRequest\n      response: ShippingLabel\n      errors:\n        - NotAuthorized\n        - InsufficientFunds\n      examples:\n        - headers:\n            X-App-Id: \"app_12345\"\n          request:\n            orderId: \"online_789\"\n            weightInOunces: 5\n          response:\n            body:\n              orderId: \"online_789\"\n              weightInOunces: 5\n              trackingNumber: \"1Z26W8370303469306\"\n              price: 2.50\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/api-definitions/ferndef/examples"
+    ],
+    "correctness": [
+      "The answer must mention that global headers must be included in the examples section of your endpoint definition by adding a headers field.",
+      "The answer should include a code example of how to include global headers in the examples section of your endpoint definition."
+    ]
+  }
+}

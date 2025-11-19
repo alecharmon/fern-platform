@@ -31,63 +31,76 @@ class VercelHTTPIntegration:
             raise ValueError("VERCEL_URL is required for Vercel HTTP integration")
 
     def generate_answer(self, question: str) -> tuple[str, AnswerMetadata]:
-        start_time = time.time()
+        max_retries = 3
+        timeout = 120
 
-        try:
-            conversation_id = str(uuid.uuid4())
-            query_id = str(uuid.uuid4())
+        for attempt in range(max_retries):
+            start_time = time.time()
 
-            payload = {
-                "url": self.vercel_url,
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": question,
-                        "parts": [{"type": "text", "text": question}],
-                    }
-                ],
-                "filters": [],
-                "conversationId": conversation_id,
-                "queryId": query_id,
-                "documentUrls": [],
-                "skipSaveQuery": True,
-            }
+            try:
+                conversation_id = str(uuid.uuid4())
+                query_id = str(uuid.uuid4())
 
-            response = requests.post(
-                f"{self.vercel_url}/api/fern-docs/search/v2/chat",
-                headers={
-                    "Content-Type": "application/json",
-                    "x-fern-host": self.domain,
-                },
-                json=payload,
-                timeout=120,
-                stream=True,
-            )
+                payload = {
+                    "url": self.vercel_url,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": question,
+                            "parts": [{"type": "text", "text": question}],
+                        }
+                    ],
+                    "filters": [],
+                    "conversationId": conversation_id,
+                    "queryId": query_id,
+                    "documentUrls": [],
+                    "skipSaveQuery": True,
+                }
 
-            response.raise_for_status()
+                response = requests.post(
+                    f"{self.vercel_url}/api/fern-docs/search/v2/chat",
+                    headers={
+                        "Content-Type": "application/json",
+                        "x-fern-host": self.domain,
+                    },
+                    json=payload,
+                    timeout=timeout,
+                    stream=True,
+                )
 
-            answer_parts: list[str] = []
-            sources: list[SourceMetadata] = []
-            assistant_query_id: str | None = None
-            tool_call_count: int = 0
+                response.raise_for_status()
 
-            for line in response.iter_lines():
-                if not line:
-                    continue
+                answer_parts: list[str] = []
+                sources: list[SourceMetadata] = []
+                assistant_query_id: str | None = None
+                tool_call_count: int = 0
 
-                line_str = line.decode("utf-8")
+                for line in response.iter_lines():
+                    if not line:
+                        continue
 
-                if not line_str.strip() or line_str.startswith(":"):
-                    continue
+                    line_str = line.decode("utf-8")
 
-                data_str = self._parse_sse_line(line_str)
-                if data_str:
-                    try:
-                        data = json.loads(data_str)
+                    if not line_str.strip() or line_str.startswith(":"):
+                        continue
 
-                        if isinstance(data, list):
-                            for item in data:
-                                result = self._process_stream_item(item, answer_parts, sources)
+                    data_str = self._parse_sse_line(line_str)
+                    if data_str:
+                        try:
+                            data = json.loads(data_str)
+
+                            if isinstance(data, list):
+                                for item in data:
+                                    result = self._process_stream_item(item, answer_parts, sources)
+                                    if result:
+                                        query_id_val = result.get("query_id")
+                                        if query_id_val is not None and isinstance(query_id_val, str):
+                                            assistant_query_id = query_id_val
+                                        tc_val = result.get("tool_calls")
+                                        if tc_val is not None and isinstance(tc_val, int):
+                                            tool_call_count = tc_val
+                            elif isinstance(data, dict):
+                                result = self._process_stream_item(data, answer_parts, sources)
                                 if result:
                                     query_id_val = result.get("query_id")
                                     if query_id_val is not None and isinstance(query_id_val, str):
@@ -95,54 +108,58 @@ class VercelHTTPIntegration:
                                     tc_val = result.get("tool_calls")
                                     if tc_val is not None and isinstance(tc_val, int):
                                         tool_call_count = tc_val
-                        elif isinstance(data, dict):
-                            result = self._process_stream_item(data, answer_parts, sources)
-                            if result:
-                                query_id_val = result.get("query_id")
-                                if query_id_val is not None and isinstance(query_id_val, str):
-                                    assistant_query_id = query_id_val
-                                tc_val = result.get("tool_calls")
-                                if tc_val is not None and isinstance(tc_val, int):
-                                    tool_call_count = tc_val
 
-                    except json.JSONDecodeError:
-                        continue
+                        except json.JSONDecodeError:
+                            continue
 
-            answer_text = "".join(answer_parts) if answer_parts else "ERROR: No response generated"
+                answer_text = "".join(answer_parts) if answer_parts else "ERROR: No response generated"
 
-            response_time_ms = (time.time() - start_time) * 1000
-            metadata: AnswerMetadata = {
-                "integration_type": "vercel-http",
-                "model": self.model,
-                "sources": sources,
-                "response_time_ms": response_time_ms,
-            }
+                response_time_ms = (time.time() - start_time) * 1000
+                metadata: AnswerMetadata = {
+                    "integration_type": "vercel-http",
+                    "model": self.model,
+                    "sources": sources,
+                    "response_time_ms": response_time_ms,
+                }
 
-            if assistant_query_id:
-                metadata["vercel_query_id"] = assistant_query_id
+                if assistant_query_id:
+                    metadata["vercel_query_id"] = assistant_query_id
 
-            if tool_call_count > 0:
-                metadata["vercel_tool_calls"] = tool_call_count
+                if tool_call_count > 0:
+                    metadata["vercel_tool_calls"] = tool_call_count
 
-            return answer_text, metadata
+                return answer_text, metadata
 
-        except requests.exceptions.RequestException as e:
-            error_metadata_req: AnswerMetadata = {
-                "integration_type": "vercel-http",
-                "model": self.model,
-                "sources": [],
-                "response_time_ms": (time.time() - start_time) * 1000,
-            }
-            return f"ERROR: HTTP request failed: {str(e)}", error_metadata_req
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:
+                    print(f"HTTP request failed (attempt {attempt + 1}/{max_retries}): {e}, retrying...")
+                    continue
+                error_metadata_req: AnswerMetadata = {
+                    "integration_type": "vercel-http",
+                    "model": self.model,
+                    "sources": [],
+                    "response_time_ms": (time.time() - start_time) * 1000,
+                }
+                return f"ERROR: HTTP request failed after {max_retries} attempts: {str(e)}", error_metadata_req
 
-        except Exception as e:
-            error_metadata_gen: AnswerMetadata = {
-                "integration_type": "vercel-http",
-                "model": self.model,
-                "sources": [],
-                "response_time_ms": (time.time() - start_time) * 1000,
-            }
-            return f"ERROR: {str(e)}", error_metadata_gen
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    print(f"Error on attempt {attempt + 1}/{max_retries}: {e}, retrying...")
+                    continue
+                error_metadata_gen: AnswerMetadata = {
+                    "integration_type": "vercel-http",
+                    "model": self.model,
+                    "sources": [],
+                    "response_time_ms": (time.time() - start_time) * 1000,
+                }
+                return f"ERROR: {str(e)}", error_metadata_gen
+
+        error_metadata: AnswerMetadata = {
+            "integration_type": "vercel-http",
+            "model": self.model,
+            "sources": [],
+        }
+        return "ERROR: Max retries exceeded", error_metadata
 
     def _parse_sse_line(self, line: str) -> str | None:
         if ":" not in line:

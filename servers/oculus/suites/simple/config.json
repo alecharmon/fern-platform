@@ -1,7 +1,11 @@
 {
-  "domain": "buildwithfern-eval",
   "integration": "fai-local",
-  "num_questions_generation": 40,
-  "generators": ["markdown"],
-  "evaluators": ["correctness", "coherence", "conciseness"]
+  "collections": [
+    "simple"
+  ],
+  "evaluators": [
+    "correctness",
+    "coherence",
+    "conciseness"
+  ]
 }

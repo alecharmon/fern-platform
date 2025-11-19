@@ -1,0 +1,11 @@
+{
+  "integration": "fai-local",
+  "collections": [
+    "complete-retrieval",
+    "complete-changelogs",
+    "complete-endpoints"
+  ],
+  "evaluators": [
+    "correctness"
+  ]
+}

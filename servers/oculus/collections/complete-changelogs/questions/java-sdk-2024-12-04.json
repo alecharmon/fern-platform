@@ -1,0 +1,15 @@
+{
+  "question": "Describe the Java SDK Maven Central publishing improvements from December 2024",
+  "ground_truth": "The December 4, 2024 Java SDK release included Maven Central publishing improvements:\n- Version 2.3.1: Fixed rootProject.name to be set in settings.gradle and updated ci.yml to use ./gradlew sonatypeCentralUpload for publishing.\n- Version 2.3.0: Fixed publishing to Maven Central with proper signing configuration and metadata.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "java-sdk-2024-12-04",
+    "cited_context": "## 2.3.1\n**`(fix):`** The rootProject.name is now set in settings.gradle and ci.yml uses ./gradlew sonatypeCentralUpload for publishing.\n\n\n## 2.3.0\n**`(feat):`** Fix publishing to Maven Central with proper signing configuration and metadata."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/java/changelog/2024/12/4"
+    ]
+  }
+}

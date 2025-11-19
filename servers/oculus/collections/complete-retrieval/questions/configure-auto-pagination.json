@@ -1,0 +1,22 @@
+{
+  "question": "We have endpoints that return paginated results - some use cursor tokens (request has 'cursor', response has 'next' and 'results'), others use numeric offsets. How do I make the library automatically iterate through all pages? What's different about configuring these two approaches?",
+  "ground_truth": "To configure auto-pagination, add the `x-fern-pagination` extension to each paginated endpoint in your OpenAPI spec. For your cursor-based endpoint, specify the pagination scheme as `cursor` with three key mappings: `cursor: $request.cursor` (the request parameter name), `next_cursor: $response.next` (where the next cursor is in the response), and `results: $response.results` (where the data array is located). For offset-based endpoints, use `offset` as the scheme instead, with similar mapping patterns but referencing offset/limit parameters rather than cursors. The SDK generator understands both patterns and generates appropriate iterator methods for each. The key difference is cursor pagination uses opaque tokens for page navigation (better for consistency with changing data), while offset uses numeric indices (simpler but can skip/duplicate items if data changes between requests). Both enable SDK users to iterate through all pages automatically without manual pagination logic.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "configure-auto-pagination",
+    "cited_context": "To set up auto pagination for OpenAPI:\n\n1. Annotate the desired paginated endpoint with the `x-fern-pagination` extension.\n1. Specify the pagination scheme, `offset` or `cursor`\n1. Specify where your `results` are located, using dot-access notation.\n\n```yaml Cursor\n...\npaths:\n  /path/to/my/endpoint:\n    get:\n      x-fern-pagination: # Add pagination extension\n        cursor: $request.cursor # Specify cursor pagination scheme\n        next_cursor: $response.next\n        results: $response.results # Specify result location\n...\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/deep-dives/auto-pagination"
+    ],
+    "correctness": [
+      "The answer must mention the `x-fern-pagination` extension.",
+      "The answer must mention the `cursor` property.",
+      "The answer must mention the `next_cursor` property.",
+      "The answer must mention the `results` property.",
+      "The answer should include a code example of how to use the `x-fern-pagination` extension."
+    ]
+  }
+}

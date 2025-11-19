@@ -1,0 +1,15 @@
+{
+  "question": "What stream handling improvements were made in the Python SDK on June 20, 2024?",
+  "ground_truth": "The June 20, 2024 Python SDK release included multiple improvements:\n- Version 2.13.1-rc0: Fixed SDK to not send additional properties via JSON or data if request is leveraging the other field, and improved by copying unit tests to generated SDK.\n- Version 2.13.0-rc0: Upgraded Python SDK generator to IR V49.\n- Version 2.10.2: Fixed SDK to handle stream termination sequences like [DONE], typical for LLM providers to communicate stream end.\n- Version 2.10.1: Improved SDK to not leak JSONDecodeError to users, throwing ApiError with response text instead.\n- Version 2.10.0: Added support for higher quality README.md generation.\n- Version 2.9.10: Generator now only specifies readme location within pyproject.toml if one was successfully created.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "python-sdk-2024-06-20",
+    "cited_context": "## 2.13.1-rc0\n**`(fix):`** The Python SDK now does not send additional properties via JSON or data if the request is leveraging the other field.\n\n### What's been fixed\n- the Python SDK now does not send additional properties via JSON or data if the request is leveraging the other field.\n\n### What's changed\n- Improvement: the Python SDK now copies unit tests over to the generated SDK for additional unit testing (separate from wire-format testing).\n\n## 2.13.0-rc0\n**`(internal):`** The Python SDK generator is now upgraded to IR V49.\n\n## 2.10.2\n**`(fix):`** The SDK now handles stream termination sequences like `[DONE]`.\n\n### What's been fixed\n- The SDK now handles stream termination sequences like `[DONE]`. This is a typical way for LLM providers to communicate when the stream has ended.\n\n## 2.10.1\n**`(fix):`** Improve the SDK to not leak `JSONDecodeError` to SDK users. Instead, an `ApiError` will be thrown with the text content of the response.\n\n## 2.10.0\n**`(feat):`** Add support for higher quality `README.md` generation.\n\n## 2.9.10\n**`(fix):`** The generator now only specifies the readme location within pyproject.toml if one was successfully created."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/python/changelog/2024/6/20"
+    ]
+  }
+}

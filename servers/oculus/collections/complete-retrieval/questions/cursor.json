@@ -1,0 +1,19 @@
+{
+  "question": "Where do I set up project-specific guidelines for the AI editor to follow automatically? Can I include actual code examples and patterns, or only written instructions? What kind of file should it be?",
+  "ground_truth": "You can add project-specific rules to the `.cursorrules` file placed in the root of your project directory. This file allows you to define custom instructions that Cursor will automatically follow when working with your codebase. The rules can include both text instructions (like \"Always use the <Callout> component for important notes\") and concrete examples of preferred syntax, code snippets, or patterns you want Cursor to follow. The `.cursorrules` file is a plain text file that Cursor reads as context for all interactions in that project, making it ideal for documenting your documentation writing guidelines, formatting standards, component usage patterns, and naming conventions. Cursor will reference these rules automatically without you needing to repeat them in every conversation.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "cursor",
+    "cited_context": "You can also add project-specific rules to the `.cursorrules` file in the root of your project."
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/developer-tools/cursor"
+    ],
+    "correctness": [
+      "The answer must mention the `.cursorrules` file.",
+      "The answer should indicate that the `.cursorrules` file is placed in the root of the project."
+    ]
+  }
+}

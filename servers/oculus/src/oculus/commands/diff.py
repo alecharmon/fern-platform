@@ -5,7 +5,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from oculus.framework.models import Answer, Evaluation, EvaluationRun, Question, SuiteConfig
+from oculus.framework.models import (
+    Answer,
+    Evaluation,
+    EvaluationRun,
+    Question,
+    SuiteConfig,
+)
 from oculus.framework.runner import EvaluationRunner
 from oculus.integrations.base import create_answer_function
 from oculus.integrations.factory import create_integration
@@ -18,7 +24,10 @@ from oculus.utils.diff_utils import (
     generate_diff_markdown_ground_truth,
     parse_question_ids,
 )
-from oculus.utils.file_utils import load_json, save_json
+from oculus.utils.file_utils import (
+    load_json,
+    save_json,
+)
 
 
 def diff_evaluation_command(args: argparse.Namespace) -> int:
@@ -80,38 +89,50 @@ def diff_evaluation_command(args: argparse.Namespace) -> int:
             getattr(suite_config, "rewrite_query", False) if integration_type in ["fai-local", "fai-http"] else False
         )
 
-        print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
-        if rewrite_query:
-            print("Query rewriting: ENABLED")
-
-        integration = create_integration(
-            integration_type=integration_type, domain=suite_config.domain, model=args.model, rewrite_query=rewrite_query
-        )
-        answer_fn = create_answer_function(integration)
-
         diff_id = args.diff_id or datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        _print_diff_header(args, suite_config, diff_id, len(questions))
-
-        print("Generating fresh answers...")
         runner = EvaluationRunner(
             suite_name=args.suite,
             suite_path=suite_path,
-            domain=suite_config.domain,
-            generators=suite_config.generators,
+            collections=suite_config.collections,
             evaluators=suite_config.evaluators,
             run_id=diff_id,
             max_workers=args.max_workers,
-            num_questions_generation=suite_config.num_questions_generation,
-            generator_config=suite_config.generator_config,
         )
 
-        new_answers = runner.generate_answers(
-            questions=questions,
-            answer_fn=answer_fn,
-            model_name=args.model,
-            skip_existing=False,
-        )
+        domains = runner.get_domains()
+
+        _print_diff_header(args, suite_config, diff_id, len(questions), domains)
+
+        from collections import defaultdict
+        questions_by_domain = defaultdict(list)
+        for question in questions:
+            domain = question.metadata.get("domain")
+            if not domain:
+                raise ValueError(f"Question missing domain in metadata: {question.question[:50]}...")
+            questions_by_domain[domain].append(question)
+
+        print("Generating fresh answers...")
+        new_answers = []
+        for domain in sorted(questions_by_domain.keys()):
+            domain_questions = questions_by_domain[domain]
+            print(f"Domain: {domain} ({len(domain_questions)} questions)")
+
+            if rewrite_query:
+                print("Query rewriting: ENABLED")
+
+            integration = create_integration(
+                integration_type=integration_type, domain=domain, model=args.model, rewrite_query=rewrite_query
+            )
+            answer_fn = create_answer_function(integration)
+
+            answers = runner.generate_answers(
+                questions=domain_questions,
+                answer_fn=answer_fn,
+                model_name=args.model,
+                skip_existing=False,
+            )
+            new_answers.extend(answers)
 
         print("\nEvaluating fresh answers...")
         new_evaluations = runner.evaluate_answers(
@@ -235,7 +256,7 @@ def _get_integration_type(args: argparse.Namespace, suite_config: SuiteConfig) -
         return suite_config.integration
 
 
-def _print_diff_header(args: argparse.Namespace, suite_config: SuiteConfig, diff_id: str, num_questions: int) -> None:
+def _print_diff_header(args: argparse.Namespace, suite_config: SuiteConfig, diff_id: str, num_questions: int, domains: set[str]) -> None:
     """Print diff command header.
 
     Args:
@@ -243,11 +264,12 @@ def _print_diff_header(args: argparse.Namespace, suite_config: SuiteConfig, diff
         suite_config: Suite configuration
         diff_id: Diff run ID
         num_questions: Number of questions
+        domains: Set of domains in the suite
     """
     print(f"\n{'='*60}")
     print(f"Starting diff: {diff_id}")
     print(f"Suite: {args.suite}")
-    print(f"Domain: {suite_config.domain}")
+    print(f"Domains: {', '.join(sorted(domains))}")
     print(f"Model: {args.model}")
     print(f"Questions: {num_questions}")
     print(f"{'='*60}\n")

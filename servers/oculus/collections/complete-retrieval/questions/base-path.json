@@ -1,0 +1,19 @@
+{
+  "question": "Our RPC API lives at `/api/v1/rpc` instead of the root. How do I make generated libraries automatically prepend this path? Can developers change it at runtime to point at different environments?",
+  "ground_truth": "To configure a custom base path for generated SDK clients, add the `x-fern-base-path` extension to the `info` section of your OpenRPC configuration file. For example, setting `x-fern-base-path: /api/v1/rpc` configures the SDK to automatically prepend `/api/v1/rpc` to all requests. This base path is set at SDK generation time as the default. However, most Fern-generated SDKs allow users to override the base URL or path during client initialization to support different environments (like staging vs production). SDK users can typically provide a full base URL when creating the client instance, which would include your custom path (e.g., `https://staging.api.com/api/v1/staging/rpc`), allowing them to point the SDK at different environments while still maintaining the generated default for the common case.",
+  "metadata": {
+    "category": "markdown",
+    "source": "markdown_generator",
+    "slug": "base-path",
+    "cited_context": "Configure base paths for generated SDK clients using `x-fern-base-path` extension. Configure base paths for generated SDK clients: ```yaml title=\"openrpc.yml\" {{3-4}} info: title: My JSON-RPC API version: 1.0.0 x-fern-base-path: /api/v1/rpc description: JSON-RPC API with custom base path ```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/api-definitions/openrpc/extensions/base-path"
+    ],
+    "correctness": [
+      "The answer must mention the `x-fern-base-path` extension.",
+      "The answer should contain a code example of how to use the `x-fern-base-path` extension."
+    ]
+  }
+}

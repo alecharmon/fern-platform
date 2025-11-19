@@ -1,0 +1,15 @@
+{
+  "question": "List the Docs bug fixes from April 29th, 2025",
+  "ground_truth": "The 2025-04-29 release introduced the following changes:\n- fix(seo): og and twitter defined in the docs.yml config are now respected\n- fix(auth): authenticated previews have been restored\n- fix(docs): frontmatter titles are now preferred over h1 tags within the MDX file\n- fix(search): canonical URLs now differentiate between endpoints that share the same method and endpoint name but are defined in APIs of different names",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "docs-2025-04-29",
+    "cited_context": "- fix(seo): `og` and `twitter` defined in the `docs.yml` config are now respected\n- fix(auth): authenticated previews have been restored\n- fix(docs): frontmatter titles are now preferred over `<h1>` tags within the MDX file\n- fix(search): canonical URLs now differentiate between endpoints that share the same method and endpoint name but are defined in APIs of different names"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/docs/changelog/2025/4/29"
+    ]
+  }
+}

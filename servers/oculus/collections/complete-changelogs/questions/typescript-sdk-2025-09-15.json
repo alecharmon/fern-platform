@@ -1,0 +1,15 @@
+{
+  "question": "What readonly/writeonly types feature was introduced in the TypeScript SDK on September 15, 2025?",
+  "ground_truth": "The September 15, 2025 TypeScript SDK release included:\n- Version 2.11.1: Fixed _getAuthorizationHeader method to return Promise<string | undefined> when oauth is enabled to prevent compilation errors.\n- Version 2.11.0: Added generation of Request and Response type variations for types with readonly and/or writeonly properties. For example, User type will have User.Request omitting readonly properties and User.Response omitting writeonly properties. Enable with experimentalGenerateReadWriteOnlyTypes: true in generator config.",
+  "metadata": {
+    "category": "changelogs",
+    "source": "handwritten",
+    "slug": "typescript-sdk-2025-09-15",
+    "cited_context": "## 2.11.1\n**`(fix):`** The `_getAuthorizationHeader` method now returns `Promise<string | undefined>` when oauth is enabled.\nThis prevents compilation errors in the TypeScript SDK.\n\n\n## 2.11.0\n**`(feat):`** Generate `Request` and `Response` types variations for types that have readonly and/or writeonly properties.\nFor example, a type `User` will have a `User.Request` type that omits readonly properties and a `User.Response` type that omits writeonly properties.\n\nSet `experimentalGenerateReadWriteOnlyTypes` to `true` in the `config` of your generator configuration to enable this feature.\n```ts\nimport { User, FooClient } from \"foo\";\n\nconst client = new FooClient(...);\nconst createUser: User.Request = {\n  name: \"Jon\",\n  // id: \"123\", // Error: id is read-only and thus omitted\n};\nconst createdUser: User.Response = await client.createUser(createUser);\n// createdUser.id is available here\n```"
+  },
+  "criteria": {
+    "citation": [
+      "https://buildwithfern.com/learn/sdks/typescript/changelog/2025/9/15"
+    ]
+  }
+}

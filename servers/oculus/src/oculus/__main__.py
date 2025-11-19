@@ -21,7 +21,6 @@ from oculus.framework.models import (
 from oculus.framework.runner import EvaluationRunner
 from oculus.integrations.base import create_answer_function
 from oculus.integrations.factory import create_integration
-from oculus.utils.diff_utils import parse_question_ids
 from oculus.utils.file_utils import (
     load_json,
     save_json,
@@ -32,54 +31,6 @@ from oculus.utils.github_formatter import (
 )
 
 load_dotenv()
-
-
-def generate_questions(args: argparse.Namespace) -> int:
-    """Generate questions for a suite using configured generators."""
-    suite_base = args.suite_path if args.suite_path else Path.cwd() / "suites"
-    suite_path = suite_base / args.suite
-
-    if not suite_path.exists():
-        print(f"Error: Suite directory not found: {suite_path}", file=sys.stderr)
-        return 1
-
-    config_path = suite_path / "config.json"
-    if not config_path.exists():
-        print(f"Error: Suite config not found: {config_path}", file=sys.stderr)
-        return 1
-
-    try:
-        config_data = load_json(config_path)
-        suite_config = SuiteConfig(**config_data)
-    except Exception as e:
-        print(f"Error: Failed to load suite config: {e}", file=sys.stderr)
-        return 1
-
-    if not suite_config.generators:
-        print(f"Suite '{args.suite}' has no generators configured. Nothing to generate.")
-        return 0
-
-    try:
-        runner = EvaluationRunner(
-            suite_name=args.suite,
-            suite_path=suite_path,
-            domain=suite_config.domain,
-            generators=suite_config.generators,
-            evaluators=suite_config.evaluators,
-            num_questions_generation=suite_config.num_questions_generation,
-            generator_config=suite_config.generator_config,
-        )
-
-        runner.generate_and_save_questions()
-        return 0
-
-    except Exception as e:
-        print("\nError: Question generation failed", file=sys.stderr)
-        print(f"{e}", file=sys.stderr)
-        import traceback
-
-        traceback.print_exc()
-        return 1
 
 
 def generate_answers_command(args: argparse.Namespace) -> int:
@@ -103,12 +54,6 @@ def generate_answers_command(args: argparse.Namespace) -> int:
         print(f"Error: Failed to load suite config: {e}", file=sys.stderr)
         return 1
 
-    questions_dir = suite_path / "questions"
-    if not questions_dir.exists() or not any(questions_dir.glob("*.json")):
-        print(f"Error: No questions found in {questions_dir}", file=sys.stderr)
-        print(f"Hint: Run 'oculus generate --suite {args.suite}' first to generate questions", file=sys.stderr)
-        return 1
-
     try:
         if hasattr(args, "integration") and args.integration:
             integration_type = args.integration
@@ -117,35 +62,21 @@ def generate_answers_command(args: argparse.Namespace) -> int:
 
         rewrite_query = suite_config.rewrite_query if integration_type in ["fai-local", "fai-http"] else False
 
-        print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
-        if suite_config.rewrite_query and integration_type not in ["fai-local", "fai-http"]:
-            print(
-                f"Warning: Query rewriting not available for {integration_type} integration "
-                f"(only supported for fai-local and fai-http)"
-            )
-        if rewrite_query:
-            print("Query rewriting: ENABLED")
-        integration = create_integration(
-            integration_type=integration_type, domain=suite_config.domain, model=args.model, rewrite_query=rewrite_query
-        )
-        answer_fn = create_answer_function(integration)
-
         runner = EvaluationRunner(
             suite_name=args.suite,
             suite_path=suite_path,
-            domain=suite_config.domain,
-            generators=suite_config.generators,
+            collections=suite_config.collections,
             evaluators=suite_config.evaluators,
             run_id=args.run_id,
             max_workers=args.max_workers,
-            num_questions_generation=suite_config.num_questions_generation,
-            generator_config=suite_config.generator_config,
         )
+
+        domains = runner.get_domains()
 
         print(f"\n{'='*60}")
         print(f"Generating answers: {runner.run_id}")
         print(f"Suite: {args.suite}")
-        print(f"Domain: {suite_config.domain}")
+        print(f"Domains: {', '.join(sorted(domains))}")
         print(f"Model: {args.model}")
         print(f"{'='*60}\n")
 
@@ -153,21 +84,57 @@ def generate_answers_command(args: argparse.Namespace) -> int:
         all_questions = runner.load_questions()
 
         if args.questions:
-            all_question_files = sorted(questions_dir.glob("*.json"), key=lambda f: f.stem)
-            question_ids = parse_question_ids(args.questions, all_question_files)
+            question_slugs = [q.metadata.get("slug", f"question_{i}") for i, q in enumerate(all_questions)]
+            question_ids = []
+            for part in args.questions.split(","):
+                part = part.strip()
+                if part.isdigit():
+                    idx = int(part) - 1
+                    if 0 <= idx < len(question_slugs):
+                        question_ids.append(question_slugs[idx])
+                    else:
+                        print(f"Warning: Question index {part} out of range (1-{len(question_slugs)})")
+                else:
+                    question_ids.append(part)
+
             questions = [q for q in all_questions if q.metadata.get("slug") in question_ids]
             print(f"Filtered to {len(questions)} questions (from {len(all_questions)} total)\n")
         else:
             questions = all_questions
             print(f"Total questions: {len(questions)}\n")
 
+        from collections import defaultdict
+        questions_by_domain = defaultdict(list)
+        for question in questions:
+            domain = question.metadata.get("domain")
+            if not domain:
+                raise ValueError(f"Question missing domain in metadata: {question.question[:50]}...")
+            questions_by_domain[domain].append(question)
+
         print("Generating answers...")
-        runner.generate_answers(
-            questions=questions,
-            answer_fn=answer_fn,
-            model_name=args.model,
-            skip_existing=not args.no_skip_existing,
-        )
+        for domain in sorted(questions_by_domain.keys()):
+            domain_questions = questions_by_domain[domain]
+            print(f"\nDomain: {domain} ({len(domain_questions)} questions)")
+
+            if suite_config.rewrite_query and integration_type not in ["fai-local", "fai-http"]:
+                print(
+                    f"Warning: Query rewriting not available for {integration_type} integration "
+                    f"(only supported for fai-local and fai-http)"
+                )
+            if rewrite_query:
+                print("Query rewriting: ENABLED")
+
+            integration = create_integration(
+                integration_type=integration_type, domain=domain, model=args.model, rewrite_query=rewrite_query
+            )
+            answer_fn = create_answer_function(integration)
+
+            runner.generate_answers(
+                questions=domain_questions,
+                answer_fn=answer_fn,
+                model_name=args.model,
+                skip_existing=not args.no_skip_existing,
+            )
 
         print(f"\n{'='*60}")
         print(f"Answers saved to {runner.answers_dir}")
@@ -214,24 +181,17 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
         print(f"Error: Failed to load suite config: {e}", file=sys.stderr)
         return 1
 
-    questions_dir = suite_path / "questions"
-    if not questions_dir.exists() or not any(questions_dir.glob("*.json")):
-        print(f"Error: No questions found in {questions_dir}", file=sys.stderr)
-        print(f"Hint: Run 'oculus generate --suite {args.suite}' first", file=sys.stderr)
-        return 1
-
     try:
         runner = EvaluationRunner(
             suite_name=args.suite,
             suite_path=suite_path,
-            domain=suite_config.domain,
-            generators=suite_config.generators,
+            collections=suite_config.collections,
             evaluators=suite_config.evaluators,
             run_id=args.run_id,
             max_workers=args.max_workers,
-            num_questions_generation=suite_config.num_questions_generation,
-            generator_config=suite_config.generator_config,
         )
+
+        domains = runner.get_domains()
 
         if not runner.answers_dir.exists() or not any(runner.answers_dir.glob("*.json")):
             print(f"Error: No answers found in {runner.answers_dir}", file=sys.stderr)
@@ -241,22 +201,33 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
         print(f"\n{'='*60}")
         print(f"Evaluating answers: {runner.run_id}")
         print(f"Suite: {args.suite}")
-        print(f"Domain: {suite_config.domain}")
+        print(f"Domains: {', '.join(sorted(domains))}")
         print(f"Evaluators: {suite_config.evaluators}")
         print(f"{'='*60}\n")
 
         print("Loading questions...")
         all_questions = runner.load_questions()
-        all_question_files = sorted(questions_dir.glob("*.json"), key=lambda f: f.stem)
 
         if args.questions:
-            question_ids = parse_question_ids(args.questions, all_question_files)
+            question_slugs = [q.metadata.get("slug", f"question_{i}") for i, q in enumerate(all_questions)]
+            question_ids = []
+            for part in args.questions.split(","):
+                part = part.strip()
+                if part.isdigit():
+                    idx = int(part) - 1
+                    if 0 <= idx < len(question_slugs):
+                        question_ids.append(question_slugs[idx])
+                    else:
+                        print(f"Warning: Question index {part} out of range (1-{len(question_slugs)})")
+                else:
+                    question_ids.append(part)
+
             question_ids_set = set(question_ids)
             questions = [q for q in all_questions if q.metadata.get("slug") in question_ids_set]
             print(f"Filtered to {len(questions)} questions (from {len(all_questions)} total)\n")
         else:
             questions = all_questions
-            question_ids_set = {f.stem for f in all_question_files}
+            question_ids_set = {q.metadata.get("slug", f"question_{i}") for i, q in enumerate(all_questions)}
             print(f"Total questions: {len(questions)}\n")
 
         print("Loading answers...")
@@ -344,12 +315,6 @@ def run_evaluation(args: argparse.Namespace) -> int:
         print(f"Error: Failed to load suite config: {e}", file=sys.stderr)
         return 1
 
-    questions_dir = suite_path / "questions"
-    if not questions_dir.exists() or not any(questions_dir.glob("*.json")):
-        print(f"Error: No questions found in {questions_dir}", file=sys.stderr)
-        if suite_config.generators:
-            print(f"Hint: Run 'oculus generate --suite {args.suite}' first to generate questions", file=sys.stderr)
-        return 1
 
     try:
         if hasattr(args, "integration") and args.integration:
@@ -359,45 +324,137 @@ def run_evaluation(args: argparse.Namespace) -> int:
 
         rewrite_query = suite_config.rewrite_query if integration_type in ["fai-local", "fai-http"] else False
 
-        print(f"Initializing {integration_type} integration for domain: {suite_config.domain}")
-        if suite_config.rewrite_query and integration_type not in ["fai-local", "fai-http"]:
-            print(
-                f"Warning: Query rewriting not available for {integration_type} integration "
-                f"(only supported for fai-local and fai-http)"
-            )
-        if rewrite_query:
-            print("Query rewriting: ENABLED")
-        integration = create_integration(
-            integration_type=integration_type, domain=suite_config.domain, model=args.model, rewrite_query=rewrite_query
-        )
-        answer_fn = create_answer_function(integration)
-
         runner = EvaluationRunner(
             suite_name=args.suite,
             suite_path=suite_path,
-            domain=suite_config.domain,
-            generators=suite_config.generators,
+            collections=suite_config.collections,
             evaluators=suite_config.evaluators,
             run_id=args.run_id,
             max_workers=args.max_workers,
-            num_questions_generation=suite_config.num_questions_generation,
-            generator_config=suite_config.generator_config,
         )
 
-        filtered_questions = None
-        if args.questions:
-            all_questions = runner.load_questions()
-            all_question_files = sorted(questions_dir.glob("*.json"), key=lambda f: f.stem)
-            question_ids = parse_question_ids(args.questions, all_question_files)
-            filtered_questions = [q for q in all_questions if q.metadata.get("slug") in question_ids]
+        domains = runner.get_domains()
 
-        result = runner.run(
-            answer_fn=answer_fn,
-            model_name=args.model,
+        print(f"\n{'='*60}")
+        print(f"Starting evaluation run: {runner.run_id}")
+        print(f"Suite: {args.suite}")
+        print(f"Domains: {', '.join(sorted(domains))}")
+        print(f"{'='*60}\n")
+
+        print("Stage 1: Loading questions...")
+        all_questions = runner.load_questions()
+
+        if args.questions:
+            question_slugs = [q.metadata.get("slug", f"question_{i}") for i, q in enumerate(all_questions)]
+            question_ids = []
+            for part in args.questions.split(","):
+                part = part.strip()
+                if part.isdigit():
+                    idx = int(part) - 1
+                    if 0 <= idx < len(question_slugs):
+                        question_ids.append(question_slugs[idx])
+                    else:
+                        print(f"Warning: Question index {part} out of range (1-{len(question_slugs)})")
+                else:
+                    question_ids.append(part)
+
+            questions = [q for q in all_questions if q.metadata.get("slug") in question_ids]
+            print(f"Using {len(questions)} filtered questions (from {len(all_questions)} total)\n")
+        else:
+            questions = all_questions
+            print(f"Total questions: {len(questions)}\n")
+
+        from collections import defaultdict
+        questions_by_domain = defaultdict(list)
+        for question in questions:
+            domain = question.metadata.get("domain")
+            if not domain:
+                raise ValueError(f"Question missing domain in metadata: {question.question[:50]}...")
+            questions_by_domain[domain].append(question)
+
+        print("Stage 2: Generating answers...")
+        all_answers = []
+        for domain in sorted(questions_by_domain.keys()):
+            domain_questions = questions_by_domain[domain]
+            print(f"\nDomain: {domain} ({len(domain_questions)} questions)")
+
+            if suite_config.rewrite_query and integration_type not in ["fai-local", "fai-http"]:
+                print(
+                    f"Warning: Query rewriting not available for {integration_type} integration "
+                    f"(only supported for fai-local and fai-http)"
+                )
+            if rewrite_query:
+                print("Query rewriting: ENABLED")
+
+            integration = create_integration(
+                integration_type=integration_type, domain=domain, model=args.model, rewrite_query=rewrite_query
+            )
+            answer_fn = create_answer_function(integration)
+
+            answers = runner.generate_answers(
+                questions=domain_questions,
+                answer_fn=answer_fn,
+                model_name=args.model,
+                skip_existing=not args.no_skip_existing,
+            )
+            all_answers.extend(answers)
+
+        print()
+        print("Stage 3: Evaluating answers...")
+        evaluations = runner.evaluate_answers(
+            questions=questions,
+            answers=all_answers,
             judge_model=args.judge_model,
             skip_existing=not args.no_skip_existing,
-            questions=filtered_questions,
         )
+        print()
+
+        print("Stage 4: Calculating metrics...")
+        metrics = runner.calculate_metrics(evaluations)
+
+        result = EvaluationRun(
+            run_id=runner.run_id,
+            timestamp=datetime.now().isoformat(),
+            suite=runner.suite_name,
+            results=evaluations,
+            metrics=metrics,
+        )
+
+        results_path = runner.results_dir / f"results_{runner.run_id}.json"
+        save_json(results_path, runner._serialize_evaluation_run(result))
+        print(f"Saved results to {results_path}\n")
+
+        print(f"{'='*60}")
+        print("EVALUATION SUMMARY")
+        print(f"{'='*60}")
+        print(f"Suite: {runner.suite_name}")
+        print(f"Run ID: {runner.run_id}")
+        print(f"Total Questions: {metrics.total_questions}")
+        print(f"Total Correct: {metrics.total_correct}")
+        print(f"Accuracy: {metrics.accuracy:.2%}")
+        if metrics.evaluator_pass_rates:
+            print("\nEvaluator Pass Rates:")
+            for evaluator, rate in sorted(metrics.evaluator_pass_rates.items()):
+                print(f"  {evaluator}: {rate:.2%}")
+        if metrics.evaluator_avg_scores:
+            print("\nEvaluator Average Scores:")
+            for evaluator, score in sorted(metrics.evaluator_avg_scores.items()):
+                print(f"  {evaluator}: {score:.2f}")
+
+        if len(suite_config.collections) > 1:
+            print(f"\n{'-'*60}")
+            print("PER-COLLECTION RESULTS")
+            print(f"{'-'*60}")
+            metrics_by_collection = runner.calculate_metrics_by_collection(evaluations)
+            for collection in suite_config.collections:
+                if collection in metrics_by_collection:
+                    coll_metrics = metrics_by_collection[collection]
+                    print(f"\n{collection}:")
+                    print(f"  Questions: {coll_metrics.total_questions}")
+                    print(f"  Correct: {coll_metrics.total_correct}")
+                    print(f"  Accuracy: {coll_metrics.accuracy:.2%}")
+
+        print(f"{'='*60}\n")
 
         if args.output_dir:
             args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -463,18 +520,6 @@ def main() -> int:
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Command to run", required=True)
-
-    generate_parser = subparsers.add_parser(
-        "generate",
-        help="Generate questions for a suite",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  oculus generate --suite basic
-        """,
-    )
-    generate_parser.add_argument("--suite", type=str, required=True, help="Name of the evaluation suite")
-    generate_parser.add_argument("--suite-path", type=Path, default=None, help="Base path to suites directory")
 
     answer_parser = subparsers.add_parser(
         "answer",
@@ -641,9 +686,7 @@ Examples:
 
     args = parser.parse_args()
 
-    if args.command == "generate":
-        return generate_questions(args)
-    elif args.command == "answer":
+    if args.command == "answer":
         return generate_answers_command(args)
     elif args.command == "evaluate":
         return evaluate_answers_command(args)
