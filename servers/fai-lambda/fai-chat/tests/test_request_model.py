@@ -1,52 +1,72 @@
 import pytest
 from pydantic import ValidationError
 
-from src.models.request import ChatRequest
+from src.models.request import ChatMessage, ChatRequest
+
+
+class TestChatMessage:
+    def test_create_user_message(self) -> None:
+        message = ChatMessage(role="user", content="Hello")
+
+        assert message.role == "user"
+        assert message.content == "Hello"
+
+    def test_create_assistant_message(self) -> None:
+        message = ChatMessage(role="assistant", content="Hi there!")
+
+        assert message.role == "assistant"
+        assert message.content == "Hi there!"
+
+    def test_invalid_role_raises_error(self) -> None:
+        with pytest.raises(ValidationError):
+            ChatMessage(role="system", content="Test")
 
 
 class TestChatRequest:
     def test_create_valid_request(self) -> None:
-        request = ChatRequest(domain="buildwithfern.docs.buildwithfern.com")
+        messages = [ChatMessage(role="user", content="Hello")]
+        request = ChatRequest(messages=messages)
 
-        assert request.domain == "buildwithfern.docs.buildwithfern.com"
+        assert len(request.messages) == 1
+        assert request.messages[0].role == "user"
+        assert request.messages[0].content == "Hello"
 
-    def test_create_request_with_different_domain(self) -> None:
-        request = ChatRequest(domain="test.example.com")
+    def test_create_request_with_multiple_messages(self) -> None:
+        messages = [
+            ChatMessage(role="user", content="Hello"),
+            ChatMessage(role="assistant", content="Hi!"),
+            ChatMessage(role="user", content="How are you?"),
+        ]
+        request = ChatRequest(messages=messages)
 
-        assert request.domain == "test.example.com"
+        assert len(request.messages) == 3
+        assert request.messages[-1].content == "How are you?"
 
-    def test_missing_domain_raises_error(self) -> None:
+    def test_missing_messages_raises_error(self) -> None:
         with pytest.raises(ValidationError):
             ChatRequest()
 
-    def test_none_domain_raises_error(self) -> None:
+    def test_empty_messages_list_raises_error(self) -> None:
         with pytest.raises(ValidationError):
-            ChatRequest(domain=None)
-
-    def test_empty_string_domain(self) -> None:
-        request = ChatRequest(domain="")
-
-        assert request.domain == ""
-
-    def test_domain_with_special_characters(self) -> None:
-        request = ChatRequest(domain="my-domain.docs.example.com")
-
-        assert request.domain == "my-domain.docs.example.com"
+            ChatRequest(messages=[])
 
     def test_request_from_dict(self) -> None:
-        data = {"domain": "buildwithfern.docs.buildwithfern.com"}
+        data = {"messages": [{"role": "user", "content": "Test"}]}
         request = ChatRequest(**data)
 
-        assert request.domain == "buildwithfern.docs.buildwithfern.com"
+        assert len(request.messages) == 1
+        assert request.messages[0].content == "Test"
 
     def test_request_to_dict(self) -> None:
-        request = ChatRequest(domain="buildwithfern.docs.buildwithfern.com")
+        messages = [ChatMessage(role="user", content="Hello")]
+        request = ChatRequest(messages=messages)
         data = request.model_dump()
 
-        assert data == {"domain": "buildwithfern.docs.buildwithfern.com"}
+        assert data == {"messages": [{"role": "user", "content": "Hello"}]}
 
     def test_extra_fields_ignored(self) -> None:
-        request = ChatRequest(domain="test.com", extra_field="ignored")
+        messages = [ChatMessage(role="user", content="Hello")]
+        request = ChatRequest(messages=messages, extra_field="ignored")
 
-        assert request.domain == "test.com"
+        assert len(request.messages) == 1
         assert not hasattr(request, "extra_field")
