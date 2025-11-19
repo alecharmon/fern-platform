@@ -5,7 +5,7 @@ import { logger } from "../config/logger";
 import type { ReindexJobMessage } from "../types";
 import { processReindexJob } from "./reindex";
 
-const MAX_CONCURRENT_JOBS = 4;
+const MAX_CONCURRENT_JOBS = 3;
 
 export async function pollSQSQueue(): Promise<void> {
     logger.info("Starting SQS polling", {
