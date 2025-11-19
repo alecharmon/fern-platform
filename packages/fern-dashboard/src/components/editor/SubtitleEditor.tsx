@@ -20,15 +20,7 @@ const extensions = [
         horizontalRule: false,
         dropcursor: false,
         gapcursor: false,
-        bold: true,
-        italic: true,
-        strike: true,
-        code: true,
-        bulletList: true,
-        orderedList: true,
-        listItem: true,
-        hardBreak: true,
-        paragraph: true
+        link: false
     }),
     Link.configure({
         openOnClick: false,
