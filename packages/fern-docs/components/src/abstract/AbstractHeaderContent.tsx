@@ -51,7 +51,6 @@ export function AbstractHeaderContent({
                         >
                             {productSelect}
                             {versionSelect}
-                            {languageSelect}
                         </div>
                     </div>
                 </div>
@@ -63,6 +62,7 @@ export function AbstractHeaderContent({
                         <nav className="fern-header-navbar-links" aria-label="Navbar links">
                             {navbarLinks}
                             {loginButton}
+                            {languageSelect}
                             {themeSwitch}
                         </nav>
                     </FernButtonGroup>

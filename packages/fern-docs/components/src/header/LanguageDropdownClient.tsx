@@ -1,7 +1,6 @@
 "use client";
 
 import { useIsDesktop } from "@fern-ui/react-commons";
-import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../cn";
 import { FernDropdown } from "../FernDropdown";
@@ -35,7 +34,7 @@ function FlagIcon({ src }: { src: string | undefined }) {
         return null;
     }
     return (
-        <div className="inline-flex h-3 w-4 items-center justify-center overflow-hidden rounded-sm border border-border-default">
+        <div className="inline-flex h-3.5 w-4.5 items-center justify-center overflow-hidden rounded-1 border border-border-default">
             <img src={src} className="h-full w-full object-cover" alt="" aria-hidden loading="lazy" />
         </div>
     );
@@ -93,12 +92,11 @@ export function LanguageDropdownClient({
             }}
             lang={lang}
         >
-            <div className={cn("language-dropdown-trigger h-9")} data-testid="language-dropdown">
-                <div className="inline-flex items-center gap-2">
-                    <FlagIcon src={FLAG_SVGS[currentLanguageItem.language]} />
-                    <p className="language-item-title w-fit">{currentLanguageItem.label}</p>
-                </div>
-                <ChevronDown className="size-icon" />
+            <div
+                className={cn("language-dropdown-trigger h-9 w-9 rounded-full ml-2 flex items-center justify-center")}
+                data-testid="language-dropdown"
+            >
+                <FlagIcon src={FLAG_SVGS[currentLanguageItem.language]} />
             </div>
         </FernDropdown>
     );

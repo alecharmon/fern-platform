@@ -57,8 +57,8 @@ export const SidebarContainer = React.memo(function SidebarContainer({
                 <React.Fragment key="login-button">{loginButton}</React.Fragment>
                 {children}
                 <MobileSidebarHeaderLinks hideInDesktop={!showHeaderInSidebar} key="mobile-sidebar-header-links">
-                    {languageSelect}
                     {navbarLinks}
+                    {languageSelect}
                 </MobileSidebarHeaderLinks>
                 <ThemeSwitch
                     className={cn("mx-auto mt-8 flex", !showHeaderInSidebar && "lg:hidden")}
