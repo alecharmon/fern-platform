@@ -71,7 +71,7 @@ jobs:
 
       - name: Update Engines
         run: |
-          node -e 'const fs = require("fs"); const pkg = require("./package.json"); console.log("Before modification:", JSON.stringify(pkg.engines, null, 2)); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "9.15.9"; pkg.packageManager = "pnpm@9.15.9"; console.log("After modification:", JSON.stringify(pkg.engines, null, 2)); fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
+          node -e 'const fs = require("fs"); const pkg = require("./package.json"); console.log("Before modification:", JSON.stringify(pkg.engines, null, 2)); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "10.11.0"; pkg.packageManager = "pnpm@10.11.0"; console.log("After modification:", JSON.stringify(pkg.engines, null, 2)); fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
 
       - name: Install
         uses: ./.github/actions/legacy-install
@@ -105,7 +105,7 @@ jobs:
           echo "Publishing version: $VERSION"
           docker tag fern-self-hosted:latest fernapi/fern-self-hosted:$VERSION
           docker push fernapi/fern-self-hosted:$VERSION
-      
+
       - name: Push to Docker Hub (fernenterprise)
         run: |
           VERSION="${{ steps.determine_version.outputs.version }}"
