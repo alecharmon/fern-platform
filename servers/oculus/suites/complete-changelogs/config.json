@@ -1,12 +1,5 @@
 {
-    "domain": "elevenlabs.io-eval",
+    "domain": "buildwithfern-eval",
     "integration": "fai-local",
-    "num_questions_generation": 100,
-    "generators": ["openapi"],
-    "evaluators": ["correctness"],
-    "generator_config": {
-        "openapi": {
-            "source_path": "sources/elevenlabs-openapi.json"
-        }
-    }
+    "evaluators": ["correctness"]
 }
