@@ -2,7 +2,7 @@
 
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
-import { useCurrentVersionId } from "@fern-docs/components/state/navigation";
+import { useCurrentProductId, useCurrentVersionId } from "@fern-docs/components/state/navigation";
 import { t } from "@fern-docs/i18n";
 import {
     AlgoliaSearchClientRoot,
@@ -76,6 +76,7 @@ export const SearchV2 = React.memo(function SearchV2({
     lang: string;
 }) {
     const currentVersion = useCurrentVersionId();
+    const currentProduct = useCurrentProductId();
 
     const isDarkCodeEnabled = useIsDarkCode();
     const userToken = useAlgoliaUserToken();
@@ -98,6 +99,7 @@ export const SearchV2 = React.memo(function SearchV2({
     });
 
     const shouldApplyVersionFilter = currentVersion != null && isDefaultSearchFilterOn;
+    const shouldApplyProductFilter = currentProduct != null && isDefaultSearchFilterOn;
 
     const facetApiEndpoint = useApiRoute("/api/fern-docs/search/v2/facet");
 
@@ -164,6 +166,14 @@ export const SearchV2 = React.memo(function SearchV2({
         </>
     );
 
+    const initialFilters: Record<string, string> = {};
+    if (shouldApplyVersionFilter) {
+        initialFilters["version.title"] = currentVersion;
+    }
+    if (shouldApplyProductFilter) {
+        initialFilters["product.title"] = currentProduct;
+    }
+
     if (process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1") {
         return (
             <MeiliSearchClientRoot
@@ -175,7 +185,7 @@ export const SearchV2 = React.memo(function SearchV2({
                 apiKey={""}
                 indexName={SEARCH_INDEX}
                 fetchFacets={facetFetcher}
-                initialFilters={shouldApplyVersionFilter ? { "version.title": currentVersion } : undefined}
+                initialFilters={Object.keys(initialFilters).length > 0 ? initialFilters : undefined}
             >
                 <DesktopSearchDialog open={open} onOpenChange={setOpen} lang={lang}>
                     <DesktopCommand onEscapeKeyDown={() => setOpen(false)} className="shadow-xl" lang={lang}>
@@ -185,6 +195,7 @@ export const SearchV2 = React.memo(function SearchV2({
             </MeiliSearchClientRoot>
         );
     }
+
     return (
         <AlgoliaSearchClientRoot
             appId={appId}
@@ -193,7 +204,7 @@ export const SearchV2 = React.memo(function SearchV2({
             indexName={SEARCH_INDEX}
             fetchFacets={facetFetcher}
             authenticatedUserToken={user?.email}
-            initialFilters={shouldApplyVersionFilter ? { "version.title": currentVersion } : undefined}
+            initialFilters={Object.keys(initialFilters).length > 0 ? initialFilters : undefined}
             analyticsTags={disableAnalytics ? [] : ["search-v2-dialog"]}
         >
             <DesktopSearchDialog open={open} onOpenChange={setOpen} lang={lang}>
