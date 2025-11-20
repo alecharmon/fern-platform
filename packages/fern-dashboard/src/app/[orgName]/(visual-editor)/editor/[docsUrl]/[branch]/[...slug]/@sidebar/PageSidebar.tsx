@@ -55,6 +55,10 @@ export default function PageSidebar({
         serializableRootNode
     });
 
+    if (!hydrated) {
+        return null;
+    }
+
     if (pageDataDeps) {
         const initialPageData =
             hydrated && !initialPageDataRef.current
