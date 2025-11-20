@@ -11,11 +11,11 @@ BEDROCK_MODEL_CONFIGS: dict[ModelId, dict[str, str]] = {
         "model_id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
         "region": "us-east-1",
     },
-    "claude-4": {
+    "claude-4-sonnet": {
         "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
         "region": "us-east-1",
     },
-    "claude-4.5": {
+    "claude-4.5-sonnet": {
         "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
         "region": "us-east-1",
     },

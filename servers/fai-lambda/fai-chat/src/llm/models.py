@@ -10,7 +10,7 @@ from typing import (
     Literal,
 )
 
-ModelId = Literal["claude-3.7", "claude-4", "claude-4.5", "claude-4.5-haiku"]
+ModelId = Literal["claude-3.7", "claude-4-sonnet", "claude-4.5-sonnet", "claude-4.5-haiku", "command-a-03-2025"]
 
 
 class MessageRole(str, Enum):
@@ -63,7 +63,7 @@ class ModelConfig:
     temperature: float = 0.0
     max_tokens: int = 4096
     fallback_models: list[str] = field(default_factory=list)
-    provider: Literal["anthropic", "bedrock"] | None = None
+    provider: Literal["anthropic", "bedrock", "cohere"] | None = None
     region: str | None = None
     api_key: str | None = None
 

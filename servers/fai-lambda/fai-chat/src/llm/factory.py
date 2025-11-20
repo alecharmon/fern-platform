@@ -1,30 +1,28 @@
 """Factory for creating LLM providers."""
 
 from functools import lru_cache
-from typing import Literal
+from typing import Literal, get_args
 
 from .anthropic_factory import AnthropicProviderFactory
 from .base import LLMProvider
-from .bedrock_factory import (
-    BEDROCK_MODEL_CONFIGS,
-    BedrockProviderFactory,
-)
+from .bedrock_factory import BedrockProviderFactory
+from .cohere_factory import CohereProviderFactory
 from .fallback import FallbackProvider
 from .models import ModelId
 from .provider_factory import ProviderFactory
 
 DEFAULT_MODEL: ModelId = "claude-3.7"
-FALLBACK_ORDER: list[ModelId] = ["claude-4", "claude-4.5-haiku", "claude-4.5"]
+FALLBACK_ORDER: list[ModelId] = ["claude-4-sonnet", "claude-4.5-haiku", "claude-4.5-sonnet"]
 
 
 def _create_llm_provider(
     model: str | None = None,
     temperature: float = 0.0,
     max_tokens: int = 4096,
-    provider_preference: list[Literal["bedrock", "anthropic"]] | None = None,
+    provider_preference: list[Literal["bedrock", "anthropic", "cohere"]] | None = None,
 ) -> LLMProvider:
     model_id = _resolve_model_id(model)
-    provider_preference = provider_preference or ["bedrock", "anthropic"]
+    provider_preference = provider_preference or ["bedrock", "anthropic", "cohere"]
 
     ordered_models = _build_ordered_models(model_id)
 
@@ -36,6 +34,8 @@ def _create_llm_provider(
             factory = BedrockProviderFactory()
         elif provider_type == "anthropic":
             factory = AnthropicProviderFactory()
+        elif provider_type == "cohere":
+            factory = CohereProviderFactory()
         else:
             continue
 
@@ -58,7 +58,8 @@ def _create_llm_provider(
 
 def _resolve_model_id(model: str | None) -> ModelId:
     m = model or DEFAULT_MODEL
-    if m in BEDROCK_MODEL_CONFIGS:
+    valid_models = get_args(ModelId)
+    if m in valid_models:
         return m  # type: ignore
     return DEFAULT_MODEL
 
@@ -72,9 +73,13 @@ def get_llm_provider(
     model: str = "claude-3.7",
     temperature: float = 0.0,
     max_tokens: int = 4096,
-    provider_preference_tuple: tuple[Literal["bedrock", "anthropic"], ...] = ("bedrock", "anthropic"),
+    provider_preference_tuple: tuple[Literal["bedrock", "anthropic", "cohere"], ...] = (
+        "bedrock",
+        "anthropic",
+        "cohere",
+    ),
 ) -> LLMProvider:
-    provider_list: list[Literal["bedrock", "anthropic"]] = [*provider_preference_tuple]
+    provider_list: list[Literal["bedrock", "anthropic", "cohere"]] = [*provider_preference_tuple]
     return _create_llm_provider(
         model=model,
         temperature=temperature,

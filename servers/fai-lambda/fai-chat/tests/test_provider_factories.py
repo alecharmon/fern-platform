@@ -7,6 +7,8 @@ from src.llm.anthropic import AnthropicProvider
 from src.llm.anthropic_factory import AnthropicProviderFactory
 from src.llm.bedrock import BedrockProvider
 from src.llm.bedrock_factory import BedrockProviderFactory
+from src.llm.cohere import CohereProvider
+from src.llm.cohere_factory import CohereProviderFactory
 
 
 class TestBedrockProviderFactory:
@@ -44,8 +46,8 @@ class TestBedrockProviderFactory:
         factory = BedrockProviderFactory()
         models = factory.get_supported_models()
         assert "claude-3.7" in models
-        assert "claude-4" in models
-        assert "claude-4.5" in models
+        assert "claude-4-sonnet" in models
+        assert "claude-4.5-sonnet" in models
         assert "claude-4.5-haiku" in models
         assert all(isinstance(v, str) for v in models.values())
 
@@ -69,7 +71,7 @@ class TestAnthropicProviderFactory:
     @patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"})
     def test_create_valid_model(self) -> None:
         factory = AnthropicProviderFactory()
-        provider = factory.create(model="claude-4", temperature=0.5, max_tokens=1000)
+        provider = factory.create(model="claude-4-sonnet", temperature=0.5, max_tokens=1000)
         assert provider is not None
         assert isinstance(provider, AnthropicProvider)
 
@@ -83,14 +85,14 @@ class TestAnthropicProviderFactory:
     def test_create_without_credentials_raises_error(self) -> None:
         factory = AnthropicProviderFactory()
         with pytest.raises(ValueError, match="Anthropic provider requires API key"):
-            factory.create(model="claude-4")
+            factory.create(model="claude-4-sonnet")
 
     @patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"})
     def test_get_supported_models(self) -> None:
         factory = AnthropicProviderFactory()
         models = factory.get_supported_models()
-        assert "claude-4" in models
-        assert "claude-4.5" in models
+        assert "claude-4-sonnet" in models
+        assert "claude-4.5-sonnet" in models
         assert "claude-4.5-haiku" in models
         assert "claude-3.7" not in models
         assert all(isinstance(v, str) for v in models.values())
@@ -99,3 +101,46 @@ class TestAnthropicProviderFactory:
     def test_provider_name(self) -> None:
         factory = AnthropicProviderFactory()
         assert factory.provider_name == "anthropic"
+
+
+class TestCohereProviderFactory:
+    @patch.dict(os.environ, {"COHERE_API_KEY": "test-key"})
+    def test_is_available_with_credentials(self) -> None:
+        factory = CohereProviderFactory()
+        assert factory.is_available()
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_is_available_without_credentials(self) -> None:
+        factory = CohereProviderFactory()
+        assert not factory.is_available()
+
+    @patch.dict(os.environ, {"COHERE_API_KEY": "test-key"})
+    def test_create_valid_model(self) -> None:
+        factory = CohereProviderFactory()
+        provider = factory.create(model="command-a-03-2025", temperature=0.5, max_tokens=1000)
+        assert provider is not None
+        assert isinstance(provider, CohereProvider)
+
+    @patch.dict(os.environ, {"COHERE_API_KEY": "test-key"})
+    def test_create_invalid_model_returns_none(self) -> None:
+        factory = CohereProviderFactory()
+        provider = factory.create(model="invalid-model")
+        assert provider is None
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_create_without_credentials_raises_error(self) -> None:
+        factory = CohereProviderFactory()
+        with pytest.raises(ValueError, match="Cohere provider requires API key"):
+            factory.create(model="command-a-03-2025")
+
+    @patch.dict(os.environ, {"COHERE_API_KEY": "test-key"})
+    def test_get_supported_models(self) -> None:
+        factory = CohereProviderFactory()
+        models = factory.get_supported_models()
+        assert "command-a-03-2025" in models
+        assert all(isinstance(v, str) for v in models.values())
+
+    @patch.dict(os.environ, {"COHERE_API_KEY": "test-key"})
+    def test_provider_name(self) -> None:
+        factory = CohereProviderFactory()
+        assert factory.provider_name == "cohere"

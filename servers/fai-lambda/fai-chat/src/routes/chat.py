@@ -135,7 +135,7 @@ async def chat(
         )
 
     try:
-        provider = get_llm_provider(model="claude-4", temperature=0.0, max_tokens=4096)
+        provider = get_llm_provider(model="claude-4-sonnet", temperature=0.0, max_tokens=4096)
     except Exception as e:
         logger.exception(f"Failed to create LLM provider: {e}")
         raise HTTPException(

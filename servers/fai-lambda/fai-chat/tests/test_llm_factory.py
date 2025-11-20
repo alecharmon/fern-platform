@@ -15,8 +15,8 @@ from src.llm.fallback import FallbackProvider
 
 class TestModelResolution:
     def test_resolve_valid_model(self) -> None:
-        result = _resolve_model_id("claude-4")
-        assert result == "claude-4"
+        result = _resolve_model_id("claude-4-sonnet")
+        assert result == "claude-4-sonnet"
 
     def test_resolve_invalid_model_returns_default(self) -> None:
         result = _resolve_model_id("invalid-model")
@@ -29,18 +29,18 @@ class TestModelResolution:
 
 class TestFallbackOrder:
     def test_build_ordered_models_claude_4(self) -> None:
-        result = _build_ordered_models("claude-4")
-        assert result[0] == "claude-4"
+        result = _build_ordered_models("claude-4-sonnet")
+        assert result[0] == "claude-4-sonnet"
         assert "claude-4.5-haiku" in result
-        assert "claude-4.5" in result
+        assert "claude-4.5-sonnet" in result
         assert len(result) == 3
 
     def test_build_ordered_models_claude_3_7(self) -> None:
         result = _build_ordered_models("claude-3.7")
         assert result[0] == "claude-3.7"
-        assert result[1] == "claude-4"
+        assert result[1] == "claude-4-sonnet"
         assert result[2] == "claude-4.5-haiku"
-        assert result[3] == "claude-4.5"
+        assert result[3] == "claude-4.5-sonnet"
 
     def test_no_duplicate_models(self) -> None:
         result = _build_ordered_models("claude-4.5-haiku")
@@ -73,7 +73,7 @@ class TestProviderCreation:
         },
     )
     def test_create_with_both_providers(self) -> None:
-        provider = _create_llm_provider(model="claude-4")
+        provider = _create_llm_provider(model="claude-4-sonnet")
         assert isinstance(provider, FallbackProvider)
 
     def test_no_api_keys_raises_error(self) -> None:
@@ -93,14 +93,14 @@ class TestProviderCreation:
 class TestModelConfigs:
     def test_bedrock_has_all_models(self) -> None:
         assert "claude-3.7" in BEDROCK_MODEL_CONFIGS
-        assert "claude-4" in BEDROCK_MODEL_CONFIGS
-        assert "claude-4.5" in BEDROCK_MODEL_CONFIGS
+        assert "claude-4-sonnet" in BEDROCK_MODEL_CONFIGS
+        assert "claude-4.5-sonnet" in BEDROCK_MODEL_CONFIGS
         assert "claude-4.5-haiku" in BEDROCK_MODEL_CONFIGS
 
     def test_anthropic_missing_claude_37(self) -> None:
         assert "claude-3.7" not in ANTHROPIC_MODEL_CONFIGS
-        assert "claude-4" in ANTHROPIC_MODEL_CONFIGS
-        assert "claude-4.5" in ANTHROPIC_MODEL_CONFIGS
+        assert "claude-4-sonnet" in ANTHROPIC_MODEL_CONFIGS
+        assert "claude-4.5-sonnet" in ANTHROPIC_MODEL_CONFIGS
 
     def test_bedrock_configs_have_region(self) -> None:
         for config in BEDROCK_MODEL_CONFIGS.values():

@@ -1,21 +1,23 @@
 """
 Manual test script for LLM providers.
 
-Tests both Anthropic and Bedrock providers with streaming and non-streaming responses.
+Tests Anthropic, Bedrock, and Cohere providers with streaming and non-streaming responses.
 
 Usage:
     # Test with environment variables
     export ANTHROPIC_API_KEY=your_key
     export AWS_ACCESS_KEY_ID=your_key
     export AWS_SECRET_ACCESS_KEY=your_secret
+    export COHERE_API_KEY=your_key
     python tests/manual_test_llm_providers.py
 
     # Or pass as arguments
-    python tests/manual_test_llm_providers.py --anthropic-key sk-... --aws-key ... --aws-secret ...
+    python tests/manual_test_llm_providers.py --anthropic-key sk-... --aws-key ... --aws-secret ... --cohere-key ...
 
     # Test specific provider only
     python tests/manual_test_llm_providers.py --provider anthropic
     python tests/manual_test_llm_providers.py --provider bedrock
+    python tests/manual_test_llm_providers.py --provider cohere
 """
 
 import argparse
@@ -158,6 +160,67 @@ async def test_bedrock_non_streaming(aws_key_id: str, aws_secret: str) -> None:
         raise
 
 
+async def test_cohere_streaming(api_key: str) -> None:
+    print("\n" + "=" * 60)
+    print("TEST: Cohere Streaming")
+    print("=" * 60)
+
+    provider = _create_llm_provider(
+        model="command-a-03-2025",
+        temperature=0.0,
+        max_tokens=512,
+        provider_preference=["cohere"],
+    )
+
+    messages = [
+        LLMMessage(role=MessageRole.SYSTEM, content="You are a helpful assistant. Be concise."),
+        LLMMessage(role=MessageRole.USER, content="Explain machine learning in one sentence."),
+    ]
+
+    print("\nStreaming response:")
+    try:
+        async for event in provider.generate_stream(messages):
+            print(event.to_sse(), end="", flush=True)
+        print("\n✓ Cohere streaming test passed")
+    except Exception as e:
+        print(f"\n✗ Cohere streaming test failed: {e}")
+        raise
+
+
+async def test_cohere_non_streaming(api_key: str) -> None:
+    print("\n" + "=" * 60)
+    print("TEST: Cohere Non-Streaming")
+    print("=" * 60)
+
+    provider = _create_llm_provider(
+        model="command-a-03-2025",
+        temperature=0.0,
+        max_tokens=512,
+        provider_preference=["cohere"],
+    )
+
+    messages = [
+        LLMMessage(role=MessageRole.SYSTEM, content="You are a helpful assistant."),
+        LLMMessage(role=MessageRole.USER, content="What is 5+3?"),
+    ]
+
+    print("\nGenerating response...")
+    try:
+        response = await provider.generate(messages)
+        print(f"Model: {response.model_id}")
+        print(f"Provider: {response.provider}")
+        print(f"Content: {response.content}")
+        print("Metrics:")
+        print(f"  - Total time: {response.metrics.total_time_ms:.2f}ms")
+        print(f"  - Input tokens: {response.metrics.input_tokens}")
+        print(f"  - Output tokens: {response.metrics.output_tokens}")
+        print(f"Finish reason: {response.finish_reason}")
+        print("✓ Cohere non-streaming test passed")
+    except Exception as e:
+        print(f"✗ Cohere non-streaming test failed: {e}")
+        raise
+
+
 async def test_fallback(anthropic_key: str, aws_key_id: str, aws_secret: str) -> None:
     print("\n" + "=" * 60)
     print("TEST: Fallback Provider (Anthropic → Bedrock)")
@@ -187,6 +250,7 @@ async def main(args: argparse.Namespace) -> None:
     anthropic_key = args.anthropic_key or os.environ.get("ANTHROPIC_API_KEY")
     aws_key_id = args.aws_key or os.environ.get("AWS_ACCESS_KEY_ID")
     aws_secret = args.aws_secret or os.environ.get("AWS_SECRET_ACCESS_KEY")
+    cohere_key = args.cohere_key or os.environ.get("COHERE_API_KEY")
 
     provider = args.provider
 
@@ -205,6 +269,13 @@ async def main(args: argparse.Namespace) -> None:
             await test_bedrock_streaming(aws_key_id, aws_secret)
             await test_bedrock_non_streaming(aws_key_id, aws_secret)
 
+    if provider in [None, "cohere"]:
+        if not cohere_key:
+            print("⚠ Skipping Cohere tests (no API key)")
+        else:
+            await test_cohere_streaming(cohere_key)
+            await test_cohere_non_streaming(cohere_key)
+
     if provider is None and anthropic_key and aws_key_id and aws_secret:
         await test_fallback(anthropic_key, aws_key_id, aws_secret)
 
@@ -218,9 +289,10 @@ if __name__ == "__main__":
     parser.add_argument("--anthropic-key", help="Anthropic API key")
     parser.add_argument("--aws-key", help="AWS access key ID")
     parser.add_argument("--aws-secret", help="AWS secret access key")
+    parser.add_argument("--cohere-key", help="Cohere API key")
     parser.add_argument(
         "--provider",
-        choices=["anthropic", "bedrock"],
+        choices=["anthropic", "bedrock", "cohere"],
         help="Test specific provider only",
     )
 

@@ -7,8 +7,8 @@ from .models import ModelId
 from .provider_factory import ProviderFactory
 
 ANTHROPIC_MODEL_CONFIGS: dict[ModelId, dict[str, str]] = {
-    "claude-4": {"model_id": "claude-sonnet-4-20250514"},
-    "claude-4.5": {"model_id": "claude-sonnet-4-5-20250929"},
+    "claude-4-sonnet": {"model_id": "claude-sonnet-4-20250514"},
+    "claude-4.5-sonnet": {"model_id": "claude-sonnet-4-5-20250929"},
     "claude-4.5-haiku": {"model_id": "claude-haiku-4-5-20251001"},
 }
 
