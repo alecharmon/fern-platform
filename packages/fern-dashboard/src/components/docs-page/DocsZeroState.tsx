@@ -26,11 +26,13 @@ export async function DocsZeroState({ user, orgName }: DocsZeroState.Props) {
             <div className="mt-12">
                 <div className="flex flex-col gap-4">
                     <DocsZeroStateImage />
-                    {orgName && (
-                        <div className="flex justify-center">
+                    <div className="flex justify-center">
+                        {orgName ? (
                             <DocsZeroStateButton orgName={orgName} />
-                        </div>
-                    )}
+                        ) : (
+                            <DocsZeroStateButton orgName={undefined} />
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

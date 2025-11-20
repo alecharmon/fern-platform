@@ -6,7 +6,7 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DocsZeroStateButtonClient } from "./DocsZeroStateButtonClient";
 
 interface DocsZeroStateButtonProps {
-    orgName: Auth0OrgName;
+    orgName: Auth0OrgName | undefined;
 }
 
 /**
@@ -14,6 +14,10 @@ interface DocsZeroStateButtonProps {
  */
 export async function DocsZeroStateButton({ orgName }: DocsZeroStateButtonProps) {
     const session = await getCurrentSession();
+
+    if (orgName == null) {
+        return <DocsZeroStateButtonClient useInternalWizard={false} />;
+    }
 
     // Default to external link if no session
     if (session == null) {
