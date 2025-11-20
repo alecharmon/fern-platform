@@ -154,8 +154,8 @@ catalogs:
       specifier: ^10.0.4
       version: 10.0.4
     tsup:
-      specifier: ^8.3.5
-      version: 8.3.5
+      specifier: ^8.5.1
+      version: 8.5.1
     url-join:
       specifier: ^5.0.0
       version: 5.0.0
@@ -1005,7 +1005,7 @@ importers:
         version: 6.14.0
       tsup:
         specifier: 'catalog:'
-        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+        version: 8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
       typescript:
         specifier: ^5
         version: 5.7.3
@@ -1093,7 +1093,7 @@ importers:
         version: 1.2.0
       tsup:
         specifier: 'catalog:'
-        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+        version: 8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
       typescript:
         specifier: ^5
         version: 5.7.3
@@ -2624,7 +2624,7 @@ importers:
         version: 16.14.1(typescript@5.7.3)
       tsup:
         specifier: 'catalog:'
-        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+        version: 8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
       typescript:
         specifier: ^5
         version: 5.7.3
@@ -3088,7 +3088,7 @@ importers:
         version: 3.5.2
       tsup:
         specifier: 'catalog:'
-        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+        version: 8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
       typescript:
         specifier: ^5
         version: 5.7.3
@@ -3280,8 +3280,8 @@ importers:
         specifier: ^22.0.0
         version: 22.18.8
       tsup:
-        specifier: ^8.3.5
-        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+        specifier: ^8.5.1
+        version: 8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
       tsx:
         specifier: ^4.19.2
         version: 4.20.6
@@ -3512,7 +3512,7 @@ importers:
         version: 7.7.2
       tsup:
         specifier: 'catalog:'
-        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+        version: 8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
       tsx:
         specifier: ^4.7.1
         version: 4.20.6
@@ -3625,7 +3625,7 @@ importers:
         version: 8.16.3
       tsup:
         specifier: 'catalog:'
-        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+        version: 8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
       tsx:
         specifier: ^4.7.1
         version: 4.20.6
@@ -3690,7 +3690,7 @@ importers:
         version: 5.1.0
       tsup:
         specifier: 'catalog:'
-        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+        version: 8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
       tsx:
         specifier: ^4.7.1
         version: 4.20.6
@@ -4002,7 +4002,7 @@ importers:
         version: 10.0.4(typescript@5.7.3)
       tsup:
         specifier: 'catalog:'
-        version: 8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
+        version: 8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0)
       tsx:
         specifier: ^4.7.1
         version: 4.20.6
@@ -11905,7 +11905,6 @@ packages:
 
   '@walletconnect/ethereum-provider@2.20.0':
     resolution: {integrity: sha512-TSu1nr+AzCjM5u7xdnWTGX8ryKuHHb1Za56BD6UU0UPS7ZC2fZ99TVa5Q3Sng9JyksY5p99Iwg7fOtlozc3QYQ==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/events@1.0.1':
     resolution: {integrity: sha512-NPTqaoi0oPBVNuLv7qPaJazmGHs5JGyO8eEAk5VGKmJzDR7AHzD4k6ilox5kxk1iwiOnFopBOOMLs86Oa76HpQ==}
@@ -11950,19 +11949,15 @@ packages:
 
   '@walletconnect/sign-client@2.19.0':
     resolution: {integrity: sha512-+GkuJzPK9SPq+RZgdKHNOvgRagxh/hhYWFHOeSiGh3DyAQofWuFTq4UrN/MPjKOYswSSBKfIa+iqKYsi4t8zLQ==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/sign-client@2.19.1':
     resolution: {integrity: sha512-OgBHRPo423S02ceN3lAzcZ3MYb1XuLyTTkKqLmKp/icYZCyRzm3/ynqJDKndiBLJ5LTic0y07LiZilnliYqlvw==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/sign-client@2.19.2':
     resolution: {integrity: sha512-a/K5PRIFPCjfHq5xx3WYKHAAF8Ft2I1LtxloyibqiQOoUtNLfKgFB1r8sdMvXM7/PADNPe4iAw4uSE6PrARrfg==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/sign-client@2.20.0':
     resolution: {integrity: sha512-5Ao9RVGsgpMTLjVByFfjMbX7RwJM0HvKV7P9ONJwPPo4OiviNyneeOufr2KKZhuwF+QUu5mTE0Lj/euGWSNaOQ==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/solana-adapter@0.0.8':
     resolution: {integrity: sha512-Qb7MT8SdkeBldfUCmF+rYW6vL98mxPuT1yAwww5X2vpx7xEPZvFCoAKnyT5fXu0v56rMxhW3MGejnHyyYdDY7Q==}
@@ -11987,19 +11982,15 @@ packages:
 
   '@walletconnect/universal-provider@2.19.0':
     resolution: {integrity: sha512-e9JvadT5F8QwdLmd7qBrmACq04MT7LQEe1m3X2Fzvs3DWo8dzY8QbacnJy4XSv5PCdxMWnua+2EavBk8nrI9QA==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/universal-provider@2.19.1':
     resolution: {integrity: sha512-4rdLvJ2TGDIieNWW3sZw2MXlX65iHpTuKb5vyvUHQtjIVNLj+7X/09iUAI/poswhtspBK0ytwbH+AIT/nbGpjg==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/universal-provider@2.19.2':
     resolution: {integrity: sha512-LkKg+EjcSUpPUhhvRANgkjPL38wJPIWumAYD8OK/g4OFuJ4W3lS/XTCKthABQfFqmiNbNbVllmywiyE44KdpQg==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/universal-provider@2.20.0':
     resolution: {integrity: sha512-kzMWXao+RyWfv46nS/owJ99/QhObGkYHhpMxdzl4bae98JXdQ0xhmov3Rvy3GRt5csgJXldoM2VO44B/Fsuj4Q==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/utils@2.19.0':
     resolution: {integrity: sha512-LZ0D8kevknKfrfA0Sq3Hf3PpmM8oWyNfsyWwFR51t//2LBgtN2Amz5xyoDDJcjLibIbKAxpuo/i0JYAQxz+aPA==}
@@ -12969,8 +12960,8 @@ packages:
   builtin-status-codes@3.0.0:
     resolution: {integrity: sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ==}
 
-  bundle-require@5.0.0:
-    resolution: {integrity: sha512-GuziW3fSSmopcx4KRymQEJVbZUfqlCqcq7dvs6TYwKRZiegK/2buMxQTPs6MGlNv50wms1699qYO54R8XfRX4w==}
+  bundle-require@5.1.0:
+    resolution: {integrity: sha512-3WrrOuZiyaaZPWiEt4G3+IffISVC9HYlWueJEBWED4ZH4aIAC2PnkdnuRrR94M+w6yGWn4AglWtJtBI8YqvgoA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     peerDependencies:
       esbuild: 0.27.0
@@ -13432,8 +13423,8 @@ packages:
     resolution: {integrity: sha512-ZqRXc+tZukToSNmh5C2iWMSoV3X1YUcPbqEM4DkEG5tNQXrQUZCNVGGv3IuicnkMtPfGf3Xtp8WCXs295iQ1pQ==}
     engines: {node: '>= 0.10.0'}
 
-  consola@3.2.3:
-    resolution: {integrity: sha512-I5qxpzLv+sJhTVEoLYNcTW+bThDCPsit0vLNKShZx6rLtpilNpmmeTPaeqJb9ZE9dV3DGaeby6Vuhrw38WjeyQ==}
+  consola@3.4.2:
+    resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
     engines: {node: ^14.18.0 || >=16.10.0}
 
   console-browserify@1.2.0:
@@ -15158,6 +15149,9 @@ packages:
   findup-sync@5.0.0:
     resolution: {integrity: sha512-MzwXju70AuyflbgeOhzvQWAvvQdo1XL0A9bVvlXsYcFEBM87WR4OakL4OfZq+QRmr+duJubio+UtNQCPsVESzQ==}
     engines: {node: '>= 10.13.0'}
+
+  fix-dts-default-cjs-exports@1.0.1:
+    resolution: {integrity: sha512-pVIECanWFC61Hzl2+oOCtoJ3F17kglZC/6N94eRWycFgBH35hHx0Li604ZIzhseh97mf2p0cv7vVrOZGoqhlEg==}
 
   flat-cache@3.2.0:
     resolution: {integrity: sha512-CYcENa+FtcUKLmhhqyctpclsq7QF38pKjZHsGNiSQF5r4FtoKDWabFDl3hzaEQMvT1LHEysw5twgLvpYYb4vbw==}
@@ -17052,9 +17046,6 @@ packages:
 
   lodash.once@4.1.1:
     resolution: {integrity: sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==}
-
-  lodash.sortby@4.7.0:
-    resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
 
   lodash.throttle@4.1.1:
     resolution: {integrity: sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==}
@@ -20311,14 +20302,9 @@ packages:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
 
-  source-map@0.7.4:
-    resolution: {integrity: sha512-l3BikUxvPOcn5E74dZiq5BGsTb5yEwhaTSzccU6t4sDOH8NWJCstKO5QT2CvtFoK6F0saL7p9xHAqHOlCPJygA==}
-    engines: {node: '>= 8'}
-
-  source-map@0.8.0-beta.0:
-    resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
-    engines: {node: '>= 8'}
-    deprecated: The work that was done in this beta branch won't be included in future versions
+  source-map@0.7.6:
+    resolution: {integrity: sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ==}
+    engines: {node: '>= 12'}
 
   sourcemap-codec@1.4.8:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
@@ -21006,9 +20992,6 @@ packages:
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
 
-  tr46@1.0.1:
-    resolution: {integrity: sha512-dTpowEjclQ7Kgx5SdBkqRzVhERQXov8/l9Ft9dVM9fmg0W0KQSVaXX9T4i6twCPNtYiZM53lpSSUAwJbFPOHxA==}
-
   tr46@3.0.0:
     resolution: {integrity: sha512-l7FvfAHlcmulp8kr+flpQZmVwtu7nfRV7NZujtN0OqES8EL4O4e0qqzL0DC5gAvx/ZC/9lk6rhcUwYvkBnBnYA==}
     engines: {node: '>=12'}
@@ -21189,8 +21172,8 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
-  tsup@8.3.5:
-    resolution: {integrity: sha512-Tunf6r6m6tnZsG9GYWndg0z8dEV7fD733VBFzFJ5Vcm1FtlXB8xBD/rtrBi2a3YKEV7hHtxiZtW5EAVADoe1pA==}
+  tsup@8.5.1:
+    resolution: {integrity: sha512-xtgkqwdhpKWr3tKPmCkvYmS9xnQK3m3XgxZHwSUjvfTjp7YfXe5tT3GgWi0F2N+ZSMsOeWeZFh7ZZFg5iPhing==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -21984,9 +21967,6 @@ packages:
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
 
-  webidl-conversions@4.0.2:
-    resolution: {integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==}
-
   webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
@@ -22068,9 +22048,6 @@ packages:
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
-
-  whatwg-url@7.1.0:
-    resolution: {integrity: sha512-WUu7Rg1DroM7oQvGWfOiAK21n74Gg+T4elXEQYkOhtyLeWiJFoOGLXPKI/9gzIie9CtwVLm8wtw6YJdKyxSjeg==}
 
   which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
@@ -26295,7 +26272,7 @@ snapshots:
       '@mdx-js/mdx': 3.0.1
       '@types/unist': 3.0.3
       esbuild: 0.27.0
-      source-map: 0.7.4
+      source-map: 0.7.6
       vfile: 6.0.1
       vfile-message: 4.0.2
     transitivePeerDependencies:
@@ -26320,7 +26297,7 @@ snapshots:
       remark-mdx: 3.1.0
       remark-parse: 11.0.0
       remark-rehype: 11.1.0
-      source-map: 0.7.4
+      source-map: 0.7.6
       unified: 11.0.5
       unist-util-position-from-estree: 2.0.0
       unist-util-stringify-position: 4.0.0
@@ -27452,7 +27429,7 @@ snapshots:
       loader-utils: 2.0.4
       react-refresh: 0.14.2
       schema-utils: 4.3.0
-      source-map: 0.7.4
+      source-map: 0.7.6
       webpack: 5.98.0(@swc/core@1.13.5)(esbuild@0.27.0)
     optionalDependencies:
       type-fest: 4.41.0
@@ -28550,7 +28527,7 @@ snapshots:
       '@web3-storage/multipart-parser': 1.0.0
       cookie: 0.7.0
       set-cookie-parser: 2.7.1
-      source-map: 0.7.4
+      source-map: 0.7.6
       turbo-stream: 2.4.0
     optionalDependencies:
       typescript: 5.7.3
@@ -29104,7 +29081,7 @@ snapshots:
       browserslist-to-es-version: 1.1.1
       htmlparser2: 10.0.0
       picocolors: 1.1.1
-      source-map: 0.7.4
+      source-map: 0.7.6
 
   '@rsdoctor/cli@1.2.3(@rspack/core@1.4.5(@swc/helpers@0.5.15))(bufferutil@4.0.9)(utf-8-validate@5.0.10)(webpack@5.98.0(@swc/core@1.13.5)(esbuild@0.27.0))':
     dependencies:
@@ -29142,7 +29119,7 @@ snapshots:
       lodash: 4.17.21
       path-browserify: 1.0.1
       semver: 7.7.2
-      source-map: 0.7.4
+      source-map: 0.7.6
     transitivePeerDependencies:
       - '@rsbuild/core'
       - '@rspack/core'
@@ -29157,7 +29134,7 @@ snapshots:
       '@rsdoctor/types': 1.2.3(@rspack/core@1.4.5(@swc/helpers@0.5.15))(webpack@5.98.0(@swc/core@1.13.5)(esbuild@0.27.0))
       '@rsdoctor/utils': 1.2.3(@rspack/core@1.4.5(@swc/helpers@0.5.15))(webpack@5.98.0(@swc/core@1.13.5)(esbuild@0.27.0))
       lodash.unionby: 4.8.0
-      source-map: 0.7.4
+      source-map: 0.7.6
     transitivePeerDependencies:
       - '@rspack/core'
       - supports-color
@@ -29196,7 +29173,7 @@ snapshots:
       open: 8.4.2
       sirv: 2.0.4
       socket.io: 4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      source-map: 0.7.4
+      source-map: 0.7.6
       tapable: 2.2.2
     transitivePeerDependencies:
       - '@rspack/core'
@@ -29210,7 +29187,7 @@ snapshots:
       '@types/connect': 3.4.38
       '@types/estree': 1.0.6
       '@types/tapable': 2.2.7
-      source-map: 0.7.4
+      source-map: 0.7.6
     optionalDependencies:
       '@rspack/core': 1.4.5(@swc/helpers@0.5.15)
       webpack: 5.98.0(@swc/core@1.13.5)(esbuild@0.27.0)
@@ -35968,7 +35945,7 @@ snapshots:
 
   builtin-status-codes@3.0.0: {}
 
-  bundle-require@5.0.0(esbuild@0.27.0):
+  bundle-require@5.1.0(esbuild@0.27.0):
     dependencies:
       esbuild: 0.27.0
       load-tsconfig: 0.2.5
@@ -36429,7 +36406,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  consola@3.2.3: {}
+  consola@3.4.2: {}
 
   console-browserify@1.2.0: {}
 
@@ -38036,7 +38013,7 @@ snapshots:
     dependencies:
       '@types/estree-jsx': 1.0.5
       astring: 1.8.6
-      source-map: 0.7.4
+      source-map: 0.7.6
 
   estree-util-value-to-estree@3.4.0:
     dependencies:
@@ -38577,6 +38554,12 @@ snapshots:
       is-glob: 4.0.3
       micromatch: 4.0.8
       resolve-dir: 1.0.1
+
+  fix-dts-default-cjs-exports@1.0.1:
+    dependencies:
+      magic-string: 0.30.17
+      mlly: 1.7.4
+      rollup: 4.35.0
 
   flat-cache@3.2.0:
     dependencies:
@@ -40890,8 +40873,6 @@ snapshots:
   lodash.merge@4.6.2: {}
 
   lodash.once@4.1.1: {}
-
-  lodash.sortby@4.7.0: {}
 
   lodash.throttle@4.1.1: {}
 
@@ -45081,11 +45062,7 @@ snapshots:
 
   source-map@0.6.1: {}
 
-  source-map@0.7.4: {}
-
-  source-map@0.8.0-beta.0:
-    dependencies:
-      whatwg-url: 7.1.0
+  source-map@0.7.6: {}
 
   sourcemap-codec@1.4.8: {}
 
@@ -45518,7 +45495,7 @@ snapshots:
       debug: 4.4.1(supports-color@5.5.0)
       glob: 7.2.3
       sax: 1.3.0
-      source-map: 0.7.4
+      source-map: 0.7.6
     transitivePeerDependencies:
       - supports-color
 
@@ -45877,10 +45854,6 @@ snapshots:
 
   tr46@0.0.3: {}
 
-  tr46@1.0.1:
-    dependencies:
-      punycode: 2.3.1
-
   tr46@3.0.0:
     dependencies:
       punycode: 2.3.1
@@ -45965,7 +45938,7 @@ snapshots:
       enhanced-resolve: 5.18.1
       micromatch: 4.0.8
       semver: 7.7.2
-      source-map: 0.7.4
+      source-map: 0.7.6
       typescript: 5.7.3
       webpack: 5.98.0(@swc/core@1.13.5)
 
@@ -46058,20 +46031,21 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.3.5(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0):
+  tsup@8.5.1(@swc/core@1.13.5)(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.0):
     dependencies:
-      bundle-require: 5.0.0(esbuild@0.27.0)
+      bundle-require: 5.1.0(esbuild@0.27.0)
       cac: 6.7.14
       chokidar: 4.0.3
-      consola: 3.2.3
+      consola: 3.4.2
       debug: 4.4.1(supports-color@5.5.0)
       esbuild: 0.27.0
+      fix-dts-default-cjs-exports: 1.0.1
       joycon: 3.1.1
       picocolors: 1.1.1
       postcss-load-config: 6.0.1(jiti@2.4.2)(postcss@8.5.6)(tsx@4.20.6)(yaml@2.8.0)
       resolve-from: 5.0.0
       rollup: 4.35.0
-      source-map: 0.8.0-beta.0
+      source-map: 0.7.6
       sucrase: 3.35.0
       tinyexec: 0.3.2
       tinyglobby: 0.2.15
@@ -46961,8 +46935,6 @@ snapshots:
 
   webidl-conversions@3.0.1: {}
 
-  webidl-conversions@4.0.2: {}
-
   webidl-conversions@7.0.0: {}
 
   webm-duration-fix@1.0.4:
@@ -47118,12 +47090,6 @@ snapshots:
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
-
-  whatwg-url@7.1.0:
-    dependencies:
-      lodash.sortby: 4.7.0
-      tr46: 1.0.1
-      webidl-conversions: 4.0.2
 
   which-boxed-primitive@1.1.1:
     dependencies:
