@@ -8,8 +8,8 @@ import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { type Auth0SessionData, getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
-import { getDocsGitUrl } from "../services/dal/git/getDocsGitUrl";
-import { validateGitRepoAccess } from "../services/dal/git/validators";
+import { getDocsGithubUrl } from "../services/dal/github/getDocsGithubUrl";
+import { validateGithubRepoAccess } from "../services/dal/github/validators";
 import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
 
 async function getMetadata(
@@ -29,9 +29,9 @@ async function getMetadata(
         sourceRepo: undefined,
         isLoading: true
     };
-    let gitUrl: string | undefined;
+    let githubUrl: string | undefined;
     try {
-        const urlResult = await getDocsGitUrl(encodedDocsUrl, session.accessToken);
+        const urlResult = await getDocsGithubUrl(encodedDocsUrl, session.accessToken);
 
         if (!urlResult.success) {
             if (urlResult.error.type === "DOMAIN_NOT_REGISTERED") {
@@ -51,23 +51,23 @@ async function getMetadata(
             return { success: false, githubAuthState };
         }
 
-        gitUrl = urlResult.gitUrl;
+        githubUrl = urlResult.githubUrl;
 
         try {
             // Parallelize validation and metadata fetching for better performance
             const [validation, sourceRepo] = await Promise.all([
-                validateGitRepoAccess(
+                validateGithubRepoAccess(
                     orgName,
                     docsUrl,
                     {
                         type: "url",
-                        gitUrl
+                        githubUrl
                     },
                     true // Skip cache for now, since this cache was causing issues with validating repos
                 ),
                 // Optimistically fetch metadata in parallel (will be used if validation succeeds)
                 getGithubSourceMetadata({
-                    gitUrl,
+                    githubUrl,
                     userId: session.user.sub
                 }).catch((error: unknown) => {
                     console.error("Failed to fetch source repo metadata:", error);
@@ -80,7 +80,7 @@ async function getMetadata(
                 sourceRepo: validation.ok ? sourceRepo : undefined,
                 isLoading: false
             };
-            return { success: true, githubAuthState, gitUrl };
+            return { success: true, githubAuthState, githubUrl };
         } catch (error) {
             console.error("Failed to validate GitHub access:", error);
             return { success: false, error: "Failed to validate GitHub access" };
@@ -94,7 +94,7 @@ async function getMetadata(
 export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<{
     success: boolean;
     orgName?: Auth0OrgName;
-    gitUrl?: string;
+    githubUrl?: string;
     baseBranch?: string;
     error?: string;
 }> {
@@ -105,7 +105,7 @@ export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<{
             url: decodedUrl,
             token: fernToken_admin() ?? session.accessToken
         });
-        const githubMetadata = await getDocsGitUrl(docsUrl, fernToken_admin() ?? session.accessToken);
+        const githubMetadata = await getDocsGithubUrl(docsUrl, fernToken_admin() ?? session.accessToken);
         if (!githubMetadata.success) {
             return { success: false, error: "Failed to fetch github metadata" };
         }
@@ -123,7 +123,7 @@ export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<{
         return {
             success: true,
             orgName: orgName,
-            gitUrl: metadata.gitUrl,
+            githubUrl: metadata.githubUrl,
             baseBranch: metadata.githubAuthState?.sourceRepo?.baseBranch ?? undefined
         };
     } catch (error) {

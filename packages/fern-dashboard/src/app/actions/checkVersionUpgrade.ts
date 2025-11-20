@@ -1,7 +1,7 @@
 "use server";
 
 import type { DocsUrl } from "@/utils/types";
-import { getFernVersionFromRepo } from "../services/dal/git/getFernVersionFromRepo";
+import { getFernVersionFromRepo } from "../services/dal/github/getFernVersionFromRepo";
 import { getOwnerAndRepoFromGithubUrl } from "../services/github/github";
 import { invalidateCommitRefCache } from "../services/github/github-loader";
 
@@ -16,13 +16,13 @@ import { invalidateCommitRefCache } from "../services/github/github-loader";
  * Use this to poll after creating an upgrade PR to detect when the PR has been merged.
  */
 export async function checkVersionUpgradeAction(
-    gitUrl: string,
+    githubUrl: string,
     docsUrl: DocsUrl,
     baseBranch: string,
     targetVersion: string
 ): Promise<{ upgraded: boolean; currentVersion?: string; error?: string }> {
     try {
-        const { owner, repo } = getOwnerAndRepoFromGithubUrl(gitUrl);
+        const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
 
         if (!owner || !repo) {
             return {
@@ -35,7 +35,7 @@ export async function checkVersionUpgradeAction(
         invalidateCommitRefCache(owner, repo, baseBranch);
 
         // Fetch the current version
-        const versionResult = await getFernVersionFromRepo(gitUrl, docsUrl);
+        const versionResult = await getFernVersionFromRepo(githubUrl, docsUrl);
 
         if (!versionResult.ok) {
             return {

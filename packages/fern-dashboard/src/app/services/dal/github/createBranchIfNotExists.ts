@@ -3,7 +3,7 @@
 import type { GitAccessError, GitOperationError } from "@fern-api/docs-loader";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getGitLoader } from "@/app/services/github/getGitLoader";
+import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
 import type { DocsUrl } from "@/utils/types";
 
 import { assertUserHasOrganizationAccess } from "../organization";
@@ -21,7 +21,6 @@ export default async function createBranchIfNotExists(request: {
     baseBranch: string;
     orgName: Auth0OrgName;
     site: DocsUrl;
-    gitUrl?: string; // Optional URL to detect provider
 }): Promise<
     | {
           success: true;
@@ -53,9 +52,7 @@ export default async function createBranchIfNotExists(request: {
     }
 
     // 3. Get GitLoader instance
-    const loader = request.gitUrl
-        ? getGitLoader(request.gitUrl)
-        : getGitLoader(`https://github.com/${request.owner}/${request.repo}`);
+    const loader = getGitLoaderByOwnerRepo(request.owner, request.repo);
 
     // 4. Validate repository access
     const accessResult = await loader.validateAccess?.({

@@ -8,7 +8,7 @@ import type { DocsUrl } from "@/utils/types";
 import { getCachedGitHubLoader } from "../../github/cachedGitHubLoader";
 
 export type CheckOrgWritePermissionToRepoError =
-    | { type: "MALFORMED_GIT_URL"; url: string }
+    | { type: "MALFORMED_GITHUB_URL"; url: string }
     | { type: "FERN_BOT_NOT_INSTALLED" }
     | { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
     | FernConfigJsonErrors;
@@ -21,19 +21,19 @@ export type CheckOrgWritePermissionToRepoResult =
  * Checks if the user has write permission to a given GitHub repository.
  *
  * @param userId - The ID of the user to check
- * @param gitUrl - The URL of the GitHub repository to check
+ * @param githubUrl - The URL of the GitHub repository to check
  * @returns true if the user has write permission, false otherwise
  */
 export async function checkOrgWritePermissionToRepo(
     orgName: string,
     site: DocsUrl,
-    gitUrl: string
+    githubUrl: string
 ): Promise<CheckOrgWritePermissionToRepoResult> {
-    const { owner, repo } = getOwnerAndRepoFromGithubUrl(gitUrl);
+    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
     if (owner == null || repo == null) {
         return {
             ok: false,
-            error: { type: "MALFORMED_GIT_URL", url: gitUrl }
+            error: { type: "MALFORMED_GITHUB_URL", url: githubUrl }
         };
     }
 
@@ -55,7 +55,7 @@ export async function checkOrgWritePermissionToRepo(
         );
     }
 
-    const githubLoader = await getCachedGitHubLoader(gitUrl);
+    const githubLoader = await getCachedGitHubLoader(githubUrl);
 
     // Use the helper function to fetch fern.config.json from the repo
     const fernConfigResult = await githubLoader.getFernConfigJson(owner, repo, site);

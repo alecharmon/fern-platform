@@ -20,7 +20,7 @@ interface CreateRedirectModalProps {
     sourcePath: string;
     orgName: Auth0OrgName;
     docsUrl: DocsUrl;
-    gitUrl: string;
+    githubUrl: string;
     baseBranch: string;
 }
 
@@ -30,7 +30,7 @@ export function CreateRedirectModal({
     sourcePath,
     orgName,
     docsUrl,
-    gitUrl,
+    githubUrl,
     baseBranch
 }: CreateRedirectModalProps) {
     const [destinationPath, setDestinationPath] = useState("");
@@ -89,7 +89,7 @@ export function CreateRedirectModal({
             const result = await createRedirectPrAction(
                 orgName,
                 docsUrl,
-                gitUrl,
+                githubUrl,
                 sourcePath,
                 destinationPath,
                 baseBranch
@@ -107,7 +107,7 @@ export function CreateRedirectModal({
         } finally {
             setIsLoading(false);
         }
-    }, [destinationPath, orgName, docsUrl, gitUrl, sourcePath, baseBranch]);
+    }, [destinationPath, orgName, docsUrl, githubUrl, sourcePath, baseBranch]);
 
     // Reset highlighted index when suggestions change
     // biome-ignore lint/correctness/useExhaustiveDependencies: reset highlighted index when suggestions change

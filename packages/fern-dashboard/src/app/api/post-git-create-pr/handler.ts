@@ -1,6 +1,6 @@
 import type { GitOperationError } from "@fern-api/docs-loader";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getGitLoader } from "@/app/services/github/getGitLoader";
+import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
 
 export type PostCreatePrErrors = GitOperationError | { type: "NOT_LOGGED_IN" };
 
@@ -12,7 +12,6 @@ export default async function postCreatePr(request: {
     title: string;
     body?: string;
     draft?: boolean;
-    gitUrl?: string;
 }): Promise<
     | {
           success: true;
@@ -31,19 +30,9 @@ export default async function postCreatePr(request: {
     }
 
     // 2. Get GitLoader instance
-    const gitUrl = request.gitUrl || `https://github.com/${request.owner}/${request.repo}`;
-    console.log("[postCreatePr] Using gitUrl:", gitUrl);
-    const loader = getGitLoader(gitUrl);
+    const loader = getGitLoaderByOwnerRepo(request.owner, request.repo);
 
     // 3. Perform git operation
-    console.log("[postCreatePr] Calling createPullRequest with:", {
-        owner: request.owner,
-        repo: request.repo,
-        head: request.head,
-        base: request.base,
-        draft: request.draft
-    });
-
     const result = await loader.createPullRequest?.({
         owner: request.owner,
         repo: request.repo,
@@ -53,8 +42,6 @@ export default async function postCreatePr(request: {
         body: request.body,
         draft: request.draft
     });
-
-    console.log("[postCreatePr] Result:", result);
 
     if (!result) {
         return {

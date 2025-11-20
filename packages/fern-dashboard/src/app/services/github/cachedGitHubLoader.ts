@@ -2,8 +2,8 @@ import { cache } from "react";
 import type { DocsUrl } from "@/utils/types";
 import { GitHubLoader } from "./github-loader";
 
-export const getCachedGitHubLoader = cache(async (gitUrl: string) => {
-    const loader = new GitHubLoader({ gitUrl });
+export const getCachedGitHubLoader = cache(async (githubUrl: string) => {
+    const loader = new GitHubLoader({ githubUrl });
 
     return {
         getDocsYml: cache(

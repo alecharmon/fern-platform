@@ -4,24 +4,23 @@ import { fernToken_admin } from "@fern-api/docs-server";
 import { cache } from "react";
 import { getDocsUrlMetadata } from "@/app/api/utils/getDocsUrlMetadata";
 import type { DocsUrl } from "@/utils/types";
-import { parseGitUrl } from "../../git-common/url-utils";
 
-interface GetDocsGitUrlSuccess {
+interface GetDocsGithubUrlSuccess {
     success: true;
-    gitUrl: string;
+    githubUrl: string;
 }
 
-interface GetDocsGitUrlError {
+interface GetDocsGithubUrlError {
     success: false;
     error:
-        | { type: "MALFORMED_GIT_URL"; url: string }
+        | { type: "MALFORMED_GITHUB_URL"; url: string }
         | { type: "DOMAIN_NOT_REGISTERED" }
         | { type: "REPO_NOT_CONNECTED" };
 }
 
-export type GetDocsGitUrlResult = GetDocsGitUrlSuccess | GetDocsGitUrlError;
+export type GetDocsGithubUrlResult = GetDocsGithubUrlSuccess | GetDocsGithubUrlError;
 
-export const getDocsGitUrl = cache(async (url: DocsUrl, token: string): Promise<GetDocsGitUrlResult> => {
+export const getDocsGithubUrl = cache(async (url: DocsUrl, token: string): Promise<GetDocsGithubUrlResult> => {
     const docsUrlMetadata = await getDocsUrlMetadata({
         url: decodeURIComponent(url),
         token: fernToken_admin() ?? token
@@ -37,7 +36,7 @@ export const getDocsGitUrl = cache(async (url: DocsUrl, token: string): Promise<
         console.error("Failed to load docs URL metadata", JSON.stringify(docsUrlMetadata.error));
         return {
             success: false,
-            error: { type: "MALFORMED_GIT_URL", url: decodeURIComponent(url) }
+            error: { type: "MALFORMED_GITHUB_URL", url: decodeURIComponent(url) }
         };
     }
 
@@ -46,16 +45,14 @@ export const getDocsGitUrl = cache(async (url: DocsUrl, token: string): Promise<
         return { success: false, error: { type: "REPO_NOT_CONNECTED" } };
     }
 
-    // Use the parseGitUrl utility to properly extract owner and repo
-    const parsed = parseGitUrl(docsUrlMetadata.body.gitUrl);
-
-    if (parsed.owner == null || parsed.repo == null || parsed.provider === "unknown") {
+    const [owner, repo] = docsUrlMetadata.body.gitUrl.split("/").slice(-2);
+    if (owner == null || repo == null) {
         // Don't cache this failure, so throw to skip cache
         return {
             success: false,
-            error: { type: "MALFORMED_GIT_URL", url: docsUrlMetadata.body.gitUrl }
+            error: { type: "MALFORMED_GITHUB_URL", url: docsUrlMetadata.body.gitUrl }
         };
     }
 
-    return { success: true, gitUrl: docsUrlMetadata.body.gitUrl };
+    return { success: true, githubUrl: docsUrlMetadata.body.gitUrl };
 });

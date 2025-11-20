@@ -2,16 +2,16 @@ import { getOwnerAndRepoFromGithubUrl } from "../../github/github";
 import type { RepoData, RepoIdentifier } from "./types";
 
 export async function deriveRepoIdentifier({
-    gitUrl,
+    githubUrl,
     owner,
     repo
 }: {
-    gitUrl?: string;
+    githubUrl?: string;
     owner?: string;
     repo?: string;
 }): Promise<{ success: true; identifier: RepoIdentifier } | { success: false }> {
-    if (gitUrl) {
-        return { success: true, identifier: { type: "url", gitUrl } };
+    if (githubUrl) {
+        return { success: true, identifier: { type: "url", githubUrl } };
     } else if (owner && repo) {
         return { success: true, identifier: { type: "owner-repo", owner, repo } };
     }
@@ -23,17 +23,17 @@ export async function deriveRepoIdentifier({
  */
 export function normalizeRepoData(identifier: RepoIdentifier): RepoData {
     if (identifier.type === "url") {
-        const { owner, repo } = getOwnerAndRepoFromGithubUrl(identifier.gitUrl);
+        const { owner, repo } = getOwnerAndRepoFromGithubUrl(identifier.githubUrl);
         return {
             owner: owner || "",
             repo: repo || "",
-            gitUrl: identifier.gitUrl
+            githubUrl: identifier.githubUrl
         };
     }
     return {
         owner: identifier.owner,
         repo: identifier.repo,
-        gitUrl: `https://github.com/${identifier.owner}/${identifier.repo}`
+        githubUrl: `https://github.com/${identifier.owner}/${identifier.repo}`
     };
 }
 

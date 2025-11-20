@@ -3,12 +3,11 @@
 import { unstable_cache } from "next/cache";
 
 import { getFernBotInstallationId, getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
-import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
 import type { GithubSourceRepo } from "@/app/services/github/types";
 
 const EMPTY_RESPONSE: GithubSourceRepo = {
-    gitUrl: undefined,
+    githubUrl: undefined,
     repoName: undefined,
     owner: undefined,
     repo: undefined,
@@ -17,28 +16,20 @@ const EMPTY_RESPONSE: GithubSourceRepo = {
 };
 
 export async function getGithubSourceMetadata({
-    gitUrl,
+    githubUrl,
     userId,
     skipCache = false
 }: {
-    gitUrl: string;
+    githubUrl: string;
     userId: string;
     skipCache?: boolean;
 }): Promise<GithubSourceRepo> {
     async function fetchGithubSourceMetadata() {
-        if (gitUrl == null) {
+        if (githubUrl == null) {
             throw new Error("NoGithubUrl");
         }
 
-        // Check if this is a GitHub URL - this function only works with GitHub
-        const parsed = parseGitUrl(gitUrl);
-        if (parsed.provider !== "github") {
-            // For non-GitHub URLs (GitLab, etc.), return empty response
-            // GitLab metadata will be handled by a separate function
-            return EMPTY_RESPONSE;
-        }
-
-        const { owner, repo } = getOwnerAndRepoFromGithubUrl(gitUrl);
+        const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
 
         if (owner == null || repo == null) {
             // Don't cache this failure, so throw to skip cache
@@ -62,7 +53,7 @@ export async function getGithubSourceMetadata({
             const fernBotHasInstallationId = installationResult.ok;
 
             return {
-                gitUrl,
+                githubUrl,
                 repoName: response.data.full_name,
                 owner: response.data.owner.name ?? owner,
                 repo: response.data.name ?? repo,
@@ -79,9 +70,9 @@ export async function getGithubSourceMetadata({
         // Only cache successful responses; do not cache failures
         const result = skipCache
             ? fetchGithubSourceMetadata()
-            : unstable_cache(fetchGithubSourceMetadata, [`github-source-${gitUrl}-${userId}`], {
+            : unstable_cache(fetchGithubSourceMetadata, [`github-source-${githubUrl}-${userId}`], {
                   revalidate: 300, // 5 minutes
-                  tags: [`github-source-${gitUrl}`]
+                  tags: [`github-source-${githubUrl}`]
               })();
         return await result;
     } catch (error) {

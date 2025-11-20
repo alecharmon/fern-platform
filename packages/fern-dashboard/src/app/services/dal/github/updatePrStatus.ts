@@ -3,7 +3,7 @@
 import type { GitAccessError, GitOperationError } from "@fern-api/docs-loader";
 import * as Sentry from "@sentry/nextjs";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getGitLoader } from "@/app/services/github/getGitLoader";
+import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
 import type { GithubPrStatus } from "@/app/services/github/types";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisDel } from "@/app/services/redis/redis";
@@ -17,7 +17,7 @@ export type UpdatePrStatusErrors =
     | { type: "ORG_ACCESS_DENIED"; message: string };
 
 /**
- * Updates the status of a PR/MR (open or draft).
+ * Updates the status of a PR (open or draft).
  */
 export default async function updatePrStatus(request: {
     owner: string;
@@ -27,7 +27,6 @@ export default async function updatePrStatus(request: {
     baseBranch?: string;
     orgName: Auth0OrgName;
     site: string;
-    gitUrl?: string;
 }): Promise<
     | {
           success: true;
@@ -60,9 +59,7 @@ export default async function updatePrStatus(request: {
     }
 
     // 3. Get GitLoader instance
-    const loader = request.gitUrl
-        ? getGitLoader(request.gitUrl)
-        : getGitLoader(`https://github.com/${request.owner}/${request.repo}`);
+    const loader = getGitLoaderByOwnerRepo(request.owner, request.repo);
 
     // 4. Validate repository access
     const accessResult = await loader.validateAccess?.({

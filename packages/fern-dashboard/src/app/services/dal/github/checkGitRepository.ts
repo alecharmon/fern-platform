@@ -15,7 +15,7 @@ export default async function checkGitRepository(request: { docsSiteUrl: string 
     | {
           success: true;
           exists: true;
-          gitUrl: string;
+          repoUrl: string;
           owner: string;
           repoName: string;
       }
@@ -84,7 +84,7 @@ export default async function checkGitRepository(request: { docsSiteUrl: string 
                         return {
                             success: true,
                             exists: true,
-                            gitUrl: matchingRepo.html_url,
+                            repoUrl: matchingRepo.html_url,
                             owner: matchingRepo.owner.login,
                             repoName: matchingRepo.name
                         };
@@ -132,7 +132,7 @@ export default async function checkGitRepository(request: { docsSiteUrl: string 
                 return {
                     success: true,
                     exists: true,
-                    gitUrl: matchingRepo.html_url,
+                    repoUrl: matchingRepo.html_url,
                     owner: matchingRepo.owner.login,
                     repoName: matchingRepo.name
                 };

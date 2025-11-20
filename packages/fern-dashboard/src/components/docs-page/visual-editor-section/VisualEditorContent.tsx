@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import type { GitRepoValidationError } from "@/app/services/dal/git/validators";
+import type { GithubRepoValidationError } from "@/app/services/dal/github/validators";
 import type { GithubSourceRepo } from "@/app/services/github/types";
 import type { DocsUrl } from "@/utils/types";
 import { BranchList } from "../BranchList";
@@ -18,7 +18,7 @@ export function VisualEditorContent({
     docsUrl,
     session,
     orgName,
-    gitUrl,
+    githubUrl,
     error,
     sourceRepo,
     criticalUpdateWarning
@@ -26,8 +26,8 @@ export function VisualEditorContent({
     docsUrl: DocsUrl;
     session: Auth0SessionData;
     orgName: Auth0OrgName;
-    gitUrl?: string;
-    error?: GitRepoValidationError;
+    githubUrl?: string;
+    error?: GithubRepoValidationError;
     sourceRepo?: GithubSourceRepo;
     criticalUpdateWarning?: ReactNode;
 }) {
@@ -37,7 +37,7 @@ export function VisualEditorContent({
             <ConnectGithubRepoButton docsUrl={docsUrl} variant="default" size="default" />
         ) : error?.type === "FERN_BOT_NOT_INSTALLED" ? (
             // If fern bot is not installed, show install fern bot button
-            <InstallGithubAppButton docsUrl={docsUrl} gitUrl={gitUrl} orgName={orgName} />
+            <InstallGithubAppButton docsUrl={docsUrl} githubUrl={githubUrl} orgName={orgName} />
         ) : (
             // Else, show editor button – should be disabled for all errors
             <GoToEditorButton docsUrl={docsUrl} session={session} disabled={!!error} />
@@ -51,7 +51,7 @@ export function VisualEditorContent({
                 error && error.type !== "REPO_NOT_CONNECTED" && error.type !== "FERN_BOT_NOT_INSTALLED" ? (
                     <VisualEditorValidationErrorHandler
                         error={error}
-                        gitUrl={gitUrl}
+                        githubUrl={githubUrl}
                         orgName={orgName}
                         docsUrl={docsUrl}
                     />

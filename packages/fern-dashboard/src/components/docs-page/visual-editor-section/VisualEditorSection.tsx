@@ -3,7 +3,7 @@ import "server-only";
 import { Suspense } from "react";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getDocsGitUrl } from "@/app/services/dal/git/getDocsGitUrl";
+import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
 import type { DocsUrl } from "@/utils/types";
 import { VisualEditorContent } from "./VisualEditorContent";
 import { VisualEditorContentAsync } from "./VisualEditorContentAsync";
@@ -23,19 +23,19 @@ export async function VisualEditorSection({
     orgName: Auth0OrgName;
 }) {
     // Only fetch the GitHub URL (fast, cached operation)
-    const gitUrlResult = await getDocsGitUrl(docsUrl, session.accessToken);
+    const githubUrlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
 
-    const gitUrl = gitUrlResult.success ? gitUrlResult.gitUrl : undefined;
+    const githubUrl = githubUrlResult.success ? githubUrlResult.githubUrl : undefined;
 
     // Handle early errors (missing GitHub URL)
-    if (!gitUrlResult.success) {
+    if (!githubUrlResult.success) {
         return (
             <VisualEditorContent
                 docsUrl={docsUrl}
                 session={session}
                 orgName={orgName}
-                gitUrl={gitUrl}
-                error={gitUrlResult.error}
+                githubUrl={githubUrl}
+                error={githubUrlResult.error}
             />
         );
     }
@@ -43,7 +43,7 @@ export async function VisualEditorSection({
     // Load the content with full validation via Suspense
     return (
         <Suspense fallback={<VisualEditorContentSkeleton />}>
-            <VisualEditorContentAsync docsUrl={docsUrl} session={session} orgName={orgName} gitUrl={gitUrl} />
+            <VisualEditorContentAsync docsUrl={docsUrl} session={session} orgName={orgName} githubUrl={githubUrl} />
         </Suspense>
     );
 }

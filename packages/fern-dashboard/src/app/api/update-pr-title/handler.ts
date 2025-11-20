@@ -1,11 +1,11 @@
 import type { GitOperationError } from "@fern-api/docs-loader";
-import { getGitLoader } from "@/app/services/github/getGitLoader";
+import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
+import type { GitHubLoader } from "@/app/services/github/github-loader";
 
 export type UpdatePrTitleErrors = GitOperationError | { type: "PR_NOT_FOUND"; message: string };
 
 /**
- * Updates the title of a PR/MR using the GitLoader abstraction.
- * Works with both GitHub and GitLab repositories.
+ * Updates the title of a PR.
  */
 export default async function updatePrTitle(request: {
     owner: string;
@@ -13,7 +13,6 @@ export default async function updatePrTitle(request: {
     branch: string;
     title: string;
     baseBranch?: string;
-    gitUrl?: string;
 }): Promise<
     | {
           success: true;
@@ -26,65 +25,62 @@ export default async function updatePrTitle(request: {
           error: UpdatePrTitleErrors;
       }
 > {
+    const { owner, repo } = request;
+
     // Get GitLoader instance
-    const gitUrl = request.gitUrl || `https://github.com/${request.owner}/${request.repo}`;
-    console.log("[updatePrTitle] Using gitUrl:", gitUrl);
-    const loader = getGitLoader(gitUrl);
+    const loader = getGitLoaderByOwnerRepo(owner, repo) as GitHubLoader;
+
+    // Need to find the PR first - this requires direct Octokit access
+    const octokit = await loader.getOctokit();
+    if (!octokit) {
+        return {
+            success: false,
+            error: { type: "OPERATION_FAILED", message: "Failed to get GitHub client" }
+        };
+    }
 
     try {
-        // First, find the PR/MR for the branch using the centralized method
-        console.log("[updatePrTitle] Getting PR for branch:", {
+        // First, find the PR for the branch
+        const getPrsResponse = await octokit.request("GET /repos/{owner}/{repo}/pulls", {
             owner: request.owner,
             repo: request.repo,
-            branch: request.branch
-        });
-        const getPrResult = await loader.getPullRequestForBranch?.({
-            owner: request.owner,
-            repo: request.repo,
-            branch: request.branch,
-            baseBranch: request.baseBranch
+            head: `${request.owner}:${request.branch}`,
+            state: "open",
+            base: request.baseBranch
         });
 
-        console.log("[updatePrTitle] getPullRequestForBranch result:", getPrResult);
-
-        if (!getPrResult) {
+        const pr = getPrsResponse?.data?.[0];
+        if (pr == null) {
             return {
                 success: false,
-                error: { type: "UNKNOWN_ERROR", message: "getPullRequestForBranch method not available on loader" }
+                error: { type: "PR_NOT_FOUND", message: "No PR found for this branch" }
             };
         }
 
-        if (getPrResult.type === "error") {
-            return {
-                success: false,
-                error: { type: "PR_NOT_FOUND", message: getPrResult.error }
-            };
-        }
-
-        // Update the PR/MR using GitLoader
-        const updateResult = await loader.updatePullRequest?.({
+        // Update the PR using GitLoader
+        const result = await loader.updatePullRequest?.({
             owner: request.owner,
             repo: request.repo,
-            prNumber: getPrResult.prNumber,
+            prNumber: pr.number,
             title: request.title
         });
 
-        if (!updateResult) {
+        if (!result) {
             return {
                 success: false,
                 error: { type: "UNKNOWN_ERROR", message: "updatePullRequest method not available on loader" }
             };
         }
 
-        if (updateResult.type === "ok") {
+        if (result.type === "ok") {
             return {
                 success: true,
                 title: request.title,
-                prNumber: getPrResult.prNumber,
-                prUrl: getPrResult.prUrl
+                prNumber: pr.number,
+                prUrl: pr.html_url
             };
         } else {
-            return { success: false, error: updateResult.error };
+            return { success: false, error: result.error };
         }
     } catch (error) {
         console.error("Failed to update PR title", error);

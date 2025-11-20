@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import transferGitRepository from "@/app/services/dal/git/transferGitRepository";
+import transferGitRepository from "@/app/services/dal/github/transferGitRepository";
 
 const requestSchema = z.object({
     orgName: z.string(),

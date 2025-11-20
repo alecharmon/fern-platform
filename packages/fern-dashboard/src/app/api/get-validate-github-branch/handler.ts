@@ -1,7 +1,4 @@
 import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
-import { parseGitUrl } from "@/app/services/git-common/url-utils";
-import { getGitLoader } from "@/app/services/github/getGitLoader";
-import type { GitLabLoader } from "@/app/services/gitlab/gitlab-loader";
 
 export type ValidateGithubBranchResponse = {
     exists: boolean;
@@ -11,17 +8,18 @@ export type ValidateGithubBranchResponse = {
 export default async function validateGithubBranchHandler({
     owner,
     repo,
-    branchName,
-    gitUrl
+    branchName
 }: {
     owner: string;
     repo: string;
     branchName: string;
-    gitUrl?: string;
 }): Promise<ValidateGithubBranchResponse> {
-    const url = gitUrl || `https://github.com/${owner}/${repo}`;
-    const parsed = parseGitUrl(url);
-    const loader = getGitLoader(url);
+    const octokitResult = await getFernBotOctokitForRepo(owner, repo);
+    if (!octokitResult.ok) {
+        throw new Error(`Failed to get Octokit instance: ${octokitResult.error.type}`);
+    }
+
+    const octokit = octokitResult.octokit;
 
     if (!owner || !repo) {
         return {
@@ -31,40 +29,23 @@ export default async function validateGithubBranchHandler({
     }
 
     try {
-        if (parsed.provider === "github") {
-            // Use Octokit for GitHub
-            const octokitResult = await getFernBotOctokitForRepo(owner, repo);
-            if (!octokitResult.ok) {
-                return { exists: false, error: "Failed to get GitHub client" };
-            }
+        // Use Octokit to check if the branch exists
+        await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}", {
+            owner,
+            repo,
+            branch: branchName
+        });
 
-            const octokit = octokitResult.octokit;
-            await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}", {
-                owner,
-                repo,
-                branch: branchName
-            });
-
-            return { exists: true };
-        } else if (parsed.provider === "gitlab") {
-            // Use GitLab API for GitLab
-            const gitlabLoader = loader as GitLabLoader;
-            const gitlab = await (gitlabLoader as any).getGitlab();
-            if (!gitlab) {
-                return { exists: false, error: "Failed to get GitLab client" };
-            }
-
-            const projectId = `${owner}/${repo}`;
-            await gitlab.Branches.show(projectId, branchName);
-
-            return { exists: true };
-        } else {
-            return { exists: false, error: "Unsupported repository provider" };
-        }
+        // If we get here, the branch exists
+        return {
+            exists: true
+        };
     } catch (error: any) {
-        // If the branch doesn't exist, both GitHub and GitLab return a 404
-        if (error.status === 404 || error?.cause?.response?.statusCode === 404) {
-            return { exists: false };
+        // If the branch doesn't exist, GitHub returns a 404
+        if (error.status === 404) {
+            return {
+                exists: false
+            };
         }
 
         // For other errors (like permission issues, network problems, etc.)

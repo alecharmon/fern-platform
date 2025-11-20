@@ -1,9 +1,8 @@
 "use client";
 
 import { Rocket } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
-import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import { Button } from "../ui/button";
 import { CopyableText } from "../ui/CopyableText";
@@ -20,12 +19,7 @@ export interface EditorNextStepsModalProps {
 export function EditorNextStepsModal({ open, onOpenChange }: EditorNextStepsModalProps) {
     const [showConfetti, setShowConfetti] = useState(true);
     const { gitPrUrl, isReadyForReview } = useGitPrInfo();
-    const { gitUrl } = useGitHubRepo();
     const { startConfetti } = useConfetti();
-
-    // Determine provider from gitUrl
-    const isGitLab = useMemo(() => gitUrl?.includes("gitlab.com"), [gitUrl]);
-    const providerName = isGitLab ? "GitLab" : "GitHub";
 
     // Trigger confetti when modal opens and showConfetti is set to true
     useEffect(() => {
@@ -50,7 +44,7 @@ export function EditorNextStepsModal({ open, onOpenChange }: EditorNextStepsModa
                             <MarkAsReadyButton />
                         </Step>
 
-                        <Step number={2} title={`Send your ${providerName} link to your team for review!`}>
+                        <Step number={2} title="Send your GitHub link to your team for review!">
                             {gitPrUrl ? (
                                 <CopyableText text={gitPrUrl} successMessage="URL copied to clipboard!" />
                             ) : (

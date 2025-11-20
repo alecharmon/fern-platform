@@ -10,7 +10,6 @@ interface GitHubRepoContextValue {
     repo: string | undefined;
     baseBranch: string | undefined;
     docsUrl: string;
-    gitUrl?: string;
 }
 
 const GitHubRepoContext = createContext<GitHubRepoContextValue | null>(null);
@@ -19,18 +18,16 @@ export function GitHubRepoProvider({
     children,
     branch,
     sourceRepo,
-    docsUrl,
-    gitUrl
+    docsUrl
 }: {
     children: React.ReactNode;
     branch: string;
     sourceRepo: GithubSourceRepo;
     docsUrl: string;
-    gitUrl?: string;
 }) {
     const { owner, repo, baseBranch } = sourceRepo;
     return (
-        <GitHubRepoContext.Provider value={{ branch, owner, repo, baseBranch, docsUrl, gitUrl }}>
+        <GitHubRepoContext.Provider value={{ branch, owner, repo, baseBranch, docsUrl }}>
             {children}
         </GitHubRepoContext.Provider>
     );

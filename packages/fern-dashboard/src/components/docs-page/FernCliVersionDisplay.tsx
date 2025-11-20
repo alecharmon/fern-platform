@@ -1,17 +1,17 @@
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import type { GetFernVersionUpdateInfoResult } from "@/app/services/dal/git/getFernVersionUpdateInfo";
+import type { GetFernVersionUpdateInfoResult } from "@/app/services/dal/github/getFernVersionUpdateInfo";
 import type { DocsUrl } from "@/utils/types";
 import { FernIcon } from "../theme/FernIcon";
 import { UpgradeFernButton } from "./UpgradeFernButton";
 
 export function FernCliVersionDisplay({
-    gitUrl,
+    githubUrl,
     docsUrl,
     baseBranch,
     orgName,
     fernVersionInfo
 }: {
-    gitUrl: string;
+    githubUrl: string;
     docsUrl: DocsUrl;
     baseBranch: string;
     orgName: Auth0OrgName;
@@ -24,7 +24,7 @@ export function FernCliVersionDisplay({
                 <UpgradeFernButton
                     orgName={orgName}
                     docsUrl={docsUrl}
-                    gitUrl={gitUrl}
+                    githubUrl={githubUrl}
                     currentVersion={fernVersionInfo.current}
                     latestVersion={fernVersionInfo.latest}
                     baseBranch={baseBranch}

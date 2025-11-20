@@ -1,4 +1,4 @@
-import type { GitRepoValidationError } from "@/app/services/dal/git/validators";
+import type { GithubRepoValidationError } from "@/app/services/dal/github/validators";
 
 // Extend the Error type to include the digest property
 interface DigestibleError extends Error {
@@ -6,32 +6,29 @@ interface DigestibleError extends Error {
 }
 
 // Extract GitHub validation error keys from the source type
-type GithubValidationErrorKeys = GitRepoValidationError["type"];
+type GithubValidationErrorKeys = GithubRepoValidationError["type"];
 
 export type ERROR_DIGEST_KEYS =
     | "BRANCH_NOT_FOUND"
     | "BASE_BRANCH_NOT_SET"
     | "USER_NOT_IN_ORG"
     | "WRITE_PERMISSION_ERROR"
-    | "GITLAB_TOKEN_NOT_CONFIGURED"
-    | "MALFORMED_GIT_URL"
     | GithubValidationErrorKeys;
 
 export const ERROR_DIGEST_MESSAGES: Record<ERROR_DIGEST_KEYS, string> = {
     BRANCH_NOT_FOUND:
-        "We were unable to find your working branch. Please confirm that the branch exists and has not been deleted.",
+        "We were unable to find your working branch. Please confirm that the GitHub branch exists and has not been deleted.",
     BASE_BRANCH_NOT_SET:
-        "Looks like your source repository is not configured correctly. Please set a base branch on your repository.",
-    REPO_NOT_CONNECTED: "Please connect your repository above.",
-    REPO_NOT_FOUND: "We were unable to locate the repository connected to this site. Please contact support.",
+        "Looks like your source repo is not configured correctly. Please set a base branch on your GitHub repo.",
+    REPO_NOT_CONNECTED: "Please connect your GitHub repo above.",
+    REPO_NOT_FOUND: "We were unable to locate the GitHub repo connected to this site. Please contact support.",
     USER_NOT_IN_ORG: "You do not have access to this organization. Please contact an organization admin to be added.",
     FERN_BOT_NOT_INSTALLED:
         "Fern bot is not installed on this repo. Please contact your GitHub admin to ensure the Fern bot has access.",
     WRITE_PERMISSION_ERROR:
-        "You do not have write permission to the underlying repository. Please contact your repository admin for access.",
-    GITLAB_TOKEN_NOT_CONFIGURED: "Please contact Fern Support to set up a GitLab repository.",
-    MALFORMED_GIT_URL:
-        "The provided repository URL is not valid. Please ensure you're using a valid GitHub or GitLab repository URL.",
+        "You do not have write permission to the underlying GitHub repo. Please contact your GitHub admin for access.",
+    MALFORMED_GITHUB_URL:
+        "The provided GitHub URL is not valid. Please ensure you're using a valid GitHub repository URL.",
     DOMAIN_NOT_REGISTERED: "This docs domain is not registered. Please contact support to register your domain.",
     FERN_CONFIG_JSON_ORG_MISMATCH:
         "The organization in fern.config.json does not match your current organization. Please update the configuration file.",
@@ -49,12 +46,12 @@ export const ERROR_DIGEST_MESSAGES: Record<ERROR_DIGEST_KEYS, string> = {
 /**
  * Gets a human-readable error message for a GitHub validation error
  */
-export function getValidationErrorMessage(error: GitRepoValidationError): string {
+export function getValidationErrorMessage(error: GithubRepoValidationError): string {
     switch (error.type) {
         case "REPO_NOT_CONNECTED":
             return ERROR_DIGEST_MESSAGES.REPO_NOT_CONNECTED;
-        case "MALFORMED_GIT_URL":
-            return `${ERROR_DIGEST_MESSAGES.MALFORMED_GIT_URL} URL: ${error.url}`;
+        case "MALFORMED_GITHUB_URL":
+            return `${ERROR_DIGEST_MESSAGES.MALFORMED_GITHUB_URL} URL: ${error.url}`;
         case "DOMAIN_NOT_REGISTERED":
             return ERROR_DIGEST_MESSAGES.DOMAIN_NOT_REGISTERED;
         case "FERN_BOT_NOT_INSTALLED":

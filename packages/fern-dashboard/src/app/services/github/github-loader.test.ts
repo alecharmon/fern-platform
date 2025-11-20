@@ -15,7 +15,6 @@ vi.mock("../auth0/fernBotOctokit", () => ({
 }));
 
 import type { DocsUrl } from "@/utils/types";
-import { parseUrlsFromDocsYml, stripAndSanitizeUrl } from "../git-common";
 import { GitHubLoader } from "./github-loader";
 
 describe("GitHubLoader - Custom Domain Support", () => {
@@ -39,7 +38,7 @@ describe("GitHubLoader - Custom Domain Support", () => {
     });
 
     describe("parseUrlsFromDocsYml", () => {
-        it("should extract both url and custom-domain from instances", () => {
+        it("should extract both url and custom-domain from instances", async () => {
             const docsYmlContent = `
 instances:
   - url: example-org.docs.buildwithfern.com
@@ -49,6 +48,8 @@ instances:
 title: Test Docs
 `;
 
+            // Access the private method using type assertion
+            const parseUrlsFromDocsYml = (loader as any).parseUrlsFromDocsYml.bind(loader);
             const urls = parseUrlsFromDocsYml(docsYmlContent);
 
             expect(urls).toHaveLength(3);
@@ -57,7 +58,7 @@ title: Test Docs
             expect(urls).toContain("another-site.docs.buildwithfern.com");
         });
 
-        it("should handle custom-domain with https:// protocol", () => {
+        it("should handle custom-domain with https:// protocol", async () => {
             const docsYmlContent = `
 instances:
   - url: https://fdr-ete-test.docs.buildwithfern.com
@@ -66,6 +67,7 @@ instances:
 title: FDR ETE Test
 `;
 
+            const parseUrlsFromDocsYml = (loader as any).parseUrlsFromDocsYml.bind(loader);
             const urls = parseUrlsFromDocsYml(docsYmlContent);
 
             expect(urls).toHaveLength(2);
@@ -73,7 +75,7 @@ title: FDR ETE Test
             expect(urls).toContain("https://fdr-ete-test.buildwithfern.com");
         });
 
-        it("should handle custom-domain as an array of domains", () => {
+        it("should handle custom-domain as an array of domains", async () => {
             const docsYmlContent = `
 instances:
   - url: example-org.docs.buildwithfern.com
@@ -86,6 +88,7 @@ instances:
 title: Example Docs
 `;
 
+            const parseUrlsFromDocsYml = (loader as any).parseUrlsFromDocsYml.bind(loader);
             const urls = parseUrlsFromDocsYml(docsYmlContent);
 
             expect(urls).toHaveLength(5);
@@ -96,7 +99,7 @@ title: Example Docs
             expect(urls).toContain("docs.staging.example.com");
         });
 
-        it("should handle instances without custom-domain", () => {
+        it("should handle instances without custom-domain", async () => {
             const docsYmlContent = `
 instances:
   - url: simple-site.docs.buildwithfern.com
@@ -104,27 +107,30 @@ instances:
 title: Simple Docs
 `;
 
+            const parseUrlsFromDocsYml = (loader as any).parseUrlsFromDocsYml.bind(loader);
             const urls = parseUrlsFromDocsYml(docsYmlContent);
 
             expect(urls).toHaveLength(1);
             expect(urls).toContain("simple-site.docs.buildwithfern.com");
         });
 
-        it("should handle malformed YAML gracefully", () => {
+        it("should handle malformed YAML gracefully", async () => {
             const docsYmlContent = `not valid yaml: [[[`;
 
+            const parseUrlsFromDocsYml = (loader as any).parseUrlsFromDocsYml.bind(loader);
             const urls = parseUrlsFromDocsYml(docsYmlContent);
 
             expect(urls).toHaveLength(0);
         });
 
-        it("should handle missing instances section", () => {
+        it("should handle missing instances section", async () => {
             const docsYmlContent = `
 title: Test Docs
 navigation:
   - page: Home
 `;
 
+            const parseUrlsFromDocsYml = (loader as any).parseUrlsFromDocsYml.bind(loader);
             const urls = parseUrlsFromDocsYml(docsYmlContent);
 
             expect(urls).toHaveLength(0);
@@ -133,6 +139,12 @@ navigation:
 
     describe("stripAndSanitizeUrl", () => {
         it("should strip https:// protocol and normalize", () => {
+            const stripAndSanitizeUrl = (str: string) => {
+                const withoutProtocol = str.replace(/^https?:\/\//i, "");
+                const lowercased = withoutProtocol.toLowerCase();
+                return lowercased.replace(/[^a-z0-9\s\-_.,!?@#$%^&*()+=[\]{};:'"<>/\\|`~%]/g, "");
+            };
+
             expect(stripAndSanitizeUrl("https://example.com")).toBe("example.com");
             expect(stripAndSanitizeUrl("http://example.com")).toBe("example.com");
             expect(stripAndSanitizeUrl("example.com")).toBe("example.com");

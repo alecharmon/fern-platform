@@ -8,9 +8,7 @@ import { Loader2 } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useState } from "react";
 import type { ValidateGithubRepoAccess } from "@/app/api/validate-github-repo-access/route";
-import type { ValidateGitlabRepoAccess } from "@/app/api/validate-gitlab-repo-access/route";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { parseGitUrl } from "@/app/services/git-common/url-parse.client";
 import { normalizeGithubUrl } from "@/app/services/github/github";
 import { ReactQueryKey } from "@/state/queryKeys";
 import type { DocsUrl } from "@/utils/types";
@@ -53,75 +51,32 @@ export function SetGithubSourcePopover({
         return () => clearTimeout(timer);
     }, [inputUrl]);
 
-    const parsedUrl = parseGitUrl(debouncedUrl);
-    const isGitHub = parsedUrl.provider === "github";
-    const isGitLab = parsedUrl.provider === "gitlab";
+    const normalized = normalizeGithubUrl(debouncedUrl);
+    const shouldCheckAccess = normalized.isValidShape && normalized.owner && normalized.repo;
 
-    const normalized = isGitHub ? normalizeGithubUrl(debouncedUrl) : null;
-    const shouldCheckGithubAccess = isGitHub && normalized?.isValidShape && normalized.owner && normalized.repo;
-    const shouldCheckGitlabAccess = isGitLab && parsedUrl.owner && parsedUrl.repo;
-
-    const { data: githubAccessResult, isLoading: isCheckingGithubAccess } =
-        useQuery<ValidateGithubRepoAccess.Response | null>({
-            queryKey: ["github-repo-access", docsUrl, normalized?.owner, normalized?.repo],
+    const { data: accessCheckResult, isLoading: isCheckingAccess } = useQuery<ValidateGithubRepoAccess.Response | null>(
+        {
+            queryKey: ["github-repo-access", docsUrl, normalized.owner, normalized.repo],
             queryFn: async () => {
-                if (!normalized?.owner || !normalized.repo) {
+                if (!normalized.owner || !normalized.repo) {
                     return null;
                 }
-                return await DashboardApiClient.validateGitRepoAccess({
+                return await DashboardApiClient.validateGithubRepoAccess({
                     url: docsUrl,
                     owner: normalized.owner,
                     repo: normalized.repo
                 });
             },
-            enabled: shouldCheckGithubAccess ? true : false,
+            enabled: shouldCheckAccess ? true : false,
             staleTime: 0,
             retry: false
-        });
-
-    const { data: gitlabAccessResult, isLoading: isCheckingGitlabAccess } =
-        useQuery<ValidateGitlabRepoAccess.Response | null>({
-            queryKey: ["gitlab-repo-access", docsUrl, parsedUrl.owner, parsedUrl.repo],
-            queryFn: async () => {
-                if (!parsedUrl.owner || !parsedUrl.repo) {
-                    return null;
-                }
-                return await DashboardApiClient.validateGitlabRepoAccess({
-                    url: docsUrl,
-                    owner: parsedUrl.owner,
-                    repo: parsedUrl.repo
-                });
-            },
-            enabled: shouldCheckGitlabAccess ? true : false,
-            staleTime: 0,
-            retry: false
-        });
-
-    const accessCheckResult = isGitHub ? githubAccessResult : isGitLab ? gitlabAccessResult : null;
-    const isCheckingAccess = isGitHub ? isCheckingGithubAccess : isGitLab ? isCheckingGitlabAccess : false;
+        }
+    );
 
     const handleConnectRepo = useCallback(
-        async (gitUrl: string) => {
-            const parsedUrl = parseGitUrl(gitUrl);
-            const isGitHub = parsedUrl.provider === "github";
-            const isGitLab = parsedUrl.provider === "gitlab";
-
-            let canonicalUrl: string | null = null;
-
-            if (isGitHub) {
-                const normalized = normalizeGithubUrl(gitUrl);
-                if (!normalized.isValidShape || !normalized.canonicalUrl) {
-                    ErrorInvalidGithubUrlToast();
-                    return;
-                }
-                canonicalUrl = normalized.canonicalUrl;
-            } else if (isGitLab) {
-                if (!parsedUrl.owner || !parsedUrl.repo) {
-                    ErrorInvalidGithubUrlToast();
-                    return;
-                }
-                canonicalUrl = `https://gitlab.com/${parsedUrl.owner}/${parsedUrl.repo}`;
-            } else {
+        async (repoUrl: string) => {
+            const normalized = normalizeGithubUrl(repoUrl);
+            if (!normalized.isValidShape || !normalized.canonicalUrl) {
                 ErrorInvalidGithubUrlToast();
                 return;
             }
@@ -131,7 +86,7 @@ export function SetGithubSourcePopover({
                 setIsPopoverOpen(false);
                 await DashboardApiClient.postDocsGithubSource({
                     url: docsUrl,
-                    gitUrl: canonicalUrl
+                    githubUrl: normalized.canonicalUrl
                 });
 
                 await queryClient.invalidateQueries({
@@ -157,29 +112,19 @@ export function SetGithubSourcePopover({
         [docsUrl, queryClient, setIsSaving, router, posthog, accessCheckResult]
     );
 
-    const currentParsedUrl = parseGitUrl(inputUrl);
-    const currentIsGitHub = currentParsedUrl.provider === "github";
-    const currentIsGitLab = currentParsedUrl.provider === "gitlab";
-
-    const currentNormalized = currentIsGitHub ? normalizeGithubUrl(inputUrl) : null;
-    const urlIsValid =
-        (currentIsGitHub && currentNormalized?.isValidShape) ||
-        (currentIsGitLab && currentParsedUrl.owner && currentParsedUrl.repo);
+    const currentNormalized = normalizeGithubUrl(inputUrl);
+    const urlIsValid = currentNormalized.isValidShape;
     const showValidation = inputUrl.trim() !== "";
 
     const hasAccessGranted = accessCheckResult?.ok === true;
     const hasAccessDenied = accessCheckResult?.ok === false;
-    const appNotInstalled = hasAccessDenied && "appInstalled" in accessCheckResult && !accessCheckResult.appInstalled;
+    const appNotInstalled = hasAccessDenied && !accessCheckResult?.appInstalled;
 
     const readyToSave =
         urlIsValid &&
         hasAccessGranted &&
-        ((currentIsGitHub &&
-            normalized?.owner === currentNormalized?.owner &&
-            normalized?.repo === currentNormalized?.repo) ||
-            (currentIsGitLab &&
-                parsedUrl.owner === currentParsedUrl.owner &&
-                parsedUrl.repo === currentParsedUrl.repo)) &&
+        normalized.owner === currentNormalized.owner &&
+        normalized.repo === currentNormalized.repo &&
         !isCheckingAccess;
 
     return (
@@ -210,7 +155,7 @@ export function SetGithubSourcePopover({
                             }`}
                         >
                             <Input
-                                placeholder="Paste GitHub or GitLab repo URL..."
+                                placeholder="Paste GitHub repo URL..."
                                 value={inputUrl}
                                 onChange={(e) => setInputUrl(e.target.value)}
                                 onKeyDown={(e) => {
@@ -233,14 +178,14 @@ export function SetGithubSourcePopover({
                                 <ExclamationCircleIcon className="mr-1.5 size-4 text-red-500 dark:text-red-600" />
                             )}
                         </div>
-                        {showValidation && urlIsValid && currentParsedUrl.owner && currentParsedUrl.repo && (
+                        {showValidation && urlIsValid && currentNormalized.owner && currentNormalized.repo && (
                             <div className="text-muted-foreground text-xs">
-                                Detected: {currentParsedUrl.owner}/{currentParsedUrl.repo}
+                                Detected: {currentNormalized.owner}/{currentNormalized.repo}
                             </div>
                         )}
                         {showValidation && !urlIsValid && (
                             <div className="text-xs text-red-500 dark:text-red-600">
-                                Please enter a valid GitHub or GitLab repository URL
+                                Please enter a valid GitHub repository URL
                             </div>
                         )}
                         {showValidation && urlIsValid && hasAccessDenied && accessCheckResult?.error && (
@@ -248,7 +193,7 @@ export function SetGithubSourcePopover({
                                 {accessCheckResult.error.message}
                             </div>
                         )}
-                        {showValidation && urlIsValid && currentIsGitHub && appNotInstalled && (
+                        {showValidation && urlIsValid && appNotInstalled && (
                             <a
                                 href="https://github.com/apps/fern-api/installations/new"
                                 target="_blank"

@@ -2,7 +2,7 @@
 
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import postGitCommit, { type PostGitCommitErrors } from "@/app/services/dal/git/postGitCommit";
+import postGitCommit, { type PostGitCommitErrors } from "@/app/services/dal/github/postGitCommit";
 import type { GithubCommitableFile } from "@/app/services/github/types";
 
 interface CommitToGitHubParams {
@@ -13,7 +13,6 @@ interface CommitToGitHubParams {
     orgName: Auth0OrgName;
     files: GithubCommitableFile[];
     site: string;
-    gitUrl?: string;
 }
 
 type CommitToGitHubResult =

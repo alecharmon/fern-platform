@@ -37,7 +37,7 @@ export type GithubRepo = {
 };
 
 export type GithubSourceRepo = {
-    gitUrl: string | undefined;
+    githubUrl: string | undefined;
     repoName: string | undefined;
     owner: string | undefined;
     repo: string | undefined;

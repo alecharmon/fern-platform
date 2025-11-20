@@ -17,12 +17,12 @@ export async function VisualEditorContentAsync({
     docsUrl,
     session,
     orgName,
-    gitUrl
+    githubUrl
 }: {
     docsUrl: DocsUrl;
     session: Auth0SessionData;
     orgName: Auth0OrgName;
-    gitUrl?: string;
+    githubUrl?: string;
 }) {
     // Fetch GitHub auth state (expensive operation)
     const githubAuthStateResult = await getGitHubAuthState(docsUrl, session.accessToken, orgName, session);
@@ -62,7 +62,7 @@ export async function VisualEditorContentAsync({
                 docsUrl={docsUrl}
                 session={session}
                 orgName={orgName}
-                gitUrl={gitUrl}
+                githubUrl={githubUrl}
                 error={githubAuthState.validationResult.error}
             />
         );
@@ -77,7 +77,7 @@ export async function VisualEditorContentAsync({
                 docsUrl={docsUrl}
                 session={session}
                 orgName={orgName}
-                gitUrl={gitUrl}
+                githubUrl={githubUrl}
                 error={{
                     type: "UNEXPECTED_ERROR",
                     message: "GitHub URL or base branch was not found."
@@ -89,7 +89,7 @@ export async function VisualEditorContentAsync({
     // Prepare the critical update warning as a separate suspense boundary
     const criticalUpdateWarning = (
         <Suspense fallback={null}>
-            <CriticalUpdateWarning orgName={orgName} docsUrl={docsUrl} gitUrl={gitUrl} baseBranch={baseBranch} />
+            <CriticalUpdateWarning orgName={orgName} docsUrl={docsUrl} githubUrl={githubUrl} baseBranch={baseBranch} />
         </Suspense>
     );
 
@@ -99,7 +99,7 @@ export async function VisualEditorContentAsync({
             docsUrl={docsUrl}
             session={session}
             orgName={orgName}
-            gitUrl={gitUrl}
+            githubUrl={githubUrl}
             sourceRepo={githubAuthState.sourceRepo}
             criticalUpdateWarning={criticalUpdateWarning}
         />

@@ -12,20 +12,20 @@ export type RepoIdentifier =
       }
     | {
           type: "url";
-          gitUrl: string;
+          githubUrl: string;
       };
 
 export interface AuthenticatedAccessOptions {
     userId: Auth0UserID;
 }
 
-export interface GitAccessValidationOptions {
+export interface GithubAccessValidationOptions {
     owner?: string;
     repo?: string;
-    gitUrl?: string;
+    githubUrl?: string;
 }
 
-export const GitIdentificationScheme = z.union([
+export const GithubIdentificationScheme = z.union([
     z.object({
         site: z.string(),
         owner: z.string(),
@@ -33,27 +33,27 @@ export const GitIdentificationScheme = z.union([
     }),
     z.object({
         site: z.string(),
-        gitUrl: z.string()
+        githubUrl: z.string()
     })
 ]);
 
-export type GitIdentificationSchemeType = z.infer<typeof GitIdentificationScheme>;
+export type GithubIdentificationSchemeType = z.infer<typeof GithubIdentificationScheme>;
 
 // Wrapper-specific types
 export interface RepoData {
     owner: string;
     repo: string;
-    gitUrl: string;
+    githubUrl: string;
 }
 
-export interface GitAuthContext {
+export interface GithubAuthContext {
     userId: Auth0UserID;
     repoData: RepoData;
 }
 
 export type AuthenticatedHandler<TAdditionalContext, TValidatedBody = undefined> = (
     req: NextRequest,
-    context: GitAuthContext & TAdditionalContext,
+    context: GithubAuthContext & TAdditionalContext,
     ...args: TValidatedBody extends undefined ? [] : [TValidatedBody]
 ) => Promise<NextResponse>;
 
@@ -64,5 +64,5 @@ export type ValidationResult<T = undefined> =
 export interface ExtractedRepoData {
     owner: string;
     repo: string;
-    gitUrl?: string;
+    githubUrl?: string;
 }

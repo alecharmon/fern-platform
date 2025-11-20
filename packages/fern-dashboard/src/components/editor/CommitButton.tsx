@@ -33,7 +33,7 @@ export interface CommitButtonProps {
 export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {}) {
     const orgName = useOrgName();
     const { branch } = useBranch();
-    const { owner, repo, baseBranch, gitUrl } = useGitHubRepo();
+    const { owner, repo, baseBranch } = useGitHubRepo();
     const { gitPrUrl, setPrUrl, prTitle, refetchPrData, site } = useGitPrInfo();
     const isEditingDisabled = useEditingDisabled();
 
@@ -76,8 +76,7 @@ export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {})
                 site,
                 branch,
                 message: DEFAULT_COMMIT_MESSAGE,
-                files: files.forCommit,
-                gitUrl
+                files: files.forCommit
             });
 
             // If commit fails because branch doesn't exist, try creating it first
@@ -94,8 +93,7 @@ export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {})
                     owner,
                     repo,
                     branch,
-                    baseBranch,
-                    gitUrl
+                    baseBranch
                 });
 
                 if (branchResult.success) {
@@ -107,8 +105,7 @@ export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {})
                         site,
                         branch,
                         message: DEFAULT_COMMIT_MESSAGE,
-                        files: files.forCommit,
-                        gitUrl
+                        files: files.forCommit
                     });
                 } else {
                     console.error("[CommitButton] Failed to create branch:", branchResult.error);
@@ -145,8 +142,7 @@ export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {})
                     repo,
                     baseBranch,
                     title: prTitle == null ? undefined : prTitle,
-                    onAiGenerationComplete: refetchPrData,
-                    gitUrl
+                    onAiGenerationComplete: refetchPrData
                 });
                 if (newPrUrl) {
                     setPrUrl(newPrUrl);
@@ -175,8 +171,7 @@ export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {})
         handleCommitSuccess,
         commitMutation,
         createBranchMutation,
-        onShowCelebrationModal,
-        gitUrl
+        onShowCelebrationModal
     ]);
 
     const commitDisabledReason = useMemo(() => {

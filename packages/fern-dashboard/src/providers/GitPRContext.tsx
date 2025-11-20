@@ -3,7 +3,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import { getPrForBranch } from "@/app/services/dal/git/getPrForBranch";
+import { getPrForBranch } from "@/app/services/dal/github/getPrForBranch";
 import type { GithubPrStatus } from "@/app/services/github/types";
 
 export const GitPRContext = createContext<{
@@ -50,8 +50,7 @@ export function GitPRProvider({
     repo,
     site,
     branch,
-    baseBranch,
-    gitUrl
+    baseBranch
 }: {
     children: ReactNode;
     owner?: string;
@@ -59,7 +58,6 @@ export function GitPRProvider({
     branch: string;
     site: string;
     baseBranch?: string;
-    gitUrl?: string;
 }) {
     const [gitPrUrl, setGitPrUrl] = useState<string | undefined>(undefined);
     const [prTitle, setPrTitle] = useState<string>("");
@@ -79,7 +77,7 @@ export function GitPRProvider({
         setIsLoading(true);
 
         try {
-            const data = await getPrForBranch(orgName, owner, repo, branch, baseBranch, gitUrl);
+            const data = await getPrForBranch(orgName, owner, repo, branch, baseBranch);
 
             if (data.success) {
                 const { status, draft, merged, title, prUrl, prNumber: newPrNumber } = data;
@@ -123,7 +121,7 @@ export function GitPRProvider({
         } finally {
             setIsLoading(false);
         }
-    }, [owner, repo, branch, baseBranch, orgName, gitUrl]);
+    }, [owner, repo, branch, baseBranch, orgName]);
 
     // Fetch PR information when component mounts or dependencies change
     useEffect(() => {

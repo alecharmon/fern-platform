@@ -5,12 +5,10 @@ import type React from "react";
 import { ClientMDXProvider } from "@/app/[orgName]/context/ClientMDXProvider";
 import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
 import { getGithubSourceMetadata } from "@/app/actions/getGithubSourceMetadata";
-import { getGitlabSourceMetadata } from "@/app/actions/getGitlabSourceMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { assertAuthAndFetchGitUrl } from "@/app/services/dal/git/assertAuthAndFetchGitUrl";
+import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
-import { parseGitUrl } from "@/app/services/git-common/url-utils";
-import { getGitLoader } from "@/app/services/github/getGitLoader";
+import { getCachedGitHubLoader } from "@/app/services/github/cachedGitHubLoader";
 import { BranchInitializer } from "@/components/editor/BranchInitializer";
 import { ClientNavigationProvider } from "@/components/editor/ClientNavigationProvider";
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
@@ -45,35 +43,27 @@ export default async function EditorLayout({
 
     await getAuthenticatedSessionOrRedirect(orgName);
 
-    const { gitUrl, session } = await assertAuthAndFetchGitUrl(orgName, docsUrl);
+    const { githubUrl, session } = await assertAuthAndFetchGithubUrl(orgName, docsUrl);
 
-    // Determine provider and fetch appropriate metadata
-    const parsed = parseGitUrl(gitUrl);
-    const isGitLab = parsed.provider === "gitlab";
-
-    const sourceRepo = isGitLab
-        ? await getGitlabSourceMetadata({
-              gitlabUrl: gitUrl,
-              userId: session.user.sub
-          })
-        : await getGithubSourceMetadata({
-              gitUrl,
-              userId: session.user.sub
-          });
+    const sourceRepo = await getGithubSourceMetadata({
+        githubUrl,
+        userId: session.user.sub
+    });
 
     if (sourceRepo.owner == null || sourceRepo.repo == null || sourceRepo.baseBranch == null) {
         throw throwDigestibleError(new Error("Source repo is not set"), "REPO_NOT_CONNECTED");
     }
 
-    // Use the factory function to get the appropriate loader (GitHub or GitLab)
-    const gitLoader = getGitLoader(gitUrl);
+    // TODO: lazy load this so we don't block the initial server render?
+    const githubLoader = await getCachedGitHubLoader(githubUrl);
 
-    // Load docs.yml from the base branch (since the editing branch might not exist yet)
-    const docsYmlAndReferences = await gitLoader.getDocsYmlAndReferences(
+    // Use the repo's default branch by passing preferDefaultBranch=true
+    const docsYmlAndReferences = await githubLoader.getDocsYmlAndReferences(
         sourceRepo.owner,
         sourceRepo.repo,
         docsUrl,
-        sourceRepo.baseBranch // Use base branch to load initial content
+        branch, // fallback branch if default branch logic fails
+        true // preferDefaultBranch = true
     );
     const latestDocsYmlAndReferences = docsYmlAndReferences.type === "ok" ? docsYmlAndReferences.result : null;
     const fernFolderPath =
@@ -88,7 +78,7 @@ export default async function EditorLayout({
             <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false} disableTransitionOnChange>
                 <OrgNameProvider orgName={orgName}>
                     <BranchProvider branch={branch}>
-                        <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo} docsUrl={docsUrl} gitUrl={gitUrl}>
+                        <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo} docsUrl={docsUrl}>
                             <BranchInitializer
                                 orgName={orgName}
                                 site={docsUrl}
@@ -96,7 +86,6 @@ export default async function EditorLayout({
                                 repo={sourceRepo.repo}
                                 branch={branch}
                                 baseBranch={sourceRepo.baseBranch}
-                                gitUrl={gitUrl}
                             />
                             <ClientNavigationProvider
                                 branchName={branch}
@@ -115,7 +104,6 @@ export default async function EditorLayout({
                                                     baseBranch={sourceRepo.baseBranch}
                                                     branch={branch}
                                                     site={docsUrl}
-                                                    gitUrl={gitUrl}
                                                 >
                                                     <HeaderToolbar session={session} docsUrl={docsUrl} />
                                                     <PreviewOnlyNotification />

@@ -1,34 +1,33 @@
 import "server-only";
 
 import type { GitLoader } from "@fern-api/docs-loader";
-import { type GitLabAuthMode, GitLabLoader } from "../gitlab";
 import { type GitHubAuthMode, GitHubLoader } from "./github-loader";
 
 /**
  * Factory function to get the appropriate GitLoader based on the repository URL.
- * Supports GitHub and GitLab providers.
+ * Currently supports GitHub, with future support for GitLab and other providers.
  *
- * @param gitUrl - The repository URL (e.g., "https://github.com/owner/repo" or "https://gitlab.com/owner/repo")
+ * @param repoUrl - The repository URL (e.g., "https://github.com/owner/repo")
  * @param demo - Whether to use demo/onboarding bot credentials instead of regular bot
  * @returns The appropriate GitLoader implementation
  */
-export function getGitLoader(gitUrl: string, demo?: boolean): GitLoader {
-    const url = gitUrl.toLowerCase();
+export function getGitLoader(repoUrl: string, demo?: boolean): GitLoader {
+    const url = repoUrl.toLowerCase();
 
     // Determine which provider based on URL
-    if (url.includes("gitlab")) {
-        const authMode: GitLabAuthMode = demo ? "demo" : "production";
-        return new GitLabLoader({ gitlabUrl: gitUrl }, authMode);
-    }
-
     if (url.includes("github.com")) {
         const authMode: GitHubAuthMode = demo ? "demo-creation-bot" : "fern-bot";
-        return new GitHubLoader({ gitUrl: gitUrl }, authMode);
+        return new GitHubLoader({ githubUrl: repoUrl }, authMode);
     }
 
-    // Default to GitHub (most common case)
+    // Future: GitLab support
+    // if (url.includes("gitlab.com")) {
+    //     return new GitLabLoader({ gitlabUrl: repoUrl }, demo ? "demo" : "production");
+    // }
+
+    // Default to GitHub for now (most common case)
     const authMode: GitHubAuthMode = demo ? "demo-creation-bot" : "fern-bot";
-    return new GitHubLoader({ gitUrl: gitUrl }, authMode);
+    return new GitHubLoader({ githubUrl: repoUrl }, authMode);
 }
 
 /**
