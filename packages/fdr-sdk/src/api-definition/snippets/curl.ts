@@ -55,13 +55,16 @@ function getBasicAuthString(
     return [`-u "${basicAuth.username}:${basicAuth.password}"`];
 }
 
-export function getUrlQueriesGetString(searchParams: Record<string, unknown>): string[] {
+export function getUrlQueriesGetString(searchParams: Record<string, unknown>, forceManualEncoding = false): string[] {
     return toUrlEncoded(searchParams).map(([key, value]) => {
-        const flag = requiresUrlEncode(value) ? "--data-urlencode" : "-d";
-        if (key.includes(" ") || value.includes(" ") || key.includes("[")) {
-            return `${flag} "${key}=${value}"`;
+        // If we're dealing with form-urlencoded content-type, always use -d with pre-encoded values
+        const encodedValue = forceManualEncoding ? encodeURIComponent(value) : value;
+        const flag = forceManualEncoding || !requiresUrlEncode(value) ? "-d" : "--data-urlencode";
+
+        if (forceManualEncoding || key.includes(" ") || value.includes(" ") || key.includes("[")) {
+            return `${flag} "${key}=${encodedValue}"`;
         }
-        return `${flag} ${key}=${value}`;
+        return `${flag} ${key}=${encodedValue}`;
     });
 }
 
@@ -200,11 +203,15 @@ function unsafeStringifyHttpRequestExampleToCurl({
             .includes("form-urlencoded");
 
     // GET requests don't have a body, so `--data-urlencode` is used to pass query parameters
-    const urlQueriesGetStrings = getUrlQueriesGetString({
-        ...(method === "GET" ? searchParams : {}),
-        // HACK: combine search params and body.value if body.type is json, because we expect the body.json to include url-encoded params
-        ...(isFormUrlEncoded && body?.type === "json" && isPlainObject(body.value) ? body.value : {})
-    });
+
+    const urlQueriesGetStrings = getUrlQueriesGetString(
+        {
+            ...(method === "GET" ? searchParams : {}),
+            // HACK: combine search params and body.value if body.type is json, because we expect the body.json to include url-encoded params
+            ...(isFormUrlEncoded && body?.type === "json" && isPlainObject(body.value) ? body.value : {})
+        },
+        isFormUrlEncoded
+    );
 
     const bodyDataStrings = isFormUrlEncoded ? [] : getBodyDataString(method, body, protocol);
 

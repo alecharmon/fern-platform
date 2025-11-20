@@ -207,13 +207,13 @@ describe("curl", () => {
                 }
             })
         ).toMatchInlineSnapshot(`
-      "curl -X POST https://api.example.com/form \\
-           -H "Content-Type: application/x-www-form-urlencoded" \\
-           --data-urlencode "name=John Doe" \\
-           --data-urlencode email=john@example.com \\
-           -d items=item1 \\
-           -d items=item2"
-    `);
+          "curl -X POST https://api.example.com/form \\
+               -H "Content-Type: application/x-www-form-urlencoded" \\
+               -d "name=John%20Doe" \\
+               -d "email=john%40example.com" \\
+               -d "items=item1" \\
+               -d "items=item2""
+        `);
     });
 
     it("generates GET request with urlencoded parameters", () => {
