@@ -7,8 +7,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 import oculus.evaluators.citation  # noqa: F401
-import oculus.evaluators.coherence  # noqa: F401
-import oculus.evaluators.conciseness  # noqa: F401
 import oculus.evaluators.correctness  # noqa: F401
 import oculus.evaluators.length  # noqa: F401
 import oculus.evaluators.style  # noqa: F401

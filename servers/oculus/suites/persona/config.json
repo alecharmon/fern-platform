@@ -5,8 +5,7 @@
   ],
   "evaluators": [
     "correctness",
-    "coherence",
-    "conciseness",
-    "citation"
+    "citation",
+    "style"
   ]
 }
