@@ -9,14 +9,37 @@
 
     display: inline-block;
     cursor: help;
-    text-decoration: underline dashed var(--tooltip-underline-color)
-      var(--tooltip-underline-thickness);
-    text-underline-position: under;
+
+    /* stylelint-disable declaration-block-no-redundant-longhand-properties */
+
+    /* Use longhand properties for better Safari compatibility */
+    text-decoration-line: underline;
+    text-decoration-style: dashed;
+    text-decoration-color: var(--tooltip-underline-color);
+    text-decoration-thickness: var(--tooltip-underline-thickness);
     text-underline-offset: var(--tooltip-underline-offset);
+    text-decoration-skip-ink: none;
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-text-decoration-skip: none;
+    /* stylelint-enable declaration-block-no-redundant-longhand-properties */
     transition: text-decoration-color var(--tooltip-transition-duration) ease;
 
     &:hover {
       text-decoration-color: var(--tooltip-underline-hover-color);
+    }
+  }
+
+  /* Safari-specific fallback for dashed underline */
+  @supports (-webkit-touch-callout: none) {
+    .fern-mdx-tooltip-trigger {
+      text-decoration: none;
+      border-bottom: var(--tooltip-underline-thickness) dashed var(--tooltip-underline-color);
+      padding-bottom: var(--tooltip-underline-offset);
+      transition: border-color var(--tooltip-transition-duration) ease;
+
+      &:hover {
+        border-color: var(--tooltip-underline-hover-color);
+      }
     }
   }
 
@@ -26,5 +49,12 @@
 
     padding-left: var(--tooltip-padding-x) !important;
     padding-right: var(--tooltip-padding-x) !important;
+  }
+
+  /* Ensure tooltip popper wrapper appears above other content */
+
+  /* This fixes z-index/stacking context issues on mobile */
+  [data-radix-popper-content-wrapper]:has(.fern-mdx-tooltip-content) {
+    z-index: 1000;
   }
 }
