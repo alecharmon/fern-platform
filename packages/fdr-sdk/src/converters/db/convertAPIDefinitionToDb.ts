@@ -282,6 +282,7 @@ function transformErrorsV2(writeShape: APIV1Write.EndpointDefinition): APIV1Read
         return writeShape.errors.map((error): APIV1Read.ErrorDeclarationV2 => {
             return {
                 name: undefined,
+                isWildcard: undefined,
                 examples: undefined,
                 ...error,
                 type:

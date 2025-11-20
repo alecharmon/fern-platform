@@ -1,1 +1,1 @@
-export { type CreateSnippetRequest } from "./CreateSnippetRequest.js";
+export type { CreateSnippetRequest } from "./CreateSnippetRequest.js";

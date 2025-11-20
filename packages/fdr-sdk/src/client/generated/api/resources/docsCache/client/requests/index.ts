@@ -1,1 +1,1 @@
-export { type InvalidateCachedDocsRequest } from "./InvalidateCachedDocsRequest.js";
+export type { InvalidateCachedDocsRequest } from "./InvalidateCachedDocsRequest.js";

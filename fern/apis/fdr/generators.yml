@@ -4,7 +4,7 @@ groups:
   local:
     generators:
       - name: fernapi/fern-typescript-express
-        version: 0.17.6
+        version: 0.18.8
         output:
           location: local-file-system
           path: ../../../servers/fdr/src/api/generated
@@ -14,7 +14,7 @@ groups:
           noOptionalProperties: true
           useBrandedStringAliases: true
       - name: fernapi/fern-typescript-node-sdk
-        version: 0.51.0
+        version: 3.33.0
         output:
           location: local-file-system
           path: ../../../packages/fdr-sdk/src/client/generated

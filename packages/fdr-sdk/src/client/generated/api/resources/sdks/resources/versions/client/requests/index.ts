@@ -1,1 +1,1 @@
-export { type ComputeSemanticVersionRequest } from "./ComputeSemanticVersionRequest.js";
+export type { ComputeSemanticVersionRequest } from "./ComputeSemanticVersionRequest.js";

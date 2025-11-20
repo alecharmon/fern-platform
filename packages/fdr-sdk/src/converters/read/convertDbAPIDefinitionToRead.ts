@@ -140,6 +140,7 @@ function transformErrorsV2(dbShape: APIV1Db.DbEndpointDefinition): APIV1Read.Err
     if (dbShape.errors != null) {
         return dbShape.errors.map((error): APIV1Read.ErrorDeclarationV2 => {
             return {
+                isWildcard: undefined,
                 name: undefined,
                 examples: undefined,
                 ...error,

@@ -1,0 +1,9 @@
+export { AddAlgoliaPreviewWhitelistRequest } from "./AddAlgoliaPreviewWhitelistRequest";
+export { DeleteDocsSiteRequest } from "./DeleteDocsSiteRequest";
+export { RegisterDocsRequest } from "./RegisterDocsRequest";
+export { RemoveAlgoliaPreviewWhitelistRequest } from "./RemoveAlgoliaPreviewWhitelistRequest";
+export { SetDocsUrlMetadataRequest } from "./SetDocsUrlMetadataRequest";
+export { SetIsArchivedRequest } from "./SetIsArchivedRequest";
+export { StartDocsPreviewRegisterRequestV2 } from "./StartDocsPreviewRegisterRequestV2";
+export { StartDocsRegisterRequestV2 } from "./StartDocsRegisterRequestV2";
+export { TransferDomainOwnershipRequest } from "./TransferDomainOwnershipRequest";

@@ -1,2 +1,2 @@
-export { type GetLatestGeneratorReleaseRequest } from "./GetLatestGeneratorReleaseRequest.js";
-export { type ListGeneratorReleasesRequest } from "./ListGeneratorReleasesRequest.js";
+export type { GetLatestGeneratorReleaseRequest } from "./GetLatestGeneratorReleaseRequest.js";
+export type { ListGeneratorReleasesRequest } from "./ListGeneratorReleasesRequest.js";

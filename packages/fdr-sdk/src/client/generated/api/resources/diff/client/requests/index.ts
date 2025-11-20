@@ -1,1 +1,1 @@
-export { type ApiDiffRequest } from "./ApiDiffRequest.js";
+export type { ApiDiffRequest } from "./ApiDiffRequest.js";

@@ -80362,6 +80362,7 @@ exports[`transformApiDefinitionToDb > {"name":"string"} 1`] = `
           "errorsV2": [
             {
               "examples": undefined,
+              "isWildcard": undefined,
               "name": undefined,
               "statusCode": 401,
               "type": undefined,

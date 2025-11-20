@@ -507,6 +507,7 @@ export class ApiDefinitionV1ToLatest {
         return errors.map((value) => {
             const shape = value.type != null ? this.migrateTypeShape(value.type) : undefined;
             return {
+                isWildcard: undefined,
                 description: value.description,
                 availability: value.availability,
                 name: (value.name != null ? titleCase(value.name) : undefined) ?? getMessageForStatus(value.statusCode),
@@ -534,6 +535,7 @@ export class ApiDefinitionV1ToLatest {
         return {
             description: response.description,
             statusCode: response.statusCode ?? 200,
+            isWildcard: undefined,
             body: visitDiscriminatedUnion(response.type)._visit<V2.HttpResponseBodyShape>({
                 object: (value) => ({
                     type: "object",
