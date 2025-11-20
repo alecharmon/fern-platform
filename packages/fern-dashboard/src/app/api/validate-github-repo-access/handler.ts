@@ -1,6 +1,6 @@
 import "server-only";
 
-import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
+import { validateGitRepoAccess } from "@/app/services/dal/git/validators";
 import { getValidationErrorMessage } from "@/utils/errors";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { getDocsUrlMetadata } from "../utils/getDocsUrlMetadata";
@@ -51,12 +51,12 @@ export default async function handler({
     }
 
     const orgName = docsUrlMetadata.body.org;
-    const githubUrl = `https://github.com/${owner}/${repo}`;
+    const gitUrl = `https://github.com/${owner}/${repo}`;
 
-    const result = await validateGithubRepoAccess(
+    const result = await validateGitRepoAccess(
         orgName,
         parseDocsUrlParam({ docsUrl: url }),
-        { type: "url", githubUrl },
+        { type: "url", gitUrl },
         true // skip cache for immediate feedback
     );
 

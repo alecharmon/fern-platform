@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
 import { orgNameValidator } from "@/app/api/utils/validators";
-import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
+import { GitIdentificationScheme } from "@/app/services/dal/git/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { getGitLoader } from "@/app/services/github/getGitLoader";
@@ -19,7 +19,7 @@ export declare namespace validateGithubBranch {
     export type Response = ResolvedReturnType<typeof handler>;
 }
 
-const ValidateGithubBranchRequest = GithubIdentificationScheme.and(
+const ValidateGithubBranchRequest = GitIdentificationScheme.and(
     z.object({
         orgName: orgNameValidator,
         branchName: z.string()
@@ -47,12 +47,12 @@ export const POST = withZodValidation(
         // 3. Parse repo data
         let owner: string;
         let repo: string;
-        let githubUrl: string;
+        let gitUrl: string;
         const site = parseDocsUrlParam({ docsUrl: repoData.site });
 
-        if ("githubUrl" in repoData) {
-            githubUrl = repoData.githubUrl;
-            const parsed = getOwnerAndRepoFromGithubUrl(githubUrl);
+        if ("gitUrl" in repoData) {
+            gitUrl = repoData.gitUrl;
+            const parsed = getOwnerAndRepoFromGithubUrl(gitUrl);
             if (!parsed.owner || !parsed.repo) {
                 return NextResponse.json({ error: "Invalid repository URL format" }, { status: 400 });
             }
@@ -61,11 +61,11 @@ export const POST = withZodValidation(
         } else {
             owner = repoData.owner;
             repo = repoData.repo;
-            githubUrl = `https://github.com/${owner}/${repo}`;
+            gitUrl = `https://github.com/${owner}/${repo}`;
         }
 
         // 4. Get GitLoader and validate access
-        const loader = getGitLoader(githubUrl);
+        const loader = getGitLoader(gitUrl);
         const accessResult = await loader.validateAccess?.({
             owner,
             repo,

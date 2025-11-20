@@ -4,7 +4,7 @@ import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import updatePrStatus, { type UpdatePrStatusErrors } from "@/app/services/dal/github/updatePrStatus";
+import updatePrStatus, { type UpdatePrStatusErrors } from "@/app/services/dal/git/updatePrStatus";
 import type { GithubPrStatus } from "@/app/services/github/types";
 import { ErrorUpdatePrStatusToast } from "@/components/editor/EditorToasts";
 import { useBranch } from "@/providers/BranchContext";
@@ -19,6 +19,7 @@ interface UpdatePRStatusParams {
     baseBranch?: string;
     orgName: Auth0OrgName;
     site: string;
+    gitUrl?: string;
 }
 
 type UpdatePRStatusResult =
@@ -46,7 +47,7 @@ function useUpdatePRStatusMutation(): UseMutationResult<UpdatePRStatusResult, Er
 export function useUpdatePrStatus() {
     const { prStatus, setPrStatus, site, gitPrUrl } = useGitPrInfo();
     const { branch } = useBranch();
-    const { owner, repo, baseBranch } = useGitHubRepo();
+    const { owner, repo, baseBranch, gitUrl } = useGitHubRepo();
 
     const orgName = useOrgName();
 
@@ -72,7 +73,8 @@ export function useUpdatePrStatus() {
                     site,
                     branch,
                     status: newStatus,
-                    baseBranch
+                    baseBranch,
+                    gitUrl
                 });
 
                 if (result.success && result.status) {
@@ -85,7 +87,19 @@ export function useUpdatePrStatus() {
                 console.error("Error updating PR status:", err);
             }
         },
-        [owner, repo, branch, site, prStatus, gitPrUrl, setPrStatus, baseBranch, orgName, updatePrStatusMutation]
+        [
+            owner,
+            repo,
+            branch,
+            site,
+            prStatus,
+            gitPrUrl,
+            setPrStatus,
+            baseBranch,
+            orgName,
+            updatePrStatusMutation,
+            gitUrl
+        ]
     );
 
     return { updatePrStatus, loading: updatePrStatusMutation.isPending };

@@ -15,9 +15,10 @@ interface BranchInitializerProps {
     repo: string;
     branch: string;
     baseBranch: string;
+    gitUrl?: string;
 }
 
-export function BranchInitializer({ orgName, site, owner, repo, branch, baseBranch }: BranchInitializerProps) {
+export function BranchInitializer({ orgName, site, owner, repo, branch, baseBranch, gitUrl }: BranchInitializerProps) {
     const createBranchMutation = useCreateBranchMutation();
     const { setBranchFailed, setBranchFailureReason } = useBranch();
     const hasInitialized = useRef(false);
@@ -38,6 +39,16 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
             return;
         }
 
+        console.log("[BranchInitializer] Creating branch with params:", {
+            orgName,
+            site,
+            owner,
+            repo,
+            branch,
+            baseBranch,
+            gitUrl
+        });
+
         createBranchMutation
             .mutateAsync({
                 orgName,
@@ -45,7 +56,8 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
                 owner,
                 repo,
                 branch,
-                baseBranch
+                baseBranch,
+                gitUrl
             })
             .then((result) => {
                 if (!result.success) {
@@ -66,7 +78,18 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
                 setBranchFailed(true);
                 setBranchFailureReason("An unexpected error occurred while creating the branch.");
             });
-    }, [orgName, site, owner, repo, branch, baseBranch, createBranchMutation, setBranchFailed, setBranchFailureReason]);
+    }, [
+        orgName,
+        site,
+        owner,
+        repo,
+        branch,
+        baseBranch,
+        createBranchMutation,
+        setBranchFailed,
+        setBranchFailureReason,
+        gitUrl
+    ]);
 
     return null;
 }

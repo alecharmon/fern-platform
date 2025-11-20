@@ -1,5 +1,6 @@
 import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { createPrDescriptionService } from "@/app/services/pr-description";
 
 export default async function generatePrDescription(request: {
@@ -7,6 +8,7 @@ export default async function generatePrDescription(request: {
     repo: string;
     branch: string;
     baseBranch?: string;
+    gitUrl?: string;
 }): Promise<{
     success: boolean;
     error?: string;
@@ -17,9 +19,18 @@ export default async function generatePrDescription(request: {
         return { success: false, error: "No session found" };
     }
 
+    // Check if this is a GitHub repo - AI PR description generation is GitHub-only for now
+    const gitUrl = request.gitUrl || `https://github.com/${request.owner}/${request.repo}`;
+    const parsed = parseGitUrl(gitUrl);
+    if (parsed.provider !== "github") {
+        // Gracefully skip for non-GitHub repos
+        return { success: true }; // Return success to not block the flow
+    }
+
     const octokitResult = await getFernBotOctokitForRepo(request.owner, request.repo);
     if (!octokitResult.ok) {
-        throw new Error(`Failed to get GitHub client: ${octokitResult.error.type}`);
+        // Gracefully handle when Fern bot is not installed
+        return { success: true }; // Return success to not block the flow
     }
 
     const octokit = octokitResult.octokit;

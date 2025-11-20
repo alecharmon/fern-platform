@@ -3,7 +3,7 @@
 import { Loader2, Pencil } from "lucide-react";
 import { useState } from "react";
 
-import type { GithubRepoValidationResult } from "@/app/services/dal/github/validators";
+import type { GitRepoValidationResult } from "@/app/services/dal/git/validators";
 import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
 import type { GithubSourceRepo } from "@/app/services/github/types";
 import type { DocsUrl } from "@/utils/types";
@@ -15,18 +15,18 @@ import { ConnectGithubRepoButton } from "./ConnectGithubRepoButton";
 import { SetGithubSourcePopover } from "./SetGithubSource";
 
 export interface GithubAuthState {
-    validationResult: GithubRepoValidationResult;
+    validationResult: GitRepoValidationResult;
     sourceRepo?: GithubSourceRepo;
     isLoading?: boolean;
 }
 
 export function GithubSourceClient({
     docsUrl,
-    githubUrl,
+    gitUrl,
     isLoading
 }: {
     docsUrl: DocsUrl;
-    githubUrl?: string;
+    gitUrl?: string;
     isLoading?: boolean;
 }) {
     const [isSaving, setIsSaving] = useState(false);
@@ -38,20 +38,20 @@ export function GithubSourceClient({
             ) : (
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <div className="flex min-w-0 items-center gap-2">
-                        {githubUrl ? (
+                        {gitUrl ? (
                             <>
                                 <div className="flex-shrink-0">
                                     <GithubLogo />
                                 </div>
                                 {/* dashboard-link uses inline-flex which prevents truncate from working – block is required for ellipsis */}
-                                <a href={githubUrl} className="dashboard-link !block truncate min-w-0" target="_blank">
-                                    {getRepoDisplayNameFromUrl(githubUrl)}
+                                <a href={gitUrl} className="dashboard-link !block truncate min-w-0" target="_blank">
+                                    {getRepoDisplayNameFromUrl(gitUrl)}
                                 </a>
                                 <div className="flex-shrink-0">
                                     <SetGithubSourcePopover
                                         docsUrl={docsUrl}
                                         setIsSaving={setIsSaving}
-                                        initialUrl={githubUrl}
+                                        initialUrl={gitUrl}
                                     >
                                         <Button
                                             size="sm"

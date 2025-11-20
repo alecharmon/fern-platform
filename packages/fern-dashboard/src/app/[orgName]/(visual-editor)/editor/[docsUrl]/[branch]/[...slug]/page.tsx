@@ -12,7 +12,7 @@ import {
 import { getFrontmatter } from "@fern-docs/mdx";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
+import { assertAuthAndFetchGitUrl } from "@/app/services/dal/git/assertAuthAndFetchGitUrl";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import ApiReferenceComingSoon from "@/components/editor/unsupported-pages/ApiReferenceComingSoon";
 import ChangelogComingSoon from "@/components/editor/unsupported-pages/ChangelogComingSoon";
@@ -39,7 +39,7 @@ export default async function Page({
     const { orgName, docsUrl, branch, slug } = await params;
     const host = await getHostFromHeaders();
 
-    const { session } = await assertAuthAndFetchGithubUrl(orgName, parseDocsUrlParam({ docsUrl }));
+    const { session } = await assertAuthAndFetchGitUrl(orgName, parseDocsUrlParam({ docsUrl }));
 
     // Use cached loader - this will reuse the loader created in layout.tsx
     const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);

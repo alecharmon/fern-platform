@@ -1,12 +1,12 @@
 "use server";
 
-import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
+import { validateGitRepoAccess } from "@/app/services/dal/git/validators";
 
-export async function validateGithubRepoAction(orgName: string, site: string, githubUrl: string) {
-    const result = await validateGithubRepoAccess(
+export async function validateGithubRepoAction(orgName: string, site: string, gitUrl: string) {
+    const result = await validateGitRepoAccess(
         orgName,
         site,
-        { type: "url", githubUrl },
+        { type: "url", gitUrl },
         true // Always skip cache for polling
     );
 

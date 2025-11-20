@@ -15,7 +15,7 @@ export declare namespace postDocsGithubSource {
 
 const PostDocsGithubSourceRequest = z.object({
     url: z.string(),
-    githubUrl: z.string()
+    gitUrl: z.string()
 });
 
 export async function POST(req: NextRequest) {
@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
     if (parsedBody.errorResponse != null) {
         return parsedBody.errorResponse;
     }
-    const { url, githubUrl } = parsedBody.data;
+    const { url, gitUrl } = parsedBody.data;
 
-    await handler({ token, url, githubUrl });
+    await handler({ token, url, gitUrl });
 
     // Return empty response since handler returns void
     return NextResponse.json({});

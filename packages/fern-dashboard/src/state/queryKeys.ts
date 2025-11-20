@@ -15,7 +15,7 @@ export const ReactQueryKey = {
     myOrganizations: () => queryKey<getMyOrganizations.Response>("my-orgs"),
     docsUrlOwner: (docsUrl: DocsUrl) => queryKey<getDocsUrlOwner.Response>("docs-url-owner", docsUrl),
     orgSvgLogo: (svgUrl: string) => queryKey<string>("org-svg", svgUrl),
-    githubSourceRepo: (githubUrl: string) => queryKey<GithubSourceRepo>("github-source-repo", githubUrl)
+    githubSourceRepo: (gitUrl: string) => queryKey<GithubSourceRepo>("github-source-repo", gitUrl)
 } as const;
 
 function queryKey<T>(...key: string[]) {

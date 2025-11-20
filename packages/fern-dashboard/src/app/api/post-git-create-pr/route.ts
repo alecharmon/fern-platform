@@ -4,11 +4,11 @@ import { z } from "zod";
 
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
 import { orgNameValidator } from "@/app/api/utils/validators";
-import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
+import { GitIdentificationScheme } from "@/app/services/dal/git/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { getGitLoader } from "@/app/services/github/getGitLoader";
-import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { ResolvedReturnType } from "@/utils/types";
 
@@ -19,7 +19,14 @@ export declare namespace postCreatePr {
     export type Response = ResolvedReturnType<typeof handler>;
 }
 
-export const PostCreatePrRequest = GithubIdentificationScheme.and(
+// Accept either a git URL or owner/repo pair, both with site
+const GitRepoIdentification = z.union([
+    z.object({ gitUrl: z.string(), site: z.string() }),
+    z.object({ owner: z.string(), repo: z.string(), site: z.string() }),
+    GitIdentificationScheme // Keep backward compatibility (has site and gitUrl)
+]);
+
+export const PostCreatePrRequest = GitRepoIdentification.and(
     z.object({
         orgName: orgNameValidator,
         head: z.string(),
@@ -51,12 +58,13 @@ export const POST = withZodValidation(
         // 3. Parse repo data
         let owner: string;
         let repo: string;
-        let githubUrl: string;
-        const site = parseDocsUrlParam({ docsUrl: repoData.site });
+        let gitUrl: string;
+        let siteRaw: string;
 
-        if ("githubUrl" in repoData) {
-            githubUrl = repoData.githubUrl;
-            const parsed = getOwnerAndRepoFromGithubUrl(githubUrl);
+        if ("gitUrl" in repoData) {
+            gitUrl = repoData.gitUrl;
+            siteRaw = repoData.site;
+            const parsed = parseGitUrl(gitUrl);
             if (!parsed.owner || !parsed.repo) {
                 return NextResponse.json({ error: "Invalid repository URL format" }, { status: 400 });
             }
@@ -65,11 +73,16 @@ export const POST = withZodValidation(
         } else {
             owner = repoData.owner;
             repo = repoData.repo;
-            githubUrl = `https://github.com/${owner}/${repo}`;
+            siteRaw = repoData.site;
+            // Default to GitHub for backward compatibility
+            gitUrl = `https://github.com/${owner}/${repo}`;
         }
 
-        // 4. Get GitLoader and validate access
-        const loader = getGitLoader(githubUrl);
+        console.log("[POST /api/post-git-create-pr] Parsed repo data:", { owner, repo, gitUrl });
+
+        // 4. Validate repository access (token/bot exists, org matches in fern.config.json)
+        const loader = getGitLoader(gitUrl);
+        const site = parseDocsUrlParam({ docsUrl: siteRaw });
         const accessResult = await loader.validateAccess?.({
             owner,
             repo,
@@ -77,7 +90,10 @@ export const POST = withZodValidation(
             orgName
         });
 
+        console.log("[POST /api/post-git-create-pr] Access validation result:", accessResult);
+
         if (accessResult?.type === "error") {
+            console.error("[POST /api/post-git-create-pr] Access denied:", accessResult.error);
             return NextResponse.json({ error: `Access denied: ${accessResult.error.type}` }, { status: 403 });
         }
 
@@ -89,7 +105,8 @@ export const POST = withZodValidation(
             base,
             title,
             body,
-            draft
+            draft,
+            gitUrl
         });
         return NextResponse.json(result);
     }

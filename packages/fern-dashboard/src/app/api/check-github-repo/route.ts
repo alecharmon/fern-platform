@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import checkGitRepository from "@/app/services/dal/github/checkGitRepository";
+import checkGitRepository from "@/app/services/dal/git/checkGitRepository";
 
 const requestSchema = z.object({
     docsSiteUrl: z.string()
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         if (result.exists) {
             return NextResponse.json({
                 exists: true,
-                repoUrl: result.repoUrl,
+                gitUrl: result.gitUrl,
                 owner: result.owner,
                 repoName: result.repoName
             });

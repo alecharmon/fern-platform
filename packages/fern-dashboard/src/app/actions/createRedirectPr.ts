@@ -9,8 +9,8 @@ import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
 import postCreatePr from "../api/post-git-create-pr/handler";
 import type { Auth0OrgName } from "../services/auth0/types";
-import createBranchIfNotExists from "../services/dal/github/createBranchIfNotExists";
-import postGitCommit from "../services/dal/github/postGitCommit";
+import createBranchIfNotExists from "../services/dal/git/createBranchIfNotExists";
+import postGitCommit from "../services/dal/git/postGitCommit";
 import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
 interface RedirectConfig {
@@ -27,7 +27,7 @@ interface DocsYmlConfig {
 export async function createRedirectPrAction(
     orgName: Auth0OrgName,
     docsUrl: DocsUrl,
-    githubUrl: string,
+    gitUrl: string,
     sourcePath: string,
     destinationPath: string,
     baseBranch: string
@@ -54,8 +54,8 @@ export async function createRedirectPrAction(
         };
     }
 
-    // 3. Extract owner/repo from githubUrl
-    const urlMatch = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
+    // 3. Extract owner/repo from gitUrl
+    const urlMatch = gitUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
     if (!urlMatch) {
         return { success: false, error: "Invalid GitHub URL" };
     }
@@ -67,7 +67,7 @@ export async function createRedirectPrAction(
     }
 
     // 4. Get GitLoader instance
-    const loader = getGitLoader(githubUrl);
+    const loader = getGitLoader(gitUrl);
 
     // 5. Validate repository access
     const accessResult = await loader.validateAccess?.({

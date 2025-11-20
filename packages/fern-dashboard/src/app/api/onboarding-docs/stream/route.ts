@@ -6,7 +6,7 @@ import type { NextRequest } from "next/server";
 import { extract } from "tar";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import postGitRepository from "@/app/services/dal/github/postGitRepository";
+import postGitRepository from "@/app/services/dal/git/postGitRepository";
 import { OnboardS3Service } from "@/app/services/onboarding-assets";
 
 import type { OnboardingDocsRequest } from "../types";
@@ -375,7 +375,7 @@ export async function GET(req: NextRequest) {
                         await postDocsGithubSourceHandler({
                             url: normalizedDocsUrl,
                             token: tokenToUse,
-                            githubUrl: githubRepoUrl
+                            gitUrl: githubRepoUrl
                         });
 
                         sendEvent({

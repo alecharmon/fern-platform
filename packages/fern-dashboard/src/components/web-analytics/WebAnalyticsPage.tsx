@@ -103,7 +103,7 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
                 docsUrl={docsUrl as DocsUrl}
                 dateRange={dateRange}
                 orgName={githubMetadata?.orgName}
-                githubUrl={githubMetadata?.githubUrl}
+                gitUrl={githubMetadata?.gitUrl}
                 baseBranch={githubMetadata?.baseBranch}
             />
         </div>

@@ -5,7 +5,7 @@ import { Suspense } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
-import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
+import { getDocsGitUrl } from "@/app/services/dal/git/getDocsGitUrl";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
 import { PublishToGitHubButton } from "@/components/docs-page/PublishToGitHubButton";
@@ -35,13 +35,15 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
         notFound();
     }
 
-    // Get GitHub URL to determine source repo owner
-    const githubUrlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
+    // Get git URL to determine source repo owner
+    const gitUrlResult = await getDocsGitUrl(docsUrl, session.accessToken);
 
-    // Extract owner from GitHub URL (e.g., "https://github.com/owner/repo" -> "owner")
+    // Extract owner from git URL (works for both GitHub and GitLab)
+    // e.g., "https://github.com/owner/repo" -> "owner"
+    // e.g., "https://gitlab.com/owner/repo" -> "owner"
     let sourceRepoOwner: string | undefined;
-    if (githubUrlResult.success) {
-        const match = githubUrlResult.githubUrl?.match(/github\.com\/([^/]+)/);
+    if (gitUrlResult.success && gitUrlResult.gitUrl) {
+        const match = gitUrlResult.gitUrl.match(/(?:github\.com|gitlab\.com)\/([^/]+)/);
         sourceRepoOwner = match?.[1];
     }
 

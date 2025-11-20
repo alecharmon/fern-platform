@@ -1,27 +1,22 @@
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import type { GithubRepoValidationError } from "@/app/services/dal/github/validators";
+import type { GitRepoValidationError } from "@/app/services/dal/git/validators";
 import { getValidationErrorMessage } from "@/utils/errors";
 import type { DocsUrl } from "@/utils/types";
 import { WarningNote } from "../WarningNote";
 
 interface ValidationErrorHandlerProps {
-    error: GithubRepoValidationError;
-    githubUrl?: string;
+    error: GitRepoValidationError;
+    gitUrl?: string;
     orgName: Auth0OrgName;
     docsUrl: DocsUrl;
 }
 
-export function VisualEditorValidationErrorHandler({
-    error,
-    orgName,
-    docsUrl,
-    githubUrl
-}: ValidationErrorHandlerProps) {
+export function VisualEditorValidationErrorHandler({ error, orgName, docsUrl, gitUrl }: ValidationErrorHandlerProps) {
     switch (error.type) {
         case "FERN_BOT_NOT_INSTALLED":
             return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
-        case "MALFORMED_GITHUB_URL":
+        case "MALFORMED_GIT_URL":
             return <WarningNote>{getValidationErrorMessage(error)}</WarningNote>;
 
         case "DOMAIN_NOT_REGISTERED":
@@ -37,12 +32,12 @@ export function VisualEditorValidationErrorHandler({
             return (
                 <WarningNote>
                     {getValidationErrorMessage(error)}
-                    {githubUrl && (
+                    {gitUrl && (
                         <>
                             {" "}
                             Check your repository{" "}
                             <a
-                                href={githubUrl}
+                                href={gitUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="hover:text-primary underline transition-colors"
@@ -59,12 +54,12 @@ export function VisualEditorValidationErrorHandler({
             return (
                 <WarningNote>
                     {getValidationErrorMessage(error)}
-                    {githubUrl && (
+                    {gitUrl && (
                         <>
                             {" "}
                             Check your repository{" "}
                             <a
-                                href={githubUrl}
+                                href={gitUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="hover:text-primary underline transition-colors"
@@ -83,9 +78,9 @@ export function VisualEditorValidationErrorHandler({
         case "SITE_NOT_FOUND": {
             const branch = error.defaultBranch || "main";
             const docsYmlUrl =
-                githubUrl && error.docsYmlPath
-                    ? `${githubUrl.replace(/\/$/, "")}/blob/${branch}/${error.docsYmlPath}`
-                    : githubUrl;
+                gitUrl && error.docsYmlPath
+                    ? `${gitUrl.replace(/\/$/, "")}/blob/${branch}/${error.docsYmlPath}`
+                    : gitUrl;
             return (
                 <WarningNote className="w-full">
                     <div>
@@ -125,12 +120,12 @@ export function VisualEditorValidationErrorHandler({
             return (
                 <WarningNote>
                     {getValidationErrorMessage(error)}
-                    {githubUrl && (
+                    {gitUrl && (
                         <>
                             {" "}
                             Check your repository{" "}
                             <a
-                                href={githubUrl}
+                                href={gitUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="hover:text-primary underline transition-colors"

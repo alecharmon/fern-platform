@@ -3,8 +3,8 @@ import "server-only";
 import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
-import { getFernVersionUpdateInfo } from "@/app/services/dal/github/getFernVersionUpdateInfo";
+import { getDocsGitUrl } from "@/app/services/dal/git/getDocsGitUrl";
+import { getFernVersionUpdateInfo } from "@/app/services/dal/git/getFernVersionUpdateInfo";
 import type { DocsUrl } from "@/utils/types";
 import { DocsSiteAttribute } from "./DocsSiteAttribute";
 import { FernCliVersionDisplay } from "./FernCliVersionDisplay";
@@ -19,19 +19,19 @@ export async function FernCliVersion({ orgName, docsUrl }: { orgName: Auth0OrgNa
     if (session == null) {
         return null;
     }
-    const [githubUrlResult, githubAuthStateResult] = await Promise.all([
-        getDocsGithubUrl(docsUrl, session.accessToken),
+    const [gitUrlResult, githubAuthStateResult] = await Promise.all([
+        getDocsGitUrl(docsUrl, session.accessToken),
         getGitHubAuthState(docsUrl, session.accessToken, orgName, session)
     ]);
 
-    const githubUrl = githubUrlResult.success ? githubUrlResult.githubUrl : undefined;
+    const gitUrl = gitUrlResult.success ? gitUrlResult.gitUrl : undefined;
     const baseBranch = "sourceRepo" in githubAuthStateResult ? githubAuthStateResult.sourceRepo?.baseBranch : undefined;
 
-    if (githubUrl == null || baseBranch == null) {
+    if (gitUrl == null || baseBranch == null) {
         return null;
     }
 
-    const fernVersionInfoResult = await getFernVersionUpdateInfo(githubUrl, docsUrl, baseBranch);
+    const fernVersionInfoResult = await getFernVersionUpdateInfo(gitUrl, docsUrl, baseBranch);
 
     if (!fernVersionInfoResult.ok) {
         return null;
@@ -42,7 +42,7 @@ export async function FernCliVersion({ orgName, docsUrl }: { orgName: Auth0OrgNa
             <FernCliVersionDisplay
                 orgName={orgName}
                 docsUrl={docsUrl}
-                githubUrl={githubUrl}
+                gitUrl={gitUrl}
                 baseBranch={baseBranch}
                 fernVersionInfo={fernVersionInfoResult.result}
             />

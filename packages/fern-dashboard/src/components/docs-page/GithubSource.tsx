@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
+import { getDocsGitUrl } from "@/app/services/dal/git/getDocsGitUrl";
 import type { DocsUrl } from "@/utils/types";
 import { GithubSourceClient } from "./GithubSourceClient";
 
@@ -14,12 +14,7 @@ export async function GithubSource({ docsUrl }: { docsUrl: DocsUrl }) {
     if (session == null) {
         return null;
     }
-    const githubUrlResult = await getDocsGithubUrl(docsUrl, session?.accessToken);
+    const gitUrlResult = await getDocsGitUrl(docsUrl, session?.accessToken);
 
-    return (
-        <GithubSourceClient
-            docsUrl={docsUrl}
-            githubUrl={githubUrlResult.success ? githubUrlResult.githubUrl : undefined}
-        />
-    );
+    return <GithubSourceClient docsUrl={docsUrl} gitUrl={gitUrlResult.success ? gitUrlResult.gitUrl : undefined} />;
 }

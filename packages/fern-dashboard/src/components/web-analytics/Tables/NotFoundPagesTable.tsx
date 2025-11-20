@@ -17,7 +17,7 @@ interface NotFoundPagesTableProps {
     docsUrl: DocsUrl;
     dateRange?: TableRequest["dateRange"];
     orgName?: Auth0OrgName;
-    githubUrl?: string;
+    gitUrl?: string;
     baseBranch?: string;
 }
 
@@ -25,7 +25,7 @@ export default function NotFoundPagesTable({
     docsUrl,
     dateRange,
     orgName,
-    githubUrl,
+    gitUrl,
     baseBranch
 }: NotFoundPagesTableProps) {
     const { sortState, handleSort } = useAnalyticsTable();
@@ -53,7 +53,7 @@ export default function NotFoundPagesTable({
         setModalOpen(true);
     };
 
-    const canCreateRedirects = orgName && githubUrl && baseBranch;
+    const canCreateRedirects = orgName && gitUrl && baseBranch;
 
     const columns = [
         {
@@ -112,7 +112,7 @@ export default function NotFoundPagesTable({
                     sourcePath={selectedPath}
                     orgName={orgName!}
                     docsUrl={docsUrl}
-                    githubUrl={githubUrl!}
+                    gitUrl={gitUrl!}
                     baseBranch={baseBranch!}
                 />
             )}

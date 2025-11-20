@@ -190,6 +190,7 @@ export interface GitLoader {
     updatePullRequest?(request: UpdatePullRequestRequest): Promise<UpdatePullRequestResult>;
     updatePullRequestStatus?(request: UpdatePullRequestStatusRequest): Promise<UpdatePullRequestStatusResult>;
     createRepository?(request: CreateRepositoryRequest): Promise<CreateRepositoryResult>;
+    getPullRequestForBranch?(request: GetPullRequestForBranchRequest): Promise<GetPullRequestForBranchResult>;
 }
 
 // Authorization types
@@ -292,6 +293,26 @@ export type UpdatePullRequestStatusResult =
 export type CreateRepositoryResult =
     | { type: "ok"; repoUrl: string; htmlUrl: string }
     | { type: "error"; error: GitOperationError };
+
+export interface GetPullRequestForBranchRequest {
+    owner: string;
+    repo: string;
+    branch: string;
+    baseBranch?: string;
+}
+
+export type GetPullRequestForBranchResult =
+    | {
+          type: "ok";
+          title: string;
+          prNumber: number;
+          prUrl: string;
+          status: string;
+          draft: boolean;
+          merged: boolean;
+          nodeId?: string;
+      }
+    | { type: "error"; error: string };
 
 export const createEditableDocsLoader = async ({
     host,

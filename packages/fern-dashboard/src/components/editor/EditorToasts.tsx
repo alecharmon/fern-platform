@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import type { PostGitCommitErrors } from "@/app/services/dal/github/postGitCommit";
+import type { PostGitCommitErrors } from "@/app/services/dal/git/postGitCommit";
 
 /**
  * This file contains reusable toasts that are used in the editor.

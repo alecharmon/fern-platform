@@ -8,12 +8,12 @@ import { getUpgradePrBranchName } from "./request-utils";
 export type UpgradePrStatus = { exists: false } | { exists: true; prUrl: string; prNumber: number };
 
 export async function checkUpgradePrStatus(
-    githubUrl: string,
+    gitUrl: string,
     currentVersion: string,
     latestVersion: string,
     baseBranch: string
 ): Promise<UpgradePrStatus> {
-    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+    const { owner, repo } = getOwnerAndRepoFromGithubUrl(gitUrl);
     if (owner == null || repo == null) {
         return { exists: false };
     }

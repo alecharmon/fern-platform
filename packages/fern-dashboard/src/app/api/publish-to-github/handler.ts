@@ -9,7 +9,7 @@ import { Readable } from "stream";
 import { finished } from "stream/promises";
 import unzipper from "unzipper";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import postGitRepository from "@/app/services/dal/github/postGitRepository";
+import postGitRepository from "@/app/services/dal/git/postGitRepository";
 
 export interface PublishToGithubRequest {
     orgName: Auth0OrgName;

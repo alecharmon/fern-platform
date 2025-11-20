@@ -1,5 +1,5 @@
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getFernVersionUpdateInfo } from "@/app/services/dal/github/getFernVersionUpdateInfo";
+import { getFernVersionUpdateInfo } from "@/app/services/dal/git/getFernVersionUpdateInfo";
 import type { DocsUrl } from "@/utils/types";
 
 import { UpgradeFernButton } from "../UpgradeFernButton";
@@ -8,18 +8,18 @@ import { WarningNote } from "../WarningNote";
 export async function CriticalUpdateWarning({
     orgName,
     docsUrl,
-    githubUrl,
+    gitUrl,
     baseBranch
 }: {
     orgName: Auth0OrgName;
     docsUrl: DocsUrl;
-    githubUrl?: string;
+    gitUrl?: string;
     baseBranch?: string;
 }) {
-    if (githubUrl == null || baseBranch == null) {
+    if (gitUrl == null || baseBranch == null) {
         return null;
     }
-    const fernVersionInfoResult = await getFernVersionUpdateInfo(githubUrl, docsUrl, baseBranch);
+    const fernVersionInfoResult = await getFernVersionUpdateInfo(gitUrl, docsUrl, baseBranch);
 
     const fernVersionInfo = fernVersionInfoResult.ok ? fernVersionInfoResult.result : undefined;
 
@@ -43,7 +43,7 @@ export async function CriticalUpdateWarning({
                         variant="black"
                         orgName={orgName}
                         docsUrl={docsUrl}
-                        githubUrl={githubUrl}
+                        gitUrl={gitUrl}
                         currentVersion={fernVersionInfo.current}
                         latestVersion={fernVersionInfo.latest}
                         baseBranch={baseBranch}

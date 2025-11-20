@@ -3,7 +3,7 @@ import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
+import { getDocsGitUrl } from "@/app/services/dal/git/getDocsGitUrl";
 import { DocsSiteNavBarWithOverflow, type NavItem } from "@/components/docs-page/DocsSiteNavBarWithOverflow";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 
@@ -37,8 +37,8 @@ export default async function DocsSiteNavbar({
     }
 
     try {
-        const githubUrlResult = await getDocsGithubUrl(parsedDocsUrl, session.accessToken);
-        siteHasConnectedRepo = githubUrlResult.success;
+        const gitUrlResult = await getDocsGitUrl(parsedDocsUrl, session.accessToken);
+        siteHasConnectedRepo = gitUrlResult.success;
     } catch (error) {
         console.error("Failed to check if repo is connected:", error);
     }

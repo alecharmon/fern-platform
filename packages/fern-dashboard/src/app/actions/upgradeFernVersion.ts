@@ -7,15 +7,15 @@ import type { DocsUrl } from "@/utils/types";
 
 import postCreatePr from "../api/post-git-create-pr/handler";
 import type { Auth0OrgName } from "../services/auth0/types";
-import createBranchIfNotExists from "../services/dal/github/createBranchIfNotExists";
-import postGitCommit from "../services/dal/github/postGitCommit";
-import { getUpgradePrBranchName } from "../services/dal/github/request-utils";
+import createBranchIfNotExists from "../services/dal/git/createBranchIfNotExists";
+import postGitCommit from "../services/dal/git/postGitCommit";
+import { getUpgradePrBranchName } from "../services/dal/git/request-utils";
 import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
 export async function upgradeFernVersionAction(
     orgName: Auth0OrgName,
     docsUrl: DocsUrl,
-    githubUrl: string,
+    gitUrl: string,
     currentVersion: string,
     latestVersion: string,
     baseBranch: string
@@ -41,8 +41,8 @@ export async function upgradeFernVersionAction(
         };
     }
 
-    // 3. Extract owner/repo from githubUrl
-    const urlMatch = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
+    // 3. Extract owner/repo from gitUrl
+    const urlMatch = gitUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
     if (!urlMatch) {
         return { success: false, error: "Invalid GitHub URL" };
     }
@@ -54,7 +54,7 @@ export async function upgradeFernVersionAction(
     }
 
     // 4. Get GitLoader instance
-    const loader = getGitLoader(githubUrl);
+    const loader = getGitLoader(gitUrl);
 
     // 5. Validate repository access
     const accessResult = await loader.validateAccess?.({

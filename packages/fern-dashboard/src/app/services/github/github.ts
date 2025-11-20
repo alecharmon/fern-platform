@@ -12,7 +12,8 @@ export async function handleCreatePr({
     repo,
     baseBranch,
     title,
-    onAiGenerationComplete
+    onAiGenerationComplete,
+    gitUrl
 }: {
     orgName: Auth0OrgName;
     branch: string;
@@ -22,8 +23,17 @@ export async function handleCreatePr({
     baseBranch: string;
     title?: string;
     onAiGenerationComplete?: () => void;
+    gitUrl?: string;
 }): Promise<string | undefined> {
     try {
+        console.log("[handleCreatePr] Creating PR/MR with params:", {
+            owner,
+            repo,
+            branch,
+            baseBranch,
+            gitUrl
+        });
+
         const response = await DashboardApiClient.postCreatePr({
             orgName,
             owner,
@@ -32,8 +42,12 @@ export async function handleCreatePr({
             head: branch,
             base: baseBranch,
             title: title || DEFAULT_PR_TITLE,
-            draft: true
+            draft: true,
+            gitUrl: gitUrl // Use gitUrl to match the schema
         });
+
+        console.log("[handleCreatePr] Response:", response);
+
         if (response.success) {
             try {
                 // No need to await this, we just want to try to generate a PR description.
@@ -43,7 +57,8 @@ export async function handleCreatePr({
                     site,
                     repo,
                     branch,
-                    baseBranch
+                    baseBranch,
+                    gitUrl: gitUrl
                 })
                     .then((result) => {
                         if (result.success && onAiGenerationComplete) {
@@ -67,10 +82,10 @@ export async function handleCreatePr({
     return undefined;
 }
 
-export function getOwnerAndRepoFromGithubUrl(githubUrl: string) {
-    let piecesAfterGithubCom = githubUrl.split("github.com/")[1];
+export function getOwnerAndRepoFromGithubUrl(gitUrl: string) {
+    let piecesAfterGithubCom = gitUrl.split("github.com/")[1];
     if (piecesAfterGithubCom == null) {
-        const sshMatch = githubUrl.match(/github\.com:(.+)/);
+        const sshMatch = gitUrl.match(/github\.com:(.+)/);
         if (sshMatch) {
             piecesAfterGithubCom = sshMatch[1];
         } else {
@@ -85,10 +100,10 @@ export function getOwnerAndRepoFromGithubUrl(githubUrl: string) {
     return { owner, repo };
 }
 
-export function getRepoDisplayNameFromUrl(githubUrl: string) {
-    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+export function getRepoDisplayNameFromUrl(gitUrl: string) {
+    const { owner, repo } = getOwnerAndRepoFromGithubUrl(gitUrl);
     if (owner == null || repo == null) {
-        return githubUrl;
+        return gitUrl;
     }
     return `${owner}/${repo}`;
 }

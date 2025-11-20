@@ -4,9 +4,11 @@ import type { GithubAuthState } from "@/components/docs-page/GithubSourceClient"
 import type { DocsUrl } from "@/utils/types";
 import type { Auth0SessionData } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
-import { type GetDocsGithubUrlResult, getDocsGithubUrl } from "../services/dal/github/getDocsGithubUrl";
-import { validateGithubRepoAccess } from "../services/dal/github/validators";
+import { type GetDocsGithubUrlResult, getDocsGitUrl } from "../services/dal/git/getDocsGitUrl";
+import { validateRepoAccess } from "../services/dal/git/validators";
+import { parseGitUrl } from "../services/git-common/url-utils";
 import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
+import { getGitlabSourceMetadata } from "./getGitlabSourceMetadata";
 
 type GetDocsGithubUrlError = Extract<GetDocsGithubUrlResult, { success: false }>["error"];
 
@@ -19,12 +21,13 @@ export const getGitHubAuthState = cache(
         orgName: Auth0OrgName,
         session: Auth0SessionData
     ): Promise<GetGitHubAuthStateResult> => {
-        const urlResult = await getDocsGithubUrl(docsUrl, token);
+        const urlResult = await getDocsGitUrl(docsUrl, token);
+
         if (!urlResult.success) {
             return { success: false, error: urlResult.error };
         }
 
-        const githubUrl = urlResult.githubUrl;
+        const gitUrl = urlResult.gitUrl;
         let githubAuthState: GithubAuthState = {
             validationResult: {
                 ok: false,
@@ -38,25 +41,29 @@ export const getGitHubAuthState = cache(
         };
 
         try {
+            // Determine provider to fetch appropriate metadata
+            const parsed = parseGitUrl(gitUrl);
+            const isGitLab = parsed.provider === "gitlab";
+
             // Parallelize validation and metadata fetching for better performance
             const [validation, sourceRepo] = await Promise.all([
-                validateGithubRepoAccess(
-                    orgName,
-                    docsUrl,
-                    {
-                        type: "url",
-                        githubUrl
-                    },
-                    true // Skip cache for now, since this cache was causing issues with validating repos
-                ),
-                // Optimistically fetch metadata in parallel (will be used if validation succeeds)
-                getGithubSourceMetadata({
-                    githubUrl,
-                    userId: session.user.sub
-                }).catch((error) => {
-                    console.error("Failed to fetch source repo metadata:", error);
-                    return undefined;
-                })
+                validateRepoAccess(orgName, docsUrl, gitUrl),
+                // Fetch metadata based on provider
+                isGitLab
+                    ? getGitlabSourceMetadata({
+                          gitlabUrl: gitUrl,
+                          userId: session.user.sub
+                      }).catch((error) => {
+                          console.error("Failed to fetch GitLab source repo metadata:", error);
+                          return undefined;
+                      })
+                    : getGithubSourceMetadata({
+                          gitUrl,
+                          userId: session.user.sub
+                      }).catch((error) => {
+                          console.error("Failed to fetch GitHub source repo metadata:", error);
+                          return undefined;
+                      })
             ]);
 
             githubAuthState = {

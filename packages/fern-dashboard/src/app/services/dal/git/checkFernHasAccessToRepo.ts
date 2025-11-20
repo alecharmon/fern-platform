@@ -6,11 +6,11 @@ import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
 /**
  * Checks if the fern GitHub app has access to a given GitHub repository.
  *
- * @param githubUrl - The URL of the GitHub repository to check
+ * @param gitUrl - The URL of the GitHub repository to check
  * @returns true if the fern GitHub app has access to the repository, false otherwise
  */
-export async function checkFernHasAccessToRepo(githubUrl: string) {
-    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+export async function checkFernHasAccessToRepo(gitUrl: string) {
+    const { owner, repo } = getOwnerAndRepoFromGithubUrl(gitUrl);
     if (owner == null || repo == null) {
         return false;
     }

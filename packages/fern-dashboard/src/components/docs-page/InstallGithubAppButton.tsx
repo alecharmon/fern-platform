@@ -12,21 +12,21 @@ import { Button } from "../ui/button";
 export function InstallGithubAppButton({
     orgName,
     docsUrl,
-    githubUrl
+    gitUrl
 }: {
     orgName: string;
     docsUrl: DocsUrl;
-    githubUrl?: string;
+    gitUrl?: string;
 }) {
     const [clicked, setClicked] = useState(false);
 
     const { startPolling } = useBackgroundPoller(async () => {
-        if (githubUrl == null) {
-            console.warn("[InstallGithubAppButton] No githubUrl to validate");
+        if (gitUrl == null) {
+            console.warn("[InstallGithubAppButton] No gitUrl to validate");
             return false;
         }
 
-        const result = await validateGithubRepoAction(orgName, docsUrl, githubUrl);
+        const result = await validateGithubRepoAction(orgName, docsUrl, gitUrl);
         return result.ok; // Return true to stop polling
     });
 

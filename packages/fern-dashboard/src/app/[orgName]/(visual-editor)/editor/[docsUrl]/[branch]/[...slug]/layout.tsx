@@ -15,7 +15,7 @@ import { DesktopSearchButton } from "@fern-docs/search-ui/components/desktop/des
 import type React from "react";
 import { Suspense } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
+import { assertAuthAndFetchGitUrl } from "@/app/services/dal/git/assertAuthAndFetchGitUrl";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { PreviewHeader } from "@/components/docs-preview/PreviewHeader";
 import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor";
@@ -53,7 +53,7 @@ export default async function VisualEditorPreviewLayout({
 }>) {
     const { orgName, docsUrl, branch } = await params;
 
-    const { session } = await assertAuthAndFetchGithubUrl(orgName, parseDocsUrlParam({ docsUrl }));
+    const { session } = await assertAuthAndFetchGitUrl(orgName, parseDocsUrlParam({ docsUrl }));
     const host = await getHostFromHeaders();
 
     // Use cached loader to prevent duplicate creation across parallel routes
