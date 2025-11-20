@@ -1,6 +1,8 @@
+import json
 import logging
 import time
 from collections.abc import AsyncGenerator
+from uuid import uuid4
 
 from fastapi import (
     Header,
@@ -14,6 +16,7 @@ from ..llm.factory import get_llm_provider
 from ..llm.models import (
     LLMMessage,
     MessageRole,
+    StreamEvent,
     StreamEventType,
 )
 from ..metadata.fetcher import (
@@ -22,6 +25,7 @@ from ..metadata.fetcher import (
 )
 from ..models.metrics import RequestMetrics
 from ..models.request import ChatRequest
+from ..models.stream import convert_documents_to_sources
 from ..prompts.system import build_messages
 from ..retrieval.factory import get_retriever
 from ..retrieval.interface import (
@@ -29,6 +33,7 @@ from ..retrieval.interface import (
     RetrievalStrategy,
 )
 from ..settings.ask_ai import is_ask_ai_enabled
+from ..streaming.protocols.vercel_ui import VercelUIMessageStreamProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +65,13 @@ async def chat(
         logger.error(f"Ask AI check failed: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    user_query = request.messages[-1].content
+    simple_messages = request.get_simple_messages()
+    user_query = simple_messages[-1].content
     logger.info(f"User query: {user_query[:100]}...")
+    logger.info(
+        f"Request metadata: source={request.source}, "
+        f"conversationId={request.conversationId}, queryId={request.queryId}"
+    )
 
     retrieval_start_ms = time.time() * 1000
     try:
@@ -76,8 +86,7 @@ async def chat(
         retrieval_end_ms = time.time() * 1000
 
         logger.info(
-            f"Retrieved {len(retrieval_result.documents)} documents in "
-            f"{retrieval_result.retrieval_time_ms:.2f}ms"
+            f"Retrieved {len(retrieval_result.documents)} documents in " f"{retrieval_result.retrieval_time_ms:.2f}ms"
         )
     except Exception as e:
         logger.exception(f"Retrieval failed: {e}")
@@ -88,7 +97,7 @@ async def chat(
 
     try:
         messages_with_context = build_messages(
-            user_messages=request.messages,
+            user_messages=simple_messages,
             retrieved_docs=retrieval_result.documents,
             domain=domain,
         )
@@ -126,13 +135,20 @@ async def chat(
             detail="LLM provider not configured",
         )
 
+    message_id = str(uuid4())
+    query_id = request.queryId or str(uuid4())
+    sources = convert_documents_to_sources(retrieval_result.documents)
+
+    protocol = VercelUIMessageStreamProtocol()
+
     async def generate_stream() -> AsyncGenerator[str, None]:
         llm_start_ms = time.time() * 1000
         first_token_ms = None
         input_tokens = 0
         output_tokens = 0
 
-        try:
+        async def track_metrics_and_stream() -> AsyncGenerator[StreamEvent, None]:
+            nonlocal first_token_ms, input_tokens, output_tokens
             async for event in provider.generate_stream(llm_messages):
                 if event.type == StreamEventType.TEXT_DELTA and first_token_ms is None:
                     first_token_ms = time.time() * 1000
@@ -164,21 +180,22 @@ async def chat(
                         f"tokens={input_tokens}/{output_tokens}"
                     )
 
-                    enriched_usage = usage_data.copy() if isinstance(usage_data, dict) else {}
-                    enriched_usage.update(metrics.to_dict())
-                    event.data = enriched_usage
+                yield event
 
-                yield event.to_sse()
+        try:
+            async for chunk in protocol.stream_chat(
+                sources=sources,
+                query_id=query_id,
+                message_id=message_id,
+                text_stream=track_metrics_and_stream(),
+            ):
+                yield chunk
         except Exception as e:
             logger.exception(f"Error during chat streaming: {e}")
-            yield f'data: {{"error": "{str(e)}"}}\n\n'
+            yield f'data: {json.dumps({"type":"error","message":str(e)})}\n\n'
 
     return StreamingResponse(
         generate_stream(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
+        media_type=protocol.get_media_type(),
+        headers=protocol.get_headers(),
     )
