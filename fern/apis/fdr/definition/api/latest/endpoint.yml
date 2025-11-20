@@ -91,6 +91,11 @@ types:
     properties:
       body: HttpResponseBodyShape
       statusCode: integer
+      isWildcard:
+        type: optional<boolean>
+        docs: |
+          When true, indicates that the statusCode represents a wildcard pattern (e.g., 4XX or 5XX).
+          The statusCode field will contain the base value (400 for 4XX, 500 for 5XX).
 
   HttpResponseBodyShape:
     union:
@@ -122,6 +127,11 @@ types:
     properties:
       shape: optional<type.TypeShape>
       statusCode: integer
+      isWildcard:
+        type: optional<boolean>
+        docs: |
+          When true, indicates that the statusCode represents a wildcard pattern (e.g., 4XX or 5XX).
+          The statusCode field will contain the base value (400 for 4XX, 500 for 5XX).
       name: string
       examples: optional<list<ErrorExample>>
 

@@ -130,6 +130,11 @@ types:
       statusCode:
         type: optional<integer>
         docs: Defaults to 200
+      isWildcard:
+        type: optional<boolean>
+        docs: |
+          When true, indicates that the statusCode represents a wildcard pattern (e.g., 4XX or 5XX).
+          The statusCode field will contain the base value (400 for 4XX, 500 for 5XX).
   
   HttpResponsesV2:
     properties:
@@ -150,6 +155,11 @@ types:
     properties:
       type: optional<type.TypeShape>
       statusCode: integer
+      isWildcard:
+        type: optional<boolean>
+        docs: |
+          When true, indicates that the statusCode represents a wildcard pattern (e.g., 4XX or 5XX).
+          The statusCode field will contain the base value (400 for 4XX, 500 for 5XX).
       name: optional<string>
       examples: optional<list<ErrorExample>>
 
