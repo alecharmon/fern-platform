@@ -11,6 +11,7 @@ import oculus.evaluators.coherence  # noqa: F401
 import oculus.evaluators.conciseness  # noqa: F401
 import oculus.evaluators.correctness  # noqa: F401
 import oculus.evaluators.length  # noqa: F401
+import oculus.evaluators.style  # noqa: F401
 import oculus.generators.endpoints  # noqa: F401
 import oculus.generators.markdown  # noqa: F401
 from oculus.commands.diff import diff_evaluation_command

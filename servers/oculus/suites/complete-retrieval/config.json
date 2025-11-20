@@ -6,6 +6,7 @@
   "evaluators": [
     "correctness",
     "citation",
-    "length"
+    "length",
+    "style"
   ]
 }

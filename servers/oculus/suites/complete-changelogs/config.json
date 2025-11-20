@@ -5,6 +5,7 @@
   ],
   "evaluators": [
     "correctness",
-    "length"
+    "length",
+    "style"
   ]
 }
