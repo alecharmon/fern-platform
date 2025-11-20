@@ -246,6 +246,13 @@ log "FDR is up and running at localhost:8080/health"
 
 log "running fern generate --docs"
 
+log "Disk usage before fern generate:"
+df -h 2>&1 | add_timestamps || true
+log "Inode usage:"
+df -i 2>&1 | add_timestamps || true
+log "MinIO data directory size:"
+du -sh /data 2>&1 | add_timestamps || true
+
 FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080  FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level debug --no-prompt 2>&1 | add_timestamps
 
 log " docs generated successfully"

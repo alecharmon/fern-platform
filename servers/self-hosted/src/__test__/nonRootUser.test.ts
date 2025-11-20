@@ -52,6 +52,8 @@ describe("Self-hosted container with security restrictions", () => {
                         "ALL", // Same as docker:run:restricted
                         "-v",
                         `${FERN_DIR}:/fern:ro`, // Same as docker:run:restricted
+                        "--tmpfs",
+                        "/data:rw,size=1g,mode=0777,uid=65532,gid=65532",
                         SELF_HOSTED_IMAGE_TAG_NAME
                     ],
                     {
@@ -161,6 +163,8 @@ describe("Self-hosted container with security restrictions", () => {
                         "ALL", // Drop all capabilities
                         "-v",
                         `${FERN_DIR}:/fern:ro`, // Read-only mount for fern
+                        "--tmpfs",
+                        "/data:rw,size=1g,mode=0777,uid=65532,gid=65532",
                         SELF_HOSTED_IMAGE_TAG_NAME
                     ],
                     {
@@ -277,6 +281,8 @@ describe("Self-hosted container with security restrictions", () => {
                         "ALL",
                         "-v",
                         `${FERN_DIR}:/fern:ro`,
+                        "--tmpfs",
+                        "/data:rw,size=1g,mode=0777,uid=65532,gid=65532",
                         SELF_HOSTED_IMAGE_TAG_NAME
                     ],
                     {

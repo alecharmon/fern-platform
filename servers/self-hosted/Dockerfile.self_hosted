@@ -10,9 +10,10 @@ ENV PATH=$PATH:/go/bin
 
 # Build MinIO
 RUN go install -v github.com/minio/minio@RELEASE.2025-10-15T17-29-55Z
+# Get most secure mc commit: https://github.com/minio/mc/pull/5264
+RUN go install -v github.com/minio/mc@4f6310723f43b117ca2ab746c6533949d777a5bb 
 
 # ----------- End MinIO build stage -----------
-
 # ----------- Main image -----------
 FROM cgr.dev/chainguard/wolfi-base:latest
 
@@ -75,18 +76,14 @@ COPY servers/fdr/prisma /prisma
 # ----------- Start MINIO setup  -----------
 # Copy MinIO binary from build stage
 COPY --from=minio-builder /go/bin/minio /usr/local/bin/minio
+COPY --from=minio-builder /go/bin/mc /usr/local/bin/mc
 
 # Set up MinIO user and data directory
 RUN log "Setting up MinIO..." && \
     adduser -D -s /bin/sh minio-user || true && \
     mkdir -p /data && \
     # Make data directory accessible to all users
-    chmod 777 /data && \
-    log "Installing MinIO client..." && \
-    apk add --no-cache wget 2>&1 | add-timestamps && \
-    wget https://dl.min.io/client/mc/release/linux-amd64/mc 2>&1 | add-timestamps && \
-    chmod +x mc && \
-    mv mc /usr/local/bin/
+    chmod 777 /data
 
 ENV MINIO_VOLUMES="/data" \
     MINIO_URL="http://localhost:9000" \
@@ -162,6 +159,7 @@ RUN log "Installing jq and yq..." && \
 
 # ----------- Start Buf CLI setup -----------
 RUN log "Installing Buf CLI..." && \
+    apk add --no-cache wget 2>&1 | add-timestamps && \
     wget https://github.com/bufbuild/buf/releases/latest/download/buf-Linux-x86_64 -O /usr/local/bin/buf 2>&1 | add-timestamps && \
     chmod +x /usr/local/bin/buf
 

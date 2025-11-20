@@ -45,6 +45,8 @@ export async function setup() {
         "3000:3000",
         "-v",
         `${FERN_DIR}:/fern`,
+        "--tmpfs",
+        "/data:rw,size=1g,mode=0777",
         SELF_HOSTED_IMAGE_TAG_NAME
     ]);
     await sleep(10000);

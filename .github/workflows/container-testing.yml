@@ -63,7 +63,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
     steps:
@@ -104,7 +104,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
     steps:
