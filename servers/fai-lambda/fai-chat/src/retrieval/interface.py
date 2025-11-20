@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+from .filters import QueryFilters
+
 
 class RetrievalStrategy(str, Enum):
     SEMANTIC = "semantic"
@@ -31,7 +33,7 @@ class RetrievalQuery:
     domain: str
     top_k: int = 5
     strategy: RetrievalStrategy = RetrievalStrategy.HYBRID
-    filters: dict[str, Any] | None = None
+    filters: QueryFilters | None = None
     min_score: float | None = None
 
     def __post_init__(self) -> None:

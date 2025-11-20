@@ -10,6 +10,7 @@ from src.embeddings.interface import (
     EmbeddingError,
     EmbeddingsGenerator,
 )
+from src.retrieval.filters import QueryFilters
 from src.retrieval.interface import (
     RetrievalQuery,
     RetrievalStrategy,
@@ -262,13 +263,14 @@ class TestTurbopufferRetriever:
         namespace = retriever._get_namespace("example.com")
         assert namespace == "example.com_query"
 
-    def test_build_filters(self, retriever: TurbopufferRetriever) -> None:
-        filters = {"type": "api", "status": "published"}
+    def test_build_filters_with_query_filters(self, retriever: TurbopufferRetriever) -> None:
+        filters = QueryFilters(
+            facet_filters=[{"field": "version.title", "value": "v1"}],
+            exploded_roles=["developer"],
+        )
         result = retriever._build_filters(filters)
         assert result is not None
-        assert len(result) == 2
-        assert ("type", "Eq", "api") in result
-        assert ("status", "Eq", "published") in result
+        assert result[0] == "And"
 
     def test_build_filters_none(self, retriever: TurbopufferRetriever) -> None:
         result = retriever._build_filters(None)

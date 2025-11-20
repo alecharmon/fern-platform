@@ -7,6 +7,7 @@ from ..embeddings.interface import (
     EmbeddingError,
     EmbeddingsGenerator,
 )
+from .filters import QueryFilters
 from .interface import (
     RAGRetriever,
     RetrievalQuery,
@@ -16,6 +17,7 @@ from .interface import (
     TimingBreakdown,
     VectorStoreError,
 )
+from .turbopuffer_query_filters import TurbopufferFilter, build_turbopuffer_filters
 
 TURBOPUFFER_INCLUDE_ATTRIBUTES = ["document", "title", "url", "id"]
 
@@ -238,15 +240,11 @@ class TurbopufferRetriever(RAGRetriever):
     def _get_namespace(self, domain: str) -> str:
         return f"{domain}_query"
 
-    def _build_filters(self, filters: dict[str, Any] | None) -> list[tuple[str, str, Any]] | None:
+    def _build_filters(self, filters: QueryFilters | None) -> TurbopufferFilter | None:
         if not filters:
             return None
 
-        tpuf_filters = []
-        for key, value in filters.items():
-            tpuf_filters.append((key, "Eq", value))
-
-        return tpuf_filters if tpuf_filters else None
+        return build_turbopuffer_filters(filters)
 
     def _parse_turbopuffer_results(self, result: Any) -> list[RetrievedDocument]:
         documents: list[RetrievedDocument] = []

@@ -28,6 +28,7 @@ from ..models.request import ChatRequest
 from ..models.stream import convert_documents_to_sources
 from ..prompts.system import build_messages
 from ..retrieval.factory import get_retriever
+from ..retrieval.filters import QueryFilters
 from ..retrieval.interface import (
     RetrievalQuery,
     RetrievalStrategy,
@@ -76,11 +77,18 @@ async def chat(
     retrieval_start_ms = time.time() * 1000
     try:
         retriever = get_retriever()
+        query_filters = QueryFilters(
+            facet_filters=[{"field": f.field, "value": f.value} for f in request.filters],
+            document_urls=request.documentUrls if request.documentUrls else None,
+            exploded_roles=[],
+            user_is_authed=False,
+        )
         retrieval_query = RetrievalQuery(
             query=user_query,
             domain=domain,
             top_k=5,
             strategy=RetrievalStrategy.HYBRID,
+            filters=query_filters,
         )
         retrieval_result = await retriever.retrieve(retrieval_query)
         retrieval_end_ms = time.time() * 1000
