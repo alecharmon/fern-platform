@@ -9,6 +9,8 @@ from fastapi import (
     status,
 )
 
+from src.middleware.posthog_middleware import PostHogMiddleware
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -17,6 +19,8 @@ app = FastAPI(
     version="0.1.0",
     description="Lambda-based chat endpoint for Fern AI",
 )
+
+app.add_middleware(PostHogMiddleware)
 
 
 def get_bearer_token(request: Request) -> str:

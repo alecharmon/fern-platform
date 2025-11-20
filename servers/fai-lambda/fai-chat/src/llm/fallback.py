@@ -3,6 +3,7 @@
 import logging
 from collections.abc import AsyncGenerator
 
+from ..analytics.events import track_llm_provider_fallback
 from .base import LLMProvider
 from .models import (
     LLMMessage,
@@ -37,6 +38,14 @@ class FallbackProvider(LLMProvider):
                 self._current_index = i
                 response = await provider.generate(messages)
                 logger.info(f"Successfully generated with provider {i}: {provider.provider_name}")
+
+                if i > 0:
+                    track_llm_provider_fallback(
+                        failed_provider=self._providers[0].provider_name,
+                        fallback_provider=provider.provider_name,
+                        error_reason=str(last_error) if last_error else None,
+                    )
+
                 return response
             except Exception as e:
                 last_error = e
@@ -81,6 +90,14 @@ class FallbackProvider(LLMProvider):
                 ) from e
 
             logger.info(f"Successfully streamed with provider {i}: {provider.provider_name}")
+
+            if i > 0:
+                track_llm_provider_fallback(
+                    failed_provider=self._providers[0].provider_name,
+                    fallback_provider=provider.provider_name,
+                    error_reason=str(last_error) if last_error else None,
+                )
+
             return
 
         raise RuntimeError(f"All {len(self._providers)} providers failed. Last error: {last_error}") from last_error

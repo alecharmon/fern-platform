@@ -20,6 +20,7 @@ env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
   TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+  POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
 
 jobs:
   preview_chat_lambda:

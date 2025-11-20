@@ -11,6 +11,11 @@ from fastapi import (
 )
 from fastapi.responses import StreamingResponse
 
+from ..analytics.events import (
+    ErrorType,
+    track_chat_request_error,
+    track_chat_request_success,
+)
 from ..app import app
 from ..llm.factory import get_llm_provider
 from ..llm.models import (
@@ -53,17 +58,20 @@ async def chat(
         validate_docs_metadata(metadata)
     except ValueError as e:
         logger.error(f"Metadata validation failed: {e}")
+        track_chat_request_error(domain, ErrorType.METADATA_VALIDATION_FAILED, status.HTTP_404_NOT_FOUND, str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
     try:
         ask_ai_enabled = await is_ask_ai_enabled(domain)
         if not ask_ai_enabled:
+            track_chat_request_error(domain, ErrorType.ASK_AI_NOT_ENABLED, status.HTTP_404_NOT_FOUND)
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Ask AI is not enabled for this domain",
             )
     except ValueError as e:
         logger.error(f"Ask AI check failed: {e}")
+        track_chat_request_error(domain, ErrorType.ASK_AI_CHECK_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     simple_messages = request.get_simple_messages()
@@ -98,6 +106,7 @@ async def chat(
         )
     except Exception as e:
         logger.exception(f"Retrieval failed: {e}")
+        track_chat_request_error(domain, ErrorType.RETRIEVAL_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve documents",
@@ -129,6 +138,7 @@ async def chat(
                 logger.info(f"  Message {i} ({msg.role.value}): {msg.content}")
     except Exception as e:
         logger.exception(f"Failed to build messages: {e}")
+        track_chat_request_error(domain, ErrorType.MESSAGE_BUILD_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to prepare messages",
@@ -138,6 +148,7 @@ async def chat(
         provider = get_llm_provider(model="claude-4-sonnet", temperature=0.0, max_tokens=4096)
     except Exception as e:
         logger.exception(f"Failed to create LLM provider: {e}")
+        track_chat_request_error(domain, ErrorType.LLM_PROVIDER_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="LLM provider not configured",
@@ -188,6 +199,13 @@ async def chat(
                         f"tokens={input_tokens}/{output_tokens}"
                     )
 
+                    track_chat_request_success(
+                        domain=domain,
+                        metrics=metrics,
+                        llm_provider=provider.provider_name,
+                        message_count=len(llm_messages),
+                    )
+
                 yield event
 
         try:
@@ -200,6 +218,7 @@ async def chat(
                 yield chunk
         except Exception as e:
             logger.exception(f"Error during chat streaming: {e}")
+            track_chat_request_error(domain, ErrorType.STREAMING_ERROR, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
             yield f'data: {json.dumps({"type":"error","message":str(e)})}\n\n'
 
     return StreamingResponse(

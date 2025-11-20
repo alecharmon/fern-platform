@@ -90,7 +90,8 @@ export class FaiChatStack extends Stack {
                 OPENAI_API_KEY: getEnvironmentVariableOrThrow("OPENAI_API_KEY"),
                 COHERE_API_KEY: getEnvironmentVariableOrThrow("COHERE_API_KEY"),
                 TURBOPUFFER_API_KEY: getEnvironmentVariableOrThrow("TURBOPUFFER_API_KEY"),
-                FERN_TOKEN: getEnvironmentVariableOrThrow("FERN_TOKEN")
+                FERN_TOKEN: getEnvironmentVariableOrThrow("FERN_TOKEN"),
+                POSTHOG_API_KEY: getEnvironmentVariableOrThrow("POSTHOG_API_KEY")
             }
         });
 
