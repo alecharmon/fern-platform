@@ -2,7 +2,7 @@ import { PopoverPortal } from "@radix-ui/react-popover";
 import { useCurrentEditor } from "@tiptap/react";
 import { BubbleMenu as EditorBubbleMenu } from "@tiptap/react/menus";
 import type { MouseEventHandler } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { IconName } from "@/components/icon/Icon";
 import { Icon } from "@/components/icon/Icon";
 import { Button, ButtonGroup } from "@/components/tiptap-ui-primitive/button";
@@ -39,32 +39,32 @@ export default function TextBubbleMenu({ disableNodeTypeSwitching = false }: Tex
     const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
     const [headingDropdownOpen, setHeadingDropdownOpen] = useState(false);
 
+    // Force re-render when editor state changes by subscribing to transaction updates
+    const [, forceUpdate] = useState({});
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+
+        const handleUpdate = () => {
+            forceUpdate({});
+        };
+
+        editor.on("selectionUpdate", handleUpdate);
+        editor.on("transaction", handleUpdate);
+
+        return () => {
+            editor.off("selectionUpdate", handleUpdate);
+            editor.off("transaction", handleUpdate);
+        };
+    }, [editor]);
+
     // Close the link popover when the component unmounts
     useEffect(() => {
         return () => {
             setLinkPopoverOpen(false);
         };
     }, []);
-
-    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when editor.state.selection changes
-    const currentNodeType = useMemo((): NodeType => {
-        if (!editor) {
-            return "paragraph";
-        }
-        if (editor.isActive("heading", { level: 1 })) {
-            return "heading1";
-        }
-        if (editor.isActive("heading", { level: 2 })) {
-            return "heading2";
-        }
-        if (editor.isActive("heading", { level: 3 })) {
-            return "heading3";
-        }
-        if (editor.isActive("heading", { level: 4 })) {
-            return "heading4";
-        }
-        return "paragraph";
-    }, [editor?.state.selection]);
 
     function setNodeType(nodeType: NodeType) {
         if (!editor) {
@@ -116,10 +116,25 @@ export default function TextBubbleMenu({ disableNodeTypeSwitching = false }: Tex
         return null;
     }
 
+    // Compute these values inline - they'll be recalculated on every render
+    // The BubbleMenu component handles re-rendering when editor state changes
+    const isInsideTable = editor.isActive("tableCell") || editor.isActive("tableHeader");
+
+    const currentNodeType: NodeType = editor.isActive("heading", { level: 1 })
+        ? "heading1"
+        : editor.isActive("heading", { level: 2 })
+          ? "heading2"
+          : editor.isActive("heading", { level: 3 })
+            ? "heading3"
+            : editor.isActive("heading", { level: 4 })
+              ? "heading4"
+              : "paragraph";
+
     const currentConfig = NODE_TYPE_CONFIG[currentNodeType];
 
     return (
         <EditorBubbleMenu
+            editor={editor}
             options={{ placement: "top-start" }}
             shouldShow={({ editor, state: { selection } }) => {
                 // Don't show the bubble menu if the selection is an image or image upload
@@ -147,7 +162,7 @@ export default function TextBubbleMenu({ disableNodeTypeSwitching = false }: Tex
             }}
         >
             <div className="border-1 rounded-3 text-gray-1100 flex items-center gap-px border-gray-500 bg-white p-0.5 shadow-sm">
-                {!disableNodeTypeSwitching && (
+                {!disableNodeTypeSwitching && !isInsideTable && (
                     <>
                         <Popover open={headingDropdownOpen} onOpenChange={setHeadingDropdownOpen}>
                             <PopoverTrigger asChild>
@@ -229,12 +244,19 @@ export default function TextBubbleMenu({ disableNodeTypeSwitching = false }: Tex
                     </PopoverPortal>
                 </Popover>
                 <BubbleMenuItem iconProps={{ variant: "Code" }} onClick={menuItemClickHandler("toggleCode")} />
-                <BubbleMenuSeparator />
-                <BubbleMenuItem iconProps={{ variant: "List" }} onClick={menuItemClickHandler("toggleBulletList")} />
-                <BubbleMenuItem
-                    iconProps={{ variant: "ListOrdered" }}
-                    onClick={menuItemClickHandler("toggleOrderedList")}
-                />
+                {!isInsideTable && (
+                    <>
+                        <BubbleMenuSeparator />
+                        <BubbleMenuItem
+                            iconProps={{ variant: "List" }}
+                            onClick={menuItemClickHandler("toggleBulletList")}
+                        />
+                        <BubbleMenuItem
+                            iconProps={{ variant: "ListOrdered" }}
+                            onClick={menuItemClickHandler("toggleOrderedList")}
+                        />
+                    </>
+                )}
             </div>
         </EditorBubbleMenu>
     );

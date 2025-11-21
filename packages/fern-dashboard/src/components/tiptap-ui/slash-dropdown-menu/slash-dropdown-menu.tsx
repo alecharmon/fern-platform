@@ -24,6 +24,20 @@ type SlashDropdownMenuProps = Omit<SuggestionMenuProps, "items" | "children"> & 
     config?: SlashMenuConfig;
 };
 
+/**
+ * Checks if the cursor is inside a table cell or header by walking up the node tree.
+ * We need to check ancestors, not just the immediate parent, because table cells contain paragraph nodes.
+ */
+function isInsideTable($pos: { depth: number; node: (depth: number) => { type: { name: string } } }): boolean {
+    for (let depth = $pos.depth; depth > 0; depth--) {
+        const node = $pos.node(depth);
+        if (node.type.name === "tableCell" || node.type.name === "tableHeader") {
+            return true;
+        }
+    }
+    return false;
+}
+
 export const SlashDropdownMenu = (props: SlashDropdownMenuProps) => {
     const { config, ...restProps } = props;
     const { getSlashMenuItems } = useSlashDropdownMenu(config);
@@ -36,7 +50,14 @@ export const SlashDropdownMenu = (props: SlashDropdownMenuProps) => {
             decorationContent="Filter..."
             selector="tiptap-slash-dropdown-menu"
             maxHeight={240}
-            items={({ query, editor }) => filterSuggestionItems(getSlashMenuItems(editor), query)}
+            allow={({ state }) => {
+                return !isInsideTable(state.selection.$from);
+            }}
+            items={({ query, editor }) => {
+                return !isInsideTable(editor.state.selection.$from)
+                    ? filterSuggestionItems(getSlashMenuItems(editor), query)
+                    : [];
+            }}
             {...restProps}
         >
             {(props) => <List {...props} config={config} />}

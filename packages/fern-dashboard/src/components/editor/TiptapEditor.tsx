@@ -4,7 +4,7 @@ import CodeBlock from "@tiptap/extension-code-block";
 import Link from "@tiptap/extension-link";
 import { BlockMath, InlineMath } from "@tiptap/extension-mathematics";
 import Placeholder from "@tiptap/extension-placeholder";
-import { Table, TableHeader, TableKit, TableRow } from "@tiptap/extension-table";
+import { Table, TableCell, TableHeader, TableKit, TableRow } from "@tiptap/extension-table";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import {
@@ -186,7 +186,11 @@ const extensions = [
             });
         }
     }),
+    TableCell.extend({
+        content: "paragraph"
+    }),
     TableHeader.extend({
+        content: "paragraph",
         addNodeView() {
             return ReactNodeViewRenderer(TableHeaderNodeView, {
                 as: "th",
@@ -197,7 +201,8 @@ const extensions = [
     TableKit.configure({
         table: false,
         tableRow: false,
-        tableHeader: false
+        tableHeader: false,
+        tableCell: false
     })
 ] as Extension[];
 export declare namespace TiptapEditor {
@@ -306,12 +311,12 @@ export default function TiptapEditor({
                         document.body.classList.remove("fern-dragging-blocked");
                         return false;
                     },
-                    dragleave: (view, event) => {
+                    dragleave: () => {
                         // Do not remove the global cursor class on dragleave. Moving between children fires dragleave
                         // continuously and would cause cursor flicker. Cleanup happens on dragover (when unblocked), drop, or dragend.
                         return false;
                     },
-                    dragend: (view, event) => {
+                    dragend: () => {
                         // Clean up cursor class and global state when drag ends
                         document.body.classList.remove("fern-dragging-blocked");
                         (window as any).__fernDraggingEditorId = undefined;
