@@ -24,7 +24,13 @@ export function Strong({ className, ...rest }: React.ComponentProps<"strong">) {
 }
 
 export function Ol({ className, type, ...rest }: React.ComponentProps<"ol">) {
-    return <ol {...rest} type={type} className={cn(className, "mb-3 list-outside", !type && "list-decimal")} />;
+    return (
+        <ol
+            {...rest}
+            type={type}
+            className={cn(className, "mb-3 list-outside", !type && "list-decimal", "[&_ol]:!list-[lower-roman]")}
+        />
+    );
 }
 
 export function Ul({ className, ...rest }: React.ComponentProps<"ul">) {
