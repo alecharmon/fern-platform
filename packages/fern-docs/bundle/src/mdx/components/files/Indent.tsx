@@ -10,7 +10,7 @@ export function Indent({ children, className }: IndentProps) {
     return (
         <div
             className={cn(
-                "fern-indent relative ml-4 pl-4 space-y-1 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:border-l before:border-border-default",
+                "fern-indent relative ml-4 pl-4 space-y-1 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:border-l before:border-transparent",
                 className
             )}
         >
