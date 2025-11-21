@@ -11,7 +11,15 @@ import type { AlgoliaRecordHit, ApiReferenceRecordHit, ChangelogRecordHit, Markd
 
 const headingLevels = ["h0", "h1", "h2", "h3", "h4", "h5", "h6"] as const;
 
-function Breadcrumb({ breadcrumb, endingArrow }: { breadcrumb: string[]; endingArrow?: boolean }): ReactNode {
+function Breadcrumb({
+    breadcrumb,
+    endingArrow,
+    productAndVersion
+}: {
+    breadcrumb: string[];
+    endingArrow?: boolean;
+    productAndVersion?: string[];
+}): ReactNode {
     if (breadcrumb.length === 0) {
         return false;
     }
@@ -19,6 +27,12 @@ function Breadcrumb({ breadcrumb, endingArrow }: { breadcrumb: string[]; endingA
     return (
         <div className="fern-search-hit-breadcrumb">
             <span className="inline-flex items-center gap-0.5">
+                {productAndVersion?.map((title) => (
+                    <Fragment key={title}>
+                        <span className="text-(color:--accent-12) font-medium">{title}</span>
+                        <ChevronRight className="-mb-px size-3 shrink-0" />
+                    </Fragment>
+                ))}
                 {uniq(breadcrumb).map((title, idx) => (
                     <Fragment key={title}>
                         <span>{title}</span>
@@ -75,28 +89,59 @@ function HitContentWithTitle({ hit, children }: { hit: AlgoliaRecordHit; childre
     );
 }
 
-function MarkdownHitContent({ hit }: { hit: MarkdownRecordHit }): ReactElement<any> {
+function MarkdownHitContent({
+    hit,
+    currentVersion,
+    currentProduct
+}: {
+    hit: MarkdownRecordHit;
+    currentVersion?: string;
+    currentProduct?: string;
+}): ReactElement<any> {
+    const breadcrumb = createHierarchyBreadcrumb(hit.breadcrumb, hit.hierarchy, hit.level);
+    const productAndVersion = getVersionProductPrefix(hit, currentVersion, currentProduct);
+
     return (
         <HitContentWithTitle hit={hit}>
-            <Breadcrumb breadcrumb={createHierarchyBreadcrumb(hit.breadcrumb, hit.hierarchy, hit.level)} />
+            <Breadcrumb breadcrumb={breadcrumb} productAndVersion={productAndVersion} />
         </HitContentWithTitle>
     );
 }
 
-function ChangelogHitContent({ hit }: { hit: ChangelogRecordHit }): ReactElement<any> {
+function ChangelogHitContent({
+    hit,
+    currentVersion,
+    currentProduct
+}: {
+    hit: ChangelogRecordHit;
+    currentVersion?: string;
+    currentProduct?: string;
+}): ReactElement<any> {
     const datestring = formatUtc(new Date(hit.date), "MMM d, yyyy");
+    const breadcrumb = [...hit.breadcrumb.map((crumb) => crumb.title), datestring];
+    const productAndVersion = getVersionProductPrefix(hit, currentVersion, currentProduct);
     return (
         <HitContentWithTitle hit={hit}>
-            <Breadcrumb breadcrumb={[...hit.breadcrumb.map((crumb) => crumb.title), datestring]} />
+            <Breadcrumb breadcrumb={breadcrumb} productAndVersion={productAndVersion} />
         </HitContentWithTitle>
     );
 }
 
-function ApiReferenceHitContent({ hit }: { hit: ApiReferenceRecordHit }): ReactElement<any> {
+function ApiReferenceHitContent({
+    hit,
+    currentVersion,
+    currentProduct
+}: {
+    hit: ApiReferenceRecordHit;
+    currentVersion?: string;
+    currentProduct?: string;
+}): ReactElement<any> {
+    const breadcrumb = hit.breadcrumb.map((crumb) => crumb.title);
+    const productAndVersion = getVersionProductPrefix(hit, currentVersion, currentProduct);
     return (
         <HitContentWithTitle hit={hit}>
             <div className="inline-flex max-w-full items-baseline gap-1">
-                <Breadcrumb breadcrumb={hit.breadcrumb.map((crumb) => crumb.title)} endingArrow />
+                <Breadcrumb breadcrumb={breadcrumb} productAndVersion={productAndVersion} endingArrow />
                 <HttpMethodBadge method={hit.method} size="sm" className="shrink-0" variant="outlined" />
                 <span className="fern-search-hit-endpoint-path shrink">{hit.endpoint_path}</span>
             </div>
@@ -122,20 +167,62 @@ function HitSnippet({ hit, attribute }: { hit: AlgoliaRecordHit; attribute?: key
     );
 }
 
-export function HitContent({ hit }: { hit: MarkRequired<AlgoliaRecordHit, "type"> }): ReactNode {
+export function HitContent({
+    hit,
+    currentVersion,
+    currentProduct
+}: {
+    hit: MarkRequired<AlgoliaRecordHit, "type">;
+    currentVersion?: string;
+    currentProduct?: string;
+}): ReactNode {
     switch (hit.type) {
         case "markdown":
-            return <MarkdownHitContent hit={hit as MarkdownRecordHit} />;
+            return (
+                <MarkdownHitContent
+                    hit={hit as MarkdownRecordHit}
+                    currentVersion={currentVersion}
+                    currentProduct={currentProduct}
+                />
+            );
         case "changelog":
-            return <ChangelogHitContent hit={hit as ChangelogRecordHit} />;
+            return (
+                <ChangelogHitContent
+                    hit={hit as ChangelogRecordHit}
+                    currentVersion={currentVersion}
+                    currentProduct={currentProduct}
+                />
+            );
         case "api-reference":
-            return <ApiReferenceHitContent hit={hit as ApiReferenceRecordHit} />;
+            return (
+                <ApiReferenceHitContent
+                    hit={hit as ApiReferenceRecordHit}
+                    currentVersion={currentVersion}
+                    currentProduct={currentProduct}
+                />
+            );
         case "parameter":
             return false;
         default:
             console.error(new UnreachableCaseError(hit));
             return false;
     }
+}
+
+function getVersionProductPrefix(hit: AlgoliaRecordHit, currentVersion?: string, currentProduct?: string): string[] {
+    const prefix: string[] = [];
+
+    // Add product title if it exists and differs from current product
+    if (hit.product?.id && hit.product.id !== currentProduct && hit.product.title) {
+        prefix.push(hit.product.title);
+    }
+
+    // Add version title if it exists and differs from current version
+    if (hit.version?.id && hit.version.id !== currentVersion && hit.version.title) {
+        prefix.push(hit.version.title);
+    }
+
+    return prefix;
 }
 
 function createHierarchyBreadcrumb(

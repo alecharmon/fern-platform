@@ -100,6 +100,8 @@ const MemoizedCommandSearchHits = memo(
                                 onSelect={onSelect}
                                 prefetch={prefetch}
                                 domain={domain}
+                                currentVersion={currentVersion}
+                                currentProduct={currentProduct}
                             />
                         ))}
                     </Command.Group>
@@ -114,7 +116,9 @@ function CommandHit({
     hit,
     domain,
     onSelect,
-    prefetch
+    prefetch,
+    currentVersion,
+    currentProduct
 }: {
     hit: GroupedHit;
     domain: string;
@@ -123,6 +127,8 @@ function CommandHit({
      */
     onSelect: (path: string) => void;
     prefetch?: (path: string) => void | Promise<void>;
+    currentVersion?: string;
+    currentProduct?: string;
 }) {
     const sendEvent = useSendEvent();
     if (!hit.record) {
@@ -150,7 +156,7 @@ function CommandHit({
                     isSubPage={hit.record.hash != null}
                     className="self-start"
                 />
-                <HitContent hit={hit.record} />
+                <HitContent hit={hit.record} currentVersion={currentVersion} currentProduct={currentProduct} />
             </CommandLink>
         </CommandGroupSearchHitTooltip>
     );
