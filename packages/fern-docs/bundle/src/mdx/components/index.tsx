@@ -35,7 +35,7 @@ import { Column, ColumnGroup } from "./columns";
 import { Copy } from "./copy";
 import { Download } from "./download";
 import { Feature } from "./feature";
-import { File, Files, Folder } from "./files";
+import { File, Files, Folder, Indent } from "./files";
 import { Frame } from "./frame";
 import { A, HeadingRenderer, Image, Li, Ol, Strong, Ul } from "./html";
 import { Table } from "./html-table";
@@ -87,6 +87,7 @@ const FERN_COMPONENTS = {
     Files,
     Folder,
     Frame,
+    Indent,
     Icon,
     If,
     Json,
