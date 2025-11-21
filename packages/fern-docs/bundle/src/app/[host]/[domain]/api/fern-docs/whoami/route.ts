@@ -24,7 +24,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         if (fernToken == null) {
             return NextResponse.json(
                 {
-                    error: "User is not authenticated"
+                    error: "User is not authenticated - I don't know who you are!"
                 },
                 { status: 401 }
             );
