@@ -16,7 +16,8 @@ from ..analytics.events import (
     track_chat_request_error,
     track_chat_request_success,
 )
-from ..app import app
+from ..app import AuthStateDep, app
+from ..auth.roles import create_exploded_roles
 from ..llm.factory import get_llm_provider
 from ..llm.models import (
     LLMMessage,
@@ -48,6 +49,7 @@ logger = logging.getLogger(__name__)
 @app.post("/chat")
 async def chat(
     request: ChatRequest,
+    auth_state: AuthStateDep,
     x_fern_host: str = Header(..., alias="x-fern-host"),
 ) -> StreamingResponse:
     domain = x_fern_host
@@ -86,11 +88,15 @@ async def chat(
     retrieval_start_ms = time.time() * 1000
     try:
         retriever = get_retriever()
+
+        roles = auth_state.user.roles if auth_state.authenticated and auth_state.user else []
+        exploded_roles = create_exploded_roles(roles) if roles else []
+
         query_filters = QueryFilters(
             facet_filters=[{"field": f.field, "value": f.value} for f in request.filters],
             document_urls=request.documentUrls if request.documentUrls else None,
-            exploded_roles=[],
-            user_is_authed=False,
+            exploded_roles=exploded_roles,
+            user_is_authed=auth_state.authenticated,
         )
         retrieval_query = RetrievalQuery(
             query=user_query,
