@@ -4,7 +4,6 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { MARKDOWN_PATTERN } from "@fern-api/docs-server/patterns";
 import { COOKIE_FERN_TOKEN, isLikelyBrowser, removeLeadingSlash } from "@fern-api/docs-utils";
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getMarkdownForPath, getPageNodeForPath } from "@/server/getMarkdownForPath";
@@ -39,12 +38,34 @@ export async function GET(
     const authedParam = req.nextUrl.searchParams.get("authed");
     const userRoles = parseRolesFromAuthedParam(authedParam);
 
-    const loader = await createCachedDocsLoader(host, domain, fernToken);
-    const node = getPageNodeForPath(await loader.getRoot(), cleanSlug);
+    let loader;
+    let node;
+
+    try {
+        loader = await createCachedDocsLoader(host, domain, fernToken);
+        node = getPageNodeForPath(await loader.getRoot(), cleanSlug);
+    } catch (error) {
+        console.error(`[${domain}] Error loading domain or node:`, error);
+        return new NextResponse("Not found", {
+            status: 404,
+            headers: {
+                "Content-Type": "text/markdown; charset=utf-8",
+                "Cache-Control": "no-store",
+                "X-Robots-Tag": "noindex"
+            }
+        });
+    }
 
     if (node == null) {
         console.error(`[${domain}] Node not found: ${path}`);
-        notFound();
+        return new NextResponse("Not found", {
+            status: 404,
+            headers: {
+                "Content-Type": "text/markdown; charset=utf-8",
+                "Cache-Control": "no-store",
+                "X-Robots-Tag": "noindex"
+            }
+        });
     }
 
     // if the page is authed, return 403
@@ -55,7 +76,14 @@ export async function GET(
     const markdown = await getMarkdownForPath(node, loader, domain, userRoles);
     if (markdown == null) {
         console.error(`[${domain}] Markdown not found: ${path}`);
-        notFound();
+        return new NextResponse("Not found", {
+            status: 404,
+            headers: {
+                "Content-Type": "text/markdown; charset=utf-8",
+                "Cache-Control": "no-store",
+                "X-Robots-Tag": "noindex"
+            }
+        });
     }
 
     const loadTime = performance.now() - startTime;

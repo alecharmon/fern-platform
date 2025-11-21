@@ -6,7 +6,6 @@ import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
@@ -56,6 +55,36 @@ export async function GET(
     const authedParam = req.nextUrl.searchParams.get("authed");
     const userRoles = parseRolesFromAuthedParam(authedParam);
 
+    let loader;
+    let root;
+
+    try {
+        loader = await createCachedDocsLoader(host, domain, fernToken);
+        root = getSectionRoot(await loader.getRoot(), path);
+    } catch (error) {
+        console.error(`[llmsTxt:${domain}] Error loading domain or root:`, error);
+        return new NextResponse("Not found", {
+            status: 404,
+            headers: {
+                "Content-Type": "text/plain; charset=utf-8",
+                "Cache-Control": "no-store",
+                "X-Robots-Tag": "noindex"
+            }
+        });
+    }
+
+    if (root == null) {
+        console.error(`[llmsTxt:${domain}] Could not find root for path: ${path}`);
+        return new NextResponse("Not found", {
+            status: 404,
+            headers: {
+                "Content-Type": "text/plain; charset=utf-8",
+                "Cache-Control": "no-store",
+                "X-Robots-Tag": "noindex"
+            }
+        });
+    }
+
     const userAgent = req.headers.get("user-agent");
     const acceptHeader = req.headers.get("accept");
     const possibleBot = !isLikelyBrowser(userAgent);
@@ -78,7 +107,9 @@ export async function GET(
                     (chunk: string) => {
                         contentLength += chunk.length;
                         controller.enqueue(encoder.encode(chunk));
-                    }
+                    },
+                    loader,
+                    root
                 );
 
                 rootRetrievalMs = timingStats.rootRetrievalMs;
@@ -130,7 +161,9 @@ async function getLlmsTxtStreaming(
     path: string,
     fernToken: string | undefined,
     userRoles: string[],
-    onChunk: (chunk: string) => void
+    onChunk: (chunk: string) => void,
+    loader: Awaited<ReturnType<typeof createCachedDocsLoader>>,
+    root: FernNavigation.NavigationNodeWithMetadata
 ): Promise<{
     timingStats: {
         rootRetrievalMs: number;
@@ -138,17 +171,8 @@ async function getLlmsTxtStreaming(
     };
     status: "unauthorized" | "ok";
 }> {
-    const loader = await createCachedDocsLoader(host, domain, fernToken);
-
-    // Time the root retrieval and section root
     const rootStartTime = performance.now();
-    const root = getSectionRoot(await loader.getRoot(), path);
     const rootEndTime = performance.now();
-
-    if (root == null) {
-        console.error(`[llmsTxt:${domain}] Could not find root`);
-        notFound();
-    }
 
     if (root.authed || root.hidden) {
         onChunk("User is not logged in");

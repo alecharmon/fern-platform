@@ -27,6 +27,36 @@ export async function GET(
     const authedParam = req.nextUrl.searchParams.get("authed");
     const userRoles = parseRolesFromAuthedParam(authedParam);
 
+    let loader;
+    let root;
+
+    try {
+        loader = await createCachedDocsLoader(host, domain, fernToken);
+        root = getSectionRoot(await loader.getRoot(), path);
+    } catch (error) {
+        console.error(`[llmsFull:${domain}] Error loading domain or root:`, error);
+        return new NextResponse("Not found", {
+            status: 404,
+            headers: {
+                "Content-Type": "text/plain; charset=utf-8",
+                "Cache-Control": "no-store",
+                "X-Robots-Tag": "noindex"
+            }
+        });
+    }
+
+    if (root == null) {
+        console.error(`[llmsFull:${domain}] Could not find root for path: ${path}`);
+        return new NextResponse("Not found", {
+            status: 404,
+            headers: {
+                "Content-Type": "text/plain; charset=utf-8",
+                "Cache-Control": "no-store",
+                "X-Robots-Tag": "noindex"
+            }
+        });
+    }
+
     const userAgent = req.headers.get("user-agent");
     const acceptHeader = req.headers.get("accept");
     const possibleBot = !isLikelyBrowser(userAgent);
@@ -40,18 +70,9 @@ export async function GET(
             let markdownProcessingMs = 0;
 
             try {
-                const loader = await createCachedDocsLoader(host, domain, fernToken);
-
                 const rootStartTime = performance.now();
-                const root = getSectionRoot(await loader.getRoot(), path);
                 const rootEndTime = performance.now();
                 rootRetrievalMs = rootEndTime - rootStartTime;
-
-                if (root == null) {
-                    console.error(`[llmsFull:${domain}] Could not find root`);
-                    controller.close();
-                    return;
-                }
 
                 const nodes: FernNavigation.NavigationNodePage[] = [];
 
