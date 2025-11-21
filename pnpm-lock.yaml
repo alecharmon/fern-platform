@@ -633,6 +633,9 @@ importers:
       '@radix-ui/colors':
         specifier: 'catalog:'
         version: 3.0.0
+      '@slack/types':
+        specifier: ^2.18.0
+        version: 2.18.0
       '@slack/web-api':
         specifier: ^6.12.0
         version: 6.12.0
@@ -9226,8 +9229,8 @@ packages:
     resolution: {integrity: sha512-DTuBFbqu4gGfajREEMrkq5jBhcnskinhr4+AnfJEk48zhVeEv3XnUKGIX98B74kxhYsIMfApGGySTn7V3b5yBA==}
     engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
 
-  '@slack/types@2.11.0':
-    resolution: {integrity: sha512-UlIrDWvuLaDly3QZhCPnwUSI/KYmV1N9LyhuH6EDKCRS1HWZhyTG3Ja46T3D0rYfqdltKYFXbJSSRPwZpwO0cQ==}
+  '@slack/types@2.18.0':
+    resolution: {integrity: sha512-ZKrdeoppbM+3l2KKOi4/3oFYKCEwiW3dQfdHZDcecJ9rAmEqWPnARYmac9taZNitb0xnSgu6GOpHgwaKI8se2g==}
     engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
 
   '@slack/web-api@6.12.0':
@@ -9253,6 +9256,7 @@ packages:
   '@smithy/core@3.18.5':
     resolution: {integrity: sha512-6gnIz3h+PEPQGDj8MnRSjDvKBah042jEoPgjFGJ4iJLBE78L4lY/n98x14XyPF4u3lN179Ub/ZKFY5za9GeLQw==}
     engines: {node: '>=18.0.0'}
+    deprecated: Please upgrade your lockfile to use the latest 3.x version of @smithy/core for various fixes, see https://github.com/smithy-lang/smithy-typescript/blob/main/packages/core/CHANGELOG.md
 
   '@smithy/credential-provider-imds@4.2.5':
     resolution: {integrity: sha512-BZwotjoZWn9+36nimwm/OLIcVe+KYRwzMjfhd4QT7QxPm9WY0HiOV8t/Wlh+HVUif0SBVV7ksq8//hPaBC/okQ==}
@@ -30318,12 +30322,12 @@ snapshots:
     dependencies:
       '@types/node': 22.18.8
 
-  '@slack/types@2.11.0': {}
+  '@slack/types@2.18.0': {}
 
   '@slack/web-api@6.12.0':
     dependencies:
       '@slack/logger': 3.0.0
-      '@slack/types': 2.11.0
+      '@slack/types': 2.18.0
       '@types/is-stream': 1.1.0
       '@types/node': 22.18.8
       axios: 1.12.2

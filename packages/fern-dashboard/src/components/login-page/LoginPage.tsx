@@ -31,8 +31,8 @@ export const LoginPage = () => {
                 <div className="mx-4 flex w-full max-w-[400px] flex-1 flex-col items-stretch md:mx-auto">
                     <div className="mb-8 text-center text-xl font-bold">Log in to Fern</div>
                     <div className="flex flex-col gap-2">
-                        <GithubLoginButton />
                         <GoogleLoginButton />
+                        <GithubLoginButton />
                     </div>
                 </div>
                 <div className="absolute bottom-16 left-0 right-0 mx-[15%] mx-auto px-4 text-center text-xs text-gray-900 md:max-w-[400px]">

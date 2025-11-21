@@ -102,7 +102,7 @@ export async function invalidateOrganizationNotFoundCache(orgName: Auth0OrgName)
 function hasStatusCode(error: unknown): error is { statusCode: number } {
     return (
         typeof error === "object" &&
-        error !== null &&
+        error != null &&
         "statusCode" in error &&
         typeof (error as { statusCode?: unknown }).statusCode === "number"
     );
@@ -347,6 +347,31 @@ export async function doesUserBelongToOrg(userId: Auth0UserID, orgName: Auth0Org
     }
     const orgs = await getMyOrganizations(userId);
     return orgs.some((o) => o.name === orgName);
+}
+
+export async function getUserIdByEmail(email: string): Promise<Auth0UserID> {
+    const auth0 = getAuth0ManagementClient();
+
+    // Find the user by email using the search query
+    const users = await auth0.users.getAll({
+        q: `email:"${email}"`,
+        search_engine: "v3"
+    });
+
+    if (users.data.length === 0) {
+        throw new Error(`No user found with email: ${email}`);
+    }
+
+    if (users.data.length > 1) {
+        throw new Error(`Multiple users found with email: ${email}`);
+    }
+
+    const user = users.data[0];
+    if (!user?.user_id) {
+        throw new Error("User ID not found");
+    }
+
+    return Auth0UserID(user.user_id);
 }
 
 export async function addUserToOrg(userId: Auth0UserID, orgName: Auth0OrgName) {

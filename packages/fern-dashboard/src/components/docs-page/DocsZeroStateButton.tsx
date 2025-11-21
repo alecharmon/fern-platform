@@ -16,13 +16,13 @@ export async function DocsZeroStateButton({ orgName }: DocsZeroStateButtonProps)
     const session = await getCurrentSession();
 
     if (orgName == null) {
-        return <DocsZeroStateButtonClient useInternalWizard={false} />;
+        return <DocsZeroStateButtonClient orgName={orgName} useInternalWizard={false} />;
     }
 
     // Default to external link if no session
     if (session == null) {
-        return <DocsZeroStateButtonClient useInternalWizard={false} />;
+        return <DocsZeroStateButtonClient orgName={orgName} useInternalWizard={false} />;
     }
 
-    return <DocsZeroStateButtonClient useInternalWizard={true} />;
+    return <DocsZeroStateButtonClient orgName={orgName} useInternalWizard={true} />;
 }

@@ -63,14 +63,18 @@ export const GoogleLoginButton = ({
     children?: React.ReactNode;
 }) => {
     const [isLastUsed, setIsLastUsed] = useState(false);
+    const [showRecommended, setShowRecommended] = useState(false);
     const hasMounted = useHasMounted();
 
     useEffect(() => {
         try {
             const lastUsed = localStorage.getItem(LAST_USED_LOGIN_KEY);
             setIsLastUsed(lastUsed === "google-oauth2");
+            // Show "recommended" when there's no last used login method at all
+            setShowRecommended(!lastUsed);
         } catch {
             setIsLastUsed(false);
+            setShowRecommended(false);
         }
     }, []);
 
@@ -89,8 +93,12 @@ export const GoogleLoginButton = ({
                         <span>Continue with Google</span>
                     </div>
                     {hasMounted && isLastUsed ? (
-                        <Kbd className="justify-self-end" useBodyFont>
+                        <Kbd className="justify-self-end -mr-1" useBodyFont>
                             last used
+                        </Kbd>
+                    ) : hasMounted && showRecommended ? (
+                        <Kbd className="justify-self-end -mr-1" useBodyFont>
+                            recommended
                         </Kbd>
                     ) : (
                         <div aria-hidden="true" />

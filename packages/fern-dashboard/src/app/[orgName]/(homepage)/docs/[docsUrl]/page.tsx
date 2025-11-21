@@ -7,6 +7,7 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
+import { DocsPageTracker } from "@/components/docs-page/DocsPageTracker";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
 import { PublishToGitHubButton } from "@/components/docs-page/PublishToGitHubButton";
 import { VisualEditorLoadingCard } from "@/components/docs-page/visual-editor-section/VisualEditorLoadingCard";
@@ -47,6 +48,7 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
 
     return (
         <div className="flex w-full flex-col gap-4">
+            <DocsPageTracker orgName={orgName} docsUrl={docsUrl} userEmail={session.user.email ?? ""} />
             <PublishToGitHubButton
                 docsUrl={docsUrl}
                 docsSiteName={currentDocsSite.title ?? "Docs"}

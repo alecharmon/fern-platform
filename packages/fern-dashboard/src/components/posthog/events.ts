@@ -6,7 +6,11 @@ import type { PostHog } from "posthog-js";
  */
 export const PosthogEventName = {
     DOCS_TAB_VIEWED: "dashboard-docs-tab-viewed",
-    REPO_CONNECTED: "dashboard-repo-connected"
+    REPO_CONNECTED: "dashboard-repo-connected",
+    DOCS_ZERO_STATE_VIEWED: "dashboard-docs-zero-state-viewed",
+    DOCS_REQUEST_ACCESS_CLICKED: "dashboard-docs-request-access-clicked",
+    DOCS_REQUEST_ACCESS_SUCCESS: "dashboard-docs-request-access-success",
+    DOCS_PAGE_VIEWED: "dashboard-docs-page-viewed"
 } as const;
 
 export type PosthogEventName = (typeof PosthogEventName)[keyof typeof PosthogEventName];
@@ -24,6 +28,23 @@ export type PosthogEventPayloads = {
     [PosthogEventName.REPO_CONNECTED]: {
         siteHasGitHubAppInstalled: boolean;
         siteHasConnectedRepo: boolean;
+    };
+    [PosthogEventName.DOCS_ZERO_STATE_VIEWED]: {
+        hasOrgName: boolean;
+        userEmail: string;
+    };
+    [PosthogEventName.DOCS_REQUEST_ACCESS_CLICKED]: {
+        userEmail: string;
+        docsUrl: string;
+    };
+    [PosthogEventName.DOCS_REQUEST_ACCESS_SUCCESS]: {
+        userEmail: string;
+        docsUrl: string;
+    };
+    [PosthogEventName.DOCS_PAGE_VIEWED]: {
+        orgName: string;
+        docsUrl: string;
+        userEmail: string;
     };
 };
 

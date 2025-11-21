@@ -49,6 +49,7 @@
     "@fern-docs/edge-config": "workspace:*",
     "@fern-platform/fdr-utils": "workspace:*",
     "@radix-ui/colors": "catalog:",
+    "@slack/types": "^2.18.0",
     "@slack/web-api": "^6.9.0",
     "@vercel/functions": "^3.1.0",
     "@workos-inc/node": "^7.31.0",

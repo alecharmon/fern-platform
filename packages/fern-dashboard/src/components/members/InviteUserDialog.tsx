@@ -10,11 +10,14 @@ import { InviteUserDialogContent } from "./InviteUserDialogContent";
 export declare namespace InviteUserDialog {
     export interface Props {
         org: Auth0Organization | undefined;
+        initialEmail?: string;
+        defaultOpen?: boolean;
+        isFernAdmin?: boolean;
     }
 }
 
-export function InviteUserDialog({ org }: InviteUserDialog.Props) {
-    const [isOpen, setIsOpen] = useState(false);
+export function InviteUserDialog({ org, initialEmail, defaultOpen, isFernAdmin }: InviteUserDialog.Props) {
+    const [isOpen, setIsOpen] = useState(defaultOpen ?? false);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -38,6 +41,9 @@ export function InviteUserDialog({ org }: InviteUserDialog.Props) {
                     close={() => {
                         setIsOpen(false);
                     }}
+                    initialEmail={initialEmail}
+                    initialTab={initialEmail ? "email" : "link"}
+                    isFernAdmin={isFernAdmin}
                 />
             </DialogContent>
         </Dialog>
