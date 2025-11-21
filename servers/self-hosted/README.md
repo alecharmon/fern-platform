@@ -56,6 +56,26 @@ Run pnpm --filter=@fern-platform/self-hosted docker:run
 
 Finally navigate to http://localhost:3000/ where you should see your docs
 
+### Serving from a Base Path
+
+To serve the docs from a base path (e.g., `/docs` instead of `/`):
+
+**During build:**
+```bash
+# Option 1: Pass BASE_PATH as environment variable
+BASE_PATH=/docs pnpm docs:self-hosted-bundle:build
+
+# Option 2: Use the script directly
+bash scripts/build-selfhosted-bundle.sh /docs
+```
+
+**During runtime (Docker):**
+```bash
+docker run -p 3000:3000 -e NEXT_PUBLIC_BASE_PATH=/docs -it fern-self-hosted:latest
+```
+
+When using a base path, your docs will be available at `http://localhost:3000/docs` instead of `http://localhost:3000/`.
+
 ### Testing Restricted Environments
 
 To test the container with restricted security settings (simulating Kubernetes environments like Anduril's):

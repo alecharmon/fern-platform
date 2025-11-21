@@ -1,10 +1,20 @@
 #!/bin/bash
 
+# Accept BASE_PATH as an optional argument (e.g., ./build-selfhosted-bundle.sh /docs)
+BASE_PATH="${1:-}"
 
 export NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700"
 export NEXT_PUBLIC_MEILISEARCH_API_KEY="fern123!"
 export NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0="
 export NEXT_TELEMETRY_DISABLED=1
+
+# Set BASE_PATH if provided
+if [ -n "$BASE_PATH" ]; then
+    echo "Building with BASE_PATH: $BASE_PATH"
+    export NEXT_PUBLIC_BASE_PATH="$BASE_PATH"
+else
+    echo "Building without BASE_PATH (app will be served from root)"
+fi
 
 ENV_LOCAL_PATH="packages/fern-docs/bundle/.env.local"
 ENV_LOCAL_BACKUP="packages/fern-docs/bundle/.env.local.bak"

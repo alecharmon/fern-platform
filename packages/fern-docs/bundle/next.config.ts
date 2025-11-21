@@ -15,6 +15,19 @@ const isStandalone =
     process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1" ||
     process.env.NEXT_PUBLIC_IS_SELF_SERVED === "1";
 
+// For self-hosted deployments, support serving the app from a basePath
+const nextBasePath = isSelfHosted && process.env.NEXT_PUBLIC_BASE_PATH ? process.env.NEXT_PUBLIC_BASE_PATH : undefined;
+
+// Log basePath configuration at startup
+if (isSelfHosted) {
+    console.log("[next.config] Self-hosted configuration:", {
+        NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH,
+        basePath: nextBasePath,
+        assetPrefixDisabled: isAssetPrefixDisabled,
+        cdnUri: cdnUri?.href
+    });
+}
+
 // TODO: move this to a shared location (this is copied in FernImage.tsx)
 const NEXT_IMAGE_HOSTS = [
     "fdr-prod-docs-files.s3.us-east-1.amazonaws.com",
@@ -27,6 +40,7 @@ const NEXT_IMAGE_HOSTS = [
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
+    basePath: nextBasePath,
     trailingSlash: isTrailingSlashEnabled,
     transpilePackages: [
         "es-toolkit",
@@ -136,8 +150,9 @@ const nextConfig: NextConfig = {
      * On prod, the CDN_URI is currently https://legacy.ferndocs.com.
      *
      * Note that local development should not set the CDN_URI to ensure that the assets are served from the local server.
+     * For self-hosted deployments with a basePath, the assetPrefix should match the basePath.
      */
-    assetPrefix: isAssetPrefixDisabled ? undefined : cdnUri != null ? cdnUri.href : undefined,
+    assetPrefix: isAssetPrefixDisabled ? undefined : cdnUri != null ? cdnUri.href : nextBasePath,
     compiler: {
         // Note: i think this removes console logs in server-side code?
         // removeConsole:
@@ -248,7 +263,7 @@ const nextConfig: NextConfig = {
             protocol: "https",
             hostname: host
         })),
-        path: cdnUri != null ? `${cdnUri.href}_next/image` : undefined
+        path: cdnUri != null ? `${cdnUri.href}_next/image` : nextBasePath ? `${nextBasePath}/_next/image` : undefined
     },
     serverExternalPackages: ["esbuild", "@typescript/vfs"],
     webpack: (config, { isServer }) => {

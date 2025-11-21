@@ -26,6 +26,9 @@ else
     export NEXT_PUBLIC_DOCS_DOMAIN_URL="${ORG_NAME}.docs.buildwithfern.com"
 fi
 
+# Export BASE_PATH if set (for health checks and other scripts)
+export NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}"
+
 # -----------  Start Postgres setup  -----------
 log "Starting PostgreSQL service..."
 
@@ -156,7 +159,7 @@ export MEILI_HTTP_ADDR=0.0.0.0:7700
 log "Starting MeiliSearch..."
 # Change to /tmp so MeiliSearch's default data directory (./data.ms) is created there
 cd /tmp
-/meilisearch --master-key="fern123!" > /tmp/meilisearch.log 2>&1 &
+/meilisearch --master-key="fern123!" 2>&1 | tee /tmp/meilisearch.log | add_timestamps &
 meili_pid=$!
 log "MeiliSearch PID: $meili_pid"
 
@@ -187,7 +190,7 @@ export MEILISEARCH_URL="http://localhost:7700"
 
 # -----------  Start MINIO setup  -----------
 log "Starting MinIO server..."
-minio server ${MINIO_VOLUMES} --console-address ":9001" > /tmp/minio.log 2>&1 &
+minio server ${MINIO_VOLUMES} --console-address ":9001" 2>&1 | tee /tmp/minio.log | add_timestamps &
 minio_pid=$!
 log "MinIO PID: $minio_pid"
 
@@ -230,7 +233,7 @@ NEXT_PUBLIC_FILES_ORIGIN="http://localhost:9000/${MINIO_BUCKET_NAME}"
 # -----------  End MINIO setup  -----------
 
 log "Starting FDR server..."
-node /fdr/server.cjs > /tmp/fdr.log 2>&1 &
+node /fdr/server.cjs 2>&1 | tee /tmp/fdr.log | add_timestamps &
 fdr_pid=$!
 log "FDR server PID: $fdr_pid"
 
@@ -276,12 +279,13 @@ NEXT_PUBLIC_FILES_ORIGIN="${NEXT_PUBLIC_FILES_ORIGIN}" \
 NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
 NEXT_PUBLIC_IS_SELF_HOSTED=1 \
+NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}" \
 NEXT_TELEMETRY_DISABLED=1 \
 NEXT_DISABLE_CACHE=1 \
 NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700" \
 NEXT_PUBLIC_MEILISEARCH_API_KEY="fern123!" \
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
-node server.js > /tmp/nextjs.log 2>&1 &
+node server.js 2>&1 | tee /tmp/nextjs.log | add_timestamps &
 docs_pid=$!
 if [ $? -ne 0 ]; then
     log "Warning: Failed to start docs server (server.js), continuing anyway."
@@ -319,7 +323,7 @@ cat "$PID_FILE" | while IFS= read -r line; do log "  $line"; done
 
 # --------------  Start health check server --------------
 log "Starting health check server on port 8081..."
-HEALTH_CHECK_PORT=8081 node /scripts/health-server.js > /tmp/health-server.log 2>&1 &
+HEALTH_CHECK_PORT=8081 node /scripts/health-server.js 2>&1 | tee /tmp/health-server.log | add_timestamps &
 health_server_pid=$!
 log "Health check server PID: $health_server_pid"
 
@@ -333,7 +337,8 @@ log "Calling /api/fern-docs/search/v2/reindex/meilisearch route..."
 # This is non-critical - docs will work without search
 REINDEX_ATTEMPTS=0
 MAX_REINDEX_ATTEMPTS=10
-until curl -f -X GET http://localhost:3000/api/fern-docs/search/v2/reindex/meilisearch 2>/dev/null; do
+REINDEX_URL="http://localhost:3000${NEXT_PUBLIC_BASE_PATH:-}/api/fern-docs/search/v2/reindex/meilisearch"
+until curl -f -X GET "$REINDEX_URL" 2>/dev/null; do
     REINDEX_ATTEMPTS=$((REINDEX_ATTEMPTS + 1))
     if [ $REINDEX_ATTEMPTS -ge $MAX_REINDEX_ATTEMPTS ]; then
         log "WARNING: Failed to reindex search after $MAX_REINDEX_ATTEMPTS attempts"

@@ -285,9 +285,24 @@ export const getMetadataFromResponse = async (
         getDocsUrlMetadata(deriveDomainFromDomainKey(domainKey))
     ]);
 
+    const isSelfHostedMode = isSelfHosted();
+    const fdrBasePath = response.baseUrl.basePath;
+    const nextBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
+    const finalBasePath = isSelfHostedMode ? cleanBasePath(nextBasePath) : cleanBasePath(fdrBasePath);
+
+    console.log("[docs-loader] basePath resolution:", {
+        isSelfHosted: isSelfHostedMode,
+        fdrBasePath,
+        nextBasePath,
+        finalBasePath,
+        domain: response.baseUrl.domain
+    });
+
     return {
         domain: response.baseUrl.domain,
-        basePath: cleanBasePath(response.baseUrl.basePath),
+        // In self-hosted mode, use the Next.js basePath instead of the FDR basePath
+        // This allows the app to be served from a single basePath for all routes
+        basePath: finalBasePath,
         url: docsUrlMetadata.url,
         org: docsUrlMetadata.org,
         isPreview: docsUrlMetadata.isPreview

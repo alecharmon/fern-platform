@@ -50,7 +50,9 @@ if ! check_http_endpoint "http://localhost:8080/health" "FDR"; then
     FAILED=1
 fi
 
-if ! check_http_endpoint "http://localhost:3000" "Next.js Docs"; then
+# Check Next.js Docs with optional BASE_PATH
+NEXTJS_URL="http://localhost:3000${NEXT_PUBLIC_BASE_PATH:-}"
+if ! check_http_endpoint "$NEXTJS_URL" "Next.js Docs"; then
     FAILED=1
 fi
 

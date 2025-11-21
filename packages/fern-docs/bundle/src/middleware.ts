@@ -45,6 +45,21 @@ export const middleware: NextMiddleware = async (request) => {
         });
     }
 
+    // Log basePath configuration for debugging
+    const nextBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
+    const isSelfHostedMode = isSelfHosted();
+    console.log("[middleware] Configuration:", {
+        nextBasePath,
+        isSelfHosted: isSelfHostedMode,
+        originalPathname: request.nextUrl.pathname,
+        decodedPathname: pathname,
+        host,
+        domain,
+        note: nextBasePath
+            ? `Next.js basePath is ${nextBasePath} - it's already stripped from pathname by Next.js`
+            : "No basePath configured"
+    });
+
     const headers = new Headers(request.headers);
     headers.set(HEADER_X_FERN_HOST, domain);
     headers.set("x-fern-requested-path", pathname);
@@ -72,7 +87,11 @@ export const middleware: NextMiddleware = async (request) => {
     };
 
     // this mutation is reversed in `useCurrentPathname` hook. if this changes, please update that hook.
-    const withDomain = (pathname: string) => `/${host}/${domain}${conformTrailingSlash(pathname)}`;
+    // When basePath is configured, internal routes also need the basePath prefix
+    const withDomain = (pathname: string) => {
+        const internalPath = `/${host}/${domain}${conformTrailingSlash(pathname)}`;
+        return nextBasePath ? `${nextBasePath}${internalPath}` : internalPath;
+    };
 
     const withoutBasepath = (splitter: string | RegExp) => {
         const [basepath, newPathname] = splitPathname(pathname, splitter);
@@ -158,7 +177,10 @@ export const middleware: NextMiddleware = async (request) => {
      * Rewrite API routes to /api/fern-docs
      */
     if (pathname.includes("/api/fern-docs/")) {
-        return rewrite(withDomain(withoutBasepath("/api/fern-docs/")));
+        // When Next.js basePath is configured, it's already stripped from the pathname,
+        // so we don't need to call withoutBasepath here
+        const apiPath = nextBasePath ? pathname : withoutBasepath("/api/fern-docs/");
+        return rewrite(withDomain(apiPath));
     }
 
     /**
@@ -289,6 +311,7 @@ export const middleware: NextMiddleware = async (request) => {
     }
 
     if (isSelfHosted()) {
+        console.log("[middleware] Self-hosted mode detected");
         // serve local files directly
         if (pathname.startsWith("/_local/")) {
             const origin = process.env.NEXT_PUBLIC_FDR_ORIGIN;
@@ -296,10 +319,17 @@ export const middleware: NextMiddleware = async (request) => {
                 throw new Error("NEXT_PUBLIC_FDR_ORIGIN is required for local file handling");
             }
             const absoluteUrl = new URL(pathname, origin);
+            console.log("[middleware] Redirecting local file to FDR:", absoluteUrl.toString());
             return NextResponse.redirect(absoluteUrl);
         }
 
-        return rewrite(withDomain(`/static/${encodeURIComponent(conformTrailingSlash(pathname))}`));
+        const rewritePath = withDomain(`/static/${encodeURIComponent(conformTrailingSlash(pathname))}`);
+        console.log("[middleware] Self-hosted routing decision:", {
+            originalPathname: pathname,
+            rewritePath,
+            reason: "Self-hosted mode - using static route"
+        });
+        return rewrite(rewritePath);
     }
 
     const { getAuthState } = await createGetAuthStateEdge(request, (token) => {
