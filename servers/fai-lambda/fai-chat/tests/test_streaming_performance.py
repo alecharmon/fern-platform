@@ -3,7 +3,10 @@ from collections.abc import AsyncGenerator
 
 import pytest
 
-from src.llm.models import StreamEvent, StreamEventType
+from src.llm.models import (
+    StreamEvent,
+    StreamEventType,
+)
 from src.models.stream import Source
 from src.streaming.protocols.vercel_ui import VercelUIMessageStreamProtocol
 
@@ -19,10 +22,7 @@ class TestStreamingPerformance:
             yield StreamEvent(type=StreamEventType.USAGE, data={"input_tokens": 100, "output_tokens": 100})
             yield StreamEvent(type=StreamEventType.DONE, data="")
 
-        sources = [
-            Source(title=f"Doc {i}", url=f"https://example.com/doc{i}")
-            for i in range(10)
-        ]
+        sources = [Source(title=f"Doc {i}", url=f"https://example.com/doc{i}") for i in range(10)]
 
         start_time = time.perf_counter()
         event_count = 0
@@ -41,8 +41,7 @@ class TestStreamingPerformance:
         avg_latency_per_event_ms = total_time_ms / event_count
 
         assert avg_latency_per_event_ms < 0.1, (
-            f"Average latency per event is {avg_latency_per_event_ms:.4f}ms, "
-            f"which exceeds the 0.1ms target"
+            f"Average latency per event is {avg_latency_per_event_ms:.4f}ms, " f"which exceeds the 0.1ms target"
         )
 
         print("\nPerformance metrics:")
@@ -59,10 +58,7 @@ class TestStreamingPerformance:
             yield StreamEvent(type=StreamEventType.USAGE, data={"input_tokens": 10, "output_tokens": 5})
             yield StreamEvent(type=StreamEventType.DONE, data="")
 
-        sources = [
-            Source(title=f"Document {i}", url=f"https://example.com/doc{i}")
-            for i in range(1000)
-        ]
+        sources = [Source(title=f"Document {i}", url=f"https://example.com/doc{i}") for i in range(1000)]
 
         start_time = time.perf_counter()
         chunks = []
@@ -79,8 +75,7 @@ class TestStreamingPerformance:
         total_time_ms = (end_time - start_time) * 1000
 
         assert total_time_ms < 10, (
-            f"Processing 1000 sources took {total_time_ms:.2f}ms, "
-            f"which exceeds the 10ms target"
+            f"Processing 1000 sources took {total_time_ms:.2f}ms, " f"which exceeds the 10ms target"
         )
 
         assert len(chunks) > 0
@@ -118,9 +113,7 @@ class TestStreamingPerformance:
             chunk_size = len(chunk)
             max_chunk_size = max(max_chunk_size, chunk_size)
 
-        assert max_chunk_size < 1000, (
-            f"Max chunk size is {max_chunk_size} bytes, which may indicate buffering issues"
-        )
+        assert max_chunk_size < 1000, f"Max chunk size is {max_chunk_size} bytes, which may indicate buffering issues"
 
         print("\nMemory efficiency metrics:")
         print(f"  Total chunks: {chunk_count}")
@@ -154,8 +147,7 @@ class TestStreamingPerformance:
         time_to_first_chunk_ms = (first_chunk_time - start_time) * 1000
 
         assert time_to_first_chunk_ms < 1.0, (
-            f"Time to first chunk is {time_to_first_chunk_ms:.4f}ms, "
-            f"which exceeds the 1ms target"
+            f"Time to first chunk is {time_to_first_chunk_ms:.4f}ms, " f"which exceeds the 1ms target"
         )
 
         print("\nFirst event latency:")
@@ -184,8 +176,7 @@ class TestStreamingPerformance:
         total_time_ms = (end_time - start_time) * 1000
 
         assert total_time_ms < 1.0, (
-            f"Processing empty sources took {total_time_ms:.4f}ms, "
-            f"which exceeds the 1ms target"
+            f"Processing empty sources took {total_time_ms:.4f}ms, " f"which exceeds the 1ms target"
         )
 
         print("\nEmpty sources performance:")

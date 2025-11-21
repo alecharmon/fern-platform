@@ -1,7 +1,12 @@
 import pytest
 from pydantic import ValidationError
 
-from src.models.request import ChatMessage, ChatRequest, TextPart, UIMessage
+from src.models.request import (
+    ChatMessage,
+    ChatRequest,
+    TextPart,
+    UIMessage,
+)
 
 
 class TestChatMessage:

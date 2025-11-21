@@ -6,6 +6,7 @@ from abc import (
 )
 from collections.abc import AsyncGenerator
 
+from ..tools.models import Tool
 from .models import (
     LLMMessage,
     LLMResponse,
@@ -17,13 +18,16 @@ class LLMProvider(ABC):
     """Base interface for LLM providers."""
 
     @abstractmethod
-    async def generate(self, messages: list[LLMMessage]) -> LLMResponse:
+    async def generate(self, messages: list[LLMMessage], tools: list[Tool] | None = None) -> LLMResponse:
         """Generate a complete response (non-streaming)."""
         pass
 
     @abstractmethod
-    async def generate_stream(self, messages: list[LLMMessage]) -> AsyncGenerator[StreamEvent, None]:
-        """Generate a streaming response as SSE events."""
+    async def generate_stream(
+        self,
+        messages: list[LLMMessage],
+        tools: list[Tool] | None = None,
+    ) -> AsyncGenerator[StreamEvent, None]:
         if False:
             yield
 

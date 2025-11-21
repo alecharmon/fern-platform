@@ -1,13 +1,29 @@
+import json
 from collections.abc import AsyncGenerator
 
 import pytest
 
-from src.llm.models import StreamEvent, StreamEventType
+from src.llm.models import (
+    StreamEvent,
+    StreamEventType,
+)
 from src.models.stream import Source
 from src.streaming.protocols.vercel_ui import VercelUIMessageStreamProtocol
 
 
 class TestVercelUIMessageStreamProtocol:
+    def _decode_types(self, chunks: list[str]) -> list[str]:
+        types: list[str] = []
+        for chunk in chunks:
+            if chunk.strip() == "data: [DONE]":
+                types.append("DONE")
+                continue
+            if chunk.startswith("data: "):
+                payload_str = chunk[len("data: ") :].strip()
+                payload = json.loads(payload_str)
+                types.append(payload.get("type", "unknown"))
+        return types
+
     @pytest.mark.asyncio
     async def test_complete_stream_sequence(self) -> None:
         protocol = VercelUIMessageStreamProtocol()
@@ -31,7 +47,10 @@ class TestVercelUIMessageStreamProtocol:
         ):
             chunks.append(chunk)
 
-        assert chunks[0] == 'data: {"type": "data-sources", "data": [{"title": "Test Doc", "url": "https://test.com"}]}\n\n'
+        assert (
+            chunks[0]
+            == 'data: {"type": "data-sources", "data": [{"title": "Test Doc", "url": "https://test.com"}]}\n\n'
+        )
         assert chunks[1] == 'data: {"type": "data-assistant-query-id", "data": "query-123"}\n\n'
         assert chunks[2] == 'data: {"type": "start", "messageId": "msg-456"}\n\n'
         assert chunks[3] == 'data: {"type":"start-step"}\n\n'
@@ -147,3 +166,87 @@ class TestVercelUIMessageStreamProtocol:
         text_end_idx = next(i for i, c in enumerate(chunks) if "text-end" in c)
 
         assert text_end_idx == text_start_idx + 1
+
+    @pytest.mark.asyncio
+    async def test_tool_flow_sequence(self) -> None:
+        protocol = VercelUIMessageStreamProtocol()
+
+        async def mock_text_stream() -> AsyncGenerator[StreamEvent, None]:
+            yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="Hello")
+            yield StreamEvent(
+                type=StreamEventType.TOOL_CALL_START,
+                data={"id": "call-1", "name": "docSearch"},
+            )
+            yield StreamEvent(
+                type=StreamEventType.TOOL_CALL_RESULT,
+                data={
+                    "id": "call-1",
+                    "name": "docSearch",
+                    "input": {"query": "hello"},
+                    "output": [{"title": "Doc", "url": "https://example.com"}],
+                },
+            )
+            yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="Answer")
+            yield StreamEvent(type=StreamEventType.DONE, data="")
+
+        chunks = []
+        async for chunk in protocol.stream_chat(
+            sources=[Source(title="S", url="u")],
+            query_id="q",
+            message_id="m",
+            text_stream=mock_text_stream(),
+        ):
+            chunks.append(chunk.strip())
+
+        types = self._decode_types(chunks)
+        assert types == [
+            "data-sources",
+            "data-assistant-query-id",
+            "start",
+            "start-step",
+            "text-start",
+            "text-delta",
+            "text-end",  # emitted before tool input
+            "tool-input-start",
+            "tool-input-available",
+            "tool-output-available",
+            "finish-step",
+            "start-step",
+            "text-start",
+            "text-delta",
+            "text-end",
+            "finish-step",
+            "finish",
+            "DONE",
+        ]
+
+    @pytest.mark.asyncio
+    async def test_tool_start_without_result_finishes_cleanly(self) -> None:
+        protocol = VercelUIMessageStreamProtocol()
+
+        async def mock_text_stream() -> AsyncGenerator[StreamEvent, None]:
+            yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="Hello")
+            yield StreamEvent(type=StreamEventType.TOOL_CALL_START, data={"id": "call-1", "name": "docSearch"})
+            yield StreamEvent(type=StreamEventType.DONE, data="")
+
+        chunks = []
+        async for chunk in protocol.stream_chat(
+            sources=[Source(title="S", url="u")],
+            query_id="q",
+            message_id="m",
+            text_stream=mock_text_stream(),
+        ):
+            chunks.append(chunk.strip())
+
+        types = self._decode_types(chunks)
+        # Expect text-end when tool starts, and protocol still closes out the stream.
+        assert types[:7] == [
+            "data-sources",
+            "data-assistant-query-id",
+            "start",
+            "start-step",
+            "text-start",
+            "text-delta",
+            "text-end",
+        ]
+        assert types[-3:] == ["finish-step", "finish", "DONE"]

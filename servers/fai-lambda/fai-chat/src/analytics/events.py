@@ -13,6 +13,7 @@ __all__ = [
     "track_chat_request_error",
     "track_llm_provider_fallback",
     "track_retrieval_error",
+    "track_tool_usage",
     "ErrorType",
 ]
 
@@ -130,3 +131,41 @@ def track_retrieval_error(
         )
     except Exception as e:
         logger.error(f"Failed to track retrieval_error: {e}")
+
+
+def track_tool_usage(
+    domain: str,
+    tool_name: str,
+    success: bool,
+    execution_time_ms: float | None = None,
+    result_count: int | None = None,
+    error_message: str | None = None,
+) -> None:
+    try:
+        client = get_posthog_client()
+        if client is None:
+            return
+
+        properties = {
+            "$process_person_profile": False,
+            "domain": domain,
+            "tool_name": tool_name,
+            "success": success,
+        }
+
+        if execution_time_ms is not None:
+            properties["execution_time_ms"] = execution_time_ms
+
+        if result_count is not None:
+            properties["result_count"] = result_count
+
+        if error_message:
+            properties["error_message"] = error_message
+
+        client.capture(
+            distinct_id=DISTINCT_ID,
+            event="tool_usage",
+            properties=properties,
+        )
+    except Exception as e:
+        logger.error(f"Failed to track tool_usage: {e}")

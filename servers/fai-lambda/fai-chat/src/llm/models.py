@@ -36,6 +36,8 @@ class StreamEventType(str, Enum):
     USAGE = "usage"
     ERROR = "error"
     DONE = "done"
+    TOOL_CALL_START = "tool-call-start"
+    TOOL_CALL_RESULT = "tool-call-result"
 
 
 @dataclass

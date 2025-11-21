@@ -4,6 +4,7 @@ import logging
 from collections.abc import AsyncGenerator
 
 from ..analytics.events import track_llm_provider_fallback
+from ..tools.models import Tool
 from .base import LLMProvider
 from .models import (
     LLMMessage,
@@ -29,14 +30,14 @@ class FallbackProvider(LLMProvider):
     def provider_name(self) -> str:
         return self._providers[self._current_index].provider_name
 
-    async def generate(self, messages: list[LLMMessage]) -> LLMResponse:
+    async def generate(self, messages: list[LLMMessage], tools: list[Tool] | None = None) -> LLMResponse:
         last_error = None
 
         for i, provider in enumerate(self._providers):
             try:
                 logger.info(f"Attempting generation with provider {i}: {provider.provider_name} ({provider.model_id})")
                 self._current_index = i
-                response = await provider.generate(messages)
+                response = await provider.generate(messages, tools=tools)
                 logger.info(f"Successfully generated with provider {i}: {provider.provider_name}")
 
                 if i > 0:
@@ -54,7 +55,11 @@ class FallbackProvider(LLMProvider):
 
         raise RuntimeError(f"All {len(self._providers)} providers failed. Last error: {last_error}") from last_error
 
-    async def generate_stream(self, messages: list[LLMMessage]) -> AsyncGenerator[StreamEvent, None]:
+    async def generate_stream(
+        self,
+        messages: list[LLMMessage],
+        tools: list[Tool] | None = None,
+    ) -> AsyncGenerator[StreamEvent, None]:
         last_error = None
 
         for i, provider in enumerate(self._providers):
@@ -62,7 +67,7 @@ class FallbackProvider(LLMProvider):
                 logger.info(f"Attempting stream with provider {i}: {provider.provider_name} ({provider.model_id})")
                 self._current_index = i
 
-                stream = provider.generate_stream(messages)
+                stream = provider.generate_stream(messages, tools=tools)
                 first_event = await anext(stream)
             except StopAsyncIteration:
                 logger.info(f"Provider {i} ({provider.provider_name}) completed with no events")

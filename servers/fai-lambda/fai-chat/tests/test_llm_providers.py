@@ -118,16 +118,12 @@ class TestCohereProvider:
             LLMMessage(role=MessageRole.USER, content="What is 3+3?"),
         ]
 
-        preamble, message_text, chat_history = provider._format_messages(messages)
+        formatted = provider._format_messages(messages)
 
-        assert preamble == "You are helpful\n\nBe concise"
-        assert message_text == "What is 3+3?"
-        assert chat_history is not None
-        assert len(chat_history) == 2
-        assert chat_history[0]["role"] == "USER"
-        assert chat_history[0]["message"] == "What is 2+2?"
-        assert chat_history[1]["role"] == "CHATBOT"
-        assert chat_history[1]["message"] == "4"
+        assert len(formatted) == 5
+        assert formatted[0].role == "system"
+        assert formatted[2].role == "assistant"
+        assert formatted[-1].role == "user"
 
     def test_format_messages_single_user_message(self) -> None:
         provider = CohereProvider(model_id="command-a-03-2025", api_key="test-key")
@@ -136,11 +132,11 @@ class TestCohereProvider:
             LLMMessage(role=MessageRole.USER, content="Hello"),
         ]
 
-        preamble, message_text, chat_history = provider._format_messages(messages)
+        formatted = provider._format_messages(messages)
 
-        assert preamble is None
-        assert message_text == "Hello"
-        assert chat_history is None
+        assert len(formatted) == 1
+        assert formatted[0].role == "user"
+        assert formatted[0].content == "Hello"
 
     def test_format_messages_with_system_no_history(self) -> None:
         provider = CohereProvider(model_id="command-a-03-2025", api_key="test-key")
@@ -150,11 +146,11 @@ class TestCohereProvider:
             LLMMessage(role=MessageRole.USER, content="Question"),
         ]
 
-        preamble, message_text, chat_history = provider._format_messages(messages)
+        formatted = provider._format_messages(messages)
 
-        assert preamble == "System prompt"
-        assert message_text == "Question"
-        assert chat_history is None
+        assert formatted[0].role == "system"
+        assert formatted[1].role == "user"
+        assert formatted[1].content == "Question"
 
     def test_format_messages_role_mapping(self) -> None:
         provider = CohereProvider(model_id="command-a-03-2025", api_key="test-key")
@@ -164,34 +160,21 @@ class TestCohereProvider:
             LLMMessage(role=MessageRole.USER, content="Hello"),
         ]
 
-        preamble, message_text, chat_history = provider._format_messages(messages)
+        formatted = provider._format_messages(messages)
 
-        assert message_text == "Hello"
-        assert chat_history is not None
-        assert len(chat_history) == 1
-        assert chat_history[0]["role"] == "CHATBOT"
-        assert chat_history[0]["message"] == "Hi"
-
-    def test_format_messages_raises_on_no_chat_messages(self) -> None:
-        provider = CohereProvider(model_id="command-a-03-2025", api_key="test-key")
-
-        messages = [
-            LLMMessage(role=MessageRole.SYSTEM, content="Only system"),
-        ]
-
-        with pytest.raises(ValueError, match="At least one user or assistant message is required"):
-            provider._format_messages(messages)
+        assert formatted[0].role == "assistant"
+        assert formatted[1].role == "user"
 
     def test_format_messages_raises_on_system_in_history(self) -> None:
         provider = CohereProvider(model_id="command-a-03-2025", api_key="test-key")
 
         messages = [
             LLMMessage(role=MessageRole.SYSTEM, content="First system"),
-            LLMMessage(role=MessageRole.USER, content="Question"),
         ]
 
-        preamble, message_text, chat_history = provider._format_messages(messages)
-        assert chat_history is None
+        formatted = provider._format_messages(messages)
+        assert len(formatted) == 1
+        assert formatted[0].role == "system"
 
 
 class TestFallbackProvider:

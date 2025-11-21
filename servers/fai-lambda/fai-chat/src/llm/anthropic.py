@@ -1,11 +1,13 @@
 """Anthropic provider implementation."""
 
+import json
 import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
 from anthropic import AsyncAnthropic
 
+from ..tools.models import Tool
 from .base import LLMProvider
 from .models import (
     LLMMessage,
@@ -49,37 +51,86 @@ class AnthropicProvider(LLMProvider):
 
         return system_prompt, [msg.to_dict() for msg in user_assistant_messages]
 
-    async def generate(self, messages: list[LLMMessage]) -> LLMResponse:
+    async def generate(self, messages: list[LLMMessage], tools: list[Tool] | None = None) -> LLMResponse:
         start_time = time.time()
         system_prompt, anthropic_messages = self._extract_system_and_messages(messages)
 
-        if system_prompt:
-            response = await self._client.messages.create(
-                model=self._model_id,
-                max_tokens=self._max_tokens,
-                temperature=self._temperature,
-                messages=anthropic_messages,
-                system=system_prompt,
+        tool_definitions = [tool.definition.to_anthropic_format() for tool in tools] if tools else None
+        tool_map = {tool.definition.name: tool for tool in tools} if tools else {}
+
+        total_input_tokens = 0
+        total_output_tokens = 0
+        finish_reason = None
+        content = ""
+
+        while True:
+            if system_prompt and tool_definitions:
+                response = await self._client.messages.create(
+                    model=self._model_id,
+                    max_tokens=self._max_tokens,
+                    temperature=self._temperature,
+                    messages=anthropic_messages,
+                    system=system_prompt,
+                    tools=tool_definitions,
+                )
+            elif system_prompt:
+                response = await self._client.messages.create(
+                    model=self._model_id,
+                    max_tokens=self._max_tokens,
+                    temperature=self._temperature,
+                    messages=anthropic_messages,
+                    system=system_prompt,
+                )
+            elif tool_definitions:
+                response = await self._client.messages.create(
+                    model=self._model_id,
+                    max_tokens=self._max_tokens,
+                    temperature=self._temperature,
+                    messages=anthropic_messages,
+                    tools=tool_definitions,
+                )
+            else:
+                response = await self._client.messages.create(
+                    model=self._model_id,
+                    max_tokens=self._max_tokens,
+                    temperature=self._temperature,
+                    messages=anthropic_messages,
+                )
+
+            if response.usage:
+                total_input_tokens += response.usage.input_tokens
+                total_output_tokens += response.usage.output_tokens
+
+            finish_reason = response.stop_reason or finish_reason
+
+            text_blocks = [block.text for block in response.content if block.type == "text"]
+            tool_use_blocks = [block for block in response.content if block.type == "tool_use"]
+
+            if not tool_use_blocks or not tools:
+                content = "".join(text_blocks)
+                break
+
+            anthropic_messages.append(
+                {
+                    "role": "assistant",
+                    "content": response.content,
+                }
             )
-        else:
-            response = await self._client.messages.create(
-                model=self._model_id,
-                max_tokens=self._max_tokens,
-                temperature=self._temperature,
-                messages=anthropic_messages,
-            )
+
+            tool_results = []
+            for tool_use in tool_use_blocks:
+                start_event, result_event, tool_result = await self._handle_tool_use(tool_use, tool_map)
+                _ = start_event, result_event
+                tool_results.append(tool_result)
+
+            anthropic_messages.append({"role": "user", "content": tool_results})
 
         total_time_ms = (time.time() - start_time) * 1000
 
-        content = ""
-        for block in response.content:
-            if block.type == "text":
-                content += block.text
-
         metrics = LLMMetrics(
             total_time_ms=total_time_ms,
-            input_tokens=response.usage.input_tokens if response.usage else 0,
-            output_tokens=response.usage.output_tokens if response.usage else 0,
+            input_tokens=total_input_tokens,
+            output_tokens=total_output_tokens,
         )
 
         return LLMResponse(
@@ -87,49 +138,165 @@ class AnthropicProvider(LLMProvider):
             model_id=self._model_id,
             provider=self.provider_name,
             metrics=metrics,
-            finish_reason=response.stop_reason,
+            finish_reason=finish_reason,
         )
 
-    async def generate_stream(self, messages: list[LLMMessage]) -> AsyncGenerator[StreamEvent, None]:
+    async def _handle_tool_use(
+        self,
+        tool_use: Any,
+        tool_map: dict[str, Tool],
+    ) -> tuple[StreamEvent, StreamEvent, dict[str, Any]]:
+        tool_name = tool_use.name
+        tool_input = tool_use.input
+
+        start_event = StreamEvent(
+            type=StreamEventType.TOOL_CALL_START,
+            data={
+                "id": tool_use.id,
+                "name": tool_name,
+            },
+        )
+
+        if tool_name not in tool_map:
+            error_msg = f"Unknown tool: {tool_name}"
+            result_event = StreamEvent(
+                type=StreamEventType.ERROR,
+                data={"tool_name": tool_name, "error": error_msg},
+            )
+            tool_result = {
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": error_msg,
+                "is_error": True,
+            }
+            return start_event, result_event, tool_result
+
+        try:
+            tool_output = await tool_map[tool_name].execute_with_limit(tool_input)
+            result_event = StreamEvent(
+                type=StreamEventType.TOOL_CALL_RESULT,
+                data={
+                    "id": tool_use.id,
+                    "name": tool_name,
+                    "input": tool_input,
+                    "output": tool_output,
+                },
+            )
+            tool_result = {
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": json.dumps(tool_output) if isinstance(tool_output, list | dict) else str(tool_output),
+            }
+            return start_event, result_event, tool_result
+        except Exception as e:
+            error_msg = f"Tool execution error: {str(e)}"
+            result_event = StreamEvent(
+                type=StreamEventType.ERROR,
+                data={"tool_name": tool_name, "error": error_msg},
+            )
+            tool_result = {
+                "type": "tool_result",
+                "tool_use_id": tool_use.id,
+                "content": error_msg,
+                "is_error": True,
+            }
+            return start_event, result_event, tool_result
+
+    async def generate_stream(
+        self,
+        messages: list[LLMMessage],
+        tools: list[Tool] | None = None,
+    ) -> AsyncGenerator[StreamEvent, None]:
         start_time = time.time()
         time_to_first_token = None
+        total_input_tokens = 0
+        total_output_tokens = 0
 
         system_prompt, anthropic_messages = self._extract_system_and_messages(messages)
 
-        if system_prompt:
-            stream_context = self._client.messages.stream(
-                model=self._model_id,
-                max_tokens=self._max_tokens,
-                temperature=self._temperature,
-                messages=anthropic_messages,
-                system=system_prompt,
-            )
-        else:
-            stream_context = self._client.messages.stream(
-                model=self._model_id,
-                max_tokens=self._max_tokens,
-                temperature=self._temperature,
-                messages=anthropic_messages,
-            )
+        tool_definitions = None
+        tool_map = {}
+        if tools:
+            tool_definitions = [tool.definition.to_anthropic_format() for tool in tools]
+            tool_map = {tool.definition.name: tool for tool in tools}
 
-        async with stream_context as stream:
-            async for text in stream.text_stream:
-                if time_to_first_token is None:
-                    time_to_first_token = (time.time() - start_time) * 1000
-                yield StreamEvent(type=StreamEventType.TEXT_DELTA, data=text)
-
-            total_time_ms = (time.time() - start_time) * 1000
-            final_message = await stream.get_final_message()
-
-            if final_message.usage:
-                yield StreamEvent(
-                    type=StreamEventType.USAGE,
-                    data={
-                        "input_tokens": final_message.usage.input_tokens,
-                        "output_tokens": final_message.usage.output_tokens,
-                        "total_time_ms": total_time_ms,
-                        "time_to_first_token_ms": time_to_first_token,
-                    },
+        while True:
+            if system_prompt and tool_definitions:
+                stream_context = self._client.messages.stream(
+                    model=self._model_id,
+                    max_tokens=self._max_tokens,
+                    temperature=self._temperature,
+                    messages=anthropic_messages,
+                    system=system_prompt,
+                    tools=tool_definitions,
+                )
+            elif system_prompt:
+                stream_context = self._client.messages.stream(
+                    model=self._model_id,
+                    max_tokens=self._max_tokens,
+                    temperature=self._temperature,
+                    messages=anthropic_messages,
+                    system=system_prompt,
+                )
+            elif tool_definitions:
+                stream_context = self._client.messages.stream(
+                    model=self._model_id,
+                    max_tokens=self._max_tokens,
+                    temperature=self._temperature,
+                    messages=anthropic_messages,
+                    tools=tool_definitions,
+                )
+            else:
+                stream_context = self._client.messages.stream(
+                    model=self._model_id,
+                    max_tokens=self._max_tokens,
+                    temperature=self._temperature,
+                    messages=anthropic_messages,
                 )
 
+            async with stream_context as stream:
+                async for text in stream.text_stream:
+                    if time_to_first_token is None:
+                        time_to_first_token = (time.time() - start_time) * 1000
+                    yield StreamEvent(type=StreamEventType.TEXT_DELTA, data=text)
+
+                final_message = await stream.get_final_message()
+
+                if final_message.usage:
+                    total_input_tokens += final_message.usage.input_tokens
+                    total_output_tokens += final_message.usage.output_tokens
+
+                tool_use_blocks = [block for block in final_message.content if block.type == "tool_use"]
+
+                if not tool_use_blocks:
+                    break
+
+                anthropic_messages.append(
+                    {
+                        "role": "assistant",
+                        "content": final_message.content,
+                    }
+                )
+
+                tool_results = []
+                for tool_use in tool_use_blocks:
+                    start_event, result_event, tool_result = await self._handle_tool_use(tool_use, tool_map)
+
+                    yield start_event
+                    yield result_event
+
+                    tool_results.append(tool_result)
+
+                anthropic_messages.append({"role": "user", "content": tool_results})
+
+        total_time_ms = (time.time() - start_time) * 1000
+        yield StreamEvent(
+            type=StreamEventType.USAGE,
+            data={
+                "input_tokens": total_input_tokens,
+                "output_tokens": total_output_tokens,
+                "total_time_ms": total_time_ms,
+                "time_to_first_token_ms": time_to_first_token,
+            },
+        )
         yield StreamEvent(type=StreamEventType.DONE, data="")

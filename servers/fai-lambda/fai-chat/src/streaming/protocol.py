@@ -1,4 +1,7 @@
-from abc import ABC, abstractmethod
+from abc import (
+    ABC,
+    abstractmethod,
+)
 from collections.abc import AsyncGenerator
 
 from ..llm.models import StreamEvent

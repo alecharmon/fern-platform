@@ -1,5 +1,6 @@
 import pytest
 
+from src.retrieval.filters import QueryFilters
 from src.retrieval.interface import (
     RAGRetriever,
     RetrievalQuery,
@@ -66,9 +67,9 @@ class TestRetrievalQuery:
         query = RetrievalQuery(
             query="test",
             domain="example.com",
-            filters={"type": "api"},
+            filters=QueryFilters(facet_filters=[{"field": "type", "value": "api"}]),
         )
-        assert query.filters == {"type": "api"}
+        assert query.filters == QueryFilters(facet_filters=[{"field": "type", "value": "api"}])
 
 
 class TestRetrievalResult:

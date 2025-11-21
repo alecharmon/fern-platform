@@ -40,6 +40,7 @@ from ..retrieval.interface import (
 )
 from ..settings.ask_ai import is_ask_ai_enabled
 from ..streaming.protocols.vercel_ui import VercelUIMessageStreamProtocol
+from ..tools.documentation_search import create_documentation_search_tool
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +159,22 @@ async def chat(
     query_id = request.queryId or str(uuid4())
     sources = convert_documents_to_sources(retrieval_result.documents)
 
+    initial_urls: set[str] = set()
+    for doc in retrieval_result.documents:
+        if doc.metadata:
+            url = doc.metadata.get("url")
+            if url:
+                initial_urls.add(url)
+
+    documentation_search_tool = create_documentation_search_tool(
+        retriever=retriever,
+        domain=domain,
+        filters=query_filters,
+        top_k=5,
+        max_calls=2,
+        already_retrieved_urls=initial_urls,
+    )
+
     protocol = VercelUIMessageStreamProtocol()
 
     async def generate_stream() -> AsyncGenerator[str, None]:
@@ -168,7 +185,7 @@ async def chat(
 
         async def track_metrics_and_stream() -> AsyncGenerator[StreamEvent, None]:
             nonlocal first_token_ms, input_tokens, output_tokens
-            async for event in provider.generate_stream(llm_messages):
+            async for event in provider.generate_stream(llm_messages, tools=[documentation_search_tool]):
                 if event.type == StreamEventType.TEXT_DELTA and first_token_ms is None:
                     first_token_ms = time.time() * 1000
 

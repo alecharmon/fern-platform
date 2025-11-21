@@ -1,13 +1,27 @@
-from collections.abc import AsyncGenerator, Callable
+from collections.abc import (
+    AsyncGenerator,
+    Callable,
+)
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import (
+    AsyncMock,
+    MagicMock,
+    patch,
+)
 
 import pytest
 from fastapi.testclient import TestClient
 
 from src.app import app
-from src.llm.models import StreamEvent, StreamEventType
-from src.retrieval.interface import RetrievalQuery, RetrievalResult, RetrievedDocument
+from src.llm.models import (
+    StreamEvent,
+    StreamEventType,
+)
+from src.retrieval.interface import (
+    RetrievalQuery,
+    RetrievalResult,
+    RetrievedDocument,
+)
 
 
 @pytest.fixture
@@ -42,7 +56,7 @@ def mock_retrieval_result() -> RetrievalResult:
 
 @pytest.fixture
 def mock_llm_stream() -> Callable[[Any], AsyncGenerator[StreamEvent, None]]:
-    async def stream(messages: Any) -> AsyncGenerator[StreamEvent, None]:
+    async def stream(messages: Any, tools: Any | None = None) -> AsyncGenerator[StreamEvent, None]:
         yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="Hello")
         yield StreamEvent(type=StreamEventType.TEXT_DELTA, data=" world")
         yield StreamEvent(type=StreamEventType.USAGE, data={"input_tokens": 100, "output_tokens": 50})

@@ -17,7 +17,10 @@ from .interface import (
     TimingBreakdown,
     VectorStoreError,
 )
-from .turbopuffer_query_filters import TurbopufferFilter, build_turbopuffer_filters
+from .turbopuffer_query_filters import (
+    TurbopufferFilter,
+    build_turbopuffer_filters,
+)
 
 TURBOPUFFER_INCLUDE_ATTRIBUTES = ["document", "title", "url", "id"]
 

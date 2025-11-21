@@ -1,7 +1,10 @@
 """Factory for creating LLM providers."""
 
 from functools import lru_cache
-from typing import Literal, get_args
+from typing import (
+    Literal,
+    get_args,
+)
 
 from .anthropic_factory import AnthropicProviderFactory
 from .base import LLMProvider
