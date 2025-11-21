@@ -1,10 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
-import {
-    type EnhanceExampleBatchRequest,
-    type EnhanceExampleRequest,
-    enhanceExample,
-    enhanceExamplesBatch
-} from "./services/enhanceExample";
+import { type EnhanceExampleRequest, enhanceExample } from "./services/enhanceExample";
+import { getCachedExample, storeCachedExample } from "./services/exampleCache";
 
 // Lambda Function URLs use a different event format than API Gateway
 type LambdaEvent = APIGatewayProxyEvent & {
@@ -29,37 +25,6 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
         if ((path === "/v2/registry/ai/enhance-example" || path === "/ai/enhance-example") && method === "POST") {
             try {
                 const body = JSON.parse(event.body || "{}");
-
-                if (body.endpoints && Array.isArray(body.endpoints)) {
-                    const batchRequest = body as EnhanceExampleBatchRequest;
-
-                    if (batchRequest.endpoints.length === 0) {
-                        return {
-                            statusCode: 400,
-                            headers: {
-                                "Content-Type": "application/json",
-                                "Access-Control-Allow-Origin": "*"
-                            },
-                            body: JSON.stringify({
-                                error: "ValidationError",
-                                message: "Batch request must contain at least one endpoint",
-                                requestId: context.awsRequestId
-                            })
-                        };
-                    }
-
-                    const enhancedResponse = await enhanceExamplesBatch(batchRequest, context.awsRequestId);
-
-                    return {
-                        statusCode: 200,
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Access-Control-Allow-Origin": "*"
-                        },
-                        body: JSON.stringify(enhancedResponse)
-                    };
-                }
-
                 const singleRequest = body as EnhanceExampleRequest;
 
                 if (!singleRequest.method || !singleRequest.endpointPath || !singleRequest.organizationId) {
@@ -77,7 +42,29 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
                     };
                 }
 
+                const cachedResponse = await getCachedExample(singleRequest);
+                if (cachedResponse) {
+                    // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
+                    console.log(`[Handler] Cache HIT for ${singleRequest.method} ${singleRequest.endpointPath}`);
+                    cachedResponse.requestId = context.awsRequestId;
+                    return {
+                        statusCode: 200,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        },
+                        body: JSON.stringify(cachedResponse)
+                    };
+                }
+
+                // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
+                console.log(
+                    `[Handler] Cache MISS for ${singleRequest.method} ${singleRequest.endpointPath} - calling OpenAI`
+                );
+
                 const enhancedResponse = await enhanceExample(singleRequest, context.awsRequestId);
+
+                await storeCachedExample(singleRequest, enhancedResponse);
 
                 return {
                     statusCode: 200,
@@ -185,6 +172,67 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
 
                 // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
                 console.error(`[Handler] Unhandled error in ai/enhance-example:`, error);
+                return {
+                    statusCode: 500,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        error: "InternalError",
+                        message: error instanceof Error ? error.message : "An unexpected error occurred",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+        }
+
+        // Route: POST /get-db-examples
+        if ((path === "/get-db-examples" || path === "/v2/registry/ai/get-db-examples") && method === "POST") {
+            try {
+                const body = JSON.parse(event.body || "{}");
+                const requests = body as EnhanceExampleRequest[];
+
+                if (!Array.isArray(requests)) {
+                    return {
+                        statusCode: 400,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        },
+                        body: JSON.stringify({
+                            error: "ValidationError",
+                            message: "Request body must be an array of EnhanceExampleRequest objects",
+                            requestId: context.awsRequestId
+                        })
+                    };
+                }
+
+                const results = [];
+
+                for (const request of requests) {
+                    const cached = await getCachedExample(request);
+                    if (cached) {
+                        results.push(cached);
+                    } else {
+                        results.push(null);
+                    }
+                }
+
+                return {
+                    statusCode: 200,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        results,
+                        requestId: context.awsRequestId
+                    })
+                };
+            } catch (error: unknown) {
+                // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
+                console.error(`[Handler] Error in get-db-examples:`, error);
                 return {
                     statusCode: 500,
                     headers: {

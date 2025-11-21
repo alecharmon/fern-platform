@@ -1,0 +1,36 @@
+// Docs Database Schema
+// This is a separate database from FDR, used only for docs-related caching
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model CachedEnhancedExample {
+  requestHash    String   @id
+
+  organizationId String
+  method         HttpMethod
+  endpointPath   String
+
+  enhancedRequestExample  Bytes?
+  enhancedResponseExample Bytes?
+  modelUsed              String
+  createdAt              DateTime @default(now())
+
+  @@index([organizationId, method, endpointPath])
+}
+
+enum HttpMethod {
+  PUT
+  POST
+  GET
+  PATCH
+  DELETE
+  HEAD
+}

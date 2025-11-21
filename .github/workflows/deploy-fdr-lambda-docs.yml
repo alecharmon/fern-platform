@@ -6,6 +6,7 @@ on:
       - app
     paths:
       - "servers/fdr-lambda-docs/**"
+      - "packages/migration-lambda-docs/**"
       - ".github/workflows/deploy-fdr-lambda-docs.yml"
 
 env:
@@ -30,23 +31,11 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
 
-      - name: Has changed
-        id: has-changed
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/kenny/fdr-lambda-docs" ]]; then
-            echo "RESULT=true" >> $GITHUB_OUTPUT
-            echo "Deploying from kenny/fdr-lambda-docs branch - skipping turbo-ignore"
-          else
-            npx turbo-ignore ${{ env.PACKAGE_NAME }} || echo "RESULT=true" >> $GITHUB_OUTPUT
-          fi
-
       - name: Run Tests
-        if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           pnpm --filter=${{ env.PACKAGE_NAME }} test
 
       - name: Setup AWS CLI
-        if: steps.has-changed.outputs.RESULT == 'true'
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -54,7 +43,6 @@ jobs:
           aws-region: us-east-1
 
       - name: Run Database Migrations via Lambda
-        if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           echo "Invoking migration Lambda..."
           RESPONSE=$(aws lambda invoke \
@@ -90,17 +78,14 @@ jobs:
           echo "Migrations completed successfully"
 
       - name: Build Lambda
-        if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           pnpm --filter=${{ env.PACKAGE_NAME }} build
 
       - name: Package Lambda
-        if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           pnpm --filter=${{ env.PACKAGE_NAME }} package
 
       - name: Deploy to Lambda
-        if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           cd servers/fdr-lambda-docs
           aws lambda update-function-code \
@@ -109,22 +94,19 @@ jobs:
             --region us-east-1
 
       - name: Wait for Lambda Update
-        if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           aws lambda wait function-updated \
             --function-name fdr-lambda-docs \
             --region us-east-1
 
       - name: Update Environment Variables
-        if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           aws lambda update-function-configuration \
             --function-name fdr-lambda-docs \
-            --environment Variables={OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},DOCS_DB_SECRET_ID=${{ secrets.DOCS_DB_SECRET_ID }}} \
+            --environment "Variables={OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},DOCS_DB_SECRET_ID=${{ secrets.DOCS_DB_SECRET_ID }}}" \
             --region us-east-1
 
       - name: Output
-        if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           echo "Lambda function 'fdr-lambda-docs' updated successfully"
           FUNCTION_URL=$(aws lambda get-function-url-config --function-name fdr-lambda-docs --query 'FunctionUrl' --output text)

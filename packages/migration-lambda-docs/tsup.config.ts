@@ -13,52 +13,25 @@ export default defineConfig({
     bundle: true,
     minify: false,
     sourcemap: false,
-    external: ["@prisma/client", ".prisma/client"],
+    external: ["pg"], // pg has native bindings, can't be bundled
     outExtension: () => ({ js: ".js" }),
     onSuccess: async () => {
         const distDir = path.join(process.cwd(), "dist");
-        const nodeModulesDir = path.join(distDir, "node_modules");
 
-        fs.mkdirSync(nodeModulesDir, { recursive: true });
+        // Copy migration files from local prisma directory (docs DB has its own migrations)
+        const migrationsSource = path.join(process.cwd(), "prisma", "migrations");
+        const migrationsDestDir = path.join(distDir, "migrations");
 
-        const workspaceRoot = path.join(process.cwd(), "../..");
-        const workspaceNodeModules = path.join(workspaceRoot, "node_modules/.pnpm");
+        fs.mkdirSync(migrationsDestDir, { recursive: true });
 
-        const pnpmDirs = fs.readdirSync(workspaceNodeModules);
-
-        const prismaClientDirs = pnpmDirs.filter((dir) => dir.startsWith("@prisma+client@"));
-
-        if (prismaClientDirs.length === 0) {
-            throw new Error("Could not find @prisma/client in pnpm store");
+        // Copy all migration directories
+        if (fs.existsSync(migrationsSource)) {
+            execSync(`cp -r "${migrationsSource}"/* "${migrationsDestDir}"`);
+            // biome-ignore lint/suspicious/noConsole: build script logging is intentional
+            console.log("✓ Copied docs database migrations to dist/");
+        } else {
+            // biome-ignore lint/suspicious/noConsole: build script logging is intentional
+            console.warn("⚠ No migrations found at prisma/migrations");
         }
-
-        const prismaClientDir = path.join(
-            workspaceNodeModules,
-            prismaClientDirs[0],
-            "node_modules",
-            "@prisma",
-            "client"
-        );
-        const destPrismaClientDir = path.join(nodeModulesDir, "@prisma", "client");
-
-        fs.mkdirSync(path.dirname(destPrismaClientDir), { recursive: true });
-        execSync(`cp -r "${prismaClientDir}" "${path.dirname(destPrismaClientDir)}"`);
-
-        const dotPrismaClientDir = path.join(
-            workspaceNodeModules,
-            prismaClientDirs[0],
-            "node_modules",
-            ".prisma",
-            "client"
-        );
-        const destDotPrismaClientDir = path.join(nodeModulesDir, ".prisma", "client");
-
-        fs.mkdirSync(path.dirname(destDotPrismaClientDir), { recursive: true });
-        execSync(`cp -r "${dotPrismaClientDir}" "${path.dirname(destDotPrismaClientDir)}"`);
-
-        const prismaSchemaSource = path.join(process.cwd(), "../../servers/fdr/prisma");
-        const prismaSchemaDestDir = path.join(distDir, "prisma");
-        fs.mkdirSync(prismaSchemaDestDir, { recursive: true });
-        execSync(`cp -r "${prismaSchemaSource}"/* "${prismaSchemaDestDir}"`);
     }
 });

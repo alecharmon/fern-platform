@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - app
-      - "devin/1763693682-migration-lambda"  # Test branch for migration lambda
     paths:
       - "packages/migration-lambda-docs/**"
       - "servers/fdr/prisma/**"
@@ -39,11 +38,6 @@ jobs:
 
       - name: Install
         uses: ./.github/actions/install
-
-      - name: Generate Prisma Client
-        run: |
-          cd packages/migration-lambda-docs
-          pnpm codegen
 
       - name: Build Migration Lambda
         run: |
@@ -95,25 +89,37 @@ jobs:
         run: |
           echo "Migration Lambda function 'prisma-migration-lambda-docs' updated successfully"
 
-      - name: Test Database Connection
+      - name: Run Database Migrations
         if: github.event.inputs.run_migration != 'false'
         run: |
-          echo "Testing database connection..."
+          # Determine if this is production branch or feature branch
+          if [[ "${{ github.ref }}" == "refs/heads/app" ]] || [[ "${{ github.ref }}" == "refs/heads/devin/1763683373-lambda-rds-secrets" ]]; then
+            echo "Running migrations..."
+            TEST_MODE="false"
+          else
+            echo "Testing connection on feature branch..."
+            TEST_MODE="true"
+          fi
+
           aws lambda invoke \
             --function-name prisma-migration-lambda-docs \
             --region us-east-1 \
-            --payload '{"testConnection": true}' \
+            --payload "{\"testConnection\": $TEST_MODE}" \
             --cli-binary-format raw-in-base64-out \
             response.json
 
           echo "Lambda response:"
           cat response.json
 
-          # Check if connection test was successful
-          if grep -q '"statusCode": 200' response.json; then
-            echo "✅ Database connection test successful"
+          # Check if operation was successful
+          if grep -qE '"statusCode":\s*200' response.json; then
+            if [[ "$TEST_MODE" == "true" ]]; then
+              echo "Database connection test successful"
+            else
+              echo "Migrations completed successfully"
+            fi
           else
-            echo "❌ Database connection test failed"
+            echo "Operation failed"
             cat response.json
             exit 1
           fi

@@ -6,6 +6,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
+import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import type { Construct } from "constructs";
 import * as path from "path";
 
@@ -47,11 +48,15 @@ export class FdrLambdaDocsDeployStack extends Stack {
             environment: {
                 NODE_ENV: "production",
                 ENVIRONMENT_TYPE: environmentType,
-                OPENAI_API_KEY: getEnvironmentVariableOrThrow("OPENAI_API_KEY")
+                OPENAI_API_KEY: getEnvironmentVariableOrThrow("OPENAI_API_KEY"),
+                DOCS_DB_SECRET_ID: process.env.DOCS_DB_SECRET_ID ?? ""
             }
         });
 
-        // No S3 or database permissions needed - this lambda only calls OpenAI
+        if (process.env.DOCS_DB_SECRET_ID) {
+            const dbSecret = Secret.fromSecretNameV2(this, "DocsDbSecret", process.env.DOCS_DB_SECRET_ID);
+            dbSecret.grantRead(lambdaFunction);
+        }
 
         // Create API Gateway with custom domain
         const apiName = `fdr-lambda-docs-${environmentType.toLowerCase()}`;

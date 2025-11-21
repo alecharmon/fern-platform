@@ -3028,13 +3028,19 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.700.0
         version: 3.936.0
+      pg:
+        specifier: ^8.11.3
+        version: 8.16.3
+    devDependencies:
       '@prisma/client':
         specifier: 5.13.0
         version: 5.13.0(prisma@5.13.0)
-    devDependencies:
       '@types/node':
         specifier: ^22.0.0
         version: 22.18.8
+      '@types/pg':
+        specifier: ^8.10.9
+        version: 8.15.5
       prisma:
         specifier: 5.13.0
         version: 5.13.0
@@ -3694,12 +3700,18 @@ importers:
 
   servers/fdr-lambda-docs:
     dependencies:
+      '@aws-sdk/client-secrets-manager':
+        specifier: ^3.936.0
+        version: 3.936.0
       '@types/aws-lambda':
         specifier: ^8.10.143
         version: 8.10.153
       openai:
         specifier: 6.8.1
         version: 6.8.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.49)
+      pg:
+        specifier: ^8.13.1
+        version: 8.16.3
     devDependencies:
       '@fern-platform/configs':
         specifier: workspace:*
@@ -3710,6 +3722,9 @@ importers:
       '@types/node':
         specifier: ^22.0.0
         version: 22.18.8
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.15.5
       express:
         specifier: ^5.0.0
         version: 5.1.0

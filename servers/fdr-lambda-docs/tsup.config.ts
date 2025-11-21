@@ -6,7 +6,6 @@ export default defineConfig({
     dts: true,
     outDir: "dist",
     clean: true,
-    // Bundle all dependencies
     noExternal: [/.*/],
     platform: "node",
     target: "node22",

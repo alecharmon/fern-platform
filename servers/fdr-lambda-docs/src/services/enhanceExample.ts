@@ -51,7 +51,7 @@ export async function enhanceExample(
 
     const openai = new OpenAI({
         apiKey: openaiApiKey,
-        timeout: 20000 // 20 seconds - must complete before API Gateway's 29s limit
+        timeout: 40000 // 40 seconds
     });
 
     const model = "gpt-4o-mini";
@@ -131,7 +131,7 @@ export async function enhanceExample(
                 // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
                 console.error(`OpenAI call timed out after ${elapsedMs}ms`);
                 const timeoutError = new Error(
-                    `OpenAI chat.completions timed out after 20000ms (model: ${model}, elapsed: ${elapsedMs}ms)`
+                    `OpenAI chat.completions timed out after 40000ms (model: ${model}, elapsed: ${elapsedMs}ms)`
                 );
                 timeoutError.name = "OpenAITimeout";
                 throw timeoutError;
