@@ -2,7 +2,6 @@
 
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
-import { SnippetResolver } from "@fern-api/snippets";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 import { t } from "@fern-docs/i18n";
 import { useAtomValue } from "jotai";
@@ -13,13 +12,31 @@ import type { PlaygroundEndpointRequestFormState } from "../types";
 import { returnSelectedOption } from "../utils/parse-auth-options";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 
+type SnippetsModule = typeof import("@fern-api/snippets");
+let snippetsModulePromise: Promise<SnippetsModule> | null = null;
+
+function loadSnippetsModule(): Promise<SnippetsModule> {
+    if (snippetsModulePromise == null) {
+        snippetsModulePromise = import("@fern-api/snippets").catch((err) => {
+            snippetsModulePromise = null;
+            throw err;
+        });
+    }
+    return snippetsModulePromise;
+}
+
+type SnippetsLoadState =
+    | { status: "loading" }
+    | { status: "loaded"; module: SnippetsModule }
+    | { status: "error"; error: unknown };
+
 export type DynamicSnippetLanguage = "typescript" | "python" | "java" | "ruby" | "csharp" | "go" | "php" | "swift";
 
 interface PlaygroundDynamicRequestPreviewProps {
     context: EndpointContext;
     formState: PlaygroundEndpointRequestFormState;
     requestType: DynamicSnippetLanguage;
-    dynamicIRsByLanguage: DynamicIRsByLanguage;
+    dynamicIRsByLanguage?: DynamicIRsByLanguage;
     lang: string;
 }
 export interface PlaygroundDynamicRequestPreviewRef {
@@ -32,9 +49,30 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
     PlaygroundDynamicRequestPreviewProps
 >(({ context, formState, requestType, dynamicIRsByLanguage, lang }, ref) => {
     const [code, setCode] = useState<string>(t(lang).status.loading);
+    const [snippetsLoad, setSnippetsLoad] = useState<SnippetsLoadState>({ status: "loading" });
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
     const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
     const [baseURL] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
+
+    useEffect(() => {
+        let cancelled = false;
+        loadSnippetsModule()
+            .then((module) => {
+                if (!cancelled) {
+                    setSnippetsLoad({ status: "loaded", module });
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to load @fern-api/snippets", error);
+                if (!cancelled) {
+                    setSnippetsLoad({ status: "error", error });
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     useImperativeHandle(
         ref,
@@ -45,69 +83,77 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
     );
 
     // create memoized snippet generators from the IR data
-    const memoizedGenerators = useMemo(() => {
+    const memoizedGenerators = useMemo<Record<string, any> | null | undefined>(() => {
+        if (snippetsLoad.status !== "loaded") {
+            return undefined;
+        }
+
         try {
+            const irs = dynamicIRsByLanguage ?? {};
             const snippetInputs = [];
             const generators: Record<string, any> = {};
 
             // only process languages that have IR data
-            if (dynamicIRsByLanguage.typescript) {
+            if (irs.typescript) {
                 snippetInputs.push({
                     language: "typescript" as const,
-                    ir: dynamicIRsByLanguage.typescript as any
+                    ir: irs.typescript as any
                 });
             }
 
-            if (dynamicIRsByLanguage.python) {
+            if (irs.python) {
                 snippetInputs.push({
                     language: "python" as const,
-                    ir: dynamicIRsByLanguage.python as any
+                    ir: irs.python as any
                 });
             }
 
-            if (dynamicIRsByLanguage.java) {
+            if (irs.java) {
                 snippetInputs.push({
                     language: "java" as const,
-                    ir: dynamicIRsByLanguage.java as any
+                    ir: irs.java as any
                 });
             }
 
-            if (dynamicIRsByLanguage.ruby) {
+            if (irs.ruby) {
                 snippetInputs.push({
                     language: "ruby" as const,
-                    ir: dynamicIRsByLanguage.ruby as any
+                    ir: irs.ruby as any
                 });
             }
 
-            if (dynamicIRsByLanguage.csharp) {
+            if (irs.csharp) {
                 snippetInputs.push({
                     language: "csharp" as const,
-                    ir: dynamicIRsByLanguage.csharp as any
+                    ir: irs.csharp as any
                 });
             }
 
-            if (dynamicIRsByLanguage.go) {
+            if (irs.go) {
                 snippetInputs.push({
                     language: "go" as const,
-                    ir: dynamicIRsByLanguage.go as any
+                    ir: irs.go as any
                 });
             }
 
-            if (dynamicIRsByLanguage.php) {
+            if (irs.php) {
                 snippetInputs.push({
                     language: "php" as const,
-                    ir: dynamicIRsByLanguage.php as any
+                    ir: irs.php as any
                 });
             }
 
-            if (dynamicIRsByLanguage.swift) {
+            if (irs.swift) {
                 snippetInputs.push({
                     language: "swift" as const,
-                    ir: dynamicIRsByLanguage.swift as any
+                    ir: irs.swift as any
                 });
             }
+            if (snippetInputs.length === 0) {
+                return generators;
+            }
 
-            const snippetResolver = new SnippetResolver({ snippetInputs });
+            const snippetResolver = new snippetsLoad.module.SnippetResolver({ snippetInputs });
 
             // create endpoint generators only for languages that have IR data
             const endpointPath = `${context.endpoint.method} ${context.endpoint.path
@@ -119,42 +165,42 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
                 })
                 .join("")}`;
 
-            if (dynamicIRsByLanguage.typescript) {
+            if (irs.typescript) {
                 const typescriptSdk = snippetResolver.sdk("typescript");
                 generators.typescript = typescriptSdk?.endpoint(endpointPath);
             }
 
-            if (dynamicIRsByLanguage.python) {
+            if (irs.python) {
                 const pythonSdk = snippetResolver.sdk("python");
                 generators.python = pythonSdk?.endpoint(endpointPath);
             }
 
-            if (dynamicIRsByLanguage.java) {
+            if (irs.java) {
                 const javaSdk = snippetResolver.sdk("java");
                 generators.java = javaSdk?.endpoint(endpointPath);
             }
 
-            if (dynamicIRsByLanguage.ruby) {
+            if (irs.ruby) {
                 const rubySdk = snippetResolver.sdk("ruby");
                 generators.ruby = rubySdk?.endpoint(endpointPath);
             }
 
-            if (dynamicIRsByLanguage.csharp) {
+            if (irs.csharp) {
                 const csharpSdk = snippetResolver.sdk("csharp");
                 generators.csharp = csharpSdk?.endpoint(endpointPath);
             }
 
-            if (dynamicIRsByLanguage.go) {
+            if (irs.go) {
                 const goSdk = snippetResolver.sdk("go");
                 generators.go = goSdk?.endpoint(endpointPath);
             }
 
-            if (dynamicIRsByLanguage.php) {
+            if (irs.php) {
                 const phpSdk = snippetResolver.sdk("php");
                 generators.php = phpSdk?.endpoint(endpointPath);
             }
 
-            if (dynamicIRsByLanguage.swift) {
+            if (irs.swift) {
                 const swiftSdk = snippetResolver.sdk("swift");
                 generators.swift = swiftSdk?.endpoint(endpointPath);
             }
@@ -164,13 +210,28 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
             console.error("Error creating snippet generators:", error);
             return null;
         }
-    }, [dynamicIRsByLanguage, context.endpoint.method, context.endpoint.path]);
+    }, [dynamicIRsByLanguage, context.endpoint.method, context.endpoint.path, snippetsLoad]);
 
     // biome-ignore lint/correctness/useExhaustiveDependencies: also runs when selectedAuthType changes
     useEffect(() => {
         const generateCode = () => {
             try {
-                if (!memoizedGenerators) {
+                if (snippetsLoad.status === "loading") {
+                    setCode(t(lang).status.loading);
+                    return;
+                }
+
+                if (snippetsLoad.status === "error") {
+                    setCode("Failed to load code generators. Please refresh and try again.");
+                    return;
+                }
+
+                if (memoizedGenerators === undefined) {
+                    setCode(t(lang).status.loading);
+                    return;
+                }
+
+                if (memoizedGenerators === null) {
                     setCode(t(lang).errors.failedToCreateSnippetGenerators);
                     return;
                 }
@@ -215,7 +276,7 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         };
 
         generateCode();
-    }, [requestType, memoizedGenerators, formState, baseURL, authState, lang, selectedAuthType]);
+    }, [requestType, memoizedGenerators, formState, baseURL, authState, lang, selectedAuthType, snippetsLoad]);
 
     return (
         <FernSyntaxHighlighter
