@@ -154,7 +154,13 @@ export const SearchV2 = React.memo(function SearchV2({
             <DefaultDesktopBackButton lang={lang} />
             <CommandGroupFilters lang={lang} />
             <CommandEmpty lang={lang} />
-            <CommandSearchHits onSelect={handleNavigate} prefetch={(path) => router.prefetch(path)} domain={domain} />
+            <CommandSearchHits
+                onSelect={handleNavigate}
+                prefetch={(path) => router.prefetch(path)}
+                domain={domain}
+                currentVersion={currentVersion}
+                currentProduct={currentProduct}
+            />
             <CommandActions>
                 <CommandTheme
                     onClose={() => {

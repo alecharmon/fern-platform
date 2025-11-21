@@ -15,11 +15,15 @@ import { type GroupedHit, generateHits } from "./hits";
 export const CommandSearchHits = ({
     domain,
     onSelect,
-    prefetch
+    prefetch,
+    currentVersion,
+    currentProduct
 }: {
     domain: string;
     onSelect: (path: string) => void;
     prefetch?: (path: string) => void | Promise<void>;
+    currentVersion?: string;
+    currentProduct?: string;
 }): ReactNode => {
     const isQueryEmpty = Command.useCommandState((state) => state.search.trimStart().length === 0);
     const { items, isLastPage, showMore } = useInfiniteSearchHits();
@@ -59,6 +63,8 @@ export const CommandSearchHits = ({
             prefetch={prefetch}
             domain={domain}
             sentinelRef={sentinelRef}
+            currentVersion={currentVersion}
+            currentProduct={currentProduct}
         />
     );
 };
@@ -69,15 +75,19 @@ const MemoizedCommandSearchHits = memo(
         items,
         onSelect,
         prefetch,
-        sentinelRef
+        sentinelRef,
+        currentVersion,
+        currentProduct
     }: {
         domain: string;
         items: AlgoliaRecordHit[];
         onSelect: (path: string) => void;
         prefetch?: (path: string) => void | Promise<void>;
         sentinelRef: React.RefObject<HTMLLIElement | null>;
+        currentVersion?: string;
+        currentProduct?: string;
     }) => {
-        const groups = generateHits(items);
+        const groups = generateHits(items, currentVersion, currentProduct);
 
         return (
             <TooltipProvider>

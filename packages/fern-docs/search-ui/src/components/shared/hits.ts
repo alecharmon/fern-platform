@@ -12,38 +12,49 @@ export interface GroupedHits {
     hits: GroupedHit[];
 }
 
-// type SegmentType = "markdown" | "changelog" | "parameter" | "http" | "webhook" | "websocket";
-// const SEGMENT_DISPLAY_NAMES: Record<SegmentType, string> = {
-//     markdown: "Guides",
-//     changelog: "Changelog",
-//     parameter: "Parameters",
-//     http: "Endpoints",
-//     webhook: "Webhooks",
-//     websocket: "WebSockets",
-// };
+export function generateHits(
+    items: AlgoliaRecordHit[],
+    currentVersion?: string,
+    currentProduct?: string
+): GroupedHits[] {
+    // prefer the current product and version for rankings
+    const sortedItems = [...items].sort((a, b) => {
+        const aMatchesVersion = currentVersion != null && a.version?.id === currentVersion;
+        const bMatchesVersion = currentVersion != null && b.version?.id === currentVersion;
+        const aMatchesProduct = currentProduct != null && a.product?.id === currentProduct;
+        const bMatchesProduct = currentProduct != null && b.product?.id === currentProduct;
 
-export function generateHits(items: AlgoliaRecordHit[]): GroupedHits[] {
-    // return Object.entries(
-    //     groupBy(items, (item): SegmentType => {
-    //         if (item.type === "api-reference") {
-    //             return item.api_type;
-    //         }
-    //         return item.type;
-    //     }),
-    // ).map(([type, hits]) => ({
-    //     title: SEGMENT_DISPLAY_NAMES[type as SegmentType] ?? type,
-    //     hits: hits.map((hit) => ({
-    //         title: hit.title,
-    //         path: `${hit.pathname}${hit.hash ?? ""}`,
-    //         icon: hit.icon,
-    //         record: hit,
-    //     })),
-    // }));
+        const aMatchesBoth = aMatchesVersion && aMatchesProduct;
+        const bMatchesBoth = bMatchesVersion && bMatchesProduct;
+
+        if (aMatchesBoth && !bMatchesBoth) {
+            return -1;
+        }
+        if (!aMatchesBoth && bMatchesBoth) {
+            return 1;
+        }
+
+        if (aMatchesProduct && !bMatchesProduct) {
+            return -1;
+        }
+        if (!aMatchesProduct && bMatchesProduct) {
+            return 1;
+        }
+
+        if (aMatchesVersion && !bMatchesVersion) {
+            return -1;
+        }
+        if (!aMatchesVersion && bMatchesVersion) {
+            return 1;
+        }
+
+        return 0;
+    });
 
     return [
         {
             title: "Results",
-            hits: items.map((hit) => ({
+            hits: sortedItems.map((hit) => ({
                 title: hit.title,
                 path: `${hit.pathname}${hit.hash ?? ""}`,
                 // category: SEGMENT_DISPLAY_NAMES[hit.type === "api-reference" ? hit.api_type : hit.type],
