@@ -90,3 +90,7 @@ test-results
 
 # Claude
 **/settings.local.json
+
+# Migration Lambda build artifacts
+packages/migration-lambda-docs/dist/
+packages/migration-lambda-docs/migration-lambda.zip

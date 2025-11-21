@@ -1,0 +1,119 @@
+name: Deploy Migration Lambda Docs
+
+on:
+  push:
+    branches:
+      - app
+      - "devin/1763693682-migration-lambda"  # Test branch for migration lambda
+    paths:
+      - "packages/migration-lambda-docs/**"
+      - "servers/fdr/prisma/**"
+      - ".github/workflows/deploy-migration-lambda-docs.yml"
+  workflow_dispatch:  # Allow manual triggering for testing
+    inputs:
+      run_migration:
+        description: 'Run migration after deployment?'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+env:
+  PACKAGE_NAME: "@fern-platform/migration-lambda-docs"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  deploy:
+    runs-on: Seed
+    environment: Fern Prod
+    strategy:
+      matrix:
+        concurrency: [1]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Generate Prisma Client
+        run: |
+          cd packages/migration-lambda-docs
+          pnpm codegen
+
+      - name: Build Migration Lambda
+        run: |
+          cd packages/migration-lambda-docs
+          pnpm build
+
+      - name: Package Migration Lambda
+        run: |
+          cd packages/migration-lambda-docs
+          pnpm package
+
+      - name: Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy Migration Lambda
+        run: |
+          cd packages/migration-lambda-docs
+          aws lambda update-function-code \
+            --function-name prisma-migration-lambda-docs \
+            --zip-file fileb://migration-lambda.zip \
+            --region us-east-1
+
+      - name: Wait for Lambda Update
+        run: |
+          aws lambda wait function-updated \
+            --function-name prisma-migration-lambda-docs \
+            --region us-east-1
+
+      - name: Update Environment Variables
+        run: |
+          aws lambda update-function-configuration \
+            --function-name prisma-migration-lambda-docs \
+            --environment Variables={DOCS_DB_SECRET_ID=${{ secrets.DOCS_DB_SECRET_ID }}} \
+            --region us-east-1
+
+      - name: Wait for Configuration Update
+        run: |
+          echo "Waiting for Lambda configuration to update..."
+          aws lambda wait function-updated \
+            --function-name prisma-migration-lambda-docs \
+            --region us-east-1
+          echo "Configuration update complete"
+
+      - name: Output
+        run: |
+          echo "Migration Lambda function 'prisma-migration-lambda-docs' updated successfully"
+
+      - name: Test Database Connection
+        if: github.event.inputs.run_migration != 'false'
+        run: |
+          echo "Testing database connection..."
+          aws lambda invoke \
+            --function-name prisma-migration-lambda-docs \
+            --region us-east-1 \
+            --payload '{"testConnection": true}' \
+            --cli-binary-format raw-in-base64-out \
+            response.json
+
+          echo "Lambda response:"
+          cat response.json
+
+          # Check if connection test was successful
+          if grep -q '"statusCode": 200' response.json; then
+            echo "✅ Database connection test successful"
+          else
+            echo "❌ Database connection test failed"
+            cat response.json
+            exit 1
+          fi

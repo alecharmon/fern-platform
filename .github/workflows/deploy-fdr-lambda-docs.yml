@@ -45,6 +45,50 @@ jobs:
         run: |
           pnpm --filter=${{ env.PACKAGE_NAME }} test
 
+      - name: Setup AWS CLI
+        if: steps.has-changed.outputs.RESULT == 'true'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run Database Migrations via Lambda
+        if: steps.has-changed.outputs.RESULT == 'true'
+        run: |
+          echo "Invoking migration Lambda..."
+          RESPONSE=$(aws lambda invoke \
+            --function-name prisma-migration-lambda-docs \
+            --region us-east-1 \
+            --payload '{}' \
+            --cli-binary-format raw-in-base64-out \
+            response.json)
+          
+          echo "Lambda response:"
+          cat response.json
+          
+          STATUS_CODE=$(echo $RESPONSE | jq -r '.StatusCode')
+          if [ "$STATUS_CODE" != "200" ]; then
+            echo "Migration Lambda invocation failed with status code: $STATUS_CODE"
+            exit 1
+          fi
+          
+          FUNCTION_ERROR=$(echo $RESPONSE | jq -r '.FunctionError // empty')
+          if [ ! -z "$FUNCTION_ERROR" ]; then
+            echo "Migration Lambda execution failed with error: $FUNCTION_ERROR"
+            cat response.json
+            exit 1
+          fi
+          
+          BODY_STATUS=$(cat response.json | jq -r '.statusCode')
+          if [ "$BODY_STATUS" != "200" ]; then
+            echo "Migration failed with status: $BODY_STATUS"
+            cat response.json
+            exit 1
+          fi
+          
+          echo "Migrations completed successfully"
+
       - name: Build Lambda
         if: steps.has-changed.outputs.RESULT == 'true'
         run: |
@@ -55,34 +99,29 @@ jobs:
         run: |
           pnpm --filter=${{ env.PACKAGE_NAME }} package
 
-      - name: Setup AWS CLI
-        if: steps.has-changed.outputs.RESULT == 'true'
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
       - name: Deploy to Lambda
         if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           cd servers/fdr-lambda-docs
           aws lambda update-function-code \
             --function-name fdr-lambda-docs \
-            --zip-file fileb://lambda.zip
+            --zip-file fileb://lambda.zip \
+            --region us-east-1
 
       - name: Wait for Lambda Update
         if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           aws lambda wait function-updated \
-            --function-name fdr-lambda-docs
+            --function-name fdr-lambda-docs \
+            --region us-east-1
 
       - name: Update Environment Variables
         if: steps.has-changed.outputs.RESULT == 'true'
         run: |
           aws lambda update-function-configuration \
             --function-name fdr-lambda-docs \
-            --environment Variables={OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}}
+            --environment Variables={OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},DOCS_DB_SECRET_ID=${{ secrets.DOCS_DB_SECRET_ID }}} \
+            --region us-east-1
 
       - name: Output
         if: steps.has-changed.outputs.RESULT == 'true'
