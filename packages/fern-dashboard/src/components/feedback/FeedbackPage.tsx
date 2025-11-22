@@ -32,12 +32,13 @@ export function FeedbackPage({ docsUrl, initialData }: FeedbackPageProps) {
         isLoading: allFeedbackLoading,
         error: allFeedbackError
     } = useQuery({
-        queryKey: ["feedback", "all", docsUrl, dateRange, allFeedbackPage],
+        queryKey: ["feedback", "page", docsUrl, dateRange, allFeedbackPage],
         queryFn: () =>
             getFeedback({
                 docsUrl,
                 dateRange,
-                page: allFeedbackPage
+                page: allFeedbackPage,
+                feedbackType: "page"
             }),
         initialData:
             allFeedbackPage === 1 && dateRange.type === "last_n_days" && dateRange.days === 7 ? initialData : undefined,
@@ -50,12 +51,13 @@ export function FeedbackPage({ docsUrl, initialData }: FeedbackPageProps) {
         isLoading: codeIssuesLoading,
         error: codeIssuesError
     } = useQuery({
-        queryKey: ["feedback", "code-issues", docsUrl, dateRange, codeIssuesPage],
+        queryKey: ["feedback", "code_block", docsUrl, dateRange, codeIssuesPage],
         queryFn: () =>
             getFeedback({
                 docsUrl,
                 dateRange,
-                page: codeIssuesPage
+                page: codeIssuesPage,
+                feedbackType: "code_block"
             }),
         staleTime: 5 * 60 * 1000,
         refetchOnWindowFocus: false
@@ -74,9 +76,8 @@ export function FeedbackPage({ docsUrl, initialData }: FeedbackPageProps) {
         setCodeIssuesPage(1);
     };
 
-    const allFeedback = allFeedbackData?.feedback ?? [];
-    const pageFeedback = allFeedback.filter((f) => f.feedbackType !== "code_block");
-    const codeIssues = codeIssuesData?.feedback.filter((f) => f.feedbackType === "code_block") ?? [];
+    const pageFeedback = allFeedbackData?.feedback ?? [];
+    const codeIssues = codeIssuesData?.feedback ?? [];
 
     return (
         <div className="flex w-full flex-col gap-4">

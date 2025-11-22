@@ -48,7 +48,8 @@ const GetFeedbackSchema = z.object({
         .optional(),
     includeInternal: z.boolean().optional(),
     page: z.number().int().min(1).optional(),
-    pageSize: z.number().int().min(1).max(1000).optional()
+    pageSize: z.number().int().min(1).max(1000).optional(),
+    feedbackType: z.enum(["page", "code_block", "all"]).optional()
 });
 
 export type GetFeedbackRequest = z.infer<typeof GetFeedbackSchema>;
@@ -143,12 +144,19 @@ async function verifyDomainAccessAndGetSite(docsUrl: string) {
 
 function getCacheKey(
     domain: string,
-    params: { dateRange?: DateRangeOptions; includeInternal?: boolean; page?: number; pageSize?: number }
+    params: {
+        dateRange?: DateRangeOptions;
+        includeInternal?: boolean;
+        page?: number;
+        pageSize?: number;
+        feedbackType?: "page" | "code_block" | "all";
+    }
 ) {
     const flatParams: Record<string, unknown> = {
         includeInternal: params.includeInternal,
         page: params.page,
-        pageSize: params.pageSize
+        pageSize: params.pageSize,
+        feedbackType: params.feedbackType
     };
 
     const dateRange = params.dateRange;
@@ -192,7 +200,8 @@ export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedb
         dateRange,
         includeInternal: validated.includeInternal,
         page,
-        pageSize
+        pageSize,
+        feedbackType: validated.feedbackType
     });
 
     const cachedData = await FEEDBACK_CACHE.get(cacheKey, async () => {
@@ -209,7 +218,8 @@ export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedb
             dateRange,
             includeInternal: validated.includeInternal,
             limit,
-            offset
+            offset,
+            feedbackType: validated.feedbackType
         });
 
         const hasMore = feedback.length > pageSize;

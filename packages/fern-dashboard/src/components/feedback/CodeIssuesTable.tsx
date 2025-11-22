@@ -77,11 +77,11 @@ export function CodeIssuesTable({
                     docsUrl,
                     dateRange,
                     page: currentPage,
-                    pageSize
+                    pageSize,
+                    feedbackType: "code_block"
                 });
 
-                const codeIssuesFeedback = response.feedback.filter((f) => f.feedbackType === "code_block");
-                allFeedback.push(...codeIssuesFeedback);
+                allFeedback.push(...response.feedback);
 
                 if (!response.pagination.hasMore) {
                     break;

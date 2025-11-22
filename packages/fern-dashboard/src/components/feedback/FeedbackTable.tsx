@@ -77,11 +77,11 @@ export function FeedbackTable({
                     docsUrl,
                     dateRange,
                     page: currentPage,
-                    pageSize
+                    pageSize,
+                    feedbackType: "page"
                 });
 
-                const pageFeedback = response.feedback.filter((f) => f.feedbackType !== "code_block");
-                allFeedback.push(...pageFeedback);
+                allFeedback.push(...response.feedback);
 
                 if (!response.pagination.hasMore) {
                     break;

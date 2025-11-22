@@ -15,7 +15,8 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
                 type: "last_n_days",
                 days: 7
             },
-            page: 1
+            page: 1,
+            feedbackType: "page"
         });
     } catch (error) {
         console.error("Failed to preload feedback data:", error);

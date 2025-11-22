@@ -786,6 +786,7 @@ export class AnalyticsService {
         options: TimeSeriesOptions & {
             limit?: number;
             offset?: number;
+            feedbackType?: "page" | "code_block" | "all";
         } = {}
     ): Promise<
         {
@@ -803,7 +804,7 @@ export class AnalyticsService {
             code?: string;
         }[]
     > {
-        const { limit = 100, offset = 0 } = options;
+        const { limit = 100, offset = 0, feedbackType = "all" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
         const hostFilter = this.buildHostFilterClause();
 
@@ -877,21 +878,47 @@ export class AnalyticsService {
         ${whereClause}
     `;
 
-        const combinedQuery = `
-      SELECT * FROM (
-        ${pageFeedbackQuery}
-        UNION ALL
-        ${codeBlockFeedbackQuery}
-      )
-      ORDER BY timestamp DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `;
+        let finalQuery: string;
+        let queryNameSuffix: string;
+
+        if (feedbackType === "page") {
+            finalQuery = `
+        SELECT * FROM (
+          ${pageFeedbackQuery}
+        )
+        ORDER BY timestamp DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+            queryNameSuffix = `feedback-page-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`;
+        } else if (feedbackType === "code_block") {
+            finalQuery = `
+        SELECT * FROM (
+          ${codeBlockFeedbackQuery}
+        )
+        ORDER BY timestamp DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+            queryNameSuffix = `feedback-code-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`;
+        } else {
+            finalQuery = `
+        SELECT * FROM (
+          ${pageFeedbackQuery}
+          UNION ALL
+          ${codeBlockFeedbackQuery}
+        )
+        ORDER BY timestamp DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+            queryNameSuffix = `feedback-all-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`;
+        }
 
         const response = await this.client.query<
             [string, string, boolean, string, string, string, string, string, string, string, string, string, string]
-        >(combinedQuery, {
-            name: `feedback-${this.getQueryNameSuffix(options)}-${this.config.baseSiteUrl}`
+        >(finalQuery, {
+            name: queryNameSuffix
         });
 
         return response.results.map((row) => ({
