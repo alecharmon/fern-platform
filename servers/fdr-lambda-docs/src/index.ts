@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import { Pool } from "pg";
 import { type EnhanceExampleRequest, enhanceExample } from "./services/enhanceExample";
-import { getCachedExample, storeCachedExample } from "./services/exampleCache";
+import { getCachedExample, getConnectionDetails, storeCachedExample } from "./services/exampleCache";
 
 // Lambda Function URLs use a different event format than API Gateway
 type LambdaEvent = APIGatewayProxyEvent & {
@@ -11,6 +12,37 @@ type LambdaEvent = APIGatewayProxyEvent & {
         };
     };
 };
+
+// Create connection pool outside handler for connection reuse
+// Pool will be initialized on first use to avoid blocking cold starts
+let pool: Pool | null = null;
+
+async function getPool(): Promise<Pool | null> {
+    if (pool) {
+        return pool;
+    }
+
+    const connectionDetails = await getConnectionDetails();
+    if (!connectionDetails) {
+        return null;
+    }
+
+    pool = new Pool({
+        host: connectionDetails.host,
+        port: connectionDetails.port,
+        database: connectionDetails.database,
+        user: connectionDetails.user,
+        password: connectionDetails.password,
+        max: 1, // Lambda best practice: use minimal connections
+        idleTimeoutMillis: 120000, // 2 minutes - align with typical Lambda timeout
+        connectionTimeoutMillis: 60000, // 60 seconds - enough for RDS Proxy cold start
+        ssl: {
+            rejectUnauthorized: false
+        }
+    });
+
+    return pool;
+}
 
 export const handler = async (event: LambdaEvent, context: Context): Promise<APIGatewayProxyResult> => {
     // Support both API Gateway and Lambda Function URL formats
@@ -42,7 +74,8 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
                     };
                 }
 
-                const cachedResponse = await getCachedExample(singleRequest);
+                const dbPool = await getPool();
+                const cachedResponse = await getCachedExample(singleRequest, dbPool);
                 if (cachedResponse) {
                     // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
                     console.log(`[Handler] Cache HIT for ${singleRequest.method} ${singleRequest.endpointPath}`);
@@ -64,7 +97,7 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
 
                 const enhancedResponse = await enhanceExample(singleRequest, context.awsRequestId);
 
-                await storeCachedExample(singleRequest, enhancedResponse);
+                await storeCachedExample(singleRequest, enhancedResponse, dbPool);
 
                 return {
                     statusCode: 200,
@@ -209,9 +242,10 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
                 }
 
                 const results = [];
+                const dbPool = await getPool();
 
                 for (const request of requests) {
-                    const cached = await getCachedExample(request);
+                    const cached = await getCachedExample(request, dbPool);
                     if (cached) {
                         results.push(cached);
                     } else {

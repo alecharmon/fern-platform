@@ -54,7 +54,7 @@ export async function enhanceExample(
         timeout: 40000 // 40 seconds
     });
 
-    const model = "gpt-4o-mini";
+    const model = "gpt-4.1-mini";
     const prompt = buildEnhancementPrompt(request);
 
     const startTime = Date.now();

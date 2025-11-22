@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { GetSecretValueCommand, SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
-import { Client } from "pg";
+import type { Pool } from "pg";
 import type { EnhanceExampleRequest, EnhanceExampleResponse } from "./enhanceExample";
 
 interface RDSSecret {
@@ -22,7 +22,7 @@ interface DbConnectionDetails {
 
 let cachedConnectionDetails: DbConnectionDetails | null = null;
 
-async function getConnectionDetails(): Promise<DbConnectionDetails | null> {
+export async function getConnectionDetails(): Promise<DbConnectionDetails | null> {
     if (cachedConnectionDetails) {
         return cachedConnectionDetails;
     }
@@ -105,24 +105,18 @@ export function computeRequestHash(request: EnhanceExampleRequest): string {
     return createHash("sha256").update(hashString).digest("hex");
 }
 
-export async function getCachedExample(request: EnhanceExampleRequest): Promise<EnhanceExampleResponse | null> {
-    const connectionDetails = await getConnectionDetails();
-    if (!connectionDetails) {
+export async function getCachedExample(
+    request: EnhanceExampleRequest,
+    pool: Pool | null
+): Promise<EnhanceExampleResponse | null> {
+    if (!pool) {
         return null;
     }
 
-    const client = new Client({
-        ...connectionDetails,
-        ssl: {
-            rejectUnauthorized: false
-        }
-    });
-
     try {
-        await client.connect();
         const hash = computeRequestHash(request);
 
-        const result = await client.query(
+        const result = await pool.query(
             'SELECT "enhancedRequestExample", "enhancedResponseExample", "modelUsed" FROM "CachedEnhancedExample" WHERE "requestHash" = $1',
             [hash]
         );
@@ -146,29 +140,19 @@ export async function getCachedExample(request: EnhanceExampleRequest): Promise<
         // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
         console.error("[getCachedExample] Error retrieving from cache:", error);
         return null;
-    } finally {
-        await client.end();
     }
 }
 
 export async function storeCachedExample(
     request: EnhanceExampleRequest,
-    response: EnhanceExampleResponse
+    response: EnhanceExampleResponse,
+    pool: Pool | null
 ): Promise<void> {
-    const connectionDetails = await getConnectionDetails();
-    if (!connectionDetails) {
+    if (!pool) {
         return;
     }
 
-    const client = new Client({
-        ...connectionDetails,
-        ssl: {
-            rejectUnauthorized: false
-        }
-    });
-
     try {
-        await client.connect();
         const hash = computeRequestHash(request);
 
         const enhancedRequestBuffer = response.enhancedRequestExample
@@ -179,7 +163,7 @@ export async function storeCachedExample(
             : null;
 
         // Upsert using INSERT ... ON CONFLICT
-        await client.query(
+        await pool.query(
             `INSERT INTO "CachedEnhancedExample" ("requestHash", "organizationId", "method", "endpointPath", "enhancedRequestExample", "enhancedResponseExample", "modelUsed", "createdAt")
              VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
              ON CONFLICT ("requestHash")
@@ -200,7 +184,5 @@ export async function storeCachedExample(
     } catch (error) {
         // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
         console.error("[storeCachedExample] Error storing to cache:", error);
-    } finally {
-        await client.end();
     }
 }
