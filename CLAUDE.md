@@ -265,3 +265,14 @@ This monorepo uses Turborepo for build caching. Key tasks defined in `turbo.json
 - All feature branches should target `app`
 - CI runs on all branches
 - Deployments happen via tagged releases or merges to `app`
+
+## Pull Request Guidelines
+
+When creating pull requests in this repository:
+
+1. **PR Title**: Must follow semantic commit message rules with format `<action>(<realm>): <description>` where:
+   - `<action>` is one of: `chore`, `devex`, `feat`, `fix`, `ui`
+   - `<realm>` is one of: `fdr`, `dashboard`, `ask-fern`, `editor`, `docs`
+2. **Assignee**: Always assign the person who prompted you to create the PR as the assignee
+3. **Description**: Follow the PR template in `.github/pull_request_template.md`
+4. **Testing**: Ensure all tests pass before marking PR as ready for review
