@@ -33,6 +33,41 @@ response = requests.post(
 print(response.json())"
 `;
 
+exports[`PlaygroundCodeSnippetBuilder > should render python with form-urlencoded and all null values as no data 1`] = `
+"import requests
+
+# My endpoint (POST /test/:test)
+response = requests.post(
+  "https://example.com/test/hello%40example",
+  headers={
+    "Accept": "application/json",
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+)
+
+print(response.json())"
+`;
+
+exports[`PlaygroundCodeSnippetBuilder > should render python with form-urlencoded and omit null/undefined values 1`] = `
+"import requests
+
+# My endpoint (POST /test/:test)
+response = requests.post(
+  "https://example.com/test/hello%40example",
+  headers={
+    "Accept": "application/json",
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  data={
+    "username": "john_doe",
+    "password": "s3cret",
+    "remember_me": "true"
+  },
+)
+
+print(response.json())"
+`;
+
 exports[`PlaygroundCodeSnippetBuilder > should render python with form-urlencoded content type 1`] = `
 "import requests
 
@@ -46,6 +81,26 @@ response = requests.post(
   data={
     "username": "john_doe",
     "password": "s3cret"
+  },
+)
+
+print(response.json())"
+`;
+
+exports[`PlaygroundCodeSnippetBuilder > should render python with form-urlencoded content type and boolean values 1`] = `
+"import requests
+
+# My endpoint (POST /test/:test)
+response = requests.post(
+  "https://example.com/test/hello%40example",
+  headers={
+    "Accept": "application/json",
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  data={
+    "query": "what model car is this for?",
+    "database_name": "nissan",
+    "include_files": "true"
   },
 )
 

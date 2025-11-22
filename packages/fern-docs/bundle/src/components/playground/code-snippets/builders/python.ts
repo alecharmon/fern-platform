@@ -66,6 +66,32 @@ print(response.json())`;
         return String(value);
     }
 
+    // Convert JavaScript value to URL-encoded form data string representation
+    #toUrlEncodedLiteral(value: unknown): string {
+        if (value === null || value === undefined) {
+            return "None";
+        }
+        if (typeof value === "boolean") {
+            return JSON.stringify(value ? "true" : "false");
+        }
+        if (typeof value === "string") {
+            return JSON.stringify(value);
+        }
+        if (typeof value === "number") {
+            return String(value);
+        }
+        if (Array.isArray(value)) {
+            return `[${value.map((v) => this.#toUrlEncodedLiteral(v)).join(", ")}]`;
+        }
+        if (typeof value === "object") {
+            const entries = Object.entries(value)
+                .filter(([, v]) => v !== null && v !== undefined)
+                .map(([k, v]) => `${JSON.stringify(k)}: ${this.#toUrlEncodedLiteral(v)}`);
+            return `{\n  ${entries.join(",\n  ")}\n}`;
+        }
+        return String(value);
+    }
+
     public override build(): string {
         const imports = ["requests"];
 
@@ -86,11 +112,13 @@ ${this.#buildRequests({})}`;
 
                 if (isFormUrlEncoded) {
                     // Use data= for form-urlencoded with Python dict syntax
-                    // Only include data if value is not null/undefined and not an empty object
-                    const hasData = value != null && (typeof value !== "object" || Object.keys(value).length > 0);
+                    // Only include data if value has non-nullish entries after filtering
+                    const hasData =
+                        value != null &&
+                        (typeof value !== "object" || Object.values(value).some((v) => v !== null && v !== undefined));
                     return `${imports.map((pkg) => `import ${pkg}`).join("\n")}
 
-${this.#buildRequests({ data: hasData ? this.#toPythonLiteral(value) : undefined })}`;
+${this.#buildRequests({ data: hasData ? this.#toUrlEncodedLiteral(value) : undefined })}`;
                 }
 
                 // Use json= for application/json

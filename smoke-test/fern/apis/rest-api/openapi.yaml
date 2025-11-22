@@ -378,6 +378,13 @@ paths:
                   type: string
                   format: password
                   example: s3cret
+                remember_me:
+                  type: boolean
+                  description: Keep user logged in
+                  example: true
+                session_name:
+                  type: string
+                  description: Optional session name
               required:
                 - username
                 - password
@@ -387,6 +394,7 @@ paths:
                 value:
                   username: john_doe
                   password: s3cret
+                  remember_me: true
       responses:
         "200":
           description: Token response

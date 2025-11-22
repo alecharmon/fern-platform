@@ -322,4 +322,80 @@ describe("PlaygroundCodeSnippetBuilder", () => {
             new PythonRequestSnippetBuilder(context, formUrlencodedStateUndefined, {}, undefined, false).build()
         ).toMatchSnapshot();
     });
+
+    it("should render python with form-urlencoded content type and boolean values", () => {
+        const formUrlencodedStateWithBooleans: PlaygroundEndpointRequestFormState = {
+            type: "endpoint",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            pathParameters: {
+                test: "hello@example"
+            },
+            queryParameters: {},
+            body: {
+                type: "json",
+                value: {
+                    query: "what model car is this for?",
+                    database_name: "nissan",
+                    include_files: true
+                }
+            }
+        };
+        expect(
+            new PythonRequestSnippetBuilder(context, formUrlencodedStateWithBooleans, {}, undefined, false).build()
+        ).toMatchSnapshot();
+    });
+
+    it("should render python with form-urlencoded and omit null/undefined values", () => {
+        const formUrlencodedStateWithNulls: PlaygroundEndpointRequestFormState = {
+            type: "endpoint",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            pathParameters: {
+                test: "hello@example"
+            },
+            queryParameters: {},
+            body: {
+                type: "json",
+                value: {
+                    username: "john_doe",
+                    password: "s3cret",
+                    remember_me: true,
+                    optional_field: undefined,
+                    nullable_field: null
+                }
+            }
+        };
+        expect(
+            new PythonRequestSnippetBuilder(context, formUrlencodedStateWithNulls, {}, undefined, false).build()
+        ).toMatchSnapshot();
+    });
+
+    it("should render python with form-urlencoded and all null values as no data", () => {
+        const formUrlencodedStateAllNulls: PlaygroundEndpointRequestFormState = {
+            type: "endpoint",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            pathParameters: {
+                test: "hello@example"
+            },
+            queryParameters: {},
+            body: {
+                type: "json",
+                value: {
+                    field1: null,
+                    field2: undefined
+                }
+            }
+        };
+        expect(
+            new PythonRequestSnippetBuilder(context, formUrlencodedStateAllNulls, {}, undefined, false).build()
+        ).toMatchSnapshot();
+    });
 });
