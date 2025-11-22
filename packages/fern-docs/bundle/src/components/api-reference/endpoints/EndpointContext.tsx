@@ -43,6 +43,7 @@ export const EndpointContext = React.createContext<
         exampleKey: undefined
     },
     availableLanguages: [],
+    availableLanguagesByStatusCode: {},
     setSelectedExampleKey: noop,
     endpointProtocol: undefined
 });
@@ -60,6 +61,7 @@ export function EndpointContextProvider({
         examplesByKeyAndStatusCode,
         selectedExampleKey,
         availableLanguages,
+        availableLanguagesByStatusCode,
         setSelectedExampleKey
     } = useExampleSelection(endpoint);
 
@@ -93,14 +95,46 @@ export function EndpointContextProvider({
                 if (prev.statusCode === String(statusCode)) {
                     return prev;
                 }
+
+                const newStatusCode = statusCode != null ? String(statusCode) : undefined;
+
+                // Check if the current language has examples for the new status code
+                let availableLanguagesForStatusCode;
+
+                if (newStatusCode) {
+                    availableLanguagesForStatusCode =
+                        availableLanguagesByStatusCode[newStatusCode] ?? availableLanguages;
+                } else {
+                    const firstStatusCode = Object.keys(availableLanguagesByStatusCode)[0];
+                    if (firstStatusCode != null) {
+                        availableLanguagesForStatusCode =
+                            availableLanguagesByStatusCode[firstStatusCode] ?? availableLanguages;
+                    } else {
+                        availableLanguagesForStatusCode = availableLanguages;
+                    }
+                }
+
+                let newLanguage;
+
+                if (availableLanguagesForStatusCode.includes(prev.language)) {
+                    newLanguage = prev.language;
+                } else if (prev.language === "javascript" && availableLanguagesForStatusCode.includes("typescript")) {
+                    newLanguage = "typescript";
+                } else if (prev.language === "typescript" && availableLanguagesForStatusCode.includes("javascript")) {
+                    newLanguage = "javascript";
+                } else {
+                    newLanguage = availableLanguagesForStatusCode[0] ?? prev.language;
+                }
+
                 return {
                     ...prev,
-                    statusCode: statusCode != null ? String(statusCode) : undefined,
+                    language: newLanguage,
+                    statusCode: newStatusCode,
                     responseIndex: 0
                 };
             });
         },
-        [setSelectedExampleKey]
+        [setSelectedExampleKey, availableLanguagesByStatusCode, availableLanguages]
     );
 
     const currentAnchor = useCurrentAnchor();
@@ -145,6 +179,7 @@ export function EndpointContextProvider({
             examplesByKeyAndStatusCode,
             selectedExampleKey,
             availableLanguages,
+            availableLanguagesByStatusCode,
             setSelectedExampleKey,
             endpointProtocol: endpoint.protocol
         }),
@@ -159,6 +194,7 @@ export function EndpointContextProvider({
             examplesByKeyAndStatusCode,
             selectedExampleKey,
             availableLanguages,
+            availableLanguagesByStatusCode,
             setSelectedExampleKey,
             endpoint.protocol
         ]

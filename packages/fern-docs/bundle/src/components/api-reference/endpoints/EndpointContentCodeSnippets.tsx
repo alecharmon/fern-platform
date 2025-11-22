@@ -46,9 +46,15 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
         examplesByStatusCode,
         examplesByKeyAndStatusCode,
         selectedExampleKey,
-        availableLanguages: languages,
+        availableLanguages,
+        availableLanguagesByStatusCode,
         setSelectedExampleKey
     } = useEndpointContext();
+
+    const languages =
+        selectedExampleKey.statusCode != null
+            ? (availableLanguagesByStatusCode[selectedExampleKey.statusCode] ?? availableLanguages)
+            : availableLanguages;
 
     const handleSelectExample = useCallback(
         (statusCode: StatusCode, responseIndex: number) => {

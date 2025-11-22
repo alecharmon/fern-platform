@@ -113,6 +113,57 @@ export function getAvailableLanguages(examples: ExamplesByLanguageKeyAndStatusCo
     ).map((l) => l.language);
 }
 
+/**
+ * Get the available languages for each status code.
+ *
+ * @param examples - The examples to get the available languages for.
+ * @param defaultLanguage - The default language to promote to the top of the list.
+ * @returns A dictionary mapping each status code to the available languages for that status code, in the order they should be displayed.
+ */
+export function getAvailableLanguagesByStatusCode(
+    examples: ExamplesByLanguageKeyAndStatusCode,
+    defaultLanguage: string
+): Record<string, string[]> {
+    const result: Record<string, string[]> = {};
+
+    // Collect all unique status codes
+    const allStatusCodes = new Set<string>();
+    Object.values(examples).forEach((examplesByKeyAndStatusCode) => {
+        Object.values(examplesByKeyAndStatusCode).forEach((examplesByStatusCode) => {
+            Object.keys(examplesByStatusCode).forEach((statusCode) => {
+                allStatusCodes.add(statusCode);
+            });
+        });
+    });
+
+    // For each status code, find which languages have examples for it
+    allStatusCodes.forEach((statusCode) => {
+        const languagesWithStatusCode = Object.keys(examples).filter((language) => {
+            const examplesByKeyAndStatusCode = examples[language];
+            if (examplesByKeyAndStatusCode == null) {
+                return false;
+            }
+            // Check if any example key has the requested status code
+            return Object.values(examplesByKeyAndStatusCode).some((examplesByStatusCode) => {
+                return examplesByStatusCode[statusCode] != null && examplesByStatusCode[statusCode].length > 0;
+            });
+        });
+
+        // Sort the filtered languages
+        result[statusCode] = sortBy(
+            languagesWithStatusCode.map((l) => ({ language: l })),
+            [
+                // promote the default language to the top of the list, otherwise promote curl
+                (l) => (examples[defaultLanguage] != null ? l.language !== defaultLanguage : l.language !== "curl"),
+                // sort the rest alphabetically
+                (l) => l.language
+            ]
+        ).map((l) => l.language);
+    });
+
+    return result;
+}
+
 interface SelectExampleToRenderResponse {
     selectedExampleKey: SelectedExampleKey;
     selectedExample: CodeExample | undefined;

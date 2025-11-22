@@ -11,6 +11,7 @@ import { getProgrammingLanguage, useDefaultProgrammingLanguage, useProgrammingLa
 import type { CodeExample } from "../examples/code-example";
 import {
     getAvailableLanguages,
+    getAvailableLanguagesByStatusCode,
     groupExamplesByLanguageKeyAndStatusCode,
     selectExampleToRender
 } from "../examples/example-groups";
@@ -30,6 +31,7 @@ export function useExampleSelection(
     selectedExampleKey: SelectedExampleKey;
     defaultLanguage: string;
     availableLanguages: string[];
+    availableLanguagesByStatusCode: Record<string, string[]>;
     setSelectedExampleKey: (update: typeof RESET | SetStateAction<SelectedExampleKey>) => void;
 } {
     const examplesByLanguageKeyAndStatusCode = React.useMemo(
@@ -113,22 +115,28 @@ export function useExampleSelection(
         (update: typeof RESET | SetStateAction<SelectedExampleKey>) => {
             setSelectedExampleKeyInner((prev) => {
                 const next = typeof update === "function" ? update(prev) : update;
-                if (next !== RESET) {
-                    setGlobalLanguage(next.language);
-                } else {
+                if (next === RESET) {
                     return getInitialExampleKey(getProgrammingLanguage());
                 }
                 return next;
             });
         },
-        [getInitialExampleKey, setGlobalLanguage]
+        [getInitialExampleKey]
     );
 
+    // Sync global language changes to internal state
     React.useEffect(() => {
         if (globalLanguage != null) {
             setSelectedExampleKey((prev) => ({ ...prev, language: globalLanguage }));
         }
     }, [globalLanguage, setSelectedExampleKey]);
+
+    // Sync internal language changes to global store
+    React.useEffect(() => {
+        if (internalSelectedExampleKey.language !== globalLanguage) {
+            setGlobalLanguage(internalSelectedExampleKey.language);
+        }
+    }, [internalSelectedExampleKey.language, globalLanguage, setGlobalLanguage]);
 
     const availableLanguages = useMemo(
         () => getAvailableLanguages(examplesByLanguageKeyAndStatusCode, defaultLanguage),
@@ -140,6 +148,11 @@ export function useExampleSelection(
         [defaultLanguage, examplesByLanguageKeyAndStatusCode, internalSelectedExampleKey]
     );
 
+    const availableLanguagesByStatusCode = useMemo(
+        () => getAvailableLanguagesByStatusCode(examplesByLanguageKeyAndStatusCode, defaultLanguage),
+        [examplesByLanguageKeyAndStatusCode, defaultLanguage]
+    );
+
     return {
         selectedExample,
         examplesByStatusCode,
@@ -147,6 +160,7 @@ export function useExampleSelection(
         selectedExampleKey,
         defaultLanguage,
         availableLanguages,
+        availableLanguagesByStatusCode,
         setSelectedExampleKey
     };
 }
