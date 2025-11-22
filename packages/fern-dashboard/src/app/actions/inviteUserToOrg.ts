@@ -1,5 +1,7 @@
 "use server";
 
+import { postToSlack } from "@fern-api/docs-server/slack";
+
 import * as auth0Management from "@/app/services/auth0/management";
 
 import { getAuth0ClientId } from "../services/auth0/auth0";
@@ -21,6 +23,14 @@ export async function inviteUserToOrg({ inviteeEmail, orgName }: { inviteeEmail:
             client_id: getAuth0ClientId(),
             send_invitation_email: true
         }
+    );
+
+    const actorName = session.user.name ?? session.user.email ?? session.user.sub;
+
+    postToSlack(
+        "#dashboard-notifs",
+        `*[${orgName}]* ${actorName} invited ${inviteeEmail} to the organization`,
+        "org-member-change"
     );
 
     return {

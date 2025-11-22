@@ -7,20 +7,21 @@ import { RateLimiterManager } from "./rate-limiter";
 
 const RATE_LIMITER_MANAGER = RateLimiterManager.getInstance();
 
-type PostToSlackChannel = "#docs-notifs" | "#search-notifs" | "#dashboard-access-notifs";
+type PostToSlackChannel = "#docs-notifs" | "#search-notifs" | "#dashboard-access-notifs" | "#dashboard-notifs";
 
 type PostToSlackContext =
     | "default"
     | "mdx-serializer"
     | "turbopuffer-reindex"
     | "algolia-reindex"
-    | "request-org-access";
+    | "request-org-access"
+    | "org-member-change";
 
 // contexts that should be allowed to post on dev and bypass rate limiting
-const alwaysAllowToPost: PostToSlackContext[] = ["request-org-access"];
+const alwaysAllowToPost: PostToSlackContext[] = ["request-org-access", "org-member-change"];
 
 // contexts that should skip posting deployment logs
-const shouldSkipDeploymentLogs: PostToSlackContext[] = ["request-org-access"];
+const shouldSkipDeploymentLogs: PostToSlackContext[] = ["request-org-access", "org-member-change"];
 
 export function postToSlack(
     channel: PostToSlackChannel,
