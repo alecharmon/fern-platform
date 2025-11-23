@@ -1,11 +1,12 @@
 "use client";
 
 import { isLocal } from "@fern-api/docs-server/isLocal";
+import { slugToHref } from "@fern-api/docs-utils";
 import { cn } from "@fern-docs/components/cn";
+import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
 import { t } from "@fern-docs/i18n";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 import { Loading } from "./Loading";
 
 export function WebSocketRefresh({ lang }: { lang: string }) {
@@ -13,6 +14,12 @@ export function WebSocketRefresh({ lang }: { lang: string }) {
     const [isLoading, setIsLoading] = useState(true);
     const [failedToLoad, setFailedToLoad] = useState(false);
     const [serverLoaded, setServerLoaded] = useState(false);
+    const currentSlug = useCurrentSlug();
+    const currentSlugRef = useRef<string | null>(currentSlug);
+
+    useEffect(() => {
+        currentSlugRef.current = currentSlug;
+    }, [currentSlug]);
 
     // biome-ignore lint/correctness/useExhaustiveDependencies: no dependencies needed
     useEffect(() => {
@@ -91,6 +98,22 @@ export function WebSocketRefresh({ lang }: { lang: string }) {
                                 }, 600);
                             } catch (error) {
                                 console.error("Client: Failed to revalidate:", error);
+                                setIsLoading(false);
+                            }
+                        }
+
+                        // if we are currently on the old slug, navigate to the new slug
+                        if (message.type === "navigateToSlug" && message.oldSlug === currentSlugRef.current) {
+                            if (!message.newSlug) {
+                                setIsLoading(false);
+                                console.error("Client: No new slug found in navigateToSlug message");
+                                return;
+                            }
+
+                            try {
+                                router.replace(slugToHref(message.newSlug), { scroll: true });
+                            } catch (error) {
+                                console.error("Client: Failed to navigate to slug:", error);
                                 setIsLoading(false);
                             }
                         }
