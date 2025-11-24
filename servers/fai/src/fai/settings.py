@@ -14,12 +14,12 @@ LOGGER = logging.getLogger()
 
 
 class Variables:
+    IS_LOCAL: bool = os.environ.get("IS_LOCAL", "false").lower() == "true"
     ANTHROPIC_API_KEY: str | None = os.environ.get("ANTHROPIC_API_KEY")
     COHERE_API_KEY: str | None = os.environ.get("COHERE_API_KEY")
     OPENAI_API_KEY: str | None = os.environ.get("OPENAI_API_KEY")
     POSTGRES_DATABASE_URL: str | None = os.environ.get("POSTGRES_DATABASE_URL")
     TURBOPUFFER_API_KEY: str | None = os.environ.get("TURBOPUFFER_API_KEY")
-    IS_LOCAL: bool = os.environ.get("IS_LOCAL", "false").lower() == "true"
 
     ASK_FERN_SLACK_BOT_TOKEN: str | None = os.environ.get("ASK_FERN_SLACK_BOT_TOKEN")
     FERNIE_SLACK_BOT_TOKEN: str | None = os.environ.get("FERNIE_SLACK_BOT_TOKEN")
@@ -27,6 +27,10 @@ class Variables:
     SLACK_CLIENT_ID: str | None = os.environ.get("SLACK_CLIENT_ID")
     SLACK_CLIENT_SECRET: str | None = os.environ.get("SLACK_CLIENT_SECRET")
     SLACK_SIGNING_SECRET: str | None = os.environ.get("SLACK_SIGNING_SECRET")
+
+    SCRIBE_SLACK_CLIENT_ID: str | None = os.environ.get("SCRIBE_SLACK_CLIENT_ID")
+    SCRIBE_SLACK_CLIENT_SECRET: str | None = os.environ.get("SCRIBE_SLACK_CLIENT_SECRET")
+    SCRIBE_SLACK_SIGNING_SECRET: str | None = os.environ.get("SCRIBE_SLACK_SIGNING_SECRET")
 
     FAI_LAMBDA_FUNCTION_NAME: str | None = os.environ.get("FAI_LAMBDA_FUNCTION_NAME")
 
