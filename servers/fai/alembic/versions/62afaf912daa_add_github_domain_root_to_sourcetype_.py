@@ -1,7 +1,7 @@
 """add github_domain_root to sourcetype enum
 
 Revision ID: 62afaf912daa
-Revises: 2d743e49aaa1
+Revises: 1a06a4d351f9
 Create Date: 2025-10-31 15:57:27.275237
 
 """

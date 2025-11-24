@@ -3,6 +3,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    Index,
     String,
 )
 
@@ -15,7 +16,10 @@ from fai.settings import CONFIG
 
 class CodeDb(Base):
     __tablename__ = "code"
-    __table_args__ = {"extend_existing": True}
+    __table_args__ = (
+        Index("idx_code_domain", "domain"),
+        {"extend_existing": True},
+    )
 
     id = Column(String, primary_key=True)
     domain = Column(String, nullable=False)

@@ -1,7 +1,7 @@
 """create websites table
 
 Revision ID: 8e63cf285ea3
-Revises: 7440621afbb0
+Revises: 62afaf912daa
 Create Date: 2025-11-04 12:28:06.823218
 
 """
@@ -16,7 +16,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "8e63cf285ea3"
-down_revision: Union[str, Sequence[str], None] = "7440621afbb0"
+down_revision: Union[str, Sequence[str], None] = "62afaf912daa"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
