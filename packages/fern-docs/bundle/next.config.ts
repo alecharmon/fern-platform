@@ -117,7 +117,6 @@ const nextConfig: NextConfig = {
             allowedOrigins: ["*"]
         }
     },
-    expireTime: 3600, // 1 hour
 
     outputFileTracingExcludes: {
         "**": [".next/cache/**/*", ".next/trace.json", "**/*.map", "node_modules/**/*.d.ts"]
