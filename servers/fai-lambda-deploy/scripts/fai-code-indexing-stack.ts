@@ -41,9 +41,10 @@ export class FaiCodeIndexingStack extends Stack {
             zoneName: environmentInfo.route53Info.hostedZoneName
         });
 
-        const vpc = ec2.Vpc.fromLookup(this, "fai-scribe-vpc", {
+        // Look up the VPC from fai-chat stack
+        const vpc = ec2.Vpc.fromLookup(this, "fai-chat-vpc", {
             tags: {
-                "aws:cloudformation:stack-name": `fai-scribe-${environmentType.toLowerCase()}`
+                "aws:cloudformation:stack-name": `fai-chat-${environmentType.toLowerCase()}`
             }
         });
 

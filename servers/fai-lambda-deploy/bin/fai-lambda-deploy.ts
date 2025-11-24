@@ -2,7 +2,6 @@ import { type Environments, EnvironmentType } from "@fern-fern/fern-cloud-sdk/ap
 import * as cdk from "aws-cdk-lib";
 import { FaiChatStack } from "../scripts/fai-chat-stack";
 import { FaiCodeIndexingStack } from "../scripts/fai-code-indexing-stack";
-import { FaiScribeStack } from "../scripts/fai-scribe-stack";
 
 void main();
 
@@ -51,17 +50,6 @@ async function main() {
         switch (environmentType) {
             case EnvironmentType.Dev:
             case EnvironmentType.Dev2:
-                new FaiScribeStack(
-                    app,
-                    `fai-scribe-${environmentType.toLowerCase()}`,
-                    version,
-                    environmentType,
-                    environmentInfo,
-                    {
-                        env: { account: "985111089818", region: "us-east-1" }
-                    }
-                );
-
                 new FaiCodeIndexingStack(
                     app,
                     `fai-code-indexing-${environmentType.toLowerCase()}`,
@@ -85,17 +73,6 @@ async function main() {
                 );
                 break;
             case EnvironmentType.Prod:
-                new FaiScribeStack(
-                    app,
-                    `fai-scribe-${environmentType.toLowerCase()}`,
-                    version,
-                    environmentType,
-                    environmentInfo,
-                    {
-                        env: { account: "985111089818", region: "us-east-1" }
-                    }
-                );
-
                 new FaiCodeIndexingStack(
                     app,
                     `fai-code-indexing-${environmentType.toLowerCase()}`,

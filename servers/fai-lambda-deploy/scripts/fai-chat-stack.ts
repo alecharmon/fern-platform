@@ -52,11 +52,22 @@ export class FaiChatStack extends Stack {
             zoneName: environmentInfo.route53Info.hostedZoneName
         });
 
-        // Look up the existing VPC from fai-scribe stack for NAT gateway access
-        const vpc = ec2.Vpc.fromLookup(this, "fai-scribe-vpc", {
-            tags: {
-                "aws:cloudformation:stack-name": `fai-scribe-${environmentType.toLowerCase()}`
-            }
+        // Create VPC for Lambda functions with NAT gateway for internet access
+        const vpc = new ec2.Vpc(this, "fai-chat-vpc", {
+            maxAzs: 2,
+            natGateways: 1,
+            subnetConfiguration: [
+                {
+                    name: "public",
+                    subnetType: ec2.SubnetType.PUBLIC,
+                    cidrMask: 24
+                },
+                {
+                    name: "private",
+                    subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+                    cidrMask: 24
+                }
+            ]
         });
 
         // Security group for Lambda function

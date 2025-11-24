@@ -4,11 +4,9 @@
   "bin": "bin/fai-lambda-deploy.js",
   "scripts": {
     "cdk": "cdk",
-    "deploy:dev:scribe": "cdk deploy fai-scribe-dev2 --require-approval never --progress events",
     "deploy:dev:code-indexing": "cdk deploy fai-code-indexing-dev2 --require-approval never --progress events",
     "deploy:dev:chat": "cdk deploy fai-chat-dev2 --require-approval never --progress events",
     "deploy:preview:chat": "cdk deploy fai-chat-preview-$PR_NUMBER --require-approval never --progress events --outputs-file preview-output.json",
-    "deploy:prod:scribe": "cdk deploy fai-scribe-prod --require-approval never --progress events",
     "deploy:prod:code-indexing": "cdk deploy fai-code-indexing-prod --require-approval never --progress events",
     "deploy:prod:chat": "cdk deploy fai-chat-prod --require-approval never --progress events",
     "destroy:preview:chat": "cdk destroy fai-chat-preview-$PR_NUMBER --force",
