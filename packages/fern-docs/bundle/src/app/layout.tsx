@@ -3,6 +3,7 @@ import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { FERN_DOCS_ID } from "@fern-docs/components/constants";
 import { ScrollToTop } from "@fern-docs/components/layouts/ScrollToTop";
 import { Providers } from "@fern-docs/components/providers/providers";
+import * as Sentry from "@sentry/nextjs";
 import type { Metadata, Viewport } from "next/types";
 import { experimental_taintUniqueValue } from "react";
 
@@ -92,6 +93,11 @@ export const viewport: Viewport = {
     userScalable: true
 };
 
-export const metadata: Metadata = {
-    generator: "https://buildwithfern.com"
-};
+export function generateMetadata(): Metadata {
+    return {
+        generator: "https://buildwithfern.com",
+        other: {
+            ...Sentry.getTraceData()
+        }
+    };
+}

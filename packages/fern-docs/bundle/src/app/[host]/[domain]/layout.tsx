@@ -32,6 +32,7 @@ import { JavascriptProvider } from "@/components/JavascriptProvider";
 import SearchV2 from "@/components/search";
 import { generateMetadataFromConfig } from "@/components/seo";
 import { withJsConfig } from "@/components/with-js-config";
+import { runAsyncSpan } from "@/server/tracing";
 import { SetColors } from "@/state/colors";
 import { DarkCode } from "@/state/dark-code";
 import { DefaultLanguage } from "@/state/language";
@@ -192,7 +193,14 @@ async function getLaunchDarklyInfo(loader: DocsLoader): Promise<LaunchDarklyInfo
 export async function generateMetadata(props: {
     params: Promise<{ host: string; domain: string }>;
 }): Promise<Metadata> {
-    return await generateMetadataFromConfig({ params: props.params });
+    return runAsyncSpan("route.layout.generateMetadata", async (span) => {
+        const resolvedParams = await props.params;
+        span.setAttributes({
+            "fern.docs.host": resolvedParams.host,
+            "fern.docs.domain": resolvedParams.domain
+        });
+        return generateMetadataFromConfig({ params: Promise.resolve(resolvedParams) });
+    });
 }
 
 function generatePreloadHrefs(

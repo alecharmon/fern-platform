@@ -10,6 +10,7 @@ import { cache } from "react";
 import { serializeMdx as internalSerializeMdx } from "@/mdx/bundler/serialize";
 import { serializeMdxImpl as internalSerializeNextMdxRemote } from "@/mdx/bundler/serializeWithNextMdxRemote";
 import type { RehypeLinksOptions } from "@/mdx/plugins/rehype-links";
+import { runAsyncSpan } from "@/server/tracing";
 
 export type MdxSerializerOptions = {
     /**
@@ -78,164 +79,234 @@ export function createCachedMdxSerializer(
 
         await monitor.acquire();
 
-        const startTime = Date.now();
-        console.log(
-            `[serializeMdx] starting serialization for domain: ${domain}, filename: ${options.filename || "unknown"}`
-        );
-
-        // this lets us key on just
-        const cachedSerializer = unstable_cache(
-            async ({ filename, toc, scope }: MdxSerializerOptions) => {
-                const cacheStartTime = Date.now();
-                console.log(
-                    `[serializeMdx] inside cache function for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${cacheStartTime - startTime}ms`
-                );
-                const [authState, metadata] = await Promise.all([loader.getAuthState(), loader.getMetadata()]);
-
-                try {
-                    if (useNextMdx && !content.includes("twoslash")) {
-                        try {
-                            const nextMdxStartTime = Date.now();
-                            console.log(
-                                `[serializeMdx] using NextMdxRemote for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${nextMdxStartTime - startTime}ms`
-                            );
-                            const result = await internalSerializeNextMdxRemote(content, {
-                                loader,
-                                scope: {
-                                    authed: authState.authed,
-                                    user: authState.authed ? authState.user : undefined,
-                                    ...scope
-                                },
-                                replaceHref
-                            });
-
-                            if (result && containsInvalidAwait(result.code)) {
-                                throw new Error(
-                                    "NextMdxRemote generated invalid code with await statements, trying regular MDX serialization"
-                                );
-                            }
-
-                            const nextMdxEndTime = Date.now();
-                            console.log(
-                                `[serializeMdx] NextMdxRemote succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${nextMdxEndTime - nextMdxStartTime}ms, total: ${nextMdxEndTime - startTime}ms`
-                            );
-                            return result;
-                        } catch (nextMdxError) {
-                            console.error(
-                                `[serializeMdx] NextMdxRemote failed for domain: ${domain}, filename: ${filename || "unknown"}, content length: ${content.length}`,
-                                nextMdxError
-                            );
-                            console.error(
-                                `[serializeMdx] NextMdxRemote error stack for domain: ${domain}, filename: ${filename || "unknown"}:`,
-                                nextMdxError instanceof Error ? nextMdxError.stack : "No stack trace available"
-                            );
-                            try {
-                                const fallbackStartTime = Date.now();
-                                console.log(
-                                    `[serializeMdx] NextMdxRemote failed, falling back to regular serialization for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${fallbackStartTime - startTime}ms`
-                                );
-                                const result = await internalSerializeMdx(
-                                    content,
-                                    {
-                                        filename,
-                                        loader,
-                                        toc,
-                                        scope: {
-                                            authed: authState.authed,
-                                            user: authState.authed ? authState.user : undefined,
-                                            ...scope
-                                        },
-                                        replaceHref,
-                                        org: metadata.org,
-                                        domain: metadata.domain,
-                                        slug: options.slug
-                                    },
-                                    metadata.domain
-                                );
-                                const fallbackEndTime = Date.now();
-                                console.log(
-                                    `[serializeMdx] fallback serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${fallbackEndTime - fallbackStartTime}ms, total: ${fallbackEndTime - startTime}ms`
-                                );
-                                return result;
-                            } catch (fallbackError) {
-                                console.error(
-                                    `[serializeMdx] Both engines failed serializing mdx for domain: ${domain}, filename: ${filename || "unknown"}, content length: ${content.length}`,
-                                    { nextMdxError, fallbackError }
-                                );
-                                console.error(
-                                    `[serializeMdx] Fallback error stack for domain: ${domain}, filename: ${filename || "unknown"}:`,
-                                    fallbackError instanceof Error ? fallbackError.stack : "No stack trace available"
-                                );
-
-                                return undefined;
-                            }
-                        }
-                    } else {
-                        const regularStartTime = Date.now();
-                        console.log(
-                            `[serializeMdx] using regular serialization for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${regularStartTime - startTime}ms`
-                        );
-                        const result = await internalSerializeMdx(
-                            content,
-                            {
-                                filename,
-                                loader,
-                                toc,
-                                scope: {
-                                    authed: authState.authed,
-                                    user: authState.authed ? authState.user : undefined,
-                                    ...scope
-                                },
-                                replaceHref,
-                                org: metadata.org,
-                                domain: metadata.domain,
-                                slug: options.slug
-                            },
-                            metadata.domain
-                        );
-                        const regularEndTime = Date.now();
-                        console.log(
-                            `[serializeMdx] regular serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${regularEndTime - regularStartTime}ms, total: ${regularEndTime - startTime}ms`
-                        );
-                        return result;
-                    }
-                } catch (error) {
-                    console.error(
-                        `[serializeMdx] Error serializing mdx for domain: ${domain}, filename: ${filename || "unknown"}, content length: ${content.length}`,
-                        error
-                    );
-                    console.error(
-                        `[serializeMdx] Error stack for domain: ${domain}, filename: ${filename || "unknown"}:`,
-                        error instanceof Error ? error.stack : "No stack trace available"
-                    );
-
-                    // Instead of returning raw content, throw the error to be handled by the caller
-                    throw error;
-                }
-            },
-            [domain, content, cacheSeed()],
-            { tags: [`${domain}:mdx`, "serializeMdx"] }
-        );
-
         try {
-            // merge the scope from the page with the scope from the serializer
-            const result = await cachedSerializer({
-                ...options,
-                scope: { ...options.scope, ...scope }
-            });
+            return await runAsyncSpan(
+                "mdx.serialize",
+                async (span) => {
+                    span.setAttributes({
+                        "fern.docs.domain": domain,
+                        "fern.docs.filename": options.filename ?? "unknown",
+                        "fern.docs.mdx.useNextMdx": Boolean(useNextMdx)
+                    });
 
-            // if the result is undefined, we need to revalidate the cache
-            // NOTE: you cannot do this because you cant revalidate the cache in a render function
-            // if (result == null) {
-            //   revalidateTag(key);
-            // }
+                    const startTime = Date.now();
+                    console.log(
+                        `[serializeMdx] starting serialization for domain: ${domain}, filename: ${options.filename || "unknown"}`
+                    );
 
-            const endTime = Date.now();
-            console.log(
-                `[serializeMdx] completed for domain: ${domain}, filename: ${options.filename || "unknown"}, total duration: ${endTime - startTime}ms`
+                    const cachedSerializer = unstable_cache(
+                        async ({ filename, toc, scope }: MdxSerializerOptions) => {
+                            return runAsyncSpan(
+                                "mdx.serialize.cacheWork",
+                                async (cacheSpan) => {
+                                    cacheSpan.setAttributes({
+                                        "fern.docs.domain": domain,
+                                        "fern.docs.filename": filename ?? "unknown"
+                                    });
+                                    const cacheStartTime = Date.now();
+                                    console.log(
+                                        `[serializeMdx] inside cache function for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${cacheStartTime - startTime}ms`
+                                    );
+
+                                    const [authState, metadata] = await Promise.all([
+                                        runAsyncSpan("mdx.loader.getAuthState", () => loader.getAuthState(), {
+                                            "fern.docs.domain": domain
+                                        }),
+                                        runAsyncSpan("mdx.loader.getMetadata", () => loader.getMetadata(), {
+                                            "fern.docs.domain": domain
+                                        })
+                                    ]);
+
+                                    try {
+                                        if (useNextMdx && !content.includes("twoslash")) {
+                                            try {
+                                                const nextMdxStartTime = Date.now();
+                                                console.log(
+                                                    `[serializeMdx] using NextMdxRemote for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${nextMdxStartTime - startTime}ms`
+                                                );
+                                                const result = await runAsyncSpan(
+                                                    "mdx.serialize.nextMdxRemote",
+                                                    () =>
+                                                        internalSerializeNextMdxRemote(content, {
+                                                            loader,
+                                                            scope: {
+                                                                authed: authState.authed,
+                                                                user: authState.authed ? authState.user : undefined,
+                                                                ...scope
+                                                            },
+                                                            replaceHref
+                                                        }),
+                                                    {
+                                                        "fern.docs.domain": domain,
+                                                        "fern.docs.filename": filename ?? "unknown"
+                                                    }
+                                                );
+
+                                                if (result && containsInvalidAwait(result.code)) {
+                                                    throw new Error(
+                                                        "NextMdxRemote generated invalid code with await statements, trying regular MDX serialization"
+                                                    );
+                                                }
+
+                                                const nextMdxEndTime = Date.now();
+                                                console.log(
+                                                    `[serializeMdx] NextMdxRemote succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${nextMdxEndTime - nextMdxStartTime}ms, total: ${nextMdxEndTime - startTime}ms`
+                                                );
+                                                return result;
+                                            } catch (nextMdxError) {
+                                                cacheSpan.addEvent("next_mdx_remote_failed");
+                                                console.error(
+                                                    `[serializeMdx] NextMdxRemote failed for domain: ${domain}, filename: ${filename || "unknown"}, content length: ${content.length}`,
+                                                    nextMdxError
+                                                );
+                                                console.error(
+                                                    `[serializeMdx] NextMdxRemote error stack for domain: ${domain}, filename: ${filename || "unknown"}:`,
+                                                    nextMdxError instanceof Error
+                                                        ? nextMdxError.stack
+                                                        : "No stack trace available"
+                                                );
+                                                try {
+                                                    const fallbackStartTime = Date.now();
+                                                    console.log(
+                                                        `[serializeMdx] NextMdxRemote failed, falling back to regular serialization for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${fallbackStartTime - startTime}ms`
+                                                    );
+                                                    const result = await runAsyncSpan(
+                                                        "mdx.serialize.fallback",
+                                                        () =>
+                                                            internalSerializeMdx(
+                                                                content,
+                                                                {
+                                                                    filename,
+                                                                    loader,
+                                                                    toc,
+                                                                    scope: {
+                                                                        authed: authState.authed,
+                                                                        user: authState.authed
+                                                                            ? authState.user
+                                                                            : undefined,
+                                                                        ...scope
+                                                                    },
+                                                                    replaceHref,
+                                                                    org: metadata.org,
+                                                                    domain: metadata.domain,
+                                                                    slug: options.slug
+                                                                },
+                                                                metadata.domain
+                                                            ),
+                                                        {
+                                                            "fern.docs.domain": domain,
+                                                            "fern.docs.filename": filename ?? "unknown"
+                                                        }
+                                                    );
+                                                    const fallbackEndTime = Date.now();
+                                                    console.log(
+                                                        `[serializeMdx] fallback serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${fallbackEndTime - fallbackStartTime}ms, total: ${fallbackEndTime - startTime}ms`
+                                                    );
+                                                    return result;
+                                                } catch (fallbackError) {
+                                                    cacheSpan.recordException(fallbackError as Error);
+                                                    console.error(
+                                                        `[serializeMdx] Both engines failed serializing mdx for domain: ${domain}, filename: ${filename || "unknown"}, content length: ${content.length}`,
+                                                        { nextMdxError, fallbackError }
+                                                    );
+                                                    console.error(
+                                                        `[serializeMdx] Fallback error stack for domain: ${domain}, filename: ${filename || "unknown"}:`,
+                                                        fallbackError instanceof Error
+                                                            ? fallbackError.stack
+                                                            : "No stack trace available"
+                                                    );
+
+                                                    return undefined;
+                                                }
+                                            }
+                                        } else {
+                                            const regularStartTime = Date.now();
+                                            console.log(
+                                                `[serializeMdx] using regular serialization for domain: ${domain}, filename: ${filename || "unknown"}, time since start: ${regularStartTime - startTime}ms`
+                                            );
+                                            const result = await runAsyncSpan(
+                                                "mdx.serialize.regular",
+                                                () =>
+                                                    internalSerializeMdx(
+                                                        content,
+                                                        {
+                                                            filename,
+                                                            loader,
+                                                            toc,
+                                                            scope: {
+                                                                authed: authState.authed,
+                                                                user: authState.authed ? authState.user : undefined,
+                                                                ...scope
+                                                            },
+                                                            replaceHref,
+                                                            org: metadata.org,
+                                                            domain: metadata.domain,
+                                                            slug: options.slug
+                                                        },
+                                                        metadata.domain
+                                                    ),
+                                                {
+                                                    "fern.docs.domain": domain,
+                                                    "fern.docs.filename": filename ?? "unknown"
+                                                }
+                                            );
+                                            const regularEndTime = Date.now();
+                                            console.log(
+                                                `[serializeMdx] regular serialization succeeded for domain: ${domain}, filename: ${filename || "unknown"}, duration: ${regularEndTime - regularStartTime}ms, total: ${regularEndTime - startTime}ms`
+                                            );
+                                            return result;
+                                        }
+                                    } catch (error) {
+                                        cacheSpan.recordException(error as Error);
+                                        console.error(
+                                            `[serializeMdx] Error serializing mdx for domain: ${domain}, filename: ${filename || "unknown"}, content length: ${content.length}`,
+                                            error
+                                        );
+                                        console.error(
+                                            `[serializeMdx] Error stack for domain: ${domain}, filename: ${filename || "unknown"}:`,
+                                            error instanceof Error ? error.stack : "No stack trace available"
+                                        );
+
+                                        // Instead of returning raw content, throw the error to be handled by the caller
+                                        throw error;
+                                    }
+                                },
+                                {
+                                    "fern.docs.domain": domain
+                                }
+                            );
+                        },
+                        [domain, content, cacheSeed()],
+                        { tags: [`${domain}:mdx`, "serializeMdx"] }
+                    );
+
+                    const result = await runAsyncSpan(
+                        "mdx.serialize.cachedSerializer",
+                        () =>
+                            cachedSerializer({
+                                ...options,
+                                scope: { ...options.scope, ...scope }
+                            }),
+                        {
+                            "fern.docs.domain": domain
+                        }
+                    );
+
+                    if (result) {
+                        span.setAttribute("fern.docs.mdx.engine", result.engine);
+                    }
+
+                    const endTime = Date.now();
+                    console.log(
+                        `[serializeMdx] completed for domain: ${domain}, filename: ${options.filename || "unknown"}, total duration: ${endTime - startTime}ms`
+                    );
+
+                    return result;
+                },
+                {
+                    "fern.docs.domain": domain
+                }
             );
-
-            return result;
         } finally {
             monitor.release();
         }

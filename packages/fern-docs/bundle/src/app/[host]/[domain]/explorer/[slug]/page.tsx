@@ -10,6 +10,7 @@ import { Suspense } from "react";
 import { getFernToken } from "@/app/fern-token";
 import { ExplorerContent, NoEndpointSelected } from "@/components/playground/ExplorerContent";
 import { PlaygroundEndpointSkeleton } from "@/components/playground/endpoint";
+import { runAsyncSpan } from "@/server/tracing";
 
 export default async function Page(props: { params: Promise<{ host: string; domain: string; slug: string }> }) {
     const { host, domain, slug: slugProp } = await props.params;
@@ -51,16 +52,31 @@ export async function generateMetadata({
 }: {
     params: Promise<{ host: string; domain: string; slug: string }>;
 }): Promise<Metadata> {
-    const { host, domain, slug: slugProp } = await params;
-    const slug = FernNavigation.slugjoin(slugProp);
-    const loader = await createCachedDocsLoader(host, domain, await getFernToken());
-    const root = await loader.getRoot();
-    const found = FernNavigation.utils.findNode(root, slug);
+    return runAsyncSpan("route.explorer.generateMetadata", async (span) => {
+        const { host, domain, slug: slugProp } = await params;
+        const slug = FernNavigation.slugjoin(slugProp);
+        span.setAttributes({
+            "fern.docs.host": host,
+            "fern.docs.domain": domain,
+            "fern.docs.slug": slug
+        });
+        const loader = await runAsyncSpan(
+            "route.explorer.createCachedDocsLoader",
+            async () => createCachedDocsLoader(host, domain, await getFernToken()),
+            {
+                "fern.docs.domain": domain
+            }
+        );
+        const root = await runAsyncSpan("route.explorer.getRoot", () => loader.getRoot(), {
+            "fern.docs.domain": loader.domain
+        });
+        const found = FernNavigation.utils.findNode(root, slug);
 
-    if (found.type !== "found") {
-        return {};
-    }
-    return {
-        title: found.node.title
-    };
+        if (found.type !== "found") {
+            return {};
+        }
+        return {
+            title: found.node.title
+        };
+    });
 }

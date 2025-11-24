@@ -2,6 +2,7 @@ import path from "node:path";
 import process from "node:process";
 
 import NextBundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 import webpack from "webpack";
@@ -42,6 +43,12 @@ const nextConfig: NextConfig = {
     reactStrictMode: true,
     basePath: nextBasePath,
     trailingSlash: isTrailingSlashEnabled,
+    ignoreWarnings: [
+        {
+            module: /@opentelemetry\/instrumentation/,
+            message: /Critical dependency: the request of a dependency is an expression/
+        }
+    ],
     transpilePackages: [
         "es-toolkit",
         "three",
@@ -359,5 +366,16 @@ export default (phase: string): NextConfig => {
         enabled: process.env.ANALYZE === "1"
     });
 
-    return withBundleAnalyzer(withVercelEnv(nextConfig));
+    const configWithVercelEnv = withBundleAnalyzer(withVercelEnv(nextConfig));
+
+    // Make sure adding Sentry options is the last code to run before exporting
+    return withSentryConfig(configWithVercelEnv, {
+        org: "buildwithfern",
+        project: "fern-docs",
+        // Only print logs for uploading source maps in CI
+        // Set to `true` to suppress logs
+        silent: !process.env.CI,
+        // Automatically tree-shake Sentry logger statements to reduce bundle size
+        disableLogger: true
+    });
 };

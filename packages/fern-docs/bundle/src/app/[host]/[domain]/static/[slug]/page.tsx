@@ -7,6 +7,7 @@ import type { Metadata } from "next/types";
 import RootPage from "@/app/page";
 import { generateMetadataFromPage } from "@/components/seo";
 import SharedPage from "@/components/shared-page";
+import { runAsyncSpan } from "@/server/tracing";
 
 export const dynamic = "force-static";
 export const revalidate = false;
@@ -55,7 +56,20 @@ export async function generateMetadata({
 }: {
     params: Promise<{ host: string; domain: string; slug: string }>;
 }): Promise<Metadata> {
-    const { host, domain, slug } = await params;
-    const loader = await createCachedDocsLoader(host, domain);
-    return generateMetadataFromPage({ loader, slug: slugjoin(slug) });
+    return runAsyncSpan("route.static.generateMetadata", async (span) => {
+        const { host, domain, slug } = await params;
+        span.setAttributes({
+            "fern.docs.host": host,
+            "fern.docs.domain": domain,
+            "fern.docs.slug": slug
+        });
+        const loader = await runAsyncSpan(
+            "route.static.createCachedDocsLoader",
+            () => createCachedDocsLoader(host, domain),
+            {
+                "fern.docs.domain": domain
+            }
+        );
+        return generateMetadataFromPage({ loader, slug: slugjoin(slug) });
+    });
 }

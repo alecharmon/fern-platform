@@ -8,6 +8,7 @@ import { getFernToken } from "@/app/fern-token";
 import RootPage from "@/app/page";
 import { generateMetadataFromPage } from "@/components/seo";
 import SharedPage from "@/components/shared-page";
+import { runAsyncSpan } from "@/server/tracing";
 
 export default async function DynamicPage(props: { params: Promise<{ host: string; domain: string; slug: string }> }) {
     const { host, domain, slug } = await props.params;
@@ -23,7 +24,20 @@ export default async function DynamicPage(props: { params: Promise<{ host: strin
 export async function generateMetadata(props: {
     params: Promise<{ host: string; domain: string; slug: string }>;
 }): Promise<Metadata> {
-    const { host, domain, slug } = await props.params;
-    const loader = await createCachedDocsLoader(host, domain);
-    return generateMetadataFromPage({ loader, slug: slugjoin(slug) });
+    return runAsyncSpan("route.dynamic.generateMetadata", async (span) => {
+        const { host, domain, slug } = await props.params;
+        span.setAttributes({
+            "fern.docs.host": host,
+            "fern.docs.domain": domain,
+            "fern.docs.slug": slug
+        });
+        const loader = await runAsyncSpan(
+            "route.dynamic.createCachedDocsLoader",
+            () => createCachedDocsLoader(host, domain),
+            {
+                "fern.docs.domain": domain
+            }
+        );
+        return generateMetadataFromPage({ loader, slug: slugjoin(slug) });
+    });
 }
