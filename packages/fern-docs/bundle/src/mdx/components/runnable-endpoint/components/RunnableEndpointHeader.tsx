@@ -68,7 +68,7 @@ export function RunnableEndpointHeader({
                 </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-                {hasMultipleExamples && (
+                {hasMultipleExamples && !readonly?.includes("examples") && (
                     <FernDropdown
                         value={String(selectedExampleIndex)}
                         options={exampleOptions}
