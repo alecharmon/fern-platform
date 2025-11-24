@@ -176,6 +176,9 @@ export async function runRouteForAnthropic({
                         }),
                         async execute({ query }) {
                             numToolCalls++;
+                            if (numToolCalls > 2) {
+                                return [];
+                            }
                             const response = [];
                             for (let i = 0; i < MAX_QUERY_ATTEMPTS; i++) {
                                 const { result, metrics } = await runQueryTurbopuffer(query, {
