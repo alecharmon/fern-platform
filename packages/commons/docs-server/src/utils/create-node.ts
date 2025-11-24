@@ -93,6 +93,7 @@ export function createVersionNode(versionId: string, children: any): VersionNode
         viewers: undefined,
         featureFlags: undefined,
         pointsTo: undefined,
+        announcement: undefined,
         child: {
             type: "sidebarRoot",
             id: NodeId("2"),
@@ -257,7 +258,8 @@ export function createProductNode(
         child: nodeChild,
         subtitle: "subtitle",
         image: undefined,
-        pointsTo: undefined
+        pointsTo: undefined,
+        announcement: undefined
     };
 }
 

@@ -8,11 +8,9 @@ import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
 import { SidebarContainer } from "@fern-docs/components/sidebar/SidebarContainer";
 import { t } from "@fern-docs/i18n";
 import React from "react";
-import { Announcement } from "@/components/header/Announcement";
 import { HeaderContent } from "@/components/header/HeaderContent";
 import { ThemedDocs } from "@/components/themes/ThemedDocs";
 import { setMdxSerializer } from "@/context/MdxSerializerContext";
-import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 import { SearchV2Trigger } from "@/state/search";
 import { SearchPanelTrigger } from "@/state/search-panel";
@@ -26,7 +24,8 @@ export default async function SharedLayout({
     productSelect,
     languageSelect,
     loader,
-    logo
+    logo,
+    announcement
 }: {
     children: React.ReactNode;
     headertabs: React.ReactNode;
@@ -39,9 +38,10 @@ export default async function SharedLayout({
         isAskAiEnabledForDocs: () => Promise<boolean>;
     };
     logo: React.ReactNode;
+    announcement?: React.ReactNode;
 }) {
     const isLocalEnvironment = isLocal() || isSelfHosted();
-    const [config, settings, edgeFlags, colors, layout, root, lang, isAskAiEnabled] = await Promise.all([
+    const [_config, settings, edgeFlags, colors, layout, root, lang, isAskAiEnabled] = await Promise.all([
         loader.getConfig(),
         loader.getSettings(),
         loader.getEdgeFlags(),
@@ -52,7 +52,6 @@ export default async function SharedLayout({
         loader.isAskAiEnabledForDocs()
     ]);
     const theme = edgeFlags.isCohereTheme ? "cohere" : "default";
-    const announcementText = config.announcement?.text;
 
     const serialize = createCachedMdxSerializer(loader, {
         useNextMdx: edgeFlags.isNextMdxRef
@@ -73,15 +72,7 @@ export default async function SharedLayout({
             lightHeaderClassName={colors.light?.headerBackgroundTheme === "dark" ? "dark" : undefined}
             darkHeaderClassName={colors.dark?.headerBackgroundTheme === "light" ? "light" : undefined}
             isHeaderDisabled={layout.isHeaderDisabled}
-            announcement={
-                announcementText && (
-                    <Announcement announcement={announcementText}>
-                        <React.Suspense fallback={announcementText}>
-                            <MdxServerComponent serialize={serialize} mdx={announcementText} />
-                        </React.Suspense>
-                    </Announcement>
-                )
-            }
+            announcement={announcement}
             header={
                 <HeaderContent
                     className="max-w-page-width mx-auto"

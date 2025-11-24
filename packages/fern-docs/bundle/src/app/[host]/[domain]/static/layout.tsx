@@ -13,7 +13,8 @@ export default async function Layout({
     productSelect,
     languageSelect,
     logo,
-    explorer
+    explorer,
+    announcement
 }: {
     children: React.ReactNode;
     params: Promise<{ host: string; domain: string }>;
@@ -24,6 +25,7 @@ export default async function Layout({
     languageSelect: React.ReactNode;
     logo: React.ReactNode;
     explorer: React.ReactNode;
+    announcement: React.ReactNode;
 }) {
     const { host, domain } = await params;
     const loader = await createCachedDocsLoader(host, domain);
@@ -36,6 +38,7 @@ export default async function Layout({
             languageSelect={languageSelect}
             sidebar={sidebar}
             logo={logo}
+            announcement={announcement}
         >
             {children}
             {explorer}

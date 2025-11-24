@@ -566,7 +566,8 @@ describe("pruneNavigationTree", () => {
                         pointsTo: undefined, // no pointsTo field
                         viewers: undefined,
                         orphaned: undefined,
-                        featureFlags: undefined
+                        featureFlags: undefined,
+                        announcement: undefined
                     },
                     {
                         type: "version",
@@ -640,7 +641,8 @@ describe("pruneNavigationTree", () => {
                         pointsTo: undefined, // no pointsTo field
                         viewers: undefined,
                         orphaned: undefined,
-                        featureFlags: undefined
+                        featureFlags: undefined,
+                        announcement: undefined
                     }
                 ]
             },
@@ -707,7 +709,8 @@ describe("pruneNavigationTree", () => {
                         pointsTo: "v1/welcome",
                         viewers: undefined,
                         orphaned: undefined,
-                        featureFlags: undefined
+                        featureFlags: undefined,
+                        announcement: undefined
                     },
                     {
                         type: "version",
@@ -781,7 +784,8 @@ describe("pruneNavigationTree", () => {
                         pointsTo: "v2/welcome",
                         viewers: undefined,
                         orphaned: undefined,
-                        featureFlags: undefined
+                        featureFlags: undefined,
+                        announcement: undefined
                     }
                 ]
             },

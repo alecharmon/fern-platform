@@ -13,4 +13,6 @@ export interface InternalProductNode
     subtitle: string;
     /** A URL to an image that will be displayed in the sidebar. Takes precedence over `icon` if both are provided. */
     image: FernRegistry.FileId | undefined;
+    /** Optional announcement banner to display for this product */
+    announcement: FernRegistry.docs.v1.commons.AnnouncementConfig | undefined;
 }

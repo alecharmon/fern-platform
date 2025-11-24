@@ -11,4 +11,6 @@ export interface VersionNode
     child: FernRegistry.navigation.latest.VersionChild;
     availability: FernRegistry.Availability | undefined;
     landingPage: FernRegistry.navigation.latest.LandingPageNode | undefined;
+    /** Optional announcement banner to display for this version */
+    announcement: FernRegistry.docs.v1.commons.AnnouncementConfig | undefined;
 }

@@ -125,7 +125,8 @@ export class NavigationConfigConverter {
                         authed: undefined,
                         viewers: undefined,
                         orphaned: undefined,
-                        featureFlags: undefined
+                        featureFlags: undefined,
+                        announcement: undefined
                     };
                 });
             });

@@ -3,6 +3,7 @@
 imports:
   commons: ../../commons.yml
   latest: ../latest/__package__.yml
+  docsCommons: ../../docs/v1/commons/commons.yml
 
 types:
   Slug:
@@ -188,6 +189,9 @@ types:
       image:
         type: optional<commons.FileId>
         docs: A URL to an image that will be displayed in the sidebar. Takes precedence over `icon` if both are provided.
+      announcement:
+        type: optional<docsCommons.AnnouncementConfig>
+        docs: Optional announcement banner to display for this product
 
   ExternalProductNode:
     extends:
@@ -231,6 +235,9 @@ types:
       child: VersionChild
       availability: optional<NavigationV1Availability>
       landingPage: optional<LandingPageNode>
+      announcement:
+        type: optional<docsCommons.AnnouncementConfig>
+        docs: Optional announcement banner to display for this version
 
   VariantNode:
     extends:

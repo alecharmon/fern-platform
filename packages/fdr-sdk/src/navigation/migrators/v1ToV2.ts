@@ -126,7 +126,8 @@ export class FernNavigationV1ToLatest {
             pointsTo: node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined,
             viewers: node.viewers,
             orphaned: node.orphaned,
-            featureFlags: node.featureFlags
+            featureFlags: node.featureFlags,
+            announcement: node.announcement
         };
         return latest;
     };
@@ -359,7 +360,8 @@ export class FernNavigationV1ToLatest {
             subtitle: node.subtitle,
             viewers: node.viewers,
             orphaned: node.orphaned,
-            featureFlags: node.featureFlags
+            featureFlags: node.featureFlags,
+            announcement: node.announcement
         };
         return latest;
     };
