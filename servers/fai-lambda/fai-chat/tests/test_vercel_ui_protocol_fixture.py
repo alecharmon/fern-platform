@@ -65,13 +65,6 @@ class TestVercelUIProtocolFixture:
             "start-step",
             "text-start",
             "text-delta",
-            "text-end",
-            "tool-input-start",
-            "tool-input-available",
-            "tool-output-available",
-            "finish-step",
-            "start-step",
-            "text-start",
             "text-delta",
             "text-end",
             "finish-step",
@@ -86,10 +79,13 @@ class TestVercelUIProtocolFixture:
                     current_idx = i + 1
                     found = True
                     break
-            assert found, f"Expected event '{expected_event}' not found in correct order. " f"Got events: {event_types}"
+            assert found, f"Expected event '{expected_event}' not found in correct order. Got events: {event_types}"
+
+        tool_events = [e for e in event_types if "tool" in e]
+        assert len(tool_events) == 0, f"Tool events should not be streamed. Got: {tool_events}"
 
     @pytest.mark.asyncio
-    async def test_tool_call_triggers_new_step(self) -> None:
+    async def test_tool_calls_do_not_create_new_steps(self) -> None:
         protocol = VercelUIMessageStreamProtocol()
         sources: list[Source] = []
 
@@ -132,18 +128,8 @@ class TestVercelUIProtocolFixture:
                 except json.JSONDecodeError:
                     pass
 
-        text_end_idx = event_types.index("text-end")
-        tool_input_start_idx = event_types.index("tool-input-start")
-        assert tool_input_start_idx > text_end_idx, "tool-input-start should come after text-end"
+        finish_step_count = sum(1 for e in event_types if e == "finish-step")
+        start_step_count = sum(1 for e in event_types if e == "start-step")
 
-        tool_output_idx = event_types.index("tool-output-available")
-        finish_step_indices = [i for i, t in enumerate(event_types) if t == "finish-step"]
-        assert len(finish_step_indices) >= 2, "Should have at least 2 finish-step events"
-
-        first_finish_step = finish_step_indices[0]
-        assert first_finish_step > tool_output_idx, "First finish-step should come after tool-output-available"
-
-        second_start_step_indices = [i for i, t in enumerate(event_types) if t == "start-step"]
-        assert len(second_start_step_indices) >= 2, "Should have at least 2 start-step events"
-        second_start_step = second_start_step_indices[1]
-        assert second_start_step > first_finish_step, "Second start-step should come after first finish-step"
+        assert finish_step_count == 1, f"Should have exactly 1 finish-step. Got: {finish_step_count}"
+        assert start_step_count == 1, f"Should have exactly 1 start-step. Got: {start_step_count}"

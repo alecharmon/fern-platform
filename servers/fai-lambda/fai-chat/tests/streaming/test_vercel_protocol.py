@@ -168,7 +168,7 @@ class TestVercelUIMessageStreamProtocol:
         assert text_end_idx == text_start_idx + 1
 
     @pytest.mark.asyncio
-    async def test_tool_flow_sequence(self) -> None:
+    async def test_tool_events_not_streamed(self) -> None:
         protocol = VercelUIMessageStreamProtocol()
 
         async def mock_text_stream() -> AsyncGenerator[StreamEvent, None]:
@@ -206,13 +206,6 @@ class TestVercelUIMessageStreamProtocol:
             "start-step",
             "text-start",
             "text-delta",
-            "text-end",  # emitted before tool input
-            "tool-input-start",
-            "tool-input-available",
-            "tool-output-available",
-            "finish-step",
-            "start-step",
-            "text-start",
             "text-delta",
             "text-end",
             "finish-step",
@@ -239,8 +232,7 @@ class TestVercelUIMessageStreamProtocol:
             chunks.append(chunk.strip())
 
         types = self._decode_types(chunks)
-        # Expect text-end when tool starts, and protocol still closes out the stream.
-        assert types[:7] == [
+        assert types == [
             "data-sources",
             "data-assistant-query-id",
             "start",
@@ -248,5 +240,7 @@ class TestVercelUIMessageStreamProtocol:
             "text-start",
             "text-delta",
             "text-end",
+            "finish-step",
+            "finish",
+            "DONE",
         ]
-        assert types[-3:] == ["finish-step", "finish", "DONE"]

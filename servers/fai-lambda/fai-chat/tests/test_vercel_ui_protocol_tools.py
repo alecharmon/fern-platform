@@ -1,4 +1,3 @@
-import json
 from collections.abc import AsyncGenerator
 
 import pytest
@@ -13,15 +12,26 @@ from src.streaming.protocols.vercel_ui import VercelUIMessageStreamProtocol
 
 class TestVercelUIProtocolToolEvents:
     @pytest.mark.asyncio
-    async def test_tool_call_start_event(self) -> None:
+    async def test_tool_call_events_are_not_streamed(self) -> None:
         protocol = VercelUIMessageStreamProtocol()
         sources: list[Source] = [Source(title="Test", url="https://test.com")]
 
         async def mock_stream() -> AsyncGenerator[StreamEvent, None]:
+            yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="Before tool")
             yield StreamEvent(
                 type=StreamEventType.TOOL_CALL_START,
                 data={"id": "tool_123", "name": "documentationSearch"},
             )
+            yield StreamEvent(
+                type=StreamEventType.TOOL_CALL_RESULT,
+                data={
+                    "id": "tool_123",
+                    "name": "documentationSearch",
+                    "input": {"query": "test query"},
+                    "output": [{"title": "Doc 1", "url": "https://example.com"}],
+                },
+            )
+            yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="After tool")
             yield StreamEvent(type=StreamEventType.DONE, data="")
 
         result = []
@@ -34,22 +44,21 @@ class TestVercelUIProtocolToolEvents:
             result.append(chunk)
 
         tool_start_chunks = [c for c in result if "tool-input-start" in c]
-        assert len(tool_start_chunks) == 1
+        assert len(tool_start_chunks) == 0
 
-        tool_start_data = json.loads(tool_start_chunks[0].replace("data: ", "").strip())
-        assert tool_start_data["type"] == "tool-input-start"
-        assert tool_start_data["toolCallId"] == "tool_123"
-        assert tool_start_data["toolName"] == "documentationSearch"
+        tool_input_chunks = [c for c in result if "tool-input-available" in c]
+        assert len(tool_input_chunks) == 0
 
-        text_end_before_tool = [i for i, c in enumerate(result) if "text-end" in c and i < len(result) - 3]
-        assert len(text_end_before_tool) > 0
+        tool_output_chunks = [c for c in result if "tool-output-available" in c]
+        assert len(tool_output_chunks) == 0
 
     @pytest.mark.asyncio
-    async def test_tool_call_result_event(self) -> None:
+    async def test_text_stream_continues_through_tool_calls(self) -> None:
         protocol = VercelUIMessageStreamProtocol()
         sources: list[Source] = []
 
         async def mock_stream() -> AsyncGenerator[StreamEvent, None]:
+            yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="Before")
             yield StreamEvent(
                 type=StreamEventType.TOOL_CALL_START,
                 data={"id": "tool_456", "name": "documentationSearch"},
@@ -60,9 +69,10 @@ class TestVercelUIProtocolToolEvents:
                     "id": "tool_456",
                     "name": "documentationSearch",
                     "input": {"query": "test query"},
-                    "output": [{"title": "Doc 1", "url": "https://example.com"}],
+                    "output": [],
                 },
             )
+            yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="After")
             yield StreamEvent(type=StreamEventType.DONE, data="")
 
         result = []
@@ -74,26 +84,16 @@ class TestVercelUIProtocolToolEvents:
         ):
             result.append(chunk)
 
-        input_available_chunks = [c for c in result if "tool-input-available" in c]
-        assert len(input_available_chunks) == 1
+        text_delta_chunks = [c for c in result if "text-delta" in c]
+        assert len(text_delta_chunks) == 2
 
-        input_data = json.loads(input_available_chunks[0].replace("data: ", "").strip())
-        assert input_data["type"] == "tool-input-available"
-        assert input_data["toolCallId"] == "tool_456"
-        assert input_data["toolName"] == "documentationSearch"
-        assert input_data["input"] == {"query": "test query"}
-
-        output_available_chunks = [c for c in result if "tool-output-available" in c]
-        assert len(output_available_chunks) == 1
-
-        output_data = json.loads(output_available_chunks[0].replace("data: ", "").strip())
-        assert output_data["type"] == "tool-output-available"
-        assert output_data["toolCallId"] == "tool_456"
-        assert len(output_data["output"]) == 1
-        assert output_data["output"][0]["title"] == "Doc 1"
+        before_chunk = [c for c in text_delta_chunks if "Before" in c]
+        after_chunk = [c for c in text_delta_chunks if "After" in c]
+        assert len(before_chunk) == 1
+        assert len(after_chunk) == 1
 
     @pytest.mark.asyncio
-    async def test_tool_call_starts_new_step(self) -> None:
+    async def test_single_step_with_tool_calls(self) -> None:
         protocol = VercelUIMessageStreamProtocol()
         sources: list[Source] = []
 
@@ -127,11 +127,11 @@ class TestVercelUIProtocolToolEvents:
         finish_step_chunks = [c for c in result if "finish-step" in c]
         start_step_chunks = [c for c in result if "start-step" in c]
 
-        assert len(finish_step_chunks) >= 2
-        assert len(start_step_chunks) >= 2
+        assert len(finish_step_chunks) == 1
+        assert len(start_step_chunks) == 1
 
     @pytest.mark.asyncio
-    async def test_multiple_tool_calls(self) -> None:
+    async def test_multiple_tool_calls_not_streamed(self) -> None:
         protocol = VercelUIMessageStreamProtocol()
         sources: list[Source] = []
 
@@ -175,32 +175,10 @@ class TestVercelUIProtocolToolEvents:
             result.append(chunk)
 
         tool_start_chunks = [c for c in result if "tool-input-start" in c]
-        assert len(tool_start_chunks) == 2
+        assert len(tool_start_chunks) == 0
 
         tool_output_chunks = [c for c in result if "tool-output-available" in c]
-        assert len(tool_output_chunks) == 2
+        assert len(tool_output_chunks) == 0
 
-    @pytest.mark.asyncio
-    async def test_tool_event_with_non_dict_data_ignored(self) -> None:
-        protocol = VercelUIMessageStreamProtocol()
-        sources: list[Source] = []
-
-        async def mock_stream() -> AsyncGenerator[StreamEvent, None]:
-            yield StreamEvent(type=StreamEventType.TOOL_CALL_START, data="invalid")
-            yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="Normal text")
-            yield StreamEvent(type=StreamEventType.DONE, data="")
-
-        result = []
-        async for chunk in protocol.stream_chat(
-            sources=sources,
-            query_id="query_5",
-            message_id="msg_5",
-            text_stream=mock_stream(),
-        ):
-            result.append(chunk)
-
-        tool_chunks = [c for c in result if "tool-input-start" in c]
-        assert len(tool_chunks) == 0
-
-        text_chunks = [c for c in result if "text-delta" in c and "Normal text" in c]
+        text_chunks = [c for c in result if "text-delta" in c and "Between calls" in c]
         assert len(text_chunks) == 1
