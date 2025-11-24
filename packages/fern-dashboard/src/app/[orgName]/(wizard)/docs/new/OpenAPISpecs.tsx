@@ -2,9 +2,11 @@
 
 import { CheckIcon, CodeXmlIcon, UploadCloudIcon, XIcon } from "lucide-react";
 import { useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
+
 import { uploadOnboardingAsset } from "./api";
 
 interface UploadedSpec {
@@ -55,7 +57,7 @@ export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs }: OpenAP
 
     return (
         <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium text-gray-1200">Your API specs (optional)</Label>
+            <Label className="text-gray-1200 dark:text-gray-1100 text-sm font-normal">Your API specs (optional)</Label>
 
             {/* Upload area */}
             <input
@@ -72,11 +74,11 @@ export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs }: OpenAP
                 className="group cursor-pointer rounded-lg border border-dashed border-gray-500 p-6 text-center transition-colors hover:border-gray-700 hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <div className="flex flex-col items-center gap-2">
-                    <UploadCloudIcon className="h-8 w-8 text-gray-900 transition-colors group-hover:text-gray-1100" />
-                    <div className="text-sm text-gray-1100">
+                    <UploadCloudIcon className="group-hover:text-gray-1100 h-8 w-8 text-gray-900 transition-colors" />
+                    <div className="text-gray-1100 text-sm">
                         {isUploading ? "Uploading..." : "Drop your spec or click to upload"}
                     </div>
-                    <div className="text-xs text-gray-1100">
+                    <div className="text-gray-1100 text-xs">
                         OpenAPI, AsyncAPI, gRPC, OpenRPC, or Fern Definition spec.
                     </div>
                 </div>
@@ -89,14 +91,14 @@ export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs }: OpenAP
                         <div key={index} className="flex items-center justify-between gap-3 py-3">
                             <div className="flex items-center gap-3">
                                 <CodeXmlIcon className="h-5 w-5 text-gray-900" />
-                                <span className="flex-1 text-sm text-gray-1200">{spec.fileName}</span>
+                                <span className="text-gray-1200 flex-1 text-sm">{spec.fileName}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="flex items-center justify-center rounded-full bg-green-300 py-1 px-2 gap-1">
-                                    <div className="h-4 w-4 bg-[#008700] rounded-full flex items-center justify-center">
+                                <div className="flex items-center justify-center gap-1 rounded-full bg-green-300 px-2 py-1">
+                                    <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[#008700]">
                                         <CheckIcon className="h-3 w-3 text-white" />
                                     </div>
-                                    <span className="text-xs font-light text-primary">Uploaded</span>
+                                    <span className="text-primary text-xs font-light">Uploaded</span>
                                 </div>
                                 <Button
                                     variant="ghost"

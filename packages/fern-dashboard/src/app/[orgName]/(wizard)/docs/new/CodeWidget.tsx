@@ -30,7 +30,7 @@ export default function CodeWidget({ wizardFormData }: CodeWidgetProps) {
     const logoUrl = wizardFormData.logoUrl;
 
     return (
-        <div className="border-border h-[450px] w-full min-w-[720px] max-w-[840px] overflow-hidden rounded-xl border bg-white shadow-lg lg:block dark:border-gray-700 dark:bg-transparent">
+        <div className="border-border h-[450px] w-[57%] min-w-[720px] overflow-hidden rounded-xl border bg-white shadow-lg lg:block dark:border-gray-700 dark:bg-transparent">
             {/* Browser Chrome */}
             <div className="border-b-border flex h-10 items-center justify-between gap-2 border-b bg-white px-4 py-2 dark:border-b-gray-700 dark:bg-transparent">
                 {/* Traffic lights */}
@@ -63,7 +63,11 @@ export default function CodeWidget({ wizardFormData }: CodeWidgetProps) {
                     {logoUrl ? (
                         <div className="flex items-center gap-2">
                             {/* biome-ignore lint/performance/noImgElement: false positive */}
-                            <img src={logoUrl} alt={companyName} className="h-6 w-auto rounded-lg object-contain" />
+                            <img
+                                src={logoUrl}
+                                alt={companyName}
+                                className="h-6 w-auto max-w-[70px] rounded-lg object-contain"
+                            />
                             {companyName && (
                                 <span className="text-sm text-gray-700 dark:text-white">{companyName}</span>
                             )}

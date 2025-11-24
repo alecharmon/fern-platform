@@ -2,6 +2,7 @@
 
 import { CheckIcon, Loader2Icon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,7 +62,7 @@ export default function DocsUrl({ value, onChange }: DocsUrlProps) {
 
     return (
         <div className="flex flex-col gap-2">
-            <Label htmlFor="docs-url" className="text-sm font-medium text-gray-1200">
+            <Label htmlFor="docs-url" className="text-gray-1200 dark:text-gray-1100 text-sm font-normal">
                 URL
             </Label>
             <div className="flex items-center gap-2">
@@ -73,11 +74,11 @@ export default function DocsUrl({ value, onChange }: DocsUrlProps) {
                     onChange={(e) => setLocalValue(e.target.value)}
                     className="w-full"
                 />
-                <span className="flex items-center gap-2 text-sm text-foreground whitespace-nowrap">
+                <span className="text-foreground flex items-center gap-2 whitespace-nowrap text-sm">
                     .docs.buildwithfern.com
                     {isChecking && <Loader2Icon className="h-4 w-4 animate-spin text-gray-900" />}
                     {!isChecking && isAvailable === false && <XIcon className="h-4 w-4 text-red-600" />}
-                    {!isChecking && isAvailable === true && <CheckIcon className="h-4 w-4 text-primary" />}
+                    {!isChecking && isAvailable === true && <CheckIcon className="text-primary h-4 w-4" />}
                 </span>
             </div>
             {errorMessage && <p className="text-xs text-red-600">{errorMessage}</p>}

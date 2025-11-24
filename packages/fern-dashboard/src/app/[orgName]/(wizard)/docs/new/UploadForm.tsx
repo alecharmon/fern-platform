@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import AutoPopulate from "./AutoPopulate";
 import CodeWidget from "./CodeWidget";
 import ColorPicker from "./ColorPicker";
 import DocsUrl from "./DocsUrl";
@@ -40,9 +41,10 @@ function UploadForm({
         wizardFormData.primaryColorHex;
     return (
         <div className="flex w-full items-start justify-center overflow-y-hidden px-2">
-            <div className="mx-auto flex w-fit max-w-[1600px] items-start gap-6 xl:gap-12">
-                <div className="flex w-full min-w-[400px] max-w-[500px] flex-col">
-                    <div className="mx-auto flex max-h-[calc(100vh-150px)] w-full flex-1 justify-center overflow-y-auto bg-[var(--gray-100)] px-8 py-12 md:rounded-t-2xl">
+            {/* // Grid with 1/2 1/2 */}
+            <div className="mx-auto mt-2 flex w-fit max-w-[1600px] items-start gap-6 xl:gap-12">
+                <div className="flex w-[40%] flex-col">
+                    <div className="lg:px-30 mx-auto flex max-h-[calc(100vh-150px)] w-full flex-1 justify-center overflow-y-auto bg-[var(--gray-100)] px-8 py-12 md:rounded-t-2xl md:px-20 md:pt-20">
                         <div className="w-full max-w-[400px]">
                             <div className="space-y-8 pb-24">
                                 <div className="space-y-2">
@@ -52,10 +54,15 @@ function UploadForm({
                                     <p className="text-gray-1100 text-sm">You can always change this later.</p>
                                 </div>
 
+                                <AutoPopulate wizardFormData={wizardFormData} setWizardFormData={setWizardFormData} />
+
                                 <div className="space-y-6">
                                     <div className="flex flex-col gap-2">
-                                        <Label htmlFor="company-site" className="text-gray-1200 text-sm font-medium">
-                                            Docs site name
+                                        <Label
+                                            htmlFor="company-site"
+                                            className="text-gray-1200 dark:text-gray-1100 text-sm font-normal"
+                                        >
+                                            Site title
                                         </Label>
                                         <Input
                                             id="company-site"
@@ -100,7 +107,7 @@ function UploadForm({
 
                                     <UploadImage
                                         label="Favicon"
-                                        description="Supported formats: ICO, PNG, GIF"
+                                        description="Upload a 32 x 32 pixel ICO, PNG, GIF, or JPG to display in browser tabs."
                                         imageUrl={wizardFormData.faviconUrl}
                                         onImageUpload={(url) =>
                                             setWizardFormData({ ...wizardFormData, faviconUrl: url })
@@ -111,7 +118,7 @@ function UploadForm({
 
                                     <UploadImage
                                         label="Logo"
-                                        description="Supported formats: PNG, GIF, SVG"
+                                        description="This will be used as the main logo on the top-left corner of the Docs site."
                                         imageUrl={wizardFormData.logoUrl}
                                         onImageUpload={(url) => setWizardFormData({ ...wizardFormData, logoUrl: url })}
                                         size="large"
@@ -132,8 +139,8 @@ function UploadForm({
                             </div>
                         </div>
                     </div>
-                    <div className="mx-auto w-full max-w-[640px] rounded-b-2xl border-t border-gray-500 bg-[var(--gray-100)] p-4">
-                        <div className="mx-auto w-full max-w-[400px] space-y-3">
+                    <div className="lg:px-30 rounded-0 mx-auto w-full border-t border-gray-500 bg-[var(--gray-100)] p-4 md:px-20">
+                        <div className="mx-auto w-full space-y-3">
                             {error && (
                                 <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-200">
                                     {error}

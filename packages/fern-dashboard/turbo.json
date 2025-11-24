@@ -20,10 +20,11 @@
       "dependsOn": ["compile"],
       "outputs": [".next/**", "!.next/cache/**"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "env": ["SENTRY_AUTH_TOKEN", "EMAIL_ORG_MAPPINGS"]
+      "env": ["SENTRY_AUTH_TOKEN", "EMAIL_ORG_MAPPINGS", "BRANDFETCH_API_KEY"]
     },
     "dashboard:dev": {
-      "dependsOn": ["^build", "^compile"]
+      "dependsOn": ["^build", "^compile"],
+      "env": ["BRANDFETCH_API_KEY"]
     },
     "dashboard:dev:turbopack": {
       "dependsOn": ["^build", "^compile"]

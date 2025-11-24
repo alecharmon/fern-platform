@@ -1,11 +1,13 @@
 "use client";
 
 import { UploadCloudIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { cn } from "@/utils/utils";
+
 import { uploadOnboardingAsset } from "./api";
 
 type ImageSize = "small" | "large";
@@ -31,6 +33,11 @@ export default function UploadImage({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(imageUrl);
+
+    // Sync internal state with prop changes
+    useEffect(() => {
+        setPreviewUrl(imageUrl);
+    }, [imageUrl]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -70,7 +77,7 @@ export default function UploadImage({
     return (
         <div className="flex flex-col gap-2">
             <div>
-                <Label className="text-sm font-medium text-gray-1200">{label}</Label>
+                <Label className="text-gray-1200 dark:text-gray-1100 text-sm font-normal">{label}</Label>
             </div>
 
             <div className="flex items-center gap-4">
@@ -78,13 +85,13 @@ export default function UploadImage({
                 <div
                     className={cn(
                         containerClasses,
-                        "p-3 cursor-pointer border border-dashed border-gray-500 hover:border-gray-700 hover:bg-opacity-100 transition-all duration-300 flex items-center justify-center overflow-hidden bg-transparent"
+                        "flex cursor-pointer items-center justify-center overflow-hidden border border-dashed border-gray-500 bg-transparent p-3 transition-all duration-300 hover:border-gray-700 hover:bg-opacity-100"
                     )}
                     onClick={() => fileInputRef.current?.click()}
                 >
                     {previewUrl ? (
                         // biome-ignore lint/performance/noImgElement: false positive
-                        <img src={previewUrl} alt={label} className="h-full w-full object-contain rounded-lg" />
+                        <img src={previewUrl} alt={label} className="h-full w-full rounded-lg object-contain" />
                     ) : (
                         <div className="text-gray-900">
                             <UploadCloudIcon className={iconSize} />
@@ -104,7 +111,7 @@ export default function UploadImage({
                     />
                     <Button
                         variant="outline"
-                        className="w-fit flex items-center gap-1 text-xs"
+                        className="flex w-fit items-center gap-1 text-xs"
                         size="default"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploading}
@@ -112,7 +119,7 @@ export default function UploadImage({
                         <UploadCloudIcon className="mr-2 h-4 w-4" />
                         <span>{isUploading ? "Uploading..." : "Upload"}</span>
                     </Button>
-                    <p className="text-xs text-gray-1000">{description}</p>
+                    <p className="text-gray-1000 text-xs">{description}</p>
                 </div>
             </div>
         </div>
