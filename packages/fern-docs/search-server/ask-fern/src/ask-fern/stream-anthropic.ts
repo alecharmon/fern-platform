@@ -337,11 +337,35 @@ export async function runRouteForAnthropic({
                 }
             });
 
-            writer.merge(result.toUIMessageStream());
+            const uiStream = result.toUIMessageStream();
+            const filteredStream = filterToolEventsFromStream(uiStream);
+            writer.merge(filteredStream);
         }
     });
 
     return createUIMessageStreamResponse({ stream: uiMessageStream });
+}
+
+const TOOL_EVENT_TYPES = new Set([
+    "tool-input-start",
+    "tool-input-delta",
+    "tool-input-available",
+    "tool-output-available"
+]);
+
+function filterToolEventsFromStream<T>(stream: ReadableStream<T>): ReadableStream<T> {
+    return stream.pipeThrough(
+        new TransformStream<T, T>({
+            transform(chunk, controller) {
+                if (typeof chunk === "object" && chunk !== null && "type" in chunk) {
+                    if (TOOL_EVENT_TYPES.has(chunk.type as string)) {
+                        return;
+                    }
+                }
+                controller.enqueue(chunk);
+            }
+        })
+    );
 }
 
 function getModelUsageInfo(languageModel: LanguageModel): {
