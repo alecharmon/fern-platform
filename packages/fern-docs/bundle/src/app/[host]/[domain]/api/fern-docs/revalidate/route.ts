@@ -9,7 +9,7 @@ import {
     createPageCacheKey,
     getMetadataFromResponse
 } from "@fern-api/docs-loader";
-import { track } from "@fern-api/docs-server";
+import { flushPosthog, track } from "@fern-api/docs-server";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
@@ -351,6 +351,9 @@ async function performRevalidation(params: {
 
     const end = performance.now();
     controller.log(`revalidate-finished:${end - start}ms\n`);
+
+    // Flush PostHog events before the function terminates
+    await flushPosthog();
 }
 
 export async function GET(
