@@ -382,7 +382,7 @@ export async function GET(
 
     if (fromDeploymentPromoted) {
         const controller: RevalidationController = {
-            log: (message: string) => console.log(message)
+            log: (message: string) => console.log(`[revalidate:${domain}] ${message.trim()}`)
         };
 
         try {
@@ -430,7 +430,10 @@ export async function GET(
 
             try {
                 const streamController: RevalidationController = {
-                    log: (message: string) => c.enqueue(message)
+                    log: (message: string) => {
+                        console.log(`[revalidate:${domain}] ${message.trim()}`);
+                        c.enqueue(message);
+                    }
                 };
 
                 const metadata = await getMetadataFromResponse(withoutStaging(domain), loadWithUrl(domain));
