@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { CachedDocsLoader } from "@fern-api/docs-loader";
+import { track } from "@fern-api/docs-server/analytics/posthog";
 import { withPrunedNavigationLoader } from "@fern-api/docs-server/withPrunedNavigation";
 import {
     addLeadingSlash,
@@ -152,6 +153,12 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
         // returning "notFound: true" here renders our custom 404 page (not-found.tsx)
         if ((edgeFlags.is404PageHidden || settings.hide404Page) && found.redirect != null) {
             console.log(`[404 AVOIDED] Redirecting ${slug} -> ${found.redirect} instead of showing 404`);
+            // Track 404 in PostHog before redirecting to home page
+            track("not_found_redirected", {
+                domain: loader.domain,
+                slug,
+                redirect: found.redirect
+            });
             redirect(prepareRedirect(found.redirect));
         }
 
