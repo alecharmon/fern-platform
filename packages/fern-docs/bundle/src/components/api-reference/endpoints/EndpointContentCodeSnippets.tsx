@@ -67,6 +67,14 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
         [setSelectedExampleKey]
     );
 
+    const errorByStatusCode = useMemo(() => {
+        const map: Record<number, ApiDefinition.ErrorResponse> = {};
+        endpoint.errors?.forEach((error) => {
+            map[error.statusCode] = error;
+        });
+        return map;
+    }, [endpoint.errors]);
+
     const getExampleId = useCallback(
         (example: CodeExample | undefined) => {
             switch (example?.exampleCall.responseBody?.type) {
@@ -79,7 +87,13 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                         example.exampleCall.name ??
                         ApiDefinition.getMessageForStatus(example.exampleCall.responseStatusCode, endpoint.method) ??
                         t(lang).apiReference.response;
-                    return renderResponseTitle(title, example.exampleCall.responseStatusCode);
+                    const error = errorByStatusCode[example.exampleCall.responseStatusCode];
+                    return renderResponseTitle(
+                        title,
+                        example.exampleCall.responseStatusCode,
+                        undefined,
+                        error?.isWildcard
+                    );
                 }
                 case "stream":
                     return t(lang).playground.streamedResponse;
@@ -89,7 +103,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     return t(lang).apiReference.response;
             }
         },
-        [endpoint.method, endpoint.protocol?.type, lang]
+        [endpoint.method, endpoint.protocol?.type, lang, errorByStatusCode]
     );
 
     const errorSelector =
