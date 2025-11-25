@@ -360,10 +360,16 @@ export const config: MiddlewareConfig = {
     matcher: [
         /*
          * Match all request paths except for the ones starting with:
-         * - api/fern-docs (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
+         * - .well-known
+         * - _next (static files, image optimization)
+         * - _vercel
+         * - manifest.webmanifest
+         *
+         * Note: When basePath is configured (e.g., NEXT_PUBLIC_BASE_PATH="/docs"),
+         * the root path "/" needs special handling. We include it here unconditionally
+         * since it doesn't affect non-basePath deployments.
          */
+        "/",
         "/((?!.well-known|_next|_vercel|manifest.webmanifest).*)"
     ]
 };
