@@ -69,7 +69,7 @@ export function RenameSectionDialog({ open, onOpenChange, currentTitle, onConfir
                             value={newTitle}
                             onChange={(e) => setNewTitle(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="new-snippet-name"
+                            placeholder="Section"
                         />
                     </div>
                 </DialogBody>
