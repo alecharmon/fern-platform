@@ -37,6 +37,7 @@ export async function removeUserFromOrg({
     await auth0Management.invalidateCachesAfterAddingOrRemovingOrgMember({
         orgName
     });
+    await auth0Management.invalidateUserOrganizationsCache(userIdToRemove);
 
     const actorName = session.user.name ?? session.user.email ?? userId;
     const removedUserName = removedUser.data.name ?? removedUser.data.email ?? userIdToRemove;

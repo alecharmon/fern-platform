@@ -61,6 +61,8 @@ const ORGANIZATION_INVITATIONS_CACHE = new AsyncRedisCache(RedisCacheKeyType.ORG
     ttlInSeconds: 60
 });
 
+const USER_ORGANIZATIONS_CACHE = new AsyncRedisCache(RedisCacheKeyType.USER_ORGANIZATIONS, { ttlInSeconds: 60 });
+
 const INVITE_TOKEN_CACHE = new AsyncRedisCache(
     RedisCacheKeyType.INVITE_TOKEN,
     { ttlInSeconds: 24 * 60 * 60 } // 24 hours
@@ -72,6 +74,10 @@ const INVITE_TOKEN_CACHE = new AsyncRedisCache(
 
 export async function invalidateCachesAfterAddingOrRemovingOrgMember({ orgName }: { orgName: Auth0OrgName }) {
     await ORGANIZATION_MEMBERS_CACHE.invalidate(RedisCacheKey.organizationMembers(orgName));
+}
+
+export async function invalidateUserOrganizationsCache(userId: Auth0UserID) {
+    await USER_ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.userOrganizations(userId));
 }
 
 export async function invalidateCachesAfterInvitingUserToOrg(orgName: Auth0OrgName) {
@@ -184,29 +190,36 @@ export async function getOrgIdFromName(orgName: Auth0OrgName) {
 }
 
 export async function getMyOrganizations(userId: Auth0UserID) {
-    const auth0 = getAuth0ManagementClient();
-    const allOrganizations: Auth0Organization[] = [];
-    let page = 0;
-    const per_page = 50;
+    console.debug(`[getMyOrganizations] Fetching organizations for user: ${userId}`);
+    return await USER_ORGANIZATIONS_CACHE.get(RedisCacheKey.userOrganizations(userId), async () => {
+        console.debug(`[getMyOrganizations] Cache miss for ${userId}, fetching from Auth0`);
+        const auth0 = getAuth0ManagementClient();
+        const allOrganizations: Auth0Organization[] = [];
+        let page = 0;
+        const per_page = 50;
 
-    while (true) {
-        const { data: organizations } = await retryWithBackoff(
-            async () =>
-                await auth0.users.getUserOrganizations({
-                    id: userId,
-                    page,
-                    per_page
-                }),
-            `getMyOrganizations(${userId}, page=${page})`
-        );
-        allOrganizations.push(...(organizations as Auth0Organization[]));
-        page++;
-        if (organizations.length < per_page) {
-            break;
+        while (true) {
+            const { data: organizations } = await retryWithBackoff(
+                async () =>
+                    await auth0.users.getUserOrganizations({
+                        id: userId,
+                        page,
+                        per_page
+                    }),
+                `getMyOrganizations(${userId}, page=${page})`
+            );
+            allOrganizations.push(...(organizations as Auth0Organization[]));
+            page++;
+            if (organizations.length < per_page) {
+                break;
+            }
         }
-    }
 
-    return allOrganizations;
+        console.debug(
+            `[getMyOrganizations] Successfully fetched ${allOrganizations.length} organizations for ${userId} from Auth0`
+        );
+        return allOrganizations;
+    });
 }
 
 export async function getOrgMembers(
@@ -378,6 +391,7 @@ export async function addUserToOrg(userId: Auth0UserID, orgName: Auth0OrgName) {
     const auth0 = getAuth0ManagementClient();
     await auth0.organizations.addMembers({ id: await getOrgIdFromName(orgName) }, { members: [userId] });
     await invalidateCachesAfterAddingOrRemovingOrgMember({ orgName });
+    await invalidateUserOrganizationsCache(userId);
 }
 
 export async function getUserGithubToken(userId: Auth0UserID): Promise<string | undefined> {
