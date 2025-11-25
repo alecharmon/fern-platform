@@ -8,7 +8,6 @@ import { executeProxyRest } from "@/components/playground/fetch-utils/executePro
 import type { PlaygroundEndpointRequestFormState, ProxyRequest } from "@/components/playground/types";
 import type { PlaygroundResponse } from "@/components/playground/types/playgroundResponse";
 import { buildAuthHeaders, serializeFormStateBody } from "@/components/playground/utils";
-import { isLocal } from "@/components/playground/utils/utils";
 import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
 
 interface UseSendRequestParams {
@@ -33,8 +32,6 @@ export function useSendRequest({
     disableProxy
 }: UseSendRequestParams): UseSendRequestReturn {
     const [response, setResponse] = useState<Loadable<PlaygroundResponse>>(notStartedLoading());
-
-    const isDisableProxy = disableProxy || isLocal();
 
     const sendRequest = useCallback(async () => {
         setResponse(loading());
@@ -81,12 +78,12 @@ export function useSendRequest({
                 })
             };
 
-            const res = await executeProxyRest(req, isDisableProxy);
+            const res = await executeProxyRest(req, disableProxy);
             setResponse(loaded(res));
         } catch (e) {
             setResponse(failed(e));
         }
-    }, [endpoint, formState, baseUrl, authSchemes, isDisableProxy]);
+    }, [endpoint, formState, baseUrl, authSchemes, disableProxy]);
 
     const clearResponse = useCallback(() => {
         setResponse(notStartedLoading());

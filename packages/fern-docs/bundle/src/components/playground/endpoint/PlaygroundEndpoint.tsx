@@ -33,7 +33,6 @@ import {
     serializeFormStateBody
 } from "../utils";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
-import { isLocal } from "../utils/utils";
 import { PlaygroundEndpointContent } from "./PlaygroundEndpointContent";
 import { PlaygroundEndpointPath } from "./PlaygroundEndpointPath";
 
@@ -84,8 +83,6 @@ export const PlaygroundEndpoint = ({
             authKeys: selectedEntry?.schemeIds.map((id) => String(id))
         };
     }, [context.authsWithKeys, context.authOptionEntries, selectedAuthType]);
-
-    const isDisableProxy = disableProxy || isLocal();
 
     const [formState, setFormState] = usePlaygroundEndpointFormState(context);
 
@@ -178,7 +175,7 @@ export const PlaygroundEndpoint = ({
                 })
             };
             if (endpoint.responses?.[0]?.body.type === "stream") {
-                const [res, stream] = await executeProxyStream(req, isDisableProxy);
+                const [res, stream] = await executeProxyStream(req, disableProxy);
 
                 const time = Date.now();
 
@@ -243,7 +240,7 @@ export const PlaygroundEndpoint = ({
                     );
                 }
             } else {
-                const res = await executeProxyRest(req, isDisableProxy);
+                const res = await executeProxyRest(req, disableProxy);
                 setResponse(loaded(res));
                 if (res.type !== "stream") {
                     track("api_playground_request_received", {
@@ -269,7 +266,7 @@ export const PlaygroundEndpoint = ({
             );
             setResponse(failed(e));
         }
-    }, [endpoint, node.title, node.slug, authSchemes, authKeys, formState, baseUrl, setOAuthValue, isDisableProxy]);
+    }, [endpoint, node.title, node.slug, authSchemes, authKeys, formState, baseUrl, setOAuthValue, disableProxy]);
 
     const settings = node.playground;
 
