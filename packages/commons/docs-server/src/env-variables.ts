@@ -72,6 +72,10 @@ export function cohereApiKey(): string {
     return getEnvVariable("COHERE_API_KEY");
 }
 
+export function getChatLambdaUrl(): string {
+    return getEnvVariable("FAI_CHAT_LAMBDA_URL");
+}
+
 function assertNonNullable<T>(value: T, key: string): asserts value is NonNullable<T> {
     if (value == null) {
         throw new Error(`${key} is not defined`);
