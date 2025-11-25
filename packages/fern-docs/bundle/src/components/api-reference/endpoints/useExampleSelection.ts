@@ -118,25 +118,20 @@ export function useExampleSelection(
                 if (next === RESET) {
                     return getInitialExampleKey(getProgrammingLanguage());
                 }
+                if (next.language !== prev.language) {
+                    setGlobalLanguage(next.language);
+                }
                 return next;
             });
         },
-        [getInitialExampleKey]
+        [getInitialExampleKey, setGlobalLanguage]
     );
 
-    // Sync global language changes to internal state
     React.useEffect(() => {
-        if (globalLanguage != null) {
-            setSelectedExampleKey((prev) => ({ ...prev, language: globalLanguage }));
+        if (globalLanguage != null && internalSelectedExampleKey.language !== globalLanguage) {
+            setSelectedExampleKeyInner((prev) => ({ ...prev, language: globalLanguage }));
         }
-    }, [globalLanguage, setSelectedExampleKey]);
-
-    // Sync internal language changes to global store
-    React.useEffect(() => {
-        if (internalSelectedExampleKey.language !== globalLanguage) {
-            setGlobalLanguage(internalSelectedExampleKey.language);
-        }
-    }, [internalSelectedExampleKey.language, globalLanguage, setGlobalLanguage]);
+    }, [globalLanguage, internalSelectedExampleKey.language]);
 
     const availableLanguages = useMemo(
         () => getAvailableLanguages(examplesByLanguageKeyAndStatusCode, defaultLanguage),
