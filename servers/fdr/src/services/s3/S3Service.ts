@@ -15,7 +15,8 @@ import type { DynamicIr } from "../../api/generated/api/resources/api/resources/
 import type { FdrApplication, FdrConfig } from "../../app";
 import { Cache } from "../../Cache";
 
-const ONE_WEEK_IN_SECONDS = 604800;
+const _ONE_WEEK_IN_SECONDS = 604800;
+const ONE_DAY_IN_SECONDS = 86400;
 
 export interface S3DocsFileInfo {
     presignedUrl: DocsV1Write.FileS3UploadUrl;
@@ -93,7 +94,7 @@ export class S3ServiceImpl implements S3Service {
     private privateDocsS3: S3Client;
     private privateApiDefinitionSourceS3: S3Client;
     private dbDocsDefinitionS3: S3Client;
-    private presignedDownloadUrlCache = new Cache<string>(10_000, ONE_WEEK_IN_SECONDS);
+    private presignedDownloadUrlCache = new Cache<string>(10_000, ONE_DAY_IN_SECONDS);
 
     constructor(
         private readonly config: FdrConfig,
