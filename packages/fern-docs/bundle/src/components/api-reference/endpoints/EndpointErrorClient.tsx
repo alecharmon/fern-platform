@@ -35,7 +35,7 @@ export function EndpointErrorClient({
             onClick={onClick}
         >
             <div className="flex items-baseline space-x-2">
-                <StatusCodeBadge statusCode={error.statusCode} size="sm" />
+                <StatusCodeBadge statusCode={error.statusCode} isWildcard={error.isWildcard} size="sm" />
                 <div className="text-(color:--grayscale-a11) text-left text-xs">{error.name}</div>
                 {availability != null && <AvailabilityBadge availability={availability} size="sm" rounded />}
             </div>

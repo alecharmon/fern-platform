@@ -477,6 +477,82 @@ paths:
           description: Unauthorized - missing or invalid authentication
         "403":
           description: Forbidden - insufficient permissions
+  /plant/wildcard-errors:
+    get:
+      tags:
+        - plant
+      summary: Endpoint demonstrating wildcard error responses
+      description: |
+        This endpoint demonstrates wildcard error responses (4XX and 5XX).
+        When an error occurs, the response will match the appropriate wildcard pattern.
+      operationId: getPlantWithWildcardErrors
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantResponse"
+              examples:
+                success:
+                  summary: Successful plant retrieval
+                  value:
+                    id: 101
+                    name: "Fern"
+                    status: "available"
+                    tags: ["green", "leafy"]
+        "400":
+          description: Bad Request - Invalid input provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpecificError"
+              examples:
+                badRequest:
+                  summary: Bad request error
+                  value:
+                    error: "Invalid plant ID format"
+                    code: "BAD_REQUEST"
+        "4XX":
+          description: Client error - covers all other 4XX status codes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WildcardError"
+              examples:
+                clientError:
+                  summary: Generic client error
+                  value:
+                    error: "Client error occurred"
+                    code: "CLIENT_ERROR"
+                    statusCode: 400
+        "500":
+          description: Internal Server Error - Server encountered an error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpecificError"
+              examples:
+                internalError:
+                  summary: Internal server error
+                  value:
+                    error: "Database connection failed"
+                    code: "INTERNAL_ERROR"
+        "5XX":
+          description: Server error - covers all other 5XX status codes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WildcardError"
+              examples:
+                serverError:
+                  summary: Generic server error
+                  value:
+                    error: "Server error occurred"
+                    code: "SERVER_ERROR"
+                    statusCode: 500
 webhooks:
   orderStatusChanged:
     post:
@@ -710,6 +786,39 @@ components:
             recommendedReorder:
               type: integer
               description: Recommended reorder quantity
+    SpecificError:
+      type: object
+      description: Error response for specific status codes (400, 500)
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Machine-readable error code
+    WildcardError:
+      type: object
+      description: Generic error response for wildcard status codes (4XX/5XX)
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Machine-readable error code
+        statusCode:
+          type: integer
+          description: The actual HTTP status code
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details
   securitySchemes:
     bearerAuth:
       type: http

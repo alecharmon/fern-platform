@@ -287,10 +287,15 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
 
 export const EndpointContentCodeSnippets = memo(UnmemoizedEndpointContentCodeSnippets);
 
-export function renderResponseTitle(title: string, statusCode: number | string, hideTitle?: boolean) {
+export function renderResponseTitle(
+    title: string,
+    statusCode: number | string,
+    hideTitle?: boolean,
+    isWildcard?: boolean
+) {
     return (
         <span className="inline-flex items-center gap-2 whitespace-nowrap">
-            <StatusCodeBadge statusCode={statusCode} />
+            <StatusCodeBadge statusCode={statusCode} isWildcard={isWildcard} />
             {!hideTitle && (
                 <span className={cn("truncate max-w-full", `text-intent-${statusCodeToIntent(String(statusCode))}`)}>
                     {title}

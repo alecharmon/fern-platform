@@ -33,7 +33,7 @@ export function EndpointMultipleResponseSection({
             const title =
                 ApiDefinition.getMessageForStatus(response.statusCode, method) ?? t(lang).apiReference.response;
 
-            return renderResponseTitle(title, response.statusCode, true);
+            return renderResponseTitle(title, response.statusCode, true, response.isWildcard);
         },
         [method, lang]
     );
