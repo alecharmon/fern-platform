@@ -1,7 +1,9 @@
 import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
 import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
+import * as appscaling from "aws-cdk-lib/aws-applicationautoscaling";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
@@ -52,22 +54,9 @@ export class FaiChatStack extends Stack {
             zoneName: environmentInfo.route53Info.hostedZoneName
         });
 
-        // Create VPC for Lambda functions with NAT gateway for internet access
-        const vpc = new ec2.Vpc(this, "fai-chat-vpc", {
-            maxAzs: 2,
-            natGateways: 1,
-            subnetConfiguration: [
-                {
-                    name: "public",
-                    subnetType: ec2.SubnetType.PUBLIC,
-                    cidrMask: 24
-                },
-                {
-                    name: "private",
-                    subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-                    cidrMask: 24
-                }
-            ]
+        // Import existing shared VPC (avoids VPC/IGW quota limits and NAT costs)
+        const vpc = ec2.Vpc.fromLookup(this, "vpc", {
+            vpcId: environmentInfo.vpcId
         });
 
         // Security group for Lambda function
@@ -82,13 +71,18 @@ export class FaiChatStack extends Stack {
             ? `${lambdaName}-preview-${previewOptions.prNumber}`
             : `${lambdaName}-${environmentType.toLowerCase()}`;
 
+        // Environment-aware configuration
+        const isProd = environmentType === EnvironmentType.Prod;
+        const reservedConcurrency = isProd ? 30 : 20;
+
         const lambdaFunction = new lambda.DockerImageFunction(this, `${lambdaName}-lambda-function`, {
             functionName,
             code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, `../../fai-lambda`), {
                 file: `${lambdaName}/Dockerfile`
             }),
-            timeout: Duration.minutes(15), // Max timeout for Lambda
-            memorySize: 2048, // 2GB for chat/AI workloads
+            timeout: Duration.minutes(15),
+            memorySize: 768,
+            reservedConcurrentExecutions: reservedConcurrency,
             logGroup,
             vpc,
             vpcSubnets: {
@@ -124,6 +118,35 @@ export class FaiChatStack extends Stack {
             })
         );
 
+        // Create alias for provisioned concurrency (only for prod, not dev or preview)
+        const alias =
+            isProd && !previewOptions?.isPreview
+                ? new lambda.Alias(this, `${lambdaName}-alias`, {
+                      aliasName: "live",
+                      version: lambdaFunction.currentVersion,
+                      provisionedConcurrentExecutions: 3
+                  })
+                : null;
+
+        // Auto-scaling for provisioned concurrency (only for prod)
+        if (alias) {
+            const scalingTarget = new appscaling.ScalableTarget(this, `${lambdaName}-scaling-target`, {
+                serviceNamespace: appscaling.ServiceNamespace.LAMBDA,
+                resourceId: `function:${lambdaFunction.functionName}:live`,
+                scalableDimension: "lambda:function:ProvisionedConcurrency",
+                minCapacity: 2,
+                maxCapacity: 10
+            });
+            scalingTarget.node.addDependency(alias);
+
+            scalingTarget.scaleToTrackMetric(`${lambdaName}-scaling-policy`, {
+                targetValue: 0.7,
+                predefinedMetric: appscaling.PredefinedMetric.LAMBDA_PROVISIONED_CONCURRENCY_UTILIZATION,
+                scaleInCooldown: Duration.minutes(5),
+                scaleOutCooldown: Duration.seconds(60)
+            });
+        }
+
         const apiName = `${lambdaName}-${environmentType.toLowerCase()}`;
 
         const api = new apigateway.RestApi(this, `${lambdaName}-api`, {
@@ -137,7 +160,9 @@ export class FaiChatStack extends Stack {
             deployOptions: {
                 stageName: environmentType.toLowerCase(),
                 loggingLevel: apigateway.MethodLoggingLevel.INFO,
-                dataTraceEnabled: true
+                dataTraceEnabled: true,
+                throttlingRateLimit: isProd ? 30 : 20,
+                throttlingBurstLimit: isProd ? 60 : 40
             }
         });
 
@@ -166,7 +191,8 @@ export class FaiChatStack extends Stack {
             });
         }
 
-        const lambdaIntegration = new apigateway.LambdaIntegration(lambdaFunction);
+        // Use alias for non-preview deployments (routes to provisioned concurrency)
+        const lambdaIntegration = new apigateway.LambdaIntegration(alias ?? lambdaFunction);
 
         // Proxy all requests to Lambda
         api.root.addProxy({
@@ -199,6 +225,28 @@ export class FaiChatStack extends Stack {
             value: lambdaFunction.functionName,
             description: "Lambda Function Name"
         });
+
+        // CloudWatch alarms (only for non-preview deployments)
+        if (!previewOptions?.isPreview) {
+            new cloudwatch.Alarm(this, "throttle-alarm", {
+                metric: lambdaFunction.metricThrottles(),
+                threshold: 1,
+                evaluationPeriods: 3,
+                alarmDescription: "Lambda throttling - capacity issue"
+            });
+
+            // Alert at 80% of reserved concurrency
+            const concurrencyAlarmThreshold = Math.floor(reservedConcurrency * 0.8);
+            new cloudwatch.Alarm(this, "concurrency-alarm", {
+                metric: lambdaFunction.metric("ConcurrentExecutions", {
+                    statistic: "Maximum",
+                    period: Duration.minutes(1)
+                }),
+                threshold: concurrencyAlarmThreshold,
+                evaluationPeriods: 3,
+                alarmDescription: `Approaching concurrency limit (${concurrencyAlarmThreshold}/${reservedConcurrency})`
+            });
+        }
     }
 }
 
