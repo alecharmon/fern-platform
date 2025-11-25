@@ -14,7 +14,6 @@ import {
     extractParentSectionId,
     findPageByPageId,
     findSectionById,
-    findSectionTitleById,
     injectPageIntoSection,
     updateSectionTitle
 } from "./navigationTreeUtils";
@@ -299,19 +298,6 @@ export class NavigationStore {
         const { section: sectionNode, tabSlug, product, version } = searchResult;
         const oldTitle = sectionNode.title;
 
-        console.log("[NavigationStore.renameSection] Renaming section:", {
-            sectionId,
-            oldTitle,
-            newTitle,
-            tabSlug,
-            hasProduct: !!product,
-            hasVersion: !!version,
-            productSlug: product && FernNavigation.isInternalProductNode(product) ? product.slug : undefined,
-            versionSlug: version?.slug,
-            slugMapSize: this._slugToDocsYmlFilePath?.size,
-            slugMapKeys: this._slugToDocsYmlFilePath ? Array.from(this._slugToDocsYmlFilePath.keys()) : []
-        });
-
         // Update the section title in rootNode
         const updatedRootNode = updateSectionTitle(this._rootNode, sectionId, newTitle);
         this._rootNode = updatedRootNode;
@@ -320,38 +306,19 @@ export class NavigationStore {
         this._navigationChanges = new Map(this._navigationChanges);
 
         // Determine which file this section belongs to using the section's context
-        // Build a minimal SerializableFoundNode to use with extractDocsYmlFilePathFromFoundNode
-        const contextForExtraction: SerializableFoundNode = {
-            type: "found",
-            node: sectionNode as any, // Use section as placeholder - we only need the context
-            parents: [],
-            sidebar: undefined,
-            tabs: [],
-            currentTab: tabSlug ? ({ slug: tabSlug } as any) : undefined,
-            currentVersion: version,
-            currentProduct: product,
-            currentVariant: undefined, // TODO: add variant support to findSectionById
-            isCurrentVersionDefault: false,
-            isCurrentProductDefault: false
-        };
+        const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+            {
+                currentVersion: version,
+                currentProduct: product,
+                currentTab: tabSlug ? { slug: tabSlug } : undefined
+            },
+            this._slugToDocsYmlFilePath
+        );
 
-        const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(contextForExtraction, this._slugToDocsYmlFilePath);
-
-        console.log("[NavigationStore.renameSection] Determined docsYmlFilePath:", docsYmlFilePath);
-
-        // Update all existing add_page changes that reference the old section title
-        // This ensures new pages added to a renamed section use the correct section title in docs.yml
-        this._navigationChanges.forEach((change, key) => {
-            if (change.type === "add_page" && change.sectionTitle === oldTitle) {
-                // Check if the tab matches (or both are undefined for root navigation)
-                if (change.tabSlug === tabSlug) {
-                    this._navigationChanges.set(key, {
-                        ...change,
-                        sectionTitle: newTitle
-                    });
-                }
-            }
-        });
+        // No need to update add_page changes! The sectionId is stable and we look up
+        // the current title from rootNode when generating YAML. This is the key insight:
+        // section titles can change, but section IDs don't, so we store IDs and resolve
+        // titles at generation time.
 
         // Track the rename change in docs.yml
         const changeKey = `section-rename-${sectionId}`;
@@ -465,8 +432,43 @@ export class NavigationStore {
             initialMdx: deps.initialMdx
         });
 
-        // Extract the docs file path from navigation context
-        const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(deps.baseFoundNode, this._slugToDocsYmlFilePath);
+        // Extract the docs file path from the target section's navigation context
+        // We need to look up the target section in the rootNode to get its version/product context
+        let docsYmlFilePath = "docs.yml"; // default fallback
+        if (this._rootNode && targetSectionId) {
+            const targetSectionResult = findSectionById(this._rootNode, targetSectionId);
+            if (targetSectionResult) {
+                // Use the target section's version/product/tab context to determine the correct file
+                docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+                    {
+                        currentVersion: targetSectionResult.version,
+                        currentProduct: targetSectionResult.product,
+                        currentTab: targetSectionResult.tabSlug ? { slug: targetSectionResult.tabSlug } : undefined
+                    },
+                    this._slugToDocsYmlFilePath
+                );
+            } else {
+                // Fallback to baseFoundNode context if we can't find the target section
+                docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+                    {
+                        currentVersion: deps.baseFoundNode.currentVersion,
+                        currentProduct: deps.baseFoundNode.currentProduct,
+                        currentTab: deps.baseFoundNode.currentTab
+                    },
+                    this._slugToDocsYmlFilePath
+                );
+            }
+        } else {
+            // Fallback to baseFoundNode context if rootNode is unavailable
+            docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+                {
+                    currentVersion: deps.baseFoundNode.currentVersion,
+                    currentProduct: deps.baseFoundNode.currentProduct,
+                    currentTab: deps.baseFoundNode.currentTab
+                },
+                this._slugToDocsYmlFilePath
+            );
+        }
 
         // Calculate insertion index from RootNode order before injecting
         // Try stored rootNode first, fall back to live sidebar from baseFoundNode if rootNode is stale/unavailable
@@ -484,7 +486,12 @@ export class NavigationStore {
         this._navigationChanges = new Map(this._navigationChanges);
         this._navigationChanges.set(filename, {
             type: "add_page",
-            sectionTitle: this._extractSectionTitleFromRootNode(targetSectionId),
+            // Store the stable section ID - we'll look up the current title when generating YAML
+            // This way renames automatically work without needing to update the change
+            sectionId: targetSectionId ?? null,
+            // No longer set sectionTitle for new changes - sectionId is the source of truth
+            // Keep field as null for backwards compatibility with old snapshots
+            sectionTitle: null,
             tabSlug: this._extractTabSlug(deps.baseFoundNode),
             pageEntry: { page: title, path: filename },
             insertionMode: "atIndex",
@@ -590,7 +597,11 @@ export class NavigationStore {
 
             // Extract the docs file path from navigation context
             const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
-                entry.pageData.foundNode,
+                {
+                    currentVersion: entry.pageData.foundNode.currentVersion,
+                    currentProduct: entry.pageData.foundNode.currentProduct,
+                    currentTab: entry.pageData.foundNode.currentTab
+                },
                 this._slugToDocsYmlFilePath
             );
 
@@ -626,23 +637,12 @@ export class NavigationStore {
                 const pageSearchResult = findPageByPageId(this._rootNode, pageId);
 
                 if (pageSearchResult) {
-                    // Build a minimal SerializableFoundNode to extract the docs yml file path
-                    const contextForExtraction: SerializableFoundNode = {
-                        type: "found",
-                        node: pageSearchResult.page,
-                        parents: [],
-                        sidebar: undefined,
-                        tabs: [],
-                        currentTab: pageSearchResult.tabSlug ? ({ slug: pageSearchResult.tabSlug } as any) : undefined,
-                        currentVersion: pageSearchResult.version,
-                        currentProduct: pageSearchResult.product,
-                        currentVariant: undefined, // TODO: add variant support to findPageByPageId
-                        isCurrentVersionDefault: false,
-                        isCurrentProductDefault: false
-                    };
-
                     docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
-                        contextForExtraction,
+                        {
+                            currentVersion: pageSearchResult.version,
+                            currentProduct: pageSearchResult.product,
+                            currentTab: pageSearchResult.tabSlug ? { slug: pageSearchResult.tabSlug } : undefined
+                        },
                         this._slugToDocsYmlFilePath
                     );
                 }
@@ -682,7 +682,11 @@ export class NavigationStore {
                 // Restore client page as an "add_page" change
                 const title = entry.pageData.foundNode.node.title;
                 const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
-                    entry.pageData.foundNode,
+                    {
+                        currentVersion: entry.pageData.foundNode.currentVersion,
+                        currentProduct: entry.pageData.foundNode.currentProduct,
+                        currentTab: entry.pageData.foundNode.currentTab
+                    },
                     this._slugToDocsYmlFilePath
                 );
 
@@ -698,7 +702,11 @@ export class NavigationStore {
                 this._navigationChanges = new Map(this._navigationChanges);
                 this._navigationChanges.set(filename, {
                     type: "add_page",
-                    sectionTitle: this._extractSectionTitleFromRootNode(entry.parentSectionId),
+                    // Store stable section ID for correct title resolution after renames
+                    sectionId: entry.parentSectionId ?? null,
+                    // No longer set sectionTitle for new changes - sectionId is the source of truth
+                    // Keep field as null for backwards compatibility with old snapshots
+                    sectionTitle: null,
                     tabSlug: this._extractTabSlug(entry.pageData.foundNode),
                     pageEntry: { page: title, path: filename },
                     insertionMode: "atIndex",
@@ -978,15 +986,6 @@ export class NavigationStore {
             }
         };
         this._setStorageAndNotify();
-    }
-
-    /** Extracts the section title from the current rootNode by section ID (always returns current/renamed title) */
-    private _extractSectionTitleFromRootNode(sectionId?: FernNavigation.NodeId): string | null {
-        if (!sectionId || !this._rootNode) {
-            return null;
-        }
-
-        return findSectionTitleById(this._rootNode, sectionId);
     }
 
     /**

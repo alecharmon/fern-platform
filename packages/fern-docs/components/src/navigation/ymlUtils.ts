@@ -1,4 +1,6 @@
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import yaml from "js-yaml";
+import { findSectionTitleById } from "./navigationTreeUtils";
 import {
     type DocsYmlConfig,
     type DocsYmlFilePath,
@@ -22,19 +24,20 @@ export function isYmlFilePath(filePath: string): boolean {
  * @returns Map of CHANGED files to updated content
  */
 export function buildDocsYmlContentFromChanges(navigationData: NavigationSnapshot): Map<DocsYmlFilePath, string> {
-    const { docsYmlBaseContent, navigationChanges } = navigationData;
+    const { docsYmlBaseContent, navigationChanges, rootNode } = navigationData;
 
     if (docsYmlBaseContent == null) {
         throw new Error("Cannot build docs.yml files: base content unavailable");
     }
 
     // Build changes for each docs.yml file separately and return all CHANGED files
-    return _buildDocsYmlContentFromChanges(docsYmlBaseContent, navigationChanges);
+    return _buildDocsYmlContentFromChanges(docsYmlBaseContent, navigationChanges, rootNode);
 }
 
 function _buildDocsYmlContentFromChanges(
     docsYmlBaseContent: Map<DocsYmlFilePath, string>,
-    navigationChanges: NavigationSnapshot["navigationChanges"]
+    navigationChanges: NavigationSnapshot["navigationChanges"],
+    rootNode?: NavigationSnapshot["rootNode"]
 ): Map<DocsYmlFilePath, string> {
     const changesByFile = new Map<DocsYmlFilePath, typeof navigationChanges>();
 
@@ -81,14 +84,19 @@ function _buildDocsYmlContentFromChanges(
             if (change.type === "add_page" && change.pageEntry) {
                 // Apply add operation with insertionMode and insertionIndex
                 // Pass the ymlFilePath so paths can be converted to be relative to this file
-                _applyAddOperation(config, {
-                    sectionTitle: change.sectionTitle ?? null,
-                    tabSlug: change.tabSlug,
-                    pageEntry: change.pageEntry,
-                    insertionMode: change.insertionMode,
-                    insertionIndex: change.insertionIndex,
-                    ymlFilePath: filePath
-                });
+                _applyAddOperation(
+                    config,
+                    {
+                        sectionTitle: change.sectionTitle ?? null,
+                        sectionId: change.sectionId ?? null,
+                        tabSlug: change.tabSlug,
+                        pageEntry: change.pageEntry,
+                        insertionMode: change.insertionMode,
+                        insertionIndex: change.insertionIndex,
+                        ymlFilePath: filePath
+                    },
+                    rootNode
+                );
             } else if (change.type === "remove_page" && change.pageEntry) {
                 _applyRemoveOperation(config, {
                     pageEntry: change.pageEntry,
@@ -260,16 +268,45 @@ function _parseDocsYmlBaseContent(baseContent: string): DocsYmlConfig {
 function _applyAddOperation(
     docsConfig: DocsYmlConfig,
     update: {
+        /** @deprecated Fallback only - prefer sectionId which is looked up from rootNode */
         sectionTitle: string | null;
+        /** Stable section ID - used to look up current section title from rootNode */
+        sectionId: FernNavigation.NodeId | null;
         tabSlug?: string;
         pageEntry: { page: string; path: string };
         insertionMode?: "atIndex" | "prepend" | "append";
         insertionIndex?: number;
         ymlFilePath: DocsYmlFilePath;
-    }
+    },
+    rootNode?: FernNavigation.RootNode
 ) {
-    const { sectionTitle, tabSlug, pageEntry, insertionMode, insertionIndex, ymlFilePath } = update;
+    const {
+        sectionTitle: fallbackSectionTitle,
+        sectionId,
+        tabSlug,
+        pageEntry,
+        insertionMode,
+        insertionIndex,
+        ymlFilePath
+    } = update;
     docsConfig.navigation ??= [];
+
+    // If we have a sectionId, look up the CURRENT title from rootNode
+    // This ensures renamed sections work correctly without needing to update the change
+    // TODO: when we migrate to remote storage, clean up schema so we can always rely on access to rootNode
+    let sectionTitle = fallbackSectionTitle;
+    if (sectionId && rootNode) {
+        const currentTitle = findSectionTitleById(rootNode, sectionId);
+        if (currentTitle) {
+            sectionTitle = currentTitle;
+        }
+    } else if (!sectionId && fallbackSectionTitle) {
+        // Warn when falling back to sectionTitle (backwards compatibility with old snapshots)
+        console.warn(
+            `[ymlUtils] Missing sectionId for page "${pageEntry.page}" in "${ymlFilePath}". ` +
+                `Falling back to sectionTitle="${fallbackSectionTitle}". This may not work correctly with renamed sections.`
+        );
+    }
 
     if (tabSlug) {
         _addToTabbedNavigation(

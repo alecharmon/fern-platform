@@ -50,6 +50,7 @@ export interface PreviousNavigationSnapshots {
             string,
             | {
                   type: "add_page" | "remove_page";
+                  /** @deprecated V1 schema - V2+ uses sectionId instead */
                   sectionTitle?: string | null;
                   tabSlug?: string;
                   pageEntry: { page: string; path: string };
@@ -100,7 +101,7 @@ export interface PreviousNavigationSnapshots {
             pendingUpdates: Record<
                 string,
                 {
-                    /** null for root-level pages */
+                    /** @deprecated V0 schema - V2+ uses sectionId instead. null for root-level pages */
                     sectionTitle: string | null;
                     /** Tab identifier for tabbed navigation */
                     tabSlug?: string;

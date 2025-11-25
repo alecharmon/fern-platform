@@ -12,7 +12,6 @@ import type {
     RootLevelContainerWithTraversalContext,
     SectionAncestorMetadata,
     SectionNodeWithTraversalContext,
-    SerializableFoundNode,
     ServerPageDataDependencies
 } from "./types";
 
@@ -70,11 +69,16 @@ export function extractLiveSidebarFromRootNode(
  * For multi-version docs, this determines which version file the navigation belongs to.
  * For multi-product docs, this determines which product file the navigation belongs to
  *
- * @param foundNode - The navigation context with version/product information
+ * @param context - The minimal navigation context needed for file path resolution
+ * @param slugToDocsYmlFilePath - Mapping of slugs to yml file paths
  * @returns The file path for the docs.yml file (e.g., "docs.yml", "versions/v2.yml")
  */
 export function extractDocsYmlFilePathFromFoundNode(
-    foundNode: SerializableFoundNode,
+    context: {
+        currentVersion?: FernNavigation.VersionNode;
+        currentProduct?: FernNavigation.ProductNode | FernNavigation.InternalProductNode;
+        currentTab?: { slug: string };
+    },
     slugToDocsYmlFilePath?: Map<NavigationSlug, DocsYmlFilePath>
 ): DocsYmlFilePath {
     // If no mapping is provided or it's not a Map, default to "docs.yml"
@@ -87,15 +91,15 @@ export function extractDocsYmlFilePathFromFoundNode(
                 slugToDocsYmlFilePath,
                 isMap: slugToDocsYmlFilePath instanceof Map,
                 size: slugToDocsYmlFilePath instanceof Map ? slugToDocsYmlFilePath.size : "N/A",
-                hasCurrentVersion: !!foundNode.currentVersion,
-                hasCurrentProduct: !!foundNode.currentProduct,
-                hasCurrentTab: !!foundNode.currentTab,
-                currentVersionSlug: foundNode.currentVersion?.slug,
+                hasCurrentVersion: !!context.currentVersion,
+                hasCurrentProduct: !!context.currentProduct,
+                hasCurrentTab: !!context.currentTab,
+                currentVersionSlug: context.currentVersion?.slug,
                 currentProductSlug:
-                    foundNode.currentProduct && FernNavigation.isInternalProductNode(foundNode.currentProduct)
-                        ? foundNode.currentProduct.slug
+                    context.currentProduct && FernNavigation.isInternalProductNode(context.currentProduct)
+                        ? context.currentProduct.slug
                         : undefined,
-                currentTabSlug: foundNode.currentTab?.slug
+                currentTabSlug: context.currentTab?.slug
             }
         );
         return "docs.yml";
@@ -106,8 +110,8 @@ export function extractDocsYmlFilePathFromFoundNode(
     // When both product and version exist, version takes precedence (products with nested versions)
 
     // 1. Check for version context (most common for multi-file docs, including nested versions in products)
-    if (foundNode.currentVersion) {
-        const versionSlug = foundNode.currentVersion.slug;
+    if (context.currentVersion) {
+        const versionSlug = context.currentVersion.slug;
         let filePath = slugToDocsYmlFilePath.get(versionSlug);
 
         // If exact match not found and slug contains slashes, try the last segment
@@ -136,8 +140,8 @@ export function extractDocsYmlFilePathFromFoundNode(
 
     // 2. Check for product context (for multi-product docs)
     // Only internal products have slug property; external products link to external URLs
-    if (foundNode.currentProduct && FernNavigation.isInternalProductNode(foundNode.currentProduct)) {
-        const productSlug = foundNode.currentProduct.slug;
+    if (context.currentProduct && FernNavigation.isInternalProductNode(context.currentProduct)) {
+        const productSlug = context.currentProduct.slug;
 
         // Try exact match first
         let filePath = slugToDocsYmlFilePath.get(productSlug);
@@ -156,23 +160,6 @@ export function extractDocsYmlFilePathFromFoundNode(
             }
         }
 
-        // If we have a version slug that matches the product slug, this might be a product with nested versions
-        // where FDR is providing the product slug as the version slug. Try to find a version that belongs to this product.
-        // Since we don't have a direct product->versions mapping, we'll need to check if any of the available
-        // paths look like they belong to this product (e.g., "docs/products/platform/v2.yml" for product "platform")
-        if (foundNode.currentVersion && foundNode.currentVersion.slug === productSlug) {
-            // Look for any slug in the map that has a path containing the product slug
-            for (const [_, path] of slugToDocsYmlFilePath.entries()) {
-                // Check if the path contains the product slug as a directory component
-                // e.g., "docs/products/platform/v2.yml" contains "platform"
-                const pathSegments = path.split("/");
-                if (pathSegments.includes(productSlug)) {
-                    // Found a matching version file for this product
-                    return path;
-                }
-            }
-        }
-
         console.warn(
             `[extractDocsYmlFilePathFromFoundNode] No file path found for product slug: "${productSlug}". Available slugs:`,
             Array.from(slugToDocsYmlFilePath.keys())
@@ -180,8 +167,8 @@ export function extractDocsYmlFilePathFromFoundNode(
     }
 
     // 3. Check for tab context (for tabbed docs with file references)
-    if (foundNode.currentTab) {
-        const tabSlug = foundNode.currentTab.slug;
+    if (context.currentTab) {
+        const tabSlug = context.currentTab.slug;
         const filePath = slugToDocsYmlFilePath.get(tabSlug);
         if (filePath) {
             return filePath;
@@ -192,9 +179,9 @@ export function extractDocsYmlFilePathFromFoundNode(
     console.warn(
         "[extractDocsYmlFilePathFromFoundNode] Could not determine file path from context, defaulting to docs.yml. Context:",
         {
-            hasCurrentVersion: !!foundNode.currentVersion,
-            hasCurrentProduct: !!foundNode.currentProduct,
-            hasCurrentTab: !!foundNode.currentTab,
+            hasCurrentVersion: !!context.currentVersion,
+            hasCurrentProduct: !!context.currentProduct,
+            hasCurrentTab: !!context.currentTab,
             availableSlugs: Array.from(slugToDocsYmlFilePath.keys())
         }
     );

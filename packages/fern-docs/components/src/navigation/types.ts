@@ -338,7 +338,10 @@ export type InsertionMode = "atIndex" | "prepend" | "append";
 export type NavigationChange =
     | {
           type: "add_page";
+          /** @deprecated Use sectionId instead - section titles can change, IDs are stable */
           sectionTitle?: string | null;
+          /** The stable section ID where this page should be added */
+          sectionId?: FernNavigation.NodeId | null;
           tabSlug?: string;
           pageEntry: { page: string; path: string };
           insertionMode: InsertionMode;
@@ -355,7 +358,10 @@ export type NavigationChange =
       }
     | {
           type: "remove_page";
+          /** @deprecated Use sectionId instead - section titles can change, IDs are stable */
           sectionTitle?: string | null;
+          /** The stable section ID where this page should be removed from */
+          sectionId?: FernNavigation.NodeId | null;
           tabSlug?: string;
           pageEntry: { page: string; path: string };
           createdAt: number;

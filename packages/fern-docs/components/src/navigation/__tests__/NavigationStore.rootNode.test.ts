@@ -442,7 +442,21 @@ describe("NavigationStore - rootNode management", () => {
         expect((section.children[0] as FernNavigation.PageNode).title).toBe("Test Page");
     });
 
-    it("should handle section rename propagating to add_page changes", () => {
+    it("should handle section rename propagating to add_page changes", async () => {
+        // Hydrate with minimal docs.yml content
+        await store.hydrate({
+            latestDocsYmlAndReferences: new Map([
+                [
+                    "docs.yml",
+                    `
+navigation:
+  - section: Test Section
+    contents: []
+`
+                ]
+            ])
+        });
+
         const rootNode = createTestRootNode();
         store.setRootNode(rootNode);
 
@@ -494,7 +508,8 @@ describe("NavigationStore - rootNode management", () => {
         const snapshot1 = store.getSnapshot();
         const change1 = snapshot1.navigationChanges.get(filename);
         expect(change1?.type).toBe("add_page");
-        expect(change1?.type === "add_page" && change1.sectionTitle).toBe("Test Section");
+        // sectionTitle is kept for backwards compatibility, but sectionId is the source of truth
+        expect(change1?.type === "add_page" && change1.sectionId).toBe("test-section");
 
         // Rename the section
         store.renameSection("test-section" as FernNavigation.NodeId, "Renamed Section");
@@ -502,7 +517,14 @@ describe("NavigationStore - rootNode management", () => {
         const snapshot2 = store.getSnapshot();
         const change2 = snapshot2.navigationChanges.get(filename);
         expect(change2?.type).toBe("add_page");
-        expect(change2?.type === "add_page" && change2.sectionTitle).toBe("Renamed Section");
+        // The sectionId should remain the same (stable identifier)
+        expect(change2?.type === "add_page" && change2.sectionId).toBe("test-section");
+
+        // What matters is that the YAML generation uses the current section title
+        const files = store.files;
+        expect(files.changed["docs.yml"]).toBeDefined();
+        expect(files.changed["docs.yml"]).toContain("Renamed Section");
+        expect(files.changed["docs.yml"]).toContain("Test Page");
     });
 
     it("should collapse multiple consecutive section renames into a single change", () => {
