@@ -2,6 +2,10 @@ import json
 import logging
 import time
 from collections.abc import AsyncGenerator
+from datetime import (
+    UTC,
+    datetime,
+)
 from uuid import uuid4
 
 from fastapi import (
@@ -16,8 +20,12 @@ from ..analytics.events import (
     track_chat_request_error,
     track_chat_request_success,
 )
-from ..app import AuthStateDep, app
+from ..app import (
+    AuthStateDep,
+    app,
+)
 from ..auth.roles import create_exploded_roles
+from ..clients.fai_client import get_fai_client
 from ..llm.factory import get_llm_provider
 from ..llm.models import (
     LLMMessage,
@@ -33,6 +41,8 @@ from ..models.metrics import RequestMetrics
 from ..models.request import ChatRequest
 from ..models.stream import convert_documents_to_sources
 from ..prompts.system import build_messages
+from ..queries.models import QueryData
+from ..queries.writer import save_query
 from ..retrieval.factory import get_retriever
 from ..retrieval.filters import QueryFilters
 from ..retrieval.interface import (
@@ -163,7 +173,21 @@ async def chat(
 
     message_id = str(uuid4())
     query_id = request.queryId or str(uuid4())
+    conversation_id = request.conversationId or str(uuid4())
     sources = convert_documents_to_sources(retrieval_result.documents)
+    chat_source = request.source or "CHAT"
+
+    if not request.skipSaveQuery:
+        user_query_data = QueryData(
+            query_id=query_id,
+            conversation_id=conversation_id,
+            domain=domain,
+            text=user_query,
+            role="USER",
+            source=chat_source,
+            created_at=datetime.now(UTC),
+        )
+        await save_query(get_fai_client(), user_query_data)
 
     initial_urls: set[str] = set()
     for doc in retrieval_result.documents:
@@ -185,15 +209,19 @@ async def chat(
 
     async def generate_stream() -> AsyncGenerator[str, None]:
         llm_start_ms = time.time() * 1000
-        first_token_ms = None
+        first_token_ms: float | None = None
         input_tokens = 0
         output_tokens = 0
+        accumulated_text = ""
 
         async def track_metrics_and_stream() -> AsyncGenerator[StreamEvent, None]:
-            nonlocal first_token_ms, input_tokens, output_tokens
+            nonlocal first_token_ms, input_tokens, output_tokens, accumulated_text
             async for event in provider.generate_stream(llm_messages, tools=[documentation_search_tool]):
-                if event.type == StreamEventType.TEXT_DELTA and first_token_ms is None:
-                    first_token_ms = time.time() * 1000
+                if event.type == StreamEventType.TEXT_DELTA:
+                    if first_token_ms is None:
+                        first_token_ms = time.time() * 1000
+                    if isinstance(event.data, str):
+                        accumulated_text += event.data
 
                 if event.type == StreamEventType.USAGE:
                     usage_data = event.data
@@ -243,6 +271,20 @@ async def chat(
             logger.exception(f"Error during chat streaming: {e}")
             track_chat_request_error(domain, ErrorType.STREAMING_ERROR, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
             yield f'data: {json.dumps({"type":"error","message":str(e)})}\n\n'
+        finally:
+            if not request.skipSaveQuery and accumulated_text:
+                ttft_ms = (first_token_ms - llm_start_ms) if first_token_ms else None
+                assistant_query_data = QueryData(
+                    query_id=str(uuid4()),
+                    conversation_id=conversation_id,
+                    domain=domain,
+                    text=accumulated_text,
+                    role="ASSISTANT",
+                    source=chat_source,
+                    created_at=datetime.now(UTC),
+                    time_to_first_token=ttft_ms,
+                )
+                await save_query(get_fai_client(), assistant_query_data)
 
     return StreamingResponse(
         generate_stream(),

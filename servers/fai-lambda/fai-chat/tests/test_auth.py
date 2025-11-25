@@ -1,5 +1,3 @@
-import pytest
-
 from src.auth.roles import create_exploded_roles
 
 

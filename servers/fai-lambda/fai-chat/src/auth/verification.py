@@ -4,7 +4,10 @@ import os
 
 import httpx
 
-from .models import AuthState, AuthUser
+from .models import (
+    AuthState,
+    AuthUser,
+)
 
 logger = logging.getLogger(__name__)
 
