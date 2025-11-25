@@ -164,14 +164,12 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
 
     let chatEndpoint = useApiRoute("/api/fern-docs/search/v2/chat");
     let migratedChatEndpoint = useApiRoute("/api/fern-docs/chat");
-    let suggestEndpoint = useApiRoute("/api/fern-docs/search/v2/suggest");
 
     // Rerouting to ferndocs.com for production environments to ensure streaming works
     // Also see: next.config.mjs, where we set CORS headers
     if (process.env.NEXT_PUBLIC_VERCEL_ENV === "production") {
         chatEndpoint = `${process.env.NEXT_PUBLIC_CDN_URI}/api/fern-docs/search/v2/chat`;
         migratedChatEndpoint = `${process.env.NEXT_PUBLIC_CDN_URI}/api/fern-docs/chat`;
-        suggestEndpoint = `${process.env.NEXT_PUBLIC_CDN_URI}/api/fern-docs/search/v2/suggest`;
     }
 
     const activeChatEndpoint = isChatMigrationEnabled ? migratedChatEndpoint : chatEndpoint;
@@ -254,7 +252,6 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
                         headers={{
                             "X-Fern-Host": domain
                         }}
-                        suggestionsApi={suggestEndpoint}
                         initialInput={initialInput}
                         setInitialInput={setInitialInput}
                         body={{ algoliaSearchKey: apiKey }}
