@@ -113,7 +113,7 @@ export class FaiChatStack extends Stack {
         lambdaFunction.addToRolePolicy(
             new iam.PolicyStatement({
                 effect: iam.Effect.ALLOW,
-                actions: ["bedrock:InvokeModel"],
+                actions: ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
                 resources: ["*"]
             })
         );

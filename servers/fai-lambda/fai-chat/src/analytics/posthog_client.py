@@ -23,9 +23,9 @@ def get_posthog_client() -> Posthog | None:
 
     try:
         client = Posthog(
-            api_key=api_key,
-            flush_at=1,
-            flush_interval=0,
+            project_api_key=api_key,
+            flush_at=10,
+            flush_interval=10,
         )
         logger.info("PostHog client initialized successfully")
         return client

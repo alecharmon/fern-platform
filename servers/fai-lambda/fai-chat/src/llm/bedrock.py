@@ -27,6 +27,7 @@ class BedrockProvider(LLMProvider):
         max_tokens: int = 4096,
         aws_access_key_id: str | None = None,
         aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
     ):
         self._model_id = model_id
         self._temperature = temperature
@@ -34,6 +35,7 @@ class BedrockProvider(LLMProvider):
         self._region = region
         self._aws_access_key_id = aws_access_key_id
         self._aws_secret_access_key = aws_secret_access_key
+        self._aws_session_token = aws_session_token
         self._session = None
 
     @property
@@ -51,6 +53,7 @@ class BedrockProvider(LLMProvider):
                     region_name=self._region,
                     aws_access_key_id=self._aws_access_key_id,
                     aws_secret_access_key=self._aws_secret_access_key,
+                    aws_session_token=self._aws_session_token,
                 )
             else:
                 self._session = aioboto3.Session(region_name=self._region)

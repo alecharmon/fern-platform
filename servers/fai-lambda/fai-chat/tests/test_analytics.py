@@ -24,9 +24,9 @@ class TestPostHogClient:
             client = get_posthog_client()
 
             mock_posthog.assert_called_once_with(
-                api_key="test-api-key",
-                flush_at=1,
-                flush_interval=0,
+                project_api_key="test-api-key",
+                flush_at=10,
+                flush_interval=10,
             )
             assert client is not None
 
@@ -48,9 +48,9 @@ class TestPostHogClient:
             get_posthog_client()
 
             mock_posthog.assert_called_once_with(
-                api_key="test-api-key",
-                flush_at=1,
-                flush_interval=0,
+                project_api_key="test-api-key",
+                flush_at=10,
+                flush_interval=10,
             )
 
 

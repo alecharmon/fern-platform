@@ -30,6 +30,7 @@ class BedrockProviderFactory(ProviderFactory):
     def __init__(self) -> None:
         self._aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
         self._aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+        self._aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
 
     def create(
         self,
@@ -51,6 +52,7 @@ class BedrockProviderFactory(ProviderFactory):
             max_tokens=max_tokens,
             aws_access_key_id=self._aws_access_key_id,
             aws_secret_access_key=self._aws_secret_access_key,
+            aws_session_token=self._aws_session_token,
         )
 
     def is_available(self) -> bool:
