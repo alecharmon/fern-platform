@@ -41,11 +41,9 @@ export class FaiCodeIndexingStack extends Stack {
             zoneName: environmentInfo.route53Info.hostedZoneName
         });
 
-        // Look up the VPC from fai-chat stack
-        const vpc = ec2.Vpc.fromLookup(this, "fai-chat-vpc", {
-            tags: {
-                "aws:cloudformation:stack-name": `fai-chat-${environmentType.toLowerCase()}`
-            }
+        // Import existing shared VPC
+        const vpc = ec2.Vpc.fromLookup(this, "vpc", {
+            vpcId: environmentInfo.vpcId
         });
 
         const efsSecurityGroup = new ec2.SecurityGroup(this, "efs-security-group", {
