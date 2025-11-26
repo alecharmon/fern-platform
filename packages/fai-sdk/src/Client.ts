@@ -11,17 +11,16 @@ import { Code } from "./api/resources/code/client/Client.js";
 import { Conversation } from "./api/resources/conversation/client/Client.js";
 import { Discord } from "./api/resources/discord/client/Client.js";
 import { Document } from "./api/resources/document/client/Client.js";
-import { EditingSessions } from "./api/resources/editingSessions/client/Client.js";
 import { Feedback } from "./api/resources/feedback/client/Client.js";
 import { Guidance } from "./api/resources/guidance/client/Client.js";
 import { Health } from "./api/resources/health/client/Client.js";
 import { Index } from "./api/resources/index/client/Client.js";
 import { Mcp } from "./api/resources/mcp/client/Client.js";
 import { Query } from "./api/resources/query/client/Client.js";
-import { Scribe } from "./api/resources/scribe/client/Client.js";
+import { Reindexing } from "./api/resources/reindexing/client/Client.js";
 import { Sdks } from "./api/resources/sdks/client/Client.js";
 import { Settings } from "./api/resources/settings/client/Client.js";
-import { Slack } from "./api/resources/slack/client/Client.js";
+import { SlackAskFern } from "./api/resources/slackAskFern/client/Client.js";
 import { Sources } from "./api/resources/sources/client/Client.js";
 import { Upstash } from "./api/resources/upstash/client/Client.js";
 import { Website } from "./api/resources/website/client/Client.js";
@@ -58,17 +57,16 @@ export class FernAIClient {
     protected _conversation: Conversation | undefined;
     protected _discord: Discord | undefined;
     protected _document: Document | undefined;
-    protected _editingSessions: EditingSessions | undefined;
     protected _feedback: Feedback | undefined;
     protected _guidance: Guidance | undefined;
     protected _health: Health | undefined;
     protected _index: Index | undefined;
     protected _mcp: Mcp | undefined;
     protected _query: Query | undefined;
-    protected _scribe: Scribe | undefined;
+    protected _reindexing: Reindexing | undefined;
     protected _sdks: Sdks | undefined;
     protected _settings: Settings | undefined;
-    protected _slack: Slack | undefined;
+    protected _slackAskFern: SlackAskFern | undefined;
     protected _sources: Sources | undefined;
     protected _upstash: Upstash | undefined;
     protected _website: Website | undefined;
@@ -111,10 +109,6 @@ export class FernAIClient {
         return (this._document ??= new Document(this._options));
     }
 
-    public get editingSessions(): EditingSessions {
-        return (this._editingSessions ??= new EditingSessions(this._options));
-    }
-
     public get feedback(): Feedback {
         return (this._feedback ??= new Feedback(this._options));
     }
@@ -139,8 +133,8 @@ export class FernAIClient {
         return (this._query ??= new Query(this._options));
     }
 
-    public get scribe(): Scribe {
-        return (this._scribe ??= new Scribe(this._options));
+    public get reindexing(): Reindexing {
+        return (this._reindexing ??= new Reindexing(this._options));
     }
 
     public get sdks(): Sdks {
@@ -151,8 +145,8 @@ export class FernAIClient {
         return (this._settings ??= new Settings(this._options));
     }
 
-    public get slack(): Slack {
-        return (this._slack ??= new Slack(this._options));
+    public get slackAskFern(): SlackAskFern {
+        return (this._slackAskFern ??= new SlackAskFern(this._options));
     }
 
     public get sources(): Sources {

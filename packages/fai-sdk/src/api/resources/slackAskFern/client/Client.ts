@@ -8,7 +8,7 @@ import * as FernAI from "../../../index.js";
 import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
 
-export declare namespace Slack {
+export declare namespace SlackAskFern {
     export interface Options {
         environment?: core.Supplier<environments.FernAIEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
@@ -32,34 +32,34 @@ export declare namespace Slack {
     }
 }
 
-export class Slack {
-    protected readonly _options: Slack.Options;
+export class SlackAskFern {
+    protected readonly _options: SlackAskFern.Options;
 
-    constructor(_options: Slack.Options = {}) {
+    constructor(_options: SlackAskFern.Options = {}) {
         this._options = _options;
     }
 
     /**
      * @param {FernAI.CreateSlackIntegrationRequest} request
-     * @param {Slack.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {SlackAskFern.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.slack.createSlackIntegration({
+     *     await client.slackAskFern.createSlackIntegration({
      *         domain: "domain"
      *     })
      */
     public createSlackIntegration(
         request: FernAI.CreateSlackIntegrationRequest,
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): core.HttpResponsePromise<FernAI.SlackIntegrationResponse> {
         return core.HttpResponsePromise.fromPromise(this.__createSlackIntegration(request, requestOptions));
     }
 
     private async __createSlackIntegration(
         request: FernAI.CreateSlackIntegrationRequest,
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.SlackIntegrationResponse>> {
         const { domain } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -121,16 +121,18 @@ export class Slack {
     }
 
     /**
-     * @param {Slack.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {SlackAskFern.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.slack.handleSlackEvents()
+     *     await client.slackAskFern.handleSlackEvents()
      */
-    public handleSlackEvents(requestOptions?: Slack.RequestOptions): core.HttpResponsePromise<unknown> {
+    public handleSlackEvents(requestOptions?: SlackAskFern.RequestOptions): core.HttpResponsePromise<unknown> {
         return core.HttpResponsePromise.fromPromise(this.__handleSlackEvents(requestOptions));
     }
 
-    private async __handleSlackEvents(requestOptions?: Slack.RequestOptions): Promise<core.WithRawResponse<unknown>> {
+    private async __handleSlackEvents(
+        requestOptions?: SlackAskFern.RequestOptions,
+    ): Promise<core.WithRawResponse<unknown>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -180,17 +182,17 @@ export class Slack {
     }
 
     /**
-     * @param {Slack.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {SlackAskFern.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.slack.handleSlackSlashCommands()
+     *     await client.slackAskFern.handleSlackSlashCommands()
      */
-    public handleSlackSlashCommands(requestOptions?: Slack.RequestOptions): core.HttpResponsePromise<unknown> {
+    public handleSlackSlashCommands(requestOptions?: SlackAskFern.RequestOptions): core.HttpResponsePromise<unknown> {
         return core.HttpResponsePromise.fromPromise(this.__handleSlackSlashCommands(requestOptions));
     }
 
     private async __handleSlackSlashCommands(
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): Promise<core.WithRawResponse<unknown>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
@@ -241,17 +243,17 @@ export class Slack {
     }
 
     /**
-     * @param {Slack.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {SlackAskFern.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.slack.handleSlackInteractions()
+     *     await client.slackAskFern.handleSlackInteractions()
      */
-    public handleSlackInteractions(requestOptions?: Slack.RequestOptions): core.HttpResponsePromise<unknown> {
+    public handleSlackInteractions(requestOptions?: SlackAskFern.RequestOptions): core.HttpResponsePromise<unknown> {
         return core.HttpResponsePromise.fromPromise(this.__handleSlackInteractions(requestOptions));
     }
 
     private async __handleSlackInteractions(
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): Promise<core.WithRawResponse<unknown>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
@@ -303,26 +305,26 @@ export class Slack {
 
     /**
      * @param {FernAI.HandleSlackOauthCallbackRequest} request
-     * @param {Slack.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {SlackAskFern.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.slack.handleSlackOauthCallback({
+     *     await client.slackAskFern.handleSlackOauthCallback({
      *         code: "code",
      *         state: "state"
      *     })
      */
     public handleSlackOauthCallback(
         request: FernAI.HandleSlackOauthCallbackRequest,
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): core.HttpResponsePromise<unknown> {
         return core.HttpResponsePromise.fromPromise(this.__handleSlackOauthCallback(request, requestOptions));
     }
 
     private async __handleSlackOauthCallback(
         request: FernAI.HandleSlackOauthCallbackRequest,
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): Promise<core.WithRawResponse<unknown>> {
         const { code, state } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -389,25 +391,25 @@ export class Slack {
 
     /**
      * @param {FernAI.GetSlackInstallLinkRequest} request
-     * @param {Slack.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {SlackAskFern.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.slack.getSlackInstallLink({
+     *     await client.slackAskFern.getSlackInstallLink({
      *         domain: "domain"
      *     })
      */
     public getSlackInstallLink(
         request: FernAI.GetSlackInstallLinkRequest,
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): core.HttpResponsePromise<unknown> {
         return core.HttpResponsePromise.fromPromise(this.__getSlackInstallLink(request, requestOptions));
     }
 
     private async __getSlackInstallLink(
         request: FernAI.GetSlackInstallLinkRequest,
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): Promise<core.WithRawResponse<unknown>> {
         const { domain } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
@@ -470,23 +472,23 @@ export class Slack {
 
     /**
      * @param {string} domain
-     * @param {Slack.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {SlackAskFern.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.slack.listSlackIntegrations("domain")
+     *     await client.slackAskFern.listSlackIntegrations("domain")
      */
     public listSlackIntegrations(
         domain: string,
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): core.HttpResponsePromise<unknown> {
         return core.HttpResponsePromise.fromPromise(this.__listSlackIntegrations(domain, requestOptions));
     }
 
     private async __listSlackIntegrations(
         domain: string,
-        requestOptions?: Slack.RequestOptions,
+        requestOptions?: SlackAskFern.RequestOptions,
     ): Promise<core.WithRawResponse<unknown>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,

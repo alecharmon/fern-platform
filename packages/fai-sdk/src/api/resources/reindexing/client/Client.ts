@@ -8,7 +8,7 @@ import * as FernAI from "../../../index.js";
 import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
 
-export declare namespace Scribe {
+export declare namespace Reindexing {
     export interface Options {
         environment?: core.Supplier<environments.FernAIEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
@@ -32,48 +32,35 @@ export declare namespace Scribe {
     }
 }
 
-export class Scribe {
-    protected readonly _options: Scribe.Options;
+export class Reindexing {
+    protected readonly _options: Reindexing.Options;
 
-    constructor(_options: Scribe.Options = {}) {
+    constructor(_options: Reindexing.Options = {}) {
         this._options = _options;
     }
 
     /**
-     * Callback endpoint for Scribe to post PR URLs back to Slack threads.
+     * Get the status of a reindexing job for a domain
      *
-     * @param {string} teamId
-     * @param {string} channelId
-     * @param {string} threadTs
-     * @param {FernAI.ScribeSlackCallbackRequest} request
-     * @param {Scribe.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {string} domain
+     * @param {Reindexing.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.scribe.slackCallback("team_id", "channel_id", "thread_ts", {
-     *         pr_url: "pr_url"
-     *     })
+     *     await client.reindexing.getReindexingJobStatus("domain")
      */
-    public slackCallback(
-        teamId: string,
-        channelId: string,
-        threadTs: string,
-        request: FernAI.ScribeSlackCallbackRequest,
-        requestOptions?: Scribe.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.ScribeSlackCallbackResponse> {
-        return core.HttpResponsePromise.fromPromise(
-            this.__slackCallback(teamId, channelId, threadTs, request, requestOptions),
-        );
+    public getReindexingJobStatus(
+        domain: string,
+        requestOptions?: Reindexing.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.ReindexingJobRecord> {
+        return core.HttpResponsePromise.fromPromise(this.__getReindexingJobStatus(domain, requestOptions));
     }
 
-    private async __slackCallback(
-        teamId: string,
-        channelId: string,
-        threadTs: string,
-        request: FernAI.ScribeSlackCallbackRequest,
-        requestOptions?: Scribe.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.ScribeSlackCallbackResponse>> {
+    private async __getReindexingJobStatus(
+        domain: string,
+        requestOptions?: Reindexing.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.ReindexingJobRecord>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -84,20 +71,17 @@ export class Scribe {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `scribe/callback/slack/${encodeURIComponent(teamId)}/${encodeURIComponent(channelId)}/${encodeURIComponent(threadTs)}`,
+                `reindexing/${encodeURIComponent(domain)}/status`,
             ),
-            method: "POST",
+            method: "GET",
             headers: _headers,
-            contentType: "application/json",
             queryParameters: requestOptions?.queryParams,
-            requestType: "json",
-            body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.ScribeSlackCallbackResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.ReindexingJobRecord, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -124,9 +108,7 @@ export class Scribe {
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling POST /scribe/callback/slack/{team_id}/{channel_id}/{thread_ts}.",
-                );
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /reindexing/{domain}/status.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
@@ -136,38 +118,93 @@ export class Scribe {
     }
 
     /**
-     * @param {string} teamId
-     * @param {string} channelId
-     * @param {string} threadTs
-     * @param {FernAI.ScribeEditCallbackRequest} request
-     * @param {Scribe.RequestOptions} requestOptions - Request-specific configuration.
+     * Update the status of a reindexing job
+     *
+     * @param {string} domain
+     * @param {FernAI.UpdateReindexingJobStatusEndpointRequest} request
+     * @param {Reindexing.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.scribe.editCallback("team_id", "channel_id", "thread_ts", {
-     *         editing_id: "editing_id"
+     *     await client.reindexing.updateReindexingJobStatusEndpoint("domain", {
+     *         status: "status",
+     *         memory_mb: 1,
+     *         retry_count: 1,
+     *         task_arn: "task_arn",
+     *         sqs_message_id: "sqs_message_id",
+     *         completed_at: "completed_at",
+     *         duration_ms: 1,
+     *         num_inserted: 1,
+     *         error: "error",
+     *         reason: "reason"
      *     })
      */
-    public editCallback(
-        teamId: string,
-        channelId: string,
-        threadTs: string,
-        request: FernAI.ScribeEditCallbackRequest,
-        requestOptions?: Scribe.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.ScribeEditCallbackResponse> {
+    public updateReindexingJobStatusEndpoint(
+        domain: string,
+        request: FernAI.UpdateReindexingJobStatusEndpointRequest,
+        requestOptions?: Reindexing.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.UpdateReindexingJobStatusResponse> {
         return core.HttpResponsePromise.fromPromise(
-            this.__editCallback(teamId, channelId, threadTs, request, requestOptions),
+            this.__updateReindexingJobStatusEndpoint(domain, request, requestOptions),
         );
     }
 
-    private async __editCallback(
-        teamId: string,
-        channelId: string,
-        threadTs: string,
-        request: FernAI.ScribeEditCallbackRequest,
-        requestOptions?: Scribe.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.ScribeEditCallbackResponse>> {
+    private async __updateReindexingJobStatusEndpoint(
+        domain: string,
+        request: FernAI.UpdateReindexingJobStatusEndpointRequest,
+        requestOptions?: Reindexing.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.UpdateReindexingJobStatusResponse>> {
+        const {
+            status,
+            memory_mb: memoryMb,
+            retry_count: retryCount,
+            task_arn: taskArn,
+            sqs_message_id: sqsMessageId,
+            completed_at: completedAt,
+            duration_ms: durationMs,
+            num_inserted: numInserted,
+            error,
+            reason,
+        } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        _queryParams["status"] = status;
+        if (memoryMb != null) {
+            _queryParams["memory_mb"] = memoryMb.toString();
+        }
+
+        if (retryCount != null) {
+            _queryParams["retry_count"] = retryCount.toString();
+        }
+
+        if (taskArn != null) {
+            _queryParams["task_arn"] = taskArn;
+        }
+
+        if (sqsMessageId != null) {
+            _queryParams["sqs_message_id"] = sqsMessageId;
+        }
+
+        if (completedAt != null) {
+            _queryParams["completed_at"] = completedAt;
+        }
+
+        if (durationMs != null) {
+            _queryParams["duration_ms"] = durationMs.toString();
+        }
+
+        if (numInserted != null) {
+            _queryParams["num_inserted"] = numInserted.toString();
+        }
+
+        if (error != null) {
+            _queryParams["error"] = error;
+        }
+
+        if (reason != null) {
+            _queryParams["reason"] = reason;
+        }
+
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -178,20 +215,20 @@ export class Scribe {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                `scribe/callback/slack/edit/${encodeURIComponent(teamId)}/${encodeURIComponent(channelId)}/${encodeURIComponent(threadTs)}`,
+                `reindexing/${encodeURIComponent(domain)}/status`,
             ),
             method: "POST",
             headers: _headers,
-            contentType: "application/json",
-            queryParameters: requestOptions?.queryParams,
-            requestType: "json",
-            body: request,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as FernAI.ScribeEditCallbackResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as FernAI.UpdateReindexingJobStatusResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
@@ -218,9 +255,7 @@ export class Scribe {
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernAITimeoutError(
-                    "Timeout exceeded when calling POST /scribe/callback/slack/edit/{team_id}/{channel_id}/{thread_ts}.",
-                );
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /reindexing/{domain}/status.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
