@@ -18,7 +18,7 @@
  *     }
  */
 export interface UpdateReindexingJobStatusRequest {
-    status: string;
+    status?: string;
     memory_mb?: number;
     retry_count?: number;
     task_arn?: string;

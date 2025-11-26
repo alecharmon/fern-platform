@@ -142,7 +142,7 @@ export class Reindexing {
      */
     public updateReindexingJobStatus(
         domain: string,
-        request: FernAI.UpdateReindexingJobStatusRequest,
+        request: FernAI.UpdateReindexingJobStatusRequest = {},
         requestOptions?: Reindexing.RequestOptions,
     ): core.HttpResponsePromise<FernAI.UpdateReindexingJobStatusResponse> {
         return core.HttpResponsePromise.fromPromise(this.__updateReindexingJobStatus(domain, request, requestOptions));
@@ -150,7 +150,7 @@ export class Reindexing {
 
     private async __updateReindexingJobStatus(
         domain: string,
-        request: FernAI.UpdateReindexingJobStatusRequest,
+        request: FernAI.UpdateReindexingJobStatusRequest = {},
         requestOptions?: Reindexing.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.UpdateReindexingJobStatusResponse>> {
         const {
@@ -166,7 +166,10 @@ export class Reindexing {
             reason,
         } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        _queryParams["status"] = status;
+        if (status != null) {
+            _queryParams["status"] = status;
+        }
+
         if (memoryMb != null) {
             _queryParams["memory_mb"] = memoryMb.toString();
         }

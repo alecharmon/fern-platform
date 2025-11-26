@@ -116,7 +116,7 @@ async def get_reindexing_job_status_by_task_arn(
 )
 async def update_reindexing_job_status(
     domain: str,
-    status: str,
+    status: str | None = None,
     memory_mb: int | None = None,
     retry_count: int | None = None,
     task_arn: str | None = None,
