@@ -1,5 +1,5 @@
 import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
-import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps, Tags } from "aws-cdk-lib";
+import { CfnOutput, Duration, Fn, RemovalPolicy, Stack, type StackProps, Tags } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as appscaling from "aws-cdk-lib/aws-applicationautoscaling";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
@@ -102,7 +102,10 @@ export class FaiChatStack extends Stack {
                 COHERE_API_KEY: getEnvironmentVariableOrThrow("COHERE_API_KEY"),
                 TURBOPUFFER_API_KEY: getEnvironmentVariableOrThrow("TURBOPUFFER_API_KEY"),
                 FERN_TOKEN: getEnvironmentVariableOrThrow("FERN_TOKEN"),
-                POSTHOG_API_KEY: getEnvironmentVariableOrThrow("POSTHOG_API_KEY")
+                POSTHOG_API_KEY: getEnvironmentVariableOrThrow("POSTHOG_API_KEY"),
+                // Lambda Web Adapter configuration for response streaming
+                AWS_LWA_INVOKE_MODE: "response_stream",
+                AWS_LWA_PORT: "8080"
             }
         });
 
@@ -190,16 +193,38 @@ export class FaiChatStack extends Stack {
 
         // Use alias for non-preview deployments (routes to provisioned concurrency)
         const lambdaIntegration = new apigateway.LambdaIntegration(alias ?? lambdaFunction);
+        const streamingTargetArn = (alias ?? lambdaFunction).functionArn;
 
-        // Proxy all requests to Lambda
-        api.root.addProxy({
+        // Helper to enable response streaming on a method via CDK escape hatch
+        const enableStreaming = (method: apigateway.Method) => {
+            const cfnMethod = method.node.defaultChild as apigateway.CfnMethod;
+            cfnMethod.addPropertyOverride("Integration.ResponseTransferMode", "STREAM");
+            cfnMethod.addPropertyOverride(
+                "Integration.Uri",
+                Fn.join("", [
+                    "arn:aws:apigateway:",
+                    this.region,
+                    ":lambda:path/2021-11-15/functions/",
+                    streamingTargetArn,
+                    "/response-streaming-invocations"
+                ])
+            );
+            cfnMethod.addPropertyOverride("Integration.TimeoutInMillis", 900000);
+        };
+
+        // Proxy all requests to Lambda with streaming enabled
+        const proxyResource = api.root.addProxy({
             defaultIntegration: lambdaIntegration,
             anyMethod: true
         });
+        if (proxyResource.anyMethod) {
+            enableStreaming(proxyResource.anyMethod);
+        }
 
-        // Add explicit health endpoint
+        // Add explicit health endpoint with streaming enabled
         const health = api.root.addResource("health");
-        health.addMethod("GET", lambdaIntegration);
+        const healthMethod = health.addMethod("GET", lambdaIntegration);
+        enableStreaming(healthMethod);
 
         const apiUrlWithoutTrailingSlash = api.url.replace(/\/$/, "");
 

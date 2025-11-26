@@ -1418,21 +1418,6 @@ files = [
 ]
 
 [[package]]
-name = "mangum"
-version = "0.17.0"
-description = "AWS Lambda support for ASGI applications"
-optional = false
-python-versions = ">=3.7"
-groups = ["main"]
-files = [
-    {file = "mangum-0.17.0-py3-none-any.whl", hash = "sha256:f00be705605bc4793958df62e4d249abf58d254c39d90bb410d069570206f4a2"},
-    {file = "mangum-0.17.0.tar.gz", hash = "sha256:5b4e26375e12eed051687670466d17968f8b74beecaca432edd4eb4127f78509"},
-]
-
-[package.dependencies]
-typing-extensions = "*"
-
-[[package]]
 name = "multidict"
 version = "6.7.0"
 description = "multidict implementation"
@@ -2997,6 +2982,25 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
+name = "uvicorn"
+version = "0.34.3"
+description = "The lightning-fast ASGI server."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "uvicorn-0.34.3-py3-none-any.whl", hash = "sha256:16246631db62bdfbf069b0645177d6e8a77ba950cfedbfd093acef9444e4d885"},
+    {file = "uvicorn-0.34.3.tar.gz", hash = "sha256:35919a9a979d7a59334b6b10e05d77c1d0d574c50e0fc98b8b1a0f165708b55a"},
+]
+
+[package.dependencies]
+click = ">=7.0"
+h11 = ">=0.8"
+
+[package.extras]
+standard = ["colorama (>=0.4) ; sys_platform == \"win32\"", "httptools (>=0.6.3)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.15.1) ; sys_platform != \"win32\" and sys_platform != \"cygwin\" and platform_python_implementation != \"PyPy\"", "watchfiles (>=0.13)", "websockets (>=10.4)"]
+
+[[package]]
 name = "wrapt"
 version = "1.17.3"
 description = "Module for decorators, wrappers and monkey patching."
@@ -3235,4 +3239,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "1b4858e5f0a0ed8b583346f173ccae30a4d20bcbb4b5d8089e058b33b0f44a7d"
+content-hash = "90946964602f7ce5a402b568971aedc111b47f488234814dc4b86cd5e994766e"
