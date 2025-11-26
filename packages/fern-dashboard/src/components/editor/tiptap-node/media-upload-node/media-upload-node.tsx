@@ -9,7 +9,7 @@ import "@/components/editor/tiptap-node/media-upload-node/media-upload-node.scss
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tab, TabGroup } from "@/docs/mdx/components/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { createCustomElementNode } from "../../extension-custom-element/create-custom-element-node";
 
@@ -573,9 +573,13 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
                         </MediaUploadDragArea>
                     </PopoverTrigger>
                     <PopoverContent className="w-[300px]">
-                        <TabGroup>
-                            <Tab title="Upload">
-                                <Button asChild className="-mt-6">
+                        <Tabs defaultValue="upload">
+                            <TabsList>
+                                <TabsTrigger value="upload">Upload</TabsTrigger>
+                                <TabsTrigger value="url">URL</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="upload">
+                                <Button asChild>
                                     <button className="relative w-full">
                                         {uploadButtonLabel}
                                         <input
@@ -593,9 +597,9 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
                                         />
                                     </button>
                                 </Button>
-                            </Tab>
-                            <Tab title="URL">
-                                <div className="-mt-3 flex flex-col gap-2">
+                            </TabsContent>
+                            <TabsContent value="url">
+                                <div className="flex flex-col gap-2">
                                     <Input
                                         type="url"
                                         placeholder={urlPlaceholder}
@@ -607,8 +611,8 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
                                         {embedButtonLabel}
                                     </Button>
                                 </div>
-                            </Tab>
-                        </TabGroup>
+                            </TabsContent>
+                        </Tabs>
                     </PopoverContent>
                 </Popover>
             )}
