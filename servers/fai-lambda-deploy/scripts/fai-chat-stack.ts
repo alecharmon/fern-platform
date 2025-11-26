@@ -1,5 +1,5 @@
 import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
-import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from "aws-cdk-lib";
+import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps, Tags } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as appscaling from "aws-cdk-lib/aws-applicationautoscaling";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
@@ -39,9 +39,15 @@ export class FaiChatStack extends Stack {
 
         const logGroup = new LogGroup(this, "log-group", {
             logGroupName,
-            retention: RetentionDays.ONE_MONTH,
+            retention: environmentType === EnvironmentType.Prod ? RetentionDays.ONE_YEAR : RetentionDays.ONE_MONTH,
             removalPolicy: RemovalPolicy.DESTROY
         });
+
+        // Add tags
+        Tags.of(logGroup).add("Environment", environmentType.toLowerCase());
+        if (environmentType !== EnvironmentType.Prod) {
+            Tags.of(logGroup).add("VantaNonProd", "true");
+        }
 
         const certificate = Certificate.fromCertificateArn(
             this,
