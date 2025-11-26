@@ -151,3 +151,39 @@ jobs:
           docker tag fern-self-hosted:latest 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/self-hosted-internal:$SANITIZED_BRANCH-${{ github.sha }}
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/self-hosted-internal:$SANITIZED_BRANCH-${{ github.sha }}
+
+  fai:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    timeout-minutes: 15
+    env:
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Build container
+        run: |
+          cd servers/fai
+          touch .env
+          docker build -t fai:local .
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: "us-east-1"
+
+      - name: Push to ECR for scanning
+        run: |-
+          aws sts get-caller-identity
+          SANITIZED_BRANCH="${BRANCH_NAME//\//-}"
+          docker tag fai:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-internal:$SANITIZED_BRANCH-${{ github.sha }}
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
+          docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-internal:$SANITIZED_BRANCH-${{ github.sha }}
