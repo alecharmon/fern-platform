@@ -7,6 +7,19 @@ interface CreateOrganizationRequestBody {
     displayName?: string;
 }
 
+function getErrorMessage(error: unknown, organizationId: string): string {
+    if (error != null && typeof error === "object" && "error" in error) {
+        const errorType = (error as { error: string }).error;
+        if (errorType === "OrganizationAlreadyExistsError") {
+            return `The "${organizationId}" organization already exists. If you are a member of this organization, please contact an admin to be added.`;
+        }
+        if (errorType === "UnauthorizedError") {
+            return "You are not authorized to create an organization.";
+        }
+    }
+    return "Failed to create organization";
+}
+
 export default async function createOrganization(accessToken: string, body: CreateOrganizationRequestBody) {
     const venusClient = getVenusClient({ token: accessToken });
 
@@ -18,7 +31,7 @@ export default async function createOrganization(accessToken: string, body: Crea
     });
 
     if (!result.ok) {
-        throw new Error(result.error?.toString() || "Failed to create organization");
+        throw new Error(getErrorMessage(result.error, body.organizationId));
     }
 
     await invalidateOrganizationNotFoundCache(Auth0OrgName(body.organizationId));
