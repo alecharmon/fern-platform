@@ -13,10 +13,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.app import app
+from src.auth.models import AuthState
+from src.exceptions import MetadataValidationError
 from src.llm.models import (
     StreamEvent,
     StreamEventType,
 )
+from src.metadata.fetcher import DocsMetadata
 from src.retrieval.interface import (
     RetrievalQuery,
     RetrievalResult,
@@ -79,16 +82,29 @@ class TestChatStreamingIntegration:
             ],
         }
 
+        mock_metadata = DocsMetadata(
+            url="test.buildwithfern.com",
+            org="test",
+            is_preview=False,
+            enable_algolia_on_preview=False,
+        )
+
         with (
+            patch("src.routes.chat.fetch_auth_state") as mock_fetch_auth,
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata") as mock_validate_metadata,
             patch("src.routes.chat.is_ask_ai_enabled") as mock_ask_ai,
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
+            patch("src.routes.chat.save_query") as mock_save_query,
+            patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com", "title": "Test Docs"}
+            mock_fetch_auth.return_value = AuthState(authenticated=False)
+            mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
             mock_ask_ai.return_value = True
+            mock_save_query.return_value = "query-id"
+            mock_get_fai_client.return_value = MagicMock()
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)
@@ -153,16 +169,29 @@ class TestChatStreamingIntegration:
             ],
         }
 
+        mock_metadata = DocsMetadata(
+            url="test.buildwithfern.com",
+            org="test",
+            is_preview=False,
+            enable_algolia_on_preview=False,
+        )
+
         with (
+            patch("src.routes.chat.fetch_auth_state") as mock_fetch_auth,
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata") as mock_validate_metadata,
             patch("src.routes.chat.is_ask_ai_enabled") as mock_ask_ai,
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
+            patch("src.routes.chat.save_query") as mock_save_query,
+            patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_auth.return_value = AuthState(authenticated=False)
+            mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
             mock_ask_ai.return_value = True
+            mock_save_query.return_value = "query-id"
+            mock_get_fai_client.return_value = MagicMock()
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)
@@ -198,12 +227,21 @@ class TestChatStreamingIntegration:
             ],
         }
 
+        mock_metadata = DocsMetadata(
+            url="test.buildwithfern.com",
+            org="test",
+            is_preview=True,
+            enable_algolia_on_preview=False,
+        )
+
         with (
+            patch("src.routes.chat.fetch_auth_state") as mock_fetch_auth,
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata") as mock_validate_metadata,
         ):
-            mock_fetch_metadata.return_value = {}
-            mock_validate_metadata.side_effect = ValueError("Invalid metadata")
+            mock_fetch_auth.return_value = AuthState(authenticated=False)
+            mock_fetch_metadata.return_value = mock_metadata
+            mock_validate_metadata.side_effect = MetadataValidationError("Invalid metadata")
 
             response = client.post(
                 "/chat",
@@ -225,12 +263,21 @@ class TestChatStreamingIntegration:
             ],
         }
 
+        mock_metadata = DocsMetadata(
+            url="test.buildwithfern.com",
+            org="test",
+            is_preview=False,
+            enable_algolia_on_preview=False,
+        )
+
         with (
+            patch("src.routes.chat.fetch_auth_state") as mock_fetch_auth,
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata") as mock_validate_metadata,
             patch("src.routes.chat.is_ask_ai_enabled") as mock_ask_ai,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_auth.return_value = AuthState(authenticated=False)
+            mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
             mock_ask_ai.return_value = False
 
@@ -254,13 +301,22 @@ class TestChatStreamingIntegration:
             ],
         }
 
+        mock_metadata = DocsMetadata(
+            url="test.buildwithfern.com",
+            org="test",
+            is_preview=False,
+            enable_algolia_on_preview=False,
+        )
+
         with (
+            patch("src.routes.chat.fetch_auth_state") as mock_fetch_auth,
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata") as mock_validate_metadata,
             patch("src.routes.chat.is_ask_ai_enabled") as mock_ask_ai,
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_auth.return_value = AuthState(authenticated=False)
+            mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
             mock_ask_ai.return_value = True
 
@@ -300,16 +356,29 @@ class TestChatStreamingIntegration:
             retrieval_time_ms=10.0,
         )
 
+        mock_metadata = DocsMetadata(
+            url="test.buildwithfern.com",
+            org="test",
+            is_preview=False,
+            enable_algolia_on_preview=False,
+        )
+
         with (
+            patch("src.routes.chat.fetch_auth_state") as mock_fetch_auth,
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata") as mock_validate_metadata,
             patch("src.routes.chat.is_ask_ai_enabled") as mock_ask_ai,
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
+            patch("src.routes.chat.save_query") as mock_save_query,
+            patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_auth.return_value = AuthState(authenticated=False)
+            mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
             mock_ask_ai.return_value = True
+            mock_save_query.return_value = "query-id"
+            mock_get_fai_client.return_value = MagicMock()
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=empty_retrieval_result)
@@ -345,16 +414,29 @@ class TestChatStreamingIntegration:
             ],
         }
 
+        mock_metadata = DocsMetadata(
+            url="test.buildwithfern.com",
+            org="test",
+            is_preview=False,
+            enable_algolia_on_preview=False,
+        )
+
         with (
+            patch("src.routes.chat.fetch_auth_state") as mock_fetch_auth,
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata") as mock_validate_metadata,
             patch("src.routes.chat.is_ask_ai_enabled") as mock_ask_ai,
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
+            patch("src.routes.chat.save_query") as mock_save_query,
+            patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_auth.return_value = AuthState(authenticated=False)
+            mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
             mock_ask_ai.return_value = True
+            mock_save_query.return_value = "query-id"
+            mock_get_fai_client.return_value = MagicMock()
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)

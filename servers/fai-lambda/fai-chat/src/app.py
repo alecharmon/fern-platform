@@ -4,14 +4,10 @@ from typing import Annotated
 from fastapi import (
     Depends,
     FastAPI,
-    Header,
     HTTPException,
     Request,
     status,
 )
-
-from src.auth.models import AuthState
-from src.auth.verification import fetch_auth_state
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -36,16 +32,6 @@ def get_bearer_token(request: Request) -> str:
 
 
 BearerToken = Annotated[str, Depends(get_bearer_token)]
-
-
-async def get_auth_state(
-    x_fern_host: str = Header(...), fern_token: str | None = Header(None, alias="FERN_TOKEN")
-) -> AuthState:
-    domain = x_fern_host.split(":")[0] if ":" in x_fern_host else x_fern_host
-    return await fetch_auth_state(domain, fern_token)
-
-
-AuthStateDep = Annotated[AuthState, Depends(get_auth_state)]
 
 
 @app.get("/health")

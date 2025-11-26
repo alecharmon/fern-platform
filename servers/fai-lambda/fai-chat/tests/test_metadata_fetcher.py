@@ -7,6 +7,7 @@ from unittest.mock import (
 
 import pytest
 
+from src.exceptions import MetadataValidationError
 from src.metadata.fetcher import (
     DocsMetadata,
     fetch_docs_metadata,
@@ -68,12 +69,12 @@ class TestFetchDocsMetadata:
 
     @pytest.mark.asyncio
     async def test_fetch_invalid_domain_with_brackets(self) -> None:
-        with pytest.raises(ValueError, match="Invalid domain"):
+        with pytest.raises(MetadataValidationError, match="Invalid domain"):
             await fetch_docs_metadata("[domain]")
 
     @pytest.mark.asyncio
     async def test_fetch_invalid_domain_with_encoded_brackets(self) -> None:
-        with pytest.raises(ValueError, match="Invalid domain"):
+        with pytest.raises(MetadataValidationError, match="Invalid domain"):
             await fetch_docs_metadata("test%5Bdomain%5D")
 
     @pytest.mark.asyncio
@@ -85,7 +86,7 @@ class TestFetchDocsMetadata:
                 side_effect=ValueError("FERN_TOKEN must be set"),
             ),
         ):
-            with pytest.raises(ValueError, match="FERN_TOKEN must be set"):
+            with pytest.raises(MetadataValidationError, match="FERN_TOKEN must be set"):
                 await fetch_docs_metadata("test.com")
 
     @pytest.mark.asyncio
@@ -94,7 +95,7 @@ class TestFetchDocsMetadata:
         mock_client.docs.v_2.read.get_docs_url_metadata = AsyncMock(side_effect=Exception("Not found"))
 
         with patch("src.metadata.fetcher.get_fdr_client", return_value=mock_client):
-            with pytest.raises(ValueError, match="Failed to fetch metadata"):
+            with pytest.raises(MetadataValidationError, match="Failed to fetch metadata"):
                 await fetch_docs_metadata("nonexistent.com")
 
     @pytest.mark.asyncio
@@ -103,7 +104,7 @@ class TestFetchDocsMetadata:
         mock_client.docs.v_2.read.get_docs_url_metadata = AsyncMock(side_effect=Exception("Connection error"))
 
         with patch("src.metadata.fetcher.get_fdr_client", return_value=mock_client):
-            with pytest.raises(ValueError, match="Failed to fetch metadata"):
+            with pytest.raises(MetadataValidationError, match="Failed to fetch metadata"):
                 await fetch_docs_metadata("test.com")
 
 
@@ -136,5 +137,5 @@ class TestValidateDocsMetadata:
             enable_algolia_on_preview=False,
         )
 
-        with pytest.raises(ValueError, match="Chat is not enabled for preview environments"):
+        with pytest.raises(MetadataValidationError, match="Chat is not enabled for preview environments"):
             validate_docs_metadata(metadata)

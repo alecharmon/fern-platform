@@ -1,6 +1,7 @@
 import logging
 
 from ..clients.fai_client import get_fai_client
+from ..exceptions import AskAICheckError
 
 logger = logging.getLogger(__name__)
 
@@ -12,4 +13,4 @@ async def is_ask_ai_enabled(domain: str) -> bool:
         return settings.ask_ai_enabled
     except Exception as e:
         logger.exception(f"Error checking Ask AI status for {domain}")
-        raise ValueError(f"Failed to check Ask AI status for domain {domain}: {str(e)}")
+        raise AskAICheckError(f"Failed to check Ask AI status for domain {domain}: {str(e)}")

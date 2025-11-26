@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import time
@@ -20,12 +21,15 @@ from ..analytics.events import (
     track_chat_request_error,
     track_chat_request_success,
 )
-from ..app import (
-    AuthStateDep,
-    app,
-)
+from ..app import app
+from ..auth.models import AuthState
 from ..auth.roles import create_exploded_roles
+from ..auth.verification import fetch_auth_state
 from ..clients.fai_client import get_fai_client
+from ..exceptions import (
+    AskAICheckError,
+    MetadataValidationError,
+)
 from ..llm.factory import get_llm_provider
 from ..llm.models import (
     LLMMessage,
@@ -59,33 +63,58 @@ logger = logging.getLogger(__name__)
 @app.post("/chat")
 async def chat(
     request: ChatRequest,
-    auth_state: AuthStateDep,
     x_fern_host: str = Header(..., alias="x-fern-host"),
+    fern_token: str | None = Header(None, alias="FERN_TOKEN"),
 ) -> StreamingResponse:
-    domain = x_fern_host
+    domain = x_fern_host.split(":")[0] if ":" in x_fern_host else x_fern_host
     request_start_ms = time.time() * 1000
     logger.info(f"Chat request received for domain: {domain}")
 
+    pre_check_start_ms = time.time() * 1000
     try:
-        metadata = await fetch_docs_metadata(domain)
+        auth_result, metadata_result, ask_ai_result = await asyncio.gather(
+            fetch_auth_state(domain, fern_token),
+            fetch_docs_metadata(domain),
+            is_ask_ai_enabled(domain),
+            return_exceptions=True,
+        )
+        pre_check_end_ms = time.time() * 1000
+        logger.info(f"Pre-checks completed in {pre_check_end_ms - pre_check_start_ms:.2f}ms")
+
+        if isinstance(auth_result, BaseException):
+            logger.warning(f"Auth check failed, treating as unauthenticated: {auth_result}")
+            auth_state = AuthState(authenticated=False)
+        else:
+            auth_state = auth_result
+
+        if isinstance(metadata_result, BaseException):
+            raise metadata_result
+        metadata = metadata_result
         validate_docs_metadata(metadata)
-    except ValueError as e:
+
+        if isinstance(ask_ai_result, BaseException):
+            raise ask_ai_result
+        ask_ai_enabled = ask_ai_result
+
+    except MetadataValidationError as e:
         logger.error(f"Metadata validation failed: {e}")
         track_chat_request_error(domain, ErrorType.METADATA_VALIDATION_FAILED, status.HTTP_404_NOT_FOUND, str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-
-    try:
-        ask_ai_enabled = await is_ask_ai_enabled(domain)
-        if not ask_ai_enabled:
-            track_chat_request_error(domain, ErrorType.ASK_AI_NOT_ENABLED, status.HTTP_404_NOT_FOUND)
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Ask AI is not enabled for this domain",
-            )
-    except ValueError as e:
+    except AskAICheckError as e:
         logger.error(f"Ask AI check failed: {e}")
         track_chat_request_error(domain, ErrorType.ASK_AI_CHECK_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    except Exception as e:
+        logger.error(f"Pre-check failed with unexpected error: {e}")
+        track_chat_request_error(domain, ErrorType.PRE_CHECK_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    if not ask_ai_enabled:
+        track_chat_request_error(domain, ErrorType.ASK_AI_NOT_ENABLED, status.HTTP_404_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ask AI is not enabled for this domain",
+        )
 
     simple_messages = request.get_simple_messages()
     user_query = simple_messages[-1].content
@@ -129,6 +158,7 @@ async def chat(
             detail="Failed to retrieve documents",
         )
 
+    message_build_start_ms = time.time() * 1000
     try:
         messages_with_context = build_messages(
             user_messages=simple_messages,
@@ -143,6 +173,8 @@ async def chat(
             )
             for msg in messages_with_context
         ]
+        message_build_end_ms = time.time() * 1000
+        logger.info(f"Message building completed in {message_build_end_ms - message_build_start_ms:.2f}ms")
 
         logger.info(f"Sending {len(llm_messages)} messages to LLM")
         for i, msg in enumerate(llm_messages):
@@ -161,8 +193,11 @@ async def chat(
             detail="Failed to prepare messages",
         )
 
+    llm_provider_start_ms = time.time() * 1000
     try:
         provider = get_llm_provider(model="claude-4-sonnet", temperature=0.0, max_tokens=4096)
+        llm_provider_end_ms = time.time() * 1000
+        logger.info(f"LLM provider initialized in {llm_provider_end_ms - llm_provider_start_ms:.2f}ms")
     except Exception as e:
         logger.exception(f"Failed to create LLM provider: {e}")
         track_chat_request_error(domain, ErrorType.LLM_PROVIDER_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
@@ -177,6 +212,7 @@ async def chat(
     sources = convert_documents_to_sources(retrieval_result.documents)
     chat_source = request.source or "CHAT"
 
+    user_save_task: asyncio.Task[str | None] | None = None
     if not request.skipSaveQuery:
         user_query_data = QueryData(
             query_id=query_id,
@@ -187,7 +223,7 @@ async def chat(
             source=chat_source,
             created_at=datetime.now(UTC),
         )
-        await save_query(get_fai_client(), user_query_data)
+        user_save_task = asyncio.create_task(save_query(get_fai_client(), user_query_data))
 
     initial_urls: set[str] = set()
     for doc in retrieval_result.documents:
@@ -272,6 +308,7 @@ async def chat(
             track_chat_request_error(domain, ErrorType.STREAMING_ERROR, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
             yield f'data: {json.dumps({"type":"error","message":str(e)})}\n\n'
         finally:
+            assistant_save_task: asyncio.Task[str | None] | None = None
             if not request.skipSaveQuery and accumulated_text:
                 ttft_ms = (first_token_ms - llm_start_ms) if first_token_ms else None
                 assistant_query_data = QueryData(
@@ -284,7 +321,18 @@ async def chat(
                     created_at=datetime.now(UTC),
                     time_to_first_token=ttft_ms,
                 )
-                await save_query(get_fai_client(), assistant_query_data)
+                assistant_save_task = asyncio.create_task(save_query(get_fai_client(), assistant_query_data))
+
+            if user_save_task:
+                try:
+                    await user_save_task
+                except Exception as e:
+                    logger.error(f"Failed to save user query: {e}")
+            if assistant_save_task:
+                try:
+                    await assistant_save_task
+                except Exception as e:
+                    logger.error(f"Failed to save assistant query: {e}")
 
     return StreamingResponse(
         generate_stream(),

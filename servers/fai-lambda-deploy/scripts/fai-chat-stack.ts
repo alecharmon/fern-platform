@@ -79,7 +79,7 @@ export class FaiChatStack extends Stack {
 
         // Environment-aware configuration
         const isProd = environmentType === EnvironmentType.Prod;
-        const reservedConcurrency = isProd ? 30 : 20;
+        const reservedConcurrency = isProd ? 60 : 30;
 
         const lambdaFunction = new lambda.DockerImageFunction(this, `${lambdaName}-lambda-function`, {
             functionName,
@@ -105,15 +105,6 @@ export class FaiChatStack extends Stack {
                 POSTHOG_API_KEY: getEnvironmentVariableOrThrow("POSTHOG_API_KEY")
             }
         });
-
-        // Grant Lambda permission to invoke other services if needed
-        lambdaFunction.addToRolePolicy(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
-                actions: ["lambda:InvokeFunction"],
-                resources: [`arn:aws:lambda:us-east-1:985111089818:function:fai-code-indexing-*`]
-            })
-        );
 
         // Grant Lambda permission to use AWS Bedrock Converse API
         lambdaFunction.addToRolePolicy(
@@ -167,8 +158,8 @@ export class FaiChatStack extends Stack {
                 stageName: environmentType.toLowerCase(),
                 loggingLevel: apigateway.MethodLoggingLevel.INFO,
                 dataTraceEnabled: true,
-                throttlingRateLimit: isProd ? 30 : 20,
-                throttlingBurstLimit: isProd ? 60 : 40
+                throttlingRateLimit: isProd ? 60 : 30,
+                throttlingBurstLimit: isProd ? 120 : 60
             }
         });
 

@@ -3,6 +3,7 @@ class ErrorType:
     ASK_AI_NOT_ENABLED = "ask_ai_not_enabled"
     ASK_AI_CHECK_FAILED = "ask_ai_check_failed"
     AUTH_FETCH_FAILED = "auth_fetch_failed"
+    PRE_CHECK_FAILED = "pre_check_failed"
     RETRIEVAL_FAILED = "retrieval_failed"
     MESSAGE_BUILD_FAILED = "message_build_failed"
     LLM_PROVIDER_FAILED = "llm_provider_failed"

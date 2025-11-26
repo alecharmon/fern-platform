@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from fdr_lambda.docs.v_2.read.errors import DomainNotRegisteredError
 
 from ..clients.fdr_client import get_fdr_client
+from ..exceptions import MetadataValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ class DocsMetadata:
 
 async def fetch_docs_metadata(domain: str) -> DocsMetadata:
     if "[" in domain or "%5B" in domain:
-        raise ValueError(f"Invalid domain: {domain}")
+        raise MetadataValidationError(f"Invalid domain: {domain}")
 
     try:
         client = get_fdr_client()
@@ -31,12 +32,12 @@ async def fetch_docs_metadata(domain: str) -> DocsMetadata:
             enable_algolia_on_preview=response.enable_algolia_on_preview,
         )
     except DomainNotRegisteredError:
-        raise ValueError(f"Domain not registered: {domain}")
+        raise MetadataValidationError(f"Domain not registered: {domain}")
     except Exception as e:
         logger.exception(f"Error fetching docs metadata for {domain}")
-        raise ValueError(f"Failed to fetch metadata for domain {domain}: {str(e)}")
+        raise MetadataValidationError(f"Failed to fetch metadata for domain {domain}: {str(e)}")
 
 
 def validate_docs_metadata(metadata: DocsMetadata) -> None:
     if metadata.is_preview and not metadata.enable_algolia_on_preview:
-        raise ValueError("Chat is not enabled for preview environments")
+        raise MetadataValidationError("Chat is not enabled for preview environments")

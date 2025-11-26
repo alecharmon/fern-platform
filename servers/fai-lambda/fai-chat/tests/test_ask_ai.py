@@ -7,6 +7,7 @@ from unittest.mock import (
 
 import pytest
 
+from src.exceptions import AskAICheckError
 from src.settings.ask_ai import is_ask_ai_enabled
 
 
@@ -46,7 +47,7 @@ class TestIsAskAiEnabled:
             patch.dict(os.environ, {}, clear=True),
             patch("src.settings.ask_ai.get_fai_client", side_effect=ValueError("FERN_TOKEN must be set")),
         ):
-            with pytest.raises(ValueError, match="FERN_TOKEN must be set"):
+            with pytest.raises(AskAICheckError, match="FERN_TOKEN must be set"):
                 await is_ask_ai_enabled("test.com")
 
     @pytest.mark.asyncio
@@ -70,7 +71,7 @@ class TestIsAskAiEnabled:
             patch.dict(os.environ, {"ENVIRONMENT_TYPE": "DEV"}, clear=True),
             patch("src.settings.ask_ai.get_fai_client", side_effect=ValueError("FERN_TOKEN must be set")),
         ):
-            with pytest.raises(ValueError, match="FERN_TOKEN must be set"):
+            with pytest.raises(AskAICheckError, match="FERN_TOKEN must be set"):
                 await is_ask_ai_enabled("test.com")
 
     @pytest.mark.asyncio
@@ -79,5 +80,5 @@ class TestIsAskAiEnabled:
         mock_client.settings.get_docs_settings = AsyncMock(side_effect=Exception("Connection error"))
 
         with patch("src.settings.ask_ai.get_fai_client", return_value=mock_client):
-            with pytest.raises(ValueError, match="Failed to check Ask AI status"):
+            with pytest.raises(AskAICheckError, match="Failed to check Ask AI status"):
                 await is_ask_ai_enabled("test.com")
