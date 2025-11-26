@@ -24,7 +24,7 @@ import { EditorRedirect } from "./EditorRedirect";
 import PageNode, { type PageNode as PageNodeNamespace } from "./PageNode";
 
 const CHANGELOG_NODE_TYPES = new Set(["changelog", "changelogEntry"]);
-const API_REFERENCE_NODE_TYPES = new Set(["apiReference", "apiPackage", "endpoint", "webSocket", "webhook", "grpc"]);
+const API_REFERENCE_NODE_TYPES = new Set(["apiPackage", "endpoint", "webSocket", "webhook", "grpc"]);
 
 export default async function Page({
     params

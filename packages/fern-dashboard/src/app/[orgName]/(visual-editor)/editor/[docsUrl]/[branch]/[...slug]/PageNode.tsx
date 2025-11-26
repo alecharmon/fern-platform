@@ -32,7 +32,7 @@ export declare namespace PageNode {
     };
 }
 
-const SUPPORTED_NODE_TYPES = new Set(["page", "section", "landingPage"]);
+const SUPPORTED_NODE_TYPES = new Set(["page", "section", "landingPage", "apiReference"]);
 
 export default function PageNode(props: PageNode.Props) {
     const { pageDataDeps, fallbackFoundNode, cssConfig, serializableRootNode } = props;
