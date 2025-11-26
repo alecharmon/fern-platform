@@ -131,6 +131,7 @@ export function MaybeEnvironmentDropdown({
                     <span className="max-sm:hidden" style={{ pointerEvents: "auto" }}>
                         {options && options.length > 1 && !isEnvironmentReadonly ? (
                             <FernDropdown
+                                className="fern-env-switcher"
                                 key="selectedEnvironment-selector"
                                 options={options.map((env) => ({
                                     value: env.id,
