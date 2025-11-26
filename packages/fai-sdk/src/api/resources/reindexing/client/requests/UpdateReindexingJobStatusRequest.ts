@@ -17,7 +17,7 @@
  *         reason: "reason"
  *     }
  */
-export interface UpdateReindexingJobStatusEndpointRequest {
+export interface UpdateReindexingJobStatusRequest {
     status: string;
     memory_mb?: number;
     retry_count?: number;

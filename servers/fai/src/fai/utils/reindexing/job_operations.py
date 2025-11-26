@@ -14,7 +14,7 @@ from fai.models.enums.reindexing_enums import ReindexingJobStatus
 from fai.settings import LOGGER
 
 
-async def get_job_record(db: AsyncSession, domain: str) -> ReindexingMetadataDb | None:
+async def get_job_record_by_domain(db: AsyncSession, domain: str) -> ReindexingMetadataDb | None:
     """Get job record by domain"""
     try:
         result = await db.execute(select(ReindexingMetadataDb).where(ReindexingMetadataDb.domain == domain))
@@ -36,7 +36,7 @@ async def get_job_record_by_task_arn(db: AsyncSession, task_arn: str) -> Reindex
 
 async def is_job_running(db: AsyncSession, domain: str) -> bool:
     """Check if a job is currently running for a domain"""
-    record = await get_job_record(db, domain)
+    record = await get_job_record_by_domain(db, domain)
 
     if not record:
         return False
@@ -68,7 +68,7 @@ async def upsert_job_record(
 ) -> None:
     """Upsert job record in the database"""
     try:
-        existing = await get_job_record(db, domain)
+        existing = await get_job_record_by_domain(db, domain)
 
         if existing:
             update_values: dict[str, object] = {"updated_at": datetime.now(UTC)}
@@ -173,7 +173,7 @@ async def update_job_status(
 async def increment_retry_count(db: AsyncSession, domain: str, new_memory_mb: int, task_arn: str) -> int:
     """Increment retry count for OOM recovery"""
     try:
-        existing = await get_job_record(db, domain)
+        existing = await get_job_record_by_domain(db, domain)
         new_retry_count = (existing.retry_count if existing else 0) + 1
 
         await upsert_job_record(
@@ -200,7 +200,7 @@ async def increment_retry_count(db: AsyncSession, domain: str, new_memory_mb: in
 async def get_memory_override(db: AsyncSession, domain: str) -> int | None:
     """Get memory override from job record if available"""
     try:
-        record = await get_job_record(db, domain)
+        record = await get_job_record_by_domain(db, domain)
 
         if record and record.memory_mb and record.memory_mb > 0 and record.reason:
             LOGGER.info(

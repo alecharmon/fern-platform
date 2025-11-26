@@ -40,7 +40,7 @@ export class Reindexing {
     }
 
     /**
-     * Get the status of a reindexing job for a domain
+     * Get the status of a reindexing job by domain
      *
      * @param {string} domain
      * @param {Reindexing.RequestOptions} requestOptions - Request-specific configuration.
@@ -48,16 +48,16 @@ export class Reindexing {
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.reindexing.getReindexingJobStatus("domain")
+     *     await client.reindexing.getReindexingJobStatusByDomain("domain")
      */
-    public getReindexingJobStatus(
+    public getReindexingJobStatusByDomain(
         domain: string,
         requestOptions?: Reindexing.RequestOptions,
     ): core.HttpResponsePromise<FernAI.ReindexingJobRecord> {
-        return core.HttpResponsePromise.fromPromise(this.__getReindexingJobStatus(domain, requestOptions));
+        return core.HttpResponsePromise.fromPromise(this.__getReindexingJobStatusByDomain(domain, requestOptions));
     }
 
-    private async __getReindexingJobStatus(
+    private async __getReindexingJobStatusByDomain(
         domain: string,
         requestOptions?: Reindexing.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.ReindexingJobRecord>> {
@@ -121,13 +121,13 @@ export class Reindexing {
      * Update the status of a reindexing job
      *
      * @param {string} domain
-     * @param {FernAI.UpdateReindexingJobStatusEndpointRequest} request
+     * @param {FernAI.UpdateReindexingJobStatusRequest} request
      * @param {Reindexing.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.reindexing.updateReindexingJobStatusEndpoint("domain", {
+     *     await client.reindexing.updateReindexingJobStatus("domain", {
      *         status: "status",
      *         memory_mb: 1,
      *         retry_count: 1,
@@ -140,19 +140,17 @@ export class Reindexing {
      *         reason: "reason"
      *     })
      */
-    public updateReindexingJobStatusEndpoint(
+    public updateReindexingJobStatus(
         domain: string,
-        request: FernAI.UpdateReindexingJobStatusEndpointRequest,
+        request: FernAI.UpdateReindexingJobStatusRequest,
         requestOptions?: Reindexing.RequestOptions,
     ): core.HttpResponsePromise<FernAI.UpdateReindexingJobStatusResponse> {
-        return core.HttpResponsePromise.fromPromise(
-            this.__updateReindexingJobStatusEndpoint(domain, request, requestOptions),
-        );
+        return core.HttpResponsePromise.fromPromise(this.__updateReindexingJobStatus(domain, request, requestOptions));
     }
 
-    private async __updateReindexingJobStatusEndpoint(
+    private async __updateReindexingJobStatus(
         domain: string,
-        request: FernAI.UpdateReindexingJobStatusEndpointRequest,
+        request: FernAI.UpdateReindexingJobStatusRequest,
         requestOptions?: Reindexing.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.UpdateReindexingJobStatusResponse>> {
         const {
@@ -256,6 +254,89 @@ export class Reindexing {
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /reindexing/{domain}/status.");
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Get the status of a reindexing job by task ARN
+     *
+     * @param {FernAI.GetReindexingJobStatusByTaskArnRequest} request
+     * @param {Reindexing.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.reindexing.getReindexingJobStatusByTaskArn({
+     *         task_arn: "task_arn"
+     *     })
+     */
+    public getReindexingJobStatusByTaskArn(
+        request: FernAI.GetReindexingJobStatusByTaskArnRequest,
+        requestOptions?: Reindexing.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.ReindexingJobRecord> {
+        return core.HttpResponsePromise.fromPromise(this.__getReindexingJobStatusByTaskArn(request, requestOptions));
+    }
+
+    private async __getReindexingJobStatusByTaskArn(
+        request: FernAI.GetReindexingJobStatusByTaskArnRequest,
+        requestOptions?: Reindexing.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.ReindexingJobRecord>> {
+        const { task_arn: taskArn } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        _queryParams["task_arn"] = taskArn;
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                "reindexing/status/arn",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.ReindexingJobRecord, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /reindexing/status/arn.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,

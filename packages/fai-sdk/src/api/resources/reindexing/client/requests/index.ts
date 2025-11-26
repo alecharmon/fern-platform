@@ -1,1 +1,2 @@
-export { type UpdateReindexingJobStatusEndpointRequest } from "./UpdateReindexingJobStatusEndpointRequest.js";
+export { type UpdateReindexingJobStatusRequest } from "./UpdateReindexingJobStatusRequest.js";
+export { type GetReindexingJobStatusByTaskArnRequest } from "./GetReindexingJobStatusByTaskArnRequest.js";

@@ -1,5 +1,5 @@
 from fai.utils.reindexing.job_operations import (
-    get_job_record,
+    get_job_record_by_domain,
     get_job_record_by_task_arn,
     get_memory_override,
     increment_retry_count,
@@ -9,7 +9,7 @@ from fai.utils.reindexing.job_operations import (
 )
 
 __all__ = [
-    "get_job_record",
+    "get_job_record_by_domain",
     "get_job_record_by_task_arn",
     "get_memory_override",
     "increment_retry_count",
