@@ -1,17 +1,25 @@
 # ----------- Build stage for MinIO -----------
 FROM cgr.dev/chainguard/wolfi-base:latest AS minio-builder
 
-# Install Go
-RUN apk add --no-cache go
+# Install Go and git (needed for go get)
+RUN apk add --no-cache go git
 
 # Set up Go environment
 ENV GOPATH=/go
 ENV PATH=$PATH:/go/bin
 
-# Build MinIO
-RUN go install -v github.com/minio/minio@RELEASE.2025-10-15T17-29-55Z
+# Build MinIO with updated golang.org/x/crypto to fix GHSA-j5w8-q4qc-rx2x and GHSA-f6x5-jh6r-wrfv
+# Clone, update dependency, and build from source
+RUN git clone --depth 1 --branch RELEASE.2025-10-15T17-29-55Z https://github.com/minio/minio.git /tmp/minio && \
+    cd /tmp/minio && \
+    go get golang.org/x/crypto@v0.45.0 && \
+    go mod tidy && \
+    go build -o $GOPATH/bin/minio . && \
+    rm -rf /tmp/minio
+
 # Get most secure mc commit: https://github.com/minio/mc/pull/5264
-RUN go install -v github.com/minio/mc@4f6310723f43b117ca2ab746c6533949d777a5bb 
+# This commit already uses golang.org/x/crypto v0.45.0
+RUN go install -v github.com/minio/mc@4f6310723f43b117ca2ab746c6533949d777a5bb
 
 # ----------- End MinIO build stage -----------
 # ----------- Main image -----------
@@ -192,6 +200,53 @@ RUN log "Verifying Buf CLI installation..." && \
     buf export . --output /tmp/buf-output 2>&1 | add-timestamps && \
     cd / && rm -rf /tmp/buf-test /tmp/buf-output
 # ----------- End Buf CLI setup -----------
+
+# ----------- Start npm vulnerability patches -----------
+# Patch glob and brace-expansion to fix GHSA-5j98-mcp5-4vw2 and GHSA-v6h2-p8h4-qcjw
+# Using npm pack + tar approach to replace vulnerable packages without running npm install
+
+# Helper function to patch glob in a node_modules directory
+# glob 10.x -> 10.5.0, glob 11.x -> 11.1.0
+RUN log "Patching npm vulnerabilities..." && \
+    cd /tmp && \
+    npm-real pack glob@10.5.0 2>&1 | add-timestamps && \
+    npm-real pack glob@11.1.0 2>&1 | add-timestamps && \
+    npm-real pack brace-expansion@2.0.2 2>&1 | add-timestamps && \
+    mkdir -p /tmp/patches/glob-10 /tmp/patches/glob-11 /tmp/patches/brace-expansion && \
+    tar -xzf glob-10.5.0.tgz -C /tmp/patches/glob-10 && \
+    tar -xzf glob-11.1.0.tgz -C /tmp/patches/glob-11 && \
+    tar -xzf brace-expansion-2.0.2.tgz -C /tmp/patches/brace-expansion && \
+    rm -f glob-*.tgz brace-expansion-*.tgz
+
+# Patch glob and brace-expansion across all node_modules directories
+# This covers: npm, pnpm, turbo, prisma, esbuild, fern-api CLI, FDR, nextapp, buf-modules
+# Only patch vulnerable versions: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0, brace-expansion 2.0.x -> 2.0.2
+RUN log "Patching glob/brace-expansion across all node_modules..." && \
+    for root in /usr/local/lib/node_modules /usr/lib/node_modules /tmp/npm-global/lib/node_modules /fdr /nextapp /opt/buf-modules; do \
+        if [ -d "$root" ]; then \
+            find "$root" -path "*/node_modules/glob/package.json" -o -path "*/dist/node_modules/glob/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -q "^10\."; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/glob-10/package "$dir" && log "Patched glob $version -> 10.5.0 at $dir"; \
+                elif echo "$version" | grep -q "^11\."; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/glob-11/package "$dir" && log "Patched glob $version -> 11.1.0 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/brace-expansion/package.json" -o -path "*/dist/node_modules/brace-expansion/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -q "^2\.0\.[01]$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/brace-expansion/package "$dir" && log "Patched brace-expansion $version -> 2.0.2 at $dir"; \
+                fi; \
+            done; \
+        fi; \
+    done || true
+
+# Clean up patches
+RUN rm -rf /tmp/patches
+
+# ----------- End npm vulnerability patches -----------
 
 # ----------- Setup for non-root execution -----------
 # Ensure /tmp directory has proper permissions (sticky bit + world writable)
