@@ -1,0 +1,41 @@
+{
+  "name": "@fern-platform/fai-reindexing",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "build": "tsup",
+    "build:lambda": "tsup --config tsup.lambda.config.ts",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "2.0.0-beta.2",
+    "@aws-sdk/client-ecs": "^3.709.0",
+    "@aws-sdk/client-sqs": "^3.709.0",
+    "@fern-api/docs-utils": "workspace:*",
+    "@fern-api/fai-sdk": "workspace:*",
+    "@fern-api/fdr-lambda-sdk": "workspace:*",
+    "@fern-api/fdr-sdk": "workspace:*",
+    "@fern-api/ui-core-utils": "workspace:*",
+    "@fern-docs/search-utils": "workspace:*",
+    "@turbopuffer/turbopuffer": "^0.5.11",
+    "ai": "5.0.86",
+    "dotenv": "^16.4.5",
+    "es-toolkit": "^1.39.7",
+    "gpt-tokenizer": "2.9.0",
+    "gray-matter": "^4.0.3",
+    "posthog-node": "^5.10.0",
+    "winston": "^3.10.0",
+    "zod": "^3.25.49"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

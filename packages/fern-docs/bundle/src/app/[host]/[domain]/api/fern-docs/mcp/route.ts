@@ -131,15 +131,7 @@ async function createHandler(host: string, domain: string): Promise<McpHandler> 
                 }
             );
         },
-        {
-            capabilities: {
-                tools: {
-                    searchDocs: {
-                        description: "Search the documentation for relevant information."
-                    }
-                }
-            }
-        },
+        {},
         {
             streamableHttpEndpoint: "/_mcp/server",
             verboseLogs: true,

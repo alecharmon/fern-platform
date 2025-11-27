@@ -1,0 +1,69 @@
+name: Deploy FAI Reindexing Stack
+
+on:
+  push:
+    tags:
+      - "fai-reindexing@*"
+
+jobs:
+  deploy-prod:
+    if: contains(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    environment: Fern Prod
+    env:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+      FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+      POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+      GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+          run_install: false
+
+      - name: Free up disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          echo "Removing unnecessary system packages..."
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /usr/local/lib/android
+          sudo apt-get clean
+          docker system prune -af --volumes
+          echo "Disk space after cleanup:"
+          df -h
+
+      - name: Deploy to Prod
+        run: |
+          git_version="$(git rev-parse --short HEAD)"
+
+          # Install dependencies
+          pnpm install
+
+          # Build FAI SDK (required for lambda bundle)
+          pnpm --filter=@fern-api/fai-sdk build
+
+          # Build FAI reindexing stack
+          cd servers/fai-reindexing
+
+          # Build Lambda function
+          pnpm build:lambda
+
+          # Build Docker container
+          docker build -t fai-reindexing-scheduler:${git_version} -f Dockerfile ../../
+          docker save fai-reindexing-scheduler:${git_version} -o fai-reindexing-scheduler:${git_version}.tar
+
+          # Deploy with CDK
+          cd deploy
+          pnpm install
+          VERSION="${git_version}" pnpm cdk deploy fai-reindexing-scheduler-prod --require-approval never --progress events
