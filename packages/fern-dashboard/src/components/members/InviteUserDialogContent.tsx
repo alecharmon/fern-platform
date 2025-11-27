@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { addUserDirectlyToOrg } from "@/app/actions/addUserDirectlyToOrg";
+import { type AddUserDirectlyResult, addUserDirectlyToOrg } from "@/app/actions/addUserDirectlyToOrg";
 import { createInviteLink } from "@/app/actions/createInviteLink";
 import { inviteUserToOrg } from "@/app/actions/inviteUserToOrg";
 import type { Auth0Organization } from "@/app/services/auth0/types";
@@ -100,18 +100,21 @@ export function InviteUserDialogContent({
         }
     });
 
-    const addUserDirectly = useMutation({
+    const addUserDirectly = useMutation<AddUserDirectlyResult>({
         mutationFn: () => addUserDirectlyToOrg({ email, orgName }),
-        onSuccess: async () => {
-            toast.success(`${email} added to organization`);
-            // Invalidate members query to refresh the list
+        onSuccess: async (result) => {
+            if (!result.ok) {
+                toast.error(result.message);
+                return;
+            }
+            toast.success(`${result.userEmail} added to organization`);
             await queryClient.invalidateQueries({ queryKey: membersQueryKey });
             setIsClosing(true);
             close();
         },
         onError: (error) => {
             console.error(`Failed to add user directly`, error);
-            toast.error(error instanceof Error ? error.message : "Failed to add user directly");
+            toast.error("Something went wrong while adding the user. Please try again.");
         }
     });
 
