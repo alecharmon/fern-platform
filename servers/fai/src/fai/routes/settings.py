@@ -200,7 +200,7 @@ async def enable_ask_ai(
 
             LOGGER.info(f"Starting reindex for domain {stripped_domain}")
             try:
-                job_id = await queue_reindex_sqs(domain, delete_existing=True)
+                job_id = await queue_reindex_sqs(stripped_domain, delete_existing=True)
                 existing_record.job_id = job_id
                 await db.commit()
                 results.append({"domain": domain, "success": True, "job_id": job_id})
@@ -256,7 +256,7 @@ async def toggle_ask_ai(
         else:
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
             try:
-                job_id = await queue_reindex_sqs(domain, delete_existing=True)
+                job_id = await queue_reindex_sqs(stripped_domain, delete_existing=True)
                 LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
             except Exception as e:
                 LOGGER.error(f"Failed to queue reindex for domain {stripped_domain}: {e}")
@@ -342,7 +342,7 @@ async def reindex_ask_ai(
             )
 
         try:
-            job_id = await queue_reindex_sqs(domain, delete_existing=True)
+            job_id = await queue_reindex_sqs(stripped_domain, delete_existing=True)
         except Exception as e:
             LOGGER.error(f"Failed to queue manual reindex for domain {stripped_domain}: {e}")
             return ToggleAskAiResponse(success=False, ask_ai_enabled=existing_record.last_reindex_time is not None)
