@@ -50,30 +50,40 @@ export async function delegateToWorkerTask(options: ECSTaskOptions, log: Logger)
         sqsMessageId
     });
 
-    try {
-        const taskArn = await runOnEC2(options, log);
-        return { taskArn };
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+    // Temporarily disabled EC2 capacity provider - defaulting to Fargate
+    // TODO: Re-enable once capacity provider is properly configured
+    // try {
+    //     const taskArn = await runOnEC2(options, log);
+    //     return { taskArn };
+    // } catch (error) {
+    //     const errorMessage = error instanceof Error ? error.message : String(error);
 
-        if (
-            errorMessage.includes("RESOURCE:MEMORY") ||
-            errorMessage.includes("RESOURCE:CPU") ||
-            errorMessage.includes("No container instance met all")
-        ) {
-            log.warn("EC2 capacity exhausted, falling back to Fargate", {
-                domain: jobMessage.domain,
-                memoryMB: memory,
-                sqsMessageId,
-                reason: errorMessage.includes("RESOURCE:CPU") ? "CPU exhaustion" : "Memory exhaustion"
-            });
+    //     if (
+    //         errorMessage.includes("RESOURCE:MEMORY") ||
+    //         errorMessage.includes("RESOURCE:CPU") ||
+    //         errorMessage.includes("No container instance met all")
+    //     ) {
+    //         log.warn("EC2 capacity exhausted, falling back to Fargate", {
+    //             domain: jobMessage.domain,
+    //             memoryMB: memory,
+    //             sqsMessageId,
+    //             reason: errorMessage.includes("RESOURCE:CPU") ? "CPU exhaustion" : "Memory exhaustion"
+    //         });
 
-            const taskArn = await runOnFargate(options, log);
-            return { taskArn };
-        }
+    //         const taskArn = await runOnFargate(options, log);
+    //         return { taskArn };
+    //     }
 
-        throw error;
-    }
+    //     throw error;
+    // }
+
+    log.info("Using Fargate (EC2 capacity provider temporarily disabled)", {
+        domain: jobMessage.domain,
+        sqsMessageId
+    });
+
+    const taskArn = await runOnFargate(options, log);
+    return { taskArn };
 }
 
 function buildSharedEnvVars(
@@ -117,7 +127,8 @@ function buildSharedTags(
     ];
 }
 
-async function runOnEC2(options: ECSTaskOptions, log: Logger): Promise<string> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function _runOnEC2(options: ECSTaskOptions, log: Logger): Promise<string> {
     const { memory, cpu, jobMessage, sqsMessageId } = options;
 
     const nodeOptions = `--max-old-space-size=${Math.floor(memory * 0.875)} --expose-gc`;
