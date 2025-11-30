@@ -26,7 +26,8 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             sqsMessageId,
             errorKind: "DomainNotFound",
             error: "Domain not found or invalid",
-            durationMs: Date.now() - start
+            durationMs: Date.now() - start,
+            launchType: process.env.LAUNCH_TYPE
         });
         await updateJobStatus(domain, JobStatus.FAILED, { error: "Domain not found or invalid" }, log);
         await sendReindexCallback(domain, sqsMessageId, "failure", log);
@@ -51,7 +52,8 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             sqsMessageId,
             errorKind: "AskAINotEnabled",
             error: "Ask AI is not enabled for this domain",
-            durationMs: Date.now() - start
+            durationMs: Date.now() - start,
+            launchType: process.env.LAUNCH_TYPE
         });
         await updateJobStatus(domain, JobStatus.FAILED, { error: "Ask AI not enabled" }, log);
         await sendReindexCallback(domain, sqsMessageId, "failure", log);
@@ -76,7 +78,8 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         numInserted,
         jobId,
         sqsMessageId,
-        deleteExisting
+        deleteExisting,
+        launchType: process.env.LAUNCH_TYPE
     });
 
     await updateJobStatus(

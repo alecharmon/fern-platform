@@ -40,7 +40,10 @@ function calculateFargateCpuMemory(memoryMB: number): { cpu: string; memory: str
     return { cpu, memory: memory.toString() };
 }
 
-export async function delegateToWorkerTask(options: ECSTaskOptions, log: Logger): Promise<{ taskArn: string }> {
+export async function delegateToWorkerTask(
+    options: ECSTaskOptions,
+    log: Logger
+): Promise<{ taskArn: string; launchType: "EC2" | "Fargate" }> {
     const { memory, cpu, jobMessage, sqsMessageId } = options;
 
     log.info("Delegating job to ECS worker task", {
@@ -54,7 +57,7 @@ export async function delegateToWorkerTask(options: ECSTaskOptions, log: Logger)
     // TODO: Re-enable once capacity provider is properly configured
     // try {
     //     const taskArn = await runOnEC2(options, log);
-    //     return { taskArn };
+    //     return { taskArn, launchType: "EC2" };
     // } catch (error) {
     //     const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -71,7 +74,7 @@ export async function delegateToWorkerTask(options: ECSTaskOptions, log: Logger)
     //         });
 
     //         const taskArn = await runOnFargate(options, log);
-    //         return { taskArn };
+    //         return { taskArn, launchType: "Fargate" };
     //     }
 
     //     throw error;
@@ -83,13 +86,14 @@ export async function delegateToWorkerTask(options: ECSTaskOptions, log: Logger)
     });
 
     const taskArn = await runOnFargate(options, log);
-    return { taskArn };
+    return { taskArn, launchType: "Fargate" };
 }
 
 function buildSharedEnvVars(
     jobMessage: ReindexJobMessage,
     sqsMessageId: string,
-    nodeOptions: string
+    nodeOptions: string,
+    launchType: "EC2" | "Fargate"
 ): Array<{ name: string; value: string }> {
     return [
         { name: "AWS_REGION", value: env.awsRegion },
@@ -102,6 +106,7 @@ function buildSharedEnvVars(
         { name: "FERN_DOCS_INDEX_NAME", value: env.fernDocsIndexName },
         { name: "POSTHOG_API_KEY", value: env.posthogApiKey || "" },
         { name: "ENVIRONMENT", value: env.environment },
+        { name: "LAUNCH_TYPE", value: launchType },
         { name: "NODE_OPTIONS", value: nodeOptions },
         { name: "SOURCE_SQS_MESSAGE_ID", value: sqsMessageId },
         { name: "REINDEX_DOMAIN", value: jobMessage.domain },
@@ -132,7 +137,7 @@ async function _runOnEC2(options: ECSTaskOptions, log: Logger): Promise<string> 
     const { memory, cpu, jobMessage, sqsMessageId } = options;
 
     const nodeOptions = `--max-old-space-size=${Math.floor(memory * 0.875)} --expose-gc`;
-    const envVars = buildSharedEnvVars(jobMessage, sqsMessageId, nodeOptions);
+    const envVars = buildSharedEnvVars(jobMessage, sqsMessageId, nodeOptions, "EC2");
     const tags = buildSharedTags(jobMessage, sqsMessageId, memory.toString(), cpu.toString(), "EC2");
 
     for (let attempt = 1; attempt <= RETRY_CONFIG.MAX_ATTEMPTS; attempt++) {
@@ -228,7 +233,7 @@ async function runOnFargate(options: ECSTaskOptions, log: Logger): Promise<strin
     });
 
     const nodeOptions = `--max-old-space-size=${Math.floor(Number.parseInt(fargateResources.memory) * 0.875)} --expose-gc`;
-    const envVars = buildSharedEnvVars(jobMessage, sqsMessageId, nodeOptions);
+    const envVars = buildSharedEnvVars(jobMessage, sqsMessageId, nodeOptions, "Fargate");
     const tags = buildSharedTags(jobMessage, sqsMessageId, fargateResources.memory, fargateResources.cpu, "Fargate");
 
     for (let attempt = 1; attempt <= RETRY_CONFIG.MAX_ATTEMPTS; attempt++) {
