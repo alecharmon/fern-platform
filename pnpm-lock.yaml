@@ -3323,101 +3323,6 @@ importers:
         specifier: ^5
         version: 5.7.3
 
-  servers/fai-reindexing-worker:
-    dependencies:
-      '@ai-sdk/openai':
-        specifier: 2.0.0-beta.2
-        version: 2.0.0-beta.2(zod@3.25.76)
-      '@aws-sdk/client-sqs':
-        specifier: ^3.709.0
-        version: 3.940.0
-      '@fern-api/docs-utils':
-        specifier: workspace:*
-        version: link:../../packages/commons/docs-utils
-      '@fern-api/fai-sdk':
-        specifier: workspace:*
-        version: link:../../packages/fai-sdk
-      '@fern-api/fdr-lambda-sdk':
-        specifier: workspace:*
-        version: link:../../packages/fdr-lambda-sdk
-      '@fern-api/fdr-sdk':
-        specifier: workspace:*
-        version: link:../../packages/fdr-sdk
-      '@fern-api/ui-core-utils':
-        specifier: workspace:*
-        version: link:../../packages/commons/core-utils
-      '@fern-docs/search-utils':
-        specifier: workspace:*
-        version: link:../../packages/fern-docs/search-server/utils
-      '@turbopuffer/turbopuffer':
-        specifier: ^0.5.11
-        version: 0.5.19
-      '@vercel/kv':
-        specifier: ^3.0.0
-        version: 3.0.0
-      ai:
-        specifier: 5.0.86
-        version: 5.0.86(zod@3.25.76)
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.6.1
-      es-toolkit:
-        specifier: ^1.39.7
-        version: 1.42.0
-      gpt-tokenizer:
-        specifier: 2.9.0
-        version: 2.9.0
-      gray-matter:
-        specifier: ^4.0.3
-        version: 4.0.3
-      posthog-node:
-        specifier: ^5.10.0
-        version: 5.14.0
-      winston:
-        specifier: ^3.10.0
-        version: 3.18.3
-      zod:
-        specifier: ^3.25.49
-        version: 3.25.76
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.1
-      tsup:
-        specifier: ^8.5.1
-        version: 8.5.1(@swc/core@1.13.5)(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.7.3)(yaml@2.8.1)
-      tsx:
-        specifier: ^4.19.2
-        version: 4.20.6
-      typescript:
-        specifier: ^5
-        version: 5.7.3
-
-  servers/fai-reindexing-worker/deploy:
-    dependencies:
-      '@fern-fern/fern-cloud-sdk':
-        specifier: ^0.0.305
-        version: 0.0.305
-      aws-cdk-lib:
-        specifier: ^2.215.0
-        version: 2.229.1(constructs@10.4.3)
-      constructs:
-        specifier: ^10.0.0
-        version: 10.4.3
-      source-map-support:
-        specifier: ^0.5.21
-        version: 0.5.21
-    devDependencies:
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.1
-      aws-cdk:
-        specifier: ^2.1029.1
-        version: 2.1033.0
-      typescript:
-        specifier: ^5
-        version: 5.7.3
-
   servers/fai-reindexing/deploy:
     dependencies:
       '@fern-fern/fern-cloud-sdk':
@@ -12077,10 +11982,6 @@ packages:
     resolution: {integrity: sha512-zdVrhbzZBYo5d1Hfn4bKtqCeKf0FuzW8rSHauzQVMUgv1+1JOwof2mWcBuI+YMJy8s0G0oqAUfQ7HgUDzb8EbA==}
     engines: {node: '>=14.6'}
 
-  '@vercel/kv@3.0.0':
-    resolution: {integrity: sha512-pKT8fRnfyYk2MgvyB6fn6ipJPCdfZwiKDdw7vB+HL50rjboEBHDVBEcnwfkEpVSp2AjNtoaOUH7zG+bVC/rvSg==}
-    engines: {node: '>=14.6'}
-
   '@vercel/node@2.15.10':
     resolution: {integrity: sha512-IfnqnKAJlL1+0FSDJgxoe9J3kfYAgPGDjz4aO/H5FSjvqP7cKJnns1F9GsQq4pM499+TY8T8mKAdos7/m+WOEw==}
 
@@ -12269,7 +12170,6 @@ packages:
 
   '@walletconnect/ethereum-provider@2.20.0':
     resolution: {integrity: sha512-TSu1nr+AzCjM5u7xdnWTGX8ryKuHHb1Za56BD6UU0UPS7ZC2fZ99TVa5Q3Sng9JyksY5p99Iwg7fOtlozc3QYQ==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/events@1.0.1':
     resolution: {integrity: sha512-NPTqaoi0oPBVNuLv7qPaJazmGHs5JGyO8eEAk5VGKmJzDR7AHzD4k6ilox5kxk1iwiOnFopBOOMLs86Oa76HpQ==}
@@ -12314,19 +12214,15 @@ packages:
 
   '@walletconnect/sign-client@2.19.0':
     resolution: {integrity: sha512-+GkuJzPK9SPq+RZgdKHNOvgRagxh/hhYWFHOeSiGh3DyAQofWuFTq4UrN/MPjKOYswSSBKfIa+iqKYsi4t8zLQ==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/sign-client@2.19.1':
     resolution: {integrity: sha512-OgBHRPo423S02ceN3lAzcZ3MYb1XuLyTTkKqLmKp/icYZCyRzm3/ynqJDKndiBLJ5LTic0y07LiZilnliYqlvw==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/sign-client@2.19.2':
     resolution: {integrity: sha512-a/K5PRIFPCjfHq5xx3WYKHAAF8Ft2I1LtxloyibqiQOoUtNLfKgFB1r8sdMvXM7/PADNPe4iAw4uSE6PrARrfg==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/sign-client@2.20.0':
     resolution: {integrity: sha512-5Ao9RVGsgpMTLjVByFfjMbX7RwJM0HvKV7P9ONJwPPo4OiviNyneeOufr2KKZhuwF+QUu5mTE0Lj/euGWSNaOQ==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/solana-adapter@0.0.8':
     resolution: {integrity: sha512-Qb7MT8SdkeBldfUCmF+rYW6vL98mxPuT1yAwww5X2vpx7xEPZvFCoAKnyT5fXu0v56rMxhW3MGejnHyyYdDY7Q==}
@@ -12351,19 +12247,15 @@ packages:
 
   '@walletconnect/universal-provider@2.19.0':
     resolution: {integrity: sha512-e9JvadT5F8QwdLmd7qBrmACq04MT7LQEe1m3X2Fzvs3DWo8dzY8QbacnJy4XSv5PCdxMWnua+2EavBk8nrI9QA==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/universal-provider@2.19.1':
     resolution: {integrity: sha512-4rdLvJ2TGDIieNWW3sZw2MXlX65iHpTuKb5vyvUHQtjIVNLj+7X/09iUAI/poswhtspBK0ytwbH+AIT/nbGpjg==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/universal-provider@2.19.2':
     resolution: {integrity: sha512-LkKg+EjcSUpPUhhvRANgkjPL38wJPIWumAYD8OK/g4OFuJ4W3lS/XTCKthABQfFqmiNbNbVllmywiyE44KdpQg==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/universal-provider@2.20.0':
     resolution: {integrity: sha512-kzMWXao+RyWfv46nS/owJ99/QhObGkYHhpMxdzl4bae98JXdQ0xhmov3Rvy3GRt5csgJXldoM2VO44B/Fsuj4Q==}
-    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/utils@2.19.0':
     resolution: {integrity: sha512-LZ0D8kevknKfrfA0Sq3Hf3PpmM8oWyNfsyWwFR51t//2LBgtN2Amz5xyoDDJcjLibIbKAxpuo/i0JYAQxz+aPA==}
@@ -34292,10 +34184,6 @@ snapshots:
       '@aws-sdk/credential-provider-web-identity': 3.940.0
 
   '@vercel/kv@2.0.0':
-    dependencies:
-      '@upstash/redis': 1.35.6
-
-  '@vercel/kv@3.0.0':
     dependencies:
       '@upstash/redis': 1.35.6
 
