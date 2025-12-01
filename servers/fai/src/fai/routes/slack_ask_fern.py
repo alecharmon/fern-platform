@@ -1,15 +1,10 @@
 import asyncio
-import hashlib
-import hmac
 import json
-import time
 from datetime import (
     UTC,
     datetime,
-    timedelta,
 )
 from typing import Any
-from urllib.parse import quote
 from uuid import uuid4
 
 from fastapi import (
@@ -23,11 +18,7 @@ from fastapi.responses import (
     Response,
 )
 from slack_sdk.web.async_client import AsyncWebClient
-from sqlalchemy import (
-    delete,
-    select,
-)
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import attributes
 
@@ -36,7 +27,6 @@ from fai.db import async_session_maker
 from fai.dependencies import (
     ask_ai_enabled,
     get_db,
-    strip_domain,
     verify_token,
 )
 from fai.models.api.update_channel_settings import ChannelSettings
@@ -56,6 +46,14 @@ from fai.utils.slack.client import (
     send_error_message,
     update_modal,
 )
+from fai.utils.slack.integration_common import (
+    cleanup_message_cache,
+    create_integration,
+    create_slack_integration_url,
+    handle_oauth_callback,
+    is_message_processed,
+    mark_message_processed,
+)
 from fai.utils.slack.message_handler import (
     get_slack_integration,
     get_thread_history,
@@ -64,122 +62,27 @@ from fai.utils.slack.message_handler import (
 )
 from fai.utils.slack.response_qa import log_message_for_qa
 
-MESSAGE_CACHE_TTL = 600
-
-
-async def cleanup_message_cache() -> None:
-    cutoff_time = datetime.now(UTC) - timedelta(seconds=MESSAGE_CACHE_TTL)
-
-    async with async_session_maker() as session:
-        await session.execute(delete(SlackMessageCacheDb).where(SlackMessageCacheDb.processed_at < cutoff_time))
-        await session.commit()
-
-
-async def is_message_processed(team_id: str, message_ts: str) -> bool:
-    async with async_session_maker() as session:
-        result = await session.execute(
-            select(SlackMessageCacheDb).where(
-                SlackMessageCacheDb.team_id == team_id, SlackMessageCacheDb.message_ts == message_ts
-            )
-        )
-        return result.scalar_one_or_none() is not None
-
-
-async def mark_message_processed(team_id: str, message_ts: str) -> None:
-    async with async_session_maker() as session:
-        stmt = insert(SlackMessageCacheDb).values(
-            id=str(uuid4()), message_ts=message_ts, team_id=team_id, processed_at=datetime.now(UTC)
-        )
-        stmt = stmt.on_conflict_do_nothing(constraint="uq_slack_message_cache_team_message")
-        await session.execute(stmt)
-        await session.commit()
-
-
-def verify_slack_signature(request_body: bytes, timestamp: str, signature: str) -> bool:
-    if abs(time.time() - float(timestamp)) > 60 * 5:
-        return False
-
-    sig_basestring = f"v0:{timestamp}:{request_body.decode('utf-8')}"
-
-    my_signature = (
-        "v0=" + hmac.new(VARIABLES.SLACK_SIGNING_SECRET.encode(), sig_basestring.encode(), hashlib.sha256).hexdigest()
-    )
-
-    return hmac.compare_digest(my_signature, signature)
-
 
 async def get_domain_from_slack_team(team_id: str) -> str | None:
+    """Get the domain associated with a Slack team ID."""
     async with async_session_maker() as session:
         result = await session.execute(select(SlackIntegrationDb).where(SlackIntegrationDb.slack_team_id == team_id))
         integration = result.scalar_one_or_none()
         return integration.domain if integration else None
 
 
-def create_slack_integration_url(integration_id: str) -> str:
-    scopes = [
-        "app_mentions:read",
-        "channels:history",
-        "channels:join",
-        "channels:read",
-        "chat:write",
-        "commands",
-        "groups:history",
-        "im:history",
-        "mpim:history",
-        "reactions:read",
-        "reactions:write",
-        "users:read",
-        "users:read.email",
-    ]
-    scope_string = ",".join(scopes)
-    return (
-        f"https://slack.com/oauth/v2/authorize?"
-        f"client_id={VARIABLES.SLACK_CLIENT_ID}&"
-        f"scope={quote(scope_string)}&"
-        f"state={integration_id}"
-    )
-
-
 @fai_app.post("/slack/install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]})
 async def create_slack_integration(
     domain: str, db: AsyncSession = Depends(get_db), _: None = Depends(verify_token), __: None = Depends(ask_ai_enabled)
 ) -> SlackIntegrationResponse:
-    try:
-        stripped_domain = strip_domain(domain)
-
-        existing = await db.execute(select(SlackIntegrationDb).where(SlackIntegrationDb.domain == stripped_domain))
-        existing_record = existing.scalar_one_or_none()
-        if existing_record:
-            integration_url = create_slack_integration_url(existing_record.integration_id)
-            return SlackIntegrationResponse(
-                integration_id=existing_record.integration_id,
-                domain=existing_record.domain,
-                slack_team_id=existing_record.slack_team_id,
-                slack_team_name=existing_record.slack_team_name,
-                created_at=existing_record.created_at,
-                installed_at=existing_record.installed_at,
-                integration_url=integration_url,
-            )
-
-        new_integration = SlackIntegrationDb(domain=stripped_domain, created_at=datetime.now(UTC))
-        db.add(new_integration)
-        await db.commit()
-        await db.refresh(new_integration)
-
-        integration_url = create_slack_integration_url(new_integration.integration_id)
-        return SlackIntegrationResponse(
-            integration_id=new_integration.integration_id,
-            domain=new_integration.domain,
-            slack_team_id=new_integration.slack_team_id,
-            slack_team_name=new_integration.slack_team_name,
-            created_at=new_integration.created_at,
-            installed_at=new_integration.installed_at,
-            integration_url=integration_url,
-        )
-
-    except Exception:
-        LOGGER.error("Failed to create Slack integration")
-        raise HTTPException(status_code=500, detail="Failed to create integration")
+    result = await create_integration(
+        domain=domain,
+        db=db,
+        integration_db_model=SlackIntegrationDb,
+        client_id=VARIABLES.SLACK_CLIENT_ID,
+        log_prefix="[ASK_FERN]",
+    )
+    return SlackIntegrationResponse(**result)
 
 
 @fai_app.post("/slack/events", openapi_extra={"x-fern-audiences": ["internal"]})
@@ -206,11 +109,11 @@ async def handle_slack_events(request: Request, background_tasks: BackgroundTask
 
             LOGGER.info(f"Received Slack event: {event_type} from team: {team_id}")
 
-            await cleanup_message_cache()
+            await cleanup_message_cache(SlackMessageCacheDb)
 
             message_ts = event.get("ts")
             if message_ts:
-                if await is_message_processed(team_id, message_ts):
+                if await is_message_processed(team_id, message_ts, SlackMessageCacheDb):
                     LOGGER.info(f"Skipping duplicate message: {message_ts}")
                     return JSONResponse(content={"status": "ok"})
 
@@ -220,7 +123,9 @@ async def handle_slack_events(request: Request, background_tasks: BackgroundTask
                     return JSONResponse(content={"status": "ok"})
 
                 if message_ts:
-                    await mark_message_processed(team_id, message_ts)
+                    await mark_message_processed(
+                        team_id, message_ts, SlackMessageCacheDb, "uq_slack_message_cache_team_message"
+                    )
                 await handle_app_mention(event, team_id, background_tasks)
             elif event_type == "message":
                 if event.get("bot_id"):
@@ -238,7 +143,9 @@ async def handle_slack_events(request: Request, background_tasks: BackgroundTask
                             return JSONResponse(content={"status": "ok"})
 
                 if message_ts:
-                    await mark_message_processed(team_id, message_ts)
+                    await mark_message_processed(
+                        team_id, message_ts, SlackMessageCacheDb, "uq_slack_message_cache_team_message"
+                    )
                 await handle_message(event, team_id, background_tasks)
             else:
                 LOGGER.info(f"Unhandled event type: {event_type}")
@@ -1266,79 +1173,14 @@ async def handle_message(event: dict[str, Any], team_id: str, background_tasks: 
 
 @fai_app.get("/slack/oauth/callback", openapi_extra={"x-fern-audiences": ["internal"]})
 async def handle_slack_oauth_callback(code: str, state: str | None = None) -> JSONResponse:
-    try:
-        LOGGER.info(f"Received OAuth callback with code: {code[:10]}... and state: {state}")
-
-        if not state:
-            raise HTTPException(status_code=400, detail="Missing integration_id in state parameter")
-
-        async with async_session_maker() as session:
-            result = await session.execute(select(SlackIntegrationDb).where(SlackIntegrationDb.integration_id == state))
-            integration = result.scalar_one_or_none()
-
-            if not integration:
-                raise HTTPException(status_code=404, detail="Invalid integration_id")
-
-            if not VARIABLES.SLACK_CLIENT_ID or not VARIABLES.SLACK_CLIENT_SECRET:
-                LOGGER.error("Slack OAuth credentials not configured")
-                raise HTTPException(status_code=500, detail="OAuth not configured")
-
-            client = AsyncWebClient()
-            oauth_response = await client.oauth_v2_access(
-                client_id=VARIABLES.SLACK_CLIENT_ID, client_secret=VARIABLES.SLACK_CLIENT_SECRET, code=code
-            )
-
-            if not oauth_response.get("ok"):
-                LOGGER.error(f"OAuth exchange error: {oauth_response.get('error')}")
-                raise HTTPException(status_code=500, detail=oauth_response.get("error", "OAuth failed"))
-
-            team_id = oauth_response.get("team", {}).get("id")
-
-            if team_id:
-                existing_team_result = await session.execute(
-                    select(SlackIntegrationDb).where(
-                        SlackIntegrationDb.slack_team_id == team_id, SlackIntegrationDb.integration_id != state
-                    )
-                )
-                existing_team_integration = existing_team_result.scalar_one_or_none()
-
-                if existing_team_integration:
-                    LOGGER.info(
-                        f"Removing team {team_id} from old integration {existing_team_integration.integration_id}"
-                    )
-                    existing_team_integration.slack_team_id = None
-                    existing_team_integration.slack_team_name = None
-                    existing_team_integration.slack_bot_token = None
-                    existing_team_integration.slack_bot_user_id = None
-                    existing_team_integration.slack_app_id = None
-                    existing_team_integration.installed_at = None
-                    await session.flush()
-
-            integration.slack_team_id = team_id
-            integration.slack_team_name = oauth_response.get("team", {}).get("name")
-            integration.slack_bot_token = oauth_response.get("access_token")
-            integration.slack_bot_user_id = oauth_response.get("bot_user_id")
-            integration.slack_app_id = oauth_response.get("app_id")
-            integration.installed_at = datetime.now(UTC)
-
-            await session.commit()
-
-            LOGGER.info(f"Successfully installed Slack app for team: {integration.slack_team_id}")
-
-        return JSONResponse(
-            content={
-                "status": "success",
-                "message": "Slack app successfully installed",
-                "team_id": integration.slack_team_id,
-                "domain": integration.domain,
-            }
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        LOGGER.error(f"Error handling Slack OAuth callback: {e}")
-        raise HTTPException(status_code=500, detail="OAuth callback failed")
+    return await handle_oauth_callback(
+        code=code,
+        state=state,
+        integration_db_model=SlackIntegrationDb,
+        client_id=VARIABLES.SLACK_CLIENT_ID,
+        client_secret=VARIABLES.SLACK_CLIENT_SECRET,
+        log_prefix="[ASK_FERN]",
+    )
 
 
 @fai_app.get("/slack/get-install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]})
@@ -1354,6 +1196,8 @@ async def get_slack_install_link(domain: str) -> JSONResponse:
             await session.refresh(new_integration)
             integration_id = new_integration.integration_id
             LOGGER.info(f"Created new integration {integration_id} for domain {domain}")
+
+        install_url = create_slack_integration_url(integration_id, VARIABLES.SLACK_CLIENT_ID)
 
         scopes = [
             "app_mentions:read",
@@ -1371,15 +1215,6 @@ async def get_slack_install_link(domain: str) -> JSONResponse:
             "users:read.email",
         ]
 
-        scope_string = ",".join(scopes)
-
-        install_url = (
-            f"https://slack.com/oauth/v2/authorize?"
-            f"client_id={VARIABLES.SLACK_CLIENT_ID}&"
-            f"scope={quote(scope_string)}&"
-            f"state={integration_id}"
-        )
-
         return JSONResponse(
             content={
                 "integration_id": integration_id,
@@ -1392,41 +1227,3 @@ async def get_slack_install_link(domain: str) -> JSONResponse:
     except Exception as e:
         LOGGER.error(f"Error generating Slack install link: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate install link")
-
-
-@fai_app.get("/slack/integrations/{domain}", openapi_extra={"x-fern-audiences": ["internal"]})
-async def list_slack_integrations(domain: str) -> JSONResponse:
-    try:
-        async with async_session_maker() as session:
-            result = await session.execute(
-                select(SlackIntegrationDb)
-                .where(SlackIntegrationDb.domain == domain)
-                .order_by(SlackIntegrationDb.created_at.desc())
-            )
-            integrations = result.scalars().all()
-
-            integration_list = []
-            for integration in integrations:
-                integration_list.append(
-                    {
-                        "integration_id": integration.integration_id,
-                        "domain": integration.domain,
-                        "slack_team_id": integration.slack_team_id,
-                        "slack_team_name": integration.slack_team_name,
-                        "created_at": integration.created_at.isoformat() if integration.created_at else None,
-                        "installed_at": integration.installed_at.isoformat() if integration.installed_at else None,
-                        "is_installed": integration.slack_team_id is not None,
-                    }
-                )
-
-            return JSONResponse(
-                content={
-                    "domain": domain,
-                    "integrations": integration_list,
-                    "total_count": len(integration_list),
-                }
-            )
-
-    except Exception as e:
-        LOGGER.error(f"Error listing Slack integrations for domain {domain}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to list integrations")
