@@ -62,3 +62,23 @@ export async function flushPosthog(): Promise<void> {
         }
     }
 }
+
+/**
+ * Check if a PostHog feature flag is enabled for the given distinctId.
+ */
+export async function isPosthogFeatureFlagEnabled(flagKey: string, distinctId: string): Promise<boolean> {
+    try {
+        const client = getPosthog();
+        if (!client) {
+            return false;
+        }
+
+        const enabled = await client.isFeatureEnabled(flagKey, distinctId);
+        return Boolean(enabled);
+    } catch (error) {
+        if (process.env.NODE_ENV !== "development") {
+            console.error(`[posthog] feature flag error: ${JSON.stringify(error)}`);
+        }
+        return false;
+    }
+}

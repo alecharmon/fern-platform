@@ -9,7 +9,7 @@ import {
     createPageCacheKey,
     getMetadataFromResponse
 } from "@fern-api/docs-loader";
-import { flushPosthog, track } from "@fern-api/docs-server";
+import { flushPosthog, isPosthogFeatureFlagEnabled, track } from "@fern-api/docs-server";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
@@ -53,6 +53,7 @@ interface RevalidationController {
     log(message: string): void;
 }
 
+const FAI_REINDEXING_MIGRATION_FLAG_KEY = "fai-reindexing-migration-enabled";
 export const maxDuration = 800; // 13 minutes timeout
 
 async function performRevalidation(params: {
@@ -487,17 +488,29 @@ async function reindex(docs: DocsV2Read.LoadDocsForUrlResponse, host: string, do
 
     await queueAlgoliaReindex(host, withoutStaging(domain), basePath);
 
-    const isAskAiEnabled = (
-        await getFaiClient({
-            token: process.env.FERN_TOKEN ?? ""
-        }).settings.getDocsSettings({ domain })
-    ).ask_ai_enabled;
+    const faiClient = getFaiClient({
+        token: process.env.FERN_TOKEN ?? ""
+    });
+
+    const { ask_ai_enabled: isAskAiEnabled } = await faiClient.settings.getDocsSettings({ domain });
 
     if (isAskAiEnabled) {
-        await queueTurbopufferReindex(host, withoutStaging(domain), basePath, maxDuration);
+        const isTurbopufferReindexMigrationEnabled = await getIsTurbopufferReindexMigrationEnabled(
+            withoutStaging(domain)
+        );
+
+        if (isTurbopufferReindexMigrationEnabled) {
+            await faiClient.settings.reindexAskAi({ domain: withoutStaging(domain) });
+        } else {
+            await queueTurbopufferReindex(host, withoutStaging(domain), basePath, maxDuration);
+        }
         return ["algolia", "turbopuffer"];
     }
     return ["algolia"];
+}
+
+async function getIsTurbopufferReindexMigrationEnabled(domain: string): Promise<boolean> {
+    return isPosthogFeatureFlagEnabled(FAI_REINDEXING_MIGRATION_FLAG_KEY, domain);
 }
 
 function createPrunedApi(api: ApiDefinition.ApiDefinition) {
