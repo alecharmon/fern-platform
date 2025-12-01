@@ -11,7 +11,7 @@ export default async function postDocsGithubSourceHandler({
     url: string;
     token: string;
     githubUrl: string;
-}): Promise<void> {
+}): Promise<{ success: boolean; error?: string }> {
     const client = getFdrClient({ token });
 
     // Use the setDocsUrlMetadata function from the docs read service
@@ -23,7 +23,10 @@ export default async function postDocsGithubSourceHandler({
     });
 
     if (!response.ok) {
-        console.error("Failed to set docs URL metadata", JSON.stringify(response.error));
-        throw new Error("Failed to set docs URL metadata");
+        const errorMessage = JSON.stringify(response.error);
+        console.error("Failed to set docs URL metadata", errorMessage);
+        return { success: false, error: errorMessage };
     }
+
+    return { success: true };
 }

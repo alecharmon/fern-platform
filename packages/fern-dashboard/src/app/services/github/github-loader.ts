@@ -800,6 +800,36 @@ export class GitHubLoader implements GitLoader {
                 }
             }
 
+            // For binary files, create blobs separately to ensure proper encoding
+            const binaryFilesToCreate = request.files.filter(
+                (f): f is { path: string; content: string; encoding: "base64"; delete?: false } =>
+                    !f.delete && f.encoding === "base64"
+            );
+            const blobShaMap = new Map<string, string>();
+
+            if (binaryFilesToCreate.length > 0) {
+                console.log(
+                    `Creating ${binaryFilesToCreate.length} binary blobs separately:`,
+                    binaryFilesToCreate.map((f) => f.path)
+                );
+
+                for (const file of binaryFilesToCreate) {
+                    try {
+                        const blobResponse = await octokit.request("POST /repos/{owner}/{repo}/git/blobs", {
+                            owner: request.owner,
+                            repo: request.repo,
+                            content: file.content,
+                            encoding: "base64"
+                        });
+                        blobShaMap.set(file.path, blobResponse.data.sha);
+                        console.log(`Created blob for ${file.path}: ${blobResponse.data.sha}`);
+                    } catch (error) {
+                        console.error(`Failed to create blob for ${file.path}:`, error);
+                        throw error;
+                    }
+                }
+            }
+
             // Create the tree with file changes
             const tree = request.files
                 .map((file) => {
@@ -819,12 +849,26 @@ export class GitHubLoader implements GitLoader {
                         if (file.content == null) {
                             throw new Error(`File ${file.path} has no content`);
                         }
-                        return {
-                            path: file.path,
-                            mode: "100644" as GITHUB_FILE_MODE,
-                            type: "blob" as const,
-                            content: file.content
-                        };
+
+                        const blobSha = blobShaMap.get(file.path);
+
+                        if (blobSha) {
+                            // Binary file - reference the blob by SHA
+                            return {
+                                path: file.path,
+                                mode: "100644" as GITHUB_FILE_MODE,
+                                type: "blob" as const,
+                                sha: blobSha
+                            };
+                        } else {
+                            // Text file - include content directly
+                            return {
+                                path: file.path,
+                                mode: "100644" as GITHUB_FILE_MODE,
+                                type: "blob" as const,
+                                content: file.content
+                            };
+                        }
                     }
                 })
                 .filter((item) => item != null);
@@ -1265,13 +1309,55 @@ export class GitHubLoader implements GitLoader {
                 }
             }
 
-            // Create tree with files
-            const tree = request.files.map((file) => ({
-                path: file.path,
-                mode: "100644" as GITHUB_FILE_MODE,
-                type: "blob" as const,
-                content: file.content
-            }));
+            // For binary files, create blobs separately to ensure proper encoding
+            const binaryFiles = request.files.filter((f) => f.encoding === "base64");
+            const blobShaMap = new Map<string, string>();
+
+            if (binaryFiles.length > 0) {
+                console.log(
+                    `Creating ${binaryFiles.length} binary blobs separately:`,
+                    binaryFiles.map((f) => f.path)
+                );
+
+                for (const file of binaryFiles) {
+                    try {
+                        const blobResponse = await octokit.request("POST /repos/{owner}/{repo}/git/blobs", {
+                            owner: request.owner,
+                            repo: request.repoName,
+                            content: file.content,
+                            encoding: "base64"
+                        });
+                        blobShaMap.set(file.path, blobResponse.data.sha);
+                        console.log(`Created blob for ${file.path}: ${blobResponse.data.sha}`);
+                    } catch (error) {
+                        console.error(`Failed to create blob for ${file.path}:`, error);
+                        throw error;
+                    }
+                }
+            }
+
+            // Create tree with files - use SHA for binary files, content for text files
+            const tree = request.files.map((file) => {
+                const blobSha = blobShaMap.get(file.path);
+
+                if (blobSha) {
+                    // Binary file - reference the blob by SHA
+                    return {
+                        path: file.path,
+                        mode: "100644" as GITHUB_FILE_MODE,
+                        type: "blob" as const,
+                        sha: blobSha
+                    };
+                } else {
+                    // Text file - include content directly
+                    return {
+                        path: file.path,
+                        mode: "100644" as GITHUB_FILE_MODE,
+                        type: "blob" as const,
+                        content: file.content
+                    };
+                }
+            });
 
             let treeSha: string;
             try {

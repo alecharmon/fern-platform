@@ -262,9 +262,13 @@ export interface CreateRepositoryRequest {
 export interface RepositoryFile {
     path: string;
     content: string;
+    /** Encoding of the content. Use "base64" for binary files, or omit for UTF-8 text. */
+    encoding?: "utf-8" | "base64";
 }
 
-export type GitCommitableFile = { path: string; delete: true } | { path: string; content: string; delete?: false };
+export type GitCommitableFile =
+    | { path: string; delete: true }
+    | { path: string; content: string; encoding?: "utf-8" | "base64"; delete?: false };
 
 // Write operation result types
 export type GitOperationError =

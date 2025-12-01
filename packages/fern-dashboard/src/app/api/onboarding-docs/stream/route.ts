@@ -15,8 +15,46 @@ import { createFernProject } from "../utils";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-async function readAllFilesFromDirectory(dirPath: string): Promise<Array<{ path: string; content: string }>> {
-    const files: Array<{ path: string; content: string }> = [];
+/**
+ * Checks if a file is binary based on its extension
+ * Note: SVG is excluded because it's text-based XML
+ */
+function isBinaryFile(filePath: string): boolean {
+    const binaryExtensions = new Set([
+        // Images (binary formats only)
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".ico",
+        ".bmp",
+        ".webp",
+        ".tiff",
+        ".tif",
+        // Other binary formats
+        ".pdf",
+        ".zip",
+        ".tar",
+        ".gz",
+        ".woff",
+        ".woff2",
+        ".ttf",
+        ".eot",
+        ".otf"
+    ]);
+
+    const ext = path.extname(filePath).toLowerCase();
+    return binaryExtensions.has(ext);
+}
+
+async function readAllFilesFromDirectory(
+    dirPath: string
+): Promise<Array<{ path: string; content: string; encoding?: "utf-8" | "base64" }>> {
+    const files: Array<{
+        path: string;
+        content: string;
+        encoding?: "utf-8" | "base64";
+    }> = [];
 
     // Files and directories to exclude from GitHub upload
     // Note: .github is NOT excluded because we want to include the workflows
@@ -37,8 +75,18 @@ async function readAllFilesFromDirectory(dirPath: string): Promise<Array<{ path:
             if (entry.isDirectory()) {
                 await readDir(fullPath, relPath);
             } else {
-                const content = await fs.readFile(fullPath, "utf-8");
-                files.push({ path: relPath, content });
+                // Read binary files as base64 to preserve their integrity
+                if (isBinaryFile(fullPath)) {
+                    const buffer = await fs.readFile(fullPath);
+                    files.push({
+                        path: relPath,
+                        content: buffer.toString("base64"),
+                        encoding: "base64"
+                    });
+                } else {
+                    const content = await fs.readFile(fullPath, "utf-8");
+                    files.push({ path: relPath, content });
+                }
             }
         }
     }
@@ -283,6 +331,15 @@ export async function GET(req: NextRequest) {
                             // Read all files from the entire project (including README.md at root)
                             const files = await readAllFilesFromDirectory(tempDir);
 
+                            // Log binary files for debugging
+                            const binaryFiles = files.filter((f) => f.encoding === "base64");
+                            if (binaryFiles.length > 0) {
+                                console.log(
+                                    `[Wizard] Found ${binaryFiles.length} binary files:`,
+                                    binaryFiles.map((f) => f.path)
+                                );
+                            }
+
                             const repoName = data.docsSiteUrl.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
                             const demoCreationBotOwner = process.env.FERN_DEMO_CREATION_BOT_OWNER;
 
@@ -354,7 +411,6 @@ export async function GET(req: NextRequest) {
 
                 const { downloadUrl } = s3Result;
                 const githubRepoUrl = githubResult.githubRepoUrl;
-                const generatedFernToken = githubResult.fernToken;
 
                 if (downloadUrl) {
                     sendEvent({
@@ -365,24 +421,33 @@ export async function GET(req: NextRequest) {
                 }
 
                 // Link GitHub repo to docs site if created
-                // Use the generated token if available, otherwise fall back to the session token
-                const tokenToUse = generatedFernToken || fernToken;
-                if (githubRepoUrl && tokenToUse) {
+                if (githubRepoUrl && session.accessToken) {
                     try {
+                        console.log(`[Wizard] Linking GitHub repo with user session token`);
+
                         const postDocsGithubSourceHandler = (await import("@/app/api/post-docs-github-source/handler"))
                             .default;
 
-                        await postDocsGithubSourceHandler({
+                        const result = await postDocsGithubSourceHandler({
                             url: normalizedDocsUrl,
-                            token: tokenToUse,
+                            token: session.accessToken,
                             githubUrl: githubRepoUrl
                         });
 
-                        sendEvent({
-                            type: "log",
-                            message: "✓ Linked GitHub repository to docs site",
-                            timestamp: new Date().toISOString()
-                        });
+                        if (result.success) {
+                            sendEvent({
+                                type: "log",
+                                message: "✓ Linked GitHub repository to docs site",
+                                timestamp: new Date().toISOString()
+                            });
+                        } else {
+                            console.warn(`[Wizard] Failed to link GitHub metadata: ${result.error}`);
+                            sendEvent({
+                                type: "log",
+                                message: "⚠ Failed to link GitHub metadata (non-critical - repo created successfully)",
+                                timestamp: new Date().toISOString()
+                            });
+                        }
                     } catch (error) {
                         console.error("Failed to link GitHub repo:", error);
                         sendEvent({

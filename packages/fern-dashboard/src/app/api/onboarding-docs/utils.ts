@@ -120,10 +120,26 @@ export async function createFernProject(
     let hasLogo = false;
     let hasFavicon = false;
 
+    const assetsDir = path.join(fernDir, "docs", "assets");
+
     if (data.logoUrl) {
         try {
+            // Remove existing logo files before adding custom one
+            const existingAssets = await fs.readdir(assetsDir);
+            const logoFilesToRemove = ["logo.", "logo-dark.", "logo-light.", "fern-logo-primary.", "fern-logo-white."];
+
+            for (const file of existingAssets) {
+                // Remove any default logo files (includes Fern branding and docs-starter defaults)
+                if (logoFilesToRemove.some((prefix) => file.startsWith(prefix))) {
+                    const filePath = path.join(assetsDir, file);
+                    await fs.unlink(filePath);
+                    console.log(`Removed default logo: ${file}`);
+                }
+            }
+
             const ext = getFileExtensionFromUrl(data.logoUrl);
-            await downloadFile(data.logoUrl, path.join(fernDir, "docs", "assets", `logo.${ext}`));
+            console.log("!!!Downloading logo from", data.logoUrl, "to", path.join(assetsDir, `logo.${ext}`));
+            await downloadFile(data.logoUrl, path.join(assetsDir, `logo.${ext}`));
             hasLogo = true;
         } catch (error) {
             console.error("Failed to download logo:", error);
@@ -132,8 +148,18 @@ export async function createFernProject(
 
     if (data.faviconUrl) {
         try {
+            // Remove existing favicon files before adding custom one
+            const existingAssets = await fs.readdir(assetsDir);
+            for (const file of existingAssets) {
+                if (file.startsWith("favicon.")) {
+                    const filePath = path.join(assetsDir, file);
+                    await fs.unlink(filePath);
+                    console.log(`Removed default favicon: ${file}`);
+                }
+            }
+
             const ext = getFileExtensionFromUrl(data.faviconUrl);
-            await downloadFile(data.faviconUrl, path.join(fernDir, "docs", "assets", `favicon.${ext}`));
+            await downloadFile(data.faviconUrl, path.join(assetsDir, `favicon.${ext}`));
             hasFavicon = true;
         } catch (error) {
             console.error("Failed to download favicon:", error);

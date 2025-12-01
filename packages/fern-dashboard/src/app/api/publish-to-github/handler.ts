@@ -87,7 +87,16 @@ export default async function handler(data: PublishToGithubRequest): Promise<
         if (files.length > 0) {
             console.log(
                 "Sample files:",
-                files.slice(0, 5).map((f) => ({ path: f.path, size: f.content.length }))
+                files.slice(0, 5).map((f) => ({ path: f.path, size: f.content.length, encoding: f.encoding }))
+            );
+        }
+
+        // Log binary files specifically
+        const binaryFiles = files.filter((f) => f.encoding === "base64");
+        if (binaryFiles.length > 0) {
+            console.log(
+                `Found ${binaryFiles.length} binary files:`,
+                binaryFiles.map((f) => f.path)
             );
         }
 
@@ -147,6 +156,38 @@ export default async function handler(data: PublishToGithubRequest): Promise<
 }
 
 /**
+ * Checks if a file is binary based on its extension
+ * Note: SVG is excluded because it's text-based XML
+ */
+function isBinaryFile(filePath: string): boolean {
+    const binaryExtensions = new Set([
+        // Images (binary formats only)
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".ico",
+        ".bmp",
+        ".webp",
+        ".tiff",
+        ".tif",
+        // Other binary formats
+        ".pdf",
+        ".zip",
+        ".tar",
+        ".gz",
+        ".woff",
+        ".woff2",
+        ".ttf",
+        ".eot",
+        ".otf"
+    ]);
+
+    const ext = path.extname(filePath).toLowerCase();
+    return binaryExtensions.has(ext);
+}
+
+/**
  * Recursively reads all files from a directory and returns them as RepositoryFile objects
  */
 async function readAllFilesFromDirectory(dirPath: string, basePath: string = dirPath): Promise<RepositoryFile[]> {
@@ -161,11 +202,21 @@ async function readAllFilesFromDirectory(dirPath: string, basePath: string = dir
             const subFiles = await readAllFilesFromDirectory(fullPath, basePath);
             files.push(...subFiles);
         } else {
-            const content = await fs.readFile(fullPath, "utf-8");
-            files.push({
-                path: relativePath,
-                content
-            });
+            // Read binary files as base64 to preserve their integrity
+            if (isBinaryFile(fullPath)) {
+                const buffer = await fs.readFile(fullPath);
+                files.push({
+                    path: relativePath,
+                    content: buffer.toString("base64"),
+                    encoding: "base64"
+                });
+            } else {
+                const content = await fs.readFile(fullPath, "utf-8");
+                files.push({
+                    path: relativePath,
+                    content
+                });
+            }
         }
     }
 
