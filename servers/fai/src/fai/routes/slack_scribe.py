@@ -8,12 +8,14 @@ from fastapi import (
     BackgroundTasks,
     HTTPException,
     Request,
+    status,
 )
 from fastapi.responses import JSONResponse
 from slack_sdk.web.async_client import AsyncWebClient
 
 from fai.app import fai_app
 from fai.db import async_session_maker
+from fai.dependencies import verify_org_token
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_message_cache_db import ScribeMessageCacheDb
 from fai.settings import (
@@ -21,6 +23,7 @@ from fai.settings import (
     VARIABLES,
 )
 from fai.utils.scribe.message_handler import handle_scribe_message
+from fai.utils.scribe.validate_github_repo import validate_scribe_github_repo_access
 from fai.utils.slack.integration_common import (
     SLACK_SCOPES,
     cleanup_message_cache,
@@ -133,30 +136,42 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
 @fai_app.get(
     "/scribe/slack/get-install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]}
 )
-async def get_scribe_slack_install_link(domain: str) -> JSONResponse:
+async def get_scribe_slack_install_link(github_repo: str, request: Request) -> JSONResponse:
     try:
+        await verify_org_token(request)
+        LOGGER.info(f"[SCRIBE] Validating GitHub repo {github_repo}")
+
+        validation_result = await validate_scribe_github_repo_access(github_repo)
+
+        if not validation_result["ok"]:
+            error = validation_result["error"]
+            LOGGER.warning(f"[SCRIBE] Validation failed for repo {github_repo}: {error['type']} - {error['message']}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error["message"])
+
         async with async_session_maker() as session:
             new_integration = ScribeIntegrationDb(
-                domain=domain,
+                github_repo=github_repo,
                 created_at=datetime.now(UTC),
             )
             session.add(new_integration)
             await session.commit()
             await session.refresh(new_integration)
             integration_id = new_integration.integration_id
-            LOGGER.info(f"[SCRIBE] Created new integration {integration_id} for domain {domain}")
+            LOGGER.info(f"[SCRIBE] Created new integration {integration_id} for GitHub repo {github_repo}")
 
         install_url = create_slack_integration_url(integration_id, VARIABLES.SCRIBE_SLACK_CLIENT_ID)
 
         return JSONResponse(
             content={
                 "integration_id": integration_id,
-                "domain": domain,
+                "github_repo": github_repo,
                 "install_url": install_url,
                 "scopes": SLACK_SCOPES,
             }
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         LOGGER.error(f"[SCRIBE] Error generating Slack install link: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate install link")

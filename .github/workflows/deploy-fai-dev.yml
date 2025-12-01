@@ -29,6 +29,8 @@ jobs:
       SCRIBE_SLACK_CLIENT_SECRET: ${{ secrets.SCRIBE_SLACK_CLIENT_SECRET }}
       SCRIBE_SLACK_SIGNING_SECRET: ${{ secrets.SCRIBE_SLACK_SIGNING_SECRET }}
       SCRIBE_DEVIN_API_KEY: ${{ secrets.SCRIBE_DEVIN_API_KEY }}
+      FERN_BOT_APP_ID: ${{ secrets.FERN_BOT_APP_ID }}
+      FERN_BOT_PRIVATE_KEY: ${{ secrets.FERN_BOT_PRIVATE_KEY }}
       ASK_FERN_SLACK_BOT_TOKEN: ${{ secrets.ASK_FERN_SLACK_BOT_TOKEN }}
       FERNIE_SLACK_BOT_TOKEN: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
       FAI_LAMBDA_FUNCTION_NAME: ${{ secrets.FAI_LAMBDA_FUNCTION_NAME }}
@@ -65,6 +67,8 @@ jobs:
           echo "SCRIBE_SLACK_CLIENT_SECRET=${{ env.SCRIBE_SLACK_CLIENT_SECRET }}" >> .env
           echo "SCRIBE_SLACK_SIGNING_SECRET=${{ env.SCRIBE_SLACK_SIGNING_SECRET }}" >> .env
           echo "SCRIBE_DEVIN_API_KEY=${{ env.SCRIBE_DEVIN_API_KEY }}" >> .env
+          echo "FERN_BOT_APP_ID=${{ env.FERN_BOT_APP_ID }}" >> .env
+          echo "FERN_BOT_PRIVATE_KEY=${{ env.FERN_BOT_PRIVATE_KEY }}" >> .env
           echo "ASK_FERN_SLACK_BOT_TOKEN=${{ env.ASK_FERN_SLACK_BOT_TOKEN }}" >> .env
           echo "FERNIE_SLACK_BOT_TOKEN=${{ env.FERNIE_SLACK_BOT_TOKEN }}" >> .env
           echo "DISCORD_BOT_TOKEN=${{ env.DISCORD_BOT_TOKEN }}" >> .env

@@ -48,9 +48,12 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
     if integration.slack_bot_user_id and text:
         text = text.replace(f"<@{integration.slack_bot_user_id}>", "").strip()
 
-    LOGGER.info(f"[SCRIBE] Cleaned message text: {text}")
+    github_repo = integration.github_repo
+    LOGGER.info(f"[SCRIBE] Processing message for repo {github_repo}: {text}")
 
-    response_text = "👋 Hello! I'm Scribe. I received your message and logged it successfully."
+    response_text = (
+        f"👋 Hello! I'm Scribe for the `{github_repo}` repository. I received your message and logged it successfully."
+    )
 
     return ScribeMessageResponse(
         response_text=response_text, channel=channel, thread_ts=thread_ts, bot_token=integration.slack_bot_token

@@ -196,12 +196,18 @@ async def handle_oauth_callback(
 
             LOGGER.info(f"{log_prefix} Successfully installed Slack app for team: {integration.slack_team_id}")
 
+        metadata = {}
+        if hasattr(integration, "domain"):
+            metadata["domain"] = integration.domain
+        if hasattr(integration, "github_repo"):
+            metadata["github_repo"] = integration.github_repo
+
         return JSONResponse(
             content={
                 "status": "success",
                 "message": f"{log_prefix.strip('[]')} Slack app successfully installed",
                 "team_id": integration.slack_team_id,
-                "domain": integration.domain,
+                "metadata": metadata,
             }
         )
 
