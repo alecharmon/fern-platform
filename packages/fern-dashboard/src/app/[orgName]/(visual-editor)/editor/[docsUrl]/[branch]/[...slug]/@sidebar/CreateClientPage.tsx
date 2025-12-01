@@ -120,6 +120,17 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
                 return "Slug cannot have leading or trailing spaces";
             }
 
+            // Reject slugs that would create empty path segments or invalid paths
+            if (finalSlug.startsWith("/") || finalSlug.endsWith("/") || finalSlug.includes("//")) {
+                return "Slug cannot start or end with '/' or contain '//'";
+            }
+
+            // Check for invalid path segments (empty, ".", or "..")
+            const segments = finalSlug.split("/");
+            if (segments.some((s) => s === "." || s === ".." || s.length === 0)) {
+                return "Slug contains an invalid path segment";
+            }
+
             if (finalSlug !== pageTitleToSlug(finalSlug)) {
                 return "Invalid slug format";
             }

@@ -18,6 +18,8 @@ export function pageTitleToSlug(pageTitle: string): string {
         .replace(/\s+/g, "-") // Replace spaces with hyphens
         .replace(/[^a-z0-9\-/]/g, "") // Remove non-alphanumeric characters except hyphens and slashes
         .replace(/-+/g, "-") // Collapse multiple hyphens
+        .replace(/\/+/g, "/") // Collapse multiple slashes to prevent empty path segments
+        .replace(/^\/+|\/+$/g, "") // Remove leading/trailing slashes to prevent malformed paths
         .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 
     // Fallback if slug becomes empty after sanitization
