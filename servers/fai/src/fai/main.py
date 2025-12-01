@@ -13,7 +13,6 @@ from fai.settings import (
 
 ROUTES_PACKAGE_NAME = "fai.routes"
 
-LOGGER.info("Setup: Importing all FastAPI routes...")
 for _, module_name, is_pkg in pkgutil.iter_modules(fai.routes.__path__):
     full_module_name = f"{ROUTES_PACKAGE_NAME}.{module_name}"
     importlib.import_module(full_module_name)
@@ -37,16 +36,8 @@ for route in fai_app.routes:
         if tag and tag not in route.tags:
             route.tags.append(tag)
 
-for route in fai_app.routes:
-    if isinstance(route, APIRoute):
-        LOGGER.info(f"{route.path} -> {route.methods} | tags={getattr(route, 'tags', [])}")
-    else:
-        LOGGER.info(f"{type(route).__name__} route | tags={getattr(route, 'tags', [])}")
-
 
 def start() -> None:
-    """Launched with `poetry run start` at root level"""
-
     LOGGER.info("Setup: Starting environment variable validation...")
     VARIABLES.validate_env_variables()
     LOGGER.info("Setup: Environment variables validated.")
