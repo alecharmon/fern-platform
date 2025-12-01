@@ -165,6 +165,32 @@ RUN log "Setting up Next.js app..." && \
 RUN log "Installing jq and yq..." && \
     apk add --no-cache jq yq 2>&1 | add-timestamps
 
+# ----------- Start Jaeger setup (optional, for debugging) -----------
+# Set ENABLE_JAEGER=true during docker build to include Jaeger tracing
+ARG ENABLE_JAEGER=false
+ENV ENABLE_JAEGER=${ENABLE_JAEGER}
+
+# TARGETARCH is automatically set by Docker buildx (amd64, arm64, etc.)
+ARG TARGETARCH
+
+RUN if [ "$ENABLE_JAEGER" = "true" ]; then \
+        log "Installing Jaeger for architecture: ${TARGETARCH:-amd64}..." && \
+        apk add --no-cache wget 2>&1 | add-timestamps && \
+        JAEGER_ARCH="${TARGETARCH:-amd64}" && \
+        wget "https://download.jaegertracing.io/v1.75.0/jaeger-2.12.0-linux-${JAEGER_ARCH}.tar.gz" -O /tmp/jaeger.tar.gz 2>&1 | add-timestamps && \
+        tar -xzf /tmp/jaeger.tar.gz -C /tmp && \
+        mv "/tmp/jaeger-2.12.0-linux-${JAEGER_ARCH}/jaeger" /usr/local/bin/jaeger && \
+        chmod +x /usr/local/bin/jaeger && \
+        rm -rf /tmp/jaeger.tar.gz "/tmp/jaeger-2.12.0-linux-${JAEGER_ARCH}"; \
+    else \
+        log "Skipping Jaeger installation (ENABLE_JAEGER not set to true)"; \
+    fi
+
+# Expose Jaeger UI port for viewing traces (only used when ENABLE_JAEGER=true)
+EXPOSE 16686
+
+# ----------- End Jaeger setup -----------
+
 # ----------- Start Buf CLI setup -----------
 RUN log "Installing Buf CLI..." && \
     apk add --no-cache wget 2>&1 | add-timestamps && \

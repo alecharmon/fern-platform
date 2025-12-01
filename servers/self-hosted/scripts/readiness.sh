@@ -46,6 +46,13 @@ if ! check_http_endpoint "http://localhost:7700/health" "MeiliSearch"; then
     echo "WARNING: MeiliSearch is not ready (non-critical, search may not work)"
 fi
 
+# Only check Jaeger if ENABLE_JAEGER=true
+if [ "${ENABLE_JAEGER:-false}" = "true" ]; then
+    if ! check_http_endpoint "http://localhost:16686/" "Jaeger"; then
+        echo "WARNING: Jaeger is not ready (non-critical, tracing may not work)"
+    fi
+fi
+
 if ! check_http_endpoint "http://localhost:8080/health" "FDR"; then
     FAILED=1
 fi

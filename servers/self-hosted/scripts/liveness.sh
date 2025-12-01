@@ -13,6 +13,7 @@ fi
 POSTGRES_PID=$(jq -r '.postgres_pid' "$PID_FILE")
 MEILI_PID=$(jq -r '.meili_pid' "$PID_FILE")
 MINIO_PID=$(jq -r '.minio_pid' "$PID_FILE")
+JAEGER_PID=$(jq -r '.jaeger_pid' "$PID_FILE")
 FDR_PID=$(jq -r '.fdr_pid' "$PID_FILE")
 DOCS_PID=$(jq -r '.docs_pid' "$PID_FILE")
 
@@ -43,6 +44,13 @@ fi
 if [ -n "${MEILI_PID:-}" ]; then
     if ! is_process_alive "$MEILI_PID" "MeiliSearch"; then
         echo "WARNING: MeiliSearch is not running (non-critical)"
+    fi
+fi
+
+# Only check Jaeger if ENABLE_JAEGER=true and PID is set
+if [ "${ENABLE_JAEGER:-false}" = "true" ] && [ -n "${JAEGER_PID:-}" ] && [ "$JAEGER_PID" != "0" ]; then
+    if ! is_process_alive "$JAEGER_PID" "Jaeger"; then
+        echo "WARNING: Jaeger is not running (non-critical, tracing may not work)"
     fi
 fi
 

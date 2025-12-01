@@ -187,6 +187,49 @@ fi
 export MEILISEARCH_URL="http://localhost:7700"
 # -----------  End MeiliSearch setup  -----------
 
+# -----------  Start Jaeger setup (optional, for debugging)  -----------
+# Jaeger is only started if ENABLE_JAEGER=true was set during docker build
+jaeger_pid=0
+if [ "${ENABLE_JAEGER:-false}" = "true" ]; then
+    log "Starting Jaeger (ENABLE_JAEGER=true)..."
+    # Start Jaeger all-in-one for tracing
+    # Ports: 16686 (UI), 4317 (OTLP gRPC), 4318 (OTLP HTTP)
+    /usr/local/bin/jaeger 2>&1 | tee /tmp/jaeger.log | add_timestamps &
+    jaeger_pid=$!
+    log "Jaeger PID: $jaeger_pid"
+
+    # Wait for Jaeger to be ready
+    log "Waiting for Jaeger to start..."
+    JAEGER_ATTEMPTS=0
+    MAX_JAEGER_ATTEMPTS=30
+    until curl -f http://localhost:16686/ 2>/dev/null; do
+        JAEGER_ATTEMPTS=$((JAEGER_ATTEMPTS + 1))
+        if [ $JAEGER_ATTEMPTS -ge $MAX_JAEGER_ATTEMPTS ]; then
+            log "WARNING: Jaeger failed to start after $MAX_JAEGER_ATTEMPTS attempts"
+            log "WARNING: Tracing functionality will not work"
+            log "Jaeger logs:"
+            cat /tmp/jaeger.log 2>/dev/null || log "No log file found"
+            break
+        fi
+        log "Jaeger not ready yet, waiting 2 seconds... ($JAEGER_ATTEMPTS/$MAX_JAEGER_ATTEMPTS)"
+        sleep 2
+    done
+
+    if [ $JAEGER_ATTEMPTS -lt $MAX_JAEGER_ATTEMPTS ]; then
+        log "Jaeger is ready!"
+        log "Jaeger UI available at http://localhost:16686"
+    fi
+
+    # Set OTEL environment variables to send traces to Jaeger
+    export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+    export OTEL_TRACES_EXPORTER="otlp"
+    export OTEL_SERVICE_NAME="fern-self-hosted"
+    log "OTEL traces configured to send to Jaeger at $OTEL_EXPORTER_OTLP_ENDPOINT"
+else
+    log "Skipping Jaeger startup (ENABLE_JAEGER not set to true)"
+fi
+
+# -----------  End Jaeger setup  -----------
 
 # -----------  Start MINIO setup  -----------
 log "Starting MinIO server..."
@@ -307,12 +350,14 @@ jq -n \
   --arg postgres "${postgres_main_pid:-0}" \
   --arg meili "${meili_pid:-0}" \
   --arg minio "${minio_pid:-0}" \
+  --arg jaeger "${jaeger_pid:-0}" \
   --arg fdr "${fdr_pid:-0}" \
   --arg docs "${docs_pid:-0}" \
   '{
     postgres_pid: ($postgres | tonumber),
     meili_pid: ($meili | tonumber),
     minio_pid: ($minio | tonumber),
+    jaeger_pid: ($jaeger | tonumber),
     fdr_pid: ($fdr | tonumber),
     docs_pid: ($docs | tonumber)
   }' > "$PID_FILE"
