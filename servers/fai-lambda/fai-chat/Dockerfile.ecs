@@ -27,6 +27,6 @@ EXPOSE 8080
 
 # Uvicorn with ECS-optimized settings:
 # --timeout-keep-alive=900: Match ALB idle timeout for long SSE streams
-# --limit-concurrency=20: Prevent task overload
+# --limit-concurrency=300: High limit for I/O-bound async workload (LLM streaming)
 # --no-access-log: Reduce log noise (ALB logs requests)
-CMD ["python", "-m", "uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8080", "--timeout-keep-alive", "900", "--limit-concurrency", "20", "--no-access-log"]
+CMD ["python", "-m", "uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8080", "--timeout-keep-alive", "900", "--limit-concurrency", "300", "--no-access-log"]
