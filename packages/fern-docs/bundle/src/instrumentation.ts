@@ -3,7 +3,6 @@ import { SentrySpanProcessor } from "@sentry/opentelemetry";
 import { OTLPHttpProtoTraceExporter, registerOTel } from "@vercel/otel";
 
 const SERVICE_NAME = "fern-docs";
-const DEFAULT_JAEGER_URL = "http://localhost:4318/v1/traces";
 let hasInitializedSentry = false;
 
 function getEnvironment() {
@@ -37,8 +36,11 @@ function initSentrySpanProcessor(environment: string) {
     return new SentrySpanProcessor();
 }
 
-function initJaegerExporter() {
-    const url = process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? DEFAULT_JAEGER_URL;
+function initOtelExporter() {
+    const url = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+    if (!url) {
+        return undefined;
+    }
     return new OTLPHttpProtoTraceExporter({ url });
 }
 
@@ -46,13 +48,10 @@ export function register() {
     const isDev = process.env.NODE_ENV === "development";
 
     const environment = getEnvironment();
-    const isLocalTracingEnabled = process.env.LOCAL_TRACING === "true";
 
-    const traceExporter = isLocalTracingEnabled ? initJaegerExporter() : undefined;
+    const traceExporter = initOtelExporter();
     const sentrySpanProcessor =
-        !isLocalTracingEnabled && process.env.NEXT_PUBLIC_SENTRY_DOCS_DSN && !isDev
-            ? initSentrySpanProcessor(environment)
-            : undefined;
+        process.env.NEXT_PUBLIC_SENTRY_DOCS_DSN && !isDev ? initSentrySpanProcessor(environment) : undefined;
 
     registerOTel({
         serviceName: SERVICE_NAME,

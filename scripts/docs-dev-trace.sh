@@ -59,7 +59,7 @@ trap cleanup EXIT
 trap handle_signal INT TERM
 
 cd "${REPO_ROOT}"
-echo "🌱 Starting docs dev server with LOCAL_TRACING enabled..."
-LOCAL_TRACING=true pnpm docs:dev &
+echo "🌱 Starting docs dev server with OTEL_EXPORTER_OTLP_ENDPOINT enabled..."
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces pnpm docs:dev &
 DOCS_DEV_PID=$!
 wait "${DOCS_DEV_PID}"
