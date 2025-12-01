@@ -3189,10 +3189,10 @@ importers:
         version: 0.0.305
       aws-cdk-lib:
         specifier: ^2.215.0
-        version: 2.215.0(constructs@10.3.0)
+        version: 2.229.1(constructs@10.4.3)
       constructs:
         specifier: ^10.0.0
-        version: 10.3.0
+        version: 10.4.3
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
