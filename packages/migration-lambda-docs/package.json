@@ -5,7 +5,6 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsup src/index.ts --format cjs --out-dir dist --clean",
-    "codegen": "prisma generate --schema=../../servers/fdr/prisma/schema.prisma",
     "package": "rm -rf migration-lambda.zip .lambda-build && mkdir -p .lambda-build && cp -r dist/* .lambda-build/ && echo '{\"dependencies\":{\"@aws-sdk/client-secrets-manager\":\"^3.700.0\",\"pg\":\"^8.11.3\"}}' > .lambda-build/package.json && cd .lambda-build && npm install --production --no-package-lock && rm -f package.json package-lock.json && zip -r ../migration-lambda.zip . && cd .. && rm -rf .lambda-build || true"
   },
   "dependencies": {
@@ -13,10 +12,8 @@
     "pg": "^8.11.3"
   },
   "devDependencies": {
-    "@prisma/client": "5.13.0",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.10.9",
-    "prisma": "5.13.0",
     "tsup": "catalog:",
     "typescript": "catalog:"
   }
