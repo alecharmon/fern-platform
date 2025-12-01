@@ -47,9 +47,6 @@ def start() -> None:
         full_module_name = f"{ROUTES_PACKAGE_NAME}.{module_name}"
         importlib.import_module(full_module_name)
 
-    for route in fai_app.routes:
-        LOGGER.info(f"{route.path} -> {route.methods}")
-
     LOGGER.info("Starting FastAPI application...")
     uvicorn.run(
         "fai.main:fai_app",
