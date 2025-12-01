@@ -171,6 +171,7 @@ jobs:
           echo "SCRIBE_SLACK_CLIENT_ID=${{ env.SCRIBE_SLACK_CLIENT_ID }}" >> .env
           echo "SCRIBE_SLACK_CLIENT_SECRET=${{ env.SCRIBE_SLACK_CLIENT_SECRET }}" >> .env
           echo "SCRIBE_SLACK_SIGNING_SECRET=${{ env.SCRIBE_SLACK_SIGNING_SECRET }}" >> .env
+          echo "SCRIBE_DEVIN_API_KEY=${{ env.SCRIBE_DEVIN_API_KEY }}" >> .env
           echo "VENUS_URL=${{ env.VENUS_URL }}" >> .env
           echo "FAI_REINDEXING_SQS_URL=${{ env.FAI_REINDEXING_DEV_SQS_URL }}" >> .env
       - name: test

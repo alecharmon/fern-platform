@@ -35,6 +35,7 @@ TEST_SLACK_SIGNING_SECRET = "test-slack-signing-secret"
 TEST_SCRIBE_SLACK_CLIENT_ID = "test-scribe-slack-client-id"
 TEST_SCRIBE_SLACK_CLIENT_SECRET = "test-scribe-slack-client-secret"
 TEST_SCRIBE_SLACK_SIGNING_SECRET = "test-scribe-slack-signing-secret"
+TEST_SCRIBE_DEVIN_API_KEY = "test-scribe-devin-api-key"
 TEST_DISCORD_BOT_TOKEN = "test-discord-bot-token"
 TEST_DISCORD_OAUTH_URL = "test-discord-oauth-url"
 TEST_ASK_FERN_SLACK_BOT_TOKEN = "test-ask-fern-slack-bot-token"
@@ -97,6 +98,7 @@ def setup_test_env(test_database_url: str) -> Any:
     os.environ["COHERE_API_KEY"] = TEST_COHERE_API_KEY
     os.environ["ANTHROPIC_API_KEY"] = TEST_ANTHROPIC_API_KEY
     os.environ["TURBOPUFFER_API_KEY"] = TEST_TURBOPUFFER_API_KEY
+    os.environ["SCRIBE_DEVIN_API_KEY"] = TEST_SCRIBE_DEVIN_API_KEY
     os.environ["OPENAI_API_KEY"] = TEST_OPENAI_API_KEY
     os.environ["DISCORD_BOT_TOKEN"] = TEST_DISCORD_BOT_TOKEN
     os.environ["DISCORD_OAUTH_URL"] = TEST_DISCORD_OAUTH_URL

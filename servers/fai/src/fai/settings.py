@@ -31,6 +31,7 @@ class Variables:
     SCRIBE_SLACK_CLIENT_ID: str | None = os.environ.get("SCRIBE_SLACK_CLIENT_ID")
     SCRIBE_SLACK_CLIENT_SECRET: str | None = os.environ.get("SCRIBE_SLACK_CLIENT_SECRET")
     SCRIBE_SLACK_SIGNING_SECRET: str | None = os.environ.get("SCRIBE_SLACK_SIGNING_SECRET")
+    SCRIBE_DEVIN_API_KEY: str | None = os.environ.get("SCRIBE_DEVIN_API_KEY")
 
     FAI_LAMBDA_FUNCTION_NAME: str | None = os.environ.get("FAI_LAMBDA_FUNCTION_NAME")
 

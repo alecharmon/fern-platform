@@ -29,6 +29,7 @@ export interface FernAiEnvVariables {
     SCRIBE_SLACK_CLIENT_ID: string;
     SCRIBE_SLACK_CLIENT_SECRET: string;
     SCRIBE_SLACK_SIGNING_SECRET: string;
+    SCRIBE_DEVIN_API_KEY: string;
     ASK_FERN_SLACK_BOT_TOKEN: string;
     FERNIE_SLACK_BOT_TOKEN: string;
     FAI_LAMBDA_FUNCTION_NAME: string;
