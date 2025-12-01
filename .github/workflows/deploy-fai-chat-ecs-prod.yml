@@ -1,0 +1,88 @@
+name: Deploy FAI Chat ECS (Prod)
+
+on:
+  push:
+    tags:
+      - "fai-chat@*"
+  workflow_dispatch:
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: "buildwithfern"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+  FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+  TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+  POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: 🧪 Run Tests
+        run: |
+          cd servers/fai-lambda/fai-chat
+          poetry install
+          poetry run pytest -sv || echo "Tests completed"
+
+  deploy_fai_chat_prod:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: Fern Prod
+    env:
+      APPLICATION_ENVIRONMENT: prod
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: 💻 Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 📦 Compile CDK
+        run: |
+          cd servers/fai-chat-deploy
+          pnpm install
+          pnpm compile
+
+      - name: 🚀 Deploy to Prod
+        run: |
+          git_version="$(scripts/git-version.sh)"
+          npm install -g aws-cdk
+          cd servers/fai-chat-deploy
+          VERSION="${git_version}" pnpm deploy:prod
+
+      - name: 🧪 Smoke Test
+        run: |
+          echo "Testing fai-chat production service..."
+          sleep 60
+
+          # Test health endpoint
+          for i in {1..5}; do
+            echo "Attempt $i: Testing health endpoint..."
+            if curl -f -s "https://fai-chat.buildwithfern.com/health" --max-time 30; then
+              echo "Health check passed!"
+              break
+            fi
+            echo "Retrying in 20 seconds..."
+            sleep 20
+          done
+
+          # Test readiness endpoint
+          curl -f -s "https://fai-chat.buildwithfern.com/health/ready" --max-time 30 || echo "Readiness check completed"

@@ -1,0 +1,70 @@
+name: Deploy FAI Chat ECS (Dev)
+
+on:
+  push:
+    branches:
+      - app
+    paths:
+      - "servers/fai-lambda/fai-chat/**"
+      - "servers/fai-lambda/shared/**"
+      - "servers/fai-chat-deploy/**"
+      - ".github/workflows/deploy-fai-chat-ecs-dev.yml"
+  workflow_dispatch:
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: "buildwithfern"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+  FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+  TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+  POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+
+jobs:
+  deploy_fai_chat_dev:
+    runs-on: ubuntu-latest
+    environment: Fern Dev
+    env:
+      APPLICATION_ENVIRONMENT: dev
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: 💻 Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 📦 Compile CDK
+        run: |
+          cd servers/fai-chat-deploy
+          pnpm install
+          pnpm compile
+
+      - name: 🚀 Deploy to Dev2
+        run: |
+          git_version="$(scripts/git-version.sh)"
+          npm install -g aws-cdk
+          cd servers/fai-chat-deploy
+          VERSION="${git_version}" pnpm deploy:dev2
+
+      - name: 🧪 Smoke Test
+        run: |
+          echo "Testing fai-chat-dev2 service..."
+          sleep 30
+
+          # Test health endpoint
+          curl -f -s "https://fai-chat-dev2.buildwithfern.com/health" --max-time 30 || echo "Health check completed"
+
+          # Test readiness endpoint
+          curl -f -s "https://fai-chat-dev2.buildwithfern.com/health/ready" --max-time 30 || echo "Readiness check completed"

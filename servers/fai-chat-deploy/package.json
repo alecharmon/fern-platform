@@ -1,0 +1,24 @@
+{
+  "name": "@fern-platform/fai-chat-deploy",
+  "version": "0.0.1",
+  "private": true,
+  "main": "bin/deploy.js",
+  "scripts": {
+    "compile": "tsc --build",
+    "deploy:dev": "cdk deploy fai-chat-dev --require-approval never --outputs-file outputs.json",
+    "deploy:dev2": "cdk deploy fai-chat-dev2 --require-approval never --outputs-file outputs.json",
+    "deploy:prod": "cdk deploy fai-chat-prod --require-approval never --outputs-file outputs.json",
+    "deploy:preview": "cdk deploy fai-chat-preview-${PR_NUMBER} --require-approval never --outputs-file preview-output.json",
+    "destroy:preview": "cdk destroy fai-chat-preview-${PR_NUMBER} --force"
+  },
+  "dependencies": {
+    "@fern-fern/fern-cloud-sdk": "workspace:*",
+    "aws-cdk-lib": "^2.215.0",
+    "constructs": "^10.0.0",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}

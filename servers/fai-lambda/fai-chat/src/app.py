@@ -1,5 +1,11 @@
+import asyncio
 import logging
-from typing import Annotated
+import signal
+import time
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from functools import partial
+from typing import Annotated, Any
 
 from fastapi import (
     Depends,
@@ -12,10 +18,47 @@ from fastapi import (
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+startup_time: float | None = None
+shutdown_event = asyncio.Event()
+active_streams: set[asyncio.Task[Any]] = set()
+
+
+def track_stream(task: asyncio.Task[Any]) -> None:
+    active_streams.add(task)
+    task.add_done_callback(lambda t: active_streams.discard(t))
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    global startup_time
+    startup_time = time.time()
+    logger.info("FAI Chat service starting up")
+
+    loop = asyncio.get_event_loop()
+
+    def graceful_shutdown(sig: signal.Signals) -> None:
+        logger.info(f"Received signal {sig.name}, initiating graceful shutdown")
+        shutdown_event.set()
+        if active_streams:
+            logger.info(f"Waiting for {len(active_streams)} active streams to complete")
+
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        loop.add_signal_handler(sig, partial(graceful_shutdown, sig))
+
+    yield
+
+    if active_streams:
+        logger.info(f"Shutdown: waiting for {len(active_streams)} active streams (30s timeout)")
+        done, pending = await asyncio.wait(active_streams, timeout=30)
+        if pending:
+            logger.warning(f"Shutdown: {len(pending)} streams did not complete in time")
+
+
 app = FastAPI(
     title="FAI Chat Service",
     version="0.1.0",
-    description="Lambda-based chat endpoint for Fern AI",
+    description="ECS-based chat endpoint for Fern AI",
+    lifespan=lifespan,
 )
 
 
@@ -37,6 +80,20 @@ BearerToken = Annotated[str, Depends(get_bearer_token)]
 @app.get("/health")
 async def health_check() -> dict[str, str]:
     return {"status": "healthy", "service": "fai-chat"}
+
+
+@app.get("/health/ready")
+async def readiness_check() -> dict[str, Any]:
+    if startup_time is None:
+        raise HTTPException(status_code=503, detail="Service starting")
+
+    checks: dict[str, Any] = {
+        "uptime_seconds": round(time.time() - startup_time, 2),
+        "active_streams": len(active_streams),
+        "shutdown_requested": shutdown_event.is_set(),
+    }
+
+    return {"status": "ready", "service": "fai-chat", "checks": checks}
 
 
 from .routes import chat  # noqa: E402, F401

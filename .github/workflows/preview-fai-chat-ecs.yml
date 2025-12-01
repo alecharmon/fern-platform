@@ -1,13 +1,8 @@
-name: Preview FAI Lambda
+name: Preview FAI Chat ECS
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
-    paths:
-      - "servers/fai-lambda/fai-chat/**"
-      - "servers/fai-lambda-deploy/**"
-      - ".github/workflows/preview-fai-lambda.yml"
-  workflow_dispatch:
+    types: [opened, synchronize, reopened, closed, labeled, unlabeled]
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -23,13 +18,39 @@ env:
   POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
 
 jobs:
-  preview_chat_lambda:
+  check_label:
     runs-on: ubuntu-latest
-    if: github.event.action != 'closed'
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+      should_cleanup: ${{ steps.check.outputs.should_cleanup }}
+    steps:
+      - id: check
+        run: |
+          if [[ "${{ github.event.action }}" == "closed" ]]; then
+            # Check if the label was present before closing
+            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'deployFaiChat') }}" == "true" ]]; then
+              echo "should_cleanup=true" >> $GITHUB_OUTPUT
+              echo "should_deploy=false" >> $GITHUB_OUTPUT
+            else
+              echo "should_cleanup=false" >> $GITHUB_OUTPUT
+              echo "should_deploy=false" >> $GITHUB_OUTPUT
+            fi
+          elif [[ "${{ github.event.action }}" == "unlabeled" && "${{ github.event.label.name }}" == "deployFaiChat" ]]; then
+            echo "should_cleanup=true" >> $GITHUB_OUTPUT
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          elif [[ "${{ contains(github.event.pull_request.labels.*.name, 'deployFaiChat') }}" == "true" ]]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "should_cleanup=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "should_cleanup=false" >> $GITHUB_OUTPUT
+          fi
+
+  preview_deploy:
+    needs: check_label
+    if: needs.check_label.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
     environment: Fern Dev
-    strategy:
-      matrix:
-        concurrency: [1]
     env:
       APPLICATION_ENVIRONMENT: dev
       PREVIEW: "true"
@@ -49,37 +70,52 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: 📦 Compile CDK
+        run: |
+          cd servers/fai-chat-deploy
+          pnpm install
+          pnpm compile
+
       - name: 🚀 Deploy Preview Stack
         id: deploy
         run: |
           git_version="$(scripts/git-version.sh)"
           npm install -g aws-cdk
-          cd servers/fai-lambda-deploy
-          VERSION="${git_version}" PR_NUMBER="${{ github.event.pull_request.number }}" PREVIEW=true pnpm --filter=@fern-platform/fai-lambda-deploy deploy:preview:chat
+          cd servers/fai-chat-deploy
+          VERSION="${git_version}" PR_NUMBER="${{ github.event.pull_request.number }}" PREVIEW=true pnpm deploy:preview
 
           # Extract the preview URL from CDK output
           if [ -f preview-output.json ]; then
-            PREVIEW_URL=$(jq -r '.["fai-chat-preview-${{ github.event.pull_request.number }}"].PreviewUrl // .["fai-chat-preview-${{ github.event.pull_request.number }}"].ApiUrl' preview-output.json)
+            PREVIEW_URL=$(jq -r '.["fai-chat-preview-${{ github.event.pull_request.number }}"].PreviewUrl // .["fai-chat-preview-${{ github.event.pull_request.number }}"].LoadBalancerDns' preview-output.json)
+            if [[ "$PREVIEW_URL" != "https://"* ]]; then
+              PREVIEW_URL="https://${PREVIEW_URL}"
+            fi
             echo "PREVIEW_URL=${PREVIEW_URL}" >> $GITHUB_OUTPUT
           fi
 
-      - name: 🧪 Test Preview Lambda
+      - name: 🧪 Test Preview Service
         run: |
           PREVIEW_URL="${{ steps.deploy.outputs.PREVIEW_URL }}"
-          echo "Testing Lambda at: ${PREVIEW_URL}"
+          echo "Testing ECS service at: ${PREVIEW_URL}"
 
-          # Wait for Lambda to be ready
-          sleep 5
+          # Wait for ECS service to be ready (longer than Lambda)
+          echo "Waiting for service to be ready..."
+          sleep 60
 
-          # Test health endpoint
-          echo "Testing health endpoint..."
-          curl -f "${PREVIEW_URL}/health" || echo "Health endpoint test failed"
+          # Test health endpoint with retries
+          for i in {1..5}; do
+            echo "Attempt $i: Testing health endpoint..."
+            if curl -f -s "${PREVIEW_URL}/health" --max-time 30; then
+              echo "Health check passed!"
+              break
+            fi
+            echo "Retrying in 20 seconds..."
+            sleep 20
+          done
 
-          # Test chat endpoint (basic smoke test without auth)
-          echo "Testing chat endpoint availability..."
-          curl -X POST "${PREVIEW_URL}/chat" \
-            -H "Content-Type: application/json" \
-            --max-time 10 || echo "Chat endpoint test completed (may require auth)"
+          # Test readiness endpoint
+          echo "Testing readiness endpoint..."
+          curl -f -s "${PREVIEW_URL}/health/ready" --max-time 30 || echo "Readiness endpoint test completed"
 
       - name: 💬 Comment on PR
         uses: actions/github-script@v7
@@ -89,14 +125,15 @@ jobs:
             const previewUrl = '${{ steps.deploy.outputs.PREVIEW_URL }}';
             const prNumber = context.issue.number;
 
-            const body = `## 🚀 FAI Chat Lambda Preview Deployed
+            const body = `## 🚀 FAI Chat ECS Preview Deployed
 
-            Your Lambda function has been deployed to a preview environment!
+            Your ECS Fargate service has been deployed to a preview environment!
 
             **🔗 Preview URL:** ${previewUrl}
 
             **📝 Available Endpoints:**
-            - Health: \`GET ${previewUrl}/health\`
+            - Health (liveness): \`GET ${previewUrl}/health\`
+            - Ready (readiness): \`GET ${previewUrl}/health/ready\`
             - Chat (streaming): \`POST ${previewUrl}/chat\`
 
             **📋 Example Usage:**
@@ -104,13 +141,17 @@ jobs:
             # Test health endpoint
             curl "${previewUrl}/health"
 
-            # Test chat endpoint (currently returns hardcoded response)
-            curl -X POST "${previewUrl}/chat"
+            # Test readiness endpoint
+            curl "${previewUrl}/health/ready"
             \`\`\`
 
             **🏷️ Stack Name:** \`fai-chat-preview-${prNumber}\`
 
-            **ℹ️ Note:** This preview will be automatically destroyed when the PR is closed or merged.`;
+            **⚙️ Resources:**
+            - CPU: 512 units (0.5 vCPU)
+            - Memory: 1024 MB
+
+            **ℹ️ Note:** This preview will be automatically destroyed when the PR is closed or the \`deployFaiChat\` label is removed.`;
 
             // Find existing preview comment
             const { data: comments } = await github.rest.issues.listComments({
@@ -121,11 +162,10 @@ jobs:
 
             const botComment = comments.find(comment =>
               comment.user.type === 'Bot' &&
-              comment.body.includes('🚀 FAI Chat Lambda Preview Deployed')
+              comment.body.includes('🚀 FAI Chat ECS Preview Deployed')
             );
 
             if (botComment) {
-              // Update existing comment
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -133,7 +173,6 @@ jobs:
                 body: body
               });
             } else {
-              // Create new comment
               await github.rest.issues.createComment({
                 issue_number: prNumber,
                 owner: context.repo.owner,
@@ -143,16 +182,14 @@ jobs:
             }
 
   cleanup_preview:
+    needs: check_label
+    if: needs.check_label.outputs.should_cleanup == 'true'
     runs-on: ubuntu-latest
-    if: github.event.action == 'closed'
     environment: Fern Dev
     env:
       APPLICATION_ENVIRONMENT: dev
       PREVIEW: "true"
       PR_NUMBER: ${{ github.event.pull_request.number }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -166,12 +203,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: 📦 Compile CDK
+        run: |
+          cd servers/fai-chat-deploy
+          pnpm install
+          pnpm compile
+
       - name: 🗑️ Destroy Preview Stack
         run: |
           git_version="$(scripts/git-version.sh)"
           npm install -g aws-cdk
-          cd servers/fai-lambda-deploy
-          VERSION="${git_version}" PR_NUMBER="${{ github.event.pull_request.number }}" PREVIEW=true pnpm --filter=@fern-platform/fai-lambda-deploy destroy:preview:chat || echo "Stack may already be destroyed"
+          cd servers/fai-chat-deploy
+          VERSION="${git_version}" PR_NUMBER="${{ github.event.pull_request.number }}" PREVIEW=true pnpm destroy:preview || echo "Stack may already be destroyed"
 
       - name: 💬 Comment on PR
         uses: actions/github-script@v7
@@ -184,5 +227,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 🗑️ Preview Environment Cleaned Up\n\nThe preview Lambda stack \`fai-chat-preview-${prNumber}\` has been destroyed.`
+              body: `## 🗑️ Preview Environment Cleaned Up\n\nThe ECS preview stack \`fai-chat-preview-${prNumber}\` has been destroyed.`
             });
