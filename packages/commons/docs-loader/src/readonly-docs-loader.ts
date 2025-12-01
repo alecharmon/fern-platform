@@ -98,7 +98,7 @@ const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrl
             .then(() => {
                 console.log(`[loadWithUrl] FDR snapshot stored for ${domain}:${branchName}`);
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
                 console.error(`[loadWithUrl] Failed to store FDR snapshot for ${domain}:${branchName}`, error);
             });
         return response;
@@ -108,6 +108,68 @@ const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrl
     }
 };
 const loadDynamicIRWithUrl = uncachedLoadDynamicIRWithUrl;
+
+type DocsBranchPathSegment = string | number;
+
+type DocsBranchPath = DocsBranchPathSegment[];
+
+type DocsBranchSelectorInput = {
+    branch: unknown;
+    path: DocsBranchPath;
+    branches: { path: DocsBranchPath; branch: unknown }[];
+    paths: DocsBranchPath[];
+    response: DocsV2Read.LoadDocsForUrlResponse;
+};
+
+type DocsBranchRequest<T> = {
+    paths?: DocsBranchPath[];
+    selector?: (input: DocsBranchSelectorInput) => T;
+};
+
+const loadDocsResponse = cache(async (domainKey: string) => loadWithUrl(domainKey));
+
+function identityBranchSelector<T>({ branch }: DocsBranchSelectorInput): T {
+    return branch as T;
+}
+
+function getBranchAtPath(target: unknown, path: DocsBranchPath) {
+    return path.reduce<unknown>((current, segment) => {
+        if (current == null) {
+            return undefined;
+        }
+        if (typeof segment === "number") {
+            return (current as unknown[])[segment];
+        }
+        return (current as Record<string, unknown>)[segment];
+    }, target);
+}
+
+async function loadDocsBranch<T>(domainKey: string, request: DocsBranchRequest<T>): Promise<T> {
+    const hasExplicitPaths = request.paths != null && request.paths.length > 0;
+    const paths = request.paths ?? [[]];
+    const response = await loadDocsResponse(domainKey);
+
+    const branches = paths.map((path) => ({
+        path,
+        branch: getBranchAtPath(response, path)
+    }));
+
+    const primaryBranch = branches[0]?.branch;
+    const primaryPath = branches[0]?.path ?? [];
+
+    if (hasExplicitPaths && primaryBranch === undefined) {
+        throw new Error(`Path not found in docs response: ${JSON.stringify(primaryPath)}`);
+    }
+
+    const selector = request.selector ?? identityBranchSelector<T>;
+    return selector({
+        branch: hasExplicitPaths ? primaryBranch : response,
+        path: primaryPath,
+        branches,
+        paths,
+        response
+    });
+}
 
 /*
  * Domain key decoder/encoder functions
@@ -277,16 +339,17 @@ const cachedGetEdgeFlags = cache(async (domainKey: string) => {
 
 export const getMetadataFromResponse = async (
     domainKey: string,
-    responsePromise: AsyncOrSync<DocsV2Read.LoadDocsForUrlResponse>
+    baseUrlPromise: AsyncOrSync<Pick<DocsV2Read.LoadDocsForUrlResponse, "baseUrl">>
 ): Promise<DocsMetadata> => {
     assertDocsDomain(domainKey);
-    const [response, docsUrlMetadata] = await Promise.all([
-        responsePromise,
+    const [baseUrlResponse, docsUrlMetadata] = await Promise.all([
+        baseUrlPromise,
         getDocsUrlMetadata(deriveDomainFromDomainKey(domainKey))
     ]);
+    const baseUrl = baseUrlResponse.baseUrl;
 
     const isSelfHostedMode = isSelfHosted();
-    const fdrBasePath = response.baseUrl.basePath;
+    const fdrBasePath = baseUrl.basePath;
     const nextBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
     const finalBasePath = isSelfHostedMode ? cleanBasePath(nextBasePath) : cleanBasePath(fdrBasePath);
 
@@ -295,11 +358,11 @@ export const getMetadataFromResponse = async (
         fdrBasePath,
         nextBasePath,
         finalBasePath,
-        domain: response.baseUrl.domain
+        domain: baseUrl.domain
     });
 
     return {
-        domain: response.baseUrl.domain,
+        domain: baseUrl.domain,
         // In self-hosted mode, use the Next.js basePath instead of the FDR basePath
         // This allows the app to be served from a single basePath for all routes
         basePath: finalBasePath,
@@ -337,7 +400,20 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
 
         const loadStart = Date.now();
         console.debug(`[DocsLoader] getMetadata loadWithUrl start - domain: ${domainKey}`);
-        const metadata = await getMetadataFromResponse(domainKey, loadWithUrl(domainKey));
+        const metadata = await getMetadataFromResponse(
+            domainKey,
+            loadDocsBranch(domainKey, {
+                paths: [["baseUrl"]],
+                selector: ({ branch }) => {
+                    if (!branch) {
+                        throw new Error("Missing baseUrl branch in docs response");
+                    }
+                    return {
+                        baseUrl: branch as DocsV2Read.LoadDocsForUrlResponse["baseUrl"]
+                    };
+                }
+            })
+        );
         const loadDuration = Date.now() - loadStart;
         console.debug(`[DocsLoader] getMetadata loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
         kvSet(domainKey, CACHE_KEY_METADATA, metadata, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
@@ -358,28 +434,33 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
         } catch (error) {
             console.warn(`Failed to get files for ${domain}, fallback to uncached`, error);
         }
-        const response = await loadWithUrl(domain);
-        const files = mapValues(response.definition.filesV2, (file) => {
-            if (file.type === "url") {
-                return {
-                    src:
-                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                            ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
-                            : file.url
-                };
-            } else if (file.type === "image") {
-                return {
-                    src:
-                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                            ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
-                            : file.url,
-                    width: file.width,
-                    height: file.height,
-                    blurDataURL: file.blurDataUrl,
-                    alt: file.alt
-                };
+        const files = await loadDocsBranch<Record<string, FileData>>(domain, {
+            paths: [["definition", "filesV2"]],
+            selector: ({ branch, response }) => {
+                const filesV2 = (branch as DocsV2Read.LoadDocsForUrlResponse["definition"]["filesV2"]) ?? {};
+                return mapValues(filesV2, (file) => {
+                    if (file.type === "url") {
+                        return {
+                            src:
+                                process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                                    ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                                    : file.url
+                        };
+                    } else if (file.type === "image") {
+                        return {
+                            src:
+                                process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                                    ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                                    : file.url,
+                            width: file.width,
+                            height: file.height,
+                            blurDataURL: file.blurDataUrl,
+                            alt: file.alt
+                        };
+                    }
+                    throw new UnreachableCaseError(file);
+                });
             }
-            throw new UnreachableCaseError(file);
         });
 
         kvSet(domain, CACHE_KEY_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
@@ -390,12 +471,19 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
 const getApi = async (domainKey: string, id: string) => {
     "use cache";
     unstable_cacheTag(domainKey, "getApi", id);
-    const response = await loadWithUrl(domainKey);
-    const latest = response.definition.apisV2[ApiDefinitionId(id)];
+    const [apisV2, apis] = await Promise.all([
+        loadDocsBranch<DocsV2Read.LoadDocsForUrlResponse["definition"]["apisV2"]>(domainKey, {
+            paths: [["definition", "apisV2"]]
+        }),
+        loadDocsBranch<DocsV2Read.LoadDocsForUrlResponse["definition"]["apis"]>(domainKey, {
+            paths: [["definition", "apis"]]
+        })
+    ]);
+    const latest = apisV2?.[ApiDefinitionId(id)];
     if (latest != null) {
         return latest;
     }
-    let v1 = response.definition.apis[ApiDefinitionId(id)];
+    let v1 = apis?.[ApiDefinitionId(id)];
     if (v1 == null) {
         const response = await provideRegistryService().api.v1.read.getApi(ApiDefinitionId(id));
         if (response.ok) {
@@ -625,7 +713,9 @@ const unsafe_getFullRoot = async (domainKey: string) => {
     } catch (error) {
         console.warn(`Failed to get full root for ${domainKey}, fallback to uncached`, error);
     }
-    const response = await loadWithUrl(domainKey);
+    const response = await loadDocsBranch(domainKey, {
+        selector: ({ response }) => response
+    });
     const root = convertResponseToRootNode(response, await cachedGetEdgeFlags(domainKey));
     if (root == null) {
         console.error("Could not find root node for domainKey", domainKey);
@@ -802,10 +892,19 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
 
         const loadStart = Date.now();
         console.debug(`[DocsLoader] getConfig loadWithUrl start - domain: ${domainKey}`);
-        const response = await loadWithUrl(domainKey);
+        const config = await loadDocsBranch<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(
+            domainKey,
+            {
+                paths: [["definition", "config"]],
+                selector: ({ branch }) => {
+                    const configBranch = (branch ?? {}) as DocsV1Read.DocsDefinition["config"];
+                    const { navigation, root, ...rest } = configBranch ?? {};
+                    return rest;
+                }
+            }
+        );
         const loadDuration = Date.now() - loadStart;
         console.debug(`[DocsLoader] getConfig loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
-        const { navigation, root, ...config } = response.definition.config;
 
         // Store in Upstash and in-memory cache (skip in-memory in local dev)
         kvSet(domainKey, CACHE_KEY_CONFIG, config, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
@@ -821,6 +920,7 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
 
 const getPage = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string, pageId: string, returnRawMarkdown: boolean = false) => {
+        const configPromise = getConfig(cacheConfig)(domainKey);
         const pageCacheKey = createPageCacheKey({ pageId });
         const kvGetStart = Date.now();
         console.debug(
@@ -833,7 +933,7 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
                 `[DocsLoader] getPage kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, pageId: ${pageId}`
             );
             if (page != null && isPlainObject(page) && "markdown" in page) {
-                const config = await getConfig(cacheConfig)(domainKey);
+                const config = await configPromise;
                 return {
                     filename: pageId,
                     markdown: page.markdown,
@@ -852,23 +952,29 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
 
         const loadStart = Date.now();
         console.debug(`[DocsLoader] getPage loadWithUrl start - domain: ${domainKey}, pageId: ${pageId}`);
-        const response = await loadWithUrl(domainKey);
+        const page = await loadDocsBranch<DocsV1Read.PageContent | undefined>(domainKey, {
+            paths: [["definition", "pages"]],
+            selector: ({ branch }) => {
+                const pages = (branch as Record<PageId, DocsV1Read.PageContent>) ?? {};
+                return pages[pageId as PageId];
+            }
+        });
         const loadDuration = Date.now() - loadStart;
         console.debug(
             `[DocsLoader] getPage loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}, pageId: ${pageId}`
         );
-        const page = response.definition.pages[pageId as PageId];
         if (page == null) {
             console.error(`Could not find page with ID ${pageId}`);
             notFound();
         }
 
         kvSet(domainKey, pageCacheKey, page, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        const config = await configPromise;
         return {
             filename: pageId,
             markdown: page.markdown,
             editThisPageUrl: page.editThisPageUrl,
-            css: response.definition.config.css,
+            css: config.css,
             rawMarkdown: returnRawMarkdown ? page.rawMarkdown : undefined
         };
     });
@@ -891,8 +997,10 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
             console.warn(`Failed to get mdx bundler files for ${domainKey}, fallback to uncached`, error);
         }
 
-        const response = await loadWithUrl(domainKey);
-        const files = response.definition.jsFiles ?? {};
+        const files = await loadDocsBranch<Record<string, string>>(domainKey, {
+            paths: [["definition", "jsFiles"]],
+            selector: ({ branch }) => (branch as Record<string, string>) ?? {}
+        });
         kvSet(domainKey, CACHE_KEY_MDX_BUNDLER_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return files;
     });
@@ -999,56 +1107,29 @@ const getLogoUrls = (cacheConfig: Required<CacheConfig>) =>
             console.warn(`Failed to get logo URLs for ${domainKey}, fallback to uncached`, error);
         }
 
-        // Load directly from FDR, bypassing other caches
-        const response = await loadWithUrl(domainKey);
-        const config = response.definition.config;
-        const filesV2 = response.definition.filesV2;
+        const [config, files] = await Promise.all([
+            getConfig(cacheConfig)(domainKey),
+            getFiles(cacheConfig)(domainKey)
+        ]);
 
         // Extract logo file IDs from colorsV3
         const lightLogoFileId =
-            config.colorsV3?.type === "light"
+            config?.colorsV3?.type === "light"
                 ? config.colorsV3?.logo
-                : config.colorsV3?.type === "darkAndLight"
+                : config?.colorsV3?.type === "darkAndLight"
                   ? config.colorsV3?.light?.logo
                   : undefined;
 
         const darkLogoFileId =
-            config.colorsV3?.type === "dark"
+            config?.colorsV3?.type === "dark"
                 ? config.colorsV3.logo
-                : config.colorsV3?.type === "darkAndLight"
+                : config?.colorsV3?.type === "darkAndLight"
                   ? config.colorsV3.dark.logo
                   : undefined;
 
         // Resolve file IDs to FileData
         const resolveFileId = (fileId: string | undefined): FileData | undefined => {
-            if (!fileId) {
-                return undefined;
-            }
-            // Cast to any to work around branded type indexing
-            const file = (filesV2 as any)[fileId];
-            if (!file) {
-                return undefined;
-            }
-            if (file.type === "url") {
-                return {
-                    src:
-                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                            ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
-                            : file.url
-                };
-            } else if (file.type === "image") {
-                return {
-                    src:
-                        process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                            ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
-                            : file.url,
-                    width: file.width,
-                    height: file.height,
-                    blurDataURL: file.blurDataUrl,
-                    alt: file.alt
-                };
-            }
-            return undefined;
+            return fileId ? files[fileId] : undefined;
         };
 
         const logoUrls = {
@@ -1075,8 +1156,15 @@ const getFonts = (cacheConfig: Required<CacheConfig>) =>
             console.warn(`Failed to get fonts for ${domainKey}, fallback to uncached`, error);
         }
 
-        const response = await loadWithUrl(domainKey);
-        const fonts = generateFonts(response.definition.config.typographyV2, await getFiles(cacheConfig)(domainKey));
+        const [config, files] = await Promise.all([
+            getConfig(cacheConfig)(domainKey),
+            getFiles(cacheConfig)(domainKey)
+        ]);
+        if (!config) {
+            console.error("Could not find config for domainKey", domainKey);
+            notFound();
+        }
+        const fonts = generateFonts(config.typographyV2, files);
         kvSet(domainKey, CACHE_KEY_FONTS, fonts, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return fonts;
     });
@@ -1242,20 +1330,27 @@ const getTypes = () =>
         "use cache";
         unstable_cacheTag(domainKey, "getTypes");
 
-        const response = await loadWithUrl(domainKey);
+        const [apisV2, apis] = await Promise.all([
+            loadDocsBranch<DocsV2Read.LoadDocsForUrlResponse["definition"]["apisV2"]>(domainKey, {
+                paths: [["definition", "apisV2"]]
+            }),
+            loadDocsBranch<DocsV2Read.LoadDocsForUrlResponse["definition"]["apis"]>(domainKey, {
+                paths: [["definition", "apis"]]
+            })
+        ]);
         const allTypes: Record<TypeId, TypeDefinition> = {};
 
         // Get all types from apisV2
-        for (const apiId of Object.keys(response.definition.apisV2)) {
-            const api = response.definition.apisV2[ApiDefinitionId(apiId)];
+        for (const apiId of Object.keys(apisV2 ?? {})) {
+            const api = apisV2?.[ApiDefinitionId(apiId)];
             if (api?.types) {
                 Object.assign(allTypes, api.types);
             }
         }
 
         // Get all types from apis (v1)
-        for (const apiId of Object.keys(response.definition.apis)) {
-            const v1Api = response.definition.apis[ApiDefinitionId(apiId)];
+        for (const apiId of Object.keys(apis ?? {})) {
+            const v1Api = apis?.[ApiDefinitionId(apiId)];
             if (v1Api) {
                 const migratedApi = ApiDefinitionV1ToLatest.from(v1Api).migrate();
                 if (migratedApi.types) {

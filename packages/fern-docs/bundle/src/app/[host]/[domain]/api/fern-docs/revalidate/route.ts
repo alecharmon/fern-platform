@@ -90,11 +90,13 @@ async function performRevalidation(params: {
     controller.log(`revalidating:${domain}\n`);
 
     const loadWithUrlPromise = loadWithUrl(domain);
+    // TODO: use the FDR API to get the baseUrl
+    const baseUrlPromise = loadWithUrlPromise.then((docs) => ({ baseUrl: docs.baseUrl }));
 
     const [docs, edgeFlags, metadata, authConfig] = await Promise.all([
         loadWithUrlPromise,
         getEdgeFlags(domain),
-        getMetadataFromResponse(withoutStaging(domain), loadWithUrlPromise),
+        getMetadataFromResponse(withoutStaging(domain), baseUrlPromise),
         getAuthEdgeConfig(domain)
     ]);
 
@@ -387,7 +389,10 @@ export async function GET(
         };
 
         try {
-            const metadata = await getMetadataFromResponse(withoutStaging(domain), loadWithUrl(domain));
+            const metadata = await getMetadataFromResponse(
+                withoutStaging(domain),
+                loadWithUrl(domain).then((docs) => ({ baseUrl: docs.baseUrl }))
+            );
             const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
             const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
 
@@ -437,7 +442,10 @@ export async function GET(
                     }
                 };
 
-                const metadata = await getMetadataFromResponse(withoutStaging(domain), loadWithUrl(domain));
+                const metadata = await getMetadataFromResponse(
+                    withoutStaging(domain),
+                    loadWithUrl(domain).then((docs) => ({ baseUrl: docs.baseUrl }))
+                );
                 const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
                 const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
 
