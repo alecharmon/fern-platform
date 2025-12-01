@@ -6,6 +6,7 @@ authors = []
 
 packages = [
     { include = "fai", from = "src" },
+    { include = "discord_bot", from = "src" },
     { include = "utils", from = "src" }
 ]
 
@@ -16,6 +17,7 @@ priority = "supplemental"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
+discord-py = "^2.6.3"
 fastapi = "^0.120.1"
 pydantic = "^2.8.0"
 requests = "^2.31.0"
@@ -52,6 +54,7 @@ beautifulsoup4 = "^4.12.0"
 
 [tool.poetry.scripts]
 start = "fai.main:start"
+discord = "discord_bot.main:start"
 openapi = "src.utils.openapi:openapi"
 
 [tool.poetry.group.dev.dependencies]
@@ -78,7 +81,7 @@ select = [
 ignore = []
 
 [tool.ruff.lint.isort]
-known-first-party = ["fai", "tests", "utils"]
+known-first-party = ["fai", "discord_bot", "tests", "utils"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -98,8 +101,13 @@ force_grid_wrap = 2
 line_length = 120
 profile = "black"
 use_parentheses = true
-known_first_party = ["fai", "tests", "utils"]
+known_first_party = ["fai", "discord_bot", "tests", "utils"]
 src_paths = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
 
 [tool.autoflake]
 in-place = true

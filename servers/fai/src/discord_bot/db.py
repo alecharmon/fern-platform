@@ -4,8 +4,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from fai.models.base import Base
-from fai.settings import VARIABLES
+from discord_bot.settings import VARIABLES
 
 engine = create_async_engine(
     VARIABLES.POSTGRES_DATABASE_URL,
@@ -17,5 +16,3 @@ engine = create_async_engine(
 )
 
 async_session_maker = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
-
-__all__ = ["Base", "engine", "async_session_maker"]

@@ -29,7 +29,6 @@ jobs:
           filters: |
             platform:
               - '!servers/fai/**'
-              - '!servers/fai-discord/**'
               - '!servers/fai-lambda/**'
               - '!servers/fai-lambda-deploy/**'
               - '!fern/apis/fai/**'

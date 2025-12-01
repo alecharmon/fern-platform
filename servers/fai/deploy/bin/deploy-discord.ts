@@ -4,7 +4,7 @@ import "source-map-support/register";
 
 import { type Environments, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api/resources/environments";
 
-import { FaiDiscordDeployStack } from "../src/deploy-stack";
+import { FaiDiscordDeployStack } from "../src/deploy-discord-stack";
 
 void main();
 
@@ -29,23 +29,11 @@ async function main() {
                     environmentType,
                     devInfo,
                     {
-                        TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
-                        OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
                         ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
-                        COHERE_API_KEY: getEnvVarOrThrow("COHERE_API_KEY"),
-                        SLACK_CLIENT_ID: getEnvVarOrThrow("SLACK_CLIENT_ID"),
-                        SLACK_CLIENT_SECRET: getEnvVarOrThrow("SLACK_CLIENT_SECRET"),
-                        SLACK_SIGNING_SECRET: getEnvVarOrThrow("SLACK_SIGNING_SECRET"),
-                        ASK_FERN_SLACK_BOT_TOKEN: getEnvVarOrThrow("ASK_FERN_SLACK_BOT_TOKEN"),
-                        FERNIE_SLACK_BOT_TOKEN: getEnvVarOrThrow("FERNIE_SLACK_BOT_TOKEN"),
-                        FAI_LAMBDA_FUNCTION_NAME: getEnvVarOrThrow("FAI_LAMBDA_FUNCTION_NAME"),
+                        TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
+                        POSTGRES_DATABASE_URL: getEnvVarOrThrow("POSTGRES_DATABASE_URL"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
-                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
-                        KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
-                        KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
-                        KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
-                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
-                        VENUS_URL: getEnvVarOrThrow("VENUS_URL")
+                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -65,23 +53,11 @@ async function main() {
                     environmentType,
                     dev2Info,
                     {
-                        TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
-                        OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
                         ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
-                        COHERE_API_KEY: getEnvVarOrThrow("COHERE_API_KEY"),
-                        SLACK_CLIENT_ID: getEnvVarOrThrow("SLACK_CLIENT_ID"),
-                        SLACK_CLIENT_SECRET: getEnvVarOrThrow("SLACK_CLIENT_SECRET"),
-                        SLACK_SIGNING_SECRET: getEnvVarOrThrow("SLACK_SIGNING_SECRET"),
-                        ASK_FERN_SLACK_BOT_TOKEN: getEnvVarOrThrow("ASK_FERN_SLACK_BOT_TOKEN"),
-                        FERNIE_SLACK_BOT_TOKEN: getEnvVarOrThrow("FERNIE_SLACK_BOT_TOKEN"),
-                        FAI_LAMBDA_FUNCTION_NAME: getEnvVarOrThrow("FAI_LAMBDA_FUNCTION_NAME"),
+                        TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
+                        POSTGRES_DATABASE_URL: getEnvVarOrThrow("POSTGRES_DATABASE_URL"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
-                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
-                        KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
-                        KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
-                        KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
-                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
-                        VENUS_URL: getEnvVarOrThrow("VENUS_URL")
+                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -101,23 +77,11 @@ async function main() {
                     environmentType,
                     prodInfo,
                     {
-                        TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
-                        OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
                         ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
-                        COHERE_API_KEY: getEnvVarOrThrow("COHERE_API_KEY"),
-                        SLACK_CLIENT_ID: getEnvVarOrThrow("SLACK_CLIENT_ID"),
-                        SLACK_CLIENT_SECRET: getEnvVarOrThrow("SLACK_CLIENT_SECRET"),
-                        SLACK_SIGNING_SECRET: getEnvVarOrThrow("SLACK_SIGNING_SECRET"),
-                        ASK_FERN_SLACK_BOT_TOKEN: getEnvVarOrThrow("ASK_FERN_SLACK_BOT_TOKEN"),
-                        FERNIE_SLACK_BOT_TOKEN: getEnvVarOrThrow("FERNIE_SLACK_BOT_TOKEN"),
-                        FAI_LAMBDA_FUNCTION_NAME: getEnvVarOrThrow("FAI_LAMBDA_FUNCTION_NAME"),
+                        TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
+                        POSTGRES_DATABASE_URL: getEnvVarOrThrow("POSTGRES_DATABASE_URL"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
-                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
-                        KV_REST_API_TOKEN: getEnvVarOrThrow("KV_REST_API_TOKEN"),
-                        KV_REST_API_READ_ONLY_TOKEN: getEnvVarOrThrow("KV_REST_API_READ_ONLY_TOKEN"),
-                        KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
-                        FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
-                        VENUS_URL: getEnvVarOrThrow("VENUS_URL")
+                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }

@@ -1,6 +1,4 @@
-FROM python:3.13
-
-COPY --from=fai . /fai
+FROM python:3.13-slim-bookworm
 
 COPY pyproject.toml ./pyproject.toml
 COPY poetry.lock ./poetry.lock
@@ -12,4 +10,4 @@ RUN pip3 install poetry &&\
   poetry config virtualenvs.create false &&\
   poetry install
 
-ENTRYPOINT ["poetry", "run", "start"]
+ENTRYPOINT ["poetry", "run", "discord"]

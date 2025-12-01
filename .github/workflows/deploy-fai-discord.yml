@@ -11,28 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: Fern Prod
     env:
+      # AWS credentials for deployment
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+      # Discord bot required environment variables
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
       POSTGRES_DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-      SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
-      SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
-      SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
-      ASK_FERN_SLACK_BOT_TOKEN: ${{ secrets.ASK_FERN_SLACK_BOT_TOKEN }}
-      FERNIE_SLACK_BOT_TOKEN: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
-      FAI_LAMBDA_FUNCTION_NAME: ${{ secrets.FAI_LAMBDA_FUNCTION_NAME }}
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
       DISCORD_OAUTH_URL: ${{ secrets.DISCORD_OAUTH_URL }}
-      KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
-      KV_REST_API_READ_ONLY_TOKEN: ${{ secrets.KV_REST_API_READ_ONLY_TOKEN }}
-      KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
-      VENUS_URL: ${{ secrets.VENUS_URL }}
-      FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
 
     steps:
       - name: Checkout
@@ -46,31 +35,18 @@ jobs:
           run_install: false
       - name: Create .env file
         run: |
-          cd servers/fai-discord
-          echo "TURBOPUFFER_API_KEY=${{ env.TURBOPUFFER_API_KEY }}" >> .env
+          cd servers/fai
           echo "ANTHROPIC_API_KEY=${{ env.ANTHROPIC_API_KEY }}" >> .env
-          echo "COHERE_API_KEY=${{ env.COHERE_API_KEY }}" >> .env
-          echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}" >> .env
+          echo "TURBOPUFFER_API_KEY=${{ env.TURBOPUFFER_API_KEY }}" >> .env
           echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env
-          echo "SLACK_CLIENT_ID=${{ env.SLACK_CLIENT_ID }}" >> .env
-          echo "SLACK_CLIENT_SECRET=${{ env.SLACK_CLIENT_SECRET }}" >> .env
-          echo "SLACK_SIGNING_SECRET=${{ env.SLACK_SIGNING_SECRET }}" >> .env
-          echo "ASK_FERN_SLACK_BOT_TOKEN=${{ env.ASK_FERN_SLACK_BOT_TOKEN }}" >> .env
-          echo "FERNIE_SLACK_BOT_TOKEN=${{ env.FERNIE_SLACK_BOT_TOKEN }}" >> .env
-          echo "FAI_LAMBDA_FUNCTION_NAME=${{ secrets.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
           echo "DISCORD_BOT_TOKEN=${{ env.DISCORD_BOT_TOKEN }}" >> .env
           echo "DISCORD_OAUTH_URL=${{ env.DISCORD_OAUTH_URL }}" >> .env
-          echo "KV_REST_API_TOKEN=${{ env.KV_REST_API_TOKEN }}" >> .env
-          echo "KV_REST_API_READ_ONLY_TOKEN=${{ env.KV_REST_API_READ_ONLY_TOKEN }}" >> .env
-          echo "KV_REST_API_URL=${{ env.KV_REST_API_URL }}" >> .env
-          echo "VENUS_URL=${{ env.VENUS_URL }}" >> .env
-          echo "FAI_LAMBDA_FUNCTION_NAME=${{ env.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
-          echo "FERN_TOKEN=${{ env.FERN_TOKEN }}" >> .env
       - name: Deploy to prod
         run: |
           git_version="$(scripts/fai-discord-version.sh)"
-          cd servers/fai-discord
-          ./scripts/create_docker.sh "${git_version}"
+          cd servers/fai
+          docker build -f Dockerfile.discord -t fai:"${git_version}" .
+          docker save fai:"${git_version}" -o fai:"${git_version}".tar
           cd deploy
           pnpm install
-          VERSION="${git_version}" npm run deploy:prod
+          VERSION="${git_version}" npm run deploy:discord-prod

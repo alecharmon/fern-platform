@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 from datetime import (
     UTC,
@@ -13,16 +14,20 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import insert
 
-from fai.db import async_session_maker
+from discord_bot.db import async_session_maker
+from discord_bot.message.classify import classify_message
+from discord_bot.settings import LOGGER
 from fai.models.db.discord_message_cache_db import DiscordMessageCacheDb
 from fai.models.db.query_db import QueryDb
 from fai.models.types.channel_settings_type import DiscordChannelSettings
-from fai.models.utils.chat import ChatMode
-from fai.settings import LOGGER
+from fai.models.utils.chat import (
+    ChatMode,
+    deduplicate_retrieved_sources,
+)
+from fai.utils.chat.query_rewriter import rewrite_query
 from fai.utils.chat.response.anthropic import get_anthropic_response
 from fai.utils.chat.retrieve.retrieve import retrieve
 from fai.utils.integration import get_discord_integration
-from src.message.classify import classify_message
 
 MESSAGE_CACHE_TTL = 30
 
@@ -383,6 +388,7 @@ async def process_message(
     model: str = "claude-4-sonnet-20250514",
     top_k: int = 5,
     conversation_id: str | None = None,
+    rewrite_query_enabled: bool = True,
 ) -> tuple[str, str | None]:
     if bot_user_id and text:
         text = text.replace(f"<@{bot_user_id}>", "").strip()
@@ -396,8 +402,24 @@ async def process_message(
 
     try:
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
-        query_results = await retrieve(text, domain, top_k=top_k)
-        rag_records = [result.document for result in query_results if result.document]
+
+        rag_records = []
+        if rewrite_query_enabled:
+            LOGGER.info(f"Query rewriting enabled for domain {domain}")
+            sub_queries = await rewrite_query(text)
+            LOGGER.info(f"Decomposed query into {len(sub_queries)} sub-queries")
+            for index, sub_query in enumerate(sub_queries):
+                LOGGER.info(f"SUBQUERY {index + 1}: {sub_query}")
+
+            query_results_list = await asyncio.gather(
+                *[retrieve(sub_query, domain, top_k=top_k) for sub_query in sub_queries]
+            )
+
+            deduplicated_rows = deduplicate_retrieved_sources(query_results_list)
+            rag_records = [row.document for row in deduplicated_rows if row.document]
+        else:
+            query_results = await retrieve(text, domain, top_k=top_k)
+            rag_records = [result.document for result in query_results if result.document]
 
         LOGGER.info(f"Retrieved {len(rag_records)} documents")
 

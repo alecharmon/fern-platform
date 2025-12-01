@@ -27,7 +27,6 @@ jobs:
           filters: |
             fai:
               - 'servers/fai/**'
-              - 'servers/fai-discord/**'
               - 'servers/fai-lambda/**'
               - 'servers/fai-lambda-deploy/**'
               - 'fern/apis/fai/**'
@@ -59,34 +58,6 @@ jobs:
       - name: Type check
         run: |
           cd servers/fai
-          poetry run mypy .
-
-  lint-fai-discord:
-    needs: check-fai-changes
-    if: needs.check-fai-changes.outputs.fai_changed == 'true'
-    runs-on: CLI
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Install
-        uses: ./.github/actions/install
-
-      - name: Setup poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
-          cd servers/fai-discord
-          poetry install
-
-      - name: Lint & Format
-        run: |
-          cd servers/fai-discord
-          make code-cleanup
-
-      - name: Type check
-        run: |
-          cd servers/fai-discord
           poetry run mypy .
 
   lint-fai-lambda:

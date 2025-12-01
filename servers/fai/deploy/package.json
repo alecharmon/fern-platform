@@ -5,7 +5,9 @@
   "scripts": {
     "cdk": "cdk",
     "deploy:dev": "cdk deploy fai-dev2 --require-approval never --progress events",
-    "deploy:prod": "cdk deploy fai-prod --require-approval never --progress events"
+    "deploy:prod": "cdk deploy fai-prod --require-approval never --progress events",
+    "deploy:discord-dev": "cdk --app 'npx ts-node bin/deploy-discord.ts' deploy fai-discord-dev2 --require-approval never --progress events",
+    "deploy:discord-prod": "cdk --app 'npx ts-node bin/deploy-discord.ts' deploy fai-discord-prod --require-approval never --progress events"
   },
   "dependencies": {
     "@fern-fern/fern-cloud-sdk": "^0.0.305",

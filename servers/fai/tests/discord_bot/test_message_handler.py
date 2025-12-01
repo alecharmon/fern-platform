@@ -1,10 +1,15 @@
-from unittest.mock import MagicMock
+from unittest.mock import (
+    AsyncMock,
+    MagicMock,
+    patch,
+)
 
 import discord
 import pytest
 
+from discord_bot.message.classify import DiscordMessageClassification
+from discord_bot.message.message_handler import should_respond_to_message
 from fai.models.types.channel_settings_type import DiscordChannelSettings
-from src.message.message_handler import should_respond_to_message
 
 
 @pytest.mark.asyncio
@@ -86,9 +91,13 @@ class TestShouldRespondToMessage:
 
         question_message = self._create_mock_message(content="How do I use the API?")
 
-        result_channel = await should_respond_to_message(settings, question_message, is_in_thread=False)
-        assert result_channel is True, "Auto mode should respond to questions in channels"
+        DiscordMessageClassification(classification="question", reasoning="Mock reasoning")
+        with patch("discord_bot.message.message_handler.classify_message", new_callable=AsyncMock) as mock_classify:
+            mock_classify.return_value = "question"
 
-        result_thread = await should_respond_to_message(settings, question_message, is_in_thread=True)
-        # Same behavior in threads
-        assert result_thread is True, "Auto mode should respond to questions in threads"
+            result_channel = await should_respond_to_message(settings, question_message, is_in_thread=False)
+            assert result_channel is True, "Auto mode should respond to questions in channels"
+
+            result_thread = await should_respond_to_message(settings, question_message, is_in_thread=True)
+            # Same behavior in threads
+            assert result_thread is True, "Auto mode should respond to questions in threads"

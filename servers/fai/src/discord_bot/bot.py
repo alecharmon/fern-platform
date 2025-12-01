@@ -2,14 +2,14 @@ import discord
 from dotenv import load_dotenv
 from sqlalchemy import delete
 
-from fai.db import async_session_maker
-from fai.models.db.discord_integration_db import DiscordIntegrationDb
-from fai.settings import (
+from discord_bot.commands.configure import ConfigureView
+from discord_bot.db import async_session_maker
+from discord_bot.message.message_handler import handle_discord_message
+from discord_bot.settings import (
     LOGGER,
     VARIABLES,
 )
-from src.commands.configure import ConfigureView
-from src.message.message_handler import handle_discord_message
+from fai.models.db.discord_integration_db import DiscordIntegrationDb
 
 load_dotenv()
 bot_token = VARIABLES.DISCORD_BOT_TOKEN

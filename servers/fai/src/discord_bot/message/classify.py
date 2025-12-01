@@ -5,7 +5,7 @@ from pydantic import (
     Field,
 )
 
-from fai.settings import LOGGER
+from discord_bot.settings import LOGGER
 from fai.utils.generate_model import generate_anthropic_generic_async
 
 
@@ -69,6 +69,7 @@ async def classify_message(
         message_text=text,
         history_context=history_context,
         bot_info=bot_info,
+        model="claude-haiku-4-5-20251001",
     )
 
     if result is None:

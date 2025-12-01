@@ -80,4 +80,3 @@ class SingletonFactory:
 
 VARIABLES = SingletonFactory.get_instance(Variables)
 CONFIG = SingletonFactory.get_instance(Config)
-VARIABLES.validate_env_variables()

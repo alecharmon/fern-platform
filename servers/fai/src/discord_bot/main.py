@@ -1,18 +1,18 @@
 import logging
 
-from fai.settings import (
+from discord_bot.bot import start_discord_bot
+from discord_bot.settings import (
     LOGGER,
     VARIABLES,
 )
-from src.bot import start_discord_bot
 
 
 def start() -> None:
-    """Launched with `poetry run start` at root level"""
+    """Launched with `poetry run discord` at root level"""
 
-    LOGGER.info("Setup: Starting environment variable validation...")
+    LOGGER.info("Discord Bot Setup: Starting environment variable validation...")
     VARIABLES.validate_env_variables()
-    LOGGER.info("Setup: Environment variables validated.")
+    LOGGER.info("Discord Bot Setup: Environment variables validated.")
 
     LOGGER.info("Starting Discord bot...")
 

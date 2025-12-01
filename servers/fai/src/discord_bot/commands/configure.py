@@ -2,9 +2,9 @@ import discord
 from sqlalchemy import select
 from sqlalchemy.orm import attributes
 
-from fai.db import async_session_maker
+from discord_bot.db import async_session_maker
+from discord_bot.settings import LOGGER
 from fai.models.db.discord_integration_db import DiscordIntegrationDb
-from fai.settings import LOGGER
 
 
 class ConfigureView(discord.ui.View):

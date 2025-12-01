@@ -14,23 +14,14 @@ const CONTAINER_NAME = "fai-discord";
 const SERVICE_NAME = "fai-discord";
 
 export interface FaiDiscordEnvVariables {
-    OPENAI_API_KEY: string;
+    // Core API Keys needed by Discord bot
     ANTHROPIC_API_KEY: string;
-    COHERE_API_KEY: string;
     TURBOPUFFER_API_KEY: string;
-    SLACK_CLIENT_ID: string;
-    SLACK_CLIENT_SECRET: string;
-    SLACK_SIGNING_SECRET: string;
-    ASK_FERN_SLACK_BOT_TOKEN: string;
-    FERNIE_SLACK_BOT_TOKEN: string;
-    FAI_LAMBDA_FUNCTION_NAME: string;
+    // Database
+    POSTGRES_DATABASE_URL: string;
+    // Discord specific
     DISCORD_BOT_TOKEN: string;
     DISCORD_OAUTH_URL: string;
-    KV_REST_API_TOKEN: string;
-    KV_REST_API_READ_ONLY_TOKEN: string;
-    KV_REST_API_URL: string;
-    FERN_TOKEN: string;
-    VENUS_URL: string;
     [key: string]: string;
 }
 
@@ -96,7 +87,7 @@ export class FaiDiscordDeployStack extends Stack {
         });
 
         taskDefinition.addContainer(CONTAINER_NAME, {
-            image: ContainerImage.fromTarball(`../fai-discord:${version}.tar`),
+            image: ContainerImage.fromTarball(`../fai:${version}.tar`),
             logging: LogDriver.awsLogs({
                 logGroup,
                 streamPrefix: SERVICE_NAME
