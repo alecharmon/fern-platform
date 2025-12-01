@@ -16,7 +16,6 @@ import { useCurrentVariantId } from "../../state/navigation";
 import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarNavigationChild } from "./SidebarNavigationChild";
 import { SidebarRootChild } from "./SidebarRootChild";
-import { SidebarRootSectionNode } from "./SidebarRootSectionNode";
 
 interface SidebarVariantedNodeProps {
     node: FernNavigation.VariantedNode;
@@ -148,42 +147,30 @@ export function SidebarVariantedNode({ node, depth, renderOptions, lang }: Sideb
             </DropdownMenu.Root>
 
             {/* Render the selected variant's children */}
-            <div className={cn("mt-2")}>
+            <ul className="fern-sidebar-group mt-2">
                 {currentVariant.children.map((child) => {
-                    // VariantChild can be sidebar-level or section-level items
-                    // We need to determine if this should be rendered as a root child or navigation child
-                    // Based on the discriminated union, VariantChild includes SidebarGroup which is a root-level item
                     if (child.type === "sidebarGroup") {
                         return (
-                            <SidebarRootChild key={child.id} node={child} renderOptions={renderOptions} lang={lang} />
+                            <li key={child.id}>
+                                <SidebarRootChild node={child} renderOptions={renderOptions} lang={lang} />
+                            </li>
                         );
                     }
 
-                    if (depth === 0 && child.type === "section") {
-                        return (
-                            <SidebarRootSectionNode
-                                key={child.id}
+                    // All other types (sections, pages, links, etc.) go through SidebarNavigationChild
+                    // This ensures sections get collapse functionality via SidebarSectionNode
+                    return (
+                        <li key={child.id}>
+                            <SidebarNavigationChild
                                 node={child}
-                                icon={processIcon({ node: child, forceClientRender, files: renderOptions.files })}
+                                depth={depth + 1}
                                 renderOptions={renderOptions}
-                                files={renderOptions.files}
                                 lang={lang}
                             />
-                        );
-                    }
-
-                    // All other types are NavigationChild types (or nested sections)
-                    return (
-                        <SidebarNavigationChild
-                            key={child.id}
-                            node={child}
-                            depth={depth + 1}
-                            renderOptions={renderOptions}
-                            lang={lang}
-                        />
+                        </li>
                     );
                 })}
-            </div>
+            </ul>
         </div>
     );
 }

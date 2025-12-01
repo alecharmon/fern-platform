@@ -12,6 +12,7 @@ import type { LaunchDarklyInfo } from "@fern-docs/components/state/feature-flags
 import { RootNodeProvider, SetBasePath } from "@fern-docs/components/state/navigation";
 import {
     getAllSidebarRootNodes,
+    getInitiallyCollapsedNodes,
     getSidebarRootNodeIdToChildToParentsMap
 } from "@fern-docs/components/state/navigation-server";
 import { FernThemeProvider } from "@fern-docs/components/theme";
@@ -89,6 +90,14 @@ export default async function Layout({
     const sidebarRootNodes = getAllSidebarRootNodes(unsafe_fullRoot);
     const sidebarRootNodesToChildToParentsMap = getSidebarRootNodeIdToChildToParentsMap(sidebarRootNodes);
 
+    // Get initially collapsed nodes for each sidebar root
+    const sidebarRootNodesToInitiallyCollapsedNodes = new Map(
+        Array.from(sidebarRootNodes.entries()).map(([nodeId, sidebarRootNode]) => [
+            nodeId,
+            getInitiallyCollapsedNodes(sidebarRootNode)
+        ])
+    );
+
     return (
         <FernThemeProvider
             hasLight={Boolean(colors.light)}
@@ -96,7 +105,10 @@ export default async function Layout({
             lightThemeColor={colors.light?.themeColor}
             darkThemeColor={colors.dark?.themeColor}
         >
-            <RootNodeProvider sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}>
+            <RootNodeProvider
+                sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}
+                sidebarRootNodesToInitiallyCollapsedNodes={sidebarRootNodesToInitiallyCollapsedNodes}
+            >
                 <Domain value={domain} />
                 <SetBasePath value={basePath || "/"} />
                 {!isSelfHosted() && !settings.disableAnalytics && (

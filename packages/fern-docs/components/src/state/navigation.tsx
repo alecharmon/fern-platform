@@ -28,7 +28,8 @@ export function createRootNodeStore(
     sidebarRootNodeToChildToParentsMap: ReadonlyMap<
         FernNavigation.NodeId,
         ReadonlyMap<FernNavigation.NodeId, FernNavigation.NodeId[]>
-    >
+    >,
+    sidebarRootNodeToInitiallyCollapsedNodes?: ReadonlyMap<FernNavigation.NodeId, ReadonlySet<FernNavigation.NodeId>>
 ) {
     return create<RootNodeState>((set) => ({
         state: new Map(),
@@ -38,7 +39,8 @@ export function createRootNodeStore(
                     state,
                     action,
                     sidebarRootNodeToChildToParentsMap,
-                    currentSidebarRootNodeId
+                    currentSidebarRootNodeId,
+                    sidebarRootNodeToInitiallyCollapsedNodes
                 )
             }))
     }));
@@ -242,15 +244,19 @@ export function useToggleSidebarNode(nodeId: FernNavigation.NodeId) {
 
 export function RootNodeProvider({
     children,
-    sidebarRootNodesToChildToParentsMap
+    sidebarRootNodesToChildToParentsMap,
+    sidebarRootNodesToInitiallyCollapsedNodes
 }: {
     children: React.ReactNode;
     sidebarRootNodesToChildToParentsMap: ReadonlyMap<
         FernNavigation.NodeId,
         ReadonlyMap<FernNavigation.NodeId, FernNavigation.NodeId[]>
     >;
+    sidebarRootNodesToInitiallyCollapsedNodes?: ReadonlyMap<FernNavigation.NodeId, ReadonlySet<FernNavigation.NodeId>>;
 }) {
-    const store = useLazyRef(() => createRootNodeStore(sidebarRootNodesToChildToParentsMap));
+    const store = useLazyRef(() =>
+        createRootNodeStore(sidebarRootNodesToChildToParentsMap, sidebarRootNodesToInitiallyCollapsedNodes)
+    );
     return <RootNodeStoreContext.Provider value={store.current}>{children}</RootNodeStoreContext.Provider>;
 }
 
@@ -369,6 +375,7 @@ function reduceExpandedNodes(prev: ExpandedNodesState, action: SidebarAction): E
  * @param action - The action to perform
  * @param sidebarRootNodeIdToChildToParentsMap - The sidebar root node id to child to parents map
  * @param currentSidebarRootNodeId - The current sidebar root node id
+ * @param sidebarRootNodeIdToInitiallyCollapsedNodes - Map of sidebar root node id to initially collapsed nodes
  * @returns The new expanded nodes state
  */
 function reduceExpandedNodesBySidebarRootId(
@@ -378,7 +385,8 @@ function reduceExpandedNodesBySidebarRootId(
         FernNavigation.NodeId,
         ReadonlyMap<FernNavigation.NodeId, FernNavigation.NodeId[]>
     >,
-    currentSidebarRootNodeId: FernNavigation.NodeId
+    currentSidebarRootNodeId: FernNavigation.NodeId,
+    sidebarRootNodeIdToInitiallyCollapsedNodes?: ReadonlyMap<FernNavigation.NodeId, ReadonlySet<FernNavigation.NodeId>>
 ): ReadonlyMap<FernNavigation.NodeId, ExpandedNodesState> {
     const childToParentsMap = sidebarRootNodeIdToChildToParentsMap.get(currentSidebarRootNodeId);
 
@@ -386,11 +394,14 @@ function reduceExpandedNodesBySidebarRootId(
         return prev;
     }
 
+    const initiallyCollapsedNodes = sidebarRootNodeIdToInitiallyCollapsedNodes?.get(currentSidebarRootNodeId);
+
     const next = new Map(prev);
     next.set(
         currentSidebarRootNodeId,
         reduceExpandedNodes(
-            prev.get(currentSidebarRootNodeId) ?? createInitialExpandedNodes(undefined, childToParentsMap),
+            prev.get(currentSidebarRootNodeId) ??
+                createInitialExpandedNodes(undefined, childToParentsMap, initiallyCollapsedNodes),
             action
         )
     );

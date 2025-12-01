@@ -15,20 +15,24 @@ export interface ExpandedNodesState {
  * Create the initial expanded nodes for a sidebar root node
  * @param currentNodeId - The current node id
  * @param childToParentsMap - The child to parents map
+ * @param initiallyCollapsedNodes - Nodes that should start collapsed (from collapsed: true in config)
  * @returns The initial expanded nodes state
  */
 export function createInitialExpandedNodes(
     currentNodeId: FernNavigation.NodeId | undefined,
-    childToParentsMap: ReadonlyMap<FernNavigation.NodeId, FernNavigation.NodeId[]>
+    childToParentsMap: ReadonlyMap<FernNavigation.NodeId, FernNavigation.NodeId[]>,
+    initiallyCollapsedNodes?: ReadonlySet<FernNavigation.NodeId>
 ): ExpandedNodesState {
     const expandedNodes = new Set<FernNavigation.NodeId>();
     const implicitExpandedNodes = new Set<FernNavigation.NodeId>();
-    const collapsedNodes = new Set<FernNavigation.NodeId>();
+    const collapsedNodes = new Set<FernNavigation.NodeId>(initiallyCollapsedNodes);
 
     if (currentNodeId != null) {
         expandedNodes.add(currentNodeId);
         childToParentsMap.get(currentNodeId)?.forEach((parent) => {
             implicitExpandedNodes.add(parent);
+            // If a parent is in the path to the current node, remove it from collapsed
+            collapsedNodes.delete(parent);
         });
     }
 
@@ -111,6 +115,28 @@ export function invertParentChildMap(
         });
     });
     return invertedParentChildMap;
+}
+
+/**
+ * Get all nodes that should be initially collapsed based on their `collapsed: true` property
+ * @param sidebar - The sidebar root node
+ * @returns Set of node IDs that should start collapsed
+ */
+export function getInitiallyCollapsedNodes(
+    sidebar: FernNavigation.SidebarRootNode | undefined
+): ReadonlySet<FernNavigation.NodeId> {
+    const collapsedNodes = new Set<FernNavigation.NodeId>();
+    if (sidebar == null) {
+        return collapsedNodes;
+    }
+
+    FernNavigation.traverseDF(sidebar, (node) => {
+        if (node.type === "section" && node.collapsed === true) {
+            collapsedNodes.add(node.id);
+        }
+    });
+
+    return collapsedNodes;
 }
 
 // /**
