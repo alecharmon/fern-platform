@@ -21,6 +21,7 @@ import { Reindexing } from "./api/resources/reindexing/client/Client.js";
 import { Sdks } from "./api/resources/sdks/client/Client.js";
 import { Settings } from "./api/resources/settings/client/Client.js";
 import { SlackAskFern } from "./api/resources/slackAskFern/client/Client.js";
+import { SlackScribe } from "./api/resources/slackScribe/client/Client.js";
 import { Sources } from "./api/resources/sources/client/Client.js";
 import { Upstash } from "./api/resources/upstash/client/Client.js";
 import { Website } from "./api/resources/website/client/Client.js";
@@ -67,6 +68,7 @@ export class FernAIClient {
     protected _sdks: Sdks | undefined;
     protected _settings: Settings | undefined;
     protected _slackAskFern: SlackAskFern | undefined;
+    protected _slackScribe: SlackScribe | undefined;
     protected _sources: Sources | undefined;
     protected _upstash: Upstash | undefined;
     protected _website: Website | undefined;
@@ -147,6 +149,10 @@ export class FernAIClient {
 
     public get slackAskFern(): SlackAskFern {
         return (this._slackAskFern ??= new SlackAskFern(this._options));
+    }
+
+    public get slackScribe(): SlackScribe {
+        return (this._slackScribe ??= new SlackScribe(this._options));
     }
 
     public get sources(): Sources {

@@ -96,10 +96,6 @@ async def mark_message_processed(team_id: str, message_ts: str) -> None:
 
 
 def verify_slack_signature(request_body: bytes, timestamp: str, signature: str) -> bool:
-    if not VARIABLES.SLACK_SIGNING_SECRET:
-        LOGGER.warning("SLACK_SIGNING_SECRET not configured, skipping verification")
-        return True
-
     if abs(time.time() - float(timestamp)) > 60 * 5:
         return False
 
