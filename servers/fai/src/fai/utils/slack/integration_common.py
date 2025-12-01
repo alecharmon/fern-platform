@@ -25,6 +25,21 @@ from fai.dependencies import strip_domain
 from fai.settings import LOGGER
 
 MESSAGE_CACHE_TTL = 600
+SLACK_SCOPES = [
+    "app_mentions:read",
+    "channels:history",
+    "channels:join",
+    "channels:read",
+    "chat:write",
+    "commands",
+    "groups:history",
+    "im:history",
+    "mpim:history",
+    "reactions:read",
+    "reactions:write",
+    "users:read",
+    "users:read.email",
+]
 
 
 def verify_slack_signature(request_body: bytes, timestamp: str, signature: str, signing_secret: str) -> bool:
@@ -39,22 +54,7 @@ def verify_slack_signature(request_body: bytes, timestamp: str, signature: str, 
 
 
 def create_slack_integration_url(integration_id: str, client_id: str) -> str:
-    scopes = [
-        "app_mentions:read",
-        "channels:history",
-        "channels:join",
-        "channels:read",
-        "chat:write",
-        "commands",
-        "groups:history",
-        "im:history",
-        "mpim:history",
-        "reactions:read",
-        "reactions:write",
-        "users:read",
-        "users:read.email",
-    ]
-    scope_string = ",".join(scopes)
+    scope_string = ",".join(SLACK_SCOPES)
     return (
         f"https://slack.com/oauth/v2/authorize?"
         f"client_id={client_id}&"

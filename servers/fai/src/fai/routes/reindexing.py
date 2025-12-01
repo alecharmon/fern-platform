@@ -15,7 +15,7 @@ from fai.models.types.reindexing_types import (
     UpdateReindexingJobStatusResponse,
 )
 from fai.settings import LOGGER
-from fai.utils.reindexing import (
+from fai.utils.reindexing.job_operations import (
     get_job_record_by_domain,
     get_job_record_by_task_arn,
     update_job_status,

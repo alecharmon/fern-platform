@@ -9,7 +9,6 @@ from uuid import uuid4
 
 from fastapi import (
     BackgroundTasks,
-    Depends,
     HTTPException,
     Request,
 )
@@ -19,21 +18,14 @@ from fastapi.responses import (
 )
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import attributes
 
 from fai.app import fai_app
 from fai.db import async_session_maker
-from fai.dependencies import (
-    ask_ai_enabled,
-    get_db,
-    verify_token,
-)
 from fai.models.api.update_channel_settings import ChannelSettings
 from fai.models.db.feedback_db import FeedbackDb
 from fai.models.db.slack_integration_db import SlackIntegrationDb
 from fai.models.db.slack_message_cache_db import SlackMessageCacheDb
-from fai.models.types.slack_integration_types import SlackIntegrationResponse
 from fai.settings import (
     LOGGER,
     VARIABLES,
@@ -47,8 +39,8 @@ from fai.utils.slack.client import (
     update_modal,
 )
 from fai.utils.slack.integration_common import (
+    SLACK_SCOPES,
     cleanup_message_cache,
-    create_integration,
     create_slack_integration_url,
     handle_oauth_callback,
     is_message_processed,
@@ -69,20 +61,6 @@ async def get_domain_from_slack_team(team_id: str) -> str | None:
         result = await session.execute(select(SlackIntegrationDb).where(SlackIntegrationDb.slack_team_id == team_id))
         integration = result.scalar_one_or_none()
         return integration.domain if integration else None
-
-
-@fai_app.post("/slack/install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]})
-async def create_slack_integration(
-    domain: str, db: AsyncSession = Depends(get_db), _: None = Depends(verify_token), __: None = Depends(ask_ai_enabled)
-) -> SlackIntegrationResponse:
-    result = await create_integration(
-        domain=domain,
-        db=db,
-        integration_db_model=SlackIntegrationDb,
-        client_id=VARIABLES.SLACK_CLIENT_ID,
-        log_prefix="[ASK_FERN]",
-    )
-    return SlackIntegrationResponse(**result)
 
 
 @fai_app.post("/slack/events", openapi_extra={"x-fern-audiences": ["internal"]})
@@ -1199,28 +1177,12 @@ async def get_slack_install_link(domain: str) -> JSONResponse:
 
         install_url = create_slack_integration_url(integration_id, VARIABLES.SLACK_CLIENT_ID)
 
-        scopes = [
-            "app_mentions:read",
-            "channels:history",
-            "channels:join",
-            "channels:read",
-            "chat:write",
-            "commands",
-            "groups:history",
-            "im:history",
-            "mpim:history",
-            "reactions:read",
-            "reactions:write",
-            "users:read",
-            "users:read.email",
-        ]
-
         return JSONResponse(
             content={
                 "integration_id": integration_id,
                 "domain": domain,
                 "install_url": install_url,
-                "scopes": scopes,
+                "scopes": SLACK_SCOPES,
             }
         )
 

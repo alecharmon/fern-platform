@@ -1,20 +1,19 @@
+from datetime import (
+    UTC,
+    datetime,
+)
 from typing import Any
 
 from fastapi import (
     BackgroundTasks,
-    Depends,
     HTTPException,
     Request,
 )
 from fastapi.responses import JSONResponse
 from slack_sdk.web.async_client import AsyncWebClient
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from fai.app import fai_app
-from fai.dependencies import (
-    get_db,
-    verify_token,
-)
+from fai.db import async_session_maker
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_message_cache_db import ScribeMessageCacheDb
 from fai.settings import (
@@ -23,8 +22,9 @@ from fai.settings import (
 )
 from fai.utils.scribe.message_handler import handle_scribe_message
 from fai.utils.slack.integration_common import (
+    SLACK_SCOPES,
     cleanup_message_cache,
-    create_integration,
+    create_slack_integration_url,
     handle_oauth_callback,
     is_message_processed,
     mark_message_processed,
@@ -44,27 +44,6 @@ async def is_scribe_message_processed(team_id: str, message_ts: str) -> bool:
 async def mark_scribe_message_processed(team_id: str, message_ts: str) -> None:
     """Mark a Scribe message as processed."""
     await mark_message_processed(team_id, message_ts, ScribeMessageCacheDb, "uq_scribe_message_cache_team_message")
-
-
-@fai_app.post(
-    "/scribe/slack/install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]}
-)
-async def create_scribe_slack_integration(
-    domain: str, db: AsyncSession = Depends(get_db), _: None = Depends(verify_token)
-) -> JSONResponse:
-    result = await create_integration(
-        domain=domain,
-        db=db,
-        integration_db_model=ScribeIntegrationDb,
-        client_id=VARIABLES.SCRIBE_SLACK_CLIENT_ID,
-        log_prefix="[SCRIBE]",
-    )
-    # Convert datetime objects to ISO format strings for JSONResponse
-    if result.get("created_at"):
-        result["created_at"] = result["created_at"].isoformat()
-    if result.get("installed_at"):
-        result["installed_at"] = result["installed_at"].isoformat()
-    return JSONResponse(content=result)
 
 
 @fai_app.post("/scribe/slack/events", openapi_extra={"x-fern-audiences": ["internal"]})
@@ -149,6 +128,38 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
             LOGGER.error(f"[SCRIBE] Failed to send message: {msg_response}")
     except Exception as e:
         LOGGER.error(f"[SCRIBE] Error sending message: {e}")
+
+
+@fai_app.get(
+    "/scribe/slack/get-install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]}
+)
+async def get_scribe_slack_install_link(domain: str) -> JSONResponse:
+    try:
+        async with async_session_maker() as session:
+            new_integration = ScribeIntegrationDb(
+                domain=domain,
+                created_at=datetime.now(UTC),
+            )
+            session.add(new_integration)
+            await session.commit()
+            await session.refresh(new_integration)
+            integration_id = new_integration.integration_id
+            LOGGER.info(f"[SCRIBE] Created new integration {integration_id} for domain {domain}")
+
+        install_url = create_slack_integration_url(integration_id, VARIABLES.SCRIBE_SLACK_CLIENT_ID)
+
+        return JSONResponse(
+            content={
+                "integration_id": integration_id,
+                "domain": domain,
+                "install_url": install_url,
+                "scopes": SLACK_SCOPES,
+            }
+        )
+
+    except Exception as e:
+        LOGGER.error(f"[SCRIBE] Error generating Slack install link: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate install link")
 
 
 @fai_app.get("/scribe/slack/oauth/callback", openapi_extra={"x-fern-audiences": ["internal"]})
