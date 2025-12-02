@@ -21,6 +21,7 @@ import {
     rehypeExpressionToMd,
     rehypeMdxClassStyle,
     rehypeSlug,
+    rehypeSqueezeParagraphs,
     rehypeToc,
     remarkInjectEsm,
     remarkSanitizeAcorn
@@ -180,6 +181,7 @@ async function serializeMdxImpl(
             ];
 
             const rehypePlugins: PluggableList = [
+                rehypeSqueezeParagraphs,
                 rehypeKatex,
                 [rehypeFiles, { files: remoteFiles }],
                 rehypeMdxClassStyle,

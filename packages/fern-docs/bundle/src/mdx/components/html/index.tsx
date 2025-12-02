@@ -15,8 +15,8 @@ export const HeadingRenderer = (level: number, props: React.ComponentProps<"h1">
     );
 };
 
-export function P({ variant, className, ...rest }: { variant: "api" | "markdown" } & React.ComponentProps<"p">) {
-    return <p {...rest} />;
+export function P({ variant, className, ...rest }: { variant?: "api" | "markdown" } & React.ComponentProps<"p">) {
+    return <p {...rest} className={className} />;
 }
 
 export function Strong({ className, ...rest }: React.ComponentProps<"strong">) {

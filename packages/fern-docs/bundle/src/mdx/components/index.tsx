@@ -37,7 +37,7 @@ import { Download } from "./download";
 import { Feature } from "./feature";
 import { File, Files, Folder, Indent } from "./files";
 import { Frame } from "./frame";
-import { A, HeadingRenderer, Image, Li, Ol, Strong, Ul } from "./html";
+import { A, HeadingRenderer, Image, Li, Ol, P, Strong, Ul } from "./html";
 import { Table } from "./html-table";
 import { Icon } from "./icon/Icon";
 import { If } from "./if";
@@ -142,6 +142,7 @@ const HTML_COMPONENTS = {
     iframe: IFrame,
     li: Li,
     ol: Ol,
+    p: P,
     strong: Strong,
     table: Table,
     ul: Ul
@@ -159,6 +160,7 @@ const ALIASED_HTML_COMPONENTS = {
     IFrame,
     Li,
     Ol,
+    P,
     Strong,
     Table,
     Ul
