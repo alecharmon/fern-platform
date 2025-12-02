@@ -4,9 +4,9 @@
 
 import * as environments from "../../../../environments.js";
 import * as core from "../../../../core/index.js";
-import * as FernAI from "../../../index.js";
 import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
+import * as FernAI from "../../../index.js";
 
 export declare namespace SlackAskFern {
     export interface Options {
@@ -37,87 +37,6 @@ export class SlackAskFern {
 
     constructor(_options: SlackAskFern.Options = {}) {
         this._options = _options;
-    }
-
-    /**
-     * @param {FernAI.CreateSlackIntegrationRequest} request
-     * @param {SlackAskFern.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link FernAI.UnprocessableEntityError}
-     *
-     * @example
-     *     await client.slackAskFern.createSlackIntegration({
-     *         domain: "domain"
-     *     })
-     */
-    public createSlackIntegration(
-        request: FernAI.CreateSlackIntegrationRequest,
-        requestOptions?: SlackAskFern.RequestOptions,
-    ): core.HttpResponsePromise<FernAI.SlackIntegrationResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__createSlackIntegration(request, requestOptions));
-    }
-
-    private async __createSlackIntegration(
-        request: FernAI.CreateSlackIntegrationRequest,
-        requestOptions?: SlackAskFern.RequestOptions,
-    ): Promise<core.WithRawResponse<FernAI.SlackIntegrationResponse>> {
-        const { domain } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        _queryParams["domain"] = domain;
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernAIEnvironment.Production,
-                "slack/install",
-            ),
-            method: "POST",
-            headers: _headers,
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body as FernAI.SlackIntegrationResponse, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch (_response.error.statusCode) {
-                case 422:
-                    throw new FernAI.UnprocessableEntityError(
-                        _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
-                    );
-                default:
-                    throw new errors.FernAIError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FernAIError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /slack/install.");
-            case "unknown":
-                throw new errors.FernAIError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
     }
 
     /**
@@ -462,82 +381,6 @@ export class SlackAskFern {
                 });
             case "timeout":
                 throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /slack/get-install.");
-            case "unknown":
-                throw new errors.FernAIError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * @param {string} domain
-     * @param {SlackAskFern.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link FernAI.UnprocessableEntityError}
-     *
-     * @example
-     *     await client.slackAskFern.listSlackIntegrations("domain")
-     */
-    public listSlackIntegrations(
-        domain: string,
-        requestOptions?: SlackAskFern.RequestOptions,
-    ): core.HttpResponsePromise<unknown> {
-        return core.HttpResponsePromise.fromPromise(this.__listSlackIntegrations(domain, requestOptions));
-    }
-
-    private async __listSlackIntegrations(
-        domain: string,
-        requestOptions?: SlackAskFern.RequestOptions,
-    ): Promise<core.WithRawResponse<unknown>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernAIEnvironment.Production,
-                `slack/integrations/${encodeURIComponent(domain)}`,
-            ),
-            method: "GET",
-            headers: _headers,
-            queryParameters: requestOptions?.queryParams,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch (_response.error.statusCode) {
-                case 422:
-                    throw new FernAI.UnprocessableEntityError(
-                        _response.error.body as FernAI.HttpValidationError,
-                        _response.rawResponse,
-                    );
-                default:
-                    throw new errors.FernAIError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FernAIError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /slack/integrations/{domain}.");
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,

@@ -60,40 +60,59 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         return;
     }
 
-    await updateJobStatus(domain, JobStatus.UPSERTING, {}, log);
-    const numInserted = await runTurbopufferUpsertTask(domain, deleteExisting);
+    try {
+        await setJobIdInSettings(domain, sqsMessageId, log);
+        await updateJobStatus(domain, JobStatus.UPSERTING, {}, log);
+        const numInserted = await runTurbopufferUpsertTask(domain, deleteExisting);
 
-    await updateJobStatus(domain, JobStatus.SYNCING, {}, log);
-    const jobId = await syncToQueryIndex(domain);
+        await updateJobStatus(domain, JobStatus.SYNCING, {}, log);
+        const jobId = await syncToQueryIndex(domain);
 
-    const end = Date.now();
-    const durationMs = end - start;
+        const end = Date.now();
+        const durationMs = end - start;
 
-    log.info("Reindex completed", { durationMs, numInserted, jobId, sqsMessageId });
+        log.info("Reindex completed", { durationMs, numInserted, jobId, sqsMessageId });
 
-    await track("ask_ai_turbopuffer_reindex", {
-        success: true,
-        domain,
-        durationMs,
-        numInserted,
-        jobId,
-        sqsMessageId,
-        deleteExisting,
-        launchType: process.env.LAUNCH_TYPE
-    });
-
-    await updateJobStatus(
-        domain,
-        JobStatus.COMPLETED,
-        {
-            completedAt: new Date().toISOString(),
+        await track("ask_ai_turbopuffer_reindex", {
+            success: true,
+            domain,
             durationMs,
-            numInserted
-        },
-        log
-    );
+            numInserted,
+            jobId,
+            sqsMessageId,
+            deleteExisting,
+            launchType: process.env.LAUNCH_TYPE
+        });
 
-    await sendReindexCallback(domain, sqsMessageId, "success", log);
+        await updateJobStatus(
+            domain,
+            JobStatus.COMPLETED,
+            {
+                completedAt: new Date().toISOString(),
+                durationMs,
+                numInserted
+            },
+            log
+        );
+
+        await sendReindexCallback(domain, sqsMessageId, "success", log);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        log.error("Reindex job failed during execution", { error: errorMessage, sqsMessageId });
+
+        await track("ask_ai_turbopuffer_reindex", {
+            success: false,
+            domain,
+            sqsMessageId,
+            errorKind: "ReindexExecutionError",
+            error: errorMessage,
+            durationMs: Date.now() - start,
+            launchType: process.env.LAUNCH_TYPE
+        });
+
+        await updateJobStatus(domain, JobStatus.FAILED, { error: errorMessage }, log);
+        await sendReindexCallback(domain, sqsMessageId, "failure", log);
+    }
 }
 
 async function sendReindexCallback(
@@ -135,6 +154,28 @@ async function sendReindexCallback(
         log.error("Error sending reindex callback to FAI after retries", {
             error: error instanceof Error ? error.message : String(error),
             sqsMessageId
+        });
+    }
+}
+
+async function setJobIdInSettings(domain: string, jobId: string, log: Logger): Promise<void> {
+    try {
+        await withRetry(
+            async () => {
+                await faiClient.settings.setJobId({
+                    domain,
+                    job_id: jobId
+                });
+
+                log.info("Successfully set job_id in settings", { domain, jobId });
+            },
+            { maxAttempts: 3, initialDelayMs: 1000 }
+        );
+    } catch (error) {
+        log.error("Error setting job_id in settings after retries", {
+            error: error instanceof Error ? error.message : String(error),
+            domain,
+            jobId
         });
     }
 }

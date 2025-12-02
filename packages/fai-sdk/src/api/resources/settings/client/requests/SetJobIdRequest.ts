@@ -5,9 +5,11 @@
 /**
  * @example
  *     {
- *         domain: "domain"
+ *         domain: "domain",
+ *         job_id: "job_id"
  *     }
  */
-export interface CreateSlackIntegrationRequest {
+export interface SetJobIdRequest {
     domain: string;
+    job_id: string;
 }

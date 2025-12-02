@@ -45,3 +45,9 @@ class EnableAskAiRequest(BaseModel):
 
 class EnableAskAiResponse(BaseModel):
     success: bool = Field(description="Whether the enable operation was successful")
+
+
+class SetJobIdResponse(BaseModel):
+    success: bool = Field(description="Whether the job_id was set successfully")
+    domain: str | None = Field(None, description="Domain for which job_id was set")
+    job_id: str | None = Field(None, description="The job_id that was set")

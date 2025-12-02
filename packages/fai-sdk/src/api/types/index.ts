@@ -58,7 +58,7 @@ export * from "./Query.js";
 export * from "./ReconstructIndexResponse.js";
 export * from "./ReindexWebsiteResponse.js";
 export * from "./ReindexingJobRecord.js";
-export * from "./SlackIntegrationResponse.js";
+export * from "./SetJobIdResponse.js";
 export * from "./SyncIndexResponse.js";
 export * from "./ToggleAskAiResponse.js";
 export * from "./ToggleStatusResponse.js";

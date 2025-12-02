@@ -25,6 +25,7 @@ from fai.models.api.settings_api import (
     EnableAskAiRequest,
     EnableAskAiResponse,
     GetSettingsResponse,
+    SetJobIdResponse,
     ToggleAskAiResponse,
     ToggleStatusResponse,
 )
@@ -201,8 +202,7 @@ async def enable_ask_ai(
             LOGGER.info(f"Starting reindex for domain {stripped_domain}")
             try:
                 job_id = await queue_reindex_sqs(stripped_domain, delete_existing=True)
-                existing_record.job_id = job_id
-                await db.commit()
+                LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
                 results.append({"domain": domain, "success": True, "job_id": job_id})
             except Exception as e:
                 LOGGER.error(f"Failed to queue reindex for domain {stripped_domain}: {e}")
@@ -263,7 +263,6 @@ async def toggle_ask_ai(
                 return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
 
             if existing_record:
-                existing_record.job_id = job_id
                 if locations is not None:
                     existing_record.docs_enabled = "docs" in locations
                     existing_record.slack_enabled = "slack" in locations
@@ -282,7 +281,7 @@ async def toggle_ask_ai(
                 new_record = SettingsDb(
                     domain=stripped_domain,
                     org_name=org_name,
-                    job_id=job_id,
+                    job_id=None,
                     last_reindex_time=None,
                     is_preview=preview,
                     docs_enabled=docs_enabled,
@@ -347,9 +346,7 @@ async def reindex_ask_ai(
             LOGGER.error(f"Failed to queue manual reindex for domain {stripped_domain}: {e}")
             return ToggleAskAiResponse(success=False, ask_ai_enabled=existing_record.last_reindex_time is not None)
 
-        existing_record.job_id = job_id
-        await db.commit()
-        LOGGER.info(f"Started manual reindex for domain {stripped_domain} with job_id: {job_id}")
+        LOGGER.info(f"Started manual reindex for domain {stripped_domain}, job_id: {job_id}")
 
         return ToggleAskAiResponse(
             success=True,
@@ -438,6 +435,38 @@ async def reindex_preview_callback(
     except Exception as e:
         LOGGER.exception(f"Error handling reindex callback: {e}")
         return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
+
+
+@fai_app.post(
+    "/settings/ask-ai/set-job-id",
+    response_model=SetJobIdResponse,
+    openapi_extra={"x-fern-audiences": ["internal"]},
+)
+async def set_job_id(
+    domain: str,
+    job_id: str,
+    db: AsyncSession = Depends(get_db),
+) -> SetJobIdResponse:
+    """Set the job_id for a domain when reindex starts processing."""
+    try:
+        stripped_domain = strip_domain(domain)
+
+        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        existing_record = existing.scalar_one_or_none()
+
+        if not existing_record:
+            LOGGER.warning(f"No settings record found for domain {stripped_domain}")
+            return SetJobIdResponse(success=False)
+
+        existing_record.job_id = job_id
+        await db.commit()
+        LOGGER.info(f"Set job_id {job_id} for domain {stripped_domain}")
+
+        return SetJobIdResponse(success=True, domain=stripped_domain, job_id=job_id)
+
+    except Exception as e:
+        LOGGER.exception(f"Error setting job_id: {e}")
+        return SetJobIdResponse(success=False)
 
 
 @fai_app.post(
