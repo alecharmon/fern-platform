@@ -12,12 +12,16 @@ import { toImageDescriptor } from "@/app/seo";
 import { createFindNode } from "@/server/find-node";
 import { runAsyncSpan } from "@/server/tracing";
 
+type DocsPage = Awaited<ReturnType<DocsLoader["getPage"]>>;
+
 export async function getMetadataTitleFromPage({
     loader,
-    slug
+    slug,
+    page: prefetchedPage
 }: {
     loader: DocsLoader;
     slug: Slug;
+    page?: DocsPage;
 }): Promise<string | undefined> {
     const slugAttr = slugToAttribute(slug);
     const findNode = createFindNode(loader);
@@ -31,12 +35,14 @@ export async function getMetadataTitleFromPage({
             });
 
             const pageId = node != null ? FernNavigation.getPageId(node) : undefined;
-            const page = pageId
-                ? await runAsyncSpan("metadata.title.getPage", () => loader.getPage(pageId), {
-                      "fern.docs.pageId": pageId,
-                      "fern.docs.domain": loader.domain
-                  })
-                : undefined;
+            const page =
+                prefetchedPage ??
+                (pageId
+                    ? await runAsyncSpan("metadata.title.getPage", () => loader.getPage(pageId), {
+                          "fern.docs.pageId": pageId,
+                          "fern.docs.domain": loader.domain
+                      })
+                    : undefined);
             const frontmatter = page ? getFrontmatter(page.markdown)?.data : undefined;
 
             return markdownToString(frontmatter?.headline || frontmatter?.title || node?.title) ?? node?.title;
@@ -114,7 +120,7 @@ export async function generateMetadataFromPage({
 
             const title = await runAsyncSpan(
                 "metadata.computeTitle",
-                () => getMetadataTitleFromPage({ loader, slug }),
+                () => getMetadataTitleFromPage({ loader, slug, page }),
                 {
                     "fern.docs.domain": loader.domain,
                     "fern.docs.slug": slugAttr
