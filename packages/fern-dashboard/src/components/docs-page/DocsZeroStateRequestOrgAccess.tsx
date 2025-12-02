@@ -117,14 +117,26 @@ export function DocsZeroStateRequestOrgAccess({ user }: DocsZeroStateRequestOrgA
                 throw new Error("Failed to request access");
             }
 
-            setIsSuccess(true);
-            setIsPolling(true);
+            const data = (await response.json().catch(() => null)) as {
+                success?: boolean;
+                autoApproved?: boolean;
+            } | null;
 
             // Track success
             captureEvent(posthog, PosthogEventName.DOCS_REQUEST_ACCESS_SUCCESS, {
                 userEmail: user.email ?? "",
-                docsUrl
+                docsUrl,
+                autoApproved: data?.autoApproved ?? false
             });
+
+            // If auto-approved, redirect immediately without showing success UI
+            if (data?.autoApproved) {
+                window.location.href = "/";
+                return;
+            }
+
+            setIsSuccess(true);
+            setIsPolling(true);
         } catch (err) {
             setError("Failed to request access. Please try again.");
             console.error("Error requesting org access:", err);

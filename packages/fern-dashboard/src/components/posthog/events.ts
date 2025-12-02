@@ -40,6 +40,7 @@ export type PosthogEventPayloads = {
     [PosthogEventName.DOCS_REQUEST_ACCESS_SUCCESS]: {
         userEmail: string;
         docsUrl: string;
+        autoApproved: boolean;
     };
     [PosthogEventName.DOCS_PAGE_VIEWED]: {
         orgName: string;
