@@ -13,6 +13,7 @@ from fai.settings import (
     LOGGER,
     VARIABLES,
 )
+from fai.utils.scribe.session_manager import resume_active_sessions
 from utils.init_db import init
 
 
@@ -33,6 +34,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         LOGGER.info("Setup: Scheduler started.")
     except Exception as e:
         LOGGER.error(f"Setup: Error starting scheduler: {e}")
+
+    try:
+        await resume_active_sessions()
+        LOGGER.info("Setup: Scribe session polling resumed.")
+    except Exception as e:
+        LOGGER.error(f"Setup: Error resuming Scribe sessions: {e}")
 
     yield
 

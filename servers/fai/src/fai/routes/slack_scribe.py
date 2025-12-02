@@ -83,7 +83,6 @@ async def handle_scribe_slack_events(request: Request, background_tasks: Backgro
 
             if event_type == "app_mention":
                 if event.get("bot_id"):
-                    LOGGER.info(f"[SCRIBE] Skipping bot message: bot_id={event.get('bot_id')}")
                     return JSONResponse(content={"status": "ok"})
 
                 if message_ts:
@@ -113,7 +112,6 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
     response = await handle_scribe_message(event, team_id)
 
     if not response.response_text or not response.bot_token:
-        LOGGER.error("[SCRIBE] Could not generate response or missing bot token")
         return
 
     client = AsyncWebClient(token=response.bot_token)
