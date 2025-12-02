@@ -14,9 +14,16 @@ class TextPart(BaseModel):
     text: str
 
 
+class MessagePart(BaseModel):
+    model_config = {"extra": "ignore"}
+    type: str
+    text: str | None = None
+
+
 class UIMessage(BaseModel):
+    model_config = {"extra": "ignore"}
     role: Literal["user", "assistant"]
-    parts: list[TextPart]
+    parts: list[MessagePart]
 
 
 class ChatMessage(BaseModel):
@@ -43,7 +50,7 @@ class ChatRequest(BaseModel):
         for msg in self.messages:
             content_parts = []
             for part in msg.parts:
-                if part.type == "text":
+                if part.type == "text" and part.text:
                     content_parts.append(part.text)
             content = "".join(content_parts)
             simple_messages.append(ChatMessage(role=msg.role, content=content))

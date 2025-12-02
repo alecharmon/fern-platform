@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from src.models.request import (
     ChatMessage,
     ChatRequest,
-    TextPart,
+    MessagePart,
     UIMessage,
 )
 
@@ -126,7 +126,7 @@ class TestChatRequest:
 
 class TestUIMessage:
     def test_create_ui_message_with_text_part(self) -> None:
-        message = UIMessage(role="user", parts=[TextPart(type="text", text="Hello world")])
+        message = UIMessage(role="user", parts=[MessagePart(type="text", text="Hello world")])
 
         assert message.role == "user"
         assert len(message.parts) == 1
@@ -137,11 +137,106 @@ class TestUIMessage:
         message = UIMessage(
             role="user",
             parts=[
-                TextPart(type="text", text="Hello "),
-                TextPart(type="text", text="world"),
+                MessagePart(type="text", text="Hello "),
+                MessagePart(type="text", text="world"),
             ],
         )
 
         assert len(message.parts) == 2
         assert message.parts[0].text == "Hello "
         assert message.parts[1].text == "world"
+
+    def test_ui_message_ignores_extra_fields(self) -> None:
+        data = {
+            "id": "msg-123",
+            "role": "user",
+            "createdAt": "2024-01-01T00:00:00Z",
+            "parts": [{"type": "text", "text": "Hello"}],
+        }
+        message = UIMessage(**data)
+
+        assert message.role == "user"
+        assert len(message.parts) == 1
+        assert message.parts[0].text == "Hello"
+
+    def test_ui_message_with_non_text_parts(self) -> None:
+        data = {
+            "role": "assistant",
+            "parts": [
+                {"type": "step-start"},
+                {"type": "text", "text": "Let me search..."},
+                {"type": "data-sources", "data": [{"url": "https://example.com"}]},
+                {"type": "text", "text": "Based on the docs..."},
+            ],
+        }
+        message = UIMessage(**data)
+
+        assert message.role == "assistant"
+        assert len(message.parts) == 4
+        assert message.parts[0].type == "step-start"
+        assert message.parts[0].text is None
+        assert message.parts[1].type == "text"
+        assert message.parts[1].text == "Let me search..."
+
+
+class TestMessagePart:
+    def test_text_part(self) -> None:
+        part = MessagePart(type="text", text="Hello")
+        assert part.type == "text"
+        assert part.text == "Hello"
+
+    def test_non_text_part(self) -> None:
+        part = MessagePart(type="step-start")
+        assert part.type == "step-start"
+        assert part.text is None
+
+    def test_ignores_extra_fields(self) -> None:
+        data = {"type": "data-sources", "data": [{"url": "https://example.com"}]}
+        part = MessagePart(**data)
+        assert part.type == "data-sources"
+        assert part.text is None
+
+
+class TestGetSimpleMessagesWithMixedParts:
+    def test_filters_non_text_parts(self) -> None:
+        data = {
+            "messages": [
+                {
+                    "role": "user",
+                    "parts": [{"type": "text", "text": "Hello"}],
+                },
+                {
+                    "role": "assistant",
+                    "parts": [
+                        {"type": "step-start"},
+                        {"type": "text", "text": "Let me search..."},
+                        {"type": "data-sources", "data": []},
+                        {"type": "text", "text": " Here's the answer."},
+                    ],
+                },
+            ]
+        }
+        request = ChatRequest(**data)
+        simple_messages = request.get_simple_messages()
+
+        assert len(simple_messages) == 2
+        assert simple_messages[0].content == "Hello"
+        assert simple_messages[1].content == "Let me search... Here's the answer."
+
+    def test_handles_message_with_only_non_text_parts(self) -> None:
+        data = {
+            "messages": [
+                {
+                    "role": "assistant",
+                    "parts": [
+                        {"type": "step-start"},
+                        {"type": "data-sources", "data": []},
+                    ],
+                },
+            ]
+        }
+        request = ChatRequest(**data)
+        simple_messages = request.get_simple_messages()
+
+        assert len(simple_messages) == 1
+        assert simple_messages[0].content == ""
