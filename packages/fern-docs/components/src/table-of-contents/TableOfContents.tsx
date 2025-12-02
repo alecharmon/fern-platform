@@ -4,7 +4,7 @@ import type { FernUser } from "@fern-api/docs-auth";
 import { t } from "@fern-docs/i18n";
 import type { TableOfContentsItem as TableOfContentsItemType } from "@fern-docs/mdx";
 import fastdom from "fastdom";
-import React, { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCallbackOne } from "use-memo-one";
 import { cn } from "../cn";
 import { WithFeatureFlags } from "../feature-flags/WithFeatureFlags";
@@ -96,14 +96,15 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, ta
         return flatten(filteredTableOfContents);
     }, [filteredTableOfContents]);
 
-    const [anchorInView, setAnchorInView] = useState<string | undefined>(undefined);
+    const [anchorsInView, setAnchorsInView] = useState<string[]>([]);
+    const tocItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
     const currentPathAnchor = useCurrentAnchor();
 
     React.useEffect(() => {
         if (currentPathAnchor != null && allAnchors.includes(currentPathAnchor)) {
             anchorJustSet = true;
-            setAnchorInView(currentPathAnchor);
+            setAnchorsInView([currentPathAnchor]);
             clearTimeout(anchorJustSetTimeout);
             anchorJustSetTimeout = window.setTimeout(() => {
                 anchorJustSet = false;
@@ -113,9 +114,9 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, ta
 
     const measure = useTableOfContentsObserver(
         allAnchors,
-        useCallback((id: string | undefined) => {
+        useCallback((ids: string[]) => {
             if (!anchorJustSet) {
-                setAnchorInView(id);
+                setAnchorsInView(ids);
             }
         }, [])
     );
@@ -127,22 +128,44 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, ta
     const [liHeight, setLiHeight] = useState<number>(0);
     const [offsetTop, setOffsetTop] = useState<number>(0);
 
+    const registerListItemRef = useCallbackOne((anchorString: string, node: HTMLLIElement | null) => {
+        if (node) {
+            tocItemRefs.current.set(anchorString, node);
+        } else {
+            tocItemRefs.current.delete(anchorString);
+        }
+    }, []);
+
     /**
-     * when the anchorInView changes to null, reset the height and top of the active li
+     * adjust highlight pill to wrap all visible anchors
      */
     useEffect(() => {
-        if (anchorInView == null) {
+        if (anchorsInView.length === 0) {
             setLiHeight(0);
             setOffsetTop(0);
+            return;
         }
-    }, [anchorInView]);
 
-    const setActiveRef = useCallbackOne((liRef: HTMLLIElement) => {
+        const firstAnchorId = anchorsInView[0];
+        const lastAnchorId = anchorsInView[anchorsInView.length - 1];
+        if (!firstAnchorId || !lastAnchorId) {
+            return;
+        }
+
+        const firstAnchor = tocItemRefs.current.get(firstAnchorId);
+        const lastAnchor = tocItemRefs.current.get(lastAnchorId);
+
+        if (!firstAnchor || !lastAnchor) {
+            return;
+        }
+
         fastdom.measure(() => {
-            setLiHeight(liRef.getBoundingClientRect().height);
-            setOffsetTop(liRef.offsetTop);
+            const top = firstAnchor.offsetTop;
+            const lastBottom = lastAnchor.offsetTop + lastAnchor.getBoundingClientRect().height;
+            setOffsetTop(top);
+            setLiHeight(Math.max(lastBottom - top, 0));
         });
-    }, []);
+    }, [anchorsInView]);
 
     const flattenTableOfContents = (items: TableOfContentsItemType[], depth = 0): ReactNode => {
         return items.flatMap(({ simpleString: text, anchorString, children, featureFlags }) => {
@@ -150,14 +173,15 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, ta
                 // don't render empty headings
                 return [];
             }
+            const isActive = anchorsInView.includes(anchorString);
             return [
                 <WithFeatureFlags featureFlags={featureFlags} key={`${depth}-${anchorString}`}>
                     <TableOfContentsItem
                         key={`${depth}-${anchorString}`}
                         text={text}
                         anchorString={anchorString}
-                        active={anchorInView === anchorString}
-                        setActiveRef={setActiveRef}
+                        active={isActive}
+                        registerRef={registerListItemRef}
                         depth={depth}
                     />
                 </WithFeatureFlags>,

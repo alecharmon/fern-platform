@@ -5,6 +5,9 @@ import { useCallbackOne } from "use-memo-one";
 
 import { SCROLL_BODY_ATOM } from "../state/viewport";
 
+const HEADER_SELECTOR = ".fern-header-content";
+const ANCHOR_TOP_BUFFER = 20;
+
 function toIdQuerySelector(id: string): string {
     if (id.startsWith("#")) {
         return id;
@@ -30,13 +33,15 @@ function toIdQuerySelector(id: string): string {
  * and is considered to be a factor in determining the visibility of the anchor ID.
  *
  * @param ids the ids of the elements to observe
- * @param setActiveId the function to call when an observed element (and its immediate siblings below) is visible above 40% of the viewport height
+ * @param setActiveIds the function to call with all anchors that intersect the viewport (after accounting for the sticky header)
  * @returns a function to call to trigger another measurement (to be called between page views)
  */
-export function useTableOfContentsObserver(ids: string[], setActiveId: (id: string | undefined) => void): () => void {
+export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: string[]) => void): () => void {
     const idToYRef = useRef<Record<string, number>>({});
     const root = useAtomValue(SCROLL_BODY_ATOM);
     const rafIdRef = useRef<number | null>(null);
+    const headerElementRef = useRef<HTMLElement | null>(null);
+    const headerHeightRef = useRef(0);
 
     /**
      * on every scroll event, measure the top Y position of each element and determine
@@ -44,7 +49,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
      */
     const take = useCallbackOne(() => {
         if (!root) {
-            setActiveId(undefined);
+            setActiveIds([]);
             return;
         }
         fastdom.measure(() => {
@@ -55,25 +60,14 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
             const intersectionTop = scrollY + rootTop;
             const intersectionBottom = scrollY + rootTop + clientHeight;
 
-            // when the user scrolls to the very top of the page, set the anchorInView to the first anchor
-            if (scrollY === 0) {
-                const firstAnchor = ids[0];
-                if (firstAnchor) {
-                    setActiveId(firstAnchor);
-                }
-                return;
-            }
+            const headerElement = headerElementRef.current;
+            const shouldApplyHeaderOffset =
+                !!headerElement && headerHeightRef.current > 0 && !!root && root.contains(headerElement);
+            const headerOffset = shouldApplyHeaderOffset ? headerHeightRef.current : 0;
+            const targetLine = intersectionTop + headerOffset;
 
-            // when the user scrolls to the very bottom of the page, set the anchorInView to the last anchor
-            const lastAnchor = ids[ids.length - 1];
-            if (scrollHeight - clientHeight <= scrollY) {
-                if (lastAnchor) {
-                    setActiveId(lastAnchor);
-                }
-                return;
-            }
-
-            let activeId: string | undefined;
+            const visibleIds: string[] = [];
+            let lastAnchorBeforeViewport: string | undefined;
             for (const id of ids) {
                 const y = idToYRef.current[id];
                 if (y == null) {
@@ -84,15 +78,84 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
                     break;
                 }
 
-                if (y < intersectionTop + clientHeight * 0.4) {
-                    // if the element is visible above 40% of the viewport height, set it as the activeId
-                    activeId = id;
+                if (y < targetLine) {
+                    lastAnchorBeforeViewport = id;
+                    continue;
+                }
+
+                if (y >= targetLine && y <= intersectionBottom) {
+                    visibleIds.push(id);
                 }
             }
 
-            setActiveId(activeId);
+            if (lastAnchorBeforeViewport && !visibleIds.includes(lastAnchorBeforeViewport)) {
+                visibleIds.unshift(lastAnchorBeforeViewport);
+            }
+
+            if (scrollY === 0) {
+                const firstAnchor = ids[0];
+                if (firstAnchor && !visibleIds.includes(firstAnchor)) {
+                    visibleIds.unshift(firstAnchor);
+                }
+            } else if (scrollHeight - clientHeight <= scrollY) {
+                const lastAnchor = ids[ids.length - 1];
+                if (lastAnchor && !visibleIds.includes(lastAnchor)) {
+                    visibleIds.push(lastAnchor);
+                }
+            }
+
+            if (visibleIds.length === 0 && ids[0]) {
+                visibleIds.push(ids[0]);
+            }
+
+            const visibleSet = new Set(visibleIds);
+            let firstIndex = -1;
+            let lastIndex = -1;
+            for (let i = 0; i < ids.length; i++) {
+                const id = ids[i];
+                if (!id) {
+                    continue;
+                }
+                if (visibleSet.has(id)) {
+                    if (firstIndex === -1) {
+                        firstIndex = i;
+                    }
+                    lastIndex = i;
+                }
+            }
+
+            let contiguousVisibleIds: string[] = [];
+            if (firstIndex !== -1 && lastIndex !== -1) {
+                contiguousVisibleIds = ids.slice(firstIndex, lastIndex + 1);
+            }
+
+            setActiveIds(contiguousVisibleIds);
         });
-    }, [ids, root, setActiveId]);
+    }, [ids, root, setActiveIds]);
+
+    const updateHeaderHeight = useCallbackOne(
+        (element?: HTMLElement | null) => {
+            const headerElement = element ?? document.querySelector<HTMLElement>(HEADER_SELECTOR);
+            headerElementRef.current = headerElement ?? null;
+
+            if (!headerElement) {
+                if (headerHeightRef.current !== 0) {
+                    headerHeightRef.current = 0;
+                    take();
+                }
+                return;
+            }
+
+            fastdom.measure(() => {
+                const measuredHeight = headerElement.getBoundingClientRect().height;
+                if (measuredHeight !== headerHeightRef.current) {
+                    headerHeightRef.current = measuredHeight;
+                    take();
+                }
+            });
+        },
+        [take]
+    );
 
     /**
      * when the page is mounted or resized, measure the top Y position of each element
@@ -101,6 +164,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
         if (!root) {
             return;
         }
+        updateHeaderHeight();
         fastdom.measure(() => {
             const scrollY = root instanceof Document ? window.scrollY : root.scrollTop;
             const top = root instanceof Document ? 0 : root.getBoundingClientRect().top;
@@ -113,7 +177,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
                             .join(", ")
                     )
                 ).reduce<Record<string, number>>((prev, curr) => {
-                    prev[curr.id] = curr.getBoundingClientRect().top + scrollY - top;
+                    prev[curr.id] = curr.getBoundingClientRect().top + scrollY - top - ANCHOR_TOP_BUFFER;
                     return prev;
                 }, {});
             } catch (e) {
@@ -124,13 +188,25 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
         });
 
         take();
-    }, [ids, root, take]);
+    }, [ids, root, take, updateHeaderHeight]);
 
     useEffect(() => {
         if (!root) {
             return;
         }
         const observer = new ResizeObserver(measure);
+        const headerElement = document.querySelector<HTMLElement>(HEADER_SELECTOR);
+        const headerObserver =
+            headerElement != null
+                ? new ResizeObserver(() => {
+                      updateHeaderHeight(headerElement);
+                  })
+                : undefined;
+        if (headerObserver && headerElement) {
+            headerObserver.observe(headerElement);
+        } else {
+            updateHeaderHeight();
+        }
 
         // Throttle scroll handler with requestAnimationFrame to process once per frame
         const handleScroll = () => {
@@ -168,7 +244,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
                                 .join(", ")
                         )
                     ).reduce<Record<string, number>>((prev, curr) => {
-                        prev[curr.id] = curr.getBoundingClientRect().top + scrollY - top;
+                        prev[curr.id] = curr.getBoundingClientRect().top + scrollY - top - ANCHOR_TOP_BUFFER;
                         return prev;
                     }, {});
                 } catch (e) {
@@ -215,6 +291,9 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
 
         return () => {
             observer.disconnect();
+            if (headerObserver && headerElement) {
+                headerObserver.disconnect();
+            }
             root.removeEventListener("scroll", handleScroll);
             window.removeEventListener("hashchange", handleHashChange);
             window.removeEventListener("resize", measure);
@@ -223,7 +302,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveId: (id: stri
                 rafIdRef.current = null;
             }
         };
-    }, [measure, take, root, ids]);
+    }, [measure, take, root, ids, updateHeaderHeight]);
 
     return measure;
 }

@@ -8,18 +8,19 @@ export interface TableOfContentsItemProps {
     text: string;
     anchorString: string;
     active: boolean;
-    setActiveRef: (ref: HTMLLIElement) => void;
+    registerRef: (anchor: string, ref: HTMLLIElement | null) => void;
     depth?: number;
 }
 
 export const TableOfContentsItem = memo<TableOfContentsItemProps>((props): ReactElement<any> => {
-    const { text, anchorString, active, setActiveRef, depth = 0 } = props;
+    const { text, anchorString, active, registerRef, depth = 0 } = props;
     const ref = useRef<HTMLLIElement>(null);
     useEffect(() => {
-        if (active && ref.current != null) {
-            setActiveRef?.(ref.current);
-        }
-    }, [active, setActiveRef]);
+        registerRef(anchorString, ref.current);
+        return () => {
+            registerRef(anchorString, null);
+        };
+    }, [anchorString, registerRef]);
 
     return (
         <li className="mb-2 last:mb-0" ref={ref} data-depth={depth}>
