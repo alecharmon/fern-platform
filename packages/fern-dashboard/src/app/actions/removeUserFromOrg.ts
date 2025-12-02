@@ -40,12 +40,11 @@ export async function removeUserFromOrg({
     await auth0Management.invalidateUserOrganizationsCache(userIdToRemove);
 
     const actorName = session.user.name ?? session.user.email ?? userId;
-    const removedUserName = removedUser.data.name ?? removedUser.data.email ?? userIdToRemove;
     const removedUserEmail = removedUser.data.email ?? "unknown";
 
     postToSlack(
         "#dashboard-notifs",
-        `*[${orgName}]* ${actorName} removed ${removedUserName} (${removedUserEmail}) from the organization`,
+        `*[${orgName}]* *<mailto:${removedUserEmail}|${removedUserEmail}>* was removed from organization by ${actorName}`,
         "org-member-change"
     );
 }

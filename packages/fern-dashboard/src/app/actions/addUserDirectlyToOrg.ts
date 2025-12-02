@@ -60,7 +60,7 @@ export async function addUserDirectlyToOrg({
 
     postToSlack(
         "#dashboard-notifs",
-        `*[${orgName}]* ${actorName} added ${email} to the organization (direct add)`,
+        `*[${orgName}]* *<mailto:${email}|${email}>* was added to organization by ${actorName} (direct add)`,
         "org-member-change"
     );
 

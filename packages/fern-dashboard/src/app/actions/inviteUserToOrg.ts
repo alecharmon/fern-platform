@@ -29,7 +29,7 @@ export async function inviteUserToOrg({ inviteeEmail, orgName }: { inviteeEmail:
 
     postToSlack(
         "#dashboard-notifs",
-        `*[${orgName}]* ${actorName} invited ${inviteeEmail} to the organization`,
+        `*[${orgName}]* *<mailto:${inviteeEmail}|${inviteeEmail}>* was invited to organization by ${actorName}`,
         "org-member-change"
     );
 

@@ -101,7 +101,7 @@ export default async function requestOrgAccessHandler({
                 try {
                     await postToSlackImmediate(
                         "#dashboard-access-notifs",
-                        `*[${orgId}]* Auto-approved *<mailto:${email}|${email}>* :herb:\n\`${docsUrl}\``,
+                        `*[${orgId}]* Auto-approved *<mailto:${email}|${email}>* :white_check_mark:\n\`${docsUrl}\``,
                         "request-org-access"
                     );
                 } catch (err) {
