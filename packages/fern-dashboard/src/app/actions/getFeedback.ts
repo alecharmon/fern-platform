@@ -1,8 +1,9 @@
 "use server";
 
 import { fernToken_admin } from "@fern-api/docs-server";
+import type { FdrAPI } from "@fern-api/fdr-sdk";
 import { z } from "zod";
-
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import getDocsSitesForOrg from "../services/dal/fdr/getDocsSitesForOrg";
@@ -19,7 +20,7 @@ const DEFAULT_DATE_RANGE: DateRangeOptions = {
 
 const FEEDBACK_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, { ttlInSeconds: 3600 });
 
-const VERIFY_ACCESS_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, {
+const VERIFY_ACCESS_CACHE = new AsyncRedisCache(RedisCacheKeyType.DOCS_SITE_ACCESS, {
     ttlInSeconds: 600
 });
 
@@ -97,18 +98,14 @@ function getBaseDomain(rawUrl: string) {
     return baseDomain;
 }
 
-async function verifyDomainAccessAndGetSite(docsUrl: string) {
+async function verifyDomainAccessAndGetSite(docsUrl: string): Promise<FdrAPI.dashboard.DocsSite> {
     const session = await getCurrentSessionOrThrow();
     const token = session.accessToken;
-    const userId = session.user.sub;
 
-    const decodedUrl = decodeURIComponent(docsUrl);
+    const decodedUrl = parseDocsUrlParam({ docsUrl });
     const baseDomain = getBaseDomain(decodedUrl);
 
-    const cacheKeyParams = JSON.stringify({
-        userId
-    });
-    const cacheKey = RedisCacheKey.webAnalytics("verify-access", baseDomain, cacheKeyParams);
+    const cacheKey = RedisCacheKey.docsSiteAccess(baseDomain);
 
     const cachedResult = await VERIFY_ACCESS_CACHE.get(cacheKey, async () => {
         const docsMetadata = await getDocsUrlMetadata({
@@ -136,10 +133,10 @@ async function verifyDomainAccessAndGetSite(docsUrl: string) {
             throw new Error("You don't have access to analytics for this docs site");
         }
 
-        return { docsSite };
+        return docsSite;
     });
 
-    return cachedResult.docsSite!;
+    return cachedResult;
 }
 
 function getCacheKey(
@@ -191,7 +188,6 @@ export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedb
     const baseDomain = getBaseDomain(validated.docsUrl);
 
     const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
 
     const page = validated.page || 1;
     const pageSize = validated.pageSize || 100;
@@ -207,8 +203,7 @@ export async function getFeedback(request: GetFeedbackRequest): Promise<GetFeedb
     const cachedData = await FEEDBACK_CACHE.get(cacheKey, async () => {
         const analytics = getAnalyticsService({
             userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
+            baseSiteUrl: baseDomain
         });
 
         const offset = (page - 1) * pageSize;

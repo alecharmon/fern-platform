@@ -61,6 +61,12 @@ const statusConfig: Record<
         dotColor: "bg-blue-900",
         textColor: "text-blue-900",
         label: "Uncommitted Changes"
+    },
+    preview: {
+        containerClass: "bg-yellow-300 border border-yellow-800",
+        dotColor: "bg-yellow-800",
+        textColor: "text-yellow-800",
+        label: "Preview"
     }
 };
 

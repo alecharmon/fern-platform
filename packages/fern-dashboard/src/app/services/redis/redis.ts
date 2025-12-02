@@ -42,7 +42,7 @@ export async function redisDelPattern(pattern: string) {
 
     // Use SCAN to find all keys matching the pattern
     do {
-        const result = await redis.scan(cursor, { match: pattern, count: 100 });
+        const result: any = await redis.scan(cursor, { match: pattern, count: 100 });
         cursor = result[0];
         keys.push(...result[1]);
         // Redis scan returns cursor as string '0' when done

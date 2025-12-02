@@ -200,7 +200,7 @@ export function ShikiPlugin({ name, defaultLanguage }: { name: string; defaultLa
     let editorView: EditorView | null = null;
     let latestUpdateToken = 0;
 
-    const shikiPlugin = new Plugin<ShikiPluginState>({
+    const shikiPlugin: Plugin<ShikiPluginState> = new Plugin({
         key: new PluginKey("shiki"),
 
         state: {

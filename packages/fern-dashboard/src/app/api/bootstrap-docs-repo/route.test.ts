@@ -20,9 +20,9 @@ describe("bootstrap-docs-repo API", () => {
 
             mockFetch.mockResolvedValueOnce({
                 ok: true,
-                headers: new Map([["content-type", "application/json"]]),
+                headers: new Headers([["content-type", "application/json"]]),
                 text: async () => JSON.stringify(mockOpenapiSpec)
-            });
+            } as Response);
 
             const request = new NextRequest("http://localhost:3000/api/bootstrap-docs-repo", {
                 method: "POST",
@@ -51,9 +51,9 @@ paths: {}`;
 
             mockFetch.mockResolvedValueOnce({
                 ok: true,
-                headers: new Map([["content-type", "application/yaml"]]),
+                headers: new Headers([["content-type", "application/yaml"]]),
                 text: async () => mockYamlSpec
-            });
+            } as Response);
 
             const request = new NextRequest("http://localhost:3000/api/bootstrap-docs-repo", {
                 method: "POST",
@@ -74,9 +74,9 @@ paths: {}`;
 
             mockFetch.mockResolvedValueOnce({
                 ok: true,
-                headers: new Map([["content-type", "application/json"]]),
+                headers: new Headers([["content-type", "application/json"]]),
                 text: async () => JSON.stringify(mockOpenapiSpec)
-            });
+            } as Response);
 
             const request = new NextRequest("http://localhost:3000/api/bootstrap-docs-repo", {
                 method: "POST",
@@ -123,7 +123,7 @@ paths: {}`;
             mockFetch.mockResolvedValueOnce({
                 ok: false,
                 statusText: "Not Found"
-            });
+            } as Response);
 
             const request = new NextRequest("http://localhost:3000/api/bootstrap-docs-repo", {
                 method: "POST",
@@ -145,9 +145,9 @@ paths: {}`;
 
             mockFetch.mockResolvedValueOnce({
                 ok: true,
-                headers: new Map([["content-type", "application/json"]]),
+                headers: new Headers([["content-type", "application/json"]]),
                 text: async () => JSON.stringify(mockOpenapiSpec)
-            });
+            } as Response);
 
             const request = new NextRequest("http://localhost:3000/api/bootstrap-docs-repo", {
                 method: "POST",
@@ -171,9 +171,9 @@ paths: {}`;
 
             mockFetch.mockResolvedValueOnce({
                 ok: true,
-                headers: new Map([["content-type", "text/yaml"]]),
+                headers: new Headers([["content-type", "text/yaml"]]),
                 text: async () => mockYamlSpec
-            });
+            } as Response);
 
             const request = new NextRequest("http://localhost:3000/api/bootstrap-docs-repo", {
                 method: "POST",

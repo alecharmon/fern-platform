@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { ensureUserOwnsUrl } from "../homepage-images/auth";
 import handler from "../homepage-images/generate/handler";
 import { parseAuthHeader } from "../utils/parseAuthHeader";
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
     const { url } = parsedBody.data;
 
-    const ensureUserOwnsUrlResponse = await ensureUserOwnsUrl({ token, url });
+    const ensureUserOwnsUrlResponse = await ensureUserOwnsUrl({ token, url: parseDocsUrlParam({ docsUrl: url }) });
     if (ensureUserOwnsUrlResponse.errorResponse != null) {
         return ensureUserOwnsUrlResponse.errorResponse;
     }

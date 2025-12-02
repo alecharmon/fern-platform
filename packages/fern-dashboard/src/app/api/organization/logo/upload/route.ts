@@ -8,6 +8,7 @@ import {
     invalidateOrganizationCache
 } from "@/app/services/auth0/management";
 import { type Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
+import { convertToAuth0Organization } from "@/app/services/auth0/utils";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { getS3Client } from "@/app/services/s3";
 
@@ -98,7 +99,7 @@ export async function POST(request: Request): Promise<NextResponse<uploadOrgLogo
         await invalidateOrganizationCache(orgName);
 
         return NextResponse.json({
-            organization: updatedOrg as Auth0Organization,
+            organization: convertToAuth0Organization(updatedOrg),
             imageUrl
         });
     } catch (error) {

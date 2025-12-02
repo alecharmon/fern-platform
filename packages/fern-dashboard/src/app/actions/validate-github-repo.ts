@@ -1,8 +1,9 @@
 "use server";
 
 import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
+import type { DocsUrl } from "@/utils/types";
 
-export async function validateGithubRepoAction(orgName: string, site: string, githubUrl: string) {
+export async function validateGithubRepoAction(orgName: string, site: DocsUrl, githubUrl: string) {
     const result = await validateGithubRepoAccess(
         orgName,
         site,

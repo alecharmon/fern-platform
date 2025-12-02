@@ -10,10 +10,9 @@ import {
     type Row,
     useReactTable
 } from "@tanstack/react-table";
-
+import { useCallback } from "react";
 import { getConversation } from "@/app/actions/getConversation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
 import { QueriesDataTableHeader } from "./QueriesDataTableHeader";
 import type { ConversationRow } from "./types";
 
@@ -65,6 +64,18 @@ export function QueriesDataTable<TData, TValue>({
             }
         };
     }
+
+    const handleRowRender = useCallback((row: Row<TData>) => {
+        const rowA = row.getVisibleCells().find((c) => c.column.id === "source")?.column.columnDef.cell;
+        const rowB = row
+            .getVisibleCells()
+            .find((c) => c.column.id === "source")
+            ?.getContext();
+        if (rowA && rowB) {
+            return flexRender(rowA, rowB);
+        }
+        return null;
+    }, []);
 
     return (
         <div className="flex w-full flex-row gap-6 rounded-md">
@@ -122,16 +133,7 @@ export function QueriesDataTable<TData, TValue>({
                                                                 {(row.original as ConversationRow).first_query}
                                                             </div>
                                                             <div className="flex items-center gap-2 text-sm text-gray-1000">
-                                                                {flexRender(
-                                                                    row
-                                                                        .getVisibleCells()
-                                                                        .find((c) => c.column.id === "source")?.column
-                                                                        .columnDef.cell,
-                                                                    row
-                                                                        .getVisibleCells()
-                                                                        .find((c) => c.column.id === "source")
-                                                                        ?.getContext()
-                                                                )}
+                                                                {handleRowRender(row)}
                                                                 <span>•</span>
                                                                 <span>
                                                                     {(row.original as ConversationRow).message_count}{" "}

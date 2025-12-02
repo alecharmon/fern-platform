@@ -51,7 +51,7 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
                 if (!result.success) {
                     console.error("[BranchInitializer] Failed to create branch:", result.error);
                     setBranchFailed(true);
-                    setBranchFailureReason(result.error);
+                    setBranchFailureReason(result.error.type);
                 }
             })
             .catch((error) => {

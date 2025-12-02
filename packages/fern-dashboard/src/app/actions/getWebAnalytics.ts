@@ -1,10 +1,10 @@
 "use server";
 
 import { fernToken_admin } from "@fern-api/docs-server";
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { z } from "zod";
-
 import type { AnalyticsField, AnalyticsSortDir } from "@/components/web-analytics/constants";
-
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import getDocsSitesForOrg from "../services/dal/fdr/getDocsSitesForOrg";
@@ -32,12 +32,17 @@ const DEFAULT_DATE_RANGE: DateRangeOptions = {
 // Cache web analytics for 1 hour (3600 seconds)
 const WEB_ANALYTICS_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, { ttlInSeconds: 3600 });
 
-const VERIFY_ACCESS_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, {
+// Cache docs site access for 10 minutes (600 seconds)
+const DOCS_SITE_ACCESS_CACHE = new AsyncRedisCache(RedisCacheKeyType.DOCS_SITE_ACCESS, {
     ttlInSeconds: 600
 });
 
 // Helper to generate a deterministic cache key from request parameters
-function getCacheKey(endpoint: string, domain: string, params: CacheKeyParams): string {
+function getCacheKey(
+    endpoint: string,
+    domain: string,
+    params: CacheKeyParams
+): RedisCacheKey<typeof RedisCacheKeyType.WEB_ANALYTICS> {
     const dateRange = params.dateRange;
     const flatParams: Record<string, unknown> = {
         includeInternal: params.includeInternal,
@@ -149,20 +154,16 @@ function getBaseDomain(rawUrl: string) {
     return baseDomain;
 }
 
-async function verifyDomainAccessAndGetSite(url: string) {
+async function verifyDomainAccessAndGetSite(url: string): Promise<FdrAPI.dashboard.DocsSite> {
     const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
 
     // Decode the URL (handles %2F -> /)
-    const decodedUrl = decodeURIComponent(url);
+    const decodedUrl = parseDocsUrlParam({ docsUrl: url });
     const baseDomain = getBaseDomain(decodedUrl);
 
-    const cacheKeyParams = JSON.stringify({
-        userId
-    });
-    const cacheKey = RedisCacheKey.webAnalytics("verify-access", baseDomain, cacheKeyParams);
+    const cacheKey = RedisCacheKey.docsSiteAccess(baseDomain);
 
-    const cachedResult = await VERIFY_ACCESS_CACHE.get(cacheKey, async () => {
+    const cachedResult = await DOCS_SITE_ACCESS_CACHE.get(cacheKey, async () => {
         const docsMetadata = await getDocsUrlMetadata({
             url: decodedUrl,
             token: fernToken_admin() ?? session.accessToken
@@ -189,10 +190,10 @@ async function verifyDomainAccessAndGetSite(url: string) {
             throw new Error("You don't have access to analytics for this docs site");
         }
 
-        return { docsSite };
+        return docsSite;
     });
 
-    return cachedResult.docsSite!;
+    return cachedResult;
 }
 
 /**
@@ -247,8 +248,12 @@ export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<
         };
     });
 
+    if (!cachedData.metrics) {
+        throw new Error("Failed to fetch metrics");
+    }
+
     return {
-        metrics: cachedData.metrics!,
+        metrics: cachedData.metrics,
         baseSiteUrl: baseDomain,
         dateRange
     };
@@ -302,7 +307,11 @@ export async function getPageViewsByDay(
         return { timeSeries };
     });
 
-    return { timeSeries: cachedData.timeSeries! };
+    if (!cachedData.timeSeries) {
+        throw new Error("Failed to fetch page views time series");
+    }
+
+    return { timeSeries: cachedData.timeSeries };
 }
 
 /**
@@ -354,7 +363,11 @@ export async function getVisitorsByDay(
         return { timeSeries };
     });
 
-    return { timeSeries: cachedData.timeSeries! };
+    if (!cachedData.timeSeries) {
+        throw new Error("Failed to fetch visitors time series");
+    }
+
+    return { timeSeries: cachedData.timeSeries };
 }
 
 /**
@@ -412,7 +425,11 @@ export async function getTopPages(
         return { topPages };
     });
 
-    return { topPages: cachedData.topPages! };
+    if (!cachedData.topPages) {
+        throw new Error("Failed to fetch top pages");
+    }
+
+    return { topPages: cachedData.topPages };
 }
 
 /**
@@ -469,7 +486,11 @@ export async function getTopCountries(request: TableRequest): Promise<{
         return { topCountries };
     });
 
-    return { topCountries: cachedData.topCountries! };
+    if (!cachedData.topCountries) {
+        throw new Error("Failed to fetch top countries");
+    }
+
+    return { topCountries: cachedData.topCountries };
 }
 
 /**
@@ -527,7 +548,11 @@ export async function getLLMFileViews(request: LLMFileViewsRequest): Promise<{
         return { llmFileViews };
     });
 
-    return { llmFileViews: cachedData.llmFileViews! };
+    if (!cachedData.llmFileViews) {
+        throw new Error("Failed to fetch LLM file views");
+    }
+
+    return { llmFileViews: cachedData.llmFileViews };
 }
 
 /**
@@ -585,7 +610,11 @@ export async function getChannels(request: TableRequest): Promise<{
         return { channels };
     });
 
-    return { channels: cachedData.channels! };
+    if (!cachedData.channels) {
+        throw new Error("Failed to fetch channels");
+    }
+
+    return { channels: cachedData.channels };
 }
 
 /**
@@ -643,7 +672,11 @@ export async function getDeviceTypes(request: TableRequest): Promise<{
         return { deviceTypes };
     });
 
-    return { deviceTypes: cachedData.deviceTypes! };
+    if (!cachedData.deviceTypes) {
+        throw new Error("Failed to fetch device types");
+    }
+
+    return { deviceTypes: cachedData.deviceTypes };
 }
 
 /**
@@ -701,7 +734,11 @@ export async function getReferringDomains(request: TableRequest): Promise<{
         return { referringDomains };
     });
 
-    return { referringDomains: cachedData.referringDomains! };
+    if (!cachedData.referringDomains) {
+        throw new Error("Failed to fetch referring domains");
+    }
+
+    return { referringDomains: cachedData.referringDomains };
 }
 
 /**
@@ -755,7 +792,11 @@ export async function get404Pages(request: TableRequest): Promise<{ pages404: { 
         return { pages404 };
     });
 
-    return { pages404: cachedData.pages404! };
+    if (!cachedData.pages404) {
+        throw new Error("Failed to fetch 404 pages");
+    }
+
+    return { pages404: cachedData.pages404 };
 }
 
 /**
@@ -815,7 +856,11 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
         return { apiExplorerRequests };
     });
 
-    return { apiExplorerRequests: cachedData.apiExplorerRequests! };
+    if (!cachedData.apiExplorerRequests) {
+        throw new Error("Failed to fetch API Explorer requests");
+    }
+
+    return { apiExplorerRequests: cachedData.apiExplorerRequests };
 }
 
 /**
@@ -827,13 +872,16 @@ export async function clearWebAnalyticsCache(docsUrl: string): Promise<{ success
 
     const allDomains = docsSite.urls.map((url) => url.domain);
 
+    // Clear web analytics cache for each individual domain
     for (const domain of allDomains) {
         await redisDelPattern(`web-analytics-*-${domain}-*`);
 
-        const verifyAccessPattern = RedisCacheKey.webAnalytics("verify-access", domain, "*");
-        await redisDelPattern(verifyAccessPattern);
+        // Clear docs site access cache for each domain
+        const docsSiteAccessPattern = RedisCacheKey.docsSiteAccess(domain);
+        await redisDelPattern(docsSiteAccessPattern);
     }
 
+    // Clear web analytics cache for combined domains (used in some queries)
     await redisDelPattern(`web-analytics-*-${allDomains.sort().join(",")}-*`);
 
     return { success: true };
@@ -856,7 +904,6 @@ export async function getLLMBotTrafficByProvider(request: TableRequest): Promise
     const baseDomain = getBaseDomain(validated.docsUrl);
 
     const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
 
     const cacheKey = getCacheKey("llmBotProviders", allDomains.sort().join(","), {
         dateRange,
@@ -870,7 +917,7 @@ export async function getLLMBotTrafficByProvider(request: TableRequest): Promise
         const analytics = getAnalyticsService({
             userId,
             baseSiteUrl: baseDomain,
-            additionalDomains
+            additionalDomains: allDomains.filter((domain) => domain !== baseDomain)
         });
 
         const providers = await analytics.getLLMBotTrafficByProvider({
@@ -884,5 +931,9 @@ export async function getLLMBotTrafficByProvider(request: TableRequest): Promise
         return { providers };
     });
 
-    return { providers: cachedData.providers! };
+    if (!cachedData.providers) {
+        throw new Error("Failed to fetch LLM bot traffic by provider");
+    }
+
+    return { providers: cachedData.providers };
 }

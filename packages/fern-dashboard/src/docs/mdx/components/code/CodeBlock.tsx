@@ -93,6 +93,7 @@ export function CodeBlock(props: {
 
     return (
         <CodeBlockWithClipboardButton
+            lang="en"
             code={() => applyTemplates(code, template)}
             className={cn({ "bg-card-solid dark": isDarkCode }, className)}
         >

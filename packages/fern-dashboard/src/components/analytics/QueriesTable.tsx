@@ -24,7 +24,6 @@ export function QueriesTable({
     setCurrentPage,
     isLoading,
     queryTimeRange,
-    setQueryTimeRange,
     cutoffTime
 }: {
     queries: FernAI.Query[];
@@ -70,8 +69,6 @@ export function QueriesTable({
                 baseDocsUrl={baseDocsUrl}
                 onSelectConversation={onSelectConversation}
                 selectedConversation={selectedConversation}
-                queryTimeRange={queryTimeRange}
-                setQueryTimeRange={setQueryTimeRange}
                 onExport={handleExport}
                 isExporting={isExporting}
             />

@@ -1,4 +1,5 @@
 import { cn } from "@fern-docs/components/cn";
+import type { FernCardProps } from "@fern-docs/components/FernCard";
 import { FernLink } from "@fern-docs/components/FernLink";
 import type { LinkProps } from "next/link";
 import { forwardRef, type PropsWithChildren } from "react";

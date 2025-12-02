@@ -32,13 +32,14 @@ export function PreviewHeader({
                 <FernTooltipProvider>
                     <FernTooltip content="Theme switch is disabled in editor" side="bottom" variant="dashboard">
                         <span className="pointer-events-auto ml-2 w-fit">
-                            <ThemeSwitch iconOnly variant="ghost" disabled />
+                            <ThemeSwitch iconOnly variant="ghost" disabled lang="en" />
                         </span>
                     </FernTooltip>
                 </FernTooltipProvider>
             }
             searchBar={
                 <DesktopSearchButton
+                    lang="en"
                     id={FERN_SEARCH_BUTTON_ID}
                     className="fern-header-search-bar cursor-not-allowed overflow-hidden"
                 />

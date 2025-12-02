@@ -14,6 +14,7 @@ import { AnalyticsService } from "./analytics";
 export function getAnalyticsService(config: {
     userId: string;
     baseSiteUrl: string;
+    additionalDomains?: string[];
     projectId?: string;
     apiUrl?: string;
 }) {

@@ -67,10 +67,7 @@ export default async function transferGitRepository(request: {
             success: false,
             error: {
                 type: "FAILED_TO_TRANSFER_REPOSITORY",
-                message:
-                    error instanceof Error
-                        ? `${error.message}${error.response?.data?.message ? ` - ${error.response.data.message}` : ""}`
-                        : "Unknown error occurred"
+                message: error instanceof Error ? error.message : "Unknown error occurred"
             }
         };
     }

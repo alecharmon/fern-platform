@@ -59,7 +59,7 @@ export function MemberRow({ member, currentUserId }: MemberRow.Props) {
                     organizations.type === "loaded" ? organizations.value.filter((org) => org.name !== orgName) : [];
 
                 // Redirect to another org if available, otherwise go to home
-                if (remainingOrgs.length > 0) {
+                if (remainingOrgs?.[0]) {
                     router.push(`/${remainingOrgs[0].name}/docs`);
                 } else {
                     router.push("/");

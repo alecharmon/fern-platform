@@ -22,7 +22,7 @@ export type GetDocsGithubUrlResult = GetDocsGithubUrlSuccess | GetDocsGithubUrlE
 
 export const getDocsGithubUrl = cache(async (url: DocsUrl, token: string): Promise<GetDocsGithubUrlResult> => {
     const docsUrlMetadata = await getDocsUrlMetadata({
-        url: decodeURIComponent(url),
+        url,
         token: fernToken_admin() ?? token
     });
     if (!docsUrlMetadata.ok) {

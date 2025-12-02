@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
-
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { maybeGetCurrentSession } from "../../utils/maybeGetCurrentSession";
 import { parseNextRequestBody } from "../../utils/parseNextRequestBody";
 import { orgNameValidator } from "../../utils/validators";
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const { url, orgName } = parsedBody.data;
 
     const ensureOrgOwnsUrlResponse = await ensureOrgOwnsUrl({
-        url,
+        url: parseDocsUrlParam({ docsUrl: url }),
         orgName,
         token
     });

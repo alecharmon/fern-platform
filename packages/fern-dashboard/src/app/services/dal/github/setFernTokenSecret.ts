@@ -1,6 +1,7 @@
 "use server";
 
 import { spawn } from "node:child_process";
+import _sodium from "libsodium-wrappers";
 
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 
@@ -103,7 +104,6 @@ export async function setFernTokenSecret(params: {
         console.log("✓ Generated FERN_TOKEN");
 
         // Get the repo's public key for encrypting secrets
-        const _sodium = (await import("libsodium-wrappers")).default;
         await _sodium.ready;
         const sodium = _sodium;
 

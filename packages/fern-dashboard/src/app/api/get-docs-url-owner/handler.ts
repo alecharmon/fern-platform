@@ -1,12 +1,12 @@
 import { Auth0OrgName } from "@/app/services/auth0/types";
-
+import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlMetadata } from "../utils/getDocsUrlMetadata";
 
 export default async function getDocsUrlOwnerHandler({
     url,
     token
 }: {
-    url: string;
+    url: DocsUrl;
     token: string;
 }): Promise<{ orgName: Auth0OrgName | undefined }> {
     const docsUrlMetadata = await getDocsUrlMetadata({ url, token });

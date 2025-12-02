@@ -7,6 +7,7 @@ import {
     invalidateOrganizationCache
 } from "@/app/services/auth0/management";
 import { type Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
+import { convertToAuth0Organization } from "@/app/services/auth0/utils";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 
 export declare namespace updateOrganizationLogo {
@@ -65,7 +66,7 @@ export async function POST(request: Request): Promise<NextResponse<updateOrganiz
         // Invalidate the organization cache so the new logo appears immediately
         await invalidateOrganizationCache(orgName);
 
-        return NextResponse.json({ organization: updatedOrg as Auth0Organization });
+        return NextResponse.json({ organization: convertToAuth0Organization(updatedOrg) });
     } catch (error) {
         console.error("Error updating organization logo:", error);
         return NextResponse.json({ error: "Failed to update logo" } as any, { status: 500 });

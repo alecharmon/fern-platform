@@ -3,8 +3,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import * as auth0Management from "@/app/services/auth0/management";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { ResolvedReturnType } from "@/utils/types";
-
 import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
 import { parseNextRequestBody } from "../utils/parseNextRequestBody";
 import handler from "./handler";
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     }
     const { url } = parsedBody.data;
 
-    let response = await handler({ token, url });
+    let response = await handler({ token, url: parseDocsUrlParam({ docsUrl: url }) });
     if (response.orgName != null) {
         const doesUserBelongToOrg = await auth0Management.doesUserBelongToOrg(userId, response.orgName);
         if (!doesUserBelongToOrg) {

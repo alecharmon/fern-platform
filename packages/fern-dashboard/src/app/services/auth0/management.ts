@@ -11,6 +11,7 @@ import { AsyncRedisCache } from "../redis/AsyncRedisCache";
 import { type InviteToken, RedisCacheKey, RedisCacheKeyType } from "../redis/cacheKey";
 import { redisDel, redisGet, redisSet } from "../redis/redis";
 import { type Auth0Organization, Auth0OrgID, Auth0OrgName, Auth0UserID } from "./types";
+import { convertToAuth0Organization } from "./utils";
 
 export const FERN_ORG_NAME = Auth0OrgName("fern");
 
@@ -171,7 +172,7 @@ export async function getOrganization(orgName: Auth0OrgName) {
         );
         console.debug(`[getOrganization] Successfully fetched organization ${orgName} from Auth0`);
 
-        return organization as Auth0Organization;
+        return convertToAuth0Organization(organization);
     });
 }
 
@@ -208,7 +209,7 @@ export async function getMyOrganizations(userId: Auth0UserID) {
                     }),
                 `getMyOrganizations(${userId}, page=${page})`
             );
-            allOrganizations.push(...(organizations as Auth0Organization[]));
+            allOrganizations.push(...organizations.map(convertToAuth0Organization));
             page++;
             if (organizations.length < per_page) {
                 break;

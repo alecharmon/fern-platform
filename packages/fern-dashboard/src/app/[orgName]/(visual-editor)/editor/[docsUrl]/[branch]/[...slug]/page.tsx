@@ -64,12 +64,7 @@ export default async function Page({
         return (
             <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={{}} lang="en">
                 <div className="flex w-full flex-col gap-2 py-12">
-                    <PageNode
-                        pageDataDeps={pageDataDeps}
-                        fallbackFoundNode={undefined}
-                        cssConfig={undefined}
-                        serializableRootNode={root}
-                    />
+                    <PageNode pageDataDeps={pageDataDeps} fallbackFoundNode={undefined} serializableRootNode={root} />
                 </div>
             </AbstractLayoutEvaluatorContent>
         );
@@ -123,7 +118,6 @@ export default async function Page({
         initialMdx: rawMarkdown,
         initialFoundNode: serializableFoundNode
     };
-    const cssConfig = page.css;
 
     return (
         // TODO: Currently, we are force-hiding the table of contents is within Fern Editor.
@@ -134,7 +128,6 @@ export default async function Page({
                 <PageNode
                     pageDataDeps={pageDataDeps}
                     fallbackFoundNode={serializableFoundNode}
-                    cssConfig={cssConfig}
                     serializableRootNode={root}
                 />
             </div>

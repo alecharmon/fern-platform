@@ -1,8 +1,12 @@
-interface CreateSeverityRequestBody {
-    name: string;
-    description: string;
-    rank: number;
-}
+import { z } from "zod";
+
+export const CreateSeverityRequestSchema = z.object({
+    name: z.string(),
+    description: z.string(),
+    rank: z.number()
+});
+
+export type CreateSeverityRequest = z.infer<typeof CreateSeverityRequestSchema>;
 
 interface Severity {
     id: string;
@@ -15,7 +19,7 @@ interface IncidentIoSeverityResponse {
     severity: Severity;
 }
 
-export default async function createSeverity(body: CreateSeverityRequestBody) {
+export default async function createSeverity(body: CreateSeverityRequest) {
     // eslint-disable-next-line turbo/no-undeclared-env-vars
     const incidentIoApiKey = process.env.INCIDENT_IO_API_KEY;
 

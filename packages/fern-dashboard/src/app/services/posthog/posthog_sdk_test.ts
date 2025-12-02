@@ -192,8 +192,10 @@ async function displayTimeSeries(analytics: any, dateRange: any) {
     console.log("   " + colors.dim + "Date".padEnd(15) + "Views" + colors.reset);
     console.log("   " + colors.dim + "─".repeat(40) + colors.reset);
 
-    pageViewsTimeSeries.forEach(({ date, value }) => {
-        const barLength = Math.round((value / Math.max(...pageViewsTimeSeries.map((d) => d.value))) * 20);
+    pageViewsTimeSeries.forEach(({ date, value }: { date: string; value: number }) => {
+        const barLength = Math.round(
+            (value / Math.max(...pageViewsTimeSeries.map((d: { value: number }) => d.value))) * 20
+        );
         const bar = colors.green + "█".repeat(barLength) + colors.reset;
         console.log(`   ${new Date(date).toISOString().slice(0, 10)}  ${bar} ${formatNumber(value)}`);
     });
@@ -202,8 +204,10 @@ async function displayTimeSeries(analytics: any, dateRange: any) {
     console.log("   " + colors.dim + "Date".padEnd(15) + "Visitors" + colors.reset);
     console.log("   " + colors.dim + "─".repeat(44) + colors.reset);
 
-    visitorsTimeSeries.forEach(({ date, value }) => {
-        const barLength = Math.round((value / Math.max(...visitorsTimeSeries.map((d) => d.value))) * 20);
+    visitorsTimeSeries.forEach(({ date, value }: { date: string; value: number }) => {
+        const barLength = Math.round(
+            (value / Math.max(...visitorsTimeSeries.map((d: { value: number }) => d.value))) * 20
+        );
         const bar = colors.cyan + "█".repeat(barLength) + colors.reset;
         console.log(`   ${new Date(date).toISOString().slice(0, 10)}  ${bar} ${formatNumber(value)}`);
     });
@@ -359,7 +363,7 @@ async function displayDeviceTypes(analytics: any, dateRange: any) {
     );
     console.log(colors.dim + "   " + "─".repeat(76) + colors.reset);
 
-    deviceTypes.forEach(({ deviceType, visitors, views }: any) => {
+    deviceTypes.forEach(({ deviceType, visitors, views }: { deviceType: string; visitors: number; views: number }) => {
         // Add emoji for device types
         const deviceEmoji =
             {

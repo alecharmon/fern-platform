@@ -3,7 +3,7 @@ import "server-only";
 import { GetObjectCommand, HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import archiver from "archiver";
-import { createReadStream } from "fs";
+import { createWriteStream } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import type { Readable } from "stream";
@@ -274,7 +274,7 @@ export const OnboardS3Service = {
 
         // Write the S3 object body to the destination file
         const bodyStream = response.Body as Readable;
-        const fileStream = createReadStream(destinationPath);
+        const fileStream = createWriteStream(destinationPath);
 
         await new Promise<void>((resolve, reject) => {
             bodyStream.pipe(fileStream);

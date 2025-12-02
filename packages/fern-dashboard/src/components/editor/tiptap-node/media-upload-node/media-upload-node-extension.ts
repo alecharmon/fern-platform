@@ -56,7 +56,7 @@ export interface MediaUploadNodeOptions {
      * @example { class: 'foo' }
      */
 
-    HTMLAttributes: Record<string, any>;
+    HTMLAttributes?: Record<string, any>;
 }
 
 declare module "@tiptap/react" {

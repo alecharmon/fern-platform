@@ -24,7 +24,10 @@ const DEFAULT_DATE_RANGE: DateRangeOptions = {
 const ALGOLIA_ANALYTICS_CACHE = new AsyncRedisCache(RedisCacheKeyType.ALGOLIA_ANALYTICS, { ttlInSeconds: 3600 });
 
 // Helper to generate a deterministic cache key from request parameters
-function getCacheKey(endpoint: string, params: CacheKeyParams): string {
+function getCacheKey(
+    endpoint: string,
+    params: CacheKeyParams
+): RedisCacheKey<typeof RedisCacheKeyType.ALGOLIA_ANALYTICS> {
     const dateRange = params.dateRange;
     const flatParams: Record<string, unknown> = {
         limit: params.limit,

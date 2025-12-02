@@ -169,6 +169,7 @@ function EndpointRequestSnippetInternal({
                     />
                     {availableLanguages.length > 0 && (
                         <FernDropdown
+                            lang="en"
                             value={selectedLanguage}
                             options={dropdownOptions}
                             onValueChange={setGlobalLanguage}

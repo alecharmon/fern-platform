@@ -133,7 +133,7 @@ async function displayTopSearches(analytics: any, dateRange: any, limit: number,
     );
     console.log(colors.dim + "   " + "─".repeat(76) + colors.reset);
 
-    result.searches.forEach((search, index) => {
+    result.searches.forEach((search: any, index: number) => {
         const rank = `#${index + 1}`.padStart(5);
         const truncatedQuery = search.search.length > 47 ? search.search.slice(0, 44) + "..." : search.search;
         const percentage = search.percentage ? formatPercentage(search.percentage) : "0.00%";
@@ -180,7 +180,7 @@ async function displaySearchesWithNoResults(analytics: any, dateRange: any, limi
     );
     console.log(colors.dim + "   " + "─".repeat(76) + colors.reset);
 
-    result.searches.forEach((search, index) => {
+    result.searches.forEach((search: any, index: number) => {
         const rank = `#${index + 1}`.padStart(5);
         const truncatedQuery = search.search.length > 47 ? search.search.slice(0, 44) + "..." : search.search;
         const percentage = search.percentage ? formatPercentage(search.percentage) : "0.00%";
@@ -220,9 +220,9 @@ async function displayTimeSeries(analytics: any, dateRange: any, tag?: string) {
     console.log("   " + colors.dim + "Date".padEnd(15) + "Searches" + colors.reset);
     console.log("   " + colors.dim + "─".repeat(50) + colors.reset);
 
-    const maxValue = Math.max(...timeSeries.map((d) => d.value));
+    const maxValue = Math.max(...timeSeries.map((d: { value: number }) => d.value));
 
-    timeSeries.forEach(({ date, value }) => {
+    timeSeries.forEach(({ date, value }: { date: string; value: number }) => {
         const barLength = maxValue > 0 ? Math.round((value / maxValue) * 30) : 0;
         const bar = colors.cyan + "█".repeat(barLength) + colors.reset;
         console.log(`   ${date.padEnd(12)}  ${bar} ${colors.yellow}${formatNumber(value)}${colors.reset}`);
@@ -231,7 +231,7 @@ async function displayTimeSeries(analytics: any, dateRange: any, tag?: string) {
     console.log("   " + colors.dim + "─".repeat(50) + colors.reset);
 
     // Calculate total and average
-    const total = timeSeries.reduce((sum, d) => sum + d.value, 0);
+    const total = timeSeries.reduce((sum: number, d: { value: number }) => sum + d.value, 0);
     const average = timeSeries.length > 0 ? total / timeSeries.length : 0;
 
     console.log(`   ${colors.bright}Total:${colors.reset}   ${formatNumber(total)}`);
@@ -262,7 +262,7 @@ async function displaySearchesByTag(analytics: any, dateRange: any, tag: string,
     );
     console.log(colors.dim + "   " + "─".repeat(76) + colors.reset);
 
-    result.searches.forEach((search, index) => {
+    result.searches.forEach((search: any, index: number) => {
         const rank = `#${index + 1}`.padStart(5);
         const truncatedQuery = search.search.length > 47 ? search.search.slice(0, 44) + "..." : search.search;
         const percentage = search.percentage ? formatPercentage(search.percentage) : "0.00%";

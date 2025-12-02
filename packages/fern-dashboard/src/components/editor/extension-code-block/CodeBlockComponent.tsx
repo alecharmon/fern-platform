@@ -25,11 +25,16 @@ export function createCodeBlockComponent() {
                 : allLanguages;
             const mapped = filtered.map((lang: string) => ({
                 value: lang,
-                label: lang
+                label: lang,
+                disabled: false
             }));
             return searchTerm
                 ? mapped
-                : [{ value: "null", label: "auto" }, { value: "disabled", label: "—", disabled: true }, ...mapped];
+                : [
+                      { value: "null", label: "auto", disabled: false },
+                      { value: "disabled", label: "—", disabled: true },
+                      ...mapped
+                  ];
         }, [searchTerm]);
 
         const currentLanguage = languages.find((lang) => lang.value === defaultLanguage);

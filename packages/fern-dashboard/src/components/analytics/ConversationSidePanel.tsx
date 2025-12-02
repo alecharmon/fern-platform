@@ -82,7 +82,7 @@ export function ConversationSidePanel({
                                                     <MarkdownContent
                                                         components={{
                                                             // ...components,
-                                                            sup: FootnoteSup,
+                                                            sup: FootnoteSup as any, // NOTE: not a good TS fix, we should handle this with grace
                                                             section: ({
                                                                 children,
                                                                 ...props

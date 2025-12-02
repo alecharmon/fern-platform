@@ -1,5 +1,5 @@
+import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import type { GetInvitations200ResponseOneOfInner, GetMembers200ResponseOneOfInner } from "auth0";
-
 import type { Auth0Organization, Auth0OrgID, Auth0OrgName } from "../auth0/types";
 
 export interface InviteToken {
@@ -47,7 +47,7 @@ export interface WebAnalyticsData {
         userFeedback: string;
     }[];
     hasMore?: boolean;
-    apiExplorerRequests?: { endpoint: string; count: number }[];
+    apiExplorerRequests?: { host: string; method: string; endpoint: string; name: string; count: number }[];
     providers?: { provider: string; count: number }[];
 }
 
@@ -77,6 +77,7 @@ export const RedisCacheKeyType = {
     GITHUB_INSTALLATION_ID: "GITHUB_INSTALLATION_ID",
     GITHUB_PR_FOR_BRANCH: "GITHUB_PR_FOR_BRANCH",
     WEB_ANALYTICS: "WEB_ANALYTICS",
+    DOCS_SITE_ACCESS: "DOCS_SITE_ACCESS",
     ALGOLIA_ANALYTICS: "ALGOLIA_ANALYTICS"
 } as const;
 
@@ -93,6 +94,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.GITHUB_INSTALLATION_ID]: number;
     [RedisCacheKeyType.GITHUB_PR_FOR_BRANCH]: GithubPrInfo;
     [RedisCacheKeyType.WEB_ANALYTICS]: WebAnalyticsData;
+    [RedisCacheKeyType.DOCS_SITE_ACCESS]: FdrAPI.dashboard.DocsSite;
     [RedisCacheKeyType.ALGOLIA_ANALYTICS]: AlgoliaAnalyticsData;
 };
 
@@ -116,6 +118,7 @@ export const RedisCacheKey = {
         ),
     webAnalytics: (endpoint: string, domain: string, params: string) =>
         cacheKey(RedisCacheKeyType.WEB_ANALYTICS)(`web-analytics-${endpoint}-${domain}-${params}`),
+    docsSiteAccess: (domain: string) => cacheKey(RedisCacheKeyType.DOCS_SITE_ACCESS)(`docs-site-access-${domain}`),
     algoliaAnalytics: (endpoint: string, params: string) =>
         cacheKey(RedisCacheKeyType.ALGOLIA_ANALYTICS)(`algolia-analytics-${endpoint}-${params}`)
 };

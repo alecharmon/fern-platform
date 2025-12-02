@@ -1,21 +1,21 @@
 "use server";
 
 import { fernToken_admin } from "@fern-api/docs-server";
-
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 
-export async function checkDocsUrlAvailability(docsUrl: string): Promise<{
+export async function checkDocsUrlAvailability(domainPrefix: string): Promise<{
     available: boolean;
     error?: string;
 }> {
     try {
         const session = await getCurrentSessionOrThrow();
-        const decodedUrl = decodeURIComponent(docsUrl);
+        const decodedUrl = decodeURIComponent(domainPrefix);
 
         const url = `${decodedUrl}.docs.buildwithfern.com`;
         const docsMetadata = await getDocsUrlMetadata({
-            url: url,
+            url: parseDocsUrlParam({ docsUrl: url }),
             token: fernToken_admin() ?? session.accessToken
         });
         // If the metadata returns ok: false, the URL is available (not claimed)

@@ -14,7 +14,6 @@ import NotFoundContent from "@fern-docs/components/not-found/NotFoundContent";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
-import { CSSProvider } from "@/components/editor/extension-custom-element/CSSContext";
 import { UnsupportedContentDisplayOnly } from "@/components/editor/UnsupportedContent";
 import { useCurrentPage } from "@/providers/CurrentPageContext";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
@@ -26,7 +25,6 @@ export declare namespace PageNode {
         pageDataDeps: ClientPageDataDependencies | ServerPageDataDependencies;
         /** Directly accepts found node from loader for non-page nodes (e.g. "endpoint") */
         fallbackFoundNode?: SerializableFoundNode;
-        cssConfig?: { inline?: string[] };
         /** Root node from server to store in NavigationStore */
         serializableRootNode?: FernNavigation.RootNode;
     };
@@ -35,7 +33,7 @@ export declare namespace PageNode {
 const SUPPORTED_NODE_TYPES = new Set(["page", "section", "landingPage", "apiReference"]);
 
 export default function PageNode(props: PageNode.Props) {
-    const { pageDataDeps, fallbackFoundNode, cssConfig, serializableRootNode } = props;
+    const { pageDataDeps, fallbackFoundNode, serializableRootNode } = props;
 
     const { resolveInitialPageData, registerPage } = useNavigation();
     const { setCurrentFilename } = useCurrentPage();
@@ -125,14 +123,12 @@ export default function PageNode(props: PageNode.Props) {
                 versionIsDefault={found.isCurrentVersionDefault}
                 productIsDefault={found.isCurrentProductDefault}
             />
-            <CSSProvider cssConfig={cssConfig}>
-                <PageContents
-                    filename={initialPageData.filename}
-                    initialHtml={initialPageData.html}
-                    initialFrontmatter={initialPageData.frontmatter}
-                    foundNode={found}
-                />
-            </CSSProvider>
+            <PageContents
+                filename={initialPageData.filename}
+                initialHtml={initialPageData.html}
+                initialFrontmatter={initialPageData.frontmatter}
+                foundNode={found}
+            />
         </>
     );
 }

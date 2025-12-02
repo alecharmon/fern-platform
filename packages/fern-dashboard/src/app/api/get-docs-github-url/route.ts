@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { ResolvedReturnType } from "@/utils/types";
-
 import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
 import { parseNextRequestBody } from "../utils/parseNextRequestBody";
 import handler from "./handler";
@@ -29,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await handler({
-        docsUrl: parsedBody.data.docsUrl,
+        docsUrl: parseDocsUrlParam({ docsUrl: parsedBody.data.docsUrl }),
         token
     });
 

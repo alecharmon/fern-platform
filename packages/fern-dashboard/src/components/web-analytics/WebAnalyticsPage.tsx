@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import { getDocsGithubMetadata } from "@/app/actions/getDocsGithubMetadata";
 import { clearWebAnalyticsCache, getWebAnalytics } from "@/app/actions/getWebAnalytics";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
-
 import { Button } from "../ui/button";
 import WebAnalyticsChart from "./Chart";
 import { MetricsCard } from "./MetricsCard";
@@ -17,7 +17,7 @@ import SelectDate from "./SelectDate";
 import AnalyticsTables from "./Tables";
 
 interface WebAnalyticsPageProps {
-    docsUrl: DocsUrl;
+    docsUrl: string;
 }
 
 export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
@@ -40,11 +40,13 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
         refetchInterval: 60000 // Refetch every minute
     });
 
-    const { data: githubMetadata } = useQuery({
+    const { data: githubMetadataResult } = useQuery({
         queryKey: ["docs-github-metadata", docsUrl],
-        queryFn: () => getDocsGithubMetadata(docsUrl),
+        queryFn: () => getDocsGithubMetadata(parseDocsUrlParam({ docsUrl })),
         staleTime: 1000 * 60 * 10 // 10 minutes
     });
+
+    const { orgName, githubUrl, baseBranch } = githubMetadataResult?.success ? githubMetadataResult : {};
 
     const refreshMutation = useMutation({
         mutationFn: async () => {
@@ -102,9 +104,9 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
             <AnalyticsTables
                 docsUrl={docsUrl as DocsUrl}
                 dateRange={dateRange}
-                orgName={githubMetadata?.orgName}
-                githubUrl={githubMetadata?.githubUrl}
-                baseBranch={githubMetadata?.baseBranch}
+                orgName={orgName}
+                githubUrl={githubUrl}
+                baseBranch={baseBranch}
             />
         </div>
     );

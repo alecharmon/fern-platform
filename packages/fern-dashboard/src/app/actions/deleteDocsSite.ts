@@ -1,5 +1,6 @@
 "use server";
 
+import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
 import { assertUserHasOrganizationAccess } from "../services/dal/organization";
@@ -10,7 +11,7 @@ export async function deleteDocsSite({ url, orgName }: { url: string; orgName: A
     await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
     const client = getFdrLambdaClient({ token: session.accessToken });
-    const response = await client.docs.v2.write.deleteDocsSite({ url });
+    const response = await client.docs.v2.write.deleteDocsSite({ url: FdrAPI.Url(url) });
     if (!response.ok) {
         console.error("Failed to delete site", JSON.stringify(response.error));
         throw new Error("Failed to delete site");

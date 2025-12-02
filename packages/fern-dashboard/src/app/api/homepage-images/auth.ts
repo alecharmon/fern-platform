@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
+import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlOwner } from "../utils/getDocsUrlMetadata";
 import type { MaybeErrorResponse } from "../utils/MaybeErrorResponse";
 
-export async function ensureUserOwnsUrl({ token, url }: { token: string; url: string }): Promise<MaybeErrorResponse> {
+export async function ensureUserOwnsUrl(params: { token: string; url: DocsUrl }): Promise<MaybeErrorResponse> {
+    const { token, url } = params;
     const owner = await getDocsUrlOwner({ url, token });
 
     const isMember = await getVenusClient({ token }).organization.isMember(owner.orgName);
@@ -22,15 +24,12 @@ export async function ensureUserOwnsUrl({ token, url }: { token: string; url: st
     return { data: undefined };
 }
 
-export async function ensureOrgOwnsUrl({
-    token,
-    url,
-    orgName
-}: {
+export async function ensureOrgOwnsUrl(params: {
     token: string;
-    url: string;
+    url: DocsUrl;
     orgName: Auth0OrgName;
 }): Promise<MaybeErrorResponse> {
+    const { token, url, orgName } = params;
     const owner = await getDocsUrlOwner({ url, token });
 
     if (owner.orgName !== orgName) {

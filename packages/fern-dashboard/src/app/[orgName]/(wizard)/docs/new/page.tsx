@@ -39,8 +39,9 @@ export default function NewDocsWizardPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
-    const [fernDocsDownloadUrl, setFernDocsDownloadUrl] = useState<string | undefined>(undefined);
-    const [githubRepoUrl, setGithubRepoUrl] = useState<string | undefined>(undefined);
+    // NOTE: These are not in use. We should delete these if we can.
+    const [_fernDocsDownloadUrl, setFernDocsDownloadUrl] = useState<string | undefined>(undefined);
+    const [_githubRepoUrl, setGithubRepoUrl] = useState<string | undefined>(undefined);
     const [formData, setFormData] = useState<WizardFormData>({
         docsSiteName: "",
         docsSiteUrl: "",
@@ -107,42 +108,44 @@ export default function NewDocsWizardPage() {
         setCurrentStep("confirmation");
     }
 
-    async function handlePublishToGithub() {
-        if (!fernDocsDownloadUrl) {
-            console.error("No download URL available");
-            return;
-        }
+    // NOTE: This was passed as an invalid prop, but am not sure where this should be used.
+    // Would like to delete this if we can.
+    // async function handlePublishToGithub() {
+    //     if (!fernDocsDownloadUrl) {
+    //         console.error("No download URL available");
+    //         return;
+    //     }
 
-        try {
-            const response = await fetch("/api/publish-to-github", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    orgName,
-                    docsSiteUrl: formData.docsSiteUrl,
-                    docsSiteName: formData.docsSiteName,
-                    fernDocsDownloadUrl
-                })
-            });
+    //     try {
+    //         const response = await fetch("/api/publish-to-github", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json"
+    //             },
+    //             body: JSON.stringify({
+    //                 orgName,
+    //                 docsSiteUrl: formData.docsSiteUrl,
+    //                 docsSiteName: formData.docsSiteName,
+    //                 fernDocsDownloadUrl
+    //             })
+    //         });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to publish to GitHub");
-            }
+    //         if (!response.ok) {
+    //             const errorData = await response.json();
+    //             throw new Error(errorData.error || "Failed to publish to GitHub");
+    //         }
 
-            const result = await response.json();
+    //         const result = await response.json();
 
-            // Update the GitHub repo URL
-            if (result.githubRepoUrl) {
-                setGithubRepoUrl(result.githubRepoUrl);
-            }
-        } catch (err) {
-            console.error("Error publishing to GitHub:", err);
-            throw err; // Re-throw so the ConfirmScreen can handle it
-        }
-    }
+    //         // Update the GitHub repo URL
+    //         if (result.githubRepoUrl) {
+    //             setGithubRepoUrl(result.githubRepoUrl);
+    //         }
+    //     } catch (err) {
+    //         console.error("Error publishing to GitHub:", err);
+    //         throw err; // Re-throw so the ConfirmScreen can handle it
+    //     }
+    // }
 
     return (
         <div className="relative flex min-h-screen w-full flex-col items-center overflow-hidden">
@@ -243,13 +246,7 @@ export default function NewDocsWizardPage() {
                         transition={{ duration: 0.3 }}
                         className="relative z-10 flex w-full flex-1"
                     >
-                        <ConfirmScreen
-                            docsUrl={formData.docsSiteUrl}
-                            wizardFormData={formData}
-                            fernDocsDownloadUrl={fernDocsDownloadUrl}
-                            githubRepoUrl={githubRepoUrl}
-                            onPublishToGithub={handlePublishToGithub}
-                        />
+                        <ConfirmScreen docsUrl={formData.docsSiteUrl} wizardFormData={formData} />
                     </motion.div>
                 ) : null}
             </AnimatePresence>

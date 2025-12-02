@@ -42,8 +42,8 @@ export function NavbarWithOverflow({ children }: { children: React.ReactNode }) 
               if (!React.isValidElement(child)) {
                   return true;
               }
-              const className = typeof child.props.className === "string" ? child.props.className : "";
-              return !className.includes("hidden md:flex");
+              const props = child.props as { className?: string };
+              return !props.className?.includes("hidden md:flex");
           })
         : childArray;
 

@@ -22,6 +22,7 @@ export function NullableDropdown({ options, onChange }: NullableDropdownProps) {
 
     return (
         <FernDropdown
+            lang="en"
             options={options.map((option) => ({
                 type: "value" as const,
                 value: option,
