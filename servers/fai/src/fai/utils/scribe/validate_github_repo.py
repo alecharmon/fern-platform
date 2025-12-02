@@ -1,3 +1,4 @@
+import base64
 import time
 from typing import TypedDict
 
@@ -50,29 +51,16 @@ async def validate_scribe_github_repo_access(
 
 
 def generate_github_app_jwt() -> str:
-    private_key = VARIABLES.FERN_BOT_PRIVATE_KEY
-    if not private_key:
-        raise ValueError("FERN_BOT_PRIVATE_KEY not set")
-
-    app_id = VARIABLES.FERN_BOT_APP_ID
-    if not app_id:
-        raise ValueError("FERN_BOT_APP_ID not set")
-
-    formatted_private_key = (
-        private_key.replace("\\n", "\n")
-        .replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n")
-        .replace("-----END PRIVATE KEY-----", "\n-----END PRIVATE KEY-----")
-        .strip()
-    )
+    decoded_private_key = base64.b64decode(VARIABLES.FERN_BOT_PRIVATE_KEY).decode('utf-8')
 
     now = int(time.time())
     payload = {
         "iat": now - 60,
         "exp": now + (10 * 60),
-        "iss": app_id,
+        "iss": VARIABLES.FERN_BOT_APP_ID,
     }
 
-    token = jwt.encode(payload, formatted_private_key, algorithm="RS256")
+    token = jwt.encode(payload, decoded_private_key, algorithm="RS256")
     return token
 
 
