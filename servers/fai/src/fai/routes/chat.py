@@ -58,7 +58,7 @@ async def post_chat_completion(
                 sub_queries = await rewrite_query(query_content)
                 LOGGER.info(f"Decomposed query into {len(sub_queries)} sub-queries")
                 for index, sub_query in enumerate(sub_queries):
-                    LOGGER.info(f"SUBQUERY {index + 1}: {sub_query}")
+                    LOGGER.info(f"Subquery {index + 1}: {sub_query}")
 
                 query_results_list = await asyncio.gather(*[retrieve(sub_query, domain) for sub_query in sub_queries])
 

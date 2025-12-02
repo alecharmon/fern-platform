@@ -1,10 +1,13 @@
 import asyncio
+import re
 from dataclasses import dataclass
 from datetime import (
     UTC,
     datetime,
     timedelta,
 )
+from typing import Any
+from urllib.parse import urlparse
 from uuid import uuid4
 
 import discord
@@ -30,6 +33,86 @@ from fai.utils.chat.retrieve.retrieve import retrieve
 from fai.utils.integration import get_discord_integration
 
 MESSAGE_CACHE_TTL = 30
+
+
+def generate_title_from_url(url: str) -> str:
+    """Generate a fallback title from a URL path."""
+    parsed = urlparse(url)
+    path_parts = [p for p in parsed.path.strip("/").split("/") if p]
+    relevant_parts = path_parts[-2:] if len(path_parts) > 2 else path_parts
+    formatted_parts = [part.replace("-", " ").replace("_", " ").title() for part in relevant_parts]
+    return " | ".join(formatted_parts) if formatted_parts else parsed.netloc
+
+
+def extract_citation_info_from_citations(citations: list[str], rows: list[Any]) -> dict[str, str]:
+    """
+    Extract URLs from citation strings and match them with titles from Row objects.
+    Citations are formatted as: "document content\nSource: URL"
+    Returns a dict mapping URL to title.
+    """
+    url_to_title = {}
+    for row in rows:
+        url = getattr(row, "url", None)
+        title = getattr(row, "title", None)
+        if url and title:
+            url_to_title[url] = title
+
+    results = {}
+    for citation in citations:
+        match = re.search(r"Source:\s*(https?://[^\s]+)", citation)
+        if match:
+            url = match.group(1)
+            if url not in results:
+                title = url_to_title.get(url)
+                if not title or len(title.strip()) < 3:
+                    title = generate_title_from_url(url)
+                results[url] = title
+
+    return results
+
+
+def deduplicate_citations(text: str) -> tuple[str, dict[int, str]]:
+    """
+    Remove duplicate citation numbers from text, keeping only the first occurrence.
+    Handles citations in the format [(1)](url) for Discord.
+    Preserves content inside code blocks (inline ` and multiline ```).
+    Returns the cleaned text and a dict mapping citation numbers to their URLs.
+    """
+    code_blocks: list[str] = []
+    placeholder_template = "___CODE_BLOCK_{}_____"
+
+    def save_code_block(match: re.Match[str]) -> str:
+        index = len(code_blocks)
+        code_blocks.append(match.group(0))
+        return placeholder_template.format(index)
+
+    text = re.sub(r"```[\s\S]*?```", save_code_block, text)
+    text = re.sub(r"`[^`]+`", save_code_block, text)
+
+    seen_citations = {}
+    citation_to_url = {}
+
+    def replace_citation(match: re.Match[str]) -> str:
+        citation_num = int(match.group(1))
+        url = match.group(2)
+
+        citation_key = (citation_num, url)
+        if citation_key in seen_citations:
+            return ""
+
+        seen_citations[citation_key] = True
+        citation_to_url[citation_num] = url
+        return match.group(0)
+
+    text = re.sub(r"\[\((\d+)\)\]\(([^)]+)\)", replace_citation, text)
+
+    text = re.sub(r" {2,}", " ", text)
+    text = re.sub(r"\s+([.,;:!?)])", r"\1", text)
+
+    for index, code_block in enumerate(code_blocks):
+        text = text.replace(placeholder_template.format(index), code_block)
+
+    return text, citation_to_url
 
 
 class FeedbackView(discord.ui.View):
@@ -232,7 +315,7 @@ async def handle_discord_message(message: discord.Message) -> None:
 
         conversation_id = f"discord_{message.guild.id}_{message.channel.id}_{message.id}"
 
-        response_text, query_id = await process_message(
+        response_text, query_id, sources_text = await process_message(
             message.content,
             domain_to_use,
             str(message.guild.me.id) if is_bot_mentioned(message) else None,
@@ -274,13 +357,13 @@ async def handle_discord_message(message: discord.Message) -> None:
                     target_channel = await message.create_thread(name=thread_name)
                     reaction_target = message
 
-                for i, chunk in enumerate(chunks):
-                    if i == len(chunks) - 1:
-                        await target_channel.send(
-                            chunk + "\n\u200b", mention_author=True, suppress_embeds=True, view=view
-                        )
-                    else:
-                        await target_channel.send(chunk, mention_author=True, suppress_embeds=True)
+                for chunk in chunks:
+                    await target_channel.send(chunk, mention_author=True, suppress_embeds=True)
+
+                if sources_text:
+                    await target_channel.send(sources_text, mention_author=False, suppress_embeds=True)
+
+                await target_channel.send("\u200b", view=view)
 
                 if reaction_target:
                     try:
@@ -389,12 +472,12 @@ async def process_message(
     top_k: int = 5,
     conversation_id: str | None = None,
     rewrite_query_enabled: bool = True,
-) -> tuple[str, str | None]:
+) -> tuple[str, str | None, str | None]:
     if bot_user_id and text:
         text = text.replace(f"<@{bot_user_id}>", "").strip()
 
     if not text:
-        return "I need a message to respond to. Please ask me a question!", None
+        return "I need a message to respond to. Please ask me a question!", None, None
 
     query_id = None
     if conversation_id:
@@ -404,22 +487,26 @@ async def process_message(
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
 
         rag_records = []
+        retrieved_rows = []
         if rewrite_query_enabled:
             LOGGER.info(f"Query rewriting enabled for domain {domain}")
             sub_queries = await rewrite_query(text)
             LOGGER.info(f"Decomposed query into {len(sub_queries)} sub-queries")
             for index, sub_query in enumerate(sub_queries):
-                LOGGER.info(f"SUBQUERY {index + 1}: {sub_query}")
+                LOGGER.info(f"Subquery {index + 1}: {sub_query}")
 
             query_results_list = await asyncio.gather(
                 *[retrieve(sub_query, domain, top_k=top_k) for sub_query in sub_queries]
             )
 
             deduplicated_rows = deduplicate_retrieved_sources(query_results_list)
-            rag_records = [row.document for row in deduplicated_rows if row.document]
+            retrieved_rows = [row for row in deduplicated_rows if row.document]
+            rag_records = [row.document for row in retrieved_rows]
         else:
             query_results = await retrieve(text, domain, top_k=top_k)
-            rag_records = [result.document for result in query_results if result.document]
+            deduplicated_rows = deduplicate_retrieved_sources([query_results])
+            retrieved_rows = [row for row in deduplicated_rows if row.document]
+            rag_records = [row.document for row in retrieved_rows]
 
         LOGGER.info(f"Retrieved {len(rag_records)} documents")
 
@@ -443,12 +530,28 @@ async def process_message(
 
         if output_turns and len(output_turns) > 0:
             response = "\n\n".join([turn["text"] for turn in output_turns])
+
+            response, citation_to_url = deduplicate_citations(response)
+
+            url_to_title = extract_citation_info_from_citations(citations, retrieved_rows)
+
+            sources_message = None
+            if citation_to_url:
+                sorted_citations = sorted(citation_to_url.keys())
+                sources_lines = []
+                for citation_num in sorted_citations:
+                    url = citation_to_url[citation_num]
+                    title = url_to_title.get(url, generate_title_from_url(url))
+                    formatted_line = f"[{citation_num}. {title}]({url})"
+                    sources_lines.append(formatted_line)
+                sources_message = "\n".join(sources_lines)
+
             if conversation_id:
                 await log_query_to_db(response, domain, conversation_id, role="ASSISTANT", source="DISCORD")
-            return response, query_id
+            return response, query_id, sources_message
 
-        return "I couldn't find any relevant information to answer your question.", query_id
+        return "I couldn't find any relevant information to answer your question.", query_id, None
 
     except Exception as e:
         LOGGER.error(f"Error processing message: {e}")
-        return "Sorry, I encountered an error while processing your request. Please try again later.", query_id
+        return "Sorry, I encountered an error while processing your request. Please try again later.", query_id, None
