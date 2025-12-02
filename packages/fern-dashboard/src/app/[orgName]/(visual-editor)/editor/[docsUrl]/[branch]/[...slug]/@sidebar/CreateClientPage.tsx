@@ -13,7 +13,7 @@ import {
 } from "@fern-docs/components/navigation";
 import { useParams } from "next/navigation";
 import type React from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
@@ -28,17 +28,44 @@ interface CreateClientPageProps {
     disabled?: boolean;
     /** The base found node to create the page from */
     baseFoundNode: SerializableFoundNode;
+    /** Optional section ID to pre-select when the dialog opens */
+    defaultSectionId?: string;
+    /** Optional controlled open state */
+    open?: boolean;
+    /** Optional callback when open state changes (for controlled mode) */
+    onOpenChange?: (open: boolean) => void;
+    /** Whether to use modal mode (blocks interaction outside popover) */
+    modal?: boolean;
 }
 
-export function CreateClientPage({ children, disabled = false, baseFoundNode }: CreateClientPageProps) {
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+export function CreateClientPage({
+    children,
+    disabled = false,
+    baseFoundNode,
+    defaultSectionId,
+    open: controlledOpen,
+    onOpenChange,
+    modal = false
+}: CreateClientPageProps) {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isPopoverOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+    const setIsPopoverOpen = useCallback(
+        (open: boolean) => {
+            if (onOpenChange) {
+                onOpenChange(open);
+            } else {
+                setInternalOpen(open);
+            }
+        },
+        [onOpenChange]
+    );
     const [pageTitle, setPageTitle] = useState("");
     const [pageSlug, setPageSlug] = useState("");
-    const [selectedContainer, setSelectedContainer] = useState<PageContainerWithTraversalContext | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [hasAttemptedSubmission, setHasAttemptedSubmission] = useState(false);
     const router = useRouter();
     const params = useParams();
+    const titleInputRef = useRef<HTMLInputElement>(null);
 
     const navigationSnapshot = useNavigation();
     const { registeredPages, createClientPage, rootNode } = navigationSnapshot;
@@ -62,12 +89,39 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
         // Depending only on rootNode may not trigger re-computation due to React's dependency comparison.
     }, [rootNode, baseFoundNode.sidebar, baseFoundNode.currentTab]);
 
-    // Set default container on first load
-    useEffect(() => {
-        if (allContainers.length > 0 && !selectedContainer) {
-            setSelectedContainer(allContainers[0] ?? null);
+    // Compute the default container based on current state
+    const getDefaultContainer = useCallback(() => {
+        if (allContainers.length === 0) {
+            return null;
         }
-    }, [allContainers, selectedContainer]);
+        if (defaultSectionId) {
+            const defaultContainer = allContainers.find((c) => c.id === defaultSectionId);
+            return defaultContainer ?? allContainers[0] ?? null;
+        }
+        return allContainers[0] ?? null;
+    }, [allContainers, defaultSectionId]);
+
+    // Initialize selected container with the default
+    const [selectedContainer, setSelectedContainer] = useState<PageContainerWithTraversalContext | null>(() =>
+        getDefaultContainer()
+    );
+
+    // Update selected container when popover opens or defaultSectionId changes
+    useEffect(() => {
+        if (isPopoverOpen) {
+            setSelectedContainer(getDefaultContainer());
+        }
+    }, [isPopoverOpen, getDefaultContainer]);
+
+    // Focus the title input when the popover opens
+    useEffect(() => {
+        if (isPopoverOpen && titleInputRef.current) {
+            // Use setTimeout to ensure the popover animation has completed
+            setTimeout(() => {
+                titleInputRef.current?.focus();
+            }, 0);
+        }
+    }, [isPopoverOpen]);
 
     // Auto-generate slug from page title
     // For root-level containers, use only the page title slug without a section prefix
@@ -168,9 +222,8 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
     const resetForm = useCallback(() => {
         setPageTitle("");
         setPageSlug("");
-        setSelectedContainer(allContainers[0] || null);
         setHasAttemptedSubmission(false);
-    }, [allContainers]);
+    }, []);
 
     const handleCreatePage = useCallback(async () => {
         setHasAttemptedSubmission(true);
@@ -237,26 +290,32 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
         createClientPage,
         blockSubmission,
         resetForm,
-        errors
+        errors,
+        setIsPopoverOpen
     ]);
 
     const shouldShowPageTitleError = hasAttemptedSubmission && errors.pageTitle;
     const shouldShowSlugError = hasAttemptedSubmission && errors.slug;
-    const shouldShowContainerError = errors.container;
+    const shouldShowContainerError = hasAttemptedSubmission && errors.container;
 
     // Button is disabled if form is invalid or currently creating
     const isCreateDisabled = blockSubmission || isCreating;
 
     return (
         <Popover
+            modal={modal}
             open={isPopoverOpen && !disabled}
             onOpenChange={(open: boolean) => {
                 if (disabled) {
                     return;
                 }
                 setIsPopoverOpen(open);
+
+                // Reset form when closing
                 if (!open) {
-                    resetForm();
+                    setPageTitle("");
+                    setPageSlug("");
+                    setHasAttemptedSubmission(false);
                     setIsCreating(false);
                 }
             }}
@@ -269,6 +328,7 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
                     <div className="space-y-1">
                         <label className="text-gray-1100 text-xs font-medium">Page title</label>
                         <Input
+                            ref={titleInputRef}
                             placeholder="Enter page title..."
                             value={pageTitle}
                             onChange={(e) => {
@@ -276,7 +336,6 @@ export function CreateClientPage({ children, disabled = false, baseFoundNode }: 
                                 setHasAttemptedSubmission(false);
                             }}
                             className={`w-full text-sm ${shouldShowPageTitleError ? "border-red-300 focus:border-red-500" : ""}`}
-                            autoFocus
                         />
                         {shouldShowPageTitleError && (
                             <div className="mt-1 text-xs text-red-600">{errors.pageTitle}</div>

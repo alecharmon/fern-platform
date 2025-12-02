@@ -20,7 +20,7 @@ import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 import { useRef } from "react";
 import { DeletablePageNodeWrapper } from "@/components/editor/DeletablePageNodeWrapper";
 import { SidebarSectionWithMenu } from "@/components/editor/SidebarSectionWithMenu";
-import { CreatePageButton } from "./CreatePageButton";
+import { CreatePageButton, type CreatePageButtonHandle } from "./CreatePageButton";
 
 interface PageSidebarProps {
     /** Maintains compat with existing docs sidebar API */
@@ -43,6 +43,9 @@ export default function PageSidebar({
 
     // Store initial page data in a ref so we don't re-resolve it on every render
     const initialPageDataRef = useRef<ResolvedPageData | null>(null);
+
+    // Create a ref to the CreatePageButton so SidebarSectionWithMenu can trigger it
+    const createPageButtonRef = useRef<CreatePageButtonHandle>(null);
 
     // Extract files from the loader data for custom icon support
     const loader = PrefetchedDocsLoader.fromSerializable(prefetchedLoaderData);
@@ -122,7 +125,7 @@ export default function PageSidebar({
             ) : (
                 <>
                     {/* Always use the current found node as the base when creating a new page */}
-                    <CreatePageButton baseFoundNode={found} />
+                    <CreatePageButton ref={createPageButtonRef} baseFoundNode={found} />
                     <SidebarClientRootNode
                         root={found.sidebar}
                         visibleNodeIds={visibleNodeIds}
@@ -133,7 +136,11 @@ export default function PageSidebar({
                                 <DeletablePageNodeWrapper node={node} component={component} />
                             ),
                             wrapSectionNode: (node, trigger) => (
-                                <SidebarSectionWithMenu node={node} trigger={trigger} />
+                                <SidebarSectionWithMenu
+                                    node={node}
+                                    trigger={trigger}
+                                    createPageButtonRef={createPageButtonRef}
+                                />
                             ),
                             files
                         }}

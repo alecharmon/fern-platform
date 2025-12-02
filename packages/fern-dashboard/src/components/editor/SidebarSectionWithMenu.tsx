@@ -3,17 +3,20 @@
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useNavigation } from "@fern-docs/components/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { MoreVertical, Pencil } from "lucide-react";
-import type { ReactNode } from "react";
+import { MoreVertical, Pencil, Plus } from "lucide-react";
+import type { ReactNode, RefObject } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
+import type { CreatePageButtonHandle } from "@/app/[orgName]/(visual-editor)/editor/[docsUrl]/[branch]/[...slug]/@sidebar/CreatePageButton";
 import { RenameSectionDialog } from "./RenameSectionDialog";
 
 export interface SidebarSectionWithMenuProps {
     node: FernNavigation.SectionNode;
     trigger: ReactNode;
+    /** Ref to the CreatePageButton to trigger its popover */
+    createPageButtonRef: RefObject<CreatePageButtonHandle | null>;
 }
 
-export function SidebarSectionWithMenu({ node, trigger }: SidebarSectionWithMenuProps): ReactNode {
+export function SidebarSectionWithMenu({ node, trigger, createPageButtonRef }: SidebarSectionWithMenuProps): ReactNode {
     const navigation = useNavigation();
     const [showRenameDialog, setShowRenameDialog] = useState(false);
     const [_showDeleteDialog, _setShowDeleteDialog] = useState(false);
@@ -84,6 +87,22 @@ export function SidebarSectionWithMenu({ node, trigger }: SidebarSectionWithMenu
                                 <Pencil className="size-4" />
                                 <span>Rename</span>
                             </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-100 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:hover:bg-transparent"
+                                onSelect={(e) => {
+                                    // Prevent default to control the dismissal
+                                    e.preventDefault();
+                                    setDropdownOpen(false);
+                                    // Wait for the dropdown to close before opening the popover
+                                    // to avoid UI conflicts between the two overlays
+                                    setTimeout(() => {
+                                        createPageButtonRef.current?.openWithSection(node.id);
+                                    }, 0);
+                                }}
+                            >
+                                <Plus className="size-4" />
+                                <span>Add page</span>
+                            </DropdownMenu.Item>
                         </DropdownMenu.Content>
                     </DropdownMenu.Portal>
                 </DropdownMenu.Root>
@@ -96,7 +115,6 @@ export function SidebarSectionWithMenu({ node, trigger }: SidebarSectionWithMenu
                 currentTitle={node.title}
                 onConfirm={handleRenameConfirm}
             />
-            {/* TODO: Add DeleteSectionDialog */}
         </>
     );
 }
