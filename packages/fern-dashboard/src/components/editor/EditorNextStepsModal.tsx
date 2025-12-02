@@ -9,7 +9,7 @@ import { CopyableText } from "../ui/CopyableText";
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Skeleton } from "../ui/skeleton";
 import { Step, Steps } from "../ui/steps";
-import { MarkAsReadyButton } from "./MarkAsReadyButton";
+import { MarkAsReadyButton } from "./git/MarkAsReadyButton";
 
 export interface EditorNextStepsModalProps {
     open: boolean;

@@ -7,6 +7,7 @@ import { File, MoreVertical, Pencil } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CreatePageButtonHandle } from "@/app/[orgName]/(visual-editor)/editor/[docsUrl]/[branch]/[...slug]/@sidebar/CreatePageButton";
+import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { RenameSectionDialog } from "./RenameSectionDialog";
 
 export interface SidebarSectionWithMenuProps {
@@ -18,6 +19,7 @@ export interface SidebarSectionWithMenuProps {
 
 export function SidebarSectionWithMenu({ node, trigger, createPageButtonRef }: SidebarSectionWithMenuProps): ReactNode {
     const navigation = useNavigation();
+    const isEditingDisabled = useEditingDisabled();
     const [showRenameDialog, setShowRenameDialog] = useState(false);
     const [_showDeleteDialog, _setShowDeleteDialog] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -61,10 +63,11 @@ export function SidebarSectionWithMenu({ node, trigger, createPageButtonRef }: S
                 <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenu.Trigger asChild>
                         <button
-                            className="absolute right-[5px] -translate-y-1/2 cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover:opacity-100 data-[state=open]:opacity-100"
+                            className="absolute right-[5px] -translate-y-1/2 cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover:opacity-100 data-[state=open]:opacity-100 disabled:cursor-default disabled:group-hover:opacity-50 disabled:hover:bg-transparent"
                             style={{ top: buttonTop != null ? `${buttonTop}px` : "50%" }}
                             title="Section options"
                             aria-label="Section options"
+                            disabled={isEditingDisabled}
                         >
                             <MoreVertical className="size-4" />
                         </button>

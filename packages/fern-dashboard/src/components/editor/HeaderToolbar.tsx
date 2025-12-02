@@ -13,15 +13,15 @@ import { useGitPrInfo } from "@/providers/GitPRContext";
 import type { DocsUrl } from "@/utils/types";
 import { ProfileImage } from "../layout/ProfileImage";
 import { Button } from "../ui/button";
-import { CelebrationRocketButton } from "./CelebrationRocketButton";
-import { ClickablePrNumber } from "./ClickablePrNumber";
-import { CommitButton } from "./CommitButton";
 import { DashboardTooltip } from "./DashboardTooltip";
 import { DevModeSwitcher } from "./DevModeSwitcher";
 import { EditorNextStepsModal } from "./EditorNextStepsModal";
 import { FilesDropdown } from "./FilesDropdown";
-import { PRStatusDropdown } from "./PRStatusDropdown";
-import { PRTitleEditor } from "./PRTitleEditor";
+import { CelebrationRocketButton } from "./git/CelebrationRocketButton";
+import { ClickablePrNumber } from "./git/ClickablePrNumber";
+import { CommitButton } from "./git/CommitButton";
+import { PRStatusDropdown } from "./git/PRStatusDropdown";
+import { PRTitleEditor } from "./git/PRTitleEditor";
 
 export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData; docsUrl: DocsUrl }) {
     const { name, picture } = session.user;

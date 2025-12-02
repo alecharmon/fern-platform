@@ -5,8 +5,8 @@ import type { GithubPrStatus } from "@/app/services/github/types";
 import { useUpdatePrStatus } from "@/hooks/useUpdatePrStatus";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 
-import { StatusBadge } from "../ui/StatusBadge";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
+import { StatusBadge } from "../../ui/StatusBadge";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "../../ui/select";
 
 interface PRStatusDropdownProps {
     owner: string | undefined;

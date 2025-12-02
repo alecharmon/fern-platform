@@ -1,6 +1,6 @@
 import { useGitPrInfo } from "@/providers/GitPRContext";
 
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 
 export function ClickablePrNumber() {
     const { gitPrUrl, prNumber } = useGitPrInfo();

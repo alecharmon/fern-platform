@@ -18,8 +18,8 @@ import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 import { useRef } from "react";
-import { DeletablePageNodeWrapper } from "@/components/editor/DeletablePageNodeWrapper";
-import { SidebarSectionWithMenu } from "@/components/editor/SidebarSectionWithMenu";
+import { DeletablePageNodeWrapper } from "@/components/editor/sidebar/DeletablePageNodeWrapper";
+import { SidebarSectionWithMenu } from "@/components/editor/sidebar/SidebarSectionWithMenu";
 import { CreatePageButton, type CreatePageButtonHandle } from "./CreatePageButton";
 
 interface PageSidebarProps {

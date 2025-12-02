@@ -7,8 +7,8 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { GitPRProvider, useGitPrInfo } from "@/providers/GitPRContext";
 import type { DocsUrl } from "@/utils/types";
 
-import { ClickablePrNumber } from "../editor/ClickablePrNumber";
-import { PRTitleEditor } from "../editor/PRTitleEditor";
+import { ClickablePrNumber } from "../editor/git/ClickablePrNumber";
+import { PRTitleEditor } from "../editor/git/PRTitleEditor";
 import { Skeleton } from "../ui/skeleton";
 
 const getDisplayNameFromBranch = (branch: string) => {

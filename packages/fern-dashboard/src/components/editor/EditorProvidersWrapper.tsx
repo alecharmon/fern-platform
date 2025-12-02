@@ -5,11 +5,11 @@ import { getGithubSourceMetadata } from "@/app/actions/getGithubSourceMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getCachedGitHubLoader } from "@/app/services/github/cachedGitHubLoader";
-import { BranchInitializer } from "@/components/editor/BranchInitializer";
 import {
     ClientNavigationProvider,
     PreviewClientNavigationProvider
 } from "@/components/editor/ClientNavigationProvider";
+import { BranchInitializer } from "@/components/editor/git/BranchInitializer";
 import { EditorPreviewProvider } from "@/providers/EditorPreviewProvider";
 import { GitHubRepoProvider, PreviewGitHubRepoProvider } from "@/providers/GitHubRepoContext";
 import { GitPRProvider, PreviewGitPRProvider } from "@/providers/GitPRContext";

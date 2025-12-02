@@ -1,7 +1,7 @@
 "use client";
 
 import { RocketIcon } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 
 export interface CelebrationRocketButtonProps {
     onClick: () => void;

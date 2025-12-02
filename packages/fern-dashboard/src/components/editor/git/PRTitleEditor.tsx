@@ -11,7 +11,7 @@ import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import { cn } from "@/utils/utils";
 
-import { ErrorUpdatePrTitleToast } from "./EditorToasts";
+import { ErrorUpdatePrTitleToast } from "../EditorToasts";
 
 interface PRTitleEditorProps {
     owner: string | undefined;

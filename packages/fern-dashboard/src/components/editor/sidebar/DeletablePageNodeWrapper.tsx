@@ -9,6 +9,7 @@ import { MinusCircleIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import type { EncodedDocsUrl } from "@/utils/types";
 
 interface DeletablePageNodeWrapperProps {
@@ -20,6 +21,7 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
     const params = useParams();
     const router = useRouter();
     const navigation = useNavigation();
+    const isEditingDisabled = useEditingDisabled();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Get page entry from registry to determine if it's a client page
@@ -125,9 +127,10 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
             <Popover.Root open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
                 <Popover.Trigger asChild>
                     <button
-                        className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-red-600 opacity-0 transition-opacity duration-200 hover:bg-red-50 hover:text-red-700 group-hover/deletable:opacity-100 data-[state=open]:opacity-100 dark:text-red-400 dark:hover:bg-red-950/20 dark:hover:text-red-300 disabled:cursor-not-allowed disabled:group-hover/deletable:opacity-50 disabled:hover:bg-transparent"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-red-600 opacity-0 transition-opacity duration-200 hover:bg-red-50 hover:text-red-700 group-hover/deletable:opacity-100 data-[state=open]:opacity-100 dark:text-red-400 dark:hover:bg-red-950/20 dark:hover:text-red-300 disabled:cursor-default disabled:group-hover/deletable:opacity-50 disabled:hover:bg-transparent"
                         title="Mark for deletion"
                         aria-label="Mark for deletion"
+                        disabled={isEditingDisabled}
                     >
                         <MinusCircleIcon className="size-4" />
                     </button>

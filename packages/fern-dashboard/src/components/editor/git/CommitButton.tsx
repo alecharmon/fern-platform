@@ -13,9 +13,9 @@ import { useGitPrInfo } from "@/providers/GitPRContext";
 import { useCommitToGitHubMutation } from "@/state/useCommitToGitHubMutation";
 import { useCreateBranchMutation } from "@/state/useCreateBranchMutation";
 import type { DocsUrl } from "@/utils/types";
-import { GithubLogo } from "../auth/GithubLogo";
-import { Button } from "../ui/button";
-import { DashboardTooltip } from "./DashboardTooltip";
+import { GithubLogo } from "../../auth/GithubLogo";
+import { Button } from "../../ui/button";
+import { DashboardTooltip } from "../DashboardTooltip";
 import {
     ErrorCommitToast,
     ErrorNoBaseBranchToast,
@@ -23,7 +23,7 @@ import {
     ErrorNoGithubSourceToast,
     SuccessfulCommitToast,
     WarningNoChangesToast
-} from "./EditorToasts";
+} from "../EditorToasts";
 
 export interface CommitButtonProps {
     onShowCelebrationModal?: (show: boolean) => void;
