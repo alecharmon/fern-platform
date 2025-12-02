@@ -7,8 +7,9 @@ import { FernLink } from "@fern-docs/components/FernLink";
 import { Separator } from "@fern-docs/components/Separator";
 import { ChevronLeft } from "lucide-react";
 import React from "react";
+import { MdxContent } from "@/mdx/components/MdxContent";
 import { MdxServerComponent } from "@/mdx/components/server-component";
-import type { MdxSerializer } from "@/server/mdx-serializer";
+import type { MdxSerializer, SerializedMdx } from "@/server/mdx-serializer";
 
 import { PageActionsDropdown } from "./PageActionsDropdown";
 import { PageFilters } from "./PageFilters";
@@ -19,10 +20,12 @@ export function PageHeader({
     serialize,
     breadcrumb,
     title,
+    titleMdx,
     titleHref,
     action,
     tags,
     subtitle,
+    subtitleMdx,
     children,
     markdownPromise,
     pageActionOptions,
@@ -36,9 +39,11 @@ export function PageHeader({
     serialize: MdxSerializer;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     title: string;
+    titleMdx?: SerializedMdx;
     titleHref?: string;
     action?: React.ReactNode;
     subtitle?: string;
+    subtitleMdx?: SerializedMdx;
     tags?: React.ReactNode;
     children?: React.ReactNode;
     markdownPromise?: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
@@ -68,7 +73,11 @@ export function PageHeader({
                                 >
                                     <ChevronLeft className="size-icon-md text-(color:--grayscale-a11)" />
                                     <h1 className="fern-page-heading text-balance break-words">
-                                        <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
+                                        {titleMdx ? (
+                                            <MdxContent mdx={titleMdx} fallback={title} engine={titleMdx.engine} />
+                                        ) : (
+                                            <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
+                                        )}
                                     </h1>
                                 </div>
                             </FernLink>
@@ -76,12 +85,20 @@ export function PageHeader({
                             <div className="flex flex-row items-center" style={{ gap: "8px" }}>
                                 {titleHref == null ? (
                                     <h1 className="fern-page-heading text-balance break-words">
-                                        <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
+                                        {titleMdx ? (
+                                            <MdxContent mdx={titleMdx} fallback={title} engine={titleMdx.engine} />
+                                        ) : (
+                                            <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
+                                        )}
                                     </h1>
                                 ) : (
                                     <FernLink href={titleHref} scroll={true}>
                                         <h1 className="fern-page-heading text-balance break-words">
-                                            <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
+                                            {titleMdx ? (
+                                                <MdxContent mdx={titleMdx} fallback={title} engine={titleMdx.engine} />
+                                            ) : (
+                                                <MdxServerComponent serialize={serialize} mdx={title} slug={slug} />
+                                            )}
                                         </h1>
                                     </FernLink>
                                 )}
@@ -109,9 +126,13 @@ export function PageHeader({
 
             {subtitle && (
                 <div className="prose-p:text-(color:--grayscale-a11) mt-2 break-words leading-7">
-                    <React.Suspense fallback={subtitle}>
-                        <MdxServerComponent serialize={serialize} mdx={subtitle} slug={slug} />
-                    </React.Suspense>
+                    {subtitleMdx ? (
+                        <MdxContent mdx={subtitleMdx} fallback={subtitle} engine={subtitleMdx.engine} />
+                    ) : (
+                        <React.Suspense fallback={subtitle}>
+                            <MdxServerComponent serialize={serialize} mdx={subtitle} slug={slug} />
+                        </React.Suspense>
+                    )}
                 </div>
             )}
 
