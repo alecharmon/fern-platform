@@ -58,11 +58,14 @@ export class GitHubLoader implements GitLoader {
     private octokit: Octokit | null = null;
     private owner: string;
     private repo: string;
+    private skipCache: boolean;
 
     constructor(
         params: string | { githubUrl: string } | { owner: string; repo: string },
-        authMode: GitHubAuthMode = "fern-bot"
+        authMode: GitHubAuthMode = "fern-bot",
+        skipCache: boolean = false
     ) {
+        this.skipCache = skipCache;
         if (typeof params === "string") {
             const parsed = getOwnerAndRepoFromGithubUrl(params);
             this.owner = parsed.owner ?? "";
@@ -108,26 +111,28 @@ export class GitHubLoader implements GitLoader {
      * Cache can be invalidated via revalidateTag using `github-commit-ref-${owner}-${repo}-${ref}`
      */
     private async getCommitRef(owner: string, repo: string, ref: string): Promise<string | null> {
-        return unstable_cache(
-            async () => {
-                const octokit = await this.getOctokit();
-                if (!octokit) {
-                    console.error("Failed to get Octokit instance");
-                    return null;
-                }
-                const response = await octokit.request("GET /repos/{owner}/{repo}/commits/{ref}", {
-                    owner,
-                    repo,
-                    ref
-                });
-                return response.data.sha;
-            },
-            [`github-commit-ref-${owner}-${repo}-${ref}`],
-            {
-                revalidate: 60 * 5, // 5 minutes - good for normal browsing, rely on visibility change for freshness
-                tags: [`github-commit-ref-${owner}-${repo}-${ref}`, `github-repo-${owner}-${repo}`]
+        const fetchCommitRef = async () => {
+            const octokit = await this.getOctokit();
+            if (!octokit) {
+                console.error("Failed to get Octokit instance");
+                return null;
             }
-        )();
+            const response = await octokit.request("GET /repos/{owner}/{repo}/commits/{ref}", {
+                owner,
+                repo,
+                ref
+            });
+            return response.data.sha;
+        };
+
+        if (this.skipCache) {
+            return fetchCommitRef();
+        }
+
+        return unstable_cache(fetchCommitRef, [`github-commit-ref-${owner}-${repo}-${ref}`], {
+            revalidate: 60 * 5, // 5 minutes - good for normal browsing, rely on visibility change for freshness
+            tags: [`github-commit-ref-${owner}-${repo}-${ref}`, `github-repo-${owner}-${repo}`]
+        })();
     }
 
     /**
@@ -159,52 +164,39 @@ export class GitHubLoader implements GitLoader {
             return null;
         }
 
-        const tag = `github-file:${owner}/${repo}:${path}`;
-
-        return unstable_cache(
-            async () => {
-                try {
-                    const octokit = await this.getOctokit();
-                    if (!octokit) {
-                        console.error("Failed to get Octokit instance");
-                        return null;
-                    }
-
-                    const getCached = unstable_cache(
-                        async () => {
-                            const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-                                owner,
-                                repo,
-                                path,
-                                ref: commitSha,
-                                headers: { accept: "application/vnd.github.v3.raw" }
-                            });
-
-                            const content = response.data as unknown as string;
-                            const etag = response.headers.etag ?? "";
-
-                            return { content, etag };
-                        },
-                        ["github-file", owner, repo, path, commitSha],
-                        {
-                            revalidate: 60 * 60 * 24 * 365,
-                            tags: [tag]
-                        }
-                    );
-
-                    const cached = await getCached();
-                    return cached?.content ?? null;
-                } catch (error) {
-                    console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
+        const fetchFileContent = async () => {
+            try {
+                const octokit = await this.getOctokit();
+                if (!octokit) {
+                    console.error("Failed to get Octokit instance");
                     return null;
                 }
-            },
-            [`github-file-${owner}-${repo}-${commitSha}-${path}`],
-            {
-                revalidate: 60 * 60 * 24 * 365,
-                tags: [tag]
+
+                const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+                    owner,
+                    repo,
+                    path,
+                    ref: commitSha,
+                    headers: { accept: "application/vnd.github.v3.raw" }
+                });
+
+                return response.data as unknown as string;
+            } catch (error) {
+                console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
+                return null;
             }
-        )();
+        };
+
+        if (this.skipCache) {
+            return fetchFileContent();
+        }
+
+        const tag = `github-file:${owner}/${repo}:${path}`;
+
+        return unstable_cache(fetchFileContent, [`github-file-${owner}-${repo}-${commitSha}-${path}`], {
+            revalidate: 60 * 60 * 24 * 365,
+            tags: [tag]
+        })();
     }
 
     /**
@@ -282,59 +274,63 @@ export class GitHubLoader implements GitLoader {
     }
 
     private async getRepository(owner: string, repo: string) {
-        return unstable_cache(
-            async () => {
-                const octokit = await this.getOctokit();
-                if (!octokit) {
-                    throw new Error("Failed to get Octokit instance");
-                }
-
-                try {
-                    const repositoryResponse = await octokit.request("GET /repos/{owner}/{repo}", {
-                        owner,
-                        repo
-                    });
-
-                    return repositoryResponse;
-                } catch (error: any) {
-                    console.error("Failed to get repository", error);
-                    if (error?.status === 404) {
-                        return null;
-                    }
-
-                    throw error; // Don't cache this failure, so throw to skip cache
-                }
-            },
-            [`github-repo-${owner}-${repo}`],
-            {
-                revalidate: 60 * 60 * 24, // 1 day
-                tags: [`github-repo-${owner}-${repo}`]
+        const fetchRepository = async () => {
+            const octokit = await this.getOctokit();
+            if (!octokit) {
+                throw new Error("Failed to get Octokit instance");
             }
-        )();
+
+            try {
+                const repositoryResponse = await octokit.request("GET /repos/{owner}/{repo}", {
+                    owner,
+                    repo
+                });
+
+                return repositoryResponse;
+            } catch (error: any) {
+                console.error("Failed to get repository", error);
+                if (error?.status === 404) {
+                    return null;
+                }
+
+                throw error; // Don't cache this failure, so throw to skip cache
+            }
+        };
+
+        if (this.skipCache) {
+            return fetchRepository();
+        }
+
+        return unstable_cache(fetchRepository, [`github-repo-${owner}-${repo}`], {
+            revalidate: 60 * 60 * 24, // 1 day
+            tags: [`github-repo-${owner}-${repo}`]
+        })();
     }
 
     private async getTree(owner: string, repo: string, defaultBranch: string) {
-        return unstable_cache(
-            async () => {
-                const octokit = await this.getOctokit();
-                if (!octokit) {
-                    throw new Error("Failed to get Octokit instance");
-                }
-
-                const treeResponse = await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
-                    owner,
-                    repo,
-                    tree_sha: defaultBranch,
-                    recursive: "true"
-                });
-
-                return treeResponse;
-            },
-            [`github-tree-${owner}-${repo}-${defaultBranch}`],
-            {
-                tags: [`github-tree-${owner}-${repo}-${defaultBranch}`]
+        const fetchTree = async () => {
+            const octokit = await this.getOctokit();
+            if (!octokit) {
+                throw new Error("Failed to get Octokit instance");
             }
-        )();
+
+            const treeResponse = await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
+                owner,
+                repo,
+                tree_sha: defaultBranch,
+                recursive: "true"
+            });
+
+            return treeResponse;
+        };
+
+        if (this.skipCache) {
+            return fetchTree();
+        }
+
+        return unstable_cache(fetchTree, [`github-tree-${owner}-${repo}-${defaultBranch}`], {
+            tags: [`github-tree-${owner}-${repo}-${defaultBranch}`]
+        })();
     }
     /**
      * Finds a Fern project by site URL using tree searching methodology.
@@ -554,25 +550,35 @@ export class GitHubLoader implements GitLoader {
         // Use the default branch from the repository if requested
         const targetRef = preferDefaultBranch ? mainDocsYmlContent.metadata.defaultBranch : ref;
 
-        const referencedFilePromises = referencedPaths.map(async (relativePath) => {
-            if (relativePath.startsWith("../")) {
-                throw new Error(`docs.yml does not allow referencing files outside of its directory: ${relativePath}`);
-            }
-            // Normalize the relative path (remove ./ prefix if present)
-            const normalizedPath = relativePath.startsWith("./") ? relativePath.substring(2) : relativePath;
-            // Construct absolute path (docs.yml location is considered the root directory)
-            const absolutePath = docsYmlDir ? `${docsYmlDir}/${normalizedPath}` : normalizedPath;
+        const referencedFileContents = await Promise.all(
+            referencedPaths.map(async (relativePath) => {
+                if (relativePath.startsWith("../")) {
+                    throw new Error(
+                        `docs.yml does not allow referencing files outside of its directory: ${relativePath}`
+                    );
+                }
+                // Normalize the relative path (remove ./ prefix if present)
+                const normalizedPath = relativePath.startsWith("./") ? relativePath.substring(2) : relativePath;
+                // Construct absolute path (docs.yml location is considered the root directory)
+                const absolutePath = docsYmlDir ? `${docsYmlDir}/${normalizedPath}` : normalizedPath;
 
-            const fileContent = await this.getFileContent(owner, repo, targetRef, absolutePath);
+                const fileContent = await this.getFileContent(owner, repo, targetRef, absolutePath);
+                return {
+                    normalizedPath,
+                    fileContent,
+                    absolutePath
+                };
+            })
+        );
+
+        for (const { normalizedPath, fileContent, absolutePath } of referencedFileContents) {
             if (fileContent) {
                 // Store with the relative path as key (normalized)
                 docsYmlMap.set(normalizedPath, fileContent);
             } else {
                 console.warn(`Failed to load referenced yml file: ${absolutePath}`);
             }
-        });
-
-        await Promise.all(referencedFilePromises);
+        }
 
         return {
             type: "ok",

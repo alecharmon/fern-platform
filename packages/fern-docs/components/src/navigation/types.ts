@@ -217,7 +217,13 @@ export function buildSlugToDocsYmlFilePath(docsYmlContent: DocsYmlBaseContent): 
         return map;
     }
 
-    const mainContent = docsYmlContent.get("docs.yml");
+    // Type guard: ensure docsYmlContent is a Map (handle stale cache data)
+    let normalizedContent = docsYmlContent;
+    if (!(docsYmlContent instanceof Map)) {
+        normalizedContent = new Map(Object.entries(docsYmlContent));
+    }
+
+    const mainContent = normalizedContent.get("docs.yml");
     if (!mainContent) {
         return map;
     }

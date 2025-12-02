@@ -2,8 +2,9 @@ import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { getFdrClient } from "@/app/services/fdr/getFdrClient";
+import type { DocsUrl } from "@/utils/types";
 
-export async function getDocsUrlMetadata({ url, token }: { url: string; token: string }) {
+export async function getDocsUrlMetadata({ url, token }: { url: DocsUrl; token: string }) {
     return await getFdrClient({
         token
     }).docs.v2.read.getDocsUrlMetadata({
@@ -15,7 +16,7 @@ export async function getDocsUrlOwner({
     url,
     token
 }: {
-    url: string;
+    url: DocsUrl;
     token: string;
 }): Promise<{ orgName: Auth0OrgName }> {
     const metadata = await getDocsUrlMetadata({ url, token });

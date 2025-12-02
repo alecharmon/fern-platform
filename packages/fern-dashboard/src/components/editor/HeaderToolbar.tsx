@@ -7,6 +7,7 @@ import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useBranch } from "@/providers/BranchContext";
+import { useIsPreviewMode } from "@/providers/EditorPreviewProvider";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import type { DocsUrl } from "@/utils/types";
@@ -28,25 +29,32 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
     const { branch } = useBranch();
     const isEditingDisabled = useEditingDisabled();
     const { owner, repo, baseBranch } = useGitHubRepo();
+    const { isPreviewMode } = useIsPreviewMode();
     const orgName = useOrgName();
 
     const [showRocketButton, setShowRocketButton] = useState(false);
     const [showCelebrationModal, setShowCelebrationModal] = useState(false);
 
     useEffect(() => {
+        if (isPreviewMode) {
+            return;
+        }
         // NOTE: This is a temporary solution to persist the PR URL across route changes/refreshes.
         const prUrl = localStorage.getItem(`gitPrUrl-${branch}`);
         if (prUrl) {
             setPrUrl(prUrl);
         }
-    }, [branch, setPrUrl]);
+    }, [branch, setPrUrl, isPreviewMode]);
 
     // Show rocket button if there's a PR URL (existing PR) or if user has committed
     useEffect(() => {
+        if (isPreviewMode) {
+            return;
+        }
         if (gitPrUrl && !showRocketButton) {
             setShowRocketButton(true);
         }
-    }, [gitPrUrl, showRocketButton]);
+    }, [gitPrUrl, showRocketButton, isPreviewMode]);
 
     const handleCelebrationModalChange = useCallback(
         (open: boolean) => {

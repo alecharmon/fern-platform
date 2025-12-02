@@ -12,12 +12,7 @@ import { getDocsGithubUrl } from "../services/dal/github/getDocsGithubUrl";
 import { validateGithubRepoAccess } from "../services/dal/github/validators";
 import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
 
-async function getMetadata(
-    encodedDocsUrl: EncodedDocsUrl,
-    session: Auth0SessionData,
-    orgName: Auth0OrgName,
-    docsUrl: DocsUrl
-) {
+async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, docsUrl: DocsUrl) {
     let githubAuthState: GithubAuthState = {
         validationResult: {
             ok: false,
@@ -31,7 +26,7 @@ async function getMetadata(
     };
     let githubUrl: string | undefined;
     try {
-        const urlResult = await getDocsGithubUrl(encodedDocsUrl, session.accessToken);
+        const urlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
 
         if (!urlResult.success) {
             if (urlResult.error.type === "DOMAIN_NOT_REGISTERED") {
@@ -91,13 +86,18 @@ async function getMetadata(
     }
 }
 
-export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<{
-    success: boolean;
-    orgName?: Auth0OrgName;
-    githubUrl?: string;
-    baseBranch?: string;
-    error?: string;
-}> {
+export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<
+    | {
+          success: true;
+          orgName: Auth0OrgName;
+          githubUrl?: string;
+          baseBranch?: string;
+      }
+    | {
+          success: false;
+          error: string;
+      }
+> {
     try {
         const session = await getCurrentSessionOrThrow();
         const decodedUrl = parseDocsUrlParam({ docsUrl });
@@ -116,7 +116,7 @@ export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<{
 
         const orgName = docsMetadata.body.org as unknown as Auth0OrgName;
 
-        const metadata = await getMetadata(docsUrl, session, orgName, decodedUrl);
+        const metadata = await getMetadata(session, orgName, docsUrl);
         if (!metadata?.success) {
             return { success: false, error: "Failed to fetch metadata" };
         }

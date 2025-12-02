@@ -68,6 +68,9 @@ export async function handleCreatePr({
 }
 
 export function getOwnerAndRepoFromGithubUrl(githubUrl: string) {
+    if (!githubUrl) {
+        return { owner: null, repo: null };
+    }
     let piecesAfterGithubCom = githubUrl.split("github.com/")[1];
     if (piecesAfterGithubCom == null) {
         const sshMatch = githubUrl.match(/github\.com:(.+)/);
@@ -77,7 +80,7 @@ export function getOwnerAndRepoFromGithubUrl(githubUrl: string) {
             return { owner: null, repo: null };
         }
     }
-    const [owner, repoRaw] = piecesAfterGithubCom.split("/").slice(0, 2);
+    const [owner, repoRaw] = piecesAfterGithubCom?.split("/").slice(0, 2) ?? [];
     if (repoRaw == null) {
         return { owner, repo: null };
     }
@@ -109,7 +112,7 @@ export function normalizeGithubUrl(input: string): NormalizedGithubUrl {
     const { owner, repo } = getOwnerAndRepoFromGithubUrl(trimmed);
 
     if (!owner || !repo || owner === "" || repo === "") {
-        return { owner, repo, canonicalUrl: null, isValidShape: false };
+        return { owner: owner ?? null, repo: repo ?? null, canonicalUrl: null, isValidShape: false };
     }
 
     const canonicalUrl = `https://github.com/${owner}/${repo}`;

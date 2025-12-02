@@ -2,8 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { ResolvedReturnType } from "@/utils/types";
-
 import { parseNextRequestBody } from "../utils/parseNextRequestBody";
 import handler from "./handler";
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         }
 
         const result = await handler({
-            docsUrl,
+            docsUrl: parseDocsUrlParam({ docsUrl }),
             email: session.user.email,
             token: session.accessToken
         });

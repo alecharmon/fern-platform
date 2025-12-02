@@ -163,6 +163,34 @@ export function GitPRProvider({
     );
 }
 
+/**
+ * Preview-only version of GitPRProvider that provides dummy context values.
+ * Used when displaying docs in preview mode without GitHub integration.
+ */
+export function PreviewGitPRProvider({ children, site }: { children: ReactNode; site: string }) {
+    return (
+        <GitPRContext.Provider
+            value={{
+                gitPrUrl: undefined,
+                setPrUrl: () => undefined,
+                prTitle: undefined,
+                setPrTitle: () => undefined,
+                loading: false,
+                refetchPrData: () => undefined,
+                prStatus: "preview",
+                setPrStatus: () => undefined,
+                prNumber: undefined,
+                site,
+                owner: undefined,
+                repo: undefined,
+                isReadyForReview: false
+            }}
+        >
+            {children}
+        </GitPRContext.Provider>
+    );
+}
+
 export function useGitPrInfo() {
     return useContext(GitPRContext);
 }

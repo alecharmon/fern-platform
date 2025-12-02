@@ -15,7 +15,6 @@ import { DesktopSearchButton } from "@fern-docs/search-ui/components/desktop/des
 import type React from "react";
 import { Suspense } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { PreviewHeader } from "@/components/docs-preview/PreviewHeader";
 import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor";
@@ -23,10 +22,11 @@ import { ResizablePanelsWrapper } from "@/components/editor/ResizablePanelsWrapp
 import { EditorRoutingProvider } from "@/providers/EditorRoutingContext";
 import { FileResolverProvider } from "@/providers/FileResolverContext";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
-import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 
 import "./index.css";
+import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 
 export default async function VisualEditorPreviewLayout({
     params,

@@ -1,14 +1,13 @@
 "use client";
 
 import { useNavigation } from "@fern-docs/components/navigation";
-
 import * as Sentry from "@sentry/nextjs";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DEFAULT_COMMIT_MESSAGE, handleCreatePr } from "@/app/services/github/github";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useBranch } from "@/providers/BranchContext";
+import { useIsPreviewMode } from "@/providers/EditorPreviewProvider";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
 import { useCommitToGitHubMutation } from "@/state/useCommitToGitHubMutation";
@@ -30,7 +29,27 @@ export interface CommitButtonProps {
     onShowCelebrationModal?: (show: boolean) => void;
 }
 
-export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {}) {
+export function CommitButton({ onShowCelebrationModal }: CommitButtonProps) {
+    const { isPreviewMode } = useIsPreviewMode();
+
+    if (isPreviewMode) {
+        return (
+            <CommitButtonUI
+                disabled
+                loading={false}
+                onClick={() => {}}
+                tooltipContent="Connect your repository to save your changes"
+            />
+        );
+    }
+    return <CommitButtonWithGitHub onShowCelebrationModal={onShowCelebrationModal} />;
+}
+
+export function CommitButtonWithGitHub({
+    onShowCelebrationModal
+}: {
+    onShowCelebrationModal?: CommitButtonProps["onShowCelebrationModal"];
+}) {
     const orgName = useOrgName();
     const { branch } = useBranch();
     const { owner, repo, baseBranch } = useGitHubRepo();
@@ -191,12 +210,29 @@ export function CommitButton({ onShowCelebrationModal }: CommitButtonProps = {})
     }, [isEditingDisabled, commitMutation.isPending, files.hasChangesToCommit]);
 
     return (
-        <DashboardTooltip content={commitDisabledReason}>
-            <Button
-                loading={commitMutation.isPending}
-                disabled={!!commitDisabledReason}
-                onClick={() => void handleCommitPress()}
-            >
+        <CommitButtonUI
+            disabled={commitDisabledReason != null}
+            loading={commitMutation.isPending}
+            onClick={() => void handleCommitPress()}
+            tooltipContent={commitDisabledReason}
+        />
+    );
+}
+
+function CommitButtonUI({
+    disabled,
+    loading,
+    onClick,
+    tooltipContent
+}: {
+    disabled: boolean;
+    loading: boolean;
+    onClick: () => void;
+    tooltipContent: string | null;
+}) {
+    return (
+        <DashboardTooltip content={tooltipContent}>
+            <Button loading={loading} disabled={disabled} onClick={onClick}>
                 <GithubLogo />
                 Commit
             </Button>

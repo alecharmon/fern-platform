@@ -23,20 +23,96 @@ interface PRTitleEditorProps {
     hideIcon?: boolean;
 }
 
-export function PRTitleEditor({
-    owner,
-    repo,
-    branch,
-    gitPrUrl,
-    baseBranch,
-    className,
-    hideIcon = false
-}: PRTitleEditorProps) {
+export function PRTitleEditor({ ...props }: PRTitleEditorProps) {
+    return <PRTitleEditorInternal {...props} />;
+}
+
+function PRTitleEditorUI({
+    title,
+    onSave,
+    disabled,
+    loading,
+    hideIcon,
+    className
+}: {
+    title: string;
+    onSave?: (title: string) => Promise<void> | void;
+    disabled?: boolean;
+    loading?: boolean;
+    hideIcon?: boolean;
+    className?: string;
+}) {
+    const [isEditing, setIsEditing] = useState(false);
+
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                setIsEditing(false);
+                void onSave?.(e.currentTarget.value);
+            } else if (e.key === "Escape") {
+                e.preventDefault();
+                setIsEditing(false);
+                e.currentTarget.value = title;
+            }
+        },
+        [onSave, title]
+    );
+
+    const handleBlur = useCallback(
+        (e: React.FocusEvent<HTMLInputElement>) => {
+            setIsEditing(false);
+            void onSave?.(e.currentTarget.value);
+        },
+        [onSave]
+    );
+
+    return (
+        <div className={cn("flex w-fit items-center", className)}>
+            {loading ? (
+                <div className="flex items-center gap-1.5">
+                    {!hideIcon && <GitPullRequest className="text-muted-foreground size-4" />}
+                    <p className="px-2 text-gray-600">Loading title...</p>
+                </div>
+            ) : !disabled && isEditing ? (
+                <div className="flex items-center gap-1.5">
+                    {!hideIcon && <GitPullRequest className="text-muted-foreground size-4" />}
+                    <Input
+                        autoFocus
+                        disabled={disabled}
+                        defaultValue={title}
+                        onKeyDown={handleKeyDown}
+                        onBlur={handleBlur}
+                        className="text-muted-foreground min-w-none mr-2 h-8 max-w-[400px] flex-1"
+                        placeholder="Enter PR title..."
+                    />
+                </div>
+            ) : (
+                <div className="group max-w-[400px] flex-1 overflow-hidden rounded-md">
+                    <button
+                        onClick={() => !disabled && setIsEditing(true)}
+                        className="text-muted-foreground w-full p-1 px-2 text-left transition-colors hover:bg-gray-300 hover:transition-none disabled:cursor-default"
+                        disabled={disabled}
+                    >
+                        <div className="flex items-center gap-1.5">
+                            {!hideIcon && <GitPullRequest className="text-muted-foreground size-4" />}
+                            <TeleprompterTextOnHover containerClassName="flex-1">
+                                {title || "Click to edit PR title"}
+                            </TeleprompterTextOnHover>
+                            {loading && <Loader2 className="ml-2 size-4 flex-shrink-0 animate-spin" />}
+                        </div>
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function PRTitleEditorInternal({ className, hideIcon, owner, repo, branch, gitPrUrl, baseBranch }: PRTitleEditorProps) {
     const { prTitle: serverTitle, setPrTitle, loading, site } = useGitPrInfo();
     const isEditingDisabled = useEditingDisabled();
     const orgName = useOrgName();
     const [localTitle, setLocalTitle] = useState<string>(serverTitle ?? "");
-    const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     const handleSave = useCallback(
@@ -52,7 +128,6 @@ export function PRTitleEditor({
             }
 
             setLocalTitle(trimmedTitle);
-            setIsEditing(false);
 
             // If no PR exists yet, just save to parent state
             if (!gitPrUrl || !owner || !repo || !branch) {
@@ -88,65 +163,14 @@ export function PRTitleEditor({
         [owner, repo, branch, site, serverTitle, gitPrUrl, setPrTitle, baseBranch, isEditingDisabled, orgName]
     );
 
-    const handleKeyDown = useCallback(
-        (e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                void handleSave(e.currentTarget.value);
-            } else if (e.key === "Escape") {
-                e.preventDefault();
-                setIsEditing(false);
-                e.currentTarget.value = localTitle;
-            }
-        },
-        [handleSave, localTitle]
-    );
-
-    const handleBlur = useCallback(
-        (e: React.FocusEvent<HTMLInputElement>) => {
-            setIsEditing(false);
-            void handleSave(e.currentTarget.value);
-        },
-        [handleSave]
-    );
-
     return (
-        <div className={cn("flex w-fit items-center", className)}>
-            {loading ? (
-                <div className="flex items-center gap-1.5">
-                    {!hideIcon && <GitPullRequest className="text-muted-foreground size-4" />}
-                    <p className="px-2 text-gray-600">Loading title...</p>
-                </div>
-            ) : !isEditingDisabled && isEditing ? (
-                <div className="flex items-center gap-1.5">
-                    {!hideIcon && <GitPullRequest className="text-muted-foreground size-4" />}
-                    <Input
-                        autoFocus
-                        disabled={isSaving}
-                        defaultValue={localTitle || serverTitle}
-                        onKeyDown={handleKeyDown}
-                        onBlur={handleBlur}
-                        className="text-muted-foreground min-w-none mr-2 h-8 max-w-[400px] flex-1"
-                        placeholder="Enter PR title..."
-                    />
-                </div>
-            ) : (
-                <div className="group max-w-[400px] flex-1 overflow-hidden rounded-md">
-                    <button
-                        onClick={() => !isEditingDisabled && setIsEditing(true)}
-                        className="text-muted-foreground w-full p-1 px-2 text-left transition-colors hover:bg-gray-300 hover:transition-none disabled:cursor-default"
-                        disabled={isSaving || isEditingDisabled}
-                    >
-                        <div className="flex items-center gap-1.5">
-                            {!hideIcon && <GitPullRequest className="text-muted-foreground size-4" />}
-                            <TeleprompterTextOnHover containerClassName="flex-1">
-                                {localTitle || serverTitle || "Click to edit PR title"}
-                            </TeleprompterTextOnHover>
-                            {isSaving && <Loader2 className="ml-2 size-4 flex-shrink-0 animate-spin" />}
-                        </div>
-                    </button>
-                </div>
-            )}
-        </div>
+        <PRTitleEditorUI
+            title={localTitle}
+            onSave={handleSave}
+            disabled={isEditingDisabled}
+            loading={loading || isSaving}
+            hideIcon={hideIcon}
+            className={className}
+        />
     );
 }

@@ -1,25 +1,31 @@
 import "server-only";
 
-import { validateGithubRepoAccess } from "@/app/services/dal/github/validators";
-import { getValidationErrorMessage } from "@/utils/errors";
+import { type GithubRepoValidationError, validateGithubRepoAccess } from "@/app/services/dal/github/validators";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
+import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlMetadata } from "../utils/getDocsUrlMetadata";
 
 export interface ValidateGithubRepoAccessRequest {
-    url: string;
+    url: DocsUrl;
     token: string;
     owner: string;
     repo: string;
 }
 
-export interface ValidateGithubRepoAccessResponse {
-    ok: boolean;
-    appInstalled: boolean;
-    error?: {
-        type: string;
-        message: string;
-    };
-}
+/**
+ * Response type using discriminated union for type safety.
+ * This matches the pattern of GithubRepoValidationResult.
+ */
+export type ValidateGithubRepoAccessResponse =
+    | {
+          ok: true;
+          appInstalled: true;
+      }
+    | {
+          ok: false;
+          appInstalled: boolean;
+          error: GithubRepoValidationError;
+      };
 
 export default async function handler({
     url,
@@ -33,10 +39,7 @@ export default async function handler({
             return {
                 ok: false,
                 appInstalled: false,
-                error: {
-                    type: "DOMAIN_NOT_REGISTERED",
-                    message: "This domain is not registered with Fern"
-                }
+                error: { type: "DOMAIN_NOT_REGISTERED" }
             };
         }
         console.error("Failed to load docs URL metadata", JSON.stringify(docsUrlMetadata.error));
@@ -67,15 +70,11 @@ export default async function handler({
         };
     }
 
-    const errorType = result.error.type;
-    const isFernBotNotInstalled = errorType === "FERN_BOT_NOT_INSTALLED";
+    const isFernBotNotInstalled = result.error.type === "FERN_BOT_NOT_INSTALLED";
 
     return {
         ok: false,
         appInstalled: !isFernBotNotInstalled,
-        error: {
-            type: errorType,
-            message: getValidationErrorMessage(result.error)
-        }
+        error: result.error
     };
 }

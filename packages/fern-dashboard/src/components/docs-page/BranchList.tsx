@@ -9,7 +9,15 @@ import type { DocsUrl } from "@/utils/types";
 import { BranchListItem } from "./BranchListItem";
 import { VEPreviewImage } from "./VEPreviewImage";
 
-export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRepo?: GithubSourceRepo }) {
+export function BranchList({
+    docsUrl,
+    sourceRepo,
+    validationPassed = true
+}: {
+    docsUrl: DocsUrl;
+    sourceRepo?: GithubSourceRepo;
+    validationPassed?: boolean;
+}) {
     const [deletedBranches, setDeletedBranches] = useState<Set<string>>(new Set());
 
     const { deleteBranch, loading } = useLocalBranches();
@@ -40,7 +48,7 @@ export function BranchList({ docsUrl, sourceRepo }: { docsUrl: DocsUrl; sourceRe
         <>
             {loading ? (
                 <></>
-            ) : filteredBranches.length > 0 ? (
+            ) : validationPassed && filteredBranches.length > 0 ? (
                 <div className="flex flex-col gap-y-3">
                     {visibleBranches.map((branch, index) => (
                         <BranchListItem

@@ -44,6 +44,7 @@ export class NavigationStore {
     private _orgName: string;
     private _docsUrl: string;
     private _fernFolderPath: string;
+    private _previewOnly: boolean;
     private _latestSnapshot: NavigationSnapshot;
     private _serverSnapshot: NavigationSnapshot | null = null;
 
@@ -64,12 +65,19 @@ export class NavigationStore {
     private _pageSaveEventListeners = new Set<(event: PageSaveEvent) => void>();
     private _nestedEditorUpdateListeners = new Set<(event: NestedEditorUpdateEvent) => void>();
 
-    constructor(branchName: string, orgName: string, docsUrl: string, fernFolderPath: string = "fern") {
+    constructor(
+        branchName: string,
+        orgName: string,
+        docsUrl: string,
+        fernFolderPath: string = "fern",
+        previewOnly: boolean = false
+    ) {
         this._branchName = branchName;
         this._orgName = orgName;
         this._docsUrl = docsUrl;
         // Normalize the fern folder path to remove leading and trailing slashes
         this._fernFolderPath = fernFolderPath.replace(/^\/+|\/+$/g, "");
+        this._previewOnly = previewOnly;
         this._latestSnapshot = createEmptyNavigationSnapshot(branchName, orgName, docsUrl);
 
         this._pageRegistry = this._latestSnapshot.pageRegistry;
@@ -150,7 +158,8 @@ export class NavigationStore {
             (change) => !change.committed
         ).length;
 
-        if (uncommittedChangesCount > 0) {
+        // Skip docs.yml generation in preview mode
+        if (uncommittedChangesCount > 0 && !this._previewOnly) {
             try {
                 const docsYmlChangedContent = buildDocsYmlContentFromChanges(this._latestSnapshot);
 
@@ -208,25 +217,35 @@ export class NavigationStore {
         storage?: NavigationStorage;
         latestDocsYmlAndReferences?: Map<string, string> | null;
     }): Promise<void> {
-        this._storage = options?.storage || createNavigationBufferedIndexedDBStorage();
+        // Skip storage initialization in preview mode
+        if (!this._previewOnly) {
+            this._storage = options?.storage || createNavigationBufferedIndexedDBStorage();
 
-        // Initialize storage and preload only the current branch to avoid OOM
-        await this._storage.init(this._branchName);
+            // Initialize storage and preload only the current branch to avoid OOM
+            await this._storage.init(this._branchName);
+        }
 
-        // Only access storage after init is complete
-        const storedSnapshot = this._storage.getOrSetStore(this._branchName, this._orgName, this._docsUrl);
+        // Only access storage after init is complete (skip in preview mode)
+        // In preview mode, always use empty snapshot to avoid reading stale cache data
+        const storedSnapshot = this._previewOnly
+            ? null
+            : this._storage!.getOrSetStore(this._branchName, this._orgName, this._docsUrl);
 
-        this._latestSnapshot = storedSnapshot;
-        this._pageRegistry = storedSnapshot.pageRegistry;
+        // Use stored snapshot if available, otherwise create empty snapshot
+        const snapshotToUse =
+            storedSnapshot ?? createEmptyNavigationSnapshot(this._branchName, this._orgName, this._docsUrl);
+
+        this._latestSnapshot = snapshotToUse;
+        this._pageRegistry = snapshotToUse.pageRegistry;
 
         // Merge strategy: prefer stored entries (they may have uncommitted changes),
         // use fresh data to fill missing entries (e.g., after migration or when new referenced files are added)
         // NOTE: because old version of NavigationSnapshot did not support multiple files, we need to make a
         // best effort to merge the content. However, because the latestDocsYmlAndReferences may be newer than the
         // stored content (fetched from the default branch), there may be inconsistencies.
-        if (storedSnapshot.docsYmlBaseContent && options?.latestDocsYmlAndReferences) {
+        if (snapshotToUse.docsYmlBaseContent && options?.latestDocsYmlAndReferences) {
             // Start with stored content (source of truth for committed/uncommitted state)
-            const merged = new Map(storedSnapshot.docsYmlBaseContent);
+            const merged = new Map(snapshotToUse.docsYmlBaseContent);
             // Add missing entries from fresh data
             for (const [key, value] of options.latestDocsYmlAndReferences) {
                 if (!merged.has(key)) {
@@ -236,16 +255,16 @@ export class NavigationStore {
             this._docsYmlBaseContent = merged;
         } else {
             // Fallback: use whichever is available
-            this._docsYmlBaseContent = options?.latestDocsYmlAndReferences ?? storedSnapshot.docsYmlBaseContent ?? null;
+            this._docsYmlBaseContent = options?.latestDocsYmlAndReferences ?? snapshotToUse.docsYmlBaseContent ?? null;
         }
 
         // Always rebuild the slug map from the resolved content
         this._slugToDocsYmlFilePath = buildSlugToDocsYmlFilePath(this._docsYmlBaseContent);
 
-        this._navigationChanges = storedSnapshot.navigationChanges;
-        this._rootNode = storedSnapshot.rootNode;
-        this._lastCommittedHash = storedSnapshot.lastCommittedHash;
-        this._version = storedSnapshot.version;
+        this._navigationChanges = snapshotToUse.navigationChanges;
+        this._rootNode = snapshotToUse.rootNode;
+        this._lastCommittedHash = snapshotToUse.lastCommittedHash;
+        this._version = snapshotToUse.version;
 
         // Validate that navigation changes reference files that exist
         if (this._docsYmlBaseContent && this._navigationChanges.size > 0) {
@@ -756,7 +775,8 @@ export class NavigationStore {
         // IMPORTANT: Capture yml file changes BEFORE marking them as committed
         // Otherwise, the files getter will skip yml generation because uncommittedChangesCount === 0
         const committedYmlFiles: Record<string, string> = {};
-        if (this._docsYmlBaseContent && this._navigationChanges.size > 0) {
+        // Skip docs.yml generation in preview mode
+        if (!this._previewOnly && this._docsYmlBaseContent && this._navigationChanges.size > 0) {
             try {
                 const docsYmlChangedContent = buildDocsYmlContentFromChanges(this._latestSnapshot);
 
@@ -866,7 +886,8 @@ export class NavigationStore {
 
     /** Require hydration from storage, prevents hydration errors and data loss from operations before data is loaded */
     private _requireHydratedFromStorage(): void {
-        if (!this._storage) {
+        // In preview mode, storage is optional
+        if (!this._previewOnly && !this._storage) {
             throw new Error("NavigationStorage not available in NavigationStore");
         }
         if (!this._hydrated) {
@@ -925,8 +946,10 @@ export class NavigationStore {
             slugToDocsYmlFilePath: this._slugToDocsYmlFilePath
         };
 
-        // Persist to storage (guaranteed to exist after hydration)
-        this._storage?.setStore(this._branchName, this._orgName, this._docsUrl, snapshot);
+        // Persist to storage (skip in preview mode)
+        if (!this._previewOnly) {
+            this._storage?.setStore(this._branchName, this._orgName, this._docsUrl, snapshot);
+        }
 
         this._latestSnapshot = snapshot;
         this._notify();

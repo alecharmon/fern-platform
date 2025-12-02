@@ -12,34 +12,31 @@ export type ERROR_DIGEST_KEYS =
     | "BRANCH_NOT_FOUND"
     | "BASE_BRANCH_NOT_SET"
     | "USER_NOT_IN_ORG"
-    | "WRITE_PERMISSION_ERROR"
     | GithubValidationErrorKeys;
 
 export const ERROR_DIGEST_MESSAGES: Record<ERROR_DIGEST_KEYS, string> = {
     BRANCH_NOT_FOUND:
-        "We were unable to find your working branch. Please confirm that the GitHub branch exists and has not been deleted.",
+        "We were unable to find your working branch. Please confirm that the branch exists and has not been deleted.",
     BASE_BRANCH_NOT_SET:
-        "Looks like your source repo is not configured correctly. Please set a base branch on your GitHub repo.",
-    REPO_NOT_CONNECTED: "Please connect your GitHub repo above.",
-    REPO_NOT_FOUND: "We were unable to locate the GitHub repo connected to this site. Please contact support.",
+        "Looks like your source repo is not configured correctly. Please set a base branch on your repo.",
+    REPO_NOT_CONNECTED: "Please connect your repo above.",
+    REPO_NOT_FOUND:
+        "We were unable to locate the repo connected to this site. Please ensure the repo exists and has not been deleted or renamed.",
     USER_NOT_IN_ORG: "You do not have access to this organization. Please contact an organization admin to be added.",
-    FERN_BOT_NOT_INSTALLED:
-        "Fern bot is not installed on this repo. Please contact your GitHub admin to ensure the Fern bot has access.",
-    WRITE_PERMISSION_ERROR:
-        "You do not have write permission to the underlying GitHub repo. Please contact your GitHub admin for access.",
-    MALFORMED_GITHUB_URL:
-        "The provided GitHub URL is not valid. Please ensure you're using a valid GitHub repository URL.",
+    FERN_BOT_NOT_INSTALLED: "Fern GitHub App is not installed on this repo. Please contact your repository admin.",
+    MALFORMED_GITHUB_URL: "The provided repository URL is not valid.",
     DOMAIN_NOT_REGISTERED: "This docs domain is not registered. Please contact support to register your domain.",
     FERN_CONFIG_JSON_ORG_MISMATCH:
-        "The organization in fern.config.json does not match your current organization. Please update the configuration file.",
+        "The organization in this repository does not match the organization you're trying to connect.",
     FERN_CONFIG_JSON_MISSING:
-        "The fern.config.json file was not found in the repository. Please ensure the configuration file exists in the root directory.",
+        "No fern.config.json file was found in the repository. Please ensure the configuration file exists in the root directory.",
     FERN_CONFIG_JSON_MALFORMED:
         "The fern.config.json file is malformed or contains invalid JSON. Please check the file syntax.",
-    SITE_NOT_FOUND: "Your repository contains one or more Fern projects, but is missing a valid instance URL.",
+    SITE_NOT_FOUND:
+        "This repository is missing a Fern URL. Check your docs.yml file to ensure it is configured correctly.",
     MULTIPLE_PROJECTS_WITH_SITE:
-        "Your repository has more than one Fern project that is configured for this docs site. Only one Fern project can be configured for a docs site.",
-    NO_PROJECTS: "No valid fern projects were detected in your repository.",
+        "Your repository contains multiple Fern projects for this docs site. Please ensure only one Fern project is connected to this site and try again.",
+    NO_PROJECTS: "No valid fern projects were detected in your repository. Did you connect the right repository?",
     UNEXPECTED_ERROR:
         "An unexpected error occurred while validating the repository. Please try again or contact support if the issue persists."
 };
@@ -66,7 +63,7 @@ export function getValidationErrorMessage(error: GithubRepoValidationError): str
             return ERROR_DIGEST_MESSAGES.REPO_NOT_FOUND;
         case "SITE_NOT_FOUND": {
             if (error.foundSites && error.foundSites.length > 0) {
-                return "Your repository is not configured for the site you're trying to access. Please check your docs.yml and ensure your site is listed.";
+                return "This repository is only associated with the following Fern site(s): ";
             }
             return ERROR_DIGEST_MESSAGES.SITE_NOT_FOUND;
         }

@@ -1,5 +1,6 @@
 import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
+import { invalidateGithubLoaderCache } from "@/app/services/dal/github/invalidateGithubLoaderCache";
 import { getFdrClient } from "@/app/services/fdr/getFdrClient";
 import { getHostnameFromUrl } from "@/utils/getHostnameFromUrl";
 
@@ -28,5 +29,7 @@ export default async function postDocsGithubSourceHandler({
         return { success: false, error: errorMessage };
     }
 
+    // Invalidate the GitHub loader cache to ensure fresh data on next load
+    await invalidateGithubLoaderCache(githubUrl);
     return { success: true };
 }

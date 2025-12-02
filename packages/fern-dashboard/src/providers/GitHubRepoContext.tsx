@@ -33,6 +33,34 @@ export function GitHubRepoProvider({
     );
 }
 
+/**
+ * Preview-only version of GitHubRepoProvider that provides dummy context values.
+ * Used when displaying docs in preview mode without GitHub integration.
+ */
+export function PreviewGitHubRepoProvider({
+    children,
+    branch,
+    docsUrl
+}: {
+    children: React.ReactNode;
+    branch: string;
+    docsUrl: string;
+}) {
+    return (
+        <GitHubRepoContext.Provider
+            value={{
+                branch,
+                owner: undefined,
+                repo: undefined,
+                baseBranch: undefined,
+                docsUrl
+            }}
+        >
+            {children}
+        </GitHubRepoContext.Provider>
+    );
+}
+
 export function useGitHubRepo() {
     const context = useContext(GitHubRepoContext);
     if (!context) {

@@ -29,15 +29,12 @@ interface BranchPRInfoProps {
 }
 
 export function BranchPRInfo({ branch, sourceRepo, docsUrl }: BranchPRInfoProps) {
-    if (!sourceRepo?.owner || !sourceRepo?.repo) {
-        return null;
-    }
     return (
         <GitPRProvider
-            owner={sourceRepo.owner}
-            repo={sourceRepo.repo}
+            owner={sourceRepo?.owner}
+            repo={sourceRepo?.repo}
             branch={branch}
-            baseBranch={sourceRepo.baseBranch}
+            baseBranch={sourceRepo?.baseBranch}
             site={docsUrl}
         >
             <BranchPRContent branch={branch} />

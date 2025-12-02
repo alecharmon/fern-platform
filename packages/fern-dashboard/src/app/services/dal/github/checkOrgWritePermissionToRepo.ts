@@ -5,7 +5,7 @@ import type { FernConfigJsonErrors } from "@fern-api/docs-loader";
 import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
 import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
 import type { DocsUrl } from "@/utils/types";
-import { getCachedGitHubLoader } from "../../github/cachedGitHubLoader";
+import { getCachedGitHubLoader, getUncachedGitHubLoader } from "../../github/cachedGitHubLoader";
 
 export type CheckOrgWritePermissionToRepoError =
     | { type: "MALFORMED_GITHUB_URL"; url: string }
@@ -20,14 +20,17 @@ export type CheckOrgWritePermissionToRepoResult =
 /**
  * Checks if the user has write permission to a given GitHub repository.
  *
- * @param userId - The ID of the user to check
+ * @param orgName - The organization name
+ * @param site - The docs URL/site
  * @param githubUrl - The URL of the GitHub repository to check
- * @returns true if the user has write permission, false otherwise
+ * @param skipCache - If true, bypasses React cache and fetches fresh data from GitHub
+ * @returns Validation result
  */
 export async function checkOrgWritePermissionToRepo(
     orgName: string,
     site: DocsUrl,
-    githubUrl: string
+    githubUrl: string,
+    skipCache: boolean = false
 ): Promise<CheckOrgWritePermissionToRepoResult> {
     const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
     if (owner == null || repo == null) {
@@ -55,7 +58,8 @@ export async function checkOrgWritePermissionToRepo(
         );
     }
 
-    const githubLoader = await getCachedGitHubLoader(githubUrl);
+    // Use uncached loader if skipCache is true to bypass React cache
+    const githubLoader = skipCache ? await getUncachedGitHubLoader(githubUrl) : await getCachedGitHubLoader(githubUrl);
 
     // Use the helper function to fetch fern.config.json from the repo
     const fernConfigResult = await githubLoader.getFernConfigJson(owner, repo, site);

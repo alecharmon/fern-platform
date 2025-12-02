@@ -51,7 +51,7 @@ export const validateGithubRepoAccess = async (
     const githubUrl = deriveGithubUrl(identifier);
 
     try {
-        const result = await checkOrgWritePermissionToRepo(orgName, site, githubUrl);
+        const result = await checkOrgWritePermissionToRepo(orgName, site, githubUrl, skipCache);
 
         const validationResult: GithubRepoValidationResult = result.ok
             ? { ok: true }

@@ -3,7 +3,7 @@ import { postToSlackImmediate } from "@fern-api/docs-server/slack";
 import * as auth0Management from "@/app/services/auth0/management";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { getAppUrlServerSide } from "@/utils/getAppUrlServerSide";
-
+import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlMetadata } from "../utils/getDocsUrlMetadata";
 
 /**
@@ -59,7 +59,7 @@ export default async function requestOrgAccessHandler({
     email,
     token
 }: {
-    docsUrl: string;
+    docsUrl: DocsUrl;
     email: string;
     token: string;
 }): Promise<{ success: true; autoApproved?: boolean }> {

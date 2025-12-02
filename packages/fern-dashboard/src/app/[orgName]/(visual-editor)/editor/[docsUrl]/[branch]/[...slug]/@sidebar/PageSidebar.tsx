@@ -66,7 +66,7 @@ export default function PageSidebar({
                 : initialPageDataRef.current;
 
         if (!initialPageData || !foundNode) {
-            console.error("[PageSidebar] Initial page data was not able to be resolved:", {
+            console.warn("[PageSidebar] Initial page data was not able to be resolved:", {
                 initialPageData,
                 foundNode
             });
@@ -75,7 +75,7 @@ export default function PageSidebar({
     }
 
     if (!foundNode) {
-        console.error("[PageSidebar] Found node was not able to be resolved:", { foundNode });
+        console.warn("[PageSidebar] Found node was not able to be resolved:", { foundNode });
         return null;
     }
 

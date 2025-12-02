@@ -1,22 +1,30 @@
+import { getDocsGithubMetadata } from "@/app/actions/getDocsGithubMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getFernVersionUpdateInfo } from "@/app/services/dal/github/getFernVersionUpdateInfo";
 import type { DocsUrl } from "@/utils/types";
-
+import { Note } from "../Note";
 import { UpgradeFernButton } from "../UpgradeFernButton";
-import { WarningNote } from "../WarningNote";
 
 export async function CriticalUpdateWarning({
     orgName,
     docsUrl,
-    githubUrl,
-    baseBranch
+    githubUrl: inputGithubUrl
 }: {
     orgName: Auth0OrgName;
     docsUrl: DocsUrl;
     githubUrl?: string;
     baseBranch?: string;
 }) {
-    if (githubUrl == null || baseBranch == null) {
+    const metadataResult = await getDocsGithubMetadata(docsUrl);
+    if (!metadataResult.success) {
+        return null;
+    }
+    const baseBranch = metadataResult.baseBranch;
+    if (!baseBranch) {
+        return null;
+    }
+    const githubUrl = inputGithubUrl ?? metadataResult.githubUrl;
+    if (!githubUrl) {
         return null;
     }
     const fernVersionInfoResult = await getFernVersionUpdateInfo(githubUrl, docsUrl, baseBranch);
@@ -30,26 +38,22 @@ export async function CriticalUpdateWarning({
     }
 
     return (
-        <WarningNote variant="error" className="py-3">
-            <div className="flex flex-wrap justify-between gap-4">
-                <div className="flex flex-col">
-                    <p className="text-md">Your Fern CLI version is incompatible</p>
-                    <p className="text-muted-foreground text-xs">
-                        Upgrade to use the latest features of the Fern Editor.
-                    </p>
-                </div>
-                <div>
-                    <UpgradeFernButton
-                        variant="black"
-                        orgName={orgName}
-                        docsUrl={docsUrl}
-                        githubUrl={githubUrl}
-                        currentVersion={fernVersionInfo.current}
-                        latestVersion={fernVersionInfo.latest}
-                        baseBranch={baseBranch}
-                    />
-                </div>
-            </div>
-        </WarningNote>
+        <Note
+            variant="error"
+            className="py-3"
+            title="Your Fern CLI version is incompatible"
+            subtitle="Upgrade to use the latest features of the Fern Editor."
+            rightContent={
+                <UpgradeFernButton
+                    variant="black"
+                    orgName={orgName}
+                    docsUrl={docsUrl}
+                    githubUrl={githubUrl}
+                    currentVersion={fernVersionInfo.current}
+                    latestVersion={fernVersionInfo.latest}
+                    baseBranch={baseBranch}
+                />
+            }
+        />
     );
 }

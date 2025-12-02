@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
+import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
+import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
 import type { DocsUrl } from "@/utils/types";
 import { VisualEditorContent } from "./VisualEditorContent";
 import { VisualEditorContentAsync } from "./VisualEditorContentAsync";
@@ -27,17 +29,15 @@ export async function VisualEditorSection({
 
     const githubUrl = githubUrlResult.success ? githubUrlResult.githubUrl : undefined;
 
+    const isPreviewModeEnabled = await isFeatureFlagEnabledForUser(
+        PosthogFeatureFlag.ENABLE_FERN_EDITOR_PREVIEW,
+        session.user.sub,
+        orgName
+    );
+
     // Handle early errors (missing GitHub URL)
     if (!githubUrlResult.success) {
-        return (
-            <VisualEditorContent
-                docsUrl={docsUrl}
-                session={session}
-                orgName={orgName}
-                githubUrl={githubUrl}
-                error={githubUrlResult.error}
-            />
-        );
+        return <VisualEditorContent docsUrl={docsUrl} session={session} buttonDisabled={!isPreviewModeEnabled} />;
     }
 
     // Load the content with full validation via Suspense

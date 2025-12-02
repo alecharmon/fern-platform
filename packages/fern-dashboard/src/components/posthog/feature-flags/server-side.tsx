@@ -34,16 +34,18 @@ export async function FeatureFlaggedServerSide({
     return null;
 }
 
-export const isFeatureFlagEnabledForUser = cache(
-    async (featureFlag: PosthogFeatureFlag, userId: Auth0UserID, orgName: Auth0OrgName) => {
-        const posthog = getServerSidePosthog();
-        return await posthog.isFeatureEnabled(featureFlag, userId, {
-            personProperties: {
-                orgName: orgName
-            }
-        });
-    }
-);
+export const isFeatureFlagEnabledForUser = async (
+    featureFlag: PosthogFeatureFlag,
+    userId: Auth0UserID,
+    orgName: Auth0OrgName
+) => {
+    const posthog = getServerSidePosthog();
+    return await posthog.isFeatureEnabled(featureFlag, userId, {
+        personProperties: {
+            orgName: orgName
+        }
+    });
+};
 
 export const getAllFeatureFlags = cache(async (userId: Auth0UserID) => {
     const posthog = getServerSidePosthog();

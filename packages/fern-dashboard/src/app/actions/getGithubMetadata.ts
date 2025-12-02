@@ -10,7 +10,9 @@ import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
 
 type GetDocsGithubUrlError = Extract<GetDocsGithubUrlResult, { success: false }>["error"];
 
-export type GetGitHubAuthStateResult = GithubAuthState | { success: false; error: GetDocsGithubUrlError };
+export type GetGitHubAuthStateResult =
+    | ({ success: true } & GithubAuthState)
+    | { success: false; error: GetDocsGithubUrlError };
 
 export const getGitHubAuthState = cache(
     async (
@@ -70,6 +72,6 @@ export const getGitHubAuthState = cache(
             // Keep default false state
         }
 
-        return githubAuthState;
+        return { success: true, ...githubAuthState };
     }
 );

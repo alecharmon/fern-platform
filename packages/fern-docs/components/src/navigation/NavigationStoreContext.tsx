@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useEffect, useRef, useSyncExternalStore } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { NavigationStore } from "./NavigationStore";
 import type { DeletionToastCallback, NavigationSnapshot } from "./types";
@@ -144,4 +144,53 @@ export function useMaybeNavigation(): NavigationSnapshotWithMethods | null {
         store?.getServerSnapshot.bind(store) || (() => null)
     );
     return store && snapshot ? createNavigationSnapshot(store, snapshot) : null;
+}
+
+/**
+ * Preview-only version of NavigationStoreProvider that provides no-op navigation functionality.
+ * Used when displaying docs in preview mode without GitHub integration.
+ */
+export function PreviewNavigationStoreProvider({
+    children,
+    branchName,
+    orgName,
+    docsUrl
+}: {
+    children: ReactNode;
+    branchName: string;
+    orgName: string;
+    docsUrl: string;
+}) {
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    // Create a minimal navigation store in preview-only mode (skips docs.yml generation)
+    const storeRef = useRef<NavigationStore>(new NavigationStore(branchName, orgName, docsUrl, undefined, true));
+
+    if (
+        !storeRef.current ||
+        storeRef.current.branchName !== branchName ||
+        storeRef.current.orgName !== orgName ||
+        storeRef.current.docsUrl !== docsUrl
+    ) {
+        storeRef.current = new NavigationStore(branchName, orgName, docsUrl, undefined, true);
+        setIsHydrated(false); // Reset hydration state when store changes
+    }
+
+    // Hydrate the store with null data so pages can be resolved from server-provided initial data
+    useEffect(() => {
+        storeRef.current.hydrate({ latestDocsYmlAndReferences: null }).then(() => {
+            setIsHydrated(true);
+        });
+    }, []);
+
+    // Don't render children until hydration is complete to avoid 404 flash
+    if (!isHydrated) {
+        return null;
+    }
+
+    return (
+        <NavigationStoreContext.Provider value={{ navigationStore: storeRef.current }}>
+            {children}
+        </NavigationStoreContext.Provider>
+    );
 }

@@ -45,4 +45,4 @@ export type GithubSourceRepo = {
     fernBotHasInstallationId: boolean | undefined;
 };
 
-export type GithubPrStatus = "open" | "closed" | "merged" | "draft";
+export type GithubPrStatus = "open" | "closed" | "merged" | "draft" | "preview";

@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { cache } from "react";
 
 import type { DocsUrl } from "@/utils/types";
 
@@ -9,7 +8,7 @@ import { assertUserHasOrganizationAccess } from "../organization";
 import { getDocsGithubUrl } from "./getDocsGithubUrl";
 import { assertGithubAccessByUrl } from "./validators";
 
-export const assertAuthAndFetchGithubUrl = cache(async (orgName: Auth0OrgName, docsUrl: DocsUrl) => {
+export const assertAuthAndFetchGithubUrl = async (orgName: Auth0OrgName, docsUrl: DocsUrl) => {
     // Validate session
     const session = await getCurrentSession();
     if (session == null) {
@@ -24,12 +23,20 @@ export const assertAuthAndFetchGithubUrl = cache(async (orgName: Auth0OrgName, d
     // Validate GitHub access
     const urlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
     if (!urlResult.success) {
-        redirect(`/${orgName}/docs`);
+        return { githubUrl: null, session };
     }
 
     const githubUrl = urlResult.githubUrl;
     console.debug(`[assertAuthAndFetchGithubUrl] Found github url: ${githubUrl}`);
-    await assertGithubAccessByUrl(orgName, docsUrl, githubUrl);
+    try {
+        await assertGithubAccessByUrl(orgName, docsUrl, githubUrl);
+    } catch (error) {
+        console.warn(
+            "[assertAuthAndFetchGithubUrl] Failed to assert GitHub access, falling back to preview mode",
+            error
+        );
+        return { githubUrl: null, session };
+    }
 
     return { githubUrl, session };
-});
+};

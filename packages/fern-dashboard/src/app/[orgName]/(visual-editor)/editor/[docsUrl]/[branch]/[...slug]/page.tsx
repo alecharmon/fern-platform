@@ -10,7 +10,6 @@ import {
     getSerializableFoundNode
 } from "@fern-docs/components/navigation";
 import { getFrontmatter } from "@fern-docs/mdx";
-
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
@@ -40,6 +39,11 @@ export default async function Page({
     const host = await getHostFromHeaders();
 
     const { session } = await assertAuthAndFetchGithubUrl(orgName, parseDocsUrlParam({ docsUrl }));
+
+    // Session should always be defined at this point
+    if (session == null) {
+        return null;
+    }
 
     // Use cached loader - this will reuse the loader created in layout.tsx
     const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);

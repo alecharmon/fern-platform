@@ -1,4 +1,5 @@
 import type { generatePrDescription } from "@/app/api/generate-pr-description/route";
+import type { getDocsGithubUrl } from "@/app/api/get-docs-github-url/route";
 import type { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
 import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
@@ -19,6 +20,8 @@ export const DashboardApiClient = {
         typedFetch<getOrgMembers.Response>("/api/get-org-members", request),
     getDocsUrlOwner: (request: getDocsUrlOwner.Request) =>
         typedFetch<getDocsUrlOwner.Response>("/api/get-docs-url-owner", request),
+    getDocsGithubUrl: (request: getDocsGithubUrl.Request) =>
+        typedFetch<getDocsGithubUrl.Response>("/api/get-docs-github-url", request),
     postCreatePr: (request: postCreatePr.Request) =>
         typedFetch<postCreatePr.Response>("/api/post-git-create-pr", request),
     generatePrDescription: (request: generatePrDescription.Request) =>

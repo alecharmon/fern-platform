@@ -29,12 +29,18 @@ export function SuccessfulEditSourceToast() {
     return toast.success("Successfully linked your repository!");
 }
 
-export function ErrorInvalidGithubUrlToast() {
-    return toast.error("Invalid GitHub URL. Please update and try again.");
+export function SuccessfulEditSourceAndRefreshToast(refreshDelayInSeconds: number = 3) {
+    return toast.success(
+        `Successfully linked your repository! Page will automatically refresh in ${refreshDelayInSeconds} seconds.`
+    );
 }
 
 export function ErrorEditSourceToast() {
     return toast.error("Failed to link your repository. Please try again.");
+}
+
+export function ErrorInvalidGithubUrlToast() {
+    return toast.error("Invalid GitHub URL. Please update and try again.");
 }
 
 export function ErrorCommitToast(error?: PostGitCommitErrors) {
