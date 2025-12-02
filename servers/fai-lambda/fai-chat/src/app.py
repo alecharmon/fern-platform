@@ -5,7 +5,10 @@ import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from functools import partial
-from typing import Annotated, Any
+from typing import (
+    Annotated,
+    Any,
+)
 
 from fastapi import (
     Depends,
@@ -15,8 +18,12 @@ from fastapi import (
     status,
 )
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    force=True,
+)
+logger = logging.getLogger(__name__)
 
 startup_time: float | None = None
 shutdown_event = asyncio.Event()
