@@ -66,8 +66,15 @@ async function performRevalidation(params: {
     cdnUri: string | undefined;
     authHeader: string | null;
     start: number;
+    useGetRequests: boolean;
 }): Promise<void> {
-    const { host, domain, origin, controller, doReindex, doRegenerate, cdnUri, authHeader, start } = params;
+    const { host, domain, origin, controller, doReindex, doRegenerate, cdnUri, authHeader, start, useGetRequests } =
+        params;
+
+    const fetchMethod = useGetRequests ? "GET" : "HEAD";
+    if (useGetRequests) {
+        controller.log(`using GET requests instead of HEAD\n`);
+    }
 
     try {
         await kv.del(domain);
@@ -120,7 +127,7 @@ async function performRevalidation(params: {
 
     const cachePromises = cacheEndpoints.map(({ path, name }) =>
         fetch(`${origin}${path}`, {
-            method: "HEAD",
+            method: fetchMethod,
             headers: { [HEADER_X_FERN_HOST]: domain },
             signal: AbortSignal.timeout(600_000)
         })
@@ -239,7 +246,7 @@ async function performRevalidation(params: {
 
                 try {
                     const res = await fetch(`${origin}${slugToHref(slug)}`, {
-                        method: "HEAD",
+                        method: fetchMethod,
                         headers: { [HEADER_X_FERN_HOST]: domain },
                         signal: AbortSignal.timeout(600_000)
                     });
@@ -395,6 +402,7 @@ export async function GET(
             );
             const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
             const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
+            const useGetRequests = req.nextUrl.searchParams.get("useGetRequests") === "true";
 
             await performRevalidation({
                 host,
@@ -405,7 +413,8 @@ export async function GET(
                 doRegenerate,
                 cdnUri,
                 authHeader: req.headers.get("authorization"),
-                start
+                start,
+                useGetRequests
             });
 
             return new NextResponse("OK", { status: 200 });
@@ -448,6 +457,7 @@ export async function GET(
                 );
                 const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
                 const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
+                const useGetRequests = req.nextUrl.searchParams.get("useGetRequests") === "true";
 
                 await performRevalidation({
                     host,
@@ -458,7 +468,8 @@ export async function GET(
                     doRegenerate,
                     cdnUri,
                     authHeader: req.headers.get("authorization"),
-                    start
+                    start,
+                    useGetRequests
                 });
             } catch (e) {
                 console.error(`[revalidate] ${JSON.stringify(e)}`);

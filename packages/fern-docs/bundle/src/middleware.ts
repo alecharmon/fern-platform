@@ -329,11 +329,7 @@ export const middleware: NextMiddleware = async (request) => {
             rewritePath,
             reason: "Self-hosted mode - using static route"
         });
-        const response = rewrite(rewritePath);
-        // Set CDN cache headers for static pages: no browser cache, 7 min CDN cache + 1 day stale-while-revalidate
-        response.headers.set("Cache-Control", "public, max-age=0, s-maxage=1, stale-while-revalidate=86400");
-        response.headers.set("CDN-Cache-Control", "max-age=1, stale-while-revalidate=86400");
-        return response;
+        return rewrite(rewritePath);
     }
 
     const { getAuthState } = await createGetAuthStateEdge(request, (token) => {
@@ -346,11 +342,7 @@ export const middleware: NextMiddleware = async (request) => {
             return rewrite(withDomain(`/dynamic/${encodeURIComponent(conformTrailingSlash(pathname))}`));
         }
 
-        const response = rewrite(withDomain(`/static/${encodeURIComponent(conformTrailingSlash(pathname))}`));
-        response.headers.set("Cache-Control", "public, max-age=0, s-maxage=1, stale-while-revalidate=86400"); // no browser cache, 1 second CDN cache, 1 day stale-while-revalidate
-        response.headers.set("CDN-Cache-Control", "max-age=1, stale-while-revalidate=86400");
-        response.headers.set("Vercel-CDN-Cache-Control", "max-age=86400, stale-while-revalidate=86400"); // longer value for vercel CDN since it respects invalidateTag
-        return response;
+        return rewrite(withDomain(`/static/${encodeURIComponent(conformTrailingSlash(pathname))}`));
     };
 
     const response = getResponse();
