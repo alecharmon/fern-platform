@@ -18,7 +18,12 @@ export const HashLink = React.forwardRef<HTMLAnchorElement, HashLinkProps>(funct
 
         // Update the hash, which will trigger hashchange event
         // The hashchange listener in useTableOfContentsObserver will handle scrolling
-        window.location.hash = hash;
+        if (window.location.hash === hash) {
+            // If hash is already set, manually dispatch hashchange event
+            window.dispatchEvent(new HashChangeEvent("hashchange"));
+        } else {
+            window.location.hash = hash;
+        }
 
         // Call original onClick if provided
         onClick?.(e);
