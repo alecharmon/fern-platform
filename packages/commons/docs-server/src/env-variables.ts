@@ -72,8 +72,8 @@ export function cohereApiKey(): string {
     return getEnvVariable("COHERE_API_KEY");
 }
 
-export function getChatLambdaUrl(): string {
-    return getEnvVariable("FAI_CHAT_LAMBDA_URL");
+export function getFaiChatUrl(): string {
+    return getEnvVariable("FAI_CHAT_URL");
 }
 
 function assertNonNullable<T>(value: T, key: string): asserts value is NonNullable<T> {

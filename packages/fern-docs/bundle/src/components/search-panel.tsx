@@ -10,9 +10,9 @@ import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { z } from "zod";
+
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
-import { useIsChatMigrationEnabled } from "@/components/hooks/useChatMigrationFlag";
 import { useIsDarkCode } from "@/state/dark-code";
 import { useIsSearchDialogOpen } from "@/state/search";
 import {
@@ -72,7 +72,6 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
     const isDarkCodeEnabled = useIsDarkCode();
     const userToken = useAlgoliaUserToken();
     const user = useFernUser();
-    const isChatMigrationEnabled = useIsChatMigrationEnabled();
 
     const [isOpen, setIsOpen] = useCommandTrigger();
     const isResizing = useIsSearchPanelResizing();
@@ -163,16 +162,12 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
     });
 
     let chatEndpoint = useApiRoute("/api/fern-docs/search/v2/chat");
-    let migratedChatEndpoint = useApiRoute("/api/fern-docs/chat");
 
     // Rerouting to ferndocs.com for production environments to ensure streaming works
     // Also see: next.config.mjs, where we set CORS headers
     if (process.env.NEXT_PUBLIC_VERCEL_ENV === "production") {
         chatEndpoint = `${process.env.NEXT_PUBLIC_CDN_URI}/api/fern-docs/search/v2/chat`;
-        migratedChatEndpoint = `${process.env.NEXT_PUBLIC_CDN_URI}/api/fern-docs/chat`;
     }
-
-    const activeChatEndpoint = isChatMigrationEnabled ? migratedChatEndpoint : chatEndpoint;
 
     const router = useRouter();
 
@@ -248,7 +243,7 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
                         useConversationId={() => conversationIdHook}
                         useQueryId={() => queryIdHook}
                         domain={domain}
-                        api={activeChatEndpoint}
+                        api={chatEndpoint}
                         headers={{
                             "X-Fern-Host": domain
                         }}
