@@ -5,13 +5,12 @@ import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { buildEndpointUrl } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
-import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { failed, type Loadable, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
 import { useEventCallback } from "@fern-ui/react-commons";
 import { mapValues } from "es-toolkit/object";
 import { useAtomValue, useSetAtom } from "jotai";
 import { SendHorizonal } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
@@ -52,6 +51,10 @@ export const PlaygroundEndpoint = ({
     const resolvedPlaygroundState = useResolvedPlaygroundState();
     const { node, endpoint } = context;
     const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
+    const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
+    // Use a ref to always have access to the latest authState in the callback
+    const authStateRef = useRef(authState);
+    authStateRef.current = authState;
 
     // Determine which auth schemes to use based on the selected auth type
     const { authSchemes, authKeys } = useMemo(() => {
@@ -123,14 +126,13 @@ export const PlaygroundEndpoint = ({
             });
 
             let authHeaders: Record<string, string> = {};
-            const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
 
             for (let i = 0; i < (authSchemes?.length ?? 0); i++) {
                 const auth = authSchemes?.[i];
                 const authKey = authKeys?.[i];
                 const headers = buildAuthHeaders(
                     auth,
-                    authState,
+                    authStateRef.current,
                     {
                         redacted: false
                     },

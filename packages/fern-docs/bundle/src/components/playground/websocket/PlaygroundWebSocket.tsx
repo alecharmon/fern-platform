@@ -3,7 +3,6 @@
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import { buildRequestUrl, type WebSocketMessage } from "@fern-api/fdr-sdk/api-definition";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
-import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { t } from "@fern-docs/i18n";
 import { usePrevious } from "@fern-ui/react-commons";
 import { useAtomValue } from "jotai";
@@ -35,6 +34,10 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
     const [formState, setFormState] = usePlaygroundWebsocketFormState(context);
     const websocketMessageLimit = context.node.playground?.["limit-websocket-messages-per-connection"];
     const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
+    const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
+    // Use a ref to always have access to the latest authState in the callback
+    const authStateRef = useRef(authState);
+    authStateRef.current = authState;
 
     // Determine which auth to use based on the selected auth type, and get its key
     const { selectedAuth, authKey } = useMemo(() => {
@@ -124,10 +127,9 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
             socket.current = new WebSocket(urlJoin(WEBSOCKET_PROXY_URI, url));
 
             socket.current.onopen = () => {
-                const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
                 const authHeaders = buildAuthHeaders(
                     selectedAuth,
-                    authState,
+                    authStateRef.current,
                     {
                         redacted: false
                     },

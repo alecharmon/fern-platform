@@ -3,7 +3,6 @@ import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
-import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { t } from "@fern-docs/i18n";
 import { useAtomValue, useSetAtom } from "jotai";
 import { type ReactElement, useMemo, useRef } from "react";
@@ -16,7 +15,7 @@ import {
 } from "@/state/playground";
 import { PlaygroundCodeSnippetResolverBuilder } from "../code-snippets/resolver";
 import { PlaygroundRequestPreview } from "../PlaygroundRequestPreview";
-import type { PlaygroundEndpointRequestFormState } from "../types";
+import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
 import { getAuthKey } from "../utils";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import {
@@ -78,6 +77,10 @@ export function PlaygroundEndpointRequestCard({
     const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
     const dynamicPreviewRef = useRef<PlaygroundDynamicRequestPreviewRef>(null);
     const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
+    const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
+    // Use a ref to always have access to the latest authState in the copy callback
+    const authStateRef = useRef<PlaygroundAuthState>(authState);
+    authStateRef.current = authState;
 
     const { selectedAuth, authKey, selectedAuthSchemes, selectedAuthKeys } = useMemo(() => {
         const authEntries =
@@ -182,9 +185,8 @@ export function PlaygroundEndpointRequestCard({
                                 return dynamicPreviewRef.current.getCurrentCode();
                             }
 
-                            const authState = jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM);
                             const resolver = new PlaygroundCodeSnippetResolverBuilder(context, true).create(
-                                authState,
+                                authStateRef.current,
                                 formState,
                                 baseUrl,
                                 setOAuthValue,

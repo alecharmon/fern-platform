@@ -1,9 +1,9 @@
 import { type AuthScheme, buildEndpointUrl, type EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
-import { jotaiStore } from "@fern-docs/components/state/jotai-provider";
 import { failed, type Loadable, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
 import { mapValues } from "es-toolkit/object";
-import { useCallback, useState } from "react";
+import { useAtomValue } from "jotai";
+import { useCallback, useRef, useState } from "react";
 import { executeProxyRest } from "@/components/playground/fetch-utils/executeProxyRest";
 import type { PlaygroundEndpointRequestFormState, ProxyRequest } from "@/components/playground/types";
 import type { PlaygroundResponse } from "@/components/playground/types/playgroundResponse";
@@ -32,6 +32,10 @@ export function useSendRequest({
     disableProxy
 }: UseSendRequestParams): UseSendRequestReturn {
     const [response, setResponse] = useState<Loadable<PlaygroundResponse>>(notStartedLoading());
+    const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
+    // Use a ref to always have access to the latest authState in the callback
+    const authStateRef = useRef(authState);
+    authStateRef.current = authState;
 
     const sendRequest = useCallback(async () => {
         setResponse(loading());
@@ -41,7 +45,7 @@ export function useSendRequest({
 
             const authHeaders = buildAuthHeaders(
                 auth,
-                jotaiStore.get(PLAYGROUND_AUTH_STATE_ATOM),
+                authStateRef.current,
                 { redacted: false },
                 {
                     formState,
