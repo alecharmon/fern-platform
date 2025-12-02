@@ -16,6 +16,7 @@ const SERVICE_NAME = "fai-discord";
 export interface FaiDiscordEnvVariables {
     // Core API Keys needed by Discord bot
     ANTHROPIC_API_KEY: string;
+    OPENAI_API_KEY: string;
     TURBOPUFFER_API_KEY: string;
     // Database
     POSTGRES_DATABASE_URL: string;

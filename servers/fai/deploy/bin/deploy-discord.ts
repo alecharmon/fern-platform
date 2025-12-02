@@ -30,6 +30,7 @@ async function main() {
                     devInfo,
                     {
                         ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
+                        OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
                         TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
                         POSTGRES_DATABASE_URL: getEnvVarOrThrow("POSTGRES_DATABASE_URL"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
@@ -54,6 +55,7 @@ async function main() {
                     dev2Info,
                     {
                         ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
+                        OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
                         TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
                         POSTGRES_DATABASE_URL: getEnvVarOrThrow("POSTGRES_DATABASE_URL"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
@@ -78,6 +80,7 @@ async function main() {
                     prodInfo,
                     {
                         ANTHROPIC_API_KEY: getEnvVarOrThrow("ANTHROPIC_API_KEY"),
+                        OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
                         TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
                         POSTGRES_DATABASE_URL: getEnvVarOrThrow("POSTGRES_DATABASE_URL"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),

@@ -19,6 +19,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
       POSTGRES_DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
@@ -33,14 +34,15 @@ jobs:
         with:
           version: 10.11.0
           run_install: false
-      - name: Create .env file
+      - name: Create .env.discord file
         run: |
           cd servers/fai
-          echo "ANTHROPIC_API_KEY=${{ env.ANTHROPIC_API_KEY }}" >> .env
-          echo "TURBOPUFFER_API_KEY=${{ env.TURBOPUFFER_API_KEY }}" >> .env
-          echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env
-          echo "DISCORD_BOT_TOKEN=${{ env.DISCORD_BOT_TOKEN }}" >> .env
-          echo "DISCORD_OAUTH_URL=${{ env.DISCORD_OAUTH_URL }}" >> .env
+          echo "ANTHROPIC_API_KEY=${{ env.ANTHROPIC_API_KEY }}" >> .env.discord
+          echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}" >> .env.discord
+          echo "TURBOPUFFER_API_KEY=${{ env.TURBOPUFFER_API_KEY }}" >> .env.discord
+          echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env.discord
+          echo "DISCORD_BOT_TOKEN=${{ env.DISCORD_BOT_TOKEN }}" >> .env.discord
+          echo "DISCORD_OAUTH_URL=${{ env.DISCORD_OAUTH_URL }}" >> .env.discord
       - name: Deploy to Dev
         run: |
           git_version="$(scripts/fai-discord-version.sh)"

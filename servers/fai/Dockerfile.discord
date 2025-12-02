@@ -4,7 +4,7 @@ COPY pyproject.toml ./pyproject.toml
 COPY poetry.lock ./poetry.lock
 COPY ./src ./src
 COPY ./logging.conf ./logging.conf
-COPY ./.env ./.env
+COPY ./.env.discord ./.env.discord
 
 RUN pip3 install poetry &&\
   poetry config virtualenvs.create false &&\

@@ -3,10 +3,13 @@
 import logging
 import logging.config
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+_fai_root = Path(__file__).parent.parent.parent
+_env_path = _fai_root / ".env.discord"
+load_dotenv(_env_path)
 logging.config.fileConfig("logging.conf")
 LOGGER = logging.getLogger()
 
@@ -15,6 +18,7 @@ class DiscordVariables:
     """Environment variables required for Discord bot operation."""
 
     ANTHROPIC_API_KEY: str | None = os.environ.get("ANTHROPIC_API_KEY")
+    OPENAI_API_KEY: str | None = os.environ.get("OPENAI_API_KEY")
     TURBOPUFFER_API_KEY: str | None = os.environ.get("TURBOPUFFER_API_KEY")
 
     POSTGRES_DATABASE_URL: str | None = os.environ.get("POSTGRES_DATABASE_URL")
