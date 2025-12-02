@@ -3,7 +3,7 @@
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useNavigation } from "@fern-docs/components/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { MoreVertical, Pencil, Plus } from "lucide-react";
+import { File, MoreVertical, Pencil } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CreatePageButtonHandle } from "@/app/[orgName]/(visual-editor)/editor/[docsUrl]/[branch]/[...slug]/@sidebar/CreatePageButton";
@@ -100,7 +100,7 @@ export function SidebarSectionWithMenu({ node, trigger, createPageButtonRef }: S
                                     }, 0);
                                 }}
                             >
-                                <Plus className="size-4" />
+                                <File className="size-4" />
                                 <span>Add page</span>
                             </DropdownMenu.Item>
                         </DropdownMenu.Content>
