@@ -36,6 +36,8 @@ TEST_SCRIBE_SLACK_CLIENT_ID = "test-scribe-slack-client-id"
 TEST_SCRIBE_SLACK_CLIENT_SECRET = "test-scribe-slack-client-secret"
 TEST_SCRIBE_SLACK_SIGNING_SECRET = "test-scribe-slack-signing-secret"
 TEST_SCRIBE_DEVIN_API_KEY = "test-scribe-devin-api-key"
+TEST_SCRIBE_SLACK_BOT_TOKEN = "test-scribe-slack-bot-token"
+TEST_FERN_GITHUB_TOKEN = "test-fern-github-token"
 TEST_FERN_BOT_APP_ID = "test-fern-bot-app-id"
 TEST_FERN_BOT_PRIVATE_KEY = "test-fern-bot-private-key"
 TEST_DISCORD_BOT_TOKEN = "test-discord-bot-token"
@@ -101,6 +103,8 @@ def setup_test_env(test_database_url: str) -> Any:
     os.environ["ANTHROPIC_API_KEY"] = TEST_ANTHROPIC_API_KEY
     os.environ["TURBOPUFFER_API_KEY"] = TEST_TURBOPUFFER_API_KEY
     os.environ["SCRIBE_DEVIN_API_KEY"] = TEST_SCRIBE_DEVIN_API_KEY
+    os.environ["SCRIBE_SLACK_BOT_TOKEN"] = TEST_SCRIBE_SLACK_BOT_TOKEN
+    os.environ["FERN_GITHUB_TOKEN"] = TEST_FERN_GITHUB_TOKEN
     os.environ["FERN_BOT_APP_ID"] = TEST_FERN_BOT_APP_ID
     os.environ["FERN_BOT_PRIVATE_KEY"] = TEST_FERN_BOT_PRIVATE_KEY
     os.environ["OPENAI_API_KEY"] = TEST_OPENAI_API_KEY

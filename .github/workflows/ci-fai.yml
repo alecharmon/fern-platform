@@ -111,6 +111,8 @@ jobs:
       VENUS_URL: ${{ secrets.VENUS_URL }}
       FAI_LAMBDA_FUNCTION_NAME: ${{ secrets.FAI_LAMBDA_FUNCTION_NAME }}
       FAI_REINDEXING_SQS_URL: ${{ secrets.FAI_REINDEXING_DEV_SQS_URL }}
+      SCRIBE_SLACK_BOT_TOKEN: ${{ secrets.SCRIBE_SLACK_BOT_TOKEN }}
+      FERN_GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -143,6 +145,8 @@ jobs:
           echo "SCRIBE_SLACK_CLIENT_SECRET=${{ env.SCRIBE_SLACK_CLIENT_SECRET }}" >> .env
           echo "SCRIBE_SLACK_SIGNING_SECRET=${{ env.SCRIBE_SLACK_SIGNING_SECRET }}" >> .env
           echo "SCRIBE_DEVIN_API_KEY=${{ env.SCRIBE_DEVIN_API_KEY }}" >> .env
+          echo "SCRIBE_SLACK_BOT_TOKEN=${{ env.SCRIBE_SLACK_BOT_TOKEN }}" >> .env
+          echo "FERN_GITHUB_TOKEN=${{ env.FERN_GITHUB_TOKEN }}" >> .env
           echo "FERN_BOT_APP_ID=${{ env.FERN_BOT_APP_ID }}" >> .env
           echo "FERN_BOT_PRIVATE_KEY=${{ env.FERN_BOT_PRIVATE_KEY }}" >> .env
           echo "VENUS_URL=${{ env.VENUS_URL }}" >> .env

@@ -51,7 +51,7 @@ async def validate_scribe_github_repo_access(
 
 
 def generate_github_app_jwt() -> str:
-    decoded_private_key = base64.b64decode(VARIABLES.FERN_BOT_PRIVATE_KEY).decode('utf-8')
+    decoded_private_key = base64.b64decode(VARIABLES.FERN_BOT_PRIVATE_KEY).decode("utf-8")
 
     now = int(time.time())
     payload = {

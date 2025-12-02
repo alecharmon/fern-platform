@@ -87,6 +87,7 @@ async def poll_devin_session(
             status = await get_devin_session_status(devin_session_id)
             status_enum = status.get("status_enum")
             messages = status.get("messages", [])
+            pull_request = status.get("pull_request")
 
             if last_event_id:
                 last_event_index = next(
@@ -137,6 +138,14 @@ async def poll_devin_session(
                     session_record.updated_at = datetime.now(UTC)
                     if last_event_id:
                         session_record.last_message_event_id = last_event_id
+
+                    if pull_request and not session_record.pr_url:
+                        pr_url = pull_request.get("url")
+                        if pr_url:
+                            session_record.pr_url = pr_url
+                            session_record.pr_status = "open"
+                            LOGGER.info(f"[SCRIBE] Stored PR URL for session {session_id}: {pr_url}")
+
                     await db_session.commit()
 
             if status_enum in ["blocked", "stopped"]:

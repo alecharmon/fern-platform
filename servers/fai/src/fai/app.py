@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
+from fai.db import async_session_maker
+from fai.jobs.scribe_pr_status_job import check_scribe_pr_statuses
 from fai.scheduler import (
     start_scheduler,
     stop_scheduler,
@@ -40,6 +42,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         LOGGER.info("Setup: Scribe session polling resumed.")
     except Exception as e:
         LOGGER.error(f"Setup: Error resuming Scribe sessions: {e}")
+
+    try:
+        async with async_session_maker() as db:
+            results = await check_scribe_pr_statuses(db)
+            LOGGER.info(
+                f"Setup: Scribe PR status check completed on startup: "
+                f"{results['checked']} checked, {results['merged']} merged, {results['errors']} errors"
+            )
+    except Exception as e:
+        LOGGER.error(f"Setup: Error checking Scribe PR statuses on startup: {e}")
 
     yield
 

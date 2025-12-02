@@ -28,5 +28,8 @@ class ScribeSessionDb(Base):
     status = Column(String, nullable=False)
     last_message_event_id = Column(String, nullable=True)
 
+    pr_url = Column(String, nullable=True, index=True)
+    pr_status = Column(String, nullable=True)
+
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)

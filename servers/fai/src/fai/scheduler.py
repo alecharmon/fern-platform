@@ -9,6 +9,7 @@ from fai.db import async_session_maker
 from fai.jobs.cleanup_job import cleanup_preview_settings
 from fai.jobs.conversation_reports_job import process_conversation_reports
 from fai.jobs.insights_job import generate_insights_for_all_domains
+from fai.jobs.scribe_pr_status_job import check_scribe_pr_statuses
 from fai.settings import LOGGER
 
 _scheduler: AsyncIOScheduler | None = None
@@ -97,6 +98,22 @@ async def process_conversation_reports_job() -> None:
         LOGGER.exception(f"Error in scheduled conversation reports processing: {e}")
 
 
+async def check_scribe_pr_statuses_job() -> None:
+    LOGGER.info("Starting scheduled Scribe PR status check")
+
+    try:
+        async with async_session_maker() as db:
+            results = await check_scribe_pr_statuses(db)
+
+            LOGGER.info(
+                f"Scheduled Scribe PR status check completed: "
+                f"{results['checked']} checked, {results['merged']} merged, {results['errors']} errors"
+            )
+
+    except Exception as e:
+        LOGGER.exception(f"Error in scheduled Scribe PR status check: {e}")
+
+
 def configure_jobs(scheduler: AsyncIOScheduler) -> None:
     scheduler.add_job(
         func=generate_weekly_insights_job,
@@ -119,6 +136,14 @@ def configure_jobs(scheduler: AsyncIOScheduler) -> None:
         trigger=CronTrigger(minute=0, timezone="UTC"),
         id="conversation_reports_processing",
         name="Process conversation reports hourly",
+        replace_existing=True,
+    )
+
+    scheduler.add_job(
+        func=check_scribe_pr_statuses_job,
+        trigger=CronTrigger(minute="*/30", timezone="UTC"),
+        id="scribe_pr_status_check",
+        name="Check Scribe PR statuses every 30 minutes",
         replace_existing=True,
     )
 
