@@ -22,8 +22,13 @@ import React from "react";
 import FeedbackPopover from "@/components/feedback/FeedbackPopover";
 import { withLaunchDarkly } from "@/server/ld-adapter";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
+import { runAsyncSpan } from "@/server/tracing";
 
 import { DocsMainContent } from "../app/[host]/[domain]/main";
+
+function slugToAttribute(slug: Slug): string {
+    return Array.isArray(slug) ? slug.join("/") : slug;
+}
 
 export default async function SharedPage({ loader, slug }: { loader: CachedDocsLoader; slug: Slug }) {
     if (slug.endsWith(".js")) {
@@ -31,291 +36,361 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
         return notFound();
     }
 
-    console.debug("/app/[domain]/_page.tsx: starting...");
+    const slugAttr = slugToAttribute(slug);
 
-    // start loading the root node early
-    const rootPromise = loader.getRoot();
-    const baseUrlPromise = loader.getMetadata();
-    const configPromise = loader.getConfig();
-    const authStatePromise = loader.getAuthState(slugToHref(slug));
-    const edgeFlagsPromise = loader.getEdgeFlags();
-    const settingsPromise = loader.getSettings();
-
-    // Await configPromise with timing
-    let config;
-    {
-        const start = Date.now();
-        console.log(`[SharedPage] calling loader.getConfig() for domain: ${loader.domain}`);
-        config = await configPromise;
-        const end = Date.now();
-        console.log(`[SharedPage] loader.getConfig() took ${end - start}ms for domain: ${loader.domain}`);
-    }
-
-    // Await baseUrlPromise with timing for getRedirectForPath
-    let baseUrl;
-    {
-        const start = Date.now();
-        console.log(`[SharedPage] calling loader.getMetadata() for domain: ${loader.domain}`);
-        baseUrl = await baseUrlPromise;
-        const end = Date.now();
-        console.log(`[SharedPage] loader.getMetadata() took ${end - start}ms for domain: ${loader.domain}`);
-    }
-
-    // check for redirects
-    const configuredRedirect = getRedirectForPath(slugToHref(slug), baseUrl, config.redirects);
-
-    if (configuredRedirect != null) {
-        console.log(
-            `[REDIRECT RULE] domain: ${loader.domain}, from: ${slug} -> to: ${configuredRedirect.destination}, permanent: ${configuredRedirect.permanent}`
-        );
-        const redirectFn = configuredRedirect.permanent ? permanentRedirect : redirect;
-        redirectFn(prepareRedirect(configuredRedirect.destination));
-    }
-
-    // get the root node with timing
-    let root: FernNavigation.RootNode | undefined;
-    {
-        const start = Date.now();
-        console.log(`[SharedPage] calling loader.getRoot() for domain: ${loader.domain}`);
-        root = await rootPromise;
-        const end = Date.now();
-        console.log(`[SharedPage] loader.getRoot() took ${end - start}ms for domain: ${loader.domain}`);
-    }
-
-    // always match the basepath of the root node
-    if (!slug.startsWith(root.slug)) {
-        redirect(prepareRedirect(root.slug));
-    }
-
-    // naively find the current node id to prune the navigation tree
-    const currentNode = FernNavigation.NodeCollector.collect(root).getSlugMapWithParents().get(slug);
-
-    // Await authStatePromise with timing
-    let authState;
-    {
-        const start = Date.now();
-        console.log(`[SharedPage] calling loader.getAuthState() for domain: ${loader.domain}`);
-        authState = await authStatePromise;
-        const end = Date.now();
-        console.log(`[SharedPage] loader.getAuthState() took ${end - start}ms for domain: ${loader.domain}`);
-    }
-
-    // this is a special case for when the user is not authenticated, but the not-found status originates from an authed node
-    // must be checked before pruning auth tree
-    if (currentNode?.node.authed && !authState.authed && authState.authorizationUrl != null) {
-        redirect(prepareRedirect(authState.authorizationUrl));
-    }
-
-    const visibleNodeIds = compact([
-        ...(currentNode?.parents.map((node) => node.id) ?? []),
-        currentNode?.node.id ?? undefined
-    ]);
-
-    // prune the tree so that neighbors don't include authed nodes or hidden nodes
-    {
-        const start = Date.now();
-        root = await withPrunedNavigationLoader(root, loader, visibleNodeIds);
-        const end = Date.now();
-        console.log(`[SharedPage] withPrunedNavigationLoader() took ${end - start}ms`);
-    }
-
-    if (root == null) {
-        console.error(`[SharedPage:${loader.domain}] Could not find root`);
-        notFound();
-    }
-
-    // find the node that is currently being viewed
-    const found = FernNavigation.utils.findNode(root, slug);
-
-    // Await edgeFlagsPromise with timing
-    let edgeFlags;
-    {
-        const start = Date.now();
-        console.log(`[SharedPage] calling loader.getEdgeFlags() for domain: ${loader.domain}`);
-        edgeFlags = await edgeFlagsPromise;
-        const end = Date.now();
-        console.log(`[SharedPage] loader.getEdgeFlags() took ${end - start}ms for domain: ${loader.domain}`);
-    }
-
-    if (found.type === "notFound") {
-        console.error(`[${loader.domain}] Not found: ${slug}`);
-
-        const settings = await settingsPromise;
-
-        // Log 404 detection details for debugging
-        console.log(`[404 DEBUG] domain: ${loader.domain}, slug: ${slug}`, {
-            is404PageHidden: edgeFlags.is404PageHidden,
-            settingsHide404Page: settings.hide404Page,
-            hasRedirect: found.redirect != null,
-            redirect: found.redirect
-        });
-
-        // returning "notFound: true" here renders our custom 404 page (not-found.tsx)
-        if ((edgeFlags.is404PageHidden || settings.hide404Page) && found.redirect != null) {
-            console.log(`[404 AVOIDED] Redirecting ${slug} -> ${found.redirect} instead of showing 404`);
-            // Track 404 in PostHog before redirecting to home page
-            track("not_found_redirected", {
-                domain: loader.domain,
-                slug,
-                redirect: found.redirect
+    return runAsyncSpan(
+        "sharedPage",
+        async (span) => {
+            span.setAttributes({
+                "fern.docs.domain": loader.domain,
+                "fern.docs.slug": slugAttr
             });
-            redirect(prepareRedirect(found.redirect));
-        }
 
-        console.error(`[SharedPage:${loader.domain}] Not found: ${slug}`);
-        notFound();
-    }
+            console.debug("/app/[domain]/_page.tsx: starting...");
 
-    if (found.type === "redirect") {
-        redirect(prepareRedirect(found.redirect));
-    }
+            // start loading the root node early with spans
+            const rootPromise = runAsyncSpan("sharedPage.loader.getRoot", () => loader.getRoot(), {
+                "fern.docs.domain": loader.domain,
+                "fern.docs.slug": slugAttr
+            });
+            const baseUrlPromise = runAsyncSpan("sharedPage.loader.getMetadata", () => loader.getMetadata(), {
+                "fern.docs.domain": loader.domain,
+                "fern.docs.slug": slugAttr
+            });
+            const configPromise = runAsyncSpan("sharedPage.loader.getConfig", () => loader.getConfig(), {
+                "fern.docs.domain": loader.domain,
+                "fern.docs.slug": slugAttr
+            });
+            const authStatePromise = runAsyncSpan(
+                "sharedPage.loader.getAuthState",
+                () => loader.getAuthState(slugToHref(slug)),
+                { "fern.docs.domain": loader.domain, "fern.docs.slug": slugAttr }
+            );
+            const edgeFlagsPromise = runAsyncSpan("sharedPage.loader.getEdgeFlags", () => loader.getEdgeFlags(), {
+                "fern.docs.domain": loader.domain,
+                "fern.docs.slug": slugAttr
+            });
+            const settingsPromise = runAsyncSpan("sharedPage.loader.getSettings", () => loader.getSettings(), {
+                "fern.docs.domain": loader.domain,
+                "fern.docs.slug": slugAttr
+            });
 
-    const rootSlug = root.slug;
-    const versionSlug = found.currentVersion?.slug;
-    const slugMap = found.collector.slugMap;
-    function replaceHref(href: string): string | undefined {
-        if (href.startsWith("/")) {
-            const url = new URL(href, withDefaultProtocol(loader.domain));
-            if (versionSlug != null) {
-                const slugWithVersion = FernNavigation.slugjoin(versionSlug, url.pathname);
-                const found = slugMap.get(slugWithVersion);
-                if (found) {
-                    return `${conformTrailingSlash(addLeadingSlash(found.slug))}${url.search}${url.hash}`;
-                }
+            // Await configPromise with timing
+            let config;
+            {
+                const start = Date.now();
+                console.log(`[SharedPage] calling loader.getConfig() for domain: ${loader.domain}`);
+                config = await configPromise;
+                const end = Date.now();
+                console.log(`[SharedPage] loader.getConfig() took ${end - start}ms for domain: ${loader.domain}`);
             }
 
-            if (rootSlug.length > 0) {
-                const slugWithRoot = FernNavigation.slugjoin(rootSlug, url.pathname);
-                const found = slugMap.get(slugWithRoot);
-                if (found) {
-                    return `${conformTrailingSlash(addLeadingSlash(found.slug))}${url.search}${url.hash}`;
-                }
+            // Await baseUrlPromise with timing for getRedirectForPath
+            let baseUrl;
+            {
+                const start = Date.now();
+                console.log(`[SharedPage] calling loader.getMetadata() for domain: ${loader.domain}`);
+                baseUrl = await baseUrlPromise;
+                const end = Date.now();
+                console.log(`[SharedPage] loader.getMetadata() took ${end - start}ms for domain: ${loader.domain}`);
             }
-        }
-        return;
-    }
 
-    const serialize = createCachedMdxSerializer(loader, {
-        scope: {
-            product: found?.currentProduct?.productId,
-            version: found?.currentVersion?.versionId,
-            tab: found?.currentTab?.title,
-            path: found.node.slug
+            // check for redirects
+            const configuredRedirect = getRedirectForPath(slugToHref(slug), baseUrl, config.redirects);
+
+            if (configuredRedirect != null) {
+                console.log(
+                    `[REDIRECT RULE] domain: ${loader.domain}, from: ${slug} -> to: ${configuredRedirect.destination}, permanent: ${configuredRedirect.permanent}`
+                );
+                const redirectFn = configuredRedirect.permanent ? permanentRedirect : redirect;
+                redirectFn(prepareRedirect(configuredRedirect.destination));
+            }
+
+            // get the root node with timing
+            let root: FernNavigation.RootNode | undefined;
+            {
+                const start = Date.now();
+                console.log(`[SharedPage] calling loader.getRoot() for domain: ${loader.domain}`);
+                root = await rootPromise;
+                const end = Date.now();
+                console.log(`[SharedPage] loader.getRoot() took ${end - start}ms for domain: ${loader.domain}`);
+            }
+
+            // always match the basepath of the root node
+            if (!slug.startsWith(root.slug)) {
+                redirect(prepareRedirect(root.slug));
+            }
+
+            // naively find the current node id to prune the navigation tree
+            const currentNode = FernNavigation.NodeCollector.collect(root).getSlugMapWithParents().get(slug);
+
+            // Await authStatePromise with timing
+            let authState;
+            {
+                const start = Date.now();
+                console.log(`[SharedPage] calling loader.getAuthState() for domain: ${loader.domain}`);
+                authState = await authStatePromise;
+                const end = Date.now();
+                console.log(`[SharedPage] loader.getAuthState() took ${end - start}ms for domain: ${loader.domain}`);
+            }
+
+            // this is a special case for when the user is not authenticated, but the not-found status originates from an authed node
+            // must be checked before pruning auth tree
+            if (currentNode?.node.authed && !authState.authed && authState.authorizationUrl != null) {
+                redirect(prepareRedirect(authState.authorizationUrl));
+            }
+
+            const visibleNodeIds = compact([
+                ...(currentNode?.parents.map((node) => node.id) ?? []),
+                currentNode?.node.id ?? undefined
+            ]);
+
+            // prune the tree so that neighbors don't include authed nodes or hidden nodes
+            root = await runAsyncSpan(
+                "sharedPage.withPrunedNavigationLoader",
+                async () => {
+                    const start = Date.now();
+                    const result = await withPrunedNavigationLoader(root, loader, visibleNodeIds);
+                    const end = Date.now();
+                    console.log(`[SharedPage] withPrunedNavigationLoader() took ${end - start}ms`);
+                    return result;
+                },
+                { "fern.docs.domain": loader.domain, "fern.docs.slug": slugAttr }
+            );
+
+            if (root == null) {
+                console.error(`[SharedPage:${loader.domain}] Could not find root`);
+                notFound();
+            }
+
+            // find the node that is currently being viewed
+            const found = runAsyncSpan(
+                "sharedPage.findNode",
+                () => Promise.resolve(FernNavigation.utils.findNode(root, slug)),
+                { "fern.docs.domain": loader.domain, "fern.docs.slug": slugAttr }
+            );
+
+            // Await edgeFlagsPromise with timing
+            let edgeFlags;
+            {
+                const start = Date.now();
+                console.log(`[SharedPage] calling loader.getEdgeFlags() for domain: ${loader.domain}`);
+                edgeFlags = await edgeFlagsPromise;
+                const end = Date.now();
+                console.log(`[SharedPage] loader.getEdgeFlags() took ${end - start}ms for domain: ${loader.domain}`);
+            }
+
+            const foundResult = await found;
+
+            if (foundResult.type === "notFound") {
+                console.error(`[${loader.domain}] Not found: ${slug}`);
+
+                const settings = await settingsPromise;
+
+                // Log 404 detection details for debugging
+                console.log(`[404 DEBUG] domain: ${loader.domain}, slug: ${slug}`, {
+                    is404PageHidden: edgeFlags.is404PageHidden,
+                    settingsHide404Page: settings.hide404Page,
+                    hasRedirect: foundResult.redirect != null,
+                    redirect: foundResult.redirect
+                });
+
+                // returning "notFound: true" here renders our custom 404 page (not-found.tsx)
+                if ((edgeFlags.is404PageHidden || settings.hide404Page) && foundResult.redirect != null) {
+                    console.log(`[404 AVOIDED] Redirecting ${slug} -> ${foundResult.redirect} instead of showing 404`);
+                    // Track 404 in PostHog before redirecting to home page
+                    track("not_found_redirected", {
+                        domain: loader.domain,
+                        slug,
+                        redirect: foundResult.redirect
+                    });
+                    redirect(prepareRedirect(foundResult.redirect));
+                }
+
+                console.error(`[SharedPage:${loader.domain}] Not found: ${slug}`);
+                notFound();
+            }
+
+            if (foundResult.type === "redirect") {
+                redirect(prepareRedirect(foundResult.redirect));
+            }
+
+            const rootSlug = root.slug;
+            const versionSlug = foundResult.currentVersion?.slug;
+            const slugMap = foundResult.collector.slugMap;
+            function replaceHref(href: string): string | undefined {
+                if (href.startsWith("/")) {
+                    const url = new URL(href, withDefaultProtocol(loader.domain));
+                    if (versionSlug != null) {
+                        const slugWithVersion = FernNavigation.slugjoin(versionSlug, url.pathname);
+                        const foundNode = slugMap.get(slugWithVersion);
+                        if (foundNode) {
+                            return `${conformTrailingSlash(addLeadingSlash(foundNode.slug))}${url.search}${url.hash}`;
+                        }
+                    }
+
+                    if (rootSlug.length > 0) {
+                        const slugWithRoot = FernNavigation.slugjoin(rootSlug, url.pathname);
+                        const foundNode = slugMap.get(slugWithRoot);
+                        if (foundNode) {
+                            return `${conformTrailingSlash(addLeadingSlash(foundNode.slug))}${url.search}${url.hash}`;
+                        }
+                    }
+                }
+                return;
+            }
+
+            const serialize = createCachedMdxSerializer(loader, {
+                scope: {
+                    product: foundResult?.currentProduct?.productId,
+                    version: foundResult?.currentVersion?.versionId,
+                    tab: foundResult?.currentTab?.title,
+                    path: foundResult.node.slug
+                },
+                replaceHref,
+                useNextMdx: false
+            });
+
+            const serializeNextMdx = edgeFlags.isNextMdxRef
+                ? createCachedMdxSerializer(loader, {
+                      scope: {
+                          product: foundResult?.currentProduct?.productId,
+                          version: foundResult?.currentVersion?.versionId,
+                          tab: foundResult?.currentTab?.title,
+                          path: foundResult.node.slug
+                      },
+                      replaceHref,
+                      useNextMdx: true
+                  })
+                : undefined;
+
+            // even if nav-links are globally disabled, we should calculate the neighbors
+            // in case the page overrides this global setting
+            const neighborsPromise = runAsyncSpan(
+                "sharedPage.getNeighbors",
+                async () => {
+                    const start = Date.now();
+                    const result = await getNeighbors(loader, foundResult);
+                    const end = Date.now();
+                    console.log(`[SharedPage] getNeighbors() took ${end - start}ms`);
+                    return result;
+                },
+                { "fern.docs.domain": loader.domain, "fern.docs.slug": slugAttr }
+            );
+
+            // if the current node requires authentication and the user is not authenticated, redirect to the auth page
+            if (foundResult.node.authed && !authState.authed) {
+                console.error(`[${loader.domain}] Not authed: ${slug}`);
+
+                // if the page can be considered an edge node when it's unauthed, then we'll follow the redirect
+                if (FernNavigation.hasRedirect(foundResult.node)) {
+                    redirect(prepareRedirect(foundResult.node.pointsTo));
+                }
+
+                if (authState.authorizationUrl == null) {
+                    unauthorized();
+                }
+
+                redirect(prepareRedirect(authState.authorizationUrl));
+            }
+
+            // isPreview is from baseUrl
+            const isPreview = baseUrl.isPreview;
+
+            // handle authed preview pages
+            if (!authState.authed && edgeFlags.isAuthedPreview && isPreview) {
+                if (authState.authorizationUrl == null) {
+                    unauthorized();
+                }
+
+                redirect(prepareRedirect(authState.authorizationUrl));
+            }
+
+            // TODO: parallelize this with the other edge config calls:
+            let flagPredicate;
+            {
+                const [, predicate] = await runAsyncSpan(
+                    "sharedPage.withLaunchDarkly",
+                    async () => {
+                        const start = Date.now();
+                        const result = await withLaunchDarkly(loader, foundResult);
+                        const end = Date.now();
+                        console.log(`[SharedPage] withLaunchDarkly() took ${end - start}ms`);
+                        return result;
+                    },
+                    { "fern.docs.domain": loader.domain, "fern.docs.slug": slugAttr }
+                );
+                flagPredicate = predicate;
+            }
+
+            if (
+                ![...foundResult.parents, foundResult.node]
+                    .filter(FernNavigation.hasMetadata)
+                    .every((node) => flagPredicate(node))
+            ) {
+                console.error(`[${loader.domain}] Feature flag predicate failed: ${slug}`);
+                notFound();
+            }
+
+            // note: we start from the version node because endpoint Ids can be duplicated across versions
+            // if we introduce versioned sections, and versioned api references, this logic will need to change
+            // const apiReferenceNodes = FernNavigation.utils.collectApiReferences(
+            //   foundResult.currentVersion ?? foundResult.node
+            // );
+
+            const FeedbackPopoverProvider = edgeFlags.isInlineFeedbackEnabled ? FeedbackPopover : React.Fragment;
+
+            // Await neighborsPromise with timing
+            let neighbors;
+            {
+                const start = Date.now();
+                neighbors = await neighborsPromise;
+                const end = Date.now();
+                console.log(`[SharedPage] neighborsPromise (getNeighbors) took ${end - start}ms`);
+            }
+
+            const lang = await loader.getLanguage();
+
+            // Set additional attributes now that we know the node
+            const pageId = FernNavigation.getPageId(foundResult.node);
+            span.setAttributes({
+                "fern.docs.nodeId": foundResult.node.id,
+                ...(pageId ? { "fern.docs.pageId": pageId } : {})
+            });
+
+            return (
+                <FeedbackPopoverProvider lang={lang}>
+                    <SetCurrentNavigationNode
+                        nodeId={foundResult.node.id}
+                        sidebarRootNodeId={foundResult.sidebar?.id}
+                        tabId={foundResult.currentTab?.id}
+                        productId={foundResult.currentProduct?.productId}
+                        productSlug={
+                            foundResult.currentProduct?.type === "product" ? foundResult.currentProduct.slug : undefined
+                        }
+                        versionId={foundResult.currentVersion?.versionId}
+                        versionSlug={foundResult.currentVersion?.slug}
+                        variantId={foundResult.currentVariant?.variantId}
+                        versionIsDefault={foundResult.isCurrentVersionDefault}
+                        productIsDefault={foundResult.isCurrentProductDefault}
+                    />
+                    <DocsMainContent
+                        loader={loader}
+                        serialize={serialize}
+                        serializeNextMdx={serializeNextMdx}
+                        node={foundResult.node}
+                        parents={foundResult.parents}
+                        neighbors={neighbors}
+                        breadcrumb={foundResult.breadcrumb}
+                        lang={lang}
+                    />
+                </FeedbackPopoverProvider>
+            );
         },
-        replaceHref,
-        useNextMdx: false
-    });
-
-    const serializeNextMdx = edgeFlags.isNextMdxRef
-        ? createCachedMdxSerializer(loader, {
-              scope: {
-                  product: found?.currentProduct?.productId,
-                  version: found?.currentVersion?.versionId,
-                  tab: found?.currentTab?.title,
-                  path: found.node.slug
-              },
-              replaceHref,
-              useNextMdx: true
-          })
-        : undefined;
-
-    // even if nav-links are globally disabled, we should calculate the neighbors
-    // in case the page overrides this global setting
-    const neighborsPromise = (async () => {
-        const start = Date.now();
-        const result = await getNeighbors(loader, found);
-        const end = Date.now();
-        console.log(`[SharedPage] getNeighbors() took ${end - start}ms`);
-        return result;
-    })();
-
-    // if the current node requires authentication and the user is not authenticated, redirect to the auth page
-    if (found.node.authed && !authState.authed) {
-        console.error(`[${loader.domain}] Not authed: ${slug}`);
-
-        // if the page can be considered an edge node when it's unauthed, then we'll follow the redirect
-        if (FernNavigation.hasRedirect(found.node)) {
-            redirect(prepareRedirect(found.node.pointsTo));
+        {
+            "fern.docs.domain": loader.domain,
+            "fern.docs.slug": slugAttr
         }
-
-        if (authState.authorizationUrl == null) {
-            unauthorized();
-        }
-
-        redirect(prepareRedirect(authState.authorizationUrl));
-    }
-
-    // isPreview is from baseUrl
-    const isPreview = baseUrl.isPreview;
-
-    // handle authed preview pages
-    if (!authState.authed && edgeFlags.isAuthedPreview && isPreview) {
-        if (authState.authorizationUrl == null) {
-            unauthorized();
-        }
-
-        redirect(prepareRedirect(authState.authorizationUrl));
-    }
-
-    // TODO: parallelize this with the other edge config calls:
-    let flagPredicate;
-    {
-        const start = Date.now();
-        const launchDarklyResult = await withLaunchDarkly(loader, found);
-        flagPredicate = launchDarklyResult[1];
-        const end = Date.now();
-        console.log(`[SharedPage] withLaunchDarkly() took ${end - start}ms`);
-    }
-
-    if (![...found.parents, found.node].filter(FernNavigation.hasMetadata).every((node) => flagPredicate(node))) {
-        console.error(`[${loader.domain}] Feature flag predicate failed: ${slug}`);
-        notFound();
-    }
-
-    // note: we start from the version node because endpoint Ids can be duplicated across versions
-    // if we introduce versioned sections, and versioned api references, this logic will need to change
-    // const apiReferenceNodes = FernNavigation.utils.collectApiReferences(
-    //   found.currentVersion ?? found.node
-    // );
-
-    const FeedbackPopoverProvider = edgeFlags.isInlineFeedbackEnabled ? FeedbackPopover : React.Fragment;
-
-    // Await neighborsPromise with timing
-    let neighbors;
-    {
-        const start = Date.now();
-        neighbors = await neighborsPromise;
-        const end = Date.now();
-        console.log(`[SharedPage] neighborsPromise (getNeighbors) took ${end - start}ms`);
-    }
-
-    const lang = await loader.getLanguage();
-
-    return (
-        <FeedbackPopoverProvider lang={lang}>
-            <SetCurrentNavigationNode
-                nodeId={found.node.id}
-                sidebarRootNodeId={found.sidebar?.id}
-                tabId={found.currentTab?.id}
-                productId={found.currentProduct?.productId}
-                productSlug={found.currentProduct?.type === "product" ? found.currentProduct.slug : undefined}
-                versionId={found.currentVersion?.versionId}
-                versionSlug={found.currentVersion?.slug}
-                variantId={found.currentVariant?.variantId}
-                versionIsDefault={found.isCurrentVersionDefault}
-                productIsDefault={found.isCurrentProductDefault}
-            />
-            <DocsMainContent
-                loader={loader}
-                serialize={serialize}
-                serializeNextMdx={serializeNextMdx}
-                node={found.node}
-                parents={found.parents}
-                neighbors={neighbors}
-                breadcrumb={found.breadcrumb}
-                lang={lang}
-            />
-        </FeedbackPopoverProvider>
     );
 }
 
