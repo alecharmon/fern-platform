@@ -238,15 +238,16 @@ async function performRevalidation(params: {
 
         const filesCount = Object.keys((keys[CACHE_KEY_FILES] as Record<string, unknown>) ?? {}).length;
 
-        track("asset_error", {
-            type: "revalidate_kv_write",
-            domain,
-            keysCount: keyNames.length,
-            filesCount,
-            failedKeysCount: failedKeys.length,
-            failedKeys: failedKeys.slice(0, 25),
-            success: failedKeys.length === 0
-        });
+        if (failedKeys.length > 0) {
+            track("asset_error", {
+                type: "revalidate_kv_write",
+                domain,
+                keysCount: keyNames.length,
+                filesCount,
+                failedKeysCount: failedKeys.length,
+                failedKeys: failedKeys.slice(0, 25)
+            });
+        }
 
         controller.log(`revalidate-kv-keys-set:${keyNames.length}\n`);
     } catch (e) {

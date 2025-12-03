@@ -356,16 +356,14 @@ async function serializeMdxImpl(
             unresolvedFileIds
         );
 
-        if (!isPreviewDomain(domainForLogging) && !isDevelopment(domainForLogging)) {
-            track("asset_error", {
-                type: "mdx_unresolved_file_ids",
-                domain: domainForLogging,
-                slug,
-                unresolvedCount: unresolvedFileIds.length,
-                unresolvedFileIds: unresolvedFileIds.slice(0, 50),
-                availableFilesCount: Object.keys(remoteFiles).length
-            });
-        }
+        track("asset_error", {
+            type: "mdx_unresolved_file_ids",
+            domain: domainForLogging,
+            slug,
+            unresolvedCount: unresolvedFileIds.length,
+            unresolvedFileIds: unresolvedFileIds.slice(0, 50),
+            availableFilesCount: Object.keys(remoteFiles).length
+        });
     }
 
     // TODO: this is doing duplicate work; figure out how to combine it with the compiler above.
