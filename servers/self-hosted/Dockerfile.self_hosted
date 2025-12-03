@@ -1,8 +1,7 @@
-# ----------- Build stage for MinIO -----------
-FROM cgr.dev/chainguard/wolfi-base:latest AS minio-builder
-
-# Install Go and git (needed for go get)
-RUN apk add --no-cache go git
+# ----------- Build stage for Go binaries -----------
+# Use Chainguard Go image with Go 1.24.11+ to fix CVE-2025-61729
+# (excessive resource consumption in crypto/x509 HostnameError.Error())
+FROM cgr.dev/chainguard/go:latest AS go-builder
 
 # Set up Go environment
 ENV GOPATH=/go
@@ -23,7 +22,10 @@ RUN git clone --depth 1 --branch RELEASE.2025-10-15T17-29-55Z https://github.com
 # This commit already uses golang.org/x/crypto v0.45.0
 RUN go install -v github.com/minio/mc@4f6310723f43b117ca2ab746c6533949d777a5bb
 
-# ----------- End MinIO build stage -----------
+# Build Buf CLI v1.61.0 from source with patched Go to fix CVE-2025-61729
+RUN go install github.com/bufbuild/buf/cmd/buf@v1.61.0
+
+# ----------- End Go build stage -----------
 # ----------- Main image -----------
 FROM cgr.dev/chainguard/wolfi-base:latest
 
@@ -85,8 +87,8 @@ COPY servers/fdr/prisma /prisma
 
 # ----------- Start MINIO setup  -----------
 # Copy MinIO binary from build stage
-COPY --from=minio-builder /go/bin/minio /usr/local/bin/minio
-COPY --from=minio-builder /go/bin/mc /usr/local/bin/mc
+COPY --from=go-builder /go/bin/minio /usr/local/bin/minio
+COPY --from=go-builder /go/bin/mc /usr/local/bin/mc
 
 # Set up MinIO user and data directory
 RUN log "Setting up MinIO..." && \
@@ -194,10 +196,8 @@ EXPOSE 16686
 # ----------- End Jaeger setup -----------
 
 # ----------- Start Buf CLI setup -----------
-RUN log "Installing Buf CLI..." && \
-    apk add --no-cache wget 2>&1 | add-timestamps && \
-    wget https://github.com/bufbuild/buf/releases/latest/download/buf-Linux-x86_64 -O /usr/local/bin/buf 2>&1 | add-timestamps && \
-    chmod +x /usr/local/bin/buf
+# Copy Buf CLI from build stage (built with patched Go to fix CVE-2025-61729)
+COPY --from=go-builder /go/bin/buf /usr/local/bin/buf
 
 # Pre-install buf's npm dependencies into a reusable location
 RUN log "Pre-installing Buf npm dependencies..." && \
