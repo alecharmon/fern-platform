@@ -25,6 +25,8 @@ export async function inviteUserToOrg({ inviteeEmail, orgName }: { inviteeEmail:
         }
     );
 
+    await auth0Management.invalidateCachesAfterCreatingInvitation(orgName);
+
     const actorName = session.user.name ?? session.user.email ?? session.user.sub;
 
     postToSlack(

@@ -1,7 +1,12 @@
 "use server";
 
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
-import { addUserToOrg, doesUserBelongToOrg, getInviteToken, invalidateInviteToken } from "../services/auth0/management";
+import {
+    addUserToOrg,
+    doesUserBelongToOrg,
+    getInviteToken,
+    invalidateCachesAfterRedeemingInviteToken
+} from "../services/auth0/management";
 import { type Auth0OrgName, Auth0UserID } from "../services/auth0/types";
 
 export type RedeemInviteTokenErrors =
@@ -37,7 +42,7 @@ export async function redeemInviteToken({
     // Check if token has expired
     if (new Date() > new Date(inviteToken.expiresAt)) {
         // Clean up expired token
-        await invalidateInviteToken(token);
+        await invalidateCachesAfterRedeemingInviteToken(token);
         return {
             success: false,
             error: { type: "EXPIRED_INVITE_TOKEN" }
@@ -47,7 +52,7 @@ export async function redeemInviteToken({
     // Check if user is already a member
     if (await doesUserBelongToOrg(userId, inviteToken.orgName)) {
         // Clean up the token since it's been used
-        await invalidateInviteToken(token);
+        await invalidateCachesAfterRedeemingInviteToken(token);
         return { success: true, orgName: inviteToken.orgName, userId };
     }
 
@@ -55,7 +60,7 @@ export async function redeemInviteToken({
     await addUserToOrg(userId, inviteToken.orgName);
 
     // Clean up the token since it's been used (one-time use)
-    await invalidateInviteToken(token);
+    await invalidateCachesAfterRedeemingInviteToken(token);
 
     // Redirect to organization
     return { success: true, orgName: inviteToken.orgName, userId };

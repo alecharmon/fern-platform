@@ -1,4 +1,4 @@
-import { invalidateOrganizationNotFoundCache } from "@/app/services/auth0/management";
+import { invalidateCachesAfterCreatingOrg } from "@/app/services/auth0/management";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
@@ -34,7 +34,7 @@ export default async function createOrganization(accessToken: string, body: Crea
         throw new Error(getErrorMessage(result.error, body.organizationId));
     }
 
-    await invalidateOrganizationNotFoundCache(Auth0OrgName(body.organizationId));
+    await invalidateCachesAfterCreatingOrg(Auth0OrgName(body.organizationId));
 
     return {
         organizationId: body.organizationId,

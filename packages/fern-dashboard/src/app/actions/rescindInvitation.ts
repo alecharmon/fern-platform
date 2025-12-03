@@ -16,4 +16,6 @@ export async function rescindInvitation({ invitationId, orgName }: { invitationI
         id: await auth0Management.getOrgIdFromName(orgName),
         invitation_id: invitationId
     });
+
+    await auth0Management.invalidateCachesAfterRescindingInvitation(orgName);
 }

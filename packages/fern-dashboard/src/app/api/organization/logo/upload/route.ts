@@ -5,7 +5,7 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import {
     getAuth0ManagementClient,
     getOrgIdFromName,
-    invalidateOrganizationCache
+    invalidateCachesAfterUpdatingOrgMetadata
 } from "@/app/services/auth0/management";
 import { type Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
 import { convertToAuth0Organization } from "@/app/services/auth0/utils";
@@ -96,7 +96,7 @@ export async function POST(request: Request): Promise<NextResponse<uploadOrgLogo
         );
 
         // Invalidate the organization cache
-        await invalidateOrganizationCache(orgName);
+        await invalidateCachesAfterUpdatingOrgMetadata(orgName);
 
         return NextResponse.json({
             organization: convertToAuth0Organization(updatedOrg),

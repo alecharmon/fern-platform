@@ -73,33 +73,60 @@ const INVITE_TOKEN_CACHE = new AsyncRedisCache(
  * cache invalidators *
  **********************/
 
-export async function invalidateCachesAfterAddingOrRemovingOrgMember({ orgName }: { orgName: Auth0OrgName }) {
-    await ORGANIZATION_MEMBERS_CACHE.invalidate(RedisCacheKey.organizationMembers(orgName));
+export async function invalidateCachesAfterAddingOrgMember(userId: Auth0UserID, orgName: Auth0OrgName): Promise<void> {
+    await Promise.all([
+        ORGANIZATION_MEMBERS_CACHE.invalidate(RedisCacheKey.organizationMembers(orgName)),
+        USER_ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.userOrganizations(userId))
+    ]);
 }
 
-export async function invalidateUserOrganizationsCache(userId: Auth0UserID) {
-    await USER_ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.userOrganizations(userId));
+export async function invalidateCachesAfterRemovingOrgMember(
+    userId: Auth0UserID,
+    orgName: Auth0OrgName
+): Promise<void> {
+    await Promise.all([
+        ORGANIZATION_MEMBERS_CACHE.invalidate(RedisCacheKey.organizationMembers(orgName)),
+        USER_ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.userOrganizations(userId))
+    ]);
 }
 
-export async function invalidateCachesAfterInvitingUserToOrg(orgName: Auth0OrgName) {
+export async function invalidateCachesAfterCreatingInvitation(orgName: Auth0OrgName): Promise<void> {
     await ORGANIZATION_INVITATIONS_CACHE.invalidate(RedisCacheKey.organizationInvitations(orgName));
 }
 
-export async function invalidateCachesAfterRescindingInvitation(orgName: Auth0OrgName) {
+export async function invalidateCachesAfterRescindingInvitation(orgName: Auth0OrgName): Promise<void> {
     await ORGANIZATION_INVITATIONS_CACHE.invalidate(RedisCacheKey.organizationInvitations(orgName));
 }
 
-export async function invalidateInviteToken(token: string) {
+export async function invalidateCachesAfterRedeemingInviteToken(token: string): Promise<void> {
     await INVITE_TOKEN_CACHE.invalidate(RedisCacheKey.inviteToken(token));
 }
 
-export async function invalidateOrganizationCache(orgName: Auth0OrgName) {
-    await ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.organization(orgName));
-    await invalidateOrganizationNotFoundCache(orgName);
+export async function invalidateCachesAfterUpdatingOrgMetadata(orgName: Auth0OrgName): Promise<void> {
+    await Promise.all([
+        ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.organization(orgName)),
+        redisDel(RedisCacheKey.organizationNotFound(orgName))
+    ]);
 }
 
-export async function invalidateOrganizationNotFoundCache(orgName: Auth0OrgName) {
+export async function invalidateCachesAfterCreatingOrg(orgName: Auth0OrgName): Promise<void> {
     await redisDel(RedisCacheKey.organizationNotFound(orgName));
+}
+
+async function invalidateAllOrgCaches(orgName: Auth0OrgName, userId?: Auth0UserID) {
+    const invalidations = [
+        ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.organization(orgName)),
+        redisDel(RedisCacheKey.organizationNotFound(orgName)),
+        ORGANIZATION_NAME_TO_ID_CACHE.invalidate(RedisCacheKey.organizationNameToId(orgName)),
+        ORGANIZATION_MEMBERS_CACHE.invalidate(RedisCacheKey.organizationMembers(orgName)),
+        invalidateCachesAfterCreatingInvitation(orgName)
+    ];
+
+    if (userId != null) {
+        invalidations.push(USER_ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.userOrganizations(userId)));
+    }
+
+    await Promise.all(invalidations);
 }
 
 /***********
@@ -113,6 +140,109 @@ function hasStatusCode(error: unknown): error is { statusCode: number } {
         "statusCode" in error &&
         typeof (error as { statusCode?: unknown }).statusCode === "number"
     );
+}
+
+function isOrgNotFoundError(error: unknown): boolean {
+    if (!hasStatusCode(error) || error.statusCode !== 404) {
+        return false;
+    }
+    // Auth0 may not give us reliable error codes
+    // So we check the error message: "[ManagementApiError]: No organization found by that id"
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return (
+        errorMessage.toLowerCase().includes("no organization found") ||
+        errorMessage.toLowerCase().includes("organization not found")
+    );
+}
+
+interface Auth0ErrorDetails {
+    statusCode?: number;
+    message?: string;
+    errorCode?: string;
+}
+
+function extractErrorDetails(error: unknown): Auth0ErrorDetails {
+    const details: Auth0ErrorDetails = {};
+    if (hasStatusCode(error)) {
+        details.statusCode = error.statusCode;
+    }
+    if (error instanceof Error) {
+        details.message = error.message;
+    }
+    if (typeof error === "object" && error != null && "errorCode" in error) {
+        details.errorCode = String((error as { errorCode?: unknown }).errorCode);
+    }
+    return details;
+}
+
+function logAuth0OrgError(
+    operation: string,
+    orgIdentifier: { orgName?: Auth0OrgName; orgId?: Auth0OrgID },
+    error: unknown
+): void {
+    const errorDetails = extractErrorDetails(error);
+    console.error(`[Auth0 Org Error] Operation: ${operation}`, {
+        orgName: orgIdentifier.orgName,
+        orgId: orgIdentifier.orgId,
+        statusCode: errorDetails.statusCode,
+        message: errorDetails.message,
+        errorCode: errorDetails.errorCode,
+        timestamp: new Date().toISOString()
+    });
+}
+
+async function getOrgIdFromNameFresh(orgName: Auth0OrgName): Promise<Auth0OrgID> {
+    const { data: organization } = await retryWithBackoff(
+        async () =>
+            await getAuth0ManagementClient().organizations.getByName({
+                name: orgName
+            }),
+        `getOrgIdFromNameFresh(${orgName})`
+    );
+    return Auth0OrgID(organization.id);
+}
+
+/**
+ * Retries an org-by-id operation with a fresh org ID when a 404 "org not found" error occurs.
+ *
+ * 1. Logs the error with detailed context
+ * 2. Invalidates all org-related caches (including user-org cache if userId is provided)
+ * 3. Re-fetches the org ID by name (bypassing cache)
+ * 4. If the ID changed, retries the operation with the fresh ID
+ * 5. If the ID is the same, the org is truly deleted - re-throws the error
+ */
+async function retryWithFreshOrgIdOnNotFound<T>(
+    operationName: string,
+    orgName: Auth0OrgName,
+    fn: (orgId: Auth0OrgID) => Promise<T>,
+    userId?: Auth0UserID
+): Promise<T> {
+    const initialOrgId = await getOrgIdFromName(orgName);
+    try {
+        return await fn(initialOrgId);
+    } catch (error) {
+        if (!isOrgNotFoundError(error)) {
+            throw error;
+        }
+
+        logAuth0OrgError(operationName, { orgName, orgId: initialOrgId }, error);
+        console.warn(
+            `[retryWithFreshOrgIdOnNotFound] Org not found with cached ID ${initialOrgId}, invalidating caches and retrying for ${orgName}`
+        );
+
+        await invalidateAllOrgCaches(orgName, userId);
+
+        const freshOrgId = await getOrgIdFromNameFresh(orgName);
+        if (freshOrgId === initialOrgId) {
+            console.error(
+                `[retryWithFreshOrgIdOnNotFound] Fresh org ID ${freshOrgId} matches stale ID, org may be deleted`
+            );
+            throw error;
+        }
+
+        console.info(`[retryWithFreshOrgIdOnNotFound] Org ID changed from ${initialOrgId} to ${freshOrgId}, retrying`);
+        return await fn(freshOrgId);
+    }
 }
 
 export async function getInviteToken(token: string) {
@@ -228,8 +358,7 @@ export async function getOrgMembers(
     { includeFernEmployees }: { includeFernEmployees: boolean }
 ) {
     let members = await ORGANIZATION_MEMBERS_CACHE.get(RedisCacheKey.organizationMembers(orgName), async () => {
-        const orgId = await getOrgIdFromName(orgName);
-        return await getAllOrgMembers(orgId);
+        return await retryWithFreshOrgIdOnNotFound("getAllOrgMembers", orgName, (orgId) => getAllOrgMembers(orgId));
     });
     if (!includeFernEmployees) {
         const isFernEmployee = await createIsFernEmployee();
@@ -288,8 +417,9 @@ export const isFernEmployee = cache(async (userId: Auth0UserID): Promise<boolean
 
 export async function getOrgInvitations(orgName: Auth0OrgName) {
     return await ORGANIZATION_INVITATIONS_CACHE.get(RedisCacheKey.organizationInvitations(orgName), async () => {
-        const orgId = await getOrgIdFromName(orgName);
-        return await getAllOrgInvitations(orgId);
+        return await retryWithFreshOrgIdOnNotFound("getAllOrgInvitations", orgName, (orgId) =>
+            getAllOrgInvitations(orgId)
+        );
     });
 }
 
@@ -390,9 +520,17 @@ export async function getUserIdByEmail(email: string): Promise<Auth0UserID> {
 
 export async function addUserToOrg(userId: Auth0UserID, orgName: Auth0OrgName) {
     const auth0 = getAuth0ManagementClient();
-    await auth0.organizations.addMembers({ id: await getOrgIdFromName(orgName) }, { members: [userId] });
-    await invalidateCachesAfterAddingOrRemovingOrgMember({ orgName });
-    await invalidateUserOrganizationsCache(userId);
+
+    await retryWithFreshOrgIdOnNotFound(
+        "addUserToOrg",
+        orgName,
+        async (orgId) => {
+            await auth0.organizations.addMembers({ id: orgId }, { members: [userId] });
+        },
+        userId
+    );
+
+    await invalidateCachesAfterAddingOrgMember(userId, orgName);
 }
 
 export async function getUserGithubToken(userId: Auth0UserID): Promise<string | undefined> {
