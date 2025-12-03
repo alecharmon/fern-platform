@@ -97,20 +97,20 @@ export function CodeBlock(props: {
         return (
             <div
                 className={cn(
-                    "bg-card-background border-card-border rounded-3 shadow-card-grayscale relative mb-6 mt-4 flex w-full min-w-0 max-w-full flex-col border first:mt-0",
+                    "fern-code fern-code-block bg-card-background border-card-border rounded-3 shadow-card-grayscale relative mb-6 mt-4 flex w-full min-w-0 max-w-full flex-col border first:mt-0",
                     { "bg-card-solid dark": isDarkCode }
                 )}
             >
-                <div className="bg-(color:--grayscale-a2) rounded-t-[inherit]">
-                    <div className="shadow-border-default mx-px flex min-h-10 items-center justify-between shadow-[inset_0_-1px_0_0]">
-                        <div className="flex min-h-10 overflow-x-auto">
+                <div className="fern-code-header fern-code-block-header bg-(color:--grayscale-a2) rounded-t-[inherit]">
+                    <div className="fern-code-header-inner fern-code-block-header-inner shadow-border-default mx-px flex min-h-10 items-center justify-between shadow-[inset_0_-1px_0_0]">
+                        <div className="fern-code-block-title flex min-h-10 overflow-x-auto">
                             <div className="flex items-center px-3 py-1.5">
-                                <span className="text-(color:--grayscale-a11) rounded-1 text-sm font-semibold">
+                                <span className="fern-code-label fern-code-block-title-label text-(color:--grayscale-a11) rounded-1 text-sm font-semibold">
                                     {title ?? language}
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="fern-code-actions fern-code-block-actions flex items-center gap-1">
                             {expandable && (
                                 <ExpandCodeButton
                                     className={cn("fern-expand-button z-20")}
@@ -135,7 +135,7 @@ export function CodeBlock(props: {
                         tooltips,
                         viewportRef
                     })}
-                    className="rounded-b-[inherit]"
+                    className="fern-code-content fern-code-block-content rounded-b-[inherit]"
                 />
             </div>
         );

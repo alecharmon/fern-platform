@@ -101,15 +101,15 @@ export function CodeGroup({
     return (
         <Tabs.Root
             className={cn(
-                "bg-card-background after:ring-card-border rounded-3 shadow-card-grayscale relative mb-6 mt-4 flex w-full min-w-0 max-w-full flex-col after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:ring-1 after:ring-inset after:content-[''] first:mt-0",
+                "fern-code fern-code-group bg-card-background after:ring-card-border rounded-3 shadow-card-grayscale relative mb-6 mt-4 flex w-full min-w-0 max-w-full flex-col after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:ring-1 after:ring-inset after:content-[''] first:mt-0",
                 { "bg-card-solid dark": isDarkCode }
             )}
             onValueChange={handleTabChange}
             value={selectedTabIndex.toString()}
         >
-            <div className="bg-(color:--grayscale-a2) rounded-t-[inherit]">
-                <div className="shadow-border-default mx-px flex min-h-10 items-center justify-between shadow-[inset_0_-1px_0_0]">
-                    <Tabs.List className="flex min-h-10" asChild>
+            <div className="fern-code-header fern-code-group-header bg-(color:--grayscale-a2) rounded-t-[inherit]">
+                <div className="fern-code-header-inner fern-code-group-header-inner shadow-border-default mx-px flex min-h-10 items-center justify-between shadow-[inset_0_-1px_0_0]">
+                    <Tabs.List className="fern-code-group-tabs flex min-h-10" asChild>
                         <HorizontalOverflowMask>
                             {items.map((item, idx) => {
                                 const { filename, title = filename, language } = item.props;
@@ -117,9 +117,9 @@ export function CodeGroup({
                                     <Tabs.Trigger
                                         key={idx}
                                         value={idx.toString()}
-                                        className="data-[state=active]:shadow-(color:--accent) group flex min-h-10 items-center px-2 py-1.5 data-[state=active]:shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.1)]"
+                                        className="fern-code-group-tab data-[state=active]:shadow-(color:--accent) group flex min-h-10 items-center px-2 py-1.5 data-[state=active]:shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.1)]"
                                     >
-                                        <span className="text-(color:--grayscale-a11) group-data-[state=active]:text-body group-hover:bg-(color:--grayscale-a3) rounded-1 whitespace-nowrap px-2 py-1 text-sm group-data-[state=active]:font-semibold">
+                                        <span className="fern-code-label fern-code-group-tab-label text-(color:--grayscale-a11) group-data-[state=active]:text-body group-hover:bg-(color:--grayscale-a3) rounded-1 whitespace-nowrap px-2 py-1 text-sm group-data-[state=active]:font-semibold">
                                             {title ?? getDisplayNameWithCount(language, items, idx)}
                                         </span>
                                     </Tabs.Trigger>
@@ -128,7 +128,7 @@ export function CodeGroup({
                         </HorizontalOverflowMask>
                     </Tabs.List>
 
-                    <div className="flex items-center gap-1 ml-2 mr-1">
+                    <div className="fern-code-actions fern-code-group-actions flex items-center gap-1 ml-2 mr-1">
                         <CodeBlockFeedbackButton
                             code={applyTemplates(items[selectedTabIndex]?.props.code ?? "", template)}
                             language={items[selectedTabIndex]?.props.language}
@@ -153,7 +153,12 @@ export function CodeGroup({
                 </div>
             </div>
             {items.map((item, idx) => (
-                <Tabs.Content value={idx.toString()} key={idx} className="rounded-b-[inherit] rounded-t-none" asChild>
+                <Tabs.Content
+                    value={idx.toString()}
+                    key={idx}
+                    className="fern-code-content fern-code-group-content rounded-b-[inherit] rounded-t-none"
+                    asChild
+                >
                     <FernSyntaxHighlighter
                         {...toSyntaxHighlighterProps({
                             ...item.props,
