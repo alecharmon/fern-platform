@@ -32,6 +32,8 @@ if (isProduction()) {
             return event;
         }
     });
+    Sentry.metrics.count("user_action", 1);
+    Sentry.metrics.distribution("api_response_time", 150);
 }
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
