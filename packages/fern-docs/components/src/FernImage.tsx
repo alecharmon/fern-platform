@@ -1,20 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
-import { type ComponentPropsWithoutRef, forwardRef, useCallback } from "react";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 
 import { UnreachableCaseError } from "ts-essentials";
 
-async function reportImageError(src: string, error: string) {
-    try {
-        await fetch("/api/fern-docs/image-error", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ src, error, url: window.location.href })
-        });
-    } catch {
-        // Silently fail - don't break the page if reporting fails
-    }
-}
+import { ImageErrorTracker } from "./ImageErrorTracker";
 
 // TODO: move this to a shared location
 const NEXT_IMAGE_HOSTS = [
@@ -50,19 +40,11 @@ export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<t
         ...rest
     } = props;
 
-    const originalSrc = src != null ? getSrc(src) : null;
-
-    const handleError = useCallback(() => {
-        if (originalSrc != null) {
-            console.error(`[FernImage] Failed to load image: ${originalSrc}`);
-            reportImageError(originalSrc, "load_failed");
-        }
-    }, [originalSrc]);
-
-    if (src == null || originalSrc == null) {
+    if (src == null) {
         return null;
     }
 
+    const originalSrc = getSrc(src);
     const { host, pathname } = safeGetUrl(originalSrc);
 
     const aspectRatio = withAspectRatio(withDimensions(props));
@@ -71,23 +53,24 @@ export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<t
     // so we'll fall back to <img> if the host is not in the allowlist (or if no custom loader is provided)
     if (((!host || !NEXT_IMAGE_HOSTS.includes(host)) && !loader) || (!width && !height)) {
         return (
-            <img
-                ref={ref}
-                {...rest}
-                src={originalSrc}
-                alt={alt}
-                width={width}
-                height={height}
-                fetchPriority={priority ? "high" : undefined}
-                loading={loading}
-                onError={handleError}
-                // on local dev, the preflight css for <img> tags is `max-width: 100%; height: auto;`
-                // which causes the image height to be ignored. we'll use the inline style prop to override this behavior:
-                style={{
-                    aspectRatio,
-                    ...props.style
-                }}
-            />
+            <ImageErrorTracker src={originalSrc}>
+                <img
+                    ref={ref}
+                    {...rest}
+                    src={originalSrc}
+                    alt={alt}
+                    width={width}
+                    height={height}
+                    fetchPriority={priority ? "high" : undefined}
+                    loading={loading}
+                    // on local dev, the preflight css for <img> tags is `max-width: 100%; height: auto;`
+                    // which causes the image height to be ignored. we'll use the inline style prop to override this behavior:
+                    style={{
+                        aspectRatio,
+                        ...props.style
+                    }}
+                />
+            </ImageErrorTracker>
         );
     }
 
@@ -95,36 +78,37 @@ export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<t
     // we'll use the inline style prop to override the aspect ratio
     // and pass the rest of the props to the <Image> component
     return (
-        <Image
-            ref={ref}
-            {...rest}
-            src={src}
-            alt={alt}
-            width={width}
-            height={height}
-            fill={fill}
-            loader={loader}
-            quality={quality}
-            priority={priority}
-            loading={loading}
-            placeholder={placeholder}
-            blurDataURL={blurDataURL}
-            unoptimized={pathname?.endsWith(".gif") || pathname?.endsWith(".svg") || unoptimized}
-            overrideSrc={originalSrc}
-            onLoadingComplete={onLoadingComplete}
-            onError={handleError}
-            layout={layout}
-            objectFit={objectFit}
-            objectPosition={objectPosition}
-            lazyBoundary={lazyBoundary}
-            lazyRoot={lazyRoot}
-            // on local dev, the preflight css for <img> tags is `max-width: 100%; height: auto;`
-            // which causes the image height to be ignored. we'll use the inline style prop to override this behavior:
-            style={{
-                aspectRatio,
-                ...props.style
-            }}
-        />
+        <ImageErrorTracker src={originalSrc}>
+            <Image
+                ref={ref}
+                {...rest}
+                src={src}
+                alt={alt}
+                width={width}
+                height={height}
+                fill={fill}
+                loader={loader}
+                quality={quality}
+                priority={priority}
+                loading={loading}
+                placeholder={placeholder}
+                blurDataURL={blurDataURL}
+                unoptimized={pathname?.endsWith(".gif") || pathname?.endsWith(".svg") || unoptimized}
+                overrideSrc={originalSrc}
+                onLoadingComplete={onLoadingComplete}
+                layout={layout}
+                objectFit={objectFit}
+                objectPosition={objectPosition}
+                lazyBoundary={lazyBoundary}
+                lazyRoot={lazyRoot}
+                // on local dev, the preflight css for <img> tags is `max-width: 100%; height: auto;`
+                // which causes the image height to be ignored. we'll use the inline style prop to override this behavior:
+                style={{
+                    aspectRatio,
+                    ...props.style
+                }}
+            />
+        </ImageErrorTracker>
     );
 });
 
