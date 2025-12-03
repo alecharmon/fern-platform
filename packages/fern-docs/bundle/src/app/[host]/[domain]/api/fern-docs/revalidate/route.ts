@@ -259,6 +259,9 @@ async function performRevalidation(params: {
         controller.log(`revalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
     }
 
+    // Delay to ensure KV writes propagate before page regeneration reads them
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     if (doRegenerate) {
         const collector = FernNavigation.NodeCollector.collect(staticRoot);
 
