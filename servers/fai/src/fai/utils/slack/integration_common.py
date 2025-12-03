@@ -32,6 +32,7 @@ SLACK_SCOPES = [
     "channels:read",
     "chat:write",
     "commands",
+    "files:read",
     "files:write",
     "groups:history",
     "im:history",
