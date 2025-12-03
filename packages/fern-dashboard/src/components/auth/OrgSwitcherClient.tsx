@@ -121,7 +121,7 @@ const OrgSwitcherClientInternal = forwardRef<
 
     const currentOrg = organizations.find((org) => org.name === localOrgName);
 
-    const shouldShowSearch = organizations.length > 10;
+    const shouldShowSearch = organizations.length > 10 || isFernAdmin;
 
     return (
         <>
