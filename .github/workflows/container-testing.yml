@@ -100,7 +100,7 @@ jobs:
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/mdx-bundler-internal:$SANITIZED_BRANCH-${{ github.sha }}
 
   self-hosted:
-    runs-on: ubuntu-latest
+    runs-on: Seed
     permissions:
       id-token: write
       contents: read
