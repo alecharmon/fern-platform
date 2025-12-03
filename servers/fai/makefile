@@ -1,16 +1,10 @@
-code-format:
-	poetry run black .
-	poetry run isort .
-
 code-cleanup:
-	make code-format
 	poetry run ruff check --unsafe-fixes --fix src/ tests/
 	poetry run ruff format src/ tests/
 
 check:
 	poetry run python -m mypy .
-	poetry run black --check .
-	poetry run isort --check .
+	poetry run ruff check src/ tests/
 
 test:
 	poetry run pytest

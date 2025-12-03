@@ -12,11 +12,36 @@ from fai.scheduler import (
     stop_scheduler,
 )
 from fai.settings import (
+    CONFIG,
     LOGGER,
     VARIABLES,
 )
 from fai.utils.scribe.session_manager import resume_active_sessions
 from utils.init_db import init
+
+
+async def start_scheduler_and_run_startup_tasks() -> None:
+    try:
+        start_scheduler()
+        LOGGER.info("Setup: Scheduler started.")
+    except Exception as e:
+        LOGGER.error(f"Setup: Error starting scheduler: {e}")
+
+    try:
+        async with async_session_maker() as db:
+            results = await check_scribe_pr_statuses(db)
+            LOGGER.info(
+                f"Setup: Scribe PR status check completed on startup: "
+                f"{results['checked']} checked, {results['merged']} merged, {results['errors']} errors"
+            )
+    except Exception as e:
+        LOGGER.error(f"Setup: Error checking Scribe PR statuses on startup: {e}")
+
+    try:
+        await resume_active_sessions()
+        LOGGER.info("Setup: Scribe session polling resumed.")
+    except Exception as e:
+        LOGGER.error(f"Setup: Error resuming Scribe sessions: {e}")
 
 
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
@@ -31,35 +56,32 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     else:
         LOGGER.info("Setup: Production mode. Database not initialized.")
 
-    try:
-        start_scheduler()
-        LOGGER.info("Setup: Scheduler started.")
-    except Exception as e:
-        LOGGER.error(f"Setup: Error starting scheduler: {e}")
-
-    try:
-        await resume_active_sessions()
-        LOGGER.info("Setup: Scribe session polling resumed.")
-    except Exception as e:
-        LOGGER.error(f"Setup: Error resuming Scribe sessions: {e}")
-
-    try:
-        async with async_session_maker() as db:
-            results = await check_scribe_pr_statuses(db)
-            LOGGER.info(
-                f"Setup: Scribe PR status check completed on startup: "
-                f"{results['checked']} checked, {results['merged']} merged, {results['errors']} errors"
-            )
-    except Exception as e:
-        LOGGER.error(f"Setup: Error checking Scribe PR statuses on startup: {e}")
+    if not VARIABLES.IS_LOCAL:
+        LOGGER.info("Setup: Production mode. Starting scheduler and running startup tasks...")
+        await start_scheduler_and_run_startup_tasks()
+    elif CONFIG.ENABLE_LOCAL_SCHEDULED_JOBS:
+        LOGGER.info("Setup: Overriding local development mode. Starting scheduler and running startup tasks...")
+        await start_scheduler_and_run_startup_tasks()
+    else:
+        LOGGER.info("Setup: Local development mode. Scheduler and scheduled jobs disabled.")
 
     yield
 
-    try:
-        stop_scheduler()
-        LOGGER.info("Shutdown: Scheduler stopped.")
-    except Exception as e:
-        LOGGER.error(f"Shutdown: Error stopping scheduler: {e}")
+    if not VARIABLES.IS_LOCAL:
+        try:
+            stop_scheduler()
+            LOGGER.info("Shutdown: Scheduler stopped.")
+        except Exception as e:
+            LOGGER.error(f"Shutdown: Error stopping scheduler: {e}")
+    elif CONFIG.ENABLE_LOCAL_SCHEDULED_JOBS:
+        LOGGER.info("Shutdown: Local development mode. Stopping scheduler...")
+        try:
+            stop_scheduler()
+            LOGGER.info("Shutdown: Scheduler stopped.")
+        except Exception as e:
+            LOGGER.error(f"Shutdown: Error stopping scheduler: {e}")
+    else:
+        LOGGER.info("Shutdown: Local development mode. Scheduler not stopped.")
 
 
 class FAIApp(FastAPI):
