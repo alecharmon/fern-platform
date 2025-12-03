@@ -25,6 +25,7 @@ export interface FeedbackProps {
     pathname?: string;
     feedbackSource?: string;
     lang: string;
+    copyAction?: React.ReactNode;
 }
 
 export const Feedback: FC<FeedbackProps> = ({
@@ -34,7 +35,8 @@ export const Feedback: FC<FeedbackProps> = ({
     metadata,
     pathname: pathnameProp,
     feedbackSource,
-    lang
+    lang,
+    copyAction
 }) => {
     const [sent, setSent] = useState(false);
     const [isHelpful, setIsHelpful] = useState<"yes" | "no" | undefined>();
@@ -144,9 +146,9 @@ export const Feedback: FC<FeedbackProps> = ({
     return (
         <div className={className} ref={ref}>
             {!sent ? (
-                <div className="flex flex-wrap items-center justify-start gap-4">
-                    <span className="text-(color:--grayscale-a11) text-sm font-medium">{defaultFeedbackQuestion}</span>
-                    <div className="flex gap-2">
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        {copyAction}
                         <FeedbackFormDialog
                             content={
                                 isHelpful && (
@@ -155,16 +157,16 @@ export const Feedback: FC<FeedbackProps> = ({
                             }
                             trigger={
                                 <Button
-                                    variant={isHelpful === "yes" ? "outlineSuccess" : "outline"}
+                                    variant={isHelpful === "yes" ? "success" : "ghost"}
                                     onClick={handleYes}
                                     size="sm"
+                                    className="h-8 w-8 p-0"
                                 >
                                     <ThumbsUp
-                                        className={cn({
+                                        className={cn("h-4 w-4", {
                                             "animate-thumb-rock": isHelpful === "yes"
                                         })}
                                     />
-                                    {t(lang).feedback.yes}
                                 </Button>
                             }
                         />
@@ -176,16 +178,16 @@ export const Feedback: FC<FeedbackProps> = ({
                             }
                             trigger={
                                 <Button
-                                    variant={isHelpful === "no" ? "outlineDanger" : "outline"}
+                                    variant={isHelpful === "no" ? "destructive" : "ghost"}
                                     onClick={handleNo}
                                     size="sm"
+                                    className="h-8 w-8 p-0"
                                 >
                                     <ThumbsDown
-                                        className={cn({
+                                        className={cn("h-4 w-4", {
                                             "animate-thumb-rock": isHelpful === "no"
                                         })}
                                     />
-                                    {t(lang).feedback.no}
                                 </Button>
                             }
                         />

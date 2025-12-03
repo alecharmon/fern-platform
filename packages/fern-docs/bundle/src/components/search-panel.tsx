@@ -1,5 +1,6 @@
 "use client";
 
+import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { t } from "@fern-docs/i18n";
@@ -10,7 +11,6 @@ import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { z } from "zod";
-
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
 import { useIsDarkCode } from "@/state/dark-code";
@@ -25,7 +25,6 @@ import {
     usePageContext,
     useSetSearchPanelResizing
 } from "@/state/search-panel";
-
 import { Feedback } from "./feedback/Feedback";
 import { generateConversationId } from "./generate-conversation-id";
 import { generateQueryId } from "./generate-query-id";
@@ -270,6 +269,13 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
                                     })}
                                     feedbackSource="ask-fern"
                                     lang={lang}
+                                    copyAction={
+                                        <CopyToClipboardButton
+                                            content={assistant.content}
+                                            lang={lang}
+                                            className="h-8 w-8 p-0"
+                                        />
+                                    }
                                 />
                             );
                         }}
