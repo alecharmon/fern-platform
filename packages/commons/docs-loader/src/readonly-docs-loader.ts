@@ -1,5 +1,4 @@
 import type { AuthEdgeConfig } from "@fern-api/docs-auth";
-// import { track } from "@fern-api/docs-server";
 import {
     type AuthState,
     loadWithUrl as cachedLoadWithUrl,
@@ -17,6 +16,7 @@ import {
     provideRegistryService,
     pruneWithAuthState,
     pruneWithPasswordAuth,
+    track,
     loadDynamicIRWithUrl as uncachedLoadDynamicIRWithUrl,
     uncachedLoadWithUrl
 } from "@fern-api/docs-server";
@@ -427,45 +427,73 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
         "use cache";
         unstable_cacheTag(domain, "getFiles");
 
+        let cacheHit = false;
         try {
             const cached = await kvGet<Record<string, FileData>>(domain, CACHE_KEY_FILES, cacheConfig.cacheKeySuffix);
             if (cached) {
+                cacheHit = true;
                 return cached;
             }
         } catch (error) {
             console.warn(`Failed to get files for ${domain}, fallback to uncached`, error);
+            track("asset_error", {
+                type: "get_files_kv_error",
+                domain,
+                error: String(error)
+            });
         }
-        const files = await loadDocsBranch<Record<string, FileData>>(domain, {
-            paths: [["definition", "filesV2"]],
-            selector: ({ branch, response }) => {
-                const filesV2 = (branch as DocsV2Read.LoadDocsForUrlResponse["definition"]["filesV2"]) ?? {};
-                return mapValues(filesV2, (file) => {
-                    if (file.type === "url") {
-                        return {
-                            src:
-                                process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                                    ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
-                                    : file.url
-                        };
-                    } else if (file.type === "image") {
-                        return {
-                            src:
-                                process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                                    ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
-                                    : file.url,
-                            width: file.width,
-                            height: file.height,
-                            blurDataURL: file.blurDataUrl,
-                            alt: file.alt
-                        };
-                    }
-                    throw new UnreachableCaseError(file);
+
+        try {
+            const files = await loadDocsBranch<Record<string, FileData>>(domain, {
+                paths: [["definition", "filesV2"]],
+                selector: ({ branch, response }) => {
+                    const filesV2 = (branch as DocsV2Read.LoadDocsForUrlResponse["definition"]["filesV2"]) ?? {};
+                    return mapValues(filesV2, (file) => {
+                        if (file.type === "url") {
+                            return {
+                                src:
+                                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                                        ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                                        : file.url
+                            };
+                        } else if (file.type === "image") {
+                            return {
+                                src:
+                                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                                        ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                                        : file.url,
+                                width: file.width,
+                                height: file.height,
+                                blurDataURL: file.blurDataUrl,
+                                alt: file.alt
+                            };
+                        }
+                        throw new UnreachableCaseError(file);
+                    });
+                }
+            });
+
+            const filesCount = Object.keys(files).length;
+            if (filesCount === 0) {
+                track("asset_error", {
+                    type: "get_files_empty",
+                    domain,
+                    cacheHit
                 });
             }
-        });
 
-        kvSet(domain, CACHE_KEY_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
-        return files;
+            kvSet(domain, CACHE_KEY_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+            return files;
+        } catch (error) {
+            console.error(`Failed to load files for ${domain}`, error);
+            track("asset_error", {
+                type: "get_files_load_error",
+                domain,
+                error: String(error)
+            });
+            // Return empty object so pages can still render (just without images)
+            return {};
+        }
     });
 
 // the api reference may be too large to cache, so we don't cache it in the KV store

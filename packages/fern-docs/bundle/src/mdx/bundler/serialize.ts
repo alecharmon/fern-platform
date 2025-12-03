@@ -134,6 +134,7 @@ async function serializeMdxImpl(
     let remoteFiles: Record<string, FileData> = {};
     const jsxElements: string[] = [];
     const styles: string[] = [];
+    const unresolvedFileIds: Array<{ fileId: string; elementName: string | null | undefined }> = [];
 
     remoteFiles = (await loader?.getFiles?.()) ?? {};
     files = (await loader?.getMdxBundlerFiles?.()) ?? {};
@@ -183,7 +184,19 @@ async function serializeMdxImpl(
             const rehypePlugins: PluggableList = [
                 rehypeSqueezeParagraphs,
                 rehypeKatex,
-                [rehypeFiles, { files: remoteFiles }],
+                [
+                    rehypeFiles,
+                    {
+                        files: remoteFiles,
+                        onUnresolvedFileId: (src: string, elementName: string | null | undefined) => {
+                            // Skip data URIs - these are inline and not file references
+                            if (src.startsWith("data:")) {
+                                return;
+                            }
+                            unresolvedFileIds.push({ fileId: src, elementName });
+                        }
+                    }
+                ],
                 rehypeMdxClassStyle,
                 rehypeLlmsFilter,
                 rehypeCodeBlock,
@@ -334,6 +347,26 @@ async function serializeMdxImpl(
     }
 
     const frontmatter = getMDXExport(bundled)?.frontmatter as Partial<FernDocs.Frontmatter> | undefined;
+
+    // Track unresolved file IDs for debugging missing images
+    if (unresolvedFileIds.length > 0) {
+        const domainForLogging = domain ?? domainFallback;
+        console.warn(
+            `[rehype-files] Unresolved file IDs for ${domainForLogging}${slug ? "/" + slug : ""}:`,
+            unresolvedFileIds
+        );
+
+        if (!isPreviewDomain(domainForLogging) && !isDevelopment(domainForLogging)) {
+            track("asset_error", {
+                type: "mdx_unresolved_file_ids",
+                domain: domainForLogging,
+                slug,
+                unresolvedCount: unresolvedFileIds.length,
+                unresolvedFileIds: unresolvedFileIds.slice(0, 50),
+                availableFilesCount: Object.keys(remoteFiles).length
+            });
+        }
+    }
 
     // TODO: this is doing duplicate work; figure out how to combine it with the compiler above.
     // const { jsxElements } = toTree(content, { sanitize: false });

@@ -11,6 +11,7 @@ import { walk } from "estree-walker";
 
 export interface RehypeFilesOptions {
     files?: Record<string, FileData>;
+    onUnresolvedFileId?: (fileId: string, elementName: string | null | undefined) => void;
 }
 
 /**
@@ -28,16 +29,25 @@ export interface RehypeFilesOptions {
  * @param options - the options for the plugin
  * @returns a function that will transform the tree
  */
-export const rehypeFiles: Unified.Plugin<[RehypeFilesOptions?], Hast.Root> = ({ files } = {}) => {
+export const rehypeFiles: Unified.Plugin<[RehypeFilesOptions?], Hast.Root> = ({ files, onUnresolvedFileId } = {}) => {
     if (files == null) {
         return;
     }
-    function replaceSrc(src: string | undefined): FileData | undefined {
+
+    function replaceSrc(src: string | undefined, elementName?: string | null): FileData | undefined {
         if (src == null) {
             return undefined;
         }
 
-        return files?.[src.startsWith("file:") ? src.slice(5) : src];
+        const fileId = src.startsWith("file:") ? src.slice(5) : src;
+        const fileData = files?.[fileId];
+
+        // Report any src we couldn't resolve (caller can filter if needed)
+        if (fileData == null) {
+            onUnresolvedFileId?.(src, elementName);
+        }
+
+        return fileData;
     }
     return (tree: Hast.Root) => {
         visit(tree, (node) => {
@@ -62,7 +72,7 @@ export const rehypeFiles: Unified.Plugin<[RehypeFilesOptions?], Hast.Root> = ({ 
                     console.warn(`[rehype-files]: src attribute is not parseable for ${node.name}`);
                     return;
                 }
-                const { src: newSrc, height, width, blurDataURL } = replaceSrc?.(src) ?? {};
+                const { src: newSrc, height, width, blurDataURL } = replaceSrc?.(src, node.name) ?? {};
 
                 if (newSrc != null) {
                     srcAttribute.value = newSrc;
@@ -95,7 +105,7 @@ export const rehypeFiles: Unified.Plugin<[RehypeFilesOptions?], Hast.Root> = ({ 
                     height,
                     width
                     // blurDataURL, should this be handled here?
-                } = replaceSrc?.(srcAttribute) ?? {};
+                } = replaceSrc?.(srcAttribute, node.tagName) ?? {};
 
                 if (newSrc != null) {
                     node.properties.src = newSrc;
@@ -120,12 +130,12 @@ export const rehypeFiles: Unified.Plugin<[RehypeFilesOptions?], Hast.Root> = ({ 
                         return;
                     }
                     walk(estree, {
-                        enter(node) {
-                            if (node.type === "Literal" && typeof node.value === "string") {
+                        enter(estreeNode) {
+                            if (estreeNode.type === "Literal" && typeof estreeNode.value === "string") {
                                 // TODO: if the replaced src is a Image (contains width and height), we need to add them to the parent JSX root somehow.
                                 // for example: <Card icon={<img src="fileId" />} /> -> <Card icon={<img src="replacedImgUrl" width={w} height={h} />} />
                                 // currently, we cannot leverage NextJS Image Optimization for this edge case.
-                                node.value = replaceSrc?.(node.value)?.src ?? node.value;
+                                estreeNode.value = replaceSrc?.(estreeNode.value, node.name)?.src ?? estreeNode.value;
                             }
                         }
                     });

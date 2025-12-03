@@ -219,15 +219,43 @@ async function performRevalidation(params: {
 
         const results = await Promise.allSettled(promises);
 
+        const keyNames = Object.keys(keys);
+        const failedKeys: string[] = [];
+
         results.forEach((result, index) => {
             if (result.status === "rejected") {
-                console.error(`Failed to set kv key ${Object.keys(keys)[index]}: ${result.reason}`);
+                const keyName = keyNames[index] ?? `unknown-${index}`;
+                failedKeys.push(keyName);
+                console.error(`Failed to set kv key ${keyName}: ${result.reason}`);
+                track("asset_error", {
+                    type: "revalidate_kv_key_failed",
+                    domain,
+                    key: keyName,
+                    error: String(result.reason)
+                });
             }
         });
 
-        controller.log(`revalidate-kv-keys-set:${Object.keys(keys).length}\n`);
+        const filesCount = Object.keys((keys[CACHE_KEY_FILES] as Record<string, unknown>) ?? {}).length;
+
+        track("asset_error", {
+            type: "revalidate_kv_write",
+            domain,
+            keysCount: keyNames.length,
+            filesCount,
+            failedKeysCount: failedKeys.length,
+            failedKeys: failedKeys.slice(0, 25),
+            success: failedKeys.length === 0
+        });
+
+        controller.log(`revalidate-kv-keys-set:${keyNames.length}\n`);
     } catch (e) {
         console.error(`[revalidate:start] ${JSON.stringify(e)}`);
+        track("asset_error", {
+            type: "revalidate_kv_write_error",
+            domain,
+            error: String(e)
+        });
         controller.log(`revalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
     }
 

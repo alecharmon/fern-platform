@@ -1,8 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
+import { type ComponentPropsWithoutRef, forwardRef, useCallback } from "react";
 
 import { UnreachableCaseError } from "ts-essentials";
+
+async function reportImageError(src: string, error: string) {
+    try {
+        await fetch("/api/fern-docs/image-error", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ src, error, url: window.location.href })
+        });
+    } catch {
+        // Silently fail - don't break the page if reporting fails
+    }
+}
 
 // TODO: move this to a shared location
 const NEXT_IMAGE_HOSTS = [
@@ -38,11 +50,19 @@ export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<t
         ...rest
     } = props;
 
-    if (src == null) {
+    const originalSrc = src != null ? getSrc(src) : null;
+
+    const handleError = useCallback(() => {
+        if (originalSrc != null) {
+            console.error(`[FernImage] Failed to load image: ${originalSrc}`);
+            reportImageError(originalSrc, "load_failed");
+        }
+    }, [originalSrc]);
+
+    if (src == null || originalSrc == null) {
         return null;
     }
 
-    const originalSrc = getSrc(src);
     const { host, pathname } = safeGetUrl(originalSrc);
 
     const aspectRatio = withAspectRatio(withDimensions(props));
@@ -60,6 +80,7 @@ export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<t
                 height={height}
                 fetchPriority={priority ? "high" : undefined}
                 loading={loading}
+                onError={handleError}
                 // on local dev, the preflight css for <img> tags is `max-width: 100%; height: auto;`
                 // which causes the image height to be ignored. we'll use the inline style prop to override this behavior:
                 style={{
@@ -91,6 +112,7 @@ export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<t
             unoptimized={pathname?.endsWith(".gif") || pathname?.endsWith(".svg") || unoptimized}
             overrideSrc={originalSrc}
             onLoadingComplete={onLoadingComplete}
+            onError={handleError}
             layout={layout}
             objectFit={objectFit}
             objectPosition={objectPosition}
