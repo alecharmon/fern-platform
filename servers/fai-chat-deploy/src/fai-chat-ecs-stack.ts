@@ -110,7 +110,9 @@ export class FaiChatEcsStack extends Stack {
                     COHERE_API_KEY: getEnvOrThrow("COHERE_API_KEY"),
                     TURBOPUFFER_API_KEY: getEnvOrThrow("TURBOPUFFER_API_KEY"),
                     FERN_TOKEN: getEnvOrThrow("FERN_TOKEN"),
-                    POSTHOG_API_KEY: getEnvOrThrow("POSTHOG_API_KEY")
+                    POSTHOG_API_KEY: getEnvOrThrow("POSTHOG_API_KEY"),
+                    AWS_ACCESS_KEY_ID: getEnvOrThrow("AWS_ACCESS_KEY_ID"),
+                    AWS_SECRET_ACCESS_KEY: getEnvOrThrow("AWS_SECRET_ACCESS_KEY")
                 }
             },
             assignPublicIp: true,

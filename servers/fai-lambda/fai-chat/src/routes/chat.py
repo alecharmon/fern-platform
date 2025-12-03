@@ -164,6 +164,7 @@ async def chat(
             user_messages=simple_messages,
             retrieved_docs=retrieval_result.documents,
             domain=domain,
+            customer_system_prompt=request.customerSystemPrompt,
         )
 
         llm_messages = [
@@ -194,8 +195,9 @@ async def chat(
         )
 
     llm_provider_start_ms = time.time() * 1000
+    model_id = request.model or "claude-4-sonnet"
     try:
-        provider = get_llm_provider(model="claude-4-sonnet", temperature=0.0, max_tokens=4096)
+        provider = get_llm_provider(model=model_id, temperature=0.0, max_tokens=4096)
         llm_provider_end_ms = time.time() * 1000
         logger.info(f"LLM provider initialized in {llm_provider_end_ms - llm_provider_start_ms:.2f}ms")
     except Exception as e:

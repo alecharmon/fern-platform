@@ -32,11 +32,13 @@ class ChatMessage(BaseModel):
 
 
 class FacetFilter(BaseModel):
-    field: str
+    model_config = {"extra": "ignore", "populate_by_name": True}
+    field: str = Field(..., alias="facet")
     value: Any
 
 
 class ChatRequest(BaseModel):
+    model_config = {"extra": "ignore", "populate_by_name": True}
     messages: list[UIMessage] = Field(..., min_length=1)
     source: str | None = None
     filters: list[FacetFilter] = Field(default_factory=list)
@@ -44,6 +46,8 @@ class ChatRequest(BaseModel):
     queryId: str | None = Field(default=None, alias="queryId")
     documentUrls: list[str] = Field(default_factory=list, alias="documentUrls")
     skipSaveQuery: bool = Field(default=False, alias="skipSaveQuery")
+    model: str | None = None
+    customerSystemPrompt: str | None = Field(default=None, alias="customerSystemPrompt")
 
     def get_simple_messages(self) -> list[ChatMessage]:
         simple_messages = []

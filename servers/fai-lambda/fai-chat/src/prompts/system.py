@@ -130,6 +130,7 @@ def build_messages(
     user_messages: list[ChatMessage],
     retrieved_docs: list[RetrievedDocument],
     domain: str,
+    customer_system_prompt: str | None = None,
 ) -> list[dict[str, str]]:
     context = format_retrieved_docs(retrieved_docs, domain)
 
@@ -142,6 +143,13 @@ You are answering questions for the documentation at: {domain}
 # Retrieved Documentation
 
 {context}"""
+
+    if customer_system_prompt:
+        system_message_content += f"""
+
+# Additional Instructions
+
+{customer_system_prompt}"""
 
     messages = [{"role": "system", "content": system_message_content}]
 

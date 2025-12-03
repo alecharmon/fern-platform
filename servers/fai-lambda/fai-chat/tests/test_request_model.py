@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from src.models.request import (
     ChatMessage,
     ChatRequest,
+    FacetFilter,
     MessagePart,
     UIMessage,
 )
@@ -195,6 +196,69 @@ class TestMessagePart:
         part = MessagePart(**data)
         assert part.type == "data-sources"
         assert part.text is None
+
+
+class TestChatRequestExtraFields:
+    def test_request_ignores_unknown_extra_fields(self) -> None:
+        data = {
+            "messages": [{"role": "user", "parts": [{"type": "text", "text": "Hello"}]}],
+            "url": "https://example.com/page",
+            "unknownField": "should be ignored",
+        }
+        request = ChatRequest(**data)
+
+        assert len(request.messages) == 1
+        assert request.messages[0].parts[0].text == "Hello"
+
+    def test_request_with_model_and_customer_system_prompt(self) -> None:
+        data = {
+            "messages": [{"role": "user", "parts": [{"type": "text", "text": "Hello"}]}],
+            "model": "claude-3.5",
+            "customerSystemPrompt": "Be helpful and concise",
+        }
+        request = ChatRequest(**data)
+
+        assert request.model == "claude-3.5"
+        assert request.customerSystemPrompt == "Be helpful and concise"
+
+    def test_request_model_and_prompt_default_to_none(self) -> None:
+        data = {
+            "messages": [{"role": "user", "parts": [{"type": "text", "text": "Hello"}]}],
+        }
+        request = ChatRequest(**data)
+
+        assert request.model is None
+        assert request.customerSystemPrompt is None
+
+
+class TestFacetFilter:
+    def test_facet_filter_with_field_property(self) -> None:
+        data = {"field": "version.title", "value": "v1"}
+        filter_obj = FacetFilter(**data)
+
+        assert filter_obj.field == "version.title"
+        assert filter_obj.value == "v1"
+
+    def test_facet_filter_with_facet_property(self) -> None:
+        data = {"facet": "product.title", "value": "API"}
+        filter_obj = FacetFilter(**data)
+
+        assert filter_obj.field == "product.title"
+        assert filter_obj.value == "API"
+
+    def test_request_with_facet_filters(self) -> None:
+        data = {
+            "messages": [{"role": "user", "parts": [{"type": "text", "text": "Hello"}]}],
+            "filters": [
+                {"facet": "version.title", "value": "v2"},
+                {"facet": "product.title", "value": "SDK"},
+            ],
+        }
+        request = ChatRequest(**data)
+
+        assert len(request.filters) == 2
+        assert request.filters[0].field == "version.title"
+        assert request.filters[1].field == "product.title"
 
 
 class TestGetSimpleMessagesWithMixedParts:
