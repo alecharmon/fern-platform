@@ -111,16 +111,18 @@ export default async function Layout({
             >
                 <Domain value={domain} />
                 <SetBasePath value={basePath || "/"} />
-                {!isSelfHosted() && !settings.disableAnalytics && (
+                {/**
+                 * We only load Vercel Insights and Speed Insights scripts for sites WITHOUT a basePath.
+                 * When a site has a basePath (e.g., /docs), we'd want _vercel/* endpoints to include basePath
+                 * to properly attribute analytics to the correct site. However, Vercel serves these endpoints
+                 * at the domain root, so we disable these scripts for sites with a basePath for now.
+                 */}
+                {!isSelfHosted() && !settings.disableAnalytics && !basePath && (
                     <>
+                        <Script data-endpoint="/_vercel/insights" src="/_vercel/insights/script.js" defer />
                         <Script
-                            data-endpoint={`${basePath ?? ""}/_vercel/insights`}
-                            src={`${basePath ?? ""}/_vercel/insights/script.js`}
-                            defer
-                        />
-                        <Script
-                            data-endpoint={`${basePath ?? ""}/_vercel/speed-insights/vitals`}
-                            src={`${basePath ?? ""}/_vercel/speed-insights/script.js`}
+                            data-endpoint="/_vercel/speed-insights/vitals"
+                            src="/_vercel/speed-insights/script.js"
                             defer
                         />
                     </>
