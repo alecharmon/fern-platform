@@ -131,6 +131,68 @@ export function pruneWithAuthState(authState: AuthState, authConfig: PathnameVie
 }
 
 /**
+ * @internal visibleForTesting
+ * For password auth anonymous users: uses RBAC to determine which nodes require auth
+ * Nodes with viewers that don't include "everyone" will be marked as authed
+ */
+function withPasswordAuthAnonymousCheck(): (
+    node: Partial<NavigationNode>,
+    parents?: readonly NavigationNodeParent[]
+) => Gate {
+    return (node, parents = EMPTY_ARRAY) => {
+        const predicate = rbacViewGate([], false);
+        return predicate(node as unknown as NavigationNode, parents);
+    };
+}
+
+/**
+ * For password auth: marks nodes as requiring auth based on RBAC (viewers)
+ * Used when user is NOT authenticated with password auth
+ * Nodes without viewers restrictions or with viewers: ["everyone"] will be accessible
+ */
+export function pruneWithPasswordAuthAnonymous(node: RootNode): RootNode {
+    const result = Pruner.from(node)
+        // mark nodes as authed based on RBAC (same logic as basic auth)
+        .authed(withDenied(withPasswordAuthAnonymousCheck()))
+        .get();
+
+    if (result == null) {
+        throw new Error("Failed to prune navigation tree for password auth");
+    }
+
+    return result;
+}
+
+/**
+ * For password auth: applies RBAC filtering and marks all nodes as unauthed
+ * Used when user IS authenticated with password auth
+ */
+export function pruneWithPasswordAuthAuthed(node: RootNode, roles: string[] = []): RootNode {
+    const result = Pruner.from(node)
+        // apply rbac - keep nodes that the user has access to
+        .keep(withAllowed(rbacViewGate(roles, true)))
+        // mark all nodes as unauthed since we are currently authenticated
+        .authed(() => false)
+        .get();
+
+    if (result == null) {
+        throw new Error("Failed to prune navigation tree for password auth");
+    }
+
+    return result;
+}
+
+/**
+ * Prune navigation tree for password authentication
+ * Similar to pruneWithAuthState but for password auth (no allowlist/denylist - everything requires auth)
+ */
+export function pruneWithPasswordAuth(authState: AuthState, node: RootNode): RootNode {
+    return authState.authed
+        ? pruneWithPasswordAuthAuthed(node, authState.user.roles)
+        : pruneWithPasswordAuthAnonymous(node);
+}
+
+/**
  * @param nodes - navigation nodes to get the viewer filters for
  * @returns the viewer filters for the given nodes
  * @internal visibleForTesting

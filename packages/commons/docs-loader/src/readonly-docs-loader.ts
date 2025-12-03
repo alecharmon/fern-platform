@@ -16,6 +16,7 @@ import {
     isSelfHosted,
     provideRegistryService,
     pruneWithAuthState,
+    pruneWithPasswordAuth,
     loadDynamicIRWithUrl as uncachedLoadDynamicIRWithUrl,
     uncachedLoadWithUrl
 } from "@fern-api/docs-server";
@@ -779,7 +780,9 @@ const getRoot = async (
     cacheConfig: Required<CacheConfig>
 ) => {
     let root = await unsafe_getRootCached(cacheConfig)(domainKey);
-    if (authConfig) {
+    if (authConfig?.type === "password") {
+        root = pruneWithPasswordAuth(authState, root);
+    } else if (authConfig) {
         root = pruneWithAuthState(authState, authConfig, root);
     }
     FernNavigation.utils.mutableUpdatePointsTo(root);
@@ -851,71 +854,69 @@ const getLanguage = (cacheConfig: Required<CacheConfig>) =>
 
 const getConfig = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
-        // Skip in-memory cache in local development to ensure fresh CSS/config on hot reload
-        if (!isLocal()) {
-            // Check in-memory cache first
-            const cacheKey = cacheConfig.cacheKeySuffix
-                ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
-                : `${domainKey}:config`;
-            const inMemoryCached =
-                getFromInMemoryCache<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(cacheKey);
-            if (inMemoryCached != null) {
-                console.debug(`[getConfig] in-memory cache hit for ${domainKey}`);
-                return inMemoryCached;
-            }
-        }
-
-        const kvGetStart = Date.now();
-        console.debug(`[DocsLoader] getConfig kvGet start - domain: ${domainKey}, key: ${CACHE_KEY_CONFIG}`);
-        try {
-            const cached = await kvGet<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(
-                domainKey,
-                CACHE_KEY_CONFIG,
-                cacheConfig.cacheKeySuffix
-            );
-            const kvGetDuration = Date.now() - kvGetStart;
-            console.debug(`[DocsLoader] getConfig kvGet done in ${kvGetDuration}ms - domain: ${domainKey}`);
-            if (cached != null) {
-                // Store in in-memory cache for future requests (skip in local dev)
-                if (!isLocal()) {
-                    const cacheKey = cacheConfig.cacheKeySuffix
-                        ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
-                        : `${domainKey}:config`;
-                    setInMemoryCache(cacheKey, cached);
-                }
-                return cached;
-            }
-        } catch (error) {
-            const kvGetDuration = Date.now() - kvGetStart;
-            console.warn(`Failed to get config for ${domainKey} in ${kvGetDuration}ms, fallback to uncached`, error);
-        }
-
-        const loadStart = Date.now();
-        console.debug(`[DocsLoader] getConfig loadWithUrl start - domain: ${domainKey}`);
-        const config = await loadDocsBranch<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(
-            domainKey,
-            {
-                paths: [["definition", "config"]],
-                selector: ({ branch }) => {
-                    const configBranch = (branch ?? {}) as DocsV1Read.DocsDefinition["config"];
-                    const { navigation, root, ...rest } = configBranch ?? {};
-                    return rest;
+        let result = await (async () => {
+            // Skip in-memory cache in local development to ensure fresh CSS/config on hot reload
+            if (!isLocal()) {
+                // Check in-memory cache first
+                const cacheKey = cacheConfig.cacheKeySuffix
+                    ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
+                    : `${domainKey}:config`;
+                const inMemoryCached =
+                    getFromInMemoryCache<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(cacheKey);
+                if (inMemoryCached != null) {
+                    console.debug(`[getConfig] in-memory cache hit for ${domainKey}`);
+                    return inMemoryCached;
                 }
             }
-        );
-        const loadDuration = Date.now() - loadStart;
-        console.debug(`[DocsLoader] getConfig loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
 
-        // Store in Upstash and in-memory cache (skip in-memory in local dev)
-        kvSet(domainKey, CACHE_KEY_CONFIG, config, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
-        if (!isLocal()) {
-            const cacheKey = cacheConfig.cacheKeySuffix
-                ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
-                : `${domainKey}:config`;
-            setInMemoryCache(cacheKey, config);
-        }
+            const kvGetStart = Date.now();
+            console.debug(`[DocsLoader] getConfig kvGet start - domain: ${domainKey}, key: ${CACHE_KEY_CONFIG}`);
+            try {
+                const cached = await kvGet<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(
+                    domainKey,
+                    CACHE_KEY_CONFIG,
+                    cacheConfig.cacheKeySuffix
+                );
+                const kvGetDuration = Date.now() - kvGetStart;
+                console.debug(`[DocsLoader] getConfig kvGet done in ${kvGetDuration}ms - domain: ${domainKey}`);
+                if (cached != null) {
+                    // Store in in-memory cache for future requests (skip in local dev)
+                    if (!isLocal()) {
+                        const cacheKey = cacheConfig.cacheKeySuffix
+                            ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
+                            : `${domainKey}:config`;
+                        setInMemoryCache(cacheKey, cached);
+                    }
+                    return cached;
+                }
+            } catch (error) {
+                const kvGetDuration = Date.now() - kvGetStart;
+                console.warn(
+                    `Failed to get config for ${domainKey} in ${kvGetDuration}ms, fallback to uncached`,
+                    error
+                );
+            }
 
-        return config;
+            const loadStart = Date.now();
+            console.debug(`[DocsLoader] getConfig loadWithUrl start - domain: ${domainKey}`);
+            const response = await loadWithUrl(domainKey);
+            const loadDuration = Date.now() - loadStart;
+            console.debug(`[DocsLoader] getConfig loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
+            const { navigation, root, ...config } = response.definition.config;
+
+            // Store in Upstash and in-memory cache (skip in-memory in local dev)
+            kvSet(domainKey, CACHE_KEY_CONFIG, config, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+            if (!isLocal()) {
+                const cacheKey = cacheConfig.cacheKeySuffix
+                    ? `${domainKey}:config:${cacheConfig.cacheKeySuffix}`
+                    : `${domainKey}:config`;
+                setInMemoryCache(cacheKey, config);
+            }
+
+            return config;
+        })();
+
+        return result;
     });
 
 const getPage = (cacheConfig: Required<CacheConfig>) =>
@@ -1412,7 +1413,8 @@ const createCachedDocsLoaderImpl = async (
                   domainKey,
                   fern_token,
                   await authConfig,
-                  await metadata
+                  await metadata,
+                  undefined // setFernToken
               );
               return await getAuthState(pathname);
           });
@@ -1450,9 +1452,12 @@ const createCachedDocsLoaderImpl = async (
                 { tags: [domainKey, "endpointByLocator"] }
             )
         ),
-        getRoot: async () => getRootCached(config)(domainKey, await getAuthState(), await authConfig),
-        getNavigationNode: async (id: string) =>
-            getNavigationNode(config)(domainKey, id, await getAuthState(), await authConfig),
+        getRoot: async () => {
+            return getRootCached(config)(domainKey, await getAuthState(), await authConfig);
+        },
+        getNavigationNode: async (id: string) => {
+            return getNavigationNode(config)(domainKey, id, await getAuthState(), await authConfig);
+        },
         unsafe_getFullRoot: async () => {
             const prefetched = await prefetchPromise;
             return prefetched.root ?? (await unsafe_getRootCached(config)(domainKey));

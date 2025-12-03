@@ -116,7 +116,12 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
         });
     }
 
-    if (edgeConfig.type === "sso" || edgeConfig["api-key-injection-enabled"] !== true) {
+    if (
+        edgeConfig.type === "sso" ||
+        edgeConfig.type === "password" ||
+        !("api-key-injection-enabled" in edgeConfig) ||
+        edgeConfig["api-key-injection-enabled"] !== true
+    ) {
         return NextResponse.json({
             enabled: false,
             returnToQueryParam

@@ -6,6 +6,7 @@ export * from "./auth/getAuthState";
 export * from "./auth/getAuthStateEdge";
 export * from "./auth/origin";
 export * from "./auth/ory";
+export * from "./auth/password-auth";
 export * from "./auth/return-to";
 export * from "./auth/with-secure-cookie";
 export * from "./auth/workos";

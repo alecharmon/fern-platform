@@ -33,6 +33,9 @@ function getAllowedRedirectUrlsForAuthConfig(authConfig?: AuthEdgeConfig) {
             return getAllowedRedirectUrlsForSSO(authConfig);
         case "oauth2":
             return getAllowedRedirectUrlsForOAuth2(authConfig);
+        case "password":
+            // Password auth doesn't require external redirects
+            return [];
         default:
             console.error(new UnreachableCaseError(authConfig));
     }

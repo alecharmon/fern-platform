@@ -1,7 +1,6 @@
 import "server-only";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
-
 import SharedLayout from "@/components/shared-layout";
 
 export default async function Layout({

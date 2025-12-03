@@ -293,6 +293,13 @@ export const middleware: NextMiddleware = async (request) => {
         return NextResponse.redirect(url);
     }
 
+    /**
+     * Rewrite /~login to the login page (for password auth)
+     */
+    if (pathname.endsWith("/~login")) {
+        return rewrite(withDomain("/~login"));
+    }
+
     let newToken: string | undefined;
 
     // ignore authentication in local preview

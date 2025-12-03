@@ -173,7 +173,19 @@ export const BasicTokenVerificationSchema = z
     .merge(APIPlaygroundEdgeConfigSchema)
     .merge(PathnameViewerRulesSchema);
 
-export const AuthEdgeConfigSchema = z.union([SSOWorkOSSchema, OAuth2Schema, BasicTokenVerificationSchema]);
+export const PasswordAuthSchema = z
+    .object({
+        type: z.literal("password"),
+        password: z.string()
+    })
+    .merge(PathnameViewerRulesSchema);
+
+export const AuthEdgeConfigSchema = z.union([
+    SSOWorkOSSchema,
+    OAuth2Schema,
+    BasicTokenVerificationSchema,
+    PasswordAuthSchema
+]);
 
 export const OAuthTokenResponseSchema = z.object({
     access_token: z.string(),
@@ -236,6 +248,7 @@ export type FernUser = z.infer<typeof FernUserSchema>;
 export type PlaygroundState = z.infer<typeof PlaygroundStateSchema>;
 export type AuthEdgeConfig = z.infer<typeof AuthEdgeConfigSchema>;
 export type SSOWorkOS = z.infer<typeof SSOWorkOSSchema>;
+export type PasswordAuth = z.infer<typeof PasswordAuthSchema>;
 export type OAuth2Ory = z.infer<typeof OAuth2OrySchema>;
 export type OAuth2Webflow = z.infer<typeof OAuth2WebflowSchema>;
 export type OAuth2ClientCredentials = z.infer<typeof OAuth2ClientCredentialsSchema>;

@@ -13,12 +13,13 @@ import { safeVerifyFernJWTConfig } from "./FernJWT";
 import { getOAuth2AuthorizationUrl } from "./oauth2";
 import { preferPreview } from "./origin";
 import { getOryAuthorizationUrl } from "./ory";
+import { safeVerifyPasswordAuth } from "./password-auth";
 import { getReturnToQueryParam } from "./return-to";
 import { getWebflowAuthorizationUrl } from "./webflow";
 import { getWorkosSSOAuthorizationUrl } from "./workos";
 import { handleWorkosAuth } from "./workos-handler";
 
-export type AuthPartner = "workos" | "ory" | "webflow" | "custom" | string;
+export type AuthPartner = "workos" | "ory" | "webflow" | "custom" | "password" | string;
 
 export interface DomainAndHost {
     /**
@@ -89,6 +90,43 @@ export async function getAuthStateInternal({
     domain: string;
     host: string;
 }): Promise<(pathname?: string) => AsyncOrSync<AuthState>> {
+    // Password auth from edge config
+    if (authConfig?.type === "password") {
+        const jwtSecret = process.env.JWT_SECRET_KEY;
+
+        if (!jwtSecret) {
+            return () => ({
+                authed: false,
+                ok: false,
+                authorizationUrl: undefined,
+                partner: "password"
+            });
+        }
+
+        const result = await safeVerifyPasswordAuth(fernToken, jwtSecret);
+
+        if (result.valid) {
+            return (pathname) => {
+                return {
+                    authed: true,
+                    ok: true,
+                    user: { roles: result.roles },
+                    partner: "password"
+                };
+            };
+        }
+
+        // User is not authenticated - return authorization URL for password login
+        return (pathname) => {
+            return {
+                authed: false,
+                ok: false,
+                authorizationUrl: getPasswordAuthorizationUrl(host, domain, pathname),
+                partner: "password"
+            };
+        };
+    }
+
     // if the auth type is neither sso nor basic_token_verification, allow the request to pass through
     if (!authConfig) {
         if (previewAuthConfig != null) {
@@ -283,4 +321,17 @@ function getAuthorizationUrl(
     }
 
     return undefined;
+}
+
+function getPasswordAuthorizationUrl(host: string, domain: string, pathname?: string): string {
+    // Decode URI components in case the host contains encoded characters (e.g., localhost%3A3000)
+    const decodedHost = decodeURIComponent(host);
+    const decodedDomain = decodeURIComponent(domain);
+    const baseUrl = withDefaultProtocol(removeTrailingSlash(preferPreview(decodedHost, decodedDomain)));
+    const loginUrl = new URL("/~login", baseUrl);
+
+    // Include the return path so user can be redirected back after login
+    loginUrl.searchParams.set("returnTo", `${baseUrl}${pathname ?? ""}`);
+
+    return loginUrl.toString();
 }

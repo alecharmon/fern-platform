@@ -56,19 +56,35 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         allowedDestinations: getAllowedRedirectUrls(authConfig)
     });
 
-    const cookieDeletions: string[] = [];
+    // Delete cookies by setting them with Max-Age=0 and Expires in the past
+    // We need to match the domain that was used when the cookie was set
+    const requestHost = req.nextUrl.host.split(":")[0] ?? req.nextUrl.host;
+    const isSecure = req.nextUrl.protocol === "https:";
 
     for (const cookieName of cookiesToDelete) {
-        const domainVariations = [domain, `.${domain}`, normalizeDomainForCookie(domain)];
+        // The password auth sets cookies with domain = req.nextUrl.hostname
+        // We need to delete with the same domain to match
+        const domainVariations = [
+            requestHost, // The actual host the cookie was set on
+            normalizeDomainForCookie(requestHost),
+            domain, // x-fern-host domain
+            normalizeDomainForCookie(domain)
+        ];
 
-        for (const domain of domainVariations) {
-            const cookieValue = `${cookieName}=; Max-Age=0; Path=/; ${domain ? `Domain=${domain}; ` : ""}SameSite=Lax; HttpOnly; ${req.nextUrl.protocol === "https" ? "Secure; " : ""}Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-            cookieDeletions.push(cookieValue);
+        // First, try to delete without a domain (for host-only cookies)
+        res.headers.append(
+            "Set-Cookie",
+            `${cookieName}=; Max-Age=0; Path=/; SameSite=Lax; HttpOnly; ${isSecure ? "Secure; " : ""}Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+        );
+
+        // Then try each domain variation
+        const uniqueDomains = [...new Set(domainVariations)];
+        for (const cookieDomain of uniqueDomains) {
+            res.headers.append(
+                "Set-Cookie",
+                `${cookieName}=; Max-Age=0; Path=/; Domain=${cookieDomain}; SameSite=Lax; HttpOnly; ${isSecure ? "Secure; " : ""}Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+            );
         }
-    }
-
-    for (const cookieValue of cookieDeletions) {
-        res.headers.append("Set-Cookie", cookieValue);
     }
 
     return res;
