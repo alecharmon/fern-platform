@@ -21,9 +21,9 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
       POSTGRES_DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
-      SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }}
-      SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
-      SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
+      ASK_FERN_SLACK_CLIENT_ID: ${{ secrets.ASK_FERN_SLACK_CLIENT_ID }}
+      ASK_FERN_SLACK_CLIENT_SECRET: ${{ secrets.ASK_FERN_SLACK_CLIENT_SECRET }}
+      ASK_FERN_SLACK_SIGNING_SECRET: ${{ secrets.ASK_FERN_SLACK_SIGNING_SECRET }}
       SCRIBE_SLACK_CLIENT_ID: ${{ secrets.SCRIBE_SLACK_CLIENT_ID }}
       SCRIBE_SLACK_CLIENT_SECRET: ${{ secrets.SCRIBE_SLACK_CLIENT_SECRET }}
       SCRIBE_SLACK_SIGNING_SECRET: ${{ secrets.SCRIBE_SLACK_SIGNING_SECRET }}
@@ -61,9 +61,9 @@ jobs:
           echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}" >> .env
           echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env
           echo "FERN_TOKEN=${{ env.FERN_TOKEN }}" >> .env
-          echo "SLACK_CLIENT_ID=${{ env.SLACK_CLIENT_ID }}" >> .env
-          echo "SLACK_CLIENT_SECRET=${{ env.SLACK_CLIENT_SECRET }}" >> .env
-          echo "SLACK_SIGNING_SECRET=${{ env.SLACK_SIGNING_SECRET }}" >> .env
+          echo "ASK_FERN_SLACK_CLIENT_ID=${{ env.ASK_FERN_SLACK_CLIENT_ID }}" >> .env
+          echo "ASK_FERN_SLACK_CLIENT_SECRET=${{ env.ASK_FERN_SLACK_CLIENT_SECRET }}" >> .env
+          echo "ASK_FERN_SLACK_SIGNING_SECRET=${{ env.ASK_FERN_SLACK_SIGNING_SECRET }}" >> .env
           echo "SCRIBE_SLACK_CLIENT_ID=${{ env.SCRIBE_SLACK_CLIENT_ID }}" >> .env
           echo "SCRIBE_SLACK_CLIENT_SECRET=${{ env.SCRIBE_SLACK_CLIENT_SECRET }}" >> .env
           echo "SCRIBE_SLACK_SIGNING_SECRET=${{ env.SCRIBE_SLACK_SIGNING_SECRET }}" >> .env

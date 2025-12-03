@@ -1155,8 +1155,8 @@ async def handle_slack_oauth_callback(code: str, state: str | None = None) -> JS
         code=code,
         state=state,
         integration_db_model=SlackIntegrationDb,
-        client_id=VARIABLES.SLACK_CLIENT_ID,
-        client_secret=VARIABLES.SLACK_CLIENT_SECRET,
+        client_id=VARIABLES.ASK_FERN_SLACK_CLIENT_ID,
+        client_secret=VARIABLES.ASK_FERN_SLACK_CLIENT_SECRET,
         log_prefix="[ASK_FERN]",
     )
 
@@ -1175,7 +1175,7 @@ async def get_slack_install_link(domain: str) -> JSONResponse:
             integration_id = new_integration.integration_id
             LOGGER.info(f"Created new integration {integration_id} for domain {domain}")
 
-        install_url = create_slack_integration_url(integration_id, VARIABLES.SLACK_CLIENT_ID)
+        install_url = create_slack_integration_url(integration_id, VARIABLES.ASK_FERN_SLACK_CLIENT_ID)
 
         return JSONResponse(
             content={

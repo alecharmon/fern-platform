@@ -21,33 +21,32 @@ class Variables:
     POSTGRES_DATABASE_URL: str | None = os.environ.get("POSTGRES_DATABASE_URL")
     TURBOPUFFER_API_KEY: str | None = os.environ.get("TURBOPUFFER_API_KEY")
 
-    ASK_FERN_SLACK_BOT_TOKEN: str | None = os.environ.get("ASK_FERN_SLACK_BOT_TOKEN")
     FERNIE_SLACK_BOT_TOKEN: str | None = os.environ.get("FERNIE_SLACK_BOT_TOKEN")
+    ASK_FERN_SLACK_BOT_TOKEN: str | None = os.environ.get("ASK_FERN_SLACK_BOT_TOKEN")
+    SCRIBE_SLACK_BOT_TOKEN: str | None = os.environ.get("SCRIBE_SLACK_BOT_TOKEN")
 
-    SLACK_CLIENT_ID: str | None = os.environ.get("SLACK_CLIENT_ID")
-    SLACK_CLIENT_SECRET: str | None = os.environ.get("SLACK_CLIENT_SECRET")
-    SLACK_SIGNING_SECRET: str | None = os.environ.get("SLACK_SIGNING_SECRET")
+    ASK_FERN_SLACK_CLIENT_ID: str | None = os.environ.get("ASK_FERN_SLACK_CLIENT_ID")
+    ASK_FERN_SLACK_CLIENT_SECRET: str | None = os.environ.get("ASK_FERN_SLACK_CLIENT_SECRET")
+    ASK_FERN_SLACK_SIGNING_SECRET: str | None = os.environ.get("ASK_FERN_SLACK_SIGNING_SECRET")
 
     SCRIBE_SLACK_CLIENT_ID: str | None = os.environ.get("SCRIBE_SLACK_CLIENT_ID")
     SCRIBE_SLACK_CLIENT_SECRET: str | None = os.environ.get("SCRIBE_SLACK_CLIENT_SECRET")
     SCRIBE_SLACK_SIGNING_SECRET: str | None = os.environ.get("SCRIBE_SLACK_SIGNING_SECRET")
     SCRIBE_DEVIN_API_KEY: str | None = os.environ.get("SCRIBE_DEVIN_API_KEY")
-    SCRIBE_SLACK_BOT_TOKEN: str | None = os.environ.get("SCRIBE_SLACK_BOT_TOKEN")
     FERN_GITHUB_TOKEN: str | None = os.environ.get("FERN_GITHUB_TOKEN")
     FERN_BOT_APP_ID: str | None = os.environ.get("FERN_BOT_APP_ID")
     FERN_BOT_PRIVATE_KEY: str | None = os.environ.get("FERN_BOT_PRIVATE_KEY")
 
-    FAI_LAMBDA_FUNCTION_NAME: str | None = os.environ.get("FAI_LAMBDA_FUNCTION_NAME")
-
     DISCORD_BOT_TOKEN: str | None = os.environ.get("DISCORD_BOT_TOKEN")
     DISCORD_OAUTH_URL: str | None = os.environ.get("DISCORD_OAUTH_URL")
 
-    KV_REST_API_TOKEN: str | None = os.environ.get("KV_REST_API_TOKEN")
     KV_REST_API_READ_ONLY_TOKEN: str | None = os.environ.get("KV_REST_API_READ_ONLY_TOKEN")
+    KV_REST_API_TOKEN: str | None = os.environ.get("KV_REST_API_TOKEN")
     KV_REST_API_URL: str | None = os.environ.get("KV_REST_API_URL")
 
     FERN_TOKEN: str | None = os.environ.get("FERN_TOKEN")
     VENUS_URL: str | None = os.environ.get("VENUS_URL")
+    FAI_LAMBDA_FUNCTION_NAME: str | None = os.environ.get("FAI_LAMBDA_FUNCTION_NAME")
     FAI_REINDEXING_SQS_URL: str | None = os.environ.get("FAI_REINDEXING_SQS_URL")
 
     @classmethod

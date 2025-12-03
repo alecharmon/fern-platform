@@ -138,9 +138,9 @@ jobs:
           echo "FAI_LAMBDA_FUNCTION_NAME=${{ env.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
           echo "DISCORD_BOT_TOKEN=${{ env.DISCORD_BOT_TOKEN }}" >> .env
           echo "DISCORD_OAUTH_URL=${{ env.DISCORD_OAUTH_URL }}" >> .env
-          echo "SLACK_CLIENT_ID=${{ env.SLACK_CLIENT_ID }}" >> .env
-          echo "SLACK_CLIENT_SECRET=${{ env.SLACK_CLIENT_SECRET }}" >> .env
-          echo "SLACK_SIGNING_SECRET=${{ env.SLACK_SIGNING_SECRET }}" >> .env
+          echo "ASK_FERN_SLACK_CLIENT_ID=${{ env.ASK_FERN_SLACK_CLIENT_ID }}" >> .env
+          echo "ASK_FERN_SLACK_CLIENT_SECRET=${{ env.ASK_FERN_SLACK_CLIENT_SECRET }}" >> .env
+          echo "ASK_FERN_SLACK_SIGNING_SECRET=${{ env.ASK_FERN_SLACK_SIGNING_SECRET }}" >> .env
           echo "SCRIBE_SLACK_CLIENT_ID=${{ env.SCRIBE_SLACK_CLIENT_ID }}" >> .env
           echo "SCRIBE_SLACK_CLIENT_SECRET=${{ env.SCRIBE_SLACK_CLIENT_SECRET }}" >> .env
           echo "SCRIBE_SLACK_SIGNING_SECRET=${{ env.SCRIBE_SLACK_SIGNING_SECRET }}" >> .env
