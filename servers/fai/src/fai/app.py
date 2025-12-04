@@ -46,13 +46,16 @@ async def start_scheduler_and_run_startup_tasks() -> None:
 
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     if VARIABLES.IS_LOCAL:
-        LOGGER.info("Setup: Local development mode. Initializing database...")
-        try:
-            await init()
-            LOGGER.info("Setup: Database initialized.")
-        except Exception as e:
-            LOGGER.error(f"Setup: Error initializing database: {e}")
-            raise e
+        if not CONFIG.SKIP_LOCAL_DB_INIT:
+            LOGGER.info("Setup: Local development mode. Initializing database...")
+            try:
+                await init()
+                LOGGER.info("Setup: Database initialized.")
+            except Exception as e:
+                LOGGER.error(f"Setup: Error initializing database: {e}")
+                raise e
+        else:
+            LOGGER.info("Setup: Overriding local database initialization.")
     else:
         LOGGER.info("Setup: Production mode. Database not initialized.")
 
