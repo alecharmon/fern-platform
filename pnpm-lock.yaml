@@ -2661,18 +2661,12 @@ importers:
       '@fern-api/fai-sdk':
         specifier: workspace:*
         version: link:../../../fai-sdk
-      '@fern-api/fdr-sdk':
-        specifier: workspace:*
-        version: link:../../../fdr-sdk
       '@fern-api/ui-core-utils':
         specifier: workspace:*
         version: link:../../../commons/core-utils
       '@fern-docs/search-keyword':
         specifier: workspace:*
         version: link:../keyword
-      '@fern-docs/search-utils':
-        specifier: workspace:*
-        version: link:../utils
       '@turbopuffer/turbopuffer':
         specifier: ^0.5.11
         version: 0.5.19
@@ -2685,9 +2679,6 @@ importers:
       es-toolkit:
         specifier: ^1.32.0
         version: 1.42.0
-      gpt-tokenizer:
-        specifier: 2.9.0
-        version: 2.9.0
       js-tiktoken:
         specifier: ^1.0.21
         version: 1.0.21
@@ -2707,9 +2698,6 @@ importers:
       stylelint:
         specifier: ^16.1.0
         version: 16.26.0(typescript@5.7.3)
-      tmp-promise:
-        specifier: ^3.0.3
-        version: 3.0.3
       typescript:
         specifier: ^5
         version: 5.7.3

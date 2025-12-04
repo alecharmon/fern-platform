@@ -34,15 +34,12 @@
     "@fern-api/docs-server": "workspace:*",
     "@fern-api/docs-utils": "workspace:*",
     "@fern-api/fai-sdk": "workspace:*",
-    "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-docs/search-keyword": "workspace:*",
-    "@fern-docs/search-utils": "workspace:*",
     "@turbopuffer/turbopuffer": "^0.5.11",
     "ai": "5.0.86",
     "ai-fallback": "^1.0.2",
     "es-toolkit": "^1.32.0",
-    "gpt-tokenizer": "2.9.0",
     "js-tiktoken": "^1.0.21",
     "zod": "catalog:"
   },
@@ -51,7 +48,6 @@
     "@types/node": "^22.0.0",
     "depcheck": "^1.4.7",
     "stylelint": "^16.1.0",
-    "tmp-promise": "^3.0.3",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

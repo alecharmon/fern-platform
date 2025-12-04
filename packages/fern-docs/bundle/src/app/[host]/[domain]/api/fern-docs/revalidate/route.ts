@@ -9,7 +9,7 @@ import {
     createPageCacheKey,
     getMetadataFromResponse
 } from "@fern-api/docs-loader";
-import { flushPosthog, isPosthogFeatureFlagEnabled, track } from "@fern-api/docs-server";
+import { flushPosthog, track } from "@fern-api/docs-server";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
@@ -33,7 +33,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { UnreachableCaseError } from "ts-essentials";
 import { getFaiClient } from "@/getFaiClient";
-import { queueAlgoliaReindex, queueTurbopufferReindex } from "@/server/queue-reindex";
+import { queueAlgoliaReindex } from "@/server/queue-reindex";
 import { ResilientQueue } from "@/utils/resilient-queue";
 import { createSafeStreamController } from "@/utils/safe-stream-controller";
 
@@ -52,8 +52,6 @@ class RevalidationError extends Error {
 interface RevalidationController {
     log(message: string): void;
 }
-
-const FAI_REINDEXING_MIGRATION_FLAG_KEY = "fai-reindexing-migration-enabled";
 export const maxDuration = 800; // 13 minutes timeout
 
 async function performRevalidation(params: {
@@ -546,22 +544,10 @@ async function reindex(docs: DocsV2Read.LoadDocsForUrlResponse, host: string, do
     const { ask_ai_enabled: isAskAiEnabled } = await faiClient.settings.getDocsSettings({ domain });
 
     if (isAskAiEnabled) {
-        const isTurbopufferReindexMigrationEnabled = await getIsTurbopufferReindexMigrationEnabled(
-            withoutStaging(domain)
-        );
-
-        if (isTurbopufferReindexMigrationEnabled) {
-            await faiClient.settings.reindexAskAi({ domain: withoutStaging(domain) });
-        } else {
-            await queueTurbopufferReindex(host, withoutStaging(domain), basePath, maxDuration);
-        }
+        await faiClient.settings.reindexAskAi({ domain: withoutStaging(domain) });
         return ["algolia", "turbopuffer"];
     }
     return ["algolia"];
-}
-
-async function getIsTurbopufferReindexMigrationEnabled(domain: string): Promise<boolean> {
-    return isPosthogFeatureFlagEnabled(FAI_REINDEXING_MIGRATION_FLAG_KEY, domain);
 }
 
 function createPrunedApi(api: ApiDefinition.ApiDefinition) {

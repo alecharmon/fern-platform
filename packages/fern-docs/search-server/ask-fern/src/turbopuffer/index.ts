@@ -6,8 +6,6 @@ export {
     type TurbopufferQueryResult,
     type TurbopufferQueryResultWithMetrics
 } from "./inference/query-turbopuffer";
-export { createTurbopufferRecords } from "./records/create-turbopuffer-records";
-export { turbopufferUpsertTask } from "./tasks/turbopuffer-indexer-task";
 export * from "./types";
 export {
     convertTpufRecordsToDocuments,
@@ -18,4 +16,3 @@ export {
     getQueryIndexName,
     getTurbopufferNamespace
 } from "./utils/get-turbopuffer-namespace";
-export { getTurbopufferVectorizer } from "./utils/get-turbopuffer-vectorizer";
