@@ -8,6 +8,7 @@ import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter/
 import * as Accordion from "@radix-ui/react-accordion";
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react";
 import type { FC } from "react";
+import { useIsDarkCode } from "@/state/dark-code";
 import type { WebSocketMessage } from "./WebSocketMessages";
 
 export interface WebSocketMessageAccordionItemProps {
@@ -23,6 +24,7 @@ export const WebsocketMessageAccordionItem: FC<WebSocketMessageAccordionItemProp
     messagesLength,
     lang
 }) => {
+    const isDarkCode = useIsDarkCode();
     return (
         <Accordion.Item value={index.toString()} key={index} className={cn("group relative")}>
             <Accordion.Trigger
@@ -68,7 +70,7 @@ export const WebsocketMessageAccordionItem: FC<WebSocketMessageAccordionItemProp
                 />
             </Accordion.Trigger>
             <Accordion.Content className="fern-web-socket-content fern-collapsible" {...useFernCollapseOverflow()}>
-                <div className="group/cb-container relative">
+                <div className={cn("group/cb-container relative", { dark: isDarkCode })}>
                     <FernSyntaxHighlighter
                         className="w-0 min-w-full overflow-y-auto"
                         code={

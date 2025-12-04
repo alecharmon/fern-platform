@@ -1,12 +1,14 @@
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
+import { cn } from "@fern-docs/components/cn";
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { t } from "@fern-docs/i18n";
 import { useAtomValue, useSetAtom } from "jotai";
 import { type ReactElement, useMemo, useRef } from "react";
 import { CodeExampleClientDropdown } from "@/components/api-reference/endpoints/CodeExampleClientDropdown";
+import { useIsDarkCode } from "@/state/dark-code";
 import { useProgrammingLanguage } from "@/state/language";
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
@@ -73,6 +75,7 @@ export function PlaygroundEndpointRequestCard({
     lang
 }: PlaygroundEndpointRequestCardProps): ReactElement<any> | null {
     const [requestType, setRequestType] = useRequestType(dynamicIRsByLanguage);
+    const isDarkCode = useIsDarkCode();
     const setOAuthValue = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
     const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
     const dynamicPreviewRef = useRef<PlaygroundDynamicRequestPreviewRef>(null);
@@ -133,7 +136,11 @@ export function PlaygroundEndpointRequestCard({
     };
 
     return (
-        <FernCard className="rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden">
+        <FernCard
+            className={cn("rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden", {
+                "bg-card-solid dark": isDarkCode
+            })}
+        >
             <div className="border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
                 <span className="text-(color:--grayscale-a11) text-xs uppercase">{t(lang).apiReference.request}</span>
                 {!hasDynamicIr && (

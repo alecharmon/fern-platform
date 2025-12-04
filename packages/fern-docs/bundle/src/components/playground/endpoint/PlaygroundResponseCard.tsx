@@ -10,6 +10,7 @@ import { round } from "es-toolkit/math";
 import { Download } from "lucide-react";
 import type { ReactElement } from "react";
 import { ErrorBoundaryFallback } from "@/components/error-boundary";
+import { useIsDarkCode } from "@/state/dark-code";
 import { PlaygroundResponsePreview } from "../PlaygroundResponsePreview";
 import { PlaygroundSendRequestButton } from "../PlaygroundSendRequestButton";
 import type { PlaygroundResponse } from "../types/playgroundResponse";
@@ -28,8 +29,13 @@ export function PlaygroundResponseCard({
     requestDisabled,
     lang
 }: PlaygroundResponseCard): ReactElement<any> {
+    const isDarkCode = useIsDarkCode();
     return (
-        <FernCard className="rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden">
+        <FernCard
+            className={cn("rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden", {
+                "bg-card-solid dark": isDarkCode
+            })}
+        >
             <div className="border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
                 <span className="text-(color:--grayscale-a11) text-xs uppercase">{t(lang).apiReference.response}</span>
 
