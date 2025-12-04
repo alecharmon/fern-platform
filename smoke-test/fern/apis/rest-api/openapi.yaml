@@ -553,6 +553,60 @@ paths:
                     error: "Server error occurred"
                     code: "SERVER_ERROR"
                     statusCode: 500
+  /plant/updates/stream:
+    get:
+      tags:
+        - plant
+      summary: Stream plant updates (simple streaming)
+      description: |
+        Stream real-time updates about plant inventory changes.
+        This endpoint uses simple x-fern-streaming: true annotation.
+      operationId: streamPlantUpdates
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Stream of plant update events
+          content:
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/PlantUpdateEvent"
+      x-fern-streaming: true
+  /plant/search/stream:
+    post:
+      tags:
+        - plant
+      summary: Stream plant search results (SSE with stream-condition)
+      description: |
+        Search for plants and stream the results as they are found.
+        This endpoint demonstrates x-fern-streaming with format: sse and stream-condition.
+      operationId: searchPlantsStream
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Search parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlantSearchRequest"
+      x-fern-streaming:
+        format: sse
+        stream-condition: $request.stream
+        stream-description: |
+          When stream=true, results are streamed as SSE events.
+          Each event contains a partial result as it's found.
+        response:
+          $ref: "#/components/schemas/PlantSearchBatchResponse"
+        response-stream:
+          $ref: "#/components/schemas/PlantSearchStreamEvent"
+      responses:
+        "200":
+          description: Search results (batch mode)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantSearchBatchResponse"
 webhooks:
   orderStatusChanged:
     post:
@@ -819,6 +873,61 @@ components:
           type: object
           additionalProperties: true
           description: Additional error details
+    PlantUpdateEvent:
+      type: object
+      description: A streaming event for plant updates
+      properties:
+        event:
+          type: string
+          enum: ["plant.created", "plant.updated", "plant.deleted"]
+          description: Type of plant event
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        plant:
+          $ref: "#/components/schemas/PlantResponse"
+    PlantSearchRequest:
+      type: object
+      description: Request parameters for plant search
+      properties:
+        query:
+          type: string
+          description: Search query for plant names or tags
+        status:
+          type: string
+          enum: [available, pending, sold]
+          description: Filter by plant status
+        stream:
+          type: boolean
+          default: false
+          description: When true, results are streamed as SSE events
+      required:
+        - query
+    PlantSearchBatchResponse:
+      type: object
+      description: Batch response containing all search results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlantResponse"
+        total:
+          type: integer
+          description: Total number of results found
+    PlantSearchStreamEvent:
+      type: object
+      description: A single streaming event from plant search
+      properties:
+        event:
+          type: string
+          enum: ["search.result", "search.complete"]
+          description: Type of search event
+        seq:
+          type: integer
+          description: Sequence number of this event
+        data:
+          $ref: "#/components/schemas/PlantResponse"
   securitySchemes:
     bearerAuth:
       type: http

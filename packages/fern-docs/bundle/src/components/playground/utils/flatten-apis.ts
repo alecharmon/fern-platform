@@ -25,7 +25,16 @@ export function flattenApiSection(root: FernNavigation.NavigationNode | undefine
         }
         if (node.type === "apiReference" || node.type === "apiPackage") {
             // webhooks are not supported in the playground
-            const items = node.children.filter(FernNavigation.isApiLeaf).filter((item) => item.type !== "webhook");
+            // Handle both regular API leaf nodes and endpointPair nodes (which contain stream/nonStream variants)
+            const items: FernNavigation.NavigationNodeApiLeaf[] = [];
+            for (const child of node.children) {
+                if (child.type === "endpointPair") {
+                    // Extract both endpoints from the pair
+                    items.push(child.nonStream, child.stream);
+                } else if (FernNavigation.isApiLeaf(child) && child.type !== "webhook") {
+                    items.push(child);
+                }
+            }
             if (items.length === 0) {
                 return;
             }
