@@ -1,7 +1,8 @@
 import type { FacetFilter } from "@fern-docs/search-keyword";
+import type { TurbopufferRecord } from "@fern-docs/search-utils";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
+
 import { measureAsync } from "../../utils/measure-async";
-import type { TurbopufferRecord } from "../types";
 import { buildQueryFilters } from "./query-filters";
 import { reciprocalRankFusion } from "./reciprocal-rank-fusion";
 

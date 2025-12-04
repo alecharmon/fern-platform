@@ -1,9 +1,8 @@
 import { slugToHref } from "@fern-api/docs-utils";
 import { type ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
+import type { TurbopufferRecordWithoutVector } from "@fern-docs/search-utils";
 import { flatten } from "es-toolkit/array";
-
-import type { TurbopufferRecordWithoutVector } from "../types";
 import { createEndpointBaseRecordHttp } from "./create-endpoint-record-http";
 import { createEndpointBaseRecordWebSocket } from "./create-endpoint-record-web-socket";
 import { createEndpointBaseRecordWebhook } from "./create-endpoint-record-webhook";

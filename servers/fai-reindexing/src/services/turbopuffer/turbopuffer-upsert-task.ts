@@ -1,12 +1,10 @@
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
-import { type LoadDocsWithUrlPayload, loadDocsWithUrl } from "@fern-docs/search-utils";
+import { FernTurbopufferAttributeSchema, type LoadDocsWithUrlPayload, loadDocsWithUrl } from "@fern-docs/search-utils";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
 import { createDomainLogger } from "../../config/logger";
 import { withRetry } from "../../utils/retry";
-
 import { createTurbopufferRecords } from "./records/create-turbopuffer-records";
 import { vectorizeTurbopufferRecords } from "./records/vectorize-turbopuffer-records";
-import { FernTurbopufferAttributeSchema } from "./types";
 
 const DEFAULT_UPSERT_BATCH_SIZE = 2000;
 const MIN_UPSERT_BATCH_SIZE = 500;

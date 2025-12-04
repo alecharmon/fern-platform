@@ -4,11 +4,10 @@ import {
     createViewersForNodes,
     endpointToMarkdown,
     maybePrepareMdxContent,
+    type TurbopufferRecord,
     toDescription
 } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
-
-import type { TurbopufferRecord } from "../types";
 
 export function createEndpointBaseRecordHttp({
     node,

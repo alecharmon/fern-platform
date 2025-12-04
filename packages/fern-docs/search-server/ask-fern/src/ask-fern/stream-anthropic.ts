@@ -2,6 +2,7 @@ import { track } from "@fern-api/docs-server";
 import { fernToken_admin, getFaiOrigin } from "@fern-api/docs-server/env-variables";
 import { FernAIClient } from "@fern-api/fai-sdk";
 import type { FacetFilter } from "@fern-docs/search-keyword";
+import type { TurbopufferRecord } from "@fern-docs/search-utils";
 import {
     convertToModelMessages,
     createUIMessageStream,
@@ -23,8 +24,7 @@ import {
     createChatSystemPrompt,
     isAuthError,
     type TurbopufferAuthError,
-    type TurbopufferQueryMetrics,
-    type TurbopufferRecord
+    type TurbopufferQueryMetrics
 } from "../index";
 import { estimateTokens, estimateTokensFromArray } from "../utils/estimate-tokens";
 import { runQueryTurbopuffer } from "./run-query-turbopuffer";

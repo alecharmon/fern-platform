@@ -2667,6 +2667,9 @@ importers:
       '@fern-docs/search-keyword':
         specifier: workspace:*
         version: link:../keyword
+      '@fern-docs/search-utils':
+        specifier: workspace:*
+        version: link:../utils
       '@turbopuffer/turbopuffer':
         specifier: ^0.5.11
         version: 0.5.19

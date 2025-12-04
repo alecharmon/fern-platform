@@ -1,6 +1,5 @@
+import type { TurbopufferRecord } from "@fern-docs/search-utils";
 import { uniqBy } from "es-toolkit/array";
-
-import type { TurbopufferRecord } from "../types";
 
 export function convertTpufRecordToCitation(results: TurbopufferRecord[]) {
     return results.map((result) => {

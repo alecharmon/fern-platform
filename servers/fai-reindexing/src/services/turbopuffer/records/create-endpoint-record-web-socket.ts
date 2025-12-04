@@ -4,12 +4,11 @@ import {
     createDelimitedRolesetString,
     createViewersForNodes,
     maybePrepareMdxContent,
+    type TurbopufferRecord,
     toDescription
 } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
 import { flatten } from "es-toolkit/array";
-
-import type { TurbopufferRecord } from "../types";
 
 export function createEndpointBaseRecordWebSocket({
     parents,
