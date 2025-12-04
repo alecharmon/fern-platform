@@ -48,6 +48,26 @@ class DevinClient:
             response.raise_for_status()
             return response.json()
 
+    async def upload_attachment(self, file_content: bytes, filename: str) -> str:
+        async with httpx.AsyncClient() as client:
+            files = {"file": (filename, file_content)}
+            response = await client.post(
+                f"{self.BASE_URL}/attachments",
+                headers=self.headers,
+                files=files,
+                timeout=60.0,
+            )
+            response.raise_for_status()
+            return response.text
+
+
+def format_message_with_attachments(message: str, attachment_urls: list[str]) -> str:
+    if not attachment_urls:
+        return message
+
+    attachment_lines = [f'ATTACHMENT:"{url}"' for url in attachment_urls]
+    return "\n".join(attachment_lines) + "\n\n" + message
+
 
 def create_devin_prompt(github_repo: str, user_message: str) -> str:
     return f"""<important_instructions>
@@ -64,9 +84,12 @@ You must communicate with the user frequently as you work to make sure they are 
 """
 
 
-async def create_or_get_devin_session(github_repo: str, user_message: str) -> dict[str, Any]:
+async def create_or_get_devin_session(
+    github_repo: str, user_message: str, attachment_urls: list[str] | None = None
+) -> dict[str, Any]:
     client = DevinClient(VARIABLES.SCRIBE_DEVIN_API_KEY)
-    prompt = create_devin_prompt(github_repo, user_message)
+    formatted_message = format_message_with_attachments(user_message, attachment_urls or [])
+    prompt = create_devin_prompt(github_repo, formatted_message)
 
     max_retries = 3
     for attempt in range(max_retries):
@@ -85,13 +108,26 @@ async def create_or_get_devin_session(github_repo: str, user_message: str) -> di
     raise RuntimeError("Failed to create Devin session")
 
 
-async def send_devin_message(session_id: str, message: str) -> dict[str, Any]:
+async def send_devin_message(
+    session_id: str,
+    message: str,
+    files: list[dict[str, Any]] | None = None,
+    bot_token: str | None = None,
+) -> dict[str, Any]:
     client = DevinClient(VARIABLES.SCRIBE_DEVIN_API_KEY)
+
+    attachment_urls: list[str] = []
+    if files and bot_token:
+        from fai.utils.scribe.slack_file_handler import process_slack_attachments
+
+        attachment_urls = await process_slack_attachments(files, bot_token, client)
+
+    formatted_message = format_message_with_attachments(message, attachment_urls)
 
     max_retries = 3
     for attempt in range(max_retries):
         try:
-            result = await client.send_message(session_id, message)
+            result = await client.send_message(session_id, formatted_message)
             LOGGER.info(f"[SCRIBE] Sent message to Devin session: {session_id}")
             return result
         except httpx.HTTPError as e:

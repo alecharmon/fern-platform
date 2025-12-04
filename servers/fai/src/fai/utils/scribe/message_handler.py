@@ -11,12 +11,14 @@ from sqlalchemy import select
 from fai.db import async_session_maker
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_session_db import ScribeSessionDb
-from fai.settings import LOGGER
+from fai.settings import LOGGER, VARIABLES
 from fai.utils.scribe.devin_client import (
+    DevinClient,
     create_or_get_devin_session,
     send_devin_message,
 )
 from fai.utils.scribe.session_poller import poll_devin_session
+from fai.utils.scribe.slack_file_handler import process_slack_attachments
 
 STARTUP_RESPONSE = "🚀 Starting a new session for `{github_repo}`..."
 ERROR_RESPONSE = "❌ An unknown error has occurred. Please reach out to support@buildwithfern.com."
@@ -39,7 +41,13 @@ async def get_scribe_integration(team_id: str) -> ScribeIntegrationDb | None:
 
 
 async def get_or_create_session(
-    integration_id: str, thread_ts: str, channel: str, github_repo: str, user_message: str
+    integration_id: str,
+    thread_ts: str,
+    channel: str,
+    github_repo: str,
+    user_message: str,
+    files: list[dict[str, Any]],
+    bot_token: str,
 ) -> tuple[ScribeSessionDb, bool]:
     async with async_session_maker() as session:
         result = await session.execute(
@@ -54,7 +62,13 @@ async def get_or_create_session(
             return existing_session, False
 
         LOGGER.info(f"[SCRIBE] Creating new Devin session for thread {thread_ts}")
-        devin_response = await create_or_get_devin_session(github_repo, user_message)
+
+        attachment_urls: list[str] = []
+        if files:
+            devin_client = DevinClient(VARIABLES.SCRIBE_DEVIN_API_KEY)
+            attachment_urls = await process_slack_attachments(files, bot_token, devin_client)
+
+        devin_response = await create_or_get_devin_session(github_repo, user_message, attachment_urls)
 
         new_session = ScribeSessionDb(
             integration_id=integration_id,
@@ -79,6 +93,7 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
     text = event.get("text", "")
     channel = event.get("channel", "")
     thread_ts = event.get("thread_ts") or event.get("ts")
+    files = event.get("files", [])
 
     LOGGER.info(f"[SCRIBE] Processing message from {user} in {channel}: {text}")
 
@@ -106,7 +121,7 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
 
     try:
         session_record, is_new_session = await get_or_create_session(
-            integration.integration_id, thread_ts, channel, github_repo, text
+            integration.integration_id, thread_ts, channel, github_repo, text, files, integration.slack_bot_token
         )
 
         if is_new_session:
@@ -126,7 +141,7 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
                 bot_token=integration.slack_bot_token,
             )
         else:
-            await send_devin_message(session_record.devin_session_id, text)
+            await send_devin_message(session_record.devin_session_id, text, files, integration.slack_bot_token)
 
             if session_record.status in ["blocked", "stopped"]:
                 LOGGER.info(
