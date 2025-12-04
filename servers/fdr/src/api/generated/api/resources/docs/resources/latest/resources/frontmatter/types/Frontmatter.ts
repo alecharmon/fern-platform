@@ -39,6 +39,8 @@ export interface Frontmatter
     "max-toc-depth": number | undefined;
     /** Hides the feedback form at the bottom of the page */
     "hide-feedback": boolean | undefined;
+    /** Hides the page actions dropdown (copy page, view as markdown, etc.) from the page header. */
+    "hide-page-actions": boolean | undefined;
     /** Disables click-to-zoom on all imgages on this page. */
     "no-image-zoom": boolean | undefined;
     /** By default, this is inferred from docs.yml, but can be overridden. */

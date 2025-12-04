@@ -14,6 +14,7 @@ export const EMPTY_FRONTMATTER: Frontmatter = {
     "max-toc-depth": undefined,
     "hide-nav-links": undefined,
     "hide-feedback": undefined,
+    "hide-page-actions": undefined,
     "no-image-zoom": undefined,
     breadcrumb: undefined,
     excerpt: undefined,

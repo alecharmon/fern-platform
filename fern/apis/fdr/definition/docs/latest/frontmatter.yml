@@ -59,6 +59,9 @@ types:
       hide-feedback:
         type: optional<boolean>
         docs: Hides the feedback form at the bottom of the page
+      hide-page-actions:
+        type: optional<boolean>
+        docs: Hides the page actions dropdown (copy page, view as markdown, etc.) from the page header.
       no-image-zoom:
         type: optional<boolean>
         docs: Disables click-to-zoom on all imgages on this page.

@@ -78,6 +78,15 @@ export async function LayoutEvaluator({
 
     const extractedStyles = mdx?.styles ?? [];
 
+    const pageActions = frontmatter?.["hide-page-actions"]
+        ? undefined
+        : await constructPageOptions({
+              pageActionConfig: config,
+              domain: loader.domain,
+              slug,
+              lang
+          });
+
     const pageHeader = (
         <PageHeader
             serialize={serialize}
@@ -88,14 +97,7 @@ export async function LayoutEvaluator({
             breadcrumb={breadcrumb}
             slug={slug}
             markdownPromise={Promise.resolve({ content: markdown, contentType: "markdown" })}
-            pageActionOptions={
-                await constructPageOptions({
-                    pageActionConfig: config,
-                    domain: loader.domain,
-                    slug,
-                    lang
-                })
-            }
+            pageActionOptions={pageActions}
             tags={availability && <AvailabilityBadge availability={availability} rounded />}
             lang={lang}
             pageActionsStyle={config.theme?.["page-actions"] ?? "default"}
