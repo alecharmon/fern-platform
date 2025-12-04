@@ -2,7 +2,7 @@ import { cn } from "@fern-docs/components/cn";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { FaIcon } from "@fern-docs/components/fa-icon";
-import { isValidElement, useEffect, useRef } from "react";
+import { cloneElement, isValidElement, type ReactElement, useEffect, useRef } from "react";
 import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/components/editor/editor-component/EditorComponentPopover";
 import { DisableFernAnchor } from "@/docs/components/FernAnchor";
 import { FernLinkCard } from "@/docs/components/FernLinkCard";
+import { useFileResolver } from "@/providers/FileResolverContext";
 
 import { Badge } from "../badge";
 import { useCardGroup } from "./CardGroupContext";
@@ -48,6 +49,29 @@ export const Card: React.FC<Card.Props> = ({
     const { isWithinEditor } = useEditorComponent();
     const popoverRef = useRef<HTMLDivElement>(null);
     const cardGroup = useCardGroup();
+    const { resolveFileSrc } = useFileResolver();
+
+    // Resolve image src in icon if it's a React element with a src prop
+    const resolvedIcon = (() => {
+        if (!isValidElement(icon)) {
+            return icon;
+        }
+
+        const element = icon as ReactElement<{ src?: unknown }>;
+        const src = element.props.src;
+        if (typeof src !== "string" || src.trim() === "") {
+            return element;
+        }
+
+        const resolved = resolveFileSrc(src);
+        const resolvedSrc = resolved?.src ?? src;
+
+        if (resolvedSrc === src) {
+            return element;
+        }
+
+        return cloneElement(element, { src: resolvedSrc });
+    })();
 
     // Register/unregister with CardGroup if within one
     useEffect(() => {
@@ -93,9 +117,9 @@ export const Card: React.FC<Card.Props> = ({
                 </style>
                 {typeof icon === "string" ? (
                     <FaIcon className="card-icon" icon={icon} />
-                ) : isValidElement(icon) ? (
+                ) : isValidElement(resolvedIcon) ? (
                     <span className="card-icon">
-                        <NoZoom>{icon}</NoZoom>
+                        <NoZoom>{resolvedIcon}</NoZoom>
                     </span>
                 ) : null}
                 <div className="w-full space-y-1">
