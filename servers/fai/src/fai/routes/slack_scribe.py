@@ -24,6 +24,7 @@ from fai.settings import (
 )
 from fai.utils.scribe.message_handler import handle_scribe_message
 from fai.utils.scribe.validate_github_repo import validate_scribe_github_repo_access
+from fai.utils.slack.client import add_reaction
 from fai.utils.slack.integration_common import (
     SLACK_SCOPES,
     cleanup_message_cache,
@@ -106,10 +107,17 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
     user = event.get("user")
     text = event.get("text", "")
     channel = event.get("channel")
+    message_ts = event.get("ts")
 
     LOGGER.info(f"[SCRIBE] App mentioned by {user} in {channel}: {text}")
 
     response = await handle_scribe_message(event, team_id)
+
+    if response.bot_token and message_ts and channel:
+        try:
+            await add_reaction(channel, message_ts, "eyes", response.bot_token)
+        except Exception as e:
+            LOGGER.warning(f"[SCRIBE] Failed to add eyes reaction: {e}")
 
     if not response.response_text or not response.bot_token:
         return
