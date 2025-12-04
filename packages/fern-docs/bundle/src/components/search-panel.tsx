@@ -3,7 +3,6 @@
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
-import { t } from "@fern-docs/i18n";
 import { AlgoliaSearchClientRoot, DesktopAskAiPanel, SEARCH_INDEX } from "@fern-docs/search-ui";
 import { useEventCallback } from "@fern-ui/react-commons";
 import { isEqual } from "es-toolkit/predicate";
@@ -25,7 +24,7 @@ import {
     usePageContext,
     useSetSearchPanelResizing
 } from "@/state/search-panel";
-import { Feedback } from "./feedback/Feedback";
+import { SearchPanelFeedback } from "./feedback/SearchPanelFeedback";
 import { generateConversationId } from "./generate-conversation-id";
 import { generateQueryId } from "./generate-query-id";
 import { useAlgoliaUserToken } from "./util/getAlgoliaUserToken";
@@ -256,9 +255,7 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
                                 return null;
                             }
                             return (
-                                <Feedback
-                                    feedbackQuestion={t(lang).feedback.wasThisResponseHelpful}
-                                    type="conversational-search"
+                                <SearchPanelFeedback
                                     metadata={() => ({
                                         user: user?.content,
                                         assistant: assistant.content,
@@ -267,7 +264,6 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
                                         queryId: queryId || queryIdHook.queryId,
                                         domain
                                     })}
-                                    feedbackSource="ask-fern"
                                     lang={lang}
                                     copyAction={
                                         <CopyToClipboardButton
