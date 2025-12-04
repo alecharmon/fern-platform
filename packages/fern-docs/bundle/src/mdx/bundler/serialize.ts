@@ -189,8 +189,8 @@ async function serializeMdxImpl(
                     {
                         files: remoteFiles,
                         onUnresolvedFileId: (src: string, elementName: string | null | undefined) => {
-                            // Skip data URIs - these are inline and not file references
-                            if (src.startsWith("data:")) {
+                            // Only track unresolved file: references
+                            if (!src.startsWith("file:")) {
                                 return;
                             }
                             unresolvedFileIds.push({ fileId: src, elementName });
