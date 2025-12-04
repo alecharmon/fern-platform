@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { Children, cloneElement, isValidElement, type ReactElement, useCallback, useEffect, useRef } from "react";
 
 async function reportImageError(src: string, error: string) {
     try {
@@ -20,11 +20,12 @@ interface ImageErrorTrackerProps {
 }
 
 /**
- * A minimal client component that wraps an image and tracks load errors via PostHog.
+ * A minimal client component that tracks image load errors via PostHog.
  * This allows FernImage to remain a Server Component while still having error tracking.
+ * Uses cloneElement to inject error handling without adding a wrapper element to the DOM.
  */
 export function ImageErrorTracker({ src, children }: ImageErrorTrackerProps) {
-    const containerRef = useRef<HTMLSpanElement>(null);
+    const imgRef = useRef<HTMLImageElement | null>(null);
 
     const handleError = useCallback(() => {
         console.error(`[FernImage] Failed to load image: ${src}`);
@@ -32,12 +33,7 @@ export function ImageErrorTracker({ src, children }: ImageErrorTrackerProps) {
     }, [src]);
 
     useEffect(() => {
-        const container = containerRef.current;
-        if (!container) {
-            return;
-        }
-
-        const img = container.querySelector("img");
+        const img = imgRef.current;
         if (!img) {
             return;
         }
@@ -54,5 +50,24 @@ export function ImageErrorTracker({ src, children }: ImageErrorTrackerProps) {
         };
     }, [handleError]);
 
-    return <span ref={containerRef}>{children}</span>;
+    const child = Children.only(children);
+
+    if (!isValidElement(child)) {
+        // If someone ever passes non-element children, just render as-is.
+        return <>{children}</>;
+    }
+
+    // Preserve existing ref on the child if any
+    const existingRef = (child as ReactElement<{ ref?: React.Ref<HTMLImageElement> }>).props.ref;
+
+    return cloneElement(child as ReactElement<{ ref?: React.Ref<HTMLImageElement> }>, {
+        ref: (node: HTMLImageElement | null) => {
+            imgRef.current = node;
+            if (typeof existingRef === "function") {
+                existingRef(node);
+            } else if (existingRef && typeof existingRef === "object" && "current" in existingRef) {
+                (existingRef as React.MutableRefObject<HTMLImageElement | null>).current = node;
+            }
+        }
+    });
 }
