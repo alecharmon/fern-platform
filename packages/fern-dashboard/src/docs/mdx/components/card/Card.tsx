@@ -158,9 +158,7 @@ export const Card: React.FC<Card.Props> = ({
         <EditorComponentPopoverProvider
             attributes={{
                 title: new TextInputControl({ defaultValue: title }),
-                icon: new TextInputControl({
-                    defaultValue: typeof icon === "string" ? icon : ""
-                }),
+                ...(typeof icon === "string" ? { icon: new TextInputControl({ defaultValue: icon }) } : {}),
                 href: new TextInputControl({ defaultValue: href || "", label: "Link" }),
                 badge: new TextInputControl({ defaultValue: badge || "" })
             }}
