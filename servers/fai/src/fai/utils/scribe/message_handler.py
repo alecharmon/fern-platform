@@ -19,6 +19,7 @@ from fai.utils.scribe.devin_client import (
 )
 from fai.utils.scribe.session_poller import poll_devin_session
 from fai.utils.scribe.slack_file_handler import process_slack_attachments
+from fai.utils.scribe.slack_thread_unfurler import unfurl_thread_links
 
 STARTUP_RESPONSE = "🚀 Starting a new session for `{github_repo}`..."
 ERROR_RESPONSE = "❌ An unknown error has occurred. Please reach out to support@buildwithfern.com."
@@ -116,6 +117,11 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
 
     if integration.slack_bot_user_id and text:
         text = text.replace(f"<@{integration.slack_bot_user_id}>", "").strip()
+
+    text, thread_context = await unfurl_thread_links(text, integration.slack_bot_token)
+
+    if thread_context:
+        text = f"{thread_context}\n{text}"
 
     github_repo = integration.github_repo
 
