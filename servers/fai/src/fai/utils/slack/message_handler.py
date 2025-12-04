@@ -28,7 +28,9 @@ from fai.utils.chat.retrieve.retrieve import retrieve
 from fai.utils.chat.roles import create_delimited_role_combinations
 from fai.utils.generate.message_classification import (
     CLASSIFICATION_PROMPT,
+    CLASSIFICATION_PROMPT_MENTIONS_ONLY,
     MessageClassification,
+    MessageClassificationMentionsOnly,
 )
 from fai.utils.generate_model import generate_anthropic_generic_async
 from fai.utils.slack.client import add_reaction
@@ -47,7 +49,8 @@ async def classify_message(
     text: str,
     message_history: list[dict[str, str]] | None = None,
     bot_user_id: str | None = None,
-) -> MessageClassification:
+    mentions_only: bool = False,
+) -> MessageClassification | MessageClassificationMentionsOnly:
     bot_info = ""
     if bot_user_id:
         bot_info = (
@@ -57,21 +60,38 @@ async def classify_message(
 
     history_context = ""
     if message_history and len(message_history) > 0:
-        recent_messages = message_history[-3:]  # Last 3 messages for context
+        recent_messages = message_history[-3:]
         history_lines = [f"{msg['role'].upper()}: {msg['content']}" for msg in recent_messages]
         history_context = "\nRecent conversation context:\n" + "\n".join(history_lines)
 
-    result = await generate_anthropic_generic_async(
-        response_type=MessageClassification,
-        prompt_template=CLASSIFICATION_PROMPT,
-        message_text=text,
-        history_context=history_context,
-        bot_info=bot_info,
-    )
+    if mentions_only:
+        result = await generate_anthropic_generic_async(
+            response_type=MessageClassificationMentionsOnly,
+            prompt_template=CLASSIFICATION_PROMPT_MENTIONS_ONLY,
+            message_text=text,
+            history_context=history_context,
+            bot_info=bot_info,
+        )
 
-    if result is None:
-        LOGGER.warning(f"Failed to classify message after retries: {text[:100]}, defaulting to 'ignore'")
-        return MessageClassification(classification="ignore", reasoning="Classification failed - defaulting to ignore")
+        if result is None:
+            LOGGER.warning(f"Failed to classify message after retries: {text[:100]}, defaulting to 'question'")
+            return MessageClassificationMentionsOnly(
+                classification="question", reasoning="Classification failed - defaulting to question"
+            )
+    else:
+        result = await generate_anthropic_generic_async(
+            response_type=MessageClassification,
+            prompt_template=CLASSIFICATION_PROMPT,
+            message_text=text,
+            history_context=history_context,
+            bot_info=bot_info,
+        )
+
+        if result is None:
+            LOGGER.warning(f"Failed to classify message after retries: {text[:100]}, defaulting to 'ignore'")
+            return MessageClassification(
+                classification="ignore", reasoning="Classification failed - defaulting to ignore"
+            )
 
     LOGGER.info(f"Message classification: {result.classification} - Reasoning: {result.reasoning}")
 
@@ -109,7 +129,7 @@ async def get_slack_integration(team_id: str) -> SlackIntegrationDb | None:
 def get_message_action(
     channel_settings: ChannelSettings | None,
     is_app_mention: bool,
-    message_classification: Literal["question", "index", "ignore"] | None = None,
+    message_classification: Literal["question", "index", "ignore"] | Literal["question", "index"] | None = None,
 ) -> Literal["question", "index", "ignore"]:
     if channel_settings is None:
         channel_settings = ChannelSettings()
@@ -384,23 +404,37 @@ async def handle_slack_message(
 
     classification_result = None
     should_classify = False
+    use_mentions_only_classification = False
     if channel_settings and channel_settings.respond_to == "auto":
         should_classify = True
+        use_mentions_only_classification = False
     elif (channel_settings is None or channel_settings.respond_to == "mentions_only") and is_app_mention:
         should_classify = True
+        use_mentions_only_classification = True
 
     if should_classify:
         LOGGER.info(f"Classifying message: {context.text[:100]}...")
         try:
-            classification_result = await classify_message(context.text, message_history, integration.slack_bot_user_id)
+            classification_result = await classify_message(
+                context.text,
+                message_history,
+                integration.slack_bot_user_id,
+                mentions_only=use_mentions_only_classification,
+            )
             LOGGER.info(
                 f"Classification: {classification_result.classification}\nReasoning: {classification_result.reasoning}"
             )
         except Exception as e:
-            LOGGER.error(f"Error classifying message: {e}, defaulting to 'ignore'")
-            classification_result = MessageClassification(
-                classification="ignore", reasoning=f"Exception during classification: {str(e)}"
-            )
+            if use_mentions_only_classification:
+                LOGGER.error(f"Error classifying message: {e}, defaulting to 'question'")
+                classification_result = MessageClassificationMentionsOnly(
+                    classification="question", reasoning=f"Exception during classification: {str(e)}"
+                )
+            else:
+                LOGGER.error(f"Error classifying message: {e}, defaulting to 'ignore'")
+                classification_result = MessageClassification(
+                    classification="ignore", reasoning=f"Exception during classification: {str(e)}"
+                )
 
         await log_slack_classification_to_db(
             str(message_ts) or "",
