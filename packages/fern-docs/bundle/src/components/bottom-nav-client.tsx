@@ -4,8 +4,7 @@ import { MaybeFernLink } from "@fern-docs/components/FernLink";
 import { Separator } from "@fern-docs/components/Separator";
 import { t } from "@fern-docs/i18n";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
+import type React from "react";
 
 export function BottomNavigationClient({
     prev,
@@ -30,27 +29,6 @@ export function BottomNavigationClient({
     lang: string;
     footerNavStyle?: "default" | "minimal";
 }) {
-    const router = useRouter();
-    React.useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if ((event.key === "ArrowLeft" && event.altKey) || (event.key === "ArrowLeft" && event.metaKey)) {
-                prev?.onClick?.();
-                if (prev?.href) {
-                    router.push(prev.href, { scroll: true });
-                }
-            } else if ((event.key === "ArrowRight" && event.altKey) || (event.key === "ArrowRight" && event.metaKey)) {
-                next?.onClick?.();
-                if (next?.href) {
-                    router.push(next.href, { scroll: true });
-                }
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [next, prev, router]);
-
     if (prev == null && next == null) {
         return <Separator />;
     }
