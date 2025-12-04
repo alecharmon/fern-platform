@@ -247,7 +247,7 @@ function RunnableEndpointInternal({
     return (
         <FernTooltipProvider>
             <div className={cn("fern-runnable-endpoint my-6", className)}>
-                <FernCard className="rounded-3 flex flex-col overflow-hidden">
+                <FernCard className="fern-runnable-card rounded-3 flex flex-col overflow-hidden">
                     {/* Header with endpoint URL and example selector */}
                     <RunnableEndpointHeader
                         endpoint={endpoint}
@@ -267,8 +267,8 @@ function RunnableEndpointInternal({
                     {/* Collapsible Form Section */}
                     <FernCollapse open={formExpanded}>
                         {hasProperties && (
-                            <div className="bg-card-background border-border-default border-b p-4">
-                                <div className="space-y-4">
+                            <div className="fern-runnable-form bg-card-background border-border-default border-b p-4">
+                                <div className="fern-runnable-form-inner space-y-4">
                                     {/* Authentication */}
                                     {authSchemes.length > 0 && (
                                         <RunnableEndpointAuthSection authSchemes={authSchemes} lang={lang} />

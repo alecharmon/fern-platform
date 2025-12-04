@@ -105,14 +105,17 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
 }) => {
     return (
         <div
-            className={cn({
-                "flex gap-2 max-sm:flex-col": renderInline,
-                "space-y-2": !renderInline
+            className={cn("fern-playground-field", {
+                "fern-playground-field-inline flex gap-2 max-sm:flex-col": renderInline,
+                "fern-playground-field-block space-y-2": !renderInline
             })}
         >
-            <div className="flex min-w-0 flex-1 shrink items-center justify-between gap-2">
-                <label className="inline-flex items-baseline gap-2 truncate" htmlFor={htmlFor}>
-                    <span className={cn("font-mono text-sm")}>{propertyKey}</span>
+            <div className="fern-playground-field-header flex min-w-0 flex-1 shrink items-center justify-between gap-2">
+                <label
+                    className="fern-playground-field-label inline-flex items-baseline gap-2 truncate"
+                    htmlFor={htmlFor}
+                >
+                    <span className="fern-playground-field-key font-mono text-sm">{propertyKey}</span>
 
                     {description != null && (
                         <FernTooltip
@@ -120,30 +123,30 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
                             content={<Markdown mdx={description} size="xs" engine="esbuild" fallback={description} />}
                             delayDuration={0}
                         >
-                            <HelpCircle className="text-(color:--grayscale-a11) size-4 self-center" />
+                            <HelpCircle className="fern-playground-field-help-icon text-(color:--grayscale-a11) size-4 self-center" />
                         </FernTooltip>
                     )}
 
                     {availability != null && <AvailabilityBadge availability={availability} />}
-                    <span className="whitespace-nowrap text-xs">
+                    <span className="fern-playground-field-type whitespace-nowrap text-xs">
                         <span className="text-(color:--grayscale-a11)">{typeShorthand}</span>
                     </span>
 
                     {isList && Array.isArray(value) && value.length > 0 && (
-                        <span className="text-(color:--grayscale-a11) whitespace-nowrap text-xs">
+                        <span className="fern-playground-field-count text-(color:--grayscale-a11) whitespace-nowrap text-xs">
                             ({value.length} {value.length === 1 ? "item" : "items"})
                         </span>
                     )}
                 </label>
 
                 {!renderInline && (
-                    <span className="inline-flex min-w-0 shrink items-center justify-end gap-1">
+                    <span className="fern-playground-field-actions inline-flex min-w-0 shrink items-center justify-end gap-1">
                         {!isRequired && (
                             <FernButton
                                 icon={<X />}
                                 size="small"
                                 variant="minimal"
-                                className="-mr-3 opacity-50 transition-opacity hover:opacity-100"
+                                className="fern-playground-field-remove -mr-3 opacity-50 transition-opacity hover:opacity-100"
                                 onClick={onRemove}
                             />
                         )}
@@ -152,7 +155,7 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
             </div>
 
             <div
-                className={cn("flex", {
+                className={cn("fern-playground-field-control flex", {
                     "min-w-0 flex-1 shrink": !isBoolean
                 })}
             >
@@ -161,7 +164,7 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
                 {renderInline && (
                     <span
                         className={cn(
-                            "inline-flex min-w-0 shrink items-center justify-end gap-1",
+                            "fern-playground-field-actions inline-flex min-w-0 shrink items-center justify-end gap-1",
                             isNullSelected && "w-full"
                         )}
                     >
@@ -170,7 +173,7 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
                                 icon={<X />}
                                 size="small"
                                 variant="minimal"
-                                className="-mr-3 ml-1 opacity-50 transition-opacity hover:opacity-100"
+                                className="fern-playground-field-remove -mr-3 ml-1 opacity-50 transition-opacity hover:opacity-100"
                                 onClick={onRemove}
                             />
                         )}

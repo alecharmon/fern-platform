@@ -54,13 +54,13 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
     const hasMultipleSchemes = authSchemes.length > 1;
 
     return (
-        <section>
+        <section className="fern-runnable-auth">
             <button
                 type="button"
                 onClick={() => openState(!open)}
-                className="text-(color:--grayscale-a11) mb-2 flex w-full items-center justify-between text-sm font-medium hover:text-(color:--grayscale-a12) transition-colors"
+                className="fern-runnable-auth-toggle text-(color:--grayscale-a11) mb-2 flex w-full items-center justify-between text-sm font-medium hover:text-(color:--grayscale-a12) transition-colors"
             >
-                <h5 className="text-(color:--grayscale-a11) text-sm font-medium">
+                <h5 className="fern-runnable-auth-title text-(color:--grayscale-a11) text-sm font-medium">
                     {t(lang).apiReference.authentication}
                 </h5>
                 <ChevronDown
@@ -68,8 +68,8 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
                 />
             </button>
             <FernCollapse open={open} onOpenChange={openState}>
-                <div className="bg-(color:--grayscale-a2) rounded-2 p-3">
-                    <div className="space-y-3">
+                <div className="fern-runnable-auth-content bg-(color:--grayscale-a2) rounded-2 p-3">
+                    <div className="fern-runnable-auth-fields space-y-3">
                         {hasMultipleSchemes && (
                             <div className="space-y-2">
                                 <label className="text-text-secondary text-xs font-medium">

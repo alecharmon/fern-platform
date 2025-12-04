@@ -29,9 +29,11 @@ export function RunnableEndpointFormSection({
     }
 
     return (
-        <section>
-            <h5 className="text-(color:--grayscale-a11) mb-2 text-sm font-medium">{title}</h5>
-            <div className="bg-(color:--grayscale-a2) rounded-2 p-3">
+        <section className={`fern-runnable-section-${id}`}>
+            <h5 className="fern-runnable-section-title text-(color:--grayscale-a11) mb-2 text-sm font-medium">
+                {title}
+            </h5>
+            <div className="fern-runnable-section-content bg-(color:--grayscale-a2) rounded-2 p-3">
                 <PlaygroundObjectPropertiesForm
                     id={id}
                     properties={properties}

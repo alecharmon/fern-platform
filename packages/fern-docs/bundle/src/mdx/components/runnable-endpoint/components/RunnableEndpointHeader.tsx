@@ -39,8 +39,8 @@ export function RunnableEndpointHeader({
     readonly
 }: RunnableEndpointHeaderProps) {
     return (
-        <div className="border-border-default flex w-full items-center justify-between border-b bg-tag-default px-3 py-2">
-            <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div className="fern-runnable-header border-border-default flex w-full items-center justify-between border-b bg-tag-default px-3 py-2">
+            <div className="fern-runnable-header-inner flex min-w-0 flex-1 items-center gap-2">
                 <button
                     type="button"
                     onClick={onToggleForm}
@@ -67,7 +67,7 @@ export function RunnableEndpointHeader({
                     />
                 </div>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="fern-code-actions fern-runnable-header-actions flex shrink-0 items-center gap-2">
                 {hasMultipleExamples && !readonly?.includes("examples") && (
                     <FernDropdown
                         value={String(selectedExampleIndex)}

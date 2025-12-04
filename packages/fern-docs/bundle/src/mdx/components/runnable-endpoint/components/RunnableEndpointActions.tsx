@@ -11,8 +11,8 @@ interface RunnableEndpointActionsProps {
 
 export function RunnableEndpointActions({ onClear, onSend, isSending, lang }: RunnableEndpointActionsProps) {
     return (
-        <div className="border-border-default bg-tag-default flex items-center justify-between border-b px-3 py-2">
-            <FernButton onClick={onClear} variant="outlined" intent="none" className="group">
+        <div className="fern-runnable-actions border-border-default bg-tag-default flex items-center justify-between border-b px-3 py-2">
+            <FernButton onClick={onClear} variant="outlined" intent="none" className="fern-runnable-clear-button group">
                 <span className="flex flex-row items-center">
                     <RotateCcw className="mr-2 size-4 transition-transform group-hover:rotate-180" />
                     {t(lang).buttons.clear}
@@ -24,7 +24,7 @@ export function RunnableEndpointActions({ onClear, onSend, isSending, lang }: Ru
                 disabled={isSending}
                 variant="filled"
                 intent="primary"
-                className="group overflow-visible"
+                className="fern-runnable-send-button group overflow-visible"
             >
                 <span className="flex flex-row items-center font-medium">
                     {isSending ? "Sending..." : t(lang).buttons.sendRequest}

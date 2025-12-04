@@ -26,13 +26,13 @@ export function RunnableEndpointResponseSection({
     }
 
     return (
-        <div className="flex flex-col">
+        <div className="fern-runnable-response flex flex-col">
             <button
                 type="button"
                 onClick={onToggle}
-                className="border-border-default flex h-10 w-full shrink-0 cursor-pointer items-center justify-between border-b px-3 py-2 hover:bg-tag-default/50"
+                className="fern-runnable-response-header border-border-default flex h-10 w-full shrink-0 cursor-pointer items-center justify-between border-b px-3 py-2 hover:bg-tag-default/50"
             >
-                <div className="flex items-center gap-2">
+                <div className="fern-runnable-response-label flex items-center gap-2">
                     <ChevronDown
                         className={cn("size-4 transition-transform", {
                             "-rotate-90": !isExpanded
@@ -44,23 +44,26 @@ export function RunnableEndpointResponseSection({
                 </div>
 
                 {response.type === "loaded" && (
-                    <div className="flex items-center gap-2 text-xs">
+                    <div className="fern-runnable-response-meta flex items-center gap-2 text-xs">
                         <span
-                            className={cn("rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono", {
-                                "bg-(color:--accent-a3) text-(color:--accent-a11)":
-                                    response.value.response.status >= 200 && response.value.response.status < 300,
-                                "bg-(color:--red-a3) text-(color:--red-a11)": response.value.response.status >= 300
-                            })}
+                            className={cn(
+                                "fern-runnable-response-status rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono",
+                                {
+                                    "bg-(color:--accent-a3) text-(color:--accent-a11)":
+                                        response.value.response.status >= 200 && response.value.response.status < 300,
+                                    "bg-(color:--red-a3) text-(color:--red-a11)": response.value.response.status >= 300
+                                }
+                            )}
                         >
                             {t(lang).apiReference.statusLower}: {response.value.response.status}
                         </span>
-                        <span className="bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono">
+                        <span className="fern-runnable-response-time bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono">
                             {t(lang).apiReference.timeLower}: {round(response.value.time, 2)}ms
                         </span>
                         {response.value.type === "json" &&
                             response.value.size != null &&
                             response.value.size.trim().length > 0 && (
-                                <span className="bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono">
+                                <span className="fern-runnable-response-size bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono">
                                     {t(lang).apiReference.size}: {response.value.size}b
                                 </span>
                             )}

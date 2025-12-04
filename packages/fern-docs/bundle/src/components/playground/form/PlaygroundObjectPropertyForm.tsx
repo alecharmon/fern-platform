@@ -206,17 +206,21 @@ export const PlaygroundObjectPropertiesFormInternal = memo<PlaygroundObjectPrope
 
     return (
         <div
-            className={cn("min-w-0 flex-1 shrink", {
+            className={cn("fern-playground-object-properties min-w-0 flex-1 shrink", {
                 "border-border-default-soft border-l pl-4": indent
             })}
         >
             {shownProperties.length > 0 && (
-                <ul className="list-none space-y-8">
+                <ul className="fern-playground-field-list list-none space-y-8">
                     {shownProperties.map((property) => {
                         const childId = id.length > 0 ? `${id}.${property.key}` : property.key;
                         const isReadOnly = readonly?.includes(property.key) ?? false;
                         return (
-                            <li key={property.key} className="relative -mx-4 px-4" tabIndex={-1}>
+                            <li
+                                key={property.key}
+                                className="fern-playground-field-item relative -mx-4 px-4"
+                                tabIndex={-1}
+                            >
                                 <PlaygroundObjectPropertyForm
                                     id={childId}
                                     property={property}
