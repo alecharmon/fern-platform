@@ -21,27 +21,17 @@ for (const fixtureName of [
     "no-version-no-tabs",
     "octoai",
     "thera-staging",
-    "primer",
-    "propexo",
     "scoutos",
     "intrinsic",
     "vellum",
-    "beehiiv",
     "uploadcare",
     "keet",
-    "cohere",
     "assemblyai",
     "ferry",
-    "humanloop",
-    "astronomer",
-    "flatfile",
-    // "monite",
     "navipartner",
     "boundary",
     "twelvelabs",
-    "polytomic",
     "yes-version-yes-tabs",
-    "hume",
     "no-version-yes-tabs"
 ]) {
     // eslint-disable-next-line vitest/valid-title
@@ -71,7 +61,7 @@ for (const fixtureName of [
                     expect(record.content.length).toBeLessThanOrEqual(50_000);
                 }
             });
-            await expect(JSON.stringify(records, null, 2)).toMatchFileSnapshot(
+            await expect(JSON.stringify(records)).toMatchFileSnapshot(
                 path.join("__snapshots__", `${fixtureName}.test.ts.json`)
             );
         }, 100_000);

@@ -36,7 +36,7 @@
     "lint:eslint:fix": "pnpm lint:eslint --fix",
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
-    "test": "vitest --run --passWithNoTests --globals",
+    "test": "NODE_OPTIONS=\"--max-old-space-size=4096\" vitest --run --passWithNoTests --globals",
     "test:update": "vitest --run -u --passWithNoTests --globals"
   },
   "dependencies": {

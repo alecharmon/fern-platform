@@ -7,7 +7,13 @@ import { Fragment, type ReactElement, type ReactNode } from "react";
 import { Highlight, Snippet } from "react-instantsearch";
 import { type MarkRequired, UnreachableCaseError } from "ts-essentials";
 
-import type { AlgoliaRecordHit, ApiReferenceRecordHit, ChangelogRecordHit, MarkdownRecordHit } from "../../types";
+import type {
+    AlgoliaRecordHit,
+    ApiReferenceRecordHit,
+    ChangelogRecordHit,
+    MarkdownRecordHit,
+    ParameterRecordHit
+} from "../../types";
 
 const headingLevels = ["h0", "h1", "h2", "h3", "h4", "h5", "h6"] as const;
 
@@ -149,6 +155,34 @@ function ApiReferenceHitContent({
     );
 }
 
+function ParameterHitContent({
+    hit,
+    currentVersion,
+    currentProduct
+}: {
+    hit: ParameterRecordHit;
+    currentVersion?: string;
+    currentProduct?: string;
+}): ReactElement<any> {
+    const breadcrumb = hit.breadcrumb.map((crumb) => crumb.title);
+    const productAndVersion = getVersionProductPrefix(hit, currentVersion, currentProduct);
+    const sectionLabel = hit.subsection_type ?? hit.section_type;
+
+    return (
+        <HitContentWithTitle hit={hit}>
+            <div className="inline-flex max-w-full items-baseline gap-1">
+                <Breadcrumb breadcrumb={breadcrumb} productAndVersion={productAndVersion} endingArrow />
+                <HttpMethodBadge method={hit.method} size="sm" className="shrink-0" variant="outlined" />
+                <span className="fern-search-hit-endpoint-path shrink">{hit.endpoint_path}</span>
+                {sectionLabel && <span className="text-(color:--grayscale-a9) text-xs shrink-0">{sectionLabel}</span>}
+                {hit.parameter_type && (
+                    <span className="text-(color:--grayscale-a9) text-xs shrink-0">{hit.parameter_type}</span>
+                )}
+            </div>
+        </HitContentWithTitle>
+    );
+}
+
 function HitSnippet({ hit, attribute }: { hit: AlgoliaRecordHit; attribute?: keyof AlgoliaRecordHit }): ReactNode {
     if (!attribute) {
         return false;
@@ -202,7 +236,13 @@ export function HitContent({
                 />
             );
         case "parameter":
-            return false;
+            return (
+                <ParameterHitContent
+                    hit={hit as ParameterRecordHit}
+                    currentVersion={currentVersion}
+                    currentProduct={currentProduct}
+                />
+            );
         default:
             console.error(new UnreachableCaseError(hit));
             return false;

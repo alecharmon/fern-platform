@@ -15,6 +15,10 @@ import { createEndpointBaseRecordHttp } from "./create-endpoint-record-http";
 import { createEndpointBaseRecordWebSocket } from "./create-endpoint-record-web-socket";
 import { createEndpointBaseRecordWebhook } from "./create-endpoint-record-webhook";
 import { createMarkdownRecords } from "./create-markdown-records";
+import { createGrpcParameterRecords } from "./create-parameter-records-grpc";
+import { createHttpParameterRecords } from "./create-parameter-records-http";
+import { createWebSocketParameterRecords } from "./create-parameter-records-web-socket";
+import { createWebhookParameterRecords } from "./create-parameter-records-webhook";
 
 interface CreateAlgoliaRecordsOptions {
     root: FernNavigation.RootNode;
@@ -125,6 +129,7 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
                 types: apiDefinition.types
             });
             records.push(...createApiReferenceRecordHttp({ endpointBase, endpoint }));
+            records.push(...createHttpParameterRecords({ endpointBase, endpoint, types: apiDefinition.types }));
             return;
         }
 
@@ -142,6 +147,9 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
                 types: apiDefinition.types
             });
             records.push(createApiReferenceRecordWebSocket({ endpointBase }));
+            records.push(
+                ...createWebSocketParameterRecords({ endpointBase, webSocket: endpoint, types: apiDefinition.types })
+            );
             return;
         }
 
@@ -159,6 +167,9 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
                 types: apiDefinition.types
             });
             records.push(...createApiReferenceRecordWebhook({ endpointBase, endpoint }));
+            records.push(
+                ...createWebhookParameterRecords({ endpointBase, webhook: endpoint, types: apiDefinition.types })
+            );
             return;
         }
 
@@ -180,6 +191,7 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
                 types: apiDefinition.types
             });
             records.push(...createApiReferenceRecordGrpc({ grpcBase, grpc }));
+            records.push(...createGrpcParameterRecords({ endpointBase: grpcBase, grpc, types: apiDefinition.types }));
             return;
         }
     });

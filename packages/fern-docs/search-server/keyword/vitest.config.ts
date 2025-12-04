@@ -6,12 +6,12 @@ export default defineConfig({
         pool: "forks",
         poolOptions: {
             forks: {
-                singleFork: true
+                singleFork: false,
+                maxForks: 1,
+                minForks: 1
             }
         },
-        sequence: {
-            concurrent: false
-        },
+        fileParallelism: false,
         retry: 1
     }
 });
