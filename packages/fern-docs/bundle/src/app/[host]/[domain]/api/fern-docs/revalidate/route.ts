@@ -138,6 +138,22 @@ async function performRevalidation(params: {
             })
     );
 
+    // Check for orphaned file references in page content
+    const fileIds = new Set(Object.keys(docs.definition.filesV2));
+    for (const [pageId, page] of Object.entries(docs.definition.pages)) {
+        const matches = page.markdown.matchAll(/file:([a-f0-9-]+)/gi);
+        for (const match of matches) {
+            if (match[1] && !fileIds.has(match[1])) {
+                track("asset_error", {
+                    type: "orphaned_file_reference",
+                    domain,
+                    pageId,
+                    fileId: match[1]
+                });
+            }
+        }
+    }
+
     const root = convertResponseToRootNode(docs, edgeFlags);
     let staticRoot = root;
 

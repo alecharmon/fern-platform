@@ -20,7 +20,8 @@ import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
 
-dotenv.config();
+dotenv.config({ path: ".env.local" });
+dotenv.config(); // also load .env as fallback
 
 interface ScriptOptions {
     domain: string;
