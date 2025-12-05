@@ -287,9 +287,13 @@ class TestGetSimpleMessagesWithMixedParts:
         assert simple_messages[0].content == "Hello"
         assert simple_messages[1].content == "Let me search... Here's the answer."
 
-    def test_handles_message_with_only_non_text_parts(self) -> None:
+    def test_filters_out_message_with_only_non_text_parts_and_merges_consecutive(self) -> None:
         data = {
             "messages": [
+                {
+                    "role": "user",
+                    "parts": [{"type": "text", "text": "Hello"}],
+                },
                 {
                     "role": "assistant",
                     "parts": [
@@ -297,10 +301,47 @@ class TestGetSimpleMessagesWithMixedParts:
                         {"type": "data-sources", "data": []},
                     ],
                 },
+                {
+                    "role": "user",
+                    "parts": [{"type": "text", "text": "Follow up"}],
+                },
             ]
         }
         request = ChatRequest(**data)
         simple_messages = request.get_simple_messages()
 
         assert len(simple_messages) == 1
-        assert simple_messages[0].content == ""
+        assert simple_messages[0].role == "user"
+        assert simple_messages[0].content == "Hello\n\nFollow up"
+
+    def test_merges_consecutive_same_role_messages(self) -> None:
+        data = {
+            "messages": [
+                {
+                    "role": "user",
+                    "parts": [{"type": "text", "text": "First question"}],
+                },
+                {
+                    "role": "assistant",
+                    "parts": [{"type": "text", "text": "First answer"}],
+                },
+                {
+                    "role": "assistant",
+                    "parts": [{"type": "text", "text": "Additional info"}],
+                },
+                {
+                    "role": "user",
+                    "parts": [{"type": "text", "text": "Second question"}],
+                },
+            ]
+        }
+        request = ChatRequest(**data)
+        simple_messages = request.get_simple_messages()
+
+        assert len(simple_messages) == 3
+        assert simple_messages[0].role == "user"
+        assert simple_messages[0].content == "First question"
+        assert simple_messages[1].role == "assistant"
+        assert simple_messages[1].content == "First answer\n\nAdditional info"
+        assert simple_messages[2].role == "user"
+        assert simple_messages[2].content == "Second question"
