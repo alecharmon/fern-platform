@@ -274,7 +274,13 @@ async function performRevalidation(params: {
         controller.log(`revalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
     }
 
-    // Delay to ensure KV writes propagate before page regeneration reads them
+    // Invalidate caches AFTER KV writes complete to ensure getFiles reads fresh data
+    revalidateTag(domain);
+    if (doRegenerate) {
+        revalidateTag(`${domain}:mdx`);
+    }
+
+    // Delay to ensure KV writes and cache invalidation propagate before page regeneration
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     if (doRegenerate) {
@@ -424,15 +430,6 @@ export async function GET(
     const start = performance.now();
 
     const { host, domain } = await props.params;
-    revalidateTag(domain);
-
-    const shouldRegenerateParam = req.nextUrl.searchParams.get("regenerate");
-    if (shouldRegenerateParam !== "false") {
-        revalidateTag(`${domain}:mdx`);
-    }
-
-    // delay to ensure invalidation propagates before cache is accessed
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const fromDeploymentPromoted = req.nextUrl.searchParams.get("fromDeploymentPromoted") === "true";
 
