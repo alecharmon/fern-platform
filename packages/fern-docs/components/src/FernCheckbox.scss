@@ -11,7 +11,7 @@
     @apply bg-(color:--accent-a3);
   }
 
-  .fern-checkbox-item:focus {
+  .fern-checkbox-item:focus-visible {
     @apply outline-(color:--accent-a3) outline outline-4 outline-offset-0;
   }
 

@@ -19,7 +19,7 @@
     @apply bg-(color:--accent-a3);
   }
 
-  .fern-radio-item:focus {
+  .fern-radio-item:focus-visible {
     @apply outline-(color:--accent-a3) outline outline-4 outline-offset-0;
   }
 
