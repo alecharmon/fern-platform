@@ -37,10 +37,13 @@ export async function AbstractLayoutEvaluatorContent({
         layout = "reference";
     }
 
+    const hideTableOfContents = frontmatter?.["hide-toc"];
+    const showTableOfContents = tableOfContents != null && !hideTableOfContents && tableOfContents.length > 0;
+
     const toc = (
         <TableOfContentsLayout
             tableOfContents={tableOfContents}
-            hideTableOfContents={frontmatter?.["hide-toc"]}
+            hideTableOfContents={hideTableOfContents}
             lang={lang}
         />
     );
@@ -50,13 +53,25 @@ export async function AbstractLayoutEvaluatorContent({
             return <CustomLayout footer={builtWithFern}>{children}</CustomLayout>;
         case "guide":
             return (
-                <GuideLayout header={pageHeader} toc={toc} footer={footer}>
+                <GuideLayout
+                    header={pageHeader}
+                    toc={toc}
+                    footer={footer}
+                    tableOfContents={showTableOfContents ? tableOfContents : undefined}
+                    lang={lang}
+                >
                     {children}
                 </GuideLayout>
             );
         case "overview":
             return (
-                <OverviewLayout header={pageHeader} toc={toc} footer={footer}>
+                <OverviewLayout
+                    header={pageHeader}
+                    toc={toc}
+                    footer={footer}
+                    tableOfContents={showTableOfContents ? tableOfContents : undefined}
+                    lang={lang}
+                >
                     {children}
                 </OverviewLayout>
             );

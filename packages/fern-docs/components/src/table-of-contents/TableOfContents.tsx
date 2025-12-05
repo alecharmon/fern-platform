@@ -19,6 +19,7 @@ export declare namespace TableOfContents {
         style?: CSSProperties;
         tableOfContents: TableOfContentsItemType[];
         lang: string;
+        hideHeading?: boolean;
     }
 }
 
@@ -82,7 +83,13 @@ function filterTocByRoles(items: TableOfContentsItemType[], user: FernUser | und
         .filter((item): item is TableOfContentsItemType => item != null);
 }
 
-export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, tableOfContents, style, lang }) => {
+export const TableOfContents: React.FC<TableOfContents.Props> = ({
+    className,
+    tableOfContents,
+    style,
+    lang,
+    hideHeading
+}) => {
     const user = useFernUser();
 
     // filter toc items based on user roles
@@ -97,6 +104,7 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, ta
     }, [filteredTableOfContents]);
 
     const [anchorsInView, setAnchorsInView] = useState<string[]>([]);
+    const activeId = anchorsInView[0];
     const tocItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
     const currentPathAnchor = useCurrentAnchor();
@@ -173,7 +181,7 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, ta
                 // don't render empty headings
                 return [];
             }
-            const isActive = anchorsInView.includes(anchorString);
+            const isActive = activeId === anchorString;
             return [
                 <WithFeatureFlags featureFlags={featureFlags} key={`${depth}-${anchorString}`}>
                     <TableOfContentsItem
@@ -192,7 +200,7 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({ className, ta
 
     return (
         <>
-            {filteredTableOfContents.length > 0 && (
+            {filteredTableOfContents.length > 0 && !hideHeading && (
                 <div className="text-(color:--grayscale-a11) m-0 mb-3 text-sm font-medium">
                     {t(lang).navigation.onThisPage}
                 </div>

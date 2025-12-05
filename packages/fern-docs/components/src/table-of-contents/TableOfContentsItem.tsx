@@ -27,7 +27,7 @@ export const TableOfContentsItem = memo<TableOfContentsItemProps>((props): React
             <HashLink
                 className={cn("block break-words text-sm transition-colors hover:transition-none", {
                     "text-(color:--grayscale-a11) hover:text-(color:--grayscale-a12)": !active,
-                    "text-(color:--accent-a11) font-semibold tracking-tight": active
+                    "text-(color:--accent-a9) font-bold tracking-tight": active
                 })}
                 href={`#${anchorString}`}
                 style={{

@@ -6,7 +6,11 @@ import { useCallbackOne } from "use-memo-one";
 import { SCROLL_BODY_ATOM } from "../state/viewport";
 
 const HEADER_SELECTOR = ".fern-header-content";
-const ANCHOR_TOP_BUFFER = 20;
+
+function getScrollPaddingTop(): number {
+    const computed = getComputedStyle(document.documentElement).scrollPaddingTop;
+    return parseFloat(computed) || 0;
+}
 
 function toIdQuerySelector(id: string): string {
     if (id.startsWith("#")) {
@@ -40,8 +44,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
     const idToYRef = useRef<Record<string, number>>({});
     const root = useAtomValue(SCROLL_BODY_ATOM);
     const rafIdRef = useRef<number | null>(null);
-    const headerElementRef = useRef<HTMLElement | null>(null);
-    const headerHeightRef = useRef(0);
+    const scrollPaddingTopRef = useRef(0);
 
     /**
      * on every scroll event, measure the top Y position of each element and determine
@@ -60,11 +63,8 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
             const intersectionTop = scrollY + rootTop;
             const intersectionBottom = scrollY + rootTop + clientHeight;
 
-            const headerElement = headerElementRef.current;
-            const shouldApplyHeaderOffset =
-                !!headerElement && headerHeightRef.current > 0 && !!root && root.contains(headerElement);
-            const headerOffset = shouldApplyHeaderOffset ? headerHeightRef.current : 0;
-            const targetLine = intersectionTop + headerOffset;
+            const scrollPaddingTop = scrollPaddingTopRef.current;
+            const targetLine = intersectionTop + scrollPaddingTop + 10;
 
             const visibleIds: string[] = [];
             let lastAnchorBeforeViewport: string | undefined;
@@ -97,9 +97,12 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
                 if (firstAnchor && !visibleIds.includes(firstAnchor)) {
                     visibleIds.unshift(firstAnchor);
                 }
-            } else if (scrollHeight - clientHeight <= scrollY) {
+            } else if (scrollHeight - clientHeight - scrollY <= 1) {
+                // At the bottom of the page - ensure last anchor is active
                 const lastAnchor = ids[ids.length - 1];
-                if (lastAnchor && !visibleIds.includes(lastAnchor)) {
+                if (lastAnchor) {
+                    // Clear and set only the last anchor as active when at bottom
+                    visibleIds.length = 0;
                     visibleIds.push(lastAnchor);
                 }
             }
@@ -133,29 +136,15 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
         });
     }, [ids, root, setActiveIds]);
 
-    const updateHeaderHeight = useCallbackOne(
-        (element?: HTMLElement | null) => {
-            const headerElement = element ?? document.querySelector<HTMLElement>(HEADER_SELECTOR);
-            headerElementRef.current = headerElement ?? null;
-
-            if (!headerElement) {
-                if (headerHeightRef.current !== 0) {
-                    headerHeightRef.current = 0;
-                    take();
-                }
-                return;
+    const updateScrollPaddingTop = useCallbackOne(() => {
+        fastdom.measure(() => {
+            const measuredScrollPaddingTop = getScrollPaddingTop();
+            if (measuredScrollPaddingTop !== scrollPaddingTopRef.current) {
+                scrollPaddingTopRef.current = measuredScrollPaddingTop;
+                take();
             }
-
-            fastdom.measure(() => {
-                const measuredHeight = headerElement.getBoundingClientRect().height;
-                if (measuredHeight !== headerHeightRef.current) {
-                    headerHeightRef.current = measuredHeight;
-                    take();
-                }
-            });
-        },
-        [take]
-    );
+        });
+    }, [take]);
 
     /**
      * when the page is mounted or resized, measure the top Y position of each element
@@ -164,7 +153,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
         if (!root) {
             return;
         }
-        updateHeaderHeight();
+        updateScrollPaddingTop();
         fastdom.measure(() => {
             const scrollY = root instanceof Document ? window.scrollY : root.scrollTop;
             const top = root instanceof Document ? 0 : root.getBoundingClientRect().top;
@@ -177,7 +166,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
                             .join(", ")
                     )
                 ).reduce<Record<string, number>>((prev, curr) => {
-                    prev[curr.id] = curr.getBoundingClientRect().top + scrollY - top - ANCHOR_TOP_BUFFER;
+                    prev[curr.id] = curr.getBoundingClientRect().top + scrollY - top;
                     return prev;
                 }, {});
             } catch (e) {
@@ -188,7 +177,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
         });
 
         take();
-    }, [ids, root, take, updateHeaderHeight]);
+    }, [ids, root, take, updateScrollPaddingTop]);
 
     useEffect(() => {
         if (!root) {
@@ -199,14 +188,13 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
         const headerObserver =
             headerElement != null
                 ? new ResizeObserver(() => {
-                      updateHeaderHeight(headerElement);
+                      updateScrollPaddingTop();
                   })
                 : undefined;
         if (headerObserver && headerElement) {
             headerObserver.observe(headerElement);
-        } else {
-            updateHeaderHeight();
         }
+        updateScrollPaddingTop();
 
         // Throttle scroll handler with requestAnimationFrame to process once per frame
         const handleScroll = () => {
@@ -244,7 +232,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
                                 .join(", ")
                         )
                     ).reduce<Record<string, number>>((prev, curr) => {
-                        prev[curr.id] = curr.getBoundingClientRect().top + scrollY - top - ANCHOR_TOP_BUFFER;
+                        prev[curr.id] = curr.getBoundingClientRect().top + scrollY - top;
                         return prev;
                     }, {});
                 } catch (e) {
@@ -302,7 +290,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
                 rafIdRef.current = null;
             }
         };
-    }, [measure, take, root, ids, updateHeaderHeight]);
+    }, [measure, take, root, ids, updateScrollPaddingTop]);
 
     return measure;
 }
