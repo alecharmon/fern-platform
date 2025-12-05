@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint returns my generated audio history?",
+  "ground_truth": "Use the GET /v1/history endpoint to retrieve your generated audio history. The response includes: 'history' (array of SpeechHistoryItemResponseModel), 'last_history_item_id' (string or null), 'has_more' (boolean), and 'scanned_until' (integer or null). Each history item contains: history_item_id, voice_id, model_id, text, date_unix, character counts, state, feedback, alignments, source, and dialogue data. Use page_size (default 100, max 1000) to control items per page. Authentication is via xi-api-key header.",
+  "metadata": {
+    "category": "history",
+    "source": "documentation",
+    "endpoint": "GET /v1/history",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/history/list"
+    ],
+    "correctness": [
+      "Must mention GET /v1/history endpoint",
+      "Must mention history array in response",
+      "Should mention page_size parameter"
+    ]
+  }
+}

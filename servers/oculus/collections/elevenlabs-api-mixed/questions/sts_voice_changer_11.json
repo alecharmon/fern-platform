@@ -1,0 +1,21 @@
+{
+  "question": "What API endpoint do I use to change the voice in an existing audio recording?",
+  "ground_truth": "Use the POST /v1/speech-to-speech/{voice_id} endpoint (Voice Changer) to transform audio from one voice to another. This endpoint accepts multipart/form-data with an audio file. Required: voice_id in the path (the target voice), xi-api-key header, and the audio file. Optional parameters include model_id (e.g., 'eleven_multilingual_sts_v2'), voice_settings, seed for reproducibility, remove_background_noise (boolean) for noise reduction, and file_format to specify input format. The response is binary audio (application/octet-stream) with the transformed voice.",
+  "metadata": {
+    "category": "speech-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/speech-to-speech/{voice_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/speech-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention POST /v1/speech-to-speech/{voice_id} endpoint",
+      "Must mention it requires an audio file input",
+      "Must mention voice_id determines the target voice",
+      "Should mention multipart/form-data content type"
+    ]
+  }
+}

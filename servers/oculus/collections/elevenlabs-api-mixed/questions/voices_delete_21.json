@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint do I use to delete a voice?",
+  "ground_truth": "Use the DELETE /v1/voices/{voice_id} endpoint, passing the voice_id as a path parameter. You need to authenticate with the xi-api-key header. On success (200), the response contains a 'status' field (string). A 422 response indicates a validation error. You can get the voice_id of voices to delete by first listing your voices using the GET /v1/voices endpoint.",
+  "metadata": {
+    "category": "voices",
+    "source": "documentation",
+    "endpoint": "DELETE /v1/voices/{voice_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/delete"
+    ],
+    "correctness": [
+      "Must mention DELETE /v1/voices/{voice_id} endpoint",
+      "Must mention voice_id path parameter",
+      "Should mention xi-api-key authentication"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "question": "What parameters can I configure when calling the dubbing API endpoint?",
+  "ground_truth": "When calling POST /v1/dubbing, you can configure: 'target_lang' (required, the target language to dub into), 'source_lang' (optional, defaults to 'auto'), 'target_accent' (accent specification), 'num_speakers' (integer, speaker count), 'watermark' (boolean, add watermark), 'start_time' and 'end_time' (integers, trim in seconds), 'highest_resolution' (boolean, quality setting), 'drop_background_audio' (boolean, remove background), 'use_profanity_filter' (boolean, content filtering), 'dubbing_studio' (boolean, studio mode), 'disable_voice_cloning' (boolean, voice cloning toggle), 'mode' (enum: 'automatic' or 'manual'), and 'csv_fps' (number, frame rate).",
+  "metadata": {
+    "category": "dubbing",
+    "source": "documentation",
+    "endpoint": "POST /v1/dubbing",
+    "question_type": "parameter-specific"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/dubbing/create"
+    ],
+    "correctness": [
+      "Must mention target_lang as required",
+      "Should mention source_lang as optional or with default",
+      "Should mention mode parameter with automatic/manual values"
+    ]
+  }
+}

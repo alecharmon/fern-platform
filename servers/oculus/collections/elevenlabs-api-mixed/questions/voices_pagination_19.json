@@ -1,0 +1,20 @@
+{
+  "question": "How do I paginate through results from the voices API endpoint?",
+  "ground_truth": "Use the GET /v2/voices endpoint with pagination parameters. Set 'page_size' (integer, max 100, default 10) to control how many voices per page. The response includes 'has_more' (boolean) indicating if more pages exist, and 'next_page_token' (string) for the next page. To get the next page, pass the returned next_page_token value to the 'next_page_token' query parameter in your next request.",
+  "metadata": {
+    "category": "voices",
+    "source": "documentation",
+    "endpoint": "GET /v2/voices",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/search"
+    ],
+    "correctness": [
+      "Must mention page_size parameter",
+      "Must mention next_page_token for pagination",
+      "Must mention has_more in response"
+    ]
+  }
+}

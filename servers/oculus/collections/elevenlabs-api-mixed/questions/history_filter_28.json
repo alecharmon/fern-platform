@@ -1,0 +1,19 @@
+{
+  "question": "How do I filter the history API results by date?",
+  "ground_truth": "When calling GET /v1/history, use the date filtering parameters: 'date_before_unix' (integer) to filter history items before a specific date (exclusive), and 'date_after_unix' (integer) to filter items after a specific date (inclusive). Both accept Unix timestamps.",
+  "metadata": {
+    "category": "history",
+    "source": "documentation",
+    "endpoint": "GET /v1/history",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/history/list"
+    ],
+    "correctness": [
+      "Must mention date_before_unix and/or date_after_unix",
+      "Must mention Unix timestamp format"
+    ]
+  }
+}

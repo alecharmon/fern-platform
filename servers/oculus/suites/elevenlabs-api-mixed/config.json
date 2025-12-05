@@ -1,0 +1,12 @@
+{
+  "integration": "vercel-http",
+  "collections": [
+    "elevenlabs-api-mixed"
+  ],
+  "evaluators": [
+    "correctness",
+    "citation",
+    "style",
+    "length"
+  ]
+}

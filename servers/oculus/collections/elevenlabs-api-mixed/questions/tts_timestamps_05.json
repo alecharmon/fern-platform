@@ -1,0 +1,21 @@
+{
+  "question": "How do I get character-level timestamps from the text-to-speech API?",
+  "ground_truth": "To get character-level timestamps, use the POST /v1/text-to-speech/{voice_id}/with-timestamps endpoint. Instead of returning a binary audio file, this endpoint returns a JSON response containing: audio_base64 (the audio encoded as base64), and an alignment object with characters (array of strings), character_start_times_seconds (array of numbers), and character_end_times_seconds (array of numbers). There's also a normalized_alignment field for normalized text alignment. This is useful for lip-syncing, karaoke-style applications, or any use case requiring precise timing information.",
+  "metadata": {
+    "category": "text-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/text-to-speech/{voice_id}/with-timestamps",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/text-to-speech/convert-with-timestamps"
+    ],
+    "correctness": [
+      "Must mention the /with-timestamps endpoint",
+      "Must mention audio_base64 in the response",
+      "Must mention alignment object with character timing arrays",
+      "Should mention character_start_times_seconds and character_end_times_seconds"
+    ]
+  }
+}

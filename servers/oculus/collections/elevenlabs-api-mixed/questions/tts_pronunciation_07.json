@@ -1,0 +1,20 @@
+{
+  "question": "How do I customize pronunciation when calling the text-to-speech API endpoint?",
+  "ground_truth": "You can customize pronunciation using pronunciation dictionaries. In the text-to-speech request body, include the pronunciation_dictionary_locators array with objects containing pronunciation_dictionary_id (required) and optionally version_id. Additionally, you can control text normalization behavior using apply_text_normalization with values 'auto', 'on', or 'off', and apply_language_text_normalization (boolean) for language-specific normalization. The text normalization affects how numbers, dates, and special characters are spoken.",
+  "metadata": {
+    "category": "text-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/text-to-speech/{voice_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/text-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention pronunciation_dictionary_locators",
+      "Should mention pronunciation_dictionary_id",
+      "May mention apply_text_normalization or apply_language_text_normalization"
+    ]
+  }
+}

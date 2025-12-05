@@ -1,0 +1,20 @@
+{
+  "question": "How do I find out which languages a model supports using the API?",
+  "ground_truth": "Call the GET /v1/models endpoint to retrieve model information. Each model includes a 'languages' array containing objects with 'language_id' (string) and 'name' (string) fields that list the supported languages for that model.",
+  "metadata": {
+    "category": "models",
+    "source": "documentation",
+    "endpoint": "GET /v1/models",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/models/list"
+    ],
+    "correctness": [
+      "Must mention GET /v1/models endpoint",
+      "Must mention languages array in response",
+      "Should mention language_id and name fields"
+    ]
+  }
+}

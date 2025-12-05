@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint returns a list of all available voices?",
+  "ground_truth": "Use the GET /v2/voices endpoint to retrieve a list of voices. The response includes a 'voices' array of VoiceResponseModel objects, 'has_more' boolean for pagination, 'total_count' integer, and 'next_page_token' for fetching additional pages. Each voice object contains voice_id, name, category, description, preview_url, samples array, fine_tuning status, labels, settings, sharing info, verified_languages, and boolean flags like is_owner and is_legacy. Authentication is via xi-api-key header.",
+  "metadata": {
+    "category": "voices",
+    "source": "documentation",
+    "endpoint": "GET /v2/voices",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/search"
+    ],
+    "correctness": [
+      "Must mention GET /v2/voices endpoint",
+      "Must mention voices array in response",
+      "Should mention voice_id and name in response"
+    ]
+  }
+}

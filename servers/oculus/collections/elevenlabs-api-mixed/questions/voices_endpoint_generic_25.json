@@ -1,0 +1,20 @@
+{
+  "question": "Tell me about the GET /v1/voices/{voice_id} endpoint.",
+  "ground_truth": "The GET /v1/voices/{voice_id} endpoint returns metadata about a specific voice. Path parameter: voice_id (required) - identifier for the target voice. Query parameter: with_settings (deprecated, ignored). Response (200): VoiceResponseModel containing voice_id, name, category, samples array, fine_tuning object (with state and verification details), labels, description, preview_url, settings (stability, similarity_boost, style, speed), sharing metadata (status, owner_id, financial_rewards_enabled), verification status, language support information, safety_control level, and ownership flags (is_owner, is_legacy). Error (422): Validation error. Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "voices",
+    "source": "documentation",
+    "endpoint": "GET /v1/voices/{voice_id}",
+    "question_type": "generic"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/get"
+    ],
+    "correctness": [
+      "Must mention endpoint path and method",
+      "Must mention voice_id path parameter",
+      "Should list response fields"
+    ]
+  }
+}

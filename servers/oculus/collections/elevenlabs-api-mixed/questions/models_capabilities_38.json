@@ -1,0 +1,20 @@
+{
+  "question": "How do I check what capabilities a model has using the API?",
+  "ground_truth": "Call the GET /v1/models endpoint to retrieve model information. Each model includes capability boolean flags: can_do_text_to_speech (supports TTS), can_do_voice_conversion (supports speech-to-speech), can_be_finetuned (supports fine-tuning), can_use_style (supports style parameter), can_use_speaker_boost (supports speaker boost), serves_pro_voices (serves professional voices), and requires_alpha_access (requires alpha access). Character limits are also provided: max_characters_request_free_user, max_characters_request_subscribed_user, and maximum_text_length_per_request.",
+  "metadata": {
+    "category": "models",
+    "source": "documentation",
+    "endpoint": "GET /v1/models",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/models/list"
+    ],
+    "correctness": [
+      "Must mention GET /v1/models endpoint",
+      "Must mention capability flags",
+      "Should mention can_do_text_to_speech and can_do_voice_conversion"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "question": "Tell me about the POST /v1/audio-isolation endpoint.",
+  "ground_truth": "The POST /v1/audio-isolation endpoint removes background noise from audio. Content-Type: multipart/form-data. Request parameters: audio file (implied from examples), 'file_format' (optional enum: 'pcm_s16le_16' or 'other'), 'preview_b64' (optional string for base64-encoded preview). Response (200): empty JSON object {}. Error (422): validation error. Authentication via xi-api-key header. SDK examples available for TypeScript, Python, Go, Ruby, Java, PHP, C#, and Swift.",
+  "metadata": {
+    "category": "audio-isolation",
+    "source": "documentation",
+    "endpoint": "POST /v1/audio-isolation",
+    "question_type": "generic"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/audio-isolation/convert"
+    ],
+    "correctness": [
+      "Must mention endpoint path and method",
+      "Must mention removes background noise",
+      "Should mention file_format parameter"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "question": "How do I maintain consistent speech flow when making multiple text-to-speech API requests?",
+  "ground_truth": "To maintain consistent speech flow across multiple requests, use the context stitching parameters in your text-to-speech requests. You can provide previous_text and next_text strings to give context about surrounding content, or use previous_request_ids and next_request_ids arrays to reference other generation requests. This helps the model maintain natural prosody and intonation across chunks. For example, when generating a long document in parts, include the previous paragraph as previous_text to ensure smooth transitions between audio segments.",
+  "metadata": {
+    "category": "text-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/text-to-speech/{voice_id}",
+    "question_type": "usage-scenario"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/text-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention previous_text and/or next_text parameters",
+      "Should mention previous_request_ids and next_request_ids",
+      "Should explain the purpose is to maintain consistent prosody/flow"
+    ]
+  }
+}

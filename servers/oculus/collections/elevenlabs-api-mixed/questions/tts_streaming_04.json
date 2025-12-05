@@ -1,0 +1,21 @@
+{
+  "question": "Does the text-to-speech API support streaming responses?",
+  "ground_truth": "To stream audio in real-time, use the POST /v1/text-to-speech/{voice_id}/stream endpoint instead of the regular convert endpoint. This endpoint returns audio as a text/event-stream (binary streaming data) rather than waiting for the complete file. You can also use the optimize_streaming_latency query parameter with values 0-4 to control latency optimization: 0 = default (no optimization), 1 = normal (~50% latency improvement), 2 = strong (~75% improvement), 3 = max optimization, 4 = max optimization with text normalizer disabled for best latency but potential mispronunciation of numbers/dates.",
+  "metadata": {
+    "category": "text-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/text-to-speech/{voice_id}/stream",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/text-to-speech/stream"
+    ],
+    "correctness": [
+      "Must mention the /stream endpoint path",
+      "Must mention streaming response format",
+      "Should mention optimize_streaming_latency parameter",
+      "Should explain the latency optimization levels"
+    ]
+  }
+}

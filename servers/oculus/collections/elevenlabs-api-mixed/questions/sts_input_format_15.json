@@ -1,0 +1,19 @@
+{
+  "question": "What audio input formats does the speech-to-speech API endpoint accept?",
+  "ground_truth": "The speech-to-speech (voice changer) endpoint accepts audio files via multipart/form-data. You can specify the input format using the file_format parameter with enum values 'pcm_s16le_16' or 'other'.",
+  "metadata": {
+    "category": "speech-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/speech-to-speech/{voice_id}",
+    "question_type": "parameter-specific"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/speech-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention file_format parameter",
+      "Should mention pcm_s16le_16 and other as options"
+    ]
+  }
+}

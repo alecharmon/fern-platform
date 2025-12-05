@@ -1,0 +1,19 @@
+{
+  "question": "What input formats does the audio isolation API endpoint accept?",
+  "ground_truth": "The POST /v1/audio-isolation endpoint accepts audio files via multipart/form-data. You can specify the input format using the 'file_format' parameter with enum values: 'pcm_s16le_16' for PCM format or 'other' for other audio formats.",
+  "metadata": {
+    "category": "audio-isolation",
+    "source": "documentation",
+    "endpoint": "POST /v1/audio-isolation",
+    "question_type": "parameter-specific"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/audio-isolation/convert"
+    ],
+    "correctness": [
+      "Must mention file_format parameter",
+      "Must mention pcm_s16le_16 and other as values"
+    ]
+  }
+}

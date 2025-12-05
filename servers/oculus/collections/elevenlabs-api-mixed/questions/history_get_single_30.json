@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint returns details about a specific history item?",
+  "ground_truth": "Use the GET /v1/history/{history_item_id} endpoint, passing the history_item_id as a path parameter. The response is a SpeechHistoryItemResponseModel containing: history_item_id (required), date_unix (required timestamp), text, voice_id, voice_name, voice_category (enum: premade, cloned, generated, professional), model_id, character_count_change_from, character_count_change_to, content_type (required), state (required), source (enum: TTS, STS, Projects, PD, AN, Dubbing, PlayAPI, ConvAI, VoiceGeneration), feedback object, alignments, and dialogue array. Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "history",
+    "source": "documentation",
+    "endpoint": "GET /v1/history/{history_item_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/history/get"
+    ],
+    "correctness": [
+      "Must mention GET /v1/history/{history_item_id} endpoint",
+      "Must mention history_item_id path parameter",
+      "Should mention response includes voice_id, text, date_unix"
+    ]
+  }
+}

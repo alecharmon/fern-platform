@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint removes background noise from audio?",
+  "ground_truth": "Use the POST /v1/audio-isolation endpoint to remove background noise from audio. The request uses multipart/form-data content type with an audio file. Optional parameters include 'file_format' (enum: 'pcm_s16le_16' or 'other') and 'preview_b64' (base64-encoded preview string). The response on success (200) is an empty JSON object {}. A 422 response indicates validation error. Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "audio-isolation",
+    "source": "documentation",
+    "endpoint": "POST /v1/audio-isolation",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/audio-isolation/convert"
+    ],
+    "correctness": [
+      "Must mention POST /v1/audio-isolation endpoint",
+      "Must mention multipart/form-data content type",
+      "Should mention audio file upload"
+    ]
+  }
+}

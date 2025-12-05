@@ -1,0 +1,20 @@
+{
+  "question": "How do I generate reproducible audio output from the text-to-speech API endpoint?",
+  "ground_truth": "You can use the seed parameter in your text-to-speech request body to achieve more reproducible audio generation. The seed is an integer value that, when provided with the same text, voice, and settings, will make a best effort to produce similar output, though determinism is not guaranteed. If seed is not specified (null), each generation will have natural variation.",
+  "metadata": {
+    "category": "text-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/text-to-speech/{voice_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/text-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention the seed parameter",
+      "Should mention seed helps with reproducibility but is not guaranteed deterministic",
+      "Should mention seed is an integer type"
+    ]
+  }
+}

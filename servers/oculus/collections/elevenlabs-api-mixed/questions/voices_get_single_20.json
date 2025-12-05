@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint returns detailed information about a specific voice?",
+  "ground_truth": "Use the GET /v1/voices/{voice_id} endpoint, passing the voice_id as a path parameter. The response is a VoiceResponseModel containing: voice_id, name, category, samples array, fine_tuning object (with state and verification details), labels, description, preview_url, settings (stability, similarity_boost, style, speed), sharing metadata (status, owner_id, financial_rewards_enabled), verification status, language support information, safety_control level, and ownership flags. Authentication is via xi-api-key header. Note: the with_settings query parameter is deprecated and ignored.",
+  "metadata": {
+    "category": "voices",
+    "source": "documentation",
+    "endpoint": "GET /v1/voices/{voice_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/get"
+    ],
+    "correctness": [
+      "Must mention GET /v1/voices/{voice_id} endpoint",
+      "Must mention voice_id path parameter",
+      "Should mention response includes voice details like name, settings, etc."
+    ]
+  }
+}

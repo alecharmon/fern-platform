@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint returns information about my user account?",
+  "ground_truth": "Use the GET /v1/user endpoint to retrieve user information. The response is a UserResponseModel containing: user_id (string), subscription object (with tier, character_count, character_limit, voice_slots_used, voice_limit, status, currency, billing_period, and capability flags), is_new_user (boolean), xi_api_key (string or null), can_use_delayed_payment_methods (boolean), is_onboarding_completed (boolean), is_onboarding_checklist_completed (boolean), first_name (string or null), is_api_key_hashed (boolean), xi_api_key_preview (string or null), referral_link_code (string or null), partnerstack_partner_default_link (string or null), and created_at (integer Unix timestamp). Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "user",
+    "source": "documentation",
+    "endpoint": "GET /v1/user",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/user/get"
+    ],
+    "correctness": [
+      "Must mention GET /v1/user endpoint",
+      "Must mention user_id in response",
+      "Should mention subscription information"
+    ]
+  }
+}

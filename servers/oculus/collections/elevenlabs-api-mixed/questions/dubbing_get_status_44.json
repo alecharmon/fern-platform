@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint do I call to check the status of a dubbing operation?",
+  "ground_truth": "Use the GET /v1/dubbing/{dubbing_id} endpoint, passing the dubbing_id as a path parameter. The endpoint returns metadata about a dubbing project, including whether it's still in progress or not. Response contains: dubbing_id (string), name (string), status (string), target_languages (array of strings), editable (boolean), created_at (date-time), media_metadata (object with content_type and duration, or null), and error (string or null). Authentication via xi-api-key header. A 422 response indicates validation error.",
+  "metadata": {
+    "category": "dubbing",
+    "source": "documentation",
+    "endpoint": "GET /v1/dubbing/{dubbing_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/dubbing/get"
+    ],
+    "correctness": [
+      "Must mention GET /v1/dubbing/{dubbing_id} endpoint",
+      "Must mention dubbing_id path parameter",
+      "Must mention status in response"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "question": "How do I search and filter results from the voices API endpoint?",
+  "ground_truth": "The GET /v2/voices endpoint supports several query parameters for searching and filtering. Use 'search' (string) to filter by name, description, labels, or category. Filter by 'voice_type' with values: 'personal', 'community', 'default', 'workspace', 'non-default'. Filter by 'category' with values: 'premade', 'cloned', 'generated', 'professional'. Filter by 'fine_tuning_state' with values: 'draft', 'not_verified', 'not_started', 'queued', 'fine_tuning', 'fine_tuned', 'failed', 'delayed'. You can also filter by 'collection_id' or specific 'voice_ids' (array, max 100).",
+  "metadata": {
+    "category": "voices",
+    "source": "documentation",
+    "endpoint": "GET /v2/voices",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/search"
+    ],
+    "correctness": [
+      "Must mention search parameter",
+      "Must mention voice_type filter options",
+      "Should mention category filter options",
+      "Should mention fine_tuning_state filter"
+    ]
+  }
+}

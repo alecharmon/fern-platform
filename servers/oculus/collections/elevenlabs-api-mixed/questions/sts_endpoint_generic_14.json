@@ -1,0 +1,21 @@
+{
+  "question": "Tell me about the POST /v1/speech-to-speech/{voice_id} endpoint.",
+  "ground_truth": "The POST /v1/speech-to-speech/{voice_id} endpoint is the Voice Changer API that transforms audio from one voice to another. Path parameter: voice_id (required) - target voice ID. Query parameters: enable_logging (boolean), optimize_streaming_latency (integer 0-4), output_format (string). Request body (multipart/form-data): audio file to transform, model_id (e.g., 'eleven_multilingual_sts_v2'), voice_settings, seed (integer), remove_background_noise (boolean), file_format. Output formats include MP3, PCM, \u03bc-law, A-law, and Opus variants. Response: 200 returns binary audio (application/octet-stream), 422 returns validation error. Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "speech-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/speech-to-speech/{voice_id}",
+    "question_type": "generic"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/speech-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention the endpoint path and method",
+      "Must mention voice_id as path parameter",
+      "Must mention multipart/form-data content type",
+      "Should mention audio file input requirement"
+    ]
+  }
+}

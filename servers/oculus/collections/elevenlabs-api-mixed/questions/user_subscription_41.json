@@ -1,0 +1,20 @@
+{
+  "question": "How do I check my subscription status and character usage via the API?",
+  "ground_truth": "Call the GET /v1/user endpoint to retrieve your subscription information. The response includes a subscription object containing: tier (string), character_count (integer - current usage), character_limit (integer - maximum allowed), voice_slots_used (integer), voice_limit (integer), status (enum: trialing, active, incomplete, past_due, free, free_disabled), currency (enum: usd, eur, inr or null), billing_period (monthly_period, annual_period, or null), and capability flags like can_use_instant_voice_cloning and can_use_professional_voice_cloning (booleans). For extended subscription details, you can also use the GET /v1/user/subscription endpoint.",
+  "metadata": {
+    "category": "user",
+    "source": "documentation",
+    "endpoint": "GET /v1/user",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/user/get"
+    ],
+    "correctness": [
+      "Must mention GET /v1/user endpoint",
+      "Must mention character_count and character_limit",
+      "Should mention status field"
+    ]
+  }
+}

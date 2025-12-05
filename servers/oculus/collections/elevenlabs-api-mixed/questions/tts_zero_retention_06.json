@@ -1,0 +1,21 @@
+{
+  "question": "What is zero retention mode and how do I enable it in API requests?",
+  "ground_truth": "Zero retention mode is an enterprise-only feature that disables request logging and history storage for privacy-sensitive use cases. To enable it, set the enable_logging query parameter to false when calling text-to-speech endpoints (e.g., POST /v1/text-to-speech/{voice_id}?enable_logging=false). When zero retention mode is active, history features are unavailable for that request, including request stitching. This means the audio won't appear in your generation history and character usage won't be tracked in the same way.",
+  "metadata": {
+    "category": "text-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/text-to-speech/{voice_id}",
+    "question_type": "usage-scenario"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/text-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention enable_logging parameter set to false",
+      "Must mention it's an enterprise-only feature",
+      "Should mention history features are unavailable in this mode",
+      "Should mention request stitching is unavailable"
+    ]
+  }
+}

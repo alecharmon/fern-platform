@@ -1,0 +1,20 @@
+{
+  "question": "Does the speech-to-speech API support streaming responses?",
+  "ground_truth": "Yes, use the POST /v1/speech-to-speech/{voice_id}/stream endpoint for real-time streaming voice conversion. This endpoint returns audio as text/event-stream (binary streaming data) instead of waiting for the complete file. You can control latency with optimize_streaming_latency (0-4, where 4 is maximum optimization with text normalizer disabled). The endpoint accepts the same multipart/form-data parameters as the regular voice changer: audio file, model_id, voice_settings, seed, remove_background_noise, and file_format.",
+  "metadata": {
+    "category": "speech-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/speech-to-speech/{voice_id}/stream",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/speech-to-speech/stream"
+    ],
+    "correctness": [
+      "Must mention the /stream endpoint",
+      "Must mention streaming response",
+      "Should mention optimize_streaming_latency parameter"
+    ]
+  }
+}

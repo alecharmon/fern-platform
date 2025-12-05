@@ -1,0 +1,21 @@
+{
+  "question": "What voice settings parameters can I pass to the text-to-speech API endpoint?",
+  "ground_truth": "When generating speech with ElevenLabs, you can adjust voice settings through the voice_settings object in the request body. Available settings include: stability (number) - controls how consistent the voice sounds; similarity_boost (number) - corresponds to 'Clarity + Similarity Enhancement' in the web app; style (number) - adjusts the speaking style; speed (number) - controls speech speed; and use_speaker_boost (boolean) - enables speaker enhancement. These settings are optional and have default values that can be retrieved via the GET /v1/voices/settings/default endpoint.",
+  "metadata": {
+    "category": "text-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/text-to-speech/{voice_id}",
+    "question_type": "parameter-specific"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/text-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention stability setting",
+      "Must mention similarity_boost setting",
+      "Should mention style and speed settings",
+      "Should mention use_speaker_boost setting"
+    ]
+  }
+}

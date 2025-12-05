@@ -1,0 +1,19 @@
+{
+  "question": "How do I filter the history API results by generation source (TTS vs STS)?",
+  "ground_truth": "When calling GET /v1/history, use the 'source' query parameter with enum values 'TTS' (text-to-speech) or 'STS' (speech-to-speech) to filter history items by their generation source.",
+  "metadata": {
+    "category": "history",
+    "source": "documentation",
+    "endpoint": "GET /v1/history",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/history/list"
+    ],
+    "correctness": [
+      "Must mention source parameter",
+      "Must mention TTS and STS as values"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "question": "What API endpoint do I use to dub audio or video into another language?",
+  "ground_truth": "Use the POST /v1/dubbing endpoint with multipart/form-data content type. This endpoint dubs a provided audio or video file into a given language. File uploads: 'file' (audio/video to dub), 'csv_file' (optional), 'foreground_audio_file' (optional), 'background_audio_file' (optional). Or use 'source_url' as an alternative to file upload. Required field: 'target_lang' (string, the target language to dub into). Optional fields: 'source_lang' (string, defaults to 'auto'), 'name', 'target_accent', 'num_speakers' (integer), 'watermark' (boolean), 'start_time' and 'end_time' (integers, trim in seconds), 'highest_resolution' (boolean), 'drop_background_audio' (boolean), 'use_profanity_filter' (boolean), 'dubbing_studio' (boolean), 'disable_voice_cloning' (boolean), 'mode' (enum: 'automatic' or 'manual'), 'csv_fps' (number). Response: dubbing_id (string) and expected_duration_sec (number). Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "dubbing",
+    "source": "documentation",
+    "endpoint": "POST /v1/dubbing",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/dubbing/create"
+    ],
+    "correctness": [
+      "Must mention POST /v1/dubbing endpoint",
+      "Must mention target_lang as required",
+      "Must mention dubbing_id in response",
+      "Should mention file upload or source_url"
+    ]
+  }
+}

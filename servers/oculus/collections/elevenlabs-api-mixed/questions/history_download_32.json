@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint do I use to download audio files from my history?",
+  "ground_truth": "Use the POST /v1/history/download endpoint with a JSON body containing 'history_item_ids' (required array of strings) and optionally 'output_format' (string: 'wav' or 'default'). The response is binary audio (application/octet-stream). If one history item ID is provided, you receive a single audio file. If more than one history item ID is provided, the items are packed into a .zip file. Authentication via xi-api-key header. Error responses: 400 for invalid request, 422 for validation error.",
+  "metadata": {
+    "category": "history",
+    "source": "documentation",
+    "endpoint": "POST /v1/history/download",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/history/download"
+    ],
+    "correctness": [
+      "Must mention POST /v1/history/download endpoint",
+      "Must mention history_item_ids array parameter",
+      "Should mention single file vs zip behavior"
+    ]
+  }
+}

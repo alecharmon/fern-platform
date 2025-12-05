@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint do I use to create an instant voice clone (IVC)?",
+  "ground_truth": "Use the POST /v1/voices/add endpoint with multipart/form-data content type to create a voice clone. Required parameters: 'name' (string) for the voice name and 'files' (audio files for cloning). Optional parameters: 'remove_background_noise' (boolean) for noise filtering, 'description' (string), and 'labels' (string). The response contains 'voice_id' (string) of the created voice and 'requires_verification' (boolean). Authentication is via xi-api-key header. A 422 response indicates validation error.",
+  "metadata": {
+    "category": "voices",
+    "source": "documentation",
+    "endpoint": "POST /v1/voices/add",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/ivc/create"
+    ],
+    "correctness": [
+      "Must mention POST /v1/voices/add endpoint",
+      "Must mention name and files as required parameters",
+      "Should mention voice_id in response"
+    ]
+  }
+}

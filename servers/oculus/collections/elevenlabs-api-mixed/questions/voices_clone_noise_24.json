@@ -1,0 +1,20 @@
+{
+  "question": "Can I remove background noise when calling the voice clone API endpoint?",
+  "ground_truth": "Yes, when creating a voice clone via POST /v1/voices/add, include the 'remove_background_noise' parameter set to true in your multipart form data. This boolean parameter enables noise filtering on the uploaded audio samples before creating the voice clone.",
+  "metadata": {
+    "category": "voices",
+    "source": "documentation",
+    "endpoint": "POST /v1/voices/add",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/ivc/create"
+    ],
+    "correctness": [
+      "Must mention remove_background_noise parameter",
+      "Must mention it's a boolean",
+      "Should mention POST /v1/voices/add endpoint"
+    ]
+  }
+}

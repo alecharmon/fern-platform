@@ -1,0 +1,20 @@
+{
+  "question": "Tell me about the GET /v1/user endpoint.",
+  "ground_truth": "The GET /v1/user endpoint gets information about the user. No query parameters required. Response (200): UserResponseModel containing user_id, subscription (tier, character_count, character_limit, voice_slots_used, voice_limit, status, currency, billing_period, capability flags), is_new_user, xi_api_key, can_use_delayed_payment_methods, is_onboarding_completed, is_onboarding_checklist_completed, first_name, is_api_key_hashed, xi_api_key_preview, referral_link_code, partnerstack_partner_default_link, and created_at. Subscription status enum values: trialing, active, incomplete, past_due, free, free_disabled. Error (422): validation error. Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "user",
+    "source": "documentation",
+    "endpoint": "GET /v1/user",
+    "question_type": "generic"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/user/get"
+    ],
+    "correctness": [
+      "Must mention endpoint path and method",
+      "Must mention user_id and subscription in response",
+      "Should list subscription status values"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "question": "How do I paginate through results from the history API endpoint?",
+  "ground_truth": "When calling GET /v1/history, use the 'start_after_history_item_id' parameter to paginate. This parameter specifies after which ID to start fetching. If not provided, history items are fetched starting from the most recently created one, ordered descending by creation date. The response includes 'has_more' (boolean) indicating if more items exist and 'last_history_item_id' for the next page. Set 'page_size' (default 100, max 1000) to control items per page.",
+  "metadata": {
+    "category": "history",
+    "source": "documentation",
+    "endpoint": "GET /v1/history",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/history/list"
+    ],
+    "correctness": [
+      "Must mention start_after_history_item_id parameter",
+      "Must mention has_more in response",
+      "Should mention page_size parameter"
+    ]
+  }
+}

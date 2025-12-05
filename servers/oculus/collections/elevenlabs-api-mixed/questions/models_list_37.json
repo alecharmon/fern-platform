@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint returns a list of available models?",
+  "ground_truth": "Use the GET /v1/models endpoint to retrieve an array of available models. Each model object contains: model_id (required string), name, can_be_finetuned (boolean), can_do_text_to_speech (boolean), can_do_voice_conversion (boolean), can_use_style (boolean), can_use_speaker_boost (boolean), serves_pro_voices (boolean), token_cost_factor (number), description, requires_alpha_access (boolean), max_characters_request_free_user (integer), max_characters_request_subscribed_user (integer), maximum_text_length_per_request (integer), languages array (with language_id and name), model_rates object (with character_cost_multiplier), and concurrency_group. Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "models",
+    "source": "documentation",
+    "endpoint": "GET /v1/models",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/models/list"
+    ],
+    "correctness": [
+      "Must mention GET /v1/models endpoint",
+      "Must mention model_id in response",
+      "Should mention capability flags like can_do_text_to_speech"
+    ]
+  }
+}

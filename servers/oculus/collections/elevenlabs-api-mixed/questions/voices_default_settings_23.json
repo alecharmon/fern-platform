@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint returns the default voice settings?",
+  "ground_truth": "Use the GET /v1/voices/settings/default endpoint to retrieve default voice settings. The response is a VoiceSettingsResponseModel containing: stability (number or null), similarity_boost (number or null) which corresponds to 'Clarity + Similarity Enhancement' in the web app, use_speaker_boost (boolean or null), style (number or null), and speed (number or null). The stability setting corresponds to the 'Stability' slider in the web app. Authentication is via xi-api-key header.",
+  "metadata": {
+    "category": "voices",
+    "source": "documentation",
+    "endpoint": "GET /v1/voices/settings/default",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/settings/get-default"
+    ],
+    "correctness": [
+      "Must mention GET /v1/voices/settings/default endpoint",
+      "Must mention stability and similarity_boost in response",
+      "Should mention the web app correspondence"
+    ]
+  }
+}

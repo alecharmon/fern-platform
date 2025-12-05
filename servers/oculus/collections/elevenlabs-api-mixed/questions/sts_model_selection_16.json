@@ -1,0 +1,20 @@
+{
+  "question": "How do I specify which model to use when calling the speech-to-speech API endpoint?",
+  "ground_truth": "For speech-to-speech voice conversion, specify the model using the model_id parameter in your multipart form data request. The parameter defaults to 'eleven_english_sts_v2'. An example model ID is 'eleven_multilingual_sts_v2'. You can get a list of all available models by calling the GET /v1/models endpoint, which returns model information including the can_do_voice_conversion boolean field indicating whether the model supports voice conversion.",
+  "metadata": {
+    "category": "speech-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/speech-to-speech/{voice_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/speech-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention model_id parameter",
+      "May mention eleven_multilingual_sts_v2 as an example",
+      "May mention GET /v1/models endpoint"
+    ]
+  }
+}

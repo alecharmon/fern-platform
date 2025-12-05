@@ -1,0 +1,20 @@
+{
+  "question": "What API endpoint do I use to delete a history item?",
+  "ground_truth": "Use the DELETE /v1/history/{history_item_id} endpoint, passing the history_item_id as a path parameter. The description notes: 'ID of the history item to be used. You can use the Get generated items endpoint to retrieve a list of history items.' On success (200), the response contains a 'status' field (string). A 422 response indicates validation error. Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "history",
+    "source": "documentation",
+    "endpoint": "DELETE /v1/history/{history_item_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/history/delete"
+    ],
+    "correctness": [
+      "Must mention DELETE /v1/history/{history_item_id} endpoint",
+      "Must mention history_item_id path parameter",
+      "Should mention status in response"
+    ]
+  }
+}

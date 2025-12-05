@@ -1,0 +1,20 @@
+{
+  "question": "How do I remove background noise when calling the speech-to-speech API endpoint?",
+  "ground_truth": "When using the speech-to-speech (voice changer) endpoint at POST /v1/speech-to-speech/{voice_id}, include the remove_background_noise parameter set to true in your multipart form data. This boolean parameter enables noise suppression on the input audio before performing the voice conversion, resulting in cleaner output audio. This is particularly useful when your source audio was recorded in noisy environments.",
+  "metadata": {
+    "category": "speech-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/speech-to-speech/{voice_id}",
+    "question_type": "task-based"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/speech-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention remove_background_noise parameter",
+      "Must mention it's a boolean set to true",
+      "Should mention it's part of the speech-to-speech endpoint"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "question": "Tell me about the POST /v1/text-to-speech/{voice_id} endpoint.",
+  "ground_truth": "The POST /v1/text-to-speech/{voice_id} endpoint converts text into speech using a specified voice and returns audio. Path parameter: voice_id (required) - the voice to use. Query parameters: enable_logging (boolean), optimize_streaming_latency (integer 0-4), output_format (string with codec options like mp3_44100_128, pcm_16000, opus_48000_64). Request body (JSON): text (required), model_id, language_code, voice_settings (stability, similarity_boost, style, speed, use_speaker_boost), pronunciation_dictionary_locators, seed, previous_text, next_text, previous_request_ids, next_request_ids, use_pvc_as_ivc, apply_text_normalization. Response: 200 returns binary audio (application/octet-stream), 422 returns validation error. Authentication via xi-api-key header.",
+  "metadata": {
+    "category": "text-to-speech",
+    "source": "documentation",
+    "endpoint": "POST /v1/text-to-speech/{voice_id}",
+    "question_type": "generic"
+  },
+  "criteria": {
+    "citation": [
+      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/text-to-speech/convert"
+    ],
+    "correctness": [
+      "Must mention the endpoint path and method",
+      "Must mention voice_id as path parameter",
+      "Must mention text as required body field",
+      "Should mention output_format query parameter",
+      "Should mention xi-api-key authentication"
+    ]
+  }
+}
