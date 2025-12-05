@@ -10,7 +10,14 @@ export function maybePrepareMdxContent(content: string | undefined): PreparedMdx
     if (content == null) {
         return { content: undefined, code_snippets: undefined };
     }
-    return prepareMdxContent(content);
+    try {
+        return prepareMdxContent(content);
+    } catch (e) {
+        // If MDX parsing fails (e.g., OpenAPI descriptions with unescaped curly braces),
+        // fall back to indexing the raw text instead of failing the entire reindex
+        console.error("Failed to parse MDX for search, falling back to plain text:", e);
+        return { content, code_snippets: undefined };
+    }
 }
 
 // TODO: this function needs to be updated to handle markdown snippets imported via mdxjsEsm
