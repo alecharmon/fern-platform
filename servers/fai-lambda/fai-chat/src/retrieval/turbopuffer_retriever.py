@@ -23,6 +23,7 @@ from .turbopuffer_query_filters import (
 )
 
 TURBOPUFFER_INCLUDE_ATTRIBUTES = ["document", "title", "url", "id"]
+MAX_BM25_QUERY_LENGTH = 1024
 
 
 class TurbopufferRetriever(RAGRetriever):
@@ -162,14 +163,15 @@ class TurbopufferRetriever(RAGRetriever):
         namespace = self._get_namespace(query.domain)
         tpuf_ns = self._client.namespace(namespace)
 
+        bm25_query = self._get_bm25_query(query.query)
         result = await tpuf_ns.query(
             top_k=query.top_k,
             include_attributes=TURBOPUFFER_INCLUDE_ATTRIBUTES,
             rank_by=(
                 "Sum",
                 [
-                    ("title", "BM25", query.query),
-                    ("keywords", "BM25", query.query),
+                    ("title", "BM25", bm25_query),
+                    ("keywords", "BM25", bm25_query),
                 ],
             ),
             filters=self._build_filters(query.filters),
@@ -193,6 +195,7 @@ class TurbopufferRetriever(RAGRetriever):
         tpuf_ns = self._client.namespace(namespace)
 
         filters = self._build_filters(query.filters)
+        bm25_query = self._get_bm25_query(query.query)
         multiquery_response = await tpuf_ns.multi_query(
             queries=[
                 {
@@ -207,8 +210,8 @@ class TurbopufferRetriever(RAGRetriever):
                     "rank_by": (
                         "Sum",
                         [
-                            ("title", "BM25", query.query),
-                            ("keywords", "BM25", query.query),
+                            ("title", "BM25", bm25_query),
+                            ("keywords", "BM25", bm25_query),
                         ],
                     ),
                     "filters": filters,
@@ -248,6 +251,15 @@ class TurbopufferRetriever(RAGRetriever):
             return None
 
         return build_turbopuffer_filters(filters)
+
+    def _get_bm25_query(self, query_text: str) -> str:
+        if len(query_text) <= MAX_BM25_QUERY_LENGTH:
+            return query_text
+        truncated = query_text[:MAX_BM25_QUERY_LENGTH]
+        last_space = truncated.rfind(" ")
+        if last_space > MAX_BM25_QUERY_LENGTH // 2:
+            return truncated[:last_space]
+        return truncated
 
     def _parse_turbopuffer_results(self, result: Any) -> list[RetrievedDocument]:
         documents: list[RetrievedDocument] = []

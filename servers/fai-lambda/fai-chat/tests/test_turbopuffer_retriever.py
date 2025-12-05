@@ -378,3 +378,88 @@ class TestTurbopufferRetriever:
 
         for i in range(len(result) - 1):
             assert result[i].score >= result[i + 1].score
+
+    def test_get_bm25_query_under_limit(self, retriever: TurbopufferRetriever) -> None:
+        short_query = "What is Python?"
+        result = retriever._get_bm25_query(short_query)
+        assert result == short_query
+
+    def test_get_bm25_query_at_limit(self, retriever: TurbopufferRetriever) -> None:
+        query_at_limit = "a" * 1024
+        result = retriever._get_bm25_query(query_at_limit)
+        assert result == query_at_limit
+        assert len(result) == 1024
+
+    def test_get_bm25_query_over_limit_truncates_at_word_boundary(self, retriever: TurbopufferRetriever) -> None:
+        words = "word " * 250
+        long_query = words.strip()
+        assert len(long_query) > 1024
+
+        result = retriever._get_bm25_query(long_query)
+
+        assert len(result) <= 1024
+        assert not result.endswith(" ")
+        assert result.endswith("word")
+
+    def test_get_bm25_query_over_limit_no_good_word_boundary(self, retriever: TurbopufferRetriever) -> None:
+        query_with_early_space = "short " + "a" * 1100
+        assert len(query_with_early_space) > 1024
+
+        result = retriever._get_bm25_query(query_with_early_space)
+
+        assert len(result) == 1024
+
+    def test_get_bm25_query_over_limit_no_spaces(self, retriever: TurbopufferRetriever) -> None:
+        no_space_query = "a" * 1500
+        result = retriever._get_bm25_query(no_space_query)
+        assert len(result) == 1024
+
+    async def test_bm25_retrieve_truncates_long_query(self, retriever: TurbopufferRetriever) -> None:
+        long_query = "word " * 300
+        query = RetrievalQuery(
+            query=long_query.strip(),
+            domain="example.com",
+            strategy=RetrievalStrategy.BM25,
+        )
+
+        mock_rows = [MockTurbopufferRow(document="Result", dist=0.9)]
+        mock_namespace = MagicMock()
+        retriever._client.namespace = MagicMock(return_value=mock_namespace)
+        mock_namespace.query = AsyncMock(return_value=MockTurbopufferResult(mock_rows))
+
+        await retriever.retrieve(query)
+
+        call_kwargs = mock_namespace.query.call_args.kwargs
+        rank_by = call_kwargs["rank_by"]
+        bm25_query_used = rank_by[1][0][2]
+        assert len(bm25_query_used) <= 1024
+
+    async def test_hybrid_retrieve_truncates_long_query_for_bm25_only(self, retriever: TurbopufferRetriever) -> None:
+        long_query = "word " * 300
+        query = RetrievalQuery(
+            query=long_query.strip(),
+            domain="example.com",
+            strategy=RetrievalStrategy.HYBRID,
+            top_k=2,
+        )
+
+        mock_multi_response = MockMultiQueryResponse(
+            [
+                MockTurbopufferResult([MockTurbopufferRow(document="semantic doc")]),
+                MockTurbopufferResult([MockTurbopufferRow(document="bm25 doc")]),
+            ]
+        )
+
+        mock_namespace = MagicMock()
+        retriever._client.namespace = MagicMock(return_value=mock_namespace)
+        mock_namespace.multi_query = AsyncMock(return_value=mock_multi_response)
+
+        await retriever.retrieve(query)
+
+        call_kwargs = mock_namespace.multi_query.call_args.kwargs
+        queries = call_kwargs["queries"]
+
+        bm25_query_config = queries[1]
+        bm25_rank_by = bm25_query_config["rank_by"]
+        bm25_query_used = bm25_rank_by[1][0][2]
+        assert len(bm25_query_used) <= 1024
