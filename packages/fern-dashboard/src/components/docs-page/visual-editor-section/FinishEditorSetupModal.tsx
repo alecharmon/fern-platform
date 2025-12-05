@@ -2,11 +2,12 @@
 
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import type { ValidateGithubRepoAccessResponse } from "@/app/api/validate-github-repo-access/handler";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { useConfetti } from "@/hooks/useConfetti";
-import { useConnectGithubRepo } from "@/hooks/useConnectGithubRepo";
-import { useValidateGithubRepo } from "@/hooks/useValidateGithubRepo";
+import { useConnectGitRepo } from "@/hooks/useConnectGitRepo";
+import { useValidateGitRepo } from "@/hooks/useValidateGitRepo";
 import type { DocsUrl } from "@/utils/types";
 import { Button } from "../../ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogTrigger } from "../../ui/dialog";
@@ -50,12 +51,12 @@ function EditorSetupModalImpl({
 }: {
     isLoadingInitialData: boolean;
 } & FinishEditorSetupModalProps) {
-    const [githubUrl, setGithubUrl] = useState<string>();
+    const [gitUrl, setGitUrl] = useState<string>();
 
     const [open, setOpen] = useState(false);
     const { startConfetti } = useConfetti();
 
-    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl ?? "");
+    const { owner, repo, provider, path } = parseGitUrl(gitUrl ?? "");
     const shouldEnableAccessCheck = open && !!owner && !!repo;
 
     const {
@@ -63,12 +64,13 @@ function EditorSetupModalImpl({
         loading: isLoadingValidation,
         fetching: isFetchingValidation,
         refetch: refetchAccessCheck
-    } = useValidateGithubRepo({
+    } = useValidateGitRepo({
         enabled: shouldEnableAccessCheck,
         docsUrl,
         owner: owner ?? undefined,
-        repo: repo ?? undefined,
-        refetchInterval: shouldEnableAccessCheck ? 3000 : false
+        repo: (provider === "gitlab" ? (path ?? repo) : repo) ?? undefined,
+        refetchInterval: shouldEnableAccessCheck && provider === "github" ? 3000 : false,
+        variant: provider === "unknown" ? "github" : provider
     });
 
     // Manage the setup state machine
@@ -81,26 +83,26 @@ function EditorSetupModalImpl({
         handleReset
     } = useEditorSetupState({
         isOpen: open,
-        isRepoConnected: !!githubUrl,
-        isAppInstalled: accessCheckResult?.appInstalled === true,
+        isRepoConnected: !!gitUrl,
+        isAppInstalled: accessCheckResult?.appInstalled ?? true,
         isLoadingInitialData: isLoadingValidation || isLoadingInitialData,
         hasValidationError: !!accessCheckResult && !accessCheckResult.ok
     });
 
     const onReset = () => {
-        setGithubUrl(undefined);
+        setGitUrl(undefined);
         handleReset();
     };
 
     // Wrap handleRepoConnected to capture the GitHub URL
     const handleRepoConnected = useCallback(
         (hasAppInstalled: boolean, newGithubUrl?: string) => {
-            if (newGithubUrl && newGithubUrl !== githubUrl) {
-                setGithubUrl(newGithubUrl);
+            if (newGithubUrl && newGithubUrl !== gitUrl) {
+                setGitUrl(newGithubUrl);
             }
             handleRepoConnectedBase(hasAppInstalled);
         },
-        [handleRepoConnectedBase, githubUrl]
+        [handleRepoConnectedBase, gitUrl]
     );
 
     const onSuccess = useCallback(() => {
@@ -118,7 +120,7 @@ function EditorSetupModalImpl({
 
     // Centralized hook for connecting GitHub repo
     // All success paths in the modal use this hook's callbacks
-    const { connectRepo } = useConnectGithubRepo({
+    const { connectRepo } = useConnectGitRepo({
         docsUrl,
         showSuccessToast: false,
         onSuccess: () => {
@@ -146,10 +148,10 @@ function EditorSetupModalImpl({
                 <FinishEditorSetupModalContent
                     state={state}
                     docsUrl={docsUrl}
-                    pendingGithubUrl={githubUrl}
+                    pendingGithubUrl={gitUrl}
                     orgName={orgName}
                     isLoadingInitialData={isLoadingValidation || isLoadingInitialData}
-                    accessCheckResult={accessCheckResult ?? undefined}
+                    accessCheckResult={(accessCheckResult as ValidateGithubRepoAccessResponse) ?? undefined}
                     isAccessCheckLoading={isLoadingValidation}
                     isAccessCheckFetching={isFetchingValidation}
                     refetchAccessCheck={refetchAccessCheck}

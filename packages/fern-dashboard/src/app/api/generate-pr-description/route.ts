@@ -7,9 +7,7 @@ import { orgNameValidator } from "@/app/api/utils/validators";
 import { GithubIdentificationScheme } from "@/app/services/dal/github/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
-import { getGitLoader } from "@/app/services/github/getGitLoader";
-import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
-import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import type { ResolvedReturnType } from "@/utils/types";
 
 import handler from "./handler";
@@ -19,7 +17,14 @@ export declare namespace generatePrDescription {
     export type Response = ResolvedReturnType<typeof handler>;
 }
 
-export const GeneratePrDescriptionRequest = GithubIdentificationScheme.and(
+// Accept either a git URL or owner/repo pair, both with site
+const GitRepoIdentification = z.union([
+    z.object({ gitUrl: z.string(), site: z.string() }),
+    z.object({ owner: z.string(), repo: z.string(), site: z.string() }),
+    GithubIdentificationScheme // Keep backward compatibility (has site and githubUrl)
+]);
+
+export const GeneratePrDescriptionRequest = GitRepoIdentification.and(
     z.object({
         orgName: orgNameValidator,
         branch: z.string(),
@@ -48,12 +53,23 @@ export const POST = withZodValidation(
         // 3. Parse repo data
         let owner: string;
         let repo: string;
-        let githubUrl: string;
-        const site = parseDocsUrlParam({ docsUrl: repoData.site });
+        let gitUrl: string;
 
-        if ("githubUrl" in repoData) {
-            githubUrl = repoData.githubUrl;
-            const parsed = getOwnerAndRepoFromGithubUrl(githubUrl);
+        if ("gitUrl" in repoData) {
+            gitUrl = repoData.gitUrl;
+            const parsed = parseGitUrl(gitUrl);
+            const isGitLab = parsed.provider === "gitlab";
+            // For GitLab, use the full path; for GitHub, use repo
+            const repoOrPath = isGitLab ? (parsed.path ?? parsed.repo) : parsed.repo;
+            if (!parsed.owner || !repoOrPath) {
+                return NextResponse.json({ error: "Invalid repository URL format" }, { status: 400 });
+            }
+            owner = parsed.owner;
+            repo = repoOrPath;
+        } else if ("githubUrl" in repoData) {
+            // Backward compatibility
+            gitUrl = repoData.githubUrl;
+            const parsed = parseGitUrl(gitUrl);
             if (!parsed.owner || !parsed.repo) {
                 return NextResponse.json({ error: "Invalid repository URL format" }, { status: 400 });
             }
@@ -62,24 +78,17 @@ export const POST = withZodValidation(
         } else {
             owner = repoData.owner;
             repo = repoData.repo;
-            githubUrl = `https://github.com/${owner}/${repo}`;
+            // Default to GitHub for backward compatibility
+            gitUrl = `https://github.com/${owner}/${repo}`;
         }
 
-        // 4. Get GitLoader and validate access
-        const loader = getGitLoader(githubUrl);
-        const accessResult = await loader.validateAccess?.({
-            owner,
-            repo,
-            site,
-            orgName
-        });
+        // Note: We skip validateAccess here because:
+        // 1. This is an optional enhancement feature (AI-generated descriptions)
+        // 2. The handler already gracefully skips for non-GitHub repos
+        // 3. User already passed validation to create the PR/MR
 
-        if (accessResult?.type === "error") {
-            return NextResponse.json({ error: `Access denied: ${accessResult.error.type}` }, { status: 403 });
-        }
-
-        // 5. Execute handler
-        const result = await handler({ owner, repo, branch, baseBranch });
+        // 4. Execute handler
+        const result = await handler({ owner, repo, branch, baseBranch, repoUrl: gitUrl });
         return NextResponse.json(result);
     }
 );

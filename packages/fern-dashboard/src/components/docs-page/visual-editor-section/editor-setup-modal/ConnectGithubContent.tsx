@@ -2,16 +2,17 @@
 
 import { useCallback, useState } from "react";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { getOwnerAndRepoFromGithubUrl, normalizeGithubUrl } from "@/app/services/github/github";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
+import { normalizeGithubUrl } from "@/app/services/github/github";
 import { DialogBody, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { DocsUrl } from "@/utils/types";
-import { ErrorEditSourceToast, ErrorInvalidGithubUrlToast } from "../../../editor/EditorToasts";
+import { ErrorEditSourceToast, ErrorInvalidGitUrlToast } from "../../../editor/EditorToasts";
 import { GithubRepoInput } from "../../GithubRepoInput";
 
 interface ConnectGithubContentProps {
     docsUrl: DocsUrl;
     onRepoConnected: (hasAppInstalled: boolean, githubUrl?: string) => void;
-    connectRepo: (params: { canonicalUrl: string }) => Promise<{ success: boolean; githubUrl: string | undefined }>;
+    connectRepo: (params: { canonicalUrl: string }) => Promise<{ success: boolean; gitUrl: string | undefined }>;
 }
 
 export function ConnectGithubContent({ docsUrl, onRepoConnected, connectRepo }: ConnectGithubContentProps) {
@@ -21,15 +22,26 @@ export function ConnectGithubContent({ docsUrl, onRepoConnected, connectRepo }: 
 
     const handleConnectRepo = useCallback(
         async (canonicalUrl: string) => {
-            const normalized = normalizeGithubUrl(canonicalUrl);
-            if (!normalized.isValidShape || !normalized.canonicalUrl) {
-                ErrorInvalidGithubUrlToast();
+            const parsedUrl = parseGitUrl(canonicalUrl);
+            const isGitHub = parsedUrl.provider === "github";
+            const isGitLab = parsedUrl.provider === "gitlab";
+
+            if (!isGitHub && !isGitLab) {
+                ErrorInvalidGitUrlToast();
                 return;
             }
 
-            const { owner, repo } = getOwnerAndRepoFromGithubUrl(normalized.canonicalUrl);
+            const normalized = isGitHub ? normalizeGithubUrl(canonicalUrl) : null;
+            if (isGitHub && (!normalized?.isValidShape || !normalized?.canonicalUrl)) {
+                ErrorInvalidGitUrlToast();
+                return;
+            }
+
+            const owner = parsedUrl.owner;
+            const repo = isGitHub ? (normalized?.repo ?? parsedUrl.repo) : parsedUrl.repo;
+
             if (!owner || !repo) {
-                ErrorInvalidGithubUrlToast();
+                ErrorInvalidGitUrlToast();
                 return;
             }
 
@@ -42,18 +54,18 @@ export function ConnectGithubContent({ docsUrl, onRepoConnected, connectRepo }: 
                 });
 
                 if (!validation?.appInstalled) {
-                    onRepoConnected(false, normalized.canonicalUrl);
+                    onRepoConnected(false, canonicalUrl);
                     return;
                 }
 
                 if (!validation.ok) {
-                    onRepoConnected(true, normalized.canonicalUrl);
+                    onRepoConnected(true, canonicalUrl);
                     return;
                 }
 
                 setPhase("saving");
-                await connectRepo({ canonicalUrl: normalized.canonicalUrl });
-                onRepoConnected(true, normalized.canonicalUrl);
+                await connectRepo({ canonicalUrl: isGitHub ? (normalized?.canonicalUrl ?? "") : canonicalUrl });
+                onRepoConnected(true, isGitHub ? (normalized?.canonicalUrl ?? "") : canonicalUrl);
             } catch (error) {
                 console.error("Failed to validate or connect repo", error);
                 ErrorEditSourceToast();

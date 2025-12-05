@@ -6,12 +6,12 @@ import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
 import { parseNextRequestBody } from "../utils/parseNextRequestBody";
 import handler from "./handler";
 
-export declare namespace getDocsGithubUrl {
-    export type Request = z.infer<typeof GetDocsGithubUrlRequest>;
+export declare namespace getDocsGitUrl {
+    export type Request = z.infer<typeof getDocsGitUrlRequest>;
     export type Response = ResolvedReturnType<typeof handler>;
 }
 
-const GetDocsGithubUrlRequest = z.object({
+const getDocsGitUrlRequest = z.object({
     docsUrl: z.string()
 });
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
     const { token } = maybeSessionData.data;
 
-    const parsedBody = await parseNextRequestBody(req, GetDocsGithubUrlRequest);
+    const parsedBody = await parseNextRequestBody(req, getDocsGitUrlRequest);
     if (parsedBody.errorResponse != null) {
         return parsedBody.errorResponse;
     }

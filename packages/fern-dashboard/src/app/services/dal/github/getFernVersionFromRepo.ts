@@ -2,12 +2,12 @@ import "server-only";
 
 import type { FernConfigJsonErrors } from "@fern-api/docs-loader";
 
-import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
+import { getGitLoader } from "@/app/services/github/getGitLoader";
 import type { DocsUrl } from "@/utils/types";
-import { getCachedGitHubLoader } from "../../github/cachedGitHubLoader";
 
 export type GetFernVersionFromRepoError =
-    | { type: "MALFORMED_GITHUB_URL"; url: string }
+    | { type: "MALFORMED_GIT_URL"; url: string }
     | { type: "FERN_BOT_NOT_INSTALLED" }
     | FernConfigJsonErrors;
 
@@ -15,20 +15,22 @@ export type GetFernVersionFromRepoResult =
     | { ok: true; version: string }
     | { ok: false; error: GetFernVersionFromRepoError };
 
-export async function getFernVersionFromRepo(
-    githubUrl: string,
-    docsUrl: DocsUrl
-): Promise<GetFernVersionFromRepoResult> {
-    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
-    if (owner == null || repo == null) {
+export async function getFernVersionFromRepo(repoUrl: string, docsUrl: DocsUrl): Promise<GetFernVersionFromRepoResult> {
+    const parsed = parseGitUrl(repoUrl);
+    const isGitLab = parsed.provider === "gitlab";
+
+    // For GitLab, use the full path; for GitHub, use repo
+    const repoOrPath = isGitLab ? (parsed.path ?? parsed.repo) : parsed.repo;
+
+    if (parsed.owner == null || repoOrPath == null) {
         return {
             ok: false,
-            error: { type: "MALFORMED_GITHUB_URL", url: githubUrl }
+            error: { type: "MALFORMED_GIT_URL", url: repoUrl }
         };
     }
 
-    const loader = await getCachedGitHubLoader(githubUrl);
-    const fernConfigResult = await loader.getFernConfigJson(owner, repo, docsUrl);
+    const loader = getGitLoader(repoUrl);
+    const fernConfigResult = await loader.getFernConfigJson(parsed.owner, repoOrPath, docsUrl);
 
     if (fernConfigResult.type !== "ok") {
         return {

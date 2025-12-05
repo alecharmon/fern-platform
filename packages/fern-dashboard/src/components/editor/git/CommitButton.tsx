@@ -52,7 +52,7 @@ export function CommitButtonWithGitHub({
 }) {
     const orgName = useOrgName();
     const { branch } = useBranch();
-    const { owner, repo, baseBranch } = useGitHubRepo();
+    const { owner, repo, baseBranch, gitUrl } = useGitHubRepo();
     const { gitPrUrl, setPrUrl, prTitle, refetchPrData, site } = useGitPrInfo();
     const isEditingDisabled = useEditingDisabled();
 
@@ -95,7 +95,8 @@ export function CommitButtonWithGitHub({
                 site,
                 branch,
                 message: DEFAULT_COMMIT_MESSAGE,
-                files: files.forCommit
+                files: files.forCommit,
+                gitUrl
             });
 
             // If commit fails because branch doesn't exist, try creating it first
@@ -112,7 +113,8 @@ export function CommitButtonWithGitHub({
                     owner,
                     repo,
                     branch,
-                    baseBranch
+                    baseBranch,
+                    gitUrl
                 });
 
                 if (branchResult.success) {
@@ -124,7 +126,8 @@ export function CommitButtonWithGitHub({
                         site,
                         branch,
                         message: DEFAULT_COMMIT_MESSAGE,
-                        files: files.forCommit
+                        files: files.forCommit,
+                        gitUrl
                     });
                 } else {
                     console.error("[CommitButton] Failed to create branch:", branchResult.error);
@@ -161,7 +164,8 @@ export function CommitButtonWithGitHub({
                     repo,
                     baseBranch,
                     title: prTitle == null ? undefined : prTitle,
-                    onAiGenerationComplete: refetchPrData
+                    onAiGenerationComplete: refetchPrData,
+                    gitUrl
                 });
                 if (newPrUrl) {
                     setPrUrl(newPrUrl);
@@ -190,7 +194,8 @@ export function CommitButtonWithGitHub({
         handleCommitSuccess,
         commitMutation,
         createBranchMutation,
-        onShowCelebrationModal
+        onShowCelebrationModal,
+        gitUrl
     ]);
 
     const commitDisabledReason = useMemo(() => {

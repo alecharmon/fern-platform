@@ -1,7 +1,7 @@
 "use client";
 
 import { GitPullRequest, Loader2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
@@ -99,7 +99,7 @@ function PRTitleEditorUI({
                             <TeleprompterTextOnHover containerClassName="flex-1">
                                 {title || "Click to edit PR title"}
                             </TeleprompterTextOnHover>
-                            {loading && <Loader2 className="ml-2 size-4 flex-shrink-0 animate-spin" />}
+                            {loading && <Loader2 className="ml-2 size-4 shrink-0 animate-spin" />}
                         </div>
                     </button>
                 </div>
@@ -114,6 +114,13 @@ function PRTitleEditorInternal({ className, hideIcon, owner, repo, branch, gitPr
     const orgName = useOrgName();
     const [localTitle, setLocalTitle] = useState<string>(serverTitle ?? "");
     const [isSaving, setIsSaving] = useState(false);
+
+    // Sync localTitle with serverTitle when it changes
+    useEffect(() => {
+        if (serverTitle != null) {
+            setLocalTitle(serverTitle);
+        }
+    }, [serverTitle]);
 
     const handleSave = useCallback(
         async (newTitle: string) => {

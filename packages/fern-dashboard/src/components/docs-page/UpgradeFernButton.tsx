@@ -17,7 +17,7 @@ type UpgradeFernButtonVariant = "outline" | "black";
 interface UpgradeFernButtonProps {
     orgName: Auth0OrgName;
     docsUrl: DocsUrl;
-    githubUrl: string;
+    gitUrl: string;
     currentVersion: string;
     latestVersion: string;
     baseBranch: string;
@@ -33,7 +33,7 @@ interface UpgradeFernButtonProps {
 export function UpgradeFernButton({
     orgName,
     docsUrl,
-    githubUrl,
+    gitUrl,
     currentVersion,
     latestVersion,
     baseBranch,
@@ -50,7 +50,7 @@ export function UpgradeFernButton({
     // Relies on visibility change events to detect upgrades when user returns to dashboard
     const { startPolling } = useBackgroundPoller(
         async () => {
-            const result = await checkVersionUpgradeAction(githubUrl, docsUrl, baseBranch, latestVersion);
+            const result = await checkVersionUpgradeAction(gitUrl, docsUrl, baseBranch, latestVersion);
             return result.upgraded; // Return true to stop polling
         },
         {
@@ -82,7 +82,7 @@ export function UpgradeFernButton({
             const result = await upgradeFernVersionAction(
                 orgName,
                 docsUrl,
-                githubUrl,
+                gitUrl,
                 currentVersion,
                 latestVersion,
                 baseBranch

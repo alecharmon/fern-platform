@@ -1,5 +1,5 @@
 import type { generatePrDescription } from "@/app/api/generate-pr-description/route";
-import type { getDocsGithubUrl } from "@/app/api/get-docs-github-url/route";
+import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
 import type { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
 import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
@@ -11,6 +11,7 @@ import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generat
 import type { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
 import type { updatePrTitle } from "@/app/api/update-pr-title/route";
 import type { ValidateGithubRepoAccess } from "@/app/api/validate-github-repo-access/route";
+import type { ValidateGitlabRepoAccess } from "@/app/api/validate-gitlab-repo-access/route";
 
 export const DashboardApiClient = {
     getMyOrganizations: () => typedFetch<getMyOrganizations.Response>("/api/get-my-organizations"),
@@ -20,8 +21,8 @@ export const DashboardApiClient = {
         typedFetch<getOrgMembers.Response>("/api/get-org-members", request),
     getDocsUrlOwner: (request: getDocsUrlOwner.Request) =>
         typedFetch<getDocsUrlOwner.Response>("/api/get-docs-url-owner", request),
-    getDocsGithubUrl: (request: getDocsGithubUrl.Request) =>
-        typedFetch<getDocsGithubUrl.Response>("/api/get-docs-github-url", request),
+    getDocsGitUrl: (request: getDocsGitUrl.Request) =>
+        typedFetch<getDocsGitUrl.Response>("/api/get-docs-github-url", request),
     postCreatePr: (request: postCreatePr.Request) =>
         typedFetch<postCreatePr.Response>("/api/post-git-create-pr", request),
     generatePrDescription: (request: generatePrDescription.Request) =>
@@ -32,6 +33,8 @@ export const DashboardApiClient = {
         typedFetch<validateGithubBranch.Response>("/api/get-validate-github-branch", request),
     validateGithubRepoAccess: (request: ValidateGithubRepoAccess.Request) =>
         typedFetch<ValidateGithubRepoAccess.Response>("/api/validate-github-repo-access", request),
+    validateGitlabRepoAccess: (request: ValidateGitlabRepoAccess.Request) =>
+        typedFetch<ValidateGitlabRepoAccess.Response>("/api/validate-gitlab-repo-access", request),
     updatePrTitle: (request: updatePrTitle.Request) =>
         typedFetch<updatePrTitle.Response>("/api/update-pr-title", request),
     generateSignedUploadUrl: (request: generateSignedUploadUrl.Request) =>

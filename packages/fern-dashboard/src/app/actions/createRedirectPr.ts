@@ -70,7 +70,7 @@ export async function createRedirectPrAction(
     const loader = getGitLoader(githubUrl);
 
     // 5. Validate repository access
-    const accessResult = await loader.validateAccess?.({
+    const accessResult = await loader.validateAccess({
         owner,
         repo,
         site: docsUrl,

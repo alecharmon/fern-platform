@@ -24,18 +24,18 @@ import { cache } from "react";
 
 export const getFernVersionUpdateInfo = cache(
     async (
-        githubUrl: string,
+        gitUrl: string,
         docsUrl: DocsUrl,
         baseBranch: string
     ): Promise<
         { ok: true; result: GetFernVersionUpdateInfoResult } | { ok: false; error: GetFernVersionUpdateInfoError }
     > => {
-        if (githubUrl == null || baseBranch == null || docsUrl == null) {
+        if (gitUrl == null || baseBranch == null || docsUrl == null) {
             return { ok: false, error: { type: "MALFORMED_INPUT" } };
         }
 
         const [fernVersionResult, latestVersion] = await Promise.all([
-            getFernVersionFromRepo(githubUrl, docsUrl),
+            getFernVersionFromRepo(gitUrl, docsUrl),
             getLatestFernCliVersion()
         ]);
 
@@ -51,7 +51,7 @@ export const getFernVersionUpdateInfo = cache(
         // Show version info if any update is available
         if (needsUpgrade) {
             // Check if there's already an existing upgrade PR
-            existingPr = await checkUpgradePrStatus(githubUrl, fernVersionResult.version, latestVersion, baseBranch);
+            existingPr = await checkUpgradePrStatus(gitUrl, fernVersionResult.version, latestVersion, baseBranch);
         }
         return {
             ok: true,

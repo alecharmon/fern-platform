@@ -14,6 +14,8 @@ import type {
     GetDocsYmlResult,
     GetFernConfigJsonResult,
     GetFernProjectResult,
+    GetPullRequestForBranchRequest,
+    GetPullRequestForBranchResult,
     GitLoader,
     UpdatePullRequestRequest,
     UpdatePullRequestResult,
@@ -23,30 +25,18 @@ import type {
     ValidateAccessResult
 } from "@fern-api/docs-loader";
 import type { Octokit } from "@octokit/core";
-import yaml from "js-yaml";
 import { revalidateTag, unstable_cache } from "next/cache";
-import z from "zod";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
 import { getDemoCreationBotOctokit, getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
-import { getOwnerAndRepoFromGithubUrl } from "./github";
+import {
+    extractReferencedYmlPaths,
+    getOwnerAndRepoFromGithubUrl,
+    parseFernConfig,
+    parseUrlsFromDocsYml,
+    stripAndSanitizeUrl
+} from "../git-common";
 import type { GITHUB_FILE_MODE } from "./types";
-
-// Types and interfaces
-interface DocsYmlConfig {
-    instances?: {
-        url: string;
-        ["custom-domain"]?: string | string[];
-    }[];
-    products?: {
-        path?: string;
-        [key: string]: any;
-    }[];
-    versions?: {
-        path?: string;
-        [key: string]: any;
-    }[];
-}
 
 export type GitHubAuthMode = "fern-bot" | "demo-creation-bot";
 
@@ -199,80 +189,6 @@ export class GitHubLoader implements GitLoader {
         })();
     }
 
-    /**
-     * Parses a docs.yml YAML content and extracts the list of URLs from the instances section
-     */
-    private parseUrlsFromDocsYml(yamlContent: string): string[] {
-        try {
-            const config = yaml.load(yamlContent) as DocsYmlConfig;
-            if (!config?.instances || !Array.isArray(config.instances)) {
-                return [];
-            }
-
-            return config.instances
-                .filter(
-                    (instance): instance is { url: string; "custom-domain"?: string | string[] } =>
-                        typeof instance === "object" &&
-                        instance != null &&
-                        "url" in instance &&
-                        typeof instance.url === "string"
-                )
-                .flatMap((instance) => {
-                    const urls: string[] = [instance.url];
-
-                    if ("custom-domain" in instance && instance["custom-domain"]) {
-                        const customDomain = instance["custom-domain"];
-
-                        // Handle both string and array formats
-                        if (typeof customDomain === "string") {
-                            urls.push(customDomain);
-                        } else if (Array.isArray(customDomain)) {
-                            // Filter out non-string values and add all custom domains
-                            urls.push(...customDomain.filter((domain): domain is string => typeof domain === "string"));
-                        }
-                    }
-
-                    return urls;
-                });
-        } catch (error) {
-            console.error("Failed to parse YAML content:", error);
-            return [];
-        }
-    }
-
-    /**
-     * Extracts all referenced yml file paths from products and versions
-     */
-    private extractReferencedYmlPaths(yamlContent: string): string[] {
-        try {
-            const config = yaml.load(yamlContent) as DocsYmlConfig;
-            const paths: string[] = [];
-
-            // Extract paths from products
-            if (config?.products && Array.isArray(config.products)) {
-                for (const product of config.products) {
-                    if (product?.path && typeof product.path === "string") {
-                        paths.push(product.path);
-                    }
-                }
-            }
-
-            // Extract paths from versions
-            if (config?.versions && Array.isArray(config.versions)) {
-                for (const version of config.versions) {
-                    if (version?.path && typeof version.path === "string") {
-                        paths.push(version.path);
-                    }
-                }
-            }
-
-            return paths;
-        } catch (error) {
-            console.error("Failed to parse YAML content for file references:", error);
-            return [];
-        }
-    }
-
     private async getRepository(owner: string, repo: string) {
         const fetchRepository = async () => {
             const octokit = await this.getOctokit();
@@ -407,7 +323,7 @@ export class GitHubLoader implements GitLoader {
             const docsYmlContent = docsYmlContents[i];
 
             if (docsYmlContent && project) {
-                const urls = this.parseUrlsFromDocsYml(docsYmlContent);
+                const urls = parseUrlsFromDocsYml(docsYmlContent);
                 console.debug(`[getFernProjectBySite] Found URLs: ${urls}`);
                 allFoundSites.push(...urls);
 
@@ -529,7 +445,7 @@ export class GitHubLoader implements GitLoader {
         docsYmlMap.set("docs.yml", mainDocsYmlContent.result);
 
         // Extract referenced yml file paths
-        const referencedPaths = this.extractReferencedYmlPaths(mainDocsYmlContent.result);
+        const referencedPaths = extractReferencedYmlPaths(mainDocsYmlContent.result);
 
         // Get the full path and directory of the main docs.yml file so we can resolve referenced file paths
         const mainDocsYmlPath = mainDocsYmlContent.metadata.path;
@@ -614,26 +530,13 @@ export class GitHubLoader implements GitLoader {
             };
         }
 
-        let parsedContent: object;
-        try {
-            parsedContent = JSON.parse(content);
-        } catch (error) {
+        const maybeConfig = parseFernConfig(content);
+        if (!maybeConfig) {
             return {
                 type: "error",
                 error: {
                     type: "FERN_CONFIG_JSON_MALFORMED",
-                    parsingErrorMessage: error instanceof Error ? error.message : String(error)
-                }
-            };
-        }
-
-        const maybeConfig = fernConfigSchema.safeParse(parsedContent);
-        if (!maybeConfig.success) {
-            return {
-                type: "error",
-                error: {
-                    type: "FERN_CONFIG_JSON_MALFORMED",
-                    parsingErrorMessage: maybeConfig.error.message
+                    parsingErrorMessage: "Failed to parse fern.config.json"
                 }
             };
         }
@@ -641,7 +544,7 @@ export class GitHubLoader implements GitLoader {
         return {
             type: "ok",
             result: {
-                ...maybeConfig.data,
+                ...maybeConfig,
                 pathToFernConfigJson
             }
         };
@@ -1459,22 +1362,72 @@ export class GitHubLoader implements GitLoader {
             };
         }
     }
-}
 
-const fernConfigSchema = z.object({
-    organization: z.string(),
-    version: z.string()
-});
+    /**
+     * Gets PR information for a branch.
+     */
+    async getPullRequestForBranch(request: GetPullRequestForBranchRequest): Promise<GetPullRequestForBranchResult> {
+        const octokit = await this.getOctokit();
+        if (!octokit) {
+            return {
+                type: "error",
+                error: "Failed to get GitHub client"
+            };
+        }
 
-/**
- * Strips protocol prefix and normalizes URL for comparison by removing protocol,
- * converting to lowercase, and sanitizing to keep only safe URL characters.
- */
-function stripAndSanitizeUrl(str: string): string {
-    // Remove http:// or https:// (case-insensitive), lowercase, then allow only specific characters
-    const withoutProtocol = str.replace(/^https?:\/\//i, "");
-    const lowercased = withoutProtocol.toLowerCase();
-    return lowercased.replace(/[^a-z0-9\s\-_.,!?@#$%^&*()+=[\]{};:'"<>/\\|`~%]/g, "");
+        try {
+            // Find associated PRs for the branch
+            const response = await octokit.request("GET /repos/{owner}/{repo}/pulls", {
+                owner: request.owner,
+                repo: request.repo,
+                head: `${request.owner}:${request.branch}`,
+                base: request.baseBranch,
+                state: "all"
+            });
+
+            if (response.data.length === 0) {
+                return {
+                    type: "error",
+                    error: "No associated PRs found for this branch"
+                };
+            }
+
+            const openPrs = response.data.filter((pr) => pr.state === "open");
+
+            if (openPrs.length > 1) {
+                return {
+                    type: "error",
+                    error: "Multiple open PRs found for this branch"
+                };
+            }
+
+            const pr = openPrs[0] || response.data[0];
+
+            if (!pr) {
+                return {
+                    type: "error",
+                    error: "No PR found for this branch"
+                };
+            }
+
+            return {
+                type: "ok",
+                title: pr.title,
+                prNumber: pr.number,
+                prUrl: pr.html_url,
+                status: pr.state,
+                draft: pr.draft || false,
+                merged: pr.merged_at != null,
+                nodeId: pr.node_id
+            };
+        } catch (error) {
+            console.error("Failed to fetch PR for branch", error);
+            return {
+                type: "error",
+                error: error instanceof Error ? error.message : "Unknown error occurred"
+            };
+        }
+    }
 }
 
 /**

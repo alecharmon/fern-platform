@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ValidateGithubRepoAccessResponse } from "@/app/api/validate-github-repo-access/handler";
 import { Button } from "@/components/ui/button";
 import { DialogBody, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import type { ConnectGithubRepoParams } from "@/hooks/useConnectGithubRepo";
+import type { ConnectGitRepoParams } from "@/hooks/useConnectGitRepo";
 import { Note } from "../../Note";
 import { VisualEditorValidationErrorHandler } from "../VisualEditorValidationErrorHandler";
 
@@ -15,7 +15,7 @@ interface ConfigurationCheckContentProps {
     accessCheckResult?: ValidateGithubRepoAccessResponse | null;
     isCheckingAccess: boolean;
     refetchAccessCheck: () => Promise<unknown>;
-    connectRepo: (params: ConnectGithubRepoParams) => Promise<{ success: boolean; githubUrl: string | undefined }>;
+    connectRepo: (params: ConnectGitRepoParams) => Promise<{ success: boolean; gitUrl: string | undefined }>;
 }
 
 export function ConfigurationCheckContent({

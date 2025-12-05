@@ -1,4 +1,4 @@
-import type { getDocsGithubUrl } from "@/app/api/get-docs-github-url/route";
+import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
 import type { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
 import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import type { getOrgMembers } from "@/app/api/get-org-members/route";
@@ -15,7 +15,7 @@ export const ReactQueryKey = {
     myOrganizations: () => queryKey<getMyOrganizations.Response>("my-orgs"),
     docsUrlOwner: (docsUrl: DocsUrl) => queryKey<getDocsUrlOwner.Response>("docs-url-owner", docsUrl),
     orgSvgLogo: (svgUrl: string) => queryKey<string>("org-svg", svgUrl),
-    docsGithubUrl: (docsUrl: DocsUrl) => queryKey<getDocsGithubUrl.Response>("github-source-repo", docsUrl)
+    docsGithubUrl: (docsUrl: DocsUrl) => queryKey<getDocsGitUrl.Response>("github-source-repo", docsUrl)
 } as const;
 
 function queryKey<T>(...key: string[]) {

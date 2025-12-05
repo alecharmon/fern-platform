@@ -5,14 +5,15 @@ import type { DocsUrl } from "@/utils/types";
 import { Note } from "../Note";
 import { UpgradeFernButton } from "../UpgradeFernButton";
 
+// TODO: This does not work for GitLab repos.
 export async function CriticalUpdateWarning({
     orgName,
     docsUrl,
-    githubUrl: inputGithubUrl
+    gitUrl: inputGitUrl
 }: {
     orgName: Auth0OrgName;
     docsUrl: DocsUrl;
-    githubUrl?: string;
+    gitUrl?: string;
     baseBranch?: string;
 }) {
     const metadataResult = await getDocsGithubMetadata(docsUrl);
@@ -23,11 +24,11 @@ export async function CriticalUpdateWarning({
     if (!baseBranch) {
         return null;
     }
-    const githubUrl = inputGithubUrl ?? metadataResult.githubUrl;
-    if (!githubUrl) {
+    const gitUrl = inputGitUrl ?? metadataResult.githubUrl;
+    if (!gitUrl) {
         return null;
     }
-    const fernVersionInfoResult = await getFernVersionUpdateInfo(githubUrl, docsUrl, baseBranch);
+    const fernVersionInfoResult = await getFernVersionUpdateInfo(gitUrl, docsUrl, baseBranch);
 
     const fernVersionInfo = fernVersionInfoResult.ok ? fernVersionInfoResult.result : undefined;
 
@@ -48,7 +49,7 @@ export async function CriticalUpdateWarning({
                     variant="black"
                     orgName={orgName}
                     docsUrl={docsUrl}
-                    githubUrl={githubUrl}
+                    gitUrl={gitUrl}
                     currentVersion={fernVersionInfo.current}
                     latestVersion={fernVersionInfo.latest}
                     baseBranch={baseBranch}

@@ -3,7 +3,7 @@ import "server-only";
 import { Suspense } from "react";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
+import { getDocsGitUrl } from "@/app/services/dal/github/getDocsGitUrl";
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
 import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
 import type { DocsUrl } from "@/utils/types";
@@ -24,10 +24,8 @@ export async function VisualEditorSection({
     session: Auth0SessionData;
     orgName: Auth0OrgName;
 }) {
-    // Only fetch the GitHub URL (fast, cached operation)
-    const githubUrlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
-
-    const githubUrl = githubUrlResult.success ? githubUrlResult.githubUrl : undefined;
+    // Only fetch the Git URL (fast, cached operation)
+    const gitUrlResult = await getDocsGitUrl(docsUrl, session.accessToken);
 
     const isPreviewModeEnabled = await isFeatureFlagEnabledForUser(
         PosthogFeatureFlag.ENABLE_FERN_EDITOR_PREVIEW,
@@ -36,14 +34,14 @@ export async function VisualEditorSection({
     );
 
     // Handle early errors (missing GitHub URL)
-    if (!githubUrlResult.success) {
+    if (!gitUrlResult.success) {
         return <VisualEditorContent docsUrl={docsUrl} session={session} buttonDisabled={!isPreviewModeEnabled} />;
     }
 
     // Load the content with full validation via Suspense
     return (
         <Suspense fallback={<VisualEditorContentSkeleton />}>
-            <VisualEditorContentAsync docsUrl={docsUrl} session={session} orgName={orgName} githubUrl={githubUrl} />
+            <VisualEditorContentAsync docsUrl={docsUrl} session={session} orgName={orgName} />
         </Suspense>
     );
 }

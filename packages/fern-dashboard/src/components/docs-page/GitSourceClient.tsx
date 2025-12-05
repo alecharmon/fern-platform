@@ -4,11 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, Pencil } from "lucide-react";
 import { useState } from "react";
 
-import type { getDocsGithubUrl } from "@/app/api/get-docs-github-url/route";
-import type { GithubRepoValidationResult } from "@/app/services/dal/github/validators";
+import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
+import type { GitRepoValidationResult } from "@/app/services/dal/github/validators";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
-import type { GithubSourceRepo } from "@/app/services/github/types";
+import type { GitSourceRepo } from "@/app/services/github/types";
 import { ReactQueryKey } from "@/state/queryKeys";
 import type { DocsUrl } from "@/utils/types";
 
@@ -16,38 +16,38 @@ import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import { ConnectGithubRepoButton } from "./ConnectGithubRepoButton";
-import { SetGithubSourcePopover } from "./SetGithubSource";
+import { SetGitSourcePopover } from "./SetGitSource";
 
-export interface GithubAuthState {
-    validationResult: GithubRepoValidationResult;
-    sourceRepo?: GithubSourceRepo;
+export interface GitAuthState {
+    validationResult: GitRepoValidationResult;
+    sourceRepo?: GitSourceRepo;
     isLoading?: boolean;
 }
 
-export function GithubSourceClient({
+export function GitSourceClient({
     docsUrl,
-    githubUrl,
+    gitUrl,
     isLoading
 }: {
     docsUrl: DocsUrl;
-    githubUrl?: string;
+    gitUrl?: string;
     isLoading?: boolean;
 }) {
     const [isSaving, setIsSaving] = useState(false);
     const {
-        data: githubUrlResponse,
+        data: gitUrlResponse,
         isLoading: isGithubUrlLoading,
         isFetching: isGithubUrlFetching
     } = useQuery({
         queryKey: ReactQueryKey.docsGithubUrl(docsUrl),
-        queryFn: () => DashboardApiClient.getDocsGithubUrl({ docsUrl }),
+        queryFn: () => DashboardApiClient.getDocsGitUrl({ docsUrl }),
         enabled: !!docsUrl,
-        initialData: githubUrl ? ({ success: true, githubUrl } as getDocsGithubUrl.Response) : undefined,
+        initialData: gitUrl ? ({ success: true, gitUrl } as getDocsGitUrl.Response) : undefined,
         staleTime: 0,
         retry: false
     });
 
-    const resolvedGithubUrl = githubUrlResponse?.success ? githubUrlResponse.githubUrl : undefined;
+    const resolvedGitUrl = gitUrlResponse?.success ? gitUrlResponse.gitUrl : undefined;
     const showLoadingState = isLoading || isGithubUrlLoading || isGithubUrlFetching;
 
     return (
@@ -57,24 +57,24 @@ export function GithubSourceClient({
             ) : (
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <div className="flex min-w-0 items-center gap-2">
-                        {resolvedGithubUrl ? (
+                        {resolvedGitUrl ? (
                             <>
-                                <div className="flex-shrink-0">
+                                <div className="shrink-0">
                                     <GithubLogo />
                                 </div>
                                 {/* dashboard-link uses inline-flex which prevents truncate from working – block is required for ellipsis */}
                                 <a
-                                    href={resolvedGithubUrl}
-                                    className="dashboard-link !block truncate min-w-0"
+                                    href={resolvedGitUrl}
+                                    className="dashboard-link block! truncate min-w-0"
                                     target="_blank"
                                 >
-                                    {getRepoDisplayNameFromUrl(resolvedGithubUrl)}
+                                    {getRepoDisplayNameFromUrl(resolvedGitUrl)}
                                 </a>
-                                <div className="flex-shrink-0">
-                                    <SetGithubSourcePopover
+                                <div className="shrink-0">
+                                    <SetGitSourcePopover
                                         docsUrl={docsUrl}
                                         setIsSaving={setIsSaving}
-                                        initialUrl={resolvedGithubUrl}
+                                        initialUrl={resolvedGitUrl}
                                     >
                                         <Button
                                             size="sm"
@@ -94,7 +94,7 @@ export function GithubSourceClient({
                                                 </>
                                             )}
                                         </Button>
-                                    </SetGithubSourcePopover>
+                                    </SetGitSourcePopover>
                                 </div>
                             </>
                         ) : (

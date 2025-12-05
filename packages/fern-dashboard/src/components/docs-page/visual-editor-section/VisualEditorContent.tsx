@@ -1,7 +1,7 @@
 "use client";
 
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
-import type { GithubSourceRepo } from "@/app/services/github/types";
+import type { GitSourceRepo } from "@/app/services/github/types";
 import type { DocsUrl } from "@/utils/types";
 import { BranchList } from "../BranchList";
 import { GoToEditorButton } from "../GoToEditorButton";
@@ -15,7 +15,7 @@ export function VisualEditorContent({
 }: {
     docsUrl: DocsUrl;
     session: Auth0SessionData;
-    sourceRepo?: GithubSourceRepo;
+    sourceRepo?: GitSourceRepo;
     buttonDisabled?: boolean;
 }) {
     return (

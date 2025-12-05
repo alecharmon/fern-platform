@@ -5,8 +5,8 @@ import type { DocsUrl } from "@/utils/types";
 import { getCurrentSession } from "../../auth0/getCurrentSession";
 import type { Auth0OrgName } from "../../auth0/types";
 import { assertUserHasOrganizationAccess } from "../organization";
-import { getDocsGithubUrl } from "./getDocsGithubUrl";
-import { assertGithubAccessByUrl } from "./validators";
+import { getDocsGitUrl } from "./getDocsGitUrl";
+import { assertRepoAccessByUrl } from "./validators";
 
 export const assertAuthAndFetchGithubUrl = async (orgName: Auth0OrgName, docsUrl: DocsUrl) => {
     // Validate session
@@ -21,22 +21,19 @@ export const assertAuthAndFetchGithubUrl = async (orgName: Auth0OrgName, docsUrl
     await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
     // Validate GitHub access
-    const urlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
+    const urlResult = await getDocsGitUrl(docsUrl, session.accessToken);
     if (!urlResult.success) {
         return { githubUrl: null, session };
     }
 
-    const githubUrl = urlResult.githubUrl;
-    console.debug(`[assertAuthAndFetchGithubUrl] Found github url: ${githubUrl}`);
+    const gitUrl = urlResult.gitUrl;
+    console.debug(`[assertAuthAndFetchGithubUrl] Found github url: ${gitUrl}`);
     try {
-        await assertGithubAccessByUrl(orgName, docsUrl, githubUrl);
+        await assertRepoAccessByUrl(orgName, docsUrl, gitUrl);
     } catch (error) {
-        console.warn(
-            "[assertAuthAndFetchGithubUrl] Failed to assert GitHub access, falling back to preview mode",
-            error
-        );
-        return { githubUrl: null, session };
+        console.warn("[assertAuthAndFetchGithubUrl] Failed to assert repo access, falling back to preview mode", error);
+        return { gitUrl: null, session };
     }
 
-    return { githubUrl, session };
+    return { gitUrl, session };
 };

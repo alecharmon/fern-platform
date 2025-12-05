@@ -66,7 +66,7 @@ export const POST = withZodValidation(
 
         // 4. Get GitLoader and validate access
         const loader = getGitLoader(githubUrl);
-        const accessResult = await loader.validateAccess?.({
+        const accessResult = await loader.validateAccess({
             owner,
             repo,
             site,

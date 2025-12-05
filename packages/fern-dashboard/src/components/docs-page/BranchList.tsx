@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { GithubSourceRepo } from "@/app/services/github/types";
+import type { GitSourceRepo } from "@/app/services/github/types";
 import { Button } from "@/components/ui/button";
 import { useLocalBranches } from "@/hooks/useLocalBranches";
 import { useLocalBranchesForSite } from "@/hooks/useLocalBranchesForSite";
@@ -15,7 +15,7 @@ export function BranchList({
     validationPassed = true
 }: {
     docsUrl: DocsUrl;
-    sourceRepo?: GithubSourceRepo;
+    sourceRepo?: GitSourceRepo;
     validationPassed?: boolean;
 }) {
     const [deletedBranches, setDeletedBranches] = useState<Set<string>>(new Set());

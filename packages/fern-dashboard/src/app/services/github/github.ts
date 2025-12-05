@@ -1,5 +1,6 @@
 import type { Auth0OrgName } from "../auth0/types";
 import { DashboardApiClient } from "../dashboard-api/client";
+import { parseGitUrl } from "../git-common/url-utils";
 
 export const DEFAULT_PR_TITLE = "Fern Editor: Update";
 export const DEFAULT_COMMIT_MESSAGE = "Fern Editor: Update";
@@ -12,7 +13,8 @@ export async function handleCreatePr({
     repo,
     baseBranch,
     title,
-    onAiGenerationComplete
+    onAiGenerationComplete,
+    gitUrl
 }: {
     orgName: Auth0OrgName;
     branch: string;
@@ -22,8 +24,17 @@ export async function handleCreatePr({
     baseBranch: string;
     title?: string;
     onAiGenerationComplete?: () => void;
+    gitUrl?: string;
 }): Promise<string | undefined> {
     try {
+        console.log("[handleCreatePr] Creating PR/MR with params:", {
+            owner,
+            repo,
+            branch,
+            baseBranch,
+            gitUrl
+        });
+
         const response = await DashboardApiClient.postCreatePr({
             orgName,
             owner,
@@ -32,8 +43,12 @@ export async function handleCreatePr({
             head: branch,
             base: baseBranch,
             title: title || DEFAULT_PR_TITLE,
-            draft: true
+            draft: true,
+            gitUrl
         });
+
+        console.log("[handleCreatePr] Response:", response);
+
         if (response.success) {
             try {
                 // No need to await this, we just want to try to generate a PR description.
@@ -43,7 +58,8 @@ export async function handleCreatePr({
                     site,
                     repo,
                     branch,
-                    baseBranch
+                    baseBranch,
+                    gitUrl
                 })
                     .then((result) => {
                         if (result.success && onAiGenerationComplete) {
@@ -68,9 +84,6 @@ export async function handleCreatePr({
 }
 
 export function getOwnerAndRepoFromGithubUrl(githubUrl: string) {
-    if (!githubUrl) {
-        return { owner: null, repo: null };
-    }
     let piecesAfterGithubCom = githubUrl.split("github.com/")[1];
     if (piecesAfterGithubCom == null) {
         const sshMatch = githubUrl.match(/github\.com:(.+)/);
@@ -88,10 +101,10 @@ export function getOwnerAndRepoFromGithubUrl(githubUrl: string) {
     return { owner, repo };
 }
 
-export function getRepoDisplayNameFromUrl(githubUrl: string) {
-    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+export function getRepoDisplayNameFromUrl(gitUrl: string) {
+    const { owner, repo } = parseGitUrl(gitUrl);
     if (owner == null || repo == null) {
-        return githubUrl;
+        return gitUrl;
     }
     return `${owner}/${repo}`;
 }

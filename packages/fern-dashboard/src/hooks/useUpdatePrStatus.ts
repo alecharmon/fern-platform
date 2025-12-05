@@ -3,23 +3,15 @@
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import type { Auth0OrgName } from "@/app/services/auth0/types";
-import updatePrStatus, { type UpdatePrStatusErrors } from "@/app/services/dal/github/updatePrStatus";
+import updatePrStatus, {
+    type UpdatePrStatusErrors,
+    type UpdatePrStatusRequest
+} from "@/app/services/dal/github/updatePrStatus";
 import type { GithubPrStatus } from "@/app/services/github/types";
 import { ErrorUpdatePrStatusToast } from "@/components/editor/EditorToasts";
 import { useBranch } from "@/providers/BranchContext";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
-
-interface UpdatePRStatusParams {
-    owner: string;
-    repo: string;
-    branch: string;
-    status: "open" | "draft";
-    baseBranch?: string;
-    orgName: Auth0OrgName;
-    site: string;
-}
 
 type UpdatePRStatusResult =
     | {
@@ -33,9 +25,9 @@ type UpdatePRStatusResult =
           error: UpdatePrStatusErrors;
       };
 
-function useUpdatePRStatusMutation(): UseMutationResult<UpdatePRStatusResult, Error, UpdatePRStatusParams> {
+function useUpdatePRStatusMutation(): UseMutationResult<UpdatePRStatusResult, Error, UpdatePrStatusRequest> {
     return useMutation({
-        mutationFn: async (params: UpdatePRStatusParams) => {
+        mutationFn: async (params: UpdatePrStatusRequest) => {
             return updatePrStatus(params);
         },
         retry: 3,
@@ -46,7 +38,7 @@ function useUpdatePRStatusMutation(): UseMutationResult<UpdatePRStatusResult, Er
 export function useUpdatePrStatus() {
     const { prStatus, setPrStatus, site, gitPrUrl } = useGitPrInfo();
     const { branch } = useBranch();
-    const { owner, repo, baseBranch } = useGitHubRepo();
+    const { owner, repo, baseBranch, gitUrl } = useGitHubRepo();
 
     const orgName = useOrgName();
 
@@ -72,7 +64,8 @@ export function useUpdatePrStatus() {
                     site,
                     branch,
                     status: newStatus,
-                    baseBranch
+                    baseBranch,
+                    gitUrl
                 });
 
                 if (result.success && result.status) {
@@ -85,7 +78,19 @@ export function useUpdatePrStatus() {
                 console.error("Error updating PR status:", err);
             }
         },
-        [owner, repo, branch, site, prStatus, gitPrUrl, setPrStatus, baseBranch, orgName, updatePrStatusMutation]
+        [
+            owner,
+            repo,
+            branch,
+            site,
+            prStatus,
+            gitPrUrl,
+            setPrStatus,
+            baseBranch,
+            orgName,
+            updatePrStatusMutation,
+            gitUrl
+        ]
     );
 
     return { updatePrStatus, loading: updatePrStatusMutation.isPending };

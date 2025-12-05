@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import type { getDocsGithubUrl } from "@/app/api/get-docs-github-url/route";
+import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
-import { useValidateGithubRepo } from "@/hooks/useValidateGithubRepo";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
+import { useValidateGitRepo } from "@/hooks/useValidateGitRepo";
 import { ReactQueryKey } from "@/state/queryKeys";
 import type { DocsUrl } from "@/utils/types";
 import { Note } from "../Note";
@@ -15,35 +15,41 @@ import { FinishEditorSetupModal } from "./FinishEditorSetupModal";
 interface FinishDocsSetupBannerProps {
     docsUrl: DocsUrl;
     orgName: Auth0OrgName;
-    githubUrl?: string;
+    gitUrl?: string;
 }
 
-export function FinishDocsSetupBanner({ docsUrl, orgName, githubUrl }: FinishDocsSetupBannerProps) {
+export function FinishDocsSetupBanner({ docsUrl, orgName, gitUrl }: FinishDocsSetupBannerProps) {
     const {
         data: githubUrlResponse,
         isLoading: isGithubUrlLoading,
         isFetching: isGithubUrlFetching
     } = useQuery({
         queryKey: ReactQueryKey.docsGithubUrl(docsUrl),
-        queryFn: () => DashboardApiClient.getDocsGithubUrl({ docsUrl }),
+        queryFn: () => DashboardApiClient.getDocsGitUrl({ docsUrl }),
         enabled: true,
-        initialData: githubUrl ? ({ success: true, githubUrl } as getDocsGithubUrl.Response) : undefined,
+        initialData: gitUrl ? ({ success: true, gitUrl } as getDocsGitUrl.Response) : undefined,
         staleTime: 0,
         retry: false
     });
 
-    const resolvedGithubUrl = githubUrlResponse?.success ? githubUrlResponse.githubUrl : githubUrl;
-    const { owner, repo } = useMemo(() => getOwnerAndRepoFromGithubUrl(resolvedGithubUrl ?? ""), [resolvedGithubUrl]);
+    const resolvedGithubUrl = githubUrlResponse?.success ? githubUrlResponse.gitUrl : gitUrl;
+    const { owner, repo, provider, path } = useMemo(() => parseGitUrl(resolvedGithubUrl ?? ""), [resolvedGithubUrl]);
 
-    const { result: validationResult, loading: isLoadingValidation } = useValidateGithubRepo({
+    const { result: validationResult, loading: isLoadingValidation } = useValidateGitRepo({
         enabled: !!owner && !!repo,
         docsUrl,
         owner: owner ?? undefined,
-        repo: repo ?? undefined
+        repo: (provider === "gitlab" ? (path ?? repo) : repo) ?? undefined,
+        variant: provider === "unknown" ? "github" : provider
     });
 
+    // We only show the setup banner for GitHub repos for now
     const shouldShowBanner =
-        !isGithubUrlLoading && !isGithubUrlFetching && !isLoadingValidation && !validationResult?.ok;
+        provider !== "gitlab" &&
+        !isGithubUrlLoading &&
+        !isGithubUrlFetching &&
+        !isLoadingValidation &&
+        !validationResult?.ok;
     const [isAnimatingIn, setIsAnimatingIn] = useState(false);
 
     useEffect(() => {

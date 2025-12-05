@@ -11,7 +11,7 @@ import { DocsSiteLink } from "./DocsSiteLink";
 import { DocsSiteImageServer } from "./docs-site-image/DocsSiteImageServer";
 import { SkeletonDocsSiteImage } from "./docs-site-image/SkeletonDocsSiteImage";
 import { FernCliVersion } from "./FernCliVersion";
-import { GithubSource } from "./GithubSource";
+import { GitSource } from "./GitSource";
 
 export async function DocsSiteOverviewCard({
     docsSite,
@@ -40,7 +40,7 @@ export async function DocsSiteOverviewCard({
                     <div className="flex flex-wrap gap-x-10 gap-y-4">
                         <DocsSiteAttribute name="Source">
                             <Suspense fallback={<Skeleton className="h-6 w-24" />}>
-                                <GithubSource docsUrl={docsUrl} />
+                                <GitSource docsUrl={docsUrl} />
                             </Suspense>
                         </DocsSiteAttribute>
                         <Suspense

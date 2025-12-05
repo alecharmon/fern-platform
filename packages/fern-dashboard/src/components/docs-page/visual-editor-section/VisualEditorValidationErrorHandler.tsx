@@ -1,8 +1,8 @@
-import type { GithubRepoValidationError } from "@/app/services/dal/github/validators";
+import type { GitRepoValidationError } from "@/app/services/dal/github/validators";
 import { getValidationErrorMessage } from "@/utils/errors";
 
 interface ValidationErrorHandlerProps {
-    error: GithubRepoValidationError;
+    error: GitRepoValidationError;
     githubUrl?: string;
 }
 
@@ -25,14 +25,14 @@ export function VisualEditorValidationErrorHandler({ error, githubUrl }: Validat
     ) : null;
     switch (error.type) {
         case "FERN_BOT_NOT_INSTALLED":
-        case "MALFORMED_GITHUB_URL":
+        case "MALFORMED_GIT_URL":
         case "DOMAIN_NOT_REGISTERED":
         case "REPO_NOT_FOUND":
         case "REPO_NOT_CONNECTED":
         case "MULTIPLE_PROJECTS_WITH_SITE":
         case "UNEXPECTED_ERROR":
-            return <>{getValidationErrorMessage(error)}</>;
-
+        case "GITLAB_TOKEN_NOT_CONFIGURED":
+        case "EDGE_CONFIG_ERROR":
         case "FERN_CONFIG_JSON_MISSING":
         case "FERN_CONFIG_JSON_MALFORMED":
         case "FERN_CONFIG_JSON_ORG_MISMATCH":

@@ -5,13 +5,13 @@ import { FernIcon } from "../theme/FernIcon";
 import { UpgradeFernButton } from "./UpgradeFernButton";
 
 export function FernCliVersionDisplay({
-    githubUrl,
+    gitUrl,
     docsUrl,
     baseBranch,
     orgName,
     fernVersionInfo
 }: {
-    githubUrl: string;
+    gitUrl: string;
     docsUrl: DocsUrl;
     baseBranch: string;
     orgName: Auth0OrgName;
@@ -24,7 +24,7 @@ export function FernCliVersionDisplay({
                 <UpgradeFernButton
                     orgName={orgName}
                     docsUrl={docsUrl}
-                    githubUrl={githubUrl}
+                    gitUrl={gitUrl}
                     currentVersion={fernVersionInfo.current}
                     latestVersion={fernVersionInfo.latest}
                     baseBranch={baseBranch}

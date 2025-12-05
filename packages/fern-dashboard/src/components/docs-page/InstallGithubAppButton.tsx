@@ -3,7 +3,7 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-import { validateGithubRepoAction } from "@/app/actions/validate-github-repo";
+import { validateGitRepoAction } from "@/app/actions/validate-git-repo";
 import { useBackgroundPoller } from "@/hooks/useBackgroundPoller";
 import type { DocsUrl } from "@/utils/types";
 import { GithubLogo } from "../auth/GithubLogo";
@@ -26,7 +26,7 @@ export function InstallGithubAppButton({
             return false;
         }
 
-        const result = await validateGithubRepoAction(orgName, docsUrl, githubUrl);
+        const result = await validateGitRepoAction(orgName, docsUrl, githubUrl);
         return result.ok; // Return true to stop polling
     });
 

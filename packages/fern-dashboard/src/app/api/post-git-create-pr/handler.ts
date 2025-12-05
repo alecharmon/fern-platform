@@ -1,6 +1,6 @@
 import type { GitOperationError } from "@fern-api/docs-loader";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
+import { getGitLoader } from "@/app/services/github/getGitLoader";
 
 export type PostCreatePrErrors = GitOperationError | { type: "NOT_LOGGED_IN" };
 
@@ -12,6 +12,7 @@ export default async function postCreatePr(request: {
     title: string;
     body?: string;
     draft?: boolean;
+    gitUrl?: string;
 }): Promise<
     | {
           success: true;
@@ -30,7 +31,8 @@ export default async function postCreatePr(request: {
     }
 
     // 2. Get GitLoader instance
-    const loader = getGitLoaderByOwnerRepo(request.owner, request.repo);
+    const gitUrl = request.gitUrl || `https://github.com/${request.owner}/${request.repo}`;
+    const loader = getGitLoader(gitUrl);
 
     // 3. Perform git operation
     const result = await loader.createPullRequest?.({

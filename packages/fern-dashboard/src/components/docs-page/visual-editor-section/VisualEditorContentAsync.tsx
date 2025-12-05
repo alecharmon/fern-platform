@@ -15,13 +15,11 @@ import { VisualEditorContent } from "./VisualEditorContent";
 export async function VisualEditorContentAsync({
     docsUrl,
     session,
-    orgName,
-    githubUrl
+    orgName
 }: {
     docsUrl: DocsUrl;
     session: Auth0SessionData;
     orgName: Auth0OrgName;
-    githubUrl?: string;
 }) {
     // Fetch GitHub auth state (expensive operation)
     const githubAuthStateResult = await getGitHubAuthState(docsUrl, session.accessToken, orgName, session);

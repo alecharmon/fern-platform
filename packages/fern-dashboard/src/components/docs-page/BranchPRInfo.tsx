@@ -2,7 +2,7 @@
 
 import { GitPullRequest, GitPullRequestDraft } from "lucide-react";
 
-import type { GithubSourceRepo } from "@/app/services/github/types";
+import type { GitSourceRepo } from "@/app/services/github/types";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { GitPRProvider, useGitPrInfo } from "@/providers/GitPRContext";
 import type { DocsUrl } from "@/utils/types";
@@ -25,7 +25,7 @@ const getDisplayNameFromBranch = (branch: string) => {
 interface BranchPRInfoProps {
     branch: string;
     docsUrl: DocsUrl;
-    sourceRepo?: GithubSourceRepo;
+    sourceRepo?: GitSourceRepo;
 }
 
 export function BranchPRInfo({ branch, sourceRepo, docsUrl }: BranchPRInfoProps) {
@@ -36,6 +36,7 @@ export function BranchPRInfo({ branch, sourceRepo, docsUrl }: BranchPRInfoProps)
             branch={branch}
             baseBranch={sourceRepo?.baseBranch}
             site={docsUrl}
+            gitUrl={sourceRepo?.gitUrl}
         >
             <BranchPRContent branch={branch} />
         </GitPRProvider>

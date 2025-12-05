@@ -3,11 +3,12 @@
 import { unstable_cache } from "next/cache";
 
 import { getFernBotInstallationId, getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
-import type { GithubSourceRepo } from "@/app/services/github/types";
+import type { GitSourceRepo } from "@/app/services/github/types";
 
-const EMPTY_RESPONSE: GithubSourceRepo = {
-    githubUrl: undefined,
+const EMPTY_RESPONSE: GitSourceRepo = {
+    gitUrl: undefined,
     repoName: undefined,
     owner: undefined,
     repo: undefined,
@@ -23,10 +24,18 @@ export async function getGithubSourceMetadata({
     githubUrl: string;
     userId: string;
     skipCache?: boolean;
-}): Promise<GithubSourceRepo> {
+}): Promise<GitSourceRepo> {
     async function fetchGithubSourceMetadata() {
         if (githubUrl == null) {
             throw new Error("NoGithubUrl");
+        }
+
+        // Check if this is a GitHub URL - this function only works with GitHub
+        const parsed = parseGitUrl(githubUrl);
+        if (parsed.provider !== "github") {
+            // For non-GitHub URLs (GitLab, etc.), return empty response
+            // GitLab metadata will be handled by a separate function
+            return EMPTY_RESPONSE;
         }
 
         const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
@@ -53,13 +62,13 @@ export async function getGithubSourceMetadata({
             const fernBotHasInstallationId = installationResult.ok;
 
             return {
-                githubUrl,
+                gitUrl: githubUrl,
                 repoName: response.data.full_name,
                 owner: response.data.owner.name ?? owner,
-                repo: response.data.name ?? repo,
+                repo: repo,
                 baseBranch: response.data.default_branch,
                 fernBotHasInstallationId
-            };
+            } as GitSourceRepo;
         } catch (error) {
             console.error("Failed to get repo info", error);
             // Don't cache this failure, so throw to skip cache
@@ -68,7 +77,7 @@ export async function getGithubSourceMetadata({
     }
     try {
         // Only cache successful responses; do not cache failures
-        const result = skipCache
+        const result: Promise<GitSourceRepo> = skipCache
             ? fetchGithubSourceMetadata()
             : unstable_cache(fetchGithubSourceMetadata, [`github-source-${githubUrl}-${userId}`], {
                   revalidate: 300, // 5 minutes

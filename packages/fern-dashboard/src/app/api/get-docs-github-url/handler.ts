@@ -1,7 +1,7 @@
 import type { DocsUrl } from "@/utils/types";
 
-import { getDocsGithubUrl } from "../../services/dal/github/getDocsGithubUrl";
+import { getDocsGitUrl } from "../../services/dal/github/getDocsGitUrl";
 
-export default async function getDocsGithubUrlHandler({ docsUrl, token }: { docsUrl: DocsUrl; token: string }) {
-    return await getDocsGithubUrl(docsUrl, token);
+export default async function getDocsGitUrlHandler({ docsUrl, token }: { docsUrl: DocsUrl; token: string }) {
+    return await getDocsGitUrl(docsUrl, token);
 }

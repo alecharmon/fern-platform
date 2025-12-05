@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import type { ValidateGithubRepoAccessResponse } from "@/app/api/validate-github-repo-access/handler";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DialogBody, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import type { ConnectGithubRepoParams } from "@/hooks/useConnectGithubRepo";
+import type { ConnectGitRepoParams } from "@/hooks/useConnectGitRepo";
 import type { DocsUrl } from "@/utils/types";
 import { ConfigurationCheckContent } from "./ConfigurationCheckContent";
 import { ConnectGithubContent } from "./ConnectGithubContent";
@@ -26,7 +26,7 @@ interface FinishEditorSetupModalContentProps {
     onRepoConnected: (hasAppInstalled: boolean, githubUrl?: string) => void;
     onAppInstalled: () => void;
     onValidationError: () => void;
-    connectRepo: (params: ConnectGithubRepoParams) => Promise<{ success: boolean; githubUrl: string | undefined }>;
+    connectRepo: (params: ConnectGitRepoParams) => Promise<{ success: boolean; gitUrl: string | undefined }>;
 }
 
 /**

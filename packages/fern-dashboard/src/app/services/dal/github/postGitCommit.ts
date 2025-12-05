@@ -2,7 +2,7 @@
 
 import type { GitAccessError, GitOperationError } from "@fern-api/docs-loader";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
+import { getGitLoader } from "@/app/services/github/getGitLoader";
 import type { GithubCommitableFile } from "@/app/services/github/types";
 import type { Auth0OrgName } from "../../auth0/types";
 import { assertUserHasOrganizationAccess } from "../organization";
@@ -21,6 +21,7 @@ export default async function postGitCommit(request: {
     orgName: Auth0OrgName;
     files: GithubCommitableFile[];
     site: string;
+    gitUrl?: string;
 }): Promise<
     | {
           success: true;
@@ -51,10 +52,12 @@ export default async function postGitCommit(request: {
     }
 
     // 3. Get GitLoader instance
-    const loader = getGitLoaderByOwnerRepo(request.owner, request.repo);
+    const loader = request.gitUrl
+        ? getGitLoader(request.gitUrl)
+        : getGitLoader(`https://github.com/${request.owner}/${request.repo}`);
 
     // 4. Validate repository access
-    const accessResult = await loader.validateAccess?.({
+    const accessResult = await loader.validateAccess({
         owner: request.owner,
         repo: request.repo,
         site: request.site,

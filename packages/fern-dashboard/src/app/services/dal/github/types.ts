@@ -12,7 +12,7 @@ export type RepoIdentifier =
       }
     | {
           type: "url";
-          githubUrl: string;
+          gitUrl: string;
       };
 
 export interface AuthenticatedAccessOptions {

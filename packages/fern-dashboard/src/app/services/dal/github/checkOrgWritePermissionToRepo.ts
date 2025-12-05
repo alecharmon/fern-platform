@@ -8,7 +8,7 @@ import type { DocsUrl } from "@/utils/types";
 import { getCachedGitHubLoader, getUncachedGitHubLoader } from "../../github/cachedGitHubLoader";
 
 export type CheckOrgWritePermissionToRepoError =
-    | { type: "MALFORMED_GITHUB_URL"; url: string }
+    | { type: "MALFORMED_GIT_URL"; url: string }
     | { type: "FERN_BOT_NOT_INSTALLED" }
     | { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
     | FernConfigJsonErrors;
@@ -36,7 +36,7 @@ export async function checkOrgWritePermissionToRepo(
     if (owner == null || repo == null) {
         return {
             ok: false,
-            error: { type: "MALFORMED_GITHUB_URL", url: githubUrl }
+            error: { type: "MALFORMED_GIT_URL", url: githubUrl }
         };
     }
 

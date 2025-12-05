@@ -2,17 +2,18 @@ import { useQueryClient } from "@tanstack/react-query";
 import { usePostHog } from "posthog-js/react";
 import { useCallback } from "react";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { normalizeGithubUrl } from "@/app/services/github/github";
 import { ReactQueryKey } from "@/state/queryKeys";
 import type { DocsUrl } from "@/utils/types";
 import {
     ErrorEditSourceToast,
-    ErrorInvalidGithubUrlToast,
+    ErrorInvalidGitUrlToast,
     SuccessfulEditSourceToast
 } from "../components/editor/EditorToasts";
 import { captureRepoConnected } from "../components/posthog/events";
 
-export interface UseConnectGithubRepoOptions {
+export interface UseConnectGitRepoOptions {
     docsUrl: DocsUrl;
     onSuccess?: () => void;
     onError?: (error: unknown) => void;
@@ -21,7 +22,7 @@ export interface UseConnectGithubRepoOptions {
     showSuccessToast?: boolean;
 }
 
-export interface ConnectGithubRepoParams {
+export interface ConnectGitRepoParams {
     canonicalUrl: string;
     skipSave?: boolean;
 }
@@ -33,28 +34,49 @@ export interface ConnectGithubRepoParams {
  * @param options Configuration options
  * @returns Object with connectRepo function and normalized GitHub URL (if provided)
  */
-export function useConnectGithubRepo({
+export function useConnectGitRepo({
     docsUrl,
     onSuccess,
     onError,
     onStart,
     onFinally,
     showSuccessToast = true
-}: UseConnectGithubRepoOptions) {
+}: UseConnectGitRepoOptions) {
     const queryClient = useQueryClient();
     const posthog = usePostHog();
 
     const connectRepo = useCallback(
-        async ({ canonicalUrl, skipSave = false }: ConnectGithubRepoParams) => {
-            const normalized = normalizeGithubUrl(canonicalUrl);
-            if (!normalized.isValidShape || !normalized.canonicalUrl) {
-                ErrorInvalidGithubUrlToast();
-                return { success: false, githubUrl: undefined };
+        async ({ canonicalUrl, skipSave = false }: ConnectGitRepoParams) => {
+            const parsedUrl = parseGitUrl(canonicalUrl);
+            const isGitHub = parsedUrl.provider === "github";
+            const isGitLab = parsedUrl.provider === "gitlab";
+
+            console.log("parsedUrl", parsedUrl);
+
+            let normalizedCanonicalUrl: string | null = null;
+
+            if (isGitHub) {
+                const normalized = normalizeGithubUrl(canonicalUrl);
+                if (!normalized.isValidShape || !normalized.canonicalUrl) {
+                    ErrorInvalidGitUrlToast();
+                    return { success: false, gitUrl: undefined };
+                }
+                normalizedCanonicalUrl = normalized.canonicalUrl;
+            } else if (isGitLab) {
+                const repoOrPath = parsedUrl.path ?? parsedUrl.repo;
+                if (!parsedUrl.owner || !repoOrPath) {
+                    ErrorInvalidGitUrlToast();
+                    return { success: false, gitUrl: undefined };
+                }
+                normalizedCanonicalUrl = `https://gitlab.com/${parsedUrl.owner}/${repoOrPath}`;
+            } else {
+                ErrorInvalidGitUrlToast();
+                return { success: false, gitUrl: undefined };
             }
 
             // If skipSave is true, just return the normalized URL without saving
             if (skipSave) {
-                return { success: true, githubUrl: normalized.canonicalUrl };
+                return { success: true, gitUrl: normalizedCanonicalUrl };
             }
 
             try {
@@ -62,7 +84,7 @@ export function useConnectGithubRepo({
 
                 await DashboardApiClient.postDocsGithubSource({
                     url: docsUrl,
-                    githubUrl: normalized.canonicalUrl
+                    githubUrl: normalizedCanonicalUrl
                 });
 
                 await queryClient.invalidateQueries({
@@ -79,12 +101,12 @@ export function useConnectGithubRepo({
                 });
 
                 onSuccess?.();
-                return { success: true, githubUrl: normalized.canonicalUrl };
+                return { success: true, gitUrl: normalizedCanonicalUrl };
             } catch (e) {
                 ErrorEditSourceToast();
                 console.error(e);
                 onError?.(e);
-                return { success: false, githubUrl: normalized.canonicalUrl };
+                return { success: false, gitUrl: normalizedCanonicalUrl };
             } finally {
                 onFinally?.();
             }

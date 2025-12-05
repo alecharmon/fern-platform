@@ -2,18 +2,18 @@
 
 import { fernToken_admin } from "@fern-api/docs-server";
 
-import type { GithubAuthState } from "@/components/docs-page/GithubSourceClient";
+import type { GitAuthState } from "@/components/docs-page/GitSourceClient";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { type Auth0SessionData, getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
-import { getDocsGithubUrl } from "../services/dal/github/getDocsGithubUrl";
-import { validateGithubRepoAccess } from "../services/dal/github/validators";
+import { getDocsGitUrl } from "../services/dal/github/getDocsGitUrl";
+import { validateGitRepoAccess } from "../services/dal/github/validators";
 import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
 
 async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, docsUrl: DocsUrl) {
-    let githubAuthState: GithubAuthState = {
+    let githubAuthState: GitAuthState = {
         validationResult: {
             ok: false,
             error: {
@@ -24,9 +24,9 @@ async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, doc
         sourceRepo: undefined,
         isLoading: true
     };
-    let githubUrl: string | undefined;
+    let gitUrl: string | undefined;
     try {
-        const urlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
+        const urlResult = await getDocsGitUrl(docsUrl, session.accessToken);
 
         if (!urlResult.success) {
             if (urlResult.error.type === "DOMAIN_NOT_REGISTERED") {
@@ -46,23 +46,23 @@ async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, doc
             return { success: false, githubAuthState };
         }
 
-        githubUrl = urlResult.githubUrl;
+        gitUrl = urlResult.gitUrl;
 
         try {
             // Parallelize validation and metadata fetching for better performance
             const [validation, sourceRepo] = await Promise.all([
-                validateGithubRepoAccess(
+                validateGitRepoAccess(
                     orgName,
                     docsUrl,
                     {
                         type: "url",
-                        githubUrl
+                        gitUrl
                     },
                     true // Skip cache for now, since this cache was causing issues with validating repos
                 ),
                 // Optimistically fetch metadata in parallel (will be used if validation succeeds)
                 getGithubSourceMetadata({
-                    githubUrl,
+                    githubUrl: gitUrl,
                     userId: session.user.sub
                 }).catch((error: unknown) => {
                     console.error("Failed to fetch source repo metadata:", error);
@@ -75,7 +75,7 @@ async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, doc
                 sourceRepo: validation.ok ? sourceRepo : undefined,
                 isLoading: false
             };
-            return { success: true, githubAuthState, githubUrl };
+            return { success: true, githubAuthState, gitUrl };
         } catch (error) {
             console.error("Failed to validate GitHub access:", error);
             return { success: false, error: "Failed to validate GitHub access" };
@@ -105,7 +105,7 @@ export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<
             url: decodedUrl,
             token: fernToken_admin() ?? session.accessToken
         });
-        const githubMetadata = await getDocsGithubUrl(docsUrl, fernToken_admin() ?? session.accessToken);
+        const githubMetadata = await getDocsGitUrl(docsUrl, fernToken_admin() ?? session.accessToken);
         if (!githubMetadata.success) {
             return { success: false, error: "Failed to fetch github metadata" };
         }
@@ -123,7 +123,7 @@ export async function getDocsGithubMetadata(docsUrl: DocsUrl): Promise<
         return {
             success: true,
             orgName: orgName,
-            githubUrl: metadata.githubUrl,
+            githubUrl: githubMetadata.gitUrl,
             baseBranch: metadata.githubAuthState?.sourceRepo?.baseBranch ?? undefined
         };
     } catch (error) {

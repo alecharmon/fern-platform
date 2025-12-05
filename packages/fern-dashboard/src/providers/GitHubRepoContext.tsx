@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-import type { GithubSourceRepo } from "@/app/services/github/types";
+import type { GitSourceRepo } from "@/app/services/github/types";
 
 interface GitHubRepoContextValue {
     branch: string;
@@ -10,6 +10,7 @@ interface GitHubRepoContextValue {
     repo: string | undefined;
     baseBranch: string | undefined;
     docsUrl: string;
+    gitUrl?: string;
 }
 
 const GitHubRepoContext = createContext<GitHubRepoContextValue | null>(null);
@@ -18,16 +19,18 @@ export function GitHubRepoProvider({
     children,
     branch,
     sourceRepo,
-    docsUrl
+    docsUrl,
+    gitUrl
 }: {
     children: React.ReactNode;
     branch: string;
-    sourceRepo: GithubSourceRepo;
+    sourceRepo: GitSourceRepo;
     docsUrl: string;
+    gitUrl?: string;
 }) {
     const { owner, repo, baseBranch } = sourceRepo;
     return (
-        <GitHubRepoContext.Provider value={{ branch, owner, repo, baseBranch, docsUrl }}>
+        <GitHubRepoContext.Provider value={{ branch, owner, repo, baseBranch, docsUrl, gitUrl }}>
             {children}
         </GitHubRepoContext.Provider>
     );

@@ -3,7 +3,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import type { GithubSourceRepo } from "@/app/services/github/types";
+import type { GitSourceRepo } from "@/app/services/github/types";
 import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
 import { Button } from "../ui/button";
 import { BranchPRInfo } from "./BranchPRInfo";
@@ -18,7 +18,7 @@ export function BranchListItem({
 }: {
     branch: string;
     docsUrl: DocsUrl;
-    sourceRepo?: GithubSourceRepo;
+    sourceRepo?: GitSourceRepo;
     showDivider?: boolean;
     handleBranchDelete: (branch: string) => void;
 }) {

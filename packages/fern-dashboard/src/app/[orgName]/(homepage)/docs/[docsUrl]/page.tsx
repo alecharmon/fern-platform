@@ -5,9 +5,9 @@ import { Suspense } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
-import { getDocsGithubUrl } from "@/app/services/dal/github/getDocsGithubUrl";
+import { getDocsGitUrl } from "@/app/services/dal/github/getDocsGitUrl";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
-import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { DocsPageTracker } from "@/components/docs-page/DocsPageTracker";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
 import { TransferRepoOwnershipBanner } from "@/components/docs-page/TransferRepoOwnershipBanner";
@@ -39,24 +39,25 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
         notFound();
     }
 
-    // Get GitHub URL to determine source repo owner and fetch validation data
-    const githubUrlResult = await getDocsGithubUrl(docsUrl, session.accessToken);
+    // Get git URL to determine source repo owner
+    const githubUrlResult = await getDocsGitUrl(docsUrl, session.accessToken);
 
-    // Extract owner from GitHub URL (e.g., "https://github.com/owner/repo" -> "owner")
+    // Extract owner from git URL
     let sourceRepoOwner: string | undefined;
-    const githubUrl = githubUrlResult.success ? githubUrlResult.githubUrl : undefined;
 
-    if (githubUrlResult.success && githubUrl) {
-        const { owner } = getOwnerAndRepoFromGithubUrl(githubUrl);
-        sourceRepoOwner = owner ?? undefined;
+    if (githubUrlResult.success && githubUrlResult.gitUrl) {
+        const parsed = parseGitUrl(githubUrlResult.gitUrl);
+        sourceRepoOwner = parsed.owner ?? undefined;
     }
+
+    const gitUrl = githubUrlResult.success ? githubUrlResult.gitUrl : undefined;
 
     return (
         <div className="flex w-full flex-col gap-4">
             <TransferRepoOwnershipBanner docsUrl={docsUrl} sourceRepoOwner={sourceRepoOwner} />
             <DocsPageTracker orgName={orgName} docsUrl={docsUrl} userEmail={session.user.email ?? ""} />
-            <FinishDocsSetupBanner docsUrl={docsUrl} orgName={orgName} githubUrl={githubUrl} />
-            <CriticalUpdateWarning orgName={orgName} docsUrl={docsUrl} githubUrl={githubUrl} />
+            <FinishDocsSetupBanner docsUrl={docsUrl} orgName={orgName} gitUrl={gitUrl} />
+            <CriticalUpdateWarning orgName={orgName} docsUrl={docsUrl} gitUrl={gitUrl} />
             <DocsSiteOverviewCard docsUrl={docsUrl} docsSite={currentDocsSite} orgName={orgName} />
             <Suspense fallback={<VisualEditorLoadingCard />}>
                 <VisualEditorSection docsUrl={docsUrl} session={session} orgName={orgName} />

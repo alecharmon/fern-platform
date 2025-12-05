@@ -75,7 +75,7 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
 
     return (
         <>
-            <div className="bg-background flex h-[var(--header-toolbar-height-mobile)] flex-wrap items-center justify-center gap-2 border-b border-gray-500 px-2 py-2 shadow-sm md:h-[var(--header-toolbar-height)] md:py-1">
+            <div className="bg-background flex h-(--header-toolbar-height-mobile) flex-wrap items-center justify-center gap-2 border-b border-gray-500 px-2 py-2 shadow-sm md:h-(--header-toolbar-height) md:py-1">
                 <div className="flex w-full flex-1 items-center gap-1 text-left md:w-auto">
                     <Button className="px-2" variant="ghost" size="iconSm" asChild>
                         <Link href={`/${orgName}/docs/${encodeURIComponent(docsUrl)}`}>

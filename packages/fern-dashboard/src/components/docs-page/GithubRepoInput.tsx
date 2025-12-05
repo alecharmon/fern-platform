@@ -4,8 +4,9 @@ import CheckCircleIcon from "@heroicons/react/24/outline/CheckCircleIcon";
 import ExclamationCircleIcon from "@heroicons/react/24/outline/ExclamationCircleIcon";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { normalizeGithubUrl } from "@/app/services/github/github";
-import { useValidateGithubRepo } from "@/hooks/useValidateGithubRepo";
+import { useValidateGitRepo } from "@/hooks/useValidateGitRepo";
 import type { DocsUrl } from "@/utils/types";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -58,45 +59,43 @@ export function GithubRepoInput({
         return () => clearTimeout(timer);
     }, [inputUrl]);
 
-    const normalized = normalizeGithubUrl(debouncedUrl);
-    const shouldCheckAccess = normalized.isValidShape && normalized.owner && normalized.repo;
+    const currentParsedUrl = parseGitUrl(debouncedUrl);
+    const currentIsGitHub = currentParsedUrl.provider === "github";
+    const currentIsGitLab = currentParsedUrl.provider === "gitlab";
 
-    const { result: accessCheckResult, loading: isCheckingAccess } = useValidateGithubRepo({
-        enabled: !!shouldCheckAccess,
-        docsUrl,
-        owner: normalized.owner ?? undefined,
-        repo: normalized.repo ?? undefined
-    });
+    const currentNormalized = currentIsGitHub ? normalizeGithubUrl(inputUrl) : null;
 
-    const currentNormalized = normalizeGithubUrl(inputUrl);
-    const urlIsValid = currentNormalized.isValidShape;
+    const urlIsValid =
+        (currentIsGitHub && currentNormalized?.isValidShape) ||
+        (currentIsGitLab && currentParsedUrl.owner && currentParsedUrl.repo);
     const showValidation = inputUrl.trim() !== "";
+
+    const { result: accessCheckResult, loading: isCheckingAccess } = useValidateGitRepo({
+        enabled: !!urlIsValid && showValidation,
+        docsUrl,
+        owner: currentIsGitHub ? (currentNormalized?.owner ?? undefined) : (currentParsedUrl.owner ?? undefined),
+        repo: currentIsGitHub ? (currentNormalized?.repo ?? undefined) : (currentParsedUrl.repo ?? undefined),
+        variant: currentIsGitHub ? "github" : "gitlab"
+    });
 
     const hasAccessGranted = accessCheckResult?.ok === true;
     const hasAccessDenied = accessCheckResult?.ok === false;
-    const appNotInstalled = hasAccessDenied && !accessCheckResult?.appInstalled;
+    const appNotInstalled = hasAccessDenied && "appInstalled" in accessCheckResult && !accessCheckResult.appInstalled;
 
-    // Determine if we're ready to save based on validation mode
     const readyToSave = isSimpleMode
         ? // Simple mode: just need valid URL and debounce to complete
-          urlIsValid &&
-          normalized.owner === currentNormalized.owner &&
-          normalized.repo === currentNormalized.repo &&
-          !isCheckingAccess &&
-          !disabled
+          urlIsValid && !isCheckingAccess && !disabled
         : // Full mode: need valid URL and app installed
-          urlIsValid &&
-          hasAccessGranted &&
-          normalized.owner === currentNormalized.owner &&
-          normalized.repo === currentNormalized.repo &&
-          !isCheckingAccess &&
-          !disabled;
+          urlIsValid && hasAccessGranted && !isCheckingAccess && !disabled;
 
     const handleSave = async () => {
-        if (!readyToSave || !currentNormalized.canonicalUrl) {
+        if (!readyToSave) {
             return;
         }
-        await onSave(currentNormalized.canonicalUrl, accessCheckResult ?? undefined);
+        await onSave(
+            currentIsGitHub ? (currentNormalized?.canonicalUrl ?? "") : debouncedUrl,
+            accessCheckResult ?? undefined
+        );
     };
 
     // Determine border color based on validation mode
@@ -169,7 +168,7 @@ export function GithubRepoInput({
                     {/* Invalid URL message */}
                     {!urlIsValid && (
                         <div className="text-xs text-red-500 dark:text-red-600">
-                            Please enter a valid GitHub repository URL
+                            Please enter a valid Git repository URL
                         </div>
                     )}
 
@@ -181,7 +180,7 @@ export function GithubRepoInput({
                     )}
 
                     {/* App not installed message */}
-                    {!isSimpleMode && urlIsValid && appNotInstalled && (
+                    {!isSimpleMode && urlIsValid && appNotInstalled && currentIsGitHub && (
                         <a
                             href="https://github.com/apps/fern-api/installations/new"
                             target="_blank"

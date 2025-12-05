@@ -3,7 +3,7 @@ import type { DocsUrl } from "@/utils/types";
 import { cn } from "@/utils/utils";
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
-import { SetGithubSourcePopover } from "./SetGithubSource";
+import { SetGitSourcePopover } from "./SetGitSource";
 
 export function ConnectGithubRepoButton({
     docsUrl,
@@ -20,11 +20,11 @@ export function ConnectGithubRepoButton({
 }) {
     const [isSaving, setIsSaving] = useState(false);
     return (
-        <SetGithubSourcePopover docsUrl={docsUrl} setIsSaving={setIsSaving}>
+        <SetGitSourcePopover docsUrl={docsUrl} setIsSaving={setIsSaving}>
             <Button size={size} variant={variant} disabled={isSaving} className={cn("w-fit", buttonClasses)}>
                 <GithubLogo />
                 {isSaving ? "Saving..." : buttonText}
             </Button>
-        </SetGithubSourcePopover>
+        </SetGitSourcePopover>
     );
 }

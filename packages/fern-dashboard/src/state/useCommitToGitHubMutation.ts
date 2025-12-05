@@ -13,6 +13,7 @@ interface CommitToGitHubParams {
     orgName: Auth0OrgName;
     files: GithubCommitableFile[];
     site: string;
+    gitUrl?: string;
 }
 
 type CommitToGitHubResult =

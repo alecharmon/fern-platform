@@ -39,8 +39,8 @@ export function ErrorEditSourceToast() {
     return toast.error("Failed to link your repository. Please try again.");
 }
 
-export function ErrorInvalidGithubUrlToast() {
-    return toast.error("Invalid GitHub URL. Please update and try again.");
+export function ErrorInvalidGitUrlToast() {
+    return toast.error("Invalid Git URL. Please update and try again.");
 }
 
 export function ErrorCommitToast(error?: PostGitCommitErrors) {

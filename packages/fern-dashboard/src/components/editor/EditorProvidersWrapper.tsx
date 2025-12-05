@@ -2,9 +2,11 @@ import "server-only";
 
 import type React from "react";
 import { getGithubSourceMetadata } from "@/app/actions/getGithubSourceMetadata";
+import { getGitlabSourceMetadata } from "@/app/actions/getGitlabSourceMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
-import { getCachedGitHubLoader } from "@/app/services/github/cachedGitHubLoader";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
+import { getGitLoader } from "@/app/services/github/getGitLoader";
 import {
     ClientNavigationProvider,
     PreviewClientNavigationProvider
@@ -29,19 +31,28 @@ interface EditorProvidersWrapperProps {
  * If GitHub is not connected or any GitHub validation fails, the editor automatically falls back to preview mode.
  */
 export async function EditorProvidersWrapper({ children, branch, orgName, docsUrl }: EditorProvidersWrapperProps) {
-    // Check if GitHub is connected first to avoid unnecessary async calls
-    const { githubUrl, session } = await assertAuthAndFetchGithubUrl(orgName, docsUrl);
+    // Check if Git is connected first to avoid unnecessary async calls
+    const { gitUrl, session } = await assertAuthAndFetchGithubUrl(orgName, docsUrl);
 
-    if (githubUrl == null) {
+    if (gitUrl == null) {
         return renderPreviewMode();
     }
 
-    // Try to set up GitHub integration, but fall back to preview mode on any error
+    // Try to set up Git integration, but fall back to preview mode on any error
     try {
-        const sourceRepo = await getGithubSourceMetadata({
-            githubUrl,
-            userId: session.user.sub
-        });
+        // Determine provider and fetch appropriate metadata
+        const parsed = parseGitUrl(gitUrl);
+        const isGitLab = parsed.provider === "gitlab";
+
+        const sourceRepo = isGitLab
+            ? await getGitlabSourceMetadata({
+                  gitlabUrl: gitUrl,
+                  userId: session.user.sub
+              })
+            : await getGithubSourceMetadata({
+                  githubUrl: gitUrl,
+                  userId: session.user.sub
+              });
 
         if (sourceRepo.owner == null || sourceRepo.repo == null || sourceRepo.baseBranch == null) {
             console.warn("[EditorProvidersWrapper] Source repo metadata incomplete, falling back to preview mode");
@@ -49,10 +60,11 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
         }
 
         // TODO: lazy load this so we don't block the initial server render?
-        const githubLoader = await getCachedGitHubLoader(githubUrl);
+        // Use the factory function to get the appropriate loader (GitHub or GitLab)
+        const gitLoader = getGitLoader(gitUrl);
 
         // Use the repo's default branch by passing preferDefaultBranch=true
-        const docsYmlAndReferences = await githubLoader.getDocsYmlAndReferences(
+        const docsYmlAndReferences = await gitLoader.getDocsYmlAndReferences(
             sourceRepo.owner,
             sourceRepo.repo,
             docsUrl,
@@ -75,7 +87,7 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
         // GitHub integration successful - render in editable mode
         return (
             <EditorPreviewProvider isPreview={false}>
-                <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo} docsUrl={docsUrl}>
+                <GitHubRepoProvider branch={branch} sourceRepo={sourceRepo} docsUrl={docsUrl} gitUrl={gitUrl}>
                     <BranchInitializer
                         orgName={orgName}
                         site={docsUrl}
@@ -83,6 +95,7 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
                         repo={sourceRepo.repo}
                         branch={branch}
                         baseBranch={sourceRepo.baseBranch}
+                        gitUrl={gitUrl}
                     />
                     <ClientNavigationProvider
                         branchName={branch}
@@ -97,6 +110,7 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
                             baseBranch={sourceRepo.baseBranch}
                             branch={branch}
                             site={docsUrl}
+                            gitUrl={gitUrl}
                         >
                             {children}
                         </GitPRProvider>

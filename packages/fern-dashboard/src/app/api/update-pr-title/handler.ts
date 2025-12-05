@@ -1,11 +1,11 @@
 import type { GitOperationError } from "@fern-api/docs-loader";
-import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
-import type { GitHubLoader } from "@/app/services/github/github-loader";
+import { getGitLoader } from "@/app/services/github/getGitLoader";
 
 export type UpdatePrTitleErrors = GitOperationError | { type: "PR_NOT_FOUND"; message: string };
 
 /**
- * Updates the title of a PR.
+ * Updates the title of a PR/MR using the GitLoader abstraction.
+ * Works with both GitHub and GitLab repositories.
  */
 export default async function updatePrTitle(request: {
     owner: string;
@@ -13,6 +13,7 @@ export default async function updatePrTitle(request: {
     branch: string;
     title: string;
     baseBranch?: string;
+    repoUrl?: string;
 }): Promise<
     | {
           success: true;
@@ -25,62 +26,57 @@ export default async function updatePrTitle(request: {
           error: UpdatePrTitleErrors;
       }
 > {
-    const { owner, repo } = request;
-
     // Get GitLoader instance
-    const loader = getGitLoaderByOwnerRepo(owner, repo) as GitHubLoader;
-
-    // Need to find the PR first - this requires direct Octokit access
-    const octokit = await loader.getOctokit();
-    if (!octokit) {
-        return {
-            success: false,
-            error: { type: "OPERATION_FAILED", message: "Failed to get GitHub client" }
-        };
-    }
+    const repoUrl = request.repoUrl || `https://github.com/${request.owner}/${request.repo}`;
+    const loader = getGitLoader(repoUrl);
 
     try {
-        // First, find the PR for the branch
-        const getPrsResponse = await octokit.request("GET /repos/{owner}/{repo}/pulls", {
+        // First, find the PR/MR for the branch using the centralized method
+        const getPrResult = await loader.getPullRequestForBranch?.({
             owner: request.owner,
             repo: request.repo,
-            head: `${request.owner}:${request.branch}`,
-            state: "open",
-            base: request.baseBranch
+            branch: request.branch,
+            baseBranch: request.baseBranch
         });
 
-        const pr = getPrsResponse?.data?.[0];
-        if (pr == null) {
+        if (!getPrResult) {
             return {
                 success: false,
-                error: { type: "PR_NOT_FOUND", message: "No PR found for this branch" }
+                error: { type: "UNKNOWN_ERROR", message: "getPullRequestForBranch method not available on loader" }
             };
         }
 
-        // Update the PR using GitLoader
-        const result = await loader.updatePullRequest?.({
+        if (getPrResult.type === "error") {
+            return {
+                success: false,
+                error: { type: "PR_NOT_FOUND", message: getPrResult.error }
+            };
+        }
+
+        // Update the PR/MR using GitLoader
+        const updateResult = await loader.updatePullRequest?.({
             owner: request.owner,
             repo: request.repo,
-            prNumber: pr.number,
+            prNumber: getPrResult.prNumber,
             title: request.title
         });
 
-        if (!result) {
+        if (!updateResult) {
             return {
                 success: false,
                 error: { type: "UNKNOWN_ERROR", message: "updatePullRequest method not available on loader" }
             };
         }
 
-        if (result.type === "ok") {
+        if (updateResult.type === "ok") {
             return {
                 success: true,
                 title: request.title,
-                prNumber: pr.number,
-                prUrl: pr.html_url
+                prNumber: getPrResult.prNumber,
+                prUrl: getPrResult.prUrl
             };
         } else {
-            return { success: false, error: result.error };
+            return { success: false, error: updateResult.error };
         }
     } catch (error) {
         console.error("Failed to update PR title", error);

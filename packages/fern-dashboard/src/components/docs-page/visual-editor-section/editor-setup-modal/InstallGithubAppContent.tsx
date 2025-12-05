@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ValidateGithubRepoAccessResponse } from "@/app/api/validate-github-repo-access/handler";
 import { DialogBody, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import type { ConnectGithubRepoParams } from "@/hooks/useConnectGithubRepo";
+import type { ConnectGitRepoParams } from "@/hooks/useConnectGitRepo";
 import { Button } from "../../../ui/button";
 
 interface InstallGithubAppContentProps {
@@ -13,7 +13,7 @@ interface InstallGithubAppContentProps {
     accessCheckResult?: ValidateGithubRepoAccessResponse | null;
     isCheckingAccess: boolean;
     onAppInstalled: () => void;
-    connectRepo: (params: ConnectGithubRepoParams) => Promise<{ success: boolean; githubUrl: string | undefined }>;
+    connectRepo: (params: ConnectGitRepoParams) => Promise<{ success: boolean; gitUrl: string | undefined }>;
 }
 
 export function InstallGithubAppContent({

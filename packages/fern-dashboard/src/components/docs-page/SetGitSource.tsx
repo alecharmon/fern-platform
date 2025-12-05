@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useConnectGithubRepo } from "@/hooks/useConnectGithubRepo";
+import { useConnectGitRepo } from "@/hooks/useConnectGitRepo";
 import type { DocsUrl } from "@/utils/types";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { GithubRepoInput } from "./GithubRepoInput";
 
-export function SetGithubSourcePopover({
+export function SetGitSourcePopover({
     docsUrl,
     children,
     setIsSaving,
@@ -19,7 +19,7 @@ export function SetGithubSourcePopover({
 }) {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    const { connectRepo } = useConnectGithubRepo({
+    const { connectRepo } = useConnectGitRepo({
         docsUrl,
         onStart: () => {
             setIsSaving(true);

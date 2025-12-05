@@ -2,7 +2,7 @@
 
 import type { GitOperationError, RepositoryFile } from "@fern-api/docs-loader";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getGitLoaderByOwnerRepo } from "@/app/services/github/getGitLoader";
+import { getGitLoader } from "@/app/services/github/getGitLoader";
 
 import type { Auth0OrgName } from "../../auth0/types";
 import { assertUserHasOrganizationAccess } from "../organization";
@@ -28,6 +28,7 @@ export default async function postGitRepository(request: {
         workingDir: string;
         fernToken?: string;
     };
+    provider?: "github" | "gitlab";
 }): Promise<
     | {
           success: true;
@@ -63,7 +64,12 @@ export default async function postGitRepository(request: {
     }
 
     // 3. Get GitLoader instance with demo-creation-bot (for repository creation)
-    const loader = getGitLoaderByOwnerRepo(request.owner, request.repoName, true);
+    const provider = request.provider || "github";
+    const repoUrl =
+        provider === "gitlab"
+            ? `https://gitlab.com/${request.owner}/${request.repoName}`
+            : `https://github.com/${request.owner}/${request.repoName}`;
+    const loader = getGitLoader(repoUrl, true);
 
     // 4. Perform git operation
     const result = await loader.createRepository?.({

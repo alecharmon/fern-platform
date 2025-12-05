@@ -23,13 +23,13 @@ interface AnalyticsTablesProps {
     docsUrl: DocsUrl;
     dateRange: DateRangeOptions;
     orgName?: Auth0OrgName;
-    githubUrl?: string;
+    gitUrl?: string;
     baseBranch?: string;
 }
 
 const formatNumber = (value: number) => new Intl.NumberFormat("en-US").format(value);
 
-function AnalyticsTables({ docsUrl, dateRange, orgName, githubUrl, baseBranch }: AnalyticsTablesProps) {
+function AnalyticsTables({ docsUrl, dateRange, orgName, gitUrl, baseBranch }: AnalyticsTablesProps) {
     // Track sorting state for both tables
     const [pagesSortState, setPagesSortState] = useState<AnalyticsSortState>({
         field: ANALYTICS_FIELDS.VISITORS,
@@ -162,7 +162,7 @@ function AnalyticsTables({ docsUrl, dateRange, orgName, githubUrl, baseBranch }:
                     docsUrl={docsUrl}
                     dateRange={dateRange}
                     orgName={orgName}
-                    githubUrl={githubUrl}
+                    gitUrl={gitUrl}
                     baseBranch={baseBranch}
                 />
             </div>

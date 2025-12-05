@@ -11,7 +11,7 @@ export async function deriveRepoIdentifier({
     repo?: string;
 }): Promise<{ success: true; identifier: RepoIdentifier } | { success: false }> {
     if (githubUrl) {
-        return { success: true, identifier: { type: "url", githubUrl } };
+        return { success: true, identifier: { type: "url", gitUrl: githubUrl } };
     } else if (owner && repo) {
         return { success: true, identifier: { type: "owner-repo", owner, repo } };
     }
@@ -23,11 +23,11 @@ export async function deriveRepoIdentifier({
  */
 export function normalizeRepoData(identifier: RepoIdentifier): RepoData {
     if (identifier.type === "url") {
-        const { owner, repo } = getOwnerAndRepoFromGithubUrl(identifier.githubUrl);
+        const { owner, repo } = getOwnerAndRepoFromGithubUrl(identifier.gitUrl);
         return {
             owner: owner || "",
             repo: repo || "",
-            githubUrl: identifier.githubUrl
+            githubUrl: identifier.gitUrl
         };
     }
     return {

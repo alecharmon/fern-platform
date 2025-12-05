@@ -12,6 +12,7 @@ interface CreateBranchParams {
     baseBranch: string;
     orgName: Auth0OrgName;
     site: DocsUrl;
+    gitUrl?: string;
 }
 
 type CreateBranchResult =

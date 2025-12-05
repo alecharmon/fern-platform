@@ -1,6 +1,6 @@
 import "server-only";
 
-import { type GithubRepoValidationError, validateGithubRepoAccess } from "@/app/services/dal/github/validators";
+import { type GitRepoValidationError, validateGitRepoAccess } from "@/app/services/dal/github/validators";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlMetadata } from "../utils/getDocsUrlMetadata";
@@ -24,7 +24,7 @@ export type ValidateGithubRepoAccessResponse =
     | {
           ok: false;
           appInstalled: boolean;
-          error: GithubRepoValidationError;
+          error: GitRepoValidationError;
       };
 
 export default async function handler({
@@ -56,10 +56,10 @@ export default async function handler({
     const orgName = docsUrlMetadata.body.org;
     const githubUrl = `https://github.com/${owner}/${repo}`;
 
-    const result = await validateGithubRepoAccess(
+    const result = await validateGitRepoAccess(
         orgName,
         parseDocsUrlParam({ docsUrl: url }),
-        { type: "url", githubUrl },
+        { type: "url", gitUrl: githubUrl },
         true // skip cache for immediate feedback
     );
 
