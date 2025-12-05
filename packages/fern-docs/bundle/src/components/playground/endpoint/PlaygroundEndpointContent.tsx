@@ -43,10 +43,12 @@ export function PlaygroundEndpointContent({
     const requestDisabled = !isLocal() && baseUrl?.includes("localhost");
 
     const form = (
-        <div className="mx-auto w-full max-w-5xl space-y-6 pt-6 max-sm:pt-0 sm:pb-20">
-            <div key="auth-form">{authForm}</div>
+        <div className="fern-explorer-form mx-auto w-full max-w-5xl space-y-6 pt-6 max-sm:pt-0 sm:pb-20">
+            <div key="auth-form" className="fern-explorer-auth-form">
+                {authForm}
+            </div>
 
-            <div key="endpoint-form" className="col-span-2 space-y-8">
+            <div key="endpoint-form" className="fern-explorer-endpoint-form col-span-2 space-y-8">
                 <PlaygroundEndpointForm
                     context={context}
                     formState={formState}

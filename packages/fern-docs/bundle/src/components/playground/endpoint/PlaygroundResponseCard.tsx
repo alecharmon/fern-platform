@@ -32,12 +32,14 @@ export function PlaygroundResponseCard({
     const isDarkCode = useIsDarkCode();
     return (
         <FernCard
-            className={cn("rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden", {
+            className={cn("fern-explorer-response-card rounded-3 flex min-w-0 flex-1 shrink flex-col overflow-hidden", {
                 "bg-card-solid dark": isDarkCode
             })}
         >
-            <div className="border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
-                <span className="text-(color:--grayscale-a11) text-xs uppercase">{t(lang).apiReference.response}</span>
+            <div className="fern-explorer-response-header border-border-default flex h-10 w-full shrink-0 items-center justify-between border-b px-3 py-2">
+                <span className="fern-explorer-response-title text-(color:--grayscale-a11) text-xs uppercase">
+                    {t(lang).apiReference.response}
+                </span>
 
                 {response.type === "loaded" && (
                     <div className="flex items-center gap-2 text-xs">

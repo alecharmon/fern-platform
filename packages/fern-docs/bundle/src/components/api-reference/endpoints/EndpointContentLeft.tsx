@@ -39,12 +39,20 @@ export async function EndpointContentLeft({
             <TypeDefinitionAnchorPart key="request" part="request">
                 {showAuth && (authOptions.length > 0 || auths.length > 0) && (
                     <TypeDefinitionAnchorPart part="auth">
-                        <EndpointAuthSection authOptions={authOptions} auths={auths} lang={lang} />
+                        <EndpointAuthSection
+                            authOptions={authOptions}
+                            auths={auths}
+                            lang={lang}
+                            className="fern-endpoint-section-auth"
+                        />
                     </TypeDefinitionAnchorPart>
                 )}
                 {endpoint.pathParameters && endpoint.pathParameters.length > 0 && (
                     <TypeDefinitionAnchorPart part="path">
-                        <EndpointSection title={t(lang).apiReference.pathParameters}>
+                        <EndpointSection
+                            title={t(lang).apiReference.pathParameters}
+                            className="fern-endpoint-section-path-parameters"
+                        >
                             <WithSeparator>
                                 {endpoint.pathParameters.map((parameter) => (
                                     <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
@@ -57,7 +65,7 @@ export async function EndpointContentLeft({
                 )}
                 {headers.length > 0 && (
                     <TypeDefinitionAnchorPart part="header">
-                        <EndpointSection title={t(lang).apiReference.headers}>
+                        <EndpointSection title={t(lang).apiReference.headers} className="fern-endpoint-section-headers">
                             <WithSeparator>
                                 {headers.map((parameter) => (
                                     <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
@@ -70,7 +78,10 @@ export async function EndpointContentLeft({
                 )}
                 {endpoint.queryParameters && endpoint.queryParameters.length > 0 && (
                     <TypeDefinitionAnchorPart part="query">
-                        <EndpointSection title={t(lang).apiReference.queryParameters}>
+                        <EndpointSection
+                            title={t(lang).apiReference.queryParameters}
+                            className="fern-endpoint-section-query-parameters"
+                        >
                             <WithSeparator>
                                 {endpoint.queryParameters.map((parameter) => (
                                     <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
@@ -83,10 +94,16 @@ export async function EndpointContentLeft({
                 )}
                 {endpoint.requests?.[0] != null ? (
                     endpoint.requests.length > 1 ? (
-                        <EndpointMultipleRequestSection requests={endpoint.requests} types={types} lang={lang} />
+                        <EndpointMultipleRequestSection
+                            requests={endpoint.requests}
+                            types={types}
+                            lang={lang}
+                            className="fern-endpoint-section-request-body"
+                        />
                     ) : (
                         <EndpointSection
                             title={t(lang).apiReference.request}
+                            className="fern-endpoint-section-request-body"
                             description={
                                 <MdxServerComponentProseSuspense
                                     size="sm"
@@ -116,10 +133,12 @@ export async function EndpointContentLeft({
                                 responses={endpoint.responses}
                                 types={types}
                                 lang={lang}
+                                className="fern-endpoint-section-response-body"
                             />
                         ) : (
                             <EndpointSection
                                 title={t(lang).apiReference.response}
+                                className="fern-endpoint-section-response-body"
                                 description={
                                     <MdxServerComponentProseSuspense
                                         size="sm"
@@ -147,7 +166,11 @@ export async function EndpointContentLeft({
                     ) : null}
                     {showErrors && endpoint.errors && endpoint.errors.length > 0 && (
                         <TypeDefinitionAnchorPart part="error">
-                            <EndpointSection title={t(lang).apiReference.errors} hideSeparator>
+                            <EndpointSection
+                                title={t(lang).apiReference.errors}
+                                hideSeparator
+                                className="fern-endpoint-section-errors"
+                            >
                                 <EndpointErrorGroup errors={endpoint.errors} types={types} lang={lang} />
                             </EndpointSection>
                         </TypeDefinitionAnchorPart>

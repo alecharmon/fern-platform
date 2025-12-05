@@ -18,13 +18,15 @@ export interface EndpointMultipleResponseSectionProps {
     responses: HttpResponse[];
     types: Record<string, ApiDefinition.TypeDefinition>;
     lang: string;
+    className?: string;
 }
 
 export function EndpointMultipleResponseSection({
     method,
     responses,
     types,
-    lang
+    lang,
+    className
 }: EndpointMultipleResponseSectionProps) {
     const { selectedResponse, setSelectedResponse, setSelectedExampleKey } = useEndpointContext();
 
@@ -45,6 +47,7 @@ export function EndpointMultipleResponseSection({
     return (
         <EndpointSection
             title={t(lang).apiReference.response}
+            className={className}
             description={
                 <MdxServerComponentProseSuspense
                     size="sm"

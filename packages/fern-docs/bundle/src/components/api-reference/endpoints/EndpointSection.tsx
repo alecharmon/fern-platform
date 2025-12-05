@@ -1,6 +1,6 @@
 import type { HttpRequest, HttpResponse } from "@fern-api/fdr-sdk/api-definition";
+import { cn } from "@fern-docs/components/cn";
 import { Separator } from "@fern-docs/components/Separator";
-
 import type { RESET } from "jotai/utils";
 import type React from "react";
 import type { SetStateAction } from "react";
@@ -18,7 +18,8 @@ export function EndpointSection({
     children,
     hideSeparator,
     multipleResponsesProps,
-    multipleRequestsProps
+    multipleRequestsProps,
+    className
 }: {
     title: React.ReactNode;
     description?: React.ReactNode;
@@ -37,10 +38,11 @@ export function EndpointSection({
         setSelectedRequest: (request: HttpRequest) => void;
         getRequestId: (request: HttpRequest) => React.JSX.Element;
     };
+    className?: string;
 }) {
     return (
         <ErrorBoundary>
-            <SectionContainer className="space-y-3">
+            <SectionContainer className={cn("space-y-3", className)}>
                 <TypeDefinitionAnchor>
                     {multipleResponsesProps && (
                         <div className="mt-0 flex flex-row items-center gap-2">

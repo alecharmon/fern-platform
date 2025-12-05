@@ -98,11 +98,11 @@ function renderTypeShorthandFormDataField(
 ): ReactNode {
     return (
         <span className="fern-api-property-meta">
-            <span>{property.type}</span>
+            <span className="fern-api-property-type">{property.type}</span>
             {property.isOptional ? (
-                <span>{t(lang).playground.optional}</span>
+                <span className="fern-api-property-optional">{t(lang).playground.optional}</span>
             ) : (
-                <span className="text-(color:--red-a11)">{t(lang).playground.required}</span>
+                <span className="fern-api-property-required text-(color:--red-a11)">{t(lang).playground.required}</span>
             )}
         </span>
     );

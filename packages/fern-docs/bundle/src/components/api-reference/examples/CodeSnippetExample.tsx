@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@fern-docs/components/cn";
 import { FernSyntaxHighlighter, type ScrollToHandle } from "@fern-docs/components/syntax-highlighter";
 import { useResizeObserver } from "@fern-ui/react-commons";
 import { isEqual } from "es-toolkit/predicate";
@@ -97,7 +98,11 @@ const CodeSnippetExampleInternal: FC<CodeSnippetExample.Props> = ({
     }, [code]);
 
     return (
-        <TitledExample copyToClipboardText={useCallback(() => code, [code])} {...props}>
+        <TitledExample
+            copyToClipboardText={useCallback(() => code, [code])}
+            {...props}
+            className={cn(className, isResponse ? "fern-endpoint-response-snippet" : "fern-endpoint-request-snippet")}
+        >
             <FernSyntaxHighlighter
                 id={id}
                 className="rounded-b-[inherit] rounded-t-none"

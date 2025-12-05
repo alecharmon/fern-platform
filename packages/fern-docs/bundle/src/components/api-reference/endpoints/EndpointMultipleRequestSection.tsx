@@ -15,9 +15,15 @@ export interface EndpointMultipleRequestSectionProps {
     requests: HttpRequest[];
     types: Record<string, ApiDefinition.TypeDefinition>;
     lang: string;
+    className?: string;
 }
 
-export function EndpointMultipleRequestSection({ requests, types, lang }: EndpointMultipleRequestSectionProps) {
+export function EndpointMultipleRequestSection({
+    requests,
+    types,
+    lang,
+    className
+}: EndpointMultipleRequestSectionProps) {
     const { selectedRequest, setSelectedRequest } = useEndpointContext();
 
     const getRequestId = useCallback(
@@ -39,6 +45,7 @@ export function EndpointMultipleRequestSection({ requests, types, lang }: Endpoi
     return (
         <EndpointSection
             title={t(lang).apiReference.request}
+            className={className}
             description={
                 <MdxServerComponentProseSuspense
                     size="sm"

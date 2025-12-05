@@ -56,7 +56,7 @@ export function renderTypeShorthandRoot({
 
     return (
         <span className="fern-api-property-meta">
-            <span>
+            <span className="fern-api-property-type">
                 {!isResponse && nullableDropdown != null ? nullableDropdown : typeShorthand}
                 {isResponse && unwrapped.isOptional && !unwrapped.isNullable && !hideAllModifiers
                     ? " " + t(lang).apiReference.orNull
@@ -65,18 +65,22 @@ export function renderTypeShorthandRoot({
             {isResponse || hideAllModifiers ? (
                 false
             ) : !unwrapped.isOptional ? (
-                <span className="text-(color:--red-a11)">{t(lang).apiReference.required}</span>
+                <span className="fern-api-property-required text-(color:--red-a11)">
+                    {t(lang).apiReference.required}
+                </span>
             ) : hideOptional ? (
                 false
             ) : (
-                <span>{t(lang).apiReference.optional}</span>
+                <span className="fern-api-property-optional">{t(lang).apiReference.optional}</span>
             )}
             {unwrapped.shape.type === "primitive" &&
                 toPrimitiveTypeLabels({ primitive: unwrapped.shape.value, lang }).map((label, index) => (
-                    <code key={index}>{label}</code>
+                    <code className="fern-api-property-constraint" key={index}>
+                        {label}
+                    </code>
                 ))}
             {unwrapped.default != null && !hideAllModifiers && (
-                <span>
+                <span className="fern-api-property-default">
                     {t(lang).playground.defaultsTo}
                     <code>{unknownToString(unwrapped.default)}</code>
                 </span>

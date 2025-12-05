@@ -108,7 +108,11 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
     return (
         <>
             {headers != null && headers.length > 0 && (
-                <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={t(lang).apiReference.headers}>
+                <PlaygroundEndpointFormSection
+                    ignoreHeaders={ignoreHeaders}
+                    title={t(lang).apiReference.headers}
+                    className="fern-explorer-section-headers"
+                >
                     <PlaygroundObjectPropertiesForm
                         id="header"
                         properties={headers.map((header) => ({
@@ -128,6 +132,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                 <PlaygroundEndpointFormSection
                     ignoreHeaders={ignoreHeaders}
                     title={t(lang).apiReference.pathParameters}
+                    className="fern-explorer-section-path-parameters"
                 >
                     <PlaygroundObjectPropertiesForm
                         id="path"
@@ -145,6 +150,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                 <PlaygroundEndpointFormSection
                     ignoreHeaders={ignoreHeaders}
                     title={t(lang).apiReference.queryParameters}
+                    className="fern-explorer-section-query-parameters"
                 >
                     <PlaygroundObjectPropertiesForm
                         id="query"
@@ -164,6 +170,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                     <PlaygroundEndpointFormSection
                         ignoreHeaders={ignoreHeaders}
                         title={t(lang).apiReference.parameters}
+                        className="fern-explorer-section-parameters"
                     >
                         <PlaygroundOpenRPCParamsForm
                             id="body"
@@ -183,6 +190,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                         <PlaygroundEndpointFormSection
                             ignoreHeaders={ignoreHeaders}
                             title={t(lang).playground.multipartForm}
+                            className="fern-explorer-section-multipart-form"
                         >
                             <PlaygroundEndpointMultipartForm
                                 endpoint={endpoint}
@@ -195,7 +203,11 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                         </PlaygroundEndpointFormSection>
                     ),
                     bytes: (bytes) => (
-                        <PlaygroundEndpointFormSection ignoreHeaders={ignoreHeaders} title={t(lang).apiReference.body}>
+                        <PlaygroundEndpointFormSection
+                            ignoreHeaders={ignoreHeaders}
+                            title={t(lang).apiReference.body}
+                            className="fern-explorer-section-body"
+                        >
                             <PlaygroundFileUploadForm
                                 id="body"
                                 propertyKey="body"
@@ -216,6 +228,7 @@ export const PlaygroundEndpointForm: FC<PlaygroundEndpointFormProps> = ({
                             <PlaygroundEndpointFormSection
                                 ignoreHeaders={ignoreHeaders}
                                 title={t(lang).apiReference.bodyParameters}
+                                className="fern-explorer-section-body-parameters"
                             >
                                 <PlaygroundObjectForm
                                     id="body"

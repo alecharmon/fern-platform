@@ -74,11 +74,13 @@ function AuthSchemeVariant({ auth, lang }: { auth: ApiDefinition.AuthScheme; lan
 export function EndpointAuthSection({
     authOptions,
     auths,
-    lang
+    lang,
+    className
 }: {
     authOptions?: ApiDefinition.AuthScheme[][];
     auths?: ApiDefinition.AuthScheme[];
     lang: string;
+    className?: string;
 }) {
     const hasAuthOptions = authOptions != null && authOptions.length > 0;
     const hasAuths = auths != null && auths.length > 0;
@@ -90,7 +92,7 @@ export function EndpointAuthSection({
     if (hasAuthOptions) {
         const totalMethods = authOptions.reduce((sum, group) => sum + group.length, 0);
         return (
-            <EndpointSection title={t(lang).apiReference.authentication}>
+            <EndpointSection title={t(lang).apiReference.authentication} className={className}>
                 <FernCollapseWithButtonUncontrolled
                     showText={`Show ${totalMethods} ${totalMethods === 1 ? "method" : "methods"}`}
                     hideText={`Hide ${totalMethods} ${totalMethods === 1 ? "method" : "methods"}`}
@@ -116,7 +118,7 @@ export function EndpointAuthSection({
     }
 
     return (
-        <EndpointSection title={t(lang).apiReference.authentication}>
+        <EndpointSection title={t(lang).apiReference.authentication} className={className}>
             <FernCollapseWithButtonUncontrolled
                 showText={`Show ${auths.length} ${auths.length === 1 ? "method" : "methods"}`}
                 hideText={`Hide ${auths.length} ${auths.length === 1 ? "method" : "methods"}`}
