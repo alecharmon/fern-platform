@@ -58,14 +58,12 @@ export default function PasswordLoginForm({ returnTo }: PasswordLoginFormProps) 
     const isPending = isLoading || isRedirecting;
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm">
+        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
             <div className="flex flex-col gap-2">
-                <label htmlFor="password" className="text-sm font-medium text-(color:--grayscale-a11)">
-                    Password
-                </label>
                 <FernInput
                     id="password"
                     type="password"
+                    className="h-[36px]"
                     value={password}
                     onValueChange={setPassword}
                     leftIcon={<Lock className="size-icon" />}
@@ -78,14 +76,14 @@ export default function PasswordLoginForm({ returnTo }: PasswordLoginFormProps) 
             </div>
 
             {error && (
-                <p className="text-sm text-(color:--red-11)" role="alert">
+                <p className="text-sm text-(--red-11)" role="alert">
                     {error}
                 </p>
             )}
 
-            <Button type="submit" disabled={isPending || !password}>
+            <Button type="submit" disabled={isPending || !password} className="h-[36px]">
                 {isPending && <Loader2 className="animate-spin" />}
-                {isLoading ? "Signing in..." : isRedirecting ? "Redirecting..." : "Sign in"}
+                {isLoading ? "Signing in..." : isRedirecting ? "Opening..." : "Continue"}
             </Button>
         </form>
     );
