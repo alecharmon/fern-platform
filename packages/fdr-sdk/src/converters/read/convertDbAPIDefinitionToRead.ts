@@ -143,6 +143,7 @@ function transformErrorsV2(dbShape: APIV1Db.DbEndpointDefinition): APIV1Read.Err
                 isWildcard: undefined,
                 name: undefined,
                 examples: undefined,
+                headers: undefined,
                 ...error,
                 type:
                     error.type != null

@@ -284,6 +284,7 @@ function transformErrorsV2(writeShape: APIV1Write.EndpointDefinition): APIV1Read
                 name: undefined,
                 isWildcard: undefined,
                 examples: undefined,
+                headers: undefined,
                 ...error,
                 type:
                     error.type != null

@@ -202,6 +202,9 @@ types:
           The statusCode field will contain the base value (400 for 4XX, 500 for 5XX).
       name: optional<string>
       examples: optional<list<ErrorExample>>
+      headers:
+        type: optional<list<Header>>
+        docs: Response headers associated with this error (e.g., Retry-After for 429 errors).
   # examples
 
   ExampleEndpointCall:

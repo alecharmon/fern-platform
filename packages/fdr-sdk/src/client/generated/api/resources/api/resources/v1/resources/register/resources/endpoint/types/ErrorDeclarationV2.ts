@@ -12,4 +12,6 @@ export interface ErrorDeclarationV2 extends FernRegistry.api.v1.WithDescription,
     isWildcard: boolean | undefined;
     name: string | undefined;
     examples: FernRegistry.api.v1.register.ErrorExample[] | undefined;
+    /** Response headers associated with this error (e.g., Retry-After for 429 errors). */
+    headers: FernRegistry.api.v1.register.Header[] | undefined;
 }
