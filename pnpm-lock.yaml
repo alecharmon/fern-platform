@@ -3069,8 +3069,8 @@ importers:
         specifier: 0.0.6
         version: 0.0.6
       '@fern-api/ruby-dynamic-snippets':
-        specifier: 0.0.1
-        version: 0.0.1
+        specifier: 1.0.0-rc61
+        version: 1.0.0-rc61
       '@fern-api/snippets-core':
         specifier: 0.1.11
         version: 0.1.11
@@ -5991,8 +5991,8 @@ packages:
   '@fern-api/python-dynamic-snippets@0.0.6':
     resolution: {integrity: sha512-CIO/WYd9++EcIH3qckXdG6f9RDhFAOJLDRCtOOczqVNl+zwD4Ef1iR2KZbCD5Ayl5lgyey7Vgqnpe87QuQdrhQ==}
 
-  '@fern-api/ruby-dynamic-snippets@0.0.1':
-    resolution: {integrity: sha512-I4/+CyMOZPqUaSqf4+Wa1kYYJxnQdhR8VQWYfIvY9ksOLtpA/yG4dFYPWezR7XAfEIMJeFn72eztYFU6DqHklg==}
+  '@fern-api/ruby-dynamic-snippets@1.0.0-rc61':
+    resolution: {integrity: sha512-2foiKg/EPxo2bUNAackq5pfWBjcnzZ9OSfGhF5cmI9hGrYutTdB3Pvc1l9lvUrZUmFbRnabrBQ9J5UO9WMwKpA==}
 
   '@fern-api/snippets-core@0.1.11':
     resolution: {integrity: sha512-FoFHuHqyBR9xHeuOjOHlIFNc1heQLLcXudgU83qW+UgGCpSCGKyW+y0CmTYN86PTPAaeog80CQ1QcSX1T2OQRg==}
@@ -25860,7 +25860,7 @@ snapshots:
 
   '@fern-api/python-dynamic-snippets@0.0.6': {}
 
-  '@fern-api/ruby-dynamic-snippets@0.0.1': {}
+  '@fern-api/ruby-dynamic-snippets@1.0.0-rc61': {}
 
   '@fern-api/snippets-core@0.1.11': {}
 

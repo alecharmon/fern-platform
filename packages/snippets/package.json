@@ -35,7 +35,7 @@
     "@fern-api/java-dynamic-snippets": "0.0.4",
     "@fern-api/php-dynamic-snippets": "0.0.6",
     "@fern-api/python-dynamic-snippets": "0.0.6",
-    "@fern-api/ruby-dynamic-snippets": "0.0.1",
+    "@fern-api/ruby-dynamic-snippets": "1.0.0-rc61",
     "@fern-api/snippets-core": "0.1.11",
     "@fern-api/swift-dynamic-snippets": "0.1.1",
     "@fern-api/typescript-dynamic-snippets": "0.0.9",

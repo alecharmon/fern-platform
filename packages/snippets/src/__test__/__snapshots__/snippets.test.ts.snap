@@ -139,12 +139,12 @@ client.users.get_users()
 exports[`Integration Tests > should generate snippets for multiple languages > ruby-snippet 1`] = `
 "require "catcatcat"
 
-client = catcatcat::Client.new(
-    token: '123',
-    base_url: 'https://api.example.com'
+client = Catcatcat::Client.new(
+  token: '123',
+  base_url: 'https://api.example.com'
 );
 
-client.users.get_users({});
+client.users.get_users();
 "
 `;
 
