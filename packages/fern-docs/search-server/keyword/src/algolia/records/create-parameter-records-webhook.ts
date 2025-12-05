@@ -32,7 +32,7 @@ export function createWebhookParameterRecords({
 
     const payload = webhook.payloads?.[0];
     if (payload?.shape) {
-        const payloadProperties = extractObjectPropertiesFromShape(payload.shape, types, 2);
+        const payloadProperties = extractObjectPropertiesFromShape(payload.shape, types, 15);
         payloadProperties.forEach(({ property, breadcrumb }) => {
             records.push(
                 createParameterRecord({

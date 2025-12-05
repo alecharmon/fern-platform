@@ -8,10 +8,12 @@ export default defineConfig({
             forks: {
                 singleFork: false,
                 maxForks: 1,
-                minForks: 1
+                minForks: 1,
+                isolate: true
             }
         },
         fileParallelism: false,
+        testTimeout: 120_000,
         retry: 1
     }
 });

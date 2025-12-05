@@ -60,7 +60,7 @@ export function createWebSocketParameterRecords({
         const origin = message.origin as "client" | "server";
         const section_type = origin === "client" ? "request" : "response";
 
-        const messageProperties = extractObjectPropertiesFromShape(message.body, types, 2);
+        const messageProperties = extractObjectPropertiesFromShape(message.body, types, 15);
         messageProperties.forEach(({ property, breadcrumb }) => {
             records.push(
                 createParameterRecord({

@@ -19,7 +19,7 @@ export function createGrpcParameterRecords({
 
     const requestBody = grpc.requests?.[0]?.body;
     if (requestBody) {
-        const bodyProperties = extractBodyProperties(requestBody, types, 2);
+        const bodyProperties = extractBodyProperties(requestBody, types, 15);
         bodyProperties.forEach(({ property, breadcrumb }) => {
             records.push(
                 createParameterRecord({
@@ -37,7 +37,7 @@ export function createGrpcParameterRecords({
 
     const responseBody = grpc.responses?.[0]?.body;
     if (responseBody) {
-        const bodyProperties = extractBodyProperties(responseBody, types, 2);
+        const bodyProperties = extractBodyProperties(responseBody, types, 15);
         bodyProperties.forEach(({ property, breadcrumb }) => {
             records.push(
                 createParameterRecord({

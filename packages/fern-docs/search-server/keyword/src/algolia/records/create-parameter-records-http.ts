@@ -69,9 +69,8 @@ export function createHttpParameterRecords({
         );
     });
 
-    const requestBody = endpoint.requests?.[0]?.body;
-    if (requestBody) {
-        const bodyProperties = extractBodyProperties(requestBody, types, 2);
+    endpoint.requests?.forEach((request) => {
+        const bodyProperties = extractBodyProperties(request.body, types, 15);
         bodyProperties.forEach(({ property, breadcrumb }) => {
             records.push(
                 createParameterRecord({
@@ -85,11 +84,10 @@ export function createHttpParameterRecords({
                 })
             );
         });
-    }
+    });
 
-    const responseBody = endpoint.responses?.[0]?.body;
-    if (responseBody) {
-        const bodyProperties = extractBodyProperties(responseBody, types, 2);
+    endpoint.responses?.forEach((response) => {
+        const bodyProperties = extractBodyProperties(response.body, types, 15);
         bodyProperties.forEach(({ property, breadcrumb }) => {
             records.push(
                 createParameterRecord({
@@ -97,17 +95,18 @@ export function createHttpParameterRecords({
                     property,
                     section_type: "response",
                     subsection_type: "body",
+                    status_code: response.statusCode.toString(),
                     breadcrumb,
                     types,
                     page_position: position++
                 })
             );
         });
-    }
+    });
 
     endpoint.errors?.forEach((error) => {
         const statusCode = error.statusCode.toString();
-        const errorProperties = extractErrorBodyProperties(error.shape, types, 2);
+        const errorProperties = extractErrorBodyProperties(error.shape, types, 15);
         errorProperties.forEach(({ property, breadcrumb }) => {
             records.push(
                 createParameterRecord({
