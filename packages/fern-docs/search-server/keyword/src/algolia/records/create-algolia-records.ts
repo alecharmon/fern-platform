@@ -57,6 +57,13 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
 } {
     const collector = FernNavigation.NodeCollector.collect(root);
 
+    const versionNodes = collector.getVersionNodes();
+    const versionIndexMap = new Map<string, number>();
+    for (const [idx, v] of versionNodes.entries()) {
+        versionIndexMap.set(v.versionId, idx);
+        console.log(`[algolia] version_index: ${v.versionId} -> ${idx}`);
+    }
+
     const pageNodes = Array.from(collector.slugMap.values())
         .filter(FernNavigation.isPage)
         // exclude hidden pages and pages within hidden packages
@@ -87,7 +94,8 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
             parents: collector.getParents(node.id) ?? [],
             domain,
             org_id,
-            authed: authed?.(node) ?? false
+            authed: authed?.(node) ?? false,
+            versionIndexMap
         });
 
         if (node.type === "changelogEntry") {
@@ -112,7 +120,8 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
             parents: collector.getParents(node.id) ?? [],
             domain,
             org_id,
-            authed: authed?.(node) ?? false
+            authed: authed?.(node) ?? false,
+            versionIndexMap
         });
 
         if (node.type === "endpoint") {

@@ -109,6 +109,12 @@ export const BaseRecordSchema = z.object({
         .describe(
             "The position of this record within the page, which is used to sort before distinct, so that the root node is preferred over a deeply nested node"
         ),
+    version_index: z
+        .number()
+        .optional()
+        .describe(
+            "The index of the version in the docs config (0 = default). Used for ranking during deduplication across versions."
+        ),
     distinct: z.string().optional()
 });
 

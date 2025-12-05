@@ -22,7 +22,7 @@ export async function setIndexSettings(
             unretrievableAttributes: ["org_id", "visible_by", "authed"],
             attributeForDistinct: "canonicalPathname",
             enableRules: true,
-            customRanking: ["desc(date_timestamp)", "asc(page_position)"],
+            customRanking: ["desc(date_timestamp)", "asc(version_index)", "asc(page_position)"],
             removeWordsIfNoResults: "allOptional",
             optionalWords: [
                 "endpoint",

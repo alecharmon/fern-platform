@@ -10,6 +10,7 @@ interface CreateBaseRecordOptions {
     parents: readonly FernNavigation.NavigationNodeParent[];
     node: FernNavigation.NavigationNodeWithMetadata;
     authed: boolean;
+    versionIndexMap?: Map<string, number>;
 }
 
 export function createBaseRecord({
@@ -17,7 +18,8 @@ export function createBaseRecord({
     org_id,
     parents,
     node,
-    authed: isDocsSiteAuthed
+    authed: isDocsSiteAuthed,
+    versionIndexMap
 }: CreateBaseRecordOptions): BaseRecord {
     const productNode = parents.find((n): n is FernNavigation.ProductNode => n.type === "product");
     const versionNode = parents.find((n): n is FernNavigation.VersionNode => n.type === "version");
@@ -80,6 +82,7 @@ export function createBaseRecord({
             : undefined,
         visible_by: roles.map(createRoleFacet),
         authed,
-        page_position: 0
+        page_position: 0,
+        version_index: versionNode && versionIndexMap ? versionIndexMap.get(versionNode.versionId) : undefined
     };
 }
