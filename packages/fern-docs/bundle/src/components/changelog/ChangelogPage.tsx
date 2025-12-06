@@ -6,14 +6,7 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { t } from "@fern-docs/i18n";
-import {
-    getFrontmatter,
-    makeToc,
-    sanitizeBreaks,
-    sanitizeMdxExpression,
-    type TableOfContentsItem,
-    toTree
-} from "@fern-docs/mdx";
+import { makeToc, type TableOfContentsItem, toTree } from "@fern-docs/mdx";
 import { compact } from "es-toolkit/compat";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
@@ -169,36 +162,15 @@ export async function ChangelogPageEntry({
     node: FernNavigation.ChangelogEntryNode;
 }) {
     const page = await loader.getPage(node.pageId);
-
-    // Extract frontmatter title without full MDX bundling (much faster)
-    const sanitized = sanitizeMdxExpression(sanitizeBreaks(page.markdown))[0];
-    const { data: frontmatter } = getFrontmatter(sanitized);
-    const frontmatterTitle = frontmatter?.title;
-
-    // Start body serialization immediately
-    const mdxPromise = serialize(page.markdown, {
+    const mdx = await serialize(page.markdown, {
         filename: page.filename,
         slug: node.slug
     });
 
-    // If frontmatter title exists, serialize it in parallel (fast path)
-    // Otherwise, wait for full MDX to run remarkExtractTitle, then serialize that title (fallback path)
-    const titlePromise = frontmatterTitle
-        ? serialize(frontmatterTitle, {
-              filename: page.filename,
-              slug: node.slug
-          })
-        : mdxPromise.then((mdx) => {
-              const extractedTitle = mdx?.frontmatter?.title;
-              return extractedTitle
-                  ? serialize(extractedTitle, {
-                        filename: page.filename,
-                        slug: node.slug
-                    })
-                  : undefined;
-          });
-
-    const [mdx, title] = await Promise.all([mdxPromise, titlePromise]);
+    const title = await serialize(mdx?.frontmatter?.title, {
+        filename: page.filename,
+        slug: node.slug
+    });
 
     return (
         <Markdown

@@ -35,18 +35,19 @@ export type MdxSerializerOptions = {
     replaceHref?: RehypeLinksOptions["replaceHref"];
 };
 
-export type SerializedMdx = {
-    code: string;
-    frontmatter?: Partial<Frontmatter>;
-    jsxElements: string[];
-    engine: "esbuild" | "next-remote" | "plaintext";
-    styles?: string[];
-};
-
 export type MdxSerializer = (
     content: string | undefined,
     options?: MdxSerializerOptions
-) => Promise<SerializedMdx | undefined>;
+) => Promise<
+    | {
+          code: string;
+          frontmatter?: Partial<Frontmatter>;
+          jsxElements: string[];
+          engine: "esbuild" | "next-remote" | "plaintext";
+          styles?: string[];
+      }
+    | undefined
+>;
 
 const monitor = new Semaphore(20);
 

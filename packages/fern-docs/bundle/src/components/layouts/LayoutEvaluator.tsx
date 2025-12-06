@@ -5,7 +5,6 @@ import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { type Availability, AvailabilityBadge } from "@fern-docs/components/badges/availability-badge";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
-import { getFrontmatter, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";
 import type React from "react";
 
 import { MdxAside } from "@/mdx/bundler/component";
@@ -37,29 +36,11 @@ export async function LayoutEvaluator({
     availability?: Availability;
 }) {
     const { filename, markdown, editThisPageUrl } = await loader.getPage(pageId);
-
-    // Extract frontmatter without full MDX bundling (much faster)
-    const sanitized = sanitizeMdxExpression(sanitizeBreaks(markdown))[0];
-    const { data: extractedFrontmatter } = getFrontmatter(sanitized);
-    const frontmatterSubtitle = extractedFrontmatter?.subtitle ?? extractedFrontmatter?.excerpt;
-
-    // Serialize page content and subtitle in parallel
-    // Note: We serialize the title after MDX parsing because remarkExtractTitle may extract it from h1 headers
-    const [mdx, subtitleMdx, config, lang] = await Promise.all([
-        serialize(markdown, {
-            filename,
-            toc: true,
-            slug
-        }),
-        frontmatterSubtitle
-            ? serialize(frontmatterSubtitle, {
-                  filename,
-                  slug
-              })
-            : Promise.resolve(undefined),
-        loader.getConfig(),
-        loader.getLanguage()
-    ]);
+    const mdx = await serialize(markdown, {
+        filename,
+        toc: true,
+        slug
+    });
 
     const exports = getMDXExport(mdx);
     const toc = asToc(exports?.toc);
@@ -70,11 +51,8 @@ export async function LayoutEvaluator({
     const title = frontmatter?.title ?? fallbackTitle;
     const subtitle = frontmatter?.subtitle ?? frontmatter?.excerpt;
 
-    // Serialize the actual title (which may have been extracted from h1 by remarkExtractTitle)
-    const titleMdx = await serialize(title, {
-        filename,
-        slug
-    });
+    const config = await loader.getConfig();
+    const lang = await loader.getLanguage();
 
     const extractedStyles = mdx?.styles ?? [];
 
@@ -91,9 +69,7 @@ export async function LayoutEvaluator({
         <PageHeader
             serialize={serialize}
             title={title}
-            titleMdx={titleMdx}
             subtitle={subtitle}
-            subtitleMdx={subtitleMdx}
             breadcrumb={breadcrumb}
             slug={slug}
             markdownPromise={Promise.resolve({ content: markdown, contentType: "markdown" })}

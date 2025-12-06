@@ -95,13 +95,11 @@ async function performRevalidation(params: {
     controller.log(`revalidating:${domain}\n`);
 
     const loadWithUrlPromise = loadWithUrl(domain);
-    // TODO: use the FDR API to get the baseUrl
-    const baseUrlPromise = loadWithUrlPromise.then((docs) => ({ baseUrl: docs.baseUrl }));
 
     const [docs, edgeFlags, metadata, authConfig] = await Promise.all([
         loadWithUrlPromise,
         getEdgeFlags(domain),
-        getMetadataFromResponse(withoutStaging(domain), baseUrlPromise),
+        getMetadataFromResponse(withoutStaging(domain), loadWithUrlPromise),
         getAuthEdgeConfig(domain)
     ]);
 
@@ -439,10 +437,7 @@ export async function GET(
         };
 
         try {
-            const metadata = await getMetadataFromResponse(
-                withoutStaging(domain),
-                loadWithUrl(domain).then((docs) => ({ baseUrl: docs.baseUrl }))
-            );
+            const metadata = await getMetadataFromResponse(withoutStaging(domain), loadWithUrl(domain));
             const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
             const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
             const useGetRequests = req.nextUrl.searchParams.get("useGetRequests") === "true";
@@ -494,10 +489,7 @@ export async function GET(
                     }
                 };
 
-                const metadata = await getMetadataFromResponse(
-                    withoutStaging(domain),
-                    loadWithUrl(domain).then((docs) => ({ baseUrl: docs.baseUrl }))
-                );
+                const metadata = await getMetadataFromResponse(withoutStaging(domain), loadWithUrl(domain));
                 const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
                 const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
                 const useGetRequests = req.nextUrl.searchParams.get("useGetRequests") === "true";

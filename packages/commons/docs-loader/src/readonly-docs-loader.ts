@@ -138,70 +138,6 @@ const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrl
 };
 const loadDynamicIRWithUrl = uncachedLoadDynamicIRWithUrl;
 
-type DocsBranchPathSegment = string | number;
-
-type DocsBranchPath = DocsBranchPathSegment[];
-
-type DocsBranchSelectorInput = {
-    branch: unknown;
-    path: DocsBranchPath;
-    branches: { path: DocsBranchPath; branch: unknown }[];
-    paths: DocsBranchPath[];
-    response: DocsV2Read.LoadDocsForUrlResponse;
-};
-
-type DocsBranchRequest<T> = {
-    paths?: DocsBranchPath[];
-    selector?: (input: DocsBranchSelectorInput) => T;
-};
-
-const loadDocsResponse = cache(async (domainKey: string) => loadWithUrl(domainKey));
-
-function identityBranchSelector<T>({ branch }: DocsBranchSelectorInput): T {
-    return branch as T;
-}
-
-function getBranchAtPath(target: unknown, path: DocsBranchPath) {
-    return path.reduce<unknown>((current, segment) => {
-        if (current == null) {
-            return undefined;
-        }
-        if (typeof segment === "number") {
-            return (current as unknown[])[segment];
-        }
-        return (current as Record<string, unknown>)[segment];
-    }, target);
-}
-
-async function loadDocsBranch<T>(domainKey: string, request: DocsBranchRequest<T>): Promise<T> {
-    const hasExplicitPaths = request.paths != null && request.paths.length > 0;
-    const paths = request.paths ?? [[]];
-
-    // Load the full response
-    const response = await loadDocsResponse(domainKey);
-
-    const branches = paths.map((path) => ({
-        path,
-        branch: getBranchAtPath(response, path)
-    }));
-
-    const primaryBranch = branches[0]?.branch;
-    const primaryPath = branches[0]?.path ?? [];
-
-    if (hasExplicitPaths && primaryBranch === undefined) {
-        throw new Error(`Path not found in docs response: ${JSON.stringify(primaryPath)}`);
-    }
-
-    const selector = request.selector ?? identityBranchSelector<T>;
-    return selector({
-        branch: hasExplicitPaths ? primaryBranch : response,
-        path: primaryPath,
-        branches,
-        paths,
-        response
-    });
-}
-
 /*
  * Domain key decoder/encoder functions
  */
@@ -370,17 +306,16 @@ const cachedGetEdgeFlags = cache(async (domainKey: string) => {
 
 export const getMetadataFromResponse = async (
     domainKey: string,
-    baseUrlPromise: AsyncOrSync<Pick<DocsV2Read.LoadDocsForUrlResponse, "baseUrl">>
+    responsePromise: AsyncOrSync<DocsV2Read.LoadDocsForUrlResponse>
 ): Promise<DocsMetadata> => {
     assertDocsDomain(domainKey);
-    const [baseUrlResponse, docsUrlMetadata] = await Promise.all([
-        baseUrlPromise,
+    const [response, docsUrlMetadata] = await Promise.all([
+        responsePromise,
         getDocsUrlMetadata(deriveDomainFromDomainKey(domainKey))
     ]);
-    const baseUrl = baseUrlResponse.baseUrl;
 
     const isSelfHostedMode = isSelfHosted();
-    const fdrBasePath = baseUrl.basePath;
+    const fdrBasePath = response.baseUrl.basePath;
     const nextBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
     const finalBasePath = isSelfHostedMode ? cleanBasePath(nextBasePath) : cleanBasePath(fdrBasePath);
 
@@ -389,11 +324,11 @@ export const getMetadataFromResponse = async (
         fdrBasePath,
         nextBasePath,
         finalBasePath,
-        domain: baseUrl.domain
+        domain: response.baseUrl.domain
     });
 
     return {
-        domain: baseUrl.domain,
+        domain: response.baseUrl.domain,
         // In self-hosted mode, use the Next.js basePath instead of the FDR basePath
         // This allows the app to be served from a single basePath for all routes
         basePath: finalBasePath,
@@ -431,25 +366,7 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
 
         const loadStart = Date.now();
         console.debug(`[DocsLoader] getMetadata loadWithUrl start - domain: ${domainKey}`);
-
-        // Try to use getDocsFields API directly
-        const { domain } = decodeDocsLoaderDomainKey(domainKey);
-        const fieldsResponse = await runWithSpan(
-            "docs.getDocsFields.baseUrl",
-            () => getDocsFieldsFromServer(domain, [DocsDefinitionField.BaseUrl]),
-            { "fern.docs.domain": domain }
-        );
-
-        let baseUrlResponse: Pick<DocsV2Read.LoadDocsForUrlResponse, "baseUrl">;
-        if (fieldsResponse?.baseUrl != null) {
-            baseUrlResponse = { baseUrl: fieldsResponse.baseUrl };
-        } else {
-            // Fallback to full load
-            const response = await loadDocsResponse(domainKey);
-            baseUrlResponse = { baseUrl: response.baseUrl };
-        }
-
-        const metadata = await getMetadataFromResponse(domainKey, baseUrlResponse);
+        const metadata = await getMetadataFromResponse(domainKey, loadWithUrl(domainKey));
         const loadDuration = Date.now() - loadStart;
         console.debug(`[DocsLoader] getMetadata loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
         kvSet(domainKey, CACHE_KEY_METADATA, metadata, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
@@ -540,7 +457,7 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
             }
 
             // Fallback to full load
-            const response = await loadDocsResponse(domainKey);
+            const response = await loadWithUrl(domainKey);
             const basePath = response.baseUrl?.basePath ?? "";
             const files = transformFilesToFileData(response.definition.filesV2, basePath);
 
@@ -588,7 +505,7 @@ const getApi = async (domainKey: string, id: string) => {
         apis = fieldsResponse.apis;
     } else {
         // Fallback to full load
-        const response = await loadDocsResponse(domainKey);
+        const response = await loadWithUrl(domainKey);
         apisV2 = response.definition.apisV2;
         apis = response.definition.apis;
     }
@@ -854,9 +771,7 @@ const unsafe_getFullRoot = async (domainKey: string) => {
 
     // Fallback to S3 if getDocsFields didn't return a root
     console.debug(`[DocsLoader] unsafe_getFullRoot falling back to S3 for domain: ${domainKey}`);
-    const response = await loadDocsBranch(domainKey, {
-        selector: ({ response }) => response
-    });
+    const response = await loadWithUrl(domainKey);
     const root = convertResponseToRootNode(response, await cachedGetEdgeFlags(domainKey));
     if (root == null) {
         console.error("Could not find root node for domainKey", domainKey);
@@ -1126,7 +1041,7 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
             pages = fieldsResponse.pages as Record<PageId, DocsV1Read.PageContent> | undefined;
         } else {
             // Fallback to full load
-            const response = await loadDocsResponse(domainKey);
+            const response = await loadWithUrl(domainKey);
             pages = response.definition.pages;
         }
 
@@ -1182,7 +1097,7 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
             files = fieldsResponse.jsFiles ?? {};
         } else {
             // Fallback to full load
-            const response = await loadDocsResponse(domainKey);
+            const response = await loadWithUrl(domainKey);
             files = response.definition.jsFiles ?? {};
         }
 
@@ -1531,7 +1446,7 @@ const getTypes = () =>
             apis = fieldsResponse.apis;
         } else {
             // Fallback to full load
-            const response = await loadDocsResponse(domainKey);
+            const response = await loadWithUrl(domainKey);
             apisV2 = response.definition.apisV2;
             apis = response.definition.apis;
         }
