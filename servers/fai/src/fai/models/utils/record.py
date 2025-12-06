@@ -15,7 +15,7 @@ class TurbopufferRecord(BaseModel):
     keywords: list[str] | None = None
     authed: bool | None = None
     content_type: str | None = None
-    breadcrumbs: str | list[str] | None = None
+    breadcrumbs: str | None = None
     chunk_index: int | None = None
     parent_id: str | None = None
     parent_content_hash: str | None = None

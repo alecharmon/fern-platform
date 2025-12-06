@@ -14,7 +14,7 @@ export const TurbopufferRecordSchema = z.object({
         keywords: z.array(z.string()).optional(),
         authed: z.boolean().optional(),
         content_type: z.string().optional(),
-        breadcrumbs: z.union([z.string(), z.array(z.string())]).optional(),
+        breadcrumbs: z.string().optional(),
         chunk_index: z.number().optional(),
         parent_id: z.string().optional(),
         parent_content_hash: z.string().optional(),

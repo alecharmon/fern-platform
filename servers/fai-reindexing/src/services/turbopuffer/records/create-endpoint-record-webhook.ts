@@ -63,7 +63,10 @@ export function createEndpointBaseRecordWebhook({
 
     const document = `${document_body}\n\n${description}`;
 
-    const breadcrumbs = FernNavigation.utils.createBreadcrumb([...parents, node]).map((b) => b.title);
+    const breadcrumbs = FernNavigation.utils
+        .createBreadcrumb([...parents, node])
+        .map((b) => b.title)
+        .join(", ");
 
     return {
         id: createHash("sha256").update(node.webhookId).digest("hex"),

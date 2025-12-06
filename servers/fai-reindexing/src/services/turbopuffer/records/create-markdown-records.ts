@@ -58,7 +58,10 @@ export async function createMarkdownRecords({
 
     const { roles, authed: isNodeAuthed } = createViewersForNodes([...parents, node], authed);
 
-    const breadcrumbs = FernNavigation.utils.createBreadcrumb([...parents, node]).map((b) => b.title);
+    const breadcrumbs = FernNavigation.utils
+        .createBreadcrumb([...parents, node])
+        .map((b) => b.title)
+        .join(", ");
 
     const markdownChunks = isChangelog ? [markdown] : chunkMarkdown(markdown);
 

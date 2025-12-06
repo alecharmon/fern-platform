@@ -66,7 +66,10 @@ export function createEndpointBaseRecordHttp({
 
     const { roles, authed: isNodeAuthed } = createViewersForNodes([...parents, node], authed);
 
-    const breadcrumbs = FernNavigation.utils.createBreadcrumb([...parents, node]).map((b) => b.title);
+    const breadcrumbs = FernNavigation.utils
+        .createBreadcrumb([...parents, node])
+        .map((b) => b.title)
+        .join(", ");
 
     return {
         id: createHash("sha256").update(node.id).digest("hex"),
