@@ -1540,8 +1540,11 @@ const createCachedDocsLoaderImpl = async (
             return prefetched.metadata ?? (await metadata);
         },
         getFiles: async () => {
-            const prefetched = await prefetchPromise;
-            return prefetched.files ?? (await getFiles(config)(domainKey));
+            // Always use getFiles() which has unstable_cacheTag and respects revalidateTag.
+            // Do NOT use prefetched.files from batchGetCommonMetadata because it reads
+            // directly from KV and doesn't respect cache invalidation, which can cause
+            // stale file data to be served after revalidation.
+            return await getFiles(config)(domainKey);
         },
         getMdxBundlerFiles: async () => {
             const prefetched = await prefetchPromise;
