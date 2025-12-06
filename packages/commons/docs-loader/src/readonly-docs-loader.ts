@@ -405,6 +405,39 @@ function transformFilesToFileData(
     });
 }
 
+/**
+ * Fetches files directly from FDR, bypassing KV cache.
+ * Use this as a fallback when cached files may be stale/incomplete during revalidation races.
+ */
+const getFilesUncached = async (domainKey: string): Promise<Record<string, FileData>> => {
+    try {
+        const { domain } = decodeDocsLoaderDomainKey(domainKey);
+        const fieldsResponse = await runWithSpan(
+            "docs.getDocsFields.files.uncached",
+            () => getDocsFieldsFromServer(domain, [DocsDefinitionField.FilesV2, DocsDefinitionField.BaseUrl]),
+            { "fern.docs.domain": domain }
+        );
+
+        if (fieldsResponse != null) {
+            const basePath = fieldsResponse.baseUrl?.basePath ?? "";
+            return transformFilesToFileData(fieldsResponse.filesV2, basePath);
+        }
+
+        // Fallback to full load via uncached path
+        const response = await uncachedLoadWithUrl(domain);
+        const basePath = response.baseUrl?.basePath ?? "";
+        return transformFilesToFileData(response.definition.filesV2, basePath);
+    } catch (error) {
+        console.error(`Failed to load files (uncached) for ${domainKey}`, error);
+        track("asset_error", {
+            type: "get_files_uncached_error",
+            domain: domainKey,
+            error: String(error)
+        });
+        return {};
+    }
+};
+
 const getFiles = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string): Promise<Record<string, FileData>> => {
         "use cache";
@@ -1484,6 +1517,11 @@ export type DocsLoaderOptions = {
 export type CachedDocsLoader = DocsLoader & {
     clearKvCache: () => Promise<void>;
     isAskAiEnabledForDocs: () => Promise<boolean>;
+    /**
+     * Fetches files directly from FDR, bypassing KV cache.
+     * Use this as a fallback when cached files may be stale/incomplete.
+     */
+    getFilesUncached?: () => Promise<Record<string, FileData>>;
 };
 
 /**
@@ -1621,7 +1659,8 @@ const createCachedDocsLoaderImpl = async (
         isAskAiEnabledForDocs: async () => {
             const prefetched = await prefetchPromise;
             return prefetched.askAiEnabled ?? (await getAskAiEnabledForDocs(config)(domainKey));
-        }
+        },
+        getFilesUncached: () => getFilesUncached(domainKey)
     };
 };
 

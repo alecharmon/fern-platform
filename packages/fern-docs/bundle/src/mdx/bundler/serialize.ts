@@ -96,7 +96,9 @@ async function serializeMdxImpl(
         domain,
         slug
     }: {
-        loader?: Partial<Pick<DocsLoader, "getFiles" | "getMdxBundlerFiles">>;
+        loader?: Partial<Pick<DocsLoader, "getFiles" | "getMdxBundlerFiles">> & {
+            getFilesUncached?: () => Promise<Record<string, FileData>>;
+        };
         scope?: Record<string, unknown>;
         filename?: string;
         toc?: boolean;
@@ -132,9 +134,6 @@ async function serializeMdxImpl(
 
     let files: Record<string, string> = {};
     let remoteFiles: Record<string, FileData> = {};
-    const jsxElements: string[] = [];
-    const styles: string[] = [];
-    const unresolvedFileIds: Array<{ fileId: string; elementName: string | null | undefined }> = [];
 
     remoteFiles = (await loader?.getFiles?.()) ?? {};
     files = (await loader?.getMdxBundlerFiles?.()) ?? {};
@@ -151,180 +150,256 @@ async function serializeMdxImpl(
         return filename;
     });
 
-    const createBundleConfig = (source: string) => ({
-        source,
-        files,
-        globals: {
-            "@mdx-js/react": {
-                varName: "MdxJsReact",
-                namedExports: ["useMDXComponents"],
-                defaultExport: false
-            }
-        },
-        mdxOptions: (o: any) => {
-            o.remarkRehypeOptions = {
-                handlers: { heading: customHeadingHandler }
-            };
+    // Helper to run bundleMDX with given files, returns result and any unresolved file IDs
+    const runBundle = async (
+        filesToUse: Record<string, FileData>
+    ): Promise<{
+        bundled: Awaited<ReturnType<typeof bundleMDX>> | null;
+        unresolvedFileIds: Array<{ fileId: string; elementName: string | null | undefined }>;
+        jsxElements: string[];
+        styles: string[];
+        lastError: Error | null;
+    }> => {
+        const unresolvedFileIds: Array<{ fileId: string; elementName: string | null | undefined }> = [];
+        const jsxElements: string[] = [];
+        const styles: string[] = [];
 
-            o.providerImportSource = "@mdx-js/react";
+        const createBundleConfig = (source: string) => ({
+            source,
+            files,
+            globals: {
+                "@mdx-js/react": {
+                    varName: "MdxJsReact",
+                    namedExports: ["useMDXComponents"],
+                    defaultExport: false
+                }
+            },
+            mdxOptions: (o: any) => {
+                o.remarkRehypeOptions = {
+                    handlers: { heading: customHeadingHandler }
+                };
 
-            const remarkPlugins: PluggableList = [
-                remarkFrontmatter,
-                remarkExtractTitle,
-                [remarkMdxFrontmatter, { name: "frontmatter" }],
-                remarkSqueezeParagraphs,
-                [remarkInjectEsm, { scope }],
-                [remarkSanitizeAcorn],
-                remarkGfm,
-                remarkSmartypants,
-                remarkMath,
-                remarkGemoji
-            ];
+                o.providerImportSource = "@mdx-js/react";
 
-            const rehypePlugins: PluggableList = [
-                rehypeSqueezeParagraphs,
-                rehypeKatex,
-                [
-                    rehypeFiles,
-                    {
-                        files: remoteFiles,
-                        onUnresolvedFileId: (src: string, elementName: string | null | undefined) => {
-                            // Only track unresolved file: references
-                            if (!src.startsWith("file:")) {
-                                return;
+                const remarkPlugins: PluggableList = [
+                    remarkFrontmatter,
+                    remarkExtractTitle,
+                    [remarkMdxFrontmatter, { name: "frontmatter" }],
+                    remarkSqueezeParagraphs,
+                    [remarkInjectEsm, { scope }],
+                    [remarkSanitizeAcorn],
+                    remarkGfm,
+                    remarkSmartypants,
+                    remarkMath,
+                    remarkGemoji
+                ];
+
+                const rehypePlugins: PluggableList = [
+                    rehypeSqueezeParagraphs,
+                    rehypeKatex,
+                    [
+                        rehypeFiles,
+                        {
+                            files: filesToUse,
+                            onUnresolvedFileId: (src: string, elementName: string | null | undefined) => {
+                                // Only track unresolved file: references
+                                if (!src.startsWith("file:")) {
+                                    return;
+                                }
+                                unresolvedFileIds.push({ fileId: src, elementName });
                             }
-                            unresolvedFileIds.push({ fileId: src, elementName });
                         }
-                    }
-                ],
-                rehypeMdxClassStyle,
-                rehypeLlmsFilter,
-                rehypeCodeBlock,
-                rehypeSteps,
-                rehypeAccordions,
-                rehypeTable,
-                rehypeTabs,
-                rehypeCards,
-                rehypeParamField,
-                [rehypeSlug, { additionalJsxElements: ["Step", "Accordion", "Tab", "ParamField"] }],
-                [rehypeLinks, { replaceHref }],
-                [
-                    rehypeExtractStyles,
-                    {
-                        collect: (styles_: string[]) => {
-                            styles.push(...styles_);
+                    ],
+                    rehypeMdxClassStyle,
+                    rehypeLlmsFilter,
+                    rehypeCodeBlock,
+                    rehypeSteps,
+                    rehypeAccordions,
+                    rehypeTable,
+                    rehypeTabs,
+                    rehypeCards,
+                    rehypeParamField,
+                    [rehypeSlug, { additionalJsxElements: ["Step", "Accordion", "Tab", "ParamField"] }],
+                    [rehypeLinks, { replaceHref }],
+                    [
+                        rehypeExtractStyles,
+                        {
+                            collect: (styles_: string[]) => {
+                                styles.push(...styles_);
+                            }
                         }
-                    }
-                ],
-                rehypeAccordionNestedHeaders,
-                [
-                    rehypeExpressionToMd,
-                    {
-                        mdxJsxElementAllowlist: {
-                            Frame: ["caption"],
-                            Tab: ["title"],
-                            Card: ["title"],
-                            Callout: ["title"],
-                            Info: ["title"],
-                            Warning: ["title"],
-                            Success: ["title"],
-                            Error: ["title"],
-                            Note: ["title"],
-                            Launch: ["title"],
-                            Tip: ["title"],
-                            Check: ["title"],
-                            Step: ["title"],
-                            Accordion: ["title"]
+                    ],
+                    rehypeAccordionNestedHeaders,
+                    [
+                        rehypeExpressionToMd,
+                        {
+                            mdxJsxElementAllowlist: {
+                                Frame: ["caption"],
+                                Tab: ["title"],
+                                Card: ["title"],
+                                Callout: ["title"],
+                                Info: ["title"],
+                                Warning: ["title"],
+                                Success: ["title"],
+                                Error: ["title"],
+                                Note: ["title"],
+                                Launch: ["title"],
+                                Tip: ["title"],
+                                Check: ["title"],
+                                Step: ["title"],
+                                Accordion: ["title"]
+                            }
                         }
-                    }
-                ],
-                rehypeButtons,
-                [rehypeEndpointSchemaSnippets, { loader }],
-                [rehypeEndpointExampleSnippets, { loader }],
-                [rehypeSchema, { loader }],
-                [rehypeRunnableEndpoint, { loader }],
-                [rehypeLang, { loader }],
-                [
-                    rehypeMigrateJsx,
-                    {
-                        a: "A",
-                        h1: "H1",
-                        h2: "H2",
-                        h3: "H3",
-                        h4: "H4",
-                        h5: "H5",
-                        h6: "H6",
-                        img: "Image",
-                        iframe: "IFrame",
-                        li: "Li",
-                        ol: "Ol",
-                        strong: "Strong",
-                        table: "Table",
-                        ul: "Ul"
-                    }
-                ],
-                toc ? rehypeToc : noop,
-                rehypeAcornErrorBoundary,
-                [
-                    rehypeCollectJsx,
-                    {
-                        collect: (jsxElements_: string[]) => {
-                            jsxElements.push(...jsxElements_);
+                    ],
+                    rehypeButtons,
+                    [rehypeEndpointSchemaSnippets, { loader }],
+                    [rehypeEndpointExampleSnippets, { loader }],
+                    [rehypeSchema, { loader }],
+                    [rehypeRunnableEndpoint, { loader }],
+                    [rehypeLang, { loader }],
+                    [
+                        rehypeMigrateJsx,
+                        {
+                            a: "A",
+                            h1: "H1",
+                            h2: "H2",
+                            h3: "H3",
+                            h4: "H4",
+                            h5: "H5",
+                            h6: "H6",
+                            img: "Image",
+                            iframe: "IFrame",
+                            li: "Li",
+                            ol: "Ol",
+                            strong: "Strong",
+                            table: "Table",
+                            ul: "Ul"
                         }
-                    }
-                ],
-                rehypeExtractAsides,
-                rehypeLog
-            ];
+                    ],
+                    toc ? rehypeToc : noop,
+                    rehypeAcornErrorBoundary,
+                    [
+                        rehypeCollectJsx,
+                        {
+                            collect: (jsxElements_: string[]) => {
+                                jsxElements.push(...jsxElements_);
+                            }
+                        }
+                    ],
+                    rehypeExtractAsides,
+                    rehypeLog
+                ];
 
-            o.remarkPlugins = remarkPlugins;
-            o.rehypePlugins = rehypePlugins;
-            o.development = process.env.NODE_ENV === "development";
+                o.remarkPlugins = remarkPlugins;
+                o.rehypePlugins = rehypePlugins;
+                o.development = process.env.NODE_ENV === "development";
 
-            return o;
-        },
-        esbuildOptions: (o: any) => {
-            o.minify = process.env.NODE_ENV === "production";
-            o.sourcemap = false;
-            o.logLevel = "error";
-            o.logLimit = 0;
-            o.metafile = false;
-            o.write = false;
+                return o;
+            },
+            esbuildOptions: (o: any) => {
+                o.minify = process.env.NODE_ENV === "production";
+                o.sourcemap = false;
+                o.logLevel = "error";
+                o.logLimit = 0;
+                o.metafile = false;
+                o.write = false;
 
-            o.define = {
-                "process.env": "{}"
-            };
-            o.inject = o.inject?.filter((path: string) => !path.includes("process"));
+                o.define = {
+                    "process.env": "{}"
+                };
+                o.inject = o.inject?.filter((path: string) => !path.includes("process"));
 
-            return o;
+                return o;
+            }
+        });
+
+        let bundled: Awaited<ReturnType<typeof bundleMDX>> | null = null;
+        let lastError: Error | null = null;
+
+        // try with processedContent first, then fallback to original content
+        const sources = [processedContent, content];
+
+        for (const source of sources) {
+            try {
+                const timeoutPromise = new Promise<never>((_, reject) =>
+                    setTimeout(
+                        () => reject(new Error(`BundleMDX timed out after ${BUNDLE_MDX_TIMEOUT / 1000} seconds`)),
+                        BUNDLE_MDX_TIMEOUT
+                    )
+                );
+
+                bundled = await Promise.race([bundleMDX(createBundleConfig(source)), timeoutPromise]);
+                break;
+            } catch (error) {
+                lastError = error instanceof Error ? error : new Error(String(error));
+                console.warn(
+                    `BundleMDX failed with ${source === processedContent ? "processed" : "original"} content:`,
+                    lastError.message
+                );
+            }
         }
-    });
 
-    let bundled: Awaited<ReturnType<typeof bundleMDX>> | null = null;
-    let lastError: Error | null = null;
+        return { bundled, unresolvedFileIds, jsxElements, styles, lastError };
+    };
 
-    // try with processedContent first, then fallback to original content
-    const sources = [processedContent, content];
+    // First pass with cached files
+    let result = await runBundle(remoteFiles);
 
-    for (const source of sources) {
+    // If there are unresolved file IDs and we have a fallback, try fetching fresh files from FDR
+    if (result.unresolvedFileIds.length > 0 && loader?.getFilesUncached != null) {
+        const domainForLogging = domain ?? domainFallback;
+        console.warn(
+            `[rehype-files] Found ${result.unresolvedFileIds.length} unresolved file IDs for ${domainForLogging}${slug ? "/" + slug : ""}, fetching fresh files from FDR`
+        );
+
         try {
-            const timeoutPromise = new Promise<never>((_, reject) =>
-                setTimeout(
-                    () => reject(new Error(`BundleMDX timed out after ${BUNDLE_MDX_TIMEOUT / 1000} seconds`)),
-                    BUNDLE_MDX_TIMEOUT
-                )
-            );
+            const freshFiles = await loader.getFilesUncached();
+            const mergedFiles = { ...remoteFiles, ...freshFiles };
 
-            bundled = await Promise.race([bundleMDX(createBundleConfig(source)), timeoutPromise]);
-            break;
+            // Check if any of the unresolved IDs are now available
+            const stillUnresolved = result.unresolvedFileIds.filter(({ fileId }) => {
+                const id = fileId.startsWith("file:") ? fileId.slice(5) : fileId;
+                return !mergedFiles[id];
+            });
+
+            // Only re-bundle if we found new files that could resolve the issues
+            if (stillUnresolved.length < result.unresolvedFileIds.length) {
+                const resolvedCount = result.unresolvedFileIds.length - stillUnresolved.length;
+                console.log(`[rehype-files] Found ${resolvedCount} previously missing files, re-bundling`);
+
+                track("asset_error", {
+                    type: "mdx_files_fallback_success",
+                    domain: domainForLogging,
+                    slug,
+                    originalUnresolvedCount: result.unresolvedFileIds.length,
+                    resolvedCount,
+                    stillUnresolvedCount: stillUnresolved.length
+                });
+
+                result = await runBundle(mergedFiles);
+                remoteFiles = mergedFiles; // Update for tracking
+            } else {
+                // Fallback didn't help - files are genuinely missing
+                track("asset_error", {
+                    type: "mdx_files_fallback_no_help",
+                    domain: domainForLogging,
+                    slug,
+                    unresolvedCount: result.unresolvedFileIds.length,
+                    freshFilesCount: Object.keys(freshFiles).length
+                });
+            }
         } catch (error) {
-            lastError = error instanceof Error ? error : new Error(String(error));
-            console.warn(
-                `BundleMDX failed with ${source === processedContent ? "processed" : "original"} content:`,
-                lastError.message
-            );
+            console.error(`[rehype-files] Failed to fetch fresh files from FDR:`, error);
+            track("asset_error", {
+                type: "mdx_files_fallback_error",
+                domain: domain ?? domainFallback,
+                slug,
+                error: String(error)
+            });
         }
     }
+
+    const { bundled, unresolvedFileIds, jsxElements, styles, lastError } = result;
 
     if (!bundled) {
         throw lastError || new Error("BundleMDX failed with all retry attempts");
@@ -348,7 +423,7 @@ async function serializeMdxImpl(
 
     const frontmatter = getMDXExport(bundled)?.frontmatter as Partial<FernDocs.Frontmatter> | undefined;
 
-    // Track unresolved file IDs for debugging missing images
+    // Track unresolved file IDs for debugging missing images (after retry if applicable)
     if (unresolvedFileIds.length > 0) {
         const domainForLogging = domain ?? domainFallback;
         console.warn(

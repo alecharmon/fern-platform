@@ -52,7 +52,7 @@ export type MdxSerializer = (
 const monitor = new Semaphore(20);
 
 export function createCachedMdxSerializer(
-    loader: CachedDocsLoader,
+    loader: Omit<CachedDocsLoader, "getFilesUncached"> & Pick<Partial<CachedDocsLoader>, "getFilesUncached">,
     {
         scope,
         replaceHref,
