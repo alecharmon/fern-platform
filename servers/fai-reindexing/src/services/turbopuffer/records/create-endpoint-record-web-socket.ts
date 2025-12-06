@@ -1,4 +1,4 @@
-import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
+import { ApiDefinition, FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
 import { truncateToBytes, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import {
     createDelimitedRolesetString,
@@ -18,15 +18,15 @@ export function createEndpointBaseRecordWebSocket({
     url,
     types
 }: {
-    node: FernNavigation.WebSocketNode;
-    parents: readonly FernNavigation.NavigationNodeParent[];
+    node: FernNavigationType.WebSocketNode;
+    parents: readonly FernNavigationType.NavigationNodeParent[];
     authed: boolean;
     endpoint: ApiDefinition.WebSocketChannel;
     url: string;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
 }): TurbopufferRecord {
-    const versionNode = parents.find((n): n is FernNavigation.VersionNode => n.type === "version");
-    const productNode = parents.find((n): n is FernNavigation.ProductNode => n.type === "product");
+    const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
+    const productNode = parents.find((n): n is FernNavigationType.ProductNode => n.type === "product");
     const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
 
     const keywords: string[] = [];
@@ -77,6 +77,8 @@ export function createEndpointBaseRecordWebSocket({
 
     const { roles, authed: isNodeAuthed } = createViewersForNodes([...parents, node], authed);
 
+    const breadcrumbs = FernNavigation.utils.createBreadcrumb([...parents, node]).map((b) => b.title);
+
     return {
         id: createHash("sha256").update(node.webSocketId).digest("hex"),
         attributes: {
@@ -88,7 +90,12 @@ export function createEndpointBaseRecordWebSocket({
             product: productNode?.title,
             authed: isNodeAuthed,
             roles: roles.map((role) => createDelimitedRolesetString(role)),
-            keywords
+            keywords,
+            content_type: "websocket",
+            breadcrumbs,
+            chunk_index: 0,
+            parent_id: node.webSocketId,
+            parent_content_hash: createHash("sha256").update(document).digest("hex")
         }
     };
 }

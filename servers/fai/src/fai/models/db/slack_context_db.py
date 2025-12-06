@@ -58,4 +58,5 @@ class SlackContextDb(Base):
             product=None,
             keywords=None,
             authed=None,
+            content_type="slack_context",
         )

@@ -1,3 +1,5 @@
+import hashlib
+
 from openai import AsyncOpenAI
 from sqlalchemy import (
     Boolean,
@@ -52,6 +54,16 @@ class DocumentDb(Base):
             model=CONFIG.DEFAULT_EMBEDDING_MODEL.model_name,
         )
         chunk_vector = embedding.data[0].embedding
+
+        # NOTE: To maintain backwards compatibility with old document IDs.
+        # Can be removed once all old documents have been confidently deleted.
+        parts = self.id.split(":")
+        if len(parts) == 2:
+            parent_id, chunk_idx = parts[0], int(parts[1])
+        else:
+            parent_id = self.id
+            chunk_idx = 0
+
         return TurbopufferRecord(
             id=self.id,
             vector=chunk_vector,
@@ -63,4 +75,8 @@ class DocumentDb(Base):
             product=self.product,
             keywords=self.keywords,
             authed=self.authed,
+            content_type="page",
+            parent_id=parent_id,
+            chunk_index=chunk_idx,
+            parent_content_hash=hashlib.sha256(self.document.encode("utf-8")).hexdigest(),
         )

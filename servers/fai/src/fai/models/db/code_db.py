@@ -67,4 +67,5 @@ class CodeDb(Base):
             product=self.product,
             keywords=self.keywords,
             authed=self.authed,
+            content_type="code",
         )

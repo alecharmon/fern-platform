@@ -1,4 +1,4 @@
-import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
+import { ApiDefinition, FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
 import {
     createDelimitedRolesetString,
     createViewersForNodes,
@@ -18,16 +18,16 @@ export function createEndpointBaseRecordHttp({
     types,
     apiDefinition
 }: {
-    node: FernNavigation.EndpointNode;
-    parents: readonly FernNavigation.NavigationNodeParent[];
+    node: FernNavigationType.EndpointNode;
+    parents: readonly FernNavigationType.NavigationNodeParent[];
     authed: boolean;
     endpoint: ApiDefinition.EndpointDefinition;
     url: string;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     apiDefinition?: ApiDefinition.ApiDefinition;
 }): TurbopufferRecord {
-    const versionNode = parents.find((n): n is FernNavigation.VersionNode => n.type === "version");
-    const productNode = parents.find((n): n is FernNavigation.ProductNode => n.type === "product");
+    const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
+    const productNode = parents.find((n): n is FernNavigationType.ProductNode => n.type === "product");
     const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
 
     const keywords: string[] = [];
@@ -66,6 +66,8 @@ export function createEndpointBaseRecordHttp({
 
     const { roles, authed: isNodeAuthed } = createViewersForNodes([...parents, node], authed);
 
+    const breadcrumbs = FernNavigation.utils.createBreadcrumb([...parents, node]).map((b) => b.title);
+
     return {
         id: createHash("sha256").update(node.id).digest("hex"),
         attributes: {
@@ -77,7 +79,12 @@ export function createEndpointBaseRecordHttp({
             version: versionNode?.title,
             authed: isNodeAuthed,
             roles: roles.map((role) => createDelimitedRolesetString(role)),
-            keywords
+            keywords,
+            content_type: "endpoint",
+            breadcrumbs,
+            chunk_index: 0,
+            parent_id: node.endpointId,
+            parent_content_hash: createHash("sha256").update(document).digest("hex")
         }
     };
 }

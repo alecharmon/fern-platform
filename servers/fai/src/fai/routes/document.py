@@ -66,10 +66,12 @@ async def create_document(
 
         chunks = await maybe_chunk_document(body.chunk or body.document)
 
-        for chunk in chunks:
-            document_id = str(uuid.uuid4())
+        document_id = str(uuid.uuid4())
+
+        for chunk_index, chunk in enumerate(chunks):
+            document_chunk_id = f"{document_id}:{chunk_index}"
             new_db_document = DocumentDb(
-                id=document_id,
+                id=document_chunk_id,
                 domain=domain,
                 chunk=chunk,
                 document=body.document,
@@ -82,7 +84,7 @@ async def create_document(
                 updated_at=datetime.now(),
             )
             db.add(new_db_document)
-            created_document_ids.append(document_id)
+            created_document_ids.append(document_chunk_id)
         await db.commit()
         await db.refresh(new_db_document)
         await sync_documents_to_tpuf(domain, created_document_ids, db)
@@ -117,10 +119,12 @@ async def batch_create_document(
         for document in body:
             chunks = await maybe_chunk_document(document.chunk or document.document)
 
-            for chunk in chunks:
-                document_id = str(uuid.uuid4())
+            document_id = str(uuid.uuid4())
+
+            for chunk_index, chunk in enumerate(chunks):
+                document_chunk_id = f"{document_id}:{chunk_index}"
                 new_db_document = DocumentDb(
-                    id=document_id,
+                    id=document_chunk_id,
                     domain=domain,
                     chunk=chunk,
                     document=document.document,
@@ -134,8 +138,8 @@ async def batch_create_document(
                 )
 
                 db.add(new_db_document)
-                created_document_ids.append(document_id)
-                LOGGER.info(f"Created document {document_id} for domain: {domain}")
+                created_document_ids.append(document_chunk_id)
+                LOGGER.info(f"Created document chunk {document_chunk_id} for domain: {domain}")
 
         await db.commit()
         await sync_documents_to_tpuf(domain, created_document_ids, db)

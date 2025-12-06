@@ -23,6 +23,12 @@ def get_data_index_tpuf_schema() -> dict[str, Any]:
         "roles": {"type": "[]string", "filterable": True},
         "keywords": {"type": "[]string", "filterable": False, "full_text_search": True},
         "authed": {"type": "bool", "filterable": True},
+        "content_type": {"type": "string", "filterable": True},
+        "breadcrumbs": {"type": "string", "filterable": False},
+        "chunk_index": {"type": "uint", "filterable": True},
+        "parent_id": {"type": "string", "filterable": True},
+        "parent_content_hash": {"type": "string", "filterable": True},
+        "indexed_at": {"type": "string", "filterable": True},
     }
 
 
@@ -49,4 +55,10 @@ def get_query_index_tpuf_schema() -> dict[str, Any]:
         "keywords": {"type": "[]string", "filterable": False, "full_text_search": True},
         "authed": {"type": "bool", "filterable": True},
         "source": {"type": "string", "filterable": True},
+        "content_type": {"type": "string", "filterable": True},
+        "breadcrumbs": {"type": "string", "filterable": False},
+        "chunk_index": {"type": "uint", "filterable": True},
+        "parent_id": {"type": "string", "filterable": True},
+        "parent_content_hash": {"type": "string", "filterable": True},
+        "indexed_at": {"type": "string", "filterable": True},
     }

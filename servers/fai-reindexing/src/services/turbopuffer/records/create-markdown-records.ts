@@ -1,4 +1,4 @@
-import type { FernNavigation } from "@fern-api/fdr-sdk";
+import { FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
 import {
     createDelimitedRolesetString,
     createViewersForNodes,
@@ -41,27 +41,32 @@ export async function createMarkdownRecords({
     authed,
     markdown,
     url,
-    isChangelog
+    isChangelog,
+    pageId
 }: {
-    node: FernNavigation.NavigationNodeWithMetadata;
-    parents: readonly FernNavigation.NavigationNodeParent[];
+    node: FernNavigationType.NavigationNodeWithMetadata;
+    parents: readonly FernNavigationType.NavigationNodeParent[];
     authed: boolean;
     markdown: string;
     url: string;
     isChangelog: boolean;
+    pageId: string;
 }): Promise<TurbopufferRecordWithoutVector[]> {
-    const versionNode = parents.find((n): n is FernNavigation.VersionNode => n.type === "version");
+    const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
 
-    const productNode = parents.find((n): n is FernNavigation.ProductNode => n.type === "product");
+    const productNode = parents.find((n): n is FernNavigationType.ProductNode => n.type === "product");
 
     const { roles, authed: isNodeAuthed } = createViewersForNodes([...parents, node], authed);
+
+    const breadcrumbs = FernNavigation.utils.createBreadcrumb([...parents, node]).map((b) => b.title);
 
     const markdownChunks = isChangelog ? [markdown] : chunkMarkdown(markdown);
 
     return markdownChunks.map((chunk, i) => {
         const processedChunk = postProcessChunk(chunk);
+        const recordId = createHash("sha256").update(`${node.id}-${i}`).digest("hex");
         return {
-            id: createHash("sha256").update(`${node.id}-${i}`).digest("hex"),
+            id: recordId,
             attributes: {
                 chunk: processedChunk,
                 title: node.title,
@@ -72,7 +77,12 @@ export async function createMarkdownRecords({
                 keywords: undefined,
                 authed: isNodeAuthed,
                 roles: roles.map((role) => createDelimitedRolesetString(role)),
-                url
+                url,
+                content_type: "page",
+                breadcrumbs,
+                chunk_index: i,
+                parent_id: pageId,
+                parent_content_hash: createHash("sha256").update(markdown).digest("hex")
             }
         };
     });

@@ -1,4 +1,4 @@
-import { ApiDefinition, type FernNavigation } from "@fern-api/fdr-sdk";
+import { ApiDefinition, FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
 import { truncateToBytes } from "@fern-api/ui-core-utils";
 import {
     createDelimitedRolesetString,
@@ -17,15 +17,15 @@ export function createEndpointBaseRecordWebhook({
     url,
     types
 }: {
-    node: FernNavigation.WebhookNode;
-    parents: readonly FernNavigation.NavigationNodeParent[];
+    node: FernNavigationType.WebhookNode;
+    parents: readonly FernNavigationType.NavigationNodeParent[];
     authed: boolean;
     endpoint: ApiDefinition.WebhookDefinition;
     url: string;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
 }): TurbopufferRecord {
-    const versionNode = parents.find((n): n is FernNavigation.VersionNode => n.type === "version");
-    const productNode = parents.find((n): n is FernNavigation.ProductNode => n.type === "product");
+    const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
+    const productNode = parents.find((n): n is FernNavigationType.ProductNode => n.type === "product");
     const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
 
     const keywords: string[] = [];
@@ -63,6 +63,8 @@ export function createEndpointBaseRecordWebhook({
 
     const document = `${document_body}\n\n${description}`;
 
+    const breadcrumbs = FernNavigation.utils.createBreadcrumb([...parents, node]).map((b) => b.title);
+
     return {
         id: createHash("sha256").update(node.webhookId).digest("hex"),
         attributes: {
@@ -74,7 +76,12 @@ export function createEndpointBaseRecordWebhook({
             product: productNode?.title,
             authed: isNodeAuthed,
             roles: roles.map((role) => createDelimitedRolesetString(role)),
-            keywords
+            keywords,
+            content_type: "webhook",
+            breadcrumbs,
+            chunk_index: 0,
+            parent_id: node.webhookId,
+            parent_content_hash: createHash("sha256").update(document).digest("hex")
         }
     };
 }

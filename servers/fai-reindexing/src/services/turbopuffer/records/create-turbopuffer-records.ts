@@ -66,7 +66,8 @@ export async function createTurbopufferRecords({
                     authed: authed?.(node) ?? false,
                     markdown,
                     url,
-                    isChangelog
+                    isChangelog,
+                    pageId
                 });
             })
         )

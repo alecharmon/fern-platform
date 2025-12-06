@@ -61,6 +61,7 @@ class GuidanceDb(Base):
                     version=None,
                     keywords=None,
                     authed=None,
+                    content_type="guidance",
                 ),
             )
         return tbuf_records

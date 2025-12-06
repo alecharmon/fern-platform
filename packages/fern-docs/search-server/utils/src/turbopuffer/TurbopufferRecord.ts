@@ -12,7 +12,13 @@ export const TurbopufferRecordSchema = z.object({
         product: z.string().optional(),
         roles: z.array(z.string()).optional(),
         keywords: z.array(z.string()).optional(),
-        authed: z.boolean().optional()
+        authed: z.boolean().optional(),
+        content_type: z.string().optional(),
+        breadcrumbs: z.union([z.string(), z.array(z.string())]).optional(),
+        chunk_index: z.number().optional(),
+        parent_id: z.string().optional(),
+        parent_content_hash: z.string().optional(),
+        indexed_at: z.string().optional()
     })
 });
 
@@ -72,5 +78,35 @@ export const FernTurbopufferAttributeSchema: Record<
         type: "[]string",
         filterable: false,
         bm25: true
+    },
+    content_type: {
+        type: "string",
+        filterable: true,
+        bm25: false
+    },
+    breadcrumbs: {
+        type: "string",
+        filterable: false,
+        bm25: true
+    },
+    chunk_index: {
+        type: "uint",
+        filterable: true,
+        bm25: false
+    },
+    parent_id: {
+        type: "string",
+        filterable: true,
+        bm25: false
+    },
+    parent_content_hash: {
+        type: "string",
+        filterable: true,
+        bm25: false
+    },
+    indexed_at: {
+        type: "string",
+        filterable: true,
+        bm25: false
     }
 };
