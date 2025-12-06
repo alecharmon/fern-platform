@@ -13,7 +13,7 @@ import {
 import type { AuthType } from "@prisma/client";
 import type { Pool } from "pg";
 import { DomainNotRegisteredError } from "../errors";
-import { checkUserBelongsToOrg } from "../utils/auth";
+import { verifyDocsServiceJWT } from "../utils/jwt";
 import { getDocsDefinitionFromS3, getPresignedDocsAssetsDownloadUrl } from "../utils/s3";
 import { readBuffer } from "../utils/serde";
 
@@ -25,11 +25,8 @@ export async function getDocsForUrl(
     const s3Docs = await getDocsDefinitionFromS3(url.hostname);
 
     if (s3Docs != null) {
-        // Check authorization using orgId from S3 response
-        await checkUserBelongsToOrg({
-            authHeader,
-            orgId: s3Docs.orgId
-        });
+        // Verify the service JWT from docs-server
+        await verifyDocsServiceJWT(authHeader);
         return s3Docs;
     } else {
         console.log(`[getDocsForUrl] No docs found in S3, falling back to db for hostname: ${url.hostname}`);
@@ -38,11 +35,8 @@ export async function getDocsForUrl(
     const dbDocs = await loadDocsForURLFromDatabase(url, pool);
 
     if (dbDocs != null) {
-        // Check authorization - user must belong to the org that owns these docs
-        await checkUserBelongsToOrg({
-            authHeader,
-            orgId: dbDocs.orgId
-        });
+        // Verify the service JWT from docs-server
+        await verifyDocsServiceJWT(authHeader);
         // Fetch API definitions referenced by the docs
         const apiDefinitions = await fetchApiDefinitions(dbDocs.docsDefinition.referencedApis, pool);
 

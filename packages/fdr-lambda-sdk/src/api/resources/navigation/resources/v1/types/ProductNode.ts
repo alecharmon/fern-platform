@@ -4,13 +4,7 @@
 
 import * as FdrLambda from "../../../../../index.js";
 
-export interface ProductNode extends FdrLambda.navigation.v1.WithNodeMetadata, FdrLambda.navigation.v1.WithRedirect {
-    type: "product";
-    default: boolean;
-    productId: FdrLambda.navigation.v1.ProductId;
-    child: FdrLambda.navigation.v1.ProductChild;
-    /** Couple words for what the product is */
-    subtitle: string;
-    /** A URL to an image that will be displayed in the sidebar. Takes precedence over `icon` if both are provided. */
-    image: FdrLambda.FileId | undefined;
-}
+/**
+ * A product can either be internal (with navigation structure) or external (linking to an external URL)
+ */
+export type ProductNode = FdrLambda.navigation.v1.InternalProductNode | FdrLambda.navigation.v1.ExternalProductNode;

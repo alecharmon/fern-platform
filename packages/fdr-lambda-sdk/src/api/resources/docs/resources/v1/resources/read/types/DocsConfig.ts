@@ -7,6 +7,7 @@ import * as FdrLambda from "../../../../../../../index.js";
 export interface DocsConfig {
     title: string | undefined;
     defaultLanguage: FdrLambda.docs.v1.commons.ProgrammingLanguage | undefined;
+    languages: FdrLambda.docs.v1.commons.Language[] | undefined;
     announcement: FdrLambda.docs.v1.commons.AnnouncementConfig | undefined;
     navigation: FdrLambda.docs.v1.read.NavigationConfig | undefined;
     root: FdrLambda.navigation.v1.RootNode | undefined;

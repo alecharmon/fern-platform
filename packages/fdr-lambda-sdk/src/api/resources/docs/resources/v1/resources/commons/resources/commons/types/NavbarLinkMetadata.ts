@@ -4,8 +4,9 @@
 
 import * as FdrLambda from "../../../../../../../../../index.js";
 
-export interface NavbarLinkMetadata {
+export interface NavbarLinkMetadata extends FdrLambda.docs.v1.commons.WithPermissions {
     url: FdrLambda.Url;
+    target: FdrLambda.LinkTarget | undefined;
     text: string | undefined;
     icon: string | undefined;
     rightIcon: string | undefined;

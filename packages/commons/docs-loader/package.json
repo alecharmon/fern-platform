@@ -46,6 +46,7 @@
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-api/visual-editor-server": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",
+    "@opentelemetry/api": "^1.9.0",
     "@vercel/kv": "^2.0.0",
     "es-toolkit": "catalog:",
     "next": "catalog:",

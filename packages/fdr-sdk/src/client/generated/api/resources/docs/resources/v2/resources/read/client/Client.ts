@@ -772,6 +772,105 @@ export class ReadClient {
         };
     }
 
+    /**
+     * Loads specific fields from the docs definition with proper conversion (e.g., S3 URLs resolved).
+     * This is more efficient than loading the entire docs definition when you only need specific parts.
+     *
+     * @param {FernRegistry.docs.v2.read.GetDocsFieldsRequest} request
+     * @param {ReadClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.docs.v2.read.getDocsFields({
+     *         domain: "domain",
+     *         fields: ["BASE_URL", "BASE_URL"]
+     *     })
+     */
+    public getDocsFields(
+        request: FernRegistry.docs.v2.read.GetDocsFieldsRequest,
+        requestOptions?: ReadClient.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<FernRegistry.docs.v2.read.GetDocsFieldsResponse, FernRegistry.docs.v2.read.getDocsFields.Error>
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__getDocsFields(request, requestOptions));
+    }
+
+    private async __getDocsFields(
+        request: FernRegistry.docs.v2.read.GetDocsFieldsRequest,
+        requestOptions?: ReadClient.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<
+                FernRegistry.docs.v2.read.GetDocsFieldsResponse,
+                FernRegistry.docs.v2.read.getDocsFields.Error
+            >
+        >
+    > {
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                "/v2/registry/docs/load-fields",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs:
+                requestOptions?.timeoutInSeconds != null
+                    ? requestOptions.timeoutInSeconds * 1000
+                    : this._options?.timeoutInSeconds != null
+                      ? this._options?.timeoutInSeconds * 1000
+                      : undefined,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FernRegistry.docs.v2.read.GetDocsFieldsResponse,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FernRegistry.docs.v2.read.getDocsFields.Error)?.error) {
+                case "DomainNotRegisteredError":
+                case "UnauthorizedError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FernRegistry.docs.v2.read.getDocsFields.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.docs.v2.read.getDocsFields.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
     protected async _getAuthorizationHeader(): Promise<string | undefined> {
         const bearer = await core.Supplier.get(this._options.token);
         if (bearer != null) {

@@ -5,8 +5,7 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface WebhookNode
-    extends FdrLambda.navigation.v1.WithNodeMetadata,
-        FdrLambda.navigation.v1.WithApiDefinitionId {
+    extends FdrLambda.navigation.v1.WithNodeMetadata, FdrLambda.navigation.v1.WithApiDefinitionId {
     type: "webhook";
     method: FdrLambda.HttpMethod;
     webhookId: FdrLambda.WebhookId;

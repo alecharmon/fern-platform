@@ -10,11 +10,12 @@ import {
     UserNotInOrgError
 } from "./errors";
 import { ensureDocsInS3 } from "./services/ensureDocsInS3";
+import { DocsV2Read, getDocsFields } from "./services/getDocsFields";
 import { getDocsForUrl } from "./services/getDocsForUrl";
 import { getEndpointById } from "./services/getEndpointById";
 import { getEndpointByLocator } from "./services/getEndpointByLocator";
 import { getMetadataForUrl } from "./services/getMetadataForUrl";
-import { checkUserBelongsToOrg } from "./utils/auth";
+import { verifyDocsServiceJWT } from "./utils/jwt";
 import { initializeS3 } from "./utils/s3";
 
 // Create connection pool outside handler for connection reuse
@@ -73,13 +74,8 @@ async function deleteDocsSite(url: string, authHeader: string | undefined): Prom
         throw new DomainNotRegisteredError();
     }
 
-    const orgId = result.rows[0].orgID;
-
-    // Check authorization - user must belong to the org that owns this docs site
-    await checkUserBelongsToOrg({
-        authHeader,
-        orgId
-    });
+    // Verify the service JWT from docs-server
+    await verifyDocsServiceJWT(authHeader);
 
     const bucketName = process.env.DB_DOCS_DEFINITION_BUCKET_NAME;
     if (!bucketName) {
@@ -298,6 +294,81 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                     "Access-Control-Allow-Origin": "*"
                 },
                 body: JSON.stringify(s3Response)
+            };
+        }
+
+        // Route: POST /v2/registry/docs/load-fields or POST /load-fields
+        if ((path === "/v2/registry/docs/load-fields" || path === "/load-fields") && method === "POST") {
+            console.log(`[Handler] load-fields endpoint called, requestId: ${context.awsRequestId}`);
+
+            const body: DocsV2Read.GetDocsFieldsRequest = JSON.parse(event.body || "{}");
+            console.log(`[Handler] Parsed request body, domain: ${body.domain}, fields: ${body.fields}`);
+
+            if (!body.domain) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Missing required field: domain",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            if (!body.fields || !Array.isArray(body.fields) || body.fields.length === 0) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Missing or invalid required field: fields (must be a non-empty array)",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            // Validate field values using enum constants
+            const { DocsDefinitionField } = DocsV2Read;
+            const validFields = Object.values(DocsDefinitionField);
+            const invalidFields = body.fields.filter((f) => !validFields.includes(f));
+            if (invalidFields.length > 0) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: `Invalid field values: ${invalidFields.join(", ")}. Valid values are: ${validFields.join(", ")}`,
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            // Extract Authorization header (case-insensitive)
+            const authHeader =
+                event.headers?.Authorization ||
+                event.headers?.authorization ||
+                event.headers?.["x-fern-token"] ||
+                event.headers?.["X-Fern-Token"];
+            console.log(`[Handler] Authorization header present: ${!!authHeader}`);
+
+            console.log(`[Handler] Calling getDocsFields for domain: ${body.domain}`);
+            const result = await getDocsFields(body, pool, authHeader);
+            console.log(`[Handler] getDocsFields completed successfully`);
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify(result)
             };
         }
 

@@ -4,4 +4,7 @@
 
 import * as FdrLambda from "../../../../../index.js";
 
-export type VersionChild = FdrLambda.navigation.v1.TabbedNode | FdrLambda.navigation.v1.SidebarRootNode;
+export type VersionChild =
+    | FdrLambda.navigation.v1.TabbedNode
+    | FdrLambda.navigation.v1.SidebarRootNode
+    | FdrLambda.navigation.v1.VariantedNode;

@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { Agent, setGlobalDispatcher } from "undici";
 
-import { fernToken_admin, getFdrLambdaOrigin } from "./env-variables";
+import { getDocsServiceJWT } from "./auth/serviceJWT";
+import { getFdrLambdaOrigin } from "./env-variables";
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 
@@ -42,9 +43,11 @@ export const uncachedGetDocsUrlMetadata = async (
             notFound();
         }
 
+        // Use service JWT for authentication instead of fern admin token
+        const token = isSelfHosted() ? "" : await getDocsServiceJWT();
         const client = new FdrLambdaClient({
             environment: getFdrLambdaOrigin(),
-            token: isSelfHosted() ? "" : fernToken_admin()
+            token
         });
 
         const response = await client.docs.v2.read.getDocsUrlMetadata({

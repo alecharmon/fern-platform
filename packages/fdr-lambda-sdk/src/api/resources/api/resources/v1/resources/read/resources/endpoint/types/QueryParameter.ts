@@ -7,4 +7,5 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 export interface QueryParameter extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.WithAvailability {
     key: string;
     type: FdrLambda.api.v1.read.TypeReference;
+    explode: boolean | undefined;
 }

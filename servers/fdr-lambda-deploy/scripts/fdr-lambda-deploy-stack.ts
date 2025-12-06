@@ -118,6 +118,7 @@ export class FdrLambdaDeployStack extends Stack {
                     "DB_DOCS_DEFINITION_BUCKET_REGION",
                     "us-east-1"
                 ),
+                JWT_SECRET_KEY: getEnvironmentVariableOrThrow("JWT_SECRET_KEY"),
                 ...(isPreview && { IS_PREVIEW: "true", PR_NUMBER: prNumber! })
             }
         });

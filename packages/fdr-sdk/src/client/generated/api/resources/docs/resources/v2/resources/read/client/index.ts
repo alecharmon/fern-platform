@@ -1,5 +1,6 @@
 export * as ensureDocsInS3 from "./ensureDocsInS3.js";
 export * as getDocsConfigById from "./getDocsConfigById.js";
+export * as getDocsFields from "./getDocsFields.js";
 export * as getDocsForUrl from "./getDocsForUrl.js";
 export * as getDocsUrlMetadata from "./getDocsUrlMetadata.js";
 export * as getOrganizationForUrl from "./getOrganizationForUrl.js";

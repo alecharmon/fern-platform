@@ -25,6 +25,7 @@ env:
   PRIVATE_DOCS_S3_BUCKET_REGION: ${{ secrets.DEV2_PRIVATE_DOCS_S3_BUCKET_REGION }}
   DB_DOCS_DEFINITION_BUCKET_NAME: ${{ secrets.DEV2_DB_DOCS_DEFINITION_BUCKET_NAME }}
   DB_DOCS_DEFINITION_BUCKET_REGION: ${{ secrets.DEV2_DB_DOCS_DEFINITION_BUCKET_REGION }}
+  JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
 
 jobs:
   preview_lambda:
@@ -122,6 +123,7 @@ jobs:
             - Health: \`GET ${previewUrl}/health\`
             - Metadata (public): \`POST ${previewUrl}/metadata-for-url\`
             - Load Docs (requires auth): \`POST ${previewUrl}/load-docs-for-url\`
+            - Get Docs Fields (requires auth): \`POST ${previewUrl}/get-docs-fields\`
 
             **📋 Example Usage:**
             \`\`\`bash
@@ -138,6 +140,12 @@ jobs:
               -H "Content-Type: application/json" \\
               -H "Authorization: Bearer \$FERN_TOKEN" \\
               -d '{"url":"https://docs.buildwithfern.com"}'
+
+            # Test load-fields endpoint (requires Fern token)
+            curl -X POST "${previewUrl}/load-fields" \\
+              -H "Content-Type: application/json" \\
+              -H "Authorization: Bearer \$FERN_TOKEN" \\
+              -d '{"domain":"docs.buildwithfern.com","fields":["BASE_URL","CONFIG"]}'
             \`\`\`
 
             **🏷️ Stack Name:** \`fdr-lambda-preview-${prNumber}\`

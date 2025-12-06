@@ -4,6 +4,7 @@
 
 import * as environments from "./environments.js";
 import * as core from "./core/index.js";
+import { Api } from "./api/resources/api/client/Client.js";
 import { Docs } from "./api/resources/docs/client/Client.js";
 
 export declare namespace FdrLambdaClient {
@@ -27,9 +28,14 @@ export declare namespace FdrLambdaClient {
 }
 
 export class FdrLambdaClient {
+    protected _api: Api | undefined;
     protected _docs: Docs | undefined;
 
     constructor(protected readonly _options: FdrLambdaClient.Options) {}
+
+    public get api(): Api {
+        return (this._api ??= new Api(this._options));
+    }
 
     public get docs(): Docs {
         return (this._docs ??= new Docs(this._options));

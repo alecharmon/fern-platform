@@ -560,6 +560,9 @@ importers:
       '@fern-docs/edge-config':
         specifier: workspace:*
         version: link:../../fern-docs/edge-config
+      '@opentelemetry/api':
+        specifier: ^1.9.0
+        version: 1.9.0
       '@vercel/kv':
         specifier: ^2.0.0
         version: 2.0.0
@@ -3620,6 +3623,9 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.143
         version: 8.10.159
+      jose:
+        specifier: ^5.9.6
+        version: 5.10.0
     devDependencies:
       '@fern-platform/configs':
         specifier: workspace:*

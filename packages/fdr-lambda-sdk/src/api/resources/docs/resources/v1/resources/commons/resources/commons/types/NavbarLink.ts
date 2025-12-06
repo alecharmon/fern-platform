@@ -9,6 +9,7 @@ export type NavbarLink =
     | FdrLambda.docs.v1.commons.NavbarLink.Outlined
     | FdrLambda.docs.v1.commons.NavbarLink.Minimal
     | FdrLambda.docs.v1.commons.NavbarLink.Github
+    | FdrLambda.docs.v1.commons.NavbarLink.Dropdown
     | FdrLambda.docs.v1.commons.NavbarLink.Primary
     | FdrLambda.docs.v1.commons.NavbarLink.Secondary;
 
@@ -27,6 +28,10 @@ export namespace NavbarLink {
 
     export interface Github extends FdrLambda.docs.v1.commons.NavbarGithubMetadata {
         type: "github";
+    }
+
+    export interface Dropdown extends FdrLambda.docs.v1.commons.NavbarLinkDropdownMetadata {
+        type: "dropdown";
     }
 
     export interface Primary extends FdrLambda.docs.v1.commons.NavbarLinkMetadata {

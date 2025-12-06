@@ -5,8 +5,7 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface ChangelogNode
-    extends FdrLambda.navigation.v1.WithNodeMetadata,
-        FdrLambda.navigation.v1.WithOverviewPage {
+    extends FdrLambda.navigation.v1.WithNodeMetadata, FdrLambda.navigation.v1.WithOverviewPage {
     type: "changelog";
     children: FdrLambda.navigation.v1.ChangelogYearNode[];
 }

@@ -4,6 +4,7 @@
 
 import * as FdrLambda from "../../../../../../../../../index.js";
 
-export interface NavbarGithubMetadata {
+export interface NavbarGithubMetadata extends FdrLambda.docs.v1.commons.WithPermissions {
     url: FdrLambda.Url;
+    target: FdrLambda.LinkTarget | undefined;
 }

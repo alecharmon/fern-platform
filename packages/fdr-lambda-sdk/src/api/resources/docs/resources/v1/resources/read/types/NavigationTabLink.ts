@@ -8,4 +8,5 @@ export interface NavigationTabLink {
     title: string;
     icon: string | undefined;
     url: FdrLambda.Url;
+    target: FdrLambda.LinkTarget | undefined;
 }

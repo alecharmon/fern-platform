@@ -15,7 +15,7 @@ import {
 import type { AuthType } from "@prisma/client";
 import type { Pool } from "pg";
 import { DomainNotRegisteredError } from "../errors";
-import { checkUserBelongsToOrg } from "../utils/auth";
+import { verifyDocsServiceJWT } from "../utils/jwt";
 import { getPresignedDocsAssetsDownloadUrl, storeDocsDefinitionInS3 } from "../utils/s3";
 import { readBuffer } from "../utils/serde";
 
@@ -32,11 +32,8 @@ export async function ensureDocsInS3(
         throw new DomainNotRegisteredError();
     }
 
-    // Check authorization - user must belong to the org that owns these docs
-    await checkUserBelongsToOrg({
-        authHeader,
-        orgId: dbDocs.orgId
-    });
+    // Verify the service JWT from docs-server
+    await verifyDocsServiceJWT(authHeader);
 
     console.log(`[ensureDocsInS3] Converting docs definition to read format for domain: ${url.hostname}`);
 

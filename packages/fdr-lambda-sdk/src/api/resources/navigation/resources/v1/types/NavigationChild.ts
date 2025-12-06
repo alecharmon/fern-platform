@@ -9,4 +9,5 @@ export type NavigationChild =
     | FdrLambda.navigation.v1.SectionNode
     | FdrLambda.navigation.v1.PageNode
     | FdrLambda.navigation.v1.LinkNode
-    | FdrLambda.navigation.v1.ChangelogNode;
+    | FdrLambda.navigation.v1.ChangelogNode
+    | FdrLambda.navigation.v1.VariantedNode;

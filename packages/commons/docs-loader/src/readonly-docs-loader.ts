@@ -4,11 +4,13 @@ import {
     loadWithUrl as cachedLoadWithUrl,
     cleanBasePath,
     createGetAuthState,
+    DocsDefinitionField,
     type DynamicIRsByLanguage,
     type FernFonts,
     findEndpoint,
     generateFernColorPalette,
     generateFonts,
+    getDocsFields as getDocsFieldsFromServer,
     getDocsUrlMetadata,
     isDocsDev,
     isLocal,
@@ -54,6 +56,8 @@ import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, isPlainObject } from "@fern-api/ui-core-utils";
 import { visualEditorStorage } from "@fern-api/visual-editor-server";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
+import type { Attributes } from "@opentelemetry/api";
+import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { createHash } from "crypto";
 import { mapValues } from "es-toolkit";
 import { unstable_cache, unstable_cacheTag } from "next/cache";
@@ -75,6 +79,30 @@ import {
     createPageCacheKey
 } from "./cache-keys";
 import { createKvCache, type KvCache } from "./kv-cache";
+
+const tracer = trace.getTracer("fern-docs");
+
+async function runWithSpan<T>(name: string, fn: () => Promise<T>, attributes?: Attributes): Promise<T> {
+    return tracer.startActiveSpan(name, async (span) => {
+        if (attributes) {
+            span.setAttributes(attributes);
+        }
+        try {
+            const result = await fn();
+            span.setStatus({ code: SpanStatusCode.OK });
+            return result;
+        } catch (error) {
+            span.recordException(error as Error);
+            span.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: error instanceof Error ? error.message : "Unknown error"
+            });
+            throw error;
+        } finally {
+            span.end();
+        }
+    });
+}
 
 // Create the appropriate cache implementation based on whether we're in docs dev mode
 const kvCache: KvCache = createKvCache(isDocsDev());
@@ -148,6 +176,8 @@ function getBranchAtPath(target: unknown, path: DocsBranchPath) {
 async function loadDocsBranch<T>(domainKey: string, request: DocsBranchRequest<T>): Promise<T> {
     const hasExplicitPaths = request.paths != null && request.paths.length > 0;
     const paths = request.paths ?? [[]];
+
+    // Load the full response
     const response = await loadDocsResponse(domainKey);
 
     const branches = paths.map((path) => ({
@@ -401,20 +431,25 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
 
         const loadStart = Date.now();
         console.debug(`[DocsLoader] getMetadata loadWithUrl start - domain: ${domainKey}`);
-        const metadata = await getMetadataFromResponse(
-            domainKey,
-            loadDocsBranch(domainKey, {
-                paths: [["baseUrl"]],
-                selector: ({ branch }) => {
-                    if (!branch) {
-                        throw new Error("Missing baseUrl branch in docs response");
-                    }
-                    return {
-                        baseUrl: branch as DocsV2Read.LoadDocsForUrlResponse["baseUrl"]
-                    };
-                }
-            })
+
+        // Try to use getDocsFields API directly
+        const { domain } = decodeDocsLoaderDomainKey(domainKey);
+        const fieldsResponse = await runWithSpan(
+            "docs.getDocsFields.baseUrl",
+            () => getDocsFieldsFromServer(domain, [DocsDefinitionField.BaseUrl]),
+            { "fern.docs.domain": domain }
         );
+
+        let baseUrlResponse: Pick<DocsV2Read.LoadDocsForUrlResponse, "baseUrl">;
+        if (fieldsResponse?.baseUrl != null) {
+            baseUrlResponse = { baseUrl: fieldsResponse.baseUrl };
+        } else {
+            // Fallback to full load
+            const response = await loadDocsResponse(domainKey);
+            baseUrlResponse = { baseUrl: response.baseUrl };
+        }
+
+        const metadata = await getMetadataFromResponse(domainKey, baseUrlResponse);
         const loadDuration = Date.now() - loadStart;
         console.debug(`[DocsLoader] getMetadata loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
         kvSet(domainKey, CACHE_KEY_METADATA, metadata, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
@@ -422,73 +457,109 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
         return metadata;
     });
 
+function transformFilesToFileData(
+    filesV2: DocsV2Read.LoadDocsForUrlResponse["definition"]["filesV2"] | undefined,
+    basePath: string
+): Record<string, FileData> {
+    if (!filesV2) {
+        return {};
+    }
+    return mapValues(filesV2, (file) => {
+        if (file.type === "url") {
+            return {
+                src:
+                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                        ? file.url.replace(getFileCDN(), `${basePath}/_files`)
+                        : file.url
+            };
+        } else if (file.type === "image") {
+            return {
+                src:
+                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                        ? file.url.replace(getFileCDN(), `${basePath}/_files`)
+                        : file.url,
+                width: file.width,
+                height: file.height,
+                blurDataURL: file.blurDataUrl,
+                alt: file.alt
+            };
+        }
+        throw new UnreachableCaseError(file);
+    });
+}
+
 const getFiles = (cacheConfig: Required<CacheConfig>) =>
-    cache(async (domain: string): Promise<Record<string, FileData>> => {
+    cache(async (domainKey: string): Promise<Record<string, FileData>> => {
         "use cache";
-        unstable_cacheTag(domain, "getFiles");
+        unstable_cacheTag(domainKey, "getFiles");
 
         let cacheHit = false;
         try {
-            const cached = await kvGet<Record<string, FileData>>(domain, CACHE_KEY_FILES, cacheConfig.cacheKeySuffix);
+            const cached = await kvGet<Record<string, FileData>>(
+                domainKey,
+                CACHE_KEY_FILES,
+                cacheConfig.cacheKeySuffix
+            );
             if (cached) {
                 cacheHit = true;
                 return cached;
             }
         } catch (error) {
-            console.warn(`Failed to get files for ${domain}, fallback to uncached`, error);
+            console.warn(`Failed to get files for ${domainKey}, fallback to uncached`, error);
             track("asset_error", {
                 type: "get_files_kv_error",
-                domain,
+                domain: domainKey,
                 error: String(error)
             });
         }
 
         try {
-            const files = await loadDocsBranch<Record<string, FileData>>(domain, {
-                paths: [["definition", "filesV2"]],
-                selector: ({ branch, response }) => {
-                    const filesV2 = (branch as DocsV2Read.LoadDocsForUrlResponse["definition"]["filesV2"]) ?? {};
-                    return mapValues(filesV2, (file) => {
-                        if (file.type === "url") {
-                            return {
-                                src:
-                                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                                        ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
-                                        : file.url
-                            };
-                        } else if (file.type === "image") {
-                            return {
-                                src:
-                                    process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
-                                        ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
-                                        : file.url,
-                                width: file.width,
-                                height: file.height,
-                                blurDataURL: file.blurDataUrl,
-                                alt: file.alt
-                            };
-                        }
-                        throw new UnreachableCaseError(file);
+            // Try to use getDocsFields API directly
+            const { domain } = decodeDocsLoaderDomainKey(domainKey);
+            const fieldsResponse = await runWithSpan(
+                "docs.getDocsFields.files",
+                () => getDocsFieldsFromServer(domain, [DocsDefinitionField.FilesV2, DocsDefinitionField.BaseUrl]),
+                { "fern.docs.domain": domain }
+            );
+
+            if (fieldsResponse != null) {
+                const basePath = fieldsResponse.baseUrl?.basePath ?? "";
+                const files = transformFilesToFileData(fieldsResponse.filesV2, basePath);
+
+                const filesCount = Object.keys(files).length;
+                if (filesCount === 0) {
+                    track("asset_error", {
+                        type: "get_files_empty",
+                        domain: domainKey,
+                        cacheHit
                     });
                 }
-            });
+
+                kvSet(domainKey, CACHE_KEY_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+                return files;
+            }
+
+            // Fallback to full load
+            const response = await loadDocsResponse(domainKey);
+            const basePath = response.baseUrl?.basePath ?? "";
+            const files = transformFilesToFileData(response.definition.filesV2, basePath);
 
             const filesCount = Object.keys(files).length;
             if (filesCount === 0) {
                 track("asset_error", {
                     type: "get_files_empty",
-                    domain,
+                    domain: domainKey,
                     cacheHit
                 });
             }
 
-            kvSet(domain, CACHE_KEY_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+            kvSet(domainKey, CACHE_KEY_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
             return files;
         } catch (error) {
-            console.error(`Failed to load files for ${domain}`, error);
+            console.error(`Failed to load files for ${domainKey}`, error);
             track("asset_error", {
                 type: "get_files_load_error",
-                domain,
+                domain: domainKey,
                 error: String(error)
             });
             // Return empty object so pages can still render (just without images)
@@ -500,14 +571,28 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
 const getApi = async (domainKey: string, id: string) => {
     "use cache";
     unstable_cacheTag(domainKey, "getApi", id);
-    const [apisV2, apis] = await Promise.all([
-        loadDocsBranch<DocsV2Read.LoadDocsForUrlResponse["definition"]["apisV2"]>(domainKey, {
-            paths: [["definition", "apisV2"]]
-        }),
-        loadDocsBranch<DocsV2Read.LoadDocsForUrlResponse["definition"]["apis"]>(domainKey, {
-            paths: [["definition", "apis"]]
-        })
-    ]);
+
+    // Try to use getDocsFields API directly
+    const { domain } = decodeDocsLoaderDomainKey(domainKey);
+    const fieldsResponse = await runWithSpan(
+        "docs.getDocsFields.apis",
+        () => getDocsFieldsFromServer(domain, [DocsDefinitionField.ApisV2, DocsDefinitionField.Apis]),
+        { "fern.docs.domain": domain, "fern.docs.apiId": id }
+    );
+
+    let apisV2: DocsV2Read.LoadDocsForUrlResponse["definition"]["apisV2"] | undefined;
+    let apis: DocsV2Read.LoadDocsForUrlResponse["definition"]["apis"] | undefined;
+
+    if (fieldsResponse != null) {
+        apisV2 = fieldsResponse.apisV2;
+        apis = fieldsResponse.apis;
+    } else {
+        // Fallback to full load
+        const response = await loadDocsResponse(domainKey);
+        apisV2 = response.definition.apisV2;
+        apis = response.definition.apis;
+    }
+
     const latest = apisV2?.[ApiDefinitionId(id)];
     if (latest != null) {
         return latest;
@@ -742,6 +827,33 @@ const unsafe_getFullRoot = async (domainKey: string) => {
     } catch (error) {
         console.warn(`Failed to get full root for ${domainKey}, fallback to uncached`, error);
     }
+
+    // Try fast path via getDocsFields API (loads from database, not S3)
+    const { domain } = decodeDocsLoaderDomainKey(domainKey);
+    const fieldsResponse = await runWithSpan(
+        "docs.getDocsFields.root",
+        () => getDocsFieldsFromServer(domain, [DocsDefinitionField.Root]),
+        { "fern.docs.domain": domain }
+    );
+
+    if (fieldsResponse?.root != null) {
+        // Migrate from v1 to latest format
+        const root = FernNavigation.migrate.FernNavigationV1ToLatest.create().root(fieldsResponse.root);
+        if (root != null) {
+            // Apply paginated flag to api references
+            FernNavigation.traverseBF(root, (node) => {
+                if (node.type === "apiReference") {
+                    node.paginated = true;
+                    return CONTINUE;
+                }
+                return SKIP;
+            });
+            return root;
+        }
+    }
+
+    // Fallback to S3 if getDocsFields didn't return a root
+    console.debug(`[DocsLoader] unsafe_getFullRoot falling back to S3 for domain: ${domainKey}`);
     const response = await loadDocsBranch(domainKey, {
         selector: ({ response }) => response
     });
@@ -927,10 +1039,29 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
 
             const loadStart = Date.now();
             console.debug(`[DocsLoader] getConfig loadWithUrl start - domain: ${domainKey}`);
-            const response = await loadWithUrl(domainKey);
+
+            // Try to use getDocsFields API directly
+            const { domain } = decodeDocsLoaderDomainKey(domainKey);
+            const fieldsResponse = await runWithSpan(
+                "docs.getDocsFields.config",
+                () => getDocsFieldsFromServer(domain, [DocsDefinitionField.Config]),
+                { "fern.docs.domain": domain }
+            );
+
+            let config: Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">;
+            if (fieldsResponse?.config != null) {
+                // Fast path - got config directly
+                const { navigation, root, ...configWithoutNav } = fieldsResponse.config;
+                config = configWithoutNav;
+            } else {
+                // Fallback to full load
+                const response = await loadWithUrl(domainKey);
+                const { navigation, root, ...configWithoutNav } = response.definition.config;
+                config = configWithoutNav;
+            }
+
             const loadDuration = Date.now() - loadStart;
             console.debug(`[DocsLoader] getConfig loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
-            const { navigation, root, ...config } = response.definition.config;
 
             // Store in Upstash and in-memory cache (skip in-memory in local dev)
             kvSet(domainKey, CACHE_KEY_CONFIG, config, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
@@ -981,13 +1112,25 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
 
         const loadStart = Date.now();
         console.debug(`[DocsLoader] getPage loadWithUrl start - domain: ${domainKey}, pageId: ${pageId}`);
-        const page = await loadDocsBranch<DocsV1Read.PageContent | undefined>(domainKey, {
-            paths: [["definition", "pages"]],
-            selector: ({ branch }) => {
-                const pages = (branch as Record<PageId, DocsV1Read.PageContent>) ?? {};
-                return pages[pageId as PageId];
-            }
-        });
+
+        // Try to use getDocsFields API directly
+        const { domain } = decodeDocsLoaderDomainKey(domainKey);
+        const fieldsResponse = await runWithSpan(
+            "docs.getDocsFields.pages",
+            () => getDocsFieldsFromServer(domain, [DocsDefinitionField.Pages]),
+            { "fern.docs.domain": domain, "fern.docs.pageId": pageId }
+        );
+
+        let pages: Record<PageId, DocsV1Read.PageContent> | undefined;
+        if (fieldsResponse != null) {
+            pages = fieldsResponse.pages as Record<PageId, DocsV1Read.PageContent> | undefined;
+        } else {
+            // Fallback to full load
+            const response = await loadDocsResponse(domainKey);
+            pages = response.definition.pages;
+        }
+
+        const page = pages?.[pageId as PageId];
         const loadDuration = Date.now() - loadStart;
         console.debug(
             `[DocsLoader] getPage loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}, pageId: ${pageId}`
@@ -1026,10 +1169,23 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
             console.warn(`Failed to get mdx bundler files for ${domainKey}, fallback to uncached`, error);
         }
 
-        const files = await loadDocsBranch<Record<string, string>>(domainKey, {
-            paths: [["definition", "jsFiles"]],
-            selector: ({ branch }) => (branch as Record<string, string>) ?? {}
-        });
+        // Try to use getDocsFields API directly
+        const { domain } = decodeDocsLoaderDomainKey(domainKey);
+        const fieldsResponse = await runWithSpan(
+            "docs.getDocsFields.jsFiles",
+            () => getDocsFieldsFromServer(domain, [DocsDefinitionField.JsFiles]),
+            { "fern.docs.domain": domain }
+        );
+
+        let files: Record<string, string>;
+        if (fieldsResponse != null) {
+            files = fieldsResponse.jsFiles ?? {};
+        } else {
+            // Fallback to full load
+            const response = await loadDocsResponse(domainKey);
+            files = response.definition.jsFiles ?? {};
+        }
+
         kvSet(domainKey, CACHE_KEY_MDX_BUNDLER_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return files;
     });
@@ -1359,14 +1515,27 @@ const getTypes = () =>
         "use cache";
         unstable_cacheTag(domainKey, "getTypes");
 
-        const [apisV2, apis] = await Promise.all([
-            loadDocsBranch<DocsV2Read.LoadDocsForUrlResponse["definition"]["apisV2"]>(domainKey, {
-                paths: [["definition", "apisV2"]]
-            }),
-            loadDocsBranch<DocsV2Read.LoadDocsForUrlResponse["definition"]["apis"]>(domainKey, {
-                paths: [["definition", "apis"]]
-            })
-        ]);
+        // Try to use getDocsFields API directly
+        const { domain } = decodeDocsLoaderDomainKey(domainKey);
+        const fieldsResponse = await runWithSpan(
+            "docs.getDocsFields.types",
+            () => getDocsFieldsFromServer(domain, [DocsDefinitionField.ApisV2, DocsDefinitionField.Apis]),
+            { "fern.docs.domain": domain }
+        );
+
+        let apisV2: DocsV2Read.LoadDocsForUrlResponse["definition"]["apisV2"] | undefined;
+        let apis: DocsV2Read.LoadDocsForUrlResponse["definition"]["apis"] | undefined;
+
+        if (fieldsResponse != null) {
+            apisV2 = fieldsResponse.apisV2;
+            apis = fieldsResponse.apis;
+        } else {
+            // Fallback to full load
+            const response = await loadDocsResponse(domainKey);
+            apisV2 = response.definition.apisV2;
+            apis = response.definition.apis;
+        }
+
         const allTypes: Record<TypeId, TypeDefinition> = {};
 
         // Get all types from apisV2

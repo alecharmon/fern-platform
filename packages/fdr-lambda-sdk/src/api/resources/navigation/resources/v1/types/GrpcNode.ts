@@ -5,8 +5,7 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface GrpcNode
-    extends FdrLambda.navigation.v1.WithNodeMetadata,
-        FdrLambda.navigation.v1.WithApiDefinitionId {
+    extends FdrLambda.navigation.v1.WithNodeMetadata, FdrLambda.navigation.v1.WithApiDefinitionId {
     type: "grpc";
     method: FdrLambda.GrpcMethod;
     grpcId: FdrLambda.GrpcId;

@@ -7,9 +7,12 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 export interface DocsSettingsConfig {
     searchText: string | undefined;
     disableSearch: boolean | undefined;
+    disableAnalytics: boolean | undefined;
     darkModeCode: boolean | undefined;
     defaultSearchFilters: boolean | undefined;
     httpSnippets: FdrLambda.docs.v1.commons.HttpSnippetsConfig | undefined;
     hide404Page: boolean | undefined;
     useJavascriptAsTypescript: boolean | undefined;
+    disableExplorerProxy: boolean | undefined;
+    language: FdrLambda.docs.v1.commons.Language | undefined;
 }

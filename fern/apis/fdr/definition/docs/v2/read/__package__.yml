@@ -4,6 +4,8 @@ imports:
   rootCommons: ../../../commons.yml
   v1DocsRead: ../../v1/read/__package__.yml
   apiReadV1: ../../../api/v1/read/__package__.yml
+  apiReadLatest: ../../../api/latest/__package__.yml
+  navigationV1: ../../../navigation/v1/__package__.yml
 
 service:
   base-path: /v2/registry/docs
@@ -123,6 +125,25 @@ service:
       path: /prepopulate-s3-bucket
       docs: Prepopulates the FDR read S3 bucket with docs definitions
 
+    getDocsFields:
+      method: POST
+      path: /load-fields
+      audiences:
+        - fdr-lambda
+      docs: |
+        Loads specific fields from the docs definition with proper conversion (e.g., S3 URLs resolved).
+        This is more efficient than loading the entire docs definition when you only need specific parts.
+      request:
+        name: GetDocsFieldsRequest
+        body:
+          properties:
+            domain: string
+            fields: list<DocsDefinitionField>
+      response: GetDocsFieldsResponse
+      errors:
+        - DomainNotRegisteredError
+        - rootCommons.UnauthorizedError
+
 types:
   DocsUrlMetadata:
     properties:
@@ -164,6 +185,31 @@ types:
       organizationId: rootCommons.OrgId
       # createdAt: datetime
       updatedAt: datetime
+
+  DocsDefinitionField:
+    docs: Fields that can be requested from the docs definition
+    enum:
+      - BASE_URL
+      - FILES_V2
+      - APIS_V2
+      - APIS
+      - PAGES
+      - JS_FILES
+      - CONFIG
+      - ROOT
+
+  GetDocsFieldsResponse:
+    docs: Partial docs definition response containing only the requested fields
+    properties:
+      domain: string
+      baseUrl: optional<BaseUrl>
+      filesV2: optional<map<rootCommons.FileId, v1DocsRead.File>>
+      apisV2: optional<map<rootCommons.ApiDefinitionId, apiReadLatest.ApiDefinition>>
+      apis: optional<map<rootCommons.ApiDefinitionId, apiReadV1.ApiDefinition>>
+      pages: optional<map<rootCommons.PageId, v1DocsRead.PageContent>>
+      jsFiles: optional<map<string, string>>
+      config: optional<v1DocsRead.DocsConfig>
+      root: optional<navigationV1.RootNode>
 
 errors:
   DocsDefinitionNotFoundError:

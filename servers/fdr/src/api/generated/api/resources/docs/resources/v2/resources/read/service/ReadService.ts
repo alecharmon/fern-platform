@@ -113,6 +113,20 @@ export interface ReadServiceMethods {
         },
         next: express.NextFunction,
     ): void | Promise<void>;
+    getDocsFields(
+        req: express.Request<
+            never,
+            FernRegistry.docs.v2.read.GetDocsFieldsResponse,
+            FernRegistry.docs.v2.read.GetDocsFieldsRequest,
+            never
+        >,
+        res: {
+            send: (responseBody: FernRegistry.docs.v2.read.GetDocsFieldsResponse) => Promise<void>;
+            cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+            locals: any;
+        },
+        next: express.NextFunction,
+    ): void | Promise<void>;
 }
 
 export class ReadService {
@@ -391,6 +405,40 @@ export class ReadService {
                     console.warn(
                         `Endpoint 'prepopulateFdrReadS3Bucket' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
                     );
+                    await error.send(res);
+                } else {
+                    res.status(500).json("Internal Server Error");
+                }
+                next(error);
+            }
+        });
+        this.router.post("/load-fields", async (req, res, next) => {
+            try {
+                await this.methods.getDocsFields(
+                    req as any,
+                    {
+                        send: async (responseBody) => {
+                            res.json(responseBody);
+                        },
+                        cookie: res.cookie.bind(res),
+                        locals: res.locals,
+                    },
+                    next,
+                );
+                if (!res.writableEnded) {
+                    next();
+                }
+            } catch (error) {
+                if (error instanceof errors.FernRegistryError) {
+                    switch (error.errorName) {
+                        case "DomainNotRegisteredError":
+                        case "UnauthorizedError":
+                            break;
+                        default:
+                            console.warn(
+                                `Endpoint 'getDocsFields' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
+                            );
+                    }
                     await error.send(res);
                 } else {
                     res.status(500).json("Internal Server Error");

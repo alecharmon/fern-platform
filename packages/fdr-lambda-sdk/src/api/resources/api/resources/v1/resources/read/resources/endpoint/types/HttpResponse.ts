@@ -8,4 +8,9 @@ export interface HttpResponse extends FdrLambda.api.v1.WithDescription {
     type: FdrLambda.api.v1.read.HttpResponseBodyShape;
     /** Defaults to 200 */
     statusCode: number | undefined;
+    /**
+     * When true, indicates that the statusCode represents a wildcard pattern (e.g., 4XX or 5XX).
+     * The statusCode field will contain the base value (400 for 4XX, 500 for 5XX).
+     */
+    isWildcard: boolean | undefined;
 }

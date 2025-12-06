@@ -5,8 +5,7 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface WebSocketNode
-    extends FdrLambda.navigation.v1.WithNodeMetadata,
-        FdrLambda.navigation.v1.WithApiDefinitionId {
+    extends FdrLambda.navigation.v1.WithNodeMetadata, FdrLambda.navigation.v1.WithApiDefinitionId {
     type: "webSocket";
     webSocketId: FdrLambda.WebSocketId;
     /** Settings for the api playground that affect this endpoint specifically. */

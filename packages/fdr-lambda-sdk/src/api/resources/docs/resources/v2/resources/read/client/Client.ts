@@ -288,6 +288,95 @@ export class Read {
         };
     }
 
+    /**
+     * Loads specific fields from the docs definition with proper conversion (e.g., S3 URLs resolved).
+     * This is more efficient than loading the entire docs definition when you only need specific parts.
+     *
+     * @param {FdrLambda.docs.v2.read.GetDocsFieldsRequest} request
+     * @param {Read.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.docs.v2.read.getDocsFields({
+     *         domain: "domain",
+     *         fields: ["BASE_URL", "BASE_URL"]
+     *     })
+     */
+    public getDocsFields(
+        request: FdrLambda.docs.v2.read.GetDocsFieldsRequest,
+        requestOptions?: Read.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<FdrLambda.docs.v2.read.GetDocsFieldsResponse, FdrLambda.docs.v2.read.getDocsFields.Error>
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__getDocsFields(request, requestOptions));
+    }
+
+    private async __getDocsFields(
+        request: FdrLambda.docs.v2.read.GetDocsFieldsRequest,
+        requestOptions?: Read.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<FdrLambda.docs.v2.read.GetDocsFieldsResponse, FdrLambda.docs.v2.read.getDocsFields.Error>
+        >
+    > {
+        const _response = await core.fetcher({
+            url: urlJoin(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FdrLambdaEnvironment.Prod,
+                "/v2/registry/docs/load-fields",
+            ),
+            method: "POST",
+            headers: {
+                Authorization: await this._getAuthorizationHeader(),
+                "X-Fern-Language": "JavaScript",
+                "X-Fern-Runtime": core.RUNTIME.type,
+                "X-Fern-Runtime-Version": core.RUNTIME.version,
+                ...requestOptions?.headers,
+            },
+            contentType: "application/json",
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : undefined,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FdrLambda.docs.v2.read.GetDocsFieldsResponse,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FdrLambda.docs.v2.read.getDocsFields.Error)?.error) {
+                case "DomainNotRegisteredError":
+                case "UnauthorizedError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FdrLambda.docs.v2.read.getDocsFields.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FdrLambda.docs.v2.read.getDocsFields.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
     protected async _getAuthorizationHeader(): Promise<string> {
         return `Bearer ${await core.Supplier.get(this._options.token)}`;
     }

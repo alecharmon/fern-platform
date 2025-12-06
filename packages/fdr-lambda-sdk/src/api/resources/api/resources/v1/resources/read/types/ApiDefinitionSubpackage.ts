@@ -5,8 +5,7 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface ApiDefinitionSubpackage
-    extends FdrLambda.api.v1.WithDescription,
-        FdrLambda.api.v1.read.ApiDefinitionPackage {
+    extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.read.ApiDefinitionPackage {
     parent: FdrLambda.api.v1.SubpackageId | undefined;
     subpackageId: FdrLambda.api.v1.SubpackageId;
     name: string;

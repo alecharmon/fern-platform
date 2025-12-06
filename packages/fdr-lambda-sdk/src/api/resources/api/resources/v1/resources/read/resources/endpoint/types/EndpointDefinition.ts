@@ -7,8 +7,8 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 export interface EndpointDefinition extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.WithAvailability {
     /** When this is true, the api definition will have a union for auth */
     authed: boolean;
-    /** List of auth scheme IDs that apply to this endpoint. Empty list means no auth required. */
     authV2: FdrLambda.AuthSchemeId[] | undefined;
+    multiAuth: FdrLambda.MultipleAuthType[] | undefined;
     defaultEnvironment: FdrLambda.EnvironmentId | undefined;
     environments: FdrLambda.api.v1.Environment[];
     method: FdrLambda.HttpMethod;
@@ -29,4 +29,6 @@ export interface EndpointDefinition extends FdrLambda.api.v1.WithDescription, Fd
     examples: FdrLambda.api.v1.read.ExampleEndpointCall[];
     snippetTemplates: FdrLambda.api.v1.read.EndpointSnippetTemplates | undefined;
     protocol: FdrLambda.api.v1.Protocol | undefined;
+    /** Whether this endpoint should be included in the API explorer. Defaults to true. */
+    includeInApiExplorer: boolean | undefined;
 }

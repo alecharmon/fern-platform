@@ -11,4 +11,6 @@ export interface VersionNode extends FdrLambda.navigation.v1.WithNodeMetadata, F
     child: FdrLambda.navigation.v1.VersionChild;
     availability: FdrLambda.navigation.v1.NavigationV1Availability | undefined;
     landingPage: FdrLambda.navigation.v1.LandingPageNode | undefined;
+    /** Optional announcement banner to display for this version */
+    announcement: FdrLambda.docs.v1.commons.AnnouncementConfig | undefined;
 }

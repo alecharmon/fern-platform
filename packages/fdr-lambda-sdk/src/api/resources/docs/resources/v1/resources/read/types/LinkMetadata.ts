@@ -8,4 +8,5 @@ export interface LinkMetadata {
     title: string;
     icon: string | undefined;
     url: FdrLambda.Url;
+    target: FdrLambda.LinkTarget | undefined;
 }

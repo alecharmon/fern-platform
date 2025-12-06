@@ -7,6 +7,13 @@ import * as FdrLambda from "../../../../../../../../../index.js";
 export interface ErrorDeclarationV2 extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.WithAvailability {
     type: FdrLambda.api.v1.read.TypeShape | undefined;
     statusCode: number;
+    /**
+     * When true, indicates that the statusCode represents a wildcard pattern (e.g., 4XX or 5XX).
+     * The statusCode field will contain the base value (400 for 4XX, 500 for 5XX).
+     */
+    isWildcard: boolean | undefined;
     name: string | undefined;
     examples: FdrLambda.api.v1.read.ErrorExample[] | undefined;
+    /** Response headers associated with this error (e.g., Retry-After for 429 errors). */
+    headers: FdrLambda.api.v1.read.Header[] | undefined;
 }

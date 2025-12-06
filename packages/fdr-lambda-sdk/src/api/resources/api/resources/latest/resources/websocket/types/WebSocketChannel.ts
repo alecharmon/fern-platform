@@ -5,7 +5,8 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface WebSocketChannel
-    extends FdrLambda.api.latest.WithDescription,
+    extends
+        FdrLambda.api.latest.WithDescription,
         FdrLambda.api.latest.WithAvailability,
         FdrLambda.api.latest.WithNamespace {
     id: FdrLambda.WebSocketId;

@@ -9,4 +9,5 @@ export interface LinkNode extends FdrLambda.navigation.v1.WithNodeId {
     title: string;
     icon: string | undefined;
     url: FdrLambda.Url;
+    target: FdrLambda.LinkTarget | undefined;
 }

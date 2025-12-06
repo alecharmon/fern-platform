@@ -5,7 +5,8 @@
 import * as FdrLambda from "../../../../../../../index.js";
 
 export interface EndpointDefinition
-    extends FdrLambda.api.latest.WithDescription,
+    extends
+        FdrLambda.api.latest.WithDescription,
         FdrLambda.api.latest.WithAvailability,
         FdrLambda.api.latest.WithNamespace {
     id: FdrLambda.EndpointId;
@@ -13,7 +14,12 @@ export interface EndpointDefinition
     path: FdrLambda.api.latest.PathPart[];
     displayName: string | undefined;
     operationId: string | undefined;
+    /**
+     * Legacy field. List of auth scheme IDs that apply to this endpoint (flattened set).
+     * Empty list means no auth required. Use multiAuth for precise OR-of-AND semantics.
+     */
     auth: FdrLambda.AuthSchemeId[] | undefined;
+    multiAuth: FdrLambda.MultipleAuthType[] | undefined;
     defaultEnvironment: FdrLambda.EnvironmentId | undefined;
     environments: FdrLambda.api.latest.Environment[] | undefined;
     pathParameters: FdrLambda.api.latest.ObjectProperty[] | undefined;
@@ -26,4 +32,6 @@ export interface EndpointDefinition
     examples: FdrLambda.api.latest.ExampleEndpointCall[] | undefined;
     snippetTemplates: FdrLambda.api.latest.EndpointSnippetTemplates | undefined;
     protocol: FdrLambda.api.latest.Protocol | undefined;
+    /** Whether this endpoint should be included in the API explorer. Defaults to true. */
+    includeInApiExplorer: boolean | undefined;
 }

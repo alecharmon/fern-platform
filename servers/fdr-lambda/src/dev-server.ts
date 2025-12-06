@@ -136,5 +136,7 @@ app.listen(PORT, () => {
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  GET  http://localhost:${PORT}/v2/registry/api/load/{apiDefinitionId}/endpoint?method=X&path=Y`);
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
+    console.log(`  POST http://localhost:${PORT}/v2/registry/docs/load-fields`);
+    // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`\n💡 Make sure your local FDR server is running on port 8080\n`);
 });

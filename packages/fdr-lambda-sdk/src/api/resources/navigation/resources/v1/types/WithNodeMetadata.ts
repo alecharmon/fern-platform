@@ -5,7 +5,8 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface WithNodeMetadata
-    extends FdrLambda.navigation.v1.WithNodeId,
+    extends
+        FdrLambda.navigation.v1.WithNodeId,
         FdrLambda.navigation.v1.WithPermissions,
         FdrLambda.navigation.latest.WithFeatureFlags {
     title: string;

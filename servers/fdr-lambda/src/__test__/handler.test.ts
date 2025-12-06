@@ -1,5 +1,32 @@
 import type { APIGatewayProxyEvent, Context } from "aws-lambda";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SignJWT } from "jose";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+// Set up JWT_SECRET_KEY for tests before any imports that might use it
+const TEST_JWT_SECRET = "test-jwt-secret-key-for-testing";
+const encoder = new TextEncoder();
+
+// Helper to sign a valid service JWT for tests
+async function signTestServiceJwt(): Promise<string> {
+    return new SignJWT({ service: "docs-server", scope: "fdr:docs-fields" })
+        .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+        .setIssuedAt()
+        .setExpirationTime("30d")
+        .setIssuer("https://buildwithfern.com")
+        .setAudience("fdr-lambda")
+        .sign(encoder.encode(TEST_JWT_SECRET));
+}
+
+// Helper to sign an invalid service JWT (wrong service claim)
+async function signInvalidServiceJwt(): Promise<string> {
+    return new SignJWT({ service: "wrong-service", scope: "fdr:docs-fields" })
+        .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+        .setIssuedAt()
+        .setExpirationTime("30d")
+        .setIssuer("https://buildwithfern.com")
+        .setAudience("fdr-lambda")
+        .sign(encoder.encode(TEST_JWT_SECRET));
+}
 
 // Use vi.hoisted to ensure mocks are set up before module imports
 const mockQuery = vi.hoisted(() => vi.fn());
@@ -36,6 +63,11 @@ vi.mock("@fern-api/venus-api-sdk", () => ({
 import { handler } from "../index";
 
 describe("Lambda Handler", () => {
+    beforeAll(() => {
+        // Set JWT_SECRET_KEY for JWT verification in tests
+        process.env.JWT_SECRET_KEY = TEST_JWT_SECRET;
+    });
+
     beforeEach(() => {
         // Reset mocks before each test
         vi.clearAllMocks();
@@ -47,9 +79,9 @@ describe("Lambda Handler", () => {
         mockGetPresignedUrl.mockResolvedValue("https://s3.example.com/file.png");
         // Default getDocsDefinitionFromS3 mock to return null (fall back to database)
         mockGetDocsDefinitionFromS3.mockResolvedValue(null);
-        // Default Venus mock to allow access (member of fern org)
+        // Default Venus mock to allow access (member of fern org) - kept for backwards compatibility
         mockIsMember.mockResolvedValue({ ok: true, body: true });
-        // Set VENUS_URL for tests
+        // Set VENUS_URL for tests - kept for backwards compatibility
         process.env.VENUS_URL = "https://venus.buildwithfern.com";
     });
 
@@ -370,6 +402,8 @@ describe("Lambda Handler", () => {
                 .mockResolvedValueOnce({ rows: [] })
                 .mockResolvedValueOnce({ rows: [] });
 
+            // Use a valid service JWT instead of a plain token
+            const validJwt = await signTestServiceJwt();
             const event = createMockEvent(
                 "/load-docs-for-url",
                 "POST",
@@ -377,7 +411,7 @@ describe("Lambda Handler", () => {
                     url: "https://docs.example.com"
                 },
                 {
-                    Authorization: "Bearer test-token"
+                    Authorization: `Bearer ${validJwt}`
                 }
             );
             const context = createMockContext();
@@ -422,6 +456,8 @@ describe("Lambda Handler", () => {
                 .mockResolvedValueOnce({ rows: [] })
                 .mockResolvedValueOnce({ rows: [] });
 
+            // Use a valid service JWT instead of a plain token
+            const validJwt = await signTestServiceJwt();
             const event = createMockEvent(
                 "/v2/registry/docs/load-docs-for-url",
                 "POST",
@@ -429,7 +465,7 @@ describe("Lambda Handler", () => {
                     url: "docs.test.com"
                 },
                 {
-                    Authorization: "Bearer test-token"
+                    Authorization: `Bearer ${validJwt}`
                 }
             );
             const context = createMockContext();
@@ -509,7 +545,7 @@ describe("Lambda Handler", () => {
             expect(JSON.parse(result.body).error).toBe("UnauthorizedError");
         });
 
-        it("should return 403 when user is not in the org", async () => {
+        it("should return 401 when JWT has invalid service claim", async () => {
             const mockDocsDefinition = Buffer.from(
                 JSON.stringify({
                     type: "v3",
@@ -537,9 +573,8 @@ describe("Lambda Handler", () => {
                 ]
             });
 
-            // Mock Venus to deny access (not in fern org, not in specific org)
-            mockIsMember.mockResolvedValue({ ok: true, body: false });
-
+            // Use a JWT with wrong service claim
+            const invalidJwt = await signInvalidServiceJwt();
             const event = createMockEvent(
                 "/load-docs-for-url",
                 "POST",
@@ -547,15 +582,15 @@ describe("Lambda Handler", () => {
                     url: "https://docs.example.com"
                 },
                 {
-                    Authorization: "Bearer test-token"
+                    Authorization: `Bearer ${invalidJwt}`
                 }
             );
             const context = createMockContext();
 
             const result = await handler(event, context);
 
-            expect(result.statusCode).toBe(403);
-            expect(JSON.parse(result.body).error).toBe("UserNotInOrgError");
+            expect(result.statusCode).toBe(401);
+            expect(JSON.parse(result.body).error).toBe("UnauthorizedError");
         });
 
         it("should return 404 when domain is not registered", async () => {
@@ -650,6 +685,8 @@ describe("Lambda Handler", () => {
                     ]
                 });
 
+            // Use a valid service JWT instead of a plain token
+            const validJwt = await signTestServiceJwt();
             const event = createMockEvent(
                 "/load-docs-for-url",
                 "POST",
@@ -657,7 +694,7 @@ describe("Lambda Handler", () => {
                     url: "https://docs.example.com"
                 },
                 {
-                    Authorization: "Bearer test-token"
+                    Authorization: `Bearer ${validJwt}`
                 }
             );
             const context = createMockContext();

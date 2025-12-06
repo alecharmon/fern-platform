@@ -5,8 +5,7 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface EndpointNode
-    extends FdrLambda.navigation.v1.WithNodeMetadata,
-        FdrLambda.navigation.v1.WithApiDefinitionId {
+    extends FdrLambda.navigation.v1.WithNodeMetadata, FdrLambda.navigation.v1.WithApiDefinitionId {
     type: "endpoint";
     method: FdrLambda.HttpMethod;
     endpointId: FdrLambda.EndpointId;

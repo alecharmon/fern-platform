@@ -183,6 +183,13 @@ export function getDocsReadV2Service(app: FdrApplication): DocsV2ReadService {
             throw new Error(
                 "ensureDocsInS3 endpoint is not implemented in the FDR service. Use the lambda endpoint instead."
             );
+        },
+        getDocsFields: async (req, res) => {
+            // This endpoint is only implemented in the lambda version of the service
+            // The FDR service redirects to the lambda endpoint
+            throw new Error(
+                "getDocsFields endpoint is not implemented in the FDR service. Use the lambda endpoint instead."
+            );
         }
     });
 }

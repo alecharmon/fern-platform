@@ -5,7 +5,8 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface ApiPackageNode
-    extends FdrLambda.navigation.v1.WithNodeMetadata,
+    extends
+        FdrLambda.navigation.v1.WithNodeMetadata,
         FdrLambda.navigation.v1.WithOverviewPage,
         FdrLambda.navigation.v1.WithApiDefinitionId,
         FdrLambda.navigation.v1.WithRedirect {

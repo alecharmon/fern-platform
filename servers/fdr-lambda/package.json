@@ -21,7 +21,8 @@
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/venus-api-sdk": "^0.19.5",
     "@prisma/client": "5.13.0",
-    "@types/aws-lambda": "^8.10.143"
+    "@types/aws-lambda": "^8.10.143",
+    "jose": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",

@@ -5,7 +5,8 @@
 import * as FdrLambda from "../../../../../index.js";
 
 export interface ApiReferenceNode
-    extends FdrLambda.navigation.v1.WithNodeMetadata,
+    extends
+        FdrLambda.navigation.v1.WithNodeMetadata,
         FdrLambda.navigation.v1.WithOverviewPage,
         FdrLambda.navigation.v1.WithApiDefinitionId,
         FdrLambda.navigation.v1.WithRedirect {
@@ -18,4 +19,6 @@ export interface ApiReferenceNode
     changelog: FdrLambda.navigation.v1.ChangelogNode | undefined;
     /** Settings for the api playground that affects all endpoints. */
     playground: FdrLambda.navigation.v1.PlaygroundSettings | undefined;
+    /** URL to a Postman collection for this API reference. */
+    postmanCollectionUrl: string | undefined;
 }

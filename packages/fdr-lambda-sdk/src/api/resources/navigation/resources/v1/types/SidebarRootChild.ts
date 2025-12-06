@@ -7,4 +7,5 @@ import * as FdrLambda from "../../../../../index.js";
 export type SidebarRootChild =
     | FdrLambda.navigation.v1.SidebarGroupNode
     | FdrLambda.navigation.v1.ApiReferenceNode
-    | FdrLambda.navigation.v1.SectionNode;
+    | FdrLambda.navigation.v1.SectionNode
+    | FdrLambda.navigation.v1.VariantedNode;
