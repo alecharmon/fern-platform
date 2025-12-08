@@ -16,3 +16,36 @@ A store has a collection of plants. It is responsible for managing the inventory
 ### User
 
 A user is a person who buys plants from the store. Also known as plant parents.
+
+### System Architecture
+
+The following diagram shows how the Plant Store system works:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User as Plant Parent
+    participant API as Plant Store API
+    participant Store as Store Service
+    participant Inventory as Inventory DB
+
+    rect rgba(129, 199, 132, 0.3)
+        note over User,API: Order Flow
+        User->>API: Browse plants
+        API->>Store: Get available plants
+        Store->>Inventory: Check stock
+        Inventory-->>Store: Stock levels
+        Store-->>API: Plant catalog
+        API-->>User: Display plants
+    end
+
+    rect rgba(239, 154, 154, 0.3)
+        note over User,Inventory: Purchase Flow
+        User->>API: Place order
+        API->>Store: Process order
+        Store->>Inventory: Reserve stock
+        Inventory-->>Store: Confirmation
+        Store-->>API: Order confirmed
+        API-->>User: Order receipt
+    end
+```
