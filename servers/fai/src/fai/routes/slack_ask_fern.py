@@ -1,21 +1,11 @@
 import asyncio
 import json
-from datetime import (
-    UTC,
-    datetime,
-)
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
-from fastapi import (
-    BackgroundTasks,
-    HTTPException,
-    Request,
-)
-from fastapi.responses import (
-    JSONResponse,
-    Response,
-)
+from fastapi import BackgroundTasks, HTTPException, Request
+from fastapi.responses import JSONResponse, Response
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
 from sqlalchemy.orm import attributes
@@ -26,10 +16,7 @@ from fai.models.api.update_channel_settings import ChannelSettings
 from fai.models.db.feedback_db import FeedbackDb
 from fai.models.db.slack_integration_db import SlackIntegrationDb
 from fai.models.db.slack_message_cache_db import SlackMessageCacheDb
-from fai.settings import (
-    LOGGER,
-    VARIABLES,
-)
+from fai.settings import LOGGER, VARIABLES
 from fai.utils.slack.client import (
     add_reaction,
     open_modal,
@@ -896,8 +883,6 @@ async def handle_configure_command(
                 current_settings = {}
 
             channel_settings = current_settings.get(channel_id, {})
-            if not isinstance(channel_settings, dict):
-                channel_settings = {}
 
             if "allowed_roles" not in channel_settings:
                 channel_settings["allowed_roles"] = []

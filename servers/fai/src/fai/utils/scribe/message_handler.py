@@ -1,22 +1,16 @@
 import asyncio
 from dataclasses import dataclass
-from datetime import (
-    UTC,
-    datetime,
-)
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
 
 from fai.db import async_session_maker
+from fai.models.api.scribe_channel_settings import ScribeChannelSettings
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_session_db import ScribeSessionDb
 from fai.settings import LOGGER, VARIABLES
-from fai.utils.scribe.devin_client import (
-    DevinClient,
-    create_or_get_devin_session,
-    send_devin_message,
-)
+from fai.utils.scribe.devin_client import DevinClient, create_or_get_devin_session, send_devin_message
 from fai.utils.scribe.session_poller import poll_devin_session
 from fai.utils.scribe.slack_file_handler import process_slack_attachments
 from fai.utils.scribe.slack_thread_unfurler import unfurl_thread_links
@@ -124,6 +118,17 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
         text = f"{thread_context}\n{text}"
 
     github_repo = integration.github_repo
+
+    current_settings = integration.settings or {}
+    channel_settings_dict = current_settings.get(channel, {})
+    if isinstance(channel_settings_dict, dict):
+        try:
+            channel_settings = ScribeChannelSettings(**channel_settings_dict)
+            if channel_settings.repo_override:
+                github_repo = channel_settings.repo_override
+                LOGGER.info(f"[SCRIBE] Using repo override for channel {channel}: {github_repo}")
+        except Exception as e:
+            LOGGER.warning(f"[SCRIBE] Failed to parse channel settings: {e}")
 
     try:
         session_record, is_new_session = await get_or_create_session(

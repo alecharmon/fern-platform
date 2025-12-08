@@ -36,7 +36,7 @@ class TestDocumentRoutes:
         with (
             patch("fai.routes.document.sync_documents_to_tpuf", new_callable=AsyncMock),
             patch("fai.routes.document.sync_documents_to_query_index", new_callable=AsyncMock),
-        ):            
+        ):
             response = test_client.post(
                 f"/document/{domain}/create",
                 json=mock_request.model_dump(mode="json"),
@@ -372,7 +372,7 @@ class TestDocumentRoutes:
         with (
             patch("fai.routes.document.sync_documents_to_tpuf", new_callable=AsyncMock),
             patch("fai.routes.document.sync_documents_to_query_index", new_callable=AsyncMock),
-        ):            
+        ):
             response = test_client.post(
                 f"/document/{domain}/batch-create",
                 json=[req.model_dump(mode="json") for req in batch_requests],

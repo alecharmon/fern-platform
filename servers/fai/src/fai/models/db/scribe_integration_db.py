@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy import (
+    JSON,
     Column,
     DateTime,
     String,
@@ -26,3 +27,5 @@ class ScribeIntegrationDb(Base):
 
     created_at = Column(DateTime(timezone=True), nullable=False)
     installed_at = Column(DateTime(timezone=True), nullable=True)
+
+    settings = Column(JSON, nullable=True, default=dict)
