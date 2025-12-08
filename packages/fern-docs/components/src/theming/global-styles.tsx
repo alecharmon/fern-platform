@@ -195,20 +195,7 @@ export function GlobalStyles({
                       lightSelector,
                       darkSelector
                   })
-                : getColorScaleCss({
-                      mode: "dark",
-                      name: "accent",
-                      scale: fallbackDark.grayScale,
-                      scaleWideGamut: fallbackDark.grayScaleWideGamut,
-                      scaleAlpha: fallbackDark.grayScaleAlpha,
-                      scaleAlphaWideGamut: fallbackDark.grayScaleAlphaWideGamut,
-                      contrast: "#000",
-                      surface: fallbackDark.graySurface,
-                      surfaceWideGamut: fallbackDark.graySurfaceWideGamut,
-                      scopeSelector,
-                      lightSelector,
-                      darkSelector
-                  })
+                : ""
         }
 
         ${
@@ -264,10 +251,7 @@ export function GlobalStyles({
           --card-background: ${dark.cardBackground ?? "initial"};
           --theme-color: ${dark.themeColor};
         }`
-                : `${darkSelector} {
-          --background: ${dark?.background ?? "#000"};
-          --card-background: ${root?.cardBackground ?? "initial"};
-        }`
+                : `${darkSelector} { --background: ${dark?.background ?? "#000"}; }`
         }
 
         ${
@@ -280,7 +264,7 @@ export function GlobalStyles({
 
       ${
           hasTheme && (light?.backgroundGradient || light?.backgroundImage)
-              ? `.dark .fern-background-image {
+              ? `${darkSelector} .fern-background-image {
           background-image: ${light?.backgroundImage?.src ? `url(${light?.backgroundImage?.src})` : "linear-gradient(to bottom, var(--background) 0, color-mix(in srgb, var(--accent), var(--background) 90%) 100%)"};
         }`
               : ""
