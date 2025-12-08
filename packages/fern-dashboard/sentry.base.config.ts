@@ -7,8 +7,10 @@ type SentryBaseConfig = Parameters<typeof Sentry.init>[0];
 
 export const baseConfig: SentryBaseConfig = {
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    environment: process.env.NODE_ENV,
     sendDefaultPii: true,
     tracesSampleRate: 1,
     enableLogs: true,
+    serverName: process.env.HOSTNAME || "unknown",
     integrations: [Sentry.consoleLoggingIntegration({ levels: ["debug", "log", "warn", "error"] })]
 };
