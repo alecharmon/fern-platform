@@ -110,7 +110,7 @@ export async function GET(
         headers: {
             "Content-Type": `text/${markdown.contentType}`,
             "X-Robots-Tag": "noindex", // prevent search engines from indexing this page
-            "Cache-Control": "s-maxage=60" // cannot guarantee that the content won't change, so we only cache for 60 seconds
+            "Cache-Control": "no-store"
         }
     });
 }

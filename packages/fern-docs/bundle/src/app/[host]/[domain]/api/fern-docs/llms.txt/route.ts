@@ -149,7 +149,7 @@ export async function GET(
         status: 200,
         headers: {
             "Content-Type": "text/plain; charset=utf-8",
-            "Cache-Control": "s-maxage=3600",
+            "Cache-Control": "no-store",
             "Transfer-Encoding": "chunked"
         }
     });

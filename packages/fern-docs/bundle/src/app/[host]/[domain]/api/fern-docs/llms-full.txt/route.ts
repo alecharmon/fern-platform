@@ -150,7 +150,7 @@ export async function GET(
         headers: {
             "Content-Type": "text/plain; charset=utf-8",
             "X-Robots-Tag": "noindex",
-            "Cache-Control": "s-maxage=60",
+            "Cache-Control": "no-store",
             "Transfer-Encoding": "chunked"
         }
     });
