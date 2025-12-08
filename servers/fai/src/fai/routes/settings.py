@@ -398,7 +398,6 @@ async def get_toggle_status(
 )
 async def reindex_preview_callback(
     request: UpstashCallbackRequest,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     """Handle callback from Upstash QStash when preview reindex completes."""
@@ -423,7 +422,6 @@ async def reindex_preview_callback(
             LOGGER.info(f"Reindex completed successfully for domain {stripped_domain}")
             existing_record.job_id = None
             existing_record.last_reindex_time = datetime.utcnow()
-            background_tasks.add_task(revalidate_domain, stripped_domain)
         else:
             LOGGER.error(f"Reindex failed for domain {stripped_domain} with status {request.status}")
             existing_record.job_id = None
@@ -474,7 +472,7 @@ async def set_job_id(
     openapi_extra={"x-fern-audiences": ["internal"]},
 )
 async def reindex_callback(
-    request: ReindexCallbackRequest, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)
+    request: ReindexCallbackRequest, db: AsyncSession = Depends(get_db)
 ) -> JSONResponse:
     """Handle callback from SQS reindexing worker when reindex completes."""
     try:
@@ -493,7 +491,6 @@ async def reindex_callback(
             LOGGER.info(f"Reindex completed successfully for domain {existing_record.domain}")
             existing_record.job_id = None
             existing_record.last_reindex_time = datetime.utcnow()
-            background_tasks.add_task(revalidate_domain, existing_record.domain)
         else:
             LOGGER.error(f"Reindex failed for domain {existing_record.domain}")
             existing_record.job_id = None
