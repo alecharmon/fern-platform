@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       fai_changed: ${{ steps.filter.outputs.fai }}
+      fai_chat_changed: ${{ steps.filter.outputs.fai_chat }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -30,6 +31,10 @@ jobs:
               - 'servers/fai-lambda/**'
               - 'servers/fai-lambda-deploy/**'
               - 'fern/apis/fai/**'
+              - '.github/workflows/ci-fai.yml'
+            fai_chat:
+              - 'servers/fai-chat/**'
+              - 'servers/python-libs/fai_ai_core/**'
               - '.github/workflows/ci-fai.yml'
 
   lint-fai:
@@ -59,6 +64,49 @@ jobs:
         run: |
           cd servers/fai
           poetry run mypy .
+
+  lint-fai-chat:
+    needs: check-fai-changes
+    if: needs.check-fai-changes.outputs.fai_chat_changed == 'true'
+    runs-on: CLI
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Setup poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+
+      - name: Install shared core (fai_ai_core)
+        run: |
+          cd servers/python-libs/fai_ai_core
+          poetry install --with dev
+
+      - name: Lint & Test shared core
+        run: |
+          cd servers/python-libs/fai_ai_core
+          poetry run ruff check
+          poetry run ruff format --check
+          poetry run pytest
+
+      - name: Install fai-chat
+        run: |
+          cd servers/fai-chat
+          poetry install --with dev
+
+      - name: Lint & Type Check fai-chat
+        run: |
+          cd servers/fai-chat
+          make check
+
+      - name: Test fai-chat
+        run: |
+          cd servers/fai-chat
+          make test
 
   lint-fai-lambda:
     needs: check-fai-changes

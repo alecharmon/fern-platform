@@ -93,8 +93,9 @@ export class FaiChatEcsStack extends Stack {
             desiredCount: resourceConfig.desiredCount,
             securityGroups: [securityGroup],
             taskImageOptions: {
-                image: ContainerImage.fromAsset(path.join(__dirname, "../../fai-lambda"), {
-                    file: "fai-chat/Dockerfile.ecs"
+                image: ContainerImage.fromAsset(path.join(__dirname, "../../.."), {
+                    file: "servers/fai-chat/Dockerfile.ecs",
+                    exclude: ["**/cdk.out/**"]
                 }),
                 containerName: SERVICE_NAME,
                 containerPort: 8080,

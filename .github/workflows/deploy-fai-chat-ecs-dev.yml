@@ -5,8 +5,8 @@ on:
     branches:
       - app
     paths:
-      - "servers/fai-lambda/fai-chat/**"
-      - "servers/fai-lambda/shared/**"
+      - "servers/fai-chat/**"
+      - "servers/python-libs/fai_ai_core/**"
       - "servers/fai-chat-deploy/**"
       - ".github/workflows/deploy-fai-chat-ecs-dev.yml"
   workflow_dispatch:

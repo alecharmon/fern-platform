@@ -1,0 +1,31 @@
+# ECS Fargate optimized Dockerfile for fai-chat
+# Unlike the Lambda version, this doesn't use Lambda Web Adapter
+FROM public.ecr.aws/docker/library/python:3.12-slim
+
+# Install system dependencies (git for poetry, curl for health checks)
+RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install poetry
+
+WORKDIR /app/servers/fai-chat
+
+COPY servers/fai-chat/pyproject.toml servers/fai-chat/poetry.lock* ./
+COPY servers/python-libs/fai_ai_core /app/servers/python-libs/fai_ai_core
+
+RUN poetry config virtualenvs.create false && \
+    poetry install --only main --no-root
+
+COPY servers/fai-chat/src/ ./src/
+
+ENV PYTHONPATH="/app/servers/fai-chat:${PYTHONPATH:-}"
+ENV PYTHONUNBUFFERED=1
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+EXPOSE 8080
+
+# Uvicorn with ECS-optimized settings:
+# --timeout-keep-alive=900: Match ALB idle timeout for long SSE streams
+# --limit-concurrency=300: High limit for I/O-bound async workload (LLM streaming)
+CMD ["python", "-m", "uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8080", "--timeout-keep-alive", "900", "--limit-concurrency", "300"]
