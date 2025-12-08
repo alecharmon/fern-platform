@@ -16,6 +16,7 @@ from fai.settings import (
     VARIABLES,
 )
 from fai.utils.scribe.devin_client import get_devin_session_status
+from fai.utils.slack.postprocessing import slackify_markdown
 
 
 def parse_attachments(message_text: str) -> tuple[str, list[str]]:
@@ -108,7 +109,7 @@ async def poll_devin_session(
                             if clean_text:
                                 await client.chat_postMessage(
                                     channel=slack_channel,
-                                    text=clean_text,
+                                    text=slackify_markdown(clean_text),
                                     thread_ts=slack_thread_ts,
                                     unfurl_links=False,
                                     unfurl_media=False,

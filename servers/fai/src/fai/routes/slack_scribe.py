@@ -25,6 +25,7 @@ from fai.utils.slack.integration_common import (
     is_message_processed,
     mark_message_processed,
 )
+from fai.utils.slack.postprocessing import slackify_markdown
 
 
 async def cleanup_scribe_message_cache() -> None:
@@ -118,7 +119,7 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
     try:
         msg_response = await client.chat_postMessage(
             channel=response.channel,
-            text=response.response_text,
+            text=slackify_markdown(response.response_text),
             thread_ts=response.thread_ts,
             unfurl_links=False,
             unfurl_media=False,
