@@ -225,6 +225,27 @@ const nextConfig: NextConfig = {
             {
                 key: "Permissions-Policy",
                 value: "camera=(), geolocation=()"
+            },
+            {
+                key: "X-Frame-Options",
+                value: "SAMEORIGIN"
+            },
+            {
+                key: "Content-Security-Policy",
+                value: [
+                    "default-src 'self'",
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:",
+                    "style-src 'self' 'unsafe-inline' https:",
+                    "img-src 'self' https: data: blob:",
+                    "font-src 'self' https: data:",
+                    "connect-src 'self' https: wss:",
+                    "media-src 'self' https: blob:",
+                    "object-src 'none'",
+                    "frame-src 'self' https:",
+                    "frame-ancestors 'self'",
+                    "base-uri 'self'",
+                    "form-action 'self' https:"
+                ].join("; ")
             }
         ];
 
