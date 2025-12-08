@@ -29,7 +29,7 @@ export type TurbopufferRecordWithoutVector = Omit<TurbopufferRecord, "vector">;
 export const FernTurbopufferAttributeSchema: Record<
     keyof TurbopufferAttributes,
     {
-        type: "string" | "uint" | "uuid" | "bool" | "[]string" | "[]uint" | "[]uuid";
+        type: "string" | "uint" | "uuid" | "bool" | "[]string" | "[]uint" | "[]uuid" | "int";
         filterable: boolean;
         bm25: boolean;
     }
@@ -90,7 +90,7 @@ export const FernTurbopufferAttributeSchema: Record<
         bm25: true
     },
     chunk_index: {
-        type: "uint",
+        type: "int",
         filterable: true,
         bm25: false
     },

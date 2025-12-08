@@ -57,7 +57,7 @@ def get_query_index_tpuf_schema() -> dict[str, Any]:
         "source": {"type": "string", "filterable": True},
         "content_type": {"type": "string", "filterable": True},
         "breadcrumbs": {"type": "string", "filterable": False},
-        "chunk_index": {"type": "uint", "filterable": True},
+        "chunk_index": {"type": "int", "filterable": True},
         "parent_id": {"type": "string", "filterable": True},
         "parent_content_hash": {"type": "string", "filterable": True},
         "indexed_at": {"type": "string", "filterable": True},
