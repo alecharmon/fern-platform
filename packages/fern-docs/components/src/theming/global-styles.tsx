@@ -266,7 +266,6 @@ export function GlobalStyles({
         }`
                 : `${darkSelector} {
           --background: ${dark?.background ?? "#000"};
-          --accent: #fff;
           --card-background: ${root?.cardBackground ?? "initial"};
         }`
         }
