@@ -64,6 +64,12 @@ let nextConfig: NextConfig = {
             },
             {
                 protocol: "https",
+                hostname: "s.gravatar.com",
+                port: "",
+                pathname: "/avatar/**"
+            },
+            {
+                protocol: "https",
                 hostname: "files.buildwithfern.com",
                 port: "",
                 pathname: "/**"

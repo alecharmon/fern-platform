@@ -3,6 +3,7 @@ import {
     type ApiResponse,
     type GetInvitations200ResponseOneOfInner,
     type GetMembers200ResponseOneOfInner,
+    type GetUsers200ResponseOneOfInner,
     ManagementClient
 } from "auth0";
 import { cache } from "react";
@@ -21,18 +22,31 @@ export const FERN_ORG_NAME = Auth0OrgName("fern");
 
 let AUTH0_MANAGEMENT_CLIENT: ManagementClient | undefined;
 
+export type Auth0User = GetUsers200ResponseOneOfInner;
+
+export type Auth0ManagementErrorCode = "CONFIG_MISSING" | "USER_NOT_FOUND" | "MULTIPLE_USERS_FOUND" | "USER_ID_MISSING";
+export class Auth0ManagementError extends Error {
+    errorCode?: Auth0ManagementErrorCode;
+
+    constructor(message: string, options?: { errorCode?: Auth0ManagementErrorCode; cause?: unknown }) {
+        super(message, options?.cause != null ? { cause: options.cause } : undefined);
+        this.name = "Auth0ManagementError";
+        this.errorCode = options?.errorCode;
+    }
+}
+
 export function getAuth0ManagementClient() {
     if (AUTH0_MANAGEMENT_CLIENT == null) {
         const { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET } = process.env;
 
         if (AUTH0_DOMAIN == null) {
-            throw new Error("AUTH0_DOMAIN is not defined");
+            throw new Auth0ManagementError("AUTH0_DOMAIN is not defined", { errorCode: "CONFIG_MISSING" });
         }
         if (AUTH0_CLIENT_ID == null) {
-            throw new Error("AUTH0_CLIENT_ID is not defined");
+            throw new Auth0ManagementError("AUTH0_CLIENT_ID is not defined", { errorCode: "CONFIG_MISSING" });
         }
         if (AUTH0_CLIENT_SECRET == null) {
-            throw new Error("AUTH0_CLIENT_SECRET is not defined");
+            throw new Auth0ManagementError("AUTH0_CLIENT_SECRET is not defined", { errorCode: "CONFIG_MISSING" });
         }
 
         AUTH0_MANAGEMENT_CLIENT = new ManagementClient({
@@ -282,11 +296,11 @@ async function retryWithBackoff<T>(operation: () => Promise<T>, operationName: s
                 continue;
             }
 
-            throw error instanceof Error ? error : new Error(String(error));
+            throw error instanceof Error ? error : new Auth0ManagementError(String(error));
         }
     }
 
-    throw lastError ?? new Error(`${operationName} failed after ${maxRetries} retries`);
+    throw lastError ?? new Auth0ManagementError(`${operationName} failed after ${maxRetries} retries`);
 }
 
 export async function getOrganization(orgName: Auth0OrgName) {
@@ -306,6 +320,19 @@ export async function getOrganization(orgName: Auth0OrgName) {
     });
 }
 
+export async function getOrganizationById(orgId: Auth0OrgID) {
+    console.debug(`[getOrganizationById] Fetching organization: ${orgId}`);
+    const { data: organization } = await retryWithBackoff(
+        async () =>
+            await getAuth0ManagementClient().organizations.get({
+                id: orgId
+            }),
+        `getOrganizationById(${orgId})`
+    );
+
+    return organization as unknown as Auth0Organization;
+}
+
 export async function getOrgIdFromName(orgName: Auth0OrgName) {
     return await ORGANIZATION_NAME_TO_ID_CACHE.get(RedisCacheKey.organizationNameToId(orgName), async () => {
         const { data: organization } = await retryWithBackoff(
@@ -321,7 +348,6 @@ export async function getOrgIdFromName(orgName: Auth0OrgName) {
 }
 
 export async function getMyOrganizations(userId: Auth0UserID) {
-    console.debug(`[getMyOrganizations] Fetching organizations for user: ${userId}`);
     return await USER_ORGANIZATIONS_CACHE.get(RedisCacheKey.userOrganizations(userId), async () => {
         console.debug(`[getMyOrganizations] Cache miss for ${userId}, fetching from Auth0`);
         const auth0 = getAuth0ManagementClient();
@@ -503,16 +529,18 @@ export async function getUserIdByEmail(email: string): Promise<Auth0UserID> {
     });
 
     if (users.data.length === 0) {
-        throw new Error(`No user found with email: ${email}`);
+        throw new Auth0ManagementError(`No user found with email: ${email}`, { errorCode: "USER_NOT_FOUND" });
     }
 
     if (users.data.length > 1) {
-        throw new Error(`Multiple users found with email: ${email}`);
+        throw new Auth0ManagementError(`Multiple users found with email: ${email}`, {
+            errorCode: "MULTIPLE_USERS_FOUND"
+        });
     }
 
     const user = users.data[0];
     if (!user?.user_id) {
-        throw new Error("User ID not found");
+        throw new Auth0ManagementError("User ID not found", { errorCode: "USER_ID_MISSING" });
     }
 
     return Auth0UserID(user.user_id);
@@ -533,11 +561,40 @@ export async function addUserToOrg(userId: Auth0UserID, orgName: Auth0OrgName) {
     await invalidateCachesAfterAddingOrgMember(userId, orgName);
 }
 
+export async function addUserToOrgById(userId: Auth0UserID, orgId: Auth0OrgID) {
+    const auth0 = getAuth0ManagementClient();
+    await auth0.organizations.addMembers({ id: orgId }, { members: [userId] });
+}
+
 export async function getUserGithubToken(userId: Auth0UserID): Promise<string | undefined> {
     const auth0 = getAuth0ManagementClient();
     const user = (await auth0.users.get({ id: userId })).data;
     return user.identities.find((identity) => identity.provider === "github")?.access_token;
 }
+
+export async function getUserByEmail(email: string): Promise<Auth0User | undefined> {
+    const auth0 = getAuth0ManagementClient();
+    const users = (
+        await auth0.usersByEmail.getByEmail({
+            email
+        })
+    ).data;
+
+    if (users.length === 0) {
+        return undefined;
+    }
+
+    if (users.length > 1) {
+        throw new Auth0ManagementError("More than one user with the same email", {
+            errorCode: "MULTIPLE_USERS_FOUND"
+        });
+    }
+
+    const user = users[0] as Auth0User;
+
+    return user;
+}
+
 export async function getUserGoogleOauth2EmailInfo(
     userId: Auth0UserID
 ): Promise<{ email: string | undefined; isEmailVerified: boolean }> {

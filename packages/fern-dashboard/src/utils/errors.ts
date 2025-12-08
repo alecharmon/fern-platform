@@ -91,7 +91,7 @@ export function getValidationErrorMessage(error: GitRepoValidationError): string
 }
 
 export const throwDigestibleError = (rawError: Error, digest: ERROR_DIGEST_KEYS | string): never => {
-    const error = new Error(rawError.message) as DigestibleError;
+    const error = new Error(JSON.stringify(rawError.message)) as DigestibleError;
     error.digest = digest;
     throw error;
 };
