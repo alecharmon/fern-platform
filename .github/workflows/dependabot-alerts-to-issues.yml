@@ -1,0 +1,147 @@
+name: Create Issues from Dependabot Alerts
+
+on:
+  schedule:
+    # Run at 5AM EST (10AM UTC) every day
+    - cron: "0 10 * * *"
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: read
+  issues: write
+  security-events: read
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create issues from Dependabot alerts
+        uses: actions/github-script@v7
+        env:
+          # ============================================================
+          # DEVIN PROMPT CONFIGURATION
+          # Edit the prompt below to customize instructions for Devin
+          # ============================================================
+          DEVIN_PROMPT: |
+            @devin-ai-integration Please resolve this Dependabot security alert.
+
+            **Instructions:**
+            1. Analyze the vulnerability and understand its impact
+            2. Update the affected dependency to a secure version
+            3. Ideally resolve this without using an override - prefer updating the dependency directly
+            4. If an override is absolutely necessary, document why in the PR description
+            5. Run tests to ensure the update doesn't break anything
+            6. Create a PR with the fix and tag @davidkonigsberg for review
+
+            **Alert Details:**
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const devinPrompt = process.env.DEVIN_PROMPT;
+
+            // Fetch all open Dependabot alerts
+            let alerts = [];
+            try {
+              const response = await github.rest.dependabot.listAlertsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100
+              });
+              alerts = response.data;
+            } catch (error) {
+              if (error.status === 403) {
+                console.log('Dependabot alerts are not enabled or accessible for this repository.');
+                return;
+              }
+              throw error;
+            }
+
+            if (alerts.length === 0) {
+              console.log('No open Dependabot alerts found.');
+              return;
+            }
+
+            console.log(`Found ${alerts.length} open Dependabot alerts.`);
+
+            // Fetch existing issues to check for duplicates
+            const existingIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              labels: 'dependabot-alert',
+              per_page: 100
+            });
+
+            // Create a set of alert numbers that already have issues
+            const existingAlertNumbers = new Set();
+            for (const issue of existingIssues) {
+              // Extract alert number from issue title
+              const match = issue.title.match(/\[Dependabot Alert #(\d+)\]/);
+              if (match) {
+                existingAlertNumbers.add(parseInt(match[1]));
+              }
+            }
+
+            console.log(`Found ${existingAlertNumbers.size} existing issues for Dependabot alerts.`);
+
+            // Create issues for new alerts
+            let createdCount = 0;
+            for (const alert of alerts) {
+              if (existingAlertNumbers.has(alert.number)) {
+                console.log(`Issue already exists for alert #${alert.number}, skipping.`);
+                continue;
+              }
+
+              const severity = alert.security_advisory?.severity || 'unknown';
+              const packageName = alert.security_vulnerability?.package?.name || 'unknown package';
+              const ecosystem = alert.security_vulnerability?.package?.ecosystem || 'unknown';
+              const vulnerableVersionRange = alert.security_vulnerability?.vulnerable_version_range || 'unknown';
+              const patchedVersions = alert.security_vulnerability?.first_patched_version?.identifier || 'No patch available';
+              const cveId = alert.security_advisory?.cve_id || 'N/A';
+              const ghsaId = alert.security_advisory?.ghsa_id || 'N/A';
+              const summary = alert.security_advisory?.summary || 'No summary available';
+              const description = alert.security_advisory?.description || 'No description available';
+              const manifestPath = alert.dependency?.manifest_path || 'unknown';
+
+              const issueTitle = `[Dependabot Alert #${alert.number}] ${severity.toUpperCase()}: ${packageName} vulnerability`;
+
+              const issueBody = `${devinPrompt}
+            - **Package:** ${packageName} (${ecosystem})
+            - **Severity:** ${severity.toUpperCase()}
+            - **Vulnerable versions:** ${vulnerableVersionRange}
+            - **Patched version:** ${patchedVersions}
+            - **CVE:** ${cveId}
+            - **GHSA:** ${ghsaId}
+            - **Manifest:** ${manifestPath}
+
+            **Summary:**
+            ${summary}
+
+            **Description:**
+            ${description}
+
+            ---
+            [View Dependabot Alert](https://github.com/${context.repo.owner}/${context.repo.repo}/security/dependabot/${alert.number})
+            `;
+
+              try {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: issueTitle,
+                  body: issueBody,
+                  labels: ['dependabot-alert', `severity:${severity}`],
+                  assignees: ['davidkonigsberg']
+                });
+                console.log(`Created issue for alert #${alert.number}: ${packageName}`);
+                createdCount++;
+              } catch (error) {
+                console.error(`Failed to create issue for alert #${alert.number}: ${error.message}`);
+              }
+            }
+
+            console.log(`Created ${createdCount} new issues from Dependabot alerts.`);
