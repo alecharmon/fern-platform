@@ -47,6 +47,10 @@ tags:
     externalDocs:
       description: User Management API
       url: https://docs.plantstore.dev/users
+  - name: oneOf Examples
+    description: Example endpoints demonstrating oneOf schemas
+  - name: anyOf Examples
+    description: Example endpoints demonstrating anyOf schemas
 # Global security requirement - applies to all endpoints unless overridden
 # security:
 #   - bearerAuth: []
@@ -572,6 +576,412 @@ paths:
               schema:
                 $ref: "#/components/schemas/PlantUpdateEvent"
       x-fern-streaming: true
+  /oneOf/discriminator:
+    post:
+      tags:
+        - oneOf Examples
+      summary: Example endpoint using oneOf with discriminator
+      description: |
+        Demonstrates oneOf with discriminator mapping.
+
+        <CodeBlock title="OpenAPI Spec">
+        ```yaml
+        schema:
+          oneOf:
+            - $ref: "#/components/schemas/OneOfDiscriminatedA"
+            - $ref: "#/components/schemas/OneOfDiscriminatedB"
+          discriminator:
+            propertyName: type
+            mapping:
+              variantA: "#/components/schemas/OneOfDiscriminatedA"
+              variantB: "#/components/schemas/OneOfDiscriminatedB"
+
+        components:
+          schemas:
+            OneOfDiscriminatedA:
+              type: object
+              required:
+                - type
+                - variantAField
+              properties:
+                type:
+                  type: string
+                variantAField:
+                  type: string
+            OneOfDiscriminatedB:
+              type: object
+              required:
+                - type
+                - variantBField
+              properties:
+                type:
+                  type: string
+                variantBField:
+                  type: integer
+        ```
+        </CodeBlock>
+      operationId: oneOfExample
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/OneOfDiscriminatedA"
+                - $ref: "#/components/schemas/OneOfDiscriminatedB"
+              discriminator:
+                propertyName: type
+                mapping:
+                  variantA: "#/components/schemas/OneOfDiscriminatedA"
+                  variantB: "#/components/schemas/OneOfDiscriminatedB"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Bad request error
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ValidationError"
+                  - $ref: "#/components/schemas/InvalidTypeError"
+                discriminator:
+                  propertyName: errorType
+                  mapping:
+                    validation: "#/components/schemas/ValidationError"
+                    invalidType: "#/components/schemas/InvalidTypeError"
+      x-fern-examples:
+        - name: VariantA
+          request:
+            type: "variantA"
+            variantAField: "example string"
+          response:
+            body:
+              success: true
+        - name: VariantB
+          request:
+            type: "variantB"
+            variantBField: 42
+          response:
+            body:
+              success: true
+  /oneOf/no-discriminator:
+    post:
+      tags:
+        - oneOf Examples
+      summary: Example endpoint using oneOf without discriminator
+      description: |
+        Demonstrates oneOf without discriminator or mapping.
+
+        <CodeBlock title="OpenAPI Spec">
+        ```yaml
+        schema:
+          oneOf:
+            - $ref: "#/components/schemas/OneOfVariantA"
+            - $ref: "#/components/schemas/OneOfVariantB"
+
+        components:
+          schemas:
+            OneOfVariantA:
+              type: object
+              required:
+                - variantAField
+              properties:
+                variantAField:
+                  type: string
+            OneOfVariantB:
+              type: object
+              required:
+                - variantBField
+              properties:
+                variantBField:
+                  type: integer
+        ```
+        </CodeBlock>
+      operationId: oneOfExampleNoDiscriminator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/OneOfVariantA"
+                - $ref: "#/components/schemas/OneOfVariantB"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Bad request error
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ErrorVariantA"
+                  - $ref: "#/components/schemas/ErrorVariantB"
+      x-fern-examples:
+        - name: VariantA
+          request:
+            variantAField: "example string"
+          response:
+            body:
+              success: true
+        - name: VariantB
+          request:
+            variantBField: 42
+          response:
+            body:
+              success: true
+  /oneOf/titled:
+    post:
+      tags:
+        - oneOf Examples
+      summary: Example endpoint using oneOf with titles
+      description: |
+        Demonstrates oneOf with title field per OpenAPI spec.
+
+        <CodeBlock title="OpenAPI Spec">
+        ```yaml
+        schema:
+          oneOf:
+            - $ref: "#/components/schemas/OneOfTitledA"
+            - $ref: "#/components/schemas/OneOfTitledB"
+
+        components:
+          schemas:
+            OneOfTitledA:
+              title: Titled Variant A
+              type: object
+              required:
+                - titledFieldA
+              properties:
+                titledFieldA:
+                  type: string
+            OneOfTitledB:
+              title: Titled Variant B
+              type: object
+              required:
+                - titledFieldB
+              properties:
+                titledFieldB:
+                  type: integer
+        ```
+        </CodeBlock>
+      operationId: oneOfExampleTitled
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/OneOfTitledA"
+                - $ref: "#/components/schemas/OneOfTitledB"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Bad request error
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ErrorTitledA"
+                  - $ref: "#/components/schemas/ErrorTitledB"
+      x-fern-examples:
+        - name: TitledVariantA
+          request:
+            titledFieldA: "example string"
+          response:
+            body:
+              success: true
+        - name: TitledVariantB
+          request:
+            titledFieldB: 42
+          response:
+            body:
+              success: true
+  /anyOf/no-titles:
+    post:
+      tags:
+        - anyOf Examples
+      summary: Example endpoint using anyOf without titles
+      description: |
+        Demonstrates anyOf without title fields.
+
+        <CodeBlock title="OpenAPI Spec">
+        ```yaml
+        schema:
+          anyOf:
+            - $ref: "#/components/schemas/AnyOfVariantA"
+            - $ref: "#/components/schemas/AnyOfVariantB"
+
+        components:
+          schemas:
+            AnyOfVariantA:
+              type: object
+              required:
+                - optionA
+              properties:
+                optionA:
+                  type: string
+            AnyOfVariantB:
+              type: object
+              required:
+                - optionB
+              properties:
+                optionB:
+                  type: boolean
+        ```
+        </CodeBlock>
+      operationId: anyOfExampleNoTitles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: "#/components/schemas/AnyOfVariantA"
+                - $ref: "#/components/schemas/AnyOfVariantB"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Bad request error
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/AnyOfErrorA"
+                  - $ref: "#/components/schemas/AnyOfErrorB"
+      x-fern-examples:
+        - name: VariantA
+          request:
+            optionA: "example string"
+          response:
+            body:
+              success: true
+        - name: VariantB
+          request:
+            optionB: true
+          response:
+            body:
+              success: true
+        - name: BothVariants
+          request:
+            optionA: "combined"
+            optionB: false
+          response:
+            body:
+              success: true
+  /anyOf/titled:
+    post:
+      tags:
+        - anyOf Examples
+      summary: Example endpoint using anyOf with titles
+      description: |
+        Demonstrates anyOf with title field per OpenAPI spec.
+
+        <CodeBlock title="OpenAPI Spec">
+        ```yaml
+        schema:
+          anyOf:
+            - $ref: "#/components/schemas/AnyOfTitledA"
+            - $ref: "#/components/schemas/AnyOfTitledB"
+
+        components:
+          schemas:
+            AnyOfTitledA:
+              title: Option A
+              type: object
+              required:
+                - optionA
+              properties:
+                optionA:
+                  type: string
+            AnyOfTitledB:
+              title: Option B
+              type: object
+              required:
+                - optionB
+              properties:
+                optionB:
+                  type: boolean
+        ```
+        </CodeBlock>
+      operationId: anyOfExample
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: "#/components/schemas/AnyOfTitledA"
+                - $ref: "#/components/schemas/AnyOfTitledB"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Bad request error
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/AnyOfErrorTitledA"
+                  - $ref: "#/components/schemas/AnyOfErrorTitledB"
+      x-fern-examples:
+        - name: VariantA
+          request:
+            optionA: "example string"
+          response:
+            body:
+              success: true
+        - name: VariantB
+          request:
+            optionB: true
+          response:
+            body:
+              success: true
+        - name: BothVariants
+          request:
+            optionA: "combined"
+            optionB: false
+          response:
+            body:
+              success: true
   /plant/search/stream:
     post:
       tags:
@@ -928,6 +1338,201 @@ components:
           description: Sequence number of this event
         data:
           $ref: "#/components/schemas/PlantResponse"
+    OneOfDiscriminatedA:
+      type: object
+      description: First variant for discriminated oneOf
+      required:
+        - type
+        - variantAField
+      properties:
+        type:
+          type: string
+        variantAField:
+          type: string
+    OneOfDiscriminatedB:
+      type: object
+      description: Second variant for discriminated oneOf
+      required:
+        - type
+        - variantBField
+      properties:
+        type:
+          type: string
+        variantBField:
+          type: integer
+    OneOfVariantA:
+      type: object
+      description: First variant for oneOf without discriminator
+      required:
+        - variantAField
+      properties:
+        variantAField:
+          type: string
+    OneOfVariantB:
+      type: object
+      description: Second variant for oneOf without discriminator
+      required:
+        - variantBField
+      properties:
+        variantBField:
+          type: integer
+    OneOfTitledA:
+      title: Titled Variant A
+      type: object
+      description: First variant for oneOf with title
+      required:
+        - titledFieldA
+      properties:
+        titledFieldA:
+          type: string
+    OneOfTitledB:
+      title: Titled Variant B
+      type: object
+      description: Second variant for oneOf with title
+      required:
+        - titledFieldB
+      properties:
+        titledFieldB:
+          type: integer
+    AnyOfVariantA:
+      type: object
+      description: First variant for anyOf without title
+      required:
+        - optionA
+      properties:
+        optionA:
+          type: string
+    AnyOfVariantB:
+      type: object
+      description: Second variant for anyOf without title
+      required:
+        - optionB
+      properties:
+        optionB:
+          type: boolean
+    AnyOfTitledA:
+      title: Option A
+      type: object
+      description: First variant for anyOf with title
+      required:
+        - optionA
+      properties:
+        optionA:
+          type: string
+    AnyOfTitledB:
+      title: Option B
+      type: object
+      description: Second variant for anyOf with title
+      required:
+        - optionB
+      properties:
+        optionB:
+          type: boolean
+    # Error schemas for oneOf examples (with discriminator)
+    ValidationError:
+      type: object
+      description: Validation error with discriminator
+      required:
+        - errorType
+        - message
+        - field
+      properties:
+        errorType:
+          type: string
+        message:
+          type: string
+        field:
+          type: string
+    InvalidTypeError:
+      type: object
+      description: Invalid type error with discriminator
+      required:
+        - errorType
+        - message
+        - expectedType
+      properties:
+        errorType:
+          type: string
+        message:
+          type: string
+        expectedType:
+          type: string
+    # Error schemas for oneOf examples (no discriminator)
+    ErrorVariantA:
+      type: object
+      description: Error variant A without discriminator
+      required:
+        - errorCodeA
+      properties:
+        errorCodeA:
+          type: string
+        details:
+          type: string
+    ErrorVariantB:
+      type: object
+      description: Error variant B without discriminator
+      required:
+        - errorCodeB
+      properties:
+        errorCodeB:
+          type: integer
+        reason:
+          type: string
+    # Error schemas for oneOf examples (with titles)
+    ErrorTitledA:
+      title: Error Type A
+      type: object
+      description: Error variant A with title
+      required:
+        - errorA
+      properties:
+        errorA:
+          type: string
+    ErrorTitledB:
+      title: Error Type B
+      type: object
+      description: Error variant B with title
+      required:
+        - errorB
+      properties:
+        errorB:
+          type: integer
+    # Error schemas for anyOf examples (no titles)
+    AnyOfErrorA:
+      type: object
+      description: AnyOf error variant A
+      required:
+        - fieldError
+      properties:
+        fieldError:
+          type: string
+    AnyOfErrorB:
+      type: object
+      description: AnyOf error variant B
+      required:
+        - formatError
+      properties:
+        formatError:
+          type: boolean
+    # Error schemas for anyOf examples (with titles)
+    AnyOfErrorTitledA:
+      title: Field Error
+      type: object
+      description: AnyOf error variant A with title
+      required:
+        - fieldIssue
+      properties:
+        fieldIssue:
+          type: string
+    AnyOfErrorTitledB:
+      title: Format Error
+      type: object
+      description: AnyOf error variant B with title
+      required:
+        - formatIssue
+      properties:
+        formatIssue:
+          type: boolean
   securitySchemes:
     bearerAuth:
       type: http
