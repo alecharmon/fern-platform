@@ -14,4 +14,6 @@ export interface ErrorResponse
     isWildcard: boolean | undefined;
     name: string;
     examples: FernRegistry.api.latest.ErrorExample[] | undefined;
+    /** Response headers associated with this error (e.g., Retry-After for 429 errors). */
+    headers: FernRegistry.api.latest.ObjectProperty[] | undefined;
 }

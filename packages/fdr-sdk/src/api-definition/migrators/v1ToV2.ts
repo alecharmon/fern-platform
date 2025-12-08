@@ -522,7 +522,8 @@ export class ApiDefinitionV1ToLatest {
                             value: sortKeysByShape(example.responseBody.value, shape, this.types)
                         }
                     })
-                )
+                ),
+                headers: this.migrateParameters(value.headers)
             };
         });
     };

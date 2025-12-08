@@ -134,6 +134,9 @@ types:
           The statusCode field will contain the base value (400 for 4XX, 500 for 5XX).
       name: string
       examples: optional<list<ErrorExample>>
+      headers:
+        type: optional<list<type.ObjectProperty>>
+        docs: Response headers associated with this error (e.g., Retry-After for 429 errors).
 
   ExampleEndpointCall:
     extends: commons.WithDescription
