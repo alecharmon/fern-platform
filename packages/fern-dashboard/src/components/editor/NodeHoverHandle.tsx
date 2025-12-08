@@ -1,16 +1,19 @@
 import { DragHandle } from "@tiptap/extension-drag-handle-react";
 import { useCurrentEditor } from "@tiptap/react";
-import { GripVertical, Plus, Trash2 } from "lucide-react";
+import { ChevronRight, GripVertical, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-
+import { TurnIntoMenu } from "@/components/tiptap-ui/turn-into-dropdown/TurnIntoMenu";
+import { useTurnIntoDropdown } from "@/components/tiptap-ui/turn-into-dropdown/use-turn-into-dropdown";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export default function NodeHoverHandle() {
     const { editor } = useCurrentEditor();
+    const { getTurnIntoMenuItems } = useTurnIntoDropdown();
     const currentNodePosRef = useRef<number | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [isTurnIntoOpen, setIsTurnIntoOpen] = useState(false);
     const dragStartPosRef = useRef<{ x: number; y: number } | null>(null);
     const closeTimerRef = useRef<number | null>(null);
 
@@ -27,6 +30,7 @@ export default function NodeHoverHandle() {
         }
         closeTimerRef.current = window.setTimeout(() => {
             setIsPopoverOpen(false);
+            setIsTurnIntoOpen(false);
             closeTimerRef.current = null;
         }, 1000);
     }, []);
@@ -141,6 +145,7 @@ export default function NodeHoverHandle() {
     return (
         <DragHandle
             editor={editor}
+            className="tiptap-node-hover-handle"
             computePositionConfig={{ placement: "left-start", strategy: "absolute" }}
             onNodeChange={({ node, pos }) => {
                 (window as any).__currentHoverNode__ = node?.toJSON();
@@ -162,11 +167,14 @@ export default function NodeHoverHandle() {
                     <Plus className="text-muted-foreground" size={16} />
                 </button>
                 <Popover
+                    modal={false}
                     open={isPopoverOpen}
                     onOpenChange={(open) => {
                         setIsPopoverOpen(open);
                         if (open) {
                             cancelScheduledClose();
+                        } else {
+                            setIsTurnIntoOpen(false);
                         }
                     }}
                 >
@@ -192,11 +200,48 @@ export default function NodeHoverHandle() {
                         onPointerDownOutside={() => {
                             cancelScheduledClose();
                             setIsPopoverOpen(false);
+                            setIsTurnIntoOpen(false);
                         }}
                     >
                         <p className="p-3 pb-1.5 editor-component-title">Block</p>
                         <div className="border-border-default border-t" />
                         <div className="flex flex-col gap-px p-1">
+                            <Popover modal={false} open={isTurnIntoOpen} onOpenChange={setIsTurnIntoOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        className="justify-between"
+                                        onMouseEnter={() => {
+                                            setIsTurnIntoOpen(true);
+                                            cancelScheduledClose();
+                                        }}
+                                        onMouseLeave={scheduleClose}
+                                    >
+                                        <span>Turn into</span>
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                    side="right"
+                                    align="start"
+                                    sideOffset={-4}
+                                    className="flex min-w-[200px] flex-col p-0"
+                                    onMouseEnter={cancelScheduledClose}
+                                    onMouseLeave={scheduleClose}
+                                >
+                                    {editor && (
+                                        <TurnIntoMenu
+                                            editor={editor}
+                                            items={getTurnIntoMenuItems(editor)}
+                                            onSelect={(item) => {
+                                                item.action(editor);
+                                                setIsPopoverOpen(false);
+                                                setIsTurnIntoOpen(false);
+                                            }}
+                                        />
+                                    )}
+                                </PopoverContent>
+                            </Popover>
                             <Button
                                 variant="ghost"
                                 onClick={handleDeleteBlock}

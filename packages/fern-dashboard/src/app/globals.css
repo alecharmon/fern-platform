@@ -784,7 +784,8 @@ why? who knows. thanks monaco:)
   outline: none;
 }
 
-.ProseMirror .ProseMirror-selectednode::before {
+/* Use ::after for the background so it doesn't interfere with ::before placeholder */
+.ProseMirror .ProseMirror-selectednode::after {
   content: "";
   position: absolute;
   top: -8px;
