@@ -11,6 +11,7 @@ const cdnUri = process.env.NEXT_PUBLIC_CDN_URI != null ? new URL("/", process.en
 const isTrailingSlashEnabled = process.env.NEXT_PUBLIC_TRAILING_SLASH === "1";
 const isAssetPrefixDisabled = process.env.NEXT_PUBLIC_ASSET_PREFIX_DISABLED === "1";
 const isSelfHosted = process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1";
+const isLocal = process.env.NEXT_PUBLIC_IS_LOCAL;
 const isStandalone =
     process.env.NEXT_PUBLIC_IS_LOCAL === "1" ||
     process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1" ||
@@ -232,20 +233,23 @@ const nextConfig: NextConfig = {
             },
             {
                 key: "Content-Security-Policy",
-                value: [
-                    "default-src 'self'",
-                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:",
-                    "style-src 'self' 'unsafe-inline' https:",
-                    "img-src 'self' https: data: blob:",
-                    "font-src 'self' https: data:",
-                    "connect-src 'self' https: wss: ws:",
-                    "media-src 'self' https: blob:",
-                    "object-src 'none'",
-                    "frame-src 'self' https:",
-                    "frame-ancestors 'self'",
-                    "base-uri 'self'",
-                    "form-action 'self' https:"
-                ].join("; ")
+                value: (() => {
+                    const httpScheme = isLocal ? "https: http:" : "https:";
+                    return [
+                        "default-src 'self'",
+                        `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${httpScheme} blob:`,
+                        `style-src 'self' 'unsafe-inline' ${httpScheme}`,
+                        `img-src 'self' ${httpScheme} data: blob:`,
+                        `font-src 'self' ${httpScheme} data:`,
+                        `connect-src 'self' ${httpScheme} wss: ws:`,
+                        `media-src 'self' ${httpScheme} blob:`,
+                        "object-src 'none'",
+                        `frame-src 'self' ${httpScheme}`,
+                        "frame-ancestors 'self'",
+                        "base-uri 'self'",
+                        `form-action 'self' ${httpScheme}`
+                    ].join("; ");
+                })()
             }
         ];
 
