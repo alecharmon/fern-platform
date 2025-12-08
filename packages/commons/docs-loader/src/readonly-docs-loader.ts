@@ -1314,6 +1314,12 @@ export type DocsLoaderOptions = {
 export type CachedDocsLoader = DocsLoader & {
     clearKvCache: () => Promise<void>;
     isAskAiEnabledForDocs: () => Promise<boolean>;
+    /**
+     * Fetches files directly from FDR, bypassing the KV cache.
+     * Used as a fallback when the cached files are stale or missing file IDs
+     * that are referenced in the page markdown.
+     */
+    getFilesUncached?: () => Promise<Record<string, FileData>>;
 };
 
 /**
@@ -1448,6 +1454,44 @@ const createCachedDocsLoaderImpl = async (
         isAskAiEnabledForDocs: async () => {
             const prefetched = await prefetchPromise;
             return prefetched.askAiEnabled ?? (await getAskAiEnabledForDocs(config)(domainKey));
+        },
+        getFilesUncached: async () => {
+            // Fetch files directly from FDR, bypassing KV cache entirely.
+            // This is used as a fallback when cached files are missing IDs referenced in page markdown.
+            const domain = deriveDomainFromDomainKey(domainKey);
+            try {
+                const response = await uncachedLoadWithUrl(domain);
+                return mapValues(response.definition.filesV2, (file) => {
+                    if (file.type === "url") {
+                        return {
+                            src:
+                                process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                                    ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                                    : file.url
+                        };
+                    } else if (file.type === "image") {
+                        return {
+                            src:
+                                process.env.NEXT_PUBLIC_ASSET_HOSTING === "1"
+                                    ? file.url.replace(getFileCDN(), `${response.baseUrl.basePath ?? ""}/_files`)
+                                    : file.url,
+                            width: file.width,
+                            height: file.height,
+                            blurDataURL: file.blurDataUrl,
+                            alt: file.alt
+                        };
+                    }
+                    throw new UnreachableCaseError(file);
+                });
+            } catch (error) {
+                console.error(`[getFilesUncached] Failed to load files for ${domain}`, error);
+                track("asset_error", {
+                    type: "get_files_uncached_error",
+                    domain,
+                    error: String(error)
+                });
+                return {};
+            }
         }
     };
 };
