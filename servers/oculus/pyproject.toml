@@ -16,7 +16,7 @@ anthropic = "^0.57.1"
 pydantic = "^2.8.0"
 pyyaml = "^6.0.1"
 python-dotenv = "^1.0.0"
-tiktoken = "^0.9.0"
+tiktoken = "^0.11.0"
 fern-ai = {path = "../fai", develop = true}
 
 [tool.poetry.group.dev.dependencies]
