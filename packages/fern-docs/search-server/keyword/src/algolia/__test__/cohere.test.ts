@@ -24,8 +24,6 @@ describe("cohere", () => {
             markdown: fixture
         });
 
-        await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(
-            path.join(__dirname, "__snapshots__/cohere.json")
-        );
+        await expect(JSON.stringify(result)).toMatchFileSnapshot(path.join(__dirname, "__snapshots__/cohere.json"));
     });
 });

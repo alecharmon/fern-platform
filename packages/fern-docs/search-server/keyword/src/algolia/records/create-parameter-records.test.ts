@@ -1,4 +1,5 @@
 // @ts-nocheck - Test file with complex mock data that doesn't fully match SDK types
+
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import { describe, expect, it } from "vitest";
 
@@ -100,7 +101,10 @@ const emptyTypes: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition> = {
 describe("createParameterRecord", () => {
     it("creates a basic parameter record", () => {
         const endpointBase = createMockEndpointBase();
-        const property = createProperty("limit", { type: "alias", value: INTEGER_PRIMITIVE });
+        const property = createProperty("limit", {
+            type: "alias",
+            value: INTEGER_PRIMITIVE
+        });
 
         const record = createParameterRecord({
             endpointBase,
@@ -121,7 +125,10 @@ describe("createParameterRecord", () => {
 
     it("handles nested breadcrumb correctly", () => {
         const endpointBase = createMockEndpointBase();
-        const property = createProperty("city", { type: "alias", value: STRING_PRIMITIVE });
+        const property = createProperty("city", {
+            type: "alias",
+            value: STRING_PRIMITIVE
+        });
 
         const record = createParameterRecord({
             endpointBase,
@@ -142,7 +149,10 @@ describe("createParameterRecord", () => {
 
     it("includes status_code in hash for error responses", () => {
         const endpointBase = createMockEndpointBase();
-        const property = createProperty("message", { type: "alias", value: STRING_PRIMITIVE });
+        const property = createProperty("message", {
+            type: "alias",
+            value: STRING_PRIMITIVE
+        });
 
         const record = createParameterRecord({
             endpointBase,
@@ -160,7 +170,10 @@ describe("createParameterRecord", () => {
 
     it("includes websocket_origin in objectID", () => {
         const endpointBase = createMockEndpointBase();
-        const property = createProperty("data", { type: "alias", value: STRING_PRIMITIVE });
+        const property = createProperty("data", {
+            type: "alias",
+            value: STRING_PRIMITIVE
+        });
 
         const record = createParameterRecord({
             endpointBase,
@@ -228,9 +241,33 @@ describe("getTypeDisplayName", () => {
                     default: undefined
                 }
             ],
-            ["integer", { type: "integer", minimum: undefined, maximum: undefined, default: undefined }],
-            ["long", { type: "long", minimum: undefined, maximum: undefined, default: undefined }],
-            ["double", { type: "double", minimum: undefined, maximum: undefined, default: undefined }],
+            [
+                "integer",
+                {
+                    type: "integer",
+                    minimum: undefined,
+                    maximum: undefined,
+                    default: undefined
+                }
+            ],
+            [
+                "long",
+                {
+                    type: "long",
+                    minimum: undefined,
+                    maximum: undefined,
+                    default: undefined
+                }
+            ],
+            [
+                "double",
+                {
+                    type: "double",
+                    minimum: undefined,
+                    maximum: undefined,
+                    default: undefined
+                }
+            ],
             ["boolean", { type: "boolean", default: undefined }],
             ["datetime", { type: "datetime", default: undefined }],
             ["uuid", { type: "uuid", default: undefined }],
@@ -242,7 +279,10 @@ describe("getTypeDisplayName", () => {
         ];
 
         for (const [expected, value] of primitives) {
-            const shape: ApiDefinition.TypeReference.Primitive = { type: "primitive", value };
+            const shape: ApiDefinition.TypeReference.Primitive = {
+                type: "primitive",
+                value
+            };
             expect(getTypeDisplayName(shape, emptyTypes)).toBe(expected);
         }
     });
@@ -571,6 +611,179 @@ describe("extractObjectPropertiesFromShape", () => {
         expect(result.some((r) => r.property.key === "meow")).toBe(true);
     });
 
+    it("extracts nested properties from discriminatedUnion variants", () => {
+        const shape: ApiDefinition.TypeShape.DiscriminatedUnion = {
+            type: "discriminatedUnion",
+            discriminant: PropertyKey("type"),
+            variants: [
+                {
+                    discriminantValue: "fusion",
+                    properties: [
+                        createProperty(
+                            "config",
+                            createObjectShape([
+                                createProperty("strategy", {
+                                    type: "alias",
+                                    value: STRING_PRIMITIVE
+                                })
+                            ])
+                        )
+                    ],
+                    extends: [],
+                    extraProperties: undefined,
+                    availability: undefined,
+                    description: undefined,
+                    displayName: undefined
+                }
+            ]
+        };
+
+        const result = extractObjectPropertiesFromShape(shape, emptyTypes, 3);
+
+        expect(result).toHaveLength(2);
+        expect(result[0]?.property.key).toBe("config");
+        expect(result[0]?.breadcrumb).toEqual([]);
+        expect(result[1]?.property.key).toBe("strategy");
+        expect(result[1]?.breadcrumb).toEqual([{ key: "config", display_name: "config", optional: false }]);
+    });
+
+    it("extracts properties from undiscriminatedUnion variants", () => {
+        const shape: ApiDefinition.TypeShape.UndiscriminatedUnion = {
+            type: "undiscriminatedUnion",
+            variants: [
+                {
+                    displayName: "FusionQuery",
+                    shape: createObjectShape([
+                        createProperty("fusion", {
+                            type: "alias",
+                            value: STRING_PRIMITIVE
+                        })
+                    ]),
+                    availability: undefined,
+                    description: undefined
+                },
+                {
+                    displayName: "VectorQuery",
+                    shape: createObjectShape([
+                        createProperty("vector", {
+                            type: "alias",
+                            value: STRING_PRIMITIVE
+                        })
+                    ]),
+                    availability: undefined,
+                    description: undefined
+                }
+            ]
+        };
+
+        const result = extractObjectPropertiesFromShape(shape, emptyTypes, 2);
+
+        expect(result).toHaveLength(2);
+        expect(result.some((r) => r.property.key === "fusion")).toBe(true);
+        expect(result.some((r) => r.property.key === "vector")).toBe(true);
+    });
+
+    it("extracts nested properties from undiscriminatedUnion variants", () => {
+        const shape: ApiDefinition.TypeShape.UndiscriminatedUnion = {
+            type: "undiscriminatedUnion",
+            variants: [
+                {
+                    displayName: "QueryOptions",
+                    shape: createObjectShape([
+                        createProperty(
+                            "options",
+                            createObjectShape([
+                                createProperty("limit", {
+                                    type: "alias",
+                                    value: INTEGER_PRIMITIVE
+                                })
+                            ])
+                        )
+                    ]),
+                    availability: undefined,
+                    description: undefined
+                }
+            ]
+        };
+
+        const result = extractObjectPropertiesFromShape(shape, emptyTypes, 3);
+
+        expect(result).toHaveLength(2);
+        expect(result[0]?.property.key).toBe("options");
+        expect(result[1]?.property.key).toBe("limit");
+        expect(result[1]?.breadcrumb).toEqual([
+            { key: "QueryOptions", display_name: "QueryOptions" },
+            { key: "options", display_name: "options", optional: false }
+        ]);
+    });
+
+    it("extracts fusion property from Qdrant-like Query union type", () => {
+        const fusionEnumShape: ApiDefinition.TypeShape.Enum = {
+            type: "enum",
+            values: [
+                { value: "rrf", description: undefined, availability: undefined },
+                { value: "dbsf", description: undefined, availability: undefined }
+            ],
+            default: undefined
+        };
+
+        const queryUnionShape: ApiDefinition.TypeShape.UndiscriminatedUnion = {
+            type: "undiscriminatedUnion",
+            variants: [
+                {
+                    displayName: "NearestQuery",
+                    shape: createObjectShape([createProperty("nearest", { type: "alias", value: STRING_PRIMITIVE })]),
+                    availability: undefined,
+                    description: undefined
+                },
+                {
+                    displayName: "FusionQuery",
+                    shape: createObjectShape([createProperty("fusion", { type: "alias", value: fusionEnumShape })]),
+                    availability: undefined,
+                    description: "Fuse the results of multiple prefetches"
+                },
+                {
+                    displayName: "SampleQuery",
+                    shape: createObjectShape([createProperty("sample", { type: "alias", value: STRING_PRIMITIVE })]),
+                    availability: undefined,
+                    description: undefined
+                }
+            ]
+        };
+
+        const types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition> = {
+            [TypeId("Query")]: {
+                name: "Query",
+                displayName: "Query",
+                shape: queryUnionShape,
+                description: undefined,
+                availability: undefined
+            }
+        };
+
+        const requestBodyShape = createObjectShape([
+            createProperty("query", {
+                type: "alias",
+                value: { type: "id", id: TypeId("Query"), default: undefined }
+            }),
+            createProperty("limit", { type: "alias", value: INTEGER_PRIMITIVE })
+        ]);
+
+        const result = extractObjectPropertiesFromShape(requestBodyShape, types, 3);
+
+        expect(result.some((r) => r.property.key === "query")).toBe(true);
+        expect(result.some((r) => r.property.key === "limit")).toBe(true);
+        expect(result.some((r) => r.property.key === "fusion")).toBe(true);
+        expect(result.some((r) => r.property.key === "nearest")).toBe(true);
+        expect(result.some((r) => r.property.key === "sample")).toBe(true);
+
+        const fusionProp = result.find((r) => r.property.key === "fusion");
+        expect(fusionProp?.breadcrumb).toEqual([
+            { key: "query", display_name: "query", optional: false },
+            { key: "FusionQuery", display_name: "FusionQuery" }
+        ]);
+    });
+
     it("returns empty array for primitive types", () => {
         const result = extractObjectPropertiesFromShape(STRING_PRIMITIVE, emptyTypes, 2);
         expect(result).toHaveLength(0);
@@ -744,7 +957,10 @@ describe("edge cases", () => {
                 type: "nullable",
                 shape: {
                     type: "optional",
-                    shape: { type: "alias", value: { type: "id", id: TypeId("inner"), default: undefined } },
+                    shape: {
+                        type: "alias",
+                        value: { type: "id", id: TypeId("inner"), default: undefined }
+                    },
                     default: undefined
                 },
                 default: undefined
@@ -782,7 +998,12 @@ describe("edge cases", () => {
             [TypeId("alias-2")]: {
                 name: "Alias2",
                 displayName: "Alias2",
-                shape: createObjectShape([createProperty("resolved", { type: "alias", value: STRING_PRIMITIVE })]),
+                shape: createObjectShape([
+                    createProperty("resolved", {
+                        type: "alias",
+                        value: STRING_PRIMITIVE
+                    })
+                ]),
                 description: undefined,
                 availability: undefined
             }
@@ -801,7 +1022,10 @@ describe("edge cases", () => {
 
     it("handles special characters in property keys", () => {
         const endpointBase = createMockEndpointBase();
-        const property = createProperty("$special.key-name", { type: "alias", value: STRING_PRIMITIVE });
+        const property = createProperty("$special.key-name", {
+            type: "alias",
+            value: STRING_PRIMITIVE
+        });
 
         const record = createParameterRecord({
             endpointBase,
@@ -817,7 +1041,10 @@ describe("edge cases", () => {
 
     it("handles empty breadcrumb array", () => {
         const endpointBase = createMockEndpointBase();
-        const property = createProperty("field", { type: "alias", value: STRING_PRIMITIVE });
+        const property = createProperty("field", {
+            type: "alias",
+            value: STRING_PRIMITIVE
+        });
 
         const record = createParameterRecord({
             endpointBase,
@@ -900,7 +1127,10 @@ describe("edge cases", () => {
         const endpointBase = createMockEndpointBase();
         endpointBase.keywords = ["users", "api"];
 
-        const property = createProperty("limit", { type: "alias", value: INTEGER_PRIMITIVE });
+        const property = createProperty("limit", {
+            type: "alias",
+            value: INTEGER_PRIMITIVE
+        });
 
         const record = createParameterRecord({
             endpointBase,

@@ -16,7 +16,7 @@ describe("hume", () => {
         });
         expect(tooLarge.length).toBe(0);
         const objectIDs = records.map((record) => record.objectID);
-        await expect(JSON.stringify(records, null, 2)).toMatchFileSnapshot(snapshotFilepath);
+        await expect(JSON.stringify(records)).toMatchFileSnapshot(snapshotFilepath);
         expect(uniq(objectIDs).length).toBe(objectIDs.length);
     }, 100_000);
 });

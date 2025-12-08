@@ -243,8 +243,52 @@ export function extractObjectPropertiesFromShape(
         }
     } else if (resolvedShape.type === "discriminatedUnion") {
         for (const variant of resolvedShape.variants) {
+            const variantBreadcrumb: ParameterBreadcrumbItem[] = variant.displayName
+                ? [...breadcrumb, { key: variant.displayName, display_name: variant.displayName }]
+                : breadcrumb;
+
             for (const prop of variant.properties) {
-                properties.push({ property: prop, breadcrumb });
+                properties.push({ property: prop, breadcrumb: variantBreadcrumb });
+
+                const nestedProperties = extractObjectPropertiesFromShape(
+                    prop.valueShape,
+                    types,
+                    maxDepth,
+                    currentDepth + 1,
+                    [
+                        ...variantBreadcrumb,
+                        {
+                            key: prop.key,
+                            display_name: prop.key,
+                            optional: isTypeOptional(prop.valueShape)
+                        }
+                    ],
+                    visitedTypeIds
+                );
+                properties.push(...nestedProperties);
+            }
+        }
+    } else if (resolvedShape.type === "undiscriminatedUnion") {
+        const seenPaths = new Set<string>();
+        for (const variant of resolvedShape.variants) {
+            const variantBreadcrumb: ParameterBreadcrumbItem[] = variant.displayName
+                ? [...breadcrumb, { key: variant.displayName, display_name: variant.displayName }]
+                : breadcrumb;
+
+            const variantProperties = extractObjectPropertiesFromShape(
+                variant.shape,
+                types,
+                maxDepth,
+                currentDepth + 1,
+                variantBreadcrumb,
+                visitedTypeIds
+            );
+            for (const prop of variantProperties) {
+                const path = [...prop.breadcrumb.map((b) => b.key), prop.property.key].join(".");
+                if (!seenPaths.has(path)) {
+                    seenPaths.add(path);
+                    properties.push(prop);
+                }
             }
         }
     }
