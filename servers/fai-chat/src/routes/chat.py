@@ -60,6 +60,8 @@ from ..streaming.protocols.vercel_ui import VercelUIMessageStreamProtocol
 
 logger = logging.getLogger(__name__)
 
+TOP_K = 3
+
 
 @app.post("/chat")
 async def chat(
@@ -141,7 +143,7 @@ async def chat(
         retrieval_query = RetrievalQuery(
             query=user_query,
             domain=domain,
-            top_k=5,
+            top_k=TOP_K,
             strategy=RetrievalStrategy.HYBRID,
             filters=query_filters,
         )
@@ -244,7 +246,7 @@ async def chat(
         retriever=retriever,
         domain=domain,
         filters=query_filters,
-        top_k=5,
+        top_k=TOP_K,
         max_calls=2,
         already_retrieved_urls=initial_urls,
     )
