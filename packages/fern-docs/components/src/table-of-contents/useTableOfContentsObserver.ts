@@ -38,9 +38,14 @@ function toIdQuerySelector(id: string): string {
  *
  * @param ids the ids of the elements to observe
  * @param setActiveIds the function to call with all anchors that intersect the viewport (after accounting for the sticky header)
+ * @param skipInitialScroll if true, skip scrolling to the hash on initial mount (used for mobile TOC dropdown)
  * @returns a function to call to trigger another measurement (to be called between page views)
  */
-export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: string[]) => void): () => void {
+export function useTableOfContentsObserver(
+    ids: string[],
+    setActiveIds: (ids: string[]) => void,
+    skipInitialScroll = false
+): () => void {
     const idToYRef = useRef<Record<string, number>>({});
     const root = useAtomValue(SCROLL_BODY_ATOM);
     const rafIdRef = useRef<number | null>(null);
@@ -269,8 +274,9 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
         measure();
 
         // Handle initial hash on page load (browser auto-scroll may not work with custom scroll containers)
+        // Skip this if skipInitialScroll is true (e.g., for mobile TOC dropdown)
         const initialHash = window.location.hash.slice(1);
-        if (initialHash && ids.includes(initialHash)) {
+        if (initialHash && ids.includes(initialHash) && !skipInitialScroll) {
             // Wait for measurement to complete, then scroll to hash
             requestAnimationFrame(() => {
                 handleHashChange();
@@ -290,7 +296,7 @@ export function useTableOfContentsObserver(ids: string[], setActiveIds: (ids: st
                 rafIdRef.current = null;
             }
         };
-    }, [measure, take, root, ids, updateScrollPaddingTop]);
+    }, [measure, take, root, ids, updateScrollPaddingTop, skipInitialScroll]);
 
     return measure;
 }

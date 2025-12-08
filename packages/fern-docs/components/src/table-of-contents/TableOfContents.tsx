@@ -20,11 +20,21 @@ export declare namespace TableOfContents {
         tableOfContents: TableOfContentsItemType[];
         lang: string;
         hideHeading?: boolean;
+        /** @deprecated use skipInitialScroll instead */
+        isMobileOpen?: boolean;
+        /** Skip scrolling to hash on initial mount (used for mobile TOC dropdown) */
+        skipInitialScroll?: boolean;
     }
 }
 
 let anchorJustSet = false;
 let anchorJustSetTimeout: number;
+
+// Export a function to clear the anchorJustSet flag (used by mobile TOC hack)
+export function clearAnchorJustSet(): void {
+    anchorJustSet = false;
+    clearTimeout(anchorJustSetTimeout);
+}
 
 export function hasRequiredRole(
     user: FernUser | undefined,
@@ -88,7 +98,8 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({
     tableOfContents,
     style,
     lang,
-    hideHeading
+    hideHeading,
+    skipInitialScroll = false
 }) => {
     const user = useFernUser();
 
@@ -110,6 +121,10 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({
     const currentPathAnchor = useCurrentAnchor();
 
     React.useEffect(() => {
+        // For mobile TOC (skipInitialScroll=true), don't set anchorJustSet - let scroll events update freely
+        if (skipInitialScroll) {
+            return;
+        }
         if (currentPathAnchor != null && allAnchors.includes(currentPathAnchor)) {
             anchorJustSet = true;
             setAnchorsInView([currentPathAnchor]);
@@ -118,7 +133,7 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({
                 anchorJustSet = false;
             }, 500);
         }
-    }, [allAnchors, currentPathAnchor]);
+    }, [allAnchors, currentPathAnchor, skipInitialScroll]);
 
     const measure = useTableOfContentsObserver(
         allAnchors,
@@ -126,7 +141,8 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({
             if (!anchorJustSet) {
                 setAnchorsInView(ids);
             }
-        }, [])
+        }, []),
+        skipInitialScroll
     );
 
     useEffect(() => {

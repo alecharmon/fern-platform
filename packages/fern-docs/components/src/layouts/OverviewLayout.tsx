@@ -25,7 +25,7 @@ export function OverviewLayout({ header, toc, children, footer, tableOfContents,
                         <TableOfContentsMobile
                             tableOfContents={tableOfContents}
                             lang={lang}
-                            className="mb-6 w-full sticky top-header-height z-10 py-2 bg-(color:--background)"
+                            className="fixed right-4 top-[calc(var(--header-height)+1rem)] z-50"
                         />
                     )}
                     {header}
