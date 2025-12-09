@@ -108,7 +108,7 @@ export function PageHeader({
             </WithAction>
 
             {subtitle && (
-                <div className="prose-p:text-(color:--grayscale-a11) mt-2 break-words leading-7">
+                <div className="fern-page-subtitle prose-p:text-(color:--grayscale-a11) mt-2 break-words leading-7">
                     <React.Suspense fallback={subtitle}>
                         <MdxServerComponent serialize={serialize} mdx={subtitle} slug={slug} />
                     </React.Suspense>
