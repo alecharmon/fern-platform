@@ -1,4 +1,3 @@
-import asyncio
 import re
 from dataclasses import dataclass
 from datetime import (
@@ -6,11 +5,22 @@ from datetime import (
     datetime,
     timedelta,
 )
-from typing import Any
 from urllib.parse import urlparse
 from uuid import uuid4
 
 import discord
+from fai_ai_core.llm.factory import get_llm_provider
+from fai_ai_core.llm.models import LLMMessage, MessageRole
+from fai_ai_core.prompts.system import ChatMode, build_system_prompt, format_retrieved_docs
+from fai_ai_core.retrieval.factory import get_retriever
+from fai_ai_core.retrieval.interface import (
+    RetrievalQuery,
+    RetrievalStrategy,
+    RetrievedDocument,
+)
+from fai_ai_core.retrieval.query_decomposition import decompose_query
+from fai_ai_core.retrieval.utils import deduplicate_documents, extract_citations, format_citations
+from fai_ai_core.tools.documentation_search import create_documentation_search_tool
 from sqlalchemy import (
     delete,
     select,
@@ -23,13 +33,6 @@ from discord_bot.settings import LOGGER
 from fai.models.db.discord_message_cache_db import DiscordMessageCacheDb
 from fai.models.db.query_db import QueryDb
 from fai.models.types.channel_settings_type import DiscordChannelSettings
-from fai.models.utils.chat import (
-    ChatMode,
-    deduplicate_retrieved_sources,
-)
-from fai.utils.chat.query_rewriter import rewrite_query
-from fai.utils.chat.response.anthropic import get_anthropic_response
-from fai.utils.chat.retrieve.retrieve import retrieve
 from fai.utils.integration import get_discord_integration
 
 MESSAGE_CACHE_TTL = 30
@@ -44,20 +47,16 @@ def generate_title_from_url(url: str) -> str:
     return " | ".join(formatted_parts) if formatted_parts else parsed.netloc
 
 
-def extract_citation_info_from_citations(citations: list[str], rows: list[Any]) -> dict[str, str]:
-    """
-    Extract URLs from citation strings and match them with titles from Row objects.
-    Citations are formatted as: "document content\nSource: URL"
-    Returns a dict mapping URL to title.
-    """
-    url_to_title = {}
-    for row in rows:
-        url = getattr(row, "url", None)
-        title = getattr(row, "title", None)
-        if url and title:
-            url_to_title[url] = title
+def extract_citation_info_from_citations(citations: list[str], docs: list[RetrievedDocument]) -> dict[str, str]:
+    url_to_title: dict[str, str] = {}
+    for doc in docs:
+        if doc.metadata:
+            url = doc.metadata.get("url")
+            title = doc.metadata.get("title")
+            if url and title:
+                url_to_title[url] = title
 
-    results = {}
+    results: dict[str, str] = {}
     for citation in citations:
         match = re.search(r"Source:\s*(https?://[^\s]+)", citation)
         if match:
@@ -468,7 +467,7 @@ async def process_message(
     domain: str,
     bot_user_id: str | None = None,
     message_history: list[dict[str, str]] | None = None,
-    model: str = "claude-4-sonnet-20250514",
+    model: str = "claude-4-sonnet",
     top_k: int = 5,
     conversation_id: str | None = None,
     rewrite_query_enabled: bool = True,
@@ -486,29 +485,29 @@ async def process_message(
     try:
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
 
-        rag_records = []
-        retrieved_rows = []
+        retriever = get_retriever()
+        retrieved_documents: list[RetrievedDocument] = []
+
         if rewrite_query_enabled:
             LOGGER.info(f"Query rewriting enabled for domain {domain}")
-            sub_queries = await rewrite_query(text)
+            sub_queries = await decompose_query(text)
             LOGGER.info(f"Decomposed query into {len(sub_queries)} sub-queries")
             for index, sub_query in enumerate(sub_queries):
                 LOGGER.info(f"Subquery {index + 1}: {sub_query}")
 
-            query_results_list = await asyncio.gather(
-                *[retrieve(sub_query, domain, top_k=top_k) for sub_query in sub_queries]
-            )
-
-            deduplicated_rows = deduplicate_retrieved_sources(query_results_list)
-            retrieved_rows = [row for row in deduplicated_rows if row.document]
-            rag_records = [row.document for row in retrieved_rows]
+            retrieval_queries = [
+                RetrievalQuery(query=sq, domain=domain, strategy=RetrievalStrategy.HYBRID, top_k=top_k)
+                for sq in sub_queries
+            ]
+            results = await retriever.batch_retrieve(retrieval_queries)
+            all_docs = [doc for result in results for doc in result.documents]
+            retrieved_documents = deduplicate_documents([all_docs])
         else:
-            query_results = await retrieve(text, domain, top_k=top_k)
-            deduplicated_rows = deduplicate_retrieved_sources([query_results])
-            retrieved_rows = [row for row in deduplicated_rows if row.document]
-            rag_records = [row.document for row in retrieved_rows]
+            retrieval_query = RetrievalQuery(query=text, domain=domain, strategy=RetrievalStrategy.HYBRID, top_k=top_k)
+            result = await retriever.retrieve(retrieval_query)
+            retrieved_documents = result.documents
 
-        LOGGER.info(f"Retrieved {len(rag_records)} documents")
+        LOGGER.info(f"Retrieved {len(retrieved_documents)} documents")
 
         if message_history:
             messages = message_history.copy()
@@ -519,21 +518,38 @@ async def process_message(
 
         LOGGER.info(f"Processing conversation with {len(messages)} messages")
 
-        output_turns, citations = await get_anthropic_response(
-            None,
-            model,
-            messages,
-            domain,
-            rag_records,
-            ChatMode.DISCORD,
+        formatted_docs = format_retrieved_docs(retrieved_documents, domain)
+        system_prompt = build_system_prompt(domain, ChatMode.DISCORD, formatted_docs)
+
+        llm_messages = [LLMMessage(role=MessageRole.SYSTEM, content=system_prompt)]
+        for msg in messages:
+            role = MessageRole.ASSISTANT if msg["role"] == "assistant" else MessageRole.USER
+            llm_messages.append(LLMMessage(role=role, content=msg["content"]))
+
+        initial_urls: set[str] = set()
+        for doc in retrieved_documents:
+            if doc.metadata:
+                url = doc.metadata.get("url")
+                if url:
+                    initial_urls.add(url)
+
+        search_tool = create_documentation_search_tool(
+            retriever=retriever,
+            domain=domain,
+            top_k=top_k,
+            max_calls=2,
+            already_retrieved_urls=initial_urls,
         )
 
-        if output_turns and len(output_turns) > 0:
-            response = "\n\n".join([turn["text"] for turn in output_turns])
+        provider = get_llm_provider(model=model, temperature=0.0, max_tokens=3000)
+        response = await provider.generate(llm_messages, tools=[search_tool])
 
-            response, citation_to_url = deduplicate_citations(response)
+        if response.content:
+            response_text = response.content
+            response_text, citation_to_url = deduplicate_citations(response_text)
 
-            url_to_title = extract_citation_info_from_citations(citations, retrieved_rows)
+            citations = format_citations(extract_citations(retrieved_documents))
+            url_to_title = extract_citation_info_from_citations(citations, retrieved_documents)
 
             sources_message = None
             if citation_to_url:
@@ -547,8 +563,8 @@ async def process_message(
                 sources_message = "\n".join(sources_lines)
 
             if conversation_id:
-                await log_query_to_db(response, domain, conversation_id, role="ASSISTANT", source="DISCORD")
-            return response, query_id, sources_message
+                await log_query_to_db(response_text, domain, conversation_id, role="ASSISTANT", source="DISCORD")
+            return response_text, query_id, sources_message
 
         return "I couldn't find any relevant information to answer your question.", query_id, None
 

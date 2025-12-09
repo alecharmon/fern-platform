@@ -471,9 +471,7 @@ async def set_job_id(
     "/settings/ask-ai/reindex-callback",
     openapi_extra={"x-fern-audiences": ["internal"]},
 )
-async def reindex_callback(
-    request: ReindexCallbackRequest, db: AsyncSession = Depends(get_db)
-) -> JSONResponse:
+async def reindex_callback(request: ReindexCallbackRequest, db: AsyncSession = Depends(get_db)) -> JSONResponse:
     """Handle callback from SQS reindexing worker when reindex completes."""
     try:
         LOGGER.info(f"Received reindex callback - status: {request.status}, messageId: {request.sourceMessageId}")

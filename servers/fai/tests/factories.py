@@ -43,7 +43,7 @@ class PostChatCompletionRequestFactory:
         messages: list[ChatMessage] | None = None,
     ) -> PostChatCompletionRequest:
         return PostChatCompletionRequest(
-            model=model or "claude-4-sonnet-20250514",
+            model=model or "claude-4-sonnet",
             system_prompt=system_prompt or "You are a helpful assistant.",
             messages=messages or [ChatMessageFactory.build()],
         )

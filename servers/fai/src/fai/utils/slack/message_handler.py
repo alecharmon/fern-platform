@@ -3,12 +3,20 @@ from datetime import (
     UTC,
     datetime,
 )
+from itertools import combinations
 from typing import (
     Any,
     Literal,
 )
 from uuid import uuid4
 
+from fai_ai_core.llm.factory import get_llm_provider
+from fai_ai_core.llm.models import LLMMessage, MessageRole
+from fai_ai_core.prompts.system import ChatMode, build_system_prompt, format_retrieved_docs
+from fai_ai_core.retrieval.factory import get_retriever
+from fai_ai_core.retrieval.filters import QueryFilters
+from fai_ai_core.retrieval.interface import RetrievalQuery, RetrievalStrategy
+from fai_ai_core.tools.documentation_search import create_documentation_search_tool
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
 
@@ -18,14 +26,7 @@ from fai.models.db.query_db import QueryDb
 from fai.models.db.slack_context_db import SlackContextDb
 from fai.models.db.slack_integration_db import SlackIntegrationDb
 from fai.models.db.slack_message_classification_db import SlackMessageClassificationDb
-from fai.models.utils.chat import ChatMode
 from fai.settings import LOGGER
-from fai.utils.chat.response.anthropic import (
-    get_anthropic_index_response,
-    get_anthropic_response,
-)
-from fai.utils.chat.retrieve.retrieve import retrieve
-from fai.utils.chat.roles import create_delimited_role_combinations
 from fai.utils.generate.message_classification import (
     CLASSIFICATION_PROMPT,
     CLASSIFICATION_PROMPT_MENTIONS_ONLY,
@@ -43,6 +44,36 @@ from fai.utils.turbopuffer.sync import (
     sync_index_to_target,
     sync_slack_context_db_to_tpuf,
 )
+
+SAVE_SLACK_CONTEXT_TOOL = {
+    "name": "save_slack_context",
+    "description": "Save a question and ideal response pair to the knowledge base for future reference.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "question": {
+                "type": "string",
+                "description": "The question that was asked or should be asked in the future",
+            },
+            "ideal_response": {
+                "type": "string",
+                "description": "The ideal response to give when this question is asked",
+            },
+        },
+        "required": ["question", "ideal_response"],
+    },
+}
+
+
+def _create_delimited_role_combinations(roleset: list[str], delimiter: str = "&") -> list[str]:
+    src = list(set(filter(None, roleset)))
+    n = len(src)
+    out: list[str] = []
+    for r in range(1, n + 1):
+        for combo in combinations(src, r):
+            sorted_combo = sorted(combo)
+            out.append(delimiter.join(sorted_combo))
+    return out
 
 
 async def classify_message(
@@ -260,12 +291,40 @@ async def save_slack_context_to_db(question: str, ideal_response: str, domain: s
         return None
 
 
+async def _get_slack_index_response(
+    messages: list[dict[str, str]],
+    domain: str,
+    model: str = "claude-4-sonnet",
+) -> tuple[str | None, dict[str, str] | None]:
+    system_prompt = build_system_prompt(domain, ChatMode.SLACK_INDEX)
+
+    llm_messages = [LLMMessage(role=MessageRole.SYSTEM, content=system_prompt)]
+    for msg in messages:
+        role = MessageRole.ASSISTANT if msg["role"] == "assistant" else MessageRole.USER
+        llm_messages.append(LLMMessage(role=role, content=msg["content"]))
+
+    provider = get_llm_provider(model=model, temperature=0.0, max_tokens=2000)
+    response = await provider.generate(llm_messages, tools=[SAVE_SLACK_CONTEXT_TOOL])
+
+    context_data = None
+    if response.tool_calls:
+        for tool_call in response.tool_calls:
+            if tool_call.name == "save_slack_context":
+                context_data = {
+                    "question": tool_call.arguments.get("question", ""),
+                    "ideal_response": tool_call.arguments.get("ideal_response", ""),
+                }
+                break
+
+    return response.content, context_data
+
+
 async def process_message(
     text: str,
     domain: str,
     bot_user_id: str | None = None,
     message_history: list[dict[str, str]] | None = None,
-    model: str = "claude-4-sonnet-20250514",
+    model: str = "claude-4-sonnet",
     top_k: int = 5,
     conversation_id: str | None = None,
     allowed_roles: list[str] | None = None,
@@ -283,18 +342,23 @@ async def process_message(
     try:
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
 
-        exploded_roles = None
+        filters = QueryFilters()
         if allowed_roles:
             roles_with_everyone = allowed_roles.copy()
             if "everyone" not in roles_with_everyone:
                 roles_with_everyone.append("everyone")
-            exploded_roles = create_delimited_role_combinations(roles_with_everyone)
+            exploded_roles = _create_delimited_role_combinations(roles_with_everyone)
             LOGGER.info(f"Using exploded roles for filtering: {exploded_roles}")
+            filters = QueryFilters(roles=exploded_roles)
 
-        query_results = await retrieve(text, domain, top_k=top_k, exploded_roles=exploded_roles)
-        rag_records = [result.document for result in query_results if result.document]
+        retriever = get_retriever()
+        retrieval_query = RetrievalQuery(
+            query=text, domain=domain, strategy=RetrievalStrategy.HYBRID, top_k=top_k, filters=filters
+        )
+        result = await retriever.retrieve(retrieval_query)
+        retrieved_documents = result.documents
 
-        LOGGER.info(f"Retrieved {len(rag_records)} documents")
+        LOGGER.info(f"Retrieved {len(retrieved_documents)} documents")
 
         if message_history:
             messages = message_history.copy()
@@ -305,20 +369,38 @@ async def process_message(
 
         LOGGER.info(f"Processing conversation with {len(messages)} messages")
 
-        output_turns, citations = await get_anthropic_response(
-            None,
-            model,
-            messages,
-            domain,
-            rag_records,
-            ChatMode.SLACK_CHAT,
+        formatted_docs = format_retrieved_docs(retrieved_documents, domain)
+        system_prompt = build_system_prompt(domain, ChatMode.SLACK_CHAT, formatted_docs)
+
+        llm_messages = [LLMMessage(role=MessageRole.SYSTEM, content=system_prompt)]
+        for msg in messages:
+            role = MessageRole.ASSISTANT if msg["role"] == "assistant" else MessageRole.USER
+            llm_messages.append(LLMMessage(role=role, content=msg["content"]))
+
+        initial_urls: set[str] = set()
+        for doc in retrieved_documents:
+            if doc.metadata:
+                url = doc.metadata.get("url")
+                if url:
+                    initial_urls.add(url)
+
+        search_tool = create_documentation_search_tool(
+            retriever=retriever,
+            domain=domain,
+            filters=filters,
+            top_k=top_k,
+            max_calls=2,
+            already_retrieved_urls=initial_urls,
         )
-        if output_turns and len(output_turns) > 0:
-            response = "\n\n".join([turn["text"] for turn in output_turns])
-            response = SlackifyMarkdown().serialize(response)
+
+        provider = get_llm_provider(model=model, temperature=0.0, max_tokens=3000)
+        response = await provider.generate(llm_messages, tools=[search_tool])
+
+        if response.content:
+            response_text = SlackifyMarkdown().serialize(response.content)
             if conversation_id:
-                await log_query_to_db(response, domain, conversation_id, role="ASSISTANT", source="SLACK")
-            return response, query_id
+                await log_query_to_db(response_text, domain, conversation_id, role="ASSISTANT", source="SLACK")
+            return response_text, query_id
 
         return "I couldn't find any relevant information to answer your question.", query_id
 
@@ -473,14 +555,14 @@ async def handle_slack_message(
         else:
             messages = [{"role": "user", "content": context.text}]
 
-        output_turns, context_data = await get_anthropic_index_response(
-            model="claude-4-sonnet-20250514",
+        response_content, context_data = await _get_slack_index_response(
             messages=messages,
             domain=domain_to_use,
+            model="claude-4-sonnet",
         )
 
-        if output_turns and len(output_turns) > 0:
-            response_text = "\n\n".join([turn["text"] for turn in output_turns])
+        if response_content:
+            response_text = response_content
         else:
             response_text = "I encountered an error while trying to help you index this content. Please try again."
 

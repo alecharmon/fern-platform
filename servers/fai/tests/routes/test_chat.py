@@ -1,4 +1,8 @@
-from unittest.mock import patch
+from unittest.mock import (
+    AsyncMock,
+    MagicMock,
+    patch,
+)
 
 from fastapi.testclient import TestClient
 
@@ -9,23 +13,53 @@ from tests.factories import (
 )
 
 
+def _create_mock_retrieved_doc(content: str, url: str | None = None) -> MagicMock:
+    doc = MagicMock()
+    doc.content = content
+    doc.score = 0.9
+    doc.document_id = f"doc_{hash(content)}"
+    doc.metadata = {"url": url, "title": "Test Doc"} if url else {}
+    return doc
+
+
+def _create_mock_retrieval_result(documents: list[MagicMock]) -> MagicMock:
+    result = MagicMock()
+    result.documents = documents
+    return result
+
+
+def _create_mock_llm_response(content: str, model_id: str = "claude-4-sonnet") -> MagicMock:
+    response = MagicMock()
+    response.content = content
+    response.model_id = model_id
+    response.metrics.input_tokens = 100
+    response.metrics.output_tokens = 50
+    response.metrics.total_time_ms = 1500.0
+    return response
+
+
 class TestChat:
     def test_post_chat_completion_success_claude(self, test_client: TestClient) -> None:
         domain = create_test_domain()
-        request_body = PostChatCompletionRequestFactory.build(model="claude-4-sonnet-20250514")
+        request_body = PostChatCompletionRequestFactory.build(model="claude-4-sonnet")
 
-        mock_turns = [{"text": "Hello, I can help you with that!"}]
-        mock_citations = ["doc1", "doc2"]
+        mock_docs = [
+            _create_mock_retrieved_doc("test doc 1", "https://example.com/1"),
+            _create_mock_retrieved_doc("test doc 2", "https://example.com/2"),
+        ]
 
-        with patch("fai.routes.chat.retrieve") as mock_retrieve, patch(
-            "fai.routes.chat.get_anthropic_response"
-        ) as mock_anthropic:
-            mock_retrieve.return_value = [
-                type("Row", (), {"document": "test doc 1"})(),
-                type("Row", (), {"document": "test doc 2"})(),
-            ]
-            mock_anthropic.return_value = (mock_turns, mock_citations)
+        mock_response = _create_mock_llm_response("Hello, I can help you with that!")
 
+        mock_retriever = MagicMock()
+        mock_retriever.retrieve = AsyncMock(return_value=_create_mock_retrieval_result(mock_docs))
+
+        mock_provider = MagicMock()
+        mock_provider.generate = AsyncMock(return_value=mock_response)
+
+        with (
+            patch("fai.routes.chat.get_retriever", return_value=mock_retriever),
+            patch("fai.routes.chat.get_llm_provider", return_value=mock_provider),
+        ):
             response = test_client.post(
                 f"/chat/{domain}",
                 json=request_body.model_dump(),
@@ -45,15 +79,20 @@ class TestChat:
         domain = create_test_domain()
         request_body = PostChatCompletionRequestFactory.build(model="command-a-03-2025")
 
-        mock_turns = [{"text": "Hello from Cohere!"}]
-        mock_citations = ["doc3"]
+        mock_docs = [_create_mock_retrieved_doc("test doc", "https://example.com/doc")]
 
-        with patch("fai.routes.chat.retrieve") as mock_retrieve, patch(
-            "fai.routes.chat.get_cohere_response"
-        ) as mock_cohere:
-            mock_retrieve.return_value = [type("Row", (), {"document": "test doc"})()]
-            mock_cohere.return_value = (mock_turns, mock_citations)
+        mock_response = _create_mock_llm_response("Hello from Cohere!", model_id="command-a-03-2025")
 
+        mock_retriever = MagicMock()
+        mock_retriever.retrieve = AsyncMock(return_value=_create_mock_retrieval_result(mock_docs))
+
+        mock_provider = MagicMock()
+        mock_provider.generate = AsyncMock(return_value=mock_response)
+
+        with (
+            patch("fai.routes.chat.get_retriever", return_value=mock_retriever),
+            patch("fai.routes.chat.get_llm_provider", return_value=mock_provider),
+        ):
             response = test_client.post(
                 f"/chat/{domain}",
                 json=request_body.model_dump(),
@@ -70,7 +109,6 @@ class TestChat:
     def test_post_chat_completion_unsupported_model(self, test_client: TestClient) -> None:
         domain = create_test_domain()
 
-        # Bypass Pydantic validation by manually creating invalid request
         invalid_request_data = {
             "model": "unsupported-model",
             "system_prompt": "You are a helpful assistant.",
@@ -78,10 +116,12 @@ class TestChat:
         }
 
         response = test_client.post(
-            f"/chat/{domain}", json=invalid_request_data, headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"}
+            f"/chat/{domain}",
+            json=invalid_request_data,
+            headers={"Authorization": f"Bearer {TEST_FERN_TOKEN}"},
         )
 
-        assert response.status_code == 422  # Pydantic validation error
+        assert response.status_code == 422
         data = response.json()
         assert "detail" in data
 
@@ -89,15 +129,18 @@ class TestChat:
         domain = create_test_domain()
         request_body = PostChatCompletionRequestFactory.build(messages=[])
 
-        mock_turns = [{"text": "No context response"}]
-        mock_citations: list[str] = []
+        mock_response = _create_mock_llm_response("No context response")
 
-        with patch("fai.routes.chat.retrieve") as mock_retrieve, patch(
-            "fai.routes.chat.get_anthropic_response"
-        ) as mock_anthropic:
-            mock_retrieve.return_value = []  # No retrieval results for empty messages
-            mock_anthropic.return_value = (mock_turns, mock_citations)
+        mock_retriever = MagicMock()
+        mock_retriever.retrieve = AsyncMock(return_value=_create_mock_retrieval_result([]))
 
+        mock_provider = MagicMock()
+        mock_provider.generate = AsyncMock(return_value=mock_response)
+
+        with (
+            patch("fai.routes.chat.get_retriever", return_value=mock_retriever),
+            patch("fai.routes.chat.get_llm_provider", return_value=mock_provider),
+        ):
             response = test_client.post(
                 f"/chat/{domain}",
                 json=request_body.model_dump(),
@@ -113,9 +156,10 @@ class TestChat:
         domain = create_test_domain()
         request_body = PostChatCompletionRequestFactory.build()
 
-        with patch("fai.routes.chat.retrieve") as mock_retrieve:
-            mock_retrieve.side_effect = Exception("Retrieve error")
+        mock_retriever = MagicMock()
+        mock_retriever.retrieve = AsyncMock(side_effect=Exception("Retrieve error"))
 
+        with patch("fai.routes.chat.get_retriever", return_value=mock_retriever):
             response = test_client.post(
                 f"/chat/{domain}",
                 json=request_body.model_dump(),
