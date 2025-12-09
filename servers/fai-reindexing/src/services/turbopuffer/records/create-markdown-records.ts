@@ -12,6 +12,7 @@ import { maybeRemoveClassNameTags } from "../post-process/shared/maybe-remove-cl
 import { maybeRemoveEmptyDivs } from "../post-process/shared/maybe-remove-empty-divs";
 import { maybeRemoveExtraneousProps } from "../post-process/shared/maybe-remove-extraneous-props";
 import { maybeRemoveIconTags } from "../post-process/shared/maybe-remove-icon-tags";
+import { maybeRemoveIfComponents } from "../post-process/shared/maybe-remove-if-components";
 import { maybeRemoveStyleTags } from "../post-process/shared/maybe-remove-style-tags";
 import { maybeRemoveWrappingTags } from "../post-process/shared/maybe-remove-wrapping-tags";
 import { maybeReplaceCarriageReturns } from "../post-process/shared/maybe-replace-carriage-returns";
@@ -23,7 +24,8 @@ const SHARED_PROCESSORS = [
     maybeRemoveEmptyDivs,
     maybeRemoveIconTags,
     maybeRemoveExtraneousProps,
-    maybeRemoveWrappingTags
+    maybeRemoveWrappingTags,
+    maybeRemoveIfComponents
 ];
 
 const CHUNK_PROCESSORS = [
