@@ -1,6 +1,7 @@
 "use client";
 
 import type { FernAI } from "@fern-api/fai-sdk";
+
 import {
     type ColumnDef,
     flexRender,
@@ -11,8 +12,10 @@ import {
     useReactTable
 } from "@tanstack/react-table";
 import { useCallback } from "react";
+
 import { getConversation } from "@/app/actions/getConversation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 import { QueriesDataTableHeader } from "./QueriesDataTableHeader";
 import type { ConversationRow } from "./types";
 
@@ -59,7 +62,11 @@ export function QueriesDataTable<TData, TValue>({
                 });
                 onSelectConversation(conversation);
             } catch (err) {
-                console.error("Failed to load conversation", { err, domain: baseDocsUrl, conversationId: convoId });
+                console.error("Failed to load conversation", {
+                    err,
+                    domain: baseDocsUrl,
+                    conversationId: convoId
+                });
                 onSelectConversation(null);
             }
         };
@@ -118,7 +125,7 @@ export function QueriesDataTable<TData, TValue>({
                                             selectedConversation?.conversation_id ===
                                                 (row.original as ConversationRow).conversation_id && "selected"
                                         }
-                                        className="data-[state=selected]:bg-accent cursor-pointer border-none py-3 border-b md:border-b-0 last:border-b-0"
+                                        className="data-[state=selected]:bg-accent cursor-pointer border-b border-none py-3 last:border-b-0 md:border-b-0"
                                         onClick={onClickRow(row)}
                                     >
                                         {row.getVisibleCells().map((cell) => {
@@ -132,7 +139,7 @@ export function QueriesDataTable<TData, TValue>({
                                                             >
                                                                 {(row.original as ConversationRow).first_query}
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-sm text-gray-1000">
+                                                            <div className="text-gray-1000 flex items-center gap-2 text-sm">
                                                                 {handleRowRender(row)}
                                                                 <span>•</span>
                                                                 <span>
@@ -163,10 +170,10 @@ export function QueriesDataTable<TData, TValue>({
                                                     data-desktop-only
                                                     className={
                                                         cell.column.id === "created_at"
-                                                            ? "hidden md:table-cell w-32"
+                                                            ? "hidden w-32 md:table-cell"
                                                             : cell.column.id === "message_count" ||
                                                                 cell.column.id === "source"
-                                                              ? "hidden md:table-cell w-24"
+                                                              ? "hidden w-24 md:table-cell"
                                                               : "hidden md:table-cell"
                                                     }
                                                 >

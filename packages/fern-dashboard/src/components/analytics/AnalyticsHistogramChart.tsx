@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis } from "recharts";
 
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";

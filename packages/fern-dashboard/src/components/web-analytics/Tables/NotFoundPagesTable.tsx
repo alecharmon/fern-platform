@@ -1,15 +1,15 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { TableRequest } from "@/app/actions/getWebAnalytics";
-import { get404Pages } from "@/app/actions/getWebAnalytics";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
 import type { DocsUrl } from "@/utils/types";
 
+import { useAnalyticsData } from "../AnalyticsDataContext";
 import { CreateRedirectModal } from "../CreateRedirectModal";
+import { ANALYTICS_SORT_DIR } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
 
@@ -28,25 +28,19 @@ export default function NotFoundPagesTable({
     gitUrl,
     baseBranch
 }: NotFoundPagesTableProps) {
+    const { data, isLoading, error } = useAnalyticsData();
     const { sortState, handleSort } = useAnalyticsTable();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedPath, setSelectedPath] = useState("");
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["404Pages", docsUrl, dateRange, sortState],
-        queryFn: () =>
-            get404Pages({
-                docsUrl,
-                dateRange,
-                orderBy: sortState.field,
-                order: sortState.order,
-                limit: 10
-            }),
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        refetchOnWindowFocus: false
-    });
-
-    const filteredData = data?.pages404 ?? [];
+    const sortedPages404 = useMemo(() => {
+        if (!data?.pages404) {
+            return undefined;
+        }
+        const pages = [...data.pages404];
+        pages.sort((a, b) => (sortState.order === ANALYTICS_SORT_DIR.DESC ? b.count - a.count : a.count - b.count));
+        return pages;
+    }, [data?.pages404, sortState]);
 
     const handleCreateRedirect = (path: string) => {
         setSelectedPath(path);
@@ -85,7 +79,7 @@ export default function NotFoundPagesTable({
         }
     ];
 
-    if (!filteredData.length) {
+    if (!sortedPages404 || sortedPages404.length === 0) {
         return null;
     }
 
@@ -93,7 +87,7 @@ export default function NotFoundPagesTable({
         <>
             <AnalyticsMiniTable
                 title="404 Pages"
-                data={filteredData}
+                data={sortedPages404}
                 isLoading={isLoading}
                 error={error}
                 columns={columns}

@@ -1,37 +1,32 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
-import type { TableRequest } from "@/app/actions/getWebAnalytics";
-import { getChannels } from "@/app/actions/getWebAnalytics";
-
-import { ANALYTICS_COLUMNS, ANALYTICS_FIELDS } from "../constants";
+import { useAnalyticsData } from "../AnalyticsDataContext";
+import { ANALYTICS_COLUMNS, ANALYTICS_FIELDS, ANALYTICS_SORT_DIR } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
 
-interface ChannelsTableProps {
-    docsUrl: string;
-    dateRange?: TableRequest["dateRange"];
-    includeInternal?: boolean;
-}
-
-export default function ChannelsTable({ docsUrl, dateRange, includeInternal }: ChannelsTableProps) {
+export default function ChannelsTable() {
+    const { data, isLoading, error } = useAnalyticsData();
     const { sortState, handleSort } = useAnalyticsTable();
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["channels", docsUrl, dateRange, includeInternal, sortState],
-        queryFn: () =>
-            getChannels({
-                docsUrl,
-                dateRange,
-                includeInternal,
-                orderBy: sortState.field,
-                order: sortState.order,
-                limit: 10
-            }),
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        refetchOnWindowFocus: false
-    });
+    const sortedChannels = useMemo(() => {
+        if (!data?.channels) {
+            return undefined;
+        }
+        const channels = [...data.channels];
+        if (sortState.field === ANALYTICS_FIELDS.VISITORS) {
+            channels.sort((a, b) =>
+                sortState.order === ANALYTICS_SORT_DIR.DESC ? b.visitors - a.visitors : a.visitors - b.visitors
+            );
+        } else if (sortState.field === ANALYTICS_FIELDS.VIEWS) {
+            channels.sort((a, b) =>
+                sortState.order === ANALYTICS_SORT_DIR.DESC ? b.views - a.views : a.views - b.views
+            );
+        }
+        return channels;
+    }, [data?.channels, sortState]);
 
     const columns = [
         {
@@ -46,7 +41,7 @@ export default function ChannelsTable({ docsUrl, dateRange, includeInternal }: C
     return (
         <AnalyticsMiniTable
             title="Channels"
-            data={data?.channels}
+            data={sortedChannels}
             isLoading={isLoading}
             error={error}
             columns={columns}

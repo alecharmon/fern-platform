@@ -24,5 +24,15 @@ export function getAnalyticsService(config: {
 // Alias for backward compatibility
 export { getAnalyticsService as createAnalyticsService };
 
+// Cache service for pre-computed analytics
+export {
+    type CachedAnalytics,
+    type DateRangePeriod,
+    type GetCachedAnalyticsOptions,
+    getAllCachedAnalytics,
+    getCachedAnalytics,
+    getLatestCachedAnalytics,
+    hasFreshCache
+} from "./cache";
 // Re-export types
 export type { APIExplorerEndpoint, APIExplorerOptions, DateRangeOptions, TimeSeriesData } from "./types";

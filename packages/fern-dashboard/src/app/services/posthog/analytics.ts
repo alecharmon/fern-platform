@@ -657,15 +657,17 @@ export class AnalyticsService {
             orderByClause = `(countIf(properties.possibleBot = true AND properties.userAgent != 'node') + countIf(properties.possibleBot = false OR properties.userAgent = 'node'))`;
         }
 
+        const domainFilter = this.buildDomainFilterClause();
+
         const query = `
-      SELECT 
+      SELECT
         properties.path as path,
         countIf(properties.possibleBot = true AND properties.userAgent != 'node') as agentViews,
         countIf(properties.possibleBot = false OR properties.userAgent = 'node') as humanViews
-      FROM events 
-      WHERE 
-        event = 'static_content_served' 
-        AND properties.domain = '${this.config.baseSiteUrl}'
+      FROM events
+      WHERE
+        event = 'static_content_served'
+        AND ${domainFilter}
         AND (
           properties.path LIKE '%llms.txt'
           OR properties.path LIKE '%llms-full.txt'
@@ -735,10 +737,17 @@ export class AnalyticsService {
         const { limit = 100, host, order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
 
-        // Build host filter - if provided, filter by specific host, otherwise use baseSiteUrl
-        const hostFilter = host
-            ? `properties.$host = '${host}'`
-            : `(properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')`;
+        const hostOnly = this.getHostOnly();
+        const pathPrefix = this.getPathPrefix();
+
+        let hostFilter: string;
+        if (host) {
+            hostFilter = `properties.$host = '${host}'`;
+        } else if (pathPrefix) {
+            hostFilter = `(properties.$host = '${hostOnly}' OR properties.$host = 'www.${hostOnly}') AND properties.$pathname LIKE '${pathPrefix}%'`;
+        } else {
+            hostFilter = `(properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')`;
+        }
 
         const query = `
       SELECT
@@ -961,12 +970,52 @@ export class AnalyticsService {
             allDomains.push(...this.config.additionalDomains);
         }
 
-        const conditions = allDomains.flatMap((domain) => [
-            `properties.$host = '${domain}'`,
-            `properties.$host = 'www.${domain}'`
-        ]);
+        const conditions = allDomains.flatMap((domain) => {
+            const slashIndex = domain.indexOf("/");
+            if (slashIndex !== -1) {
+                const host = domain.substring(0, slashIndex);
+                const pathPrefix = domain.substring(slashIndex);
+                return [
+                    `(properties.$host = '${host}' AND properties.$pathname LIKE '${pathPrefix}%')`,
+                    `(properties.$host = 'www.${host}' AND properties.$pathname LIKE '${pathPrefix}%')`
+                ];
+            }
+            return [`properties.$host = '${domain}'`, `properties.$host = 'www.${domain}'`];
+        });
 
         return `(${conditions.join(" OR ")})`;
+    }
+
+    private buildDomainFilterClause(): string {
+        const allDomains = [this.config.baseSiteUrl];
+        if (this.config.additionalDomains && this.config.additionalDomains.length > 0) {
+            allDomains.push(...this.config.additionalDomains);
+        }
+
+        const conditions = allDomains.flatMap((domain) => {
+            const slashIndex = domain.indexOf("/");
+            if (slashIndex !== -1) {
+                const host = domain.substring(0, slashIndex);
+                const pathPrefix = domain.substring(slashIndex);
+                return [
+                    `(properties.domain = '${host}' AND properties.path LIKE '${pathPrefix}%')`,
+                    `(properties.domain = 'www.${host}' AND properties.path LIKE '${pathPrefix}%')`
+                ];
+            }
+            return [`properties.domain = '${domain}'`, `properties.domain = 'www.${domain}'`];
+        });
+
+        return `(${conditions.join(" OR ")})`;
+    }
+
+    private getHostOnly(): string {
+        const slashIndex = this.config.baseSiteUrl.indexOf("/");
+        return slashIndex !== -1 ? this.config.baseSiteUrl.substring(0, slashIndex) : this.config.baseSiteUrl;
+    }
+
+    private getPathPrefix(): string | null {
+        const slashIndex = this.config.baseSiteUrl.indexOf("/");
+        return slashIndex !== -1 ? this.config.baseSiteUrl.substring(slashIndex) : null;
     }
 
     /**
@@ -979,11 +1028,8 @@ export class AnalyticsService {
 
         let dateClause: string;
         if (dateRange.type === "last_n_days") {
-            // Keep the exact requested date range - don't extend start date to boundaries
             const startDate = `toStartOfDay(now() - interval ${dateRange.days} day)`;
-            const endDate = "now()";
-
-            dateClause = `AND timestamp >= ${startDate} AND timestamp <= ${endDate}`;
+            dateClause = `AND timestamp >= ${startDate} AND timestamp < now()`;
         } else if (dateRange.type === "last_n_weeks") {
             // Clean week boundaries: start of first week to end of current week
             const startDate = `toStartOfWeek(now() - interval ${dateRange.weeks} week)`;
@@ -1017,9 +1063,10 @@ export class AnalyticsService {
     ): Promise<{ provider: string; count: number }[]> {
         const { limit = 20, order = "desc" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
+        const domainFilter = this.buildDomainFilterClause();
 
         const query = `
-      SELECT 
+      SELECT
         CASE
           WHEN properties.userAgent LIKE '%chatgpt%' OR properties.userAgent LIKE '%openai%' THEN 'ChatGPT/OpenAI'
           WHEN properties.userAgent LIKE '%googlebot%' OR properties.userAgent LIKE '%google-extended%' THEN 'GoogleBot/Bard'
@@ -1030,10 +1077,10 @@ export class AnalyticsService {
           ELSE 'Other Bot/Crawler'
         END as provider,
         count(*) as count
-      FROM events 
-      WHERE 
+      FROM events
+      WHERE
         event = 'static_content_served'
-        AND properties.domain = '${this.config.baseSiteUrl}'
+        AND ${domainFilter}
         AND properties.domain != 'preview.ferndocs.com'
         AND (properties.possibleBot = true OR properties.possibleBot = 1)
         ${whereClause}

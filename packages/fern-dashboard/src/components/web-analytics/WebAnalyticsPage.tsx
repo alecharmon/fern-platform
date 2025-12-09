@@ -1,16 +1,19 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { getDocsGithubMetadata } from "@/app/actions/getDocsGithubMetadata";
-import { clearWebAnalyticsCache, getWebAnalytics } from "@/app/actions/getWebAnalytics";
+import { refreshWebAnalytics } from "@/app/actions/getWebAnalytics";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
+
 import { Button } from "../ui/button";
+import { AnalyticsDataProvider, useAnalyticsData } from "./AnalyticsDataContext";
+import { useInvalidateAnalyticsCache } from "./api";
 import WebAnalyticsChart from "./Chart";
 import { MetricsCard } from "./MetricsCard";
 import SelectDate from "./SelectDate";
@@ -20,25 +23,16 @@ interface WebAnalyticsPageProps {
     docsUrl: string;
 }
 
-export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
-    const [dateRange, setDateRange] = useState<DateRangeOptions>({
-        type: "last_n_days",
-        days: 7
-    });
-    const [groupBy, setGroupBy] = useState<number>(1);
+interface WebAnalyticsContentProps extends WebAnalyticsPageProps {
+    dateRange: DateRangeOptions;
+    setDateRange: (dateRange: DateRangeOptions) => void;
+    groupBy: number | undefined;
+    setGroupBy: (groupBy: number) => void;
+}
 
-    const queryClient = useQueryClient();
-
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["web-analytics", docsUrl, dateRange, groupBy],
-        queryFn: () =>
-            getWebAnalytics({
-                docsUrl,
-                dateRange,
-                groupBy
-            }),
-        refetchInterval: 60000 // Refetch every minute
-    });
+function WebAnalyticsContent({ docsUrl, dateRange, setDateRange, groupBy, setGroupBy }: WebAnalyticsContentProps) {
+    const { data, isLoading, error } = useAnalyticsData();
+    const invalidateCache = useInvalidateAnalyticsCache();
 
     const { data: githubMetadataResult } = useQuery({
         queryKey: ["docs-github-metadata", docsUrl],
@@ -50,30 +44,41 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
 
     const refreshMutation = useMutation({
         mutationFn: async () => {
-            await clearWebAnalyticsCache(docsUrl);
+            const result = await refreshWebAnalytics(docsUrl, dateRange);
+            if (!result.success) {
+                throw new Error(result.error || "Failed to refresh analytics");
+            }
         },
         onSuccess: async () => {
-            // Invalidate all web analytics queries to force refetch
-            await queryClient.invalidateQueries({ queryKey: ["web-analytics"] });
-            toast.success("Analytics refreshed");
+            invalidateCache(docsUrl);
+            toast.success("Analytics refreshed successfully");
         },
         onError: (error) => {
             console.error("Failed to refresh analytics", error);
-            toast.error("Failed to refresh analytics");
+            const message = error instanceof Error ? error.message : "Failed to refresh analytics";
+            toast.error(message);
         }
     });
 
+    // Check if current date range is cacheable (standard period)
+    const isCacheablePeriod =
+        dateRange.type === "last_n_days" && [7, 14, 30, 90, 180].includes(dateRange.days as number);
+
     return (
         <div className="flex w-full flex-col gap-4">
-            {/* Date Range and Refresh Button */}
             <div className="flex items-center gap-2">
                 <SelectDate value={dateRange} onChange={setDateRange} />
                 <Button
                     variant="outline"
                     size="default"
                     onClick={() => refreshMutation.mutate()}
-                    disabled={refreshMutation.isPending}
-                    className="border-border shadow-xs gap-2 bg-white px-3 py-1.5 text-sm dark:border-border dark:bg-transparent dark:hover:bg-input/50"
+                    disabled={refreshMutation.isPending || !isCacheablePeriod}
+                    title={
+                        !isCacheablePeriod
+                            ? "Refresh only available for standard periods (7, 14, 30, 90, 180 days)"
+                            : "Refresh analytics from PostHog"
+                    }
+                    className="border-border shadow-xs dark:border-border dark:hover:bg-input/50 gap-2 bg-white px-3 py-1.5 text-sm dark:bg-transparent"
                 >
                     <RefreshCwIcon className={`size-4 ${refreshMutation.isPending ? "animate-spin" : ""}`} />
                     Refresh
@@ -109,5 +114,25 @@ export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
                 baseBranch={baseBranch}
             />
         </div>
+    );
+}
+
+export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
+    const [dateRange, setDateRange] = useState<DateRangeOptions>({
+        type: "last_n_days",
+        days: 7
+    });
+    const [groupBy, setGroupBy] = useState<number | undefined>(undefined);
+
+    return (
+        <AnalyticsDataProvider docsUrl={docsUrl} dateRange={dateRange} groupBy={groupBy}>
+            <WebAnalyticsContent
+                docsUrl={docsUrl}
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+                groupBy={groupBy}
+                setGroupBy={setGroupBy}
+            />
+        </AnalyticsDataProvider>
     );
 }

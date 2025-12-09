@@ -1,39 +1,32 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
-import type { TableRequest } from "@/app/actions/getWebAnalytics";
-import { getReferringDomains } from "@/app/actions/getWebAnalytics";
-
-import { ANALYTICS_COLUMNS, ANALYTICS_FIELDS } from "../constants";
+import { useAnalyticsData } from "../AnalyticsDataContext";
+import { ANALYTICS_COLUMNS, ANALYTICS_FIELDS, ANALYTICS_SORT_DIR } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
 
-interface ReferringDomainsTableProps {
-    docsUrl: string;
-    dateRange?: TableRequest["dateRange"];
-    includeInternal?: boolean;
-}
-
-export default function ReferringDomainsTable({ docsUrl, dateRange, includeInternal }: ReferringDomainsTableProps) {
+export default function ReferringDomainsTable() {
+    const { data, isLoading, error } = useAnalyticsData();
     const { sortState, handleSort } = useAnalyticsTable();
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["referringDomains", docsUrl, dateRange, includeInternal, sortState],
-        queryFn: () =>
-            getReferringDomains({
-                docsUrl,
-                dateRange,
-                includeInternal,
-                orderBy: sortState.field,
-                order: sortState.order,
-                limit: 10
-            }),
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        refetchOnWindowFocus: false
-    });
-
-    const filteredData = data?.referringDomains ?? [];
+    const sortedReferringDomains = useMemo(() => {
+        if (!data?.referringDomains) {
+            return undefined;
+        }
+        const domains = [...data.referringDomains];
+        if (sortState.field === ANALYTICS_FIELDS.VISITORS) {
+            domains.sort((a, b) =>
+                sortState.order === ANALYTICS_SORT_DIR.DESC ? b.visitors - a.visitors : a.visitors - b.visitors
+            );
+        } else if (sortState.field === ANALYTICS_FIELDS.VIEWS) {
+            domains.sort((a, b) =>
+                sortState.order === ANALYTICS_SORT_DIR.DESC ? b.views - a.views : a.views - b.views
+            );
+        }
+        return domains;
+    }, [data?.referringDomains, sortState]);
 
     const columns = [
         {
@@ -72,7 +65,7 @@ export default function ReferringDomainsTable({ docsUrl, dateRange, includeInter
     return (
         <AnalyticsMiniTable
             title="Referring Domains"
-            data={filteredData}
+            data={sortedReferringDomains}
             isLoading={isLoading}
             error={error}
             columns={columns}

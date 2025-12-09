@@ -203,7 +203,11 @@ export const COUNTRY_DATA: Record<string, Country> = {
     SD: { code: "SD", flag: "🇸🇩", name: "Sudan" },
     SE: { code: "SE", flag: "🇸🇪", name: "Sweden" },
     SG: { code: "SG", flag: "🇸🇬", name: "Singapore" },
-    SH: { code: "SH", flag: "🇸🇭", name: "Saint Helena, Ascension and Tristan Da Cunha" },
+    SH: {
+        code: "SH",
+        flag: "🇸🇭",
+        name: "Saint Helena, Ascension and Tristan Da Cunha"
+    },
     SI: { code: "SI", flag: "🇸🇮", name: "Slovenia" },
     SJ: { code: "SJ", flag: "🇸🇯", name: "Svalbard and Jan Mayen" },
     SK: { code: "SK", flag: "🇸🇰", name: "Slovakia" },

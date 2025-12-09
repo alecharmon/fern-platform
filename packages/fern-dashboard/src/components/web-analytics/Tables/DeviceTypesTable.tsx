@@ -1,19 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
-import type { TableRequest } from "@/app/actions/getWebAnalytics";
-import { getDeviceTypes } from "@/app/actions/getWebAnalytics";
-
-import { ANALYTICS_COLUMNS, ANALYTICS_FIELDS } from "../constants";
+import { useAnalyticsData } from "../AnalyticsDataContext";
+import { ANALYTICS_COLUMNS, ANALYTICS_FIELDS, ANALYTICS_SORT_DIR } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
-
-interface DeviceTypesTableProps {
-    docsUrl: string;
-    dateRange?: TableRequest["dateRange"];
-    includeInternal?: boolean;
-}
 
 const deviceEmojis: Record<string, string> = {
     Desktop: "🖥️",
@@ -23,23 +15,26 @@ const deviceEmojis: Record<string, string> = {
     TV: "📺"
 };
 
-export default function DeviceTypesTable({ docsUrl, dateRange, includeInternal }: DeviceTypesTableProps) {
+export default function DeviceTypesTable() {
+    const { data, isLoading, error } = useAnalyticsData();
     const { sortState, handleSort } = useAnalyticsTable();
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["deviceTypes", docsUrl, dateRange, includeInternal, sortState],
-        queryFn: () =>
-            getDeviceTypes({
-                docsUrl,
-                dateRange,
-                includeInternal,
-                orderBy: sortState.field,
-                order: sortState.order,
-                limit: 10
-            }),
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        refetchOnWindowFocus: false
-    });
+    const sortedDeviceTypes = useMemo(() => {
+        if (!data?.deviceTypes) {
+            return undefined;
+        }
+        const deviceTypes = [...data.deviceTypes];
+        if (sortState.field === ANALYTICS_FIELDS.VISITORS) {
+            deviceTypes.sort((a, b) =>
+                sortState.order === ANALYTICS_SORT_DIR.DESC ? b.visitors - a.visitors : a.visitors - b.visitors
+            );
+        } else if (sortState.field === ANALYTICS_FIELDS.VIEWS) {
+            deviceTypes.sort((a, b) =>
+                sortState.order === ANALYTICS_SORT_DIR.DESC ? b.views - a.views : a.views - b.views
+            );
+        }
+        return deviceTypes;
+    }, [data?.deviceTypes, sortState]);
 
     const columns = [
         {
@@ -58,7 +53,7 @@ export default function DeviceTypesTable({ docsUrl, dateRange, includeInternal }
     return (
         <AnalyticsMiniTable
             title="Device Type"
-            data={data?.deviceTypes}
+            data={sortedDeviceTypes}
             isLoading={isLoading}
             error={error}
             columns={columns}

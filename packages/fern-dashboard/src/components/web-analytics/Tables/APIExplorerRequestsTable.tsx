@@ -1,18 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
-import type { TableRequest } from "@/app/actions/getWebAnalytics";
-import { getAPIExplorerRequests } from "@/app/actions/getWebAnalytics";
-
+import { useAnalyticsData } from "../AnalyticsDataContext";
+import { ANALYTICS_SORT_DIR } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
-
-interface APIExplorerRequestsTableProps {
-    docsUrl: string;
-    dateRange?: TableRequest["dateRange"];
-    includeInternal?: boolean;
-}
 
 const METHOD_COLORS: Record<string, "blue" | "green" | "yellow" | "red"> = {
     GET: "green",
@@ -22,26 +15,18 @@ const METHOD_COLORS: Record<string, "blue" | "green" | "yellow" | "red"> = {
     DELETE: "red"
 };
 
-export default function APIExplorerRequestsTable({
-    docsUrl,
-    dateRange,
-    includeInternal
-}: APIExplorerRequestsTableProps) {
+export default function APIExplorerRequestsTable() {
+    const { data, isLoading, error } = useAnalyticsData();
     const { sortState, handleSort } = useAnalyticsTable();
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["apiExplorerRequests", docsUrl, dateRange, includeInternal, sortState],
-        queryFn: () =>
-            getAPIExplorerRequests({
-                docsUrl,
-                dateRange,
-                includeInternal,
-                order: sortState.order,
-                limit: 20
-            }),
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        refetchOnWindowFocus: false
-    });
+    const sortedAPIExplorerRequests = useMemo(() => {
+        if (!data?.apiExplorerRequests) {
+            return undefined;
+        }
+        const requests = [...data.apiExplorerRequests];
+        requests.sort((a, b) => (sortState.order === ANALYTICS_SORT_DIR.DESC ? b.count - a.count : a.count - b.count));
+        return requests;
+    }, [data?.apiExplorerRequests, sortState]);
 
     const columns = [
         {
@@ -84,8 +69,9 @@ export default function APIExplorerRequestsTable({
     ];
 
     // Transform data to add barVariant based on method
-    const dataWithVariant = data?.apiExplorerRequests.map((item) => ({
+    const dataWithVariant = sortedAPIExplorerRequests?.map((item) => ({
         ...item,
+        host: "",
         barVariant: METHOD_COLORS[item.method] || "blue"
     }));
 

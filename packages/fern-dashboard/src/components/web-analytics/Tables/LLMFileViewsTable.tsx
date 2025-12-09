@@ -1,40 +1,35 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
-import type { LLMFileViewsRequest } from "@/app/actions/getWebAnalytics";
-import { getLLMFileViews } from "@/app/actions/getWebAnalytics";
-
-import { ANALYTICS_COLUMNS } from "../constants";
+import { useAnalyticsData } from "../AnalyticsDataContext";
+import { ANALYTICS_COLUMNS, ANALYTICS_SORT_DIR } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
 
-interface LLMFileViewsTableProps {
-    docsUrl: string;
-    dateRange?: LLMFileViewsRequest["dateRange"];
-    includeInternal?: boolean;
-}
-
-export default function LLMFileViewsTable({ docsUrl, dateRange, includeInternal }: LLMFileViewsTableProps) {
+export default function LLMFileViewsTable() {
+    const { data, isLoading, error } = useAnalyticsData();
     const { sortState, handleSort } = useAnalyticsTable({
         defaultSortField: "agentViews",
         validSortFields: ["agentViews", "humanViews"]
     });
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["llmFileViews", docsUrl, dateRange, includeInternal, sortState],
-        queryFn: () =>
-            getLLMFileViews({
-                docsUrl,
-                dateRange,
-                includeInternal,
-                orderBy: sortState.field as "agentViews" | "humanViews",
-                order: sortState.order as "asc" | "desc",
-                limit: 10
-            }),
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        refetchOnWindowFocus: false
-    });
+    const sortedLLMFileViews = useMemo(() => {
+        if (!data?.llmFileViews) {
+            return undefined;
+        }
+        const fileViews = [...data.llmFileViews];
+        if (sortState.field === "agentViews") {
+            fileViews.sort((a, b) =>
+                sortState.order === ANALYTICS_SORT_DIR.DESC ? b.agentViews - a.agentViews : a.agentViews - b.agentViews
+            );
+        } else if (sortState.field === "humanViews") {
+            fileViews.sort((a, b) =>
+                sortState.order === ANALYTICS_SORT_DIR.DESC ? b.humanViews - a.humanViews : a.humanViews - b.humanViews
+            );
+        }
+        return fileViews;
+    }, [data?.llmFileViews, sortState]);
 
     const columns = [
         {
@@ -49,7 +44,7 @@ export default function LLMFileViewsTable({ docsUrl, dateRange, includeInternal 
     return (
         <AnalyticsMiniTable
             title=".md + llms.txt Visitors"
-            data={data?.llmFileViews}
+            data={sortedLLMFileViews}
             isLoading={isLoading}
             error={error}
             columns={columns}

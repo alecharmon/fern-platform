@@ -1,37 +1,24 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
-import type { TableRequest } from "@/app/actions/getWebAnalytics";
-import { getLLMBotTrafficByProvider } from "@/app/actions/getWebAnalytics";
-
+import { useAnalyticsData } from "../AnalyticsDataContext";
+import { ANALYTICS_SORT_DIR } from "../constants";
 import { useAnalyticsTable } from "../hooks/useAnalyticsTable";
 import AnalyticsMiniTable from "./AnalyticsMiniTable";
 
-interface LLMBotProvidersTableProps {
-    docsUrl: string;
-    dateRange?: TableRequest["dateRange"];
-    includeInternal?: boolean;
-}
-
-export default function LLMBotProvidersTable({ docsUrl, dateRange, includeInternal }: LLMBotProvidersTableProps) {
+export default function LLMBotProvidersTable() {
+    const { data, isLoading, error } = useAnalyticsData();
     const { sortState, handleSort } = useAnalyticsTable();
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["llm-bot-providers", docsUrl, dateRange, includeInternal, sortState],
-        queryFn: () =>
-            getLLMBotTrafficByProvider({
-                docsUrl,
-                dateRange,
-                includeInternal,
-                order: sortState.order,
-                limit: 10
-            }),
-        staleTime: 1000 * 60 * 5,
-        refetchOnWindowFocus: false
-    });
-
-    const providers = data?.providers ?? [];
+    const sortedProviders = useMemo(() => {
+        if (!data?.llmBotTraffic) {
+            return undefined;
+        }
+        const providers = [...data.llmBotTraffic];
+        providers.sort((a, b) => (sortState.order === ANALYTICS_SORT_DIR.DESC ? b.count - a.count : a.count - b.count));
+        return providers;
+    }, [data?.llmBotTraffic, sortState]);
 
     const columns = [
         {
@@ -51,7 +38,7 @@ export default function LLMBotProvidersTable({ docsUrl, dateRange, includeIntern
     return (
         <AnalyticsMiniTable
             title="LLM Bot Traffic by Provider"
-            data={providers}
+            data={sortedProviders}
             isLoading={isLoading}
             error={error}
             columns={columns}

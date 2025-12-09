@@ -1,80 +1,42 @@
 "use server";
 
-import { fernToken_admin } from "@fern-api/docs-server";
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { z } from "zod";
-import type { AnalyticsField, AnalyticsSortDir } from "@/components/web-analytics/constants";
-import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
-import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
-import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
-import getDocsSitesForOrg from "../services/dal/fdr/getDocsSitesForOrg";
-import { getAnalyticsService } from "../services/posthog";
-import type { DateRangeOptions } from "../services/posthog/types";
-import { AsyncRedisCache } from "../services/redis/AsyncRedisCache";
-import { RedisCacheKey, RedisCacheKeyType } from "../services/redis/cacheKey";
-import { redisDelPattern } from "../services/redis/redis";
 
-// Interface for cache key generation - uses flattened structure
-interface CacheKeyParams {
-    dateRange?: DateRangeOptions;
-    includeInternal?: boolean;
-    groupBy?: number;
-    limit?: number;
-    orderBy?: string;
-    order?: string;
-}
+import type { AnalyticsField, AnalyticsSortDir } from "@/components/web-analytics/constants";
+
+import { insertAnalyticsForSite } from "../services/analyticsCron/insert";
+import type { DateRangePeriod } from "../services/analyticsCron/types";
+import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
+import { getAnalyticsService } from "../services/posthog";
+import { type CachedAnalytics, getCachedAnalytics } from "../services/posthog/cache";
+import type { DateRangeOptions } from "../services/posthog/types";
 
 const DEFAULT_DATE_RANGE: DateRangeOptions = {
     type: "last_n_days",
     days: 7
 };
 
-// Cache web analytics for 1 hour (3600 seconds)
-const WEB_ANALYTICS_CACHE = new AsyncRedisCache(RedisCacheKeyType.WEB_ANALYTICS, { ttlInSeconds: 3600 });
+const SUPABASE_CACHEABLE_PERIODS: DateRangePeriod[] = [7, 14, 30, 90, 180];
 
-// Cache docs site access for 10 minutes (600 seconds)
-const DOCS_SITE_ACCESS_CACHE = new AsyncRedisCache(RedisCacheKeyType.DOCS_SITE_ACCESS, {
-    ttlInSeconds: 600
-});
-
-// Helper to generate a deterministic cache key from request parameters
-function getCacheKey(
-    endpoint: string,
-    domain: string,
-    params: CacheKeyParams
-): RedisCacheKey<typeof RedisCacheKeyType.WEB_ANALYTICS> {
-    const dateRange = params.dateRange;
-    const flatParams: Record<string, unknown> = {
-        includeInternal: params.includeInternal,
-        groupBy: params.groupBy,
-        limit: params.limit,
-        orderBy: params.orderBy,
-        order: params.order
-    };
-
-    // Flatten date range based on its discriminated type
-    if (dateRange) {
-        flatParams.dateRangeType = dateRange.type;
-
-        if (dateRange.type === "last_n_days") {
-            flatParams.dateRangeDays = dateRange.days;
-        } else if (dateRange.type === "last_n_weeks") {
-            flatParams.dateRangeWeeks = dateRange.weeks;
-        } else if (dateRange.type === "last_n_months") {
-            flatParams.dateRangeMonths = dateRange.months;
-        } else if (dateRange.type === "custom_range") {
-            flatParams.dateRangeStartDate = dateRange.startDate;
-            flatParams.dateRangeEndDate = dateRange.endDate;
-        }
+function getSupabaseCachePeriod(dateRange: DateRangeOptions): DateRangePeriod | null {
+    if (dateRange.type === "last_n_days" && SUPABASE_CACHEABLE_PERIODS.includes(dateRange.days as DateRangePeriod)) {
+        return dateRange.days as DateRangePeriod;
     }
-
-    const sortedParams = JSON.stringify(flatParams, Object.keys(flatParams).sort());
-    return RedisCacheKey.webAnalytics(endpoint, domain, sortedParams);
+    return null;
 }
 
-// Schema for web analytics request
+function getDocsSiteKey(docsUrl: string): string {
+    const decodedUrl = decodeURIComponent(docsUrl);
+    try {
+        const url = new URL(decodedUrl.startsWith("http") ? decodedUrl : `https://${decodedUrl}`);
+        return url.hostname;
+    } catch {
+        return decodedUrl.split("/")[0] ?? decodedUrl;
+    }
+}
+
 const GetWebAnalyticsSchema = z.object({
-    docsUrl: z.string(), // Accept any string, we'll decode and validate later
+    docsUrl: z.string(),
     dateRange: z
         .union([
             z.object({
@@ -97,17 +59,15 @@ const GetWebAnalyticsSchema = z.object({
         ])
         .optional(),
     includeInternal: z.boolean().optional(),
-    groupBy: z.number().optional() // Number of days to group by (7 for weekly, 30 for monthly)
+    groupBy: z.number().optional()
 });
 
-// Extended schema for table requests with sorting parameters
 const TableRequestSchema = GetWebAnalyticsSchema.extend({
     limit: z.number().int().min(1).max(100).optional(),
     orderBy: z.enum(["visitors", "views"]).optional(),
     order: z.enum(["asc", "desc"]).optional()
 });
 
-// Extended schema for LLM file views requests with specific sorting parameters
 const LLMFileViewsRequestSchema = GetWebAnalyticsSchema.extend({
     limit: z.number().int().min(1).max(100).optional(),
     orderBy: z.enum(["agentViews", "humanViews", "totalViews"]).optional(),
@@ -136,6 +96,33 @@ export interface TableRequest extends GetWebAnalyticsRequest {
 
 export type LLMFileViewsRequest = z.infer<typeof LLMFileViewsRequestSchema>;
 
+/**
+ * Unified response containing all analytics data
+ * Single fetch instead of 9+ separate requests
+ */
+export interface AllAnalyticsResponse {
+    metrics: WebAnalyticsMetrics;
+    topPages: { path: string; visitors: number; views: number }[];
+    topCountries: { country: string; visitors: number; views: number }[];
+    channels: { channel: string; visitors: number; views: number }[];
+    deviceTypes: { deviceType: string; visitors: number; views: number }[];
+    referringDomains: { domain: string; visitors: number; views: number }[];
+    llmFileViews: { path: string; agentViews: number; humanViews: number }[];
+    apiExplorerRequests: {
+        method: string;
+        endpoint: string;
+        name: string;
+        count: number;
+    }[];
+    llmBotTraffic: { provider: string; count: number }[];
+    pages404: { path: string; count: number }[];
+    pageViewsTimeSeries: { date: string; value: number }[];
+    visitorsTimeSeries: { date: string; value: number }[];
+    baseSiteUrl: string;
+    dateRange: DateRangeOptions;
+    cacheHit: boolean;
+}
+
 function getBaseDomain(rawUrl: string) {
     const decodedUrl = decodeURIComponent(rawUrl);
     let baseDomain: string;
@@ -143,7 +130,6 @@ function getBaseDomain(rawUrl: string) {
         const url = new URL(decodedUrl.startsWith("http") ? decodedUrl : `https://${decodedUrl}`);
         baseDomain = url.hostname;
     } catch {
-        // If URL parsing fails, assume it's already just a domain
         baseDomain = decodedUrl.split("/")[0] ?? "";
     }
 
@@ -154,654 +140,526 @@ function getBaseDomain(rawUrl: string) {
     return baseDomain;
 }
 
-async function verifyDomainAccessAndGetSite(url: string): Promise<FdrAPI.dashboard.DocsSite> {
-    const session = await getCurrentSessionOrThrow();
+class AnalyticsQueryHandler {
+    private supabaseCache: CachedAnalytics | null | undefined = undefined;
+    private docsUrl: string;
+    private dateRange: DateRangeOptions;
 
-    // Decode the URL (handles %2F -> /)
-    const decodedUrl = parseDocsUrlParam({ docsUrl: url });
-    const baseDomain = getBaseDomain(decodedUrl);
-
-    const cacheKey = RedisCacheKey.docsSiteAccess(baseDomain);
-
-    const cachedResult = await DOCS_SITE_ACCESS_CACHE.get(cacheKey, async () => {
-        const docsMetadata = await getDocsUrlMetadata({
-            url: decodedUrl,
-            token: fernToken_admin() ?? session.accessToken
-        });
-
-        // Get all organizations the user has access to
-        if (!docsMetadata.ok || !docsMetadata.body.org) {
-            throw new Error(`Invalid docs URL`);
-        }
-
-        // Verify user has access to this org's docs
-        const orgSites = await getDocsSitesForOrg({
-            token: session.accessToken,
-
-            // @ts-expect-error - OrgId vs Auth0OrgName type mismatch
-            orgName: docsMetadata.body.org
-        });
-        if (!orgSites.ok) {
-            throw new Error("Failed to fetch organization sites");
-        }
-        const docsSite = orgSites.docsSites.find((site) => site.urls.some((siteUrl) => siteUrl.domain === baseDomain));
-
-        if (!docsSite) {
-            throw new Error("You don't have access to analytics for this docs site");
-        }
-
-        return docsSite;
-    });
-
-    return cachedResult;
-}
-
-/**
- * Server action to fetch web analytics from PostHog
- * This is different from getDomainAnalytics which uses FAI
- */
-export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<GetWebAnalyticsResponse> {
-    // Validate input
-    const validated = GetWebAnalyticsSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-    // Default date range if not provided
-    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
-
-    const baseDomain = getBaseDomain(validated.docsUrl);
-
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
-
-    // Generate cache key using all domains
-    const cacheKey = getCacheKey("metrics", allDomains.sort().join(","), {
-        dateRange,
-        includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy
-    });
-
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service with all domains
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch metrics from PostHog (now includes all domains)
-        const metrics = await analytics.getMetrics({
-            dateRange,
-            includeInternal: validated.includeInternal
-        });
-
-        return {
-            metrics: {
-                visitors: metrics.visitors,
-                pageViews: metrics.pageViews,
-                sessions: metrics.sessions
-            }
-        };
-    });
-
-    if (!cachedData.metrics) {
-        throw new Error("Failed to fetch metrics");
+    constructor(docsUrl: string, dateRange: DateRangeOptions) {
+        this.docsUrl = docsUrl;
+        this.dateRange = dateRange;
     }
 
+    async getSupabaseCache(): Promise<CachedAnalytics | null> {
+        if (this.supabaseCache !== undefined) {
+            return this.supabaseCache;
+        }
+
+        const period = getSupabaseCachePeriod(this.dateRange);
+        if (!period) {
+            this.supabaseCache = null;
+            return null;
+        }
+
+        const docsSiteKey = getDocsSiteKey(this.docsUrl);
+        const startTime = Date.now();
+        this.supabaseCache = await getCachedAnalytics({
+            docsSite: docsSiteKey,
+            period
+        });
+        const endTime = Date.now();
+        console.log("getCachedAnalytics", {
+            docsSiteKey,
+            period,
+            found: !!this.supabaseCache,
+            duration: endTime - startTime
+        });
+        return this.supabaseCache;
+    }
+}
+
+const handlerCache = new Map<string, AnalyticsQueryHandler>();
+
+function getHandler(docsUrl: string, dateRange: DateRangeOptions): AnalyticsQueryHandler {
+    const key = `${docsUrl}:${JSON.stringify(dateRange)}`;
+    let handler = handlerCache.get(key);
+    if (!handler) {
+        handler = new AnalyticsQueryHandler(docsUrl, dateRange);
+        handlerCache.set(key, handler);
+        setTimeout(() => handlerCache.delete(key), 60000);
+    }
+    return handler;
+}
+
+async function getLiveAnalytics(docsUrl: string) {
+    const session = await getCurrentSessionOrThrow();
+    const userId = session.user.sub;
+    const baseDomain = getBaseDomain(docsUrl);
+
     return {
-        metrics: cachedData.metrics,
+        userId,
+        baseDomain,
+        getAnalytics: () =>
+            getAnalyticsService({
+                userId,
+                baseSiteUrl: baseDomain
+                // NOT including additionalDomains - each domain tracked separately
+            })
+    };
+}
+
+export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<GetWebAnalyticsResponse> {
+    const validated = GetWebAnalyticsSchema.parse(request);
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
+
+    if (supabaseCache) {
+        console.log(`Using Supabase cache for ${validated.docsUrl} ${JSON.stringify(dateRange)}`);
+        return {
+            metrics: {
+                visitors: supabaseCache.totalVisitors,
+                pageViews: supabaseCache.totalViews,
+                sessions: 0
+            },
+            baseSiteUrl: supabaseCache.docsSite,
+            dateRange
+        };
+    }
+
+    console.log(`Getting live analytics from PostHog`);
+
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const metrics = await analytics.getMetrics({
+        dateRange,
+        includeInternal: validated.includeInternal
+    });
+
+    return {
+        metrics: {
+            visitors: metrics.visitors,
+            pageViews: metrics.pageViews,
+            sessions: metrics.sessions
+        },
         baseSiteUrl: baseDomain,
         dateRange
     };
 }
 
 /**
- * Server action to fetch page views by day from PostHog
+ * Unified server action that fetches ALL analytics data in a single request
+ * This replaces making 9+ separate HTTP requests
  */
+export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<AllAnalyticsResponse> {
+    const validated = GetWebAnalyticsSchema.parse(request);
+    const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+    const baseDomain = getBaseDomain(validated.docsUrl);
+
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
+
+    if (supabaseCache && !validated.groupBy) {
+        console.log(`Using Supabase cache for ALL analytics data`, {
+            docsSite: supabaseCache.docsSite,
+            totalVisitors: supabaseCache.totalVisitors,
+            totalViews: supabaseCache.totalViews,
+            numPaths: supabaseCache.topPaths?.length || 0,
+            numCountries: supabaseCache.topCountries?.length || 0,
+            numChannels: supabaseCache.topChannels?.length || 0,
+            numDeviceTypes: supabaseCache.topDeviceTypes?.length || 0
+        });
+        return {
+            metrics: {
+                visitors: supabaseCache.totalVisitors,
+                pageViews: supabaseCache.totalViews,
+                sessions: 0
+            },
+            topPages: supabaseCache.topPaths,
+            topCountries: supabaseCache.topCountries,
+            channels: supabaseCache.topChannels,
+            deviceTypes: supabaseCache.topDeviceTypes,
+            referringDomains: supabaseCache.topReferringDomains,
+            llmFileViews: supabaseCache.topLlmTxts,
+            apiExplorerRequests: supabaseCache.topApiExplorer.map((a) => ({
+                method: a.method,
+                endpoint: a.endpoint,
+                name: a.name,
+                count: a.count
+            })),
+            llmBotTraffic: supabaseCache.topLlmBotTraffic,
+            pages404: [],
+            pageViewsTimeSeries: supabaseCache.viewChart,
+            visitorsTimeSeries: supabaseCache.visitorChart,
+            baseSiteUrl: supabaseCache.docsSite,
+            dateRange,
+            cacheHit: true
+        };
+    }
+
+    console.log(`Getting ALL analytics from Redshift (cache miss) - data may be 3-4 hours delayed`);
+    console.warn(
+        `[getAllAnalytics] Cache miss for ${baseDomain} - querying Redshift directly. Use Refresh button for real-time PostHog data.`
+    );
+
+    // Use Redshift for cache misses - much faster than PostHog (parallel queries, no rate limits)
+    const { RedshiftAnalytics } = await import("../services/analytics/redshift-analytics");
+    const analytics = new RedshiftAnalytics(baseDomain);
+
+    // Convert dateRange to Redshift format
+    const dayjs = (await import("dayjs")).default;
+    const utc = (await import("dayjs/plugin/utc")).default;
+    dayjs.extend(utc);
+
+    const endDateDay = dayjs().utc();
+    let startDateDay = endDateDay;
+
+    if (dateRange.type === "last_n_days") {
+        startDateDay = endDateDay.subtract(dateRange.days, "days");
+    } else if (dateRange.type === "last_n_weeks") {
+        startDateDay = endDateDay.subtract(dateRange.weeks * 7, "days");
+    } else if (dateRange.type === "last_n_months") {
+        startDateDay = endDateDay.subtract(dateRange.months, "months");
+    } else if (dateRange.type === "custom_range") {
+        startDateDay = dayjs(dateRange.startDate).utc();
+    }
+
+    const redshiftDateRange = {
+        startDate: startDateDay.startOf("day").toDate(),
+        endDate: endDateDay.endOf("day").toDate()
+    };
+
+    // Query Redshift in PARALLEL (no rate limits!)
+    const [
+        metrics,
+        topPages,
+        topCountries,
+        channels,
+        deviceTypes,
+        referringDomains,
+        llmFileViews,
+        apiExplorerRequests,
+        llmBotTraffic,
+        pageViewsTimeSeries,
+        visitorsTimeSeries
+    ] = await Promise.all([
+        analytics.getMetrics({ dateRange: redshiftDateRange }),
+        analytics.getTopPages({ dateRange: redshiftDateRange, limit: 10 }),
+        analytics.getTopCountries({ dateRange: redshiftDateRange, limit: 10 }),
+        analytics.getChannels({ dateRange: redshiftDateRange, limit: 20 }),
+        analytics.getDeviceTypes({ dateRange: redshiftDateRange, limit: 10 }),
+        analytics.getReferringDomains({ dateRange: redshiftDateRange, limit: 10 }),
+        analytics.getLLMFileViews({ dateRange: redshiftDateRange, limit: 20 }),
+        analytics.getAPIExplorerRequests({ dateRange: redshiftDateRange, limit: 20 }),
+        analytics.getLLMBotTrafficByProvider({ dateRange: redshiftDateRange, limit: 20 }),
+        analytics.getPageViewsTimeSeries({ dateRange: redshiftDateRange }),
+        analytics.getVisitorsTimeSeries({ dateRange: redshiftDateRange })
+    ]);
+
+    console.log("[getAllAnalytics] All Redshift queries completed");
+
+    // Map Redshift results to expected format
+    return {
+        metrics: {
+            visitors: metrics.visitors,
+            pageViews: metrics.pageviews,
+            sessions: metrics.sessions
+        },
+        topPages,
+        topCountries,
+        channels,
+        deviceTypes: deviceTypes.map((d) => ({ deviceType: d.device, visitors: d.visitors, views: d.views })),
+        referringDomains,
+        llmFileViews: llmFileViews.map((f) => ({ path: f.file, agentViews: f.agentViews, humanViews: f.humanViews })),
+        apiExplorerRequests: apiExplorerRequests.map((a) => ({
+            method: "",
+            endpoint: a.endpoint,
+            name: a.endpoint,
+            count: a.requests
+        })),
+        llmBotTraffic: llmBotTraffic.map((b) => ({ provider: b.provider, count: b.requests })),
+        pages404: [], // Not implemented in Redshift
+        pageViewsTimeSeries: pageViewsTimeSeries.map((t) => ({ date: t.date, value: t.count })),
+        visitorsTimeSeries: visitorsTimeSeries.map((t) => ({ date: t.date, value: t.count })),
+        baseSiteUrl: baseDomain,
+        dateRange,
+        cacheHit: false
+    };
+}
+
 export async function getPageViewsByDay(
     request: GetWebAnalyticsRequest
 ): Promise<{ timeSeries: { date: string; value: number }[] }> {
-    // Validate input
     const validated = GetWebAnalyticsSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+    if (supabaseCache && !validated.groupBy) {
+        console.log(`Using Supabase cache for pageviews timeseries`);
+        return {
+            timeSeries: supabaseCache.viewChart.map((d) => ({
+                date: d.date,
+                value: d.value
+            }))
+        };
+    }
 
-    // Generate cache key
-    const cacheKey = getCacheKey("pageViewsByDay", allDomains.sort().join(","), {
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const timeSeries = await analytics.getPageViewsTimeSeries({
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy
     });
 
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch page views time series from PostHog
-        const timeSeries = await analytics.getPageViewsTimeSeries({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy
-        });
-
-        return { timeSeries };
-    });
-
-    if (!cachedData.timeSeries) {
-        throw new Error("Failed to fetch page views time series");
-    }
-
-    return { timeSeries: cachedData.timeSeries };
+    return { timeSeries };
 }
 
-/**
- * Server action to fetch visitors by day from PostHog
- */
 export async function getVisitorsByDay(
     request: GetWebAnalyticsRequest
 ): Promise<{ timeSeries: { date: string; value: number }[] }> {
-    // Validate input
     const validated = GetWebAnalyticsSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+    if (supabaseCache && !validated.groupBy) {
+        console.log(`Using Supabase cache for visitors timeseries`);
+        return {
+            timeSeries: supabaseCache.visitorChart.map((d) => ({
+                date: d.date,
+                value: d.value
+            }))
+        };
+    }
 
-    // Generate cache key
-    const cacheKey = getCacheKey("visitorsByDay", allDomains.sort().join(","), {
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const timeSeries = await analytics.getVisitorsTimeSeries({
         dateRange,
         includeInternal: validated.includeInternal,
         groupBy: validated.groupBy
     });
 
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch visitors time series from PostHog
-        const timeSeries = await analytics.getVisitorsTimeSeries({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy
-        });
-
-        return { timeSeries };
-    });
-
-    if (!cachedData.timeSeries) {
-        throw new Error("Failed to fetch visitors time series");
-    }
-
-    return { timeSeries: cachedData.timeSeries };
+    return { timeSeries };
 }
 
-/**
- * Server action to fetch top pages from PostHog
- */
 export async function getTopPages(
     request: TableRequest
 ): Promise<{ topPages: { path: string; visitors: number; views: number }[] }> {
-    // Validate input
     const validated = TableRequestSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+    const limit = validated.limit || 10;
+    const orderBy = validated.orderBy || "views";
+    const order = validated.order || "desc";
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
-
-    // Generate cache key
-    const cacheKey = getCacheKey("topPages", allDomains.sort().join(","), {
-        dateRange,
-        includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy,
-        limit: validated.limit,
-        orderBy: validated.orderBy,
-        order: validated.order
-    });
-
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch top pages from PostHog
-        const topPages = await analytics.getTopPages({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy,
-            limit: validated.limit || 10,
-            orderBy: validated.orderBy || "views",
-            order: validated.order || "desc"
-        });
-
-        return { topPages };
-    });
-
-    if (!cachedData.topPages) {
-        throw new Error("Failed to fetch top pages");
+    if (supabaseCache) {
+        console.log(`Using Supabase cache for top pages`);
+        const pages = [...supabaseCache.topPaths];
+        if (orderBy === "visitors") {
+            pages.sort((a, b) => (order === "desc" ? b.visitors - a.visitors : a.visitors - b.visitors));
+        } else {
+            pages.sort((a, b) => (order === "desc" ? b.views - a.views : a.views - b.views));
+        }
+        return { topPages: pages.slice(0, limit) };
     }
 
-    return { topPages: cachedData.topPages };
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const topPages = await analytics.getTopPages({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        limit,
+        orderBy,
+        order
+    });
+
+    return { topPages };
 }
 
-/**
- * Server action to fetch top countries from PostHog
- */
 export async function getTopCountries(request: TableRequest): Promise<{
     topCountries: { country: string; visitors: number; views: number }[];
 }> {
-    // Validate input
     const validated = TableRequestSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
+    const limit = validated.limit || 10;
+    const orderBy = validated.orderBy || "visitors";
+    const order = validated.order || "desc";
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
-
-    // Generate cache key
-    const cacheKey = getCacheKey("topCountries", allDomains.sort().join(","), {
-        dateRange,
-        includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy,
-        limit: validated.limit,
-        orderBy: validated.orderBy,
-        order: validated.order
-    });
-
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch top countries from PostHog
-        const topCountries = await analytics.getTopCountries({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy,
-            limit: validated.limit || 10,
-            orderBy: validated.orderBy || "visitors",
-            order: validated.order || "desc"
-        });
-
-        return { topCountries };
-    });
-
-    if (!cachedData.topCountries) {
-        throw new Error("Failed to fetch top countries");
+    if (supabaseCache) {
+        console.log(`Using Supabase cache for top countries`);
+        const countries = [...supabaseCache.topCountries];
+        if (orderBy === "visitors") {
+            countries.sort((a, b) => (order === "desc" ? b.visitors - a.visitors : a.visitors - b.visitors));
+        } else if (orderBy === "views") {
+            countries.sort((a, b) => (order === "desc" ? b.views - a.views : a.views - b.views));
+        } else {
+            // Sort by country name alphabetically
+            countries.sort((a, b) => {
+                const comparison = a.country.localeCompare(b.country);
+                return order === "desc" ? -comparison : comparison;
+            });
+        }
+        return { topCountries: countries.slice(0, limit) };
     }
 
-    return { topCountries: cachedData.topCountries };
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const topCountries = await analytics.getTopCountries({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        limit,
+        orderBy,
+        order
+    });
+
+    return { topCountries };
 }
 
-/**
- * Server action to fetch LLM file views (llms.txt, llms-full.txt, .md files) from PostHog
- */
 export async function getLLMFileViews(request: LLMFileViewsRequest): Promise<{
     llmFileViews: { path: string; agentViews: number; humanViews: number }[];
 }> {
-    // Validate input
     const validated = LLMFileViewsRequestSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
-
-    // Generate cache key
-    const cacheKey = getCacheKey("llmFileViews", allDomains.sort().join(","), {
-        dateRange,
-        includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy,
-        limit: validated.limit,
-        orderBy: validated.orderBy,
-        order: validated.order
-    });
-
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch LLM file views from PostHog
-        const llmFileViews = await analytics.getLLMFileViews({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy,
-            limit: validated.limit || 20,
-            orderBy: validated.orderBy || "humanViews",
-            order: validated.order || "desc"
-        });
-
-        return { llmFileViews };
-    });
-
-    if (!cachedData.llmFileViews) {
-        throw new Error("Failed to fetch LLM file views");
+    if (supabaseCache) {
+        console.log(`Using Supabase cache for LLM file views`);
+        return {
+            llmFileViews: supabaseCache.topLlmTxts.slice(0, validated.limit || 20)
+        };
     }
 
-    return { llmFileViews: cachedData.llmFileViews };
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const llmFileViews = await analytics.getLLMFileViews({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        limit: validated.limit || 20,
+        orderBy: validated.orderBy || "humanViews",
+        order: validated.order || "desc"
+    });
+
+    return { llmFileViews };
 }
 
-/**
- * Server action to fetch channel data from PostHog
- */
 export async function getChannels(request: TableRequest): Promise<{
     channels: { channel: string; visitors: number; views: number }[];
 }> {
-    // Validate input
     const validated = TableRequestSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
-
-    // Generate cache key
-    const cacheKey = getCacheKey("channels", allDomains.sort().join(","), {
-        dateRange,
-        includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy,
-        limit: validated.limit,
-        orderBy: validated.orderBy,
-        order: validated.order
-    });
-
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch channels from PostHog
-        const channels = await analytics.getChannels({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy,
-            limit: validated.limit || 20,
-            orderBy: validated.orderBy || "visitors",
-            order: validated.order || "desc"
-        });
-
-        return { channels };
-    });
-
-    if (!cachedData.channels) {
-        throw new Error("Failed to fetch channels");
+    if (supabaseCache) {
+        console.log(`Using Supabase cache for channels`);
+        return {
+            channels: supabaseCache.topChannels.slice(0, validated.limit || 20)
+        };
     }
 
-    return { channels: cachedData.channels };
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const channels = await analytics.getChannels({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        limit: validated.limit || 20,
+        orderBy: validated.orderBy || "visitors",
+        order: validated.order || "desc"
+    });
+
+    return { channels };
 }
 
-/**
- * Server action to fetch device type data from PostHog
- */
 export async function getDeviceTypes(request: TableRequest): Promise<{
     deviceTypes: { deviceType: string; visitors: number; views: number }[];
 }> {
-    // Validate input
     const validated = TableRequestSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
-
-    // Generate cache key
-    const cacheKey = getCacheKey("deviceTypes", allDomains.sort().join(","), {
-        dateRange,
-        includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy,
-        limit: validated.limit,
-        orderBy: validated.orderBy,
-        order: validated.order
-    });
-
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch device types from PostHog
-        const deviceTypes = await analytics.getDeviceTypes({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy,
-            limit: validated.limit || 10,
-            orderBy: validated.orderBy || "visitors",
-            order: validated.order || "desc"
-        });
-
-        return { deviceTypes };
-    });
-
-    if (!cachedData.deviceTypes) {
-        throw new Error("Failed to fetch device types");
+    if (supabaseCache) {
+        console.log(`Using Supabase cache for device types`);
+        return {
+            deviceTypes: supabaseCache.topDeviceTypes.slice(0, validated.limit || 10)
+        };
     }
 
-    return { deviceTypes: cachedData.deviceTypes };
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const deviceTypes = await analytics.getDeviceTypes({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        limit: validated.limit || 10,
+        orderBy: validated.orderBy || "visitors",
+        order: validated.order || "desc"
+    });
+
+    return { deviceTypes };
 }
 
-/**
- * Server action to fetch referring domains from PostHog
- */
 export async function getReferringDomains(request: TableRequest): Promise<{
     referringDomains: { domain: string; visitors: number; views: number }[];
 }> {
-    // Validate input
     const validated = TableRequestSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
-
-    // Generate cache key
-    const cacheKey = getCacheKey("referringDomains", allDomains.sort().join(","), {
-        dateRange,
-        includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy,
-        limit: validated.limit,
-        orderBy: validated.orderBy,
-        order: validated.order
-    });
-
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch referring domains from PostHog
-        const referringDomains = await analytics.getReferringDomains({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy,
-            limit: validated.limit || 10,
-            orderBy: validated.orderBy || "visitors",
-            order: validated.order || "desc"
-        });
-
-        return { referringDomains };
-    });
-
-    if (!cachedData.referringDomains) {
-        throw new Error("Failed to fetch referring domains");
+    if (supabaseCache) {
+        console.log(`Using Supabase cache for referring domains`);
+        return {
+            referringDomains: supabaseCache.topReferringDomains.slice(0, validated.limit || 10)
+        };
     }
 
-    return { referringDomains: cachedData.referringDomains };
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const referringDomains = await analytics.getReferringDomains({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        limit: validated.limit || 10,
+        orderBy: validated.orderBy || "visitors",
+        order: validated.order || "desc"
+    });
+
+    return { referringDomains };
 }
 
-/**
- * Server action to fetch 404 pages from PostHog
- */
 export async function get404Pages(request: TableRequest): Promise<{ pages404: { path: string; count: number }[] }> {
-    // Validate input
     const validated = TableRequestSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
-
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
-
-    // Generate cache key
-    const cacheKey = getCacheKey("404Pages", allDomains.sort().join(","), {
+    // 404 pages not cached in Supabase, always fetch live
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const pages404 = await analytics.get404Pages({
         dateRange,
         includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy,
-        limit: validated.limit,
-        order: validated.order
+        limit: validated.limit || 20,
+        order: validated.order || "desc"
     });
 
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch 404 pages from PostHog
-        const pages404 = await analytics.get404Pages({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy,
-            limit: validated.limit || 20,
-            order: validated.order || "desc"
-        });
-
-        return { pages404 };
-    });
-
-    if (!cachedData.pages404) {
-        throw new Error("Failed to fetch 404 pages");
-    }
-
-    return { pages404: cachedData.pages404 };
+    return { pages404 };
 }
 
-/**
- * Server action to fetch API Explorer requests from PostHog
- */
 export async function getAPIExplorerRequests(request: TableRequest): Promise<{
     apiExplorerRequests: {
         host: string;
@@ -811,129 +669,106 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
         count: number;
     }[];
 }> {
-    // Validate input
     const validated = TableRequestSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    // Get current session
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
-    // Default date range if not provided
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
-    const additionalDomains = allDomains.filter((domain) => domain !== baseDomain);
+    if (supabaseCache) {
+        console.log(`Using Supabase cache for API Explorer requests`);
+        return {
+            apiExplorerRequests: supabaseCache.topApiExplorer.map((a) => ({
+                host: "",
+                method: a.method,
+                endpoint: a.endpoint,
+                name: a.name,
+                count: a.count
+            }))
+        };
+    }
 
-    // Generate cache key
-    const cacheKey = getCacheKey("apiExplorerRequests", allDomains.sort().join(","), {
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const apiExplorerRequests = await analytics.getAPIExplorerRequests({
         dateRange,
-        includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy,
-        limit: validated.limit,
-        order: validated.order
+        limit: validated.limit || 20,
+        order: validated.order || "desc"
     });
 
-    // Use cache
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize PostHog analytics service
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains
-        });
-
-        // Fetch API Explorer requests from PostHog
-        const apiExplorerRequests = await analytics.getAPIExplorerRequests({
-            dateRange,
-            limit: validated.limit || 20,
-            order: validated.order || "desc"
-        });
-
-        return { apiExplorerRequests };
-    });
-
-    if (!cachedData.apiExplorerRequests) {
-        throw new Error("Failed to fetch API Explorer requests");
-    }
-
-    return { apiExplorerRequests: cachedData.apiExplorerRequests };
+    return { apiExplorerRequests };
 }
 
-/**
- * Server action to clear all web analytics cache for a specific domain
- * This invalidates all cached analytics data, forcing fresh fetches from PostHog
- */
-export async function clearWebAnalyticsCache(docsUrl: string): Promise<{ success: boolean }> {
-    const docsSite = await verifyDomainAccessAndGetSite(docsUrl);
-
-    const allDomains = docsSite.urls.map((url) => url.domain);
-
-    // Clear web analytics cache for each individual domain
-    for (const domain of allDomains) {
-        await redisDelPattern(`web-analytics-*-${domain}-*`);
-
-        // Clear docs site access cache for each domain
-        const docsSiteAccessPattern = RedisCacheKey.docsSiteAccess(domain);
-        await redisDelPattern(docsSiteAccessPattern);
-    }
-
-    // Clear web analytics cache for combined domains (used in some queries)
-    await redisDelPattern(`web-analytics-*-${allDomains.sort().join(",")}-*`);
-
-    return { success: true };
-}
-
-/**
- * Server action to fetch LLM bot traffic by provider from PostHog
- */
 export async function getLLMBotTrafficByProvider(request: TableRequest): Promise<{
     providers: { provider: string; count: number }[];
 }> {
     const validated = TableRequestSchema.parse(request);
-
-    const docsSite = await verifyDomainAccessAndGetSite(validated.docsUrl);
-
-    const session = await getCurrentSessionOrThrow();
-    const userId = session.user.sub;
-
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
-    const baseDomain = getBaseDomain(validated.docsUrl);
 
-    const allDomains = docsSite.urls.map((url) => url.domain);
+    const handler = getHandler(validated.docsUrl, dateRange);
+    const supabaseCache = await handler.getSupabaseCache();
 
-    const cacheKey = getCacheKey("llmBotProviders", allDomains.sort().join(","), {
-        dateRange,
-        includeInternal: validated.includeInternal,
-        groupBy: validated.groupBy,
-        limit: validated.limit,
-        order: validated.order
-    });
-
-    const cachedData = await WEB_ANALYTICS_CACHE.get(cacheKey, async () => {
-        const analytics = getAnalyticsService({
-            userId,
-            baseSiteUrl: baseDomain,
-            additionalDomains: allDomains.filter((domain) => domain !== baseDomain)
-        });
-
-        const providers = await analytics.getLLMBotTrafficByProvider({
-            dateRange,
-            includeInternal: validated.includeInternal,
-            groupBy: validated.groupBy,
-            limit: validated.limit || 20,
-            order: validated.order || "desc"
-        });
-
-        return { providers };
-    });
-
-    if (!cachedData.providers) {
-        throw new Error("Failed to fetch LLM bot traffic by provider");
+    if (supabaseCache) {
+        console.log(`Using Supabase cache for LLM bot traffic`);
+        return {
+            providers: supabaseCache.topLlmBotTraffic.slice(0, validated.limit || 20)
+        };
     }
 
-    return { providers: cachedData.providers };
+    const live = await getLiveAnalytics(validated.docsUrl);
+    const analytics = live.getAnalytics();
+    const providers = await analytics.getLLMBotTrafficByProvider({
+        dateRange,
+        includeInternal: validated.includeInternal,
+        limit: validated.limit || 20,
+        order: validated.order || "desc"
+    });
+
+    return { providers };
+}
+
+/**
+ * Server action to refresh analytics by re-computing and storing in Supabase
+ * This will insert/update the analytics record for the period the user is viewing
+ */
+export async function refreshWebAnalytics(
+    docsUrl: string,
+    dateRange: DateRangeOptions
+): Promise<{ success: boolean; error?: string }> {
+    try {
+        const docsSiteKey = getDocsSiteKey(docsUrl);
+
+        // Only refresh if this is a standard cacheable period
+        const period = getSupabaseCachePeriod(dateRange);
+        if (!period) {
+            return {
+                success: false,
+                error: "Cannot refresh analytics for custom date ranges. Only standard periods (7, 14, 30, 90, 180 days) are supported."
+            };
+        }
+
+        console.log(
+            `[refreshWebAnalytics] Starting HARD REFRESH from Redshift for ${docsSiteKey}, period: ${period} days`
+        );
+
+        // Use Redshift to re-fetch analytics (same as cron job)
+        // This is faster and more reliable than PostHog API which times out
+        const result = await insertAnalyticsForSite(docsSiteKey, period);
+
+        if (!result.success) {
+            console.error(`[refreshWebAnalytics] Failed:`, result.error);
+            return { success: false, error: result.error };
+        }
+
+        console.log(`[refreshWebAnalytics] Successfully refreshed from Redshift for ${docsSiteKey}`);
+
+        // Invalidate the handler cache so next request gets fresh data
+        handlerCache.clear();
+
+        return { success: true };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`[refreshWebAnalytics] Error:`, error);
+        return { success: false, error: errorMessage };
+    }
 }

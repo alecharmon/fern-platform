@@ -10,7 +10,7 @@ export interface GroupByOption {
 }
 
 export interface GroupBySelectProps {
-    value: number;
+    value: number | undefined;
     onChange: (value: number) => void;
     disabled?: boolean;
 }
@@ -22,19 +22,17 @@ const GROUP_BY_OPTIONS: GroupByOption[] = [
 ];
 
 export default function GroupBySelect({ value, onChange, disabled = false }: GroupBySelectProps) {
-    const selectedOption = GROUP_BY_OPTIONS.find((option) => option.value === value);
+    const selectedOption = GROUP_BY_OPTIONS.find((option) => option.value === value) ?? GROUP_BY_OPTIONS[0];
 
     const handleChange = (val: string) => {
-        const option = GROUP_BY_OPTIONS.find(
-            (opt) => opt.value.toString() === val || (val === "undefined" && opt.value === 1)
-        );
+        const option = GROUP_BY_OPTIONS.find((opt) => opt.value.toString() === val);
         onChange(option?.value ?? 1);
     };
 
     return (
         <div className="flex items-center gap-1">
             <span className="text-muted-foreground text-sm">Group by</span>
-            <Select value={value.toString()} onValueChange={handleChange} disabled={disabled}>
+            <Select value={value?.toString() ?? "1"} onValueChange={handleChange} disabled={disabled}>
                 <SelectTrigger className="border-border min-w-[120px] gap-2 bg-white px-3 py-1.5 text-sm dark:bg-transparent">
                     <BarChart className="text-muted-foreground size-4" />
                     <SelectValue placeholder={selectedOption?.label ?? "Daily"} />
