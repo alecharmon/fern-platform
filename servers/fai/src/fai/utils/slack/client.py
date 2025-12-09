@@ -1,25 +1,51 @@
+import hashlib
+from datetime import UTC, datetime
 from typing import Any
 
 from slack_sdk.errors import SlackApiError
 from slack_sdk.web.async_client import AsyncWebClient
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
+from fai.db import async_session_maker
+from fai.models.db.slack_outbound_message_cache_db import SlackOutboundMessageCacheDb
 from fai.settings import LOGGER
 
 
-async def send_slack_message(channel: str, text: str, bot_token: str, thread_ts: str | None = None) -> bool:
+async def send_slack_message(
+    channel: str, text: str, bot_token: str, thread_ts: str | None = None, message_key: str | None = None
+) -> bool:
     try:
-        client = AsyncWebClient(token=bot_token)
+        if message_key is None:
+            content_hash = hashlib.sha256(f"{channel}:{text}:{thread_ts}".encode()).hexdigest()[:16]
+            message_key = f"auto:{content_hash}"
 
+        async with async_session_maker() as db_session:
+            result = await db_session.execute(
+                select(SlackOutboundMessageCacheDb).where(SlackOutboundMessageCacheDb.message_key == message_key)
+            )
+            existing = result.scalar_one_or_none()
+
+            if existing:
+                LOGGER.info(f"Message with key {message_key} already sent, skipping duplicate")
+                return True
+
+            cache_entry = SlackOutboundMessageCacheDb(message_key=message_key, sent_at=datetime.now(UTC))
+            db_session.add(cache_entry)
+
+            try:
+                await db_session.commit()
+            except IntegrityError:
+                LOGGER.info(f"Message with key {message_key} already sent (race condition), skipping")
+                return True
+
+        client = AsyncWebClient(token=bot_token)
         response = await client.chat_postMessage(
-            channel=channel,
-            text=text,
-            thread_ts=thread_ts,
-            unfurl_links=False,
-            unfurl_media=False,
+            channel=channel, text=text, thread_ts=thread_ts, unfurl_links=False, unfurl_media=False
         )
 
         if response["ok"]:
-            LOGGER.info("Successfully sent response to Slack")
+            LOGGER.info(f"Successfully sent message to Slack (message_key={message_key})")
             return True
         else:
             LOGGER.error(f"Slack API returned not ok: {response}")
@@ -155,3 +181,24 @@ async def update_modal(view_id: str, view: dict[str, Any], bot_token: str) -> bo
     except Exception as e:
         LOGGER.error(f"Error updating modal: {e}")
         return False
+
+
+async def cleanup_slack_outbound_cache(hours: int = 24) -> None:
+    try:
+        async with async_session_maker() as db_session:
+            cutoff = datetime.now(UTC).timestamp() - (hours * 3600)
+            cutoff_datetime = datetime.fromtimestamp(cutoff, UTC)
+
+            result = await db_session.execute(
+                select(SlackOutboundMessageCacheDb).where(SlackOutboundMessageCacheDb.sent_at < cutoff_datetime)
+            )
+            old_entries = result.scalars().all()
+
+            for entry in old_entries:
+                await db_session.delete(entry)
+
+            await db_session.commit()
+            LOGGER.info(f"Cleaned up {len(old_entries)} old Slack outbound message cache entries")
+
+    except Exception as e:
+        LOGGER.error(f"Error cleaning up Slack outbound message cache: {e}")

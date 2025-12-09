@@ -16,6 +16,7 @@ from fai.settings import (
     VARIABLES,
 )
 from fai.utils.scribe.devin_client import get_devin_session_status
+from fai.utils.slack.client import send_slack_message
 from fai.utils.slack.postprocessing import slackify_markdown
 
 
@@ -102,20 +103,18 @@ async def poll_devin_session(
                 if message.get("type") == "devin_message":
                     message_text = message.get("message", "")
                     message_event_id = message.get("event_id")
-                    if message_text:
+                    if message_text and message_event_id:
                         try:
                             clean_text, attachment_urls = parse_attachments(message_text)
 
                             if clean_text:
-                                await client.chat_postMessage(
+                                message_key = f"scribe:{session_id}:{message_event_id}"
+                                await send_slack_message(
                                     channel=slack_channel,
                                     text=slackify_markdown(clean_text),
+                                    bot_token=bot_token,
                                     thread_ts=slack_thread_ts,
-                                    unfurl_links=False,
-                                    unfurl_media=False,
-                                )
-                                LOGGER.info(
-                                    f"[SCRIBE] Posted Devin message to Slack thread (event_id={message_event_id})"
+                                    message_key=message_key,
                                 )
 
                             for attachment_url in attachment_urls:
