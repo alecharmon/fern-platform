@@ -144,6 +144,7 @@ class TestVercelUIMessageStreamProtocol:
         assert headers["Cache-Control"] == "no-cache"
         assert headers["Connection"] == "keep-alive"
         assert headers["X-Accel-Buffering"] == "no"
+        assert headers["x-vercel-ai-ui-message-stream"] == "v1"
 
     @pytest.mark.asyncio
     async def test_no_text_deltas(self) -> None:

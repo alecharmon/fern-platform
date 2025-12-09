@@ -69,4 +69,5 @@ class VercelUIMessageStreamProtocol(StreamProtocol):
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
+            "x-vercel-ai-ui-message-stream": "v1",
         }
