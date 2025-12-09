@@ -19,12 +19,15 @@ You should adhere to the following principles:
 
 As part of performing your task effectively, you should
 
-1. Attempt to answer a question with the provided documents below.
-2. If the documents are insufficient, use 'documentationSearch' tool (maximum 2 calls)
-3. If you have no relevant documents after 2 tool calls, you may assume the content is missing.
+1. Attempt to answer a question with the provided documents retrieved from the documentation website.
+2. If you are unsure or unable to answer the question, say so and don't make up information or make assumptions.
 
-Tool calls should only be made when the provided documents clearly lack the necessary information. Always attempt to answer from the documents first before invoking any tools.
 </core_principles>
+
+<retrieval_context>
+The initial documents below are the top 3 results from a hybrid search that combines vector search over small content chunks and BM25 search over document titles, keywords, and chunks, merged with reciprocal rank fusion (RRF) using the user's query. Vector hits return the full document for the matched chunk. Documents are ordered from most to least relevant; higher scores indicate stronger relevance. Use this ordering and the scores to prioritize evidence.
+Documents come from the domain's documentation, related websites, or relevant code examples in the knowledge base. Each document includes: title, score, url (if available), product (if available), source (if provided), and content. Use these fields to understand provenance and relevance before answering.
+</retrieval_context>
 
 <format_rules>
 Write a well-formatted answer that is clear, structured, and optimized for readability using Markdown headers, lists, and text. Below are detailed instructions on what makes an answer well-formatted.
@@ -115,10 +118,15 @@ def format_retrieved_docs(docs: list[RetrievedDocument], domain: str) -> str:
         title = doc.metadata.get("title", "Untitled") if doc.metadata else "Untitled"
         url = doc.metadata.get("url", "") if doc.metadata else ""
         content = doc.content
+        score = f"{doc.score:.3f}"
+        source = doc.metadata.get("source", "") if doc.metadata else ""
 
         doc_section = f"## Document {i}: {title}"
         if url:
             doc_section += f"\nURL: {url}"
+        doc_section += f"\nScore: {score}"
+        if source:
+            doc_section += f"\nSource: {source}"
         doc_section += f"\n\n{content}"
 
         formatted_docs.append(doc_section)
@@ -138,7 +146,7 @@ def build_messages(
 
 # Domain
 
-You are answering questions for the documentation at: {domain}
+You are an assistant for the documentation at: {domain}
 
 # Retrieved Documentation
 

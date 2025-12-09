@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import signal
 import time
 from collections.abc import AsyncIterator
@@ -48,6 +49,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         shutdown_event.set()
         if active_streams:
             logger.info(f"Waiting for {len(active_streams)} active streams to complete")
+        else:
+            logger.info("No active streams, shutting down")
+            loop.remove_signal_handler(sig)
+            loop.call_soon(os.kill, os.getpid(), sig)
 
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(sig, partial(graceful_shutdown, sig))

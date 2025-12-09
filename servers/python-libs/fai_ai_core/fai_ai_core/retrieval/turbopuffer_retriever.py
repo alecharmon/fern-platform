@@ -199,13 +199,13 @@ class TurbopufferRetriever(RAGRetriever):
         multiquery_response = await tpuf_ns.multi_query(
             queries=[
                 {
-                    "top_k": query.top_k * 2,
+                    "top_k": 50,
                     "include_attributes": TURBOPUFFER_INCLUDE_ATTRIBUTES,
                     "rank_by": ("vector", "ANN", embedding),
                     "filters": filters,
                 },
                 {
-                    "top_k": query.top_k * 2,
+                    "top_k": 50,
                     "include_attributes": TURBOPUFFER_INCLUDE_ATTRIBUTES,
                     "rank_by": (
                         "Sum",

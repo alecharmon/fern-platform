@@ -23,7 +23,6 @@ from fai_ai_core.retrieval.interface import (
     RetrievalQuery,
     RetrievalStrategy,
 )
-from fai_ai_core.tools.documentation_search import create_documentation_search_tool
 from fastapi import (
     Header,
     HTTPException,
@@ -60,7 +59,7 @@ from ..streaming.protocols.vercel_ui import VercelUIMessageStreamProtocol
 
 logger = logging.getLogger(__name__)
 
-TOP_K = 3
+TOP_K = 6
 
 
 @app.post("/chat")
@@ -242,15 +241,6 @@ async def chat(
             if url:
                 initial_urls.add(url)
 
-    documentation_search_tool = create_documentation_search_tool(
-        retriever=retriever,
-        domain=domain,
-        filters=query_filters,
-        top_k=TOP_K,
-        max_calls=2,
-        already_retrieved_urls=initial_urls,
-    )
-
     protocol = VercelUIMessageStreamProtocol()
 
     async def generate_stream() -> AsyncGenerator[str, None]:
@@ -262,7 +252,7 @@ async def chat(
 
         async def track_metrics_and_stream() -> AsyncGenerator[StreamEvent, None]:
             nonlocal first_token_ms, input_tokens, output_tokens, accumulated_text
-            async for event in provider.generate_stream(llm_messages, tools=[documentation_search_tool]):
+            async for event in provider.generate_stream(llm_messages):
                 if event.type == StreamEventType.TEXT_DELTA:
                     if first_token_ms is None:
                         first_token_ms = time.time() * 1000
