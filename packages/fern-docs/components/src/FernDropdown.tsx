@@ -368,8 +368,8 @@ function FernDropdownItemValue({
                     )}
                 </span>
 
-                <DropdownMenu.ItemIndicator asChild>
-                    <Check />
+                <DropdownMenu.ItemIndicator asChild className="fern-dropdown-item-indicator">
+                    <Check className="fern-dropdown-checkmark" />
                 </DropdownMenu.ItemIndicator>
             </div>
         );
@@ -427,8 +427,8 @@ function FernDropdownItemAuth({ option }: { option: FernDropdown.AuthOption }) {
             <div className="flex cursor-pointer items-center justify-between gap-2 px-2 py-1">
                 <div className="text-sm">{option.key}</div>
 
-                <DropdownMenu.ItemIndicator asChild>
-                    <Check />
+                <DropdownMenu.ItemIndicator asChild className="fern-dropdown-item-indicator">
+                    <Check className="fern-dropdown-checkmark" />
                 </DropdownMenu.ItemIndicator>
             </div>
         </DropdownMenu.RadioItem>
@@ -470,7 +470,7 @@ function FernDropdownItemMultiSelect({
                         {option.rightElement && <span>{option.rightElement}</span>}
                     </span>
 
-                    {isSelected && <Check className="size-icon" />}
+                    {isSelected && <Check className="fern-dropdown-checkmark size-icon" />}
                 </div>
             </div>
         );

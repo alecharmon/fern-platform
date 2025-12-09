@@ -44,17 +44,18 @@ export function PageFilters({
                     type: "value",
                     value: filter,
                     label: filter,
-                    className: "hover:text-(color:--accent-contrast) hover:bg-(color:--accent) w-[12rem]",
+                    className:
+                        "fern-filter-dropdown-item hover:text-(color:--accent-contrast) hover:bg-(color:--accent) w-[12rem]",
                     labelClassName: "truncate w-full"
                 }))}
                 value={selectedFilters.length > 0 ? selectedFilters : ["All"]}
                 onValueChange={handleFilterClick}
                 lang={lang}
             >
-                <FernButton variant="outlined">
-                    <div className="flex w-[10rem] items-center justify-between gap-2 truncate">
-                        {filterText(selectedFilters, lang)}
-                        <ChevronDown className="size-icon" />
+                <FernButton variant="outlined" className="fern-filter-dropdown-button">
+                    <div className="fern-filter-dropdown-button-content flex w-[10rem] items-center justify-between gap-2 truncate">
+                        <span className="fern-filter-dropdown-button-text">{filterText(selectedFilters, lang)}</span>
+                        <ChevronDown className="fern-filter-dropdown-button-icon size-icon" />
                     </div>
                 </FernButton>
             </FernDropdown>
@@ -63,23 +64,23 @@ export function PageFilters({
 
     return (
         <>
-            {filters.map((filter) => (
-                <FernTooltip key={filter} content={filter}>
-                    <Badge
-                        key={filter}
-                        variant={
-                            selectedFilters.includes(filter) || (filter === "All" && selectedFilters.length === 0)
-                                ? "outlined"
-                                : "outlined-subtle"
-                        }
-                        interactive
-                        onClick={() => handleFilterClick(filter)}
-                        className="fern-filter-badge"
-                    >
-                        {filter}
-                    </Badge>
-                </FernTooltip>
-            ))}
+            {filters.map((filter) => {
+                const isSelected =
+                    selectedFilters.includes(filter) || (filter === "All" && selectedFilters.length === 0);
+                return (
+                    <FernTooltip key={filter} content={filter}>
+                        <Badge
+                            key={filter}
+                            variant={isSelected ? "outlined" : "outlined-subtle"}
+                            interactive
+                            onClick={() => handleFilterClick(filter)}
+                            className={`fern-filter-badge ${isSelected ? "fern-filter-badge-selected" : "fern-filter-badge-unselected"}`}
+                        >
+                            {filter}
+                        </Badge>
+                    </FernTooltip>
+                );
+            })}
         </>
     );
 }
