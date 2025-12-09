@@ -115,15 +115,6 @@ export function PageHeader({
                 </div>
             )}
 
-            {filters && filters.length > 0 && (
-                <>
-                    <hr className="my-4" />
-                    <div className="flex flex-row gap-2 overflow-x-auto">
-                        <PageFilters filters={filters} lang={lang} />
-                    </div>
-                </>
-            )}
-
             {pageActionOptions && pageActionsStyle === "toolbar" && (
                 <>
                     <PageActions
@@ -133,6 +124,15 @@ export function PageHeader({
                         style={pageActionsStyle}
                     />
                     <Separator />
+                </>
+            )}
+
+            {filters && filters.length > 0 && (
+                <>
+                    <hr className="my-4" />
+                    <div className="flex flex-row gap-2 overflow-x-auto">
+                        <PageFilters filters={filters} lang={lang} />
+                    </div>
                 </>
             )}
 

@@ -51,4 +51,6 @@ export interface Frontmatter
     "canonical-url": string | undefined;
     /** Tags for the page. This is used to group and filter changelog pages. */
     tags: FernRegistry.docs.latest.StringOrStringList | undefined;
+    /** The date when the page was last updated. If set, displays "Last updated at <date>" in the page header. */
+    "last-updated": string | undefined;
 }

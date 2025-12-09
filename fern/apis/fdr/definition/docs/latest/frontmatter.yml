@@ -78,6 +78,9 @@ types:
       tags:
         type: optional<seo.StringOrStringList>
         docs: Tags for the page. This is used to group and filter changelog pages.
+      last-updated:
+        type: optional<string>
+        docs: The date when the page was last updated. If set, displays "Last updated at <date>" in the page header.
   
   Logo:
     discriminated: false

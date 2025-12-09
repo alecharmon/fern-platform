@@ -10,7 +10,8 @@ export function FooterLayout({
     editThisPageUrl,
     bottomNavigation,
     pathname,
-    className
+    className,
+    lastUpdated
 }: {
     lang: string;
     hideFeedback?: boolean;
@@ -19,6 +20,7 @@ export function FooterLayout({
     bottomNavigation?: React.ReactNode;
     pathname?: string;
     className?: string;
+    lastUpdated?: string;
 }) {
     return (
         <AbstractFooterLayout
@@ -29,6 +31,7 @@ export function FooterLayout({
             className={className}
             feedback={<div>{!hideFeedback && <Feedback pathname={pathname} lang={lang} />}</div>}
             builtWithFern={<BuiltWithFern className="mx-auto mt-12 w-fit" lang={lang} />}
+            lastUpdated={lastUpdated}
         />
     );
 }
