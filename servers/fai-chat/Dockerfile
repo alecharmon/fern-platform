@@ -9,6 +9,7 @@ COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
+RUN pip3 install --upgrade pip==25.3
 RUN pip3 install poetry
 
 # Set working directory (Lambda convention within repo layout)
