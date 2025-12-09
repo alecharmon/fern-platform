@@ -140,28 +140,35 @@ export function CreateRedirectModal({
     }, [isPopoverOpen]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (filteredSuggestions.length > 0) {
-            switch (e.key) {
-                case "ArrowDown":
+        switch (e.key) {
+            case "ArrowDown":
+                if (filteredSuggestions.length > 0) {
                     e.preventDefault();
                     setHighlightedIndex((prev) => Math.min(prev + 1, filteredSuggestions.length - 1));
-                    return;
-                case "ArrowUp":
+                }
+                return;
+            case "ArrowUp":
+                if (filteredSuggestions.length > 0) {
                     e.preventDefault();
                     setHighlightedIndex((prev) => Math.max(prev - 1, 0));
-                    return;
-                case "Enter":
-                    e.preventDefault();
-                    if (filteredSuggestions[highlightedIndex]) {
-                        setDestinationPath(filteredSuggestions[highlightedIndex]);
-                        setIsPopoverOpen(false);
-                    }
-                    return;
-                case "Escape":
-                    e.preventDefault();
+                }
+                return;
+            case "Enter":
+                e.preventDefault();
+                // If there are suggestions and one is highlighted, use it
+                if (filteredSuggestions.length > 0 && filteredSuggestions[highlightedIndex]) {
+                    setDestinationPath(filteredSuggestions[highlightedIndex]);
                     setIsPopoverOpen(false);
-                    return;
-            }
+                } else if (searchTerm.trim()) {
+                    // Otherwise, use the typed value as a custom path
+                    setDestinationPath(searchTerm.trim());
+                    setIsPopoverOpen(false);
+                }
+                return;
+            case "Escape":
+                e.preventDefault();
+                setIsPopoverOpen(false);
+                return;
         }
     };
 
@@ -238,29 +245,64 @@ export function CreateRedirectModal({
                                             className="z-50 max-h-[300px] overflow-y-auto py-1"
                                             style={{ overscrollBehavior: "contain" }}
                                         >
-                                            {filteredSuggestions.length === 0 ? (
+                                            {filteredSuggestions.length === 0 && !searchTerm.trim() ? (
                                                 <div className="px-3 py-2 text-center text-sm text-gray-500">
                                                     No paths found
                                                 </div>
-                                            ) : (
-                                                filteredSuggestions.map((path, index) => (
+                                            ) : filteredSuggestions.length === 0 && searchTerm.trim() ? (
+                                                <>
+                                                    <div className="px-3 py-2 text-center text-sm text-gray-500">
+                                                        No matching paths found
+                                                    </div>
                                                     <div
-                                                        key={path}
                                                         className={cn(
-                                                            "cursor-pointer px-3 py-2 text-sm",
-                                                            index === highlightedIndex
-                                                                ? "bg-gray-100 dark:bg-gray-700"
-                                                                : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                                                            "cursor-pointer border-t border-gray-200 px-3 py-2 text-sm font-medium dark:border-gray-700",
+                                                            "bg-gray-100 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-800"
                                                         )}
                                                         onClick={() => {
-                                                            setDestinationPath(path);
+                                                            setDestinationPath(searchTerm.trim());
                                                             setIsPopoverOpen(false);
                                                         }}
-                                                        onMouseEnter={() => setHighlightedIndex(index)}
                                                     >
-                                                        {path}
+                                                        Use path: {searchTerm.trim()}
                                                     </div>
-                                                ))
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {filteredSuggestions.map((path, index) => (
+                                                        <div
+                                                            key={path}
+                                                            className={cn(
+                                                                "cursor-pointer px-3 py-2 text-sm",
+                                                                index === highlightedIndex
+                                                                    ? "bg-gray-100 dark:bg-gray-700"
+                                                                    : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                                                            )}
+                                                            onClick={() => {
+                                                                setDestinationPath(path);
+                                                                setIsPopoverOpen(false);
+                                                            }}
+                                                            onMouseEnter={() => setHighlightedIndex(index)}
+                                                        >
+                                                            {path}
+                                                        </div>
+                                                    ))}
+                                                    {searchTerm.trim() &&
+                                                        !filteredSuggestions.includes(searchTerm.trim()) && (
+                                                            <div
+                                                                className={cn(
+                                                                    "cursor-pointer border-t border-gray-200 px-3 py-2 text-sm font-medium dark:border-gray-700",
+                                                                    "bg-gray-100 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-800"
+                                                                )}
+                                                                onClick={() => {
+                                                                    setDestinationPath(searchTerm.trim());
+                                                                    setIsPopoverOpen(false);
+                                                                }}
+                                                            >
+                                                                Use custom path: {searchTerm.trim()}
+                                                            </div>
+                                                        )}
+                                                </>
                                             )}
                                         </div>
                                     </PopoverContent>
@@ -293,7 +335,7 @@ export function CreateRedirectModal({
                         >
                             Dismiss
                         </Button>
-                        <Button type="submit" disabled={isLoading || !destinationPath.trim() || prUrl !== null}>
+                        <Button type="submit" disabled={isLoading || !destinationPath.trim() || prUrl != null}>
                             {isLoading ? "Creating..." : prUrl ? "Redirect Created" : "Create Redirect"}
                         </Button>
                     </DialogFooter>
