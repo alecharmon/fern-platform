@@ -3,15 +3,14 @@
 import { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { HttpResponse } from "@fern-api/fdr-sdk/api-definition";
 import { t } from "@fern-docs/i18n";
+import type { ReactNode } from "react";
 import { useCallback } from "react";
-import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { TypeDefinitionAnchorPart } from "../type-definitions/TypeDefinitionContext";
 import { renderResponseTitle } from "./EndpointContentCodeSnippets";
 import { useEndpointContext } from "./EndpointContext";
 import { EndpointResponseSection } from "./EndpointResponseSection";
 import { EndpointSection } from "./EndpointSection";
-import { ResponseSummaryFallback } from "./response-summary-fallback";
 
 export interface EndpointMultipleResponseSectionProps {
     method: ApiDefinition.HttpMethod;
@@ -19,6 +18,7 @@ export interface EndpointMultipleResponseSectionProps {
     types: Record<string, ApiDefinition.TypeDefinition>;
     lang: string;
     className?: string;
+    renderedDescriptions: Record<number, ReactNode>;
 }
 
 export function EndpointMultipleResponseSection({
@@ -26,7 +26,8 @@ export function EndpointMultipleResponseSection({
     responses,
     types,
     lang,
-    className
+    className,
+    renderedDescriptions
 }: EndpointMultipleResponseSectionProps) {
     const { selectedResponse, setSelectedResponse, setSelectedExampleKey } = useEndpointContext();
 
@@ -48,14 +49,7 @@ export function EndpointMultipleResponseSection({
         <EndpointSection
             title={t(lang).apiReference.response}
             className={className}
-            description={
-                <MdxServerComponentProseSuspense
-                    size="sm"
-                    className="text-(color:--grayscale-a11)"
-                    mdx={selectedResponse.description}
-                    fallback={<ResponseSummaryFallback response={selectedResponse} types={types} lang={lang} />}
-                />
-            }
+            description={renderedDescriptions[selectedResponse.statusCode]}
             multipleResponsesProps={{
                 responses,
                 selectedResponse,

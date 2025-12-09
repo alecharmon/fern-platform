@@ -13,11 +13,13 @@ import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefin
 export function EndpointRequestSection({
     request,
     types,
-    lang
+    lang,
+    renderedFieldDescriptions
 }: {
     request: ApiDefinition.HttpRequest;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     lang: string;
+    renderedFieldDescriptions?: Record<string, ReactNode>;
 }) {
     return visitDiscriminatedUnion(request.body)._visit({
         formData: (formData) => (
@@ -29,6 +31,7 @@ export function EndpointRequestSection({
                                 <PropertyRenderer
                                     name={file.key}
                                     description={file.description}
+                                    renderedDescription={renderedFieldDescriptions?.[file.key]}
                                     typeShorthand={renderTypeShorthandFormDataField(file, lang)}
                                     availability={file.availability}
                                 />
@@ -39,6 +42,7 @@ export function EndpointRequestSection({
                                 <PropertyRenderer
                                     name={files.key}
                                     description={files.description}
+                                    renderedDescription={renderedFieldDescriptions?.[files.key]}
                                     typeShorthand={renderTypeShorthandFormDataField(files, lang)}
                                     availability={files.availability}
                                 />
@@ -54,6 +58,7 @@ export function EndpointRequestSection({
                                             ...ApiDefinition.unwrapReference(property.valueShape, types).descriptions
                                         ])[0]
                                     }
+                                    renderedDescription={renderedFieldDescriptions?.[property.key]}
                                     shape={property.valueShape}
                                     availability={property.availability}
                                     types={types}

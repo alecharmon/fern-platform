@@ -43,6 +43,7 @@ export const ObjectProperty = React.memo(function ObjectProperty({
 export const PropertyWithShape = React.memo(function PropertyWithShape({
     name,
     description,
+    renderedDescription,
     shape,
     availability,
     types,
@@ -53,7 +54,8 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
 }: {
     icon?: React.ReactNode;
     name?: string;
-    description: string | undefined;
+    description?: string | undefined;
+    renderedDescription?: React.ReactNode;
     availability: ApiDefinition.Availability | null | undefined;
     shape: ApiDefinition.TypeShape;
     types: Record<string, ApiDefinition.TypeDefinition>;
@@ -66,6 +68,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
         <PropertyRenderer
             name={name}
             description={description}
+            renderedDescription={renderedDescription}
             typeShorthand={<TypeShorthand shape={shape} lang={lang} />}
             availability={availability}
             badge={badge}
@@ -86,13 +89,15 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
     name,
     availability,
     description,
+    renderedDescription,
     typeShorthand,
     children,
     badge
 }: {
     icon?: React.ReactNode;
     name?: string;
-    description: string | undefined;
+    description?: string | undefined;
+    renderedDescription?: React.ReactNode;
     typeShorthand: React.ReactNode;
     availability: ApiDefinition.Availability | null | undefined;
     children?: React.ReactNode;
@@ -108,7 +113,9 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
                 {availability != null && <AvailabilityBadge availability={availability} size="sm" rounded />}
             </TypeDefinitionAnchor>
 
-            <MdxServerComponentProseSuspense mdx={description} size="sm" className="text-(color:--grayscale-a11)" />
+            {renderedDescription ?? (
+                <MdxServerComponentProseSuspense mdx={description} size="sm" className="text-(color:--grayscale-a11)" />
+            )}
 
             <TypeDefinitionCollapsible>{children}</TypeDefinitionCollapsible>
         </PropertyContainer>

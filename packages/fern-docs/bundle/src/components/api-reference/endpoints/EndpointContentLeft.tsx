@@ -1,8 +1,11 @@
 import "server-only";
 
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
-
+import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { t } from "@fern-docs/i18n";
+import { compact } from "es-toolkit/array";
+import type { ReactNode } from "react";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
@@ -16,6 +19,63 @@ import { createEndpointRequestDescriptionFallback, EndpointRequestSection } from
 import { EndpointResponseSection } from "./EndpointResponseSection";
 import { EndpointSection } from "./EndpointSection";
 import { ResponseSummaryFallback } from "./response-summary-fallback";
+
+function renderFormDataFieldDescriptions(
+    request: ApiDefinition.HttpRequest,
+    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>
+): Record<string, ReactNode> {
+    return visitDiscriminatedUnion(request.body)._visit<Record<string, ReactNode>>({
+        formData: (formData) => {
+            const result: Record<string, ReactNode> = {};
+            for (const field of formData.fields) {
+                visitDiscriminatedUnion(field, "type")._visit({
+                    file: (file) => {
+                        if (file.description) {
+                            result[file.key] = (
+                                <MdxServerComponentProseSuspense
+                                    mdx={file.description}
+                                    size="sm"
+                                    className="text-(color:--grayscale-a11)"
+                                />
+                            );
+                        }
+                    },
+                    files: (files) => {
+                        if (files.description) {
+                            result[files.key] = (
+                                <MdxServerComponentProseSuspense
+                                    mdx={files.description}
+                                    size="sm"
+                                    className="text-(color:--grayscale-a11)"
+                                />
+                            );
+                        }
+                    },
+                    property: (property) => {
+                        const description = compact([
+                            property.description,
+                            ...ApiDefinition.unwrapReference(property.valueShape, types).descriptions
+                        ])[0];
+                        if (description) {
+                            result[property.key] = (
+                                <MdxServerComponentProseSuspense
+                                    mdx={description}
+                                    size="sm"
+                                    className="text-(color:--grayscale-a11)"
+                                />
+                            );
+                        }
+                    },
+                    _other: () => {}
+                });
+            }
+            return result;
+        },
+        bytes: () => ({}),
+        object: () => ({}),
+        alias: () => ({})
+    });
+}
 
 export interface HoveringProps {
     isHovering: boolean;
@@ -99,6 +159,24 @@ export async function EndpointContentLeft({
                             types={types}
                             lang={lang}
                             className="fern-endpoint-section-request-body"
+                            renderedDescriptions={Object.fromEntries(
+                                endpoint.requests.map((request) => [
+                                    request.contentType ?? "default",
+                                    <MdxServerComponentProseSuspense
+                                        key={request.contentType ?? "default"}
+                                        size="sm"
+                                        className="text-(color:--grayscale-a11)"
+                                        mdx={request.description}
+                                        fallback={createEndpointRequestDescriptionFallback(request, types, lang)}
+                                    />
+                                ])
+                            )}
+                            renderedFieldDescriptions={Object.fromEntries(
+                                endpoint.requests.map((request) => [
+                                    request.contentType ?? "default",
+                                    renderFormDataFieldDescriptions(request, types)
+                                ])
+                            )}
                         />
                     ) : (
                         <EndpointSection
@@ -134,6 +212,24 @@ export async function EndpointContentLeft({
                                 types={types}
                                 lang={lang}
                                 className="fern-endpoint-section-response-body"
+                                renderedDescriptions={Object.fromEntries(
+                                    endpoint.responses.map((response) => [
+                                        response.statusCode,
+                                        <MdxServerComponentProseSuspense
+                                            key={response.statusCode}
+                                            size="sm"
+                                            className="text-(color:--grayscale-a11)"
+                                            mdx={response.description}
+                                            fallback={
+                                                <ResponseSummaryFallback
+                                                    response={response}
+                                                    types={types}
+                                                    lang={lang}
+                                                />
+                                            }
+                                        />
+                                    ])
+                                )}
                             />
                         ) : (
                             <EndpointSection

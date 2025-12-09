@@ -3,12 +3,12 @@
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
 import { t } from "@fern-docs/i18n";
+import type { ReactNode } from "react";
 import { useCallback } from "react";
-import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { TypeDefinitionAnchorPart } from "../type-definitions/TypeDefinitionContext";
 import { useEndpointContext } from "./EndpointContext";
-import { createEndpointRequestDescriptionFallback, EndpointRequestSection } from "./EndpointRequestSection";
+import { EndpointRequestSection } from "./EndpointRequestSection";
 import { EndpointSection } from "./EndpointSection";
 
 export interface EndpointMultipleRequestSectionProps {
@@ -16,13 +16,17 @@ export interface EndpointMultipleRequestSectionProps {
     types: Record<string, ApiDefinition.TypeDefinition>;
     lang: string;
     className?: string;
+    renderedDescriptions: Record<string, ReactNode>;
+    renderedFieldDescriptions: Record<string, Record<string, ReactNode>>;
 }
 
 export function EndpointMultipleRequestSection({
     requests,
     types,
     lang,
-    className
+    className,
+    renderedDescriptions,
+    renderedFieldDescriptions
 }: EndpointMultipleRequestSectionProps) {
     const { selectedRequest, setSelectedRequest } = useEndpointContext();
 
@@ -42,18 +46,13 @@ export function EndpointMultipleRequestSection({
         return null;
     }
 
+    const descriptionKey = selectedRequest.contentType ?? "default";
+
     return (
         <EndpointSection
             title={t(lang).apiReference.request}
             className={className}
-            description={
-                <MdxServerComponentProseSuspense
-                    size="sm"
-                    className="text-(color:--grayscale-a11)"
-                    mdx={selectedRequest.description}
-                    fallback={createEndpointRequestDescriptionFallback(selectedRequest, types, lang)}
-                />
-            }
+            description={renderedDescriptions[descriptionKey]}
             multipleRequestsProps={{
                 requests,
                 selectedRequest,
@@ -62,7 +61,12 @@ export function EndpointMultipleRequestSection({
             }}
         >
             <TypeDefinitionAnchorPart part="body">
-                <EndpointRequestSection request={selectedRequest} types={types} lang={lang} />
+                <EndpointRequestSection
+                    request={selectedRequest}
+                    types={types}
+                    lang={lang}
+                    renderedFieldDescriptions={renderedFieldDescriptions[descriptionKey]}
+                />
             </TypeDefinitionAnchorPart>
         </EndpointSection>
     );
