@@ -1,0 +1,24 @@
+# Allow FAI and fai_ai_core files for Docker builds
+# This overrides the root .dockerignore when building from servers/
+
+# Ignore node_modules and build artifacts
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/build
+**/.cache
+**/*.tsbuildinfo
+
+# Ignore test files and caches
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+
+# Ignore git
+.git
+.gitignore
+
+# Keep .env files (they are needed for FAI)
+# Note: .env is NOT ignored here, unlike the root .dockerignore

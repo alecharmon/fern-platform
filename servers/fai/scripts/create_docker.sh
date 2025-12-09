@@ -5,9 +5,11 @@ set -e
 TAG="$1"
 DOCKER_NAME=fai:"$TAG"
 
-PACKAGE_DIR="$DOCKER_DIR/.."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FAI_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+SERVERS_DIR="$(cd "$FAI_DIR/.." && pwd)"
 
-docker build -f Dockerfile -t "$DOCKER_NAME" .
+docker build -f "$FAI_DIR/Dockerfile" -t "$DOCKER_NAME" "$SERVERS_DIR"
 
 docker save "$DOCKER_NAME" -o "$DOCKER_NAME.tar"
 

@@ -46,9 +46,9 @@ jobs:
       - name: Deploy to Dev
         run: |
           git_version="$(scripts/fai-discord-version.sh)"
-          cd servers/fai
-          docker build -f Dockerfile.discord -t fai:"${git_version}" .
+          cd servers
+          docker build -f fai/Dockerfile.discord -t fai:"${git_version}" .
           docker save fai:"${git_version}" -o fai:"${git_version}".tar
-          cd deploy
+          cd fai/deploy
           pnpm install
           VERSION="${git_version}" npm run deploy:discord-dev
