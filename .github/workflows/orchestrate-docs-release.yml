@@ -2,12 +2,11 @@ name: Notify Docs Repo
 on:
   release:
     types: [created]
-    tags:
-      - "docs@*"
 
 jobs:
   notify-docs:
     runs-on: ubuntu-latest
+    if: startsWith(github.event.release.tag_name, 'docs@')
     steps:
       - name: Trigger docs repo workflow
         run: |
