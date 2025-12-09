@@ -14,14 +14,12 @@ interface ColorPickerProps {
 
 export default function ColorPicker({ label, color, onColorChange }: ColorPickerProps) {
     const [isPickerOpen, setIsPickerOpen] = useState(false);
-    const [currentColor, setCurrentColor] = useState(color || "#1E1F24");
+    const [currentColor, setCurrentColor] = useState<string | null>(color);
     const pickerRef = useRef<HTMLDivElement>(null);
 
     // Sync internal state with prop changes
     useEffect(() => {
-        if (color) {
-            setCurrentColor(color);
-        }
+        setCurrentColor(color);
     }, [color]);
 
     // Close picker when clicking outside
@@ -61,7 +59,10 @@ export default function ColorPicker({ label, color, onColorChange }: ColorPicker
                     )}
                     onClick={() => setIsPickerOpen(!isPickerOpen)}
                 >
-                    <div className="h-full w-full rounded-lg" style={{ backgroundColor: currentColor }} />
+                    <div
+                        className="h-full w-full rounded-lg"
+                        style={{ backgroundColor: currentColor ?? "transparent" }}
+                    />
                 </div>
 
                 {/* Color value display */}
@@ -70,9 +71,9 @@ export default function ColorPicker({ label, color, onColorChange }: ColorPicker
                         className="text-gray-1200 cursor-pointer font-mono text-sm"
                         onClick={() => setIsPickerOpen(!isPickerOpen)}
                     >
-                        {currentColor.toUpperCase()}
+                        {currentColor ? currentColor.toUpperCase() : "Color not set"}
                     </div>
-                    {!color && (
+                    {!currentColor && (
                         <p
                             className="text-gray-1000 cursor-pointer text-xs font-light"
                             onClick={() => setIsPickerOpen(!isPickerOpen)}
@@ -85,7 +86,7 @@ export default function ColorPicker({ label, color, onColorChange }: ColorPicker
                 {/* Color picker popover */}
                 {isPickerOpen && (
                     <div ref={pickerRef} className="absolute bottom-24 left-0 z-50" style={{ zIndex: 1000 }}>
-                        <ChromePicker color={currentColor} onChange={handleColorChange} disableAlpha />
+                        <ChromePicker color={currentColor ?? "#000000"} onChange={handleColorChange} disableAlpha />
                     </div>
                 )}
             </div>

@@ -17,20 +17,29 @@ interface UploadedSpec {
 interface OpenAPISpecsProps {
     uploadedSpecs: UploadedSpec[];
     setUploadedSpecs: (specs: UploadedSpec[]) => void;
+    defaultSpec?: UploadedSpec;
 }
 
-export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs }: OpenAPISpecsProps) {
+const FALLBACK_DEFAULT_SPEC: UploadedSpec = {
+    fileName: "Sample OpenAPI (Petstore).json",
+    assetUrl: "https://petstore3.swagger.io/api/v3/openapi.json"
+};
+
+export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs, defaultSpec }: OpenAPISpecsProps) {
     const orgName = useOrgNameFromPathname();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const effectiveDefaultSpec = defaultSpec ?? FALLBACK_DEFAULT_SPEC;
+    const hasDefaultSpec = uploadedSpecs.some((spec) => spec.assetUrl === effectiveDefaultSpec.assetUrl);
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+    const handleUpload = async (file: File | undefined) => {
         if (!file) {
             return;
         }
 
         setIsUploading(true);
+        setError(null);
 
         try {
             const { assetUrl } = await uploadOnboardingAsset(file, orgName);
@@ -45,7 +54,7 @@ export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs }: OpenAP
             ]);
         } catch (error) {
             console.error("Error uploading file:", error);
-            // TODO: Show error message to user
+            setError("We couldn't upload that file. Please try again.");
         } finally {
             setIsUploading(false);
             // Reset the file input
@@ -55,9 +64,31 @@ export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs }: OpenAP
         }
     };
 
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        await handleUpload(file);
+    };
+
+    const handleDrop = async (e: React.DragEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        if (isUploading) {
+            return;
+        }
+
+        const file = e.dataTransfer.files?.[0];
+        await handleUpload(file);
+    };
+
+    const handleUseDefaultSpec = () => {
+        if (hasDefaultSpec) {
+            return;
+        }
+        setUploadedSpecs([...uploadedSpecs, effectiveDefaultSpec]);
+    };
+
     return (
         <div className="flex flex-col gap-2">
-            <Label className="text-gray-1200 dark:text-gray-1100 text-sm font-normal">Your API specs (optional)</Label>
+            <Label className="text-gray-1200 dark:text-gray-1100 text-sm font-normal">Your API specs</Label>
 
             {/* Upload area */}
             <input
@@ -71,6 +102,8 @@ export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs }: OpenAP
             <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
                 className="group cursor-pointer rounded-lg border border-dashed border-gray-500 p-6 text-center transition-colors hover:border-gray-700 hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <div className="flex flex-col items-center gap-2">
@@ -83,6 +116,21 @@ export default function OpenAPISpecs({ uploadedSpecs, setUploadedSpecs }: OpenAP
                     </div>
                 </div>
             </button>
+
+            <div className="flex items-center justify-between text-xs text-gray-1100">
+                <span>Don&apos;t have one yet?</span>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[11px]"
+                    onClick={handleUseDefaultSpec}
+                    disabled={isUploading || hasDefaultSpec}
+                >
+                    {hasDefaultSpec ? "Sample added" : "Use sample OpenAPI spec"}
+                </Button>
+            </div>
+
+            {error && <div className="text-xs text-red-600">{error}</div>}
 
             {/* Uploaded specs list */}
             {uploadedSpecs.length > 0 && (

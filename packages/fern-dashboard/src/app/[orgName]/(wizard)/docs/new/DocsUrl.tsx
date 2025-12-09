@@ -31,6 +31,29 @@ export default function DocsUrl({ value, onChange }: DocsUrlProps) {
             return;
         }
 
+        const validateSubdomain = (val: string): string | null => {
+            if (val.length > 63) {
+                return "Subdomain must be 63 characters or fewer.";
+            }
+            if (!/^[a-z0-9-_]+$/.test(val)) {
+                return "Use lowercase letters, numbers, underscores,and hyphens only.";
+            }
+            if (/--/.test(val)) {
+                return "Consecutive hyphens are not allowed.";
+            }
+            if (/^[-_]|[-_]$/.test(val)) {
+                return "Cannot start or end with a hyphen or underscore.";
+            }
+            return null;
+        };
+
+        const validationError = validateSubdomain(localValue);
+        if (validationError) {
+            setErrorMessage(validationError);
+            onChange(localValue, false);
+            return;
+        }
+
         // Debounce the API call
         const timeoutId = setTimeout(async () => {
             setIsChecking(true);
@@ -46,7 +69,7 @@ export default function DocsUrl({ value, onChange }: DocsUrlProps) {
                     if (!result.available) {
                         setErrorMessage("This URL has already been claimed; try again.");
                     }
-                    onChange(localValue, true);
+                    onChange(localValue, result.available);
                 }
             } catch (error) {
                 console.error("Error checking URL availability:", error);

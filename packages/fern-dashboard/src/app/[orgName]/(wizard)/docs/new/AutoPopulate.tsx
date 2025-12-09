@@ -12,11 +12,10 @@ import { uploadOnboardingAsset } from "./api";
 import type { WizardFormData } from "./page";
 
 interface AutoPopulateProps {
-    wizardFormData: WizardFormData;
-    setWizardFormData: (data: WizardFormData) => void;
+    onApplyUpdates: (updates: Partial<WizardFormData>) => void;
 }
 
-export default function AutoPopulate({ wizardFormData, setWizardFormData }: AutoPopulateProps) {
+export default function AutoPopulate({ onApplyUpdates }: AutoPopulateProps) {
     const orgName = useOrgNameFromPathname();
     const [domain, setDomain] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -133,12 +132,8 @@ export default function AutoPopulate({ wizardFormData, setWizardFormData }: Auto
                 }
             }
 
-            // Apply all updates
             if (Object.keys(updates).length > 0) {
-                setWizardFormData({
-                    ...wizardFormData,
-                    ...updates
-                });
+                onApplyUpdates(updates);
             }
         } catch (err) {
             console.error("Error auto-populating from BrandFetch:", err);
@@ -146,7 +141,7 @@ export default function AutoPopulate({ wizardFormData, setWizardFormData }: Auto
         } finally {
             setIsLoading(false);
         }
-    }, [domain, orgName, wizardFormData, setWizardFormData, downloadImageAsFile, getIconItem]);
+    }, [domain, orgName, onApplyUpdates, downloadImageAsFile, getIconItem]);
 
     // Debounce effect - auto-fetch after user stops typing
     // biome-ignore lint/correctness/useExhaustiveDependencies: handleAutoPopulate causes infinite re-renders if included

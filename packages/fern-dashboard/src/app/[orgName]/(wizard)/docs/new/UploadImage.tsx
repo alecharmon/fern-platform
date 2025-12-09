@@ -1,7 +1,7 @@
 "use client";
 
 import { UploadCloudIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,7 @@ interface UploadImageProps {
     onImageUpload: (url: string) => void;
     size?: ImageSize;
     accept?: string;
+    defaultImageUrl?: string | null;
 }
 
 export default function UploadImage({
@@ -26,18 +27,18 @@ export default function UploadImage({
     description,
     imageUrl,
     onImageUpload,
+    defaultImageUrl = "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
     size = "large",
     accept = "image/*"
 }: UploadImageProps) {
     const orgName = useOrgNameFromPathname();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(imageUrl);
+    const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
 
-    // Sync internal state with prop changes
-    useEffect(() => {
-        setPreviewUrl(imageUrl);
-    }, [imageUrl]);
+    // If parent clears imageUrl (explicit null), ignore local preview and fall back to default.
+    const effectivePreview =
+        imageUrl === null ? (defaultImageUrl ?? null) : (imageUrl ?? localPreviewUrl ?? defaultImageUrl ?? null);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -47,17 +48,16 @@ export default function UploadImage({
 
         // Create a local preview immediately
         const localPreview = URL.createObjectURL(file);
-        setPreviewUrl(localPreview);
+        setLocalPreviewUrl(localPreview);
         setIsUploading(true);
 
         try {
             const { assetUrl } = await uploadOnboardingAsset(file, orgName);
             onImageUpload(assetUrl);
-            setPreviewUrl(assetUrl);
+            setLocalPreviewUrl(assetUrl);
         } catch (error) {
             console.error("Error uploading image:", error);
-            // Revert preview on error
-            setPreviewUrl(imageUrl);
+            setLocalPreviewUrl(null);
             // TODO: Show error message to user
         } finally {
             setIsUploading(false);
@@ -89,9 +89,9 @@ export default function UploadImage({
                     )}
                     onClick={() => fileInputRef.current?.click()}
                 >
-                    {previewUrl ? (
+                    {effectivePreview ? (
                         // biome-ignore lint/performance/noImgElement: false positive
-                        <img src={previewUrl} alt={label} className="h-full w-full rounded-lg object-contain" />
+                        <img src={effectivePreview} alt={label} className="h-full w-full rounded-lg object-contain" />
                     ) : (
                         <div className="text-gray-900">
                             <UploadCloudIcon className={iconSize} />

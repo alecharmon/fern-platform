@@ -16,7 +16,7 @@ import {
     DialogTitle
 } from "@/components/ui/dialog";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
-
+import { uploadOnboardingAsset } from "./api";
 import ConfirmScreen from "./ConfirmScreen";
 import LoaderScreen from "./LoaderScreen";
 import UploadForm from "./UploadForm";
@@ -46,8 +46,10 @@ export default function NewDocsWizardPage() {
         docsSiteName: "",
         docsSiteUrl: "",
         docsSiteUrlAvailable: null,
-        faviconUrl: null,
-        logoUrl: null,
+        faviconUrl:
+            "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
+        logoUrl:
+            "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
         primaryColorHex: null,
         existingDocsSite: "",
         openApiSpecUrls: []
@@ -57,7 +59,26 @@ export default function NewDocsWizardPage() {
         setShowExitDialog(true);
     };
 
-    async function onSubmitForm() {
+    const DEFAULT_IMAGE_FALLBACK =
+        "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633";
+
+    const ensureUploadedImage = async (url: string | null, fileName: string) => {
+        const sourceUrl = url ?? DEFAULT_IMAGE_FALLBACK;
+        if (!sourceUrl) {
+            return url;
+        }
+
+        const response = await fetch(sourceUrl);
+        if (!response.ok) {
+            throw new Error("Failed to fetch default image");
+        }
+        const blob = await response.blob();
+        const file = new File([blob], fileName, { type: blob.type || "image/png" });
+        const { assetUrl } = await uploadOnboardingAsset(file, orgName);
+        return assetUrl;
+    };
+
+    async function onSubmitForm(values: WizardFormData) {
         if (currentStep === "docsSiteInfo") {
             setIsLoading(true);
             setError(null);
@@ -67,13 +88,26 @@ export default function NewDocsWizardPage() {
             setSessionId(newSessionId);
 
             try {
+                const [resolvedFaviconUrl, resolvedLogoUrl] = await Promise.all([
+                    ensureUploadedImage(values.faviconUrl, "favicon-default.png"),
+                    ensureUploadedImage(values.logoUrl, "logo-default.png")
+                ]);
+
+                const resolvedValues = {
+                    ...values,
+                    faviconUrl: resolvedFaviconUrl,
+                    logoUrl: resolvedLogoUrl
+                };
+
+                setFormData(resolvedValues);
+
                 const response = await fetch("/api/onboarding-docs", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        ...formData,
+                        ...resolvedValues,
                         orgName,
                         sessionId: newSessionId
                     })
