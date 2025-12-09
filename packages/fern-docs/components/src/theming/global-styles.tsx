@@ -195,7 +195,22 @@ export function GlobalStyles({
                       lightSelector,
                       darkSelector
                   })
-                : ""
+                : !hasTheme && !!light
+                  ? getColorScaleCss({
+                        mode: "dark",
+                        name: "accent",
+                        scale: fallbackDark.accentScale,
+                        scaleWideGamut: fallbackDark.accentScaleWideGamut,
+                        scaleAlpha: fallbackDark.accentScaleAlpha,
+                        scaleAlphaWideGamut: fallbackDark.accentScaleAlphaWideGamut,
+                        contrast: fallbackDark.accentContrast,
+                        surface: fallbackDark.accentSurface,
+                        surfaceWideGamut: fallbackDark.accentSurfaceWideGamut,
+                        scopeSelector,
+                        lightSelector,
+                        darkSelector
+                    })
+                  : ""
         }
 
         ${
@@ -251,7 +266,12 @@ export function GlobalStyles({
           --card-background: ${dark.cardBackground ?? "initial"};
           --theme-color: ${dark.themeColor};
         }`
-                : `${darkSelector} { --background: ${dark?.background ?? "#000"}; }`
+                : !hasTheme && !!light
+                  ? `${darkSelector} {
+          --background: ${dark?.background ?? "#000"};
+          --accent: #fff;
+        }`
+                  : `${darkSelector} { --background: ${dark?.background ?? "#000"}; }`
         }
 
         ${
