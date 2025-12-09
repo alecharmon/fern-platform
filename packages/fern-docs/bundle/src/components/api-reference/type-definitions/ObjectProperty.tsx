@@ -14,12 +14,14 @@ export const ObjectProperty = React.memo(function ObjectProperty({
     property,
     types,
     location,
-    lang
+    lang,
+    badge
 }: {
     property: ApiDefinition.ObjectProperty;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     lang: string;
+    badge?: React.ReactNode;
 }) {
     const unwrapped = ApiDefinition.unwrapReference(property.valueShape, types);
     const description = compact([property.description, ...unwrapped.descriptions])[0];
@@ -33,6 +35,7 @@ export const ObjectProperty = React.memo(function ObjectProperty({
             types={types}
             location={location}
             lang={lang}
+            badge={badge}
         />
     );
 });
@@ -45,7 +48,8 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     types,
     location,
     additionalProperties,
-    lang
+    lang,
+    badge
 }: {
     icon?: React.ReactNode;
     name?: string;
@@ -56,6 +60,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang: string;
+    badge?: React.ReactNode;
 }) {
     return (
         <PropertyRenderer
@@ -63,6 +68,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
             description={description}
             typeShorthand={<TypeShorthand shape={shape} lang={lang} />}
             availability={availability}
+            badge={badge}
         >
             <TypeReferenceDefinitions
                 shape={shape}
@@ -81,7 +87,8 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
     availability,
     description,
     typeShorthand,
-    children
+    children,
+    badge
 }: {
     icon?: React.ReactNode;
     name?: string;
@@ -89,11 +96,13 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
     typeShorthand: React.ReactNode;
     availability: ApiDefinition.Availability | null | undefined;
     children?: React.ReactNode;
+    badge?: React.ReactNode;
 }) {
     const child = (
         <PropertyContainer>
             <TypeDefinitionAnchor sideOffset={6}>
                 {icon}
+                {badge}
                 {name != null && <PropertyKey className="fern-api-property-key">{name}</PropertyKey>}
                 {typeShorthand}
                 {availability != null && <AvailabilityBadge availability={availability} size="sm" rounded />}

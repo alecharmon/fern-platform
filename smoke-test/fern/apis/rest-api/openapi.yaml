@@ -557,6 +557,77 @@ paths:
                     error: "Server error occurred"
                     code: "SERVER_ERROR"
                     statusCode: 500
+  /plant/error-with-response-headers:
+    get:
+      tags:
+        - plant
+      summary: Endpoint demonstrating error response headers
+      description: |
+        This endpoint demonstrates error responses that include response headers.
+        For example, a 429 error includes a Retry-After header indicating when the client can retry.
+      operationId: getPlantWithErrorHeaders
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantResponse"
+        "429":
+          description: Too Many Requests - Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying
+              schema:
+                type: integer
+              example: 60
+            X-RateLimit-Limit:
+              description: The maximum number of requests allowed per hour
+              schema:
+                type: integer
+              example: 1000
+            X-RateLimit-Remaining:
+              description: The number of requests remaining in the current rate limit window
+              schema:
+                type: integer
+              example: 0
+            X-RateLimit-Reset:
+              description: Unix timestamp when the rate limit window resets
+              schema:
+                type: integer
+              example: 1640995200
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RateLimitError"
+              examples:
+                rateLimited:
+                  summary: Rate limit exceeded
+                  value:
+                    error: "Rate limit exceeded"
+                    code: "RATE_LIMITED"
+                    retryAfter: 60
+        "503":
+          description: Service Unavailable - Server temporarily unavailable
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying, or an HTTP-date
+              schema:
+                type: string
+              example: "120"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceUnavailableError"
+              examples:
+                serviceUnavailable:
+                  summary: Service temporarily unavailable
+                  value:
+                    error: "Service temporarily unavailable"
+                    code: "SERVICE_UNAVAILABLE"
+                    message: "The server is under maintenance. Please try again later."
   /plant/updates/stream:
     get:
       tags:
@@ -1283,6 +1354,38 @@ components:
           type: object
           additionalProperties: true
           description: Additional error details
+    RateLimitError:
+      type: object
+      description: Error response when rate limit is exceeded (429)
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Machine-readable error code
+        retryAfter:
+          type: integer
+          description: Number of seconds to wait before retrying
+    ServiceUnavailableError:
+      type: object
+      description: Error response when service is temporarily unavailable (503)
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Machine-readable error code
+        message:
+          type: string
+          description: Additional details about the service unavailability
     PlantUpdateEvent:
       type: object
       description: A streaming event for plant updates
