@@ -9,18 +9,15 @@ export const baseConfig: SentryBaseConfig = {
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
     environment: process.env.NODE_ENV,
     sendDefaultPii: true,
-    tracesSampleRate: 1,
     tracesSampler: (samplingContext) => {
         const name = samplingContext.transactionContext?.name?.toLowerCase() ?? "";
 
-        // Heavily sample middleware routes
         if (name.includes("middleware")) {
-            return 0.01; // sample 1% of middleware traces
+            return 0.0; // drop middleware traces
         }
 
-        // drastically drop _next/static or other noise
         if (name.includes("_next/")) {
-            return 0.001;
+            return 0.0; // drop middleware traces
         }
 
         // Use env or default sampling rate for everything else
