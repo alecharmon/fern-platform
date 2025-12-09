@@ -6,43 +6,39 @@ interface PlaygroundEndpointMobileLayoutProps {
     form: ReactNode;
     requestCard: ReactNode;
     responseCard: ReactNode;
-    sendButton: ReactNode;
     endpointId?: string;
     lang: string;
+    mobileTab?: string;
+    onMobileTabChange?: (value: string) => void;
 }
 
 export function PlaygroundEndpointMobileLayout({
-    // endpointId,
     form,
     requestCard,
     responseCard,
-    sendButton,
-    lang
+    lang,
+    mobileTab,
+    onMobileTabChange
 }: PlaygroundEndpointMobileLayoutProps): ReactElement<any> {
-    const [tabValue, setTabValue] = useState<string>("0");
+    const [internalTab, setInternalTab] = useState<string>("0");
+    const tabValue = mobileTab ?? internalTab;
+
+    const handleTabChange = (value: string) => {
+        setInternalTab(value);
+        onMobileTabChange?.(value);
+    };
+
     return (
         <FernTabs
             className="px-4"
             value={tabValue}
-            onValueChange={setTabValue}
+            onValueChange={handleTabChange}
             tabs={[
                 {
                     title: t(lang).apiReference.request,
                     content: (
                         <div className="space-y-4 pb-6">
                             {form}
-                            <div className="border-border-default flex justify-end border-b pb-4">
-                                {sendButton}
-                                {/* <PlaygroundSendRequestButton
-                                    sendRequest={() => {
-                                        sendRequest();
-                                        setTabValue("1");
-                                    }}
-                                    sendRequestIcon={
-                                        <SendSolid className="transition-transform group-hover:translate-x-0.5" />
-                                    }
-                                /> */}
-                            </div>
                             {requestCard}
                         </div>
                     )

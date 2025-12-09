@@ -6,11 +6,14 @@ import { buildEndpointUrl } from "@fern-api/fdr-sdk/api-definition";
 import { unknownToString } from "@fern-api/ui-core-utils";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { failed, type Loadable, loaded, loading, notStartedLoading } from "@fern-ui/loadable";
-import { useEventCallback } from "@fern-ui/react-commons";
+import { useEventCallback, useIsMobile } from "@fern-ui/react-commons";
 import { mapValues } from "es-toolkit/object";
 import { useAtomValue, useSetAtom } from "jotai";
 import { SendHorizonal } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
+
+const MOBILE_TAB_REQUEST = "0";
+const MOBILE_TAB_RESPONSE = "1";
 
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
@@ -104,6 +107,9 @@ export const PlaygroundEndpoint = ({
     });
 
     const [response, setResponse] = useState<Loadable<PlaygroundResponse>>(notStartedLoading());
+
+    const isMobile = useIsMobile();
+    const [mobileTab, setMobileTab] = useState<string>(MOBILE_TAB_REQUEST);
 
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint, node.apiDefinitionId);
 
@@ -270,6 +276,16 @@ export const PlaygroundEndpoint = ({
         }
     }, [endpoint, node.title, node.slug, authSchemes, authKeys, formState, baseUrl, setOAuthValue, disableProxy]);
 
+    const handleSendRequest = useCallback(async () => {
+        try {
+            await sendRequest();
+        } finally {
+            if (isMobile) {
+                setMobileTab(MOBILE_TAB_RESPONSE);
+            }
+        }
+    }, [sendRequest, isMobile]);
+
     const settings = node.playground;
 
     return (
@@ -282,7 +298,7 @@ export const PlaygroundEndpoint = ({
                         sendRequest={() => {
                             void (async () => {
                                 try {
-                                    await sendRequest();
+                                    await handleSendRequest();
                                 } catch (e) {
                                     console.error("Failed to send request:", e);
                                 }
@@ -317,7 +333,7 @@ export const PlaygroundEndpoint = ({
                         sendRequest={() => {
                             void (async () => {
                                 try {
-                                    await sendRequest();
+                                    await handleSendRequest();
                                 } catch (e) {
                                     console.error("Failed to send request:", e);
                                 }
@@ -325,6 +341,8 @@ export const PlaygroundEndpoint = ({
                         }}
                         dynamicIRsByLanguage={dynamicIRsByLanguage}
                         lang={lang}
+                        mobileTab={mobileTab}
+                        onMobileTabChange={setMobileTab}
                     />
                 </div>
             </div>

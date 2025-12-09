@@ -29,7 +29,6 @@ export const PlaygroundFloatingButton = ({ lang }: { lang: string }) => {
                     // remove this ID.
                     id={FERN_PLAYGROUND_FLOATING_BUTTON_ID}
                     href={slug ? conformExplorerRoute(slug) : "?explorer=true"}
-                    className="hidden md:flex"
                 >
                     <SquareTerminal height={16} width={16} />
 

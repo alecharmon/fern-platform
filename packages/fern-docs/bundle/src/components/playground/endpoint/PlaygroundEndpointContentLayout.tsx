@@ -3,7 +3,6 @@
 import { useIsMobile, useResizeObserver } from "@fern-ui/react-commons";
 import { type ReactElement, type ReactNode, useRef, useState } from "react";
 
-import { PlaygroundSendRequestButton } from "../PlaygroundSendRequestButton";
 import { PlaygroundEndpointDesktopLayout } from "./PlaygroundEndpointDesktopLayout";
 import { PlaygroundEndpointMobileLayout } from "./PlaygroundEndpointMobileLayout";
 
@@ -15,6 +14,8 @@ interface PlaygroundEndpointContentLayoutProps {
     endpointId?: string;
     requestDisabled: boolean;
     lang: string;
+    mobileTab?: string;
+    onMobileTabChange?: (value: string) => void;
 }
 
 export function PlaygroundEndpointContentLayout({
@@ -24,7 +25,9 @@ export function PlaygroundEndpointContentLayout({
     responseCard,
     endpointId,
     requestDisabled,
-    lang
+    lang,
+    mobileTab,
+    onMobileTabChange
 }: PlaygroundEndpointContentLayoutProps): ReactElement<any> {
     const isMobile = useIsMobile();
 
@@ -56,15 +59,10 @@ export function PlaygroundEndpointContentLayout({
                         form={form}
                         requestCard={requestCard}
                         responseCard={responseCard}
-                        sendButton={
-                            <PlaygroundSendRequestButton
-                                sendRequest={sendRequest}
-                                disabled={requestDisabled}
-                                lang={lang}
-                            />
-                        }
                         endpointId={endpointId}
                         lang={lang}
+                        mobileTab={mobileTab}
+                        onMobileTabChange={onMobileTabChange}
                     />
                 )}
             </div>

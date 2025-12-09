@@ -24,6 +24,8 @@ interface PlaygroundEndpointContentProps {
     authForm?: React.ReactNode;
     dynamicIRsByLanguage: DynamicIRsByLanguage | undefined;
     lang: string;
+    mobileTab?: string;
+    onMobileTabChange?: (value: string) => void;
 }
 
 export function PlaygroundEndpointContent({
@@ -36,7 +38,9 @@ export function PlaygroundEndpointContent({
     sendRequest,
     authForm,
     dynamicIRsByLanguage,
-    lang
+    lang,
+    mobileTab,
+    onMobileTabChange
 }: PlaygroundEndpointContentProps): ReactElement<any> {
     const deferredFormState = useDeferredValue(formState);
     const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
@@ -93,6 +97,8 @@ export function PlaygroundEndpointContent({
             responseCard={responseCard}
             requestDisabled={requestDisabled ?? false}
             lang={lang}
+            mobileTab={mobileTab}
+            onMobileTabChange={onMobileTabChange}
         />
     );
 }

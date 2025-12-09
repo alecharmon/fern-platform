@@ -17,6 +17,7 @@ import { cn } from "@fern-docs/components/cn";
 import { useBooleanState } from "@fern-ui/react-commons";
 import { omitBy } from "es-toolkit/object";
 import { isUndefined } from "es-toolkit/predicate";
+import { SendHorizonal } from "lucide-react";
 import qs from "qs";
 import { type FC, Fragment, type ReactNode } from "react";
 
@@ -168,6 +169,16 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
                     lang={lang}
                 />
             </div>
+
+            <button
+                type="button"
+                className="sm:hidden flex items-center justify-center text-(color:--accent-a11) p-2"
+                onClick={sendRequest}
+                aria-label="Send request"
+                disabled={requestDisabled}
+            >
+                <SendHorizonal className="size-5" />
+            </button>
 
             <div className="max-sm:hidden">
                 <PlaygroundSendRequestButton
