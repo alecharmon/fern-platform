@@ -27,7 +27,7 @@ function initSentrySpanProcessor(environment: string) {
         Sentry.init({
             dsn,
             environment,
-            tracesSampleRate: parseRate(process.env.SENTRY_TRACES_SAMPLE_RATE, 1),
+            tracesSampleRate: parseRate(process.env.SENTRY_TRACES_SAMPLE_RATE, 0.0001),
             profilesSampleRate: parseRate(process.env.SENTRY_PROFILES_SAMPLE_RATE, 0)
         });
         hasInitializedSentry = true;
