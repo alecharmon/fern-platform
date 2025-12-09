@@ -9,5 +9,6 @@ export interface WebhookDefinition extends FernRegistry.api.v1.WithDescription {
     path: string[];
     headers: FernRegistry.api.v1.register.Header[];
     payload: FernRegistry.api.v1.register.WebhookPayload;
+    responses: FernRegistry.api.v1.register.HttpResponse[] | undefined;
     examples: FernRegistry.api.v1.register.ExampleWebhookPayload[];
 }

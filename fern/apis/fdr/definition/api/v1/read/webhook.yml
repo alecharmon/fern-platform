@@ -18,6 +18,7 @@ types:
       path: list<string>
       headers: list<endpoint.Header>
       payload: WebhookPayload
+      responses: optional<list<endpoint.HttpResponse>>
       examples: list<ExampleWebhookPayload>
 
   WebhookPayload:

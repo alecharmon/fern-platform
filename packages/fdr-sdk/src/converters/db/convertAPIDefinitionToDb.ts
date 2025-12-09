@@ -170,6 +170,7 @@ function transformWebhook({
         name: writeShape.name,
         path: writeShape.path,
         headers: writeShape.headers,
+        responses: undefined,
         payload: writeShape.payload,
         examples:
             writeShape.examples.length > 0

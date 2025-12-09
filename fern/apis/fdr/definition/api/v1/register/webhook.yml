@@ -16,6 +16,7 @@ types:
       path: list<string>
       headers: list<http.Header>
       payload: WebhookPayload
+      responses: optional<list<http.HttpResponse>>
       examples: list<ExampleWebhookPayload>
 
   WebhookPayload:

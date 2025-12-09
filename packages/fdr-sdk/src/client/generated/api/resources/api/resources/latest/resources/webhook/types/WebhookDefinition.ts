@@ -13,5 +13,6 @@ export interface WebhookDefinition
     path: string[];
     headers: FernRegistry.api.latest.ObjectProperty[] | undefined;
     payloads: FernRegistry.api.latest.WebhookPayload[] | undefined;
+    responses: FernRegistry.api.latest.HttpResponse[] | undefined;
     examples: FernRegistry.api.v1.read.ExampleWebhookPayload[] | undefined;
 }
