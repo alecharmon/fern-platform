@@ -19,6 +19,6 @@ COPY fai/src/ ./src/
 COPY fai/logging.conf ./logging.conf
 COPY fai/.env ./.env
 
-ENV PYTHONPATH="/app/servers/fai:${PYTHONPATH:-}"
+ENV PYTHONPATH="/app/servers/fai/src:${PYTHONPATH:-}"
 
 ENTRYPOINT ["poetry", "run", "start"]
