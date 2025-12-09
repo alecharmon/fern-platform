@@ -59,6 +59,7 @@ export declare namespace FernDropdown {
         labelClassName?: string;
         href?: string;
         target?: string;
+        default?: boolean;
     }
     export interface SeparatorOption {
         type: "separator";

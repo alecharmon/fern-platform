@@ -10,7 +10,7 @@ import React from "react";
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
-import { PageActionsDropdown } from "./PageActionsDropdown";
+import { PageActions } from "./PageActions";
 import { PageFilters } from "./PageFilters";
 import { RSSFeedButton } from "./RSSFeedButton";
 
@@ -91,7 +91,7 @@ export function PageHeader({
                     </div>
                     {pageActionOptions && pageActionsStyle === "default" && (
                         <div className="hidden md:flex">
-                            <PageActionsDropdown
+                            <PageActions
                                 markdownPromise={markdownPromise}
                                 pageActionOptions={pageActionOptions}
                                 lang={lang}
@@ -126,7 +126,7 @@ export function PageHeader({
 
             {pageActionOptions && pageActionsStyle === "toolbar" && (
                 <>
-                    <PageActionsDropdown
+                    <PageActions
                         markdownPromise={markdownPromise}
                         pageActionOptions={pageActionOptions}
                         lang={lang}

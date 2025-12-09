@@ -6,14 +6,7 @@ import type { ParamValue } from "next/dist/server/request/params";
 import type { ReactNode } from "react";
 import { isSelfHosted } from "@/server/isSelfHosted";
 
-import {
-    ClaudeIcon,
-    CursorIcon,
-    MarkdownIcon,
-    OpenAIIcon,
-    SparklesIconHollow,
-    TextIcon
-} from "./PageActionsDropdownAssets";
+import { ClaudeIcon, CursorIcon, MarkdownIcon, OpenAIIcon, SparklesIconHollow, TextIcon } from "./PageActionsAssets";
 
 export const Separator = (): FernDropdown.SeparatorOption => {
     return {
@@ -21,17 +14,34 @@ export const Separator = (): FernDropdown.SeparatorOption => {
     } as FernDropdown.SeparatorOption;
 };
 
-export const CopyPageOption = ({ lang }: { lang: string }): FernDropdown.ValueOption => {
+export const CopyPageOption = ({
+    lang,
+    defaultOption
+}: {
+    lang: string;
+    defaultOption?: boolean;
+}): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "copy-page",
         label: t(lang).documentation.copyPage,
         helperText: t(lang).documentation.copyPageAsMarkdown,
-        icon: <Copy className="size-icon" height={24} width={24} />
+        icon: <Copy className="size-icon" height={24} width={24} />,
+        default: defaultOption
     } as FernDropdown.ValueOption;
 };
 
-export const ViewAsMarkdownOption = (domain: string, slug: string, lang: string): FernDropdown.ValueOption => {
+export const ViewAsMarkdownOption = ({
+    domain,
+    slug,
+    lang,
+    defaultOption
+}: {
+    domain: string;
+    slug: string;
+    lang: string;
+    defaultOption?: boolean;
+}): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "view-as-markdown",
@@ -39,7 +49,8 @@ export const ViewAsMarkdownOption = (domain: string, slug: string, lang: string)
         helperText: t(lang).documentation.viewThisPageAsPlainText,
         icon: <MarkdownIcon />,
         href: `https://${domain}/${slug}.md`,
-        rightElement: <ExternalLink className="size-icon" />
+        rightElement: <ExternalLink className="size-icon" />,
+        default: defaultOption
     } as FernDropdown.ValueOption;
 };
 
@@ -50,24 +61,38 @@ export const LLM_URLS: Record<LLM_OPTIONS, [string, ReactNode]> = {
     Claude: ["https://claude.ai/new?q=", <ClaudeIcon key="claude-logo" />]
 };
 
-export const OpenAISearchOption = ({ lang }: { lang: string }): FernDropdown.ValueOption => {
+export const OpenAISearchOption = ({
+    lang,
+    defaultOption
+}: {
+    lang: string;
+    defaultOption?: boolean;
+}): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "open-ai-search",
         label: t(lang).search.askAQuestion,
         helperText: t(lang).search.chatWithAIAssistant,
-        icon: <SparklesIconHollow />
+        icon: <SparklesIconHollow />,
+        default: defaultOption
     } as FernDropdown.ValueOption;
 };
 
-export const OpenLLMSTxtOption = ({ lang }: { lang: string }): FernDropdown.ValueOption => {
+export const OpenLLMSTxtOption = ({
+    lang,
+    defaultOption
+}: {
+    lang: string;
+    defaultOption?: boolean;
+}): FernDropdown.ValueOption => {
     return {
         type: "value",
         value: "open-llms-txt",
         label: t(lang).ai.llm,
         helperText: t(lang).buttons.readLlmsTxt,
         icon: <TextIcon key="llms-txt-logo" />,
-        href: `/llms.txt`
+        href: `/llms.txt`,
+        default: defaultOption
     } as FernDropdown.ValueOption;
 };
 
@@ -77,12 +102,14 @@ export const OpenWithLLM = ({
     domain,
     slug,
     llm,
-    lang
+    lang,
+    defaultOption
 }: {
     domain: ParamValue;
     slug: ParamValue;
     llm: LLM_OPTIONS;
     lang: string;
+    defaultOption?: boolean;
 }): FernDropdown.ValueOption => {
     const resolveParam = (param: ParamValue): string => {
         if (typeof param === "string") {
@@ -108,16 +135,19 @@ export const OpenWithLLM = ({
         helperText: t(lang).search.askQuestionsAboutThisPage,
         icon: LLM_URLS[llm][1],
         href: `${LLM_URLS[llm][0]}${encodeURIComponent(prompt)}`,
-        rightElement: <ExternalLink className="size-icon" />
+        rightElement: <ExternalLink className="size-icon" />,
+        default: defaultOption
     } as FernDropdown.ValueOption;
 };
 
 export const OpenWithCursor = async ({
     domain,
-    lang
+    lang,
+    defaultOption
 }: {
     domain: ParamValue;
     lang: string;
+    defaultOption?: boolean;
 }): Promise<FernDropdown.ValueOption> => {
     const resolveParam = (param: ParamValue): string => {
         if (typeof param === "string") {
@@ -146,10 +176,12 @@ export const OpenWithCursor = async ({
         // Example MCP server config for Cursor install link
         // See: https://modelcontextprotocol.org/docs/context/mcp
         href: `cursor://anysphere.cursor-deeplink/mcp/install?name=${mcpServerConfig.name}&config=${mcpServerConfigBase64}`,
-        rightElement: <ExternalLink className="size-icon" />
+        rightElement: <ExternalLink className="size-icon" />,
+        default: defaultOption
     } as FernDropdown.ValueOption;
 };
 
+// don't add separators here, since we may reorder and add options in PageActionsDropdown.tsx
 export async function constructPageOptions({
     pageActionConfig,
     domain,
@@ -161,10 +193,20 @@ export async function constructPageOptions({
     slug: ParamValue;
     lang: string;
 }): Promise<FernDropdown.PageActionOption[] | undefined> {
-    const options: FernDropdown.PageActionOption[] = [CopyPageOption({ lang })];
+    const options: FernDropdown.PageActionOption[] = [];
+    if (pageActionConfig.pageActions?.options?.copyPage !== false) {
+        options.push(CopyPageOption({ lang, defaultOption: pageActionConfig.pageActions?.default === "copyPage" }));
+    }
 
-    if (slug?.toString() && domain?.toString()) {
-        options.push(Separator(), ViewAsMarkdownOption(domain?.toString(), slug?.toString(), lang));
+    if (slug?.toString() && domain?.toString() && pageActionConfig.pageActions?.options?.viewAsMarkdown !== false) {
+        options.push(
+            ViewAsMarkdownOption({
+                domain: domain?.toString(),
+                slug: slug?.toString(),
+                lang,
+                defaultOption: pageActionConfig.pageActions?.default === "viewAsMarkdown"
+            })
+        );
     }
 
     if (isSelfHosted()) {
@@ -172,15 +214,37 @@ export async function constructPageOptions({
     }
 
     if (pageActionConfig.pageActions?.options?.claude !== false) {
-        options.push(Separator(), OpenWithLLM({ domain, slug, llm: "Claude", lang }));
+        options.push(
+            OpenWithLLM({
+                domain,
+                slug,
+                llm: "Claude",
+                lang,
+                defaultOption: pageActionConfig.pageActions?.default === "claude"
+            })
+        );
     }
 
     if (pageActionConfig.pageActions?.options?.openAi !== false) {
-        options.push(Separator(), OpenWithLLM({ domain, slug, llm: "ChatGPT", lang }));
+        options.push(
+            OpenWithLLM({
+                domain,
+                slug,
+                llm: "ChatGPT",
+                lang,
+                defaultOption: pageActionConfig.pageActions?.default === "openAi"
+            })
+        );
     }
 
     if (pageActionConfig.pageActions?.options?.cursor !== false) {
-        options.push(Separator(), await OpenWithCursor({ domain, lang }));
+        options.push(
+            await OpenWithCursor({ domain, lang, defaultOption: pageActionConfig.pageActions?.default === "cursor" })
+        );
+    }
+
+    if (options.length === 0) {
+        return undefined;
     }
 
     return options;

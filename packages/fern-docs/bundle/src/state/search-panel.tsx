@@ -7,7 +7,7 @@ import { FernButton } from "@fern-docs/components/FernButton";
 import { t } from "@fern-docs/i18n";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import React from "react";
-import { SparklesIcon } from "@/components/PageActionsDropdownAssets";
+import { SparklesIcon } from "@/components/PageActionsAssets";
 
 export const searchPanelInitializedAtom = atom(false);
 export const searchPanelOpenAtom = atom(false);

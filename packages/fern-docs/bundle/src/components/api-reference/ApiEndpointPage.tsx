@@ -16,7 +16,7 @@ import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
-import { constructPageOptions } from "../PageActionsDropdownOptions";
+import { constructPageOptions } from "../PageActionsOptions";
 import { EndpointContent } from "./endpoints/EndpointContent";
 import { GrpcContent } from "./grpcs/GrpcContent";
 import { WebhookContent } from "./webhooks/WebhookContent";

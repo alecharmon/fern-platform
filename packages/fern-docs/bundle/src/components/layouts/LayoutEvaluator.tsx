@@ -12,7 +12,7 @@ import { MdxContent } from "@/mdx/components/MdxContent";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
 import { BuiltWithFern } from "../built-with-fern";
-import { constructPageOptions } from "../PageActionsDropdownOptions";
+import { constructPageOptions } from "../PageActionsOptions";
 import { PageHeader } from "../PageHeader";
 import { FooterLayout } from "./FooterLayout";
 
