@@ -1,3 +1,4 @@
+import { ExpandMermaidModal } from "@fern-docs/components/ExpandMermaidModal";
 import type { MermaidConfig } from "mermaid";
 import { type ReactElement, useEffect, useId, useRef, useState } from "react";
 
@@ -94,6 +95,7 @@ export function Mermaid({ children }: { children: string }): ReactElement<any> {
 function MermaidInternal({ code }: { code: string }): ReactElement<any> {
     const ref = useRef<HTMLDivElement>(null);
     const [svg, setSvg] = useState<string>();
+    const [isOpen, setIsOpen] = useState(false);
     const theme = useResolvedTheme();
     const id = useId();
     const mermaidId = `mermaid-${id.replace(/:/g, "-")}`;
@@ -111,10 +113,18 @@ function MermaidInternal({ code }: { code: string }): ReactElement<any> {
     }, [code, theme, mermaidId]);
 
     return (
-        <div
-            ref={ref}
-            className="mermaid-container"
-            dangerouslySetInnerHTML={svg != null ? { __html: svg } : undefined}
-        />
+        <>
+            <div
+                ref={ref}
+                className="mermaid-container cursor-zoom-in"
+                dangerouslySetInnerHTML={svg != null ? { __html: svg } : undefined}
+                onClick={() => {
+                    if (svg != null) {
+                        setIsOpen(true);
+                    }
+                }}
+            />
+            {svg != null && <ExpandMermaidModal svgContent={svg} open={isOpen} onOpenChange={setIsOpen} />}
+        </>
     );
 }
