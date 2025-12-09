@@ -8,6 +8,7 @@ import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import type React from "react";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
+import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
@@ -42,6 +43,9 @@ export async function GrpcContent({
 }) {
     const { node, grpc, types } = context;
 
+    // Extract footer content from the description
+    const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(grpc.description);
+
     const grpcExample = {
         request: grpc.examples?.[0]?.requestBody?.value,
         response: grpc.examples?.[0]?.responseBody?.value
@@ -74,9 +78,14 @@ export async function GrpcContent({
                         </TypeDefinitionSlotsServer>
                     </TypeDefinitionRoot>
                 }
+                descriptionFooter={
+                    footerContent ? (
+                        <MdxServerComponentProseSuspense key="description-footer" mdx={footerContent} />
+                    ) : undefined
+                }
                 footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
             >
-                <MdxServerComponentProseSuspense mdx={grpc.description} />
+                <MdxServerComponentProseSuspense mdx={descriptionWithoutFooter} />
             </ReferenceLayout>
         </GrpcContextProvider>
     );

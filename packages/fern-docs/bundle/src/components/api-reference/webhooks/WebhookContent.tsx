@@ -9,6 +9,7 @@ import { t } from "@fern-docs/i18n";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { renderTypeShorthand } from "@/components/type-shorthand";
+import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
@@ -45,6 +46,9 @@ export async function WebhookContent({
     pageActionsStyle?: "default" | "toolbar";
 }) {
     const { node, webhook, types } = context;
+
+    // Extract footer content from the description
+    const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(webhook.description);
 
     const example = webhook.examples?.[0]; // TODO: Need a way to show all the examples
 
@@ -112,9 +116,14 @@ export async function WebhookContent({
                     </TypeDefinitionSlotsServer>
                 </TypeDefinitionRoot>
             }
+            descriptionFooter={
+                footerContent ? (
+                    <MdxServerComponentProseSuspense key="description-footer" mdx={footerContent} />
+                ) : undefined
+            }
             footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
         >
-            <MdxServerComponentProseSuspense mdx={webhook.description} />
+            <MdxServerComponentProseSuspense mdx={descriptionWithoutFooter} />
         </ReferenceLayout>
     );
 }

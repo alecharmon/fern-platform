@@ -9,6 +9,7 @@ import type React from "react";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKeyboardTrigger";
+import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
@@ -53,6 +54,9 @@ export async function EndpointContent({
     pageActionsStyle?: "default" | "toolbar";
 }) {
     const { node, endpoint, types } = context;
+
+    // Extract footer content from the description
+    const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(endpoint.description);
 
     return (
         <EndpointContextProvider endpoint={endpoint}>
@@ -101,10 +105,15 @@ export async function EndpointContent({
                         </TypeDefinitionSlotsServer>
                     </TypeDefinitionRoot>
                 }
+                descriptionFooter={
+                    footerContent ? (
+                        <MdxServerComponentProseSuspense key="description-footer" mdx={footerContent} />
+                    ) : undefined
+                }
                 footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
             >
                 <PlaygroundKeyboardTrigger key="keyboard-trigger" />
-                <MdxServerComponentProseSuspense key="description" mdx={endpoint.description} />
+                <MdxServerComponentProseSuspense key="description" mdx={descriptionWithoutFooter} />
             </ReferenceLayout>
         </EndpointContextProvider>
     );

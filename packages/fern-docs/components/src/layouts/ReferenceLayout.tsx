@@ -12,6 +12,11 @@ interface ReferenceLayoutProps {
     aside?: React.ReactNode;
     children?: React.ReactNode;
     reference?: React.ReactNode;
+    /**
+     * Custom footer content extracted from the description's <Footer> component.
+     * Rendered below the response section but above the navigation footer.
+     */
+    descriptionFooter?: React.ReactNode;
     footer?: React.ReactNode;
     enableFullWidth?: boolean;
     /**
@@ -26,7 +31,7 @@ export const ReferenceLayout = React.forwardRef<
     HTMLDivElement,
     ComponentPropsWithoutRef<"article"> & ReferenceLayoutProps
 >(function ReferenceLayout(
-    { header, aside, children, footer, reference, enableFullWidth, kind = "api", ...props },
+    { header, aside, children, footer, descriptionFooter, reference, enableFullWidth, kind = "api", ...props },
     ref
 ) {
     const isMobile = useIsMobile();
@@ -58,6 +63,9 @@ export const ReferenceLayout = React.forwardRef<
                                 </section>
                             )}
                             {reference && <React.Fragment key="reference">{reference}</React.Fragment>}
+                            {descriptionFooter && (
+                                <React.Fragment key="description-footer">{descriptionFooter}</React.Fragment>
+                            )}
                             {footer && <React.Fragment key="footer">{footer}</React.Fragment>}
                         </div>
                     </Prose>

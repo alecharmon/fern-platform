@@ -14,6 +14,7 @@ import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { PlaygroundButton } from "@/components/playground/PlaygroundButton";
 import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKeyboardTrigger";
+import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
@@ -56,6 +57,9 @@ export async function WebSocketContent({
     pageActionsStyle?: "default" | "toolbar";
 }) {
     const { channel, node, types, globalHeaders } = context;
+
+    // Extract footer content from the description
+    const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(channel.description);
 
     const publishMessages = channel.messages.filter(
         (message) => message.origin === APIV1Read.WebSocketMessageOrigin.Client
@@ -271,10 +275,15 @@ export async function WebSocketContent({
                     </TypeDefinitionSlotsServer>
                 </TypeDefinitionRoot>
             }
+            descriptionFooter={
+                footerContent ? (
+                    <MdxServerComponentProseSuspense key="description-footer" mdx={footerContent} />
+                ) : undefined
+            }
             footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
         >
             <PlaygroundKeyboardTrigger />
-            <MdxServerComponentProseSuspense mdx={channel.description} />
+            <MdxServerComponentProseSuspense mdx={descriptionWithoutFooter} />
         </ReferenceLayout>
     );
 }
