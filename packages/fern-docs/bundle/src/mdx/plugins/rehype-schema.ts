@@ -12,8 +12,8 @@ import {
 
 /**
  * This plugin is used to add the `typeDefinition` and `types`
- * props to a `Schema` node. This is necessary to hydrate the
- * `Schema` node with the correct prop values to render.
+ * props to `Schema` and `SchemaSnippet` nodes. This is necessary to hydrate
+ * these nodes with the correct prop values to render.
  */
 export const rehypeSchema: Unified.Plugin<[{ loader: DocsLoader }?], Hast.Root> = (opts) => {
     if (!opts?.loader) {
@@ -29,7 +29,7 @@ export const rehypeSchema: Unified.Plugin<[{ loader: DocsLoader }?], Hast.Root> 
                 return CONTINUE;
             }
 
-            if (node.name != null && node.name === "Schema") {
+            if (node.name != null && (node.name === "Schema" || node.name === "SchemaSnippet")) {
                 const { props } = hastMdxJsxElementHastToProps(node);
 
                 if (typeof props.type !== "string") {
