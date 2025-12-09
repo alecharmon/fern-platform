@@ -10,7 +10,61 @@ import { AsyncApiYamlFormatter, OpenApiYamlFormatter } from "@fern-docs/search-u
 import { convertToLlmTxtMarkdown } from "./llm-txt-md";
 import { runAsyncSpan, runSyncSpan } from "./tracing";
 
-function generateEndpointSections(endpoint: EndpointDefinition, apiDefinition?: ApiDefinition.ApiDefinition): string[] {
+export type SdkLanguageFilter = "node" | "python" | "java" | "ruby" | "go" | "csharp" | "swift";
+
+export interface MarkdownFilterOptions {
+    sdkLanguage?: SdkLanguageFilter;
+    excludeSpec?: boolean;
+}
+
+const SDK_LANGUAGE_MAPPINGS: Record<SdkLanguageFilter, string[]> = {
+    node: ["typescript", "javascript", "node", "js", "ts"],
+    python: ["python", "py"],
+    java: ["java"],
+    ruby: ["ruby"],
+    go: ["go", "golang"],
+    csharp: ["csharp"],
+    swift: ["swift"]
+};
+
+export function isValidSdkLanguage(language: string): language is SdkLanguageFilter {
+    return ["node", "python", "java", "ruby", "go", "csharp", "swift"].includes(language);
+}
+
+const LANGUAGE_PARAM_ALIASES: Record<string, SdkLanguageFilter> = Object.entries(SDK_LANGUAGE_MAPPINGS).reduce(
+    (acc, [sdkLanguage, aliases]) => {
+        for (const alias of aliases) {
+            acc[alias.toLowerCase()] = sdkLanguage as SdkLanguageFilter;
+        }
+        return acc;
+    },
+    {} as Record<string, SdkLanguageFilter>
+);
+
+export function parseSdkLanguageFilter(langParam: string | null): SdkLanguageFilter | undefined {
+    if (langParam == null) {
+        return undefined;
+    }
+    return LANGUAGE_PARAM_ALIASES[langParam.toLowerCase()];
+}
+
+function shouldIncludeLanguage(language: string, sdkLanguageFilter?: SdkLanguageFilter): boolean {
+    if (sdkLanguageFilter == null) {
+        return true;
+    }
+    const allowedLanguages = SDK_LANGUAGE_MAPPINGS[sdkLanguageFilter];
+    return allowedLanguages.includes(language.toLowerCase());
+}
+
+function generateEndpointSections(
+    endpoint: EndpointDefinition,
+    apiDefinition?: ApiDefinition.ApiDefinition,
+    excludeSpec?: boolean
+): string[] {
+    if (excludeSpec) {
+        return [];
+    }
+
     const sections: string[] = [];
 
     try {
@@ -27,8 +81,13 @@ function generateEndpointSections(endpoint: EndpointDefinition, apiDefinition?: 
 
 function generateWebhookSections(
     webhook: ApiDefinition.WebhookDefinition,
-    apiDefinition?: ApiDefinition.ApiDefinition
+    apiDefinition?: ApiDefinition.ApiDefinition,
+    excludeSpec?: boolean
 ): string[] {
+    if (excludeSpec) {
+        return [];
+    }
+
     const sections: string[] = [];
 
     try {
@@ -45,8 +104,13 @@ function generateWebhookSections(
 
 function generateWebSocketSections(
     websocket: ApiDefinition.WebSocketChannel,
-    apiDefinition?: ApiDefinition.ApiDefinition
+    apiDefinition?: ApiDefinition.ApiDefinition,
+    excludeSpec?: boolean
 ): string[] {
+    if (excludeSpec) {
+        return [];
+    }
+
     const sections: string[] = [];
 
     try {
@@ -65,7 +129,8 @@ export async function getMarkdownForPath(
     node: FernNavigation.NavigationNodePage,
     loader: DocsLoader,
     domain?: string,
-    userRoles: string[] = []
+    userRoles: string[] = [],
+    filterOptions?: MarkdownFilterOptions
 ): Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined> {
     return runAsyncSpan(
         "docs.getMarkdownForPath",
@@ -87,7 +152,7 @@ export async function getMarkdownForPath(
                         return undefined;
                     }
                     return {
-                        content: endpointDefinitionToMarkdown(endpoint, node, domain, apiDefinition),
+                        content: endpointDefinitionToMarkdown(endpoint, node, domain, apiDefinition, filterOptions),
                         contentType: "mdx"
                     };
                 }
@@ -97,7 +162,7 @@ export async function getMarkdownForPath(
                         return undefined;
                     }
                     return {
-                        content: webhookDefinitionToMarkdown(webhook, node, domain, apiDefinition),
+                        content: webhookDefinitionToMarkdown(webhook, node, domain, apiDefinition, filterOptions),
                         contentType: "mdx"
                     };
                 }
@@ -107,7 +172,7 @@ export async function getMarkdownForPath(
                         return undefined;
                     }
                     return {
-                        content: websocketDefinitionToMarkdown(websocket, node, domain, apiDefinition),
+                        content: websocketDefinitionToMarkdown(websocket, node, domain, apiDefinition, filterOptions),
                         contentType: "mdx"
                     };
                 }
@@ -166,7 +231,8 @@ export function endpointDefinitionToMarkdown(
     endpoint: EndpointDefinition,
     node: FernNavigation.NavigationNodePage,
     domain?: string,
-    apiDefinition?: ApiDefinition.ApiDefinition
+    apiDefinition?: ApiDefinition.ApiDefinition,
+    filterOptions?: MarkdownFilterOptions
 ): string {
     return runSyncSpan(
         "docs.endpointDefinitionToMarkdown",
@@ -174,7 +240,7 @@ export function endpointDefinitionToMarkdown(
             const pageHref = slugToHref(node.canonicalSlug ?? node.slug);
             const fullUrl = domain ? `https://${domain}${pageHref}` : undefined;
 
-            const endpointSections = generateEndpointSections(endpoint, apiDefinition);
+            const endpointSections = generateEndpointSections(endpoint, apiDefinition, filterOptions?.excludeSpec);
 
             const examplesContent = endpoint.examples
                 ?.flatMap((example) => {
@@ -192,6 +258,11 @@ export function endpointDefinitionToMarkdown(
                     return Object.entries(example.snippets ?? {}).flatMap(([language, snippets]) => {
                         // Filter out curl snippets, since AI should know how to use curl. SDK examples are specific to that generated SDK, so that would be helpful to use.
                         if (language === "curl") {
+                            return [];
+                        }
+
+                        // Filter by SDK language if specified
+                        if (!shouldIncludeLanguage(language, filterOptions?.sdkLanguage)) {
                             return [];
                         }
 
@@ -241,7 +312,8 @@ export function webhookDefinitionToMarkdown(
     webhook: ApiDefinition.WebhookDefinition,
     node: FernNavigation.NavigationNodePage,
     domain?: string,
-    apiDefinition?: ApiDefinition.ApiDefinition
+    apiDefinition?: ApiDefinition.ApiDefinition,
+    filterOptions?: MarkdownFilterOptions
 ): string {
     return runSyncSpan(
         "docs.webhookDefinitionToMarkdown",
@@ -249,7 +321,7 @@ export function webhookDefinitionToMarkdown(
             const pageHref = slugToHref(node.canonicalSlug ?? node.slug);
             const fullUrl = domain ? `https://${domain}${pageHref}` : undefined;
 
-            const webhookSections = generateWebhookSections(webhook, apiDefinition);
+            const webhookSections = generateWebhookSections(webhook, apiDefinition, filterOptions?.excludeSpec);
 
             return [
                 `# ${node.title}`,
@@ -273,7 +345,8 @@ export function websocketDefinitionToMarkdown(
     websocket: ApiDefinition.WebSocketChannel,
     node: FernNavigation.NavigationNodePage,
     domain?: string,
-    apiDefinition?: ApiDefinition.ApiDefinition
+    apiDefinition?: ApiDefinition.ApiDefinition,
+    filterOptions?: MarkdownFilterOptions
 ): string {
     return runSyncSpan(
         "docs.websocketDefinitionToMarkdown",
@@ -281,7 +354,7 @@ export function websocketDefinitionToMarkdown(
             const pageHref = slugToHref(node.canonicalSlug ?? node.slug);
             const fullUrl = domain ? `https://${domain}${pageHref}` : undefined;
 
-            const websocketSections = generateWebSocketSections(websocket, apiDefinition);
+            const websocketSections = generateWebSocketSections(websocket, apiDefinition, filterOptions?.excludeSpec);
 
             return [
                 `# ${node.title}`,

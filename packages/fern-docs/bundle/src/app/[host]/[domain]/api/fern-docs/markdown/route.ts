@@ -6,7 +6,12 @@ import { COOKIE_FERN_TOKEN, isLikelyBrowser, removeLeadingSlash } from "@fern-ap
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { getMarkdownForPath, getPageNodeForPath } from "@/server/getMarkdownForPath";
+import {
+    getMarkdownForPath,
+    getPageNodeForPath,
+    type MarkdownFilterOptions,
+    parseSdkLanguageFilter
+} from "@/server/getMarkdownForPath";
 import { parseRolesFromAuthedParam } from "@/server/parseRoles";
 
 /**
@@ -37,6 +42,14 @@ export async function GET(
     // Parse roles from authed query parameter
     const authedParam = req.nextUrl.searchParams.get("authed");
     const userRoles = parseRolesFromAuthedParam(authedParam);
+
+    // Parse filter options from query parameters
+    const langParam = req.nextUrl.searchParams.get("lang");
+    const excludeSpecParam = req.nextUrl.searchParams.get("excludeSpec");
+    const filterOptions: MarkdownFilterOptions = {
+        sdkLanguage: parseSdkLanguageFilter(langParam),
+        excludeSpec: excludeSpecParam === "true"
+    };
 
     let loader;
     let node;
@@ -73,7 +86,7 @@ export async function GET(
         return new NextResponse("User is not logged in", { status: 403 });
     }
 
-    const markdown = await getMarkdownForPath(node, loader, domain, userRoles);
+    const markdown = await getMarkdownForPath(node, loader, domain, userRoles, filterOptions);
     if (markdown == null) {
         console.error(`[${domain}] Markdown not found: ${path}`);
         return new NextResponse("Not found", {

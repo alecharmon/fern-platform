@@ -23,7 +23,28 @@ vi.mock("@/server/getSectionRoot", () => ({
 }));
 
 vi.mock("@/server/getMarkdownForPath", () => ({
-    getMarkdownForPath: vi.fn()
+    getMarkdownForPath: vi.fn(),
+    parseSdkLanguageFilter: vi.fn().mockImplementation((langParam: string | null) => {
+        if (langParam == null) {
+            return undefined;
+        }
+        const mappings: Record<string, string> = {
+            typescript: "node",
+            javascript: "node",
+            node: "node",
+            js: "node",
+            ts: "node",
+            python: "python",
+            py: "python",
+            java: "java",
+            ruby: "ruby",
+            go: "go",
+            golang: "go",
+            csharp: "csharp",
+            swift: "swift"
+        };
+        return mappings[langParam.toLowerCase()];
+    })
 }));
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";

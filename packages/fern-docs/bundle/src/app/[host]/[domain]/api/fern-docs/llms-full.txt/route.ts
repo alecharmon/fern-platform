@@ -7,7 +7,7 @@ import { uniqBy } from "es-toolkit/array";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { getMarkdownForPath } from "@/server/getMarkdownForPath";
+import { getMarkdownForPath, type MarkdownFilterOptions, parseSdkLanguageFilter } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
 import { parseRolesFromAuthedParam } from "@/server/parseRoles";
 
@@ -26,6 +26,14 @@ export async function GET(
     // Parse roles from authed query parameter
     const authedParam = req.nextUrl.searchParams.get("authed");
     const userRoles = parseRolesFromAuthedParam(authedParam);
+
+    // Parse filter options from query parameters
+    const langParam = req.nextUrl.searchParams.get("lang");
+    const excludeSpecParam = req.nextUrl.searchParams.get("excludeSpec");
+    const filterOptions: MarkdownFilterOptions = {
+        sdkLanguage: parseSdkLanguageFilter(langParam),
+        excludeSpec: excludeSpecParam === "true"
+    };
 
     let loader;
     let root;
@@ -107,7 +115,7 @@ export async function GET(
 
                 for (const node of uniqueNodes) {
                     try {
-                        const markdown = await getMarkdownForPath(node, loader, domain, userRoles);
+                        const markdown = await getMarkdownForPath(node, loader, domain, userRoles, filterOptions);
                         if (markdown != null) {
                             const content = markdown.content + "\n\n";
                             contentLength += content.length;

@@ -8,7 +8,7 @@ import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { getMarkdownForPath } from "@/server/getMarkdownForPath";
+import { getMarkdownForPath, type MarkdownFilterOptions, parseSdkLanguageFilter } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
 import { getLlmTxtMetadata } from "@/server/llm-txt-md";
 import { parseRolesFromAuthedParam } from "@/server/parseRoles";
@@ -54,6 +54,14 @@ export async function GET(
     // Parse roles from authed query parameter
     const authedParam = req.nextUrl.searchParams.get("authed");
     const userRoles = parseRolesFromAuthedParam(authedParam);
+
+    // Parse filter options from query parameters
+    const langParam = req.nextUrl.searchParams.get("lang");
+    const excludeSpecParam = req.nextUrl.searchParams.get("excludeSpec");
+    const filterOptions: MarkdownFilterOptions = {
+        sdkLanguage: parseSdkLanguageFilter(langParam),
+        excludeSpec: excludeSpecParam === "true"
+    };
 
     let loader;
     let root;
@@ -104,6 +112,7 @@ export async function GET(
                     path,
                     fernToken,
                     userRoles,
+                    filterOptions,
                     (chunk: string) => {
                         contentLength += chunk.length;
                         controller.enqueue(encoder.encode(chunk));
@@ -161,6 +170,7 @@ async function getLlmsTxtStreaming(
     path: string,
     fernToken: string | undefined,
     userRoles: string[],
+    filterOptions: MarkdownFilterOptions,
     onChunk: (chunk: string) => void,
     loader: Awaited<ReturnType<typeof createCachedDocsLoader>>,
     root: FernNavigation.NavigationNodeWithMetadata
@@ -204,7 +214,7 @@ async function getLlmsTxtStreaming(
     const landingPage = getLandingPage(root);
     const markdown =
         landingPage != null && !landingPage.authed && !landingPage.hidden
-            ? await getMarkdownForPath(landingPage, loader, domain, userRoles)
+            ? await getMarkdownForPath(landingPage, loader, domain, userRoles, filterOptions)
             : undefined;
 
     const header = markdown?.content ?? `# ${root.title}`;
