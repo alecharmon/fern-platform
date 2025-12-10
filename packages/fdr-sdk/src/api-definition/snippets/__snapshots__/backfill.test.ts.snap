@@ -185,7 +185,8 @@ client = Catcatcat::Client.new(base_url: 'https://api.example.com/v1');
 client.users.create_user(
   name: 'John Doe',
   email: 'john.doe@example.com',
-  password: 'securePassword123'
+  password: 'securePassword123',
+  role: 'user'
 );
 ",
       "description": undefined,
@@ -1386,7 +1387,7 @@ client.conversations.get(
 
 client = Pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
 
-client.conversations.get();
+client.conversations.get(request: {});
 ",
                 "description": undefined,
                 "generated": true,
