@@ -8,6 +8,7 @@ import { mergeHeaders } from "./core/headers.js";
 import { Analytics } from "./api/resources/analytics/client/Client.js";
 import { Chat } from "./api/resources/chat/client/Client.js";
 import { Code } from "./api/resources/code/client/Client.js";
+import { ContentHash } from "./api/resources/contentHash/client/Client.js";
 import { Conversation } from "./api/resources/conversation/client/Client.js";
 import { Discord } from "./api/resources/discord/client/Client.js";
 import { Document } from "./api/resources/document/client/Client.js";
@@ -55,6 +56,7 @@ export class FernAIClient {
     protected _analytics: Analytics | undefined;
     protected _chat: Chat | undefined;
     protected _code: Code | undefined;
+    protected _contentHash: ContentHash | undefined;
     protected _conversation: Conversation | undefined;
     protected _discord: Discord | undefined;
     protected _document: Document | undefined;
@@ -97,6 +99,10 @@ export class FernAIClient {
 
     public get code(): Code {
         return (this._code ??= new Code(this._options));
+    }
+
+    public get contentHash(): ContentHash {
+        return (this._contentHash ??= new ContentHash(this._options));
     }
 
     public get conversation(): Conversation {

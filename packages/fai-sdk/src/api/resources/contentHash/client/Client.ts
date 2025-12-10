@@ -4,11 +4,11 @@
 
 import * as environments from "../../../../environments.js";
 import * as core from "../../../../core/index.js";
+import * as FernAI from "../../../index.js";
 import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
-import * as FernAI from "../../../index.js";
 
-export declare namespace SlackScribe {
+export declare namespace ContentHash {
     export interface Options {
         environment?: core.Supplier<environments.FernAIEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
@@ -32,99 +32,39 @@ export declare namespace SlackScribe {
     }
 }
 
-export class SlackScribe {
-    protected readonly _options: SlackScribe.Options;
+export class ContentHash {
+    protected readonly _options: ContentHash.Options;
 
-    constructor(_options: SlackScribe.Options = {}) {
+    constructor(_options: ContentHash.Options = {}) {
         this._options = _options;
     }
 
     /**
-     * @param {SlackScribe.RequestOptions} requestOptions - Request-specific configuration.
+     * Get content hashes for multiple parent_ids.
+     * If parent_ids is empty, returns all content hashes for the domain.
      *
-     * @example
-     *     await client.slackScribe.handleScribeSlackEvents()
-     */
-    public handleScribeSlackEvents(requestOptions?: SlackScribe.RequestOptions): core.HttpResponsePromise<unknown> {
-        return core.HttpResponsePromise.fromPromise(this.__handleScribeSlackEvents(requestOptions));
-    }
-
-    private async __handleScribeSlackEvents(
-        requestOptions?: SlackScribe.RequestOptions,
-    ): Promise<core.WithRawResponse<unknown>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.FernAIEnvironment.Production,
-                "scribe/slack/events",
-            ),
-            method: "POST",
-            headers: _headers,
-            queryParameters: requestOptions?.queryParams,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            throw new errors.FernAIError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.FernAIError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /scribe/slack/events.");
-            case "unknown":
-                throw new errors.FernAIError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * @param {FernAI.GetScribeSlackInstallLinkRequest} request
-     * @param {SlackScribe.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {string} domain
+     * @param {FernAI.BatchGetContentHashesRequest} request
+     * @param {ContentHash.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.slackScribe.getScribeSlackInstallLink({
-     *         github_repo: "github_repo"
-     *     })
+     *     await client.contentHash.batchGetContentHashes("domain")
      */
-    public getScribeSlackInstallLink(
-        request: FernAI.GetScribeSlackInstallLinkRequest,
-        requestOptions?: SlackScribe.RequestOptions,
-    ): core.HttpResponsePromise<unknown> {
-        return core.HttpResponsePromise.fromPromise(this.__getScribeSlackInstallLink(request, requestOptions));
+    public batchGetContentHashes(
+        domain: string,
+        request: FernAI.BatchGetContentHashesRequest = {},
+        requestOptions?: ContentHash.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.BatchGetContentHashesResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__batchGetContentHashes(domain, request, requestOptions));
     }
 
-    private async __getScribeSlackInstallLink(
-        request: FernAI.GetScribeSlackInstallLinkRequest,
-        requestOptions?: SlackScribe.RequestOptions,
-    ): Promise<core.WithRawResponse<unknown>> {
-        const { github_repo: githubRepo } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        _queryParams["github_repo"] = githubRepo;
+    private async __batchGetContentHashes(
+        domain: string,
+        request: FernAI.BatchGetContentHashesRequest = {},
+        requestOptions?: ContentHash.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.BatchGetContentHashesResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -135,17 +75,20 @@ export class SlackScribe {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "scribe/slack/get-install",
+                `content-hash/${encodeURIComponent(domain)}/batch-get`,
             ),
-            method: "GET",
+            method: "POST",
             headers: _headers,
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.BatchGetContentHashesResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -172,7 +115,9 @@ export class SlackScribe {
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /scribe/slack/get-install.");
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling POST /content-hash/{domain}/batch-get.",
+                );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
@@ -182,35 +127,36 @@ export class SlackScribe {
     }
 
     /**
-     * @param {FernAI.HandleScribeSlackOauthCallbackRequest} request
-     * @param {SlackScribe.RequestOptions} requestOptions - Request-specific configuration.
+     * Upsert content hashes for multiple parent_ids.
+     * Creates new records or updates existing ones.
+     *
+     * @param {string} domain
+     * @param {FernAI.BatchUpsertContentHashesRequest} request
+     * @param {ContentHash.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.slackScribe.handleScribeSlackOauthCallback({
-     *         code: "code",
-     *         state: "state"
+     *     await client.contentHash.batchUpsertContentHashes("domain", {
+     *         entries: [{
+     *                 parent_id: "parent_id",
+     *                 content_hash: "content_hash"
+     *             }]
      *     })
      */
-    public handleScribeSlackOauthCallback(
-        request: FernAI.HandleScribeSlackOauthCallbackRequest,
-        requestOptions?: SlackScribe.RequestOptions,
-    ): core.HttpResponsePromise<unknown> {
-        return core.HttpResponsePromise.fromPromise(this.__handleScribeSlackOauthCallback(request, requestOptions));
+    public batchUpsertContentHashes(
+        domain: string,
+        request: FernAI.BatchUpsertContentHashesRequest,
+        requestOptions?: ContentHash.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.BatchUpsertContentHashesResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__batchUpsertContentHashes(domain, request, requestOptions));
     }
 
-    private async __handleScribeSlackOauthCallback(
-        request: FernAI.HandleScribeSlackOauthCallbackRequest,
-        requestOptions?: SlackScribe.RequestOptions,
-    ): Promise<core.WithRawResponse<unknown>> {
-        const { code, state } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        _queryParams["code"] = code;
-        if (state != null) {
-            _queryParams["state"] = state;
-        }
-
+    private async __batchUpsertContentHashes(
+        domain: string,
+        request: FernAI.BatchUpsertContentHashesRequest,
+        requestOptions?: ContentHash.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.BatchUpsertContentHashesResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -221,17 +167,23 @@ export class SlackScribe {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "scribe/slack/oauth/callback",
+                `content-hash/${encodeURIComponent(domain)}/batch-upsert`,
             ),
-            method: "GET",
+            method: "POST",
             headers: _headers,
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as FernAI.BatchUpsertContentHashesResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
@@ -258,7 +210,9 @@ export class SlackScribe {
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernAITimeoutError("Timeout exceeded when calling GET /scribe/slack/oauth/callback.");
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling POST /content-hash/{domain}/batch-upsert.",
+                );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
@@ -268,18 +222,32 @@ export class SlackScribe {
     }
 
     /**
-     * @param {SlackScribe.RequestOptions} requestOptions - Request-specific configuration.
+     * Delete content hashes for multiple parent_ids.
+     *
+     * @param {string} domain
+     * @param {FernAI.DeleteContentHashesRequest} request
+     * @param {ContentHash.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.slackScribe.handleScribeSlashCommands()
+     *     await client.contentHash.deleteContentHashes("domain", {
+     *         parent_ids: ["parent_ids"]
+     *     })
      */
-    public handleScribeSlashCommands(requestOptions?: SlackScribe.RequestOptions): core.HttpResponsePromise<unknown> {
-        return core.HttpResponsePromise.fromPromise(this.__handleScribeSlashCommands(requestOptions));
+    public deleteContentHashes(
+        domain: string,
+        request: FernAI.DeleteContentHashesRequest,
+        requestOptions?: ContentHash.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.DeleteContentHashesResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteContentHashes(domain, request, requestOptions));
     }
 
-    private async __handleScribeSlashCommands(
-        requestOptions?: SlackScribe.RequestOptions,
-    ): Promise<core.WithRawResponse<unknown>> {
+    private async __deleteContentHashes(
+        domain: string,
+        request: FernAI.DeleteContentHashesRequest,
+        requestOptions?: ContentHash.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.DeleteContentHashesResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
@@ -290,25 +258,36 @@ export class SlackScribe {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.FernAIEnvironment.Production,
-                "scribe/slack/slash-commands",
+                `content-hash/${encodeURIComponent(domain)}/delete`,
             ),
-            method: "POST",
+            method: "DELETE",
             headers: _headers,
+            contentType: "application/json",
             queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body, rawResponse: _response.rawResponse };
+            return { data: _response.body as FernAI.DeleteContentHashesResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.FernAIError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -319,7 +298,9 @@ export class SlackScribe {
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.FernAITimeoutError("Timeout exceeded when calling POST /scribe/slack/slash-commands.");
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling DELETE /content-hash/{domain}/delete.",
+                );
             case "unknown":
                 throw new errors.FernAIError({
                     message: _response.error.errorMessage,
