@@ -44,7 +44,7 @@ export default async function AnnouncementPage({
 
     return (
         <Announcement announcement={announcementText}>
-            <React.Suspense fallback={announcementText}>
+            <React.Suspense fallback={null}>
                 <MdxServerComponent serialize={serialize} mdx={announcementText} />
             </React.Suspense>
         </Announcement>
