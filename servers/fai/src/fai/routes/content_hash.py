@@ -57,8 +57,10 @@ async def batch_get_content_hashes(
 
         entries = [
             ContentHashEntry(
+                domain=h.domain,
                 parent_id=h.parent_id,
                 content_hash=h.content_hash,
+                chunk_count=h.chunk_count,
                 indexed_at=h.indexed_at.isoformat(),
             )
             for h in hashes
@@ -99,9 +101,15 @@ async def batch_upsert_content_hashes(
 
             if existing:
                 existing.content_hash = entry.content_hash
+                existing.chunk_count = entry.chunk_count
                 existing.updated_at = datetime.utcnow()
             else:
-                new_hash = ContentHashDb(domain=domain, parent_id=entry.parent_id, content_hash=entry.content_hash)
+                new_hash = ContentHashDb(
+                    domain=domain,
+                    parent_id=entry.parent_id,
+                    content_hash=entry.content_hash,
+                    chunk_count=entry.chunk_count,
+                )
                 db.add(new_hash)
 
             upserted_count += 1

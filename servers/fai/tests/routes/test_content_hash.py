@@ -29,9 +29,9 @@ class TestBatchGetContentHashes:
         domain = "test-domain"
 
         # Insert test data
-        hash1 = ContentHashDb(domain=domain, parent_id="page-1", content_hash="hash1")
-        hash2 = ContentHashDb(domain=domain, parent_id="page-2", content_hash="hash2")
-        hash3 = ContentHashDb(domain="other-domain", parent_id="page-3", content_hash="hash3")
+        hash1 = ContentHashDb(domain=domain, parent_id="page-1", content_hash="hash1", chunk_count=5)
+        hash2 = ContentHashDb(domain=domain, parent_id="page-2", content_hash="hash2", chunk_count=10)
+        hash3 = ContentHashDb(domain="other-domain", parent_id="page-3", content_hash="hash3", chunk_count=15)
         test_session.add_all([hash1, hash2, hash3])
         await test_session.commit()
 
@@ -52,9 +52,9 @@ class TestBatchGetContentHashes:
         domain = "test-domain"
 
         # Insert test data
-        hash1 = ContentHashDb(domain=domain, parent_id="page-1", content_hash="hash1")
-        hash2 = ContentHashDb(domain=domain, parent_id="page-2", content_hash="hash2")
-        hash3 = ContentHashDb(domain=domain, parent_id="page-3", content_hash="hash3")
+        hash1 = ContentHashDb(domain=domain, parent_id="page-1", content_hash="hash1", chunk_count=5)
+        hash2 = ContentHashDb(domain=domain, parent_id="page-2", content_hash="hash2", chunk_count=10)
+        hash3 = ContentHashDb(domain=domain, parent_id="page-3", content_hash="hash3", chunk_count=15)
         test_session.add_all([hash1, hash2, hash3])
         await test_session.commit()
 
@@ -94,8 +94,8 @@ class TestBatchUpsertContentHashes:
             f"/content-hash/{domain}/batch-upsert",
             json={
                 "entries": [
-                    {"parent_id": "page-1", "content_hash": "hash1"},
-                    {"parent_id": "page-2", "content_hash": "hash2"},
+                    {"parent_id": "page-1", "content_hash": "hash1", "chunk_count": 5},
+                    {"parent_id": "page-2", "content_hash": "hash2", "chunk_count": 10},
                 ]
             },
         )
@@ -119,14 +119,14 @@ class TestBatchUpsertContentHashes:
         domain = "test-domain"
 
         # Insert initial hash
-        initial = ContentHashDb(domain=domain, parent_id="page-1", content_hash="old-hash")
+        initial = ContentHashDb(domain=domain, parent_id="page-1", content_hash="old-hash", chunk_count=5)
         test_session.add(initial)
         await test_session.commit()
 
         # Update with new hash
         response = test_client.post(
             f"/content-hash/{domain}/batch-upsert",
-            json={"entries": [{"parent_id": "page-1", "content_hash": "new-hash"}]},
+            json={"entries": [{"parent_id": "page-1", "content_hash": "new-hash", "chunk_count": 10}]},
         )
 
         assert response.status_code == 200
@@ -146,7 +146,7 @@ class TestBatchUpsertContentHashes:
         domain = "test-domain"
 
         # Insert existing hash
-        existing = ContentHashDb(domain=domain, parent_id="page-1", content_hash="old-hash")
+        existing = ContentHashDb(domain=domain, parent_id="page-1", content_hash="old-hash", chunk_count=5)
         test_session.add(existing)
         await test_session.commit()
 
@@ -155,8 +155,8 @@ class TestBatchUpsertContentHashes:
             f"/content-hash/{domain}/batch-upsert",
             json={
                 "entries": [
-                    {"parent_id": "page-1", "content_hash": "updated-hash"},
-                    {"parent_id": "page-2", "content_hash": "new-hash"},
+                    {"parent_id": "page-1", "content_hash": "updated-hash", "chunk_count": 10},
+                    {"parent_id": "page-2", "content_hash": "new-hash", "chunk_count": 15},
                 ]
             },
         )
@@ -184,9 +184,9 @@ class TestDeleteContentHashes:
         domain = "test-domain"
 
         # Insert test hashes
-        hash1 = ContentHashDb(domain=domain, parent_id="page-1", content_hash="hash1")
-        hash2 = ContentHashDb(domain=domain, parent_id="page-2", content_hash="hash2")
-        hash3 = ContentHashDb(domain=domain, parent_id="page-3", content_hash="hash3")
+        hash1 = ContentHashDb(domain=domain, parent_id="page-1", content_hash="hash1", chunk_count=5)
+        hash2 = ContentHashDb(domain=domain, parent_id="page-2", content_hash="hash2", chunk_count=10)
+        hash3 = ContentHashDb(domain=domain, parent_id="page-3", content_hash="hash3", chunk_count=15)
         test_session.add_all([hash1, hash2, hash3])
         await test_session.commit()
 
@@ -215,7 +215,7 @@ class TestDeleteContentHashes:
         domain = "test-domain"
 
         # Insert test hash
-        hash1 = ContentHashDb(domain=domain, parent_id="page-1", content_hash="hash1")
+        hash1 = ContentHashDb(domain=domain, parent_id="page-1", content_hash="hash1", chunk_count=5)
         test_session.add(hash1)
         await test_session.commit()
 

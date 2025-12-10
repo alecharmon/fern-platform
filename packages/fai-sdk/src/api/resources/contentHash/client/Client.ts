@@ -140,7 +140,8 @@ export class ContentHash {
      *     await client.contentHash.batchUpsertContentHashes("domain", {
      *         entries: [{
      *                 parent_id: "parent_id",
-     *                 content_hash: "content_hash"
+     *                 content_hash: "content_hash",
+     *                 chunk_count: 1
      *             }]
      *     })
      */

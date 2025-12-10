@@ -8,4 +8,5 @@
 export interface ContentHashUpsertEntry {
     parent_id: string;
     content_hash: string;
+    chunk_count: number;
 }

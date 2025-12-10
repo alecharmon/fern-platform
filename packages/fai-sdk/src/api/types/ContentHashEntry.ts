@@ -6,7 +6,9 @@
  * A single content hash entry.
  */
 export interface ContentHashEntry {
+    domain: string;
     parent_id: string;
     content_hash: string;
+    chunk_count: number;
     indexed_at?: string;
 }

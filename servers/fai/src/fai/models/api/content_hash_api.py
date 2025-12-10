@@ -6,8 +6,10 @@ from pydantic import BaseModel
 class ContentHashEntry(BaseModel):
     """A single content hash entry."""
 
+    domain: str
     parent_id: str
     content_hash: str
+    chunk_count: int
     indexed_at: str | None = None
 
 
@@ -16,6 +18,7 @@ class ContentHashUpsertEntry(BaseModel):
 
     parent_id: str
     content_hash: str
+    chunk_count: int
 
 
 class BatchGetContentHashesRequest(BaseModel):

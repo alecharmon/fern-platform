@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Index, String
+from sqlalchemy import Column, DateTime, Index, Integer, String
 
 from fai.models.base import Base
 
@@ -17,6 +17,7 @@ class ContentHashDb(Base):
     parent_id = Column(String, primary_key=True, nullable=False, comment="FDR PageId or EndpointId")
 
     content_hash = Column(String, nullable=False, comment="SHA-256 hash of page markdown or endpoint document content")
+    chunk_count = Column(Integer, nullable=False, comment="Number of chunks created during indexing")
 
     # Metadata
     indexed_at = Column(DateTime, nullable=False, default=datetime.utcnow)
