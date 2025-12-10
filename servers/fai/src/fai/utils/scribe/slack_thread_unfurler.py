@@ -7,8 +7,8 @@ from fai.settings import LOGGER
 
 
 def extract_slack_thread_urls(text: str) -> list[dict[str, str]]:
-    slack_wrapped_pattern = r"<(https://[\w\-]+\.slack\.com/archives/(C[A-Z0-9]+)/p(\d+)(?:\?thread_ts=(\d+\.\d+))?(?:&cid=[A-Z0-9]+)?)(?:\|[^>]+)?>"
-    plain_url_pattern = r"(?<!<)https://[\w\-]+\.slack\.com/archives/(C[A-Z0-9]+)/p(\d+)(?:\?thread_ts=(\d+\.\d+))?(?:&cid=[A-Z0-9]+)?(?![>\|])"
+    slack_wrapped_pattern = r"<(https://[\w\-]+\.slack\.com/archives/(C[A-Z0-9]+)/p(\d+)(?:\?thread_ts=(\d+\.\d+))?(?:&(?:amp;)?cid=[A-Z0-9]+)?)(?:\|[^>]+)?>"
+    plain_url_pattern = r"(?<!<)https://[\w\-]+\.slack\.com/archives/(C[A-Z0-9]+)/p(\d+)(?:\?thread_ts=(\d+\.\d+))?(?:&(?:amp;)?cid=[A-Z0-9]+)?(?![>\|])"
 
     threads = []
     seen_urls = set()
