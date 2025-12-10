@@ -5,7 +5,7 @@ These routes provide simple read/write operations for content hashes.
 The actual diffing logic lives in the fai-reindexing service.
 """
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 from fastapi import Body, Depends
 from fastapi.encoders import jsonable_encoder
@@ -99,7 +99,7 @@ async def batch_upsert_content_hashes(
 
             if existing:
                 existing.content_hash = entry.content_hash
-                existing.updated_at = datetime.now(UTC)
+                existing.updated_at = datetime.utcnow()
             else:
                 new_hash = ContentHashDb(domain=domain, parent_id=entry.parent_id, content_hash=entry.content_hash)
                 db.add(new_hash)

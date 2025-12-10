@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Index, String
 
@@ -19,8 +19,8 @@ class ContentHashDb(Base):
     content_hash = Column(String, nullable=False, comment="SHA-256 hash of page markdown or endpoint document content")
 
     # Metadata
-    indexed_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
-    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
+    indexed_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
         Index("idx_content_hashes_domain", "domain"),
