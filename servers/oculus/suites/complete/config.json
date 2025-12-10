@@ -3,7 +3,7 @@
   "collections": [
     "complete-retrieval",
     "complete-changelogs",
-    "complete-endpoints"
+    "elevenlabs-api-mixed"
   ],
   "evaluators": [
     "correctness",
