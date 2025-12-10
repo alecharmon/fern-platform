@@ -167,6 +167,7 @@ async def handle_oauth_callback(
                 raise HTTPException(status_code=500, detail=oauth_response.get("error", "OAuth failed"))
 
             team_id = oauth_response.get("team", {}).get("id")
+            new_app_id = oauth_response.get("app_id")
 
             if team_id:
                 existing_team_result = await session.execute(
@@ -178,14 +179,31 @@ async def handle_oauth_callback(
 
                 if existing_team_integration:
                     old_integration_id = existing_team_integration.integration_id
-                    LOGGER.info(f"{log_prefix} Removing team {team_id} from old integration {old_integration_id}")
-                    existing_team_integration.slack_team_id = None
-                    existing_team_integration.slack_team_name = None
-                    existing_team_integration.slack_bot_token = None
-                    existing_team_integration.slack_bot_user_id = None
-                    existing_team_integration.slack_app_id = None
-                    existing_team_integration.installed_at = None
-                    await session.flush()
+                    old_app_id = existing_team_integration.slack_app_id
+
+                    if new_app_id is None or old_app_id is None:
+                        LOGGER.warning(
+                            f"{log_prefix} Team {team_id} already exists in integration {old_integration_id}. "
+                            f"Not removing because app_id is missing (new: {new_app_id}, old: {old_app_id})"
+                        )
+                    elif new_app_id == old_app_id:
+                        LOGGER.info(
+                            f"{log_prefix} Removing team {team_id} from old integration {old_integration_id} "
+                            f"(same app_id: {new_app_id})"
+                        )
+                        existing_team_integration.slack_team_id = None
+                        existing_team_integration.slack_team_name = None
+                        existing_team_integration.slack_bot_token = None
+                        existing_team_integration.slack_bot_user_id = None
+                        existing_team_integration.slack_app_id = None
+                        existing_team_integration.installed_at = None
+                        await session.flush()
+                    else:
+                        LOGGER.warning(
+                            f"{log_prefix} Team {team_id} already exists in integration {old_integration_id} "
+                            f"with different app_id (new: {new_app_id}, old: {old_app_id}). "
+                            f"Allowing both integrations to exist."
+                        )
 
             integration.slack_team_id = team_id
             integration.slack_team_name = oauth_response.get("team", {}).get("name")

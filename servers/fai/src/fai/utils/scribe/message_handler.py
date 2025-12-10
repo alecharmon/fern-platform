@@ -91,6 +91,8 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
     files = event.get("files", [])
 
     LOGGER.info(f"[SCRIBE] Processing message from {user} in {channel}: {text}")
+    LOGGER.info(f"[SCRIBE] Event has {len(files)} files: {[f.get('name') for f in files]}")
+    LOGGER.info(f"[SCRIBE] Full event keys: {list(event.keys())}")
 
     integration = await get_scribe_integration(team_id)
     if not integration:
