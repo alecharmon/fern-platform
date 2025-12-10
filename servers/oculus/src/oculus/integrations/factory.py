@@ -3,9 +3,10 @@ import os
 from oculus.integrations.base import AnswerIntegration
 from oculus.integrations.fai_http import FAIHTTPIntegration
 from oculus.integrations.fai_local import FAILocalIntegration
+from oculus.integrations.faichat_http import FAIChatHTTPIntegration
 from oculus.integrations.vercel_http import VercelHTTPIntegration
 
-INTEGRATION_TYPES = ["fai-local", "fai-http", "vercel-http"]
+INTEGRATION_TYPES = ["fai-local", "fai-http", "vercel-http", "faichat-http"]
 
 
 def create_integration(
@@ -20,7 +21,7 @@ def create_integration(
     Create an answer integration based on type.
 
     Args:
-        integration_type: Type of integration ("fai-local", "fai-http", "vercel-http")
+        integration_type: Type of integration ("fai-local", "fai-http", "vercel-http", "faichat-http")
         domain: Documentation domain
         model: Model to use for generation
         system_prompt: Optional system prompt override
@@ -37,6 +38,7 @@ def create_integration(
         FAI_URL: Base URL for FAI service (for fai-http)
         FERN_TOKEN: Auth token for FAI (for fai-http)
         VERCEL_URL: Base URL for Vercel docs site (for vercel-http, required)
+        FAICHAT_URL: Base URL for FAI-Chat service (for faichat-http)
     """
     integration_type = integration_type.lower()
 
@@ -65,6 +67,21 @@ def create_integration(
             model=model,
             system_prompt=system_prompt,
             vercel_url=vercel_url,
+        )
+
+    elif integration_type == "faichat-http":
+        faichat_url_kwarg = kwargs.get("faichat_url")
+        faichat_url = (faichat_url_kwarg if isinstance(faichat_url_kwarg, str) else None) or os.environ.get(
+            "FAICHAT_URL"
+        )
+        ssl_verify_kwarg = kwargs.get("ssl_verify")
+        ssl_verify = ssl_verify_kwarg if isinstance(ssl_verify_kwarg, bool) else None
+        return FAIChatHTTPIntegration(
+            domain=domain,
+            model=model,
+            system_prompt=system_prompt,
+            faichat_url=faichat_url,
+            ssl_verify=ssl_verify,
         )
 
     else:

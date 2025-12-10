@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/search"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/voices/search"
     ],
     "correctness": [
       "Must mention GET /v2/voices endpoint",

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/sdks/deep-dives/customize-method-names"
+      "https://fern-eval.docs.buildwithfern.com/learn/sdks/deep-dives/customize-method-names"
     ],
     "correctness": [
       "The answer must mention the `x-fern-sdk-group-name` extension.",

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/api-definitions/openapi/extensions/api-version"
+      "https://fern-eval.docs.buildwithfern.com/learn/api-definitions/openapi/extensions/api-version"
     ],
     "correctness": [
       "The answer must mention the `x-fern-version` extension.",

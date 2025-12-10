@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/developer-tools/cursor"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/developer-tools/cursor"
     ],
     "correctness": [
       "The answer must mention the `.cursorrules` file.",

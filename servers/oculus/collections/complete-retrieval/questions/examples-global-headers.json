@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/api-definitions/ferndef/examples"
+      "https://fern-eval.docs.buildwithfern.com/learn/api-definitions/ferndef/examples"
     ],
     "correctness": [
       "The answer must mention that global headers must be included in the examples section of your endpoint definition by adding a headers field.",

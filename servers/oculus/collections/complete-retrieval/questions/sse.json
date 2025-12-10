@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/api-definitions/openapi/endpoints/sses"
+      "https://fern-eval.docs.buildwithfern.com/learn/api-definitions/openapi/endpoints/sses"
     ],
     "correctness": [
       "The answer must mention the `response-stream` property.",

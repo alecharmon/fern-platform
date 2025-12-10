@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/audio-isolation/convert"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/audio-isolation/convert"
     ],
     "correctness": [
       "Must mention file_format parameter",

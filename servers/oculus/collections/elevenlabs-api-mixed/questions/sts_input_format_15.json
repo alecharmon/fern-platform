@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/speech-to-speech/convert"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/speech-to-speech/convert"
     ],
     "correctness": [
       "Must mention file_format parameter",

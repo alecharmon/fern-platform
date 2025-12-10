@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/speech-to-speech/stream"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/speech-to-speech/stream"
     ],
     "correctness": [
       "Must mention the /stream endpoint",

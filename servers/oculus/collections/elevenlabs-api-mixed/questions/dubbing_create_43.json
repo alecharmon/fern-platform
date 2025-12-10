@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/dubbing/create"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/dubbing/create"
     ],
     "correctness": [
       "Must mention POST /v1/dubbing endpoint",

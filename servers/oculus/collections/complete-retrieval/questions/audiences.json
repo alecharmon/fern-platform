@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/sdks/deep-dives/audiences"
+      "https://fern-eval.docs.buildwithfern.com/learn/sdks/deep-dives/audiences"
     ],
     "correctness": [
       "The answer must mention the `audiences` section in the `api.yml` file.",

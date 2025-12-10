@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/sdks/generators/swift/configuration"
+      "https://fern-eval.docs.buildwithfern.com/learn/sdks/generators/swift/configuration"
     ],
     "correctness": [
       "The answer must mention the `clientClassName` configuration option.",

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/sdks/generators/typescript/custom-code"
+      "https://fern-eval.docs.buildwithfern.com/learn/sdks/generators/typescript/custom-code"
     ],
     "correctness": [
       "The answer should mention that you can add both custom code and custom methods to the SDK itself.",

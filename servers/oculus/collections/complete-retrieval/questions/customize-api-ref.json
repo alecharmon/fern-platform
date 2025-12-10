@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/api-references/customize-api-reference-layout"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/api-references/customize-api-reference-layout"
     ],
     "correctness": [
       "The answer must mention the `section` property in the `docs.yml` file.",

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/cli-api-reference/cli-reference/commands#fern-generate"
+      "https://fern-eval.docs.buildwithfern.com/learn/cli-api-reference/cli-reference/commands#fern-generate"
     ],
     "correctness": [
       "The answer must mention the `fern generate --preview` command.",

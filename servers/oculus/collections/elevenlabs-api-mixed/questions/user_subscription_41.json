@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/user/get"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/user/get"
     ],
     "correctness": [
       "Must mention GET /v1/user endpoint",

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/writing-content/components/callouts"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/writing-content/components/callouts"
     ],
     "correctness": [
       "The answer must mention the eight available intent types for the `Callout` component.",

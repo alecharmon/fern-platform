@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/api-definitions/openrpc/extensions/base-path"
+      "https://fern-eval.docs.buildwithfern.com/learn/api-definitions/openrpc/extensions/base-path"
     ],
     "correctness": [
       "The answer must mention the `x-fern-base-path` extension.",

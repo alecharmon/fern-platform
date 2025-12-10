@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/settings/get-default"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/voices/settings/get-default"
     ],
     "correctness": [
       "Must mention GET /v1/voices/settings/default endpoint",

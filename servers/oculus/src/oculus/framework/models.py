@@ -15,7 +15,7 @@ class CollectionConfig(BaseModel):
 class SuiteConfig(BaseModel):
     """Configuration for an evaluation suite."""
 
-    integration: Literal["fai-local", "fai-http", "vercel-http"]
+    integration: Literal["fai-local", "fai-http", "vercel-http", "faichat-http"]
     collections: list[str] = Field(default_factory=list)
     evaluators: list[str] = Field(default_factory=list)
     rewrite_query: bool = False
@@ -89,6 +89,8 @@ class EvaluationRun(BaseModel):
     run_id: str
     timestamp: str
     suite: str
+    integration: str | None = None
+    model: str | None = None
     results: list[Evaluation]
     metrics: "EvaluationMetrics"
 

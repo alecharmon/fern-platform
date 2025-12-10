@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/voices/delete"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/voices/delete"
     ],
     "correctness": [
       "Must mention DELETE /v1/voices/{voice_id} endpoint",

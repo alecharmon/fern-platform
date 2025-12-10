@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/writing-content/components/anchor"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/writing-content/components/anchor"
     ],
     "correctness": [
       "The answer must mention the `<Anchor>` tag.",

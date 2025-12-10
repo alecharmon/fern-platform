@@ -10,9 +10,19 @@ The `oculus` subrepository is used to generate and run evaluations on Ask Fern. 
 
 Oculus supports multiple integration types for generating answers:
 
-- `fai-local`
-- `fai-http`
-- `vercel-http` (requires `VERCEL_URL` environment variable)
+- `faichat-http` (default) - Calls fai-chat service `/chat` endpoint
+- `fai-local` - Runs FAI locally in-process
+- `fai-http` - Calls FAI HTTP `/chat` endpoint
+- `vercel-http` - Calls Vercel docs site chat endpoint (requires `VERCEL_URL`)
+
+### Environment Variables
+
+- `FAICHAT_URL` - FAI-Chat service URL (default: `https://fai-chat.buildwithfern.com`)
+  - Dev: `https://fai-chat-dev2.buildwithfern.com`
+  - Preview URLs: SSL verification is automatically disabled for non-buildwithfern.com domains
+- `VERCEL_URL` - Vercel docs site URL (required for `vercel-http`)
+- `FAI_URL` - FAI service URL (for `fai-http`, default: `https://fai.buildwithfern.com`)
+- `FERN_TOKEN` - Auth token for FAI (required for `fai-http`)
 
 ### Selecting Integration
 
@@ -67,7 +77,7 @@ oculus diff --suite payroc --baseline --baseline-run 20251111_163859
 - `{question-slug}.md` - Per-question comparison with retrieved docs, sources, and subqueries
 
 **Options:**
-- `--integration`: One of `fai-local`, `fai-http`, `vercel-http` (defaults to suite config, then `OCULUS_INTEGRATION` env var, or `fai-local`)
+- `--integration`: One of `faichat-http`, `fai-local`, `fai-http`, `vercel-http` (defaults to suite config)
 - `--model`: One of `claude-4-sonnet-20250514`, `command-a-03-2025` (default: `claude-4-sonnet-20250514`)
 - `--judge-model`: Claude model for evaluation judging (default: `claude-opus-4-20250514`)
 - `--output-dir`: Directory to save results and GitHub-formatted outputs

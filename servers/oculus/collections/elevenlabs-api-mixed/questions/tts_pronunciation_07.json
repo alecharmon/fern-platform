@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/text-to-speech/convert"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/text-to-speech/convert"
     ],
     "correctness": [
       "Must mention pronunciation_dictionary_locators",

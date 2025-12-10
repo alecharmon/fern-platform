@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/authentication/rbac"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/authentication/rbac"
     ],
     "correctness": [
       "The answer must mention the `<If />` component.",

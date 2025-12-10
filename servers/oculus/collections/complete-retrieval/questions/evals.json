@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/ask-fern/features/evaluation"
+      "https://fern-eval.docs.buildwithfern.com/learn/ask-fern/features/evaluation"
     ],
     "correctness": [
       "The answer should mention that Fern generates eval questions from documentation files.",

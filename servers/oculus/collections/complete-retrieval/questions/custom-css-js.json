@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/customization/custom-css-js"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/customization/custom-css-js"
     ],
     "correctness": [
       "The answer must mention the `styles.css` file.",

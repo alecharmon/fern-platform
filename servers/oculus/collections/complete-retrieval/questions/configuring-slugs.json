@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/seo/configuring-slugs"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/seo/configuring-slugs"
     ],
     "correctness": [
       "The answer must mention the `slug` property in the `navigation` object in the `docs.yml` file.",

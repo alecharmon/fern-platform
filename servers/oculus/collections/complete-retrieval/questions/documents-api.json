@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/ask-fern/configuration/documents"
+      "https://fern-eval.docs.buildwithfern.com/learn/ask-fern/configuration/documents"
     ],
     "correctness": [
       "The answer must mention the Documents API.",

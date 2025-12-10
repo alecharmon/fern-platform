@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/ask-fern/features/citations"
+      "https://fern-eval.docs.buildwithfern.com/learn/ask-fern/features/citations"
     ],
     "correctness": [
       "The answer must mention that Fern's AI search includes citations with responses."

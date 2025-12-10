@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/api-definitions/grpc/sync-your-g-rpc-specification"
+      "https://fern-eval.docs.buildwithfern.com/learn/api-definitions/grpc/sync-your-g-rpc-specification"
     ],
     "correctness": [
       "The answer must mention using Fern's GitHub Action.",

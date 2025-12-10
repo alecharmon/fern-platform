@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/api-references/api-explorer/overview"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/api-references/api-explorer/overview"
     ],
     "correctness": [
       "The answer should indicate that the API Explorer supports all authentication schemes configured in the OpenAPI spec.",

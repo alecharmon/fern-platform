@@ -38,6 +38,8 @@ class AnswerMetadata(TypedDict, total=False):
     fai_http_citations: list[str]
     vercel_query_id: str
     vercel_tool_calls: int
+    faichat_query_id: str
+    faichat_tool_calls: int
     subqueries: str  # JSON-encoded list of subqueries for query rewriting
 
     # Optional - Timing

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/writing-content/components/accordions"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/writing-content/components/accordions"
     ],
     "correctness": [
       "The answer must mention the `true` value for the `defaultOpen` property.",

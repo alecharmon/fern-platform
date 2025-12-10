@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/models/list"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/models/list"
     ],
     "correctness": [
       "Must mention GET /v1/models endpoint",

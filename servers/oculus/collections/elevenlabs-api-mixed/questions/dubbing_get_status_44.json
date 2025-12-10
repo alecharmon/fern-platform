@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://eleven-labs-indexing.docs.buildwithfern.com/api-reference/dubbing/get"
+      "https://elevenlabs-eval.docs.buildwithfern.com/api-reference/dubbing/get"
     ],
     "correctness": [
       "Must mention GET /v1/dubbing/{dubbing_id} endpoint",

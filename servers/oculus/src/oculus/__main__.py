@@ -236,6 +236,9 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
         answers = [Answer(**load_json(f)) for f in answer_files]
         print(f"Total answers: {len(answers)}\n")
 
+        integration_type = answers[0].metadata.get("integration_type") if answers else None
+        model = answers[0].model if answers else None
+
         print("Evaluating answers...")
         evaluations = runner.evaluate_answers(
             questions=questions,
@@ -252,6 +255,8 @@ def evaluate_answers_command(args: argparse.Namespace) -> int:
             run_id=runner.run_id,
             timestamp=datetime.now().isoformat(),
             suite=args.suite,
+            integration=integration_type,
+            model=model,
             results=evaluations,
             metrics=metrics,
         )
@@ -430,6 +435,8 @@ def run_evaluation(args: argparse.Namespace) -> int:
             run_id=runner.run_id,
             timestamp=datetime.now().isoformat(),
             suite=runner.suite_name,
+            integration=integration_type,
+            model=args.model,
             results=evaluations,
             metrics=metrics,
         )

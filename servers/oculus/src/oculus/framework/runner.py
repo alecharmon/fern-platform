@@ -235,9 +235,7 @@ class EvaluationRunner:
                 question_data = load_json(question_file)
                 question = Question(**question_data)
 
-                if "domain" not in question.metadata:
-                    question.metadata["domain"] = collection_config.domain
-
+                question.metadata["domain"] = collection_config.domain
                 question.metadata["collection"] = collection_name
 
                 all_questions.append(question)

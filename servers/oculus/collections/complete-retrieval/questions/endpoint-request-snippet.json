@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/writing-content/components/request-snippet"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/writing-content/components/request-snippet"
     ],
     "correctness": [
       "The answer must mention that the example name must be set in the spec.",

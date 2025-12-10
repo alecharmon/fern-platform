@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/authentication/api-key-injection"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/authentication/api-key-injection"
     ],
     "correctness": [
       "The answer must mention that Fern can use both JWT and OAuth authentication flows.",

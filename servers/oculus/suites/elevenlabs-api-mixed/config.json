@@ -1,5 +1,5 @@
 {
-  "integration": "vercel-http",
+  "integration": "faichat-http",
   "collections": [
     "elevenlabs-api-mixed"
   ],

@@ -1,5 +1,5 @@
 {
-  "integration": "fai-local",
+  "integration": "faichat-http",
   "collections": [
     "persona"
   ],

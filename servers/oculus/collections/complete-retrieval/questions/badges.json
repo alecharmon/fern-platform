@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://buildwithfern.com/learn/docs/writing-content/components/badges"
+      "https://fern-eval.docs.buildwithfern.com/learn/docs/writing-content/components/badges"
     ],
     "correctness": [
       "The answer must mention the available intent options for the `Badge` component.",
