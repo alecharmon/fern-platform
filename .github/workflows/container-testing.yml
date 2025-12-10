@@ -170,9 +170,8 @@ jobs:
 
       - name: Build container
         run: |
-          cd servers/fai
-          touch .env
-          docker build -t fai:local .
+          touch servers/fai/.env
+          docker build -f servers/fai/Dockerfile -t fai:local servers/
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
