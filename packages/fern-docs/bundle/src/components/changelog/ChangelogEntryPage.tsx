@@ -62,6 +62,7 @@ export default function ChangelogEntryPage({
                             {children}
                         </ChangelogContentLayout>
                     </HideBuiltWithFern>
+                    <div className="grow" />
                     <FooterLayoutWithEditThisPageUrl
                         slug={node.slug}
                         pageId={node.pageId}

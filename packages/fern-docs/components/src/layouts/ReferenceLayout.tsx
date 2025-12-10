@@ -66,11 +66,12 @@ export const ReferenceLayout = React.forwardRef<
                             {descriptionFooter && (
                                 <React.Fragment key="description-footer">{descriptionFooter}</React.Fragment>
                             )}
-                            {footer && <React.Fragment key="footer">{footer}</React.Fragment>}
                         </div>
                     </Prose>
                 </div>
             </article>
+            <div className="grow" />
+            {footer}
         </div>
     );
 });

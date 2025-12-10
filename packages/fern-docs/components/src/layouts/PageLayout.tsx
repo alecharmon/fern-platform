@@ -13,12 +13,15 @@ interface PageLayoutProps {
 // sidebar is always hidden on page layouts
 export function PageLayout({ header, children, footer }: PageLayoutProps) {
     return (
-        <article className="fern-layout-page">
+        <div className="fern-layout-page">
             <SetLayout value="page" />
             <HiddenSidebar />
-            {header}
-            <Prose className="prose-h1:mt-[1.5em] first:prose-h1:mt-0 max-w-full">{children}</Prose>
+            <article>
+                {header}
+                <Prose className="prose-h1:mt-[1.5em] first:prose-h1:mt-0 max-w-full">{children}</Prose>
+            </article>
+            <div className="grow" />
             {footer}
-        </article>
+        </div>
     );
 }

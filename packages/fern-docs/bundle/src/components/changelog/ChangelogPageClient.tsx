@@ -151,7 +151,7 @@ export default function ChangelogPageClient({
             <TableOfContentsLayout tableOfContents={undefined} hideTableOfContents={true} lang={lang} />
             {/* TODO(cd): treat as a guide for now, update for large-screen changelog */}
             <AsideAwareDiv className="fern-layout-changelog" isFullPage={isFullPage}>
-                <article className="max-w-full">
+                <article className="fern-layout-page max-w-full">
                     <SetLayout value="guide" />
                     <HideBuiltWithFern>
                         <ChangelogContentLayout as="section">{overview}</ChangelogContentLayout>
@@ -187,6 +187,7 @@ export default function ChangelogPageClient({
                             );
                         })}
                     </HideBuiltWithFern>
+                    <div className="grow" />
                     <FooterLayout
                         hideFeedback
                         bottomNavigation={

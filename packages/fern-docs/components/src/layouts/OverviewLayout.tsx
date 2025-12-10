@@ -30,8 +30,9 @@ export function OverviewLayout({ header, toc, children, footer, tableOfContents,
                     )}
                     {header}
                     <Prose className="prose-h1:mt-[1.5em] first:prose-h1:mt-0 max-w-full">{children}</Prose>
-                    {footer}
                 </article>
+                <div className="grow" />
+                {footer}
             </div>
         </>
     );
