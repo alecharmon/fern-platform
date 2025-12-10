@@ -13,7 +13,7 @@ import { FernButton } from "@fern-docs/components/FernButton";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { t } from "@fern-docs/i18n";
 import type { FacetFilter } from "@fern-docs/search-keyword";
-import { useEventCallback } from "@fern-ui/react-commons";
+import { useEventCallback, useIsMobile } from "@fern-ui/react-commons";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { DefaultChatTransport } from "ai";
@@ -630,6 +630,7 @@ const AskAIComposer = forwardRef<
             .split(/\s+/)
             .filter((word) => word.length > 0).length >= 1 && !isOverLimit;
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const isMobile = useIsMobile();
     return (
         <div className="relative p-4">
             <div
@@ -668,6 +669,13 @@ const AskAIComposer = forwardRef<
                             props.onKeyDown,
                             (e) => {
                                 if (e.key === "Enter") {
+                                    // On mobile, Enter should create a newline instead of sending
+                                    // Stop propagation to prevent cmdk Root from calling preventDefault()
+                                    if (isMobile) {
+                                        e.stopPropagation();
+                                        return;
+                                    }
+
                                     if (value.length === 0) {
                                         return;
                                     } else if (isLoading) {
