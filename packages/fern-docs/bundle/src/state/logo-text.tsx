@@ -22,8 +22,6 @@ export function LogoText({ className }: { className?: string }) {
     }
 
     return (
-        <span className={cn("font-heading text-(color:--accent) text-[1.5rem] font-light lowercase", className)}>
-            {logoText}
-        </span>
+        <span className={cn("font-heading text-(color:--accent) text-[1.5rem] font-light", className)}>{logoText}</span>
     );
 }

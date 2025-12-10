@@ -31,6 +31,7 @@ const HEALTHCHECK_DOCS_RESPONSE: CachedDocsResponse = {
                 hideNavLinks: undefined,
                 logoHeight: undefined,
                 logoHref: undefined,
+                logoRightText: undefined,
                 favicon: undefined,
                 metadata: undefined,
                 redirects: undefined,

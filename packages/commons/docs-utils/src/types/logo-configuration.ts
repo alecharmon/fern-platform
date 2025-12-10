@@ -5,4 +5,5 @@ export interface LogoConfiguration {
     href: string | undefined;
     light: FileData | undefined;
     dark: FileData | undefined;
+    rightText: string | undefined;
 }

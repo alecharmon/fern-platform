@@ -17,6 +17,7 @@ export function convertDbDocsConfigToRead({ dbShape }: { dbShape: DocsV1Db.DocsD
         root: dbShape.root,
         logoHeight: dbShape.logoHeight,
         logoHref: dbShape.logoHref,
+        logoRightText: dbShape.logoRightText,
         colorsV3: dbShape.colorsV3 ?? getColorsV3(dbShape),
         navbarLinks: dbShape.navbarLinks,
         footerLinks: dbShape.footerLinks,

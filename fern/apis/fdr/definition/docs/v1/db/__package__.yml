@@ -65,6 +65,7 @@ types:
       # logo
       logoHeight: optional<docsReadV1.Height>
       logoHref: optional<rootCommons.Url>
+      logoRightText: optional<string>
       favicon: optional<rootCommons.FileId>
 
       # seo

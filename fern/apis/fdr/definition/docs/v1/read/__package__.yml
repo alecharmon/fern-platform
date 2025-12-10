@@ -104,6 +104,7 @@ types:
       # logo
       logoHeight: optional<Height>
       logoHref: optional<rootCommons.Url>
+      logoRightText: optional<string>
       favicon: optional<rootCommons.FileId>
 
       # seo

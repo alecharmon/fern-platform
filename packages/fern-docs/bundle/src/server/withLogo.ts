@@ -19,9 +19,11 @@ export function withLogo(
     href: string;
     light: FileData | undefined;
     dark: FileData | undefined;
+    rightText: string | undefined;
 } {
     const height = config.logoHeight;
     const href = config.logoHref ?? encodeURI(slugToHref(basepath ?? ""));
+    const rightText = config.logoRightText;
 
     const frontmatterLogo = getLogoFromFrontmatter(frontmatter);
 
@@ -31,7 +33,8 @@ export function withLogo(
             height: height ?? DEFAULT_LOGO_HEIGHT,
             href,
             light: resolveFileSrc(frontmatterLogo.light),
-            dark: resolveFileSrc(frontmatterLogo.dark)
+            dark: resolveFileSrc(frontmatterLogo.dark),
+            rightText
         };
     }
 
@@ -41,7 +44,8 @@ export function withLogo(
             height: height ?? DEFAULT_LOGO_HEIGHT,
             href,
             light: preResolvedLogos.light,
-            dark: preResolvedLogos.dark
+            dark: preResolvedLogos.dark,
+            rightText
         };
     }
 
@@ -63,7 +67,8 @@ export function withLogo(
         height: height ?? DEFAULT_LOGO_HEIGHT,
         href,
         light: resolveFileSrc(lightDocsYmlLogo),
-        dark: resolveFileSrc(darkDocsYmlLogo)
+        dark: resolveFileSrc(darkDocsYmlLogo),
+        rightText
     };
 }
 

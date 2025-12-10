@@ -92,6 +92,7 @@ export function convertDocsDefinitionToDb({
             logoV2,
             logoHeight: writeShape.config.logoHeight,
             logoHref: writeShape.config.logoHref,
+            logoRightText: writeShape.config.logoRightText,
             colors,
             colorsV2,
             colorsV3:

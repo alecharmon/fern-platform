@@ -36,7 +36,8 @@ export function withLogo(
         height: height ?? DEFAULT_LOGO_HEIGHT,
         href,
         light: resolveFileSrc(frontmatterLogo.light ?? lightDocsYmlLogo),
-        dark: resolveFileSrc(frontmatterLogo.dark ?? darkDocsYmlLogo)
+        dark: resolveFileSrc(frontmatterLogo.dark ?? darkDocsYmlLogo),
+        rightText: config.logoRightText
     };
 }
 

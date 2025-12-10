@@ -14,6 +14,7 @@ export interface DocsConfig {
     hideNavLinks: boolean | undefined;
     logoHeight: FernRegistry.docs.v1.read.Height | undefined;
     logoHref: FernRegistry.Url | undefined;
+    logoRightText: string | undefined;
     favicon: FernRegistry.FileId | undefined;
     metadata: FernRegistry.docs.v1.commons.MetadataConfig | undefined;
     redirects: FernRegistry.docs.v1.commons.RedirectConfig[] | undefined;
