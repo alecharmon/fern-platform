@@ -228,10 +228,6 @@ const nextConfig: NextConfig = {
                 value: "camera=(), geolocation=()"
             },
             {
-                key: "X-Frame-Options",
-                value: "SAMEORIGIN"
-            },
-            {
                 key: "Content-Security-Policy",
                 value: (() => {
                     const httpScheme = isLocal ? "https: http:" : "https:";
