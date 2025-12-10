@@ -8,7 +8,7 @@ export function VisualEditorHeader({ rightContent }: { rightContent?: React.Reac
                     Fern Editor
                     <BetaBadge />
                 </div>
-                <p className="text-muted-foreground text-sm">Modify your documentation without touching code.</p>
+                <p className="text-muted-foreground text-sm">Edit your docs in the browser.</p>
             </div>
             <div className="lg:max-w-1/2 max-w-[400px] w-fit">{rightContent}</div>
         </div>
