@@ -5,7 +5,7 @@ import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { t } from "@fern-docs/i18n";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { useSelectedFilters, useSetSelectedFilters } from "@/state/search";
 
 export function PageFilters({
@@ -39,26 +39,48 @@ export function PageFilters({
 
     if (filters.length > 5 && !forcePillDisplay) {
         return (
-            <FernDropdown
-                options={filters.map((filter) => ({
-                    type: "value",
-                    value: filter,
-                    label: filter,
-                    className:
-                        "fern-filter-dropdown-item hover:text-(color:--accent-contrast) hover:bg-(color:--accent) w-[12rem]",
-                    labelClassName: "truncate w-full"
-                }))}
-                value={selectedFilters.length > 0 ? selectedFilters : ["All"]}
-                onValueChange={handleFilterClick}
-                lang={lang}
-            >
-                <FernButton variant="outlined" className="fern-filter-dropdown-button">
-                    <div className="fern-filter-dropdown-button-content flex w-[10rem] items-center justify-between gap-2 truncate">
-                        <span className="fern-filter-dropdown-button-text">{filterText(selectedFilters, lang)}</span>
-                        <ChevronDown className="fern-filter-dropdown-button-icon size-icon" />
-                    </div>
-                </FernButton>
-            </FernDropdown>
+            <div className="flex flex-wrap items-center gap-2">
+                <FernDropdown
+                    options={filters.map((filter) => ({
+                        type: "value",
+                        value: filter,
+                        label: filter,
+                        className:
+                            "fern-filter-dropdown-item hover:text-(color:--accent-contrast) hover:bg-(color:--accent) w-[12rem]",
+                        labelClassName: "truncate w-full"
+                    }))}
+                    value={selectedFilters.length > 0 ? selectedFilters : ["All"]}
+                    onValueChange={handleFilterClick}
+                    lang={lang}
+                >
+                    <FernButton variant="outlined" className="fern-filter-dropdown-button">
+                        <div className="fern-filter-dropdown-button-content flex w-[10rem] items-center justify-between gap-2 truncate">
+                            <span className="fern-filter-dropdown-button-text">
+                                {filterText(selectedFilters, lang)}
+                            </span>
+                            <ChevronDown className="fern-filter-dropdown-button-icon size-icon" />
+                        </div>
+                    </FernButton>
+                </FernDropdown>
+                {selectedFilters.map((filter: string) => (
+                    <FernTooltip key={filter} content={filter}>
+                        <Badge
+                            variant="outlined"
+                            className="fern-filter-badge fern-filter-badge-selected flex items-center gap-1"
+                        >
+                            <span className="truncate">{filter}</span>
+                            <button
+                                type="button"
+                                onClick={() => handleFilterClick(filter)}
+                                className="hover:bg-(color:--grayscale-a3) -mr-1 rounded p-0.5 transition-colors"
+                                aria-label={`Remove ${filter} filter`}
+                            >
+                                <X className="size-3" />
+                            </button>
+                        </Badge>
+                    </FernTooltip>
+                ))}
+            </div>
         );
     }
 
