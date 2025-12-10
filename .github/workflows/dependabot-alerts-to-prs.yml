@@ -1,18 +1,19 @@
 name: Create PRs from Dependabot Alerts
 
 # ============================================================
-# TOKEN REQUIREMENT
-# This workflow uses FERN_GITHUB_TOKEN to access Dependabot alerts
-# and create branches/PRs. The token must be a PAT (classic) with:
-# - `security_events` scope (for Dependabot alerts)
-# - `repo` scope (for creating branches and PRs)
+# TOKEN REQUIREMENTS
+# This workflow uses TWO tokens in separate steps:
 # 
-# The default GITHUB_TOKEN does not have the capability to access
-# Dependabot alerts - the `permissions` block only controls what
-# GITHUB_TOKEN can do within its supported capabilities.
+# 1. FERN_GITHUB_TOKEN - Used ONLY for accessing Dependabot alerts
+#    Must be a PAT (classic) with `security_events` scope.
+#    The default GITHUB_TOKEN cannot access Dependabot alerts.
 # 
-# If you see a 403 error, ensure FERN_GITHUB_TOKEN has the required
-# scopes enabled.
+# 2. GITHUB_TOKEN - Used for creating branches and PRs
+#    This is the default Actions token, which makes PRs appear
+#    as coming from "github-actions[bot]" rather than a user.
+# 
+# If you see a 403 error when fetching alerts, ensure
+# FERN_GITHUB_TOKEN has the `security_events` scope enabled.
 # ============================================================
 
 on:
@@ -28,8 +29,50 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create PRs from Dependabot alerts
+      - name: Fetch Dependabot alerts
+        id: fetch-alerts
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.FERN_GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Fetch all open Dependabot alerts using FERN_GITHUB_TOKEN
+            let alerts = [];
+            try {
+              const response = await github.rest.dependabot.listAlertsForRepo({
+                owner,
+                repo,
+                state: 'open',
+                per_page: 100
+              });
+              alerts = response.data;
+            } catch (error) {
+              if (error.status === 403) {
+                console.log('ERROR: Unable to access Dependabot alerts. This is likely because:');
+                console.log('1. The FERN_GITHUB_TOKEN secret is not set, OR');
+                console.log('2. The token does not have the required `security_events` scope');
+                console.log('');
+                console.log('To fix: Ensure FERN_GITHUB_TOKEN is a PAT (classic) with `security_events` scope');
+                core.setOutput('alerts_json', '[]');
+                return;
+              }
+              throw error;
+            }
+
+            if (alerts.length === 0) {
+              console.log('No open Dependabot alerts found.');
+              core.setOutput('alerts_json', '[]');
+              return;
+            }
+
+            console.log(`Found ${alerts.length} open Dependabot alerts.`);
+            core.setOutput('alerts_json', JSON.stringify(alerts));
+
+      - name: Create PRs and send Slack notifications
         id: create-prs
+        if: steps.fetch-alerts.outputs.alerts_json != '[]'
         uses: actions/github-script@v7
         env:
           # ============================================================
@@ -49,43 +92,26 @@ jobs:
             7. Delete the scaffold file (.github/dependabot-alerts/alert-*.md) as part of your fix
 
             **Alert Details:**
+          ALERTS_JSON: ${{ steps.fetch-alerts.outputs.alerts_json }}
+          SLACK_TOKEN: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
         with:
-          github-token: ${{ secrets.FERN_GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const devinPrompt = process.env.DEVIN_PROMPT;
+            const slackToken = process.env.SLACK_TOKEN;
+            const slackChannelId = 'C0A23CZEFNF';
+            const devinMention = '<@U088PL5FS3B>';
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const baseBranch = 'app';
-            const createdPRs = [];
 
-            // Fetch all open Dependabot alerts
-            let alerts = [];
-            try {
-              const response = await github.rest.dependabot.listAlertsForRepo({
-                owner,
-                repo,
-                state: 'open',
-                per_page: 100
-              });
-              alerts = response.data;
-            } catch (error) {
-              if (error.status === 403) {
-                console.log('ERROR: Unable to access Dependabot alerts. This is likely because:');
-                console.log('1. The FERN_GITHUB_TOKEN secret is not set, OR');
-                console.log('2. The token does not have the required `security_events` scope');
-                console.log('');
-                console.log('To fix: Ensure FERN_GITHUB_TOKEN is a PAT (classic) with `security_events` scope');
-                return;
-              }
-              throw error;
-            }
-
+            const alerts = JSON.parse(process.env.ALERTS_JSON || '[]');
             if (alerts.length === 0) {
-              console.log('No open Dependabot alerts found.');
+              console.log('No alerts to process.');
               return;
             }
 
-            console.log(`Found ${alerts.length} open Dependabot alerts.`);
+            console.log(`Processing ${alerts.length} Dependabot alerts.`);
 
             // Fetch existing OPEN PRs to check for duplicates (closed PRs should not block new ones)
             const existingPRs = await github.paginate(github.rest.pulls.list, {
@@ -97,14 +123,25 @@ jobs:
 
             // Create a set of alert numbers that already have open PRs
             const existingAlertNumbers = new Set();
+            // Also track packages that already have open PRs to avoid creating multiple PRs for the same package
+            const existingPackages = new Set();
             for (const pr of existingPRs) {
-              const match = pr.title.match(/\[Dependabot Alert #(\d+)\]/);
-              if (match) {
-                existingAlertNumbers.add(parseInt(match[1]));
+              const alertMatch = pr.title.match(/\[Dependabot Alert #(\d+)\]/);
+              if (alertMatch) {
+                existingAlertNumbers.add(parseInt(alertMatch[1]));
+                // Extract package name from PR title (format: "[Dependabot Alert #N] SEVERITY: packageName vulnerability")
+                const packageMatch = pr.title.match(/\[Dependabot Alert #\d+\] \w+: (.+) vulnerability/);
+                if (packageMatch) {
+                  existingPackages.add(packageMatch[1]);
+                }
               }
             }
 
             console.log(`Found ${existingAlertNumbers.size} existing open PRs for Dependabot alerts.`);
+            console.log(`Found ${existingPackages.size} packages with existing open PRs: ${[...existingPackages].join(', ')}`);
+
+            // Track packages we create PRs for in this run to avoid duplicates within the same run
+            const packagesWithNewPRs = new Set();
 
             // Get the base branch ref for creating new branches
             const baseRef = await github.rest.git.getRef({
@@ -121,8 +158,38 @@ jobs:
             });
             const baseTreeSha = baseCommit.data.tree.sha;
 
+            // Helper function to send Slack notification
+            async function sendSlackNotification(prInfo) {
+              const message = `${devinMention} *New Dependabot Alert PR Created*\nNew PR created for Dependabot security alert. Please open a PR into the \`fern-platform\` repo to address the dependabot alert "<${prInfo.alertUrl}|${prInfo.alertName}>". Follow the instructions in the <${prInfo.url}|PR>.`;
+              
+              try {
+                const response = await fetch('https://slack.com/api/chat.postMessage', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${slackToken}`
+                  },
+                  body: JSON.stringify({
+                    channel: slackChannelId,
+                    text: message,
+                    mrkdwn: true
+                  })
+                });
+                
+                const result = await response.json();
+                if (result.ok) {
+                  console.log(`Sent Slack notification for PR #${prInfo.number}: ${prInfo.alertName}`);
+                } else {
+                  console.error(`Failed to send Slack notification for PR #${prInfo.number}: ${result.error}`);
+                }
+              } catch (error) {
+                console.error(`Error sending Slack notification for PR #${prInfo.number}: ${error.message}`);
+              }
+            }
+
             // Create PRs for new alerts
             let createdCount = 0;
+            let skippedDueToPackage = 0;
             for (const alert of alerts) {
               if (existingAlertNumbers.has(alert.number)) {
                 console.log(`PR already exists for alert #${alert.number}, skipping.`);
@@ -131,6 +198,13 @@ jobs:
 
               const severity = alert.security_advisory?.severity || 'unknown';
               const packageName = alert.security_vulnerability?.package?.name || 'unknown package';
+
+              // Skip if there's already an open PR for this package (either existing or created in this run)
+              if (existingPackages.has(packageName) || packagesWithNewPRs.has(packageName)) {
+                console.log(`PR already exists for package "${packageName}" (alert #${alert.number}), skipping to avoid duplicate PRs.`);
+                skippedDueToPackage++;
+                continue;
+              }
               const ecosystem = alert.security_vulnerability?.package?.ecosystem || 'unknown';
               const vulnerableVersionRange = alert.security_vulnerability?.vulnerable_version_range || 'unknown';
               const patchedVersions = alert.security_vulnerability?.first_patched_version?.identifier || 'No patch available';
@@ -238,68 +312,24 @@ jobs:
 
                 console.log(`Created PR for alert #${alert.number}: ${packageName}`);
                 createdCount++;
-                
-                  // Store PR info for Slack notification
-                  const alertUrl = `https://github.com/${owner}/${repo}/security/dependabot/${alert.number}`;
-                  createdPRs.push({
-                    number: pr.data.number,
-                    url: pr.data.html_url,
-                    title: prTitle,
-                    packageName,
-                    severity: severity.toUpperCase(),
-                    alertName: summary,
-                    alertUrl
-                  });
+
+                // Track this package so we don't create duplicate PRs for other alerts affecting the same package
+                packagesWithNewPRs.add(packageName);
+
+                // Send Slack notification immediately after creating the PR
+                const alertUrl = `https://github.com/${owner}/${repo}/security/dependabot/${alert.number}`;
+                await sendSlackNotification({
+                  number: pr.data.number,
+                  url: pr.data.html_url,
+                  alertName: summary,
+                  alertUrl
+                });
               } catch (error) {
                 console.error(`Failed to create PR for alert #${alert.number}: ${error.message}`);
               }
             }
 
             console.log(`Created ${createdCount} new PRs from Dependabot alerts.`);
-            
-            // Output created PRs as JSON for Slack notification step
-            core.setOutput('created_prs_json', JSON.stringify(createdPRs));
-            core.setOutput('created_count', createdCount);
-
-      - name: Send Slack notifications
-        if: steps.create-prs.outputs.created_count > 0
-        uses: actions/github-script@v7
-        env:
-          SLACK_TOKEN: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
-          CREATED_PRS_JSON: ${{ steps.create-prs.outputs.created_prs_json }}
-        with:
-          script: |
-            const createdPRs = JSON.parse(process.env.CREATED_PRS_JSON || '[]');
-            const slackToken = process.env.SLACK_TOKEN;
-            const channelId = 'C0A23CZEFNF';
-            
-            // Devin Slack App member ID for proper mention
-            const devinMention = '<@U088PL5FS3B>';
-            
-            for (const pr of createdPRs) {
-              const message = `${devinMention} *New Dependabot Alert PR Created*\nNew PR created for Dependabot security alert. Please open a PR into the \`fern-platform\` repo to address the dependabot alert "<${pr.alertUrl}|${pr.alertName}>". Follow the instructions in the <${pr.url}|PR>.`;
-              
-              try {
-                const response = await fetch('https://slack.com/api/chat.postMessage', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${slackToken}`
-                  },
-                  body: JSON.stringify({
-                    channel: channelId,
-                    text: message,
-                    mrkdwn: true
-                  })
-                });
-                
-                const result = await response.json();
-                if (result.ok) {
-                  console.log(`Sent Slack notification for PR #${pr.number}: ${pr.alertName}`);
-                } else {
-                  console.error(`Failed to send Slack notification for PR #${pr.number}: ${result.error}`);
-                }
-              } catch (error) {
-                console.error(`Error sending Slack notification for PR #${pr.number}: ${error.message}`);
-              }
+            if (skippedDueToPackage > 0) {
+              console.log(`Skipped ${skippedDueToPackage} alerts because PRs already exist for those packages.`);
             }
