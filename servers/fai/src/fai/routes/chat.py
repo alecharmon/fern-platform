@@ -79,6 +79,7 @@ async def post_chat_completion(
                         query=sq,
                         domain=domain,
                         strategy=RetrievalStrategy.HYBRID,
+                        top_k=TOP_K,
                     )
                     for sq in sub_queries
                 ]
@@ -90,8 +91,9 @@ async def post_chat_completion(
                     query=query_content,
                     domain=domain,
                     strategy=RetrievalStrategy.HYBRID,
+                    top_k=TOP_K,
                 )
-                result = await retriever.retrieve(retrieval_query, top_k=TOP_K)
+                result = await retriever.retrieve(retrieval_query)
                 retrieved_documents = result.documents
 
         model: ModelId = DEFAULT_MODEL

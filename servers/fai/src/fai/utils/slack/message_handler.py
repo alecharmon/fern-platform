@@ -17,6 +17,7 @@ from fai_ai_core.retrieval.factory import get_retriever
 from fai_ai_core.retrieval.filters import QueryFilters
 from fai_ai_core.retrieval.interface import RetrievalQuery, RetrievalStrategy
 from fai_ai_core.tools.documentation_search import create_documentation_search_tool
+from fai_ai_core.tools.models import Tool, ToolDefinition, ToolParameter
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
 
@@ -45,24 +46,42 @@ from fai.utils.turbopuffer.sync import (
     sync_slack_context_db_to_tpuf,
 )
 
-SAVE_SLACK_CONTEXT_TOOL = {
-    "name": "save_slack_context",
-    "description": "Save a question and ideal response pair to the knowledge base for future reference.",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "question": {
-                "type": "string",
-                "description": "The question that was asked or should be asked in the future",
-            },
-            "ideal_response": {
-                "type": "string",
-                "description": "The ideal response to give when this question is asked",
-            },
-        },
-        "required": ["question", "ideal_response"],
-    },
-}
+
+@dataclass
+class SlackContextCapture:
+    data: dict[str, str] | None = None
+
+
+def create_save_slack_context_tool(capture: SlackContextCapture) -> Tool:
+    async def execute(arguments: dict[str, str]) -> str:
+        capture.data = {
+            "question": arguments.get("question", ""),
+            "ideal_response": arguments.get("ideal_response", ""),
+        }
+        return "Context saved successfully."
+
+    return Tool(
+        definition=ToolDefinition(
+            name="save_slack_context",
+            description="Save a question and ideal response pair to the knowledge base for future reference.",
+            parameters=[
+                ToolParameter(
+                    name="question",
+                    type="string",
+                    description="The question that was asked or should be asked in the future",
+                    required=True,
+                ),
+                ToolParameter(
+                    name="ideal_response",
+                    type="string",
+                    description="The ideal response to give when this question is asked",
+                    required=True,
+                ),
+            ],
+        ),
+        execute=execute,
+        max_calls=1,
+    )
 
 
 def _create_delimited_role_combinations(roleset: list[str], delimiter: str = "&") -> list[str]:
@@ -303,20 +322,13 @@ async def _get_slack_index_response(
         role = MessageRole.ASSISTANT if msg["role"] == "assistant" else MessageRole.USER
         llm_messages.append(LLMMessage(role=role, content=msg["content"]))
 
+    capture = SlackContextCapture()
+    save_context_tool = create_save_slack_context_tool(capture)
+
     provider = get_llm_provider(model=model, temperature=0.0, max_tokens=2000)
-    response = await provider.generate(llm_messages, tools=[SAVE_SLACK_CONTEXT_TOOL])
+    response = await provider.generate(llm_messages, tools=[save_context_tool])
 
-    context_data = None
-    if response.tool_calls:
-        for tool_call in response.tool_calls:
-            if tool_call.name == "save_slack_context":
-                context_data = {
-                    "question": tool_call.arguments.get("question", ""),
-                    "ideal_response": tool_call.arguments.get("ideal_response", ""),
-                }
-                break
-
-    return response.content, context_data
+    return response.content, capture.data
 
 
 async def process_message(
@@ -349,7 +361,7 @@ async def process_message(
                 roles_with_everyone.append("everyone")
             exploded_roles = _create_delimited_role_combinations(roles_with_everyone)
             LOGGER.info(f"Using exploded roles for filtering: {exploded_roles}")
-            filters = QueryFilters(roles=exploded_roles)
+            filters = QueryFilters(exploded_roles=exploded_roles)
 
         retriever = get_retriever()
         retrieval_query = RetrievalQuery(
