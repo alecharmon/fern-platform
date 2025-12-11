@@ -34,6 +34,7 @@ import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeLlmsFilter } from "../plugins/rehype-llms-filter";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
 import { rehypeParamField } from "../plugins/rehype-param-field";
+import { rehypeSchema } from "../plugins/rehype-schema";
 import { rehypeSteps } from "../plugins/rehype-steps";
 import { rehypeTable } from "../plugins/rehype-table";
 import { rehypeTabs } from "../plugins/rehype-tabs";
@@ -47,7 +48,8 @@ function withDefaultMdxOptions(
     frontmatter: FernDocs.Frontmatter,
     files: Record<string, FileData>,
     replaceHref?: RehypeLinksOptions["replaceHref"],
-    collectStyles?: (styles: string[]) => void
+    collectStyles?: (styles: string[]) => void,
+    loader?: DocsLoader
 ): SerializeOptions["mdxOptions"] {
     const remarkRehypeOptions = {
         handlers: {
@@ -104,6 +106,8 @@ function withDefaultMdxOptions(
             }
         ],
         rehypeButtons,
+        // Add rehypeSchema to pre-serialize type definitions in Schema components
+        ...(loader ? ([[rehypeSchema, { loader }]] as PluggableList) : []),
         [
             rehypeMigrateJsx,
             {
@@ -156,7 +160,7 @@ export async function serializeMdxImpl(
         scope,
         replaceHref
     }: {
-        loader?: Partial<Pick<DocsLoader, "getFiles" | "getMdxBundlerFiles">>;
+        loader?: DocsLoader;
         scope?: Record<string, unknown>;
         replaceHref?: RehypeLinksOptions["replaceHref"];
     } = {}
@@ -172,9 +176,15 @@ export async function serializeMdxImpl(
         const files = (await loader?.getFiles?.()) ?? {};
 
         const result = await serialize<Record<string, unknown>, FernDocs.Frontmatter>(contentWithoutFrontmatter, {
-            mdxOptions: withDefaultMdxOptions(frontmatter, files, replaceHref, (styles_: string[]) => {
-                styles.push(...styles_);
-            }),
+            mdxOptions: withDefaultMdxOptions(
+                frontmatter,
+                files,
+                replaceHref,
+                (styles_: string[]) => {
+                    styles.push(...styles_);
+                },
+                loader
+            ),
             parseFrontmatter: false // this is parsed above via getFrontmatter
         });
 

@@ -10,16 +10,28 @@ import {
     visit
 } from "@fern-docs/mdx";
 
+import {
+    serializeAllTypeDefinitionDescriptions,
+    serializeTypeDefinitionDescriptions
+} from "./serialize-type-definition-descriptions";
+
+export interface RehypeSchemaOptions {
+    loader: DocsLoader;
+}
+
 /**
  * This plugin is used to add the `typeDefinition` and `types`
  * props to `Schema` and `SchemaSnippet` nodes. This is necessary to hydrate
  * these nodes with the correct prop values to render.
+ *
+ * It also pre-serializes all markdown descriptions within the type definitions
+ * so they can be rendered correctly in client components.
  */
-export const rehypeSchema: Unified.Plugin<[{ loader: DocsLoader }?], Hast.Root> = (opts) => {
+export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (opts) => {
     if (!opts?.loader) {
         return;
     }
-    const loader = opts.loader;
+    const { loader } = opts;
 
     return async (ast: Hast.Root) => {
         const promises: Promise<void>[] = [];
@@ -47,9 +59,14 @@ export const rehypeSchema: Unified.Plugin<[{ loader: DocsLoader }?], Hast.Root> 
                                 const [_typeEntryId, typeEntryDef] = typeEntry;
                                 // Match by the type's name field, not the TypeId key
                                 if (typeEntryDef.name === typeName) {
+                                    // Pre-serialize all descriptions for client-side rendering
+                                    const [serializedTypeDef, serializedTypes] = await Promise.all([
+                                        serializeTypeDefinitionDescriptions(typeEntryDef),
+                                        serializeAllTypeDefinitionDescriptions(typeDefinitions)
+                                    ]);
                                     node.attributes.push(
-                                        unknownToMdxJsxAttribute("typeDefinition", typeEntryDef),
-                                        unknownToMdxJsxAttribute("types", typeDefinitions)
+                                        unknownToMdxJsxAttribute("typeDefinition", serializedTypeDef),
+                                        unknownToMdxJsxAttribute("types", serializedTypes)
                                     );
                                     return;
                                 }

@@ -8,9 +8,10 @@ import {
 } from "@/components/api-reference/type-definitions/TypeDefinitionContext";
 import { TypeDefinitionSlotsServer } from "@/components/api-reference/type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "@/components/api-reference/type-definitions/TypeReferenceDefinitions";
+import type { TypeDefinitionWithSerializedDescriptions } from "@/mdx/plugins/serialize-type-definition-descriptions";
 
 type SchemaProps = {
-    typeDefinition?: ApiDefinition.TypeDefinition;
+    typeDefinition?: ApiDefinition.TypeDefinition | TypeDefinitionWithSerializedDescriptions;
     types?: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     lang?: string;
     className?: string;

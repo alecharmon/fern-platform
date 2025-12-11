@@ -3,6 +3,8 @@ import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import type { ReactElement } from "react";
 
+import type { UndiscriminatedUnionVariantWithSerializedDescription } from "@/mdx/plugins/serialize-type-definition-descriptions";
+
 import { PropertyWithShape } from "./ObjectProperty";
 import type { PropertyLocation } from "./TypeReferenceDefinitions";
 
@@ -81,19 +83,23 @@ export function UndiscriminatedUnionVariant({
     additionalProperties,
     lang
 }: {
-    unionVariant: ApiDefinition.UndiscriminatedUnionVariant;
+    unionVariant: ApiDefinition.UndiscriminatedUnionVariant | UndiscriminatedUnionVariantWithSerializedDescription;
     idx: number;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang: string;
 }) {
+    const serializedDescription = (unionVariant as UndiscriminatedUnionVariantWithSerializedDescription)
+        .serializedDescription;
+
     return (
         <PropertyWithShape
             icon={getIconForTypeReference(unionVariant.shape, types)}
             name={unionVariant.displayName}
             availability={unionVariant.availability}
             description={unionVariant.description}
+            serializedDescription={serializedDescription}
             shape={unionVariant.shape}
             types={types}
             location={location}

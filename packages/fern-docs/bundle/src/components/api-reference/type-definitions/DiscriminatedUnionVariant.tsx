@@ -2,6 +2,8 @@ import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
 import { compact } from "es-toolkit/array";
 
+import type { DiscriminatedUnionVariantWithSerializedDescription } from "@/mdx/plugins/serialize-type-definition-descriptions";
+
 import { PropertyWithShape } from "./ObjectProperty";
 import { TypeDefinitionPathPart } from "./TypeDefinitionContext";
 import { WithSeparator } from "./TypeDefinitionDetails";
@@ -14,7 +16,7 @@ export function DiscriminatedUnionVariant({
     lang
 }: {
     discriminant: ApiDefinition.PropertyKey;
-    unionVariant: ApiDefinition.DiscriminatedUnionVariant;
+    unionVariant: ApiDefinition.DiscriminatedUnionVariant | DiscriminatedUnionVariantWithSerializedDescription;
     types: Record<string, ApiDefinition.TypeDefinition>;
     location?: "request" | "response";
     lang: string;
@@ -22,6 +24,8 @@ export function DiscriminatedUnionVariant({
     const unwrapped = ApiDefinition.unwrapDiscriminatedUnionVariant({ discriminant }, unionVariant, types);
 
     const description = compact([unionVariant.description, ...unwrapped.descriptions])[0];
+    const serializedDescription = (unionVariant as DiscriminatedUnionVariantWithSerializedDescription)
+        .serializedDescription;
 
     /**
      * HACKHACK: This is a hack to get an undiscriminated union that is extended by the current discriminated union variant to render correctly
@@ -54,6 +58,7 @@ export function DiscriminatedUnionVariant({
                             key={`discriminated-variant-extended-type-${index}`}
                             name={unionVariant.discriminantValue ?? titleCase(unionVariant.discriminantValue)}
                             description={description}
+                            serializedDescription={serializedDescription}
                             shape={extendedShape}
                             availability={unionVariant.availability}
                             types={types}
@@ -67,6 +72,7 @@ export function DiscriminatedUnionVariant({
                 <PropertyWithShape
                     name={unionVariant.discriminantValue ?? titleCase(unionVariant.discriminantValue)}
                     description={description}
+                    serializedDescription={serializedDescription}
                     shape={{
                         type: "object" as const,
                         properties: unwrapped.properties,

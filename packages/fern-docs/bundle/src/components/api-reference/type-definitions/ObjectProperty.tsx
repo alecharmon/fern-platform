@@ -2,10 +2,15 @@ import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { compact } from "es-toolkit/array";
 import React from "react";
-
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
+import type {
+    ObjectPropertyWithSerializedDescription,
+    SerializedDescription
+} from "@/mdx/plugins/serialize-type-definition-descriptions";
+
 import { PropertyContainer, TypeDefinitionAnchor } from "../endpoints/TypeDefinitionAnchor";
 import { PropertyKey } from "./PropertyKey";
+import { SerializedMdxRenderer } from "./SerializedMdxRenderer";
 import { TypeDefinitionAnchorPart, TypeDefinitionCollapsible } from "./TypeDefinitionContext";
 import { type PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 import { TypeShorthand } from "./TypeShorthand";
@@ -17,7 +22,7 @@ export const ObjectProperty = React.memo(function ObjectProperty({
     lang,
     badge
 }: {
-    property: ApiDefinition.ObjectProperty;
+    property: ApiDefinition.ObjectProperty | ObjectPropertyWithSerializedDescription;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     lang: string;
@@ -26,11 +31,15 @@ export const ObjectProperty = React.memo(function ObjectProperty({
     const unwrapped = ApiDefinition.unwrapReference(property.valueShape, types);
     const description = compact([property.description, ...unwrapped.descriptions])[0];
 
+    // Check if property has a serialized description
+    const serializedDescription = (property as ObjectPropertyWithSerializedDescription).serializedDescription;
+
     return (
         <PropertyWithShape
             name={property.key}
             availability={property.availability}
             description={description}
+            serializedDescription={serializedDescription}
             shape={property.valueShape}
             types={types}
             location={location}
@@ -43,6 +52,7 @@ export const ObjectProperty = React.memo(function ObjectProperty({
 export const PropertyWithShape = React.memo(function PropertyWithShape({
     name,
     description,
+    serializedDescription,
     renderedDescription,
     shape,
     availability,
@@ -55,6 +65,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     icon?: React.ReactNode;
     name?: string;
     description?: string | undefined;
+    serializedDescription?: SerializedDescription;
     renderedDescription?: React.ReactNode;
     availability: ApiDefinition.Availability | null | undefined;
     shape: ApiDefinition.TypeShape;
@@ -68,6 +79,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
         <PropertyRenderer
             name={name}
             description={description}
+            serializedDescription={serializedDescription}
             renderedDescription={renderedDescription}
             typeShorthand={<TypeShorthand shape={shape} lang={lang} />}
             availability={availability}
@@ -89,6 +101,7 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
     name,
     availability,
     description,
+    serializedDescription,
     renderedDescription,
     typeShorthand,
     children,
@@ -97,12 +110,34 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
     icon?: React.ReactNode;
     name?: string;
     description?: string | undefined;
+    serializedDescription?: SerializedDescription;
     renderedDescription?: React.ReactNode;
     typeShorthand: React.ReactNode;
     availability: ApiDefinition.Availability | null | undefined;
     children?: React.ReactNode;
     badge?: React.ReactNode;
 }) {
+    // Determine what to render for description
+    let descriptionContent: React.ReactNode = null;
+    if (renderedDescription) {
+        descriptionContent = renderedDescription;
+    } else if (serializedDescription) {
+        // Use pre-serialized description (from Schema component in MDX)
+        descriptionContent = (
+            <SerializedMdxRenderer
+                serializedDescription={serializedDescription}
+                fallback={description}
+                size="sm"
+                className="text-(color:--grayscale-a11)"
+            />
+        );
+    } else {
+        // Use server-side serialization (for API reference pages)
+        descriptionContent = (
+            <MdxServerComponentProseSuspense mdx={description} size="sm" className="text-(color:--grayscale-a11)" />
+        );
+    }
+
     const child = (
         <PropertyContainer>
             <TypeDefinitionAnchor sideOffset={6}>
@@ -113,9 +148,7 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
                 {availability != null && <AvailabilityBadge availability={availability} size="sm" rounded />}
             </TypeDefinitionAnchor>
 
-            {renderedDescription ?? (
-                <MdxServerComponentProseSuspense mdx={description} size="sm" className="text-(color:--grayscale-a11)" />
-            )}
+            {descriptionContent}
 
             <TypeDefinitionCollapsible>{children}</TypeDefinitionCollapsible>
         </PropertyContainer>
