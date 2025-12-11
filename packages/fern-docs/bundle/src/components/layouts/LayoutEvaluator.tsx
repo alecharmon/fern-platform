@@ -89,6 +89,7 @@ export async function LayoutEvaluator({
             editThisPageUrl={frontmatter?.["edit-this-page-url"]}
             bottomNavigation={bottomNavigation}
             lang={lang}
+            hasMultipleLanguages={config.languages != null && config.languages.length > 1}
             lastUpdated={frontmatter?.["last-updated"]}
         />
     );

@@ -68,7 +68,8 @@
     "resetToTheDefaultValue": "기본값으로 재설정",
     "generate": "생성",
     "retry": "재시도",
-    "edit": "편집"
+    "edit": "편집",
+    "reportTranslation": "Report translation"
   },
   "search": {
     "search": "검색",
@@ -218,7 +219,14 @@
     "helpful": "도움이 됨",
     "notHelpful": "도움이 되지 않음",
     "feedbackReceived": "피드백을 받았습니다!",
-    "thankYouForImprovingDocs": "문서 개선에 도움을 주셔서 감사합니다."
+    "thankYouForImprovingDocs": "문서 개선에 도움을 주셔서 감사합니다.",
+    "reportTranslationIssue": "번역 문제 신고",
+    "whatIsWrongWithTranslation": "이 번역에 어떤 문제가 있나요?",
+    "helpUsImproveTranslation": "문제점을 신고하여 번역 개선에 도움을 주세요.",
+    "contentWellTranslated": "번역이 잘 됨",
+    "contentWellTranslatedDescription": "내용이 명확하고 정확하게 번역되었습니다.",
+    "incorrectTranslation": "잘못된 번역",
+    "incorrectTranslationDescription": "번역이 부정확하거나 부자연스럽거나 이해하기 어렵습니다."
   },
   "feedbackQuality": {
     "accurate": "정확함",

@@ -68,7 +68,8 @@
     "resetToTheDefaultValue": "Сбросить к значению по умолчанию",
     "generate": "Сгенерировать",
     "retry": "Повторить попытку",
-    "edit": "Редактировать"
+    "edit": "Редактировать",
+    "reportTranslation": "Report translation"
   },
   "search": {
     "search": "Поиск",
@@ -218,7 +219,14 @@
     "helpful": "Полезно",
     "notHelpful": "Не полезно",
     "feedbackReceived": "Отзыв получен!",
-    "thankYouForImprovingDocs": "Спасибо за улучшение документации."
+    "thankYouForImprovingDocs": "Спасибо за улучшение документации.",
+    "reportTranslationIssue": "Сообщить о проблеме с переводом",
+    "whatIsWrongWithTranslation": "Что не так с этим переводом?",
+    "helpUsImproveTranslation": "Помогите нам улучшить переводы, сообщив о проблеме.",
+    "contentWellTranslated": "Контент хорошо переведён",
+    "contentWellTranslatedDescription": "Контент переведён чётко и точно.",
+    "incorrectTranslation": "Неправильный перевод",
+    "incorrectTranslationDescription": "Перевод неточный, неестественный или трудный для понимания."
   },
   "feedbackQuality": {
     "accurate": "Точно",

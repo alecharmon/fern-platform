@@ -68,7 +68,8 @@
     "resetToTheDefaultValue": "デフォルト値にリセット",
     "generate": "生成",
     "retry": "再試行",
-    "edit": "編集"
+    "edit": "編集",
+    "reportTranslation": "Report translation"
   },
   "search": {
     "search": "検索",
@@ -218,7 +219,14 @@
     "helpful": "役に立ちました",
     "notHelpful": "役に立たない",
     "feedbackReceived": "フィードバックを受け取りました！",
-    "thankYouForImprovingDocs": "ドキュメントの改善にご協力ください。"
+    "thankYouForImprovingDocs": "ドキュメントの改善にご協力ください。",
+    "reportTranslationIssue": "翻訳の問題を報告",
+    "whatIsWrongWithTranslation": "この翻訳の何が問題ですか？",
+    "helpUsImproveTranslation": "問題点を報告して、翻訳の改善にご協力ください。",
+    "contentWellTranslated": "翻訳が適切",
+    "contentWellTranslatedDescription": "内容が明確かつ正確に翻訳されています。",
+    "incorrectTranslation": "翻訳が不正確",
+    "incorrectTranslationDescription": "翻訳が不正確、不自然、または理解しにくいです。"
   },
   "feedbackQuality": {
     "accurate": "正確",

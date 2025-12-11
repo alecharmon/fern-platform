@@ -27,6 +27,7 @@ interface FeedbackFormProps {
     }) => void;
     layoutDensity?: "condensed" | "verbose";
     lang: string;
+    hasMultipleLanguages?: boolean;
 }
 
 const SHOW_EMAIL_INPUT_ATOM = atomWithStorage<boolean | "indeterminate">("feedback-show-email-input", false);
@@ -34,7 +35,13 @@ const EMAIL_ATOM = atomWithStorage<string>("feedback-email", "");
 
 const FEEDBACK_FORM_REASON_ID = "feedback-reason";
 
-export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layoutDensity = "verbose", lang }) => {
+export const FeedbackForm: FC<FeedbackFormProps> = ({
+    isHelpful,
+    onSubmit,
+    layoutDensity = "verbose",
+    lang,
+    hasMultipleLanguages
+}) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [feedbackId, setFeedbackId] = useState<string>();
     const [feedbackMessage, setFeedbackMessage] = useState<string>("");
@@ -49,7 +56,11 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
               : t(lang).feedback.feedback;
     const feedbackOptions = useMemo<FernDropdown.Option[]>(() => {
         const options =
-            isHelpful === "yes" ? POSITIVE_FEEDBACK(lang) : isHelpful === "no" ? NEGATIVE_FEEDBACK(lang) : [];
+            isHelpful === "yes"
+                ? POSITIVE_FEEDBACK(lang, hasMultipleLanguages)
+                : isHelpful === "no"
+                  ? NEGATIVE_FEEDBACK(lang, hasMultipleLanguages)
+                  : [];
         const transformedOptions: FernDropdown.Option[] = options.map(
             (option): FernDropdown.Option => ({
                 type: "value",
@@ -89,7 +100,7 @@ export const FeedbackForm: FC<FeedbackFormProps> = ({ isHelpful, onSubmit, layou
             });
         }
         return transformedOptions;
-    }, [isHelpful, feedbackMessage, layoutDensity, lang]);
+    }, [isHelpful, feedbackMessage, layoutDensity, lang, hasMultipleLanguages]);
 
     useKeyboardPress({
         key: "Escape",
@@ -197,56 +208,82 @@ interface FeedbackItem {
     satisfied: boolean;
 }
 
-export const POSITIVE_FEEDBACK = (lang: string): FeedbackItem[] => [
-    {
-        feedbackId: "accurate",
-        title: t(lang).feedbackQuality.accurate,
-        description: t(lang).feedbackQuality.accuratelyDescribes,
-        satisfied: true
-    },
-    {
-        feedbackId: "solved-my-issue",
-        title: t(lang).feedback.solvedMyIssue,
-        description: t(lang).feedback.helpedMeResolveIssue,
-        satisfied: true
-    },
-    {
-        feedbackId: "easy-to-understand",
-        title: t(lang).feedbackQuality.easyToUnderstand,
-        description: t(lang).feedbackQuality.easyToFollowAndComprehend,
-        satisfied: true
-    },
-    {
-        feedbackId: "product-adoption",
-        title: t(lang).feedback.helpedMeDecideToUse,
-        description: t(lang).feedback.convincedMeToAdopt,
-        satisfied: true
-    }
-];
+export const POSITIVE_FEEDBACK = (lang: string, hasMultipleLanguages?: boolean): FeedbackItem[] => {
+    const items: FeedbackItem[] = [
+        {
+            feedbackId: "accurate",
+            title: t(lang).feedbackQuality.accurate,
+            description: t(lang).feedbackQuality.accuratelyDescribes,
+            satisfied: true
+        },
+        {
+            feedbackId: "solved-my-issue",
+            title: t(lang).feedback.solvedMyIssue,
+            description: t(lang).feedback.helpedMeResolveIssue,
+            satisfied: true
+        },
+        {
+            feedbackId: "easy-to-understand",
+            title: t(lang).feedbackQuality.easyToUnderstand,
+            description: t(lang).feedbackQuality.easyToFollowAndComprehend,
+            satisfied: true
+        },
+        {
+            feedbackId: "product-adoption",
+            title: t(lang).feedback.helpedMeDecideToUse,
+            description: t(lang).feedback.convincedMeToAdopt,
+            satisfied: true
+        }
+    ];
 
-export const NEGATIVE_FEEDBACK = (lang: string): FeedbackItem[] => [
-    {
-        feedbackId: "inaccurate",
-        title: t(lang).feedbackQuality.inaccurate,
-        description: t(lang).feedback.doesntAccuratelyDescribe,
-        satisfied: false
-    },
-    {
-        feedbackId: "hard-to-follow",
-        title: t(lang).feedback.couldntFindWhatLookingFor,
-        description: t(lang).feedback.missingImportantInfo,
-        satisfied: true
-    },
-    {
-        feedbackId: "hard-to-understand",
-        title: t(lang).feedbackQuality.hardToUnderstand,
-        description: t(lang).feedback.tooComplicatedOrUnclear,
-        satisfied: true
-    },
-    {
-        feedbackId: "code-sample-errors",
-        title: t(lang).feedback.codeSampleErrors,
-        description: t(lang).feedback.oneOrMoreCodeSamplesIncorrect,
-        satisfied: true
+    if (hasMultipleLanguages) {
+        items.push({
+            feedbackId: "translation-good",
+            title: t(lang).feedback.contentWellTranslated,
+            description: t(lang).feedback.contentWellTranslatedDescription,
+            satisfied: true
+        });
     }
-];
+
+    return items;
+};
+
+export const NEGATIVE_FEEDBACK = (lang: string, hasMultipleLanguages?: boolean): FeedbackItem[] => {
+    const items: FeedbackItem[] = [
+        {
+            feedbackId: "inaccurate",
+            title: t(lang).feedbackQuality.inaccurate,
+            description: t(lang).feedback.doesntAccuratelyDescribe,
+            satisfied: false
+        },
+        {
+            feedbackId: "hard-to-follow",
+            title: t(lang).feedback.couldntFindWhatLookingFor,
+            description: t(lang).feedback.missingImportantInfo,
+            satisfied: false
+        },
+        {
+            feedbackId: "hard-to-understand",
+            title: t(lang).feedbackQuality.hardToUnderstand,
+            description: t(lang).feedback.tooComplicatedOrUnclear,
+            satisfied: false
+        },
+        {
+            feedbackId: "code-sample-errors",
+            title: t(lang).feedback.codeSampleErrors,
+            description: t(lang).feedback.oneOrMoreCodeSamplesIncorrect,
+            satisfied: false
+        }
+    ];
+
+    if (hasMultipleLanguages) {
+        items.push({
+            feedbackId: "translation-bad",
+            title: t(lang).feedback.incorrectTranslation,
+            description: t(lang).feedback.incorrectTranslationDescription,
+            satisfied: false
+        });
+    }
+
+    return items;
+};

@@ -68,7 +68,8 @@
     "resetToTheDefaultValue": "Varsayılan değere sıfırla",
     "generate": "Oluştur",
     "retry": "Tekrar dene",
-    "edit": "Düzenlemek"
+    "edit": "Düzenlemek",
+    "reportTranslation": "Report translation"
   },
   "search": {
     "search": "Ara",
@@ -218,7 +219,14 @@
     "helpful": "Yararlı",
     "notHelpful": "Yararlı değil",
     "feedbackReceived": "Geri bildirim alındı!",
-    "thankYouForImprovingDocs": "Dokümantasyonumuzu iyileştirmemize yardık."
+    "thankYouForImprovingDocs": "Dokümantasyonumuzu iyileştirmemize yardık.",
+    "reportTranslationIssue": "Çeviri sorununu bildir",
+    "whatIsWrongWithTranslation": "Bu çeviride ne yanlış?",
+    "helpUsImproveTranslation": "Neyin yanlış olduğunu bildirerek çevirilerimizi geliştirmemize yardımcı olun.",
+    "contentWellTranslated": "İçerik iyi çevrilmiş",
+    "contentWellTranslatedDescription": "İçerik açık ve doğru bir şekilde çevrilmiş.",
+    "incorrectTranslation": "Yanlış çeviri",
+    "incorrectTranslationDescription": "Çeviri yanlış, doğal değil veya anlaşılması zor."
   },
   "feedbackQuality": {
     "accurate": "Doğru",

@@ -68,7 +68,8 @@
     "resetToTheDefaultValue": "Redefinir para o valor padrão",
     "generate": "Gerar",
     "retry": "Tentar novamente",
-    "edit": "Editar"
+    "edit": "Editar",
+    "reportTranslation": "Report translation"
   },
   "search": {
     "search": "Pesquisar",
@@ -218,7 +219,14 @@
     "helpful": "Útil",
     "notHelpful": "Não útil",
     "feedbackReceived": "Feedback recebido!",
-    "thankYouForImprovingDocs": "Obrigado por melhorar a documentação."
+    "thankYouForImprovingDocs": "Obrigado por melhorar a documentação.",
+    "reportTranslationIssue": "Reportar problema de tradução",
+    "whatIsWrongWithTranslation": "O que está errado com esta tradução?",
+    "helpUsImproveTranslation": "Ajude-nos a melhorar nossas traduções reportando o que está errado.",
+    "contentWellTranslated": "Conteúdo bem traduzido",
+    "contentWellTranslatedDescription": "O conteúdo está traduzido de forma clara e precisa.",
+    "incorrectTranslation": "Tradução incorreta",
+    "incorrectTranslationDescription": "A tradução é imprecisa, não natural ou difícil de entender."
   },
   "feedbackQuality": {
     "accurate": "Preciso",

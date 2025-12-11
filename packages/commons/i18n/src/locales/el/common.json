@@ -68,7 +68,8 @@
     "resetToTheDefaultValue": "Επαναφορά στην προεπιλεγμένη τιμή",
     "generate": "Δημιουργία",
     "retry": "Επανάληψη",
-    "edit": "Εκδίδω"
+    "edit": "Εκδίδω",
+    "reportTranslation": "Report translation"
   },
   "search": {
     "search": "Αναζήτηση",
@@ -218,7 +219,14 @@
     "helpful": "Χρήσιμο",
     "notHelpful": "Μη χρήσιμο",
     "feedbackReceived": "Λήφθηκε το σχόλιο!",
-    "thankYouForImprovingDocs": "Ευχαριστούμε που βελτιώσετε την τεκμηρίωση."
+    "thankYouForImprovingDocs": "Ευχαριστούμε που βελτιώσετε την τεκμηρίωση.",
+    "reportTranslationIssue": "Αναφορά προβλήματος μετάφρασης",
+    "whatIsWrongWithTranslation": "Τι δεν πάει καλά με αυτή τη μετάφραση;",
+    "helpUsImproveTranslation": "Βοηθήστε μας να βελτιώσουμε τις μεταφράσεις μας αναφέροντας τι δεν πάει καλά.",
+    "contentWellTranslated": "Περιεχόμενο καλά μεταφρασμένο",
+    "contentWellTranslatedDescription": "Το περιεχόμενο είναι σαφώς και ακριβώς μεταφρασμένο.",
+    "incorrectTranslation": "Λανθασμένη μετάφραση",
+    "incorrectTranslationDescription": "Η μετάφραση είναι ανακριβής, αφύσικη ή δύσκολη στην κατανόηση."
   },
   "feedbackQuality": {
     "accurate": "Ακριβής",

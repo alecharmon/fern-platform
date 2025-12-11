@@ -68,7 +68,8 @@
     "resetToTheDefaultValue": "Tilbakestill til standardverdi",
     "generate": "Generer",
     "retry": "Prøv igjen",
-    "edit": "Rediger"
+    "edit": "Rediger",
+    "reportTranslation": "Report translation"
   },
   "search": {
     "search": "Søk",
@@ -218,7 +219,14 @@
     "helpful": "Nyttig",
     "notHelpful": "Ikke nyttig",
     "feedbackReceived": "Feedback mottatt!",
-    "thankYouForImprovingDocs": "Takk for at du hjalp oss med å forbedre dokumentasjonen."
+    "thankYouForImprovingDocs": "Takk for at du hjalp oss med å forbedre dokumentasjonen.",
+    "reportTranslationIssue": "Rapporter oversettelsesproblem",
+    "whatIsWrongWithTranslation": "Hva er galt med denne oversettelsen?",
+    "helpUsImproveTranslation": "Hjelp oss å forbedre oversettelsene våre ved å rapportere hva som er galt.",
+    "contentWellTranslated": "Innhold godt oversatt",
+    "contentWellTranslatedDescription": "Innholdet er klart og nøyaktig oversatt.",
+    "incorrectTranslation": "Feil oversettelse",
+    "incorrectTranslationDescription": "Oversettelsen er unøyaktig, unaturlig eller vanskelig å forstå."
   },
   "feedbackQuality": {
     "accurate": "Nøyaktig",

@@ -68,7 +68,8 @@
     "resetToTheDefaultValue": "重置为默认值",
     "generate": "生成",
     "retry": "重试",
-    "edit": "编辑"
+    "edit": "编辑",
+    "reportTranslation": "Report translation"
   },
   "search": {
     "search": "搜索",
@@ -218,7 +219,14 @@
     "helpful": "帮助",
     "notHelpful": "不帮助",
     "feedbackReceived": "反馈收到！",
-    "thankYouForImprovingDocs": "感谢您改进文档。"
+    "thankYouForImprovingDocs": "感谢您改进文档。",
+    "reportTranslationIssue": "报告翻译问题",
+    "whatIsWrongWithTranslation": "这个翻译有什么问题？",
+    "helpUsImproveTranslation": "请告诉我们问题所在，帮助我们改进翻译。",
+    "contentWellTranslated": "内容翻译良好",
+    "contentWellTranslatedDescription": "内容翻译清晰准确。",
+    "incorrectTranslation": "翻译不正确",
+    "incorrectTranslationDescription": "翻译不准确、不自然或难以理解。"
   },
   "feedbackQuality": {
     "accurate": "准确",

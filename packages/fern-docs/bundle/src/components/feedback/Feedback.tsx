@@ -25,6 +25,7 @@ export interface FeedbackProps {
     pathname?: string;
     feedbackSource?: string;
     lang: string;
+    hasMultipleLanguages?: boolean;
 }
 
 export const Feedback: FC<FeedbackProps> = ({
@@ -34,7 +35,8 @@ export const Feedback: FC<FeedbackProps> = ({
     metadata,
     pathname: pathnameProp,
     feedbackSource,
-    lang
+    lang,
+    hasMultipleLanguages
 }) => {
     const [sent, setSent] = useState(false);
     const [isHelpful, setIsHelpful] = useState<"yes" | "no" | undefined>();
@@ -150,7 +152,12 @@ export const Feedback: FC<FeedbackProps> = ({
                         <FeedbackFormDialog
                             content={
                                 isHelpful && (
-                                    <FeedbackForm isHelpful={isHelpful} onSubmit={handleSubmitFeedback} lang={lang} />
+                                    <FeedbackForm
+                                        isHelpful={isHelpful}
+                                        onSubmit={handleSubmitFeedback}
+                                        lang={lang}
+                                        hasMultipleLanguages={hasMultipleLanguages}
+                                    />
                                 )
                             }
                             trigger={
@@ -171,7 +178,12 @@ export const Feedback: FC<FeedbackProps> = ({
                         <FeedbackFormDialog
                             content={
                                 isHelpful && (
-                                    <FeedbackForm isHelpful={isHelpful} onSubmit={handleSubmitFeedback} lang={lang} />
+                                    <FeedbackForm
+                                        isHelpful={isHelpful}
+                                        onSubmit={handleSubmitFeedback}
+                                        lang={lang}
+                                        hasMultipleLanguages={hasMultipleLanguages}
+                                    />
                                 )
                             }
                             trigger={

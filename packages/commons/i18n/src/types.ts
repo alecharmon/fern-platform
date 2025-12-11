@@ -70,6 +70,7 @@ export type Translations = {
         generate: string;
         retry: string;
         edit: string;
+        reportTranslation: string;
     };
 
     search: {
@@ -225,6 +226,13 @@ export type Translations = {
         notHelpful: string;
         feedbackReceived: string;
         thankYouForImprovingDocs: string;
+        reportTranslationIssue: string;
+        whatIsWrongWithTranslation: string;
+        helpUsImproveTranslation: string;
+        contentWellTranslated: string;
+        contentWellTranslatedDescription: string;
+        incorrectTranslation: string;
+        incorrectTranslationDescription: string;
     };
 
     feedbackQuality: {
