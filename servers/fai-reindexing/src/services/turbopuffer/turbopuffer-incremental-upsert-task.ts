@@ -16,6 +16,7 @@ import { vectorizeTurbopufferRecords } from "./records/vectorize-turbopuffer-rec
 
 const DEFAULT_UPSERT_BATCH_SIZE = 2000;
 const MIN_UPSERT_BATCH_SIZE = 500;
+const PAGE_PROCESSING_BATCH_SIZE = 100; // Process 100 pages at a time to limit memory usage
 
 function isStringLengthError(error: unknown): boolean {
     if (error instanceof RangeError) {
@@ -155,6 +156,19 @@ export async function incrementalUpsertTurbopuffer({
         deleted: diff.deleted.length
     });
 
+    if (diff.added.length === 0 && diff.updated.length === 0 && diff.deleted.length === 0) {
+        logger.info("No changes detected, skipping incremental sync");
+        return {
+            numInserted: 0,
+            numUpdated: 0,
+            numDeleted: 0,
+            totalRecordsAffected: 0,
+            numChunksAdded: 0,
+            numChunksDeleted: 0,
+            changedParentIds: []
+        };
+    }
+
     const recordsToDelete = [...diff.deleted, ...diff.updated.map((item) => item.parent_id)];
     let totalRecordsDeleted = 0;
 
@@ -220,86 +234,114 @@ export async function incrementalUpsertTurbopuffer({
         totalItemsToProcess: recordsToAdd.length
     });
 
-    const unvectorizedRecords = await createTurbopufferRecords({
-        root,
-        domain,
-        pages: filteredPages,
-        apis: filteredApis,
-        authed,
-        splitText
-    });
-
-    // Necessary because we don't initially filter out apis in filteredApis
-    const filteredRecords = unvectorizedRecords.filter(
-        (record) => record.attributes.parent_id !== undefined && parentIdsToProcess.has(record.attributes.parent_id)
-    );
-
-    logger.info(`Created ${filteredRecords.length} unvectorized records`);
-
-    const vectorizedRecords = await vectorizeTurbopufferRecords(filteredRecords, vectorizer);
-
-    logger.info(`Vectorized ${vectorizedRecords.length} records`);
-
     const chunksPerParentId = new Map<string, number>();
-    for (const record of vectorizedRecords) {
-        const parentId = record.attributes.parent_id!;
-        chunksPerParentId.set(parentId, (chunksPerParentId.get(parentId) || 0) + 1);
-    }
-
     let totalRecordsUpserted = 0;
 
-    try {
-        let i = 0;
-        let currentUploadBatchSize = DEFAULT_UPSERT_BATCH_SIZE;
+    // Process pages in batches to limit memory usage
+    const pageEntries = Object.entries(filteredPages);
+    const totalBatches = Math.ceil(pageEntries.length / PAGE_PROCESSING_BATCH_SIZE);
 
-        while (i < vectorizedRecords.length) {
-            const uploadBatchSize = Math.min(currentUploadBatchSize, vectorizedRecords.length - i);
-            const uploadBatch = vectorizedRecords.slice(i, i + uploadBatchSize).map((record) => ({
-                id: record.id,
-                vector: record.vector,
-                ...record.attributes
-            }));
+    for (let batchStart = 0; batchStart < pageEntries.length; batchStart += PAGE_PROCESSING_BATCH_SIZE) {
+        const batchEnd = Math.min(batchStart + PAGE_PROCESSING_BATCH_SIZE, pageEntries.length);
+        const pageBatch = Object.fromEntries(pageEntries.slice(batchStart, batchEnd));
+        const batchNumber = Math.floor(batchStart / PAGE_PROCESSING_BATCH_SIZE) + 1;
 
-            try {
-                await withRetry(
-                    async () =>
-                        await ns.write({
-                            upsert_rows: uploadBatch,
-                            distance_metric: "cosine_distance",
-                            schema: FernTurbopufferAttributeSchema
-                        }),
-                    {
-                        maxAttempts: 3,
-                        initialDelayMs: 1000,
-                        retryableErrors: (error) => !isStringLengthError(error)
-                    }
-                );
-
-                logger.info("Upserted batch to Turbopuffer", {
-                    startIndex: i,
-                    count: uploadBatch.length
-                });
-                i += uploadBatchSize;
-                totalRecordsUpserted += uploadBatch.length;
-                currentUploadBatchSize = DEFAULT_UPSERT_BATCH_SIZE;
-            } catch (error) {
-                if (isStringLengthError(error) && uploadBatchSize > MIN_UPSERT_BATCH_SIZE) {
-                    currentUploadBatchSize = Math.max(MIN_UPSERT_BATCH_SIZE, Math.floor(uploadBatchSize / 2));
-
-                    logger.info("Length error; reducing upload batch size and retrying", {
-                        newBatchSize: currentUploadBatchSize,
-                        retryIndex: i
-                    });
-                    continue;
-                }
-                throw error;
-            }
-        }
-    } catch (error) {
-        logger.error("Error upserting to turbopuffer", {
-            error: error instanceof Error ? error.message : String(error)
+        logger.info(`Processing batch ${batchNumber}/${totalBatches}`, {
+            pagesInBatch: Object.keys(pageBatch).length,
+            progress: `${batchEnd}/${pageEntries.length}`
         });
-        throw error;
+
+        const unvectorizedRecords = await createTurbopufferRecords({
+            root,
+            domain,
+            pages: pageBatch,
+            apis: filteredApis,
+            authed,
+            splitText
+        });
+
+        // Necessary because we don't initially filter out apis in filteredApis
+        const filteredRecords = unvectorizedRecords.filter(
+            (record) => record.attributes.parent_id !== undefined && parentIdsToProcess.has(record.attributes.parent_id)
+        );
+
+        logger.info(`Created ${filteredRecords.length} unvectorized records for batch ${batchNumber}`);
+
+        const vectorizedRecords = await vectorizeTurbopufferRecords(filteredRecords, vectorizer);
+
+        logger.info(`Vectorized ${vectorizedRecords.length} records for batch ${batchNumber}`);
+
+        for (const record of vectorizedRecords) {
+            const parentId = record.attributes.parent_id!;
+            chunksPerParentId.set(parentId, (chunksPerParentId.get(parentId) || 0) + 1);
+        }
+
+        try {
+            let i = 0;
+            let currentUploadBatchSize = DEFAULT_UPSERT_BATCH_SIZE;
+
+            while (i < vectorizedRecords.length) {
+                const uploadBatchSize = Math.min(currentUploadBatchSize, vectorizedRecords.length - i);
+                const uploadBatch = vectorizedRecords.slice(i, i + uploadBatchSize).map((record) => ({
+                    id: record.id,
+                    vector: record.vector,
+                    ...record.attributes
+                }));
+
+                try {
+                    await withRetry(
+                        async () =>
+                            await ns.write({
+                                upsert_rows: uploadBatch,
+                                distance_metric: "cosine_distance",
+                                schema: FernTurbopufferAttributeSchema
+                            }),
+                        {
+                            maxAttempts: 3,
+                            initialDelayMs: 1000,
+                            retryableErrors: (error) => !isStringLengthError(error)
+                        }
+                    );
+
+                    logger.info("Upserted batch to Turbopuffer", {
+                        batchNumber,
+                        startIndex: i,
+                        count: uploadBatch.length
+                    });
+                    i += uploadBatchSize;
+                    totalRecordsUpserted += uploadBatch.length;
+                    currentUploadBatchSize = DEFAULT_UPSERT_BATCH_SIZE;
+                } catch (error) {
+                    if (isStringLengthError(error) && uploadBatchSize > MIN_UPSERT_BATCH_SIZE) {
+                        currentUploadBatchSize = Math.max(MIN_UPSERT_BATCH_SIZE, Math.floor(uploadBatchSize / 2));
+
+                        logger.info("Length error; reducing upload batch size and retrying", {
+                            newBatchSize: currentUploadBatchSize,
+                            retryIndex: i
+                        });
+                        continue;
+                    }
+                    throw error;
+                }
+            }
+        } catch (error) {
+            logger.error(`Error upserting batch ${batchNumber} to turbopuffer`, {
+                error: error instanceof Error ? error.message : String(error)
+            });
+            throw error;
+        }
+
+        logger.info(`Completed batch ${batchNumber}/${totalBatches}`, {
+            recordsInserted: vectorizedRecords.length,
+            totalInserted: totalRecordsUpserted
+        });
+
+        if (global.gc) {
+            const gcStart = Date.now();
+            global.gc();
+            const gcDuration = Date.now() - gcStart;
+            logger.info("Forced garbage collection after batch", { batchNumber, gcDurationMs: gcDuration });
+        }
     }
 
     logger.info("Updating content hashes in FAI");
