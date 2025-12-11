@@ -241,7 +241,6 @@ const nextConfig: NextConfig = {
                         `media-src 'self' ${httpScheme} blob:`,
                         "object-src 'none'",
                         `frame-src 'self' ${httpScheme}`,
-                        "frame-ancestors 'self'",
                         "base-uri 'self'",
                         `form-action 'self' ${httpScheme}`
                     ].join("; ");
