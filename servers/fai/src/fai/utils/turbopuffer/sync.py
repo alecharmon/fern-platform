@@ -508,34 +508,38 @@ async def sync_index_to_target_incremental(
             return
 
         total_synced = 0
-        for parent_id in parent_ids:
-            last_id = None
-            while True:
-                filter_conditions = [("parent_id", "Eq", parent_id)]
-                if last_id is not None:
-                    filter_conditions.append(("id", "Gt", last_id))
+        last_id = None
 
-                result = await source_ns.query(
-                    rank_by=("id", "asc"),
-                    top_k=1000,
-                    include_attributes=True,
-                    filters=("And", filter_conditions),
-                )
+        while True:
+            filter_conditions = [("parent_id", "In", parent_ids)]
+            if last_id is not None:
+                filter_conditions.append(("id", "Gt", last_id))
 
-                prefixed_rows = []
-                for row in result.rows:
-                    new_row = Row.from_dict(row.model_dump())
-                    new_row.id = prefixed_id(source_namespace_id, row.id)
-                    new_row.source = source_index_name
-                    prefixed_rows.append(new_row)
+            result = await source_ns.query(
+                rank_by=("id", "asc"),
+                top_k=10000,
+                include_attributes=True,
+                filters=("And", filter_conditions),
+            )
 
-                await target_ns.write(
-                    upsert_rows=prefixed_rows, distance_metric="cosine_distance", schema=get_query_index_tpuf_schema()
-                )
-                total_synced += len(prefixed_rows)
+            if not result.rows:
+                break
 
-                if len(result.rows) < 1000:
-                    break
-                last_id = result.rows[-1].id
+            prefixed_rows = []
+            for row in result.rows:
+                new_row = Row.from_dict(row.model_dump())
+                new_row.id = prefixed_id(source_namespace_id, row.id)
+                new_row.source = source_index_name
+                prefixed_rows.append(new_row)
+
+            await target_ns.write(
+                upsert_rows=prefixed_rows, distance_metric="cosine_distance", schema=get_query_index_tpuf_schema()
+            )
+            total_synced += len(prefixed_rows)
+            LOGGER.info(f"Synced batch: {len(prefixed_rows)} records (total: {total_synced})")
+
+            if len(result.rows) < 10000:
+                break
+            last_id = result.rows[-1].id
 
         LOGGER.info(f"Incremental sync completed: {total_synced} total records synced to {target_namespace_id}")
