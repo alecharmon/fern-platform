@@ -22,8 +22,51 @@ from .turbopuffer_query_filters import (
     build_turbopuffer_filters,
 )
 
-TURBOPUFFER_INCLUDE_ATTRIBUTES = ["document", "title", "url", "id"]
+TURBOPUFFER_INCLUDE_ATTRIBUTES = ["document", "chunk", "title", "url", "id"]
+DEFAULT_MAX_CONTEXT_CHARS = 15000
 MAX_BM25_QUERY_LENGTH = 1024
+
+
+def _extract_context_window(document: str, chunk: str | None, max_chars: int) -> str:
+    if not chunk:
+        return document[:max_chars]
+
+    chunk_start = document.find(chunk)
+    if chunk_start == -1:
+        return document[:max_chars]
+
+    chunk_end = chunk_start + len(chunk)
+
+    if len(chunk) >= max_chars:
+        return chunk
+
+    end = min(chunk_end + (max_chars - len(chunk)), len(document))
+
+    end = _extend_to_code_block_end(document, end)
+
+    if end > max_chars:
+        start = end - max_chars
+        newline_pos = document.find("\n\n", max(0, start - 50), chunk_start)
+        if newline_pos != -1:
+            start = newline_pos + 2
+        return document[start:end]
+
+    return document[:end]
+
+
+def _extend_to_code_block_end(document: str, end: int) -> int:
+    code_fence_start = document.rfind("```", 0, end)
+    if code_fence_start == -1:
+        return end
+
+    code_fence_end = document.find("```", code_fence_start + 3)
+    if code_fence_end == -1:
+        return len(document)
+
+    if code_fence_end + 3 > end:
+        return min(code_fence_end + 3, len(document))
+
+    return end
 
 
 class TurbopufferRetriever(RAGRetriever):
@@ -33,10 +76,12 @@ class TurbopufferRetriever(RAGRetriever):
         turbopuffer_api_key: str,
         embeddings_generator: EmbeddingsGenerator,
         region: str,
+        max_context_chars: int = DEFAULT_MAX_CONTEXT_CHARS,
     ):
         self.turbopuffer_api_key = turbopuffer_api_key
         self.embeddings_generator = embeddings_generator
         self.region = region
+        self._max_context_chars = max_context_chars
         self._client = AsyncTurbopuffer(
             api_key=turbopuffer_api_key,
             region=region,
@@ -270,6 +315,9 @@ class TurbopufferRetriever(RAGRetriever):
             if not hasattr(row, "document") or not row.document:
                 continue
 
+            chunk = getattr(row, "chunk", None)
+            content = _extract_context_window(row.document, chunk, self._max_context_chars)
+
             metadata = {}
             if hasattr(row, "title") and row.title:
                 metadata["title"] = row.title
@@ -280,7 +328,7 @@ class TurbopufferRetriever(RAGRetriever):
 
             documents.append(
                 RetrievedDocument(
-                    content=row.document,
+                    content=content,
                     score=score,
                     metadata=metadata if metadata else None,
                     document_id=str(row.id),
