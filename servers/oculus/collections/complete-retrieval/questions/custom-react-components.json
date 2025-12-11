@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/writing-content/custom-react-components"
+      "https://fern-eval.docs.buildwithfern.com/docs/writing-content/custom-react-components"
     ],
     "correctness": [
       "The answer must mention creating a components folder with your React components in .ts, .tsx, .js or .mdx files.",

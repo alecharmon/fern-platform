@@ -5,11 +5,11 @@
     "category": "markdown",
     "source": "markdown_generator",
     "slug": "configuring-slugs",
-    "cited_context": "To modify the slug used for a page or section, you can set the `slug` within the `navigation` object. \n\n```yaml {{3, 6}}\nnavigation:\n  - section: Get Started\n    slug: start\n    contents: \n      - page: Welcome \n        slug: intro\n        path: ./docs/pages/welcome.mdx\n```\n\nIn the example above, the **Welcome** page would be hosted at `plantstore.docs.buildwithfern.com/start/intro`. \n\n#### Override a page's slug\nYou can set the exact slug of a page within its frontmatter. [You can read more about the frontmatter configuration here](/learn/docs/configuration/page-level-settings#slug). \n\n```yaml title=\"docs.yml\"\nnavigation:\n  - section: Get Started\n    slug: start\n    contents: \n      - page: Quick Start \n        path: ./docs/pages/quick-start.mdx\n```\n\nYou can set the slug in the frontmatter of `./docs/pages/quick-start.mdx` to `start-up`:\n\n```markdown title=\"quick-start.mdx\" {{2}}\n---\nslug: start-up\n---\n```\n\nThe page then becomes available at `plantstore.docs.buildwithfern.com/start-up`."
+    "cited_context": "To modify the slug used for a page or section, you can set the `slug` within the `navigation` object. \n\n```yaml {{3, 6}}\nnavigation:\n  - section: Get Started\n    slug: start\n    contents: \n      - page: Welcome \n        slug: intro\n        path: ./docs/pages/welcome.mdx\n```\n\nIn the example above, the **Welcome** page would be hosted at `plantstore.docs.buildwithfern.com/start/intro`. \n\n#### Override a page's slug\nYou can set the exact slug of a page within its frontmatter. [You can read more about the frontmatter configuration here](/docs/configuration/page-level-settings#slug). \n\n```yaml title=\"docs.yml\"\nnavigation:\n  - section: Get Started\n    slug: start\n    contents: \n      - page: Quick Start \n        path: ./docs/pages/quick-start.mdx\n```\n\nYou can set the slug in the frontmatter of `./docs/pages/quick-start.mdx` to `start-up`:\n\n```markdown title=\"quick-start.mdx\" {{2}}\n---\nslug: start-up\n---\n```\n\nThe page then becomes available at `plantstore.docs.buildwithfern.com/start-up`."
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/seo/configuring-slugs"
+      "https://fern-eval.docs.buildwithfern.com/docs/seo/configuring-slugs"
     ],
     "correctness": [
       "The answer must mention the `slug` property in the `navigation` object in the `docs.yml` file.",

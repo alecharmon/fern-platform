@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/sdks/overview/quickstart"
+      "https://fern-eval.docs.buildwithfern.com/sdks/overview/quickstart"
     ],
     "correctness": [
       "The answer must mention the `fern init --openapi` command.",

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/cli-api-reference/cli-reference/overview"
+      "https://fern-eval.docs.buildwithfern.com/cli-api-reference/cli-reference/overview"
     ],
     "correctness": [
       "The answer must mention the `npm install fern-api` command.",

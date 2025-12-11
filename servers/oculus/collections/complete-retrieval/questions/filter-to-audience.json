@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/api-definitions/openapi/extensions/audiences"
+      "https://fern-eval.docs.buildwithfern.com/api-definitions/openapi/extensions/audiences"
     ],
     "correctness": [
       "The answer must mention the `x-fern-audiences` extension.",

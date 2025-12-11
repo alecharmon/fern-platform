@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/api-references/endpoint-errors"
+      "https://fern-eval.docs.buildwithfern.com/docs/api-references/endpoint-errors"
     ],
     "correctness": [
       "The answer must mention the `display-errors: true` configuration.",

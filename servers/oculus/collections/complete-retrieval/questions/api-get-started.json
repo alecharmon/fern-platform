@@ -5,11 +5,11 @@
     "category": "markdown",
     "source": "markdown_generator",
     "slug": "api-get-started",
-    "cited_context": "Fern API requests require a bearer token for authentication. Use the CLI command [`fern token`](/learn/cli-api/cli-reference/commands#fern-token) to generate a bearer token. Tokens do not expire."
+    "cited_context": "Fern API requests require a bearer token for authentication. Use the CLI command [`fern token`](/cli-api/cli-reference/commands#fern-token) to generate a bearer token. Tokens do not expire."
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/ask-fern/api-reference/overview"
+      "https://fern-eval.docs.buildwithfern.com/ask-fern/api-reference/overview"
     ],
     "correctness": [
       "The answer must mention the `fern token` CLI command.",

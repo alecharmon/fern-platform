@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/ask-fern/features/analytics"
+      "https://fern-eval.docs.buildwithfern.com/ask-fern/features/analytics"
     ],
     "correctness": [
       "The answer must mention the `Ask Fern` tab in the Fern Dashboard.",

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/sdks/deep-dives/dynamic-authentication"
+      "https://fern-eval.docs.buildwithfern.com/sdks/deep-dives/dynamic-authentication"
     ],
     "correctness": [
       "The answer must mention the `custom fetcher middleware` in the TypeScript SDK.",

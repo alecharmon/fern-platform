@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/sdks/deep-dives/global-headers"
+      "https://fern-eval.docs.buildwithfern.com/sdks/deep-dives/global-headers"
     ],
     "correctness": [
       "The answer must mention the `x-fern-global-headers` extension.",

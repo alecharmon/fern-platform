@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/customization/changelogs"
+      "https://fern-eval.docs.buildwithfern.com/docs/customization/changelogs"
     ],
     "correctness": [
       "The answer must mention creating a Markdown file with a date-based filename.",

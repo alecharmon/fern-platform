@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/writing-content/components/files"
+      "https://fern-eval.docs.buildwithfern.com/docs/writing-content/components/files"
     ],
     "correctness": [
       "The answer must mention the `highlighted` property for files or folders.",

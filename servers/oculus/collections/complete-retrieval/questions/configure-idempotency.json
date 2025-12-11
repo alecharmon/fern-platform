@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/sdks/deep-dives/idempotency"
+      "https://fern-eval.docs.buildwithfern.com/sdks/deep-dives/idempotency"
     ],
     "correctness": [
       "The answer must mention the `overrides` file.",

@@ -5,11 +5,11 @@
     "category": "changelogs",
     "source": "handwritten",
     "slug": "docs-2025-01-14",
-    "cited_context": "## Support for /llms.txt\n\nAPI Docs should be for LLMs and Agents too, not just people!\n\nWe're excited to announce compatibility with the `/llms.txt` [emerging standard](https://llmstxt.org/), making your documentation accessible and optimized for AI developer tools such as Cursor, Github Copilot, ChatGPT, Perplexity, and Anthropic's Claude.\n\nBoth `/llms.txt` and `/llms-full.txt` are designed to be token-efficient, ensuring faster processing and cost-effective LLM interactions without sacrificing valuable info.\n\nIf you use Fern Docs, this feature is auto-enabled like /robots.txt and /sitemap.xml. [Learn more](https://buildwithfern.com/learn/docs/seo/llms-txt)\n\n![LLMs.txt Splash Image](./llms-txt.png)\n\nCheck out ElevenLabs:\n\n<CardGroup cols={2}>\n  <Card\n    title=\"/llms.txt\"\n    variant=\"bordered\"\n    href=\"https://elevenlabs.io/docs/llms.txt\"\n  >\n    *loads in < 1 sec*\n  </Card>\n\n  <Card\n    title=\"/llms-full.txt\"\n    variant=\"bordered\"\n    href=\"https://elevenlabs.io/docs/llms-full.txt\"\n  >\n    *loads in 5+ sec*\n  </Card>\n</CardGroup>"
+    "cited_context": "## Support for /llms.txt\n\nAPI Docs should be for LLMs and Agents too, not just people!\n\nWe're excited to announce compatibility with the `/llms.txt` [emerging standard](https://llmstxt.org/), making your documentation accessible and optimized for AI developer tools such as Cursor, Github Copilot, ChatGPT, Perplexity, and Anthropic's Claude.\n\nBoth `/llms.txt` and `/llms-full.txt` are designed to be token-efficient, ensuring faster processing and cost-effective LLM interactions without sacrificing valuable info.\n\nIf you use Fern Docs, this feature is auto-enabled like /robots.txt and /sitemap.xml. [Learn more](https://buildwithfern.com/docs/seo/llms-txt)\n\n![LLMs.txt Splash Image](./llms-txt.png)\n\nCheck out ElevenLabs:\n\n<CardGroup cols={2}>\n  <Card\n    title=\"/llms.txt\"\n    variant=\"bordered\"\n    href=\"https://elevenlabs.io/docs/llms.txt\"\n  >\n    *loads in < 1 sec*\n  </Card>\n\n  <Card\n    title=\"/llms-full.txt\"\n    variant=\"bordered\"\n    href=\"https://elevenlabs.io/docs/llms-full.txt\"\n  >\n    *loads in 5+ sec*\n  </Card>\n</CardGroup>"
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/changelog/2025/1/14"
+      "https://fern-eval.docs.buildwithfern.com/docs/changelog/2025/1/14"
     ]
   }
 }

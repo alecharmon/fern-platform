@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/writing-content/components/download"
+      "https://fern-eval.docs.buildwithfern.com/docs/writing-content/components/download"
     ],
     "correctness": [
       "The answer must mention the `filename` property on the `<Download>` component.",

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/customization/announcement-banner"
+      "https://fern-eval.docs.buildwithfern.com/docs/customization/announcement-banner"
     ],
     "correctness": [
       "The answer must mention configuring the announcement banner in the `docs.yml` file.",

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/api-definitions/openapi/extensions/enum-descriptions-and-names"
+      "https://fern-eval.docs.buildwithfern.com/api-definitions/openapi/extensions/enum-descriptions-and-names"
     ],
     "correctness": [
       "The answer must mention the `x-fern-enum` extension.",

@@ -5,11 +5,11 @@
     "category": "changelogs",
     "source": "handwritten",
     "slug": "docs-2024-10-31",
-    "cited_context": "## JWT API Key Integration\nImplemented automatic API key extraction from JWT tokens in the documentation playground. Users can now test authenticated endpoints more easily with automatic credential handling.\n\n<Card\n  title=\"Contact us to learn more\"\n  variant=\"bordered\"\n  href=\"/learn/home#get-support\"\n/>\n\n## Query Parameter Enhancement\nImproved handling of query parameters in documentation middleware. Complex query parameters are now properly handled and displayed in the documentation."
+    "cited_context": "## JWT API Key Integration\nImplemented automatic API key extraction from JWT tokens in the documentation playground. Users can now test authenticated endpoints more easily with automatic credential handling.\n\n<Card\n  title=\"Contact us to learn more\"\n  variant=\"bordered\"\n  href=\"/home#get-support\"\n/>\n\n## Query Parameter Enhancement\nImproved handling of query parameters in documentation middleware. Complex query parameters are now properly handled and displayed in the documentation."
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/changelog/2024/10/31"
+      "https://fern-eval.docs.buildwithfern.com/docs/changelog/2024/10/31"
     ]
   }
 }

@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/sdks/deep-dives/readme"
+      "https://fern-eval.docs.buildwithfern.com/sdks/deep-dives/readme"
     ],
     "correctness": [
       "The answer must mention the `introduction` field in the `readme` section of the `generators.yml` file.",

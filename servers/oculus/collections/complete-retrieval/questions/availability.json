@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/api-definitions/openapi/extensions/availability"
+      "https://fern-eval.docs.buildwithfern.com/api-definitions/openapi/extensions/availability"
     ],
     "correctness": [
       "The answer must mention the `availability` property in the `docs.yml` file.",

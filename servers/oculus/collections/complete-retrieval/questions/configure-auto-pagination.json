@@ -9,7 +9,7 @@
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/sdks/deep-dives/auto-pagination"
+      "https://fern-eval.docs.buildwithfern.com/sdks/deep-dives/auto-pagination"
     ],
     "correctness": [
       "The answer must mention the `x-fern-pagination` extension.",

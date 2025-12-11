@@ -5,11 +5,11 @@
     "category": "changelogs",
     "source": "handwritten",
     "slug": "docs-2025-01-21",
-    "cited_context": "## Improvements to the Accordion Component\n\nThe accordion component has been upgraded so that you can now use your in-browser `cmd+f` search to look for text that is otherwise hidden.\n\n- Improved accessibility for all of our customers who are leveraging the `<Accordion>` component\n- Improved SEO indexing of content (more html is now generated on the server-side instead of client-side)\n\nTry searching for **burst** on this page: https://dev.hume.ai/docs/expression-measurement/faq \n\n<embed src=\"./accordion.mp4\" type=\"video/mp4\" width=\"640px\" height=\"360px\" />\n\n\n## Support for embedding local assets\n\nWe've added support for embedding local assets in your docs. This is useful for displaying PDFs, images, videos, and other assets into your docs.\n\nTo embed an asset, you can use the `embed` tag.\n\n```mdx\n<embed src=\"./path/to/asset.pdf\" type=\"application/pdf\" />\n<embed src=\"./path/to/asset.mp4\" type=\"video/mp4\" />\n<embed src=\"./path/to/asset.png\" type=\"image/png\" />\n```\n\nRead more [here](https://buildwithfern.com/learn/docs/content/write-markdown#embedding-local-assets)"
+    "cited_context": "## Improvements to the Accordion Component\n\nThe accordion component has been upgraded so that you can now use your in-browser `cmd+f` search to look for text that is otherwise hidden.\n\n- Improved accessibility for all of our customers who are leveraging the `<Accordion>` component\n- Improved SEO indexing of content (more html is now generated on the server-side instead of client-side)\n\nTry searching for **burst** on this page: https://dev.hume.ai/docs/expression-measurement/faq \n\n<embed src=\"./accordion.mp4\" type=\"video/mp4\" width=\"640px\" height=\"360px\" />\n\n\n## Support for embedding local assets\n\nWe've added support for embedding local assets in your docs. This is useful for displaying PDFs, images, videos, and other assets into your docs.\n\nTo embed an asset, you can use the `embed` tag.\n\n```mdx\n<embed src=\"./path/to/asset.pdf\" type=\"application/pdf\" />\n<embed src=\"./path/to/asset.mp4\" type=\"video/mp4\" />\n<embed src=\"./path/to/asset.png\" type=\"image/png\" />\n```\n\nRead more [here](https://buildwithfern.com/docs/content/write-markdown#embedding-local-assets)"
   },
   "criteria": {
     "citation": [
-      "https://fern-eval.docs.buildwithfern.com/learn/docs/changelog/2025/1/21"
+      "https://fern-eval.docs.buildwithfern.com/docs/changelog/2025/1/21"
     ]
   }
 }
