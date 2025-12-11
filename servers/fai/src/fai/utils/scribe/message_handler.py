@@ -13,7 +13,12 @@ from fai.settings import LOGGER, VARIABLES
 from fai.utils.scribe.devin_client import DevinClient, create_or_get_devin_session, send_devin_message
 from fai.utils.scribe.session_poller import poll_devin_session
 from fai.utils.scribe.slack_file_handler import process_slack_attachments
-from fai.utils.scribe.slack_thread_unfurler import unfurl_thread_links
+from fai.utils.scribe.slack_thread_unfurler import (
+    fetch_thread_messages,
+    fetch_user_info,
+    format_thread_as_context,
+    unfurl_thread_links,
+)
 
 STARTUP_RESPONSE = "🚀 Starting a new session for `{github_repo}`..."
 ERROR_RESPONSE = "❌ An unknown error has occurred. Please reach out to support@buildwithfern.com."
@@ -118,6 +123,56 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
 
     if thread_context:
         text = f"{thread_context}\n{text}"
+
+    async with async_session_maker() as session:
+        result = await session.execute(
+            select(ScribeSessionDb).where(
+                ScribeSessionDb.integration_id == integration.integration_id,
+                ScribeSessionDb.slack_thread_ts == thread_ts,
+            )
+        )
+        existing_session = result.scalar_one_or_none()
+
+    current_msg_ts = event.get("ts")
+    is_reply_in_existing_thread = thread_ts != current_msg_ts
+    is_new_session = existing_session is None
+
+    if is_reply_in_existing_thread and is_new_session:
+        LOGGER.info(f"[SCRIBE] Bot tagged in existing thread {thread_ts} (new session), fetching thread history")
+        try:
+            from slack_sdk.web.async_client import AsyncWebClient
+
+            client = AsyncWebClient(token=integration.slack_bot_token)
+            thread_messages = await fetch_thread_messages(client, channel, thread_ts)
+
+            if thread_messages:
+                messages_before_mention = [msg for msg in thread_messages if msg.get("ts", "") < current_msg_ts]
+
+                if messages_before_mention:
+                    LOGGER.info(
+                        f"[SCRIBE] Found {len(messages_before_mention)} messages before current mention in thread"
+                    )
+
+                    user_cache: dict[str, str] = {}
+                    for msg in messages_before_mention:
+                        user_id = msg.get("user")
+                        if user_id and user_id not in user_cache:
+                            user_cache[user_id] = await fetch_user_info(client, user_id)
+
+                    existing_thread_context = format_thread_as_context(messages_before_mention, user_cache)
+
+                    if existing_thread_context:
+                        text = f"{existing_thread_context}\n{text}"
+                        LOGGER.info("[SCRIBE] Added existing thread context to message")
+                else:
+                    LOGGER.info("[SCRIBE] No messages found before current mention")
+            else:
+                LOGGER.warning(f"[SCRIBE] Failed to fetch thread messages for {thread_ts}")
+
+        except Exception as e:
+            LOGGER.warning(f"[SCRIBE] Error fetching existing thread context: {e}, proceeding without it")
+    elif existing_session:
+        LOGGER.info(f"[SCRIBE] Existing session found for thread {thread_ts}, skipping thread context loading")
 
     github_repo = integration.github_repo
 
