@@ -10,7 +10,7 @@ from datetime import datetime
 from fastapi import Body, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fai.app import fai_app
@@ -52,8 +52,18 @@ async def batch_get_content_hashes(
         else:
             stmt = select(ContentHashDb).where(ContentHashDb.domain == stripped_domain)
 
+        stmt = stmt.order_by(ContentHashDb.parent_id)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        count_result = await db.execute(count_stmt)
+        total_count = count_result.scalar()
+
+        stmt = stmt.limit(body.limit).offset(body.offset)
+
         result = await db.execute(stmt)
         hashes = result.scalars().all()
+
+        has_more = (body.offset + len(hashes)) < total_count
 
         entries = [
             ContentHashEntry(
@@ -66,7 +76,9 @@ async def batch_get_content_hashes(
             for h in hashes
         ]
 
-        return JSONResponse(jsonable_encoder(BatchGetContentHashesResponse(entries=entries)))
+        return JSONResponse(
+            jsonable_encoder(BatchGetContentHashesResponse(entries=entries, total_count=total_count, has_more=has_more))
+        )
 
     except Exception as e:
         LOGGER.exception(f"Failed to get content hashes for domain {stripped_domain}")
@@ -90,33 +102,44 @@ async def batch_upsert_content_hashes(
     Creates new records or updates existing ones.
     """
     try:
-        upserted_count = 0
+        if not body.entries:
+            return BatchUpsertContentHashesResponse(upserted_count=0)
+
+        parent_ids = [entry.parent_id for entry in body.entries]
+        stmt = select(ContentHashDb).where(ContentHashDb.domain == domain, ContentHashDb.parent_id.in_(parent_ids))
+        result = await db.execute(stmt)
+        existing_hashes = {h.parent_id: h for h in result.scalars().all()}
+
+        now = datetime.utcnow()
+        inserts = []
 
         for entry in body.entries:
-            stmt = select(ContentHashDb).where(
-                ContentHashDb.domain == domain, ContentHashDb.parent_id == entry.parent_id
-            )
-            result = await db.execute(stmt)
-            existing = result.scalar_one_or_none()
-
-            if existing:
+            if entry.parent_id in existing_hashes:
+                existing = existing_hashes[entry.parent_id]
                 existing.content_hash = entry.content_hash
                 existing.chunk_count = entry.chunk_count
-                existing.updated_at = datetime.utcnow()
+                existing.updated_at = now
             else:
-                new_hash = ContentHashDb(
-                    domain=domain,
-                    parent_id=entry.parent_id,
-                    content_hash=entry.content_hash,
-                    chunk_count=entry.chunk_count,
+                inserts.append(
+                    ContentHashDb(
+                        domain=domain,
+                        parent_id=entry.parent_id,
+                        content_hash=entry.content_hash,
+                        chunk_count=entry.chunk_count,
+                    )
                 )
-                db.add(new_hash)
 
-            upserted_count += 1
+        if inserts:
+            db.add_all(inserts)
 
         await db.commit()
 
-        LOGGER.info(f"Upserted {upserted_count} content hashes for domain {domain}")
+        upserted_count = len(body.entries)
+        num_new = len(inserts)
+        num_updated = len(body.entries) - len(inserts)
+        LOGGER.info(
+            f"Upserted {upserted_count} content hashes for domain {domain} " f"({num_new} new, {num_updated} updated)"
+        )
         return BatchUpsertContentHashesResponse(upserted_count=upserted_count)
 
     except Exception as e:

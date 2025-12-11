@@ -8,4 +8,8 @@
  */
 export interface BatchGetContentHashesRequest {
     parent_ids?: string[];
+    /** The number of content hashes to return */
+    limit?: number;
+    /** The offset to start from */
+    offset?: number;
 }

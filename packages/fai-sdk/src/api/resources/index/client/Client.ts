@@ -200,6 +200,95 @@ export class Index {
     }
 
     /**
+     * @param {string} domain
+     * @param {FernAI.SyncIndexIncrementalRequest} request
+     * @param {Index.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link FernAI.UnprocessableEntityError}
+     *
+     * @example
+     *     await client.index.syncIndexToQueryIndexIncremental("domain", {
+     *         index_name: "index_name",
+     *         parent_ids: ["parent_ids"]
+     *     })
+     */
+    public syncIndexToQueryIndexIncremental(
+        domain: string,
+        request: FernAI.SyncIndexIncrementalRequest,
+        requestOptions?: Index.RequestOptions,
+    ): core.HttpResponsePromise<FernAI.SyncIndexResponse> {
+        return core.HttpResponsePromise.fromPromise(
+            this.__syncIndexToQueryIndexIncremental(domain, request, requestOptions),
+        );
+    }
+
+    private async __syncIndexToQueryIndexIncremental(
+        domain: string,
+        request: FernAI.SyncIndexIncrementalRequest,
+        requestOptions?: Index.RequestOptions,
+    ): Promise<core.WithRawResponse<FernAI.SyncIndexResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernAIEnvironment.Production,
+                `index/${encodeURIComponent(domain)}/sync-incremental`,
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as FernAI.SyncIndexResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 422:
+                    throw new FernAI.UnprocessableEntityError(
+                        _response.error.body as FernAI.HttpValidationError,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.FernAIError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.FernAIError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.FernAITimeoutError(
+                    "Timeout exceeded when calling POST /index/{domain}/sync-incremental.",
+                );
+            case "unknown":
+                throw new errors.FernAIError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
      * @param {string} jobId
      * @param {Index.RequestOptions} requestOptions - Request-specific configuration.
      *

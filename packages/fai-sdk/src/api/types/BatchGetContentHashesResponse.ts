@@ -9,4 +9,6 @@ import * as FernAI from "../index.js";
  */
 export interface BatchGetContentHashesResponse {
     entries: FernAI.ContentHashEntry[];
+    total_count?: number;
+    has_more?: boolean;
 }
