@@ -9,14 +9,6 @@ function getEnvironment() {
     return process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? "development";
 }
 
-function parseRate(value: string | undefined, fallback: number) {
-    if (value == null) {
-        return fallback;
-    }
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : fallback;
-}
-
 function initSentrySpanProcessor(environment: string) {
     const dsn = process.env.NEXT_PUBLIC_SENTRY_DOCS_DSN;
     if (!dsn) {
@@ -27,8 +19,9 @@ function initSentrySpanProcessor(environment: string) {
         Sentry.init({
             dsn,
             environment,
-            tracesSampleRate: parseRate(process.env.SENTRY_TRACES_SAMPLE_RATE, 0.0001),
-            profilesSampleRate: parseRate(process.env.SENTRY_PROFILES_SAMPLE_RATE, 0)
+            tracesSampleRate: 0,
+            profilesSampleRate: 0,
+            skipOpenTelemetrySetup: true
         });
         hasInitializedSentry = true;
     }
