@@ -11148,9 +11148,6 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  '@turbopuffer/turbopuffer@0.5.19':
-    resolution: {integrity: sha512-AmQYrF5FSYLN1VSuJv5eLipDfztN10Jr9JtYSzDXhbMKvUvEXm9/U3BO3vai4AypbR9386WMg70GSmhIoXvWzg==}
-
   '@turbopuffer/turbopuffer@1.10.0':
     resolution: {integrity: sha512-4ma/BR4/VlAUs7K+a9m6dJvcOoPE41XFt/fJcQphQ94mB2e/xgAGih/zMRRIZ3/5OwTlv9haaSzxZDcxVWqAEg==}
 
@@ -33178,11 +33175,6 @@ snapshots:
   '@tsconfig/node14@1.0.3': {}
 
   '@tsconfig/node16@1.0.4': {}
-
-  '@turbopuffer/turbopuffer@0.5.19':
-    dependencies:
-      pako: 2.1.0
-      undici: 6.22.0
 
   '@turbopuffer/turbopuffer@1.10.0':
     dependencies:
