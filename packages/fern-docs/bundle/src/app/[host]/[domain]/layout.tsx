@@ -6,7 +6,10 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import type { DocsV1Read, DocsV2Read } from "@fern-api/fdr-sdk/client/types";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { FERN_DOCS_ID } from "@fern-docs/components/constants";
 import { FeatureFlagProvider } from "@fern-docs/components/feature-flags/FeatureFlagProvider";
+import { ScrollToTop } from "@fern-docs/components/layouts/ScrollToTop";
+import { Providers } from "@fern-docs/components/providers/providers";
 import { Domain } from "@fern-docs/components/state/domain";
 import type { LaunchDarklyInfo } from "@fern-docs/components/state/feature-flags";
 import { RootNodeProvider, SetBasePath } from "@fern-docs/components/state/navigation";
@@ -28,10 +31,12 @@ import type { Metadata } from "next/types";
 import React from "react";
 import { preload } from "react-dom";
 import { CustomerAnalytics } from "@/components/analytics/CustomerAnalytics";
+import { ConsoleMessage } from "@/components/console-message";
 import { FernUser } from "@/components/fern-user";
 import { JavascriptProvider } from "@/components/JavascriptProvider";
 import SearchV2 from "@/components/search";
 import { generateMetadataFromConfig } from "@/components/seo";
+import { WebSocketRefresh } from "@/components/websocket-refresh";
 import { withJsConfig } from "@/components/with-js-config";
 import { runAsyncSpan } from "@/server/tracing";
 import { SetColors } from "@/state/colors";
@@ -100,73 +105,119 @@ export default async function Layout({
         ])
     );
 
+    const cdnOrigin = process.env.NEXT_PUBLIC_CDN_URI ? new URL(process.env.NEXT_PUBLIC_CDN_URI).origin : undefined;
+
+    const headers = (
+        <head>
+            {/* Preconnect to critical domains for faster resource loading */}
+            {cdnOrigin && (
+                <>
+                    <link rel="preconnect" href={cdnOrigin} crossOrigin="anonymous" />
+                    <link rel="dns-prefetch" href={cdnOrigin} />
+                </>
+            )}
+            <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+            {/* KaTeX CSS for LaTeX math rendering */}
+            <link
+                rel="preload"
+                as="style"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+                crossOrigin="anonymous"
+            />
+            <link
+                rel="stylesheet"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+                crossOrigin="anonymous"
+            />
+        </head>
+    );
+
     return (
-        <FernThemeProvider
-            hasLight={Boolean(colors.light)}
-            hasDark={Boolean(colors.dark)}
-            lightThemeColor={colors.light?.themeColor}
-            darkThemeColor={colors.dark?.themeColor}
-        >
-            <RootNodeProvider
-                sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}
-                sidebarRootNodesToInitiallyCollapsedNodes={sidebarRootNodesToInitiallyCollapsedNodes}
-            >
-                <Domain value={domain} />
-                <SetBasePath value={basePath || "/"} />
-                {/**
-                 * We only load Vercel Insights and Speed Insights scripts for sites WITHOUT a basePath.
-                 * When a site has a basePath (e.g., /docs), we'd want _vercel/* endpoints to include basePath
-                 * to properly attribute analytics to the correct site. However, Vercel serves these endpoints
-                 * at the domain root, so we disable these scripts for sites with a basePath for now.
-                 */}
-                {!isSelfHosted() && !settings.disableAnalytics && !basePath && (
-                    <>
-                        <Script data-endpoint="/_vercel/insights" src="/_vercel/insights/script.js" defer />
-                        <Script
-                            data-endpoint="/_vercel/speed-insights/vitals"
-                            src="/_vercel/speed-insights/script.js"
-                            defer
-                        />
-                    </>
-                )}
-                {/* TODO: remove cohere hack they've added to docs.yml */}
-                <SetLogoText text={domain.includes("cohere") ? "docs" : config.logoRightText} />
-                {config.defaultLanguage != null && <DefaultLanguage language={config.defaultLanguage} />}
-                <DarkCode value={(edgeFlags.isDarkCodeEnabled || settings.darkModeCode) ?? false} />
-                <Whitelabeled value={edgeFlags.isWhitelabeled} />
-                <SetColors colors={colors} />
-                <SetIsAskAiEnabled isAskAiEnabled={isAskAiEnabled} />
-                <SetIsDefaultSearchFilterOn
-                    isDefaultSearchFilterOn={
-                        edgeFlags.isDefaultSearchFilterOn || (settings.defaultSearchFilters ?? false)
-                    }
-                />
-                <FernUser domain={domain} host={host} />
-                <GlobalStyles
-                    domain={domain}
-                    layout={layout}
-                    fonts={fonts}
-                    light={colors.light}
-                    dark={colors.dark}
-                    inlineCss={config.css?.inline}
-                    theme={theme}
-                />
-                <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>
-                    <div data-body-theme={theme?.body}>{children}</div>
-                </FeatureFlagProvider>
-                <React.Suspense fallback={null}>
-                    {!isLocalEnvironment && !settings.disableSearch && (
-                        <SearchV2 domain={domain} disableAnalytics={settings.disableAnalytics} lang={lang} />
-                    )}
-                </React.Suspense>
-                {jsConfig != null && <JavascriptProvider config={jsConfig} />}
-                {VERCEL_ENV === "production" && !settings.disableAnalytics && (
-                    <CustomerAnalytics
-                        config={mergeCustomerAnalytics(deprecated_customerAnalytics, config.analyticsConfig)}
-                    />
-                )}
-            </RootNodeProvider>
-        </FernThemeProvider>
+        <html lang={lang} suppressHydrationWarning>
+            {!isSelfHosted() && headers}
+            <body className="antialiased" id={FERN_DOCS_ID}>
+                <ConsoleMessage />
+                <ScrollToTop />
+                {isLocalEnvironment && <WebSocketRefresh lang={lang} />}
+                <Providers>
+                    <FernThemeProvider
+                        hasLight={Boolean(colors.light)}
+                        hasDark={Boolean(colors.dark)}
+                        lightThemeColor={colors.light?.themeColor}
+                        darkThemeColor={colors.dark?.themeColor}
+                    >
+                        <RootNodeProvider
+                            sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}
+                            sidebarRootNodesToInitiallyCollapsedNodes={sidebarRootNodesToInitiallyCollapsedNodes}
+                        >
+                            <Domain value={domain} />
+                            <SetBasePath value={basePath || "/"} />
+                            {/**
+                             * We only load Vercel Insights and Speed Insights scripts for sites WITHOUT a basePath.
+                             * When a site has a basePath (e.g., /docs), we'd want _vercel/* endpoints to include basePath
+                             * to properly attribute analytics to the correct site. However, Vercel serves these endpoints
+                             * at the domain root, so we disable these scripts for sites with a basePath for now.
+                             */}
+                            {!isSelfHosted() && !settings.disableAnalytics && !basePath && (
+                                <>
+                                    <Script data-endpoint="/_vercel/insights" src="/_vercel/insights/script.js" defer />
+                                    <Script
+                                        data-endpoint="/_vercel/speed-insights/vitals"
+                                        src="/_vercel/speed-insights/script.js"
+                                        defer
+                                    />
+                                </>
+                            )}
+                            {/* TODO: remove cohere hack they've added to docs.yml */}
+                            <SetLogoText text={domain.includes("cohere") ? "docs" : config.logoRightText} />
+                            {config.defaultLanguage != null && <DefaultLanguage language={config.defaultLanguage} />}
+                            <DarkCode value={(edgeFlags.isDarkCodeEnabled || settings.darkModeCode) ?? false} />
+                            <Whitelabeled value={edgeFlags.isWhitelabeled} />
+                            <SetColors colors={colors} />
+                            <SetIsAskAiEnabled isAskAiEnabled={isAskAiEnabled} />
+                            <SetIsDefaultSearchFilterOn
+                                isDefaultSearchFilterOn={
+                                    edgeFlags.isDefaultSearchFilterOn || (settings.defaultSearchFilters ?? false)
+                                }
+                            />
+                            <FernUser domain={domain} host={host} />
+                            <GlobalStyles
+                                domain={domain}
+                                layout={layout}
+                                fonts={fonts}
+                                light={colors.light}
+                                dark={colors.dark}
+                                inlineCss={config.css?.inline}
+                                theme={theme}
+                            />
+                            <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>
+                                <div data-body-theme={theme?.body}>{children}</div>
+                            </FeatureFlagProvider>
+                            <React.Suspense fallback={null}>
+                                {!isLocalEnvironment && !settings.disableSearch && (
+                                    <SearchV2
+                                        domain={domain}
+                                        disableAnalytics={settings.disableAnalytics}
+                                        lang={lang}
+                                    />
+                                )}
+                            </React.Suspense>
+                            {jsConfig != null && <JavascriptProvider config={jsConfig} />}
+                            {VERCEL_ENV === "production" && !settings.disableAnalytics && (
+                                <CustomerAnalytics
+                                    config={mergeCustomerAnalytics(
+                                        deprecated_customerAnalytics,
+                                        config.analyticsConfig
+                                    )}
+                                />
+                            )}
+                        </RootNodeProvider>
+                    </FernThemeProvider>
+                </Providers>
+            </body>
+        </html>
     );
 }
 

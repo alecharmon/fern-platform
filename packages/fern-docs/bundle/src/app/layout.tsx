@@ -1,14 +1,6 @@
-import { isLocal } from "@fern-api/docs-server/isLocal";
-import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
-import { FERN_DOCS_ID } from "@fern-docs/components/constants";
-import { ScrollToTop } from "@fern-docs/components/layouts/ScrollToTop";
-import { Providers } from "@fern-docs/components/providers/providers";
 import * as Sentry from "@sentry/nextjs";
 import type { Metadata, Viewport } from "next/types";
 import { experimental_taintUniqueValue } from "react";
-
-import { ConsoleMessage } from "@/components/console-message";
-import { WebSocketRefresh } from "@/components/websocket-refresh";
 
 import "./globals.css";
 
@@ -42,46 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         }
     }
 
-    const cdnOrigin = process.env.NEXT_PUBLIC_CDN_URI ? new URL(process.env.NEXT_PUBLIC_CDN_URI).origin : undefined;
-
-    const headers = (
-        <head>
-            {/* Preconnect to critical domains for faster resource loading */}
-            {cdnOrigin && (
-                <>
-                    <link rel="preconnect" href={cdnOrigin} crossOrigin="anonymous" />
-                    <link rel="dns-prefetch" href={cdnOrigin} />
-                </>
-            )}
-            <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-            <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-
-            {/* KaTeX CSS for LaTeX math rendering */}
-            <link
-                rel="preload"
-                as="style"
-                href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
-                crossOrigin="anonymous"
-            />
-            <link
-                rel="stylesheet"
-                href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
-                crossOrigin="anonymous"
-            />
-        </head>
-    );
-
-    return (
-        <html lang="en" suppressHydrationWarning>
-            {!isSelfHosted() && headers}
-            <body className="antialiased" id={FERN_DOCS_ID}>
-                <ConsoleMessage />
-                <ScrollToTop />
-                {isLocal() && <WebSocketRefresh lang={"en"} />}
-                <Providers>{children}</Providers>
-            </body>
-        </html>
-    );
+    return children;
 }
 
 export const viewport: Viewport = {
