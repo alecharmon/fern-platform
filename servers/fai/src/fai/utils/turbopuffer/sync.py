@@ -511,14 +511,15 @@ async def sync_index_to_target_incremental(
         for parent_id in parent_ids:
             last_id = None
             while True:
+                filter_conditions = [("parent_id", "Eq", parent_id)]
+                if last_id is not None:
+                    filter_conditions.append(("id", "Gt", last_id))
+
                 result = await source_ns.query(
                     rank_by=("id", "asc"),
                     top_k=1000,
                     include_attributes=True,
-                    filters=[
-                        ["parent_id", "Eq", parent_id],
-                        ["id", "Gt", last_id] if last_id is not None else NOT_GIVEN,
-                    ],
+                    filters=("And", filter_conditions),
                 )
 
                 prefixed_rows = []
