@@ -1,3 +1,4 @@
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { TableOfContentsItem } from "@fern-docs/mdx";
 import { Prose } from "../mdx/prose";
 import { SetLayout } from "../state/layout";
@@ -8,14 +9,15 @@ interface GuideLayoutProps {
     toc?: React.ReactNode;
     children?: React.ReactNode;
     footer?: React.ReactNode;
+    theme?: FernThemeConfig;
     tableOfContents?: TableOfContentsItem[];
     lang?: string;
 }
 
-export function GuideLayout({ header, toc, children, footer, tableOfContents, lang }: GuideLayoutProps) {
-    return (
+export function GuideLayout({ header, toc, children, footer, theme, tableOfContents, lang }: GuideLayoutProps) {
+    const isCanvasTheme = theme?.body === "canvas";
+    const content = (
         <>
-            <SetLayout value="guide" />
             {toc}
             <div className="fern-layout-guide transition-all duration-500 ease-out">
                 <article className="w-content-width max-w-full">
@@ -32,6 +34,13 @@ export function GuideLayout({ header, toc, children, footer, tableOfContents, la
                 <div className="grow" />
                 {footer}
             </div>
+        </>
+    );
+
+    return (
+        <>
+            <SetLayout value="guide" />
+            {isCanvasTheme ? <div className="canvas-wrapper">{content}</div> : content}
         </>
     );
 }

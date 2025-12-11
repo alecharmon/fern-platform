@@ -1,3 +1,4 @@
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type React from "react";
 
 import { Prose } from "../mdx/prose";
@@ -8,11 +9,13 @@ interface PageLayoutProps {
     header?: React.ReactNode;
     children?: React.ReactNode;
     footer?: React.ReactNode;
+    theme?: FernThemeConfig;
 }
 
 // sidebar is always hidden on page layouts
-export function PageLayout({ header, children, footer }: PageLayoutProps) {
-    return (
+export function PageLayout({ header, children, footer, theme }: PageLayoutProps) {
+    const isCanvasTheme = theme?.body === "canvas";
+    const content = (
         <div className="fern-layout-page">
             <SetLayout value="page" />
             <HiddenSidebar />
@@ -24,4 +27,6 @@ export function PageLayout({ header, children, footer }: PageLayoutProps) {
             {footer}
         </div>
     );
+
+    return isCanvasTheme ? <div className="canvas-wrapper">{content}</div> : content;
 }

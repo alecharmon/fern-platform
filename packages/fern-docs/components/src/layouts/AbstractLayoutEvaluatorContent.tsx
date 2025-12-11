@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type { TableOfContentsItem } from "@fern-docs/mdx";
 import type React from "react";
@@ -20,7 +21,8 @@ export async function AbstractLayoutEvaluatorContent({
     pageHeader,
     builtWithFern,
     footer,
-    lang
+    lang,
+    theme
 }: {
     pageHeader?: React.ReactNode;
     frontmatter?: Partial<FernDocs.Frontmatter>;
@@ -30,6 +32,7 @@ export async function AbstractLayoutEvaluatorContent({
     builtWithFern?: React.ReactNode;
     footer?: React.ReactNode;
     lang: string;
+    theme?: FernThemeConfig;
 }) {
     let layout = frontmatter?.layout ?? "guide";
 
@@ -57,6 +60,7 @@ export async function AbstractLayoutEvaluatorContent({
                     header={pageHeader}
                     toc={toc}
                     footer={footer}
+                    theme={theme}
                     tableOfContents={showTableOfContents ? tableOfContents : undefined}
                     lang={lang}
                 >
@@ -69,6 +73,7 @@ export async function AbstractLayoutEvaluatorContent({
                     header={pageHeader}
                     toc={toc}
                     footer={footer}
+                    theme={theme}
                     tableOfContents={showTableOfContents ? tableOfContents : undefined}
                     lang={lang}
                 >
@@ -77,13 +82,13 @@ export async function AbstractLayoutEvaluatorContent({
             );
         case "page":
             return (
-                <PageLayout header={pageHeader} footer={footer}>
+                <PageLayout header={pageHeader} footer={footer} theme={theme}>
                     {children}
                 </PageLayout>
             );
         case "reference":
             return (
-                <ReferenceLayout header={pageHeader} aside={aside} footer={footer} kind="guide">
+                <ReferenceLayout header={pageHeader} aside={aside} footer={footer} kind="guide" theme={theme}>
                     {children}
                 </ReferenceLayout>
             );

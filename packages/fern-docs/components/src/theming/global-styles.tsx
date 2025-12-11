@@ -1,6 +1,8 @@
 import type { FernFonts } from "@fern-api/docs-server/generateFonts";
 import { type ArrayOf12, FERN_COLOR_ACCENT, type FernColorTheme } from "@fern-api/docs-utils";
 import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
+import { getThemeCss } from "./variants";
 
 const FONT_MONO = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
 const FONT_SANS =
@@ -18,7 +20,8 @@ export function GlobalStyles({
     inlineCssScopeSelector,
     scopeSelector = ":root",
     lightSelector = ".light, :root",
-    darkSelector = ".dark"
+    darkSelector = ".dark",
+    theme
 }: {
     domain: string;
     layout: FernLayoutConfig;
@@ -30,9 +33,16 @@ export function GlobalStyles({
     scopeSelector?: string;
     lightSelector?: string;
     darkSelector?: string;
+    theme?: FernThemeConfig;
 }) {
     const root = light ?? dark;
     const hasTheme = !!light && !!dark;
+
+    const themeCss = getThemeCss(theme, {
+        scopeSelector,
+        lightSelector,
+        darkSelector
+    });
 
     // if no dark theme is provided, add a fallback dark theme for code blocks
     const fallbackDark = {
@@ -291,6 +301,8 @@ export function GlobalStyles({
       }
 
         ${fonts.additionalCss}
+
+        ${themeCss}
 
         ${
             inlineCssScopeSelector

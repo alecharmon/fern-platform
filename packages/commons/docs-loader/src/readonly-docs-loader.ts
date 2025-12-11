@@ -776,6 +776,26 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
         };
     });
 
+const getTheme = (cacheConfig: Required<CacheConfig>) =>
+    cache(async (domainKey: string) => {
+        "use cache";
+        unstable_cacheTag(domainKey, "getTheme");
+
+        const config = await getConfig(cacheConfig)(domainKey);
+        if (!config) {
+            console.error("Could not find config for domainKey", domainKey);
+            notFound();
+        }
+
+        const theme = config.theme;
+
+        return {
+            sidebar: theme?.sidebar ?? "default",
+            tabs: theme?.tabs ?? "default",
+            body: theme?.body ?? "default"
+        };
+    });
+
 const getLanguage = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
@@ -1434,6 +1454,7 @@ const createCachedDocsLoaderImpl = async (
         },
         getLayout: () => getLayout(config)(domainKey),
         getSettings: () => getSettings(config)(domainKey),
+        getTheme: () => getTheme(config)(domainKey),
         getLanguage: () => getLanguage(config)(domainKey),
         getFonts: async () => {
             const prefetched = await prefetchPromise;

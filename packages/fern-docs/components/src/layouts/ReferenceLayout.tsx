@@ -1,5 +1,6 @@
 "use client";
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import { useIsMobile } from "@fern-ui/react-commons";
 import React, { type ComponentPropsWithoutRef } from "react";
 
@@ -25,17 +26,19 @@ interface ReferenceLayoutProps {
      * scrolling within themselves.
      */
     kind?: "api" | "guide";
+    theme?: FernThemeConfig;
 }
 
 export const ReferenceLayout = React.forwardRef<
     HTMLDivElement,
     ComponentPropsWithoutRef<"article"> & ReferenceLayoutProps
 >(function ReferenceLayout(
-    { header, aside, children, footer, descriptionFooter, reference, enableFullWidth, kind = "api", ...props },
+    { header, aside, children, footer, descriptionFooter, reference, enableFullWidth, kind = "api", theme, ...props },
     ref
 ) {
     const isMobile = useIsMobile();
-    return (
+    const isCanvasTheme = theme?.body === "canvas";
+    const content = (
         <div className="fern-layout-reference">
             <SetLayout value="reference" />
             <article
@@ -74,4 +77,6 @@ export const ReferenceLayout = React.forwardRef<
             {footer}
         </div>
     );
+
+    return isCanvasTheme ? <div className="canvas-wrapper">{content}</div> : content;
 });

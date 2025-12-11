@@ -1,3 +1,4 @@
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { TableOfContentsItem } from "@fern-docs/mdx";
 import type React from "react";
 
@@ -10,14 +11,15 @@ interface OverviewLayoutProps {
     toc?: React.ReactNode;
     children?: React.ReactNode;
     footer?: React.ReactNode;
+    theme?: FernThemeConfig;
     tableOfContents?: TableOfContentsItem[];
     lang?: string;
 }
 
-export function OverviewLayout({ header, toc, children, footer, tableOfContents, lang }: OverviewLayoutProps) {
-    return (
+export function OverviewLayout({ header, toc, children, footer, theme, tableOfContents, lang }: OverviewLayoutProps) {
+    const isCanvasTheme = theme?.body === "canvas";
+    const content = (
         <>
-            <SetLayout value="overview" />
             {toc}
             <div className="fern-layout-overview">
                 <article className="w-content-wide-width max-w-full">
@@ -34,6 +36,13 @@ export function OverviewLayout({ header, toc, children, footer, tableOfContents,
                 <div className="grow" />
                 {footer}
             </div>
+        </>
+    );
+
+    return (
+        <>
+            <SetLayout value="overview" />
+            {isCanvasTheme ? <div className="canvas-wrapper">{content}</div> : content}
         </>
     );
 }

@@ -53,6 +53,7 @@ export async function LayoutEvaluator({
 
     const config = await loader.getConfig();
     const lang = await loader.getLanguage();
+    const theme = await loader.getTheme();
 
     const extractedStyles = mdx?.styles ?? [];
 
@@ -108,6 +109,7 @@ export async function LayoutEvaluator({
                 footer={footer}
                 builtWithFern={<BuiltWithFern className="mx-auto my-8 w-fit" lang={lang} />}
                 lang={lang}
+                theme={theme}
             >
                 <MdxContent mdx={mdx} fallback={markdown} engine={mdx?.engine} />
             </AbstractLayoutEvaluatorContent>

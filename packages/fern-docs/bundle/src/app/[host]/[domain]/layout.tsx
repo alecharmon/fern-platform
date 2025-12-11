@@ -60,6 +60,7 @@ export default async function Layout({
         colors,
         layout,
         settings,
+        theme,
         lang,
         fonts,
         isAskAiEnabled,
@@ -74,6 +75,7 @@ export default async function Layout({
         loader.getColors(),
         loader.getLayout(),
         loader.getSettings(),
+        loader.getTheme(),
         loader.getLanguage(),
         loader.getFonts(),
         loader.isAskAiEnabledForDocs(),
@@ -147,8 +149,11 @@ export default async function Layout({
                     light={colors.light}
                     dark={colors.dark}
                     inlineCss={config.css?.inline}
+                    theme={theme}
                 />
-                <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>{children}</FeatureFlagProvider>
+                <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>
+                    <div data-body-theme={theme?.body}>{children}</div>
+                </FeatureFlagProvider>
                 <React.Suspense fallback={null}>
                     {!isLocalEnvironment && !settings.disableSearch && (
                         <SearchV2 domain={domain} disableAnalytics={settings.disableAnalytics} lang={lang} />

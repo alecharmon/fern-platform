@@ -3,6 +3,7 @@ import type { EdgeFlags, FernColorTheme, HttpMethod } from "@fern-api/docs-utils
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 import type { FernSettingsConfig } from "@fern-api/docs-utils/types/settings-config";
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { ApiDefinition, DocsV1Read, FernNavigation } from "@fern-api/fdr-sdk";
 import type {
     AuthScheme,
@@ -159,6 +160,8 @@ export interface DocsLoader<IsAsync extends boolean = true> {
     getLayout: () => MaybePromise<FernLayoutConfig, IsAsync>;
 
     getSettings: () => MaybePromise<FernSettingsConfig, IsAsync>;
+
+    getTheme: () => MaybePromise<FernThemeConfig, IsAsync>;
 
     getLanguage: () => MaybePromise<string, IsAsync>;
 
