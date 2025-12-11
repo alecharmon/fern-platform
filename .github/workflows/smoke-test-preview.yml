@@ -5,6 +5,7 @@ on:
     paths:
       - "smoke-test/fern/**"
       - "packages/fern-docs/bundle/**"
+      - "packages/fern-docs/components/**"
       - "servers/fdr/**"
       - "servers/fdr-lambda/**"
       - ".github/workflows/smoke-test-preview.yml"
@@ -230,6 +231,8 @@ jobs:
         if: github.event_name == 'pull_request' && always()
         run: |
           echo "## 🌱 Smoke Test Preview" > final-comment.txt
+          echo "" >> final-comment.txt
+          echo "**Run at:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> final-comment.txt
           echo "" >> final-comment.txt
           echo "Testing branch changes with smoke test content:" >> final-comment.txt
           echo "" >> final-comment.txt

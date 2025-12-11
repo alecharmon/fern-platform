@@ -1,0 +1,57 @@
+tabs:
+  home:
+    display-name: Home
+    icon: home
+  guides:
+    display-name: Guides
+    icon: book
+  rest-api:
+    display-name: REST API
+    icon: puzzle
+  test-api:
+    display-name: Test API
+    icon: test-tube
+  events-api:
+    display-name: Events API
+    icon: bolt
+  grpc-api:
+    display-name: gRPC API
+    icon: code
+  changelog:
+    display-name: Changelog
+    icon: clock
+    changelog: ../../changelog
+
+navigation:
+  - tab: home
+    layout:
+      - section: Get Started
+        contents:
+          - page: Welcome
+            path: ../../docs/pages/welcome.mdx
+          - page: Plaintext Test
+            path: ../../docs/pages/plaintext-test.mdx
+          - page: External Dependency Test
+            path: ../../docs/pages/external-dependency-test.mdx
+  - tab: guides
+    layout:
+      - section: Learn
+        contents:
+          - page: Concepts
+            path: ../../docs/pages/concepts.mdx
+          - page: SDKs
+            path: ../../docs/pages/sdks.mdx
+            slug: sdks
+  - tab: rest-api
+    layout:
+      - api: Rest API
+        api-name: rest-api
+  - tab: events-api
+    layout:
+      - api: Events API
+        api-name: events-api
+  - tab: grpc-api
+    layout:
+      - api: gRPC API
+        api-name: grpc-api
+  - tab: changelog

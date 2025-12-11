@@ -1,0 +1,12 @@
+tabs:
+  overview:
+    display-name: Overview
+    icon: book
+
+navigation:
+  - tab: overview
+    layout:
+      - section: Getting Started
+        contents:
+          - page: Introduction
+            path: ../../docs/pages/second-product-intro.mdx

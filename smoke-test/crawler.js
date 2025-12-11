@@ -67,11 +67,11 @@ async function crawlSite(startUrl) {
 
     // Add specific URLs to test with expected status codes
     const specificUrls = [
-        // API explorers
-        { url: `${baseUrlString}/rest-api/rest-api/plant/updates-web-socket?explorer=true`, expectedStatus: 200 },
-        { url: `${baseUrlString}/events-api/events-api/inventory/inventory?explorer=true`, expectedStatus: 200 },
-        // LLMs.txt files
-        { url: `${baseUrlString}/rest-api/rest-api/plant/add-plant/llms.txt`, expectedStatus: 200 },
+        // API explorers (under home product)
+        { url: `${baseUrlString}/home/rest-api/rest-api/plant/updates-web-socket?explorer=true`, expectedStatus: 200 },
+        { url: `${baseUrlString}/home/events-api/events-api/inventory/inventory?explorer=true`, expectedStatus: 200 },
+        // LLMs.txt files (under home product)
+        { url: `${baseUrlString}/home/rest-api/rest-api/plant/add-plant/llms.txt`, expectedStatus: 200 },
         { url: `${baseUrlString}/llms.txt`, expectedStatus: 200 },
         { url: `${baseUrlString}/llms-full.txt`, expectedStatus: 200 },
         // Note: Accept header content negotiation test removed due to CORS issues with Cache-Control header

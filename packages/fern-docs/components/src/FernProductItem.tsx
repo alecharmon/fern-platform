@@ -2,6 +2,7 @@
 
 import { cn } from "./cn";
 import type { FernDropdown } from "./FernDropdown";
+import { checkIsExternalUrl, FernLink, toUrlObject } from "./FernLink";
 import { FernSelectionItem } from "./FernSelectionItem";
 
 /**
@@ -21,17 +22,37 @@ export function FernProductItem({
     dense?: boolean;
     target?: string;
 }) {
+    const href = option.href ?? "";
+    const url = toUrlObject(href);
+    const isExternal = checkIsExternalUrl(url);
+
+    const content = (
+        <div className={cn("fern-product-item", option.className)}>
+            <FernSelectionItem
+                image={option.image}
+                icon={option.icon}
+                title={option.title}
+                subtitle={option.subtitle}
+                dense={dense}
+            />
+        </div>
+    );
+
+    if (!href) {
+        return content;
+    }
+
+    if (isExternal) {
+        return (
+            <a className="fern-product-item-link" href={href} target={target}>
+                {content}
+            </a>
+        );
+    }
+
     return (
-        <a href={option.href} target={target}>
-            <div className={cn("fern-product-item", option.className)}>
-                <FernSelectionItem
-                    image={option.image}
-                    icon={option.icon}
-                    title={option.title}
-                    subtitle={option.subtitle}
-                    dense={dense}
-                />
-            </div>
-        </a>
+        <FernLink className="fern-product-item-link" href={href} target={target}>
+            {content}
+        </FernLink>
     );
 }
