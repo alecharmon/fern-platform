@@ -1,4 +1,3 @@
-from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
 
 from fai.db import async_session_maker
@@ -8,6 +7,7 @@ from fai.settings import (
     LOGGER,
     VARIABLES,
 )
+from fai.utils.slack.client import send_slack_message
 
 
 async def log_merged_pr_for_qa(session_db: ScribeSessionDb, status: str) -> None:
@@ -24,8 +24,6 @@ async def log_merged_pr_for_qa(session_db: ScribeSessionDb, status: str) -> None
             if not integration:
                 LOGGER.warning(f"[SCRIBE] No integration found for session {session_db.id}")
                 return
-
-        client = AsyncWebClient(token=qa_bot_token)
 
         if status == "merged":
             title = "*SCRIBE PR MERGED* ✅"
@@ -46,10 +44,12 @@ async def log_merged_pr_for_qa(session_db: ScribeSessionDb, status: str) -> None
         if session_db.slack_thread_ts:
             message_text += f"*Slack Thread:* https://slack.com/app_redirect?channel={session_db.slack_channel}&message_ts={session_db.slack_thread_ts}\n"
 
-        await client.chat_postMessage(
+        message_key = f"scribe_pr_{session_db.id}_{status}"
+        await send_slack_message(
             channel=qa_channel_id,
             text=message_text,
-            mrkdwn=True,
+            bot_token=qa_bot_token,
+            message_key=message_key,
         )
 
         LOGGER.info(f"[SCRIBE] Sent {status} PR notification to QA channel for {session_db.pr_url}")
