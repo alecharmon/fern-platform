@@ -23,9 +23,11 @@ export function AbstractFooterLayout({
     lastUpdated?: string;
 }) {
     const lastUpdatedElement = lastUpdated && (
-        <p className="text-sm text-(color:--grayscale-a11)">
-            {t(lang).navigation.lastUpdated} {lastUpdated}
-        </p>
+        <div className="flex items-center">
+            <p className="text-sm text-(color:--grayscale-a11)">
+                {t(lang).navigation.lastUpdated} {lastUpdated}
+            </p>
+        </div>
     );
 
     return (
