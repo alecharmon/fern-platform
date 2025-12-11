@@ -3,7 +3,6 @@
 import { Button } from "@fern-docs/components/button";
 import { FernInput } from "@fern-docs/components/FernInput";
 import { Loader2, Lock } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
 import { useApiRoute } from "./hooks/useApiRoute";
@@ -13,7 +12,6 @@ interface PasswordLoginFormProps {
 }
 
 export default function PasswordLoginForm({ returnTo }: PasswordLoginFormProps) {
-    const router = useRouter();
     const apiRoute = useApiRoute("/api/fern-docs/auth/password");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -38,9 +36,9 @@ export default function PasswordLoginForm({ returnTo }: PasswordLoginFormProps) 
                 // Show redirecting state before navigating
                 setIsLoading(false);
                 setIsRedirecting(true);
-                // Redirect to the return URL
-                router.push(returnTo || "/");
-                router.refresh();
+                // Use full page navigation to ensure the browser sends the new auth cookie
+                // router.push() does client-side navigation which may not pick up the cookie
+                window.location.href = returnTo || "/";
             } else if (response.status === 401) {
                 setError("Invalid password");
                 setIsLoading(false);
