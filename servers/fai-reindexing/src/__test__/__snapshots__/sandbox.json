@@ -11,7 +11,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/overview"
+      "url": "https://sandbox/history/overview",
+      "content_type": "page",
+      "breadcrumbs": "Overview",
+      "chunk_index": 0,
+      "parent_id": "products/history/v1/pages/overview.mdx",
+      "parent_content_hash": "b9cd1b4715ef08835feff4bbae6fb2793952bce977b646a25bbd32aea299625f"
     }
   },
   {
@@ -26,7 +31,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/overview"
+      "url": "https://sandbox/history/overview",
+      "content_type": "page",
+      "breadcrumbs": "Overview",
+      "chunk_index": 1,
+      "parent_id": "products/history/v1/pages/overview.mdx",
+      "parent_content_hash": "b9cd1b4715ef08835feff4bbae6fb2793952bce977b646a25bbd32aea299625f"
     }
   },
   {
@@ -41,7 +51,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/overview"
+      "url": "https://sandbox/history/overview",
+      "content_type": "page",
+      "breadcrumbs": "Overview",
+      "chunk_index": 2,
+      "parent_id": "products/history/v1/pages/overview.mdx",
+      "parent_content_hash": "b9cd1b4715ef08835feff4bbae6fb2793952bce977b646a25bbd32aea299625f"
     }
   },
   {
@@ -56,7 +71,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/economy"
+      "url": "https://sandbox/history/economy",
+      "content_type": "page",
+      "breadcrumbs": "Economy",
+      "chunk_index": 0,
+      "parent_id": "products/history/v1/pages/economy.mdx",
+      "parent_content_hash": "54598e8ef8b341bd15016736cd6b36b10805f06feeafdf9b515e6812083ed0af"
     }
   },
   {
@@ -71,7 +91,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/economy"
+      "url": "https://sandbox/history/economy",
+      "content_type": "page",
+      "breadcrumbs": "Economy",
+      "chunk_index": 1,
+      "parent_id": "products/history/v1/pages/economy.mdx",
+      "parent_content_hash": "54598e8ef8b341bd15016736cd6b36b10805f06feeafdf9b515e6812083ed0af"
     }
   },
   {
@@ -86,7 +111,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/washington"
+      "url": "https://sandbox/history/washington",
+      "content_type": "page",
+      "breadcrumbs": "Presidents",
+      "chunk_index": 0,
+      "parent_id": "products/history/v1/pages/washington.mdx",
+      "parent_content_hash": "2b7afc6ec92f374995cb77c19a5826ec9675094f90957c64aba8ef94c2dabca1"
     }
   },
   {
@@ -101,7 +131,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/washington"
+      "url": "https://sandbox/history/washington",
+      "content_type": "page",
+      "breadcrumbs": "Presidents",
+      "chunk_index": 1,
+      "parent_id": "products/history/v1/pages/washington.mdx",
+      "parent_content_hash": "2b7afc6ec92f374995cb77c19a5826ec9675094f90957c64aba8ef94c2dabca1"
     }
   },
   {
@@ -116,7 +151,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/washington"
+      "url": "https://sandbox/history/washington",
+      "content_type": "page",
+      "breadcrumbs": "Presidents",
+      "chunk_index": 2,
+      "parent_id": "products/history/v1/pages/washington.mdx",
+      "parent_content_hash": "2b7afc6ec92f374995cb77c19a5826ec9675094f90957c64aba8ef94c2dabca1"
     }
   },
   {
@@ -131,7 +171,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/lincoln"
+      "url": "https://sandbox/history/lincoln",
+      "content_type": "page",
+      "breadcrumbs": "Presidents",
+      "chunk_index": 0,
+      "parent_id": "products/history/v1/pages/lincoln.mdx",
+      "parent_content_hash": "d19e422946335cac710ef5b1855188217d469518a6a3f50b08534badf82d0426"
     }
   },
   {
@@ -146,7 +191,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/lincoln"
+      "url": "https://sandbox/history/lincoln",
+      "content_type": "page",
+      "breadcrumbs": "Presidents",
+      "chunk_index": 1,
+      "parent_id": "products/history/v1/pages/lincoln.mdx",
+      "parent_content_hash": "d19e422946335cac710ef5b1855188217d469518a6a3f50b08534badf82d0426"
     }
   },
   {
@@ -161,7 +211,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/lincoln"
+      "url": "https://sandbox/history/lincoln",
+      "content_type": "page",
+      "breadcrumbs": "Presidents",
+      "chunk_index": 2,
+      "parent_id": "products/history/v1/pages/lincoln.mdx",
+      "parent_content_hash": "d19e422946335cac710ef5b1855188217d469518a6a3f50b08534badf82d0426"
     }
   },
   {
@@ -176,7 +231,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/roosevelt"
+      "url": "https://sandbox/history/roosevelt",
+      "content_type": "page",
+      "breadcrumbs": "Presidents",
+      "chunk_index": 0,
+      "parent_id": "products/history/v1/pages/roosevelt.mdx",
+      "parent_content_hash": "16a8103153467f1af66040825e47784edf7c05dc5e5bb405e982cbb7e07fd9b1"
     }
   },
   {
@@ -191,7 +251,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/roosevelt"
+      "url": "https://sandbox/history/roosevelt",
+      "content_type": "page",
+      "breadcrumbs": "Presidents",
+      "chunk_index": 1,
+      "parent_id": "products/history/v1/pages/roosevelt.mdx",
+      "parent_content_hash": "16a8103153467f1af66040825e47784edf7c05dc5e5bb405e982cbb7e07fd9b1"
     }
   },
   {
@@ -206,7 +271,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/roosevelt"
+      "url": "https://sandbox/history/roosevelt",
+      "content_type": "page",
+      "breadcrumbs": "Presidents",
+      "chunk_index": 2,
+      "parent_id": "products/history/v1/pages/roosevelt.mdx",
+      "parent_content_hash": "16a8103153467f1af66040825e47784edf7c05dc5e5bb405e982cbb7e07fd9b1"
     }
   },
   {
@@ -221,7 +291,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/-api"
+      "url": "https://sandbox/history/-api",
+      "content_type": "page",
+      "breadcrumbs": "",
+      "chunk_index": 0,
+      "parent_id": "shared/shared-api-info.mdx",
+      "parent_content_hash": "eee8c329deb1792fa6729b20216c6907fb21990e114ac6b8269a77c9a93f4c72"
     }
   },
   {
@@ -236,7 +311,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/-api"
+      "url": "https://sandbox/history/-api",
+      "content_type": "page",
+      "breadcrumbs": "",
+      "chunk_index": 1,
+      "parent_id": "shared/shared-api-info.mdx",
+      "parent_content_hash": "eee8c329deb1792fa6729b20216c6907fb21990e114ac6b8269a77c9a93f4c72"
     }
   },
   {
@@ -251,7 +331,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/demographics"
+      "url": "https://sandbox/history/v-2/demographics",
+      "content_type": "page",
+      "breadcrumbs": "Demographics",
+      "chunk_index": 0,
+      "parent_id": "products/history/v2/pages/demographics.mdx",
+      "parent_content_hash": "17474bfd0b698ebe10bf8d202fc13988feec3132ea01c08dcbaf4c4d20367973"
     }
   },
   {
@@ -266,7 +351,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/demographics"
+      "url": "https://sandbox/history/v-2/demographics",
+      "content_type": "page",
+      "breadcrumbs": "Demographics",
+      "chunk_index": 1,
+      "parent_id": "products/history/v2/pages/demographics.mdx",
+      "parent_content_hash": "17474bfd0b698ebe10bf8d202fc13988feec3132ea01c08dcbaf4c4d20367973"
     }
   },
   {
@@ -281,7 +371,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/demographics"
+      "url": "https://sandbox/history/v-2/demographics",
+      "content_type": "page",
+      "breadcrumbs": "Demographics",
+      "chunk_index": 2,
+      "parent_id": "products/history/v2/pages/demographics.mdx",
+      "parent_content_hash": "17474bfd0b698ebe10bf8d202fc13988feec3132ea01c08dcbaf4c4d20367973"
     }
   },
   {
@@ -296,7 +391,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/demographics"
+      "url": "https://sandbox/history/v-2/demographics",
+      "content_type": "page",
+      "breadcrumbs": "Demographics",
+      "chunk_index": 3,
+      "parent_id": "products/history/v2/pages/demographics.mdx",
+      "parent_content_hash": "17474bfd0b698ebe10bf8d202fc13988feec3132ea01c08dcbaf4c4d20367973"
     }
   },
   {
@@ -311,7 +411,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/demographics"
+      "url": "https://sandbox/history/v-2/demographics",
+      "content_type": "page",
+      "breadcrumbs": "Demographics",
+      "chunk_index": 4,
+      "parent_id": "products/history/v2/pages/demographics.mdx",
+      "parent_content_hash": "17474bfd0b698ebe10bf8d202fc13988feec3132ea01c08dcbaf4c4d20367973"
     }
   },
   {
@@ -326,7 +431,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/austria"
+      "url": "https://sandbox/history/v-2/austria",
+      "content_type": "page",
+      "breadcrumbs": "Countries",
+      "chunk_index": 0,
+      "parent_id": "products/history/v2/pages/austria.mdx",
+      "parent_content_hash": "8737162b451d226274c29d15b5166c4c516602ed2214669e2ee3ac6544e5a843"
     }
   },
   {
@@ -341,7 +451,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/austria"
+      "url": "https://sandbox/history/v-2/austria",
+      "content_type": "page",
+      "breadcrumbs": "Countries",
+      "chunk_index": 1,
+      "parent_id": "products/history/v2/pages/austria.mdx",
+      "parent_content_hash": "8737162b451d226274c29d15b5166c4c516602ed2214669e2ee3ac6544e5a843"
     }
   },
   {
@@ -356,7 +471,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/austria"
+      "url": "https://sandbox/history/v-2/austria",
+      "content_type": "page",
+      "breadcrumbs": "Countries",
+      "chunk_index": 2,
+      "parent_id": "products/history/v2/pages/austria.mdx",
+      "parent_content_hash": "8737162b451d226274c29d15b5166c4c516602ed2214669e2ee3ac6544e5a843"
     }
   },
   {
@@ -371,7 +491,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/italy"
+      "url": "https://sandbox/history/v-2/italy",
+      "content_type": "page",
+      "breadcrumbs": "Countries",
+      "chunk_index": 0,
+      "parent_id": "products/history/v2/pages/italy.mdx",
+      "parent_content_hash": "20e571265a45a6a388b82b5031e43d2afdd3901d3eed6e84efd019b1a3359030"
     }
   },
   {
@@ -386,7 +511,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/italy"
+      "url": "https://sandbox/history/v-2/italy",
+      "content_type": "page",
+      "breadcrumbs": "Countries",
+      "chunk_index": 1,
+      "parent_id": "products/history/v2/pages/italy.mdx",
+      "parent_content_hash": "20e571265a45a6a388b82b5031e43d2afdd3901d3eed6e84efd019b1a3359030"
     }
   },
   {
@@ -401,7 +531,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/italy"
+      "url": "https://sandbox/history/v-2/italy",
+      "content_type": "page",
+      "breadcrumbs": "Countries",
+      "chunk_index": 2,
+      "parent_id": "products/history/v2/pages/italy.mdx",
+      "parent_content_hash": "20e571265a45a6a388b82b5031e43d2afdd3901d3eed6e84efd019b1a3359030"
     }
   },
   {
@@ -416,7 +551,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/switzerland"
+      "url": "https://sandbox/history/v-2/switzerland",
+      "content_type": "page",
+      "breadcrumbs": "Countries",
+      "chunk_index": 0,
+      "parent_id": "products/history/v2/pages/switzerland.mdx",
+      "parent_content_hash": "cfab1de48512d4c3ec465909a3fd4f5ee6029a0c984e3fb895f4c69663aaa207"
     }
   },
   {
@@ -431,7 +571,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/switzerland"
+      "url": "https://sandbox/history/v-2/switzerland",
+      "content_type": "page",
+      "breadcrumbs": "Countries",
+      "chunk_index": 1,
+      "parent_id": "products/history/v2/pages/switzerland.mdx",
+      "parent_content_hash": "cfab1de48512d4c3ec465909a3fd4f5ee6029a0c984e3fb895f4c69663aaa207"
     }
   },
   {
@@ -446,7 +591,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/history/v-2/switzerland"
+      "url": "https://sandbox/history/v-2/switzerland",
+      "content_type": "page",
+      "breadcrumbs": "Countries",
+      "chunk_index": 2,
+      "parent_id": "products/history/v2/pages/switzerland.mdx",
+      "parent_content_hash": "cfab1de48512d4c3ec465909a3fd4f5ee6029a0c984e3fb895f4c69663aaa207"
     }
   },
   {
@@ -460,7 +610,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/art"
+      "url": "https://sandbox/art",
+      "content_type": "page",
+      "breadcrumbs": "Art",
+      "chunk_index": 0,
+      "parent_id": "products/art/pages/overview.mdx",
+      "parent_content_hash": "f003444cd9c2611add7bb747fc857bd1addd8a5edc68944e04146bcf40a89e47"
     }
   },
   {
@@ -474,7 +629,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/art"
+      "url": "https://sandbox/art",
+      "content_type": "page",
+      "breadcrumbs": "Art",
+      "chunk_index": 1,
+      "parent_id": "products/art/pages/overview.mdx",
+      "parent_content_hash": "f003444cd9c2611add7bb747fc857bd1addd8a5edc68944e04146bcf40a89e47"
     }
   },
   {
@@ -488,7 +648,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/art/monet"
+      "url": "https://sandbox/art/monet",
+      "content_type": "page",
+      "breadcrumbs": "Artists",
+      "chunk_index": 0,
+      "parent_id": "products/art/pages/monet.mdx",
+      "parent_content_hash": "abf0f60620461cc680355e0ab1a346ec219961d7a4243e133cf0e0da66f4a67b"
     }
   },
   {
@@ -502,7 +667,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/art/monet"
+      "url": "https://sandbox/art/monet",
+      "content_type": "page",
+      "breadcrumbs": "Artists",
+      "chunk_index": 1,
+      "parent_id": "products/art/pages/monet.mdx",
+      "parent_content_hash": "abf0f60620461cc680355e0ab1a346ec219961d7a4243e133cf0e0da66f4a67b"
     }
   },
   {
@@ -516,7 +686,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/art/monet"
+      "url": "https://sandbox/art/monet",
+      "content_type": "page",
+      "breadcrumbs": "Artists",
+      "chunk_index": 2,
+      "parent_id": "products/art/pages/monet.mdx",
+      "parent_content_hash": "abf0f60620461cc680355e0ab1a346ec219961d7a4243e133cf0e0da66f4a67b"
     }
   },
   {
@@ -530,7 +705,12 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/art/monet"
+      "url": "https://sandbox/art/monet",
+      "content_type": "page",
+      "breadcrumbs": "Artists",
+      "chunk_index": 3,
+      "parent_id": "products/art/pages/monet.mdx",
+      "parent_content_hash": "abf0f60620461cc680355e0ab1a346ec219961d7a4243e133cf0e0da66f4a67b"
     }
   },
   {
@@ -544,14 +724,19 @@
       "roles": [
         "everyone"
       ],
-      "url": "https://sandbox/art/monet"
+      "url": "https://sandbox/art/monet",
+      "content_type": "page",
+      "breadcrumbs": "Artists",
+      "chunk_index": 4,
+      "parent_id": "products/art/pages/monet.mdx",
+      "parent_content_hash": "abf0f60620461cc680355e0ab1a346ec219961d7a4243e133cf0e0da66f4a67b"
     }
   },
   {
     "id": "a163a47b76e111700c00111bef5999fc7e7a4ce2236e06c5ba2492320e775239",
     "attributes": {
       "title": "Search events",
-      "chunk": "Search historical events using time period, tags, or keywords.",
+      "chunk": "Search events (GET /events/search): Search historical events using time period, tags, or keywords. This endpoint accepts period, tags, and q as parameters. It returns A list of events matching the search criteria.",
       "document": "# Search events\n\nGET https://api.historylibrary.dev/v1/events/search\n\nSearch historical events using time period, tags, or keywords.\n\nReference: https://sandbox/history/api-reference/api-reference/event/search-events\n\n## OpenAPI Specification\n\n```yaml\nopenapi: 3.1.1\ninfo:\n  title: Search events\n  version: endpoint_event.searchEvents\npaths:\n  /events/search:\n    get:\n      operationId: search-events\n      summary: Search events\n      description: Search historical events using time period, tags, or keywords.\n      tags:\n        - - subpackage_event\n      parameters:\n        - name: period\n          in: query\n          description: Time period filter (e.g., \"Renaissance\", \"World War II\").\n          required: false\n          schema:\n            type: string\n        - name: tags\n          in: query\n          description: Comma-separated tags to filter (e.g., \"art,science\").\n          required: false\n          schema:\n            type: array\n            items:\n              type: string\n        - name: q\n          in: query\n          description: Keyword search.\n          required: false\n          schema:\n            type: string\n      responses:\n        '200':\n          description: A list of events matching the search criteria\n          content:\n            application/json:\n              schema:\n                type: array\n                items:\n                  $ref: '#/components/schemas/EventSummary'\ncomponents:\n  schemas:\n    EventSummary:\n      type: object\n      properties:\n        id:\n          type: integer\n        title:\n          type: string\n        period:\n          type: string\n        tags:\n          type: array\n          items:\n            type: string\n\n```",
       "url": "https://sandbox/history/api-reference/api-reference/event/search-events",
       "product": "History",
@@ -566,15 +751,28 @@
         "http",
         "rest",
         "openapi",
-        "json"
-      ]
+        "Search events",
+        "search-events",
+        "GET",
+        "/events/search",
+        "GET /events/search",
+        "json",
+        "period",
+        "tags",
+        "q"
+      ],
+      "content_type": "endpoint",
+      "breadcrumbs": "API Reference, event",
+      "chunk_index": 0,
+      "parent_id": "endpoint_event.searchEvents",
+      "parent_content_hash": "a4c6aa45905b4d44b1a92e901d5d6b7e221e5c7c2015ac4565c57b2888ceef07"
     }
   },
   {
     "id": "35761359153db28ed0a73a4a0a2bcde0dd545899524d4c3a4b122e16ea7eb917",
     "attributes": {
       "title": "Get event by ID",
-      "chunk": "Retrieve details about a historical event.",
+      "chunk": "Get event by ID (GET /events/{eventId}): Retrieve details about a historical event. This endpoint accepts eventId as parameters. It returns Event details retrieved successfully.",
       "document": "# Get event by ID\n\nGET https://api.historylibrary.dev/v1/events/{eventId}\n\nRetrieve details about a historical event.\n\nReference: https://sandbox/history/api-reference/api-reference/event/get-event-by-id\n\n## OpenAPI Specification\n\n```yaml\nopenapi: 3.1.1\ninfo:\n  title: Get event by ID\n  version: endpoint_event.getEventById\npaths:\n  /events/{eventId}:\n    get:\n      operationId: get-event-by-id\n      summary: Get event by ID\n      description: Retrieve details about a historical event.\n      tags:\n        - - subpackage_event\n      parameters:\n        - name: eventId\n          in: path\n          required: true\n          schema:\n            type: integer\n      responses:\n        '200':\n          description: Event details retrieved successfully\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/Event'\ncomponents:\n  schemas:\n    Event:\n      type: object\n      properties:\n        id:\n          type: integer\n        title:\n          type: string\n        description:\n          type: string\n        period:\n          type: string\n        tags:\n          type: array\n          items:\n            type: string\n        sources:\n          type: array\n          items:\n            type: string\n\n```",
       "url": "https://sandbox/history/api-reference/api-reference/event/get-event-by-id",
       "product": "History",
@@ -589,15 +787,28 @@
         "http",
         "rest",
         "openapi",
-        "json"
-      ]
+        "Get event by ID",
+        "get-event-by-id",
+        "GET",
+        "/events/:eventId",
+        "/events/{eventId}",
+        "GET /events/:eventId",
+        "GET /events/{eventId}",
+        "json",
+        "eventId"
+      ],
+      "content_type": "endpoint",
+      "breadcrumbs": "API Reference, event",
+      "chunk_index": 0,
+      "parent_id": "endpoint_event.getEventById",
+      "parent_content_hash": "df9d2ebed61e26c719ec85b9118f2dd63574d3eb119e2a85debad5881530434c"
     }
   },
   {
     "id": "fc1093afc46f87f4f72ef14037c0a4e56a6ee7374353708033e5f195e4a2d826",
     "attributes": {
       "title": "Get user favorites",
-      "chunk": "Retrieve a list of events the user marked as favorite.",
+      "chunk": "Get user favorites (GET /user/{username}/favorites): Retrieve a list of events the user marked as favorite. This endpoint accepts username as parameters. It returns List of favorite events.",
       "document": "# Get user favorites\n\nGET https://api.historylibrary.dev/v1/user/{username}/favorites\n\nRetrieve a list of events the user marked as favorite.\n\nReference: https://sandbox/history/api-reference/api-reference/user/get-user-favorites\n\n## OpenAPI Specification\n\n```yaml\nopenapi: 3.1.1\ninfo:\n  title: Get user favorites\n  version: endpoint_user.getUserFavorites\npaths:\n  /user/{username}/favorites:\n    get:\n      operationId: get-user-favorites\n      summary: Get user favorites\n      description: Retrieve a list of events the user marked as favorite.\n      tags:\n        - - subpackage_user\n      parameters:\n        - name: username\n          in: path\n          required: true\n          schema:\n            type: string\n      responses:\n        '200':\n          description: List of favorite events\n          content:\n            application/json:\n              schema:\n                type: array\n                items:\n                  $ref: '#/components/schemas/EventSummary'\ncomponents:\n  schemas:\n    EventSummary:\n      type: object\n      properties:\n        id:\n          type: integer\n        title:\n          type: string\n        period:\n          type: string\n        tags:\n          type: array\n          items:\n            type: string\n\n```",
       "url": "https://sandbox/history/api-reference/api-reference/user/get-user-favorites",
       "product": "History",
@@ -612,15 +823,28 @@
         "http",
         "rest",
         "openapi",
-        "json"
-      ]
+        "Get user favorites",
+        "get-user-favorites",
+        "GET",
+        "/user/:username/favorites",
+        "/user/{username}/favorites",
+        "GET /user/:username/favorites",
+        "GET /user/{username}/favorites",
+        "json",
+        "username"
+      ],
+      "content_type": "endpoint",
+      "breadcrumbs": "API Reference, user",
+      "chunk_index": 0,
+      "parent_id": "endpoint_user.getUserFavorites",
+      "parent_content_hash": "56725dae13ed60d2e340caa09cceb1312efe1256419685ea5ae0310c7fc1060a"
     }
   },
   {
     "id": "7c170547bc914d320cc8f3c94c2163e61f0454ea1264690d6d0c9cc7cc7c5e8a",
     "attributes": {
       "title": "Add event to favorites",
-      "chunk": "",
+      "chunk": "Add event to favorites is a POST endpoint at /user/{username}/favorites. This endpoint accepts username and eventId as parameters. It returns Event successfully added to favorites.",
       "document": "# Add event to favorites\n\nPOST https://api.historylibrary.dev/v1/user/{username}/favorites\nContent-Type: application/json\n\nReference: https://sandbox/history/api-reference/api-reference/user/add-event-to-favorites\n\n## OpenAPI Specification\n\n```yaml\nopenapi: 3.1.1\ninfo:\n  title: Add event to favorites\n  version: endpoint_user.addEventToFavorites\npaths:\n  /user/{username}/favorites:\n    post:\n      operationId: add-event-to-favorites\n      summary: Add event to favorites\n      tags:\n        - - subpackage_user\n      parameters:\n        - name: username\n          in: path\n          required: true\n          schema:\n            type: string\n      responses:\n        '200':\n          description: Event successfully added to favorites\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/user_addEventToFavorites_Response_200'\n      requestBody:\n        content:\n          application/json:\n            schema:\n              type: object\n              properties:\n                eventId:\n                  type: integer\ncomponents:\n  schemas:\n    user_addEventToFavorites_Response_200:\n      type: object\n      properties: {}\n\n```",
       "url": "https://sandbox/history/api-reference/api-reference/user/add-event-to-favorites",
       "product": "History",
@@ -635,8 +859,22 @@
         "http",
         "rest",
         "openapi",
-        "json"
-      ]
+        "Add event to favorites",
+        "add-event-to-favorites",
+        "POST",
+        "/user/:username/favorites",
+        "/user/{username}/favorites",
+        "POST /user/:username/favorites",
+        "POST /user/{username}/favorites",
+        "json",
+        "username",
+        "eventId"
+      ],
+      "content_type": "endpoint",
+      "breadcrumbs": "API Reference, user",
+      "chunk_index": 0,
+      "parent_id": "endpoint_user.addEventToFavorites",
+      "parent_content_hash": "a6202b61ea676c7bbd129ce927d97c85667e1f3e21f11245a73e12cbadbe16c7"
     }
   }
 ]

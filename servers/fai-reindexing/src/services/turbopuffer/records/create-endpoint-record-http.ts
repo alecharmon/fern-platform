@@ -3,11 +3,12 @@ import {
     createDelimitedRolesetString,
     createViewersForNodes,
     endpointToMarkdown,
-    maybePrepareMdxContent,
-    type TurbopufferRecord,
-    toDescription
+    type TurbopufferRecord
 } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
+
+import { buildEndpointSummary } from "./endpoint-summary";
+import { createKeywordAccumulator } from "./keyword-utils";
 
 export function createEndpointBaseRecordHttp({
     node,
@@ -28,11 +29,22 @@ export function createEndpointBaseRecordHttp({
 }): TurbopufferRecord {
     const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
     const productNode = parents.find((n): n is FernNavigationType.ProductNode => n.type === "product");
-    const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
+    const chunk = buildEndpointSummary(node.title, endpoint, types);
 
-    const keywords: string[] = [];
+    const keywords = createKeywordAccumulator();
 
-    keywords.push("endpoint", "api", "http", "rest", "openapi");
+    const colonPath = ApiDefinition.toColonEndpointPathLiteral(endpoint.path);
+    const curlyPath = ApiDefinition.toCurlyBraceEndpointPathLiteral(endpoint.path);
+
+    ["endpoint", "api", "http", "rest", "openapi"].forEach(keywords.add);
+    keywords.add(node.title);
+    keywords.add(endpoint.displayName);
+    keywords.add(endpoint.operationId);
+    keywords.add(endpoint.method);
+    keywords.add(colonPath);
+    keywords.add(curlyPath);
+    keywords.add(`${endpoint.method} ${colonPath}`);
+    keywords.add(`${endpoint.method} ${curlyPath}`);
 
     const response_type =
         endpoint.responses?.[0]?.body.type === "streamingText" || endpoint.responses?.[0]?.body.type === "stream"
@@ -44,7 +56,7 @@ export function createEndpointBaseRecordHttp({
                 : undefined;
 
     if (response_type != null) {
-        keywords.push(response_type);
+        keywords.add(response_type);
     }
 
     ApiDefinition.Transformer.with({
@@ -52,10 +64,14 @@ export function createEndpointBaseRecordHttp({
             if (type.type === "alias" && type.value.type === "id") {
                 const definition = types[type.value.id];
                 if (definition != null) {
-                    keywords.push(definition.name);
+                    keywords.add(definition.name);
                 }
             }
             return type;
+        },
+        ObjectProperty: (property) => {
+            keywords.add(property.key);
+            return property;
         }
     }).endpoint(endpoint, endpoint.id);
 
@@ -75,14 +91,14 @@ export function createEndpointBaseRecordHttp({
         id: createHash("sha256").update(node.id).digest("hex"),
         attributes: {
             title: node.title,
-            chunk: prepared.content ?? "",
+            chunk,
             document,
             url,
             product: productNode?.title,
             version: versionNode?.title,
             authed: isNodeAuthed,
             roles: roles.map((role) => createDelimitedRolesetString(role)),
-            keywords,
+            keywords: keywords.values(),
             content_type: "endpoint",
             breadcrumbs,
             chunk_index: 0,

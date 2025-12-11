@@ -1,13 +1,9 @@
 import { ApiDefinition, FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
-import { truncateToBytes } from "@fern-api/ui-core-utils";
-import {
-    createDelimitedRolesetString,
-    createViewersForNodes,
-    maybePrepareMdxContent,
-    type TurbopufferRecord,
-    toDescription
-} from "@fern-docs/search-utils";
+import { createDelimitedRolesetString, createViewersForNodes, type TurbopufferRecord } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
+
+import { buildWebhookSummary } from "./endpoint-summary";
+import { createKeywordAccumulator } from "./keyword-utils";
 
 export function createEndpointBaseRecordWebhook({
     parents,
@@ -26,34 +22,43 @@ export function createEndpointBaseRecordWebhook({
 }): TurbopufferRecord {
     const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
     const productNode = parents.find((n): n is FernNavigationType.ProductNode => n.type === "product");
-    const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
+    const chunk = buildWebhookSummary(node.title, node, endpoint, types);
 
-    const keywords: string[] = [];
+    const keywords = createKeywordAccumulator();
 
-    keywords.push("endpoint", "api", "webhook");
+    const webhookPath = endpoint.path.join("");
+
+    ["endpoint", "api", "webhook"].forEach(keywords.add);
+    keywords.add(node.title);
+    keywords.add(endpoint.displayName);
+    keywords.add(endpoint.operationId);
+    keywords.add(node.method);
+    keywords.add(webhookPath);
+    keywords.add(`${node.method} ${webhookPath}`);
 
     ApiDefinition.Transformer.with({
         TypeShape: (type) => {
             if (type.type === "alias" && type.value.type === "id") {
                 const definition = types[type.value.id];
                 if (definition != null) {
-                    keywords.push(definition.name);
+                    keywords.add(definition.name);
                 }
             }
             return type;
+        },
+        ObjectProperty: (property) => {
+            keywords.add(property.key);
+            return property;
         }
     }).webhookDefinition(endpoint, endpoint.id);
 
-    const description = prepared.content != null ? truncateToBytes(prepared.content, 50 * 1000) : undefined;
-
     const document_body = JSON.stringify(
         {
-            description,
             api_type: "webhook",
             api_definition_id: node.apiDefinitionId,
             api_endpoint_id: node.webhookId,
             method: node.method,
-            endpoint_path: endpoint.path.join("")
+            endpoint_path: webhookPath
         },
         null,
         2
@@ -61,7 +66,7 @@ export function createEndpointBaseRecordWebhook({
 
     const { roles, authed: isNodeAuthed } = createViewersForNodes([...parents, node], authed);
 
-    const document = `${document_body}\n\n${description}`;
+    const document = `${document_body}\n\n${chunk}`;
 
     const breadcrumbs = FernNavigation.utils
         .createBreadcrumb([...parents, node])
@@ -71,7 +76,7 @@ export function createEndpointBaseRecordWebhook({
     return {
         id: createHash("sha256").update(node.webhookId).digest("hex"),
         attributes: {
-            chunk: prepared.content ?? "",
+            chunk,
             title: node.title,
             document,
             url,
@@ -79,7 +84,7 @@ export function createEndpointBaseRecordWebhook({
             product: productNode?.title,
             authed: isNodeAuthed,
             roles: roles.map((role) => createDelimitedRolesetString(role)),
-            keywords,
+            keywords: keywords.values(),
             content_type: "webhook",
             breadcrumbs,
             chunk_index: 0,
