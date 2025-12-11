@@ -1666,9 +1666,6 @@ importers:
 
   packages/fern-docs/bundle:
     dependencies:
-      '@ai-sdk/openai':
-        specifier: 2.0.0-beta.2
-        version: 2.0.0-beta.2(zod@3.25.76)
       '@algolia/client-search':
         specifier: ^5.20.3
         version: 5.45.0
@@ -2685,33 +2682,12 @@ importers:
       '@fern-api/docs-utils':
         specifier: workspace:*
         version: link:../../../commons/docs-utils
-      '@fern-api/fai-sdk':
-        specifier: workspace:*
-        version: link:../../../fai-sdk
-      '@fern-api/ui-core-utils':
-        specifier: workspace:*
-        version: link:../../../commons/core-utils
-      '@fern-docs/search-keyword':
-        specifier: workspace:*
-        version: link:../keyword
-      '@fern-docs/search-utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@turbopuffer/turbopuffer':
-        specifier: ^0.5.11
-        version: 0.5.19
       ai:
         specifier: 5.0.86
         version: 5.0.86(zod@3.25.76)
       ai-fallback:
         specifier: ^1.0.2
         version: 1.0.8(zod@3.25.76)
-      es-toolkit:
-        specifier: ^1.32.0
-        version: 1.42.0
-      js-tiktoken:
-        specifier: ^1.0.21
-        version: 1.0.21
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -16912,9 +16888,6 @@ packages:
 
   js-sha3@0.8.0:
     resolution: {integrity: sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q==}
-
-  js-tiktoken@1.0.21:
-    resolution: {integrity: sha512-biOj/6M5qdgx5TKjDnFT1ymSpM5tbd3ylwDtrQvFQSu0Z7bBYko2dF+W/aUkXUPuk6IVpRxk/3Q2sHOzGlS36g==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -41130,10 +41103,6 @@ snapshots:
 
   js-sha3@0.8.0:
     optional: true
-
-  js-tiktoken@1.0.21:
-    dependencies:
-      base64-js: 1.5.1
 
   js-tokens@4.0.0: {}
 
