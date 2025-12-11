@@ -471,7 +471,7 @@ async def sync_index_to_target_incremental(
     This is more efficient than full sync when only a subset of content has changed.
     """
     if not parent_ids:
-        LOGGER.info("No parent_ids provided for incremental sync, skipping")
+        LOGGER.info("No parent_ids provided for incremental sync, completing successfully")
         return
 
     source_namespace_id = get_tpuf_namespace(domain, source_index_name)
@@ -487,16 +487,20 @@ async def sync_index_to_target_incremental(
         source_ns = tpuf_client.namespace(source_namespace_id)
         target_ns = tpuf_client.namespace(target_namespace_id)
 
-        for parent_id in parent_ids:
-            try:
-                await target_ns.write(
-                    delete_by_filter=[["source", "Eq", source_index_name], ["parent_id", "Eq", parent_id]]
-                )
-            except Exception as e:
-                # The parent_id might not exist in target yet (net new)
-                LOGGER.warning(f"Failed to delete parent_id {parent_id} from target: {e}")
-
-        LOGGER.info(f"Deleted old records for {len(parent_ids)} parent_ids from target")
+        try:
+            await target_ns.write(
+                delete_by_filter=("And", [("source", "Eq", source_index_name), ("parent_id", "In", parent_ids)])
+            )
+            LOGGER.info(f"Deleted old records for {len(parent_ids)} parent_ids from target")
+        except Exception as e:
+            LOGGER.warning(f"Batch delete failed, trying individual deletes: {e}")
+            for parent_id in parent_ids:
+                try:
+                    await target_ns.write(
+                        delete_by_filter=("And", [("source", "Eq", source_index_name), ("parent_id", "Eq", parent_id)])
+                    )
+                except Exception as delete_error:
+                    LOGGER.warning(f"Failed to delete parent_id {parent_id}: {delete_error}")
 
         source_ns_exists = await source_ns.exists()
         if not source_ns_exists:
