@@ -1,4 +1,4 @@
-import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { createCachedDocsLoader, createPruneKey } from "@fern-api/docs-loader";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
@@ -12,7 +12,52 @@ import { toImageDescriptor } from "@/app/seo";
 import { createFindNode } from "@/server/find-node";
 import { runAsyncSpan } from "@/server/tracing";
 
+import { truncateDescription } from "./util/truncateDescription";
+
+export { truncateDescription };
+
 type DocsPage = Awaited<ReturnType<DocsLoader["getPage"]>>;
+
+/**
+ * Gets the description from an API definition node (endpoint, webhook, or websocket).
+ * Returns undefined if the node is not an API leaf or if no description is available.
+ */
+async function getApiDescriptionFromNode(
+    node: FernNavigation.NavigationNode | undefined,
+    loader: DocsLoader
+): Promise<string | undefined> {
+    if (node == null || !FernNavigation.isApiLeaf(node)) {
+        return undefined;
+    }
+
+    try {
+        const apiDefinition = await loader.getPrunedApi(node.apiDefinitionId, createPruneKey(node));
+        if (apiDefinition == null) {
+            return undefined;
+        }
+
+        if (node.type === "endpoint") {
+            const endpoint = apiDefinition.endpoints[node.endpointId];
+            return typeof endpoint?.description === "string" ? endpoint.description : undefined;
+        }
+
+        if (node.type === "webhook") {
+            const webhook = apiDefinition.webhooks[node.webhookId];
+            return typeof webhook?.description === "string" ? webhook.description : undefined;
+        }
+
+        if (node.type === "webSocket") {
+            const websocket = apiDefinition.websockets[node.webSocketId];
+            return typeof websocket?.description === "string" ? websocket.description : undefined;
+        }
+    } catch (error) {
+        // If we fail to fetch the API definition, fall back to undefined
+        console.error("Failed to fetch API definition for description:", error);
+        return undefined;
+    }
+
+    return undefined;
+}
 
 export async function getMetadataTitleFromPage({
     loader,
@@ -118,6 +163,16 @@ export async function generateMetadataFromPage({
                 canonicalUrl = baseUrl;
             }
 
+            const frontmatterDescription = markdownToString(
+                frontmatter?.description || frontmatter?.subtitle || frontmatter?.excerpt
+            );
+
+            let description = frontmatterDescription;
+            if (!description && node != null) {
+                const descriptionSrc = await getApiDescriptionFromNode(node, loader);
+                description = truncateDescription(descriptionSrc);
+            }
+
             const title = await runAsyncSpan(
                 "metadata.computeTitle",
                 () => getMetadataTitleFromPage({ loader, slug, page }),
@@ -129,9 +184,7 @@ export async function generateMetadataFromPage({
 
             return {
                 title,
-                description: markdownToString(
-                    frontmatter?.description || frontmatter?.subtitle || frontmatter?.excerpt
-                ),
+                description,
                 keywords: frontmatter?.keywords,
                 robots: {
                     index: noindex ? false : undefined,
