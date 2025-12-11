@@ -44,9 +44,9 @@ export class FaiChatEcsStack extends Stack {
             removalPolicy: isPreview ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN
         });
 
-        Tags.of(logGroup).add("Environment", environmentType.toLowerCase());
+        Tags.of(this).add("Environment", environmentType.toLowerCase());
         if (!isProd) {
-            Tags.of(logGroup).add("VantaNonProd", "true");
+            Tags.of(this).add("VantaNonProd", "true");
         }
 
         const vpc = Vpc.fromLookup(this, "vpc", {

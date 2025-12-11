@@ -1,6 +1,5 @@
 import { type Environments, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api/";
 import * as cdk from "aws-cdk-lib";
-import { FaiChatStack } from "../scripts/fai-chat-stack";
 import { FaiCodeIndexingStack } from "../scripts/fai-code-indexing-stack";
 
 void main();
@@ -11,38 +10,9 @@ async function main() {
         throw new Error("Version is not specified!");
     }
 
-    const isPreview = process.env["PREVIEW"] === "true";
-    const prNumber = process.env["PR_NUMBER"];
-
-    if (isPreview && !prNumber) {
-        throw new Error("PR_NUMBER is required when PREVIEW=true");
-    }
-
     const environments = await getEnvironments();
     const app = new cdk.App();
 
-    // If preview mode, only deploy preview stacks
-    if (isPreview) {
-        const environmentInfo = environments[EnvironmentType.Dev2];
-        if (environmentInfo == null) {
-            throw new Error(`No info for environment Dev2`);
-        }
-
-        new FaiChatStack(
-            app,
-            `fai-chat-preview-${prNumber}`,
-            version,
-            EnvironmentType.Dev2,
-            environmentInfo,
-            {
-                env: { account: "985111089818", region: "us-east-1" }
-            },
-            { isPreview: true, prNumber: prNumber! }
-        );
-        return;
-    }
-
-    // Normal deployment flow
     for (const [environmentType, environmentInfo] of Object.entries(environments)) {
         if (environmentInfo == null) {
             throw new Error(`No info for environment ${environmentType}`);
@@ -50,43 +20,10 @@ async function main() {
         switch (environmentType) {
             case EnvironmentType.Dev:
             case EnvironmentType.Dev2:
-                new FaiCodeIndexingStack(
-                    app,
-                    `fai-code-indexing-${environmentType.toLowerCase()}`,
-                    version,
-                    environmentType,
-                    environmentInfo,
-                    {
-                        env: { account: "985111089818", region: "us-east-1" }
-                    }
-                );
-
-                new FaiChatStack(
-                    app,
-                    `fai-chat-${environmentType.toLowerCase()}`,
-                    version,
-                    environmentType,
-                    environmentInfo,
-                    {
-                        env: { account: "985111089818", region: "us-east-1" }
-                    }
-                );
-                break;
             case EnvironmentType.Prod:
                 new FaiCodeIndexingStack(
                     app,
                     `fai-code-indexing-${environmentType.toLowerCase()}`,
-                    version,
-                    environmentType,
-                    environmentInfo,
-                    {
-                        env: { account: "985111089818", region: "us-east-1" }
-                    }
-                );
-
-                new FaiChatStack(
-                    app,
-                    `fai-chat-${environmentType.toLowerCase()}`,
                     version,
                     environmentType,
                     environmentInfo,

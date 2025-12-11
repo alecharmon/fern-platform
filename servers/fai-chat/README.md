@@ -6,10 +6,10 @@ Shared retrieval/LLM/prompt logic now lives in `../python-libs/fai_ai_core` and 
 
 ## Architecture
 
-- **Runtime**: Python 3.12 (AWS Lambda)
-- **Framework**: FastAPI with Mangum adapter
-- **Deployment**: API Gateway + Lambda
-- **Domain**: `fai-chat.buildwithfern.com` (prod), `fai-chat-dev.buildwithfern.com` (dev)
+- **Runtime**: Python 3.12 (ECS Fargate)
+- **Framework**: FastAPI
+- **Deployment**: ECS Fargate with ALB
+- **Domain**: `fai-chat.buildwithfern.com` (prod), `fai-chat-dev2.buildwithfern.com` (dev)
 
 ## Development
 
@@ -58,15 +58,15 @@ Health check endpoint.
 
 ## Deployment
 
-Deployed via CDK stack in `servers/fai-lambda-deploy/scripts/fai-chat-stack.ts`.
+Deployed via CDK stack in `servers/fai-chat-deploy/src/fai-chat-ecs-stack.ts`.
 
 ```bash
 # Deploy to dev
-cd servers/fai-lambda-deploy
-VERSION=0.1.0 cdk deploy fai-chat-dev
+cd servers/fai-chat-deploy
+VERSION=0.1.0 pnpm deploy:dev2
 
 # Deploy to prod
-VERSION=0.1.0 cdk deploy fai-chat-prod
+VERSION=0.1.0 pnpm deploy:prod
 ```
 
 ## TODO
