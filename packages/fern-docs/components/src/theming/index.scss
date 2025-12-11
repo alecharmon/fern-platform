@@ -37,7 +37,7 @@
         &[data-state="inactive"] {
           @apply text-(color:--grayscale-a11);
 
-          @variants hover {
+          &:hover {
             @apply text-body;
           }
         }

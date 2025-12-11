@@ -8,7 +8,7 @@
       @apply mt-0!;
     }
 
-    // Disabled input styling
+    /* Disabled input styling */
     .fern-input:disabled,
     .fern-textarea:disabled {
       @apply cursor-not-allowed opacity-60;
