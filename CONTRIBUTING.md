@@ -34,6 +34,52 @@ This repo contains both unit tests and integration (end-to-end) tests.
 
 To run the unit tests: `pnpm test`.
 
+#### Important: Always Include Test Fixtures
+
+**When contributing code changes, you must always include test fixtures to validate your changes.** This is a critical requirement for maintaining code quality and preventing regressions.
+
+**When to add/update test fixtures:**
+- Adding new API endpoints → Create test cases in `servers/fdr/src/__test__/` or `servers/fai/tests/`
+- Modifying FDR/FAI APIs → Add integration tests that exercise the new/changed functionality
+- Changing docs rendering → Create test MDX files or documentation fixtures
+- Fixing bugs → Add a test that reproduces the bug and verifies the fix
+- Changing database schema → Add migration tests and data fixtures
+
+**Example workflow for FDR changes:**
+```bash
+# 1. Add test fixtures
+# Example: servers/fdr/src/__test__/local/my-feature.test.ts
+
+# 2. Run tests
+pnpm --filter=@fern-platform/fdr test
+
+# 3. For integration tests (requires Docker)
+pnpm --filter=@fern-platform/fdr test:local
+
+# 4. Commit both source and test changes
+git add servers/fdr/src/
+git add servers/fdr/src/__test__/
+git commit -m "feat(fdr): add new feature with tests"
+```
+
+**Example workflow for docs UI changes:**
+```bash
+# 1. Create test fixtures
+# Example: packages/fern-docs/bundle/src/__test__/my-feature.test.ts
+
+# 2. Run dev server to test manually
+pnpm docs:dev
+
+# 3. Run automated tests
+pnpm --filter=@fern-docs/bundle test
+
+# 4. Commit changes
+git add packages/fern-docs/bundle/
+git commit -m "feat(docs): add new feature with tests"
+```
+
+For more detailed guidance on fixture testing, see the "Testing Changes with Fixtures" section in [CLAUDE.md](./CLAUDE.md).
+
 ### Lint/formatting
 
 This repo uses [Biome](https://biomejs.dev) for linting and formatting.
