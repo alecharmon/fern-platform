@@ -216,6 +216,7 @@ types:
       tabs: optional<DocsTabsConfig>
       footerNav: optional<FooterNavConfig>
       page-actions: optional<DocsPageActionsConfig>
+      language-switcher: optional<LanguageSwitcherConfig>
       
   FooterNavConfig:
     enum:
@@ -241,6 +242,11 @@ types:
     enum:
       - default
       - toolbar
+
+  LanguageSwitcherConfig:
+    enum:
+      - default
+      - minimal
 
   DocsSettingsConfig:
     properties:

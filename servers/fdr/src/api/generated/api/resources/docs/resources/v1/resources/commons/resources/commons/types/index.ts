@@ -49,6 +49,7 @@ export * from "./JsRemoteConfig";
 export * from "./JsScriptStrategy";
 export * from "./KoalaConfig";
 export * from "./Language";
+export * from "./LanguageSwitcherConfig";
 export * from "./LogRocketConfig";
 export * from "./MetadataConfig";
 export * from "./MixpanelConfig";

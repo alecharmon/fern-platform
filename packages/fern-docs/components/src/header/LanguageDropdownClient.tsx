@@ -1,6 +1,7 @@
 "use client";
 
 import { useIsDesktop } from "@fern-ui/react-commons";
+import { Languages } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../cn";
 import { FernDropdown } from "../FernDropdown";
@@ -43,11 +44,13 @@ function FlagIcon({ src }: { src: string | undefined }) {
 export function LanguageDropdownClient({
     languages,
     lang,
-    disabled = false
+    disabled = false,
+    minimal = false
 }: {
     languages: LanguageDropdownItem[];
     lang: string;
     disabled?: boolean;
+    minimal?: boolean;
 }) {
     const isDesktop = useIsDesktop();
     const [currentLanguage, setCurrentLanguage] = useState<string>(lang);
@@ -70,7 +73,7 @@ export function LanguageDropdownClient({
                     label,
                     value: language,
                     href: slug,
-                    icon: flagSrc ? icon : undefined
+                    icon: minimal ? undefined : flagSrc ? icon : undefined
                 };
             })}
             contentProps={{
@@ -96,7 +99,11 @@ export function LanguageDropdownClient({
                 className={cn("language-dropdown-trigger h-9 w-9 rounded-full ml-2 flex items-center justify-center")}
                 data-testid="language-dropdown"
             >
-                <FlagIcon src={FLAG_SVGS[currentLanguageItem.language]} />
+                {minimal ? (
+                    <Languages className="size-icon" />
+                ) : (
+                    <FlagIcon src={FLAG_SVGS[currentLanguageItem.language]} />
+                )}
             </div>
         </FernDropdown>
     );

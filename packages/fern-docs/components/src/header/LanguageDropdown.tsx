@@ -15,11 +15,13 @@ export declare namespace LanguageDropdown {
 export async function LanguageDropdown({
     loader,
     nodeSlug,
-    lang
+    lang,
+    minimal = false
 }: {
     loader: DocsLoader;
     nodeSlug?: string;
     lang: string;
+    minimal?: boolean;
 }) {
     const config = await loader.getConfig();
 
@@ -35,7 +37,7 @@ export async function LanguageDropdown({
         slug: removedLanguagePrefix ? `/${language}/${removedLanguagePrefix}` : `/${language}`
     }));
 
-    return <LanguageDropdownClient languages={languageOptions} lang={lang} disabled={isLocal()} />;
+    return <LanguageDropdownClient languages={languageOptions} lang={lang} disabled={isLocal()} minimal={minimal} />;
 }
 
 /**

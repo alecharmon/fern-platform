@@ -8,4 +8,5 @@ export interface DocsThemeConfig {
     tabs: FernRegistry.docs.v1.commons.DocsTabsConfig | undefined;
     footerNav: FernRegistry.docs.v1.commons.FooterNavConfig | undefined;
     "page-actions": FernRegistry.docs.v1.commons.DocsPageActionsConfig | undefined;
+    "language-switcher": FernRegistry.docs.v1.commons.LanguageSwitcherConfig | undefined;
 }
