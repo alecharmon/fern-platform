@@ -55,7 +55,7 @@ export function AnalyticsPageClient({
     useEffect(() => {
         async function fetchData() {
             try {
-                const [histogram, resolution] = await Promise.all([
+                const [histogramResult, resolution] = await Promise.all([
                     getDomainAnalytics({
                         docsUrl: baseDocsUrl,
                         timeRange
@@ -65,7 +65,11 @@ export function AnalyticsPageClient({
                         timeRange
                     })
                 ]);
-                setHistogramData(histogram);
+                if (histogramResult.success) {
+                    setHistogramData(histogramResult.data);
+                } else {
+                    console.error("Failed to fetch histogram data:", histogramResult.error);
+                }
                 setResolutionData(resolution);
             } catch (error) {
                 console.error("Failed to fetch analytics data:", error);

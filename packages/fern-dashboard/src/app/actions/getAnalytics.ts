@@ -4,8 +4,18 @@ import type { FernAI } from "@fern-api/fai-sdk";
 
 import { getRequestParams, type TimeRange } from "@/components/analytics/utils/get-request-params";
 
-import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
+import { getCurrentSession } from "../services/auth0/getCurrentSession";
 import { getFaiClient } from "../services/fai/getFaiClient";
+
+type GetDomainAnalyticsResponse =
+    | {
+          success: true;
+          data: FernAI.GetHistogramAnalyticsResponse;
+      }
+    | {
+          success: false;
+          error: string;
+      };
 
 export async function getDomainAnalytics({
     docsUrl,
@@ -13,12 +23,32 @@ export async function getDomainAnalytics({
 }: {
     docsUrl: string;
     timeRange: TimeRange;
-}): Promise<FernAI.GetHistogramAnalyticsResponse> {
-    const session = await getCurrentSessionOrThrow();
+}): Promise<GetDomainAnalyticsResponse> {
+    const session = await getCurrentSession();
+    if (!session) {
+        return {
+            success: false,
+            error: "Not authenticated"
+        };
+    }
     const faiClient = getFaiClient({ token: session.accessToken });
     const requestParams = getRequestParams(timeRange);
     if (requestParams.start_date === undefined) {
-        throw new Error("All data is not supported for analytics");
+        return {
+            success: false,
+            error: "All data is not supported for analytics"
+        };
     }
-    return await faiClient.analytics.getAnalyticsHistogram(docsUrl, requestParams);
+    try {
+        const response = await faiClient.analytics.getAnalyticsHistogram(docsUrl, requestParams);
+        return {
+            success: true,
+            data: response
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error)
+        };
+    }
 }

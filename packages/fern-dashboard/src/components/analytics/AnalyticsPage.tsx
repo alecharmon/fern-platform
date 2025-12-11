@@ -19,10 +19,15 @@ export default async function AnalyticsPage({
     const baseDocsUrl = getBaseDocsUrl(docsUrl);
     const cutoffTime = new Date(Date.now()).toISOString();
 
-    const analyticsData = await getDomainAnalytics({
+    const analyticsDataResponse = await getDomainAnalytics({
         docsUrl: baseDocsUrl,
         timeRange: TimeRange.LAST_WEEK
     });
+
+    if (!analyticsDataResponse.success) {
+        console.error("Failed to fetch analytics data:", analyticsDataResponse.error);
+        return null;
+    }
 
     let resolutionData;
     try {
@@ -50,7 +55,7 @@ export default async function AnalyticsPage({
         <AnalyticsPageClient
             baseDocsUrl={baseDocsUrl}
             initialQueriesData={queriesData.queries}
-            initialHistogramData={analyticsData}
+            initialHistogramData={analyticsDataResponse.data}
             initialResolutionData={resolutionData}
             initialTotalQueries={queriesData.pagination.total}
             cutoffTime={cutoffTime}
