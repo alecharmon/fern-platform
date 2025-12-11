@@ -107,8 +107,6 @@ export async function updateJobStatus(
             },
             log
         );
-
-        log.info("Updated job status", { domain, status });
     } catch (error) {
         log.error("Failed to update job status", {
             domain,

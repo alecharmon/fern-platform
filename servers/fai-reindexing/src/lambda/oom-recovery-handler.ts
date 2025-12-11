@@ -334,8 +334,7 @@ async function requeueJob(metadata: TaskMetadata): Promise<void> {
     }
 
     const message = {
-        domain: metadata.domain,
-        deleteExisting: false
+        domain: metadata.domain
     };
 
     await withRetry(

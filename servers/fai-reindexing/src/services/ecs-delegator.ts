@@ -94,13 +94,12 @@ function buildSharedEnvVars(
         { name: "FDR_ORIGIN", value: env.fdrOrigin },
         { name: "FDR_LAMBDA_ORIGIN", value: env.fdrLambdaOrigin },
         { name: "FERN_DOCS_INDEX_NAME", value: env.fernDocsIndexName },
-        { name: "POSTHOG_API_KEY", value: env.posthogApiKey || "" },
+        { name: "POSTHOG_API_KEY", value: env.posthogApiKey ?? "" },
         { name: "ENVIRONMENT", value: env.environment },
         { name: "LAUNCH_TYPE", value: launchType },
         { name: "NODE_OPTIONS", value: nodeOptions },
         { name: "SOURCE_SQS_MESSAGE_ID", value: sqsMessageId },
-        { name: "REINDEX_DOMAIN", value: jobMessage.domain },
-        { name: "REINDEX_DELETE_EXISTING", value: jobMessage.deleteExisting ? "true" : "false" }
+        { name: "REINDEX_DOMAIN", value: jobMessage.domain }
     ];
 }
 

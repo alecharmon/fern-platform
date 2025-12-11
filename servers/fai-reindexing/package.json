@@ -9,6 +9,7 @@
     "build:lambda": "tsup --config tsup.lambda.config.ts",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
+    "test:reindexing": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -21,7 +22,7 @@
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-docs/search-utils": "workspace:*",
-    "@turbopuffer/turbopuffer": "^0.5.11",
+    "@turbopuffer/turbopuffer": "^1.10.0",
     "ai": "5.0.86",
     "dotenv": "^16.4.5",
     "es-toolkit": "^1.39.7",

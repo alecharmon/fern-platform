@@ -71,7 +71,7 @@ export const orchestratorEnv = {
     },
 
     get posthogApiKey() {
-        return process.env.POSTHOG_API_KEY;
+        return process.env.POSTHOG_API_KEY || "";
     },
 
     get environment() {

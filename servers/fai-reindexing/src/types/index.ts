@@ -3,7 +3,6 @@
  */
 export interface ReindexJobMessage {
     domain: string;
-    deleteExisting?: boolean;
 }
 
 /**

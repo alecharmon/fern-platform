@@ -6,10 +6,12 @@
  * @example
  *     {
  *         domain: "domain",
- *         org_name: "org_name"
+ *         org_name: "org_name",
+ *         incremental: true
  *     }
  */
 export interface ReindexAskAiRequest {
     domain: string;
     org_name?: string;
+    incremental?: boolean;
 }

@@ -39,7 +39,7 @@ export async function upsertTurbopuffer({
 }: TurbopufferUpsertTaskOptions): Promise<number> {
     const tpuf = new Turbopuffer({
         apiKey,
-        baseUrl: "https://gcp-us-east4.turbopuffer.com"
+        region: "gcp-us-east4"
     });
     const ns = tpuf.namespace(namespace);
 
@@ -101,13 +101,17 @@ export async function upsertTurbopuffer({
 
             while (i < vectorizedRecords.length) {
                 const uploadBatchSize = Math.min(currentUploadBatchSize, vectorizedRecords.length - i);
-                const uploadBatch = vectorizedRecords.slice(i, i + uploadBatchSize);
+                const uploadBatch = vectorizedRecords.slice(i, i + uploadBatchSize).map((record) => ({
+                    id: record.id,
+                    vector: record.vector,
+                    ...record.attributes
+                }));
 
                 try {
                     await withRetry(
                         async () =>
-                            await ns.upsert({
-                                vectors: uploadBatch,
+                            await ns.write({
+                                upsert_rows: uploadBatch,
                                 distance_metric: "cosine_distance",
                                 schema: FernTurbopufferAttributeSchema
                             }),

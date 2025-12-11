@@ -20,6 +20,7 @@ jobs:
     outputs:
       fai_changed: ${{ steps.filter.outputs.fai }}
       fai_chat_changed: ${{ steps.filter.outputs.fai_chat }}
+      fai_reindexing_changed: ${{ steps.filter.outputs.fai_reindexing }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -35,6 +36,9 @@ jobs:
             fai_chat:
               - 'servers/fai-chat/**'
               - 'servers/python-libs/fai_ai_core/**'
+              - '.github/workflows/ci-fai.yml'
+            fai_reindexing:
+              - 'servers/fai-reindexing/**'
               - '.github/workflows/ci-fai.yml'
 
   lint-fai:
@@ -204,3 +208,23 @@ jobs:
           cd servers/fai
           export PYTHONPATH=$PYTHONPATH:$(pwd)
           poetry run pytest -sv
+
+  test-fai-reindexing:
+    needs: check-fai-changes
+    if: needs.check-fai-changes.outputs.fai_reindexing_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Compile dependencies
+        run: pnpm --filter=@fern-platform/fai-reindexing^... compile
+
+      - name: Run tests
+        run: pnpm --filter=@fern-platform/fai-reindexing test:reindexing
+        env:
+          CI: true

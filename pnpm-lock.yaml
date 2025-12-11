@@ -3283,8 +3283,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/fern-docs/search-server/utils
       '@turbopuffer/turbopuffer':
-        specifier: ^0.5.11
-        version: 0.5.19
+        specifier: ^1.10.0
+        version: 1.10.0
       ai:
         specifier: 5.0.86
         version: 5.0.86(zod@3.25.76)
@@ -11174,6 +11174,9 @@ packages:
 
   '@turbopuffer/turbopuffer@0.5.19':
     resolution: {integrity: sha512-AmQYrF5FSYLN1VSuJv5eLipDfztN10Jr9JtYSzDXhbMKvUvEXm9/U3BO3vai4AypbR9386WMg70GSmhIoXvWzg==}
+
+  '@turbopuffer/turbopuffer@1.10.0':
+    resolution: {integrity: sha512-4ma/BR4/VlAUs7K+a9m6dJvcOoPE41XFt/fJcQphQ94mB2e/xgAGih/zMRRIZ3/5OwTlv9haaSzxZDcxVWqAEg==}
 
   '@turnkey/api-key-stamper@0.4.7':
     resolution: {integrity: sha512-/0/kW7v+uCnmHnGMoHSXn4Vb/MxLAIivGxX/T0L4vVoIiJalQmqcCtgiWnPWZDiJNGjMKp+jd/8j6VXgbVVozg==}
@@ -33207,6 +33210,11 @@ snapshots:
     dependencies:
       pako: 2.1.0
       undici: 6.22.0
+
+  '@turbopuffer/turbopuffer@1.10.0':
+    dependencies:
+      pako: 2.1.0
+      undici: 7.14.0
 
   '@turnkey/api-key-stamper@0.4.7':
     dependencies:

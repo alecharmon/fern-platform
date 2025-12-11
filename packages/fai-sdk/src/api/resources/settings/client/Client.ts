@@ -483,6 +483,13 @@ export class Settings {
     /**
      * Manually trigger reindex for an already enabled Ask AI setup.
      *
+     * Args:
+     *     domain: The domain to reindex
+     *     org_name: Organization name (unused, kept for backwards compatibility)
+     *     incremental: If True, only reindex changed content based on content hashes
+     *     db: Database session
+     *     _: Token verification
+     *
      * @param {FernAI.ReindexAskAiRequest} request
      * @param {Settings.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -491,7 +498,8 @@ export class Settings {
      * @example
      *     await client.settings.reindexAskAi({
      *         domain: "domain",
-     *         org_name: "org_name"
+     *         org_name: "org_name",
+     *         incremental: true
      *     })
      */
     public reindexAskAi(
@@ -505,11 +513,15 @@ export class Settings {
         request: FernAI.ReindexAskAiRequest,
         requestOptions?: Settings.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.ToggleAskAiResponse>> {
-        const { domain, org_name: orgName } = request;
+        const { domain, org_name: orgName, incremental } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         _queryParams["domain"] = domain;
         if (orgName != null) {
             _queryParams["org_name"] = orgName;
+        }
+
+        if (incremental != null) {
+            _queryParams["incremental"] = incremental.toString();
         }
 
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(

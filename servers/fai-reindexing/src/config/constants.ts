@@ -7,8 +7,8 @@ export const RETRY_CONFIG = {
     MAX_ATTEMPTS: 3,
     /** Delay between ECS task launch retries (10 seconds) */
     ECS_RETRY_DELAY_MS: 10_000,
-    /** Delay between sync retry attempts (15 seconds) */
-    SYNC_RETRY_DELAY_MS: 15_000
+    /** Delay between sync retry attempts (2 seconds) */
+    SYNC_RETRY_DELAY_MS: 2_000
 } as const;
 
 export const POLLING_CONFIG = {

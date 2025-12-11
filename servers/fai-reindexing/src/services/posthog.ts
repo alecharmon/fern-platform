@@ -5,7 +5,7 @@ const log = createDomainLogger("posthog");
 
 function getPosthogKey(): string | undefined {
     const key = process.env.POSTHOG_API_KEY;
-    if (key == null) {
+    if (key == null || key.trim() === "") {
         return undefined;
     }
     return key.trim();
@@ -37,5 +37,21 @@ export async function track(event: string, properties?: Record<string, unknown>)
         await client?.shutdown();
     } catch (error) {
         log.error("Error tracking event", { error: JSON.stringify(error) });
+    }
+}
+
+export async function isPosthogFeatureFlagEnabled(flagKey: string, distinctId: string): Promise<boolean> {
+    try {
+        const client = getPosthog();
+        if (!client) {
+            return false;
+        }
+
+        const enabled = await client.isFeatureEnabled(flagKey, distinctId);
+        await client.shutdown();
+        return Boolean(enabled);
+    } catch (error) {
+        log.error("Error checking feature flag", { error: JSON.stringify(error), flagKey });
+        return false;
     }
 }

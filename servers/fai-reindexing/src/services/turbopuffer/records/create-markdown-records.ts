@@ -93,7 +93,7 @@ export async function createMarkdownRecords({
     });
 }
 
-function chunkMarkdown(markdown: string): string[] {
+export function chunkMarkdown(markdown: string): string[] {
     const chunks: string[] = [];
 
     // Split on ### headers
