@@ -461,3 +461,76 @@ async def sync_index_to_target(domain: str, source_index_name: str, target_index
                 if len(result.rows) < 1000:
                     break
                 last_id = result.rows[-1].id
+
+
+async def sync_index_to_target_incremental(
+    domain: str, source_index_name: str, target_index_name: str, parent_ids: list[str]
+) -> None:
+    """
+    Incrementally sync only specific parent_ids from source index to target query index.
+    This is more efficient than full sync when only a subset of content has changed.
+    """
+    if not parent_ids:
+        LOGGER.info("No parent_ids provided for incremental sync, skipping")
+        return
+
+    source_namespace_id = get_tpuf_namespace(domain, source_index_name)
+    target_namespace_id = get_tpuf_namespace(domain, target_index_name)
+    LOGGER.info(
+        f"Incrementally syncing {len(parent_ids)} parent_ids from {source_namespace_id} to {target_namespace_id}"
+    )
+
+    async with AsyncTurbopuffer(
+        region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
+        api_key=VARIABLES.TURBOPUFFER_API_KEY,
+    ) as tpuf_client:
+        source_ns = tpuf_client.namespace(source_namespace_id)
+        target_ns = tpuf_client.namespace(target_namespace_id)
+
+        for parent_id in parent_ids:
+            try:
+                await target_ns.write(
+                    delete_by_filter=[["source", "Eq", source_index_name], ["parent_id", "Eq", parent_id]]
+                )
+            except Exception as e:
+                # The parent_id might not exist in target yet (net new)
+                LOGGER.warning(f"Failed to delete parent_id {parent_id} from target: {e}")
+
+        LOGGER.info(f"Deleted old records for {len(parent_ids)} parent_ids from target")
+
+        source_ns_exists = await source_ns.exists()
+        if not source_ns_exists:
+            LOGGER.warning(f"Source namespace {source_namespace_id} does not exist")
+            return
+
+        total_synced = 0
+        for parent_id in parent_ids:
+            last_id = None
+            while True:
+                result = await source_ns.query(
+                    rank_by=("id", "asc"),
+                    top_k=1000,
+                    include_attributes=True,
+                    filters=[
+                        ["parent_id", "Eq", parent_id],
+                        ["id", "Gt", last_id] if last_id is not None else NOT_GIVEN,
+                    ],
+                )
+
+                prefixed_rows = []
+                for row in result.rows:
+                    new_row = Row.from_dict(row.model_dump())
+                    new_row.id = prefixed_id(source_namespace_id, row.id)
+                    new_row.source = source_index_name
+                    prefixed_rows.append(new_row)
+
+                await target_ns.write(
+                    upsert_rows=prefixed_rows, distance_metric="cosine_distance", schema=get_query_index_tpuf_schema()
+                )
+                total_synced += len(prefixed_rows)
+
+                if len(result.rows) < 1000:
+                    break
+                last_id = result.rows[-1].id
+
+        LOGGER.info(f"Incremental sync completed: {total_synced} total records synced to {target_namespace_id}")

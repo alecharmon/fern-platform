@@ -13,6 +13,7 @@ from fai.dependencies import (
 from fai.models.api.index_api import (
     JobStatusResponse,
     ReconstructIndexResponse,
+    SyncIndexIncrementalRequest,
     SyncIndexRequest,
     SyncIndexResponse,
 )
@@ -23,7 +24,7 @@ from fai.utils.jobs import (
 )
 from fai.utils.turbopuffer.namespace import get_query_index_name
 from fai.utils.turbopuffer.reconstruct import reconstruct_query_index_for_domain
-from fai.utils.turbopuffer.sync import sync_index_to_target
+from fai.utils.turbopuffer.sync import sync_index_to_target, sync_index_to_target_incremental
 
 
 @fai_app.post(
@@ -66,6 +67,38 @@ async def sync_index_to_query_index(
 
     except Exception as e:
         LOGGER.exception("Failed to create sync job")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+
+@fai_app.post(
+    "/index/{domain}/sync-incremental",
+    response_model=SyncIndexResponse,
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+)
+async def sync_index_to_query_index_incremental(
+    domain: str,
+    body: SyncIndexIncrementalRequest,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
+) -> JSONResponse:
+    try:
+        job_id = await job_manager.create_job(db)
+
+        asyncio.create_task(
+            job_manager.execute_job(
+                job_id,
+                sync_index_to_target_incremental,
+                domain,
+                body.index_name,
+                get_query_index_name(),
+                body.parent_ids,
+            )
+        )
+
+        return JSONResponse(jsonable_encoder(SyncIndexResponse(job_id=job_id)))
+
+    except Exception as e:
+        LOGGER.exception("Failed to create incremental sync job")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
