@@ -1,3 +1,4 @@
+export * from "./collect-referenced-types";
 export * from "./collect-type-tree";
 export * from "./endpoint-context";
 export * from "./endpoint-path-literal";

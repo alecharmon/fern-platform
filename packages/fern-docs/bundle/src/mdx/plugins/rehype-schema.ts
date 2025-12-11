@@ -1,4 +1,5 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import { filterReferencedTypes } from "@fern-api/fdr-sdk/api-definition";
 import {
     CONTINUE,
     type Hast,
@@ -59,10 +60,14 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                                 const [_typeEntryId, typeEntryDef] = typeEntry;
                                 // Match by the type's name field, not the TypeId key
                                 if (typeEntryDef.name === typeName) {
+                                    // Filter types to only include those referenced by this type definition
+                                    // This significantly reduces payload size for pages with large type registries
+                                    const referencedTypes = filterReferencedTypes(typeEntryDef.shape, typeDefinitions);
+
                                     // Pre-serialize all descriptions for client-side rendering
                                     const [serializedTypeDef, serializedTypes] = await Promise.all([
                                         serializeTypeDefinitionDescriptions(typeEntryDef),
-                                        serializeAllTypeDefinitionDescriptions(typeDefinitions)
+                                        serializeAllTypeDefinitionDescriptions(referencedTypes)
                                     ]);
                                     node.attributes.push(
                                         unknownToMdxJsxAttribute("typeDefinition", serializedTypeDef),
