@@ -97,39 +97,51 @@ async def handle_scribe_slack_events(request: Request, background_tasks: Backgro
 
 
 async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
-    user = event.get("user")
-    text = event.get("text", "")
-    channel = event.get("channel")
-    message_ts = event.get("ts")
-
-    LOGGER.info(f"[SCRIBE] App mentioned by {user} in {channel}: {text}")
-
-    response = await handle_scribe_message(event, team_id)
-
-    if response.bot_token and message_ts and channel:
-        try:
-            await add_reaction(channel, message_ts, "eyes", response.bot_token)
-        except Exception as e:
-            LOGGER.warning(f"[SCRIBE] Failed to add eyes reaction: {e}")
-
-    if not response.response_text or not response.bot_token:
-        return
-
-    client = AsyncWebClient(token=response.bot_token)
     try:
-        msg_response = await client.chat_postMessage(
-            channel=response.channel,
-            text=slackify_markdown(response.response_text),
-            thread_ts=response.thread_ts,
-            unfurl_links=False,
-            unfurl_media=False,
+        user = event.get("user")
+        text = event.get("text", "")
+        channel = event.get("channel")
+        message_ts = event.get("ts")
+
+        LOGGER.info(f"[SCRIBE] App mentioned by {user} in {channel}: {text}")
+
+        response = await handle_scribe_message(event, team_id)
+
+        LOGGER.info(
+            f"[SCRIBE] handle_scribe_message returned: response_text={bool(response.response_text)}, "
+            f"bot_token={bool(response.bot_token)}, channel={response.channel}"
         )
-        if msg_response["ok"]:
-            LOGGER.info("[SCRIBE] Successfully sent response to Slack")
-        else:
-            LOGGER.error(f"[SCRIBE] Failed to send message: {msg_response}")
+
+        if response.bot_token and message_ts and channel:
+            try:
+                await add_reaction(channel, message_ts, "eyes", response.bot_token)
+            except Exception as e:
+                LOGGER.warning(f"[SCRIBE] Failed to add eyes reaction: {e}")
+
+        if not response.response_text or not response.bot_token:
+            LOGGER.info(
+                f"[SCRIBE] Not sending message: response_text={bool(response.response_text)}, "
+                f"bot_token={bool(response.bot_token)}"
+            )
+            return
+
+        client = AsyncWebClient(token=response.bot_token)
+        try:
+            msg_response = await client.chat_postMessage(
+                channel=response.channel,
+                text=slackify_markdown(response.response_text),
+                thread_ts=response.thread_ts,
+                unfurl_links=False,
+                unfurl_media=False,
+            )
+            if msg_response["ok"]:
+                LOGGER.info("[SCRIBE] Successfully sent response to Slack")
+            else:
+                LOGGER.error(f"[SCRIBE] Failed to send message: {msg_response}")
+        except Exception as e:
+            LOGGER.error(f"[SCRIBE] Error sending message: {e}")
     except Exception as e:
-        LOGGER.error(f"[SCRIBE] Error sending message: {e}")
+        LOGGER.error(f"[SCRIBE] Unhandled exception in handle_app_mention: {e}", exc_info=True)
 
 
 @fai_app.get(

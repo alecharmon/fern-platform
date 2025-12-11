@@ -68,6 +68,13 @@ async def fetch_thread_messages(
     thread_ts: str,
 ) -> list[dict[str, Any]]:
     try:
+        try:
+            join_response = await client.conversations_join(channel=channel_id)
+            if join_response["ok"]:
+                LOGGER.info(f"[SCRIBE] Successfully joined channel {channel_id}")
+        except Exception as join_error:
+            LOGGER.warning(f"[SCRIBE] Could not join channel {channel_id}: {join_error}")
+
         response = await client.conversations_replies(
             channel=channel_id,
             ts=thread_ts,
