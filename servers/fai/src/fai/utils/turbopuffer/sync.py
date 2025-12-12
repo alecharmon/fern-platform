@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from turbopuffer import (
     NOT_GIVEN,
+    APITimeoutError,
     AsyncTurbopuffer,
 )
 from turbopuffer.types.row import Row
@@ -483,24 +484,39 @@ async def sync_index_to_target_incremental(
     async with AsyncTurbopuffer(
         region=CONFIG.TURBOPUFFER_DEFAULT_REGION,
         api_key=VARIABLES.TURBOPUFFER_API_KEY,
+        max_retries=0,
+        timeout=30.0,
     ) as tpuf_client:
         source_ns = tpuf_client.namespace(source_namespace_id)
+        await source_ns.hint_cache_warm()
         target_ns = tpuf_client.namespace(target_namespace_id)
 
-        try:
-            await target_ns.write(
-                delete_by_filter=("And", [("source", "Eq", source_index_name), ("parent_id", "In", parent_ids)])
-            )
-            LOGGER.info(f"Deleted old records for {len(parent_ids)} parent_ids from target")
-        except Exception as e:
-            LOGGER.warning(f"Batch delete failed, trying individual deletes: {e}")
-            for parent_id in parent_ids:
-                try:
-                    await target_ns.write(
-                        delete_by_filter=("And", [("source", "Eq", source_index_name), ("parent_id", "Eq", parent_id)])
+        delete_parent_id_batch_size = len(parent_ids)
+        while delete_parent_id_batch_size >= 1:
+            try:
+                total_deleted = 0
+                for i in range(0, len(parent_ids), delete_parent_id_batch_size):
+                    batch = parent_ids[i:min(i+delete_parent_id_batch_size, len(parent_ids))]
+                    result = await target_ns.write(
+                        delete_by_filter=("And", [("source", "Eq", source_index_name), ("parent_id", "In", batch)])
                     )
-                except Exception as delete_error:
-                    LOGGER.warning(f"Failed to delete parent_id {parent_id}: {delete_error}")
+                    LOGGER.info(
+                        f"Deleted {result.rows_deleted or 0} records for {len(batch)} parent_ids"
+                    )
+                    total_deleted += result.rows_deleted or 0
+                LOGGER.info(
+                    f"Successfully deleted {total_deleted} records from {target_namespace_id}"
+                )
+                break
+            except APITimeoutError:
+                LOGGER.warning(
+                    f"Batch delete with size {delete_parent_id_batch_size} timed out, "
+                    f"trying batch size {delete_parent_id_batch_size // 2}"
+                )
+                delete_parent_id_batch_size = delete_parent_id_batch_size // 2
+                if delete_parent_id_batch_size < 1:
+                    LOGGER.error("Failed to delete records even with batch size 1")
+                    raise
 
         source_ns_exists = await source_ns.exists()
         if not source_ns_exists:
@@ -508,38 +524,55 @@ async def sync_index_to_target_incremental(
             return
 
         total_synced = 0
-        last_id = None
+        sync_parent_id_batch_size = len(parent_ids)
 
-        while True:
-            filter_conditions = [("parent_id", "In", parent_ids)]
-            if last_id is not None:
-                filter_conditions.append(("id", "Gt", last_id))
+        while sync_parent_id_batch_size >= 1:
+            try:
+                for parent_idx in range(0, len(parent_ids), sync_parent_id_batch_size):
+                    last_id = None
+                    parent_id_batch = parent_ids[parent_idx:min(parent_idx+sync_parent_id_batch_size, len(parent_ids))]
+                    filter_conditions = [("parent_id", "In", parent_id_batch)]
+                    while True:
+                        if last_id is not None:
+                            filter_conditions.append(("id", "Gt", last_id))
 
-            result = await source_ns.query(
-                rank_by=("id", "asc"),
-                top_k=10000,
-                include_attributes=True,
-                filters=("And", filter_conditions),
-            )
+                        result = await source_ns.query(
+                            rank_by=("id", "asc"),
+                            top_k=1000,
+                            include_attributes=True,
+                            filters=("And", filter_conditions),
+                        )
 
-            if not result.rows:
+                        if not result.rows:
+                            break
+
+                        prefixed_rows = []
+                        for row in result.rows:
+                            new_row = Row.from_dict(row.model_dump())
+                            new_row.id = prefixed_id(source_namespace_id, row.id)
+                            new_row.source = source_index_name
+                            prefixed_rows.append(new_row)
+
+                        await target_ns.write(
+                            upsert_rows=prefixed_rows,
+                            distance_metric="cosine_distance",
+                            schema=get_query_index_tpuf_schema(),
+                        )
+                        total_synced += len(prefixed_rows)
+                        LOGGER.info(f"Synced batch: {len(prefixed_rows)} records (total: {total_synced})")
+
+                        last_id = result.rows[-1].id
+                        if len(result.rows) < 1000:
+                            break
                 break
-
-            prefixed_rows = []
-            for row in result.rows:
-                new_row = Row.from_dict(row.model_dump())
-                new_row.id = prefixed_id(source_namespace_id, row.id)
-                new_row.source = source_index_name
-                prefixed_rows.append(new_row)
-
-            await target_ns.write(
-                upsert_rows=prefixed_rows, distance_metric="cosine_distance", schema=get_query_index_tpuf_schema()
-            )
-            total_synced += len(prefixed_rows)
-            LOGGER.info(f"Synced batch: {len(prefixed_rows)} records (total: {total_synced})")
-
-            if len(result.rows) < 10000:
-                break
-            last_id = result.rows[-1].id
+            except APITimeoutError:
+                LOGGER.warning(
+                    f"Batch sync with size {sync_parent_id_batch_size} timed out, "
+                    f"trying batch size {sync_parent_id_batch_size // 2}"
+                )
+                sync_parent_id_batch_size = sync_parent_id_batch_size // 2
+                if sync_parent_id_batch_size < 1:
+                    LOGGER.error("Failed to sync records even with batch size 1")
+                    raise
 
         LOGGER.info(f"Incremental sync completed: {total_synced} total records synced to {target_namespace_id}")

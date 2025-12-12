@@ -45,7 +45,7 @@ export async function syncToQueryIndexIncremental(domain: string, parentIds: str
 }
 
 async function pollJobStatus(jobId: string, domain: string): Promise<void> {
-    const log = createDomainLogger(domain);
+    const logger = createDomainLogger(domain);
     const maxAttempts = 1000;
     let attempts = 0;
 
@@ -54,15 +54,17 @@ async function pollJobStatus(jobId: string, domain: string): Promise<void> {
             const statusResponse = await faiClient.index.getJobStatus(jobId);
             const { status, success, error } = statusResponse;
 
-            log.info("Job status", { jobId, status, success, error, attempt: attempts + 1, maxAttempts });
+            logger.info("Job status", { jobId, status, success, error, attempt: attempts + 1, maxAttempts });
 
             if (status === "completed") {
                 if (success === false) {
+                    logger.error("Sync job completed but failed", { jobId, error });
                     const errorMessage = typeof error === "object" ? JSON.stringify(error) : error || "Unknown error";
-                    throw new Error(`Sync job completed but failed: ${errorMessage}`);
+                    throw new Error(`Sync job failed: ${errorMessage}`);
                 }
                 return;
             } else if (status === "failed") {
+                logger.error("Sync job failed", { jobId, error });
                 const errorMessage = typeof error === "object" ? JSON.stringify(error) : error || "Unknown error";
                 throw new Error(`Sync job failed: ${errorMessage}`);
             }
@@ -71,16 +73,19 @@ async function pollJobStatus(jobId: string, domain: string): Promise<void> {
             attempts++;
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
+            if (errorMessage.includes("Sync job failed:")) {
+                throw error;
+            }
             attempts++;
             if (attempts >= maxAttempts) {
-                log.error("Error polling job status - max attempts exceeded", {
+                logger.error("Error polling job status - max attempts exceeded", {
                     error: errorMessage,
                     attempts,
                     maxAttempts
                 });
                 throw error;
             }
-            log.warn("Error polling job status - retrying", { error: errorMessage, attempt: attempts, maxAttempts });
+            logger.warn("Error polling job status - retrying", { error: errorMessage, attempt: attempts, maxAttempts });
             await new Promise((resolve) => setTimeout(resolve, RETRY_CONFIG.SYNC_RETRY_DELAY_MS));
         }
     }
