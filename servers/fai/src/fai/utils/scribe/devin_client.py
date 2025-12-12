@@ -71,7 +71,7 @@ def format_message_with_attachments(message: str, attachment_urls: list[str]) ->
 
 def create_devin_prompt(github_repo: str, user_message: str) -> str:
     return f"""<important_instructions>
-You will be working out of the fern-api/scribe-editing-environment snapshot. From there, you'll want to \
+You will be working out of the fern-api/workspace snapshot. From there, you'll want to \
 make changes with the following repository: {github_repo}
 
 Inspect the AGENTS.md file to understand how to work in the scribe editing environment. \
@@ -118,7 +118,8 @@ async def send_devin_message(
 
     attachment_urls: list[str] = []
     if files and bot_token:
-        from fai.utils.scribe.slack_file_handler import process_slack_attachments
+        from fai.utils.scribe.slack_file_handler import \
+            process_slack_attachments
 
         attachment_urls = await process_slack_attachments(files, bot_token, client)
 
