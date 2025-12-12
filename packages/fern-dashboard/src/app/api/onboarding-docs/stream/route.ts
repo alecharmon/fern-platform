@@ -214,11 +214,18 @@ export async function GET(req: NextRequest) {
                 };
 
                 // Spawn the process to get streaming output
-                const child = spawn("sh", ["-c", 'echo "y" | npx fern-api generate --docs --no-prompt'], {
-                    cwd: tempDir,
-                    env,
-                    shell: true
-                });
+                const child = spawn(
+                    "sh",
+                    [
+                        "-c",
+                        'echo "y" | npx fern-api@latest upgrade -y ; npx fern-api@latest generate --docs --no-prompt'
+                    ],
+                    {
+                        cwd: tempDir,
+                        env,
+                        shell: true
+                    }
+                );
 
                 // Stream stdout
                 child.stdout.on("data", (data) => {
