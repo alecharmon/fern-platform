@@ -3,10 +3,10 @@
 import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import { useIsMobile } from "@fern-ui/react-commons";
 import React, { type ComponentPropsWithoutRef } from "react";
-
 import { cn } from "../cn";
 import { Prose } from "../mdx/prose";
 import { SetLayout } from "../state/layout";
+import { CanvasWrapper } from "./CanvasWrapper";
 
 interface ReferenceLayoutProps {
     header?: React.ReactNode;
@@ -78,5 +78,5 @@ export const ReferenceLayout = React.forwardRef<
         </div>
     );
 
-    return isCanvasTheme ? <div className="canvas-wrapper">{content}</div> : content;
+    return isCanvasTheme ? <CanvasWrapper>{content}</CanvasWrapper> : content;
 });

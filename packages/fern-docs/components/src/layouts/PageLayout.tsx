@@ -1,9 +1,9 @@
 import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type React from "react";
-
 import { Prose } from "../mdx/prose";
 import { SetLayout } from "../state/layout";
 import { HiddenSidebar } from "../theming/HiddenSidebar";
+import { CanvasWrapper } from "./CanvasWrapper";
 
 interface PageLayoutProps {
     header?: React.ReactNode;
@@ -28,5 +28,5 @@ export function PageLayout({ header, children, footer, theme }: PageLayoutProps)
         </div>
     );
 
-    return isCanvasTheme ? <div className="canvas-wrapper">{content}</div> : content;
+    return isCanvasTheme ? <CanvasWrapper>{content}</CanvasWrapper> : content;
 }
