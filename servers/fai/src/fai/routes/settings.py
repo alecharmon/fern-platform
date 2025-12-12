@@ -148,7 +148,6 @@ async def get_discord_settings(
 )
 async def enable_ask_ai(
     request: EnableAskAiRequest,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ) -> EnableAskAiResponse:
     """Enable Ask AI for multiple domains with specified locations and trigger reindex.
@@ -366,7 +365,6 @@ async def reindex_ask_ai(
 )
 async def get_toggle_status(
     domain: str,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> ToggleStatusResponse:
@@ -471,7 +469,9 @@ async def set_job_id(
     "/settings/ask-ai/reindex-callback",
     openapi_extra={"x-fern-audiences": ["internal"]},
 )
-async def reindex_callback(request: ReindexCallbackRequest, db: AsyncSession = Depends(get_db)) -> JSONResponse:
+async def reindex_callback(
+    request: ReindexCallbackRequest, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)
+) -> JSONResponse:
     """Handle callback from SQS reindexing worker when reindex completes."""
     try:
         LOGGER.info(f"Received reindex callback - status: {request.status}, messageId: {request.sourceMessageId}")
@@ -487,8 +487,12 @@ async def reindex_callback(request: ReindexCallbackRequest, db: AsyncSession = D
 
         if request.status == "success":
             LOGGER.info(f"Reindex completed successfully for domain {existing_record.domain}")
+            was_first_reindex = existing_record.last_reindex_time is None
             existing_record.job_id = None
             existing_record.last_reindex_time = datetime.utcnow()
+
+            if was_first_reindex:
+                background_tasks.add_task(revalidate_domain, existing_record.domain)
         else:
             LOGGER.error(f"Reindex failed for domain {existing_record.domain}")
             existing_record.job_id = None
