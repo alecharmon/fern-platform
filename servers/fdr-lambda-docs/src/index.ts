@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-l
 import { Pool } from "pg";
 import { type EnhanceExampleRequest, enhanceExample } from "./services/enhanceExample";
 import { getCachedExample, getConnectionDetails, storeCachedExample } from "./services/exampleCache";
+import { validateCliJwt } from "./utils/jwt";
 
 // Lambda Function URLs use a different event format than API Gateway
 type LambdaEvent = APIGatewayProxyEvent & {
@@ -74,6 +75,15 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
                     };
                 }
 
+                // Validate JWT authentication
+                const authHeader =
+                    event.headers?.Authorization ||
+                    event.headers?.authorization ||
+                    event.headers?.["x-fern-token"] ||
+                    event.headers?.["X-Fern-Token"];
+
+                await validateCliJwt(authHeader, singleRequest.organizationId);
+
                 const dbPool = await getPool();
                 const cachedResponse = await getCachedExample(singleRequest, dbPool);
                 if (cachedResponse) {
@@ -111,6 +121,21 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
                 if (error && typeof error === "object" && "name" in error) {
                     const errorName = (error as { name: string }).name;
                     const errorMessage = error instanceof Error ? error.message : String(error);
+
+                    if (errorName === "UnauthorizedError") {
+                        return {
+                            statusCode: 401,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            body: JSON.stringify({
+                                error: "UnauthorizedError",
+                                message: errorMessage,
+                                requestId: context.awsRequestId
+                            })
+                        };
+                    }
 
                     if (errorName === "OpenAITimeout") {
                         return {

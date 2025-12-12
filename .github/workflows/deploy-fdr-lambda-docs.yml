@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - app
+      - kenny/jwt-to-fdr-lambda-docs
     paths:
       - "servers/fdr-lambda-docs/**"
       - "packages/migration-lambda-docs/**"
@@ -103,7 +104,7 @@ jobs:
         run: |
           aws lambda update-function-configuration \
             --function-name fdr-lambda-docs \
-            --environment "Variables={OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},DOCS_DB_SECRET_ID=${{ secrets.DOCS_DB_SECRET_ID }}}" \
+            --environment "Variables={OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},DOCS_DB_SECRET_ID=${{ secrets.DOCS_DB_SECRET_ID }},JWT_SECRET_KEY=${{ secrets.PROD_JWT_SECRET_KEY }}}" \
             --region us-east-1
 
       - name: Output

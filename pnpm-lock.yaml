@@ -3697,6 +3697,9 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.143
         version: 8.10.159
+      jose:
+        specifier: ^5.9.6
+        version: 5.10.0
       openai:
         specifier: 6.8.1
         version: 6.8.1(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.1.13)

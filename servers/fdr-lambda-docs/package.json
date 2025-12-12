@@ -17,6 +17,7 @@
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.936.0",
     "@types/aws-lambda": "^8.10.143",
+    "jose": "^5.2.3",
     "openai": "6.8.1",
     "pg": "^8.13.1"
   },

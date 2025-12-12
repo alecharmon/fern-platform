@@ -5,6 +5,13 @@ export class ConfigError extends Error {
     }
 }
 
+export class UnauthorizedError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "UnauthorizedError";
+    }
+}
+
 export class OpenAITimeout extends Error {
     constructor(message: string) {
         super(message);
