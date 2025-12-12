@@ -1,4 +1,5 @@
 import asyncio
+import random
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
@@ -11,6 +12,7 @@ from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_session_db import ScribeSessionDb
 from fai.settings import LOGGER, VARIABLES
 from fai.utils.scribe.devin_client import DevinClient, create_or_get_devin_session, send_devin_message
+from fai.utils.scribe.generate_startup_message import PLANT_FACTS, STARTUP_INITIAL_MESSAGE
 from fai.utils.scribe.session_poller import poll_devin_session
 from fai.utils.scribe.slack_file_handler import process_slack_attachments
 from fai.utils.scribe.slack_thread_unfurler import (
@@ -20,7 +22,6 @@ from fai.utils.scribe.slack_thread_unfurler import (
     unfurl_thread_links,
 )
 
-STARTUP_RESPONSE = "🚀 Starting a new session for `{github_repo}`..."
 ERROR_RESPONSE = "❌ An unknown error has occurred. Please reach out to support@buildwithfern.com."
 
 
@@ -202,8 +203,9 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
                     integration.slack_bot_token,
                 )
             )
+            plant_fact = random.choice(PLANT_FACTS)
             return ScribeMessageResponse(
-                response_text=STARTUP_RESPONSE.format(github_repo=github_repo),
+                response_text=STARTUP_INITIAL_MESSAGE.format(github_repo=github_repo, plant_fact=plant_fact),
                 channel=channel,
                 thread_ts=thread_ts,
                 bot_token=integration.slack_bot_token,

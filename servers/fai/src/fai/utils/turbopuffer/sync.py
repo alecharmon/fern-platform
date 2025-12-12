@@ -496,17 +496,13 @@ async def sync_index_to_target_incremental(
             try:
                 total_deleted = 0
                 for i in range(0, len(parent_ids), delete_parent_id_batch_size):
-                    batch = parent_ids[i:min(i+delete_parent_id_batch_size, len(parent_ids))]
+                    batch = parent_ids[i : min(i + delete_parent_id_batch_size, len(parent_ids))]
                     result = await target_ns.write(
                         delete_by_filter=("And", [("source", "Eq", source_index_name), ("parent_id", "In", batch)])
                     )
-                    LOGGER.info(
-                        f"Deleted {result.rows_deleted or 0} records for {len(batch)} parent_ids"
-                    )
+                    LOGGER.info(f"Deleted {result.rows_deleted or 0} records for {len(batch)} parent_ids")
                     total_deleted += result.rows_deleted or 0
-                LOGGER.info(
-                    f"Successfully deleted {total_deleted} records from {target_namespace_id}"
-                )
+                LOGGER.info(f"Successfully deleted {total_deleted} records from {target_namespace_id}")
                 break
             except APITimeoutError:
                 LOGGER.warning(
@@ -530,7 +526,9 @@ async def sync_index_to_target_incremental(
             try:
                 for parent_idx in range(0, len(parent_ids), sync_parent_id_batch_size):
                     last_id = None
-                    parent_id_batch = parent_ids[parent_idx:min(parent_idx+sync_parent_id_batch_size, len(parent_ids))]
+                    parent_id_batch = parent_ids[
+                        parent_idx : min(parent_idx + sync_parent_id_batch_size, len(parent_ids))
+                    ]
                     filter_conditions = [("parent_id", "In", parent_id_batch)]
                     while True:
                         if last_id is not None:
