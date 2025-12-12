@@ -32,6 +32,18 @@ check_postgres() {
     fi
 }
 
+check_warmup_complete() {
+    local warmup_file="/tmp/warmup-complete"
+    
+    if [ -f "$warmup_file" ]; then
+        echo "✓ Cache warmup is complete"
+        return 0
+    else
+        echo "✗ Cache warmup not yet complete (waiting for $warmup_file)"
+        return 1
+    fi
+}
+
 FAILED=0
 
 if ! check_postgres; then
@@ -61,6 +73,14 @@ fi
 NEXTJS_URL="http://localhost:3000${NEXT_PUBLIC_BASE_PATH:-}"
 if ! check_http_endpoint "$NEXTJS_URL" "Next.js Docs"; then
     FAILED=1
+fi
+
+# Check if cache warmup is complete (ensures first request after ready is fast)
+# Skip warmup check if SKIP_WARMUP is set
+if [ "${SKIP_WARMUP:-false}" != "true" ]; then
+    if ! check_warmup_complete; then
+        FAILED=1
+    fi
 fi
 
 if [ $FAILED -eq 1 ]; then

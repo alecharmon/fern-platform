@@ -398,5 +398,30 @@ if [ $REINDEX_ATTEMPTS -lt $MAX_REINDEX_ATTEMPTS ]; then
     log "Successfully called /api/fern-docs/search/v2/reindex/meilisearch"
 fi
 
+# --------------  Start cache warmup --------------
+# Warm up the cache by fetching all pages
+# This ensures the first real user request is fast
+# Run in background so we can report progress while it runs
+if [ "${SKIP_WARMUP:-false}" != "true" ]; then
+    log "Starting cache warmup (this may take a few minutes)..."
+    bash /scripts/warmup.sh 2>&1 | add_timestamps &
+    warmup_pid=$!
+    log "Warmup PID: $warmup_pid"
+    
+    # Wait for warmup to complete
+    if wait $warmup_pid; then
+        log "Cache warmup completed successfully"
+    else
+        log "WARNING: Cache warmup failed, but continuing..."
+        # Create marker anyway so readiness check passes
+        # The cache will be populated on-demand
+        echo '{"timestamp": "'$(date -Iseconds)'", "status": "skipped", "reason": "warmup_failed"}' > /tmp/warmup-complete
+    fi
+else
+    log "Skipping cache warmup (SKIP_WARMUP=true)"
+    echo '{"timestamp": "'$(date -Iseconds)'", "status": "skipped", "reason": "SKIP_WARMUP=true"}' > /tmp/warmup-complete
+fi
+# --------------  End cache warmup --------------
+
 log "All services started. Tailing logs to keep the container running."
 tail -f /dev/null

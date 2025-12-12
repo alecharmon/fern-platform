@@ -44,6 +44,8 @@ describe("Self-hosted container with security restrictions", () => {
                         "-d", // Run in detached mode to check logs
                         "--network",
                         FERN_NETWORK_NAME,
+                        "-e",
+                        "SKIP_WARMUP=true",
                         "--user",
                         "65532:65532", // Anduril's specific UID/GID
                         "--security-opt",
@@ -155,6 +157,8 @@ describe("Self-hosted container with security restrictions", () => {
                         "-d",
                         "--network",
                         FERN_NETWORK_NAME,
+                        "-e",
+                        "SKIP_WARMUP=true",
                         "--user",
                         "65532:65532", // Non-root user
                         "--security-opt",
@@ -273,6 +277,8 @@ describe("Self-hosted container with security restrictions", () => {
                         "-d",
                         "--network",
                         FERN_NETWORK_NAME,
+                        "-e",
+                        "SKIP_WARMUP=true",
                         "--user",
                         "65532:65532",
                         "--security-opt",

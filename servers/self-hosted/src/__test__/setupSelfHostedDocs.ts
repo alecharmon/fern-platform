@@ -33,6 +33,8 @@ export async function setup() {
         "-d",
         "--network",
         FERN_NETWORK_NAME,
+        "-e",
+        "SKIP_WARMUP=true",
         "-p",
         `${SELF_HOSTED_CONTAINER_PORT}:5432`,
         "-p",
