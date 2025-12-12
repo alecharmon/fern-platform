@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/nextjs";
 import type { Metadata, Viewport } from "next/types";
 import { experimental_taintUniqueValue } from "react";
 
@@ -46,11 +45,6 @@ export const viewport: Viewport = {
     userScalable: true
 };
 
-export function generateMetadata(): Metadata {
-    return {
-        generator: "https://buildwithfern.com",
-        other: {
-            ...Sentry.getTraceData()
-        }
-    };
-}
+export const metadata: Metadata = {
+    generator: "https://buildwithfern.com"
+};
