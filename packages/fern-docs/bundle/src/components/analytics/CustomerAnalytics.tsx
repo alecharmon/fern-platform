@@ -3,8 +3,9 @@
 import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import dynamic from "next/dynamic";
 
-import { PosthogProvider } from "./posthog-provider";
-
+const PosthogProvider = dynamic(() => import("./posthog-provider").then((mod) => mod.PosthogProvider), {
+    ssr: false
+});
 const FullstoryScript = dynamic(() => import("./FullstoryScript"), {
     ssr: true
 });

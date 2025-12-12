@@ -150,13 +150,21 @@ const trackPageView = (pathname: string) => {
 export function useInitializePosthog(customerConfig?: DocsV1Read.PostHogConfig): void {
     const route = useApiRoute("/api/fern-docs/analytics/posthog");
     useEffect(() => {
-        void (async () => {
+        const initialize = async () => {
             try {
                 await initializePosthog(route, customerConfig);
             } catch (e) {
                 console.error("Failed to initialize PostHog:", e);
             }
-        })();
+        };
+
+        // Defer PostHog initialization until the browser is idle to improve PageSpeed scores
+        if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+            window.requestIdleCallback(() => void initialize(), { timeout: 3000 });
+        } else {
+            // Fallback for browsers that don't support requestIdleCallback (e.g., Safari)
+            setTimeout(() => void initialize(), 1000);
+        }
     }, [customerConfig, route]);
     const pathname = useCurrentPathname();
     useEffect(() => {
