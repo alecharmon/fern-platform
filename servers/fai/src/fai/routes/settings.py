@@ -389,50 +389,6 @@ async def get_toggle_status(
         LOGGER.exception("Failed to get toggle status")
         return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="failed", ask_ai_enabled=False)))
 
-
-@fai_app.post(
-    "/settings/reindex-preview-callback",
-    openapi_extra={"x-fern-audiences": ["internal"]},
-)
-async def reindex_preview_callback(
-    request: UpstashCallbackRequest,
-    db: AsyncSession = Depends(get_db),
-) -> JSONResponse:
-    """Handle callback from Upstash QStash when preview reindex completes."""
-    try:
-        LOGGER.info(f"Received reindex callback - status: {request.status}, messageId: {request.sourceMessageId}")
-
-        if not request.sourceMessageId:
-            LOGGER.error("No sourceMessageId provided in callback")
-            return JSONResponse(content={"success": False, "error": "No sourceMessageId provided"}, status_code=400)
-
-        existing = await db.execute(select(SettingsDb).where(SettingsDb.job_id == request.sourceMessageId))
-        existing_record = existing.scalar_one_or_none()
-
-        if not existing_record:
-            LOGGER.warning(f"No settings record found for job_id {request.sourceMessageId}")
-            return JSONResponse(content={"success": True, "message": "No record to update"})
-
-        stripped_domain = existing_record.domain
-        LOGGER.info(f"Found domain: {stripped_domain} for job_id: {request.sourceMessageId}")
-
-        if 200 <= request.status < 300:
-            LOGGER.info(f"Reindex completed successfully for domain {stripped_domain}")
-            existing_record.job_id = None
-            existing_record.last_reindex_time = datetime.utcnow()
-        else:
-            LOGGER.error(f"Reindex failed for domain {stripped_domain} with status {request.status}")
-            existing_record.job_id = None
-
-        await db.commit()
-
-        return JSONResponse(content={"success": True, "domain": stripped_domain, "status": request.status})
-
-    except Exception as e:
-        LOGGER.exception(f"Error handling reindex callback: {e}")
-        return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
-
-
 @fai_app.post(
     "/settings/ask-ai/set-job-id",
     response_model=SetJobIdResponse,
