@@ -1,6 +1,6 @@
 FROM node:22-alpine AS base
 
-RUN npm install -g pnpm@10.11.0
+RUN npm install -g pnpm@10.25.0
 
 WORKDIR /app
 
@@ -56,12 +56,13 @@ RUN ls -lh dist-bundle/
 FROM node:22-alpine AS runner
 WORKDIR /app
 
-RUN npm install -g pnpm@10.11.0 && \
+RUN npm install -g pnpm@10.25.0 && \
     pnpm add \
         @aws-sdk/client-ecs@^3.709.0 \
         @aws-sdk/client-sqs@^3.709.0 \
         --prod && \
-    rm -rf ~/.pnpm-store
+    rm -rf ~/.pnpm-store && \
+    rm -rf /usr/local/lib/node_modules/npm
 
 COPY --from=builder /app/servers/fai-reindexing/dist-bundle ./dist
 
