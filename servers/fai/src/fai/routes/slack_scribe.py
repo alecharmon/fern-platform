@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import BackgroundTasks, HTTPException, Request, status
+from fastapi import BackgroundTasks, HTTPException, Query, Request, status
 from fastapi.responses import JSONResponse
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
@@ -147,7 +147,18 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
 @fai_app.get(
     "/scribe/slack/get-install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]}
 )
-async def get_fern_writer_install_link(github_repo: str, request: Request) -> JSONResponse:
+async def get_fern_writer_install_link(
+    request: Request,
+    github_repo: str = Query(
+        ...,
+        description=(
+            "The GitHub repository to install the Fern Writer for. "
+            "Must have the `fern-api` bot installed. "
+            "Must be in the format `owner/repo`."
+            "Example: `fern-api/docs`"
+        ),
+    ),
+) -> JSONResponse:
     try:
         await verify_org_token(request)
         LOGGER.info(f"[SCRIBE] Validating GitHub repo {github_repo}")

@@ -118,8 +118,7 @@ async def send_devin_message(
 
     attachment_urls: list[str] = []
     if files and bot_token:
-        from fai.utils.scribe.slack_file_handler import \
-            process_slack_attachments
+        from fai.utils.scribe.slack_file_handler import process_slack_attachments
 
         attachment_urls = await process_slack_attachments(files, bot_token, client)
 
