@@ -147,7 +147,7 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
 @fai_app.get(
     "/scribe/slack/get-install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]}
 )
-async def get_scribe_slack_install_link(github_repo: str, request: Request) -> JSONResponse:
+async def get_fern_writer_install_link(github_repo: str, request: Request) -> JSONResponse:
     try:
         await verify_org_token(request)
         LOGGER.info(f"[SCRIBE] Validating GitHub repo {github_repo}")
