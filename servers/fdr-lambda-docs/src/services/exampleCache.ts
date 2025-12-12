@@ -98,11 +98,29 @@ export function computeRequestHash(request: EnhanceExampleRequest): string {
         pathParameters: request.pathParameters,
         queryParameters: request.queryParameters,
         headers: request.headers,
-        openApiSpec: request.openApiSpec
+        openApiSpec: request.openApiSpec,
+        exampleStyleInstructions: request.exampleStyleInstructions
     };
 
     const hashString = JSON.stringify(hashInput, Object.keys(hashInput).sort());
     return createHash("sha256").update(hashString).digest("hex");
+}
+
+const MAX_STYLE_INSTRUCTIONS_LENGTH = 500;
+
+/**
+ * Normalize the request by truncating fields that have length limits.
+ * This should be called early in the request handling to ensure consistent
+ * hashing and prompt generation.
+ */
+export function normalizeRequest(request: EnhanceExampleRequest): EnhanceExampleRequest {
+    if (request.exampleStyleInstructions && request.exampleStyleInstructions.length > MAX_STYLE_INSTRUCTIONS_LENGTH) {
+        return {
+            ...request,
+            exampleStyleInstructions: request.exampleStyleInstructions.slice(0, MAX_STYLE_INSTRUCTIONS_LENGTH)
+        };
+    }
+    return request;
 }
 
 export async function getCachedExample(

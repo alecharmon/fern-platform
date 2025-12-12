@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { Pool } from "pg";
 import { type EnhanceExampleRequest, enhanceExample } from "./services/enhanceExample";
-import { getCachedExample, getConnectionDetails, storeCachedExample } from "./services/exampleCache";
+import { getCachedExample, getConnectionDetails, normalizeRequest, storeCachedExample } from "./services/exampleCache";
 import { validateCliJwt } from "./utils/jwt";
 
 // Lambda Function URLs use a different event format than API Gateway
@@ -84,11 +84,16 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
 
                 await validateCliJwt(authHeader, singleRequest.organizationId);
 
+                // Normalize request (e.g., truncate exampleStyleInstructions to 500 chars)
+                const normalizedRequest = normalizeRequest(singleRequest);
+
                 const dbPool = await getPool();
-                const cachedResponse = await getCachedExample(singleRequest, dbPool);
+                const cachedResponse = await getCachedExample(normalizedRequest, dbPool);
                 if (cachedResponse) {
                     // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
-                    console.log(`[Handler] Cache HIT for ${singleRequest.method} ${singleRequest.endpointPath}`);
+                    console.log(
+                        `[Handler] Cache HIT for ${normalizedRequest.method} ${normalizedRequest.endpointPath}`
+                    );
                     cachedResponse.requestId = context.awsRequestId;
                     return {
                         statusCode: 200,
@@ -102,12 +107,12 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
 
                 // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
                 console.log(
-                    `[Handler] Cache MISS for ${singleRequest.method} ${singleRequest.endpointPath} - calling OpenAI`
+                    `[Handler] Cache MISS for ${normalizedRequest.method} ${normalizedRequest.endpointPath} - calling OpenAI`
                 );
 
-                const enhancedResponse = await enhanceExample(singleRequest, context.awsRequestId);
+                const enhancedResponse = await enhanceExample(normalizedRequest, context.awsRequestId);
 
-                await storeCachedExample(singleRequest, enhancedResponse, dbPool);
+                await storeCachedExample(normalizedRequest, enhancedResponse, dbPool);
 
                 return {
                     statusCode: 200,

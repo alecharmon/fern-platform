@@ -12,6 +12,7 @@ export interface EnhanceExampleRequest {
     queryParameters?: Record<string, unknown>;
     headers?: Record<string, unknown>;
     openApiSpec?: string;
+    exampleStyleInstructions?: string;
 }
 
 export interface EnhanceExampleResponse {
@@ -316,7 +317,18 @@ function buildEnhancementPrompt(request: EnhanceExampleRequest): string {
         JSON.stringify(request.originalRequestExample, null, 2),
         "",
         "Response:",
-        JSON.stringify(request.originalResponseExample, null, 2),
+        JSON.stringify(request.originalResponseExample, null, 2)
+    );
+
+    if (request.exampleStyleInstructions) {
+        parts.push(
+            "",
+            "**Additionally, style the example following these instructions:**",
+            request.exampleStyleInstructions
+        );
+    }
+
+    parts.push(
         "",
         "**Return only the JSON output in this exact format:**",
         "{",
