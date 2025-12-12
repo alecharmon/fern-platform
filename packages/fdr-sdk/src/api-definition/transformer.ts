@@ -377,10 +377,14 @@ export class Transformer {
             webhook.headers?.map((header) =>
                 this.visitor.ObjectProperty(header, `${parentKey}/header/${header.key}`)
             ) ?? [];
+        const responses = webhook.responses?.map((response, i) =>
+            this.visitor.HttpResponse(response, `${parentKey}/response/${i}/${response.statusCode}`)
+        );
         return {
             ...webhook,
             payloads: payload != null ? [payload] : undefined,
-            headers: headers.length > 0 ? headers : undefined
+            headers: headers.length > 0 ? headers : undefined,
+            responses
         };
     };
 

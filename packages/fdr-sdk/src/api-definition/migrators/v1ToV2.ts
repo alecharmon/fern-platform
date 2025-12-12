@@ -233,7 +233,7 @@ export class ApiDefinitionV1ToLatest {
             path: v1.path,
             headers: this.migrateParameters(v1.headers),
             payloads: [payload],
-            responses: undefined,
+            responses: v1.responses?.map(this.migrateHttpResponse)?.filter(isNonNullish),
             examples: v1.examples.map((example) => ({
                 ...example,
                 payload: sortKeysByShape(example.payload, payload.shape, this.types)

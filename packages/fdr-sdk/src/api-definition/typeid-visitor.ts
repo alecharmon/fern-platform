@@ -65,6 +65,11 @@ export class ApiTypeIdVisitor {
         if (webhook.payloads?.[0] != null) {
             ApiTypeIdVisitor.visitTypeShape(webhook.payloads[0].shape, visit);
         }
+        webhook.responses?.forEach((response) => {
+            if (response.body != null) {
+                ApiTypeIdVisitor.visitHttpResponseBodyShape(response.body, visit);
+            }
+        });
     }
 
     public static visitHttpRequestBodyShape(

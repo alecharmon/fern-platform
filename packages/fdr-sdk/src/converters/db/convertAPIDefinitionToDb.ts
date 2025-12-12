@@ -170,7 +170,7 @@ function transformWebhook({
         name: writeShape.name,
         path: writeShape.path,
         headers: writeShape.headers,
-        responses: undefined,
+        responses: writeShape.responses?.map(convertWebhookResponseToDb),
         payload: writeShape.payload,
         examples:
             writeShape.examples.length > 0
@@ -182,6 +182,28 @@ function transformWebhook({
                       })
                   ]
     };
+}
+
+function convertWebhookResponseToDb(writeShape: APIV1Write.HttpResponse): APIV1Read.HttpResponse {
+    const writeShapeType = writeShape.type;
+    switch (writeShapeType.type) {
+        case "fileDownload":
+        case "object":
+        case "reference":
+        case "streamingText":
+        case "stream":
+            return {
+                ...writeShape,
+                type: writeShapeType
+            };
+        case "streamCondition":
+            // Webhook responses shouldn't have streamCondition, but handle it gracefully
+            // by converting to a simple reference type if the non-stream response has a shape
+            return {
+                ...writeShape,
+                type: writeShapeType.response.shape
+            };
+    }
 }
 
 function transformEndpoint({

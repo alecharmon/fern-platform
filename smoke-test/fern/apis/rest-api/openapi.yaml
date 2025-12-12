@@ -1124,11 +1124,46 @@ webhooks:
                     estimatedDelivery: "2024-01-18T12:00:00Z"
       responses:
         "200":
-          description: Webhook received successfully
+          description: |
+            Webhook received and processed successfully. Your server should return this response to acknowledge receipt of the webhook event.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookAcknowledgement"
+              examples:
+                success:
+                  summary: Successful acknowledgement
+                  value:
+                    received: true
+                    processedAt: "2024-01-15T14:30:01Z"
         "400":
-          description: Invalid webhook payload
-        "401":
-          description: Webhook signature verification failed
+          description: |
+            The webhook payload was malformed or missing required fields. Check the error details for specific validation failures.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookError"
+              examples:
+                invalidPayload:
+                  summary: Invalid payload error
+                  value:
+                    error: "Invalid webhook payload"
+                    code: "INVALID_PAYLOAD"
+                    details: "Missing required field: orderId"
+        "500":
+          description: |
+            An internal server error occurred while processing the webhook. The webhook delivery will be retried automatically.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookError"
+              examples:
+                serverError:
+                  summary: Server error
+                  value:
+                    error: "Internal server error"
+                    code: "INTERNAL_ERROR"
+                    details: "Database connection failed"
       security:
         - webhook_signature: []
   plantInventoryLow:
@@ -1161,11 +1196,46 @@ webhooks:
                     recommendedReorder: 50
       responses:
         "200":
-          description: Webhook received successfully
+          description: |
+            Webhook received and processed successfully. Your inventory management system has acknowledged the low stock alert.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookAcknowledgement"
+              examples:
+                success:
+                  summary: Alert acknowledged
+                  value:
+                    received: true
+                    processedAt: "2024-01-15T09:00:01Z"
         "400":
-          description: Invalid webhook payload
-        "401":
-          description: Webhook signature verification failed
+          description: |
+            The webhook payload was malformed or missing required fields. Ensure the payload includes plantId, currentStock, and threshold.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookError"
+              examples:
+                invalidPayload:
+                  summary: Missing plant ID
+                  value:
+                    error: "Invalid webhook payload"
+                    code: "INVALID_PAYLOAD"
+                    details: "Missing required field: plantId"
+        "500":
+          description: |
+            An internal server error occurred while processing the inventory alert. The webhook delivery will be retried automatically.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookError"
+              examples:
+                serverError:
+                  summary: Database error
+                  value:
+                    error: "Internal server error"
+                    code: "INTERNAL_ERROR"
+                    details: "Failed to update inventory tracking system"
       security:
         - webhook_signature: []
 components:
@@ -1321,6 +1391,39 @@ components:
             recommendedReorder:
               type: integer
               description: Recommended reorder quantity
+    WebhookAcknowledgement:
+      type: object
+      description: Standard acknowledgement response for webhook events. Return this response to confirm successful receipt and processing of the webhook.
+      required:
+        - received
+      properties:
+        received:
+          type: boolean
+          description: Indicates whether the webhook was successfully received
+        processedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the webhook was processed by your server
+        message:
+          type: string
+          description: Optional message providing additional context about the processing
+    WebhookError:
+      type: object
+      description: Error response returned when webhook processing fails. Includes error details to help diagnose the issue.
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message describing what went wrong
+        code:
+          type: string
+          description: Machine-readable error code for programmatic handling
+          enum: ["INVALID_PAYLOAD", "INTERNAL_ERROR", "SIGNATURE_MISMATCH", "RATE_LIMITED"]
+        details:
+          type: string
+          description: Additional details about the error, such as which field failed validation
     SpecificError:
       type: object
       description: Error response for specific status codes (400, 500)

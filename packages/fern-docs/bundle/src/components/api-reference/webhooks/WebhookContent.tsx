@@ -12,7 +12,7 @@ import { renderTypeShorthand } from "@/components/type-shorthand";
 import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
-
+import { EndpointResponseSection } from "../endpoints/EndpointResponseSection";
 import { EndpointSection } from "../endpoints/EndpointSection";
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
 import { TypeDefinitionAnchorPart, TypeDefinitionRoot } from "../type-definitions/TypeDefinitionContext";
@@ -51,6 +51,7 @@ export async function WebhookContent({
     const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(webhook.description);
 
     const example = webhook.examples?.[0]; // TODO: Need a way to show all the examples
+    const responses = webhook.responses;
 
     const webhookExample = example ? <WebhookExample example={example} slug={node.slug} lang={lang} /> : null;
 
@@ -110,7 +111,20 @@ export async function WebhookContent({
 
                         <TypeDefinitionAnchorPart part="response">
                             <EndpointSection title={t(lang).apiReference.response}>
-                                <WebhookResponseSection lang={lang} />
+                                {responses && responses.length > 0 ? (
+                                    <>
+                                        {responses.map((response) => (
+                                            <EndpointResponseSection
+                                                key={response.statusCode}
+                                                body={response.body}
+                                                types={types}
+                                                lang={lang}
+                                            />
+                                        ))}
+                                    </>
+                                ) : (
+                                    <WebhookResponseSection lang={lang} />
+                                )}
                             </EndpointSection>
                         </TypeDefinitionAnchorPart>
                     </TypeDefinitionSlotsServer>
