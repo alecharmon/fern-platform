@@ -31,7 +31,6 @@ from fai.models.api.settings_api import (
 )
 from fai.models.db.settings_db import SettingsDb
 from fai.models.types.reindex_callback_request_type import ReindexCallbackRequest
-from fai.models.types.upstash_callback_request_type import UpstashCallbackRequest
 from fai.settings import LOGGER
 
 
