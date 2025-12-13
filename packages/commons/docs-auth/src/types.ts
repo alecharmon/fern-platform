@@ -19,6 +19,12 @@ export const PlaygroundStateSchema = z.object({
 });
 
 export const FernUserSchema = z.object({
+    /**
+     * Subject identifier from the JWT's root-level sub claim.
+     * Used as user_id for analytics (e.g., Google Analytics).
+     * This is populated from the JWT's root `sub` claim, not from the `fern` payload.
+     */
+    sub: z.string().optional(),
     name: z.string().optional(),
     email: z.string().optional(),
     roles: z

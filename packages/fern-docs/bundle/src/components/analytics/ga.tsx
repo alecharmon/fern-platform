@@ -1,6 +1,7 @@
+import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { useServerInsertedHTML } from "next/navigation";
 import Script from "next/script";
-import React, { type ReactNode, useEffect } from "react";
+import React, { type ReactNode, useEffect, useRef } from "react";
 
 import { useSafeListenTrackEvents } from "./use-track";
 
@@ -20,6 +21,9 @@ type GAParams = {
 
 export default function GoogleAnalytics(props: GAParams): ReactNode {
     const { gaId, debugMode, dataLayerName = "dataLayer", nonce } = props;
+    const fernUser = useFernUser();
+    const userIdSetRef = useRef(false);
+
     useEffect(() => {
         // performance.mark is being used as a feature use signal. While it is traditionally used for performance
         // benchmarking it is low overhead and thus considered safe to use in production and it is a widely available
@@ -32,6 +36,17 @@ export default function GoogleAnalytics(props: GAParams): ReactNode {
             }
         });
     }, []);
+
+    // Set user_id for Google Analytics when user is logged in with a sub claim
+    useEffect(() => {
+        if (fernUser?.sub && !userIdSetRef.current) {
+            const gtag = window.gtag;
+            if (typeof gtag === "function") {
+                gtag("set", { user_id: fernUser.sub });
+                userIdSetRef.current = true;
+            }
+        }
+    }, [fernUser?.sub]);
 
     useSafeListenTrackEvents(({ event, properties }) => {
         sendGAEvent(dataLayerName, { event, properties });
