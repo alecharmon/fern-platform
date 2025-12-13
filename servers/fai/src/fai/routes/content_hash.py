@@ -14,7 +14,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fai.app import fai_app
-from fai.dependencies import ask_ai_enabled, get_db, strip_domain, verify_token
+from fai.dependencies import get_db, strip_domain, verify_token
 from fai.models.api.content_hash_api import (
     BatchGetContentHashesRequest,
     BatchGetContentHashesResponse,
@@ -95,7 +95,6 @@ async def batch_upsert_content_hashes(
     body: BatchUpsertContentHashesRequest = Body(...),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
-    __: None = Depends(ask_ai_enabled),
 ) -> BatchUpsertContentHashesResponse:
     """
     Upsert content hashes for multiple parent_ids.
@@ -158,7 +157,6 @@ async def delete_content_hashes(
     body: DeleteContentHashesRequest = Body(...),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
-    __: None = Depends(ask_ai_enabled),
 ) -> DeleteContentHashesResponse:
     """
     Delete content hashes for multiple parent_ids.
