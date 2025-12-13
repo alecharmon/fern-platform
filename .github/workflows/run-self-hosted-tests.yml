@@ -85,4 +85,4 @@ jobs:
 
       - name: Run single self-hosted test (singleNode only)
         if: steps.detect_changes.outputs.run_all_tests == 'false'
-        run: pnpm --filter=@fern-platform/self-hosted vitest src/__test__/singleNode.test.ts --globals --config src/__test__/vitest.config.ts
+        run: pnpm --filter=@fern-platform/self-hosted exec -- vitest src/__test__/singleNode.test.ts --globals --config src/__test__/vitest.config.ts
