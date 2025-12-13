@@ -54,7 +54,7 @@ echo ""
 echo "💡 To stop infrastructure, run: cd $FDR_DIR && docker compose -f docker-compose.local.yml down"
 echo ""
 
-# Start FDR in development mode (with watch/reload)
+# Start FDR in development mode
 # Set environment variables for local mode (using S3 Mock as MinIO)
 export LOCAL_MODE_OVERRIDE=true
 export DATABASE_URL="postgresql://fdr:fdr1!@localhost:5432/fdr?schema=public"
@@ -68,4 +68,10 @@ export LOG_LEVEL="$LOG_LEVEL"
 echo "🔍 Log level set to: $LOG_LEVEL"
 echo ""
 
-pnpm dev
+# Build CJS bundle (required due to ESM/tsx compatibility issues with generated code)
+echo "📦 Building CJS bundle..."
+pnpm build:tsup:cjs
+
+echo ""
+echo "🚀 Starting server..."
+node cjs/server.cjs
