@@ -5,7 +5,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "target": "es2022",
-    "lib": ["DOM", "ESNext"],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "esModuleInterop": true,
     "verbatimModuleSyntax": false
   },
