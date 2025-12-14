@@ -6,8 +6,6 @@ on:
       - "smoke-test/fern/**"
       - "packages/fern-docs/bundle/**"
       - "packages/fern-docs/components/**"
-      - "servers/fdr/**"
-      - "servers/fdr-lambda/**"
       - ".github/workflows/smoke-test-preview.yml"
   workflow_dispatch:
 
