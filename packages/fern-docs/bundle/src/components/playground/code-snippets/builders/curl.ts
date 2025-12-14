@@ -27,7 +27,7 @@ export class CurlSnippetBuilder extends PlaygroundCodeSnippetBuilder {
         return convertToCurl({
             method: this.context.endpoint.method,
             url: this.url,
-            searchParams: this.formState.queryParameters,
+            searchParams: this.processedQueryParameters,
             headers: this.formState.headers,
             basicAuth: hasBasicAuthSelected ? this.authState.basicAuth : undefined,
             body: this.#convertFormStateToBody(),

@@ -153,8 +153,8 @@ export class ApiDefinitionV1ToLatest {
             multiAuth: v1.multiAuth,
             defaultEnvironment: v1.defaultEnvironment,
             environments: v1.environments,
-            pathParameters: this.migrateParameters(v1.path.pathParameters),
-            queryParameters: this.migrateParameters(v1.queryParameters),
+            pathParameters: this.migratePathOrQueryParameters(v1.path.pathParameters),
+            queryParameters: this.migratePathOrQueryParameters(v1.queryParameters),
             requestHeaders: this.migrateParameters(v1.headers),
             responseHeaders: undefined,
             requests: (() => {
@@ -209,8 +209,8 @@ export class ApiDefinitionV1ToLatest {
             auth: v1.auth ? [AUTH_SCHEME_ID] : undefined,
             defaultEnvironment: v1.defaultEnvironment,
             environments: v1.environments,
-            pathParameters: this.migrateParameters(v1.path.pathParameters),
-            queryParameters: this.migrateParameters(v1.queryParameters),
+            pathParameters: this.migratePathOrQueryParameters(v1.path.pathParameters),
+            queryParameters: this.migratePathOrQueryParameters(v1.queryParameters),
             requestHeaders: this.migrateParameters(v1.headers),
             examples: this.migrateChannelExamples(v1.examples, messages)
         };
@@ -264,6 +264,25 @@ export class ApiDefinitionV1ToLatest {
             propertyAccess: undefined,
             description: parameter.description,
             availability: parameter.availability
+        }));
+    };
+
+    migratePathOrQueryParameters = (
+        v1: APIV1Read.PathParameter[] | APIV1Read.QueryParameter[] | undefined
+    ): V2.ParameterProperty[] | undefined => {
+        if (v1 == null || v1.length === 0) {
+            return undefined;
+        }
+        return v1.map((parameter) => ({
+            key: V2.PropertyKey(parameter.key),
+            valueShape: {
+                type: "alias",
+                value: this.migrateTypeReference(parameter.type)
+            },
+            propertyAccess: undefined,
+            description: parameter.description,
+            availability: parameter.availability,
+            explode: parameter.explode
         }));
     };
 

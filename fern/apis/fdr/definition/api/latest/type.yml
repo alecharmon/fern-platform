@@ -65,6 +65,12 @@ types:
       valueShape: TypeShape
       propertyAccess: optional<ObjectPropertyAccess>
 
+  ParameterProperty:
+    docs: A property that represents a path or query parameter, with optional explode behavior.
+    extends: ObjectProperty
+    properties:
+      explode: optional<boolean>
+
   ObjectPropertyAccess:
     enum:
       - READ_ONLY

@@ -94,7 +94,8 @@ describe("PlaygroundCodeSnippetBuilder", () => {
                 },
                 description: undefined,
                 availability: undefined,
-                propertyAccess: undefined
+                propertyAccess: undefined,
+                explode: undefined
             }
         ],
         queryParameters: undefined,

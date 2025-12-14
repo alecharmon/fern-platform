@@ -19,8 +19,8 @@ export interface EndpointDefinition
     multiAuth: FernRegistry.MultipleAuthType[] | undefined;
     defaultEnvironment: FernRegistry.EnvironmentId | undefined;
     environments: FernRegistry.api.latest.Environment[] | undefined;
-    pathParameters: FernRegistry.api.latest.ObjectProperty[] | undefined;
-    queryParameters: FernRegistry.api.latest.ObjectProperty[] | undefined;
+    pathParameters: FernRegistry.api.latest.ParameterProperty[] | undefined;
+    queryParameters: FernRegistry.api.latest.ParameterProperty[] | undefined;
     requestHeaders: FernRegistry.api.latest.ObjectProperty[] | undefined;
     responseHeaders: FernRegistry.api.latest.ObjectProperty[] | undefined;
     requests: FernRegistry.api.latest.HttpRequest[] | undefined;

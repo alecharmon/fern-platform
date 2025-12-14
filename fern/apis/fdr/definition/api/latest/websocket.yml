@@ -31,8 +31,8 @@ types:
       auth: optional<list<rootCommons.AuthSchemeId>>
       defaultEnvironment: optional<rootCommons.EnvironmentId>
       environments: optional<list<commons.Environment>>
-      pathParameters: optional<list<type.ObjectProperty>>
-      queryParameters: optional<list<type.ObjectProperty>>
+      pathParameters: optional<list<type.ParameterProperty>>
+      queryParameters: optional<list<type.ParameterProperty>>
       requestHeaders: optional<list<type.ObjectProperty>>
       examples: optional<list<ExampleWebSocketSession>>
 

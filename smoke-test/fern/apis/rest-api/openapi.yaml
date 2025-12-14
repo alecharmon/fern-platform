@@ -286,6 +286,57 @@ paths:
                       name: "Cactus"
                       status: "available"
                       tags: ["spiky", "desert"]
+  /plant/search/filters:
+    get:
+      tags:
+        - plant
+      summary: Search plants with explode parameter options
+      description: |
+        Demonstrates the explode parameter behavior for query parameters.
+        - `tagsExplode` uses explode=true (default): tags are sent as separate query params (e.g., `tagsExplode=green&tagsExplode=leafy`)
+        - `tagsNoExplode` uses explode=false: tags are sent as comma-separated values (e.g., `tagsNoExplode=green,leafy`)
+      operationId: searchPlantsWithFilters
+      security: []
+      parameters:
+        - name: tagsExplode
+          in: query
+          description: Tags with explode=true (default). Each tag is sent as a separate query parameter.
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+          example: ["green", "leafy"]
+        - name: tagsNoExplode
+          in: query
+          description: Tags with explode=false. Tags are sent as comma-separated values.
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+          example: ["tropical", "indoor"]
+      responses:
+        "200":
+          description: List of plants matching the filter criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlantResponse"
+              examples:
+                exampleResponse:
+                  summary: Plants filtered by multiple criteria
+                  value:
+                    - id: 101
+                      name: "Fern"
+                      status: "available"
+                      tags: ["green", "leafy"]
+                    - id: 104
+                      name: "Tropical Palm"
+                      status: "available"
+                      tags: ["tropical", "indoor"]
   /plant/{plantId}:
     get:
       tags:

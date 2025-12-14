@@ -43,7 +43,8 @@ const endpoint1: Latest.EndpointDefinition = {
             },
             description: undefined,
             availability: undefined,
-            propertyAccess: undefined
+            propertyAccess: undefined,
+            explode: undefined
         }
     ],
     requestHeaders: undefined,

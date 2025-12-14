@@ -15,6 +15,7 @@ export * from "./MapType.js";
 export * from "./NullableType.js";
 export * from "./ObjectProperty.js";
 export * from "./ObjectPropertyAccess.js";
+export * from "./ParameterProperty.js";
 export * from "./ObjectType.js";
 export * from "./OptionalType.js";
 export * from "./PrimitiveType.js";

@@ -6,7 +6,8 @@ import {
     buildEndpointUrl,
     type EndpointDefinition,
     type ExampleEndpointCall,
-    type ExampleEndpointRequest
+    type ExampleEndpointRequest,
+    preprocessQueryParameters
 } from "../";
 
 export function getHarRequest(
@@ -31,7 +32,10 @@ export function getHarRequest(
         pathParameters: example.pathParameters
     });
     request.method = endpoint.method;
-    request.queryString = Object.entries(example.queryParameters ?? {}).map(([name, value]) => ({
+
+    // Preprocess query parameters based on explode metadata
+    const processedQueryParams = preprocessQueryParameters(example.queryParameters, endpoint.queryParameters) ?? {};
+    request.queryString = Object.entries(processedQueryParams).map(([name, value]) => ({
         name,
         value: unknownToString(value)
     }));

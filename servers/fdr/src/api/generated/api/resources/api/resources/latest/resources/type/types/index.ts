@@ -15,6 +15,7 @@ export * from "./MapType";
 export * from "./NullableType";
 export * from "./ObjectProperty";
 export * from "./ObjectPropertyAccess";
+export * from "./ParameterProperty";
 export * from "./ObjectType";
 export * from "./OptionalType";
 export * from "./PrimitiveType";

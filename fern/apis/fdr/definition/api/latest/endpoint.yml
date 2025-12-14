@@ -35,8 +35,8 @@ types:
         type: optional<list<rootCommons.MultipleAuthType>>
       defaultEnvironment: optional<rootCommons.EnvironmentId>
       environments: optional<list<commons.Environment>>
-      pathParameters: optional<list<type.ObjectProperty>>
-      queryParameters: optional<list<type.ObjectProperty>>
+      pathParameters: optional<list<type.ParameterProperty>>
+      queryParameters: optional<list<type.ParameterProperty>>
       requestHeaders: optional<list<type.ObjectProperty>>
       responseHeaders: optional<list<type.ObjectProperty>> # this is not being used currently
       requests: optional<list<HttpRequest>>

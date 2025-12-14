@@ -15,8 +15,8 @@ export interface WebSocketChannel
     auth: FernRegistry.AuthSchemeId[] | undefined;
     defaultEnvironment: FernRegistry.EnvironmentId | undefined;
     environments: FernRegistry.api.latest.Environment[] | undefined;
-    pathParameters: FernRegistry.api.latest.ObjectProperty[] | undefined;
-    queryParameters: FernRegistry.api.latest.ObjectProperty[] | undefined;
+    pathParameters: FernRegistry.api.latest.ParameterProperty[] | undefined;
+    queryParameters: FernRegistry.api.latest.ParameterProperty[] | undefined;
     requestHeaders: FernRegistry.api.latest.ObjectProperty[] | undefined;
     examples: FernRegistry.api.latest.ExampleWebSocketSession[] | undefined;
 }

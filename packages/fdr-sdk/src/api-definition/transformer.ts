@@ -234,13 +234,15 @@ export class Transformer {
 
     endpoint = (endpoint: Latest.EndpointDefinition, parentKey: string): Latest.EndpointDefinition => {
         const pathParameters =
-            endpoint.pathParameters?.map((param) =>
-                this.visitor.ObjectProperty(param, `${parentKey}/path/${param.key}`)
-            ) ?? [];
+            endpoint.pathParameters?.map((param) => ({
+                ...this.visitor.ObjectProperty(param, `${parentKey}/path/${param.key}`),
+                explode: param.explode
+            })) ?? [];
         const queryParameters =
-            endpoint.queryParameters?.map((param) =>
-                this.visitor.ObjectProperty(param, `${parentKey}/query/${param.key}`)
-            ) ?? [];
+            endpoint.queryParameters?.map((param) => ({
+                ...this.visitor.ObjectProperty(param, `${parentKey}/query/${param.key}`),
+                explode: param.explode
+            })) ?? [];
         const requestHeaders =
             endpoint.requestHeaders?.map((param) =>
                 this.visitor.ObjectProperty(param, `${parentKey}/requestHeader/${param.key}`)
@@ -395,13 +397,15 @@ export class Transformer {
 
     webSocketChannel = (channel: Latest.WebSocketChannel, parentKey: string): Latest.WebSocketChannel => {
         const pathParameters =
-            channel.pathParameters?.map((param) =>
-                this.visitor.ObjectProperty(param, `${parentKey}/path/${param.key}`)
-            ) ?? [];
+            channel.pathParameters?.map((param) => ({
+                ...this.visitor.ObjectProperty(param, `${parentKey}/path/${param.key}`),
+                explode: param.explode
+            })) ?? [];
         const queryParameters =
-            channel.queryParameters?.map((param) =>
-                this.visitor.ObjectProperty(param, `${parentKey}/query/${param.key}`)
-            ) ?? [];
+            channel.queryParameters?.map((param) => ({
+                ...this.visitor.ObjectProperty(param, `${parentKey}/query/${param.key}`),
+                explode: param.explode
+            })) ?? [];
         const requestHeaders =
             channel.requestHeaders?.map((param) =>
                 this.visitor.ObjectProperty(param, `${parentKey}/requestHeader/${param.key}`)
