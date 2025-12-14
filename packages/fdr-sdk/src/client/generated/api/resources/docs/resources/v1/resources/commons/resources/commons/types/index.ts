@@ -16,6 +16,7 @@ export * from "./ContentAlignment.js";
 export * from "./CssConfig.js";
 export * from "./CustomFontConfig.js";
 export * from "./CustomFontConfigVariant.js";
+export * from "./CustomPageAction.js";
 export * from "./DocsBodyConfig.js";
 export * from "./DocsLayoutConfig.js";
 export * from "./DocsPageActionsConfig.js";

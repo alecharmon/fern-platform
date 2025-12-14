@@ -16,6 +16,7 @@ export * from "./ContentAlignment";
 export * from "./CssConfig";
 export * from "./CustomFontConfig";
 export * from "./CustomFontConfigVariant";
+export * from "./CustomPageAction";
 export * from "./DocsBodyConfig";
 export * from "./DocsLayoutConfig";
 export * from "./DocsPageActionsConfig";

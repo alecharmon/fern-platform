@@ -60,6 +60,7 @@ export * from "./DocsTypographyConfigV2.js";
 export * from "./FontConfigV2.js";
 export * from "./CustomFontConfig.js";
 export * from "./CustomFontConfigVariant.js";
+export * from "./CustomPageAction.js";
 export * from "./FontStyle.js";
 export * from "./FontDisplay.js";
 export * from "./PageActionsConfig.js";

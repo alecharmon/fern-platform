@@ -1,5 +1,7 @@
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { FaIcon } from "@fern-docs/components/fa-icon";
 import { t } from "@fern-docs/i18n";
 import { Copy, ExternalLink } from "lucide-react";
 import type { ParamValue } from "next/dist/server/request/params";
@@ -7,6 +9,7 @@ import type { ReactNode } from "react";
 import { isSelfHosted } from "@/server/isSelfHosted";
 
 import { ClaudeIcon, CursorIcon, MarkdownIcon, OpenAIIcon, SparklesIconHollow, TextIcon } from "./PageActionsAssets";
+import { processIconString } from "./util/processIconString";
 
 export const Separator = (): FernDropdown.SeparatorOption => {
     return {
@@ -181,17 +184,80 @@ export const OpenWithCursor = async ({
     } as FernDropdown.ValueOption;
 };
 
+export interface CustomPageActionConfig {
+    title: string;
+    subtitle?: string;
+    url: string;
+    icon?: string;
+    default?: boolean;
+}
+
+const resolveParam = (param: ParamValue): string => {
+    if (typeof param === "string") {
+        return decodeURIComponent(param);
+    } else if (Array.isArray(param)) {
+        return decodeURIComponent(param.join("/"));
+    } else {
+        return "";
+    }
+};
+
+const isUrl = (str: string): boolean => {
+    return str.startsWith("http://") || str.startsWith("https://");
+};
+
+const renderCustomActionIcon = (icon?: string, files?: Record<string, FileData>): ReactNode | undefined => {
+    if (!icon) {
+        return undefined;
+    }
+    if (isUrl(icon)) {
+        return <img src={icon} alt="" className="size-icon" width={16} height={16} />;
+    }
+    return processIconString({
+        icon,
+        files,
+        className: "size-icon",
+        renderFaIcon: (faIcon) => <FaIcon icon={faIcon} className="size-icon" />
+    });
+};
+
+export const CustomPageActionOption = ({
+    customAction,
+    slug,
+    files
+}: {
+    customAction: CustomPageActionConfig;
+    slug: ParamValue;
+    files?: Record<string, FileData>;
+}): FernDropdown.ValueOption => {
+    const resolvedSlug = resolveParam(slug);
+    const resolvedUrl = customAction.url.replaceAll("{slug}", resolvedSlug);
+
+    return {
+        type: "value",
+        value: `custom-${customAction.title.toLowerCase().replace(/\s+/g, "-")}`,
+        label: customAction.title,
+        helperText: customAction.subtitle,
+        icon: renderCustomActionIcon(customAction.icon, files),
+        href: resolvedUrl,
+        rightElement: <ExternalLink className="size-icon" />,
+        default: customAction.default
+    } as FernDropdown.ValueOption;
+};
+
 // don't add separators here, since we may reorder and add options in PageActionsDropdown.tsx
 export async function constructPageOptions({
     pageActionConfig,
     domain,
     slug,
-    lang
+    lang,
+    files
 }: {
     pageActionConfig: Omit<DocsV1Read.DocsConfig, "navigation" | "root">;
     domain: ParamValue;
     slug: ParamValue;
     lang: string;
+    files?: Record<string, FileData>;
 }): Promise<FernDropdown.PageActionOption[] | undefined> {
     const options: FernDropdown.PageActionOption[] = [];
     if (pageActionConfig.pageActions?.options?.copyPage !== false) {
@@ -207,6 +273,25 @@ export async function constructPageOptions({
                 defaultOption: pageActionConfig.pageActions?.default === "viewAsMarkdown"
             })
         );
+    }
+
+    const customActions = pageActionConfig.pageActions?.options?.custom;
+    if (customActions && slug) {
+        for (const customAction of customActions) {
+            options.push(
+                CustomPageActionOption({
+                    customAction: {
+                        title: customAction.title,
+                        subtitle: customAction.subtitle,
+                        url: customAction.url,
+                        icon: customAction.icon,
+                        default: customAction.default
+                    },
+                    slug,
+                    files
+                })
+            );
+        }
     }
 
     if (isSelfHosted()) {

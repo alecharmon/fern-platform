@@ -557,3 +557,23 @@ types:
       claude: optional<boolean>
       cursor: optional<boolean>
       vscode: optional<boolean>
+      custom: optional<list<CustomPageAction>>
+      
+  CustomPageAction:
+    docs: A custom page action that can be configured by the user.
+    properties:
+      title: 
+        type: string
+        docs: The title of the custom action.
+      subtitle: 
+        type: optional<string>
+        docs: The subtitle/helper text of the custom action.
+      url: 
+        type: string
+        docs: The URL to navigate to. Use {slug} as a placeholder for the current page slug.
+      icon:
+        type: optional<string>
+        docs: Icon to display for the custom action. Can be a file ID (e.g., "file:my-icon"), an image URL (starting with http://, https://, or /), or a Font Awesome icon name (e.g., "fas fa-star" or "star").
+      default:
+        type: optional<boolean>
+        docs: Whether this custom action should be the default action.
