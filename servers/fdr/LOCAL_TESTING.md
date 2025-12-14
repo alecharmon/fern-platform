@@ -84,6 +84,12 @@ When running locally, the following services are available:
 | S3 Mock    | localhost:9090 (API)   |
 | S3 Mock UI | localhost:9191         |
 
+## Testing Docker Build
+
+```bash
+docker build -f servers/fdr/Dockerfile --target installer .
+```
+
 ## Troubleshooting
 
 ### ESM/TypeScript Issues
