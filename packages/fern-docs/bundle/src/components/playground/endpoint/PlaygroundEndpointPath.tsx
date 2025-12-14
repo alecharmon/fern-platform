@@ -2,12 +2,12 @@ import type {
     Environment,
     EnvironmentId,
     HttpMethod,
-    ObjectProperty,
+    ParameterProperty,
     PathPart,
     TypeDefinition,
     TypeId
 } from "@fern-api/fdr-sdk/api-definition";
-import { buildRequestUrl, unwrapReference } from "@fern-api/fdr-sdk/api-definition";
+import { buildRequestUrl, preprocessQueryParameters, unwrapReference } from "@fern-api/fdr-sdk/api-definition";
 import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import unknownToString from "@fern-api/ui-core-utils/unknownToString";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
@@ -36,7 +36,7 @@ interface PlaygroundEndpointPathProps {
     options: Environment[] | undefined;
     formState: PlaygroundRequestFormState;
     path: PathPart[];
-    queryParameters: ObjectProperty[] | undefined;
+    queryParameters: ParameterProperty[] | undefined;
     sendRequest: () => void;
     sendRequestButtonLabel?: string;
     sendRequestIcon?: ReactNode;
@@ -132,8 +132,11 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
                                     }
                                 });
 
-                            const queryString = qs.stringify(filteredParams, {
-                                encode: false,
+                            // Preprocess query parameters based on explode metadata
+                            const processedParams = preprocessQueryParameters(filteredParams, queryParameters) ?? {};
+
+                            const queryString = qs.stringify(processedParams, {
+                                encode: true,
                                 arrayFormat: "repeat"
                             });
 
@@ -162,7 +165,7 @@ export const PlaygroundEndpointPath: FC<PlaygroundEndpointPathProps> = ({
                         buildRequestUrl({
                             path,
                             pathParameters: formState.pathParameters,
-                            queryParameters: formState.queryParameters,
+                            queryParameters: preprocessQueryParameters(formState.queryParameters, queryParameters),
                             baseUrl
                         })
                     }

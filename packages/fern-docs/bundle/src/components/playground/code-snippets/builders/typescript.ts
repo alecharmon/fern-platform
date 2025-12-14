@@ -7,7 +7,7 @@ export class TypescriptFetchSnippetBuilder extends PlaygroundCodeSnippetBuilder 
     // TODO: write more tests for this
     #buildFetch(body: string | undefined): string {
         return `// ${this.context.node.title} (${this.context.endpoint.method} ${buildPath(this.context.endpoint.path)})
-const response = await fetch("${buildUrlWithQueryParams(this.url, this.formState.queryParameters)}", {
+const response = await fetch("${buildUrlWithQueryParams(this.url, this.processedQueryParameters)}", {
   method: "${this.context.endpoint.method}",
   headers: ${indentAfter(JSON.stringify(this.formState.headers, undefined, 2), 2, 0)},${body != null && body.length > 0 ? `\n  body: ${body},` : ""}
 });

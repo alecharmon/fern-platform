@@ -23,7 +23,7 @@ export class PythonRequestSnippetBuilder extends PlaygroundCodeSnippetBuilder {
 
         return `# ${this.context.node.title} (${this.context.endpoint.method} ${buildPath(this.context.endpoint.path)})
 response = requests.${this.context.endpoint.method.toLowerCase()}(
-  "${buildUrlWithQueryParams(this.url, this.formState.queryParameters)}",
+  "${buildUrlWithQueryParams(this.url, this.processedQueryParameters)}",
   headers=${indentAfter(JSON.stringify(headers, undefined, 2), 2, 0)},${json != null ? `\n  json=${indentAfter(json, 2, 0)},` : ""}${
       data != null ? `\n  data=${indentAfter(data, 2, 0)},` : ""
   }${files != null ? `\n  files=${indentAfter(files, 2, 0)},` : ""}

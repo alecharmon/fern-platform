@@ -5,6 +5,7 @@ import { noop } from "ts-essentials";
 import urljoin from "url-join";
 
 import type * as Latest from "../latest";
+import { preprocessQueryParameters } from "../url";
 
 interface SnippetHttpRequestBodyJson {
     type: "json";
@@ -124,10 +125,13 @@ export function toSnippetHttpRequest(
         headers["Content-Type"] = "application/json";
     }
 
+    // Preprocess query parameters based on explode metadata
+    const processedQueryParams = preprocessQueryParameters(example.queryParameters, endpoint.queryParameters) ?? {};
+
     return {
         method: endpoint.method,
         url,
-        searchParams: example.queryParameters ?? {},
+        searchParams: processedQueryParams,
         headers: JSON.parse(JSON.stringify(headers)),
         basicAuth,
         protocol: endpoint.protocol,
