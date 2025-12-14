@@ -76,8 +76,9 @@ jobs:
 
       - name: Publish FDR SDK
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.FERN_FDR_SDK_NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.FERN_FDR_SDK_NPM_TOKEN }}
         run: |
+          npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
           git_version="$(scripts/fdr-version.sh)"
           working_dir=$(pwd)
 
@@ -88,3 +89,19 @@ jobs:
           cd $working_dir/packages/fdr-sdk
           npm version "$git_version" --no-git-tag-version
           pnpm publish --access public --tag latest --no-git-checks
+
+  notify:
+    needs: publish_sdk
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v2
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "FDR SDK Publish ${{ needs.publish_sdk.result }}: ${{ github.ref_name }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+            }
