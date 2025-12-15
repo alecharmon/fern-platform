@@ -1,5 +1,5 @@
 {
-  "question": "What API endpoint converts text to speech?",
+  "question": "What API endpoint converts text to speech (non-streaming)?",
   "ground_truth": "To convert text to speech, use the POST /v1/text-to-speech/{voice_id} endpoint. You need to provide a voice_id in the path (get available voices from GET /v1/voices), an xi-api-key header for authentication, and a JSON request body with at least the 'text' field containing the content to convert. The response is a binary audio file (application/octet-stream). Optional parameters include model_id, voice_settings (stability, similarity_boost, style, speed), output_format, and language_code.",
   "metadata": {
     "category": "text-to-speech",

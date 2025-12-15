@@ -72,6 +72,14 @@ export function createEndpointBaseRecordHttp({
         ObjectProperty: (property) => {
             keywords.add(property.key);
             return property;
+        },
+        FormDataFile: (file) => {
+            keywords.add(file.key);
+            return file;
+        },
+        FormDataFiles: (files) => {
+            keywords.add(files.key);
+            return files;
         }
     }).endpoint(endpoint, endpoint.id);
 

@@ -83,6 +83,13 @@ Use bolding to emphasize specific words or phrases where appropriate (e.g. list 
 Include code snippets using Markdown code blocks. Use the appropriate language identifier for syntax highlighting.
 </code_snippets>
 
+<api_references>
+When describing an API endpoint, always include:
+- Request parameters (name, type, required/optional)
+- Response fields (name, type, description)
+- Valid enum values for any enum parameters
+</api_references>
+
 <quotations>
 Use Markdown blockquotes to include any relevant quotes that support or supplement your answer.
 </quotations>

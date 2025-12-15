@@ -193,22 +193,59 @@ function convertBodyToOpenApiContent(
                 schema: { type: "string", format: "binary" }
             };
             break;
-        case "formData":
-            content["multipart/form-data"] = {
-                schema: {
-                    type: "object",
-                    properties: body.fields?.reduce<
-                        Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject>
-                    >((acc, field) => {
-                        // Form data fields are actually just properties with key and valueShape
-                        if ("key" in field && "valueShape" in field) {
-                            acc[field.key] = convertToOpenApiSchema(field.valueShape, context);
+        case "formData": {
+            const formDataProperties: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject> = {};
+            const formDataRequired: string[] = [];
+
+            for (const field of body.fields ?? []) {
+                switch (field.type) {
+                    case "property": {
+                        const propSchema = convertToOpenApiSchema(field.valueShape, context);
+                        formDataProperties[field.key] = field.description
+                            ? { ...propSchema, description: field.description }
+                            : propSchema;
+                        if (!isOptional(field.valueShape)) {
+                            formDataRequired.push(field.key);
                         }
-                        return acc;
-                    }, {})
+                        break;
+                    }
+                    case "file":
+                        formDataProperties[field.key] = field.description
+                            ? { type: "string", format: "binary", description: field.description }
+                            : { type: "string", format: "binary" };
+                        if (!field.isOptional) {
+                            formDataRequired.push(field.key);
+                        }
+                        break;
+                    case "files":
+                        formDataProperties[field.key] = field.description
+                            ? {
+                                  type: "array",
+                                  items: { type: "string", format: "binary" },
+                                  description: field.description
+                              }
+                            : {
+                                  type: "array",
+                                  items: { type: "string", format: "binary" }
+                              };
+                        if (!field.isOptional) {
+                            formDataRequired.push(field.key);
+                        }
+                        break;
                 }
+            }
+
+            const formDataSchema: OpenAPIV3_1.SchemaObject = {
+                type: "object",
+                properties: formDataProperties
             };
+            if (formDataRequired.length > 0) {
+                formDataSchema.required = formDataRequired;
+            }
+
+            content["multipart/form-data"] = { schema: formDataSchema };
             break;
+        }
         case "fileDownload":
             content["application/octet-stream"] = {
                 schema: { type: "string", format: "binary" }
@@ -263,16 +300,44 @@ function isOptional(shape: ApiDefinition.TypeShapeOrReference): boolean {
 
 function convertPrimitiveToSchema(primitive: ApiDefinition.PrimitiveType): OpenAPIV3_1.SchemaObject {
     switch (primitive.type) {
-        case "string":
-            return { type: "string", format: primitive.format };
-        case "integer":
-            return { type: "integer" };
-        case "double":
-            return { type: "number", format: "double" };
-        case "long":
-            return { type: "integer", format: "int64" };
-        case "boolean":
-            return { type: "boolean" };
+        case "string": {
+            const schema: OpenAPIV3_1.SchemaObject = { type: "string" };
+            if (primitive.format) {
+                schema.format = primitive.format;
+            }
+            if (primitive.default !== undefined) {
+                schema.default = primitive.default;
+            }
+            return schema;
+        }
+        case "integer": {
+            const schema: OpenAPIV3_1.SchemaObject = { type: "integer" };
+            if (primitive.default !== undefined) {
+                schema.default = primitive.default;
+            }
+            return schema;
+        }
+        case "double": {
+            const schema: OpenAPIV3_1.SchemaObject = { type: "number", format: "double" };
+            if (primitive.default !== undefined) {
+                schema.default = primitive.default;
+            }
+            return schema;
+        }
+        case "long": {
+            const schema: OpenAPIV3_1.SchemaObject = { type: "integer", format: "int64" };
+            if (primitive.default !== undefined) {
+                schema.default = primitive.default;
+            }
+            return schema;
+        }
+        case "boolean": {
+            const schema: OpenAPIV3_1.SchemaObject = { type: "boolean" };
+            if (primitive.default !== undefined) {
+                schema.default = primitive.default;
+            }
+            return schema;
+        }
         case "date":
             return { type: "string", format: "date" };
         case "datetime":
@@ -281,7 +346,7 @@ function convertPrimitiveToSchema(primitive: ApiDefinition.PrimitiveType): OpenA
             return { type: "string", format: "uuid" };
         case "base64":
             return { type: "string", format: "base64" };
-        case "bigInteger": // TODO: is this ok?
+        case "bigInteger":
             return { type: "integer", format: "int64" };
         case "uint":
             return { type: "integer", format: "uint" };
@@ -327,10 +392,9 @@ function buildPropertiesAndRequired(
     if (shape.type === "object" && shape.properties) {
         shape.properties.forEach((prop: ApiDefinition.ObjectProperty) => {
             const propSchema = convertToOpenApiSchema(prop.valueShape, context);
-            if (prop.description && "description" in propSchema) {
-                propSchema.description = prop.description;
-            }
-            properties[prop.key] = propSchema;
+            // In OpenAPI 3.1, description can be added alongside $ref
+            // We spread to create a new object with the description added
+            properties[prop.key] = prop.description ? { ...propSchema, description: prop.description } : propSchema;
 
             // Add to required array if not optional
             if (!isOptional(prop.valueShape)) {
@@ -407,10 +471,10 @@ function convertDiscriminatedUnionToSchema(
         if (variant.properties) {
             variant.properties.forEach((prop: ApiDefinition.ObjectProperty) => {
                 const propSchema = convertToOpenApiSchema(prop.valueShape, context);
-                if (prop.description && "description" in propSchema) {
-                    propSchema.description = prop.description;
-                }
-                variantProperties[prop.key] = propSchema;
+                // In OpenAPI 3.1, description can be added alongside $ref
+                variantProperties[prop.key] = prop.description
+                    ? { ...propSchema, description: prop.description }
+                    : propSchema;
 
                 if (!isOptional(prop.valueShape)) {
                     variantRequired.push(prop.key);
@@ -476,8 +540,13 @@ export function convertToOpenApiSchema(
                 additionalProperties: valueSchema
             };
         }
-        case "optional":
-            return convertToOpenApiSchema(shape.shape, context);
+        case "optional": {
+            const optionalSchema = convertToOpenApiSchema(shape.shape, context);
+            if (shape.default !== undefined) {
+                return { ...optionalSchema, default: shape.default };
+            }
+            return optionalSchema;
+        }
         case "nullable": {
             const baseSchema = convertToOpenApiSchema(shape.shape, context);
             // In OpenAPI 3.1, we can use type arrays for nullable types
@@ -492,8 +561,13 @@ export function convertToOpenApiSchema(
                 oneOf: [baseSchema, { type: "null" } as OpenAPIV3_1.SchemaObject]
             } as OpenAPIV3_1.SchemaObject;
         }
-        case "enum":
-            return { type: "string", enum: shape.values };
+        case "enum": {
+            const enumSchema: OpenAPIV3_1.SchemaObject = { type: "string", enum: shape.values };
+            if (shape.default !== undefined) {
+                enumSchema.default = shape.default;
+            }
+            return enumSchema;
+        }
         case "literal":
             return {
                 type: "string",
@@ -512,7 +586,14 @@ export function convertToOpenApiSchema(
         }
         case "discriminatedUnion":
             return convertDiscriminatedUnionToSchema(shape, context);
-        case "id":
+        case "id": {
+            const buildRefResult = (ref: string): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject => {
+                if (shape.default !== undefined) {
+                    return { $ref: ref, default: shape.default };
+                }
+                return { $ref: ref };
+            };
+
             if (context.apiDefinition?.types?.[shape.id]) {
                 const typeDef = context.apiDefinition.types[shape.id];
                 if (!typeDef) {
@@ -522,7 +603,7 @@ export function convertToOpenApiSchema(
                 }
 
                 if (context.visitedTypes.has(shape.id)) {
-                    return { $ref: `#/components/schemas/${shape.id}` };
+                    return buildRefResult(`#/components/schemas/${shape.id}`);
                 }
 
                 context.visitedTypes.add(shape.id);
@@ -542,11 +623,12 @@ export function convertToOpenApiSchema(
 
                 context.visitedTypes.delete(shape.id);
 
-                return { $ref: `#/components/schemas/${shape.id}` };
+                return buildRefResult(`#/components/schemas/${shape.id}`);
             }
             return {
                 description: `Reference to ${shape.id}`
             } as OpenAPIV3_1.SchemaObject;
+        }
         case "unknown":
             return {
                 description: shape.displayName || "Any type"

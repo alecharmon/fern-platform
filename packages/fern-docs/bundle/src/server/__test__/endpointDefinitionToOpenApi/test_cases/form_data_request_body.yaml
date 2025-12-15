@@ -9,16 +9,21 @@ endpoint_input:
       body:
         type: formData
         fields:
-          - key: name
+          - type: property
+            key: name
+            description: The name of the user.
             valueShape:
               type: primitive
               value:
                 type: string
-          - key: file
-            valueShape:
-              type: primitive
-              value:
-                type: string
+          - type: file
+            key: avatar
+            description: The user's avatar image.
+            isOptional: false
+          - type: files
+            key: documents
+            description: Supporting documents to upload.
+            isOptional: true
 endpoint_definitions: {}
 output:
   openapi: 3.1.1
@@ -42,5 +47,17 @@ output:
                 properties:
                   name:
                     type: string
-                  file:
+                    description: The name of the user.
+                  avatar:
                     type: string
+                    format: binary
+                    description: The user's avatar image.
+                  documents:
+                    type: array
+                    items:
+                      type: string
+                      format: binary
+                    description: Supporting documents to upload.
+                required:
+                  - name
+                  - avatar
