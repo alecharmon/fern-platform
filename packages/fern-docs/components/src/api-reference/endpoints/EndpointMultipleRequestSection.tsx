@@ -1,6 +1,5 @@
 "use client";
 
-import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { HttpRequest } from "@fern-api/fdr-sdk/api-definition";
 import { t } from "@fern-docs/i18n";
 import type { ReactNode } from "react";
@@ -8,36 +7,28 @@ import { useCallback } from "react";
 
 import { TypeDefinitionAnchorPart } from "../type-definitions/TypeDefinitionContext";
 import { useEndpointContext } from "./EndpointContext";
-import {
-    EndpointRequestSection,
-    type PropertyRendererProps,
-    type PropertyWithShapeProps,
-    type TypeReferenceDefinitionsProps
-} from "./EndpointRequestSection";
 import { EndpointSection } from "./EndpointSection";
 
 export interface EndpointMultipleRequestSectionProps {
     requests: HttpRequest[];
-    types: Record<string, ApiDefinition.TypeDefinition>;
     lang: string;
     className?: string;
+    /**
+     * Pre-rendered descriptions keyed by contentType (or "default").
+     */
     renderedDescriptions: Record<string, ReactNode>;
-    renderedFieldDescriptions: Record<string, Record<string, ReactNode>>;
-    PropertyRenderer: React.ComponentType<PropertyRendererProps>;
-    PropertyWithShape: React.ComponentType<PropertyWithShapeProps>;
-    TypeReferenceDefinitions: React.ComponentType<TypeReferenceDefinitionsProps>;
+    /**
+     * Pre-rendered request bodies keyed by contentType (or "default").
+     */
+    renderedBodies: Record<string, ReactNode>;
 }
 
 export function EndpointMultipleRequestSection({
     requests,
-    types,
     lang,
     className,
     renderedDescriptions,
-    renderedFieldDescriptions,
-    PropertyRenderer,
-    PropertyWithShape,
-    TypeReferenceDefinitions
+    renderedBodies
 }: EndpointMultipleRequestSectionProps) {
     const { selectedRequest, setSelectedRequest } = useEndpointContext();
 
@@ -71,17 +62,7 @@ export function EndpointMultipleRequestSection({
                 getRequestId
             }}
         >
-            <TypeDefinitionAnchorPart part="body">
-                <EndpointRequestSection
-                    request={selectedRequest}
-                    types={types}
-                    lang={lang}
-                    renderedFieldDescriptions={renderedFieldDescriptions[descriptionKey]}
-                    PropertyRenderer={PropertyRenderer}
-                    PropertyWithShape={PropertyWithShape}
-                    TypeReferenceDefinitions={TypeReferenceDefinitions}
-                />
-            </TypeDefinitionAnchorPart>
+            <TypeDefinitionAnchorPart part="body">{renderedBodies[descriptionKey]}</TypeDefinitionAnchorPart>
         </EndpointSection>
     );
 }

@@ -8,6 +8,7 @@ import { useEndpointContext } from "@fern-docs/components/api-reference/endpoint
 import { EndpointExampleSegmentedControl } from "@fern-docs/components/api-reference/endpoints/EndpointExampleSegmentedControl";
 import { EndpointUrlWithOverflow } from "@fern-docs/components/api-reference/endpoints/EndpointUrlWithOverflow";
 import { ErrorExampleSelect } from "@fern-docs/components/api-reference/endpoints/ErrorExampleSelect";
+import { renderResponseTitle } from "@fern-docs/components/api-reference/endpoints/render-response-title";
 import { AudioExample } from "@fern-docs/components/api-reference/examples/AudioExample";
 import {
     CodeSnippetExample,
@@ -18,7 +19,7 @@ import { TitledExample } from "@fern-docs/components/api-reference/examples/Titl
 import { lineNumberOf } from "@fern-docs/components/api-reference/examples/utils";
 import type { StatusCode } from "@fern-docs/components/api-reference/type-definitions/EndpointContent";
 import { WebSocketMessages } from "@fern-docs/components/api-reference/websockets/WebSocketMessages";
-import { StatusCodeBadge, statusCodeToIntent } from "@fern-docs/components/badges/status-code-badge";
+import { statusCodeToIntent } from "@fern-docs/components/badges/status-code-badge";
 import { cn } from "@fern-docs/components/cn";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { t } from "@fern-docs/i18n";
@@ -303,24 +304,6 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
 };
 
 export const EndpointContentCodeSnippets = memo(UnmemoizedEndpointContentCodeSnippets);
-
-export function renderResponseTitle(
-    title: string,
-    statusCode: number | string,
-    hideTitle?: boolean,
-    isWildcard?: boolean
-) {
-    return (
-        <span className="inline-flex items-center gap-2 whitespace-nowrap">
-            <StatusCodeBadge statusCode={statusCode} isWildcard={isWildcard} />
-            {!hideTitle && (
-                <span className={cn("truncate max-w-full", `text-intent-${statusCodeToIntent(String(statusCode))}`)}>
-                    {title}
-                </span>
-            )}
-        </span>
-    );
-}
 
 const resolveEnvironmentUrlInCodeSnippet = (
     endpoint: ApiDefinition.EndpointDefinition,

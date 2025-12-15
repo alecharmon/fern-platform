@@ -164,7 +164,6 @@ export async function EndpointContentLeft({
                     endpoint.requests.length > 1 ? (
                         <EndpointMultipleRequestSection
                             requests={endpoint.requests}
-                            types={types}
                             lang={lang}
                             className="fern-endpoint-section-request-body"
                             renderedDescriptions={Object.fromEntries(
@@ -179,15 +178,21 @@ export async function EndpointContentLeft({
                                     />
                                 ])
                             )}
-                            renderedFieldDescriptions={Object.fromEntries(
+                            renderedBodies={Object.fromEntries(
                                 endpoint.requests.map((request) => [
                                     request.contentType ?? "default",
-                                    renderFormDataFieldDescriptions(request, types)
+                                    <EndpointRequestSection
+                                        key={request.contentType ?? "default"}
+                                        request={request}
+                                        types={types}
+                                        lang={lang}
+                                        renderedFieldDescriptions={renderFormDataFieldDescriptions(request, types)}
+                                        PropertyRenderer={PropertyRenderer}
+                                        PropertyWithShape={PropertyWithShape}
+                                        TypeReferenceDefinitions={TypeReferenceDefinitions}
+                                    />
                                 ])
                             )}
-                            PropertyRenderer={PropertyRenderer}
-                            PropertyWithShape={PropertyWithShape}
-                            TypeReferenceDefinitions={TypeReferenceDefinitions}
                         />
                     ) : (
                         <EndpointSection
@@ -227,7 +232,6 @@ export async function EndpointContentLeft({
                             <EndpointMultipleResponseSection
                                 method={endpoint.method}
                                 responses={endpoint.responses}
-                                types={types}
                                 lang={lang}
                                 className="fern-endpoint-section-response-body"
                                 renderedDescriptions={Object.fromEntries(
@@ -248,7 +252,18 @@ export async function EndpointContentLeft({
                                         />
                                     ])
                                 )}
-                                TypeReferenceDefinitions={TypeReferenceDefinitions}
+                                renderedBodies={Object.fromEntries(
+                                    endpoint.responses.map((response) => [
+                                        response.statusCode,
+                                        <EndpointResponseSection
+                                            key={response.statusCode}
+                                            body={response.body}
+                                            types={types}
+                                            lang={lang}
+                                            TypeReferenceDefinitions={TypeReferenceDefinitions}
+                                        />
+                                    ])
+                                )}
                             />
                         ) : (
                             <EndpointSection
