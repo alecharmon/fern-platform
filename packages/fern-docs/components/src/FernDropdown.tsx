@@ -223,7 +223,7 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
                         )}
                         <FernScrollArea rootClassName="min-h-0 shrink" className="p-1" scrollbars="vertical">
                             {Array.isArray(value) ? (
-                                <div onClick={onClick}>
+                                <div onClick={onClick} className="flex flex-col gap-px">
                                     {optionsToRender.map((option, idx) =>
                                         option.type === "value" ? (
                                             <FernDropdownItemMultiSelect
@@ -253,6 +253,7 @@ export const FernDropdown = forwardRef<HTMLButtonElement, PropsWithChildren<Fern
                                     onValueChange={onValueChange}
                                     onClick={onClick}
                                     {...radioGroupProps}
+                                    className={cn("flex flex-col gap-px", radioGroupProps.className)}
                                 >
                                     {optionsToRender.map((option, idx) =>
                                         option.type === "value" ? (
