@@ -2,10 +2,10 @@ import "server-only";
 
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { ErrorResponse } from "@fern-api/fdr-sdk/api-definition";
+import { EndpointErrorGroupClient } from "@fern-docs/components/api-reference/endpoints/EndpointErrorGroupClient";
 import { sortBy } from "es-toolkit/array";
 
 import { EndpointError } from "./EndpointError";
-import { EndpointErrorGroupClient } from "./EndpointErrorGroupClient";
 
 export function EndpointErrorGroup({
     errors,

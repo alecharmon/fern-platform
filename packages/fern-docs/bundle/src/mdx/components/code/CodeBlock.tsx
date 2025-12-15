@@ -2,14 +2,13 @@ import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
 import { ExpandCodeButton } from "@fern-docs/components/ExpandCodeButton";
+import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
 import {
     CodeBlockWithClipboardButton,
     FernSyntaxHighlighter,
     type ScrollToHandle
 } from "@fern-docs/components/syntax-highlighter";
 import { type ComponentProps, type ReactNode, type RefObject, useEffect, useRef } from "react";
-
-import { useIsDarkCode } from "@/state/dark-code";
 
 import { CodeBlockFeedbackButton } from "./CodeBlockFeedbackButton";
 import { applyTemplates, useTemplate } from "./Template";

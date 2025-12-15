@@ -9,9 +9,12 @@ import { isNonNullish } from "@fern-api/ui-core-utils";
 import { FERN_DOCS_ID } from "@fern-docs/components/constants";
 import { FeatureFlagProvider } from "@fern-docs/components/feature-flags/FeatureFlagProvider";
 import { ScrollToTop } from "@fern-docs/components/layouts/ScrollToTop";
+import { ErrorBoundaryProvider } from "@fern-docs/components/providers/ErrorBoundaryProvider";
 import { Providers } from "@fern-docs/components/providers/providers";
+import { DarkCode } from "@fern-docs/components/state/dark-code";
 import { Domain } from "@fern-docs/components/state/domain";
 import type { LaunchDarklyInfo } from "@fern-docs/components/state/feature-flags";
+import { DefaultLanguage } from "@fern-docs/components/state/language";
 import { RootNodeProvider, SetBasePath } from "@fern-docs/components/state/navigation";
 import {
     getAllSidebarRootNodes,
@@ -32,6 +35,7 @@ import React from "react";
 import { preload } from "react-dom";
 import { CustomerAnalytics } from "@/components/analytics/CustomerAnalytics";
 import { ConsoleMessage } from "@/components/console-message";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { FernUser } from "@/components/fern-user";
 import { JavascriptProvider } from "@/components/JavascriptProvider";
 import SearchV2 from "@/components/search";
@@ -40,8 +44,6 @@ import { WebSocketRefresh } from "@/components/websocket-refresh";
 import { withJsConfig } from "@/components/with-js-config";
 import { runAsyncSpan } from "@/server/tracing";
 import { SetColors } from "@/state/colors";
-import { DarkCode } from "@/state/dark-code";
-import { DefaultLanguage } from "@/state/language";
 import { SetLogoText } from "@/state/logo-text";
 import { SetIsAskAiEnabled, SetIsDefaultSearchFilterOn } from "@/state/search";
 import { Whitelabeled } from "@/state/whitelabeled";
@@ -193,7 +195,9 @@ export default async function Layout({
                                 theme={theme}
                             />
                             <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>
-                                <div data-body-theme={theme?.body}>{children}</div>
+                                <ErrorBoundaryProvider ErrorBoundary={ErrorBoundary}>
+                                    <div data-body-theme={theme?.body}>{children}</div>
+                                </ErrorBoundaryProvider>
                             </FeatureFlagProvider>
                             <React.Suspense fallback={null}>
                                 {!isLocalEnvironment && !settings.disableSearch && (

@@ -3,26 +3,29 @@
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { EMPTY_OBJECT, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { CodeExampleClientDropdown } from "@fern-docs/components/api-reference/endpoints/CodeExampleClientDropdown";
+import { useEndpointContext } from "@fern-docs/components/api-reference/endpoints/EndpointContext";
+import { EndpointExampleSegmentedControl } from "@fern-docs/components/api-reference/endpoints/EndpointExampleSegmentedControl";
+import { EndpointUrlWithOverflow } from "@fern-docs/components/api-reference/endpoints/EndpointUrlWithOverflow";
+import { ErrorExampleSelect } from "@fern-docs/components/api-reference/endpoints/ErrorExampleSelect";
+import { AudioExample } from "@fern-docs/components/api-reference/examples/AudioExample";
+import {
+    CodeSnippetExample,
+    JsonCodeSnippetExample
+} from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
+import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
+import { TitledExample } from "@fern-docs/components/api-reference/examples/TitledExample";
+import { lineNumberOf } from "@fern-docs/components/api-reference/examples/utils";
+import type { StatusCode } from "@fern-docs/components/api-reference/type-definitions/EndpointContent";
+import { WebSocketMessages } from "@fern-docs/components/api-reference/websockets/WebSocketMessages";
 import { StatusCodeBadge, statusCodeToIntent } from "@fern-docs/components/badges/status-code-badge";
 import { cn } from "@fern-docs/components/cn";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { t } from "@fern-docs/i18n";
 import { sortBy } from "es-toolkit/array";
 import { memo, type ReactNode, useCallback, useMemo } from "react";
-import { WebSocketMessages } from "@/components/api-reference/websockets/WebSocketMessages";
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { usePlaygroundBaseUrl } from "../../playground/utils/select-environment";
-import { AudioExample } from "../examples/AudioExample";
-import { CodeSnippetExample, JsonCodeSnippetExample } from "../examples/CodeSnippetExample";
-import type { CodeExample } from "../examples/code-example";
-import { TitledExample } from "../examples/TitledExample";
-import { lineNumberOf } from "../examples/utils";
-import type { StatusCode } from "../type-definitions/EndpointContent";
-import { CodeExampleClientDropdown } from "./CodeExampleClientDropdown";
-import { useEndpointContext } from "./EndpointContext";
-import { EndpointExampleSegmentedControl } from "./EndpointExampleSegmentedControl";
-import { EndpointUrlWithOverflow } from "./EndpointUrlWithOverflow";
-import { ErrorExampleSelect } from "./ErrorExampleSelect";
 
 export declare namespace EndpointContentCodeSnippets {
     export interface Props {

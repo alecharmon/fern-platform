@@ -2,15 +2,22 @@ import "server-only";
 
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
-
+import {
+    createEndpointRequestDescriptionFallback,
+    EndpointRequestSection
+} from "@fern-docs/components/api-reference/endpoints/EndpointRequestSection";
+import { EndpointResponseSection } from "@fern-docs/components/api-reference/endpoints/EndpointResponseSection";
+import { ResponseSummaryFallback } from "@fern-docs/components/api-reference/endpoints/response-summary-fallback";
+import { GrpcSection } from "@fern-docs/components/api-reference/grpcs/GrpcSection";
+import {
+    TypeDefinitionAnchorPart,
+    TypeDefinitionResponse
+} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { t } from "@fern-docs/i18n";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
-import { createEndpointRequestDescriptionFallback, EndpointRequestSection } from "../endpoints/EndpointRequestSection";
-import { EndpointResponseSection } from "../endpoints/EndpointResponseSection";
-import { ResponseSummaryFallback } from "../endpoints/response-summary-fallback";
-import { TypeDefinitionAnchorPart, TypeDefinitionResponse } from "../type-definitions/TypeDefinitionContext";
-import { GrpcSection } from "./GrpcSection";
+import { PropertyRenderer, PropertyWithShape } from "../type-definitions/ObjectProperty";
+import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 
 export interface HoveringProps {
     isHovering: boolean;
@@ -42,7 +49,14 @@ export async function GrpcContentLeft({ context: { grpc, types }, lang }: { cont
                         }
                     >
                         <TypeDefinitionAnchorPart part="body">
-                            <EndpointRequestSection request={grpc.requests[0]} types={types} lang={lang} />
+                            <EndpointRequestSection
+                                request={grpc.requests[0]}
+                                types={types}
+                                lang={lang}
+                                PropertyRenderer={PropertyRenderer}
+                                PropertyWithShape={PropertyWithShape}
+                                TypeReferenceDefinitions={TypeReferenceDefinitions}
+                            />
                         </TypeDefinitionAnchorPart>
                     </GrpcSection>
                 )}
@@ -77,7 +91,12 @@ export async function GrpcContentLeft({ context: { grpc, types }, lang }: { cont
                             }
                         >
                             <TypeDefinitionAnchorPart part="body">
-                                <EndpointResponseSection body={grpc.responses[0].body} types={types} lang={lang} />
+                                <EndpointResponseSection
+                                    body={grpc.responses[0].body}
+                                    types={types}
+                                    lang={lang}
+                                    TypeReferenceDefinitions={TypeReferenceDefinitions}
+                                />
                             </TypeDefinitionAnchorPart>
                         </GrpcSection>
                     )}

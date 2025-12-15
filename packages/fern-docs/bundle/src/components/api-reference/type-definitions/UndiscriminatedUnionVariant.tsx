@@ -4,7 +4,6 @@ import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import type { ReactElement } from "react";
 
 import type { UndiscriminatedUnionVariantWithSerializedDescription } from "@/mdx/plugins/serialize-type-definition-descriptions";
-
 import { PropertyWithShape } from "./ObjectProperty";
 import type { PropertyLocation } from "./TypeReferenceDefinitions";
 

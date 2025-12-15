@@ -1,15 +1,14 @@
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { TypeDefinitionAnchorPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
 import { Badge } from "@fern-docs/components/badges";
 import { Separator } from "@fern-docs/components/Separator";
-
+import { renderTypeShorthand } from "@fern-docs/components/type-shorthand";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
-import { renderTypeShorthand } from "../../type-shorthand";
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
-import { TypeDefinitionAnchorPart } from "../type-definitions/TypeDefinitionContext";
-import { WithSeparator } from "../type-definitions/TypeDefinitionDetails";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 
 const HEADER_BADGE = (

@@ -1,10 +1,9 @@
 import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
+import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
 import { CodeBlockWithClipboardButton, FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 import type React from "react";
-
-import { useIsDarkCode } from "@/docs/state/dark-code";
 
 import { applyTemplates, useTemplate } from "./Template";
 

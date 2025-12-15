@@ -3,6 +3,7 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
+import { WebSocketMessagesVirtualized } from "@fern-docs/components/api-reference/websockets/WebSocketMessagesVirtualized";
 import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
@@ -11,7 +12,6 @@ import { FernTabs } from "@fern-docs/components/FernTabs";
 import { t } from "@fern-docs/i18n";
 import { useIsMobile } from "@fern-ui/react-commons";
 import { type Dispatch, type FC, type SetStateAction, useCallback, useState } from "react";
-import { WebSocketMessagesVirtualized } from "@/components/api-reference/websockets/WebSocketMessagesVirtualized";
 import { PlaygroundTypeReferenceForm } from "../form/PlaygroundTypeReferenceForm";
 import { useWebsocketMessages } from "../hooks/useWebsocketMessages";
 import type { PlaygroundWebSocketRequestFormState } from "../types";

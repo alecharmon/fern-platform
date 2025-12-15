@@ -2,7 +2,7 @@
 
 import type { TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
 
-import { renderTypeShorthandRoot } from "@/docs/components/type-shorthand";
+import { renderTypeShorthandRoot } from "@fern-docs/components/type-shorthand";
 
 import { useTypeDefinitionContext } from "./TypeDefinitionContext";
 
@@ -11,6 +11,7 @@ export function TypeShorthand({ shape }: { shape: TypeShapeOrReference }) {
     return renderTypeShorthandRoot({
         shape,
         types: context.types,
-        isResponse: context.isResponse
+        isResponse: context.isResponse,
+        lang: "en"
     });
 }

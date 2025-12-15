@@ -5,6 +5,7 @@ import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FaIcon } from "@fern-docs/components/fa-icon";
+import { useDefaultProgrammingLanguage, useProgrammingLanguage } from "@fern-docs/components/state/language";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 import { ChevronDown } from "lucide-react";
 import { useRef } from "react";
@@ -14,7 +15,6 @@ import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { useDefaultProgrammingLanguage, useProgrammingLanguage } from "@/docs/state/language";
 
 import { EditorPreviewBanner } from "./EditorPreviewBanner";
 import { EndpointNotFoundState } from "./EndpointNotFoundState";

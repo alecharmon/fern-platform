@@ -3,11 +3,10 @@ import "server-only";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { getIsSidebarFixed } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import { EndpointStreamingEnabledToggle } from "@fern-docs/components/api-reference/endpoints/EndpointStreamingEnabledToggle";
 import { last } from "es-toolkit/array";
 import { notFound } from "next/navigation";
-
 import ApiEndpointPage from "@/components/api-reference/ApiEndpointPage";
-import { EndpointStreamingEnabledToggle } from "@/components/api-reference/endpoints/EndpointStreamingEnabledToggle";
 import { BottomNavigation } from "@/components/bottom-nav";
 import ChangelogEntryPage from "@/components/changelog/ChangelogEntryPage";
 import ChangelogPage, { ChangelogPageEntry, ChangelogPageOverview } from "@/components/changelog/ChangelogPage";

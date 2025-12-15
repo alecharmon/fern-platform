@@ -1,15 +1,15 @@
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
+import { CodeExampleClientDropdown } from "@fern-docs/components/api-reference/endpoints/CodeExampleClientDropdown";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
+import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
+import { useProgrammingLanguage } from "@fern-docs/components/state/language";
 import { t } from "@fern-docs/i18n";
 import { useAtomValue, useSetAtom } from "jotai";
 import { type ReactElement, useMemo, useRef } from "react";
-import { CodeExampleClientDropdown } from "@/components/api-reference/endpoints/CodeExampleClientDropdown";
-import { useIsDarkCode } from "@/state/dark-code";
-import { useProgrammingLanguage } from "@/state/language";
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
     PLAYGROUND_AUTH_STATE_OAUTH_ATOM,

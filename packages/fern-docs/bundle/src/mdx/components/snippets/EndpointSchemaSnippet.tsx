@@ -1,17 +1,22 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
-
-import { EndpointRequestSection } from "@/components/api-reference/endpoints/EndpointRequestSection";
-import { EndpointResponseSection } from "@/components/api-reference/endpoints/EndpointResponseSection";
-import { EndpointSection } from "@/components/api-reference/endpoints/EndpointSection";
-import { PropertyContainer } from "@/components/api-reference/endpoints/TypeDefinitionAnchor";
-import { ObjectProperty } from "@/components/api-reference/type-definitions/ObjectProperty";
+import { EndpointRequestSection } from "@fern-docs/components/api-reference/endpoints/EndpointRequestSection";
+import { EndpointResponseSection } from "@fern-docs/components/api-reference/endpoints/EndpointResponseSection";
+import { EndpointSection } from "@fern-docs/components/api-reference/endpoints/EndpointSection";
+import { PropertyContainer } from "@fern-docs/components/api-reference/endpoints/TypeDefinitionAnchor";
 import {
     TypeDefinitionAnchorPart,
     TypeDefinitionRoot
-} from "@/components/api-reference/type-definitions/TypeDefinitionContext";
-import { WithSeparator } from "@/components/api-reference/type-definitions/TypeDefinitionDetails";
+} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
+import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
+
+import {
+    ObjectProperty,
+    PropertyRenderer,
+    PropertyWithShape
+} from "@/components/api-reference/type-definitions/ObjectProperty";
 import { TypeDefinitionSlotsServer } from "@/components/api-reference/type-definitions/TypeDefinitionSlotsServer";
+import { TypeReferenceDefinitions } from "@/components/api-reference/type-definitions/TypeReferenceDefinitions";
 
 type EndpointSchemaSnippetProps = {
     /**
@@ -133,6 +138,9 @@ export const EndpointSchemaSnippetInternal: React.FC<React.PropsWithChildren<End
                             request={endpointDefinition.requests[0]}
                             types={types}
                             lang={language}
+                            PropertyRenderer={PropertyRenderer}
+                            PropertyWithShape={PropertyWithShape}
+                            TypeReferenceDefinitions={TypeReferenceDefinitions}
                         />
                     </EndpointSection>
                 </TypeDefinitionAnchorPart>
@@ -145,6 +153,7 @@ export const EndpointSchemaSnippetInternal: React.FC<React.PropsWithChildren<End
                                 body={endpointDefinition.responses[0].body}
                                 types={types}
                                 lang={language}
+                                TypeReferenceDefinitions={TypeReferenceDefinitions}
                             />
                         </TypeDefinitionAnchorPart>
                     </EndpointSection>

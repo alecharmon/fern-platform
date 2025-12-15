@@ -1,9 +1,9 @@
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import { useExampleSelection } from "@fern-docs/components/api-reference/endpoints/useExampleSelection";
+import { CodeSnippetExample } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
 import { cn } from "@fern-docs/components/cn";
 import { t } from "@fern-docs/i18n";
-import { useExampleSelection } from "@/components/api-reference/endpoints/useExampleSelection";
-import { CodeSnippetExample } from "@/components/api-reference/examples/CodeSnippetExample";
 
 export function EndpointResponseSnippet({
     example,

@@ -2,6 +2,7 @@ import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { Button } from "@fern-docs/components/button";
 import { cn } from "@fern-docs/components/cn";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
+import { useProgrammingLanguage } from "@fern-docs/components/state/language";
 import * as RadixTabs from "@radix-ui/react-tabs";
 import { CirclePlusIcon } from "lucide-react";
 import React, {
@@ -25,7 +26,6 @@ import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { useProgrammingLanguage } from "@/docs/state/language";
 
 export const EMPTY_TAB_CONTENT = `
 <Tab title="Untitled">

@@ -161,8 +161,7 @@
     "unzipper": "^0.12.3",
     "url-join": "catalog:",
     "uuid": "catalog:",
-    "zod": "catalog:",
-    "zustand": "^5.0.2"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",

@@ -2,12 +2,11 @@ import type { EndpointDefinition, HttpRequestBodyShape, TypeDefinition } from "@
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { renderTypeShorthandRoot } from "@fern-docs/components/type-shorthand";
 import { t } from "@fern-docs/i18n";
 import { PlusCircle } from "lucide-react";
 import { type ReactElement, useCallback } from "react";
 import { Markdown } from "@/mdx/components/Markdown";
-
-import { renderTypeShorthandRoot } from "../../type-shorthand";
 import { PlaygroundFileUploadForm } from "../form/PlaygroundFileUploadForm";
 import { PlaygroundObjectPropertyForm } from "../form/PlaygroundObjectPropertyForm";
 import type {

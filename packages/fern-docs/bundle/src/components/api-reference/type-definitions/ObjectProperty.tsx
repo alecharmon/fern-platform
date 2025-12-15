@@ -1,4 +1,21 @@
+/**
+ * Bundle-specific ObjectProperty with full MDX rendering support.
+ *
+ * This component renders descriptions with MDX via MdxServerComponentProseSuspense.
+ * It uses local (bundle) TypeReferenceDefinitions to maintain the closed recursive loop
+ * where all nested types also render descriptions with MDX.
+ */
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import {
+    PropertyContainer,
+    TypeDefinitionAnchor
+} from "@fern-docs/components/api-reference/endpoints/TypeDefinitionAnchor";
+import { PropertyKey } from "@fern-docs/components/api-reference/type-definitions/PropertyKey";
+import {
+    TypeDefinitionAnchorPart,
+    TypeDefinitionCollapsible
+} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { TypeShorthand } from "@fern-docs/components/api-reference/type-definitions/TypeShorthand";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { compact } from "es-toolkit/array";
 import React from "react";
@@ -7,13 +24,8 @@ import type {
     ObjectPropertyWithSerializedDescription,
     SerializedDescription
 } from "@/mdx/plugins/serialize-type-definition-descriptions";
-
-import { PropertyContainer, TypeDefinitionAnchor } from "../endpoints/TypeDefinitionAnchor";
-import { PropertyKey } from "./PropertyKey";
 import { SerializedMdxRenderer } from "./SerializedMdxRenderer";
-import { TypeDefinitionAnchorPart, TypeDefinitionCollapsible } from "./TypeDefinitionContext";
 import { type PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
-import { TypeShorthand } from "./TypeShorthand";
 
 export const ObjectProperty = React.memo(function ObjectProperty({
     property,

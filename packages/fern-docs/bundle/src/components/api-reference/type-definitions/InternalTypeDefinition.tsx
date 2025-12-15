@@ -1,14 +1,14 @@
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { EnumTypeDefinition } from "@fern-docs/components/api-reference/type-definitions/EnumTypeDefinition";
+import { FernCollapseWithButtonUncontrolled } from "@fern-docs/components/api-reference/type-definitions/FernCollapseWithButtonUncontrolled";
+import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
 import { memo } from "react";
 import { UnreachableCaseError } from "ts-essentials";
 
 import { DiscriminatedUnionVariant } from "./DiscriminatedUnionVariant";
-import { EnumTypeDefinition } from "./EnumTypeDefinition";
 import { EnumValue } from "./EnumValue";
-import { FernCollapseWithButtonUncontrolled } from "./FernCollapseWithButtonUncontrolled";
 import { ObjectProperty } from "./ObjectProperty";
-import { TypeDefinitionPathPart } from "./TypeDefinitionContext";
-import { WithSeparator } from "./TypeDefinitionDetails";
 import type { PropertyLocation } from "./TypeReferenceDefinitions";
 import { UndiscriminatedUnionVariant } from "./UndiscriminatedUnionVariant";
 

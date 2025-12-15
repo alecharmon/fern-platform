@@ -10,14 +10,13 @@ import {
 import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { renderTypeShorthandRoot } from "@fern-docs/components/type-shorthand";
 import { t } from "@fern-docs/i18n";
 import { useBooleanState } from "@fern-ui/react-commons";
 import { PlusCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type FC, memo, useCallback, useEffect, useMemo, useState } from "react";
 import { withErrorBoundary } from "@/components/error-boundary";
-
-import { renderTypeShorthandRoot } from "../../type-shorthand";
 import { castToRecord, getEmptyValueForType, isExpandable } from "../utils";
 import { PlaygroundAdditionalProperties } from "./PlaygroundAdditionalProperties";
 import { PlaygroundTypeReferenceForm } from "./PlaygroundTypeReferenceForm";

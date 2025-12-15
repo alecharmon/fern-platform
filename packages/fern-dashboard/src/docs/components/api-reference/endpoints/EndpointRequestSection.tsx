@@ -3,7 +3,7 @@
 import { EndpointRequestSection as SharedEndpointRequestSection } from "@fern-api/endpoint-snippet-dependencies";
 
 import { Chip, ChipSizeProvider } from "@fern-docs/components/Chip";
-import { renderTypeShorthand } from "@/docs/components/type-shorthand";
+import { renderTypeShorthand } from "@fern-docs/components/type-shorthand";
 import { MdxContent } from "@/docs/mdx/components/MdxContent";
 
 import { TypeShorthand } from "../type-definitions/TypeShorthand";

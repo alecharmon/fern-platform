@@ -1,5 +1,6 @@
 import { slugToHref } from "@fern-api/docs-utils";
 import type { EndpointDefinition, EnvironmentId } from "@fern-api/fdr-sdk/api-definition";
+import { EndpointUrlWithOverflow } from "@fern-docs/components/api-reference/endpoints/EndpointUrlWithOverflow";
 import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
@@ -7,7 +8,6 @@ import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { t } from "@fern-docs/i18n";
 import { ChevronDown, ExternalLink } from "lucide-react";
-import { EndpointUrlWithOverflow } from "@/components/api-reference/endpoints/EndpointUrlWithOverflow";
 
 interface RunnableEndpointHeaderProps {
     endpoint: EndpointDefinition;

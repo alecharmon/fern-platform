@@ -1,7 +1,6 @@
 import { FernSdk } from "@fern-docs/components/FernSdk";
+import { useProgrammingLanguage } from "@fern-docs/components/state/language";
 import type { ComponentProps, FC } from "react";
-
-import { useProgrammingLanguage } from "@/state/language";
 
 export const ClientLibraries: FC<Pick<ComponentProps<typeof FernSdk>, "sdks">> = ({ sdks }) => {
     const [language, setLanguage] = useProgrammingLanguage();

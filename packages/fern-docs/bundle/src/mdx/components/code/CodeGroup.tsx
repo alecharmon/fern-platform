@@ -1,15 +1,14 @@
 import { cleanLanguage } from "@fern-api/fdr-sdk/api-definition";
+import { getLanguageDisplayName } from "@fern-docs/components/api-reference/examples/code-example";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
 import { HorizontalOverflowMask } from "@fern-docs/components/HorizontalOverflowMask";
+import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
+import { useProgrammingLanguage } from "@fern-docs/components/state/language";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 import * as Tabs from "@radix-ui/react-tabs";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { getLanguageDisplayName } from "@/components/api-reference/examples/code-example";
-import { useIsDarkCode } from "@/state/dark-code";
-import { useProgrammingLanguage } from "@/state/language";
-
 import { unwrapChildren } from "../../common/unwrap-children";
 import { CodeBlock, toSyntaxHighlighterProps } from "./CodeBlock";
 import { CodeBlockFeedbackButton } from "./CodeBlockFeedbackButton";

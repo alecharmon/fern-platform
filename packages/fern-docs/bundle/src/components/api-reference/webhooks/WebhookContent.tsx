@@ -3,24 +3,27 @@ import "server-only";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { getMessageForStatus } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { EndpointSection } from "@fern-docs/components/api-reference/endpoints/EndpointSection";
+import {
+    TypeDefinitionAnchorPart,
+    TypeDefinitionRoot
+} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
+import { WebhookExample } from "@fern-docs/components/api-reference/webhooks/WebhookExample";
 import { StatusCodeBadge } from "@fern-docs/components/badges";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import { Prose } from "@fern-docs/components/mdx/prose";
+import { renderTypeShorthand } from "@fern-docs/components/type-shorthand";
 import { t } from "@fern-docs/i18n";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
-import { renderTypeShorthand } from "@/components/type-shorthand";
 import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
-import { EndpointSection } from "../endpoints/EndpointSection";
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
-import { TypeDefinitionAnchorPart, TypeDefinitionRoot } from "../type-definitions/TypeDefinitionContext";
-import { WithSeparator } from "../type-definitions/TypeDefinitionDetails";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
-import { WebhookExample } from "./WebhookExample";
 import { WebhookResponseSection } from "./WebhookResponseSection";
 
 export async function WebhookContent({

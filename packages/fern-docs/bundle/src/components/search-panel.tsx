@@ -2,6 +2,7 @@
 
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
+import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { AlgoliaSearchClientRoot, DesktopAskAiPanel, SEARCH_INDEX } from "@fern-docs/search-ui";
 import { useEventCallback } from "@fern-ui/react-commons";
@@ -12,7 +13,6 @@ import React from "react";
 import { z } from "zod";
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
-import { useIsDarkCode } from "@/state/dark-code";
 import { useIsSearchDialogOpen } from "@/state/search";
 import {
     pageContextAtom,

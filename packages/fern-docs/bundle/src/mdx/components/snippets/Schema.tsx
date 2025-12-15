@@ -1,11 +1,10 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
-
-import { SectionContainer } from "@/components/api-reference/endpoints/TypeDefinitionAnchor";
+import { SectionContainer } from "@fern-docs/components/api-reference/endpoints/TypeDefinitionAnchor";
 import {
     TypeDefinitionAnchorPart,
     TypeDefinitionRoot
-} from "@/components/api-reference/type-definitions/TypeDefinitionContext";
+} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
 import { TypeDefinitionSlotsServer } from "@/components/api-reference/type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "@/components/api-reference/type-definitions/TypeReferenceDefinitions";
 import type { TypeDefinitionWithSerializedDescriptions } from "@/mdx/plugins/serialize-type-definition-descriptions";

@@ -1,5 +1,6 @@
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import { serialize } from "@fern-api/next-mdx-remote/serialize";
+import type { SerializedDescription } from "@fern-docs/components/api-reference/type-definitions/serialized-types";
 import {
     customHeadingHandler,
     getFrontmatter,
@@ -8,6 +9,10 @@ import {
     sanitizeMdxExpression,
     toTree
 } from "@fern-docs/mdx";
+
+// Re-export type from components for consumers
+export type { SerializedDescription };
+
 import {
     rehypeAcornErrorBoundary,
     rehypeCodeBlock,
@@ -72,12 +77,6 @@ function getDescriptionMdxOptions(): SerializeOptions["mdxOptions"] {
         format: "mdx",
         useDynamicImport: true
     };
-}
-
-export interface SerializedDescription {
-    code: string;
-    jsxElements: string[];
-    engine: "next-remote" | "plaintext";
 }
 
 /**

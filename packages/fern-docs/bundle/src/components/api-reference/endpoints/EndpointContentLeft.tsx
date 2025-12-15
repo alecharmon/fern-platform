@@ -3,22 +3,29 @@ import "server-only";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { EndpointAuthSection } from "@fern-docs/components/api-reference/endpoints/EndpointAuthSection";
+import { EndpointMultipleRequestSection } from "@fern-docs/components/api-reference/endpoints/EndpointMultipleRequestSection";
+import { EndpointMultipleResponseSection } from "@fern-docs/components/api-reference/endpoints/EndpointMultipleResponseSection";
+import {
+    createEndpointRequestDescriptionFallback,
+    EndpointRequestSection
+} from "@fern-docs/components/api-reference/endpoints/EndpointRequestSection";
+import { EndpointResponseSection } from "@fern-docs/components/api-reference/endpoints/EndpointResponseSection";
+import { EndpointSection } from "@fern-docs/components/api-reference/endpoints/EndpointSection";
+import { ResponseSummaryFallback } from "@fern-docs/components/api-reference/endpoints/response-summary-fallback";
+import {
+    TypeDefinitionAnchorPart,
+    TypeDefinitionResponse
+} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
 import { t } from "@fern-docs/i18n";
 import { compact } from "es-toolkit/array";
 import type { ReactNode } from "react";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
-import { ObjectProperty } from "../type-definitions/ObjectProperty";
-import { TypeDefinitionAnchorPart, TypeDefinitionResponse } from "../type-definitions/TypeDefinitionContext";
-import { WithSeparator } from "../type-definitions/TypeDefinitionDetails";
-import { EndpointAuthSection } from "./EndpointAuthSection";
+import { ObjectProperty, PropertyRenderer, PropertyWithShape } from "../type-definitions/ObjectProperty";
+import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 import { EndpointErrorGroup } from "./EndpointErrorGroup";
-import { EndpointMultipleRequestSection } from "./EndpointMultipleRequestSection";
-import { EndpointMultipleResponseSection } from "./EndpointMultipleResponseSection";
-import { createEndpointRequestDescriptionFallback, EndpointRequestSection } from "./EndpointRequestSection";
-import { EndpointResponseSection } from "./EndpointResponseSection";
-import { EndpointSection } from "./EndpointSection";
-import { ResponseSummaryFallback } from "./response-summary-fallback";
 
 function renderFormDataFieldDescriptions(
     request: ApiDefinition.HttpRequest,
@@ -104,6 +111,7 @@ export async function EndpointContentLeft({
                             auths={auths}
                             lang={lang}
                             className="fern-endpoint-section-auth"
+                            PropertyRenderer={PropertyRenderer}
                         />
                     </TypeDefinitionAnchorPart>
                 )}
@@ -177,6 +185,9 @@ export async function EndpointContentLeft({
                                     renderFormDataFieldDescriptions(request, types)
                                 ])
                             )}
+                            PropertyRenderer={PropertyRenderer}
+                            PropertyWithShape={PropertyWithShape}
+                            TypeReferenceDefinitions={TypeReferenceDefinitions}
                         />
                     ) : (
                         <EndpointSection
@@ -196,7 +207,14 @@ export async function EndpointContentLeft({
                             }
                         >
                             <TypeDefinitionAnchorPart part="body">
-                                <EndpointRequestSection request={endpoint.requests[0]} types={types} lang={lang} />
+                                <EndpointRequestSection
+                                    request={endpoint.requests[0]}
+                                    types={types}
+                                    lang={lang}
+                                    PropertyRenderer={PropertyRenderer}
+                                    PropertyWithShape={PropertyWithShape}
+                                    TypeReferenceDefinitions={TypeReferenceDefinitions}
+                                />
                             </TypeDefinitionAnchorPart>
                         </EndpointSection>
                     )
@@ -230,6 +248,7 @@ export async function EndpointContentLeft({
                                         />
                                     ])
                                 )}
+                                TypeReferenceDefinitions={TypeReferenceDefinitions}
                             />
                         ) : (
                             <EndpointSection
@@ -255,6 +274,7 @@ export async function EndpointContentLeft({
                                         body={endpoint.responses[0].body}
                                         types={types}
                                         lang={lang}
+                                        TypeReferenceDefinitions={TypeReferenceDefinitions}
                                     />
                                 </TypeDefinitionAnchorPart>
                             </EndpointSection>

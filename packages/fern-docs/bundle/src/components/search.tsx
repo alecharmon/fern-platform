@@ -1,6 +1,7 @@
 "use client";
 
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
+import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { useCurrentProductId, useCurrentVersionId } from "@fern-docs/components/state/navigation";
 import { t } from "@fern-docs/i18n";
@@ -27,7 +28,6 @@ import { z } from "zod";
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
 import { useSetTheme, useThemeSwitchEnabled } from "@/hooks/use-theme";
-import { useIsDarkCode } from "@/state/dark-code";
 import {
     searchDialogOpenAtom,
     searchInitializedAtom,

@@ -1,12 +1,11 @@
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
+import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
 import { compact } from "es-toolkit/array";
 
 import type { DiscriminatedUnionVariantWithSerializedDescription } from "@/mdx/plugins/serialize-type-definition-descriptions";
-
 import { PropertyWithShape } from "./ObjectProperty";
-import { TypeDefinitionPathPart } from "./TypeDefinitionContext";
-import { WithSeparator } from "./TypeDefinitionDetails";
 
 export function DiscriminatedUnionVariant({
     discriminant,

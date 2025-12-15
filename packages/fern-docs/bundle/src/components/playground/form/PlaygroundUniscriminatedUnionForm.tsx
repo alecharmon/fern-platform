@@ -4,12 +4,11 @@ import type { TypeDefinition, UndiscriminatedUnionType } from "@fern-api/fdr-sdk
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernSegmentedControl } from "@fern-docs/components/FernSegmentedControl";
+import { renderTypeShorthand } from "@fern-docs/components/type-shorthand";
 import { t } from "@fern-docs/i18n";
 import { ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import { memo, useCallback, useMemo, useState } from "react";
-
-import { renderTypeShorthand } from "../../type-shorthand";
 import { getEmptyValueForType, matchesTypeReference } from "../utils";
 import { PlaygroundTypeReferenceForm } from "./PlaygroundTypeReferenceForm";
 

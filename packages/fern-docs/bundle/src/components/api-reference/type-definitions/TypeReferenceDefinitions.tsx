@@ -1,11 +1,16 @@
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import {
+    type PropertyLocation,
+    TypeDefinitionSlot
+} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
 import React from "react";
 import { UnreachableCaseError } from "ts-essentials";
 
 import { InternalTypeDefinition } from "./InternalTypeDefinition";
-import { TypeDefinitionPathPart } from "./TypeDefinitionContext";
-import { TypeDefinitionSlot } from "./TypeDefinitionSlotsClient";
+
+export type { PropertyLocation };
 
 // HACHACK: this is a hack to render inlined enums above the description
 export function hasInlineEnum(
@@ -47,8 +52,6 @@ export function hasInternalTypeReference(
         _other: () => false
     });
 }
-
-export type PropertyLocation = "request" | "response";
 
 export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinitions({
     shape,

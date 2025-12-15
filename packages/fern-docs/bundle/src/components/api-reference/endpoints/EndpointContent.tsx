@@ -2,6 +2,8 @@ import "server-only";
 
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { EndpointContextProvider } from "@fern-docs/components/api-reference/endpoints/EndpointContext";
+import { TypeDefinitionRoot } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
@@ -12,13 +14,10 @@ import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKey
 import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
-
 import { ApiReferenceClientWrapper } from "../ApiReferenceClientWrapper";
-import { TypeDefinitionRoot } from "../type-definitions/TypeDefinitionContext";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { EndpointContentCodeSnippets } from "./EndpointContentCodeSnippets";
 import { EndpointContentLeft } from "./EndpointContentLeft";
-import { EndpointContextProvider } from "./EndpointContext";
 import { EndpointUrlWithPlaygroundBaseUrl } from "./EndpointUrlWithPlaygroundBaseUrl";
 
 function getAvailabilityBadge(endpoint: EndpointContext["endpoint"], node: EndpointContext["node"]) {

@@ -1,4 +1,5 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import { extractMethodAndPath } from "@fern-docs/components/api-reference/endpoints/utils";
 import {
     CONTINUE,
     type Hast,
@@ -9,8 +10,6 @@ import {
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";
-
-import { extractMethodAndPath } from "@/components/api-reference/endpoints/utils";
 
 /**
  * This plugin is used to add the `endpointDefinition`, `slugs`, and `types`

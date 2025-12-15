@@ -1,14 +1,13 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { EMPTY_OBJECT } from "@fern-api/ui-core-utils";
+import { CodeExampleClientDropdown } from "@fern-docs/components/api-reference/endpoints/CodeExampleClientDropdown";
+import { EndpointUrlWithOverflow } from "@fern-docs/components/api-reference/endpoints/EndpointUrlWithOverflow";
+import { useExampleSelection } from "@fern-docs/components/api-reference/endpoints/useExampleSelection";
+import { CodeSnippetExample } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
 import { cn } from "@fern-docs/components/cn";
 import { useCurrentVersionSlug } from "@fern-docs/components/state/navigation";
 import type { ReactElement } from "react";
-
 import { ApiReferenceButton } from "@/components/ApiReferenceButton";
-import { CodeExampleClientDropdown } from "@/components/api-reference/endpoints/CodeExampleClientDropdown";
-import { EndpointUrlWithOverflow } from "@/components/api-reference/endpoints/EndpointUrlWithOverflow";
-import { useExampleSelection } from "@/components/api-reference/endpoints/useExampleSelection";
-import { CodeSnippetExample } from "@/components/api-reference/examples/CodeSnippetExample";
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";
 
 export function EndpointRequestSnippet({

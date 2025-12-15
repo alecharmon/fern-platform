@@ -2,6 +2,9 @@ import "server-only";
 
 import type { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { GrpcContentCodeSnippets } from "@fern-docs/components/api-reference/grpcs/GrpcContentCodeSnippets";
+import { GrpcContextProvider } from "@fern-docs/components/api-reference/grpcs/GrpcContext";
+import { TypeDefinitionRoot } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
@@ -11,12 +14,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
-
-import { TypeDefinitionRoot } from "../type-definitions/TypeDefinitionContext";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
-import { GrpcContentCodeSnippets } from "./GrpcContentCodeSnippets";
 import { GrpcContentLeft } from "./GrpcContentLeft";
-import { GrpcContextProvider } from "./GrpcContext";
 
 export async function GrpcContent({
     serialize,

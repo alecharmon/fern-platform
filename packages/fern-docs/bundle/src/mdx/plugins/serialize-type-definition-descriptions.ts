@@ -1,46 +1,30 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type {
+    DiscriminatedUnionVariantWithSerializedDescription,
+    EnumValueWithSerializedDescription,
+    ObjectPropertyWithSerializedDescription,
+    SerializedDescription,
+    TypeDefinitionWithSerializedDescriptions,
+    TypeShapeWithSerializedDescriptions,
+    UndiscriminatedUnionVariantWithSerializedDescription,
+    WithSerializedDescription
+} from "@fern-docs/components/api-reference/type-definitions/serialized-types";
 
-import { type SerializedDescription, serializeDescription } from "./serialize-description";
+import { serializeDescription } from "./serialize-description";
 
 /**
- * Re-export SerializedDescription for consumers
+ * Re-export types from components for consumers
  */
-export type { SerializedDescription };
-
-/**
- * Extended type interfaces with optional serialized descriptions
- */
-export interface WithSerializedDescription {
-    serializedDescription?: SerializedDescription;
-}
-
-export type ObjectPropertyWithSerializedDescription = ApiDefinition.ObjectProperty & WithSerializedDescription;
-
-export type EnumValueWithSerializedDescription = ApiDefinition.EnumValue & WithSerializedDescription;
-
-export type UndiscriminatedUnionVariantWithSerializedDescription = ApiDefinition.UndiscriminatedUnionVariant &
-    WithSerializedDescription;
-
-export type DiscriminatedUnionVariantWithSerializedDescription = ApiDefinition.DiscriminatedUnionVariant &
-    WithSerializedDescription & {
-        properties: ObjectPropertyWithSerializedDescription[];
-    };
-
-export type TypeShapeWithSerializedDescriptions =
-    | ApiDefinition.TypeShape.Alias
-    | (ApiDefinition.TypeShape.Enum & { values: EnumValueWithSerializedDescription[] })
-    | (ApiDefinition.TypeShape.UndiscriminatedUnion & {
-          variants: UndiscriminatedUnionVariantWithSerializedDescription[];
-      })
-    | (ApiDefinition.TypeShape.DiscriminatedUnion & {
-          variants: DiscriminatedUnionVariantWithSerializedDescription[];
-      })
-    | (ApiDefinition.TypeShape.Object_ & { properties: ObjectPropertyWithSerializedDescription[] });
-
-export type TypeDefinitionWithSerializedDescriptions = ApiDefinition.TypeDefinition &
-    WithSerializedDescription & {
-        shape: TypeShapeWithSerializedDescriptions;
-    };
+export type {
+    DiscriminatedUnionVariantWithSerializedDescription,
+    EnumValueWithSerializedDescription,
+    ObjectPropertyWithSerializedDescription,
+    SerializedDescription,
+    TypeDefinitionWithSerializedDescriptions,
+    TypeShapeWithSerializedDescriptions,
+    UndiscriminatedUnionVariantWithSerializedDescription,
+    WithSerializedDescription
+};
 
 /**
  * Serializes all descriptions in an ObjectProperty.

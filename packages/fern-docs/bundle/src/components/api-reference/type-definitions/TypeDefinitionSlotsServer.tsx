@@ -1,8 +1,8 @@
-// import "server-only";
 import type { TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
+import { getTypeIdWithLocation } from "@fern-docs/components/api-reference/type-definitions/slots-utils";
+import { TypeDefinitionSlotsProvider } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
 
-import { TypeDefinitionSlotsProvider } from "./TypeDefinitionSlotsClient";
-import { type PropertyLocation, TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
+import { TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 
 export function TypeDefinitionSlotsServer({
     types,
@@ -44,8 +44,4 @@ function createPropertyAccessTypeVariants(
         request: <TypeReferenceDefinitions shape={type.shape} types={types} location="request" lang={lang} />,
         response: <TypeReferenceDefinitions shape={type.shape} types={types} location="response" lang={lang} />
     };
-}
-
-export function getTypeIdWithLocation(id: string, location: PropertyLocation) {
-    return `${id}_location:${location}`;
 }

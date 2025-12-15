@@ -1,8 +1,7 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { CodeSnippetExample } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
 import { cn } from "@fern-docs/components/cn";
 import { useMemo } from "react";
-
-import { CodeSnippetExample } from "@/components/api-reference/examples/CodeSnippetExample";
 
 import { generateExampleFromTypeDefinition } from "./generate-example-from-type";
 

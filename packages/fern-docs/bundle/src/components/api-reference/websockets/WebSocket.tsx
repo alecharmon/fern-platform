@@ -4,6 +4,18 @@ import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { EndpointSection } from "@fern-docs/components/api-reference/endpoints/EndpointSection";
+import { TitledExample } from "@fern-docs/components/api-reference/examples/TitledExample";
+import {
+    TypeDefinitionAnchorPart,
+    TypeDefinitionRoot
+} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
+import { CardedSection } from "@fern-docs/components/api-reference/websockets/CardedSection";
+import {
+    type WebSocketMessage,
+    WebSocketMessages
+} from "@fern-docs/components/api-reference/websockets/WebSocketMessages";
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
@@ -17,21 +29,14 @@ import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKey
 import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
-
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { ApiReferenceClientWrapper } from "../ApiReferenceClientWrapper";
-import { EndpointSection } from "../endpoints/EndpointSection";
 import { EndpointUrlWithPlaygroundBaseUrl } from "../endpoints/EndpointUrlWithPlaygroundBaseUrl";
-import { TitledExample } from "../examples/TitledExample";
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
-import { TypeDefinitionAnchorPart, TypeDefinitionRoot } from "../type-definitions/TypeDefinitionContext";
-import { WithSeparator } from "../type-definitions/TypeDefinitionDetails";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
-import { CardedSection } from "./CardedSection";
 import { CopyWithBaseUrl } from "./CopyWithBaseUrl";
 import { HandshakeExample } from "./HandshakeExample";
-import { type WebSocketMessage, WebSocketMessages } from "./WebSocketMessages";
 
 export async function WebSocketContent({
     serialize,

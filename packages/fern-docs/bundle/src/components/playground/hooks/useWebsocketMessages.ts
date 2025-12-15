@@ -1,9 +1,8 @@
 "use client";
 
+import type { WebSocketMessage } from "@fern-docs/components/api-reference/websockets/WebSocketMessages";
 import { atom, useAtom } from "jotai";
 import { useCallback } from "react";
-
-import type { WebSocketMessage } from "@/components/api-reference/websockets/WebSocketMessages";
 
 const WEBSOCKET_MESSAGES_ATOM = atom<Record<string, WebSocketMessage[]>>({});
 

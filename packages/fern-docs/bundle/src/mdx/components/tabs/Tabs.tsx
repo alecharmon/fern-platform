@@ -1,10 +1,9 @@
 import { ApiDefinition } from "@fern-api/fdr-sdk";
 import { cn } from "@fern-docs/components/cn";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
+import { useProgrammingLanguage } from "@fern-docs/components/state/language";
 import * as RadixTabs from "@radix-ui/react-tabs";
 import { type ReactNode, useEffect, useState } from "react";
-
-import { useProgrammingLanguage } from "@/state/language";
 
 import { unwrapChildren } from "../../common/unwrap-children";
 
