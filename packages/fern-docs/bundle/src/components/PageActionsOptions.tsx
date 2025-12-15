@@ -5,6 +5,7 @@ import { FaIcon } from "@fern-docs/components/fa-icon";
 import { t } from "@fern-docs/i18n";
 import { Copy, ExternalLink } from "lucide-react";
 import type { ParamValue } from "next/dist/server/request/params";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { isSelfHosted } from "@/server/isSelfHosted";
 
@@ -211,7 +212,7 @@ const renderCustomActionIcon = (icon?: string, files?: Record<string, FileData>)
         return undefined;
     }
     if (isUrl(icon)) {
-        return <img src={icon} alt="" className="size-icon" width={16} height={16} />;
+        return <Image src={icon} alt="" className="size-icon" width={16} height={16} />;
     }
     return processIconString({
         icon,
