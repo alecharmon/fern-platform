@@ -1,5 +1,5 @@
 STARTUP_INITIAL_MESSAGE = """\
-Starting a new session for `{github_repo}`. In the mean time, here's a plant fact:
+Starting a new session for `{github_repo}`. In the meantime, here's a plant fact:
 
 > {plant_fact}
 """
