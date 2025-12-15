@@ -68,6 +68,7 @@ export const FernButton = forwardRef<HTMLButtonElement, FernButtonProps>(functio
     function isEllipsisActive() {
         return buttonTextRef.current != null && buttonTextRef.current.scrollWidth > buttonTextRef.current.clientWidth;
     }
+
     const button = (
         <button
             tabIndex={0}
@@ -101,7 +102,7 @@ export const FernButton = forwardRef<HTMLButtonElement, FernButtonProps>(functio
 
     if (isEllipsisActive() && !disableAutomaticTooltip && (children ?? text) != null) {
         return (
-            <FernTooltip content={children ?? text} className="line-clamp-3">
+            <FernTooltip content={children ?? text} className="max-h-24 overflow-auto">
                 {button}
             </FernTooltip>
         );

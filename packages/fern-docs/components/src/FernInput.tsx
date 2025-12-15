@@ -1,10 +1,11 @@
 "use client";
 
 import { t } from "@fern-docs/i18n";
+
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { isEqual } from "es-toolkit/predicate";
-import { Undo2 } from "lucide-react";
+import { Undo2, X } from "lucide-react";
 import { type ComponentPropsWithoutRef, forwardRef, useRef } from "react";
 import { cn } from "./cn";
 import { Button } from "./FernButtonV2";
@@ -39,14 +40,42 @@ export interface FernInputProps extends Omit<ComponentPropsWithoutRef<"input">, 
      * Callback to call when the reset button is clicked
      */
     onClickReset?: () => void;
+    /**
+     * Whether to show a clear button inside the input when there is a value
+     * @default false
+     */
+    clearable?: boolean;
+    /**
+     * Callback to call when the clear button is clicked
+     */
+    onClear?: () => void;
     lang: string;
 }
 
 export const FernInput = forwardRef<HTMLInputElement, FernInputProps>(function FernInput(
-    { className, inputClassName, onValueChange, leftIcon, rightElement, resettable, onClickReset, lang, ...props },
+    {
+        className,
+        inputClassName,
+        onValueChange,
+        leftIcon,
+        rightElement,
+        resettable,
+        onClickReset,
+        clearable,
+        onClear,
+        lang,
+        ...props
+    },
     forwardedRef
 ) {
     const inputRef = useRef<HTMLInputElement>(null);
+    const hasValue = props.value != null && props.value.length > 0;
+
+    const handleClear = () => {
+        onClear?.();
+        onValueChange?.("");
+        inputRef.current?.focus();
+    };
 
     return (
         <div className={cn("fern-input-group", className)}>
@@ -68,6 +97,16 @@ export const FernInput = forwardRef<HTMLInputElement, FernInputProps>(function F
                 )}
                 placeholder={props.placeholder ?? props.defaultValue}
             />
+            {clearable && hasValue && (
+                <button
+                    type="button"
+                    className="fern-input-clear-button"
+                    onClick={handleClear}
+                    aria-label="Clear input"
+                >
+                    <X className="size-3.5" />
+                </button>
+            )}
             <FernInputRightElement
                 value={props.value}
                 onReset={

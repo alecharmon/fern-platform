@@ -15,6 +15,7 @@ import { FernSwitch } from "@fern-docs/components/FernSwitch";
 import { FernTextarea } from "@fern-docs/components/FernTextarea";
 import { t } from "@fern-docs/i18n";
 import { memo, type ReactElement, useCallback, useState } from "react";
+
 import { withErrorBoundary } from "@/components/error-boundary";
 
 import { IdempotentInputGroup } from "../IdempotentInputGroup";
@@ -90,7 +91,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 isNullSelected={isNullSelected}
                 lang={lang}
             >
-                <span className={cn("block w-full", isNullSelected && "invisible")}>
+                <span className={cn("block w-full min-w-0", isNullSelected && "invisible")}>
                     <PlaygroundEnumForm enumValues={values} onChange={onChange} value={value} id={id} lang={lang} />
                 </span>
             </WithLabel>
@@ -203,6 +204,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                     // TODO: add validation UX feedback
                                     pattern={string.regex}
                                     disabled={disabled}
+                                    clearable={!disabled}
                                     lang={lang}
                                 />
                             )}
@@ -409,6 +411,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                                 onValueChange={onChange}
                                 disabled={disabled}
+                                clearable={!disabled}
                                 lang={lang}
                             />
                         </span>
@@ -457,6 +460,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 resettable={typeof defaultValue === "string"}
                                 onValueChange={onChange}
                                 disabled={disabled}
+                                clearable={!disabled}
                                 lang={lang}
                             />
                         </span>

@@ -6,6 +6,7 @@ import { FernButton } from "@fern-docs/components/FernButton";
 import { t } from "@fern-docs/i18n";
 import { Plus, X } from "lucide-react";
 import { memo, useCallback } from "react";
+
 import { getEmptyValueForType, shouldRenderInline } from "../utils";
 import { PlaygroundTypeReferenceForm } from "./PlaygroundTypeReferenceForm";
 
@@ -137,15 +138,17 @@ function PlaygroundListItemForm({
                 </label>
 
                 {renderInline && (
-                    <PlaygroundTypeReferenceForm
-                        shape={itemShape}
-                        value={item}
-                        onChange={handleChangeItem}
-                        renderAsPanel={true}
-                        id={`${id}[${idx}]`}
-                        types={types}
-                        lang={lang}
-                    />
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                        <PlaygroundTypeReferenceForm
+                            shape={itemShape}
+                            value={item}
+                            onChange={handleChangeItem}
+                            renderAsPanel={true}
+                            id={`${id}[${idx}]`}
+                            types={types}
+                            lang={lang}
+                        />
+                    </div>
                 )}
 
                 <FernButton
@@ -153,7 +156,7 @@ function PlaygroundListItemForm({
                     onClick={() => onRemove(idx)}
                     variant="minimal"
                     size="small"
-                    className="-ml-1 -mr-3 opacity-50 transition-opacity hover:opacity-100"
+                    className="-mr-3 opacity-50 transition-opacity hover:bg-transparent hover:opacity-100"
                 />
             </div>
 

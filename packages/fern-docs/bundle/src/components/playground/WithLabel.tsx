@@ -10,9 +10,11 @@ import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import { renderTypeShorthandRoot } from "@fern-docs/components/type-shorthand";
-import { HelpCircle, X } from "lucide-react";
+import { HelpCircle, Trash2 } from "lucide-react";
 import type { FC, PropsWithChildren, ReactNode } from "react";
+
 import { Markdown } from "@/mdx/components/Markdown";
+
 import { shouldRenderInline } from "./utils";
 
 interface WithLabelProps {
@@ -108,7 +110,7 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
                 "fern-playground-field-block space-y-2": !renderInline
             })}
         >
-            <div className="fern-playground-field-header flex min-w-0 flex-1 shrink items-center justify-between gap-2">
+            <div className="fern-playground-field-header flex min-w-0 flex-1 items-center justify-between gap-2">
                 <label
                     className="fern-playground-field-label inline-flex items-baseline gap-2 truncate"
                     htmlFor={htmlFor}
@@ -141,7 +143,7 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
                     <span className="fern-playground-field-actions inline-flex min-w-0 shrink items-center justify-end gap-1">
                         {!isRequired && (
                             <FernButton
-                                icon={<X />}
+                                icon={<Trash2 />}
                                 size="small"
                                 variant="minimal"
                                 className="fern-playground-field-remove -mr-3 opacity-50 transition-opacity hover:opacity-100"
@@ -153,8 +155,8 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
             </div>
 
             <div
-                className={cn("fern-playground-field-control flex", {
-                    "min-w-0 flex-1 shrink": !isBoolean
+                className={cn("fern-playground-field-control flex gap-2", {
+                    "min-w-0 flex-1": !isBoolean
                 })}
             >
                 {children}
@@ -168,10 +170,10 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
                     >
                         {!isRequired && (
                             <FernButton
-                                icon={<X />}
+                                icon={<Trash2 />}
                                 size="small"
                                 variant="minimal"
-                                className="fern-playground-field-remove -mr-3 ml-1 opacity-50 transition-opacity hover:opacity-100"
+                                className="fern-playground-field-remove opacity-50 transition-opacity hover:opacity-100"
                                 onClick={onRemove}
                             />
                         )}
