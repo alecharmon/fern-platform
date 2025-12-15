@@ -143,7 +143,9 @@ export function toSnippetHttpRequest(
                       form: (value) => {
                           const toRet: Record<string, SnippetHttpRequestBodyFormValue> = {};
                           for (const [key, val] of Object.entries(value.value)) {
-                              toRet[key] = visitDiscriminatedUnion(val)._visit<SnippetHttpRequestBodyFormValue>({
+                              const formValue = visitDiscriminatedUnion(val)._visit<
+                                  SnippetHttpRequestBodyFormValue | undefined
+                              >({
                                   exploded: (value) => value,
                                   json: (value) => value,
                                   filename: (value) => ({
@@ -169,8 +171,12 @@ export function toSnippetHttpRequest(
                                           filename,
                                           contentType: undefined // TODO: infer content type?
                                       }))
-                                  })
+                                  }),
+                                  _other: () => undefined
                               });
+                              if (formValue != null) {
+                                  toRet[key] = formValue;
+                              }
                           }
                           return { type: "form", value: toRet };
                       },
