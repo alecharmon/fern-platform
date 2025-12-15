@@ -98,7 +98,7 @@ export function PageActionsDefault({
                 >
                     <FernButton
                         variant="minimal"
-                        className="rounded-l-none px-2"
+                        className="group rounded-l-none px-2"
                         onClick={() => {
                             capturePosthogEventInternal("page_actions_dropdown", {
                                 type: "open",
@@ -106,7 +106,7 @@ export function PageActionsDefault({
                             });
                         }}
                     >
-                        <ChevronDown className="size-icon" />
+                        <ChevronDown className="size-icon transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </FernButton>
                 </FernDropdown>
             )}
