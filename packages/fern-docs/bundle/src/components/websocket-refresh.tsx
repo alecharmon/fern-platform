@@ -8,6 +8,7 @@ import { t } from "@fern-docs/i18n";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Loading } from "./Loading";
+import { LocalMetricsCollector } from "./local-metrics";
 
 export function WebSocketRefresh({ lang }: { lang: string }) {
     const router = useRouter();
@@ -16,6 +17,8 @@ export function WebSocketRefresh({ lang }: { lang: string }) {
     const [serverLoaded, setServerLoaded] = useState(false);
     const currentSlug = useCurrentSlug();
     const currentSlugRef = useRef<string | null>(currentSlug);
+    const reloadCycleStartRef = useRef<number>(0);
+    const metricsCollectorRef = useRef<LocalMetricsCollector | null>(null);
 
     useEffect(() => {
         currentSlugRef.current = currentSlug;
@@ -68,9 +71,14 @@ export function WebSocketRefresh({ lang }: { lang: string }) {
             console.log(`Attempting to connect to WebSocket server at ${wsUrl}...`);
 
             try {
+                const wsConnectStart = performance.now();
                 ws = new WebSocket(wsUrl);
 
                 ws.onopen = () => {
+                    const wsConnectDuration = performance.now() - wsConnectStart;
+                    metricsCollectorRef.current = new LocalMetricsCollector(ws!);
+                    metricsCollectorRef.current.record("ws_connection", wsConnectDuration);
+                    metricsCollectorRef.current.startPeriodicSummaries();
                     setIsLoading(false);
                     setServerLoaded(true);
                 };
@@ -80,20 +88,42 @@ export function WebSocketRefresh({ lang }: { lang: string }) {
                         const message = JSON.parse(event.data);
 
                         if (message.type === "startReload") {
+                            reloadCycleStartRef.current = performance.now();
+                            metricsCollectorRef.current?.record("reload_start", 0);
                             setIsLoading(true);
                         }
 
                         if (message.type === "finishReload") {
+                            const backendProcessingTime = performance.now() - reloadCycleStartRef.current;
+                            metricsCollectorRef.current?.record("reload_finish", backendProcessingTime);
+
                             try {
+                                const revalidateStart = performance.now();
                                 const response = await fetch("/api/fern-docs/revalidate-local");
+                                const revalidateDuration = performance.now() - revalidateStart;
+                                metricsCollectorRef.current?.record("revalidate_api", revalidateDuration, {
+                                    status: response.status
+                                });
+
                                 if (!response.ok) {
                                     throw new Error(`HTTP error! status: ${response.status}`);
                                 }
+
+                                const refreshStart = performance.now();
                                 router.refresh();
 
                                 // Keep loading indicator visible for a bit longer to ensure
                                 // the revalidation and router refresh complete
                                 setTimeout(() => {
+                                    const refreshDuration = performance.now() - refreshStart;
+                                    metricsCollectorRef.current?.record("router_refresh", refreshDuration);
+
+                                    const fullCycleDuration = performance.now() - reloadCycleStartRef.current;
+                                    metricsCollectorRef.current?.record("full_cycle", fullCycleDuration);
+
+                                    // Record memory usage after reload completes
+                                    metricsCollectorRef.current?.recordMemory();
+
                                     setIsLoading(false);
                                 }, 600);
                             } catch (error) {
@@ -132,6 +162,8 @@ export function WebSocketRefresh({ lang }: { lang: string }) {
 
                 ws.onclose = (event) => {
                     console.log(`Client: WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason}`);
+                    metricsCollectorRef.current?.stop();
+                    metricsCollectorRef.current = null;
                     setFailedToLoad(true);
                 };
 
@@ -156,6 +188,8 @@ export function WebSocketRefresh({ lang }: { lang: string }) {
                 ws.close();
                 setFailedToLoad(true);
             }
+            metricsCollectorRef.current?.stop();
+            metricsCollectorRef.current = null;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

@@ -28,9 +28,22 @@ jobs:
         uses: ./.github/actions/install
       - name: Compile
         run: pnpm compile
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            # Extract version from tag (e.g., docs@1.2.3 -> 1.2.3)
+            VERSION="${{ github.event.release.tag_name }}"
+            VERSION="${VERSION#docs@}"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            # For manual dispatch, use a timestamp-based version
+            echo "version=prod-$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+          fi
       - name: Build local preview bundle
         env:
           NODE_OPTIONS: --max-old-space-size=8192
+          NEXT_PUBLIC_DOCS_BUNDLE_VERSION: ${{ steps.version.outputs.version }}
         run: pnpm --filter=@fern-docs/bundle run docs:make:local
       - name: Synthesize local preview bundle
         run: pnpm --filter=@fern-platform/cdk run deploy-app:prod

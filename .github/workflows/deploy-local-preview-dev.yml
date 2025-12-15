@@ -26,9 +26,13 @@ jobs:
         uses: ./.github/actions/install
       - name: Compile
         run: pnpm compile
+      - name: Generate dev version
+        id: version
+        run: echo "version=dev-$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
       - name: Build local preview bundle
         run: pnpm --filter=@fern-docs/bundle run docs:make:local
         env:
           NODE_OPTIONS: --max-old-space-size=8192
+          NEXT_PUBLIC_DOCS_BUNDLE_VERSION: ${{ steps.version.outputs.version }}
       - name: Synthesize local preview bundle
         run: pnpm --filter=@fern-platform/cdk run deploy-app:dev2
