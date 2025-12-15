@@ -154,7 +154,7 @@ async def get_fern_writer_install_link(
         description=(
             "The GitHub repository to install the Fern Writer for. "
             "Must have the `fern-api` bot installed. "
-            "Must be in the format `owner/repo`."
+            "Must be in the format `owner/repo`. "
             "Example: `fern-api/docs`"
         ),
     ),
