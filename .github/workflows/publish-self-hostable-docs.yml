@@ -96,19 +96,17 @@ jobs:
           username: fernapi
           password: ${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}
 
-      - name: Build Docker image
-        run: pnpm --filter=@fern-platform/self-hosted docker:build
-
-      - name: Push to Docker Hub (fernapi)
+      - name: Build and push multi-platform Docker image
+        working-directory: servers/self-hosted
         run: |
           VERSION="${{ steps.determine_version.outputs.version }}"
-          echo "Publishing version: $VERSION"
-          docker tag fern-self-hosted:latest fernapi/fern-self-hosted:$VERSION
-          docker push fernapi/fern-self-hosted:$VERSION
-
-      - name: Push to Docker Hub (fernenterprise)
-        run: |
-          VERSION="${{ steps.determine_version.outputs.version }}"
-          echo "Publishing version: $VERSION"
-          docker tag fern-self-hosted:latest fernenterprise/fern-self-hosted:$VERSION
-          docker push fernenterprise/fern-self-hosted:$VERSION
+          echo "Building and publishing version: $VERSION for linux/amd64 and linux/arm64"
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --push \
+            -f Dockerfile.self_hosted \
+            -t fernapi/fern-self-hosted:$VERSION \
+            -t fernenterprise/fern-self-hosted:$VERSION \
+            ../..
