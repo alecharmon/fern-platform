@@ -1,6 +1,6 @@
 # Use standard Python image instead of Lambda base image
 # Lambda Web Adapter handles Lambda Runtime API communication
-FROM public.ecr.aws/docker/library/python:3.12-slim
+FROM public.ecr.aws/docker/library/python:3.13-slim
 
 # Copy Lambda Web Adapter extension for response streaming support
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt/extensions/lambda-adapter
