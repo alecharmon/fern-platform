@@ -216,6 +216,14 @@ async def handle_oauth_callback(
 
             LOGGER.info(f"{log_prefix} Successfully installed Slack app for team: {integration.slack_team_id}")
 
+            if log_prefix == "[SCRIBE]":
+                from fai.utils.scribe.pr_qa_logger import log_install_for_qa
+
+                try:
+                    await log_install_for_qa(integration)
+                except Exception as e:
+                    LOGGER.error(f"{log_prefix} Failed to send install notification to QA channel: {e}")
+
         metadata = {}
         if hasattr(integration, "domain"):
             metadata["domain"] = integration.domain

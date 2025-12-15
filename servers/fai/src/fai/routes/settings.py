@@ -388,6 +388,7 @@ async def get_toggle_status(
         LOGGER.exception("Failed to get toggle status")
         return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="failed", ask_ai_enabled=False)))
 
+
 @fai_app.post(
     "/settings/ask-ai/set-job-id",
     response_model=SetJobIdResponse,

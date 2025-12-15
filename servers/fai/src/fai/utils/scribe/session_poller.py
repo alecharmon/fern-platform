@@ -130,6 +130,7 @@ async def poll_devin_session(
                         except Exception as e:
                             LOGGER.error(f"[SCRIBE] Failed to post message to Slack: {e}")
 
+            pr_was_created = False
             async with async_session_maker() as db_session:
                 result = await db_session.execute(select(ScribeSessionDb).where(ScribeSessionDb.id == session_id))
                 session_record = result.scalar_one_or_none()
@@ -144,9 +145,18 @@ async def poll_devin_session(
                         if pr_url:
                             session_record.pr_url = pr_url
                             session_record.pr_status = "open"
+                            pr_was_created = True
                             LOGGER.info(f"[SCRIBE] Stored PR URL for session {session_id}: {pr_url}")
 
                     await db_session.commit()
+
+            if pr_was_created and session_record:
+                from fai.utils.scribe.pr_qa_logger import log_pr_created_for_qa
+
+                try:
+                    await log_pr_created_for_qa(session_record)
+                except Exception as e:
+                    LOGGER.error(f"[SCRIBE] Failed to send PR created notification to QA channel: {e}")
 
             if status_enum in ["blocked", "stopped"]:
                 LOGGER.info(f"[SCRIBE] Devin session {devin_session_id} reached terminal state: {status_enum}")
