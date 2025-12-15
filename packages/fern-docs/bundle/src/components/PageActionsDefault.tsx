@@ -94,6 +94,7 @@ export function PageActionsDefault({
                     onValueChange={(value) => void onValueChange(value)}
                     dropdownMenuElement={<a target="_blank" rel="noopener noreferrer" />}
                     lang={lang}
+                    align="end"
                 >
                     <FernButton
                         variant="minimal"
