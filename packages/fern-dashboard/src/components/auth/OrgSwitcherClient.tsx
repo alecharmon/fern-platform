@@ -2,10 +2,9 @@
 
 import { useRouter } from "@bprogress/next/app";
 import { ChevronDown, Clock, Plus } from "lucide-react";
-import Link from "next/link";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
-import type { Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
+import type { Auth0Organization, Auth0OrgID, Auth0OrgName } from "@/app/services/auth0/types";
 import { CreateOrganizationModal } from "@/components/auth/CreateOrganizationModal";
 import { Button } from "@/components/ui/button";
 import { SearchableDropdown, type SearchableDropdownRef } from "@/components/ui/SearchableDropdown";
@@ -22,10 +21,12 @@ interface OrgSwitcherClientRef {
     openSwitcher: () => void;
 }
 
+type OrgDropdownItem = Auth0Organization & { __isAdmin?: boolean };
+
 const OrgSwitcherClientInternal = forwardRef<
     OrgSwitcherClientRef,
     {
-        organizations: Auth0Organization[];
+        organizations: OrgDropdownItem[];
         currentOrgName?: Auth0OrgName;
         isFernAdmin: boolean;
         accessToken: string;
@@ -56,67 +57,97 @@ const OrgSwitcherClientInternal = forwardRef<
     const pathname = usePathnameWithoutOrgName();
     const router = useRouter();
 
+    const recentOrgIndex = useMemo(() => {
+        return new Map(recentOrgNames.map((name, index) => [name, index]));
+    }, [recentOrgNames]);
+
+    const normalizedSearch = useMemo(() => {
+        const trimmed = searchTerm.trim();
+        return {
+            trimmed,
+            lower: trimmed.toLowerCase()
+        };
+    }, [searchTerm]);
+
     // Organize organizations: recent first, then the rest
-    const organizedOrganizations = useMemo(() => {
-        const recentOrgs = organizations.filter((org) => recentOrgNames.includes(org.name));
-        const otherOrgs = organizations.filter((org) => !recentOrgNames.includes(org.name));
+    const organizedOrganizations = useMemo<OrgDropdownItem[]>(() => {
+        const recentOrgs: OrgDropdownItem[] = [];
+        const otherOrgs: OrgDropdownItem[] = [];
+
+        for (const org of organizations) {
+            if (recentOrgIndex.has(org.name)) {
+                recentOrgs.push(org);
+            } else {
+                otherOrgs.push(org);
+            }
+        }
 
         // Sort recent orgs by their order in recentOrgNames
-        const sortedRecentOrgs = recentOrgs.sort((a, b) => {
-            return recentOrgNames.indexOf(a.name) - recentOrgNames.indexOf(b.name);
+        recentOrgs.sort((a, b) => {
+            return (recentOrgIndex.get(a.name) ?? 0) - (recentOrgIndex.get(b.name) ?? 0);
         });
 
-        return [...sortedRecentOrgs, ...otherOrgs];
-    }, [organizations, recentOrgNames]);
+        return [...recentOrgs, ...otherOrgs];
+    }, [organizations, recentOrgIndex]);
 
     // Filter organizations by search term and add admin option if applicable
-    const filteredOrganizationsWithAdmin = useMemo(() => {
+    const filteredOrganizationsWithAdmin = useMemo<OrgDropdownItem[]>(() => {
         const filtered = organizedOrganizations.filter((org) => {
             const displayName = getOrgDisplayName(org) ?? "";
-            return displayName.toLowerCase().includes(searchTerm.toLowerCase());
+            return displayName.toLowerCase().includes(normalizedSearch.lower);
         });
 
-        const trimmedSearch = searchTerm.trim();
-
         // If user is Fern admin, has a search term, and the search doesn't match any org name exactly, add admin option
-        if (isFernAdmin && trimmedSearch.length > 0) {
-            const hasExactMatch = filtered.some((org) => org.name.toLowerCase() === trimmedSearch.toLowerCase());
+        if (isFernAdmin && normalizedSearch.trimmed.length > 0) {
+            const hasExactMatch = filtered.some((org) => org.name.toLowerCase() === normalizedSearch.lower);
             if (!hasExactMatch) {
                 // Create a pseudo-organization for the admin option
                 const adminOption = {
-                    id: `__admin_${trimmedSearch}`,
-                    name: trimmedSearch as Auth0OrgName,
-                    display_name: `Go to '${trimmedSearch}' →`,
-                    __isAdminOption: true
-                } as Auth0Organization & { __isAdminOption: boolean };
+                    id: `__admin_${normalizedSearch.trimmed}` as Auth0OrgID,
+                    name: normalizedSearch.trimmed as Auth0OrgName,
+                    display_name: `Go to '${normalizedSearch.trimmed}' →`,
+                    __isAdmin: true
+                } satisfies OrgDropdownItem;
 
                 return [...filtered, adminOption];
             }
         }
 
         return filtered;
-    }, [organizedOrganizations, searchTerm, isFernAdmin]);
+    }, [organizedOrganizations, normalizedSearch, isFernAdmin]);
 
-    const getPathnameForOrg = (newOrgName: Auth0OrgName) => {
+    const getRedirectPathForOrg = (newOrgName: Auth0OrgName) => {
         return `/${newOrgName}${getRedirectPathname(pathname)}`;
     };
 
-    const onClickOrg = (newOrgName: Auth0OrgName) => {
-        if (newOrgName !== orgName) {
-            setLocalOrgName(newOrgName);
+    const buildOrgLoginUrl = (organization: OrgDropdownItem) => {
+        const searchParams = new URLSearchParams({
+            redirect_on_login: getRedirectPathForOrg(organization.name),
+            organization: organization.id,
+            scope: "openid profile email read:docs write:docs"
+        });
+
+        if (process.env.NEXT_PUBLIC_VENUS_AUDIENCE) {
+            searchParams.set("audience", process.env.NEXT_PUBLIC_VENUS_AUDIENCE);
+        }
+
+        return `/auth/login?${searchParams.toString()}`;
+    };
+
+    const onSelectOrg = (organization: OrgDropdownItem) => {
+        if (organization.name !== orgName) {
+            setLocalOrgName(organization.name);
         }
         // Save to recent orgs
-        addRecentOrg(newOrgName);
+        addRecentOrg(organization.name);
         setRecentOrgNames(getRecentOrgs());
-    };
 
-    const onSelectOrg = (newOrgName: Auth0OrgName) => {
-        onClickOrg(newOrgName);
-        router.push(getPathnameForOrg(newOrgName));
-    };
+        if (organization.__isAdmin) {
+            router.push(getRedirectPathForOrg(organization.name));
+            return;
+        }
 
-    const onHoverOrg = (hoveredOrgName: Auth0OrgName) => {
-        router.prefetch(getPathnameForOrg(hoveredOrgName));
+        router.push(buildOrgLoginUrl(organization));
     };
 
     const currentOrg = organizations.find((org) => org.name === localOrgName);
@@ -130,7 +161,7 @@ const OrgSwitcherClientInternal = forwardRef<
                 items={filteredOrganizationsWithAdmin}
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
-                onSelect={(org) => onSelectOrg(org.name)}
+                onSelect={(org) => onSelectOrg(org)}
                 searchPlaceholder="Search organizations..."
                 emptyMessage="No organizations found"
                 getItemKey={(org) => org.id}
@@ -161,7 +192,7 @@ const OrgSwitcherClientInternal = forwardRef<
                 }
                 renderItem={(organization, onSelectFromDropdown, isHighlighted) => {
                     // Check if this is the admin option
-                    const isAdminOption = "__isAdminOption" in organization && organization.__isAdminOption;
+                    const isAdminOption = "__isAdmin" in organization && organization.__isAdmin;
 
                     if (isAdminOption) {
                         return (
@@ -172,7 +203,6 @@ const OrgSwitcherClientInternal = forwardRef<
                                     isHighlighted ? "bg-gray-300" : "hover:bg-gray-300"
                                 )}
                                 onClick={() => {
-                                    onSelectOrg(organization.name);
                                     onSelectFromDropdown();
                                 }}
                             >
@@ -188,30 +218,25 @@ const OrgSwitcherClientInternal = forwardRef<
                     const isRecent = recentOrgNames.includes(organization.name);
                     const isCurrent = organization.name === localOrgName;
                     return (
-                        <Link
+                        <button
+                            type="button"
                             className={cn(
                                 "flex w-full cursor-pointer items-center justify-between px-3 rounded py-1.5 text-left text-sm focus:outline-none",
                                 searchTerm.length > 0 && isHighlighted ? "bg-gray-300" : "hover:bg-gray-300"
                             )}
-                            href={getPathnameForOrg(organization.name)}
-                            onMouseOver={() => {
-                                onHoverOrg(organization.name);
-                            }}
                             onClick={() => {
                                 if (isCurrent) {
                                     return;
                                 }
-                                onClickOrg(organization.name);
                                 onSelectFromDropdown();
                             }}
-                            prefetch
                         >
                             <div className="flex items-center gap-2">
                                 <OrgLogo organization={organization} />
                                 {getOrgDisplayName(organization)}
                             </div>
                             {isRecent && <Clock className="h-4 w-4 text-gray-600" />}
-                        </Link>
+                        </button>
                     );
                 }}
             >
