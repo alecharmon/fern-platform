@@ -13,4 +13,6 @@ export interface GetSettingsResponse {
     slack_enabled?: boolean;
     /** Whether Ask AI is enabled for discord */
     discord_enabled?: boolean;
+    /** Whether query decomposition is enabled */
+    decompose_queries?: boolean;
 }

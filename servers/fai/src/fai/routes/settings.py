@@ -78,10 +78,18 @@ async def get_docs_settings(
         job_id = existing_record.job_id if existing_record else None
 
         return GetSettingsResponse(
-            ask_ai_enabled=ask_ai_enabled, job_id=job_id, docs_enabled=existing_record.docs_enabled
+            ask_ai_enabled=ask_ai_enabled,
+            job_id=job_id,
+            docs_enabled=existing_record.docs_enabled,
+            decompose_queries=existing_record.decompose_queries,
         )
     except Exception:
-        return GetSettingsResponse(ask_ai_enabled=False, job_id=None, docs_enabled=existing_record.docs_enabled)
+        return GetSettingsResponse(
+            ask_ai_enabled=False,
+            job_id=None,
+            docs_enabled=existing_record.docs_enabled if existing_record else None,
+            decompose_queries=existing_record.decompose_queries if existing_record else None,
+        )
 
 
 @fai_app.get(

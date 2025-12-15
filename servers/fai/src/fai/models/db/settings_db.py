@@ -28,6 +28,7 @@ class SettingsDb(Base):
     slack_enabled = Column(Boolean, nullable=False, default=True)
     discord_enabled = Column(Boolean, nullable=False, default=True)
     is_preview = Column(Boolean, nullable=False, default=False)
+    decompose_queries = Column(Boolean, nullable=False, default=False)
 
     def to_api(self) -> Settings:
         return Settings(
@@ -40,4 +41,5 @@ class SettingsDb(Base):
             slack_enabled=self.slack_enabled,
             discord_enabled=self.discord_enabled,
             is_preview=self.is_preview,
+            decompose_queries=self.decompose_queries,
         )

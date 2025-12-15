@@ -22,6 +22,7 @@ class GetSettingsResponse(BaseModel):
     docs_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for docs")
     slack_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for slack")
     discord_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for discord")
+    decompose_queries: bool | None = Field(None, description="Whether query decomposition is enabled")
 
 
 class ToggleAskAiResponse(BaseModel):

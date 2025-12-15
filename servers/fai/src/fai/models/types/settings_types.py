@@ -11,3 +11,4 @@ class Settings(BaseModel):
     docs_enabled: bool = True
     slack_enabled: bool = True
     discord_enabled: bool = True
+    decompose_queries: bool = False
