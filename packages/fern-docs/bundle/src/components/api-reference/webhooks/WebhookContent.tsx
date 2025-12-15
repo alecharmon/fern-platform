@@ -131,6 +131,7 @@ export async function WebhookContent({
                                                                     <Prose size="sm" className="inline">
                                                                         {response.description ? (
                                                                             <MdxServerComponentProseSuspense
+                                                                                size="sm"
                                                                                 mdx={response.description}
                                                                                 fallback={null}
                                                                             />
