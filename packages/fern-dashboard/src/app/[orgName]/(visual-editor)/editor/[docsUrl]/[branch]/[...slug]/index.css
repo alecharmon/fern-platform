@@ -15,7 +15,7 @@
   container-type: inline-size;
   @import "../../../../../../../../../fern-docs/bundle/src/components/css/base.scss";
   @import "../../../../../../../../../fern-docs/bundle/src/components/css/components.scss";
-  @import "../../../../../../../../../fern-docs/bundle/src/components/FernAnchor.scss";
+  @import "@fern-docs/components/src/FernAnchor.scss";
   @import "../../../../../../../../../fern-docs/bundle/src/components/css/rmiz.scss";
   @import "../../../../../../../docs/mdx/components/index.scss";
 

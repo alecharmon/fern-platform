@@ -2,8 +2,8 @@ import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { NavigationNode } from "@fern-api/fdr-sdk/navigation";
 import { hasMetadata } from "@fern-api/fdr-sdk/navigation";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
+import { FaIconServer } from "@fern-docs/components/fa-icon-server";
 import type { ReactNode } from "react";
-import { FaIconServer } from "../fa-icon-server";
 import { processIconString } from "./processIconString";
 
 export interface ProcessIconOptions {

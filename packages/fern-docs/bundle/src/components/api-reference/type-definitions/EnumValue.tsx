@@ -1,6 +1,6 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 
-import { Chip } from "@/components/Chip";
+import { Chip } from "@fern-docs/components/Chip";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { EnumValueWithSerializedDescription } from "@/mdx/plugins/serialize-type-definition-descriptions";
 

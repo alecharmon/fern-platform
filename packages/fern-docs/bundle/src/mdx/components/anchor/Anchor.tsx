@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@fern-docs/components/cn";
+import { FernAnchor } from "@fern-docs/components/FernAnchor";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import React, { type ReactNode, useEffect, useRef, useState } from "react";
-import { FernAnchor } from "@/components/FernAnchor";
 
 function useCurrentHash() {
     const [hash, setHash] = useState("");

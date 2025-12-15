@@ -1,13 +1,13 @@
 "use client";
 
-import { FernLink } from "@fern-docs/components/FernLink";
 import { useCopyToClipboard } from "@fern-ui/react-commons";
-
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Check, Link2 } from "lucide-react";
 import { AnimatePresence, domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
 import React, { useEffect, useState } from "react";
+
+import { FernLink } from "./FernLink";
 
 interface FernAnchorProps {
     href: string;

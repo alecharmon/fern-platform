@@ -2,7 +2,7 @@
 
 import { ObjectProperty as SharedObjectProperty } from "@fern-api/endpoint-snippet-dependencies";
 
-import { Chip, ChipSizeProvider } from "@/docs/components/Chip";
+import { Chip, ChipSizeProvider } from "@fern-docs/components/Chip";
 import { MdxContent } from "@/docs/mdx/components/MdxContent";
 
 import { PropertyContainer, TypeDefinitionAnchor } from "../endpoints/TypeDefinitionAnchor";

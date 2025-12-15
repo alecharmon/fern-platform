@@ -1,11 +1,10 @@
 import { cn } from "@fern-docs/components/cn";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
+import { DisableFernAnchor } from "@fern-docs/components/FernAnchor";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { FernImage } from "@fern-docs/components/FernImage";
 import { FaIcon } from "@fern-docs/components/fa-icon";
 import { isValidElement } from "react";
-
-import { DisableFernAnchor } from "@/components/FernAnchor";
 import { FernLinkCard } from "@/components/FernLinkCard";
 
 import { Badge } from "../badge";

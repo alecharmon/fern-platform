@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@fern-docs/components/cn";
+import { useIsFernAnchorDisabled } from "@fern-docs/components/FernAnchor";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { useCopyToClipboard } from "@fern-ui/react-commons";
 import { Check, Link2 } from "lucide-react";
@@ -13,7 +14,6 @@ import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { useIsFernAnchorDisabled } from "@/docs/components/FernAnchor";
 
 import { useStepsContext } from "./Steps";
 

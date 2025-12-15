@@ -1,6 +1,6 @@
 import { cn } from "@fern-docs/components/cn";
 
-import { HorizontalOverflowMask } from "../HorizontalOverflowMask";
+import { HorizontalOverflowMask } from "@fern-docs/components/HorizontalOverflowMask";
 import { EndpointUrl } from "./EndpointUrl";
 
 export const EndpointUrlWithOverflow: React.FC<Omit<EndpointUrl.Props, "urlStyle">> = ({ className, ...props }) => {

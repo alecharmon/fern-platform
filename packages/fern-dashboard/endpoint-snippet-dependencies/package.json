@@ -39,7 +39,6 @@
     "@radix-ui/react-compose-refs": "catalog:",
     "@radix-ui/react-select": "catalog:",
     "es-toolkit": "catalog:",
-    "fastdom": "^1.0.12",
     "jotai": "catalog:",
     "lucide-react": "^0.460.0",
     "react": "catalog:",

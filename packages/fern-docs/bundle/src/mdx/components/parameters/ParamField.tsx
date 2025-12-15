@@ -1,8 +1,8 @@
 import { cn } from "@fern-docs/components/cn";
+import { FernAnchor } from "@fern-docs/components/FernAnchor";
 import { Prose } from "@fern-docs/components/mdx/prose";
 import { t } from "@fern-docs/i18n";
 import type React from "react";
-import { FernAnchor } from "@/components/FernAnchor";
 
 export const ParamField: React.FC<
     React.PropsWithChildren<{

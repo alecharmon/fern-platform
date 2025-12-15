@@ -1,5 +1,5 @@
 import { cn } from "@fern-docs/components/cn";
-
+import { DisableFernAnchor } from "@fern-docs/components/FernAnchor";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { type ReactElement, type ReactNode, useRef } from "react";
@@ -9,7 +9,6 @@ import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { DisableFernAnchor } from "@/docs/components/FernAnchor";
 
 export const EMPTY_BUTTON_CONTENT = `
 <Button text="Click me" intent="primary" />

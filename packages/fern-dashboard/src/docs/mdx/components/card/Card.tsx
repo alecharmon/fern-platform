@@ -1,5 +1,6 @@
 import { cn } from "@fern-docs/components/cn";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
+import { DisableFernAnchor } from "@fern-docs/components/FernAnchor";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { FaIcon } from "@fern-docs/components/fa-icon";
 import { cloneElement, isValidElement, type ReactElement, useEffect, useRef } from "react";
@@ -9,7 +10,6 @@ import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
 } from "@/components/editor/editor-component/EditorComponentPopover";
-import { DisableFernAnchor } from "@/docs/components/FernAnchor";
 import { FernLinkCard } from "@/docs/components/FernLinkCard";
 import { useFileResolver } from "@/providers/FileResolverContext";
 

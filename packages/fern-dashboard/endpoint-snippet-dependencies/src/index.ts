@@ -1,5 +1,6 @@
 // Type Definition Components
 
+export { HorizontalOverflowMask } from "@fern-docs/components/HorizontalOverflowMask";
 export type { EndpointRequestSectionProps } from "./endpoints/EndpointRequestSection";
 export {
     createEndpointRequestDescriptionFallback,
@@ -34,7 +35,6 @@ export type {
     JsonPropertyPath,
     JsonPropertyPathPart
 } from "./examples/JsonPropertyPath";
-export { HorizontalOverflowMask } from "./HorizontalOverflowMask";
 export { MaybeEnvironmentDropdown } from "./MaybeEnvironmentDropdown";
 // State
 export {

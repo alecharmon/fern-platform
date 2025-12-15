@@ -1,10 +1,8 @@
 import { cn } from "@fern-docs/components/cn";
-
+import { DisableFernAnchor } from "@fern-docs/components/FernAnchor";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import type { ReactElement, ReactNode } from "react";
-
-import { DisableFernAnchor } from "@/components/FernAnchor";
 
 export declare namespace Button {
     export interface Props {

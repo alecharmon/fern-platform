@@ -1,10 +1,9 @@
 "use client";
 
 import { cn } from "@fern-docs/components/cn";
+import { FernAnchor } from "@fern-docs/components/FernAnchor";
 import { isomorphicRequestIdleCallback } from "@fern-ui/react-commons";
 import React from "react";
-
-import { FernAnchor } from "@/docs/components/FernAnchor";
 
 import { useHref, useIsActive, useTypeDefinitionContext } from "../type-definitions/TypeDefinitionContext";
 

@@ -1,6 +1,6 @@
 import { cn } from "@fern-docs/components/cn";
 
-import { HorizontalOverflowMask } from "@/components/HorizontalOverflowMask";
+import { HorizontalOverflowMask } from "@fern-docs/components/HorizontalOverflowMask";
 
 import { EndpointUrl } from "./EndpointUrl";
 

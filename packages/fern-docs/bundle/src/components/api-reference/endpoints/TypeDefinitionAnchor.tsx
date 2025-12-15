@@ -2,10 +2,9 @@
 
 import { slugToHref } from "@fern-api/docs-utils";
 import { cn } from "@fern-docs/components/cn";
+import { FernAnchor } from "@fern-docs/components/FernAnchor";
 import { isomorphicRequestIdleCallback } from "@fern-ui/react-commons";
 import React from "react";
-
-import { FernAnchor } from "@/components/FernAnchor";
 
 import {
     useIsActive,

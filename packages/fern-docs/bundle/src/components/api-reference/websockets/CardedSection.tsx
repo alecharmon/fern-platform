@@ -2,9 +2,8 @@
 
 import { slugToHref } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { FernAnchor } from "@fern-docs/components/FernAnchor";
 import React from "react";
-
-import { FernAnchor } from "@/components/FernAnchor";
 import { getSlugFromChildren } from "@/components/util/getSlugFromText";
 
 export function CardedSection({

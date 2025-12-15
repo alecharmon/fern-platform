@@ -1,5 +1,6 @@
 "use client";
 
+import { ChipSizeProvider } from "@fern-docs/components/Chip";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernInput } from "@fern-docs/components/FernInput";
 import { FernTooltipProvider } from "@fern-docs/components/FernTooltip";
@@ -7,7 +8,6 @@ import { t } from "@fern-docs/i18n";
 import { useBooleanState } from "@fern-ui/react-commons";
 import { Search, X } from "lucide-react";
 import React, { useState } from "react";
-import { ChipSizeProvider } from "@/components/Chip";
 
 import { EnumDefinitionDetails } from "./EnumDefinitionDetails";
 import { FernCollapseWithButton } from "./FernCollapseWithButton";

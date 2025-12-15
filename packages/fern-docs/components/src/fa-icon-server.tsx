@@ -1,14 +1,10 @@
+/// <reference types="next" />
+
 import React from "react";
 
 import { FaIcon } from "./fa-icon";
 import { getIconUrl, parseSvg } from "./util/fa";
 
-/**
- * TODO:
- * This is a duplicate of the FaIconServer component in the bundle. In order to use
- * next image caching, we need to have this live within a next directory. For now, we
- * are leaving this as a duplicate until that work is done.
- */
 async function FaIconServerInternal({
     icon,
     ...props
@@ -19,8 +15,8 @@ async function FaIconServerInternal({
     const clientIcon = <FaIcon icon={icon} {...props} />;
     try {
         const res = await fetch(url, {
-            cache: "force-cache"
-            // next: { tags: ["icon", icon] }, // TODO: add this back in
+            cache: "force-cache",
+            next: { tags: ["icon", icon] }
         });
         if (!res.ok) {
             return clientIcon;

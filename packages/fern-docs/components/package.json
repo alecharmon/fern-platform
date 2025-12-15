@@ -23,6 +23,8 @@
     "./src/fern-accent.scss": "./src/fern-accent.scss",
     "./src/badges/index.scss": "./src/badges/index.scss",
     "./src/kbd.css": "./src/kbd.css",
+    "./src/FernAnchor.scss": "./src/FernAnchor.scss",
+    "./src/HorizontalOverflowMask.scss": "./src/HorizontalOverflowMask.scss",
     "./fa-icon": "./src/fa-icon.tsx",
     "./util/fa": "./src/util/fa.ts",
     "./syntax-highlighter": "./src/syntax-highlighter/index.ts",

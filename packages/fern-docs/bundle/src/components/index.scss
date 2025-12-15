@@ -1,8 +1,8 @@
 @import "./css/rmiz.scss";
 @import "./css/base.scss";
 @import "./css/components.scss";
-@import "./FernAnchor.scss";
-@import "./HorizontalOverflowMask.scss";
+@import "@fern-docs/components/src/FernAnchor.scss";
+@import "@fern-docs/components/src/HorizontalOverflowMask.scss";
 @import "./api-reference/index.scss";
 @import "./playground/index.scss";
 @import "./changelog/index.scss";

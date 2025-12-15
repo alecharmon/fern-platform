@@ -1382,9 +1382,6 @@ importers:
       es-toolkit:
         specifier: ^1.39.7
         version: 1.42.0
-      fastdom:
-        specifier: ^1.0.12
-        version: 1.0.12
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
@@ -1487,9 +1484,6 @@ importers:
       three:
         specifier: ^0.173.0
         version: 0.173.0
-      ts-essentials:
-        specifier: 'catalog:'
-        version: 10.0.4(typescript@5.7.3)
       unzipper:
         specifier: ^0.12.3
         version: 0.12.3
@@ -1626,9 +1620,6 @@ importers:
       es-toolkit:
         specifier: 'catalog:'
         version: 1.42.0
-      fastdom:
-        specifier: ^1.0.12
-        version: 1.0.12
       jotai:
         specifier: 'catalog:'
         version: 2.15.1(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.0.10)(react@19.0.1)
@@ -1840,9 +1831,6 @@ importers:
       estree-walker:
         specifier: ^3.0.3
         version: 3.0.3
-      fastdom:
-        specifier: ^1.0.12
-        version: 1.0.12
       feed:
         specifier: ^4.2.2
         version: 4.2.2
