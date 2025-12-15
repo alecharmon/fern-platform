@@ -256,12 +256,10 @@ export const PlaygroundEndpoint = ({
                         endpointName: node.title,
                         method: endpoint.method,
                         docsRoute: `/${node.slug}`,
-                        response: {
-                            status: res.response.status,
-                            statusText: res.response.statusText,
-                            time: res.time,
-                            size: res.size
-                        }
+                        responseStatus: res.response.status,
+                        responseStatusText: res.response.statusText,
+                        responseTime: res.time,
+                        responseSize: res.size
                     });
                 }
             }
