@@ -8,17 +8,20 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 
-import { runAnalyticsCron } from "@/app/services/analyticsCron/run";
+import { runAnalyticsCronForAllPeriods } from "@/app/services/analyticsCron/run";
+import type { DateRangePeriod } from "@/app/services/analyticsCron/types";
 
 /**
- * POST /api/cron/analytics
+ * GET /api/cron/analytics
  *
  * Runs the analytics cron job for all organizations and docs sites.
  * This endpoint is called by Vercel Cron on a schedule defined in vercel.json.
  *
  * The endpoint is protected by Vercel's cron secret to prevent unauthorized access.
+ *
+ * Note: Uses GET instead of POST because Vercel Cron only sends GET requests
  */
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
     // Verify the request is from Vercel Cron
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.ANALYTICS_CRON_SECRET;
@@ -31,22 +34,17 @@ export async function POST(request: NextRequest) {
     console.log("[analytics-cron] Starting analytics cron job");
 
     try {
-        // Run analytics cron for all organizations with 7, 14, and 30-day periods
-        // Using default concurrency limits (5 orgs, 10 sites)
-        const periods = [7, 14, 30] as const;
-        const results = [];
+        // Run analytics cron for all domains with periods 7, 14, and 30 days
+        // Processes domains in parallel (10 concurrent), periods sequentially per domain
+        const periods: DateRangePeriod[] = [7, 14, 30];
 
-        for (const period of periods) {
-            console.log(`[analytics-cron] Running for period: ${period} days`);
-            const result = await runAnalyticsCron({ period });
-            results.push(result);
-            console.log(
-                `[analytics-cron] Completed period ${period}: ${result.totalSuccesses} successes, ${result.totalErrors} errors`
-            );
-        }
+        console.log(`[analytics-cron] Running analytics cron for periods: ${periods.join(", ")} days`);
+
+        const resultsByPeriod = await runAnalyticsCronForAllPeriods({ periods });
 
         // Aggregate results
-        const totalDuration = results.reduce(
+        const allResults = Array.from(resultsByPeriod.values());
+        const totalDuration = allResults.reduce(
             (sum, r) => sum + (new Date(r.completedAt).getTime() - new Date(r.startedAt).getTime()),
             0
         );
@@ -59,9 +57,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: true,
-                results: results.map((r) => ({
+                results: allResults.map((r) => ({
                     period: r.period,
-                    totalOrgs: r.totalOrgs,
                     totalSites: r.totalSites,
                     totalSuccesses: r.totalSuccesses,
                     totalErrors: r.totalErrors,
