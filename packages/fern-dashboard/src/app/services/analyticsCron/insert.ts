@@ -139,9 +139,9 @@ export async function insertAnalyticsForSite(
                 humanViews: l.humanViews
             })),
             top_api_explorer: apiExplorerRequests.map((a) => ({
-                method: a.endpoint,
+                method: a.method,
                 endpoint: a.endpoint,
-                name: a.endpoint,
+                name: a.name,
                 count: a.requests
             })),
             top_llm_bot_traffic: llmBotTraffic.map((b) => ({

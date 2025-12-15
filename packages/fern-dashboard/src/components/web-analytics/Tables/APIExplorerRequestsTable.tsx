@@ -54,7 +54,7 @@ export default function APIExplorerRequestsTable() {
                         >
                             {item.method}
                         </span>
-                        <span className="relative z-10 truncate">{item.name || item.endpoint}</span>
+                        <span className="relative z-10 truncate">{item.endpoint || item.name}</span>
                     </div>
                 );
             }

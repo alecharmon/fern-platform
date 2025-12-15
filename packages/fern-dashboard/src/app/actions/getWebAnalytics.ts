@@ -374,9 +374,9 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
         referringDomains,
         llmFileViews: llmFileViews.map((f) => ({ path: f.file, agentViews: f.agentViews, humanViews: f.humanViews })),
         apiExplorerRequests: apiExplorerRequests.map((a) => ({
-            method: "",
+            method: a.method,
             endpoint: a.endpoint,
-            name: a.endpoint,
+            name: a.name,
             count: a.requests
         })),
         llmBotTraffic: llmBotTraffic.map((b) => ({ provider: b.provider, count: b.requests })),

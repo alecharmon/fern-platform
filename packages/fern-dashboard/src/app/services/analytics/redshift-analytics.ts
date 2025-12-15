@@ -468,18 +468,14 @@ export class RedshiftAnalytics {
     async getAPIExplorerRequests(options: {
         dateRange: RedshiftDateRange;
         limit: number;
-    }): Promise<Array<{ endpoint: string; requests: number }>> {
+    }): Promise<Array<{ method: string; endpoint: string; name: string; requests: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
 
+        // Fetch raw events and parse in TypeScript (Redshift SUPER column limitations)
         const query = `
             SELECT
-                COALESCE(
-                    properties."endpointName"::VARCHAR,
-                    properties."endpointRoute"::VARCHAR,
-                    properties."method"::VARCHAR
-                ) as endpoint,
-                COUNT(*) as requests
+                JSON_SERIALIZE(properties) as props_json
             FROM posthog.events
             WHERE
                 event = 'api_playground_request_sent'
@@ -489,23 +485,41 @@ export class RedshiftAnalytics {
                 )
                 AND timestamp >= $3
                 AND timestamp < $4
-            GROUP BY endpoint
-            ORDER BY requests DESC
-            LIMIT $5
+            LIMIT 10000
         `;
 
         const result = await pool.query(query, [
             this.domain,
             `www.${this.domain}`,
             startDate.toISOString(),
-            endDate.toISOString(),
-            options.limit
+            endDate.toISOString()
         ]);
 
-        return result.rows.map((row) => ({
-            endpoint: row.endpoint || "Unknown",
-            requests: parseInt(row.requests) || 0
-        }));
+        // Parse and aggregate in TypeScript
+        const counts = new Map<string, { method: string; endpoint: string; name: string; count: number }>();
+
+        for (const row of result.rows) {
+            const props = JSON.parse(row.props_json);
+            const method = props.method || "";
+            const endpointRoute = props.endpointRoute || "";
+            const endpointName = props.endpointName || "";
+
+            const key = `${method}|${endpointRoute}|${endpointName}`;
+            const existing = counts.get(key) || { method, endpoint: endpointRoute, name: endpointName, count: 0 };
+            existing.count++;
+            counts.set(key, existing);
+        }
+
+        // Sort by count and limit
+        return Array.from(counts.values())
+            .sort((a, b) => b.count - a.count)
+            .slice(0, options.limit)
+            .map((item) => ({
+                method: item.method,
+                endpoint: item.endpoint || "Unknown", // Use endpointRoute (path)
+                name: item.name || item.endpoint || "", // Use endpointName (description)
+                requests: item.count
+            }));
     }
 
     /**
