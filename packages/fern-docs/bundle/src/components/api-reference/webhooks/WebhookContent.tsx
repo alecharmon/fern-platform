@@ -1,7 +1,9 @@
 import "server-only";
 
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { getMessageForStatus } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { StatusCodeBadge } from "@fern-docs/components/badges";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import { Prose } from "@fern-docs/components/mdx/prose";
@@ -12,7 +14,6 @@ import { renderTypeShorthand } from "@/components/type-shorthand";
 import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
-import { EndpointResponseSection } from "../endpoints/EndpointResponseSection";
 import { EndpointSection } from "../endpoints/EndpointSection";
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
 import { TypeDefinitionAnchorPart, TypeDefinitionRoot } from "../type-definitions/TypeDefinitionContext";
@@ -112,16 +113,39 @@ export async function WebhookContent({
                         <TypeDefinitionAnchorPart part="response">
                             <EndpointSection title={t(lang).apiReference.response}>
                                 {responses && responses.length > 0 ? (
-                                    <>
-                                        {responses.map((response) => (
-                                            <EndpointResponseSection
-                                                key={response.statusCode}
-                                                body={response.body}
-                                                types={types}
-                                                lang={lang}
-                                            />
-                                        ))}
-                                    </>
+                                    <div className="border-border-default rounded-3 flex flex-col overflow-visible border items-start">
+                                        <WithSeparator>
+                                            {responses.map((response, idx) => {
+                                                const fallbackText = getMessageForStatus(response.statusCode);
+                                                const displayText = response.description || fallbackText;
+                                                return (
+                                                    <div key={response.statusCode + idx} className="p-3">
+                                                        <div className="flex items-start gap-2">
+                                                            <StatusCodeBadge
+                                                                statusCode={response.statusCode}
+                                                                isWildcard={response.isWildcard}
+                                                                size="sm"
+                                                            />
+                                                            {displayText && (
+                                                                <div className="text-(--grayscale-a11) text-left text-xs">
+                                                                    <Prose size="sm" className="inline">
+                                                                        {response.description ? (
+                                                                            <MdxServerComponentProseSuspense
+                                                                                mdx={response.description}
+                                                                                fallback={null}
+                                                                            />
+                                                                        ) : (
+                                                                            fallbackText
+                                                                        )}
+                                                                    </Prose>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </WithSeparator>
+                                    </div>
                                 ) : (
                                     <WebhookResponseSection lang={lang} />
                                 )}
