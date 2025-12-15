@@ -19,7 +19,7 @@ import { cn } from "../cn";
 import { FernLink } from "../FernLink";
 import { FernTooltip } from "../FernTooltip";
 import { useScrollSidebarNodeIntoView } from "../hooks/sidebar-scroll";
-import { useIsChildSelected, useIsSelectedSidebarNode } from "../state/navigation";
+import { useIsSelectedSidebarNode } from "../state/navigation";
 
 interface SidebarSlugLinkProps {
     nodeId: FernNavigation.NodeId;
@@ -237,9 +237,7 @@ export const SidebarSlugLink = forwardRef<HTMLAnchorElement, PropsWithChildren<O
         const { slug, ...innerProps } = props;
         const ref = useRef<HTMLAnchorElement>(null);
         useScrollSidebarNodeIntoView(ref, props.nodeId);
-        const isSelected = useIsSelectedSidebarNode(props.nodeId);
-        const isChildSelected = useIsChildSelected(props.nodeId);
-        const selected = isSelected || isChildSelected;
+        const selected = useIsSelectedSidebarNode(props.nodeId);
         const href = slug ? slugToHref(slug) : undefined;
         return (
             <SidebarLink
