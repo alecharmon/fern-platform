@@ -238,7 +238,7 @@ const nextConfig: NextConfig = {
                         `font-src 'self' ${httpScheme} data:`,
                         `connect-src 'self' ${httpScheme} wss: ws:`,
                         `media-src 'self' ${httpScheme} blob:`,
-                        "object-src 'none'",
+                        `object-src 'self' ${httpScheme}`,
                         `frame-src 'self' ${httpScheme}`,
                         "base-uri 'self'",
                         `form-action 'self' ${httpScheme}`
