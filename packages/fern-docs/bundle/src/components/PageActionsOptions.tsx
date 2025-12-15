@@ -223,15 +223,22 @@ const renderCustomActionIcon = (icon?: string, files?: Record<string, FileData>)
 
 export const CustomPageActionOption = ({
     customAction,
+    domain,
     slug,
     files
 }: {
     customAction: CustomPageActionConfig;
+    domain: ParamValue;
     slug: ParamValue;
     files?: Record<string, FileData>;
 }): FernDropdown.ValueOption => {
+    const resolvedDomain = resolveParam(domain);
     const resolvedSlug = resolveParam(slug);
-    const resolvedUrl = customAction.url.replaceAll("{slug}", resolvedSlug);
+    const fullUrl = `https://${resolvedDomain}/${resolvedSlug}`;
+    const resolvedUrl = customAction.url
+        .replaceAll("{slug}", resolvedSlug)
+        .replaceAll("{domain}", resolvedDomain)
+        .replaceAll("{url}", fullUrl);
 
     return {
         type: "value",
@@ -287,6 +294,7 @@ export async function constructPageOptions({
                         icon: customAction.icon,
                         default: customAction.default
                     },
+                    domain,
                     slug,
                     files
                 })
