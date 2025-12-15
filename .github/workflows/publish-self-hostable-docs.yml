@@ -4,11 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to publish"
-        required: false
+        description: "Version to publish (must match a docs@ release version)"
+        required: true
         type: string
-  schedule:
-    - cron: "0 6 * * 1" # Runs at 6 AM UTC every Monday
+  push:
+    tags:
+      - "docs@*"
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -32,41 +33,20 @@ jobs:
         id: determine_version
         run: |
           PROVIDED_VERSION="${{ github.event.inputs.version }}"
+          GIT_REF="${{ github.ref }}"
+          
           if [ -n "$PROVIDED_VERSION" ]; then
+            # Manual dispatch with version provided
             echo "Using provided version: $PROVIDED_VERSION"
             echo "version=$PROVIDED_VERSION" >> $GITHUB_OUTPUT
+          elif [[ "$GIT_REF" == refs/tags/docs@* ]]; then
+            # Triggered by docs@ tag - extract version from tag
+            TAG_VERSION="${GIT_REF#refs/tags/docs@}"
+            echo "Using version from docs@ tag: $TAG_VERSION"
+            echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
           else
-            echo "No version provided, determining next version..."
-            
-            # Get Docker Hub token
-            USR="fernapi"
-            IMG="fern-self-hosted"
-            TOKEN=$(curl -fsSL -u "$USR:${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}" \
-              "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$USR/$IMG:pull" | \
-              jq -r .token)
-            
-            # Get latest tag from Docker Hub registry
-            LATEST_TAG=$(curl -fsSL -H "Authorization: Bearer $TOKEN" \
-              "https://registry-1.docker.io/v2/$USR/$IMG/tags/list" | \
-              jq -r '.tags | map(select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))) | sort_by(split(".") | map(tonumber)) | reverse | .[0]')
-            
-            if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "null" ]; then
-              echo "ERROR: No valid semantic version tags found for $USR/$IMG"
-              exit 1
-            fi
-            
-            echo "Current latest tag is $LATEST_TAG"
-            
-            # Validate semver format (major.minor.patch)
-            if [[ ! "$LATEST_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "Error: LATEST_TAG '$LATEST_TAG' does not match semver format (major.minor.patch). Manually publish new version to unblock automatic publishing."
-              exit 1
-            fi
-            
-            # Increment minor version
-            NEW_TAG=$(echo $LATEST_TAG | awk -F. '{print $1"."$2+1".0"}')
-            echo "New tag is $NEW_TAG"
-            echo "version=$NEW_TAG" >> $GITHUB_OUTPUT
+            echo "ERROR: Version must be provided via workflow_dispatch input or docs@ tag"
+            exit 1
           fi
 
       - name: Update Engines
