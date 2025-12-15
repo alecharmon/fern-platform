@@ -21,12 +21,19 @@ interface AnalyticsDataProviderProps {
     docsUrl: string;
     dateRange: GetWebAnalyticsRequest["dateRange"];
     groupBy?: number | undefined;
+    selectedDomain?: string | null;
 }
 
-export function AnalyticsDataProvider({ children, docsUrl, dateRange, groupBy }: AnalyticsDataProviderProps) {
+export function AnalyticsDataProvider({
+    children,
+    docsUrl,
+    dateRange,
+    groupBy,
+    selectedDomain
+}: AnalyticsDataProviderProps) {
     const { data, isLoading, error } = useQuery({
-        queryKey: ["all-analytics", docsUrl, dateRange, groupBy],
-        queryFn: () => getAllAnalytics({ docsUrl, dateRange, groupBy }),
+        queryKey: ["all-analytics", docsUrl, dateRange, groupBy, selectedDomain],
+        queryFn: () => getAllAnalytics({ docsUrl, dateRange, groupBy, selectedDomain: selectedDomain || undefined }),
         staleTime: ANALYTICS_STALE_TIME
     });
 

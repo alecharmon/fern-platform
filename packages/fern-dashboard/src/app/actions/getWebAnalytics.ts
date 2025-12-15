@@ -59,7 +59,8 @@ const GetWebAnalyticsSchema = z.object({
         ])
         .optional(),
     includeInternal: z.boolean().optional(),
-    groupBy: z.number().optional()
+    groupBy: z.number().optional(),
+    selectedDomain: z.string().optional()
 });
 
 const TableRequestSchema = GetWebAnalyticsSchema.extend({
@@ -144,10 +145,12 @@ class AnalyticsQueryHandler {
     private supabaseCache: CachedAnalytics | null | undefined = undefined;
     private docsUrl: string;
     private dateRange: DateRangeOptions;
+    private selectedDomain: string | undefined;
 
-    constructor(docsUrl: string, dateRange: DateRangeOptions) {
+    constructor(docsUrl: string, dateRange: DateRangeOptions, selectedDomain?: string) {
         this.docsUrl = docsUrl;
         this.dateRange = dateRange;
+        this.selectedDomain = selectedDomain;
     }
 
     async getSupabaseCache(): Promise<CachedAnalytics | null> {
@@ -161,7 +164,8 @@ class AnalyticsQueryHandler {
             return null;
         }
 
-        const docsSiteKey = getDocsSiteKey(this.docsUrl);
+        // Use selectedDomain if provided, otherwise extract from docsUrl
+        const docsSiteKey = this.selectedDomain || getDocsSiteKey(this.docsUrl);
         const startTime = Date.now();
         this.supabaseCache = await getCachedAnalytics({
             docsSite: docsSiteKey,
@@ -180,11 +184,11 @@ class AnalyticsQueryHandler {
 
 const handlerCache = new Map<string, AnalyticsQueryHandler>();
 
-function getHandler(docsUrl: string, dateRange: DateRangeOptions): AnalyticsQueryHandler {
-    const key = `${docsUrl}:${JSON.stringify(dateRange)}`;
+function getHandler(docsUrl: string, dateRange: DateRangeOptions, selectedDomain?: string): AnalyticsQueryHandler {
+    const key = `${docsUrl}:${JSON.stringify(dateRange)}:${selectedDomain || ""}`;
     let handler = handlerCache.get(key);
     if (!handler) {
-        handler = new AnalyticsQueryHandler(docsUrl, dateRange);
+        handler = new AnalyticsQueryHandler(docsUrl, dateRange, selectedDomain);
         handlerCache.set(key, handler);
         setTimeout(() => handlerCache.delete(key), 60000);
     }
@@ -211,9 +215,10 @@ async function getLiveAnalytics(docsUrl: string) {
 export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<GetWebAnalyticsResponse> {
     const validated = GetWebAnalyticsSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    // Use selectedDomain if provided, otherwise extract from docsUrl
+    const baseDomain = validated.selectedDomain || getBaseDomain(validated.docsUrl);
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache) {
@@ -256,9 +261,10 @@ export async function getWebAnalytics(request: GetWebAnalyticsRequest): Promise<
 export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<AllAnalyticsResponse> {
     const validated = GetWebAnalyticsSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
-    const baseDomain = getBaseDomain(validated.docsUrl);
+    // Use selectedDomain if provided, otherwise extract from docsUrl
+    const baseDomain = validated.selectedDomain || getBaseDomain(validated.docsUrl);
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache && !validated.groupBy) {
@@ -395,7 +401,7 @@ export async function getPageViewsByDay(
     const validated = GetWebAnalyticsSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache && !validated.groupBy) {
@@ -425,7 +431,7 @@ export async function getVisitorsByDay(
     const validated = GetWebAnalyticsSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache && !validated.groupBy) {
@@ -458,7 +464,7 @@ export async function getTopPages(
     const orderBy = validated.orderBy || "views";
     const order = validated.order || "desc";
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache) {
@@ -494,7 +500,7 @@ export async function getTopCountries(request: TableRequest): Promise<{
     const orderBy = validated.orderBy || "visitors";
     const order = validated.order || "desc";
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache) {
@@ -533,7 +539,7 @@ export async function getLLMFileViews(request: LLMFileViewsRequest): Promise<{
     const validated = LLMFileViewsRequestSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache) {
@@ -562,7 +568,7 @@ export async function getChannels(request: TableRequest): Promise<{
     const validated = TableRequestSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache) {
@@ -591,7 +597,7 @@ export async function getDeviceTypes(request: TableRequest): Promise<{
     const validated = TableRequestSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache) {
@@ -620,7 +626,7 @@ export async function getReferringDomains(request: TableRequest): Promise<{
     const validated = TableRequestSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache) {
@@ -672,7 +678,7 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
     const validated = TableRequestSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache) {
@@ -705,7 +711,7 @@ export async function getLLMBotTrafficByProvider(request: TableRequest): Promise
     const validated = TableRequestSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
 
-    const handler = getHandler(validated.docsUrl, dateRange);
+    const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
     const supabaseCache = await handler.getSupabaseCache();
 
     if (supabaseCache) {

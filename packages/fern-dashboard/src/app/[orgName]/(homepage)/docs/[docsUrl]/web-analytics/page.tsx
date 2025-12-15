@@ -7,5 +7,5 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
     const params = await props.params;
     await getAuthenticatedSessionOrRedirect(params.orgName);
 
-    return <WebAnalyticsPage docsUrl={params.docsUrl as DocsUrl} />;
+    return <WebAnalyticsPage docsUrl={params.docsUrl as DocsUrl} orgName={params.orgName} />;
 }

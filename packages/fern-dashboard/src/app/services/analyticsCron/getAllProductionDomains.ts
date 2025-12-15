@@ -79,6 +79,7 @@ export async function getAllProductionDomains(): Promise<ProductionDomain[]> {
     // If docs KV is available with CDN_URI, try that first (faster)
     if (docsKv && cdnUri) {
         const kvDomains = await getAllProductionDomainsFromKV(docsKv, cdnUri);
+        console.log("[getAllProductionDomains] KV returned!!!", kvDomains.length, "domains");
         if (kvDomains.length > 0) {
             return kvDomains;
         }
@@ -106,7 +107,7 @@ async function getAllProductionDomainsFromKV(kv: any, cdnUri: string): Promise<P
 /**
  * Get production domains from FDR (Fern Definition Registry)
  */
-async function getAllProductionDomainsFromFDR(): Promise<ProductionDomain[]> {
+export async function getAllProductionDomainsFromFDR(): Promise<ProductionDomain[]> {
     const fdrServerUrl = process.env.FDR_SERVER_URL ?? process.env.NEXT_PUBLIC_FDR_ORIGIN;
     const fernToken = process.env.FERN_TOKEN;
 

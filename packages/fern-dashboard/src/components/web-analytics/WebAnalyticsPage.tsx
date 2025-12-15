@@ -2,11 +2,12 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { RefreshCwIcon } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 
 import { getDocsGithubMetadata } from "@/app/actions/getDocsGithubMetadata";
 import { refreshWebAnalytics } from "@/app/actions/getWebAnalytics";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
@@ -17,10 +18,12 @@ import { useInvalidateAnalyticsCache } from "./api";
 import WebAnalyticsChart from "./Chart";
 import { MetricsCard } from "./MetricsCard";
 import SelectDate from "./SelectDate";
+import SelectDomain from "./SelectDomain";
 import AnalyticsTables from "./Tables";
 
 interface WebAnalyticsPageProps {
     docsUrl: string;
+    orgName: Auth0OrgName;
 }
 
 interface WebAnalyticsContentProps extends WebAnalyticsPageProps {
@@ -28,9 +31,20 @@ interface WebAnalyticsContentProps extends WebAnalyticsPageProps {
     setDateRange: (dateRange: DateRangeOptions) => void;
     groupBy: number | undefined;
     setGroupBy: (groupBy: number) => void;
+    selectedDomain: string | null;
+    setSelectedDomain: (domain: string | null) => void;
 }
 
-function WebAnalyticsContent({ docsUrl, dateRange, setDateRange, groupBy, setGroupBy }: WebAnalyticsContentProps) {
+function WebAnalyticsContent({
+    docsUrl,
+    orgName,
+    dateRange,
+    setDateRange,
+    groupBy,
+    setGroupBy,
+    selectedDomain,
+    setSelectedDomain
+}: WebAnalyticsContentProps) {
     const { data, isLoading, error } = useAnalyticsData();
     const invalidateCache = useInvalidateAnalyticsCache();
 
@@ -40,7 +54,7 @@ function WebAnalyticsContent({ docsUrl, dateRange, setDateRange, groupBy, setGro
         staleTime: 1000 * 60 * 10 // 10 minutes
     });
 
-    const { orgName, githubUrl, baseBranch } = githubMetadataResult?.success ? githubMetadataResult : {};
+    const { githubUrl, baseBranch } = githubMetadataResult?.success ? githubMetadataResult : {};
 
     const refreshMutation = useMutation({
         mutationFn: async () => {
@@ -68,6 +82,7 @@ function WebAnalyticsContent({ docsUrl, dateRange, setDateRange, groupBy, setGro
         <div className="flex w-full flex-col gap-4">
             <div className="flex items-center gap-2">
                 <SelectDate value={dateRange} onChange={setDateRange} />
+                <SelectDomain docsUrl={docsUrl} orgName={orgName} value={selectedDomain} onChange={setSelectedDomain} />
                 <Button
                     variant="outline"
                     size="default"
@@ -117,21 +132,59 @@ function WebAnalyticsContent({ docsUrl, dateRange, setDateRange, groupBy, setGro
     );
 }
 
-export default function WebAnalyticsPage({ docsUrl }: WebAnalyticsPageProps) {
+export default function WebAnalyticsPage({ docsUrl, orgName }: WebAnalyticsPageProps) {
     const [dateRange, setDateRange] = useState<DateRangeOptions>({
         type: "last_n_days",
         days: 7
     });
     const [groupBy, setGroupBy] = useState<number | undefined>(undefined);
+    const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+    const [hasInitialized, setHasInitialized] = useState(false);
+
+    // Fetch domains to determine the default
+    const { data: domains } = useQuery({
+        queryKey: ["docs-site-domains", docsUrl, orgName],
+        queryFn: async () => {
+            const { getDocsSiteDomains } = await import("@/app/actions/getDocsSiteDomains");
+            return getDocsSiteDomains(docsUrl, orgName);
+        },
+        staleTime: 1000 * 60 * 10 // 10 minutes
+    });
+
+    // Set default domain to primary/production domain on initial load
+    React.useEffect(() => {
+        if (!hasInitialized && domains && domains.length > 0) {
+            // Find primary domain: not staging, not buildwithfern.com subdomain
+            const primaryDomain = domains.find(
+                (d) => !d.domain.includes("staging") && !d.domain.includes(".buildwithfern.com")
+            );
+
+            if (primaryDomain) {
+                setSelectedDomain(primaryDomain.domain);
+            } else if (domains[0]?.domain) {
+                // Fallback to first domain if no primary found
+                setSelectedDomain(domains[0].domain);
+            }
+            setHasInitialized(true);
+        }
+    }, [domains, hasInitialized]);
 
     return (
-        <AnalyticsDataProvider docsUrl={docsUrl} dateRange={dateRange} groupBy={groupBy}>
+        <AnalyticsDataProvider
+            docsUrl={docsUrl}
+            dateRange={dateRange}
+            groupBy={groupBy}
+            selectedDomain={selectedDomain}
+        >
             <WebAnalyticsContent
                 docsUrl={docsUrl}
+                orgName={orgName}
                 dateRange={dateRange}
                 setDateRange={setDateRange}
                 groupBy={groupBy}
                 setGroupBy={setGroupBy}
+                selectedDomain={selectedDomain}
+                setSelectedDomain={setSelectedDomain}
             />
         </AnalyticsDataProvider>
     );
