@@ -1,19 +1,21 @@
-name: Create PRs from Dependabot Alerts
+name: Create PRs to Remediate vulns
 
 # ============================================================
-# TOKEN REQUIREMENTS
-# This workflow uses TWO tokens in separate steps:
-# 
-# 1. FERN_GITHUB_TOKEN - Used ONLY for accessing Dependabot alerts
-#    Must be a PAT (classic) with `security_events` scope.
-#    The default GITHUB_TOKEN cannot access Dependabot alerts.
-# 
-# 2. GITHUB_TOKEN - Used for creating branches and PRs
-#    This is the default Actions token, which makes PRs appear
-#    as coming from "github-actions[bot]" rather than a user.
-# 
-# If you see a 403 error when fetching alerts, ensure
-# FERN_GITHUB_TOKEN has the `security_events` scope enabled.
+# This workflow runs two independent security scans:
+#
+# 1. Dependabot Alerts (create-dependabot-prs job)
+#    - Fetches open Dependabot alerts from GitHub
+#    - Creates PRs for each alert with instructions for Devin AI
+#
+# 2. Grype Container Scan (create-grype-pr-{CONTAINER_NAME} jobs)
+#    - Builds the Docker container
+#    - Scans it with grype for OS and package vulnerabilities
+#    - Creates a PR if actionable vulnerabilities are found
+#
+# TOKEN REQUIREMENTS:
+# - FERN_GITHUB_TOKEN: PAT with `security_events` scope for Dependabot alerts
+# - GITHUB_TOKEN: Default token for creating branches and PRs
+# - DEVIN_AI_PR_BOT_SLACK_TOKEN: For Slack notifications to Devin AI
 # ============================================================
 
 on:
@@ -23,7 +25,8 @@ on:
   workflow_dispatch: # Allow manual triggering
 
 jobs:
-  create-prs:
+  create-dependabot-prs:
+    name: Check Dependabot alerts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -333,3 +336,275 @@ jobs:
             if (skippedDueToPackage > 0) {
               console.log(`Skipped ${skippedDueToPackage} alerts because PRs already exist for those packages.`);
             }
+
+  # ============================================================
+  # GRYPE CONTAINER VULNERABILITY SCANS
+  # Builds the Docker containers and scans them with grype for
+  # OS-level and package vulnerabilities.
+  # ============================================================
+  create-grype-pr-fdr:
+    name: Run grype scan - fdr
+    runs-on: Seed
+    permissions:
+      contents: write
+      pull-requests: write
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Build container
+        run: docker build -f servers/fdr/Dockerfile -t fern-definition-registry:grype-scan --build-arg DATABASE_URL='postgres://fdr:fdr1!@postgres:5432/postgres' .
+
+      - name: Install grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run grype scan
+        run: |
+          grype docker:fern-definition-registry:grype-scan -o json > grype-report.json
+
+      # ============================================================
+      # IGNORED CVEs CONFIGURATION
+      # Add CVEs here that have been reviewed and accepted as risks.
+      # Format: One CVE ID per line in the ignored_cves input
+      # ============================================================
+      - name: Process vulnerabilities and create PR
+        uses: ./.github/actions/process-grype-vulns
+        with:
+          container_name: fdr
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_token: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
+          ignored_cves: ""
+
+  create-grype-pr-mdx-bundler:
+    name: Run grype scan - mdx bundler
+    runs-on: Seed
+    permissions:
+      contents: write
+      pull-requests: write
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: run build:tsup:cjs
+        run: |
+          pnpm build
+          pnpm --filter @fern-platform/mdx-bundler run build:tsup:cjs
+
+      - name: Build container
+        run: docker build -f servers/mdx-bundler/Dockerfile -t mdx-bundler:grype-scan .
+
+      - name: Install grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run grype scan
+        run: |
+          grype docker:mdx-bundler:grype-scan -o json > grype-report.json
+
+      # ============================================================
+      # IGNORED CVEs CONFIGURATION
+      # Add CVEs here that have been reviewed and accepted as risks.
+      # Format: One CVE ID per line in the ignored_cves input
+      # ============================================================
+      - name: Process vulnerabilities and create PR
+        uses: ./.github/actions/process-grype-vulns
+        with:
+          container_name: mdx-bundler
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_token: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
+          ignored_cves: ""
+
+  create-grype-pr-self-hosted:
+    name: Run grype scan - self-hosted
+    runs-on: Seed
+    permissions:
+      contents: write
+      pull-requests: write
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Update Engines
+        run: |
+          node -e 'const fs = require("fs"); const pkg = require("./package.json"); console.log("Before modification:", JSON.stringify(pkg.engines, null, 2)); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "10.11.0"; pkg.packageManager = "pnpm@10.11.0"; console.log("After modification:", JSON.stringify(pkg.engines, null, 2)); fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Compile
+        run: pnpm compile
+
+      - name: Build FDR CJS
+        run: pnpm --filter @fern-platform/fdr build:tsup:cjs
+
+      - name: Build self-hosted bundle
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: pnpm docs:self-hosted-bundle:build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: pnpm --filter=@fern-platform/self-hosted docker:build
+
+      - name: Install grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run grype scan
+        run: |
+          grype docker:fern-self-hosted:latest -o json > grype-report.json
+
+      # ============================================================
+      # IGNORED CVEs CONFIGURATION
+      # Add CVEs here that have been reviewed and accepted as risks.
+      # Format: One CVE ID per line in the ignored_cves input
+      # ============================================================
+      - name: Process vulnerabilities and create PR
+        uses: ./.github/actions/process-grype-vulns
+        with:
+          container_name: self-hosted
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_token: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
+          ignored_cves: ""
+
+  create-grype-pr-fai:
+    name: Run grype scan - fai
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Build container
+        run: |
+          touch servers/fai/.env
+          docker build -f servers/fai/Dockerfile -t fai:grype-scan servers/
+
+      - name: Install grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run grype scan
+        run: |
+          grype docker:fai:grype-scan -o json > grype-report.json
+
+      # ============================================================
+      # IGNORED CVEs CONFIGURATION
+      # Add CVEs here that have been reviewed and accepted as risks.
+      # Format: One CVE ID per line in the ignored_cves input
+      # ============================================================
+      - name: Process vulnerabilities and create PR
+        uses: ./.github/actions/process-grype-vulns
+        with:
+          container_name: fai
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_token: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
+          ignored_cves: ""
+
+  create-grype-pr-fai-chat:
+    name: Run grype scan - fai-chat
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Build container
+        run: |
+          docker build -f ./servers/fai-chat/Dockerfile -t fai-chat:grype-scan .
+
+      - name: Install grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run grype scan
+        run: |
+          grype docker:fai-chat:grype-scan -o json > grype-report.json
+
+      # ============================================================
+      # IGNORED CVEs CONFIGURATION
+      # Add CVEs here that have been reviewed and accepted as risks.
+      # Format: One CVE ID per line in the ignored_cves input
+      # ============================================================
+      - name: Process vulnerabilities and create PR
+        uses: ./.github/actions/process-grype-vulns
+        with:
+          container_name: fai-chat
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_token: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
+          ignored_cves: ""
+
+  create-grype-pr-fai-reindexing:
+    name: Run grype scan - fai-reindexing
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Build container
+        run: |
+          docker build -f ./servers/fai-reindexing/Dockerfile -t fai-reindexing:grype-scan .
+
+      - name: Install grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run grype scan
+        run: |
+          grype docker:fai-reindexing:grype-scan -o json > grype-report.json
+
+      # ============================================================
+      # IGNORED CVEs CONFIGURATION
+      # Add CVEs here that have been reviewed and accepted as risks.
+      # Format: One CVE ID per line in the ignored_cves input
+      # ============================================================
+      - name: Process vulnerabilities and create PR
+        uses: ./.github/actions/process-grype-vulns
+        with:
+          container_name: fai-reindexing
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_token: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
+          ignored_cves: ""
