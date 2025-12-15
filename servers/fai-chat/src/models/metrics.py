@@ -11,6 +11,7 @@ class RequestMetrics:
     llm_end_ms: float
     input_tokens: int
     output_tokens: int
+    query_decomposition_ms: float | None = None
 
     @property
     def ttft_ms(self) -> float | None:
@@ -34,6 +35,7 @@ class RequestMetrics:
         return {
             "ttft_ms": self.ttft_ms,
             "retrieval_time_ms": self.retrieval_time_ms,
+            "query_decomposition_ms": self.query_decomposition_ms,
             "total_llm_time_ms": self.total_llm_time_ms,
             "total_request_time_ms": self.total_request_time_ms,
             "input_tokens": self.input_tokens,

@@ -101,25 +101,25 @@ export class SlackScribe {
     }
 
     /**
-     * @param {FernAI.GetScribeSlackInstallLinkRequest} request
+     * @param {FernAI.GetFernWriterInstallLinkRequest} request
      * @param {SlackScribe.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link FernAI.UnprocessableEntityError}
      *
      * @example
-     *     await client.slackScribe.getScribeSlackInstallLink({
+     *     await client.slackScribe.getFernWriterInstallLink({
      *         github_repo: "github_repo"
      *     })
      */
-    public getScribeSlackInstallLink(
-        request: FernAI.GetScribeSlackInstallLinkRequest,
+    public getFernWriterInstallLink(
+        request: FernAI.GetFernWriterInstallLinkRequest,
         requestOptions?: SlackScribe.RequestOptions,
     ): core.HttpResponsePromise<unknown> {
-        return core.HttpResponsePromise.fromPromise(this.__getScribeSlackInstallLink(request, requestOptions));
+        return core.HttpResponsePromise.fromPromise(this.__getFernWriterInstallLink(request, requestOptions));
     }
 
-    private async __getScribeSlackInstallLink(
-        request: FernAI.GetScribeSlackInstallLinkRequest,
+    private async __getFernWriterInstallLink(
+        request: FernAI.GetFernWriterInstallLinkRequest,
         requestOptions?: SlackScribe.RequestOptions,
     ): Promise<core.WithRawResponse<unknown>> {
         const { github_repo: githubRepo } = request;

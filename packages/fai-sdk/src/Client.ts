@@ -24,7 +24,6 @@ import { Settings } from "./api/resources/settings/client/Client.js";
 import { SlackAskFern } from "./api/resources/slackAskFern/client/Client.js";
 import { SlackScribe } from "./api/resources/slackScribe/client/Client.js";
 import { Sources } from "./api/resources/sources/client/Client.js";
-import { Upstash } from "./api/resources/upstash/client/Client.js";
 import { Website } from "./api/resources/website/client/Client.js";
 
 export declare namespace FernAIClient {
@@ -72,7 +71,6 @@ export class FernAIClient {
     protected _slackAskFern: SlackAskFern | undefined;
     protected _slackScribe: SlackScribe | undefined;
     protected _sources: Sources | undefined;
-    protected _upstash: Upstash | undefined;
     protected _website: Website | undefined;
 
     constructor(_options: FernAIClient.Options = {}) {
@@ -163,10 +161,6 @@ export class FernAIClient {
 
     public get sources(): Sources {
         return (this._sources ??= new Sources(this._options));
-    }
-
-    public get upstash(): Upstash {
-        return (this._upstash ??= new Upstash(this._options));
     }
 
     public get website(): Website {

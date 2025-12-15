@@ -260,6 +260,7 @@ async def log_query_to_db(
     conversation_id: str,
     role: str = "USER",
     source: str = "SLACK",
+    subqueries: list[str] | None = None,
 ) -> str | None:
     try:
         async with async_session_maker() as session:
@@ -272,6 +273,7 @@ async def log_query_to_db(
                 source=source,
                 created_at=datetime.now(UTC),
                 time_to_first_token=None,
+                subqueries=subqueries,
             )
             session.add(db_query)
             await session.commit()

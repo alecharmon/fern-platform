@@ -6,6 +6,7 @@ from sqlalchemy import (
 )
 
 from fai.db import Base
+from fai.models.db.utils.array_column import ArrayColumn
 from fai.models.types.query_types import Query
 
 
@@ -21,6 +22,7 @@ class QueryDb(Base):
     source = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False)
     time_to_first_token = Column(Float, nullable=True)
+    subqueries = Column(ArrayColumn(String), nullable=True)
 
     def to_api(self) -> Query:
         return Query(
@@ -32,4 +34,5 @@ class QueryDb(Base):
             source=self.source,
             created_at=self.created_at,
             time_to_first_token=self.time_to_first_token,
+            subqueries=self.subqueries,
         )

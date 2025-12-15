@@ -48,6 +48,7 @@ async def create_query(
             source=query.source,
             created_at=query.created_at,
             time_to_first_token=query.time_to_first_token,
+            subqueries=query.subqueries,
         )
         db.add(db_query)
         await db.commit()

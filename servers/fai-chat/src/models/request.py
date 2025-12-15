@@ -46,6 +46,7 @@ class ChatRequest(BaseModel):
     skipSaveQuery: bool = Field(default=False, alias="skipSaveQuery")
     model: str | None = None
     customerSystemPrompt: str | None = Field(default=None, alias="customerSystemPrompt")
+    rewriteQuery: bool = Field(default=False, alias="rewriteQuery")
 
     def get_simple_messages(self) -> list[ChatMessage]:
         # Extract only text parts from UI messages. Non-text parts (step-start, data-sources,

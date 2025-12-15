@@ -11,4 +11,5 @@ export interface Query {
     source: string;
     created_at: string;
     time_to_first_token?: number;
+    subqueries?: string[];
 }

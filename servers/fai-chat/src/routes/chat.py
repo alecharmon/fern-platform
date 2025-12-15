@@ -21,8 +21,11 @@ from fai_ai_core.retrieval.factory import get_retriever
 from fai_ai_core.retrieval.filters import QueryFilters
 from fai_ai_core.retrieval.interface import (
     RetrievalQuery,
+    RetrievalResult,
     RetrievalStrategy,
 )
+from fai_ai_core.retrieval.query_decomposition import decompose_query
+from fai_ai_core.retrieval.utils import deduplicate_documents
 from fastapi import (
     Header,
     HTTPException,
@@ -126,7 +129,6 @@ async def chat(
         f"conversationId={request.conversationId}, queryId={request.queryId}"
     )
 
-    retrieval_start_ms = time.time() * 1000
     try:
         retriever = get_retriever()
 
@@ -139,18 +141,65 @@ async def chat(
             exploded_roles=exploded_roles,
             user_is_authed=auth_state.authenticated,
         )
-        retrieval_query = RetrievalQuery(
-            query=user_query,
-            domain=domain,
-            top_k=TOP_K,
-            strategy=RetrievalStrategy.HYBRID,
-            filters=query_filters,
-        )
-        retrieval_result = await retriever.retrieve(retrieval_query)
-        retrieval_end_ms = time.time() * 1000
+
+        subqueries: list[str] | None = None
+        query_decomposition_ms: float | None = None
+
+        if request.rewriteQuery:
+            logger.info(f"Query rewriting enabled for domain {domain}")
+
+            decomposition_start_ms = time.time() * 1000
+            subqueries = await decompose_query(user_query)
+            decomposition_end_ms = time.time() * 1000
+            query_decomposition_ms = decomposition_end_ms - decomposition_start_ms
+
+            logger.info(f"Decomposed query into {len(subqueries)} sub-queries in {query_decomposition_ms:.2f}ms")
+            for index, subquery in enumerate(subqueries):
+                logger.info(f"Subquery {index + 1}: {subquery}")
+
+            retrieval_start_ms = time.time() * 1000
+            retrieval_queries = [
+                RetrievalQuery(
+                    query=sq,
+                    domain=domain,
+                    top_k=TOP_K,
+                    strategy=RetrievalStrategy.HYBRID,
+                    filters=query_filters,
+                )
+                for sq in subqueries
+            ]
+            results = await retriever.batch_retrieve(retrieval_queries)
+            all_docs = [doc for result in results for doc in result.documents]
+            documents = deduplicate_documents([all_docs])
+            retrieval_end_ms = time.time() * 1000
+
+            aggregated_query = RetrievalQuery(
+                query=user_query,
+                domain=domain,
+                top_k=TOP_K,
+                strategy=RetrievalStrategy.SEMANTIC,
+                filters=query_filters,
+            )
+            retrieval_result = RetrievalResult(
+                documents=documents,
+                query=aggregated_query,
+                retrieval_time_ms=retrieval_end_ms - retrieval_start_ms,
+            )
+        else:
+            retrieval_start_ms = time.time() * 1000
+            retrieval_query = RetrievalQuery(
+                query=user_query,
+                domain=domain,
+                top_k=TOP_K,
+                strategy=RetrievalStrategy.SEMANTIC,
+                filters=query_filters,
+            )
+            retrieval_result = await retriever.retrieve(retrieval_query)
+            retrieval_end_ms = time.time() * 1000
 
         logger.info(
-            f"Retrieved {len(retrieval_result.documents)} documents in " f"{retrieval_result.retrieval_time_ms:.2f}ms"
+            f"Retrieved {len(retrieval_result.documents)} documents in {retrieval_result.retrieval_time_ms:.2f}ms"
+            + (f" (query decomposition: {query_decomposition_ms:.2f}ms)" if query_decomposition_ms else "")
         )
     except Exception as e:
         logger.exception(f"Retrieval failed: {e}")
@@ -231,6 +280,7 @@ async def chat(
             role="USER",
             source=chat_source,
             created_at=datetime.now(UTC),
+            subqueries=subqueries,
         )
         user_save_task = asyncio.create_task(save_query(get_fai_client(), user_query_data))
 
@@ -276,11 +326,13 @@ async def chat(
                         llm_end_ms=llm_end_ms,
                         input_tokens=input_tokens,
                         output_tokens=output_tokens,
+                        query_decomposition_ms=query_decomposition_ms,
                     )
 
+                    decomp_log = f", decomposition={query_decomposition_ms:.2f}ms" if query_decomposition_ms else ""
                     logger.info(
                         f"Request metrics: TTFT={metrics.ttft_ms:.2f}ms, "
-                        f"retrieval={metrics.retrieval_time_ms:.2f}ms, "
+                        f"retrieval={metrics.retrieval_time_ms:.2f}ms{decomp_log}, "
                         f"llm_total={metrics.total_llm_time_ms:.2f}ms, "
                         f"total={metrics.total_request_time_ms:.2f}ms, "
                         f"tokens={input_tokens}/{output_tokens}"

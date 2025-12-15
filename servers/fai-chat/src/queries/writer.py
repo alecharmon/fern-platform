@@ -19,6 +19,7 @@ async def save_query(client: AsyncFernAI, data: QueryData) -> str | None:
             source=data.source.upper(),
             created_at=data.created_at,
             time_to_first_token=data.time_to_first_token,
+            subqueries=data.subqueries,
         )
         logger.info(f"Query saved: {data.query_id}")
         return data.query_id

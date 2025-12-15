@@ -440,6 +440,7 @@ async def log_query_to_db(
     conversation_id: str,
     role: str = "USER",
     source: str = "DISCORD",
+    subqueries: list[str] | None = None,
 ) -> str | None:
     try:
         async with async_session_maker() as session:
@@ -452,6 +453,7 @@ async def log_query_to_db(
                 source=source,
                 created_at=datetime.now(UTC),
                 time_to_first_token=None,
+                subqueries=subqueries,
             )
             session.add(db_query)
             await session.commit()
@@ -478,26 +480,23 @@ async def process_message(
     if not text:
         return "I need a message to respond to. Please ask me a question!", None, None
 
-    query_id = None
-    if conversation_id:
-        query_id = await log_query_to_db(text, domain, conversation_id, role="USER", source="DISCORD")
-
     try:
         LOGGER.info(f"Retrieving documents for query: {text[:100]}...")
 
         retriever = get_retriever()
         retrieved_documents: list[RetrievedDocument] = []
+        subqueries: list[str] | None = None
 
         if rewrite_query_enabled:
             LOGGER.info(f"Query rewriting enabled for domain {domain}")
-            sub_queries = await decompose_query(text)
-            LOGGER.info(f"Decomposed query into {len(sub_queries)} sub-queries")
-            for index, sub_query in enumerate(sub_queries):
+            subqueries = await decompose_query(text)
+            LOGGER.info(f"Decomposed query into {len(subqueries)} sub-queries")
+            for index, sub_query in enumerate(subqueries):
                 LOGGER.info(f"Subquery {index + 1}: {sub_query}")
 
             retrieval_queries = [
                 RetrievalQuery(query=sq, domain=domain, strategy=RetrievalStrategy.HYBRID, top_k=top_k)
-                for sq in sub_queries
+                for sq in subqueries
             ]
             results = await retriever.batch_retrieve(retrieval_queries)
             all_docs = [doc for result in results for doc in result.documents]
@@ -506,6 +505,17 @@ async def process_message(
             retrieval_query = RetrievalQuery(query=text, domain=domain, strategy=RetrievalStrategy.HYBRID, top_k=top_k)
             result = await retriever.retrieve(retrieval_query)
             retrieved_documents = result.documents
+
+        query_id = None
+        if conversation_id:
+            query_id = await log_query_to_db(
+                text,
+                domain,
+                conversation_id,
+                role="USER",
+                source="DISCORD",
+                subqueries=subqueries,
+            )
 
         LOGGER.info(f"Retrieved {len(retrieved_documents)} documents")
 

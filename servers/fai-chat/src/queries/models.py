@@ -12,3 +12,4 @@ class QueryData:
     source: str
     created_at: datetime
     time_to_first_token: float | None = None
+    subqueries: list[str] | None = None

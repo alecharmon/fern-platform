@@ -230,6 +230,32 @@ class TestChatRequestExtraFields:
         assert request.model is None
         assert request.customerSystemPrompt is None
 
+    def test_request_with_rewrite_query_true(self) -> None:
+        data = {
+            "messages": [{"role": "user", "parts": [{"type": "text", "text": "Hello"}]}],
+            "rewriteQuery": True,
+        }
+        request = ChatRequest(**data)
+
+        assert request.rewriteQuery is True
+
+    def test_request_with_rewrite_query_false(self) -> None:
+        data = {
+            "messages": [{"role": "user", "parts": [{"type": "text", "text": "Hello"}]}],
+            "rewriteQuery": False,
+        }
+        request = ChatRequest(**data)
+
+        assert request.rewriteQuery is False
+
+    def test_request_rewrite_query_defaults_to_false(self) -> None:
+        data = {
+            "messages": [{"role": "user", "parts": [{"type": "text", "text": "Hello"}]}],
+        }
+        request = ChatRequest(**data)
+
+        assert request.rewriteQuery is False
+
 
 class TestFacetFilter:
     def test_facet_filter_with_field_property(self) -> None:

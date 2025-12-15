@@ -58,7 +58,6 @@ export * from "./JobStatusResponse.js";
 export * from "./LanguageModel.js";
 export * from "./PaginationResponse.js";
 export * from "./PostChatCompletionResponse.js";
-export * from "./QStashFailureCallbackResponse.js";
 export * from "./Query.js";
 export * from "./ReconstructIndexResponse.js";
 export * from "./ReindexWebsiteResponse.js";
