@@ -39,6 +39,7 @@ async function FaIconServerInternal({
                 aria-hidden="true"
                 focusable="false"
                 role="img"
+                style={{ overflow: "visible", ...props.style }}
                 dangerouslySetInnerHTML={{ __html: body }}
             />
         );

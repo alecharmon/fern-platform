@@ -97,6 +97,7 @@ export const FaIcon = React.memo(
                 aria-hidden="true"
                 focusable="false"
                 role="img"
+                style={{ overflow: "visible", ...props.style }}
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
             />
         );
