@@ -34,6 +34,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.0-beta.2",
     "@anthropic-ai/sdk": "^0.54.0",
     "@auth0/nextjs-auth0": "^4.6.1",
     "@aws-sdk/client-s3": "^3.744.0",
@@ -112,6 +113,7 @@
     "@vercel/edge-config": "^1.4.0",
     "@vercel/kv": "^3.0.0",
     "@vercel/speed-insights": "^1.2.0",
+    "ai": "5.0.112",
     "algoliasearch": "^5.40.1",
     "archiver": "^7.0.1",
     "auth0": "^4.20.0",

@@ -149,11 +149,15 @@ describe("UploadForm validations", () => {
 
 describe("NewDocsWizardPage default image handling", () => {
     const originalFetch = global.fetch;
+    let fetchMock: ReturnType<typeof vi.fn<typeof fetch>>;
 
     beforeEach(() => {
         mockUploadOnboardingAsset.mockClear();
-        global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+        fetchMock = vi.fn<typeof fetch>(async (input: RequestInfo | URL) => {
             const url = typeof input === "string" || input instanceof URL ? input.toString() : input.url;
+            if (url === "/api/brand-assets/auto-populate") {
+                return new Response(JSON.stringify({ updates: {} }), { status: 200 });
+            }
             if (url.includes("brandfetch.io")) {
                 return new Response(new Blob(["image"], { type: "image/png" }), { status: 200 });
             }
@@ -163,7 +167,8 @@ describe("NewDocsWizardPage default image handling", () => {
             }
 
             throw new Error(`Unhandled fetch for ${url}`);
-        }) as unknown as typeof fetch;
+        });
+        global.fetch = fetchMock;
     });
 
     afterEach(() => {
@@ -178,7 +183,18 @@ describe("NewDocsWizardPage default image handling", () => {
         fireEvent.change(screen.getByTestId("color-picker"), { target: { value: "#ffffff" } });
         fireEvent.click(screen.getByText("Add Spec"));
 
+        expect((screen.getByLabelText("Site title") as HTMLInputElement).value).toBe("My Docs");
+        expect((screen.getByTestId("docs-url") as HTMLInputElement).value).toBe("my-docs");
+        expect((screen.getByTestId("color-picker") as HTMLInputElement).value).toBe("#ffffff");
+
+        await waitFor(() => expect(screen.getByTestId("spec-count").textContent).toBe("1"));
+
         fireEvent.click(screen.getByRole("button", { name: /continue/i }));
+
+        await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        const urls = fetchMock.mock.calls.map((call: Parameters<typeof fetch>) => call[0]?.toString());
+        expect(urls).toContain("/api/onboarding-docs");
+        expect(urls.some((url: string | undefined) => url?.includes("brandfetch.io"))).toBe(true);
 
         await waitFor(() => {
             expect(mockUploadOnboardingAsset).toHaveBeenCalledTimes(2);

@@ -1,11 +1,11 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import { ArrowRightIcon, Loader2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import AutoPopulate from "./AutoPopulate";
 import CodeWidget from "./CodeWidget";
 import ColorPicker from "./ColorPicker";
 import DocsUrl from "./DocsUrl";
@@ -62,6 +62,15 @@ function UploadForm({
 
     const formValues = useStore(form.store, (state) => state.values);
 
+    const applyAutoPopulateUpdates = useCallback(
+        (updates: Partial<WizardFormData>) => {
+            Object.entries(updates).forEach(([key, value]) => {
+                form.setFieldValue(key as keyof WizardFormData, value as WizardFormData[keyof WizardFormData]);
+            });
+        },
+        [form]
+    );
+
     useEffect(() => {
         setWizardFormData(formValues);
     }, [formValues, setWizardFormData]);
@@ -93,11 +102,13 @@ function UploadForm({
                                     <p className="text-gray-1100 text-sm">You can always change this later.</p>
                                 </div>
 
+                                <AutoPopulate onApplyUpdates={applyAutoPopulateUpdates} />
+
                                 <div className="space-y-6">
                                     <form.Field
                                         name="docsSiteName"
                                         validators={{
-                                            onSubmit: ({ value, ...x }) => {
+                                            onSubmit: ({ value }) => {
                                                 const trimmed = value.trim();
                                                 if (!trimmed) {
                                                     return "Site title is required.";

@@ -1,151 +1,135 @@
 "use server";
 
-export interface BrandFetchResponse {
-    id: string;
-    name: string;
-    domain: string;
-    claimed: boolean;
-    description?: string;
-    longDescription?: string;
-    links?: {
-        name: string;
-        url: string;
-    }[];
-    logos?: {
-        theme: "dark" | "light";
-        formats: {
-            src: string;
-            format: "svg" | "png" | "jpg" | "webp";
-            height?: number;
-            width?: number;
-            size?: number;
-            background?: "transparent" | string;
-        }[];
-        tags?: Record<string, unknown>[];
-        type: "icon" | "logo" | "symbol" | "mark";
-    }[];
-    colors?: {
-        hex: string;
-        type: "accent" | "brand" | "primary" | "secondary" | "background";
-        brightness?: number;
-    }[];
-    fonts?: {
-        name: string;
-        type: "title" | "body" | "heading";
-        origin?: "google" | "adobe" | "system";
-        originId?: string;
-        weights?: Record<string, unknown>[];
-    }[];
-    images?: {
-        formats: {
-            src: string;
-            format: "svg" | "png" | "jpg" | "webp";
-            height?: number;
-            width?: number;
-            size?: number;
-            background?: "transparent" | string;
-        }[];
-        tags?: Record<string, unknown>[];
-        type: "banner" | "cover" | "screenshot";
-    }[];
-    qualityScore?: number;
-    company?: {
-        employees?: number;
-        financialIdentifiers?: {
-            isin?: string[];
-            ticker?: string[];
-        };
-        foundedYear?: number;
-        industries?: {
-            id: string;
-            score?: number;
-            slug: string;
-            name: string;
-            emoji?: string;
-            parent?: {
-                id: string;
-                slug: string;
-                name: string;
-                emoji?: string;
-            }[];
-        }[];
-        kind?: "EDUCATIONAL" | "BUSINESS" | "GOVERNMENT" | "NONPROFIT" | "PERSONAL";
-        location?: {
-            city?: string;
-            country?: string;
-            countryCode?: string;
-            region?: string;
-            state?: string;
-            subregion?: string;
-        };
-    };
-    isNsfw?: boolean;
-    urn?: string;
+import type { AutoPopulateUpdates, BrandProfile } from "../services/auto-populate-brand";
+import { getBrandFetchAssets as getBrandFetchAssetsService } from "../services/auto-populate-brand";
+import type { GetBrandFetchAssetsResult } from "../services/auto-populate-brand/brand-fetch-api";
+import { OnboardS3Service } from "../services/onboarding-assets";
+
+const nameToUrl = (name: string): string => {
+    return name
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
+};
+
+function getIconItem(logos: BrandProfile["logos"]) {
+    const icon = logos
+        ?.find((logo) => logo.type === "icon")
+        ?.formats.find((iconFormat) => iconFormat?.format !== "svg");
+    if (icon) {
+        return icon;
+    }
+    const logoItem = logos?.find((logo) => logo.type === "logo")?.formats.find((format) => format.format !== "svg");
+    if (logoItem) {
+        return logoItem;
+    }
+    const remainingItem = logos
+        ?.find((logo) => logo.formats.find((format) => format.format !== "svg"))
+        ?.formats.find((format) => format.format !== "svg");
+    if (remainingItem) {
+        return remainingItem;
+    }
+    return null;
 }
 
-export type GetBrandFetchAssetsResult = { success: true; data: BrandFetchResponse } | { success: false; error: string };
+function sanitizeFileName(fileName: string) {
+    return fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
 
-/**
- * Fetches brand assets from BrandFetch API
- *
- * @param identifier - Domain name or brand identifier (e.g., "stripe.com")
- * @returns Brand data including logos, colors, fonts, and other assets
- */
-export const getBrandFetchAssets = async (identifier: string): Promise<GetBrandFetchAssetsResult> => {
-    if (!identifier || identifier.trim().length === 0) {
-        return {
-            success: false,
-            error: "Identifier is required"
-        };
+async function uploadImageToOnboardingAssets({
+    imageUrl,
+    organizationId,
+    fileName,
+    contentType
+}: {
+    imageUrl: string;
+    organizationId: string;
+    fileName: string;
+    contentType: string;
+}): Promise<string | null> {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+        console.error("Failed to download image:", response.statusText);
+        return null;
     }
 
-    // eslint-disable-next-line turbo/no-undeclared-env-vars -- BRANDFETCH_API_KEY is declared in turbo.json
-    const apiKey = process.env.BRANDFETCH_API_KEY;
-    if (!apiKey) {
-        console.error("BRANDFETCH_API_KEY is not configured");
-        return {
-            success: false,
-            error: "BrandFetch API key is not configured"
-        };
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const uploadContentType = contentType || response.headers.get("content-type") || "application/octet-stream";
+
+    const { uploadUrl, assetUrl } = await OnboardS3Service.generateUploadUrl({
+        organizationId,
+        contentType: uploadContentType,
+        fileName: sanitizeFileName(fileName)
+    });
+
+    const uploadResponse = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+            "Content-Type": uploadContentType
+        },
+        body: buffer
+    });
+
+    if (!uploadResponse.ok) {
+        console.error("Failed to upload image to onboarding assets:", uploadResponse.statusText);
+        return null;
     }
 
-    try {
-        const response = await fetch(`https://api.brandfetch.io/v2/brands/${encodeURIComponent(identifier)}`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${apiKey}`,
-                Accept: "application/json"
+    return assetUrl;
+}
+
+export const getBrandFetchAssets = async (identifier: string): Promise<GetBrandFetchAssetsResult> =>
+    getBrandFetchAssetsService(identifier);
+
+export const getBrandAssetsWithUpload = async ({
+    identifier,
+    organizationId
+}: {
+    identifier: string;
+    organizationId: string;
+}): Promise<{ success: true; updates: AutoPopulateUpdates } | { success: false; error: string }> => {
+    const brandResult = await getBrandFetchAssetsService(identifier);
+    if (!brandResult.success) {
+        return brandResult;
+    }
+
+    const brandData = brandResult.data;
+    const updates: AutoPopulateUpdates = {};
+
+    if (brandData.name) {
+        updates.docsSiteName = brandData.name;
+        updates.docsSiteUrl = nameToUrl(brandData.name);
+        updates.docsSiteUrlAvailable = null;
+    }
+
+    const iconItem = getIconItem(brandData.logos);
+    if (iconItem?.src) {
+        try {
+            const uploadedUrl = await uploadImageToOnboardingAssets({
+                imageUrl: iconItem.src,
+                organizationId,
+                fileName: `logo.${iconItem.format || "png"}`,
+                contentType: iconItem.format ? `image/${iconItem.format}` : "application/octet-stream"
+            });
+
+            if (uploadedUrl) {
+                updates.logoUrl = uploadedUrl;
+                updates.faviconUrl = updates.faviconUrl ?? uploadedUrl;
             }
-        });
-
-        if (!response.ok) {
-            if (response.status === 404) {
-                return {
-                    success: false,
-                    error: "Brand not found"
-                };
-            }
-
-            const errorText = await response.text().catch(() => "Unknown error");
-            console.error(`BrandFetch API error (${response.status}):`, errorText);
-
-            return {
-                success: false,
-                error: `Failed to fetch brand data: ${response.status} ${response.statusText}`
-            };
+        } catch (error) {
+            console.error("Failed to process logo upload for brand fetch:", error);
         }
-
-        const data = (await response.json()) as BrandFetchResponse;
-
-        return {
-            success: true,
-            data
-        };
-    } catch (error) {
-        console.error("Error fetching BrandFetch data:", error);
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : "An unexpected error occurred"
-        };
     }
+
+    if (brandData.colors && brandData.colors.length > 0) {
+        let colorToUse =
+            brandData.colors.find((color) => color.type === "accent") ||
+            brandData.colors.find((color) => color.type === "brand");
+        colorToUse = colorToUse || brandData.colors[0];
+        if (colorToUse) {
+            updates.primaryColorHex = colorToUse.hex;
+        }
+    }
+
+    return { success: true, updates };
 };
