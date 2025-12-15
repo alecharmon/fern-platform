@@ -216,6 +216,10 @@ export async function EndpointContentLeft({
                                     request={endpoint.requests[0]}
                                     types={types}
                                     lang={lang}
+                                    renderedFieldDescriptions={renderFormDataFieldDescriptions(
+                                        endpoint.requests[0],
+                                        types
+                                    )}
                                     PropertyRenderer={PropertyRenderer}
                                     PropertyWithShape={PropertyWithShape}
                                     TypeReferenceDefinitions={TypeReferenceDefinitions}
