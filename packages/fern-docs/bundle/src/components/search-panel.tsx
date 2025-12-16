@@ -233,7 +233,7 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
                         "-translate-x-1 transition-transform"
                     )}
                     onMouseDown={handleMouseDown}
-                    style={{ pointerEvents: "auto" }}
+                    style={{ pointerEvents: isOpen ? "auto" : "none" }}
                 />
 
                 <div className="flex-1 overflow-y-auto">
