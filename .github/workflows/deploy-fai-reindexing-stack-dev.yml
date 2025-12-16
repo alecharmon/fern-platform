@@ -8,6 +8,7 @@ on:
       - '**'
     paths:
       - 'servers/fai-reindexing/**'
+  workflow_dispatch:
   workflow_call:
 
 jobs:
