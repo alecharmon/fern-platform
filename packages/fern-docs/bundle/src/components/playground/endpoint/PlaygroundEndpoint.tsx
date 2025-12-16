@@ -204,6 +204,9 @@ export const PlaygroundEndpoint = ({
                     });
                     const audioUrl = URL.createObjectURL(audioBlob);
 
+                    const responseTime = Date.now() - time;
+                    const responseSize = String(chunks.reduce((total, chunk) => total + chunk.length, 0));
+
                     setResponse(
                         loaded({
                             type: "file",
@@ -218,10 +221,21 @@ export const PlaygroundEndpoint = ({
                                 body: audioUrl
                             },
                             contentType: res.headers.get("content-type") || "",
-                            time: Date.now() - time,
-                            size: String(chunks.reduce((total, chunk) => total + chunk.length, 0))
+                            time: responseTime,
+                            size: responseSize
                         })
                     );
+
+                    track("api_playground_request_received", {
+                        endpointId: endpoint.id,
+                        endpointName: node.title,
+                        method: endpoint.method,
+                        docsRoute: `/${node.slug}`,
+                        responseStatus: res.status,
+                        responseStatusText: res.statusText,
+                        responseTime,
+                        responseSize
+                    });
 
                     return;
                 }
@@ -247,21 +261,30 @@ export const PlaygroundEndpoint = ({
                         })
                     );
                 }
+
+                track("api_playground_request_received", {
+                    endpointId: endpoint.id,
+                    endpointName: node.title,
+                    method: endpoint.method,
+                    docsRoute: `/${node.slug}`,
+                    responseStatus: res.status,
+                    responseStatusText: res.statusText,
+                    responseTime: Date.now() - time,
+                    responseSize: String(result.length)
+                });
             } else {
                 const res = await executeProxyRest(req, disableProxy);
                 setResponse(loaded(res));
-                if (res.type !== "stream") {
-                    track("api_playground_request_received", {
-                        endpointId: endpoint.id,
-                        endpointName: node.title,
-                        method: endpoint.method,
-                        docsRoute: `/${node.slug}`,
-                        responseStatus: res.response.status,
-                        responseStatusText: res.response.statusText,
-                        responseTime: res.time,
-                        responseSize: res.size
-                    });
-                }
+                track("api_playground_request_received", {
+                    endpointId: endpoint.id,
+                    endpointName: node.title,
+                    method: endpoint.method,
+                    docsRoute: `/${node.slug}`,
+                    responseStatus: res.response.status,
+                    responseStatusText: res.response.statusText,
+                    responseTime: res.time,
+                    responseSize: res.size
+                });
             }
         } catch (e) {
             // TODO: sentry

@@ -1,12 +1,15 @@
 import urljoin from "url-join";
 
 import type { ProxyRequest } from "../types";
-import type { PlaygroundResponse } from "../types/playgroundResponse";
+import type { PlaygroundRestResponse } from "../types/playgroundResponse";
 import { toBodyInit } from "./requestToBodyInit";
 
 const PROXY_URL = "https://proxy.ferndocs.com/";
 
-export async function executeProxyRest(req: ProxyRequest, disableProxy: boolean = false): Promise<PlaygroundResponse> {
+export async function executeProxyRest(
+    req: ProxyRequest,
+    disableProxy: boolean = false
+): Promise<PlaygroundRestResponse> {
     const requestHeaders = new Headers(req.headers);
 
     // Only set proxy-specific headers when using the proxy

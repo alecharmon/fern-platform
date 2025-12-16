@@ -40,3 +40,5 @@ export type PlaygroundResponse =
     | PlaygroundResponse.Json
     | PlaygroundResponse.String
     | PlaygroundResponse.File;
+
+export type PlaygroundRestResponse = PlaygroundResponse.Json | PlaygroundResponse.String | PlaygroundResponse.File;
