@@ -106,7 +106,7 @@ export function PageActionsToolbar({
                             className="group px-2 py-1 rounded-2 text-(color:--grayscale-a11) hover:bg-(color:--accent-a3) hover:text-(color:--accent-12) transition-colors flex items-center gap-1 cursor-pointer"
                         >
                             <span>{t(lang).buttons.moreActions}</span>
-                            <ChevronDown className="size-icon transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                            <ChevronDown className="size-icon animate-dropdown-chevron" />
                         </button>
                     </FernDropdown>
                 </>

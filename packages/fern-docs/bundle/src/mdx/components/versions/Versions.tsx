@@ -75,7 +75,7 @@ export function Versions({ children, className, paramName = "v" }: VersionsProps
                 >
                     <div className="bg-tag-default hover:bg-tag-default/80 inline-flex h-9 items-center gap-2 rounded px-3 text-sm">
                         {currentVersion?.props.title || currentVersion?.props.version}
-                        <ChevronDown className="size-icon transition-transform data-[state=open]:rotate-180" />
+                        <ChevronDown className="size-icon animate-dropdown-chevron" />
                     </div>
                 </FernDropdown>
             </div>

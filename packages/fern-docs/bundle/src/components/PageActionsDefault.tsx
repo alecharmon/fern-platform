@@ -3,7 +3,7 @@
 import { cn } from "@fern-docs/components/cn";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
 import { PageActionItem } from "./PageActionItem";
@@ -64,28 +64,14 @@ export function PageActionsDefault({
                 onClick={handleDefaultAction}
             >
                 <div className="flex items-center gap-2">
-                    {defaultOption.value === "copy-page" && showCopied ? (
-                        <>
-                            <Check className="size-icon" />
-                            <PageActionItem
-                                option={defaultOption}
-                                lang={lang}
-                                variant="defaultOption"
-                                onCopyPage={handleCopyPage}
-                                showCopied={showCopied}
-                                onValueChange={onValueChange}
-                            />
-                        </>
-                    ) : (
-                        <PageActionItem
-                            option={defaultOption}
-                            lang={lang}
-                            variant="defaultOption"
-                            onCopyPage={handleCopyPage}
-                            showCopied={showCopied}
-                            onValueChange={onValueChange}
-                        />
-                    )}
+                    <PageActionItem
+                        option={defaultOption}
+                        lang={lang}
+                        variant="defaultOption"
+                        onCopyPage={handleCopyPage}
+                        showCopied={showCopied}
+                        onValueChange={onValueChange}
+                    />
                 </div>
             </FernButton>
             {options.length > 1 && (
@@ -106,7 +92,7 @@ export function PageActionsDefault({
                             });
                         }}
                     >
-                        <ChevronDown className="size-icon transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                        <ChevronDown className="size-icon animate-dropdown-chevron" />
                     </FernButton>
                 </FernDropdown>
             )}

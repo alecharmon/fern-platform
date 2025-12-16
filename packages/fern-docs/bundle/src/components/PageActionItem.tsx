@@ -2,7 +2,7 @@
 
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { t } from "@fern-docs/i18n";
-import { Copy } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import type { ReactNode } from "react";
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
 import { ClaudeIcon, CursorIcon, MarkdownIcon, OpenAIIcon, SparklesIconHollow } from "./PageActionsAssets";
@@ -26,7 +26,11 @@ export function PageActionItem({ option, lang, variant, onCopyPage, showCopied, 
     const getIcon = (optionValue: string): ReactNode => {
         switch (optionValue) {
             case "copy-page":
-                return <Copy className="size-icon" />;
+                return showCopied ? (
+                    <Check className="size-icon animate-in fade-in duration-200" />
+                ) : (
+                    <Copy className="size-icon animate-in fade-in duration-200" />
+                );
             case "open-ai-search":
                 return <SparklesIconHollow />;
             case "view-as-markdown":
@@ -52,7 +56,11 @@ export function PageActionItem({ option, lang, variant, onCopyPage, showCopied, 
 
     const getLabel = () => {
         if (value === "copy-page" && variant === "toolbar") {
-            return showCopied ? t(lang).buttons.copied : t(lang).buttons.copyPage;
+            return (
+                <span key={showCopied ? "copied" : "copy"} className="animate-in fade-in duration-200">
+                    {showCopied ? t(lang).buttons.copied : t(lang).buttons.copyPage}
+                </span>
+            );
         }
         return label;
     };
@@ -96,7 +104,9 @@ export function PageActionItem({ option, lang, variant, onCopyPage, showCopied, 
             return (
                 <>
                     {getIcon(value)}
-                    {showCopied ? t(lang).buttons.copied : t(lang).buttons.copyPage}
+                    <span key={showCopied ? "copied" : "copy"} className="animate-in fade-in duration-300">
+                        {showCopied ? t(lang).buttons.copied : t(lang).buttons.copyPage}
+                    </span>
                 </>
             );
         }

@@ -79,7 +79,7 @@ export function ProductDropdownClient({
             side="bottom"
             align={isDesktop ? "start" : "center"}
             triggerAsChild={false}
-            className="fern-product-selector w-full lg:w-auto"
+            className="fern-product-selector group w-full lg:w-auto"
             radioGroupProps={{
                 className: "fern-product-selector-radio-group"
             }}
@@ -93,7 +93,7 @@ export function ProductDropdownClient({
                 data-testid="product-dropdown"
             >
                 <p className="product-item-title w-fit">{currentProduct?.title}</p>
-                <ChevronDown className="size-icon transition-transform data-[state=open]:rotate-180" />
+                <ChevronDown className="size-icon animate-dropdown-chevron" />
             </div>
 
             <FernSelectionItem

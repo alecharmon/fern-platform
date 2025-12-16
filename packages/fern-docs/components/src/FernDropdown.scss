@@ -1,12 +1,24 @@
 @layer components {
   .fern-dropdown {
     @apply relative z-50;
-    @apply animate-popover;
+    @apply animate-dropdown-expand;
     @apply min-w-(--radix-dropdown-menu-trigger-width);
     @apply bg-background border-border-default rounded-2 flex flex-col border backdrop-blur will-change-[opacity,transform];
     @apply shadow-xl;
 
     max-height: calc(300px + 0.5rem + 2px);
+
+    &[data-align="start"] {
+      transform-origin: top left;
+    }
+
+    &[data-align="center"] {
+      transform-origin: top center;
+    }
+
+    &[data-align="end"] {
+      transform-origin: top right;
+    }
 
     .fern-dropdown-item {
       @apply rounded-1 flex w-full cursor-default items-center justify-start px-2 py-1 text-left text-sm;

@@ -76,7 +76,7 @@ export function VersionDropdownClient({
             side="bottom"
             align={isDesktop ? "start" : "center"}
             triggerAsChild={false}
-            className="fern-version-selector w-full lg:w-auto"
+            className="fern-version-selector group w-full lg:w-auto"
             radioGroupProps={{
                 className: "fern-version-selector-radio-group"
             }}
@@ -91,7 +91,7 @@ export function VersionDropdownClient({
                     data-testid="version-dropdown"
                 >
                     {currentVersion.title}
-                    <ChevronDown className="size-icon transition-transform data-[state=open]:rotate-180" />
+                    <ChevronDown className="size-icon animate-dropdown-chevron" />
                 </div>
                 <FernSelectionItem
                     icon={<Tag />}
