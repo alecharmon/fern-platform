@@ -46,8 +46,22 @@ jobs:
             exit 0
           fi
 
+          # Check if BASE_REF is the null SHA (happens on first push to a new branch or force-push)
+          # or if the commit is unreachable (e.g., after force-push where old commit was garbage collected)
+          if [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
+            echo "run_all_tests=true" >> $GITHUB_OUTPUT
+            echo "BASE_REF is null SHA (new branch or force-push) - will run all tests"
+            exit 0
+          fi
+
+          if ! git rev-parse --verify "$BASE_REF^{commit}" >/dev/null 2>&1; then
+            echo "run_all_tests=true" >> $GITHUB_OUTPUT
+            echo "BASE_REF commit is unreachable - will run all tests"
+            exit 0
+          fi
+
           # Check if servers/self-hosted has changes
-          CHANGED_FILES=$(git diff --name-only $BASE_REF $HEAD_REF)
+          CHANGED_FILES=$(git diff --name-only "$BASE_REF" "$HEAD_REF")
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
