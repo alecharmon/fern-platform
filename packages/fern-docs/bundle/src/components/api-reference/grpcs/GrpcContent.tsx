@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { GrpcContentCodeSnippets } from "@fern-docs/components/api-reference/grpcs/GrpcContentCodeSnippets";
@@ -27,7 +28,8 @@ export async function GrpcContent({
     pageActionOptions,
     markdownPromise,
     lang,
-    pageActionsStyle = "default"
+    pageActionsStyle = "default",
+    theme
 }: {
     serialize: MdxSerializer;
     context: GrpcContext;
@@ -39,6 +41,7 @@ export async function GrpcContent({
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
     pageActionsStyle?: "default" | "toolbar";
+    theme?: FernThemeConfig;
 }) {
     const { node, grpc, types } = context;
 
@@ -53,6 +56,7 @@ export async function GrpcContent({
     return (
         <GrpcContextProvider grpcEndpoint={grpc} example={grpcExample}>
             <ReferenceLayout
+                theme={theme}
                 header={
                     <PageHeader
                         serialize={serialize}

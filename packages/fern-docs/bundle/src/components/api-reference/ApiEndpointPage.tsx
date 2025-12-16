@@ -2,6 +2,7 @@ import "server-only";
 
 import { createPruneKey } from "@fern-api/docs-loader";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import {
     type ApiDefinition,
     createEndpointContext,
@@ -44,6 +45,7 @@ export default async function ApiEndpointPage({
     const config = await loader.getConfig();
     const layout = await loader.getLayout();
     const files = await loader.getFiles();
+    const theme = await loader.getTheme();
     const pageActionOptions = await constructPageOptions({
         pageActionConfig: config,
         domain: loader.domain,
@@ -68,6 +70,7 @@ export default async function ApiEndpointPage({
             markdownPromise={markdownPromise}
             lang={lang}
             pageActionsStyle={pageActionsStyle}
+            theme={theme}
         />
     );
 }
@@ -83,7 +86,8 @@ async function ApiEndpointContent({
     pageActionOptions,
     markdownPromise,
     lang,
-    pageActionsStyle
+    pageActionsStyle,
+    theme
 }: {
     serialize: MdxSerializer;
     node: FernNavigation.NavigationNodeApiLeaf;
@@ -96,6 +100,7 @@ async function ApiEndpointContent({
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
     pageActionsStyle: "default" | "toolbar";
+    theme?: FernThemeConfig;
 }) {
     switch (node.type) {
         case "endpoint": {
@@ -117,6 +122,7 @@ async function ApiEndpointContent({
                     markdownPromise={markdownPromise}
                     lang={lang}
                     pageActionsStyle={pageActionsStyle}
+                    theme={theme}
                 />
             );
         }
@@ -137,6 +143,7 @@ async function ApiEndpointContent({
                     markdownPromise={markdownPromise}
                     lang={lang}
                     pageActionsStyle={pageActionsStyle}
+                    theme={theme}
                 />
             );
         }
@@ -157,6 +164,7 @@ async function ApiEndpointContent({
                     markdownPromise={markdownPromise}
                     lang={lang}
                     pageActionsStyle={pageActionsStyle}
+                    theme={theme}
                 />
             );
         }
@@ -177,6 +185,7 @@ async function ApiEndpointContent({
                     markdownPromise={markdownPromise}
                     lang={lang}
                     pageActionsStyle={pageActionsStyle}
+                    theme={theme}
                 />
             );
         }

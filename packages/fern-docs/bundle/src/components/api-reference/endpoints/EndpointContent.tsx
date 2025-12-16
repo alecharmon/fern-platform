@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { EndpointContextProvider } from "@fern-docs/components/api-reference/endpoints/EndpointContext";
@@ -37,7 +38,8 @@ export async function EndpointContent({
     pageActionOptions,
     markdownPromise,
     lang,
-    pageActionsStyle = "default"
+    pageActionsStyle = "default",
+    theme
 }: {
     serialize: MdxSerializer;
     showErrors: boolean;
@@ -51,6 +53,7 @@ export async function EndpointContent({
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
     pageActionsStyle?: "default" | "toolbar";
+    theme?: FernThemeConfig;
 }) {
     const { node, endpoint, types } = context;
 
@@ -60,6 +63,7 @@ export async function EndpointContent({
     return (
         <EndpointContextProvider endpoint={endpoint}>
             <ReferenceLayout
+                theme={theme}
                 header={
                     <PageHeader
                         serialize={serialize}

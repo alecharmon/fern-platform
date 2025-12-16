@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
@@ -48,7 +49,8 @@ export async function WebSocketContent({
     pageActionOptions,
     markdownPromise,
     lang,
-    pageActionsStyle = "default"
+    pageActionsStyle = "default",
+    theme
 }: {
     serialize: MdxSerializer;
     context: WebSocketContext;
@@ -60,6 +62,7 @@ export async function WebSocketContent({
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
     pageActionsStyle?: "default" | "toolbar";
+    theme?: FernThemeConfig;
 }) {
     const { channel, node, types, globalHeaders } = context;
 
@@ -104,6 +107,7 @@ export async function WebSocketContent({
 
     return (
         <ReferenceLayout
+            theme={theme}
             header={
                 <PageHeader
                     serialize={serialize}

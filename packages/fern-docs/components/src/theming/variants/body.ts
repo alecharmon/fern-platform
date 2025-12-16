@@ -47,7 +47,15 @@ ${options.scopeSelector} [data-body-theme="canvas"] #fern-toc:has(> *) {
 }
 
 ${options.scopeSelector} [data-body-theme="canvas"] .fern-layout-guide,
-${options.scopeSelector} [data-body-theme="canvas"] .fern-layout-overview,
+${options.scopeSelector} [data-body-theme="canvas"] .fern-layout-overview {
+  width: 100%;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
 ${options.scopeSelector} [data-body-theme="canvas"] .fern-layout-reference {
   width: 100%;
   border: none;

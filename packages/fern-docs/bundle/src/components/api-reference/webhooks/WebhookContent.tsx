@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { getMessageForStatus } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
@@ -36,7 +37,8 @@ export async function WebhookContent({
     pageActionOptions,
     markdownPromise,
     lang,
-    pageActionsStyle = "default"
+    pageActionsStyle = "default",
+    theme
 }: {
     serialize: MdxSerializer;
     context: ApiDefinition.WebhookContext;
@@ -48,6 +50,7 @@ export async function WebhookContent({
     markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
     lang: string;
     pageActionsStyle?: "default" | "toolbar";
+    theme?: FernThemeConfig;
 }) {
     const { node, webhook, types } = context;
 
@@ -61,6 +64,7 @@ export async function WebhookContent({
 
     return (
         <ReferenceLayout
+            theme={theme}
             header={
                 <PageHeader
                     serialize={serialize}
