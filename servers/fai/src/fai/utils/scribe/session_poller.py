@@ -18,6 +18,18 @@ from fai.utils.scribe.devin_client import get_devin_session_status
 from fai.utils.slack.client import send_slack_message
 from fai.utils.slack.postprocessing import slackify_markdown
 
+FILTERED_MESSAGE_PATTERNS = [
+    r"Warning: your clone commands for .* failed to run and returned with a return code",
+    r"This could cause Devin to develop on outdated code",
+]
+
+
+def should_filter_message(message_text: str) -> bool:
+    for pattern in FILTERED_MESSAGE_PATTERNS:
+        if re.search(pattern, message_text, re.IGNORECASE):
+            return True
+    return False
+
 
 def parse_attachments(message_text: str) -> tuple[str, list[str]]:
     attachment_pattern = r'ATTACHMENT:"([^"]+)"'
@@ -102,6 +114,11 @@ async def poll_devin_session(
                     message_event_id = message.get("event_id")
                     if message_text and message_event_id:
                         try:
+                            if should_filter_message(message_text):
+                                LOGGER.info(f"[SCRIBE] Filtered out message: {message_text[:100]}...")
+                                last_event_id = message_event_id
+                                continue
+
                             clean_text, attachment_urls = parse_attachments(message_text)
 
                             if clean_text:
