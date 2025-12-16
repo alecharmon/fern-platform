@@ -5,7 +5,6 @@ import {
     type TurbopufferRecordWithoutVector
 } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
-import { maybeRemoveCodeBlocks } from "../post-process/chunks/maybe-remove-code-blocks";
 import { maybeRemoveDuplicateNewlines } from "../post-process/chunks/maybe-remove-duplicate-newlines";
 import { maybeRemoveLongWhitespace } from "../post-process/chunks/maybe-remove-long-whitespace";
 import { maybeRemoveClassNameTags } from "../post-process/shared/maybe-remove-class-name-tags";
@@ -28,12 +27,7 @@ const SHARED_PROCESSORS = [
     maybeRemoveIfComponents
 ];
 
-const CHUNK_PROCESSORS = [
-    ...SHARED_PROCESSORS,
-    maybeRemoveDuplicateNewlines,
-    maybeRemoveLongWhitespace,
-    maybeRemoveCodeBlocks
-];
+const CHUNK_PROCESSORS = [...SHARED_PROCESSORS, maybeRemoveDuplicateNewlines, maybeRemoveLongWhitespace];
 
 const MARKDOWN_PROCESSORS = [...SHARED_PROCESSORS];
 
@@ -69,6 +63,8 @@ export async function createMarkdownRecords({
 
     return markdownChunks.map((chunk, i) => {
         const processedChunk = postProcessChunk(chunk);
+        const extractedKeywords = extractKeywordsFromChunk(chunk);
+        const keywords = extractedKeywords.length > 0 ? extractedKeywords : undefined;
         const recordId = createHash("sha256").update(`${node.id}-${i}`).digest("hex");
         return {
             id: recordId,
@@ -79,7 +75,7 @@ export async function createMarkdownRecords({
                 version: versionNode?.title,
                 product: productNode?.title,
                 description: undefined,
-                keywords: undefined,
+                keywords,
                 authed: isNodeAuthed,
                 roles: roles.map((role) => createDelimitedRolesetString(role)),
                 url,
@@ -117,6 +113,71 @@ export function chunkMarkdown(markdown: string): string[] {
     }
 
     return chunks;
+}
+
+export function extractKeywordsFromChunk(chunk: string): string[] {
+    const keywords = new Set<string>();
+
+    const headings = extractHeadings(chunk);
+    headings.forEach((h) => keywords.add(h));
+
+    const inlineCode = extractInlineCode(chunk);
+    inlineCode.forEach((c) => keywords.add(c));
+
+    const frontmatter = extractFrontmatterFields(chunk);
+    frontmatter.forEach((f) => keywords.add(f));
+
+    return Array.from(keywords);
+}
+
+function extractHeadings(chunk: string): string[] {
+    const headings: string[] = [];
+    const lines = chunk.split("\n");
+
+    for (const line of lines) {
+        const match = line.match(/^#{1,6}\s+(.+)$/);
+        if (match) {
+            headings.push(match[1].trim());
+        }
+    }
+
+    return headings;
+}
+
+function extractInlineCode(chunk: string): string[] {
+    const codeSnippets: string[] = [];
+    const inlineCodeRegex = /`([^`\n]+)`/g;
+
+    let match;
+    while ((match = inlineCodeRegex.exec(chunk)) !== null) {
+        const code = match[1].trim();
+        if (code.length >= 2 && code.length <= 100 && !code.includes(" ")) {
+            codeSnippets.push(code);
+        }
+    }
+
+    return codeSnippets;
+}
+
+function extractFrontmatterFields(chunk: string): string[] {
+    const fields: string[] = [];
+    const frontmatterMatch = chunk.match(/^---\n([\s\S]*?)\n---/);
+
+    if (!frontmatterMatch) {
+        return fields;
+    }
+
+    const frontmatter = frontmatterMatch[1];
+    const lines = frontmatter.split("\n");
+
+    for (const line of lines) {
+        const titleMatch = line.match(/^title:\s*(.+)$/);
+        if (titleMatch) {
+            fields.push(titleMatch[1].trim().replace(/^["']|["']$/g, ""));
+        }
+    }
+
+    return fields;
 }
 
 function postProcessChunk(markdown: string): string {
