@@ -15,6 +15,9 @@ const isStandalone =
     process.env.NEXT_PUBLIC_IS_LOCAL === "1" ||
     process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1" ||
     process.env.NEXT_PUBLIC_IS_SELF_SERVED === "1";
+// Disable cache for local development, or when explicitly requested via NEXT_DISABLE_CACHE=1
+// Self-hosted production should have caching enabled for performance
+const isCacheDisabled = process.env.NEXT_PUBLIC_IS_LOCAL === "1" || process.env.NEXT_DISABLE_CACHE === "1";
 
 // For self-hosted deployments, support serving the app from a basePath
 const nextBasePath = isSelfHosted && process.env.NEXT_PUBLIC_BASE_PATH ? process.env.NEXT_PUBLIC_BASE_PATH : undefined;
@@ -280,7 +283,9 @@ const nextConfig: NextConfig = {
                 source: "/:prefix*/api/fern-docs/search/v2/:path*",
                 headers: searchV2Headers
             },
-            ...(isStandalone ? [disableCaching] : [])
+            // Disable caching for local development (always fresh content) or when explicitly requested
+            // For self-hosted production, caching is enabled by default for performance
+            ...(isCacheDisabled ? [disableCaching] : [])
         ];
     },
     images: {
