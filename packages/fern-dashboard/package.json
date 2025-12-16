@@ -130,7 +130,7 @@
     "github-slugger": "^2.0.0",
     "jotai": "catalog:",
     "js-yaml": "catalog:",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "katex": "0.16.21",
     "libsodium-wrappers": "^0.7.15",
     "lowlight": "^3.3.0",
