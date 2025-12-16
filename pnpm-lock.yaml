@@ -1163,6 +1163,9 @@ importers:
       '@fern-docs/edge-config':
         specifier: workspace:*
         version: link:../fern-docs/edge-config
+      '@fern-docs/i18n':
+        specifier: workspace:*
+        version: link:../commons/i18n
       '@fern-docs/mdx':
         specifier: workspace:*
         version: link:../fern-docs/mdx

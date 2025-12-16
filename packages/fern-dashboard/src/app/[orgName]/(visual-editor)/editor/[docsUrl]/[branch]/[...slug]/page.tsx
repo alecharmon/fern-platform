@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createPruneKey } from "@fern-api/docs-loader";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { getPageId, slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
@@ -19,11 +20,13 @@ import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 import { cn } from "@/utils/utils";
+import { ApiEndpointPageWrapper } from "./ApiEndpointPageWrapper";
 import { EditorRedirect } from "./EditorRedirect";
 import PageNode, { type PageNode as PageNodeNamespace } from "./PageNode";
 
 const CHANGELOG_NODE_TYPES = new Set(["changelog", "changelogEntry"]);
-const API_REFERENCE_NODE_TYPES = new Set(["apiPackage", "endpoint", "webSocket", "webhook", "grpc"]);
+// Note: "endpoint" is now handled separately for rendering
+const API_REFERENCE_COMING_SOON_TYPES = new Set(["apiPackage", "webSocket", "webhook", "grpc"]);
 
 export default async function Page({
     params
@@ -88,7 +91,24 @@ export default async function Page({
         throw new Error("navigationNode of type 'redirect' should be handled by EditorRedirect");
     }
 
-    if (API_REFERENCE_NODE_TYPES.has(navigationNode.node.type)) {
+    // Handle HTTP endpoints - render full API reference page
+    // Note: We don't wrap this in AbstractLayoutEvaluatorContent because EndpointContent
+    // already provides its own ReferenceLayout which handles full-width styling
+    if (navigationNode.node.type === "endpoint") {
+        const endpointNode = navigationNode.node as FernNavigation.EndpointNode;
+        const apiDefinition = await loader.getPrunedApi(endpointNode.apiDefinitionId, createPruneKey(endpointNode));
+
+        return (
+            <ApiEndpointPageWrapper
+                node={endpointNode}
+                apiDefinition={apiDefinition}
+                breadcrumb={navigationNode.breadcrumb}
+            />
+        );
+    }
+
+    // Other API reference types still show "coming soon"
+    if (API_REFERENCE_COMING_SOON_TYPES.has(navigationNode.node.type)) {
         return <ApiReferenceComingSoon />;
     }
     if (CHANGELOG_NODE_TYPES.has(navigationNode.node.type)) {

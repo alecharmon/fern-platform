@@ -7,6 +7,7 @@ import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useBranch } from "@/providers/BranchContext";
+import { useDevMode } from "@/providers/DevModeProvider";
 import { useIsPreviewMode } from "@/providers/EditorPreviewProvider";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
@@ -30,6 +31,7 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
     const isEditingDisabled = useEditingDisabled();
     const { owner, repo, baseBranch } = useGitHubRepo();
     const { isPreviewMode } = useIsPreviewMode();
+    const { isDevModeDisabled } = useDevMode();
     const orgName = useOrgName();
 
     const [showRocketButton, setShowRocketButton] = useState(false);
@@ -109,7 +111,14 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
                     </DashboardTooltip>
                 </div>
                 <div className="flex items-center justify-end gap-2 sm:flex-1 sm:shrink-0">
-                    <DashboardTooltip content="Enable dev mode to edit the source code" hideInnerSpan>
+                    <DashboardTooltip
+                        content={
+                            isDevModeDisabled
+                                ? "Dev mode is not available for API References"
+                                : "Enable dev mode to edit the source code"
+                        }
+                        hideInnerSpan
+                    >
                         <div className="pointer-events-auto hidden items-center justify-center md:flex">
                             <DevModeSwitcher />
                         </div>

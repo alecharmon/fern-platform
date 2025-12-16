@@ -204,4 +204,12 @@
     left: 0;
     user-select: none;
   }
+
+  /* Fix sticky aside positioning for API reference pages.
+   * The scroll container is inside <main mt-(--header-height)>, so the
+   * header height is already accounted for. Override the top/max-height
+   * to not double-count it. */
+  .fern-layout-reference-content[data-kind="api"] .fern-layout-reference-aside {
+    @apply md:top-6 md:max-h-[calc(100vh-3rem)];
+  }
 }

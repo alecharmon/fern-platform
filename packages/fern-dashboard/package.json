@@ -51,6 +51,7 @@
     "@fern-api/venus-api-sdk": "0.20.0",
     "@fern-docs/components": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",
+    "@fern-docs/i18n": "workspace:*",
     "@fern-docs/mdx": "workspace:*",
     "@fern-docs/search-ui": "workspace:*",
     "@fern-ui/loadable": "workspace:*",
