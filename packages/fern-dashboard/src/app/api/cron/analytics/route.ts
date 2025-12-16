@@ -23,10 +23,16 @@ import type { DateRangePeriod } from "@/app/services/analyticsCron/types";
  */
 export async function GET(request: NextRequest) {
     // Verify the request is from Vercel Cron
+    // Vercel automatically sends Authorization header with CRON_SECRET when configured
     const authHeader = request.headers.get("authorization");
-    const cronSecret = process.env.ANALYTICS_CRON_SECRET;
+    const cronSecret = process.env.CRON_SECRET;
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret) {
+        console.error("[analytics-cron] CRON_SECRET not configured");
+        return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
         console.error("[analytics-cron] Unauthorized request - invalid or missing authorization header");
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
