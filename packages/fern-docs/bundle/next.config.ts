@@ -239,10 +239,10 @@ const nextConfig: NextConfig = {
                         `style-src 'self' 'unsafe-inline' ${httpScheme}`,
                         `img-src 'self' ${httpScheme} data: blob:`,
                         `font-src 'self' ${httpScheme} data:`,
-                        `connect-src 'self' ${httpScheme} wss: ws:`,
-                        `media-src 'self' ${httpScheme} blob:`,
-                        `object-src 'self' ${httpScheme}`,
-                        `frame-src 'self' ${httpScheme}`,
+                        `connect-src 'self' ${httpScheme} wss: ws: data: blob:`,
+                        `media-src 'self' ${httpScheme} data: blob:`,
+                        `object-src 'self' ${httpScheme} data: blob:`,
+                        `frame-src 'self' ${httpScheme} data: blob:`,
                         "base-uri 'self'",
                         `form-action 'self' ${httpScheme}`
                     ].join("; ");
