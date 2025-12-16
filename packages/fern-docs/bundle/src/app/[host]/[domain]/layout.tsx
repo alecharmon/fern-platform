@@ -13,6 +13,7 @@ import { ErrorBoundaryProvider } from "@fern-docs/components/providers/ErrorBoun
 import { Providers } from "@fern-docs/components/providers/providers";
 import { DarkCode } from "@fern-docs/components/state/dark-code";
 import { Domain } from "@fern-docs/components/state/domain";
+import { EmbeddedProvider } from "@fern-docs/components/state/embedded";
 import type { LaunchDarklyInfo } from "@fern-docs/components/state/feature-flags";
 import { DefaultLanguage } from "@fern-docs/components/state/language";
 import { RootNodeProvider, SetBasePath } from "@fern-docs/components/state/navigation";
@@ -155,6 +156,9 @@ export default async function Layout({
                             sidebarRootNodesToInitiallyCollapsedNodes={sidebarRootNodesToInitiallyCollapsedNodes}
                         >
                             <Domain value={domain} />
+                            <React.Suspense fallback={null}>
+                                <EmbeddedProvider />
+                            </React.Suspense>
                             <SetBasePath value={basePath || "/"} />
                             {/**
                              * We only load Vercel Insights and Speed Insights scripts for sites WITHOUT a basePath.

@@ -5,6 +5,7 @@ import React, { Fragment } from "react";
 import { cn } from "../cn";
 import { FERN_FOOTER_ID } from "../constants";
 import { Separator } from "../Separator";
+import { useIsEmbedded } from "../state/embedded";
 import { FernHeader } from "./fern-header";
 import { MainCtx } from "./mobile-menu";
 import { SidebarNav } from "./side-nav";
@@ -45,6 +46,7 @@ export default function AbstractDefaultDocs({
     isSidePanelResizing?: boolean;
 }) {
     const { resolvedTheme } = useTheme();
+    const isEmbedded = useIsEmbedded();
     const headerClassName = resolvedTheme === "dark" ? darkHeaderClassName : lightHeaderClassName;
     const sidebarClassName = resolvedTheme === "dark" ? darkSidebarClassName : lightSidebarClassName;
     const mainRef = React.useRef<HTMLDivElement>(null);
@@ -66,31 +68,37 @@ export default function AbstractDefaultDocs({
             }}
         >
             <div className="fern-background-image pointer-events-none fixed inset-0" />
-            <FernHeader
-                className={cn(
-                    "fern-background-image transition-all duration-500 ease-out",
-                    { "lg:hidden": isHeaderDisabled },
-                    isSidePanelResizing && "!transition-none",
-                    headerClassName
-                )}
-                style={{
-                    width: isSidePanelOpen ? "calc(100% - var(--ask-ai-panel-width, 24rem))" : "100%"
-                }}
-                data-theme="default"
-            >
-                {announcement}
-                <div className="width-before-scroll-bar">
-                    <div className="fern-header-content">{header}</div>
-                    <Fragment key="header-tabs">{headerTabs}</Fragment>
-                </div>
-            </FernHeader>
+            {!isEmbedded && (
+                <FernHeader
+                    className={cn(
+                        "fern-background-image transition-all duration-500 ease-out",
+                        { "lg:hidden": isHeaderDisabled },
+                        isSidePanelResizing && "!transition-none",
+                        headerClassName
+                    )}
+                    style={{
+                        width: isSidePanelOpen ? "calc(100% - var(--ask-ai-panel-width, 24rem))" : "100%"
+                    }}
+                    data-theme="default"
+                >
+                    {announcement}
+                    <div className="width-before-scroll-bar">
+                        <div className="fern-header-content">{header}</div>
+                        <Fragment key="header-tabs">{headerTabs}</Fragment>
+                    </div>
+                </FernHeader>
+            )}
 
             <MainCtx.Provider value={mainRef}>
                 <main
                     ref={mainRef}
-                    className={cn("mt-(--header-height) relative z-0 flex transition-all duration-500 ease-out", {
-                        "mx-auto": isSidePanelOpen
-                    })}
+                    className={cn(
+                        "relative z-0 flex transition-all duration-500 ease-out",
+                        !isEmbedded && "mt-(--header-height)",
+                        {
+                            "mx-auto": isSidePanelOpen
+                        }
+                    )}
                     style={{
                         maxWidth: isSidePanelOpen ? "calc(var(--page-width) + 3rem)" : "inherit",
                         transition: "max-width 500ms ease-out"
@@ -130,7 +138,7 @@ export default function AbstractDefaultDocs({
             </MainCtx.Provider>
 
             {/* Enables footer DOM injection */}
-            <footer id={FERN_FOOTER_ID} className="width-before-scroll-bar" />
+            {!isEmbedded && <footer id={FERN_FOOTER_ID} className="width-before-scroll-bar" />}
         </div>
     );
 }
