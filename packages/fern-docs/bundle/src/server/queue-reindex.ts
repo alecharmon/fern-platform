@@ -6,6 +6,7 @@ export const queueAlgoliaReindex = async (host: string, domain: string, basepath
         domain,
         basepath,
         endpoint: "/api/fern-docs/search/v2/reindex/algolia",
-        method: "GET"
+        method: "GET",
+        deduplicationId: `algolia-reindex-${domain}`
     });
 };
