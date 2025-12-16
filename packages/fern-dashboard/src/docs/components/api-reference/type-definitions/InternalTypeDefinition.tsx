@@ -5,12 +5,17 @@ import { EnumTypeDefinition } from "@fern-docs/components/api-reference/type-def
 import { FernCollapseWithButtonUncontrolled } from "@fern-docs/components/api-reference/type-definitions/FernCollapseWithButtonUncontrolled";
 import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
+import {
+    filterDuplicateObjectProperties,
+    filterObjectPropertiesByAccess,
+    filterObjectPropertiesByExclude,
+    type PropertyLocation
+} from "@fern-docs/components/api-reference/type-definitions/utils";
 import { memo } from "react";
 
 import { DiscriminatedUnionVariant } from "./DiscriminatedUnionVariant";
 import { EnumValue } from "./EnumValue";
 import { ObjectProperty } from "./ObjectProperty";
-import type { PropertyLocation } from "./TypeReferenceDefinitions";
 import { UndiscriminatedUnionVariant } from "./UndiscriminatedUnionVariant";
 
 export const InternalTypeDefinition = memo(function InternalTypeDefinition({
@@ -18,7 +23,9 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     types,
     location,
     additionalProperties,
-    lang = "en"
+    lang = "en",
+    exclude,
+    excludeDeprecated
 }: {
     shape:
         | ApiDefinition.TypeShape.Enum
@@ -30,6 +37,10 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang?: string;
+    /** @todo Handle for API compatibility with bundle's InternalTypeDefinition */
+    exclude?: string[];
+    /** @todo Handle for API compatibility with bundle's InternalTypeDefinition */
+    excludeDeprecated?: boolean;
 }) {
     switch (shape.type) {
         case "enum": {
@@ -88,7 +99,11 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
             const properties = ApiDefinition.unwrapObjectType(shape, types).properties;
 
             const filteredProperties = filterDuplicateObjectProperties(
-                filterObjectPropertiesByAccess(properties, location)
+                filterObjectPropertiesByExclude(
+                    filterObjectPropertiesByAccess(properties, location),
+                    exclude,
+                    excludeDeprecated
+                )
             );
 
             if (filteredProperties.length === 0) {
@@ -129,30 +144,3 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
         }
     }
 });
-
-const filterObjectPropertiesByAccess = (
-    properties: ApiDefinition.ObjectProperty[],
-    location: PropertyLocation | undefined
-) => {
-    if (location === undefined) {
-        return properties;
-    }
-
-    return properties.filter((property) => {
-        if (location === "request") {
-            return property.propertyAccess !== "READ_ONLY";
-        } else if (location === "response") {
-            return property.propertyAccess !== "WRITE_ONLY";
-        }
-        return true;
-    });
-};
-
-const filterDuplicateObjectProperties = (properties: ApiDefinition.ObjectProperty[]) => {
-    return properties.reduce<ApiDefinition.ObjectProperty[]>((acc, property) => {
-        if (!acc.some((p) => p.key === property.key)) {
-            acc.push(property);
-        }
-        return acc;
-    }, []);
-};

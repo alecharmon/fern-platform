@@ -64,7 +64,7 @@
     "./api-reference/*": "./src/api-reference/*.tsx",
     "./api-reference/type-definitions/*": "./src/api-reference/type-definitions/*.tsx",
     "./api-reference/type-definitions/serialized-types": "./src/api-reference/type-definitions/serialized-types.ts",
-    "./api-reference/type-definitions/slots-utils": "./src/api-reference/type-definitions/slots-utils.ts",
+    "./api-reference/type-definitions/utils": "./src/api-reference/type-definitions/utils.ts",
     "./api-reference/examples/*": "./src/api-reference/examples/*.tsx",
     "./api-reference/examples/JsonPropertyPath": "./src/api-reference/examples/JsonPropertyPath.ts",
     "./api-reference/examples/code-example": "./src/api-reference/examples/code-example.ts",

@@ -1,50 +1,13 @@
 "use client";
 
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import {
+    getIconInfoForTypeReference,
+    type PropertyLocation
+} from "@fern-docs/components/api-reference/type-definitions/utils";
 import type { ReactElement } from "react";
 
 import { PropertyWithShape } from "./ObjectProperty";
-import type { PropertyLocation } from "./TypeReferenceDefinitions";
-
-type IconInfo = {
-    content: string;
-    size: number;
-};
-
-function getIconInfoForTypeReference(
-    typeRef: ApiDefinition.TypeShapeOrReference,
-    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>
-): IconInfo | null {
-    return visitDiscriminatedUnion(ApiDefinition.unwrapReference(typeRef, types).shape)._visit<IconInfo | null>({
-        primitive: (primitive) =>
-            visitDiscriminatedUnion(primitive.value, "type")._visit<IconInfo | null>({
-                string: () => ({ content: "abc", size: 6 }),
-                boolean: () => ({ content: "true", size: 6 }),
-                integer: () => ({ content: "123", size: 6 }),
-                uint: () => ({ content: "123", size: 6 }),
-                uint64: () => ({ content: "123", size: 6 }),
-                double: () => ({ content: "1.2", size: 6 }),
-                long: () => ({ content: "123", size: 6 }),
-                datetime: () => ({ content: "abc", size: 6 }),
-                uuid: () => ({ content: "abc", size: 6 }),
-                base64: () => ({ content: "abc", size: 6 }),
-                date: () => ({ content: "abc", size: 6 }),
-                bigInteger: () => ({ content: "123", size: 6 }),
-                _other: () => null
-            }),
-        literal: () => ({ content: "!", size: 6 }),
-        object: () => null,
-        undiscriminatedUnion: () => null,
-        discriminatedUnion: () => null,
-        enum: () => null,
-        list: (list) => getIconInfoForTypeReference(list.itemShape, types),
-        set: (set) => getIconInfoForTypeReference(set.itemShape, types),
-        map: () => ({ content: "{}", size: 9 }),
-        unknown: () => ({ content: "{}", size: 6 }),
-        _other: () => null
-    });
-}
 
 function getIconForTypeReference(
     typeRef: ApiDefinition.TypeShapeOrReference,

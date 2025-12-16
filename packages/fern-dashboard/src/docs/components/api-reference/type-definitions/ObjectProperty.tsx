@@ -37,13 +37,15 @@ export interface ObjectPropertyProps {
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     lang?: string;
+    badge?: React.ReactNode;
 }
 
 export const ObjectProperty = React.memo(function ObjectProperty({
     property,
     types,
     location,
-    lang = "en"
+    lang = "en",
+    badge
 }: ObjectPropertyProps) {
     const unwrapped = ApiDefinition.unwrapReference(property.valueShape, types);
     const description = compact([property.description, ...unwrapped.descriptions])[0];
@@ -57,6 +59,7 @@ export const ObjectProperty = React.memo(function ObjectProperty({
             types={types}
             location={location}
             lang={lang}
+            badge={badge}
         />
     );
 });
@@ -73,6 +76,7 @@ export interface PropertyWithShapeProps {
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang?: string;
+    badge?: React.ReactNode;
 }
 
 export const PropertyWithShape = React.memo(function PropertyWithShape({
@@ -84,7 +88,8 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     types,
     location,
     additionalProperties,
-    lang = "en"
+    lang = "en",
+    badge
 }: PropertyWithShapeProps) {
     return (
         <PropertyRenderer
@@ -93,6 +98,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
             description={description}
             typeShorthand={<TypeShorthand shape={shape} lang={lang} />}
             availability={availability}
+            badge={badge}
         >
             <TypeReferenceDefinitions
                 shape={shape}
@@ -114,6 +120,7 @@ export interface PropertyRendererProps {
     typeShorthand: React.ReactNode;
     availability: ApiDefinition.Availability | null | undefined;
     children?: React.ReactNode;
+    badge?: React.ReactNode;
 }
 
 export const PropertyRenderer = React.memo(function PropertyRenderer({
@@ -122,7 +129,8 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
     availability,
     description,
     typeShorthand,
-    children
+    children,
+    badge
 }: PropertyRendererProps) {
     const { jsonPropertyPath } = useTypeDefinitionContext();
     const fullPath = jsonPropertyPathToString(jsonPropertyPath);
@@ -134,6 +142,7 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
         <PropertyContainer>
             <TypeDefinitionAnchor sideOffset={6}>
                 {icon}
+                {badge}
                 {name != null && <PropertyKey className="fern-api-property-key">{name}</PropertyKey>}
                 {showTooltip && (
                     <FernTooltipProvider delayDuration={0}>

@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { getTypeIdWithLocation, type PropertyLocation } from "./slots-utils";
+import { getTypeIdWithLocation, type PropertyLocation } from "./utils";
 
 export { getTypeIdWithLocation, type PropertyLocation };
 

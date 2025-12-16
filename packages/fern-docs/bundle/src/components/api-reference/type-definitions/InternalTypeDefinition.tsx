@@ -3,13 +3,18 @@ import { EnumTypeDefinition } from "@fern-docs/components/api-reference/type-def
 import { FernCollapseWithButtonUncontrolled } from "@fern-docs/components/api-reference/type-definitions/FernCollapseWithButtonUncontrolled";
 import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
+import {
+    filterDuplicateObjectProperties,
+    filterObjectPropertiesByAccess,
+    filterObjectPropertiesByExclude,
+    type PropertyLocation
+} from "@fern-docs/components/api-reference/type-definitions/utils";
 import { memo } from "react";
 import { UnreachableCaseError } from "ts-essentials";
 
 import { DiscriminatedUnionVariant } from "./DiscriminatedUnionVariant";
 import { EnumValue } from "./EnumValue";
 import { ObjectProperty } from "./ObjectProperty";
-import type { PropertyLocation } from "./TypeReferenceDefinitions";
 import { UndiscriminatedUnionVariant } from "./UndiscriminatedUnionVariant";
 
 export declare namespace InternalTypeDefinition {
@@ -146,46 +151,3 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
             throw new UnreachableCaseError(shape);
     }
 });
-
-const filterObjectPropertiesByAccess = (
-    properties: ApiDefinition.ObjectProperty[],
-    location: PropertyLocation | undefined
-) => {
-    if (location === undefined) {
-        return properties;
-    }
-
-    return properties.filter((property) => {
-        if (location === "request") {
-            return property.propertyAccess !== "READ_ONLY";
-        } else if (location === "response") {
-            return property.propertyAccess !== "WRITE_ONLY";
-        }
-        return true;
-    });
-};
-
-const filterObjectPropertiesByExclude = (
-    properties: ApiDefinition.ObjectProperty[],
-    exclude: string[] | undefined,
-    excludeDeprecated: boolean | undefined
-) => {
-    return properties.filter((property) => {
-        if (exclude?.includes(property.key)) {
-            return false;
-        }
-        if (excludeDeprecated && property.availability === "Deprecated") {
-            return false;
-        }
-        return true;
-    });
-};
-
-const filterDuplicateObjectProperties = (properties: ApiDefinition.ObjectProperty[]) => {
-    return properties.reduce<ApiDefinition.ObjectProperty[]>((acc, property) => {
-        if (!acc.some((p) => p.key === property.key)) {
-            acc.push(property);
-        }
-        return acc;
-    }, []);
-};

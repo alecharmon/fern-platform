@@ -1,6 +1,6 @@
 import type { TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
-import { getTypeIdWithLocation } from "@fern-docs/components/api-reference/type-definitions/slots-utils";
 import { TypeDefinitionSlotsProvider } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
+import { getTypeIdWithLocation } from "@fern-docs/components/api-reference/type-definitions/utils";
 
 import { TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 

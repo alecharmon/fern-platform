@@ -10,72 +10,38 @@
  * @see packages/fern-docs/bundle/src/components/api-reference/type-definitions/TypeReferenceDefinitions.tsx
  */
 
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { TypeDefinitionSlot } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
 import {
-    type PropertyLocation,
-    TypeDefinitionSlot
-} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
+    hasInlineEnum,
+    hasInternalTypeReference,
+    type PropertyLocation
+} from "@fern-docs/components/api-reference/type-definitions/utils";
 import React from "react";
 
 import { InternalTypeDefinition } from "./InternalTypeDefinition";
 
-export type { PropertyLocation };
-
-// HACHACK: this is a hack to render inlined enums above the description
-export function hasInlineEnum(
-    shape: ApiDefinition.TypeShapeOrReference,
-    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>
-): boolean {
-    const unwrapped = ApiDefinition.unwrapReference(shape, types);
-    return visitDiscriminatedUnion(unwrapped.shape)._visit<boolean>({
-        object: () => false,
-        enum: (value) => value.values.length < 6,
-        undiscriminatedUnion: () => false,
-        discriminatedUnion: () => false,
-        list: (value) => hasInlineEnum(value.itemShape, types),
-        set: (value) => hasInlineEnum(value.itemShape, types),
-        map: (map) => hasInlineEnum(map.keyShape, types) || hasInlineEnum(map.valueShape, types),
-        primitive: () => false,
-        literal: () => true,
-        unknown: () => false,
-        _other: () => false
-    });
-}
-
-export function hasInternalTypeReference(
-    shape: ApiDefinition.TypeShapeOrReference,
-    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>
-): boolean {
-    const unwrapped = ApiDefinition.unwrapReference(shape, types);
-    return visitDiscriminatedUnion(unwrapped.shape)._visit<boolean>({
-        object: () => true,
-        enum: () => true,
-        undiscriminatedUnion: () => true,
-        discriminatedUnion: () => true,
-        list: () => true,
-        set: () => true,
-        map: (map) => hasInternalTypeReference(map.keyShape, types) || hasInternalTypeReference(map.valueShape, types),
-        primitive: () => false,
-        literal: () => true,
-        unknown: () => false,
-        _other: () => false
-    });
-}
+export { hasInlineEnum, hasInternalTypeReference, type PropertyLocation };
 
 export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinitions({
     shape,
     types,
     location,
     additionalProperties,
-    lang = "en"
+    lang = "en",
+    exclude,
+    excludeDeprecated
 }: {
     shape: ApiDefinition.TypeShapeOrReference;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang?: string;
+    /** @todo Handle for API compatibility with bundle's TypeReferenceDefinitions */
+    exclude?: string[];
+    /** @todo Handle for API compatibility with bundle's TypeReferenceDefinitions */
+    excludeDeprecated?: boolean;
 }) {
     switch (shape.type) {
         case "id":
@@ -87,7 +53,14 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         properties: [...(additionalProperties ?? []), ...(newTypeShape.properties ?? [])]
                     };
                     return (
-                        <TypeReferenceDefinitions shape={updatedShape} types={types} location={location} lang={lang} />
+                        <TypeReferenceDefinitions
+                            shape={updatedShape}
+                            types={types}
+                            location={location}
+                            lang={lang}
+                            exclude={exclude}
+                            excludeDeprecated={excludeDeprecated}
+                        />
                     );
                 }
             }
@@ -104,6 +77,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    exclude={exclude}
+                    excludeDeprecated={excludeDeprecated}
                 />
             );
         case "list":
@@ -116,6 +91,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        exclude={exclude}
+                        excludeDeprecated={excludeDeprecated}
                     />
                 </TypeDefinitionPathPart>
             );
@@ -128,6 +105,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        exclude={exclude}
+                        excludeDeprecated={excludeDeprecated}
                     />
                     <TypeReferenceDefinitions
                         shape={shape.valueShape}
@@ -135,6 +114,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        exclude={exclude}
+                        excludeDeprecated={excludeDeprecated}
                     />
                 </TypeDefinitionPathPart>
             );
@@ -149,6 +130,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    exclude={exclude}
+                    excludeDeprecated={excludeDeprecated}
                 />
             );
         }
@@ -161,6 +144,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    exclude={exclude}
+                    excludeDeprecated={excludeDeprecated}
                 />
             );
         }
