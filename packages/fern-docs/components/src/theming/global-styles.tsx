@@ -1,3 +1,4 @@
+import { generateFernColorPalette } from "@fern-api/docs-server/generateFernColors";
 import type { FernFonts } from "@fern-api/docs-server/generateFonts";
 import { type ArrayOf12, FERN_COLOR_ACCENT, type FernColorTheme } from "@fern-api/docs-utils";
 import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
@@ -44,84 +45,29 @@ export function GlobalStyles({
         darkSelector
     });
 
-    // if no dark theme is provided, add a fallback dark theme for code blocks
+    // Fallback dark theme when no dark theme is provided (white accent on black background)
+    const fallbackDarkPalette = generateFernColorPalette({
+        appearance: "dark",
+        accent: "#ffffff",
+        background: "#000000"
+    });
+
     const fallbackDark = {
-        appearance: "dark" as const,
-        accentScale: dark?.accentScale ?? (Array(12).fill("#fff") as ArrayOf12<string>),
-        accentScaleAlpha: dark?.accentScaleAlpha ?? (Array(12).fill("#fff") as ArrayOf12<string>),
-        accentScaleWideGamut: dark?.accentScaleWideGamut ?? (Array(12).fill("oklch(100% 0 0)") as ArrayOf12<string>),
-        accentScaleAlphaWideGamut:
-            dark?.accentScaleAlphaWideGamut ?? (Array(12).fill("oklch(100% 0 0)") as ArrayOf12<string>),
-        accentContrast: dark?.accentContrast ?? "#000",
-        grayScale:
-            dark?.grayScale ??
-            ([
-                "#000",
-                "#111",
-                "#222",
-                "#333",
-                "#444",
-                "#555",
-                "#666",
-                "#777",
-                "#888",
-                "#999",
-                "#aaa",
-                "#bbb"
-            ] as ArrayOf12<string>),
-        grayScaleAlpha:
-            dark?.grayScaleAlpha ??
-            ([
-                "#000",
-                "#111",
-                "#222",
-                "#333",
-                "#444",
-                "#555",
-                "#666",
-                "#777",
-                "#888",
-                "#999",
-                "#aaa",
-                "#bbb"
-            ] as ArrayOf12<string>),
-        grayScaleWideGamut:
-            dark?.grayScaleWideGamut ??
-            ([
-                "oklch(0% 0 0)",
-                "oklch(10% 0 0)",
-                "oklch(20% 0 0)",
-                "oklch(30% 0 0)",
-                "oklch(40% 0 0)",
-                "oklch(50% 0 0)",
-                "oklch(60% 0 0)",
-                "oklch(70% 0 0)",
-                "oklch(80% 0 0)",
-                "oklch(90% 0 0)",
-                "oklch(95% 0 0)",
-                "oklch(100% 0 0)"
-            ] as ArrayOf12<string>),
-        grayScaleAlphaWideGamut:
-            dark?.grayScaleAlphaWideGamut ??
-            ([
-                "oklch(0% 0 0)",
-                "oklch(10% 0 0)",
-                "oklch(20% 0 0)",
-                "oklch(30% 0 0)",
-                "oklch(40% 0 0)",
-                "oklch(50% 0 0)",
-                "oklch(60% 0 0)",
-                "oklch(70% 0 0)",
-                "oklch(80% 0 0)",
-                "oklch(90% 0 0)",
-                "oklch(95% 0 0)",
-                "oklch(100% 0 0)"
-            ] as ArrayOf12<string>),
-        graySurface: dark?.graySurface ?? "rgba(0, 0, 0, 0.05)",
-        graySurfaceWideGamut: dark?.graySurfaceWideGamut ?? "color(display-p3 0 0 0 / 5%)",
-        accentSurface: dark?.accentSurface ?? "#ffffff",
-        accentSurfaceWideGamut: dark?.accentSurfaceWideGamut ?? "color(display-p3 1 1 1)",
-        background: dark?.background ?? "#000000"
+        ...fallbackDarkPalette,
+        accentScale: dark?.accentScale ?? fallbackDarkPalette.accentScale,
+        accentScaleAlpha: dark?.accentScaleAlpha ?? fallbackDarkPalette.accentScaleAlpha,
+        accentScaleWideGamut: dark?.accentScaleWideGamut ?? fallbackDarkPalette.accentScaleWideGamut,
+        accentScaleAlphaWideGamut: dark?.accentScaleAlphaWideGamut ?? fallbackDarkPalette.accentScaleAlphaWideGamut,
+        accentContrast: dark?.accentContrast ?? fallbackDarkPalette.accentContrast,
+        grayScale: dark?.grayScale ?? fallbackDarkPalette.grayScale,
+        grayScaleAlpha: dark?.grayScaleAlpha ?? fallbackDarkPalette.grayScaleAlpha,
+        grayScaleWideGamut: dark?.grayScaleWideGamut ?? fallbackDarkPalette.grayScaleWideGamut,
+        grayScaleAlphaWideGamut: dark?.grayScaleAlphaWideGamut ?? fallbackDarkPalette.grayScaleAlphaWideGamut,
+        graySurface: dark?.graySurface ?? fallbackDarkPalette.graySurface,
+        graySurfaceWideGamut: dark?.graySurfaceWideGamut ?? fallbackDarkPalette.graySurfaceWideGamut,
+        accentSurface: dark?.accentSurface ?? fallbackDarkPalette.accentSurface,
+        accentSurfaceWideGamut: dark?.accentSurfaceWideGamut ?? fallbackDarkPalette.accentSurfaceWideGamut,
+        background: dark?.background ?? fallbackDarkPalette.background
     };
     return (
         <style key="__fern-global-styles">
@@ -278,8 +224,8 @@ export function GlobalStyles({
         }`
                 : !hasTheme && !!light
                   ? `${darkSelector} {
-          --background: ${dark?.background ?? "#000"};
-          --accent: #fff;
+          --background: ${fallbackDark.background};
+          --accent: ${fallbackDark.accent};
         }`
                   : `${darkSelector} { --background: ${dark?.background ?? "#000"}; }`
         }
