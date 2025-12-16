@@ -122,7 +122,7 @@
   }
 
   .fern-sidebar-group {
-    @apply list-none flex flex-col gap-px;
+    @apply list-none space-y-px;
     @apply max-lg:-mx-4;
 
     .fern-sidebar-group {
