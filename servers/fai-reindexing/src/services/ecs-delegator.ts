@@ -99,7 +99,8 @@ function buildSharedEnvVars(
         { name: "LAUNCH_TYPE", value: launchType },
         { name: "NODE_OPTIONS", value: nodeOptions },
         { name: "SOURCE_SQS_MESSAGE_ID", value: sqsMessageId },
-        { name: "REINDEX_DOMAIN", value: jobMessage.domain }
+        { name: "REINDEX_DOMAIN", value: jobMessage.domain },
+        { name: "FORCE_FULL_REINDEX", value: String(jobMessage.forceFullReindex ?? false) }
     ];
 }
 

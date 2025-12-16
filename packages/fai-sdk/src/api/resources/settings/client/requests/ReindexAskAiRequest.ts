@@ -6,10 +6,12 @@
  * @example
  *     {
  *         domain: "domain",
- *         org_name: "org_name"
+ *         org_name: "org_name",
+ *         force_full_reindex: true
  *     }
  */
 export interface ReindexAskAiRequest {
     domain: string;
     org_name?: string;
+    force_full_reindex?: boolean;
 }

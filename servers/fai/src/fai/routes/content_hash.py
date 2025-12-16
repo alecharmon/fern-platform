@@ -178,3 +178,34 @@ async def delete_content_hashes(
         LOGGER.exception(f"Failed to delete content hashes for domain {domain}")
         await db.rollback()
         raise
+
+
+@fai_app.delete(
+    "/content-hash/{domain}/delete-all",
+    response_model=DeleteContentHashesResponse,
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+)
+async def delete_all_content_hashes(
+    domain: str,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_token),
+) -> DeleteContentHashesResponse:
+    """
+    Delete all content hashes for a domain.
+    Used when forcing a full reindex.
+    """
+    stripped_domain = strip_domain(domain)
+    try:
+        stmt = delete(ContentHashDb).where(ContentHashDb.domain == stripped_domain)
+        result = await db.execute(stmt)
+        await db.commit()
+
+        deleted_count = result.rowcount or 0
+
+        LOGGER.info(f"Deleted all {deleted_count} content hashes for domain {stripped_domain}")
+        return DeleteContentHashesResponse(deleted_count=deleted_count)
+
+    except Exception:
+        LOGGER.exception(f"Failed to delete all content hashes for domain {stripped_domain}")
+        await db.rollback()
+        raise

@@ -78,7 +78,10 @@ async function handleMessage(message: any): Promise<void> {
         logger.info("Received message (orchestrator)", { messageId });
 
         const body = JSON.parse(message.Body || "{}");
-        const jobMessage: ReindexJobMessage = body;
+        const jobMessage: ReindexJobMessage = {
+            domain: body.domain,
+            forceFullReindex: body.forceFullReindex ?? false
+        };
 
         if (!jobMessage.domain) {
             logger.error("Invalid message: missing domain", { messageId, body: message.Body });

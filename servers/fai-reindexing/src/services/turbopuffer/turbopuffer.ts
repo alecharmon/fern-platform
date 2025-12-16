@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { withoutStaging } from "@fern-api/docs-utils";
+import { Turbopuffer } from "@turbopuffer/turbopuffer";
 import { env } from "../../config/env";
 import { createDomainLogger } from "../../config/logger";
 import { incrementalUpsertTurbopuffer } from "./turbopuffer-incremental-upsert-task";
@@ -72,4 +73,17 @@ export function getFernDocsIndexName(): string {
 
 export function getTurbopufferNamespace(domain: string, indexName: string): string {
     return `${withoutStaging(domain)}_${indexName}`;
+}
+
+export async function deleteTurbopufferNamespace(domain: string): Promise<void> {
+    const logger = createDomainLogger(domain);
+    const namespace = getTurbopufferNamespace(domain, getFernDocsIndexName());
+
+    logger.info("Deleting all records from Turbopuffer namespace", { namespace });
+
+    const tpuf = new Turbopuffer({ apiKey: env.turbopufferApiKey, region: "gcp-us-east4" });
+    const ns = tpuf.namespace(namespace);
+    await ns.deleteAll();
+
+    logger.info("Successfully deleted all Turbopuffer records", { namespace });
 }

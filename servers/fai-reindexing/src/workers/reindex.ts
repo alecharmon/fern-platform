@@ -3,22 +3,19 @@ import { faiClient } from "../config/clients";
 import { env } from "../config/env";
 import { createDomainLogger } from "../config/logger";
 import { updateJobStatus } from "../services/job-tracker";
-import { isPosthogFeatureFlagEnabled, track } from "../services/posthog";
-import { syncToQueryIndex, syncToQueryIndexIncremental } from "../services/sync";
-import { runIncrementalTurbopufferUpsertTask, runTurbopufferUpsertTask } from "../services/turbopuffer/turbopuffer";
+import { track } from "../services/posthog";
+import { syncToQueryIndexIncremental } from "../services/sync";
+import { deleteTurbopufferNamespace, runIncrementalTurbopufferUpsertTask } from "../services/turbopuffer/turbopuffer";
 import { JobStatus, type ReindexJobMessage } from "../types";
 import { getDocsUrlMetadata } from "../utils/docs-metadata";
 import { withRetry } from "../utils/retry";
 
 export async function processReindexJob(message: ReindexJobMessage, sqsMessageId: string): Promise<void> {
-    const { domain } = message;
+    const { domain, forceFullReindex = false } = message;
     const log = createDomainLogger(domain);
     const start = Date.now();
 
-    const incremental = await isPosthogFeatureFlagEnabled("fai-incremental-indexing-enabled", domain);
-    const deleteExisting = !incremental;
-
-    log.info("Starting reindex job", { sqsMessageId, deleteExisting, incremental });
+    log.info("Starting reindex job", { sqsMessageId, forceFullReindex });
 
     const metadata = await getDocsUrlMetadata(domain);
     if (!metadata) {
@@ -65,31 +62,39 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
 
     try {
         await setJobIdInSettings(domain, sqsMessageId, log);
-        await updateJobStatus(domain, JobStatus.UPSERTING, {}, log);
 
-        let numInserted: number;
-        let numUpdated = 0;
-        let numDeleted = 0;
-        let numChunksAdded = 0;
-        let numChunksDeleted = 0;
-        let changedParentIds: string[] = [];
+        // For force full reindex, delete all content hashes and Turbopuffer records first
+        if (forceFullReindex) {
+            log.info("Force full reindex: deleting all content hashes and Turbopuffer records");
 
-        if (incremental) {
-            const result = await runIncrementalTurbopufferUpsertTask(domain);
-            numInserted = result.numInserted;
-            numUpdated = result.numUpdated;
-            numDeleted = result.numDeleted;
-            numChunksAdded = result.numChunksAdded;
-            numChunksDeleted = result.numChunksDeleted;
-            changedParentIds = result.changedParentIds;
-        } else {
-            numInserted = await runTurbopufferUpsertTask(domain, deleteExisting);
+            try {
+                await withRetry(async () => await faiClient.contentHash.deleteAllContentHashes(domain), {
+                    maxAttempts: 3,
+                    initialDelayMs: 1000
+                });
+                log.info("Successfully deleted all content hashes");
+            } catch (error) {
+                log.warn("Failed to delete content hashes, continuing with reindex", {
+                    error: error instanceof Error ? error.message : String(error)
+                });
+            }
+
+            try {
+                await deleteTurbopufferNamespace(domain);
+            } catch (error) {
+                log.warn("Failed to delete Turbopuffer namespace, continuing with reindex", {
+                    error: error instanceof Error ? error.message : String(error)
+                });
+            }
         }
 
+        await updateJobStatus(domain, JobStatus.UPSERTING, {}, log);
+
+        const result = await runIncrementalTurbopufferUpsertTask(domain);
+        const { numInserted, numUpdated, numDeleted, numChunksAdded, numChunksDeleted, changedParentIds } = result;
+
         await updateJobStatus(domain, JobStatus.SYNCING, {}, log);
-        const jobId = incremental
-            ? await syncToQueryIndexIncremental(domain, changedParentIds)
-            : await syncToQueryIndex(domain);
+        const jobId = await syncToQueryIndexIncremental(domain, changedParentIds);
 
         const end = Date.now();
         const durationMs = end - start;
@@ -116,8 +121,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             numChunksDeleted,
             jobId,
             sqsMessageId,
-            deleteExisting,
-            incremental,
+            forceFullReindex,
             launchType: process.env.LAUNCH_TYPE
         });
 

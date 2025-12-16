@@ -3,6 +3,7 @@
  */
 export interface ReindexJobMessage {
     domain: string;
+    forceFullReindex?: boolean;
 }
 
 /**

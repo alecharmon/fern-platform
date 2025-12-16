@@ -22,6 +22,7 @@ export const env = workerEnv;
 async function main() {
     const domain = process.env.REINDEX_DOMAIN;
     const sourceSqsMessageId = process.env.SOURCE_SQS_MESSAGE_ID || "unknown";
+    const forceFullReindex = process.env.FORCE_FULL_REINDEX === "true";
 
     if (!domain) {
         logger.error("Missing required environment variable: REINDEX_DOMAIN");
@@ -30,12 +31,14 @@ async function main() {
 
     logger.info("Starting delegated reindex worker", {
         domain,
-        sourceSqsMessageId
+        sourceSqsMessageId,
+        forceFullReindex
     });
 
     try {
         const jobMessage: ReindexJobMessage = {
-            domain
+            domain,
+            forceFullReindex
         };
 
         await processReindexJob(jobMessage, sourceSqsMessageId);

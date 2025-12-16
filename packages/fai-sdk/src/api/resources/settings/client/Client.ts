@@ -483,6 +483,11 @@ export class Settings {
     /**
      * Manually trigger reindex for an already enabled Ask AI setup.
      *
+     * Args:
+     *     domain: Domain to reindex
+     *     org_name: Organization name (unused, kept for backwards compatibility)
+     *     force_full_reindex: If True, deletes all existing data and performs a fresh full index
+     *
      * @param {FernAI.ReindexAskAiRequest} request
      * @param {Settings.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -491,7 +496,8 @@ export class Settings {
      * @example
      *     await client.settings.reindexAskAi({
      *         domain: "domain",
-     *         org_name: "org_name"
+     *         org_name: "org_name",
+     *         force_full_reindex: true
      *     })
      */
     public reindexAskAi(
@@ -505,11 +511,15 @@ export class Settings {
         request: FernAI.ReindexAskAiRequest,
         requestOptions?: Settings.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.ToggleAskAiResponse>> {
-        const { domain, org_name: orgName } = request;
+        const { domain, org_name: orgName, force_full_reindex: forceFullReindex } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         _queryParams["domain"] = domain;
         if (orgName != null) {
             _queryParams["org_name"] = orgName;
+        }
+
+        if (forceFullReindex != null) {
+            _queryParams["force_full_reindex"] = forceFullReindex.toString();
         }
 
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(

@@ -34,7 +34,7 @@ from fai.models.types.reindex_callback_request_type import ReindexCallbackReques
 from fai.settings import LOGGER
 
 
-async def queue_reindex_sqs(domain: str, delete_existing: bool = True) -> str:
+async def queue_reindex_sqs(domain: str, force_full_reindex: bool = False) -> str:
     queue_url = os.environ.get("FAI_REINDEXING_SQS_URL")
 
     if not queue_url:
@@ -44,10 +44,10 @@ async def queue_reindex_sqs(domain: str, delete_existing: bool = True) -> str:
 
     async with session.client("sqs", region_name="us-east-1") as sqs:
         response = await sqs.send_message(
-            QueueUrl=queue_url, MessageBody=json.dumps({"domain": domain, "deleteExisting": delete_existing})
+            QueueUrl=queue_url, MessageBody=json.dumps({"domain": domain, "forceFullReindex": force_full_reindex})
         )
         message_id = response["MessageId"]
-        LOGGER.info(f"Successfully queued reindex for {domain}, MessageId: {message_id}")
+        LOGGER.info(f"Queued reindex for {domain}, MessageId: {message_id}, forceFullReindex: {force_full_reindex}")
         return message_id
 
 
@@ -207,7 +207,7 @@ async def enable_ask_ai(
 
             LOGGER.info(f"Starting reindex for domain {stripped_domain}")
             try:
-                job_id = await queue_reindex_sqs(stripped_domain, delete_existing=True)
+                job_id = await queue_reindex_sqs(stripped_domain)
                 LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
                 results.append({"domain": domain, "success": True, "job_id": job_id})
             except Exception as e:
@@ -262,7 +262,7 @@ async def toggle_ask_ai(
         else:
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
             try:
-                job_id = await queue_reindex_sqs(stripped_domain, delete_existing=True)
+                job_id = await queue_reindex_sqs(stripped_domain)
                 LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
             except Exception as e:
                 LOGGER.error(f"Failed to queue reindex for domain {stripped_domain}: {e}")
@@ -321,10 +321,17 @@ async def toggle_ask_ai(
 async def reindex_ask_ai(
     domain: str,
     org_name: str | None = None,  # noqa: ARG001
+    force_full_reindex: bool = False,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> ToggleAskAiResponse:
-    """Manually trigger reindex for an already enabled Ask AI setup."""
+    """Manually trigger reindex for an already enabled Ask AI setup.
+
+    Args:
+        domain: Domain to reindex
+        org_name: Organization name (unused, kept for backwards compatibility)
+        force_full_reindex: If True, deletes all existing data and performs a fresh full index
+    """
     try:
         stripped_domain = strip_domain(domain)
 
@@ -347,12 +354,12 @@ async def reindex_ask_ai(
             )
 
         try:
-            job_id = await queue_reindex_sqs(stripped_domain, delete_existing=True)
+            job_id = await queue_reindex_sqs(stripped_domain, force_full_reindex=force_full_reindex)
         except Exception as e:
             LOGGER.error(f"Failed to queue manual reindex for domain {stripped_domain}: {e}")
             return ToggleAskAiResponse(success=False, ask_ai_enabled=existing_record.last_reindex_time is not None)
 
-        LOGGER.info(f"Started manual reindex for domain {stripped_domain}, job_id: {job_id}")
+        LOGGER.info(f"Started manual reindex for {stripped_domain}, job_id: {job_id}, force_full: {force_full_reindex}")
 
         return ToggleAskAiResponse(
             success=True,
