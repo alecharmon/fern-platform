@@ -16,14 +16,16 @@ class TestIsAskAiEnabled:
     async def test_ask_ai_enabled(self) -> None:
         mock_settings = MagicMock()
         mock_settings.ask_ai_enabled = True
+        mock_settings.decompose_queries = False
 
         mock_client = MagicMock()
         mock_client.settings.get_docs_settings = AsyncMock(return_value=mock_settings)
 
         with patch("src.settings.ask_ai.get_fai_client", return_value=mock_client):
-            result = await is_ask_ai_enabled("buildwithfern.docs.buildwithfern.com")
+            ask_ai_enabled, decompose_queries = await is_ask_ai_enabled("buildwithfern.docs.buildwithfern.com")
 
-            assert result is True
+            assert ask_ai_enabled is True
+            assert decompose_queries is False
             mock_client.settings.get_docs_settings.assert_called_once_with(
                 domain="buildwithfern.docs.buildwithfern.com"
             )
@@ -32,14 +34,16 @@ class TestIsAskAiEnabled:
     async def test_ask_ai_disabled(self) -> None:
         mock_settings = MagicMock()
         mock_settings.ask_ai_enabled = False
+        mock_settings.decompose_queries = False
 
         mock_client = MagicMock()
         mock_client.settings.get_docs_settings = AsyncMock(return_value=mock_settings)
 
         with patch("src.settings.ask_ai.get_fai_client", return_value=mock_client):
-            result = await is_ask_ai_enabled("test.docs.buildwithfern.com")
+            ask_ai_enabled, decompose_queries = await is_ask_ai_enabled("test.docs.buildwithfern.com")
 
-            assert result is False
+            assert ask_ai_enabled is False
+            assert decompose_queries is False
 
     @pytest.mark.asyncio
     async def test_missing_env_vars(self) -> None:
@@ -54,6 +58,7 @@ class TestIsAskAiEnabled:
     async def test_with_fern_token_only(self) -> None:
         mock_settings = MagicMock()
         mock_settings.ask_ai_enabled = True
+        mock_settings.decompose_queries = True
 
         mock_client = MagicMock()
         mock_client.settings.get_docs_settings = AsyncMock(return_value=mock_settings)
@@ -62,8 +67,9 @@ class TestIsAskAiEnabled:
             patch.dict(os.environ, {"FERN_TOKEN": "test-token"}, clear=True),
             patch("src.settings.ask_ai.get_fai_client", return_value=mock_client),
         ):
-            result = await is_ask_ai_enabled("test.com")
-            assert result is True
+            ask_ai_enabled, decompose_queries = await is_ask_ai_enabled("test.com")
+            assert ask_ai_enabled is True
+            assert decompose_queries is True
 
     @pytest.mark.asyncio
     async def test_missing_fern_token_only(self) -> None:
@@ -82,3 +88,17 @@ class TestIsAskAiEnabled:
         with patch("src.settings.ask_ai.get_fai_client", return_value=mock_client):
             with pytest.raises(AskAICheckError, match="Failed to check Ask AI status"):
                 await is_ask_ai_enabled("test.com")
+
+    @pytest.mark.asyncio
+    async def test_decompose_queries_none_defaults_to_false(self) -> None:
+        mock_settings = MagicMock()
+        mock_settings.ask_ai_enabled = True
+        mock_settings.decompose_queries = None
+
+        mock_client = MagicMock()
+        mock_client.settings.get_docs_settings = AsyncMock(return_value=mock_settings)
+
+        with patch("src.settings.ask_ai.get_fai_client", return_value=mock_client):
+            ask_ai_enabled, decompose_queries = await is_ask_ai_enabled("test.com")
+            assert ask_ai_enabled is True
+            assert decompose_queries is False

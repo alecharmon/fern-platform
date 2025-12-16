@@ -79,7 +79,7 @@ class TestChatQuerySaving:
         with (
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata"),
-            patch("src.routes.chat.is_ask_ai_enabled", return_value=True),
+            patch("src.routes.chat.is_ask_ai_enabled", return_value=(True, False)),
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
@@ -140,7 +140,7 @@ class TestChatQuerySaving:
         with (
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata"),
-            patch("src.routes.chat.is_ask_ai_enabled", return_value=True),
+            patch("src.routes.chat.is_ask_ai_enabled", return_value=(True, False)),
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
@@ -198,7 +198,7 @@ class TestChatQuerySaving:
         with (
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata"),
-            patch("src.routes.chat.is_ask_ai_enabled", return_value=True),
+            patch("src.routes.chat.is_ask_ai_enabled", return_value=(True, False)),
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
             patch("src.routes.chat.get_fai_client"),
@@ -241,7 +241,7 @@ class TestChatQuerySaving:
         with (
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata"),
-            patch("src.routes.chat.is_ask_ai_enabled", return_value=True),
+            patch("src.routes.chat.is_ask_ai_enabled", return_value=(True, False)),
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
@@ -293,7 +293,7 @@ class TestChatQuerySaving:
         with (
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata"),
-            patch("src.routes.chat.is_ask_ai_enabled", return_value=True),
+            patch("src.routes.chat.is_ask_ai_enabled", return_value=(True, False)),
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
@@ -344,7 +344,7 @@ class TestChatQuerySaving:
         with (
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata"),
-            patch("src.routes.chat.is_ask_ai_enabled", return_value=True),
+            patch("src.routes.chat.is_ask_ai_enabled", return_value=(True, False)),
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
@@ -394,7 +394,7 @@ class TestChatQuerySaving:
         with (
             patch("src.routes.chat.fetch_docs_metadata") as mock_fetch_metadata,
             patch("src.routes.chat.validate_docs_metadata"),
-            patch("src.routes.chat.is_ask_ai_enabled", return_value=True),
+            patch("src.routes.chat.is_ask_ai_enabled", return_value=(True, False)),
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
             patch("src.routes.chat.get_llm_provider") as mock_get_provider,
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,

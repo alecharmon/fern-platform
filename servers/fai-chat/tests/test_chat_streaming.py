@@ -102,7 +102,7 @@ class TestChatStreamingIntegration:
             mock_fetch_auth.return_value = AuthState(authenticated=False)
             mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
-            mock_ask_ai.return_value = True
+            mock_ask_ai.return_value = (True, False)
             mock_save_query.return_value = "query-id"
             mock_get_fai_client.return_value = MagicMock()
 
@@ -189,7 +189,7 @@ class TestChatStreamingIntegration:
             mock_fetch_auth.return_value = AuthState(authenticated=False)
             mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
-            mock_ask_ai.return_value = True
+            mock_ask_ai.return_value = (True, False)
             mock_save_query.return_value = "query-id"
             mock_get_fai_client.return_value = MagicMock()
 
@@ -279,7 +279,7 @@ class TestChatStreamingIntegration:
             mock_fetch_auth.return_value = AuthState(authenticated=False)
             mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
-            mock_ask_ai.return_value = False
+            mock_ask_ai.return_value = (False, False)
 
             response = client.post(
                 "/chat",
@@ -318,7 +318,7 @@ class TestChatStreamingIntegration:
             mock_fetch_auth.return_value = AuthState(authenticated=False)
             mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
-            mock_ask_ai.return_value = True
+            mock_ask_ai.return_value = (True, False)
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(side_effect=Exception("Retrieval failed"))
@@ -376,7 +376,7 @@ class TestChatStreamingIntegration:
             mock_fetch_auth.return_value = AuthState(authenticated=False)
             mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
-            mock_ask_ai.return_value = True
+            mock_ask_ai.return_value = (True, False)
             mock_save_query.return_value = "query-id"
             mock_get_fai_client.return_value = MagicMock()
 
@@ -434,7 +434,7 @@ class TestChatStreamingIntegration:
             mock_fetch_auth.return_value = AuthState(authenticated=False)
             mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
-            mock_ask_ai.return_value = True
+            mock_ask_ai.return_value = (True, False)
             mock_save_query.return_value = "query-id"
             mock_get_fai_client.return_value = MagicMock()
 

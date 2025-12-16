@@ -21,8 +21,8 @@ def on_request(
     response_time: float,
     response_length: int,
     exception: Exception | None,
-    context: dict,
-    **kwargs,
+    context: dict[str, object],
+    **kwargs: object,
 ) -> None:
     if exception is None:
         if "[TTFT]" in name:
@@ -46,7 +46,7 @@ def print_percentile_stats(name: str, stats: list[float]) -> None:
 
 
 @events.quitting.add_listener
-def on_quitting(environment, **kwargs) -> None:
+def on_quitting(environment: object, **kwargs: object) -> None:
     print("\n" + "=" * 60)
     print_percentile_stats("Time to First Byte (TTFB)", time_to_first_byte_stats)
     print_percentile_stats("Time to First Token (TTFT)", ttft_stats)

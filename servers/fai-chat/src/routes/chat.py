@@ -99,7 +99,7 @@ async def chat(
 
         if isinstance(ask_ai_result, BaseException):
             raise ask_ai_result
-        ask_ai_enabled = ask_ai_result
+        ask_ai_enabled, decompose_queries = ask_ai_result
 
     except MetadataValidationError as e:
         logger.error(f"Metadata validation failed: {e}")
@@ -145,8 +145,8 @@ async def chat(
         subqueries: list[str] | None = None
         query_decomposition_ms: float | None = None
 
-        if request.rewriteQuery:
-            logger.info(f"Query rewriting enabled for domain {domain}")
+        if decompose_queries:
+            logger.info(f"Query decomposition enabled for domain {domain}")
 
             decomposition_start_ms = time.time() * 1000
             subqueries = await decompose_query(user_query)
