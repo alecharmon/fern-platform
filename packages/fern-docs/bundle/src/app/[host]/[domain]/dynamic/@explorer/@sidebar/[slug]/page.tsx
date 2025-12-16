@@ -21,11 +21,44 @@ export default async function EndpointSelectorPage({
     const lang = await loader.getLanguage();
 
     const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
+
+    // When the endpoint is not found, try to show the API section from the redirect target
+    // or fall back to the root API section
+    let targetNode: FernNavigation.utils.Node | undefined = foundNode;
     if (foundNode.type !== "found") {
+        // Try to find the redirect target if available
+        if (foundNode.redirect != null) {
+            const redirectNode = FernNavigation.utils.findNode(root, foundNode.redirect);
+            if (redirectNode.type === "found") {
+                targetNode = redirectNode;
+            }
+        }
+
+        // If we still don't have a valid node, try to find the first API section in the root
+        if (targetNode?.type !== "found") {
+            let firstApiNode: FernNavigation.NavigationNodePage | undefined;
+            FernNavigation.traverseDF(root, (node) => {
+                if (FernNavigation.isApiLeaf(node)) {
+                    firstApiNode = node;
+                    return false; // stop traversal
+                }
+                return true;
+            });
+
+            if (firstApiNode != null) {
+                const found = FernNavigation.utils.findNode(root, firstApiNode.slug);
+                if (found.type === "found") {
+                    targetNode = found;
+                }
+            }
+        }
+    }
+
+    if (targetNode?.type !== "found") {
         return null;
     }
 
-    const visibleNodes = [...foundNode.parents, foundNode.node];
+    const visibleNodes = [...targetNode.parents, targetNode.node];
     const visibleNodeIds = visibleNodes.map((node) => node.id);
 
     const filtered = withPrunedNavigation(root, {
@@ -43,9 +76,9 @@ export default async function EndpointSelectorPage({
 
     let scopedNode: FernNavigation.NavigationNode | undefined = filtered;
 
-    if (foundNode.currentProduct) {
+    if (targetNode.currentProduct) {
         FernNavigation.traverseDF(filtered, (node) => {
-            if (node.type === "product" && node.productId === foundNode.currentProduct?.productId) {
+            if (node.type === "product" && node.productId === targetNode.currentProduct?.productId) {
                 scopedNode = node;
                 return false;
             }
@@ -53,9 +86,9 @@ export default async function EndpointSelectorPage({
         });
     }
 
-    if (foundNode.currentVersion) {
+    if (targetNode.currentVersion) {
         FernNavigation.traverseDF(scopedNode, (node) => {
-            if (node.type === "version" && node.versionId === foundNode.currentVersion?.versionId) {
+            if (node.type === "version" && node.versionId === targetNode.currentVersion?.versionId) {
                 scopedNode = node;
                 return false;
             }

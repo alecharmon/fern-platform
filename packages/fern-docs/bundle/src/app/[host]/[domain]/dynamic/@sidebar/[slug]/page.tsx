@@ -2,20 +2,13 @@ import "server-only";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { getTabs } from "@fern-api/docs-server/handle-node-fallbacks";
-import {
-    getIsSidebarFixed,
-    getIsSingleOverviewPage,
-    getRedirectForPath,
-    prepareRedirect,
-    slugToHref
-} from "@fern-api/docs-utils";
+import { getIsSidebarFixed, getIsSingleOverviewPage } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { SidebarRootNode } from "@fern-docs/components/sidebar/nodes/SidebarRootNode";
 import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SidebarTabsRoot } from "@fern-docs/components/sidebar/SidebarTabsRoot";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
-import { permanentRedirect, redirect } from "next/navigation";
 
 import { getFernToken } from "@/app/fern-token";
 
@@ -26,17 +19,10 @@ export default async function SidebarPage({
 }) {
     const { host, domain, slug } = await params;
     const loader = await createCachedDocsLoader(host, domain, await getFernToken());
-    const [config, baseUrl] = await Promise.all([loader.getConfig(), loader.getMetadata()]);
+    const config = await loader.getConfig();
     const isSidebarFixed = getIsSidebarFixed(config);
 
     const showHiddenNodes = (await loader.getEdgeFlags()).isAuthenticatedPagesDiscoverable;
-
-    // Check for configured redirects FIRST (before findNode)
-    const configuredRedirect = getRedirectForPath(slugToHref(slugjoin(slug)), baseUrl, config.redirects);
-    if (configuredRedirect != null) {
-        const redirectFn = configuredRedirect.permanent ? permanentRedirect : redirect;
-        redirectFn(prepareRedirect(configuredRedirect.destination));
-    }
 
     const root = await loader.getRoot();
 
@@ -46,12 +32,8 @@ export default async function SidebarPage({
     await loader.getLayout();
 
     const found = FernNavigation.utils.findNode(root, slugjoin(slug));
+    // Let SharedPage handle all redirects - just return null for non-found cases
     if (found.type !== "found") {
-        // explicitly redirect the sidebar slot for dynamic pages to avoid race condition => empty sidebar
-        if (found.type === "redirect") {
-            redirect(prepareRedirect(found.redirect));
-        }
-
         return null;
     }
 

@@ -47,6 +47,17 @@ logo:
 
 favicon: docs/assets/favicon.svg
 
+redirects:
+  # Page redirect test
+  - source: /old-welcome
+    destination: /home/welcome
+  # API redirect test
+  - source: /old-api/plant
+    destination: /home/rest-api/rest-api/plant/add-plant
+  # API redirect test with explorer mode
+  - source: /old-api/plant-explorer
+    destination: /home/rest-api/rest-api/plant/add-plant?explorer=true
+
 experimental:
   mdx-components:
     - docs/components
