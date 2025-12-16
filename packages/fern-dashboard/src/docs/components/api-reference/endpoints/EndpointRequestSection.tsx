@@ -1,20 +1,21 @@
 "use client";
 
-import { EndpointRequestSection as SharedEndpointRequestSection } from "@fern-api/endpoint-snippet-dependencies";
+/**
+ * Dashboard-specific wrapper for the shared EndpointRequestSection component.
+ *
+ * Passes dashboard's local PropertyRenderer, PropertyWithShape, and TypeReferenceDefinitions
+ * which handle MDX rendering via MdxContent.
+ */
 
-import { Chip, ChipSizeProvider } from "@fern-docs/components/Chip";
-import { renderTypeShorthand } from "@fern-docs/components/type-shorthand";
-import { MdxContent } from "@/docs/mdx/components/MdxContent";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { EndpointRequestSection as SharedEndpointRequestSection } from "@fern-docs/components/api-reference/endpoints/EndpointRequestSection";
 
-import { TypeShorthand } from "../type-definitions/TypeShorthand";
-import { PropertyContainer, TypeDefinitionAnchor } from "./TypeDefinitionAnchor";
-
-// Re-export all types from the shared package
-export * from "@fern-api/endpoint-snippet-dependencies";
+import { PropertyRenderer, PropertyWithShape } from "../type-definitions/ObjectProperty";
+import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 
 export interface EndpointRequestSectionProps {
-    request: Parameters<typeof SharedEndpointRequestSection>[0]["request"];
-    types: Parameters<typeof SharedEndpointRequestSection>[0]["types"];
+    request: ApiDefinition.HttpRequest;
+    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
 }
 
 export function EndpointRequestSection({ request, types }: EndpointRequestSectionProps) {
@@ -22,13 +23,10 @@ export function EndpointRequestSection({ request, types }: EndpointRequestSectio
         <SharedEndpointRequestSection
             request={request}
             types={types}
-            renderTypeShorthand={renderTypeShorthand}
-            TypeShorthand={TypeShorthand}
-            PropertyContainer={PropertyContainer}
-            TypeDefinitionAnchor={TypeDefinitionAnchor}
-            MdxRenderer={MdxContent}
-            Chip={Chip}
-            ChipSizeProvider={ChipSizeProvider}
+            lang="en"
+            PropertyRenderer={PropertyRenderer}
+            PropertyWithShape={PropertyWithShape}
+            TypeReferenceDefinitions={TypeReferenceDefinitions}
         />
     );
 }

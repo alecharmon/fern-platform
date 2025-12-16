@@ -1,49 +1,26 @@
+"use client";
+
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import titleCase from "@fern-api/ui-core-utils/titleCase";
+import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
 import { compact } from "es-toolkit/array";
-import type React from "react";
 
 import { PropertyWithShape } from "./ObjectProperty";
-import { TypeDefinitionPathPart } from "./TypeDefinitionContext";
-import { WithSeparator } from "./TypeDefinitionDetails";
+import type { PropertyLocation } from "./TypeReferenceDefinitions";
 
 export function DiscriminatedUnionVariant({
     discriminant,
     unionVariant,
     types,
     location,
-    TypeShorthand,
-    PropertyContainer,
-    TypeDefinitionAnchor,
-    MdxRenderer,
-    Chip,
-    ChipSizeProvider
+    lang = "en"
 }: {
     discriminant: ApiDefinition.PropertyKey;
     unionVariant: ApiDefinition.DiscriminatedUnionVariant;
     types: Record<string, ApiDefinition.TypeDefinition>;
-    location?: "request" | "response";
-    TypeShorthand: React.ComponentType<{
-        shape: ApiDefinition.TypeShapeOrReference;
-    }>;
-    PropertyContainer: React.ComponentType<{ children: React.ReactNode }>;
-    TypeDefinitionAnchor: React.ComponentType<{
-        children: React.ReactNode;
-        sideOffset?: number;
-    }>;
-    MdxRenderer?: React.ComponentType<{
-        mdx: string | undefined;
-        size?: string;
-        className?: string;
-    }>;
-    Chip: React.ComponentType<{
-        name: string;
-        description?: React.ReactNode;
-    }>;
-    ChipSizeProvider: React.ComponentType<{
-        children: React.ReactNode;
-        size: "sm" | "lg";
-    }>;
+    location?: PropertyLocation;
+    lang?: string;
 }) {
     const unwrapped = ApiDefinition.unwrapDiscriminatedUnionVariant({ discriminant }, unionVariant, types);
 
@@ -85,12 +62,7 @@ export function DiscriminatedUnionVariant({
                             types={types}
                             location={location}
                             additionalProperties={unwrapped.properties}
-                            TypeShorthand={TypeShorthand}
-                            PropertyContainer={PropertyContainer}
-                            TypeDefinitionAnchor={TypeDefinitionAnchor}
-                            MdxRenderer={MdxRenderer}
-                            Chip={Chip}
-                            ChipSizeProvider={ChipSizeProvider}
+                            lang={lang}
                         />
                     ))}
                 </WithSeparator>
@@ -107,12 +79,7 @@ export function DiscriminatedUnionVariant({
                     availability={unionVariant.availability}
                     types={types}
                     location={location}
-                    TypeShorthand={TypeShorthand}
-                    PropertyContainer={PropertyContainer}
-                    TypeDefinitionAnchor={TypeDefinitionAnchor}
-                    MdxRenderer={MdxRenderer}
-                    Chip={Chip}
-                    ChipSizeProvider={ChipSizeProvider}
+                    lang={lang}
                 />
             )}
         </TypeDefinitionPathPart>

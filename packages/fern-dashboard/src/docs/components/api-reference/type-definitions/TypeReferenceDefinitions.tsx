@@ -1,11 +1,27 @@
+"use client";
+
+/**
+ * Dashboard-specific TypeReferenceDefinitions (client-side MDX).
+ *
+ * Forms a closed recursive loop with other local type definition components
+ * (ObjectProperty, InternalTypeDefinition, etc.) to ensure all nested types
+ * render descriptions client-side via MdxContent.
+ *
+ * @see packages/fern-docs/bundle/src/components/api-reference/type-definitions/TypeReferenceDefinitions.tsx
+ */
+
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import {
+    type PropertyLocation,
+    TypeDefinitionSlot
+} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
 import React from "react";
-import { UnreachableCaseError } from "ts-essentials";
 
 import { InternalTypeDefinition } from "./InternalTypeDefinition";
-import { TypeDefinitionPathPart } from "./TypeDefinitionContext";
-import { TypeDefinitionSlot } from "./TypeDefinitionSlotsClient";
+
+export type { PropertyLocation };
 
 // HACHACK: this is a hack to render inlined enums above the description
 export function hasInlineEnum(
@@ -48,48 +64,19 @@ export function hasInternalTypeReference(
     });
 }
 
-export type PropertyLocation = "request" | "response";
-
-export interface TypeReferenceDefinitionsProps {
-    shape: ApiDefinition.TypeShapeOrReference;
-    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
-    location?: PropertyLocation;
-    additionalProperties?: ApiDefinition.ObjectProperty[];
-    TypeShorthand: React.ComponentType<{
-        shape: ApiDefinition.TypeShapeOrReference;
-    }>;
-    PropertyContainer: React.ComponentType<{ children: React.ReactNode }>;
-    TypeDefinitionAnchor: React.ComponentType<{
-        children: React.ReactNode;
-        sideOffset?: number;
-    }>;
-    MdxRenderer?: React.ComponentType<{
-        mdx: string | undefined;
-        size?: string;
-        className?: string;
-    }>;
-    Chip: React.ComponentType<{
-        name: string;
-        description?: React.ReactNode;
-    }>;
-    ChipSizeProvider: React.ComponentType<{
-        children: React.ReactNode;
-        size: "sm" | "lg";
-    }>;
-}
-
 export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinitions({
     shape,
     types,
     location,
     additionalProperties,
-    TypeShorthand,
-    PropertyContainer,
-    TypeDefinitionAnchor,
-    MdxRenderer,
-    Chip,
-    ChipSizeProvider
-}: TypeReferenceDefinitionsProps) {
+    lang = "en"
+}: {
+    shape: ApiDefinition.TypeShapeOrReference;
+    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    location?: PropertyLocation;
+    additionalProperties?: ApiDefinition.ObjectProperty[];
+    lang?: string;
+}) {
     switch (shape.type) {
         case "id":
             if (additionalProperties) {
@@ -100,17 +87,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         properties: [...(additionalProperties ?? []), ...(newTypeShape.properties ?? [])]
                     };
                     return (
-                        <TypeReferenceDefinitions
-                            shape={updatedShape}
-                            types={types}
-                            location={location}
-                            TypeShorthand={TypeShorthand}
-                            PropertyContainer={PropertyContainer}
-                            TypeDefinitionAnchor={TypeDefinitionAnchor}
-                            MdxRenderer={MdxRenderer}
-                            Chip={Chip}
-                            ChipSizeProvider={ChipSizeProvider}
-                        />
+                        <TypeReferenceDefinitions shape={updatedShape} types={types} location={location} lang={lang} />
                     );
                 }
             }
@@ -126,12 +103,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     types={types}
                     location={location}
                     additionalProperties={additionalProperties}
-                    TypeShorthand={TypeShorthand}
-                    PropertyContainer={PropertyContainer}
-                    TypeDefinitionAnchor={TypeDefinitionAnchor}
-                    MdxRenderer={MdxRenderer}
-                    Chip={Chip}
-                    ChipSizeProvider={ChipSizeProvider}
+                    lang={lang}
                 />
             );
         case "list":
@@ -143,12 +115,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         types={types}
                         location={location}
                         additionalProperties={additionalProperties}
-                        TypeShorthand={TypeShorthand}
-                        PropertyContainer={PropertyContainer}
-                        TypeDefinitionAnchor={TypeDefinitionAnchor}
-                        MdxRenderer={MdxRenderer}
-                        Chip={Chip}
-                        ChipSizeProvider={ChipSizeProvider}
+                        lang={lang}
                     />
                 </TypeDefinitionPathPart>
             );
@@ -159,25 +126,15 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         shape={shape.keyShape}
                         types={types}
                         location={location}
-                        TypeShorthand={TypeShorthand}
-                        PropertyContainer={PropertyContainer}
-                        TypeDefinitionAnchor={TypeDefinitionAnchor}
-                        MdxRenderer={MdxRenderer}
-                        Chip={Chip}
-                        ChipSizeProvider={ChipSizeProvider}
                         additionalProperties={additionalProperties}
+                        lang={lang}
                     />
                     <TypeReferenceDefinitions
                         shape={shape.valueShape}
                         types={types}
                         location={location}
                         additionalProperties={additionalProperties}
-                        TypeShorthand={TypeShorthand}
-                        PropertyContainer={PropertyContainer}
-                        TypeDefinitionAnchor={TypeDefinitionAnchor}
-                        MdxRenderer={MdxRenderer}
-                        Chip={Chip}
-                        ChipSizeProvider={ChipSizeProvider}
+                        lang={lang}
                     />
                 </TypeDefinitionPathPart>
             );
@@ -191,12 +148,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     types={types}
                     location={location}
                     additionalProperties={additionalProperties}
-                    TypeShorthand={TypeShorthand}
-                    PropertyContainer={PropertyContainer}
-                    TypeDefinitionAnchor={TypeDefinitionAnchor}
-                    MdxRenderer={MdxRenderer}
-                    Chip={Chip}
-                    ChipSizeProvider={ChipSizeProvider}
+                    lang={lang}
                 />
             );
         }
@@ -208,16 +160,13 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     types={types}
                     location={location}
                     additionalProperties={additionalProperties}
-                    TypeShorthand={TypeShorthand}
-                    PropertyContainer={PropertyContainer}
-                    TypeDefinitionAnchor={TypeDefinitionAnchor}
-                    MdxRenderer={MdxRenderer}
-                    Chip={Chip}
-                    ChipSizeProvider={ChipSizeProvider}
+                    lang={lang}
                 />
             );
         }
-        default:
-            throw new UnreachableCaseError(shape);
+        default: {
+            const _exhaustiveCheck: never = shape;
+            throw new Error(`Unhandled case: ${(_exhaustiveCheck as { type: string }).type}`);
+        }
     }
 });

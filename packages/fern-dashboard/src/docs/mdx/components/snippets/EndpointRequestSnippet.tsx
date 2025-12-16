@@ -1,7 +1,7 @@
 "use client";
 
-import { EndpointUrlWithOverflow } from "@fern-api/endpoint-snippet-dependencies";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { EndpointUrlWithOverflow } from "@fern-docs/components/api-reference/endpoints/EndpointUrlWithOverflow";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FaIcon } from "@fern-docs/components/fa-icon";
@@ -166,6 +166,7 @@ function EndpointRequestSnippetInternal({
                         method={endpoint.method}
                         hideCopyButton={true}
                         className="min-w-0 flex-1"
+                        lang="en"
                     />
                     {availableLanguages.length > 0 && (
                         <FernDropdown

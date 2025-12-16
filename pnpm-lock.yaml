@@ -1142,9 +1142,6 @@ importers:
       '@fern-api/docs-utils':
         specifier: workspace:*
         version: link:../commons/docs-utils
-      '@fern-api/endpoint-snippet-dependencies':
-        specifier: workspace:*
-        version: link:endpoint-snippet-dependencies
       '@fern-api/fai-sdk':
         specifier: workspace:*
         version: link:../fai-sdk
@@ -1593,70 +1590,6 @@ importers:
       webpack:
         specifier: 5.98.0
         version: 5.98.0(@swc/core@1.13.5)(esbuild@0.27.0)
-
-  packages/fern-dashboard/endpoint-snippet-dependencies:
-    dependencies:
-      '@fern-api/docs-utils':
-        specifier: workspace:*
-        version: link:../../commons/docs-utils
-      '@fern-api/fdr-sdk':
-        specifier: workspace:*
-        version: link:../../fdr-sdk
-      '@fern-api/ui-core-utils':
-        specifier: workspace:*
-        version: link:../../commons/core-utils
-      '@fern-docs/components':
-        specifier: workspace:*
-        version: link:../../fern-docs/components
-      '@fern-ui/react-commons':
-        specifier: workspace:*
-        version: link:../../commons/react-commons
-      '@radix-ui/primitive':
-        specifier: 'catalog:'
-        version: 1.1.1
-      '@radix-ui/react-compose-refs':
-        specifier: 'catalog:'
-        version: 1.1.2(@types/react@19.0.10)(react@19.0.1)
-      '@radix-ui/react-select':
-        specifier: 'catalog:'
-        version: 2.1.6(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)
-      es-toolkit:
-        specifier: 'catalog:'
-        version: 1.42.0
-      jotai:
-        specifier: 'catalog:'
-        version: 2.15.1(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.0.10)(react@19.0.1)
-      lucide-react:
-        specifier: ^0.460.0
-        version: 0.460.0(react@19.0.1)
-      react:
-        specifier: 19.0.1
-        version: 19.0.1
-      ts-essentials:
-        specifier: 'catalog:'
-        version: 10.0.4(typescript@5.7.3)
-    devDependencies:
-      '@fern-platform/configs':
-        specifier: workspace:*
-        version: link:../../configs
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.1
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.0.10
-      depcheck:
-        specifier: 'catalog:'
-        version: 1.4.7
-      stylelint:
-        specifier: 'catalog:'
-        version: 16.26.0(typescript@5.7.3)
-      typescript:
-        specifier: ^5
-        version: 5.7.3
-      vitest:
-        specifier: 'catalog:'
-        version: 3.2.4(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.19.1)(jiti@2.6.1)(jsdom@24.1.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(less@4.2.0)(lightningcss@1.30.2)(msw@2.12.3(@types/node@22.19.1)(typescript@5.7.3))(sass@1.94.2)(stylus@0.62.0)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
 
   packages/fern-docs/bundle:
     dependencies:

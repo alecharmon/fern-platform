@@ -1,37 +1,47 @@
-import { TypeDefinitionSlotsServer as SharedTypeDefinitionSlotsServer } from "@fern-api/endpoint-snippet-dependencies";
-import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+"use client";
 
-import { Chip, ChipSizeProvider } from "@fern-docs/components/Chip";
-import { MdxContent } from "@/docs/mdx/components/MdxContent";
+import type { TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
+import { getTypeIdWithLocation } from "@fern-docs/components/api-reference/type-definitions/slots-utils";
+import { TypeDefinitionSlotsProvider } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
 
-import { PropertyContainer, TypeDefinitionAnchor } from "../endpoints/TypeDefinitionAnchor";
-import { TypeShorthand } from "./TypeShorthand";
+import { TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 
 // Re-export for convenience
-export { getTypeIdWithLocation } from "@fern-api/endpoint-snippet-dependencies";
+export { getTypeIdWithLocation };
 
 /**
- * Dashboard-specific wrapper for TypeDefinitionSlotsServer that injects
- * dashboard-specific component implementations
+ * Dashboard-specific wrapper for TypeDefinitionSlotsServer that provides
+ * pre-rendered type definition slots for each type in the types map.
  */
 export function TypeDefinitionSlotsServer({
     types,
     children
 }: {
-    types: Record<string, ApiDefinition.TypeDefinition>;
+    types: Record<string, TypeDefinition>;
     children: React.ReactNode;
 }) {
     return (
-        <SharedTypeDefinitionSlotsServer
-            types={types}
-            TypeShorthand={TypeShorthand}
-            PropertyContainer={PropertyContainer}
-            TypeDefinitionAnchor={TypeDefinitionAnchor}
-            MdxRenderer={MdxContent}
-            Chip={Chip}
-            ChipSizeProvider={ChipSizeProvider}
-        >
-            {children}
-        </SharedTypeDefinitionSlotsServer>
+        <TypeDefinitionSlotsProvider slots={createTypeDefinitionSlots(types)}>{children}</TypeDefinitionSlotsProvider>
     );
+}
+
+function createTypeDefinitionSlots(types: Record<string, TypeDefinition>) {
+    return Object.fromEntries(
+        Object.entries(types).flatMap(([id, type]) => {
+            const variants = createPropertyAccessTypeVariants(id, type, types);
+            return [
+                [id, variants.default],
+                [getTypeIdWithLocation(id, "request"), variants.request],
+                [getTypeIdWithLocation(id, "response"), variants.response]
+            ];
+        })
+    );
+}
+
+function createPropertyAccessTypeVariants(id: string, type: TypeDefinition, types: Record<string, TypeDefinition>) {
+    return {
+        default: <TypeReferenceDefinitions shape={type.shape} types={types} />,
+        request: <TypeReferenceDefinitions shape={type.shape} types={types} location="request" />,
+        response: <TypeReferenceDefinitions shape={type.shape} types={types} location="response" />
+    };
 }

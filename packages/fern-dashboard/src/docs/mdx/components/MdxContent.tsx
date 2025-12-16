@@ -1,3 +1,10 @@
+/**
+ * Dashboard-specific MDX content renderer (client-side).
+ *
+ * This is the key differentiator from @fern-docs/bundle which uses server-side MDX rendering.
+ * Shared API reference components accept MDX renderers via dependency injection, allowing
+ * the dashboard to use this client-side MdxComponent while bundle uses server-rendered MDX.
+ */
 import type React from "react";
 
 import { ErrorBoundary } from "@/docs/components/error-boundary";
@@ -10,6 +17,10 @@ export declare namespace MdxContent {
     export interface Props {
         mdx: MarkdownText | MarkdownText[] | undefined;
         fallback?: React.ReactNode;
+        /** @todo Handle for API compatibility with MdxServerComponentProseSuspense in @fern-docs/bundle */
+        size?: string;
+        /** @todo Handle for API compatibility with MdxServerComponentProseSuspense in @fern-docs/bundle */
+        className?: string;
     }
 }
 

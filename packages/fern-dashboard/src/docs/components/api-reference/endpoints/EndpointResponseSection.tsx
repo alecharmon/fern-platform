@@ -1,19 +1,30 @@
 "use client";
 
-import { EndpointResponseSection as SharedEndpointResponseSection } from "@fern-api/endpoint-snippet-dependencies";
+/**
+ * Dashboard-specific adapter for the shared EndpointResponseSection component.
+ *
+ * Wraps @fern-docs/components/api-reference/endpoints/EndpointResponseSection
+ * with dashboard-specific TypeReferenceDefinitions that uses local MdxContent.
+ */
 
-import { Chip, ChipSizeProvider } from "@fern-docs/components/Chip";
-import { MdxContent } from "@/docs/mdx/components/MdxContent";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import {
+    EndpointResponseSection as SharedEndpointResponseSection,
+    type TypeReferenceDefinitionsProps
+} from "@fern-docs/components/api-reference/endpoints/EndpointResponseSection";
 
-import { TypeShorthand } from "../type-definitions/TypeShorthand";
-import { PropertyContainer, TypeDefinitionAnchor } from "./TypeDefinitionAnchor";
-
-// Re-export all types from the shared package
-export * from "@fern-api/endpoint-snippet-dependencies";
+import { TypeReferenceDefinitions as LocalTypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 
 export interface EndpointResponseSectionProps {
-    body: Parameters<typeof SharedEndpointResponseSection>[0]["body"];
-    types: Parameters<typeof SharedEndpointResponseSection>[0]["types"];
+    body: ApiDefinition.HttpResponseBodyShape;
+    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+}
+
+/**
+ * Dashboard-specific TypeReferenceDefinitions adapter.
+ */
+function TypeReferenceDefinitions({ shape, types, location }: TypeReferenceDefinitionsProps) {
+    return <LocalTypeReferenceDefinitions shape={shape} types={types} location={location} />;
 }
 
 export function EndpointResponseSection({ body, types }: EndpointResponseSectionProps) {
@@ -21,12 +32,8 @@ export function EndpointResponseSection({ body, types }: EndpointResponseSection
         <SharedEndpointResponseSection
             body={body}
             types={types}
-            TypeShorthand={TypeShorthand}
-            PropertyContainer={PropertyContainer}
-            TypeDefinitionAnchor={TypeDefinitionAnchor}
-            MdxRenderer={MdxContent}
-            Chip={Chip}
-            ChipSizeProvider={ChipSizeProvider}
+            lang="en"
+            TypeReferenceDefinitions={TypeReferenceDefinitions}
         />
     );
 }

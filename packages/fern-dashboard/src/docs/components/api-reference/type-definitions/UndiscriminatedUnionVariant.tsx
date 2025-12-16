@@ -1,7 +1,7 @@
+"use client";
+
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
-import type React from "react";
 import type { ReactElement } from "react";
 
 import { PropertyWithShape } from "./ObjectProperty";
@@ -49,7 +49,7 @@ function getIconInfoForTypeReference(
 function getIconForTypeReference(
     typeRef: ApiDefinition.TypeShapeOrReference,
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>
-): ReactElement<any> | null {
+): ReactElement<unknown> | null {
     const info = getIconInfoForTypeReference(typeRef, types);
     if (info == null) {
         return null;
@@ -65,54 +65,19 @@ function getIconForTypeReference(
     );
 }
 
-export declare namespace UndiscriminatedUnionVariant {
-    export interface Props {
-        unionVariant: ApiDefinition.UndiscriminatedUnionVariant;
-        anchorIdParts: readonly string[];
-        slug: FernNavigation.Slug;
-        idx: number;
-        types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
-    }
-}
-
 export function UndiscriminatedUnionVariant({
     unionVariant,
     types,
     location,
     additionalProperties,
-    TypeShorthand,
-    PropertyContainer,
-    TypeDefinitionAnchor,
-    MdxRenderer,
-    Chip,
-    ChipSizeProvider
+    lang = "en"
 }: {
     unionVariant: ApiDefinition.UndiscriminatedUnionVariant;
     idx: number;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
-    TypeShorthand: React.ComponentType<{
-        shape: ApiDefinition.TypeShapeOrReference;
-    }>;
-    PropertyContainer: React.ComponentType<{ children: React.ReactNode }>;
-    TypeDefinitionAnchor: React.ComponentType<{
-        children: React.ReactNode;
-        sideOffset?: number;
-    }>;
-    MdxRenderer?: React.ComponentType<{
-        mdx: string | undefined;
-        size?: string;
-        className?: string;
-    }>;
-    Chip: React.ComponentType<{
-        name: string;
-        description?: React.ReactNode;
-    }>;
-    ChipSizeProvider: React.ComponentType<{
-        children: React.ReactNode;
-        size: "sm" | "lg";
-    }>;
+    lang?: string;
 }) {
     return (
         <PropertyWithShape
@@ -124,12 +89,7 @@ export function UndiscriminatedUnionVariant({
             types={types}
             location={location}
             additionalProperties={additionalProperties}
-            TypeShorthand={TypeShorthand}
-            PropertyContainer={PropertyContainer}
-            TypeDefinitionAnchor={TypeDefinitionAnchor}
-            MdxRenderer={MdxRenderer}
-            Chip={Chip}
-            ChipSizeProvider={ChipSizeProvider}
+            lang={lang}
         />
     );
 }

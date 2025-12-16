@@ -1,58 +1,24 @@
+"use client";
+
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { EnumTypeDefinition } from "@fern-docs/components/api-reference/type-definitions/EnumTypeDefinition";
+import { FernCollapseWithButtonUncontrolled } from "@fern-docs/components/api-reference/type-definitions/FernCollapseWithButtonUncontrolled";
+import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
 import { memo } from "react";
-import { UnreachableCaseError } from "ts-essentials";
 
 import { DiscriminatedUnionVariant } from "./DiscriminatedUnionVariant";
-import { EnumTypeDefinition } from "./EnumTypeDefinition";
 import { EnumValue } from "./EnumValue";
-import { FernCollapseWithButtonUncontrolled } from "./FernCollapseWithButtonUncontrolled";
 import { ObjectProperty } from "./ObjectProperty";
-import { TypeDefinitionPathPart } from "./TypeDefinitionContext";
-import { WithSeparator } from "./TypeDefinitionDetails";
 import type { PropertyLocation } from "./TypeReferenceDefinitions";
 import { UndiscriminatedUnionVariant } from "./UndiscriminatedUnionVariant";
-
-export declare namespace InternalTypeDefinition {
-    export interface Props {
-        shape: ApiDefinition.TypeShapeOrReference;
-        types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
-        location?: PropertyLocation;
-        additionalProperties?: ApiDefinition.ObjectProperty[];
-        TypeShorthand: React.ComponentType<{
-            shape: ApiDefinition.TypeShapeOrReference;
-        }>;
-        PropertyContainer: React.ComponentType<{ children: React.ReactNode }>;
-        TypeDefinitionAnchor: React.ComponentType<{
-            children: React.ReactNode;
-            sideOffset?: number;
-        }>;
-        MdxRenderer?: React.ComponentType<{
-            mdx: string | undefined;
-            size?: string;
-            className?: string;
-        }>;
-        Chip: React.ComponentType<{
-            name: string;
-            description?: React.ReactNode;
-        }>;
-        ChipSizeProvider: React.ComponentType<{
-            children: React.ReactNode;
-            size: "sm" | "lg";
-        }>;
-    }
-}
 
 export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     shape,
     types,
     location,
     additionalProperties,
-    TypeShorthand,
-    PropertyContainer,
-    TypeDefinitionAnchor,
-    MdxRenderer,
-    Chip,
-    ChipSizeProvider
+    lang = "en"
 }: {
     shape:
         | ApiDefinition.TypeShape.Enum
@@ -63,39 +29,17 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
-    TypeShorthand: React.ComponentType<{
-        shape: ApiDefinition.TypeShapeOrReference;
-    }>;
-    PropertyContainer: React.ComponentType<{ children: React.ReactNode }>;
-    TypeDefinitionAnchor: React.ComponentType<{
-        children: React.ReactNode;
-        sideOffset?: number;
-    }>;
-    MdxRenderer?: React.ComponentType<{
-        mdx: string | undefined;
-        size?: string;
-        className?: string;
-    }>;
-    Chip: React.ComponentType<{
-        name: string;
-        description?: React.ReactNode;
-    }>;
-    ChipSizeProvider: React.ComponentType<{
-        children: React.ReactNode;
-        size: "sm" | "lg";
-    }>;
+    lang?: string;
 }) {
     switch (shape.type) {
         case "enum": {
             return (
                 <EnumTypeDefinition
                     elements={shape.values.map((value) => ({
-                        element: (
-                            <EnumValue key={value.value} enumValue={value} Chip={Chip} MdxRenderer={MdxRenderer} />
-                        ),
+                        element: <EnumValue key={value.value} enumValue={value} lang={lang} />,
                         searchableString: `${value.value} ${value.description ?? ""}`
                     }))}
-                    ChipSizeProvider={ChipSizeProvider}
+                    lang={lang}
                 />
             );
         }
@@ -114,12 +58,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 types={types}
                                 location={location}
                                 additionalProperties={additionalProperties}
-                                TypeShorthand={TypeShorthand}
-                                PropertyContainer={PropertyContainer}
-                                TypeDefinitionAnchor={TypeDefinitionAnchor}
-                                MdxRenderer={MdxRenderer}
-                                Chip={Chip}
-                                ChipSizeProvider={ChipSizeProvider}
+                                lang={lang}
                             />
                         ))}
                     </WithSeparator>
@@ -139,12 +78,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 unionVariant={variant}
                                 types={types}
                                 location={location}
-                                TypeShorthand={TypeShorthand}
-                                PropertyContainer={PropertyContainer}
-                                TypeDefinitionAnchor={TypeDefinitionAnchor}
-                                MdxRenderer={MdxRenderer}
-                                Chip={Chip}
-                                ChipSizeProvider={ChipSizeProvider}
+                                lang={lang}
                             />
                         ))}
                     </WithSeparator>
@@ -172,17 +106,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 key={property.key}
                                 part={{ type: "objectProperty", propertyName: property.key }}
                             >
-                                <ObjectProperty
-                                    property={property}
-                                    types={types}
-                                    location={location}
-                                    TypeShorthand={TypeShorthand}
-                                    PropertyContainer={PropertyContainer}
-                                    TypeDefinitionAnchor={TypeDefinitionAnchor}
-                                    MdxRenderer={MdxRenderer}
-                                    Chip={Chip}
-                                    ChipSizeProvider={ChipSizeProvider}
-                                />
+                                <ObjectProperty property={property} types={types} location={location} lang={lang} />
                             </TypeDefinitionPathPart>
                         ))}
                         {filteredProperties.map((property) => (
@@ -190,17 +114,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 key={property.key}
                                 part={{ type: "objectProperty", propertyName: property.key }}
                             >
-                                <ObjectProperty
-                                    property={property}
-                                    types={types}
-                                    location={location}
-                                    TypeShorthand={TypeShorthand}
-                                    PropertyContainer={PropertyContainer}
-                                    TypeDefinitionAnchor={TypeDefinitionAnchor}
-                                    MdxRenderer={MdxRenderer}
-                                    Chip={Chip}
-                                    ChipSizeProvider={ChipSizeProvider}
-                                />
+                                <ObjectProperty property={property} types={types} location={location} lang={lang} />
                             </TypeDefinitionPathPart>
                         ))}
                     </WithSeparator>
@@ -209,8 +123,10 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
         }
         case "primitive":
             return null;
-        default:
-            throw new UnreachableCaseError(shape);
+        default: {
+            const _exhaustiveCheck: never = shape;
+            throw new Error(`Unhandled case: ${(_exhaustiveCheck as { type: string }).type}`);
+        }
     }
 });
 

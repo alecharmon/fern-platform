@@ -1,7 +1,7 @@
 "use client";
 
-import { WithSeparator } from "@fern-api/endpoint-snippet-dependencies";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import { TextInputControl } from "@/components/editor/editor-component/controls";
