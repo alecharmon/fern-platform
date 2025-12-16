@@ -89,7 +89,7 @@ jobs:
   notify:
     needs: deploy_prod
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && startsWith(github.ref, 'refs/tags/fdr@')
     steps:
       - name: Notify Slack
         uses: slackapi/slack-github-action@v2
