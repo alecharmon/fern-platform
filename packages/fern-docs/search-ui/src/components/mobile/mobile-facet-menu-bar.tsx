@@ -37,17 +37,21 @@ export function MobileFacetMenuBar({
     return (
         <Menubar.Root className="flex gap-2 overflow-x-auto overflow-y-hidden p-2 [&::-webkit-scrollbar]:hidden">
             {facets.map((facet) => {
-                const value = filters?.find((f) => f.facet === facet)?.value;
+                const value = filters?.find((f: FacetFilter) => f.facet === facet)?.value;
                 return (
                     <MobileFacetMenu
                         key={facet}
                         facet={facet}
                         value={value}
                         filters={filters ?? EMPTY_ARRAY}
-                        removeFilter={() => setFilters?.((prev) => prev.filter((f) => f.facet !== facet))}
+                        removeFilter={() =>
+                            setFilters?.((prev: readonly FacetFilter[]) =>
+                                prev.filter((f: FacetFilter) => f.facet !== facet)
+                            )
+                        }
                         updateFilter={(value) => {
-                            setFilters?.((prev) => {
-                                const newFilters = prev.filter((f) => f.facet !== facet);
+                            setFilters?.((prev: readonly FacetFilter[]) => {
+                                const newFilters = prev.filter((f: FacetFilter) => f.facet !== facet);
                                 newFilters.push({ facet, value });
                                 return newFilters;
                             });

@@ -101,6 +101,7 @@ export type Translations = {
         searchOurDocumentation: string;
         filters: string;
         theme: string;
+        or: string;
         toGoToRootSearch: string;
         toGoBack: string;
     };

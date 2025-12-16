@@ -2,6 +2,7 @@ import {
     type AlgoliaRecord,
     type ApiReferenceRecord,
     type ChangelogRecord,
+    type FacetFilter,
     type FacetName,
     type MarkdownRecord,
     type ParameterRecord,
@@ -11,6 +12,7 @@ import type { BaseHit, Hit } from "instantsearch.js";
 import type { MarkRequired } from "ts-essentials";
 
 export type AlgoliaRecordHit = Hit<AlgoliaRecord & BaseHit>;
+
 export interface AskFernRecordHit {
     title?: string;
     url?: string;
@@ -29,3 +31,6 @@ export interface FilterOption {
     value: string;
     count: number;
 }
+
+// Re-export types for convenience
+export type { AlgoliaRecord, FacetFilter };

@@ -190,4 +190,4 @@ function AlgoliaInstantSearchWrapper({
     );
 }
 
-export { AlgoliaSearchClientRoot, useFacets, usePreloadFacets, useSearchClient };
+export { AlgoliaSearchClientRoot, useFacetFilters, useFacets, usePreloadFacets, useSearchClient };

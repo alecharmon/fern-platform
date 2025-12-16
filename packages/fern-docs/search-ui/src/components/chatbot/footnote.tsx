@@ -14,7 +14,7 @@ import { PageIcon } from "../icons/page";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { useChatbotTurnContext } from "./turn-context";
 
-export function FootnoteSup({ node, lang }: { node?: HastElement; lang: string }) {
+export function FootnoteSup({ node }: { node?: HastElement }) {
     const { footnotesAtom } = useChatbotTurnContext();
     const footnotes = useAtomValue(footnotesAtom);
 
@@ -118,7 +118,7 @@ export function FootnotesSection({
     node: HastElement;
     searchResults: AskFernRecordHit[];
     className?: string;
-    lang: string;
+    lang?: string;
 }) {
     const { footnotesAtom } = useChatbotTurnContext();
     const [footnotes, setFootnotes] = useAtom(footnotesAtom);

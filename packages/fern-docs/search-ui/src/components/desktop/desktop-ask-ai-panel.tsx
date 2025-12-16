@@ -63,7 +63,7 @@ import { FootnoteCommands } from "./footnote-commands";
 import { HideHeadersInUserMessage } from "./hide-headers-in-user-messages";
 import { Suggestions } from "./suggestions";
 
-type PropsWithElement<T> = T & { node: HastElement };
+type PropsWithElement<T> = T & { node?: HastElement };
 
 export const MIN_ASK_FERN_PANEL_WIDTH = 344;
 
@@ -307,6 +307,7 @@ const DesktopAskAIChat = ({
             };
         } else {
             setIsAnimating(false);
+            return undefined;
         }
     }, [isSidePanelOpen]);
 
@@ -330,6 +331,8 @@ const DesktopAskAIChat = ({
 
     const chat = useChat({
         id: chatId,
+        // TODO: FIX THIS AND MIGRATE TO COMPATIBLE @AI and @AI-SDK/* VERSIONS
+        // @ts-expect-error - version mismatch between ai 5.0.86 and @ai-sdk/react 2.0.0-beta.2
         transport
     });
 

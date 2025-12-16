@@ -1,6 +1,6 @@
 import type { Element as HastElement } from "hast";
 
-type PropsWithElement<T> = T & { node: HastElement };
+type PropsWithElement<T> = T & { node?: HastElement };
 
 export function HideHeadersInUserMessage() {
     return {

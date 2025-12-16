@@ -47,6 +47,7 @@ export const CommandSearchHits = ({
         }
 
         triggerSelection();
+        return undefined;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [items, isLastPage, showMore]);
 
@@ -58,7 +59,7 @@ export const CommandSearchHits = ({
 
     return (
         <MemoizedCommandSearchHits
-            items={items}
+            items={items as unknown as AlgoliaRecordHit[]}
             onSelect={onSelect}
             prefetch={prefetch}
             domain={domain}

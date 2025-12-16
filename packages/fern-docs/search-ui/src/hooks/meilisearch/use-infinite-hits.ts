@@ -5,7 +5,7 @@ import type { useInfiniteHits } from "react-instantsearch";
 import { useMeiliSearchClient } from "../../components/search/meili-search-client";
 import { useFacetFilters } from "../../components/search/useFacetFilters";
 import { useSearchBox } from "../../components/search/useSearchBox";
-import type { AlgoliaRecordHit, FacetFilter } from "../../types";
+import type { AlgoliaRecord, AlgoliaRecordHit, FacetFilter } from "../../types";
 
 function useSearchQuery(): string {
     const { query } = useSearchBox();
@@ -40,7 +40,7 @@ interface _MeilisearchResponse {
 
 const HITS_PER_PAGE = 20;
 
-export function useMeilisearchInfiniteHits(): ReturnType<typeof useInfiniteHits> {
+export function useMeilisearchInfiniteHits(): ReturnType<typeof useInfiniteHits<AlgoliaRecord>> {
     const [allHits, setAllHits] = useState<AlgoliaRecordHit[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
