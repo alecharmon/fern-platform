@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "Välj en endpoint för att komma igång",
     "selectAVariant": "Välj en variant...",
     "selectAnEnum": "Välj en enum...",
-    "doubleClickToEdit": "Dubbelklicka för att redigera"
+    "doubleClickToEdit": "Dubbelklicka för att redigera",
+    "selectExample": "Välj exempel"
   },
   "responses": {
     "responseBodyIsNull": "Svarskroppen är null",

@@ -1,0 +1,95 @@
+import { ChevronDown } from "lucide-react";
+import type { ReactElement } from "react";
+import { FernButton, FernButtonGroup } from "./FernButton";
+import { FernDropdown } from "./FernDropdown";
+
+export interface ExampleSelectorOption {
+    key: string;
+    label: string;
+    title?: string;
+}
+
+export interface ExampleSelectorProps {
+    options: ExampleSelectorOption[];
+    selectedKey: string | undefined;
+    onSelect: (key: string) => void;
+    lang: string;
+    totalLabelLengthOverride?: number;
+    placeholder?: string;
+}
+
+export function ExampleSelector({
+    options,
+    selectedKey,
+    onSelect,
+    lang,
+    totalLabelLengthOverride,
+    placeholder
+}: ExampleSelectorProps): ReactElement<any> | null {
+    if (options.length === 0) {
+        return null;
+    }
+
+    const selectedOption = options.find((opt) => opt.key === selectedKey);
+    const totalLabelLength = totalLabelLengthOverride ?? options.map((opt) => opt.label).join("").length;
+    const shouldUseDropdown = options.length >= 8 || totalLabelLength >= 80;
+    const hasSelection = selectedKey !== undefined && selectedOption !== undefined;
+
+    if (shouldUseDropdown) {
+        return (
+            <div className="w-full min-w-0">
+                <FernDropdown
+                    options={options.map((opt) => ({
+                        type: "value",
+                        value: opt.key,
+                        label: opt.label,
+                        labelClassName: "truncate max-w-md"
+                    }))}
+                    onValueChange={(value) => {
+                        onSelect(value);
+                    }}
+                    value={selectedKey}
+                    lang={lang}
+                >
+                    <FernButton
+                        className="w-full min-w-0 truncate text-left"
+                        size="normal"
+                        variant="outlined"
+                        text={hasSelection ? selectedOption.label : placeholder}
+                        rightIcon={<ChevronDown className="size-icon flex-shrink-0" />}
+                    />
+                </FernDropdown>
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full min-w-0">
+            <FernButtonGroup className="w-full min-w-0">
+                {options.map((opt) => {
+                    const isSelected = opt.key === selectedKey;
+                    return (
+                        <FernButton
+                            key={opt.key}
+                            rounded={true}
+                            onClick={() => {
+                                onSelect(opt.key);
+                            }}
+                            className={
+                                "min-w-0 flex-1 truncate" + (isSelected ? " ring-primary-500" : " ring-transparent")
+                            }
+                            mono
+                            size="small"
+                            variant="outlined"
+                            intent={isSelected ? "primary" : "none"}
+                        >
+                            <span className="block w-full truncate" title={opt.title ?? opt.label}>
+                                {opt.label}
+                            </span>
+                        </FernButton>
+                    );
+                })}
+            </FernButtonGroup>
+        </div>
+    );
+}

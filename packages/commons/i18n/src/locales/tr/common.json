@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "Başlamak için bir endpoint seçin",
     "selectAVariant": "Bir varyant seçin...",
     "selectAnEnum": "Bir enum seçin...",
-    "doubleClickToEdit": "Düzenlemek için çift tıklayın"
+    "doubleClickToEdit": "Düzenlemek için çift tıklayın",
+    "selectExample": "Örnek seç"
   },
   "responses": {
     "responseBodyIsNull": "Yanıt gövdesi null",

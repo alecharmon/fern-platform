@@ -177,6 +177,7 @@ export type Translations = {
         selectAVariant: string;
         selectAnEnum: string;
         doubleClickToEdit: string;
+        selectExample: string;
     };
 
     responses: {

@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "Выберите эндпоинт, чтобы начать",
     "selectAVariant": "Выберите вариант...",
     "selectAnEnum": "Выберите enum...",
-    "doubleClickToEdit": "Дважды щёлкните для редактирования"
+    "doubleClickToEdit": "Дважды щёлкните для редактирования",
+    "selectExample": "Выбрать пример"
   },
   "responses": {
     "responseBodyIsNull": "Тело ответа равно null",

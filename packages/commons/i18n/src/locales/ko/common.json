@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "시작하려면 엔드포인트를 선택하세요",
     "selectAVariant": "변형 선택...",
     "selectAnEnum": "열거형 선택...",
-    "doubleClickToEdit": "더블 클릭하여 편집"
+    "doubleClickToEdit": "더블 클릭하여 편집",
+    "selectExample": "예제 선택"
   },
   "responses": {
     "responseBodyIsNull": "응답 본문이 null입니다",

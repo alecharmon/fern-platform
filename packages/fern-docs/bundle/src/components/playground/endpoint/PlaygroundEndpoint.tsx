@@ -92,17 +92,17 @@ export const PlaygroundEndpoint = ({
 
     const [formState, setFormState] = usePlaygroundEndpointFormState(context);
 
-    const resetWithExample = useEventCallback(() => {
-        setFormState(
-            getInitialEndpointRequestFormStateWithExample(
-                context,
-                context.endpoint.examples?.[0],
-                resolvedPlaygroundState
-            )
-        );
+    const hasExamples = (context.endpoint.examples?.length ?? 0) > 0;
+    const [selectedExampleIndex, setSelectedExampleIndex] = useState<number | undefined>(hasExamples ? 0 : undefined);
+
+    const onSelectExample = useEventCallback((exampleIndex: number) => {
+        const example = context.endpoint.examples?.[exampleIndex];
+        setSelectedExampleIndex(exampleIndex);
+        setFormState(getInitialEndpointRequestFormStateWithExample(context, example, resolvedPlaygroundState));
     });
 
     const resetWithoutExample = useEventCallback(() => {
+        setSelectedExampleIndex(undefined);
         setFormState(getInitialEndpointRequestFormStateWithExample(context, undefined, resolvedPlaygroundState));
     });
 
@@ -348,7 +348,8 @@ export const PlaygroundEndpoint = ({
                         context={context}
                         formState={formState}
                         setFormState={setFormState}
-                        resetWithExample={resetWithExample}
+                        selectedExampleIndex={selectedExampleIndex}
+                        onSelectExample={onSelectExample}
                         resetWithoutExample={resetWithoutExample}
                         response={response}
                         sendRequest={() => {

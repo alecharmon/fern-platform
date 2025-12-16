@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "Επιλέξτε ένα endpoint για να ξεκινήσετε",
     "selectAVariant": "Επιλέξτε μια παραλλαγή...",
     "selectAnEnum": "Επιλέξτε ένα enum...",
-    "doubleClickToEdit": "Διπλό κλικ για επεξεργασία"
+    "doubleClickToEdit": "Διπλό κλικ για επεξεργασία",
+    "selectExample": "Επιλέξτε παράδειγμα"
   },
   "responses": {
     "responseBodyIsNull": "Το σώμα της απόκρισης είναι null",

@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "開始するにはエンドポイントを選択してください",
     "selectAVariant": "バリアントを選択...",
     "selectAnEnum": "列挙型を選択...",
-    "doubleClickToEdit": "ダブルクリックして編集"
+    "doubleClickToEdit": "ダブルクリックして編集",
+    "selectExample": "例を選択"
   },
   "responses": {
     "responseBodyIsNull": "レスポンスボディがnullです",

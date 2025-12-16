@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "选择一个端点以开始",
     "selectAVariant": "选择一个变体...",
     "selectAnEnum": "选择一个枚举...",
-    "doubleClickToEdit": "双击编辑"
+    "doubleClickToEdit": "双击编辑",
+    "selectExample": "选择示例"
   },
   "responses": {
     "responseBodyIsNull": "响应体为 null",

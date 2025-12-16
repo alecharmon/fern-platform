@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "Wybierz endpoint, aby rozpocząć",
     "selectAVariant": "Wybierz wariant...",
     "selectAnEnum": "Wybierz enum...",
-    "doubleClickToEdit": "Kliknij dwukrotnie, aby edytować"
+    "doubleClickToEdit": "Kliknij dwukrotnie, aby edytować",
+    "selectExample": "Wybierz przykład"
   },
   "responses": {
     "responseBodyIsNull": "Treść odpowiedzi jest null",

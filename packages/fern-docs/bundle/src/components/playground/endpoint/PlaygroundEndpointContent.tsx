@@ -17,7 +17,8 @@ interface PlaygroundEndpointContentProps {
     context: EndpointContext;
     formState: PlaygroundEndpointRequestFormState;
     setFormState: Dispatch<SetStateAction<PlaygroundEndpointRequestFormState>>;
-    resetWithExample: () => void;
+    selectedExampleIndex: number | undefined;
+    onSelectExample: (exampleIndex: number) => void;
     resetWithoutExample: () => void;
     response: Loadable<PlaygroundResponse>;
     sendRequest: () => void;
@@ -32,7 +33,8 @@ export function PlaygroundEndpointContent({
     context,
     formState,
     setFormState,
-    resetWithExample,
+    selectedExampleIndex,
+    onSelectExample,
     resetWithoutExample,
     response,
     sendRequest,
@@ -64,7 +66,9 @@ export function PlaygroundEndpointContent({
             <PlaygroundEndpointFormButtons
                 key="form-buttons"
                 node={context.node}
-                resetWithExample={resetWithExample}
+                examples={context.endpoint.examples}
+                selectedExampleIndex={selectedExampleIndex}
+                onSelectExample={onSelectExample}
                 resetWithoutExample={resetWithoutExample}
                 lang={lang}
             />

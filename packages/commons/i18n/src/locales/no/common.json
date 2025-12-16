@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "Velg et endepunkt for å komme i gang",
     "selectAVariant": "Velg en variant...",
     "selectAnEnum": "Velg en enum...",
-    "doubleClickToEdit": "Dobbeltklikk for å redigere"
+    "doubleClickToEdit": "Dobbeltklikk for å redigere",
+    "selectExample": "Velg eksempel"
   },
   "responses": {
     "responseBodyIsNull": "Responsbody er null",

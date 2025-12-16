@@ -1,7 +1,5 @@
-import { ChevronDown } from "lucide-react";
-import type { ReactElement } from "react";
-import { FernButton, FernButtonGroup } from "../../FernButton";
-import { FernDropdown } from "../../FernDropdown";
+import { type ReactElement, useMemo } from "react";
+import { ExampleSelector } from "../../ExampleSelector";
 
 import type { CodeExample } from "../examples/code-example";
 
@@ -19,81 +17,33 @@ export function EndpointExampleSegmentedControl({
     onSelectExample: (exampleKey: string) => void;
     lang: string;
 }): ReactElement<any> {
-    if (
-        segmentedControlExamples.length >= 8 ||
-        segmentedControlExamples
+    const options = useMemo(() => {
+        return segmentedControlExamples.map(({ exampleKey, examples }) => {
+            const exampleIndex = examples[0]?.exampleIndex ?? 0;
+            const label = examples[0]?.name ?? examples[0]?.exampleCall.name ?? `Example ${exampleIndex + 1}`;
+            return {
+                key: exampleKey,
+                label,
+                title: label
+            };
+        });
+    }, [segmentedControlExamples]);
+
+    const totalLabelLengthForDropdownCheck = useMemo(() => {
+        return segmentedControlExamples
             .flatMap(({ examples }) => examples)
             .filter((ex) => ex.exampleCall.responseStatusCode < 400)
             .map(({ name }) => name)
-            .join("").length >= 80
-    ) {
-        return (
-            <div className="w-full min-w-0">
-                <FernDropdown
-                    options={segmentedControlExamples.map(({ exampleKey, examples }) => ({
-                        type: "value",
-                        value: exampleKey,
-                        label: examples[0]?.name ?? exampleKey,
-                        labelClassName: "truncate max-w-md"
-                    }))}
-                    onValueChange={(value) => {
-                        onSelectExample(value);
-                    }}
-                    value={selectedExample?.exampleKey}
-                    lang={lang}
-                >
-                    <FernButton
-                        className="w-full min-w-0 truncate text-left"
-                        size="normal"
-                        variant="outlined"
-                        text={selectedExample?.name ?? selectedExample?.exampleKey}
-                        rightIcon={<ChevronDown className="size-icon flex-shrink-0" />}
-                    />
-                </FernDropdown>
-            </div>
-        );
-    }
+            .join("").length;
+    }, [segmentedControlExamples]);
 
-    // TODO: Replace this with a proper segmented control component
     return (
-        <div className="w-full min-w-0">
-            <FernButtonGroup className="w-full min-w-0">
-                {segmentedControlExamples.map(({ exampleKey, examples }) => {
-                    const exampleIndex = examples[0]?.exampleIndex ?? 0;
-                    return (
-                        <FernButton
-                            key={exampleKey}
-                            rounded={true}
-                            onClick={() => {
-                                onSelectExample(exampleKey);
-                            }}
-                            className={
-                                "min-w-0 flex-1 truncate" +
-                                (exampleKey === selectedExample?.exampleKey ? " ring-primary-500" : " ring-transparent")
-                            }
-                            mono
-                            size="small"
-                            variant="outlined"
-                            intent={exampleKey === selectedExample?.exampleKey ? "primary" : "none"}
-                        >
-                            <span
-                                className="block w-full truncate"
-                                title={
-                                    (exampleKey === selectedExample?.exampleKey ? selectedExample?.name : undefined) ??
-                                    examples[0]?.name ??
-                                    examples[0]?.exampleCall.name ??
-                                    `Example ${exampleIndex + 1}`
-                                }
-                            >
-                                {(exampleKey === selectedExample?.exampleKey ? selectedExample?.name : undefined) ??
-                                    examples[0]?.name ??
-                                    examples[0]?.exampleCall.name ??
-                                    `Example ${exampleIndex + 1}`}
-                            </span>
-                        </FernButton>
-                    );
-                })}
-            </FernButtonGroup>
-        </div>
+        <ExampleSelector
+            options={options}
+            selectedKey={selectedExample?.exampleKey}
+            onSelect={onSelectExample}
+            lang={lang}
+            totalLabelLengthOverride={totalLabelLengthForDropdownCheck}
+        />
     );
 }

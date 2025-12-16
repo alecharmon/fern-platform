@@ -144,12 +144,33 @@ paths:
             schema:
               $ref: "#/components/schemas/Plant"
             examples:
-              example1:
-                summary: Add a Fern Plant
+              indoorFern:
+                summary: Indoor Fern Plant
                 value:
                   name: "Fern"
                   category: "Indoor"
                   tags: ["green", "leafy"]
+                  status: "available"
+              tropicalPalm:
+                summary: Tropical Palm Tree
+                value:
+                  name: "Palm Tree"
+                  category: "Outdoor"
+                  tags: ["tropical", "tall", "exotic"]
+                  status: "available"
+              desertCactus:
+                summary: Desert Cactus
+                value:
+                  name: "Saguaro Cactus"
+                  category: "Outdoor"
+                  tags: ["desert", "spiky", "drought-resistant"]
+                  status: "pending"
+              rareOrchid:
+                summary: Rare Orchid Collection
+                value:
+                  name: "Blue Orchid"
+                  category: "Indoor"
+                  tags: ["rare", "flowering", "exotic", "premium"]
                   status: "available"
       responses:
         "200":
@@ -184,13 +205,27 @@ paths:
             schema:
               $ref: "#/components/schemas/Plant"
             examples:
-              example1:
-                summary: Update plant status
+              markAsSold:
+                summary: Mark plant as sold
                 value:
                   name: "Fern"
                   category: "Indoor"
                   tags: ["green", "leafy"]
                   status: "sold"
+              updateToPending:
+                summary: Update to pending status
+                value:
+                  name: "Palm Tree"
+                  category: "Outdoor"
+                  tags: ["tropical", "tall"]
+                  status: "pending"
+              addNewTags:
+                summary: Add new tags to plant
+                value:
+                  name: "Cactus"
+                  category: "Indoor"
+                  tags: ["desert", "spiky", "low-maintenance", "beginner-friendly"]
+                  status: "available"
       responses:
         "200":
           description: Plant successfully updated

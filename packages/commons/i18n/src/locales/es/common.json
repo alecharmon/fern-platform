@@ -175,7 +175,8 @@
     "selectAnEndpointToGetStarted": "Selecciona un endpoint para comenzar",
     "selectAVariant": "Selecciona una variante...",
     "selectAnEnum": "Selecciona un enum...",
-    "doubleClickToEdit": "Haz doble clic para editar"
+    "doubleClickToEdit": "Haz doble clic para editar",
+    "selectExample": "Seleccionar ejemplo"
   },
   "responses": {
     "responseBodyIsNull": "El cuerpo de la respuesta es nulo",

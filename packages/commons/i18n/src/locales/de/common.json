@@ -172,7 +172,8 @@
     "selectAnEndpointToGetStarted": "Wählen Sie einen Endpunkt aus, um zu beginnen",
     "selectAVariant": "Eine Variante auswählen...",
     "selectAnEnum": "Ein Enum auswählen...",
-    "doubleClickToEdit": "Doppelklicken zum Bearbeiten"
+    "doubleClickToEdit": "Doppelklicken zum Bearbeiten",
+    "selectExample": "Beispiel auswählen"
   },
   "responses": {
     "responseBodyIsNull": "Antwortkörper ist null",
