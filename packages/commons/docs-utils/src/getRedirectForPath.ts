@@ -57,6 +57,14 @@ export function getRedirectForPath(
                 }
             }
 
+            // Skip redirect if destination equals source to prevent infinite redirect loops
+            const normalizedSource = removeTrailingSlash(pathWithoutBasepath);
+            const normalizedDestination = removeTrailingSlash(destination);
+            if (normalizedSource === normalizedDestination) {
+                console.debug(`[redirect-for-path] Skipping redirect where destination equals source: ${destination}`);
+                continue;
+            }
+
             // - Do NOT conform trailing slash in the destination because this relies on the user's direct configuration
             // - Do encode the URI to prevent any potential issues with special characters
             return {

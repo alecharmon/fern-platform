@@ -208,4 +208,34 @@ describe("getRedirectForPath", () => {
             ])
         ).toBeUndefined();
     });
+    it("should skip redirect if destination equals source to prevent infinite loops", () => {
+        expect(
+            getRedirectForPath("/bar", MOCK_BASE_URL_0, [{ source: "/bar", destination: "/bar", permanent: undefined }])
+        ).toBeUndefined();
+        expect(
+            getRedirectForPath("/bar/", MOCK_BASE_URL_0, [
+                { source: "/bar", destination: "/bar/", permanent: undefined }
+            ])
+        ).toBeUndefined();
+        expect(
+            getRedirectForPath("/bar", MOCK_BASE_URL_0, [
+                { source: "/bar/", destination: "/bar", permanent: undefined }
+            ])
+        ).toBeUndefined();
+    });
+    it("should skip self-redirect and continue to next redirect rule", () => {
+        expect(
+            getRedirectForPath("/bar", MOCK_BASE_URL_0, [
+                { source: "/bar", destination: "/bar", permanent: undefined },
+                { source: "/bar", destination: "/baz", permanent: undefined }
+            ])
+        ).toEqual({ destination: "/baz", permanent: true });
+    });
+    it("should skip self-redirect with params", () => {
+        expect(
+            getRedirectForPath("/bar/123", MOCK_BASE_URL_0, [
+                { source: "/bar/:id", destination: "/bar/:id", permanent: undefined }
+            ])
+        ).toBeUndefined();
+    });
 });
