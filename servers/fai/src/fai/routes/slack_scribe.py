@@ -4,7 +4,6 @@ from typing import Any
 from fastapi import BackgroundTasks, HTTPException, Query, Request, status
 from fastapi.responses import JSONResponse
 from slack_sdk.web.async_client import AsyncWebClient
-from sqlalchemy import select
 from sqlalchemy.orm import attributes
 
 from fai.app import fai_app
@@ -14,6 +13,7 @@ from fai.models.api.scribe_channel_settings import ScribeChannelSettings
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_message_cache_db import ScribeMessageCacheDb
 from fai.settings import LOGGER, VARIABLES
+from fai.utils.scribe.db_helpers import get_scribe_integration_by_team_id
 from fai.utils.scribe.message_handler import handle_scribe_message
 from fai.utils.scribe.validate_github_repo import validate_scribe_github_repo_access
 from fai.utils.slack.client import add_reaction
@@ -294,102 +294,99 @@ async def handle_scribe_configure_command(
                 }
             )
 
-        async with async_session_maker() as session:
-            result = await session.execute(
-                select(ScribeIntegrationDb).where(ScribeIntegrationDb.slack_team_id == team_id)
+        integration = await get_scribe_integration_by_team_id(team_id)
+
+        if not integration:
+            return JSONResponse(
+                content={
+                    "response_type": "ephemeral",
+                    "text": "Slack integration not found. Please install the Scribe bot first.",
+                }
             )
-            integration = result.scalar_one_or_none()
 
-            if not integration:
+        current_settings = integration.settings or {}
+        if not isinstance(current_settings, dict):
+            current_settings = {}
+
+        channel_settings = current_settings.get(channel_id, {})
+
+        if "repo_override" not in channel_settings:
+            channel_settings["repo_override"] = None
+
+        if action == "show":
+            settings_obj = ScribeChannelSettings(**channel_settings)
+            repo_text = (
+                settings_obj.repo_override if settings_obj.repo_override else f"{integration.github_repo} (default)"
+            )
+
+            return JSONResponse(
+                content={
+                    "response_type": "ephemeral",
+                    "text": (f"*Current settings for <#{channel_id}>:*\n" f"• *GitHub repository:* {repo_text}"),
+                }
+            )
+
+        elif action == "repo":
+            if len(parts) < 2:
                 return JSONResponse(
                     content={
                         "response_type": "ephemeral",
-                        "text": "Slack integration not found. Please install the Scribe bot first.",
+                        "text": (
+                            "Please provide a repository. "
+                            f"Example: `{cmd_name} repo owner/repo` or `{cmd_name} repo clear`"
+                        ),
                     }
                 )
 
-            current_settings = integration.settings or {}
-            if not isinstance(current_settings, dict):
-                current_settings = {}
-
-            channel_settings = current_settings.get(channel_id, {})
-
-            if "repo_override" not in channel_settings:
+            repo = " ".join(parts[1:])
+            if repo.lower() == "clear" or repo.lower() == "none":
                 channel_settings["repo_override"] = None
+                repo_text = f"cleared (using default: {integration.github_repo})"
+            else:
+                validation_result = await validate_scribe_github_repo_access(repo)
 
-            if action == "show":
-                settings_obj = ScribeChannelSettings(**channel_settings)
-                repo_text = (
-                    settings_obj.repo_override if settings_obj.repo_override else f"{integration.github_repo} (default)"
-                )
-
-                return JSONResponse(
-                    content={
-                        "response_type": "ephemeral",
-                        "text": (f"*Current settings for <#{channel_id}>:*\n" f"• *GitHub repository:* {repo_text}"),
-                    }
-                )
-
-            elif action == "repo":
-                if len(parts) < 2:
+                if not validation_result["ok"]:
+                    error = validation_result["error"]
+                    LOGGER.warning(
+                        f"[SCRIBE] Validation failed for repo {repo}: " f"{error['type']} - {error['message']}"
+                    )
                     return JSONResponse(
                         content={
                             "response_type": "ephemeral",
-                            "text": (
-                                "Please provide a repository. "
-                                f"Example: `{cmd_name} repo owner/repo` or `{cmd_name} repo clear`"
-                            ),
+                            "text": f"Failed to validate repository: {error['message']}",
                         }
                     )
 
-                repo = " ".join(parts[1:])
-                if repo.lower() == "clear" or repo.lower() == "none":
-                    channel_settings["repo_override"] = None
-                    repo_text = f"cleared (using default: {integration.github_repo})"
-                else:
-                    validation_result = await validate_scribe_github_repo_access(repo)
+                channel_settings["repo_override"] = repo
+                repo_text = f"`{repo}`"
 
-                    if not validation_result["ok"]:
-                        error = validation_result["error"]
-                        LOGGER.warning(
-                            f"[SCRIBE] Validation failed for repo {repo}: " f"{error['type']} - {error['message']}"
-                        )
-                        return JSONResponse(
-                            content={
-                                "response_type": "ephemeral",
-                                "text": f"Failed to validate repository: {error['message']}",
-                            }
-                        )
+            if current_settings is None:
+                current_settings = {}
+            current_settings[channel_id] = channel_settings
 
-                    channel_settings["repo_override"] = repo
-                    repo_text = f"`{repo}`"
+            integration.settings = current_settings
+            attributes.flag_modified(integration, "settings")
 
-                if current_settings is None:
-                    current_settings = {}
-                current_settings[channel_id] = channel_settings
+            LOGGER.info(f"[SCRIBE] Updating repo override for {channel_id}: {repo}")
 
-                integration.settings = current_settings
-                attributes.flag_modified(integration, "settings")
-
-                LOGGER.info(f"[SCRIBE] Updating repo override for {channel_id}: {repo}")
-
+            async with async_session_maker() as session:
                 await session.commit()
                 await session.refresh(integration)
 
-                return JSONResponse(
-                    content={
-                        "response_type": "ephemeral",
-                        "text": f"Updated repository override for <#{channel_id}>: {repo_text}",
-                    }
-                )
+            return JSONResponse(
+                content={
+                    "response_type": "ephemeral",
+                    "text": f"Updated repository override for <#{channel_id}>: {repo_text}",
+                }
+            )
 
-            else:
-                return JSONResponse(
-                    content={
-                        "response_type": "ephemeral",
-                        "text": f"Unknown action '{action}'. Use `{cmd_name} help` for available commands.",
-                    }
-                )
+        else:
+            return JSONResponse(
+                content={
+                    "response_type": "ephemeral",
+                    "text": f"Unknown action '{action}'. Use `{cmd_name} help` for available commands.",
+                }
+            )
 
     except Exception as e:
         LOGGER.error(f"[SCRIBE] Error handling configure command: {e}")

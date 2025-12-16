@@ -11,6 +11,7 @@ from fai.models.api.scribe_channel_settings import ScribeChannelSettings
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_session_db import ScribeSessionDb
 from fai.settings import LOGGER, VARIABLES
+from fai.utils.scribe.db_helpers import get_scribe_integration_by_team_id, get_scribe_session_by_id
 from fai.utils.scribe.devin_client import DevinClient, create_or_get_devin_session, send_devin_message
 from fai.utils.scribe.generate_startup_message import PLANT_FACTS, STARTUP_INITIAL_MESSAGE
 from fai.utils.scribe.session_poller import poll_devin_session
@@ -34,11 +35,7 @@ class ScribeMessageResponse:
 
 
 async def get_scribe_integration(team_id: str) -> ScribeIntegrationDb | None:
-    async with async_session_maker() as session:
-        result = await session.execute(
-            select(ScribeIntegrationDb).where(ScribeIntegrationDb.slack_team_id == team_id).limit(1)
-        )
-        return result.scalar_one_or_none()
+    return await get_scribe_integration_by_team_id(team_id)
 
 
 async def get_or_create_session(
@@ -219,10 +216,7 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
                 )
 
                 async with async_session_maker() as db_session:
-                    result = await db_session.execute(
-                        select(ScribeSessionDb).where(ScribeSessionDb.id == session_record.id)
-                    )
-                    db_record = result.scalar_one_or_none()
+                    db_record = await get_scribe_session_by_id(session_record.id, db=db_session)
                     if db_record:
                         db_record.status = "running"
                         db_record.updated_at = datetime.now(UTC)

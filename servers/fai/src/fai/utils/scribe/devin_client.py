@@ -1,4 +1,3 @@
-import asyncio
 from typing import Any
 
 import httpx
@@ -7,6 +6,7 @@ from fai.settings import (
     LOGGER,
     VARIABLES,
 )
+from fai.utils.retry import retry_with_exponential_backoff
 
 
 class DevinClient:
@@ -91,21 +91,12 @@ async def create_or_get_devin_session(
     formatted_message = format_message_with_attachments(user_message, attachment_urls or [])
     prompt = create_devin_prompt(github_repo, formatted_message)
 
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            result = await client.create_session(prompt, idempotent=False)
-            LOGGER.info(f"[SCRIBE] Created Devin session: {result.get('session_id')}")
-            return result
-        except httpx.HTTPError as e:
-            if attempt == max_retries - 1:
-                LOGGER.error(f"[SCRIBE] Failed to create Devin session after {max_retries} attempts: {e}")
-                raise
-            wait_time = 2**attempt
-            LOGGER.warning(f"[SCRIBE] Devin session creation failed (attempt {attempt + 1}), retrying in {wait_time}s")
-            await asyncio.sleep(wait_time)
+    async def _create_session() -> dict[str, Any]:
+        result = await client.create_session(prompt, idempotent=False)
+        LOGGER.info(f"[SCRIBE] Created Devin session: {result.get('session_id')}")
+        return result
 
-    raise RuntimeError("Failed to create Devin session")
+    return await retry_with_exponential_backoff(_create_session, max_retries=3, log_prefix="[SCRIBE]")
 
 
 async def send_devin_message(
@@ -124,37 +115,18 @@ async def send_devin_message(
 
     formatted_message = format_message_with_attachments(message, attachment_urls)
 
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            result = await client.send_message(session_id, formatted_message)
-            LOGGER.info(f"[SCRIBE] Sent message to Devin session: {session_id}")
-            return result
-        except httpx.HTTPError as e:
-            if attempt == max_retries - 1:
-                LOGGER.error(f"[SCRIBE] Failed to send message after {max_retries} attempts: {e}")
-                raise
-            wait_time = 2**attempt
-            LOGGER.warning(f"[SCRIBE] Message send failed (attempt {attempt + 1}), retrying in {wait_time}s")
-            await asyncio.sleep(wait_time)
+    async def _send_message() -> dict[str, Any]:
+        result = await client.send_message(session_id, formatted_message)
+        LOGGER.info(f"[SCRIBE] Sent message to Devin session: {session_id}")
+        return result
 
-    raise RuntimeError("Failed to send message to Devin session")
+    return await retry_with_exponential_backoff(_send_message, max_retries=3, log_prefix="[SCRIBE]")
 
 
 async def get_devin_session_status(session_id: str) -> dict[str, Any]:
     client = DevinClient(VARIABLES.SCRIBE_DEVIN_API_KEY)
 
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            result = await client.get_session_status(session_id)
-            return result
-        except httpx.HTTPError as e:
-            if attempt == max_retries - 1:
-                LOGGER.error(f"[SCRIBE] Failed to get session status after {max_retries} attempts: {e}")
-                raise
-            wait_time = 2**attempt
-            LOGGER.warning(f"[SCRIBE] Status check failed (attempt {attempt + 1}), retrying in {wait_time}s")
-            await asyncio.sleep(wait_time)
+    async def _get_status() -> dict[str, Any]:
+        return await client.get_session_status(session_id)
 
-    raise RuntimeError("Failed to get Devin session status")
+    return await retry_with_exponential_backoff(_get_status, max_retries=3, log_prefix="[SCRIBE]")

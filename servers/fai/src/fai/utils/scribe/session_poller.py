@@ -7,14 +7,13 @@ from datetime import (
 
 import httpx
 from slack_sdk.web.async_client import AsyncWebClient
-from sqlalchemy import select
 
 from fai.db import async_session_maker
-from fai.models.db.scribe_session_db import ScribeSessionDb
 from fai.settings import (
     LOGGER,
     VARIABLES,
 )
+from fai.utils.scribe.db_helpers import get_scribe_session_by_id
 from fai.utils.scribe.devin_client import get_devin_session_status
 from fai.utils.slack.client import send_slack_message
 from fai.utils.slack.postprocessing import slackify_markdown
@@ -73,10 +72,8 @@ async def poll_devin_session(
     client = AsyncWebClient(token=bot_token)
     poll_interval = 15
 
-    async with async_session_maker() as db_session:
-        result = await db_session.execute(select(ScribeSessionDb).where(ScribeSessionDb.id == session_id))
-        session_record = result.scalar_one_or_none()
-        last_event_id = session_record.last_message_event_id if session_record else None
+    session_record = await get_scribe_session_by_id(session_id)
+    last_event_id = session_record.last_message_event_id if session_record else None
 
     LOGGER.info(f"[SCRIBE] Starting polling for Devin session {devin_session_id} (last_event_id={last_event_id})")
 
@@ -132,8 +129,7 @@ async def poll_devin_session(
 
             pr_was_created = False
             async with async_session_maker() as db_session:
-                result = await db_session.execute(select(ScribeSessionDb).where(ScribeSessionDb.id == session_id))
-                session_record = result.scalar_one_or_none()
+                session_record = await get_scribe_session_by_id(session_id, db=db_session)
                 if session_record:
                     session_record.status = status_enum or status.get("status", "unknown")
                     session_record.updated_at = datetime.now(UTC)

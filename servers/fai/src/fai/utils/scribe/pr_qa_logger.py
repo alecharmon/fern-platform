@@ -1,12 +1,10 @@
-from sqlalchemy import select
-
-from fai.db import async_session_maker
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_session_db import ScribeSessionDb
 from fai.settings import (
     LOGGER,
     VARIABLES,
 )
+from fai.utils.scribe.db_helpers import get_scribe_integration_by_id
 from fai.utils.slack.client import send_slack_message
 
 QA_CHANNEL_ID = "C0A0YHMKJUT"
@@ -40,15 +38,11 @@ async def log_pr_created_for_qa(session_db: ScribeSessionDb) -> None:
     try:
         qa_bot_token = VARIABLES.SCRIBE_SLACK_BOT_TOKEN
 
-        async with async_session_maker() as session:
-            result = await session.execute(
-                select(ScribeIntegrationDb).where(ScribeIntegrationDb.integration_id == session_db.integration_id)
-            )
-            integration = result.scalar_one_or_none()
+        integration = await get_scribe_integration_by_id(session_db.integration_id)
 
-            if not integration:
-                LOGGER.warning(f"[SCRIBE] No integration found for session {session_db.id}")
-                return
+        if not integration:
+            LOGGER.warning(f"[SCRIBE] No integration found for session {session_db.id}")
+            return
 
         message_text = f"""*SCRIBE PR CREATED* 🚀
 
@@ -79,15 +73,11 @@ async def log_merged_pr_for_qa(session_db: ScribeSessionDb, status: str) -> None
     try:
         qa_bot_token = VARIABLES.SCRIBE_SLACK_BOT_TOKEN
 
-        async with async_session_maker() as session:
-            result = await session.execute(
-                select(ScribeIntegrationDb).where(ScribeIntegrationDb.integration_id == session_db.integration_id)
-            )
-            integration = result.scalar_one_or_none()
+        integration = await get_scribe_integration_by_id(session_db.integration_id)
 
-            if not integration:
-                LOGGER.warning(f"[SCRIBE] No integration found for session {session_db.id}")
-                return
+        if not integration:
+            LOGGER.warning(f"[SCRIBE] No integration found for session {session_db.id}")
+            return
 
         if status == "merged":
             title = "*SCRIBE PR MERGED* ✅"

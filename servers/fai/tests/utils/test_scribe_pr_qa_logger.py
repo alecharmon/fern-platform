@@ -80,18 +80,14 @@ class TestLogPRCreatedForQA:
     async def test_sends_pr_created_notification(
         self, mock_session: ScribeSessionDb, mock_integration: ScribeIntegrationDb
     ) -> None:
-        mock_db_session = AsyncMock()
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = mock_integration
-        mock_db_session.execute = AsyncMock(return_value=mock_result)
-        mock_db_session.__aenter__ = AsyncMock(return_value=mock_db_session)
-        mock_db_session.__aexit__ = AsyncMock()
-
         with (
-            patch("fai.utils.scribe.pr_qa_logger.async_session_maker", return_value=mock_db_session),
+            patch(
+                "fai.utils.scribe.pr_qa_logger.get_scribe_integration_by_id", new_callable=AsyncMock
+            ) as mock_get_integration,
             patch("fai.utils.scribe.pr_qa_logger.send_slack_message", new_callable=AsyncMock) as mock_send,
             patch("fai.utils.scribe.pr_qa_logger.VARIABLES") as mock_vars,
         ):
+            mock_get_integration.return_value = mock_integration
             mock_vars.SCRIBE_SLACK_BOT_TOKEN = "test-bot-token"
 
             await log_pr_created_for_qa(mock_session)
@@ -119,18 +115,14 @@ class TestLogPRCreatedForQA:
         mock_session.devin_session_url = None
         mock_session.slack_thread_ts = None
 
-        mock_db_session = AsyncMock()
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = mock_integration
-        mock_db_session.execute = AsyncMock(return_value=mock_result)
-        mock_db_session.__aenter__ = AsyncMock(return_value=mock_db_session)
-        mock_db_session.__aexit__ = AsyncMock()
-
         with (
-            patch("fai.utils.scribe.pr_qa_logger.async_session_maker", return_value=mock_db_session),
+            patch(
+                "fai.utils.scribe.pr_qa_logger.get_scribe_integration_by_id", new_callable=AsyncMock
+            ) as mock_get_integration,
             patch("fai.utils.scribe.pr_qa_logger.send_slack_message", new_callable=AsyncMock) as mock_send,
             patch("fai.utils.scribe.pr_qa_logger.VARIABLES") as mock_vars,
         ):
+            mock_get_integration.return_value = mock_integration
             mock_vars.SCRIBE_SLACK_BOT_TOKEN = "test-bot-token"
 
             await log_pr_created_for_qa(mock_session)
@@ -145,18 +137,14 @@ class TestLogMergedPRForQA:
     async def test_sends_merged_pr_notification(
         self, mock_session: ScribeSessionDb, mock_integration: ScribeIntegrationDb
     ) -> None:
-        mock_db_session = AsyncMock()
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = mock_integration
-        mock_db_session.execute = AsyncMock(return_value=mock_result)
-        mock_db_session.__aenter__ = AsyncMock(return_value=mock_db_session)
-        mock_db_session.__aexit__ = AsyncMock()
-
         with (
-            patch("fai.utils.scribe.pr_qa_logger.async_session_maker", return_value=mock_db_session),
+            patch(
+                "fai.utils.scribe.pr_qa_logger.get_scribe_integration_by_id", new_callable=AsyncMock
+            ) as mock_get_integration,
             patch("fai.utils.scribe.pr_qa_logger.send_slack_message", new_callable=AsyncMock) as mock_send,
             patch("fai.utils.scribe.pr_qa_logger.VARIABLES") as mock_vars,
         ):
+            mock_get_integration.return_value = mock_integration
             mock_vars.SCRIBE_SLACK_BOT_TOKEN = "test-bot-token"
 
             await log_merged_pr_for_qa(mock_session, "merged")
@@ -181,18 +169,14 @@ class TestLogMergedPRForQA:
     async def test_sends_closed_pr_notification(
         self, mock_session: ScribeSessionDb, mock_integration: ScribeIntegrationDb
     ) -> None:
-        mock_db_session = AsyncMock()
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = mock_integration
-        mock_db_session.execute = AsyncMock(return_value=mock_result)
-        mock_db_session.__aenter__ = AsyncMock(return_value=mock_db_session)
-        mock_db_session.__aexit__ = AsyncMock()
-
         with (
-            patch("fai.utils.scribe.pr_qa_logger.async_session_maker", return_value=mock_db_session),
+            patch(
+                "fai.utils.scribe.pr_qa_logger.get_scribe_integration_by_id", new_callable=AsyncMock
+            ) as mock_get_integration,
             patch("fai.utils.scribe.pr_qa_logger.send_slack_message", new_callable=AsyncMock) as mock_send,
             patch("fai.utils.scribe.pr_qa_logger.VARIABLES") as mock_vars,
         ):
+            mock_get_integration.return_value = mock_integration
             mock_vars.SCRIBE_SLACK_BOT_TOKEN = "test-bot-token"
 
             await log_merged_pr_for_qa(mock_session, "closed")
@@ -204,18 +188,14 @@ class TestLogMergedPRForQA:
     async def test_updated_format_uses_org_not_team(
         self, mock_session: ScribeSessionDb, mock_integration: ScribeIntegrationDb
     ) -> None:
-        mock_db_session = AsyncMock()
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = mock_integration
-        mock_db_session.execute = AsyncMock(return_value=mock_result)
-        mock_db_session.__aenter__ = AsyncMock(return_value=mock_db_session)
-        mock_db_session.__aexit__ = AsyncMock()
-
         with (
-            patch("fai.utils.scribe.pr_qa_logger.async_session_maker", return_value=mock_db_session),
+            patch(
+                "fai.utils.scribe.pr_qa_logger.get_scribe_integration_by_id", new_callable=AsyncMock
+            ) as mock_get_integration,
             patch("fai.utils.scribe.pr_qa_logger.send_slack_message", new_callable=AsyncMock) as mock_send,
             patch("fai.utils.scribe.pr_qa_logger.VARIABLES") as mock_vars,
         ):
+            mock_get_integration.return_value = mock_integration
             mock_vars.SCRIBE_SLACK_BOT_TOKEN = "test-bot-token"
 
             await log_merged_pr_for_qa(mock_session, "merged")
