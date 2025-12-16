@@ -992,6 +992,300 @@ export class WriteClient {
         };
     }
 
+    /**
+     * Start async documentation generation for a library from source code.
+     *
+     * @param {FernRegistry.docs.v2.write.StartLibraryDocsGenerationRequest} request
+     * @param {WriteClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.docs.v2.write.startLibraryDocsGeneration({
+     *         orgId: FernRegistry.OrgId("orgId"),
+     *         githubUrl: FernRegistry.Url("githubUrl"),
+     *         language: "PYTHON"
+     *     })
+     */
+    public startLibraryDocsGeneration(
+        request: FernRegistry.docs.v2.write.StartLibraryDocsGenerationRequest,
+        requestOptions?: WriteClient.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<
+            FernRegistry.docs.v2.write.StartLibraryDocsGenerationResponse,
+            FernRegistry.docs.v2.write.startLibraryDocsGeneration.Error
+        >
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__startLibraryDocsGeneration(request, requestOptions));
+    }
+
+    private async __startLibraryDocsGeneration(
+        request: FernRegistry.docs.v2.write.StartLibraryDocsGenerationRequest,
+        requestOptions?: WriteClient.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<
+                FernRegistry.docs.v2.write.StartLibraryDocsGenerationResponse,
+                FernRegistry.docs.v2.write.startLibraryDocsGeneration.Error
+            >
+        >
+    > {
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                "/v2/registry/docs/library-docs/generate",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs:
+                requestOptions?.timeoutInSeconds != null
+                    ? requestOptions.timeoutInSeconds * 1000
+                    : this._options?.timeoutInSeconds != null
+                      ? this._options?.timeoutInSeconds * 1000
+                      : undefined,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FernRegistry.docs.v2.write.StartLibraryDocsGenerationResponse,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FernRegistry.docs.v2.write.startLibraryDocsGeneration.Error)?.error) {
+                case "UnauthorizedError":
+                case "UserNotInOrgError":
+                case "InvalidGithubUrlError":
+                case "UnsupportedLanguageError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FernRegistry.docs.v2.write.startLibraryDocsGeneration.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.docs.v2.write.startLibraryDocsGeneration.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
+    /**
+     * Get the status of a documentation generation job.
+     *
+     * @param {FernRegistry.docs.v2.write.LibraryDocsJobId} jobId
+     * @param {WriteClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.docs.v2.write.getLibraryDocsGenerationStatus(FernRegistry.docs.v2.write.LibraryDocsJobId("jobId"))
+     */
+    public getLibraryDocsGenerationStatus(
+        jobId: FernRegistry.docs.v2.write.LibraryDocsJobId,
+        requestOptions?: WriteClient.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<
+            FernRegistry.docs.v2.write.LibraryDocsGenerationStatus,
+            FernRegistry.docs.v2.write.getLibraryDocsGenerationStatus.Error
+        >
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__getLibraryDocsGenerationStatus(jobId, requestOptions));
+    }
+
+    private async __getLibraryDocsGenerationStatus(
+        jobId: FernRegistry.docs.v2.write.LibraryDocsJobId,
+        requestOptions?: WriteClient.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<
+                FernRegistry.docs.v2.write.LibraryDocsGenerationStatus,
+                FernRegistry.docs.v2.write.getLibraryDocsGenerationStatus.Error
+            >
+        >
+    > {
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                `/v2/registry/docs/library-docs/status/${core.url.encodePathParam(jobId)}`,
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
+            timeoutMs:
+                requestOptions?.timeoutInSeconds != null
+                    ? requestOptions.timeoutInSeconds * 1000
+                    : this._options?.timeoutInSeconds != null
+                      ? this._options?.timeoutInSeconds * 1000
+                      : undefined,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FernRegistry.docs.v2.write.LibraryDocsGenerationStatus,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FernRegistry.docs.v2.write.getLibraryDocsGenerationStatus.Error)?.error) {
+                case "LibraryDocsJobNotFoundError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error
+                                .body as FernRegistry.docs.v2.write.getLibraryDocsGenerationStatus.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.docs.v2.write.getLibraryDocsGenerationStatus.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
+    /**
+     * Get the result of a completed documentation generation job.
+     *
+     * @param {FernRegistry.docs.v2.write.LibraryDocsJobId} jobId
+     * @param {WriteClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.docs.v2.write.getLibraryDocsResult(FernRegistry.docs.v2.write.LibraryDocsJobId("jobId"))
+     */
+    public getLibraryDocsResult(
+        jobId: FernRegistry.docs.v2.write.LibraryDocsJobId,
+        requestOptions?: WriteClient.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<
+            FernRegistry.docs.v2.write.LibraryDocsResult,
+            FernRegistry.docs.v2.write.getLibraryDocsResult.Error
+        >
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__getLibraryDocsResult(jobId, requestOptions));
+    }
+
+    private async __getLibraryDocsResult(
+        jobId: FernRegistry.docs.v2.write.LibraryDocsJobId,
+        requestOptions?: WriteClient.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<
+                FernRegistry.docs.v2.write.LibraryDocsResult,
+                FernRegistry.docs.v2.write.getLibraryDocsResult.Error
+            >
+        >
+    > {
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                `/v2/registry/docs/library-docs/result/${core.url.encodePathParam(jobId)}`,
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
+            timeoutMs:
+                requestOptions?.timeoutInSeconds != null
+                    ? requestOptions.timeoutInSeconds * 1000
+                    : this._options?.timeoutInSeconds != null
+                      ? this._options?.timeoutInSeconds * 1000
+                      : undefined,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FernRegistry.docs.v2.write.LibraryDocsResult,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FernRegistry.docs.v2.write.getLibraryDocsResult.Error)?.error) {
+                case "LibraryDocsJobNotFoundError":
+                case "LibraryDocsGenerationNotCompleteError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FernRegistry.docs.v2.write.getLibraryDocsResult.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.docs.v2.write.getLibraryDocsResult.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
     protected async _getAuthorizationHeader(): Promise<string | undefined> {
         const bearer = await core.Supplier.get(this._options.token);
         if (bearer != null) {

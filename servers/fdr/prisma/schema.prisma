@@ -38,7 +38,7 @@ model ApiEndpoint {
   method          HttpMethod
   path            String
   endpoint        Bytes
-  createdAt       DateTime @default(now())
+  createdAt       DateTime   @default(now())
 
   @@id([apiDefinitionId, endpointId])
   @@index([apiDefinitionId, method, path])
@@ -82,7 +82,7 @@ model DocsV2 {
   isPreview            Boolean  @default(false)
   hasPublicS3Assets    Boolean  @default(false)
   isArchived           Boolean  @default(false)
-  githubUrl String?
+  githubUrl            String?
 
   @@id([domain, path])
 }
@@ -90,6 +90,37 @@ model DocsV2 {
 enum AuthType {
   PUBLIC
   WORKOS_SSO
+}
+
+// Library Documentation Generation
+model LibraryDocsGeneration {
+  id          String                      @id
+  orgId       String
+  githubUrl   String
+  language    LibraryDocsLanguage
+  branch      String?
+  packagePath String?
+  status      LibraryDocsGenerationStatus
+  error       Bytes?
+  resultS3Key String? // S3 key where result JSON is stored (temporary until CLI fetches)
+  createdAt   DateTime                    @default(now())
+  updatedAt   DateTime                    @updatedAt
+
+  @@map("library_docs_generations")
+}
+
+enum LibraryDocsLanguage {
+  PYTHON
+  CPP
+}
+
+enum LibraryDocsGenerationStatus {
+  PENDING
+  CLONING
+  PARSING
+  GENERATING
+  COMPLETED
+  FAILED
 }
 
 model DocsConfigInstances {
@@ -115,7 +146,8 @@ model OverwrittenAlgoliaIndex {
 }
 
 model AlgoliaPreviewDomainWhitelist {
-  domain    String   @id
+  domain String @id
+
   @@map("algolia_preview_domain_whitelist")
 }
 

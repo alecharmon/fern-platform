@@ -126,6 +126,19 @@ export class FdrDeployStack extends Stack {
             versioned: true
         });
 
+        const libraryDocsBucket = new Bucket(this, "fdr-library-docs-files", {
+            bucketName: `fdr-${environmentType.toLowerCase()}-library-docs-files`,
+            removalPolicy: RemovalPolicy.RETAIN,
+            cors: [
+                {
+                    allowedMethods: [HttpMethods.GET, HttpMethods.POST, HttpMethods.PUT],
+                    allowedOrigins: ["*"],
+                    allowedHeaders: ["*"]
+                }
+            ],
+            versioned: true
+        });
+
         const publicDocsBucket = new Bucket(this, "fdr-docs-files-public", {
             bucketName: `fdr-${environmentType.toLowerCase()}-docs-files-public`,
             removalPolicy: RemovalPolicy.RETAIN,
@@ -217,6 +230,8 @@ export class FdrDeployStack extends Stack {
                     DB_DOCS_DEFINITION_BUCKET_REGION: dbDocsDefinitionBucket.stack.region,
                     API_DEFINITION_SOURCE_BUCKET_NAME: privateApiDefinitionSourceBucket.bucketName,
                     API_DEFINITION_SOURCE_BUCKET_REGION: privateApiDefinitionSourceBucket.stack.region,
+                    LIBRARY_DOCS_S3_BUCKET_NAME: libraryDocsBucket.bucketName,
+                    LIBRARY_DOCS_S3_BUCKET_REGION: libraryDocsBucket.stack.region,
                     DOMAIN_SUFFIX: getDomainSuffix(environmentType),
                     SLACK_TOKEN: getEnvironmentVariableOrThrow("FERNIE_SLACK_APP_TOKEN"),
                     LOG_LEVEL: getLogLevel(environmentType),

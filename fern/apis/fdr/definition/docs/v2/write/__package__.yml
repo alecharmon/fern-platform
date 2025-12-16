@@ -171,6 +171,50 @@ service:
         - DocsNotFoundError
         - rootCommons.UnauthorizedError
 
+    # Library Documentation Generation Endpoints
+    startLibraryDocsGeneration:
+      auth: true
+      method: POST
+      path: /library-docs/generate
+      docs: Start async documentation generation for a library from source code.
+      request:
+        name: StartLibraryDocsGenerationRequest
+        body:
+          properties:
+            orgId: rootCommons.OrgId
+            githubUrl: rootCommons.Url
+            language: LibraryLanguage
+            config: optional<LibraryDocsConfig>
+      response: StartLibraryDocsGenerationResponse
+      errors:
+        - rootCommons.UnauthorizedError
+        - rootCommons.UserNotInOrgError
+        - InvalidGithubUrlError
+        - UnsupportedLanguageError
+
+    getLibraryDocsGenerationStatus:
+      auth: true
+      method: GET
+      path: /library-docs/status/{jobId}
+      docs: Get the status of a documentation generation job.
+      path-parameters:
+        jobId: LibraryDocsJobId
+      response: LibraryDocsGenerationStatus
+      errors:
+        - LibraryDocsJobNotFoundError
+
+    getLibraryDocsResult:
+      auth: true
+      method: GET
+      path: /library-docs/result/{jobId}
+      docs: Get the result of a completed documentation generation job.
+      path-parameters:
+        jobId: LibraryDocsJobId
+      response: LibraryDocsResult
+      errors:
+        - LibraryDocsJobNotFoundError
+        - LibraryDocsGenerationNotCompleteError
+
 types:
   FilePathWithHash:
     properties:
@@ -232,6 +276,75 @@ types:
     properties:
       authType: literal<"sso">
 
+  # Library Documentation Generation Types
+  LibraryLanguage:
+    enum:
+      - PYTHON
+      - CPP
+
+  LibraryDocsJobId: string
+
+  LibraryDocsConfig:
+    docs: Configuration options for library documentation generation.
+    properties:
+      branch:
+        type: optional<string>
+        docs: Git branch to clone. Defaults to default branch.
+      packagePath:
+        type: optional<string>
+        docs: Path to package within repo. For monorepos.
+      title:
+        type: optional<string>
+        docs: Navigation title. Defaults to "Library Reference".
+      slug:
+        type: optional<string>
+        docs: URL slug. Defaults to "library-reference".
+
+  StartLibraryDocsGenerationResponse:
+    properties:
+      jobId: LibraryDocsJobId
+
+  LibraryDocsGenerationStatusType:
+    enum:
+      - PENDING
+      - CLONING
+      - PARSING
+      - GENERATING
+      - COMPLETED
+      - FAILED
+
+  LibraryDocsGenerationStatus:
+    properties:
+      jobId: LibraryDocsJobId
+      status: LibraryDocsGenerationStatusType
+      progress: optional<string>
+      error: optional<LibraryDocsGenerationError>
+      createdAt: datetime
+      updatedAt: datetime
+
+  LibraryDocsGenerationError:
+    properties:
+      code: LibraryDocsErrorCode
+      message: string
+
+  LibraryDocsErrorCode:
+    enum:
+      - CLONE_FAILED
+      - PARSE_FAILED
+      - GENERATION_FAILED
+      - TIMEOUT
+      - INVALID_PROJECT
+
+  LibraryDocsResult:
+    docs: |
+      Result of a completed documentation generation job.
+      Use the resultUrl to download the full result (pages + navigation) from S3.
+    properties:
+      jobId: LibraryDocsJobId
+      resultUrl:
+        type: string
+        docs: Presigned S3 URL to download the full result. Expires in 1 hour.
+
 errors:
   InvalidDomainError:
     status-code: 400
@@ -248,3 +361,20 @@ errors:
   ReindexNotAllowedError:
     status-code: 403
     docs: Reindexing is not allowed for this domain.
+
+  # Library Documentation Generation Errors
+  InvalidGithubUrlError:
+    status-code: 400
+    type: string
+
+  UnsupportedLanguageError:
+    status-code: 400
+    type: string
+
+  LibraryDocsJobNotFoundError:
+    status-code: 404
+
+  LibraryDocsGenerationNotCompleteError:
+    status-code: 400
+    type: string
+

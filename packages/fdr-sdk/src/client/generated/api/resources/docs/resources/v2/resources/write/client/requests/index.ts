@@ -6,4 +6,5 @@ export type { SetDocsUrlMetadataRequest } from "./SetDocsUrlMetadataRequest.js";
 export type { SetIsArchivedRequest } from "./SetIsArchivedRequest.js";
 export type { StartDocsPreviewRegisterRequestV2 } from "./StartDocsPreviewRegisterRequestV2.js";
 export type { StartDocsRegisterRequestV2 } from "./StartDocsRegisterRequestV2.js";
+export type { StartLibraryDocsGenerationRequest } from "./StartLibraryDocsGenerationRequest.js";
 export type { TransferDomainOwnershipRequest } from "./TransferDomainOwnershipRequest.js";

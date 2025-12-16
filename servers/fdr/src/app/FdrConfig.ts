@@ -18,6 +18,10 @@ const API_DEFINITION_SOURCE_BUCKET_NAME_ENV_VAR = "API_DEFINITION_SOURCE_BUCKET_
 const API_DEFINITION_SOURCE_BUCKET_REGION_ENV_VAR = "API_DEFINITION_SOURCE_BUCKET_REGION";
 const API_DEFINITION_SOURCE_BUCKET_URL_OVERRIDE_ENV_VAR = "API_DEFINITION_SOURCE_BUCKET_URL_OVERRIDE";
 
+const LIBRARY_DOCS_S3_BUCKET_NAME_ENV_VAR = "LIBRARY_DOCS_S3_BUCKET_NAME";
+const LIBRARY_DOCS_S3_BUCKET_REGION_ENV_VAR = "LIBRARY_DOCS_S3_BUCKET_REGION";
+const LIBRARY_DOCS_S3_URL_OVERRIDE_ENV_VAR = "LIBRARY_DOCS_S3_URL_OVERRIDE";
+
 const DOMAIN_SUFFIX_ENV_VAR = "DOMAIN_SUFFIX";
 const SLACK_TOKEN_ENV_VAR = "SLACK_TOKEN";
 const LOG_LEVEL_ENV_VAR = "LOG_LEVEL";
@@ -52,6 +56,7 @@ export interface FdrConfig {
     privateDocsS3: S3Config;
     dbDocsDefinitionS3: S3Config;
     privateApiDefinitionSourceS3: S3Config;
+    libraryDocsS3: S3Config;
     domainSuffix: string;
     slackToken: string;
     logLevel: string;
@@ -83,6 +88,7 @@ function getConfigForLocalMode(): FdrConfig {
         privateDocsS3: selfHostedS3Config,
         dbDocsDefinitionS3: selfHostedS3Config,
         privateApiDefinitionSourceS3: selfHostedS3Config,
+        libraryDocsS3: selfHostedS3Config,
         domainSuffix: "docs.buildwithfern.com",
         slackToken: "local",
         logLevel: "info",
@@ -126,6 +132,11 @@ export function getConfig(): FdrConfig {
             bucketName: getEnvironmentVariableOrThrow(API_DEFINITION_SOURCE_BUCKET_NAME_ENV_VAR),
             bucketRegion: getEnvironmentVariableOrThrow(API_DEFINITION_SOURCE_BUCKET_REGION_ENV_VAR),
             urlOverride: process.env[API_DEFINITION_SOURCE_BUCKET_URL_OVERRIDE_ENV_VAR]
+        },
+        libraryDocsS3: {
+            bucketName: getEnvironmentVariableOrThrow(LIBRARY_DOCS_S3_BUCKET_NAME_ENV_VAR),
+            bucketRegion: getEnvironmentVariableOrThrow(LIBRARY_DOCS_S3_BUCKET_REGION_ENV_VAR),
+            urlOverride: process.env[LIBRARY_DOCS_S3_URL_OVERRIDE_ENV_VAR]
         },
         domainSuffix: getEnvironmentVariableOrThrow(DOMAIN_SUFFIX_ENV_VAR),
         slackToken: getEnvironmentVariableOrThrow(SLACK_TOKEN_ENV_VAR),

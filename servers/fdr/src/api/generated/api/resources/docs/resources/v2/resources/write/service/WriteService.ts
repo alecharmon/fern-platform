@@ -112,6 +112,52 @@ export interface WriteServiceMethods {
         },
         next: express.NextFunction,
     ): void | Promise<void>;
+    startLibraryDocsGeneration(
+        req: express.Request<
+            never,
+            FernRegistry.docs.v2.write.StartLibraryDocsGenerationResponse,
+            FernRegistry.docs.v2.write.StartLibraryDocsGenerationRequest,
+            never
+        >,
+        res: {
+            send: (responseBody: FernRegistry.docs.v2.write.StartLibraryDocsGenerationResponse) => Promise<void>;
+            cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+            locals: any;
+        },
+        next: express.NextFunction,
+    ): void | Promise<void>;
+    getLibraryDocsGenerationStatus(
+        req: express.Request<
+            {
+                jobId: FernRegistry.docs.v2.write.LibraryDocsJobId;
+            },
+            FernRegistry.docs.v2.write.LibraryDocsGenerationStatus,
+            never,
+            never
+        >,
+        res: {
+            send: (responseBody: FernRegistry.docs.v2.write.LibraryDocsGenerationStatus) => Promise<void>;
+            cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+            locals: any;
+        },
+        next: express.NextFunction,
+    ): void | Promise<void>;
+    getLibraryDocsResult(
+        req: express.Request<
+            {
+                jobId: FernRegistry.docs.v2.write.LibraryDocsJobId;
+            },
+            FernRegistry.docs.v2.write.LibraryDocsResult,
+            never,
+            never
+        >,
+        res: {
+            send: (responseBody: FernRegistry.docs.v2.write.LibraryDocsResult) => Promise<void>;
+            cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+            locals: any;
+        },
+        next: express.NextFunction,
+    ): void | Promise<void>;
 }
 
 export class WriteService {
@@ -471,6 +517,109 @@ export class WriteService {
                         default:
                             console.warn(
                                 `Endpoint 'deleteDocsSite' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
+                            );
+                    }
+                    await error.send(res);
+                } else {
+                    res.status(500).json("Internal Server Error");
+                }
+                next(error);
+            }
+        });
+        this.router.post("/library-docs/generate", async (req, res, next) => {
+            try {
+                await this.methods.startLibraryDocsGeneration(
+                    req as any,
+                    {
+                        send: async (responseBody) => {
+                            res.json(responseBody);
+                        },
+                        cookie: res.cookie.bind(res),
+                        locals: res.locals,
+                    },
+                    next,
+                );
+                if (!res.writableEnded) {
+                    next();
+                }
+            } catch (error) {
+                if (error instanceof errors.FernRegistryError) {
+                    switch (error.errorName) {
+                        case "UnauthorizedError":
+                        case "UserNotInOrgError":
+                        case "InvalidGithubUrlError":
+                        case "UnsupportedLanguageError":
+                            break;
+                        default:
+                            console.warn(
+                                `Endpoint 'startLibraryDocsGeneration' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
+                            );
+                    }
+                    await error.send(res);
+                } else {
+                    res.status(500).json("Internal Server Error");
+                }
+                next(error);
+            }
+        });
+        this.router.get("/library-docs/status/:jobId", async (req, res, next) => {
+            try {
+                await this.methods.getLibraryDocsGenerationStatus(
+                    req as any,
+                    {
+                        send: async (responseBody) => {
+                            res.json(responseBody);
+                        },
+                        cookie: res.cookie.bind(res),
+                        locals: res.locals,
+                    },
+                    next,
+                );
+                if (!res.writableEnded) {
+                    next();
+                }
+            } catch (error) {
+                if (error instanceof errors.FernRegistryError) {
+                    switch (error.errorName) {
+                        case "LibraryDocsJobNotFoundError":
+                            break;
+                        default:
+                            console.warn(
+                                `Endpoint 'getLibraryDocsGenerationStatus' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
+                            );
+                    }
+                    await error.send(res);
+                } else {
+                    res.status(500).json("Internal Server Error");
+                }
+                next(error);
+            }
+        });
+        this.router.get("/library-docs/result/:jobId", async (req, res, next) => {
+            try {
+                await this.methods.getLibraryDocsResult(
+                    req as any,
+                    {
+                        send: async (responseBody) => {
+                            res.json(responseBody);
+                        },
+                        cookie: res.cookie.bind(res),
+                        locals: res.locals,
+                    },
+                    next,
+                );
+                if (!res.writableEnded) {
+                    next();
+                }
+            } catch (error) {
+                if (error instanceof errors.FernRegistryError) {
+                    switch (error.errorName) {
+                        case "LibraryDocsJobNotFoundError":
+                        case "LibraryDocsGenerationNotCompleteError":
+                            break;
+                        default:
+                            console.warn(
+                                `Endpoint 'getLibraryDocsResult' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
                             );
                     }
                     await error.send(res);

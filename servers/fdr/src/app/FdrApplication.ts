@@ -7,6 +7,7 @@ import { LocalAuthServiceImpl } from "../services/auth/LocalAuthService";
 import { type DatabaseService, DatabaseServiceImpl } from "../services/db";
 import { type DocsDefinitionCache, DocsDefinitionCacheImpl } from "../services/docs-cache/DocsDefinitionCache";
 import RedisDocsDefinitionStore from "../services/docs-cache/RedisDocsDefinitionStore";
+import { type LibraryDocsService, LibraryDocsServiceImpl } from "../services/library-docs";
 import { LocalRevalidatorServiceImpl } from "../services/revalidator/LocalRevalidatorService";
 import { type RevalidatorService, RevalidatorServiceImpl } from "../services/revalidator/RevalidatorService";
 import { type S3Service, S3ServiceImpl } from "../services/s3";
@@ -20,6 +21,7 @@ export interface FdrServices {
     readonly s3: S3Service;
     readonly slack: SlackService;
     readonly revalidator: RevalidatorService;
+    readonly libraryDocs: LibraryDocsService;
 }
 
 export const LOGGER = winston.createLogger({
@@ -65,7 +67,8 @@ export class FdrApplication {
             db: services?.db ?? new DatabaseServiceImpl(prisma),
             s3: services?.s3 ?? new S3ServiceImpl(this.config, this),
             slack: services?.slack ?? new SlackServiceImpl(this),
-            revalidator: services?.revalidator ?? new RevalidatorServiceImpl()
+            revalidator: services?.revalidator ?? new RevalidatorServiceImpl(),
+            libraryDocs: services?.libraryDocs ?? new LibraryDocsServiceImpl(this)
         };
 
         this.dao = new FdrDao(prisma);

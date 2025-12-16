@@ -1,6 +1,8 @@
 export * as addAlgoliaPreviewWhitelistEntry from "./addAlgoliaPreviewWhitelistEntry.js";
 export * as deleteDocsSite from "./deleteDocsSite.js";
 export * as finishDocsRegister from "./finishDocsRegister.js";
+export * as getLibraryDocsGenerationStatus from "./getLibraryDocsGenerationStatus.js";
+export * as getLibraryDocsResult from "./getLibraryDocsResult.js";
 export * as listAlgoliaPreviewWhitelist from "./listAlgoliaPreviewWhitelist.js";
 export * as removeAlgoliaPreviewWhitelistEntry from "./removeAlgoliaPreviewWhitelistEntry.js";
 export * from "./requests/index.js";
@@ -8,4 +10,5 @@ export * as setDocsUrlMetadata from "./setDocsUrlMetadata.js";
 export * as setIsArchived from "./setIsArchived.js";
 export * as startDocsPreviewRegister from "./startDocsPreviewRegister.js";
 export * as startDocsRegister from "./startDocsRegister.js";
+export * as startLibraryDocsGeneration from "./startLibraryDocsGeneration.js";
 export * as transferOwnershipOfDomain from "./transferOwnershipOfDomain.js";
