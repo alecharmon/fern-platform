@@ -35,6 +35,26 @@ service:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
 
+    getSdkDynamicIrUploadUrls:
+      docs: Get presigned S3 upload URLs for SDK dynamic IR without requiring full API registration. Used for SDK generation.
+      path: /sdk-dynamic-ir-upload-urls
+      method: POST
+      request:
+        name: GetSdkDynamicIrUploadUrlsRequest
+        body:
+          properties:
+            orgId: rootCommons.OrgId
+            version:
+              type: string
+              docs: The version of the SDK being generated
+            snippetConfiguration:
+              type: map<string, string>
+              docs: A mapping of languages to snippet names (e.g., {"typescript": "my-api-ts", "python": "my-api-py"})
+      response: GetSdkDynamicIrUploadUrlsResponse
+      errors:
+        - rootCommons.UnauthorizedError
+        - rootCommons.UserNotInOrgError
+
 types:
   DynamicIR:
     properties:
@@ -47,6 +67,12 @@ types:
       apiDefinitionId: rootCommons.ApiDefinitionId
       sources: optional<map<SourceId, SourceUpload>>
       dynamicIRs: optional<map<string, DynamicIRUpload>>
+
+  GetSdkDynamicIrUploadUrlsResponse:
+    properties:
+      uploadUrls:
+        type: map<string, DynamicIRUpload>
+        docs: A mapping of languages to their upload URLs.
 
   DynamicIRUpload:
     properties:

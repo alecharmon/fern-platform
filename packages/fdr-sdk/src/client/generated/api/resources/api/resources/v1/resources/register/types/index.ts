@@ -12,6 +12,7 @@ export * from "./CratesPackage.js";
 export * from "./DynamicIr.js";
 export * from "./DynamicIrUpload.js";
 export * from "./EndpointExampleGenerationErrorBody.js";
+export * from "./GetSdkDynamicIrUploadUrlsResponse.js";
 export * from "./GoModule.js";
 export * from "./HeaderAuth.js";
 export * from "./JavaCoordinate.js";

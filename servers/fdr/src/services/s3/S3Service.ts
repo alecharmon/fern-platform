@@ -85,6 +85,16 @@ export interface S3Service {
         dynamicIRs: Record<string, DynamicIr> | undefined;
     }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>>;
 
+    getPresignedDynamicIrUploadUrlsForSdk({
+        orgId,
+        version,
+        snippetConfiguration
+    }: {
+        orgId: FernRegistry.OrgId;
+        version: string;
+        snippetConfiguration: Record<string, string>;
+    }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>>;
+
     getPresignedApiDefinitionSourceDownloadUrl({ key }: { key: string }): Promise<string>;
 }
 
@@ -462,6 +472,33 @@ export class S3ServiceImpl implements S3Service {
         return result;
     }
 
+    async getPresignedDynamicIrUploadUrlsForSdk({
+        orgId,
+        version,
+        snippetConfiguration
+    }: {
+        orgId: FernRegistry.OrgId;
+        version: string;
+        snippetConfiguration: Record<string, string>;
+    }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>> {
+        const result: Record<string, S3ApiDefinitionSourceFileInfo> = {};
+
+        for (const [language, snippetName] of Object.entries(snippetConfiguration)) {
+            const { url, key } = await this.createPresignedDynamicIrUrlForSdkWithClient({
+                orgId,
+                snippetName,
+                version,
+                language
+            });
+            result[language] = {
+                presignedUrl: url,
+                key
+            };
+        }
+
+        return result;
+    }
+
     async createPresignedApiDefinitionSourceUploadUrlWithClient({
         orgId,
         apiId,
@@ -532,6 +569,39 @@ export class S3ServiceImpl implements S3Service {
         };
     }
 
+    async createPresignedDynamicIrUrlForSdkWithClient({
+        orgId,
+        snippetName,
+        version,
+        language
+    }: {
+        orgId: FernRegistry.OrgId;
+        snippetName: string;
+        version: string;
+        language: string;
+    }): Promise<{ url: string; key: string }> {
+        const key = this.constructS3DynamicIrKeyForSdk({
+            orgId,
+            snippetName,
+            version,
+            language
+        });
+
+        // store the dynamic ir for SDK generation
+        const bucketName = this.config.privateApiDefinitionSourceS3.bucketName;
+        const input: PutObjectCommandInput = {
+            Bucket: bucketName,
+            Key: key
+        };
+        const command = new PutObjectCommand(input);
+        return {
+            url: await getSignedUrl(this.privateApiDefinitionSourceS3, command, {
+                expiresIn: 3600
+            }),
+            key
+        };
+    }
+
     constructS3DocsKey({
         domain,
         time,
@@ -573,6 +643,21 @@ export class S3ServiceImpl implements S3Service {
         language: string;
     }): string {
         return `${orgId}/${apiId}/${language}.json`;
+    }
+
+    constructS3DynamicIrKeyForSdk({
+        orgId,
+        snippetName,
+        version,
+        language
+    }: {
+        orgId: FernRegistry.OrgId;
+        snippetName: string;
+        version: string;
+        language: string;
+    }): string {
+        // Format: <org-name>/<language>/<snippet-name>/<version>.json
+        return `${orgId}/${language}/${snippetName}/${version}.json`;
     }
 
     constructS3ApiDefinitionSourceKey({

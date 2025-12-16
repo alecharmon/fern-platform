@@ -119,6 +119,108 @@ export class RegisterClient {
         };
     }
 
+    /**
+     * Get presigned S3 upload URLs for SDK dynamic IR without requiring full API registration. Used for SDK generation.
+     *
+     * @param {FernRegistry.api.v1.register.GetSdkDynamicIrUploadUrlsRequest} request
+     * @param {RegisterClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.api.v1.register.getSdkDynamicIrUploadUrls({
+     *         orgId: FernRegistry.OrgId("orgId"),
+     *         version: "version",
+     *         snippetConfiguration: {"typescript": "my-api-ts", "python": "my-api-py"}
+     *     })
+     */
+    public getSdkDynamicIrUploadUrls(
+        request: FernRegistry.api.v1.register.GetSdkDynamicIrUploadUrlsRequest,
+        requestOptions?: RegisterClient.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<
+            FernRegistry.api.v1.register.GetSdkDynamicIrUploadUrlsResponse,
+            FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error
+        >
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__getSdkDynamicIrUploadUrls(request, requestOptions));
+    }
+
+    private async __getSdkDynamicIrUploadUrls(
+        request: FernRegistry.api.v1.register.GetSdkDynamicIrUploadUrlsRequest,
+        requestOptions?: RegisterClient.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<
+                FernRegistry.api.v1.register.GetSdkDynamicIrUploadUrlsResponse,
+                FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error
+            >
+        >
+    > {
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                "/registry/api/sdk-dynamic-ir-upload-urls",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs:
+                requestOptions?.timeoutInSeconds != null
+                    ? requestOptions.timeoutInSeconds * 1000
+                    : this._options?.timeoutInSeconds != null
+                      ? this._options?.timeoutInSeconds * 1000
+                      : undefined,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FernRegistry.api.v1.register.GetSdkDynamicIrUploadUrlsResponse,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error)?.error) {
+                case "UnauthorizedError":
+                case "UserNotInOrgError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
     protected async _getAuthorizationHeader(): Promise<string | undefined> {
         const bearer = await core.Supplier.get(this._options.token);
         if (bearer != null) {

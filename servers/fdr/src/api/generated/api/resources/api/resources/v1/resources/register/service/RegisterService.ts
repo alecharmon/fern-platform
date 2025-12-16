@@ -19,6 +19,20 @@ export interface RegisterServiceMethods {
         },
         next: express.NextFunction,
     ): void | Promise<void>;
+    getSdkDynamicIrUploadUrls(
+        req: express.Request<
+            never,
+            FernRegistry.api.v1.register.GetSdkDynamicIrUploadUrlsResponse,
+            FernRegistry.api.v1.register.GetSdkDynamicIrUploadUrlsRequest,
+            never
+        >,
+        res: {
+            send: (responseBody: FernRegistry.api.v1.register.GetSdkDynamicIrUploadUrlsResponse) => Promise<void>;
+            cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+            locals: any;
+        },
+        next: express.NextFunction,
+    ): void | Promise<void>;
 }
 
 export class RegisterService {
@@ -67,6 +81,40 @@ export class RegisterService {
                         default:
                             console.warn(
                                 `Endpoint 'registerApiDefinition' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
+                            );
+                    }
+                    await error.send(res);
+                } else {
+                    res.status(500).json("Internal Server Error");
+                }
+                next(error);
+            }
+        });
+        this.router.post("/sdk-dynamic-ir-upload-urls", async (req, res, next) => {
+            try {
+                await this.methods.getSdkDynamicIrUploadUrls(
+                    req as any,
+                    {
+                        send: async (responseBody) => {
+                            res.json(responseBody);
+                        },
+                        cookie: res.cookie.bind(res),
+                        locals: res.locals,
+                    },
+                    next,
+                );
+                if (!res.writableEnded) {
+                    next();
+                }
+            } catch (error) {
+                if (error instanceof errors.FernRegistryError) {
+                    switch (error.errorName) {
+                        case "UnauthorizedError":
+                        case "UserNotInOrgError":
+                            break;
+                        default:
+                            console.warn(
+                                `Endpoint 'getSdkDynamicIrUploadUrls' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
                             );
                     }
                     await error.send(res);

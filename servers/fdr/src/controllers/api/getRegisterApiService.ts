@@ -29,6 +29,32 @@ function logSlowOperation(operation: string, durationMs: number) {
 
 export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
     return new APIV1WriteService({
+        getSdkDynamicIrUploadUrls: async (req, res) => {
+            app.logger.debug(`Getting SDK dynamic IR upload URLs for org ${req.body.orgId}`);
+
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: req.headers.authorization,
+                orgId: req.body.orgId
+            });
+
+            const uploadUrls = await app.services.s3.getPresignedDynamicIrUploadUrlsForSdk({
+                orgId: req.body.orgId,
+                version: req.body.version,
+                snippetConfiguration: req.body.snippetConfiguration
+            });
+
+            const dynamicIrUploads: Record<string, DynamicIrUpload> = {};
+            for (const [language, uploadInfo] of Object.entries(uploadUrls)) {
+                dynamicIrUploads[language] = {
+                    uploadUrl: uploadInfo.presignedUrl
+                };
+            }
+
+            app.logger.debug(`Successfully prepared dynamic IR upload URLs for SDK generation`);
+            return res.send({
+                uploadUrls: dynamicIrUploads
+            });
+        },
         registerApiDefinition: async (req, res) => {
             const startTime = Date.now();
             let lastOperationTime = startTime;

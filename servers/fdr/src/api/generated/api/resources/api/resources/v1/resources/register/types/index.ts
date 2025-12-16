@@ -12,6 +12,7 @@ export * from "./CratesPackage";
 export * from "./DynamicIr";
 export * from "./DynamicIrUpload";
 export * from "./EndpointExampleGenerationErrorBody";
+export * from "./GetSdkDynamicIrUploadUrlsResponse";
 export * from "./GoModule";
 export * from "./HeaderAuth";
 export * from "./JavaCoordinate";
