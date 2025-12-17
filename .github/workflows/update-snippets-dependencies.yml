@@ -25,10 +25,8 @@ jobs:
       - name: Update dynamic snippets dependencies
         id: update
         run: |
-          cd packages/snippets
-          
-          # Update dynamic snippets dependencies within their semver ranges
-          pnpm update \
+          # Update dynamic snippets dependencies to latest, scoped to the snippets workspace only
+          pnpm --filter @fern-api/snippets update \
             @fern-api/csharp-dynamic-snippets \
             @fern-api/dynamic-ir-sdk \
             @fern-api/go-dynamic-snippets \
@@ -37,9 +35,8 @@ jobs:
             @fern-api/python-dynamic-snippets \
             @fern-api/ruby-dynamic-snippets \
             @fern-api/snippets-core \
-            @fern-api/typescript-dynamic-snippets
-          
-          cd ../..
+            @fern-api/typescript-dynamic-snippets \
+            --latest
           
           # Run format on snippets package to fix any linting issues
           pnpm exec biome check --write packages/snippets
