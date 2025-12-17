@@ -1,5 +1,7 @@
 /*eslint i18next/no-literal-string: off*/
 export default function RootPage() {
+    console.error("Error: Host not found. Use /api/fern-docs/preview?host= to point this domain at a host.");
+
     return (
         <div
             style={{
@@ -9,24 +11,14 @@ export default function RootPage() {
                 alignItems: "center",
                 justifyContent: "center",
                 height: "100vh",
-                textAlign: "center"
+                textAlign: "center",
+                padding: "2rem"
             }}
         >
-            <h1 style={{ marginBottom: "1rem" }}>Hey Fernie!</h1>
-            <p>
-                Use{" "}
-                <code
-                    style={{
-                        backgroundColor: "#f0f0f0",
-                        padding: "0.25rem 0.5rem",
-                        borderRadius: "0.25rem",
-                        userSelect: "text",
-                        cursor: "text"
-                    }}
-                >
-                    /api/fern-docs/preview?host=
-                </code>{" "}
-                to point this domain at a host.
+            <h1 style={{ marginBottom: "1rem", color: "#dc2626" }}>Error: Host Not Found</h1>
+            <p style={{ maxWidth: "600px" }}>
+                The requested host could not be found. This error occurs when no documentation host has been configured
+                for this domain.
             </p>
         </div>
     );
