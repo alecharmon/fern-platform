@@ -1521,8 +1521,12 @@ const createCachedDocsLoaderImpl = async (
  * Request-level memoized version of createCachedDocsLoader.
  * This ensures that all parallel routes within a single request share the same loader instance,
  * dramatically reducing duplicate Upstash KV calls.
+ *
+ * In docs dev mode, we bypass the cache() wrapper to prevent memoizing rejected promises
+ * when the backend is not ready. This allows the docs dev server to recover when the
+ * backend becomes available.
  */
-export const createCachedDocsLoader = cache(createCachedDocsLoaderImpl);
+export const createCachedDocsLoader = isDocsDev() ? createCachedDocsLoaderImpl : cache(createCachedDocsLoaderImpl);
 
 function toOklch(color: object | undefined): string | undefined {
     if (!color || !isPlainObject(color)) {
