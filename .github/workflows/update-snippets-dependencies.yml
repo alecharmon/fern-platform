@@ -27,7 +27,7 @@ jobs:
         run: |
           cd packages/snippets
           
-          # Update all dynamic snippets dependencies to latest
+          # Update dynamic snippets dependencies within their semver ranges
           pnpm update \
             @fern-api/csharp-dynamic-snippets \
             @fern-api/dynamic-ir-sdk \
@@ -37,8 +37,7 @@ jobs:
             @fern-api/python-dynamic-snippets \
             @fern-api/ruby-dynamic-snippets \
             @fern-api/snippets-core \
-            @fern-api/typescript-dynamic-snippets \
-            --latest
+            @fern-api/typescript-dynamic-snippets
           
           cd ../..
           
