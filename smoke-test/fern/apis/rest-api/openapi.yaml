@@ -263,6 +263,13 @@ paths:
           schema:
             type: string
             enum: [available, pending, sold]
+          examples:
+            searchAvailable:
+              summary: Search for available plants
+              value: available
+            searchPending:
+              summary: Search for pending plants
+              value: pending
       responses:
         "200":
           description: List of plants matching the status filter
@@ -273,7 +280,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/PlantResponse"
               examples:
-                exampleResponse:
+                searchAvailable:
                   summary: Plants with status available
                   value:
                     - id: 101
@@ -284,6 +291,20 @@ paths:
                       name: "Palm"
                       status: "available"
                       tags: ["tropical"]
+                searchPending:
+                  summary: Plants with status pending
+                  value:
+                    - id: 103
+                      name: "Cactus"
+                      status: "pending"
+                      tags: ["spiky", "desert"]
+                responseOnly:
+                  summary: Response-only example (should be filtered out)
+                  value:
+                    - id: 104
+                      name: "Orchid"
+                      status: "sold"
+                      tags: ["rare", "flowering"]
   /plant/search/tags:
     get:
       tags:
