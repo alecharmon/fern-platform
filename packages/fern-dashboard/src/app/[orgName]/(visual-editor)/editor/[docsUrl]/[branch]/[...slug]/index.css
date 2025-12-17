@@ -4,8 +4,12 @@
 @plugin "@tailwindcss/typography";
 @import "@fern-docs/components/styles";
 @import "@fern-docs/search-ui/styles";
+@import "@fern-docs/components/src/syntax-highlighter/index.css";
+@import "@fern-docs/components/src/api-reference/index.scss";
+@import "@fern-docs/components/src/HorizontalOverflowMask.scss";
 
 @source "../../../../../../../components";
+@source "../../../../../../../../../fern-docs/components/src";
 
 :root {
   --preview-container-height: calc(100vh - var(--header-height, var(--header-height-real)) - var(--header-toolbar-height));

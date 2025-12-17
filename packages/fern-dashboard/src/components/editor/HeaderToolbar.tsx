@@ -114,8 +114,8 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
                     <DashboardTooltip
                         content={
                             isDevModeDisabled
-                                ? "Dev mode is not available for API References"
-                                : "Enable dev mode to edit the source code"
+                                ? "Dev mode unavailable for API reference pages"
+                                : "Edit source code in dev mode"
                         }
                         hideInnerSpan
                     >

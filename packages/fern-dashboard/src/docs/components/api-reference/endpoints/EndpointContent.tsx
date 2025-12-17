@@ -61,7 +61,7 @@ export function EndpointContent({ context, breadcrumb, showErrors, showAuth, lan
                 }
                 reference={
                     <TypeDefinitionRoot types={types} slug={node.slug}>
-                        <TypeDefinitionSlotsServer types={types}>
+                        <TypeDefinitionSlotsServer types={types} lang={lang}>
                             <EndpointContentLeft
                                 context={context}
                                 showAuth={showAuth}

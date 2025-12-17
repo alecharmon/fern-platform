@@ -15,20 +15,24 @@ export { getTypeIdWithLocation };
  */
 export function TypeDefinitionSlotsServer({
     types,
-    children
+    children,
+    lang = "en"
 }: {
     types: Record<string, TypeDefinition>;
     children: React.ReactNode;
+    lang?: string;
 }) {
     return (
-        <TypeDefinitionSlotsProvider slots={createTypeDefinitionSlots(types)}>{children}</TypeDefinitionSlotsProvider>
+        <TypeDefinitionSlotsProvider slots={createTypeDefinitionSlots(types, lang)}>
+            {children}
+        </TypeDefinitionSlotsProvider>
     );
 }
 
-function createTypeDefinitionSlots(types: Record<string, TypeDefinition>) {
+function createTypeDefinitionSlots(types: Record<string, TypeDefinition>, lang: string) {
     return Object.fromEntries(
         Object.entries(types).flatMap(([id, type]) => {
-            const variants = createPropertyAccessTypeVariants(id, type, types);
+            const variants = createPropertyAccessTypeVariants(id, type, types, lang);
             return [
                 [id, variants.default],
                 [getTypeIdWithLocation(id, "request"), variants.request],
@@ -38,10 +42,15 @@ function createTypeDefinitionSlots(types: Record<string, TypeDefinition>) {
     );
 }
 
-function createPropertyAccessTypeVariants(id: string, type: TypeDefinition, types: Record<string, TypeDefinition>) {
+function createPropertyAccessTypeVariants(
+    id: string,
+    type: TypeDefinition,
+    types: Record<string, TypeDefinition>,
+    lang: string
+) {
     return {
-        default: <TypeReferenceDefinitions shape={type.shape} types={types} />,
-        request: <TypeReferenceDefinitions shape={type.shape} types={types} location="request" />,
-        response: <TypeReferenceDefinitions shape={type.shape} types={types} location="response" />
+        default: <TypeReferenceDefinitions shape={type.shape} types={types} lang={lang} />,
+        request: <TypeReferenceDefinitions shape={type.shape} types={types} location="request" lang={lang} />,
+        response: <TypeReferenceDefinitions shape={type.shape} types={types} location="response" lang={lang} />
     };
 }

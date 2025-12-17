@@ -14,19 +14,19 @@ import { getFrontmatter } from "@fern-docs/mdx";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
-import ApiReferenceComingSoon from "@/components/editor/unsupported-pages/ApiReferenceComingSoon";
 import ChangelogComingSoon from "@/components/editor/unsupported-pages/ChangelogComingSoon";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 import { cn } from "@/utils/utils";
 import { ApiEndpointPageWrapper } from "./ApiEndpointPageWrapper";
+import { ApiGrpcPageWrapper } from "./ApiGrpcPageWrapper";
+import { ApiWebhookPageWrapper } from "./ApiWebhookPageWrapper";
+import { ApiWebSocketPageWrapper } from "./ApiWebSocketPageWrapper";
 import { EditorRedirect } from "./EditorRedirect";
 import PageNode, { type PageNode as PageNodeNamespace } from "./PageNode";
 
 const CHANGELOG_NODE_TYPES = new Set(["changelog", "changelogEntry"]);
-// Note: "endpoint" is now handled separately for rendering
-const API_REFERENCE_COMING_SOON_TYPES = new Set(["apiPackage", "webSocket", "webhook", "grpc"]);
 
 export default async function Page({
     params
@@ -91,9 +91,9 @@ export default async function Page({
         throw new Error("navigationNode of type 'redirect' should be handled by EditorRedirect");
     }
 
-    // Handle HTTP endpoints - render full API reference page
-    // Note: We don't wrap this in AbstractLayoutEvaluatorContent because EndpointContent
-    // already provides its own ReferenceLayout which handles full-width styling
+    // Handle API reference node types - render full API reference pages
+    // Note: We don't wrap these in AbstractLayoutEvaluatorContent because they
+    // provide their own ReferenceLayout which handles full-width styling
     if (navigationNode.node.type === "endpoint") {
         const endpointNode = navigationNode.node as FernNavigation.EndpointNode;
         const apiDefinition = await loader.getPrunedApi(endpointNode.apiDefinitionId, createPruneKey(endpointNode));
@@ -107,10 +107,44 @@ export default async function Page({
         );
     }
 
-    // Other API reference types still show "coming soon"
-    if (API_REFERENCE_COMING_SOON_TYPES.has(navigationNode.node.type)) {
-        return <ApiReferenceComingSoon />;
+    if (navigationNode.node.type === "webSocket") {
+        const webSocketNode = navigationNode.node as FernNavigation.WebSocketNode;
+        const apiDefinition = await loader.getPrunedApi(webSocketNode.apiDefinitionId, createPruneKey(webSocketNode));
+
+        return (
+            <ApiWebSocketPageWrapper
+                node={webSocketNode}
+                apiDefinition={apiDefinition}
+                breadcrumb={navigationNode.breadcrumb}
+            />
+        );
     }
+
+    if (navigationNode.node.type === "webhook") {
+        const webhookNode = navigationNode.node as FernNavigation.WebhookNode;
+        const apiDefinition = await loader.getPrunedApi(webhookNode.apiDefinitionId, createPruneKey(webhookNode));
+
+        return (
+            <ApiWebhookPageWrapper
+                node={webhookNode}
+                apiDefinition={apiDefinition}
+                breadcrumb={navigationNode.breadcrumb}
+            />
+        );
+    }
+
+    if (navigationNode.node.type === "grpc") {
+        const grpcNode = navigationNode.node as FernNavigation.GrpcNode;
+        const apiDefinition = await loader.getPrunedApi(grpcNode.apiDefinitionId, createPruneKey(grpcNode));
+
+        return (
+            <ApiGrpcPageWrapper node={grpcNode} apiDefinition={apiDefinition} breadcrumb={navigationNode.breadcrumb} />
+        );
+    }
+
+    // apiPackage nodes with overviewPageId will fall through to the page rendering logic below.
+    // apiPackage nodes without overviewPageId should redirect (handled by getEditorRedirectSlug above).
+
     if (CHANGELOG_NODE_TYPES.has(navigationNode.node.type)) {
         return <ChangelogComingSoon />;
     }
