@@ -244,7 +244,9 @@ export class FdrDeployStack extends Stack {
                         environmentType === "DEV2"
                             ? "https://files-dev2.buildwithfern.com"
                             : "https://files.buildwithfern.com",
-                    NODE_ENV: "production"
+                    NODE_ENV: "production",
+                    PYTHON_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME: `fdr-python-library-docs-parser-${environmentType.toLowerCase()}`,
+                    PYTHON_LIBRARY_DOCS_LAMBDA_REGION: "us-east-1"
                 },
                 containerName: CONTAINER_NAME,
                 containerPort: 8080,
@@ -296,6 +298,16 @@ export class FdrDeployStack extends Stack {
                     new ServicePrincipal("ecs-tasks.amazonaws.com"),
                     new ArnPrincipal(fargateService.taskDefinition.taskRole.roleArn)
                 ]
+            })
+        );
+
+        // Grant permission to invoke Python library docs Lambda
+        const pythonLibraryDocsLambdaArn = `arn:aws:lambda:us-east-1:985111089818:function:fdr-python-library-docs-parser-${environmentType.toLowerCase()}`;
+        fargateService.taskDefinition.taskRole.addToPrincipalPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ["lambda:InvokeFunction"],
+                resources: [pythonLibraryDocsLambdaArn]
             })
         );
 

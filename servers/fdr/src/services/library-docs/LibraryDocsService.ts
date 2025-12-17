@@ -3,10 +3,8 @@ import type { FernRegistry } from "../../api/generated";
 import { LibraryDocsJobId } from "../../api/generated/api/resources/docs/resources/v2/resources/write/types/LibraryDocsJobId";
 import type { FdrApplication } from "../../app";
 import { parseErrorFromDb } from "../../db/library-docs/LibraryDocsDao";
-import { MarkdownGeneratorStub } from "./generators/MarkdownGenerator";
-import { NavigationBuilder } from "./generators/NavigationBuilder";
-import { PythonParserStub } from "./parsers/PythonParser";
-import { ResultStorage, type StoredResult } from "./ResultStorage";
+import { LambdaInvoker } from "./LambdaInvoker";
+import { ResultStorage } from "./ResultStorage";
 
 export interface StartGenerationParams {
     orgId: string;
@@ -23,15 +21,15 @@ export interface LibraryDocsService {
 
 export class LibraryDocsServiceImpl implements LibraryDocsService {
     private resultStorage: ResultStorage;
-    private parser: PythonParserStub;
-    private markdownGenerator: MarkdownGeneratorStub;
-    private navigationBuilder: NavigationBuilder;
+    private lambdaInvoker: LambdaInvoker | undefined;
 
     constructor(private readonly app: FdrApplication) {
         this.resultStorage = new ResultStorage(app.config);
-        this.parser = new PythonParserStub();
-        this.markdownGenerator = new MarkdownGeneratorStub();
-        this.navigationBuilder = new NavigationBuilder();
+
+        const lambdaConfig = app.config.pythonLibraryDocsLambda;
+        if (lambdaConfig != null) {
+            this.lambdaInvoker = new LambdaInvoker(lambdaConfig);
+        }
     }
 
     async startGeneration(params: StartGenerationParams): Promise<string> {
@@ -84,11 +82,11 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
             return null;
         }
 
-        if (generation.status !== "COMPLETED" || generation.resultS3Key == null) {
+        if (generation.status !== "COMPLETED" || generation.irS3Key == null) {
             return null;
         }
 
-        const resultUrl = await this.resultStorage.getPresignedDownloadUrl(generation.resultS3Key);
+        const resultUrl = await this.resultStorage.getPresignedDownloadUrl(generation.irS3Key);
 
         return {
             jobId: LibraryDocsJobId(jobId),
@@ -100,53 +98,45 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
         const dao = this.app.dao.libraryDocs();
 
         try {
-            await dao.updateStatus(jobId, "CLONING");
-            // Stub: skip actual cloning
-            const repoPath = `/tmp/stub-repo-${jobId}`;
+            if (this.lambdaInvoker == null) {
+                throw new Error("Python library docs Lambda is not configured");
+            }
 
             await dao.updateStatus(jobId, "PARSING");
-            const libraryDef = await this.parser.parse(repoPath, {
+
+            // Invoke Lambda to parse library and upload IR to S3
+            const lambdaResult = await this.lambdaInvoker.invoke({
+                jobId,
                 githubUrl: params.githubUrl,
+                language: params.language,
+                branch: params.config?.branch,
                 packagePath: params.config?.packagePath
             });
 
-            await dao.updateStatus(jobId, "GENERATING");
-            const baseSlug = params.config?.slug ?? "library-reference";
-            const pages = this.markdownGenerator.generateFromLibrary(libraryDef, baseSlug);
-            const navigation = this.navigationBuilder.buildNavigation(libraryDef, pages, {
-                title: params.config?.title ?? "Library Reference",
-                slug: baseSlug
-            });
-
-            // Convert to storage format
-            const pagesMap: Record<string, string> = {};
-            for (const page of pages) {
-                pagesMap[page.pageId] = page.content;
+            if (lambdaResult.status === "error") {
+                await dao.saveError(jobId, lambdaResult.error ?? { code: "LAMBDA_ERROR", message: "Unknown error" });
+                await dao.updateStatus(jobId, "FAILED");
+                return;
             }
 
-            const storedResult: StoredResult = {
-                jobId,
-                pages: pagesMap,
-                navigation,
-                metadata: {
-                    sourceUrl: params.githubUrl,
-                    branch: params.config?.branch,
-                    parsedAt: libraryDef.metadata.parsedAt.toISOString(),
-                    parserVersion: libraryDef.metadata.parserVersion
-                }
-            };
+            if (lambdaResult.irS3Key == null) {
+                await dao.saveError(jobId, { code: "LAMBDA_NO_IR", message: "Lambda did not return IR S3 key" });
+                await dao.updateStatus(jobId, "FAILED");
+                return;
+            }
 
-            // TODO: (future optimization: to break up the upload into multiple parts if result is too large)
-            const s3Key = await this.resultStorage.upload(storedResult);
-            await dao.setResultS3Key(jobId, s3Key);
+            // Store IR S3 key - markdown generation will happen during docs registration
+            await dao.setIrS3Key(jobId, lambdaResult.irS3Key);
+            await dao.updateStatus(jobId, "COMPLETED");
 
-            this.app.logger.info(`Library docs generation completed for job ${jobId}`);
+            this.app.logger.info(`Library docs IR stored for job ${jobId}`);
         } catch (error) {
             this.app.logger.error(`Library docs generation failed for job ${jobId}:`, error);
             await dao.saveError(jobId, {
                 code: "GENERATION_FAILED",
                 message: error instanceof Error ? error.message : "Unknown error"
             });
+            await dao.updateStatus(jobId, "FAILED");
         }
     }
 
@@ -154,14 +144,10 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
         switch (status) {
             case "PENDING":
                 return "Queued for processing";
-            case "CLONING":
-                return "Cloning repository...";
             case "PARSING":
                 return "Parsing library code...";
-            case "GENERATING":
-                return "Generating documentation...";
             case "COMPLETED":
-                return "Documentation generated successfully";
+                return "Library IR generated successfully";
             case "FAILED":
                 return "Generation failed";
             default:

@@ -25,7 +25,7 @@ export interface LibraryDocsDao {
     createGeneration(params: CreateGenerationParams): Promise<string>;
     getGeneration(id: string): Promise<LibraryDocsGeneration | null>;
     updateStatus(id: string, status: FernRegistry.docs.v2.write.LibraryDocsGenerationStatusType): Promise<void>;
-    setResultS3Key(id: string, s3Key: string): Promise<void>;
+    setIrS3Key(id: string, s3Key: string): Promise<void>;
     saveError(id: string, error: GenerationError): Promise<void>;
 }
 
@@ -67,23 +67,17 @@ export class LibraryDocsDaoImpl implements LibraryDocsDao {
         });
     }
 
-    async setResultS3Key(id: string, s3Key: string): Promise<void> {
+    async setIrS3Key(id: string, s3Key: string): Promise<void> {
         await this.prisma.libraryDocsGeneration.update({
             where: { id },
-            data: {
-                resultS3Key: s3Key,
-                status: "COMPLETED"
-            }
+            data: { irS3Key: s3Key }
         });
     }
 
     async saveError(id: string, error: GenerationError): Promise<void> {
         await this.prisma.libraryDocsGeneration.update({
             where: { id },
-            data: {
-                error: writeBuffer(error),
-                status: "FAILED"
-            }
+            data: { error: writeBuffer(error) }
         });
     }
 }

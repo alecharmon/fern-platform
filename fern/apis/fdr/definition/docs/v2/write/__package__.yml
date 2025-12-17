@@ -307,9 +307,7 @@ types:
   LibraryDocsGenerationStatusType:
     enum:
       - PENDING
-      - CLONING
       - PARSING
-      - GENERATING
       - COMPLETED
       - FAILED
 
@@ -332,6 +330,10 @@ types:
       - CLONE_FAILED
       - PARSE_FAILED
       - GENERATION_FAILED
+      - LAMBDA_ERROR
+      - LAMBDA_NO_IR
+      - LAMBDA_FUNCTION_ERROR
+      - LAMBDA_NO_RESPONSE
       - TIMEOUT
       - INVALID_PROJECT
 

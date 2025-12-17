@@ -22,6 +22,10 @@ const LIBRARY_DOCS_S3_BUCKET_NAME_ENV_VAR = "LIBRARY_DOCS_S3_BUCKET_NAME";
 const LIBRARY_DOCS_S3_BUCKET_REGION_ENV_VAR = "LIBRARY_DOCS_S3_BUCKET_REGION";
 const LIBRARY_DOCS_S3_URL_OVERRIDE_ENV_VAR = "LIBRARY_DOCS_S3_URL_OVERRIDE";
 
+const PYTHON_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME_ENV_VAR = "PYTHON_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME";
+const PYTHON_LIBRARY_DOCS_LAMBDA_REGION_ENV_VAR = "PYTHON_LIBRARY_DOCS_LAMBDA_REGION";
+const PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT_ENV_VAR = "PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT";
+
 const DOMAIN_SUFFIX_ENV_VAR = "DOMAIN_SUFFIX";
 const SLACK_TOKEN_ENV_VAR = "SLACK_TOKEN";
 const LOG_LEVEL_ENV_VAR = "LOG_LEVEL";
@@ -46,6 +50,12 @@ export interface S3Config {
     forcePathStyle?: boolean;
 }
 
+export interface LambdaConfig {
+    functionName: string;
+    region: string;
+    endpoint?: string;
+}
+
 export interface FdrConfig {
     localModeOverride: boolean;
     venusUrl: string;
@@ -57,6 +67,7 @@ export interface FdrConfig {
     dbDocsDefinitionS3: S3Config;
     privateApiDefinitionSourceS3: S3Config;
     libraryDocsS3: S3Config;
+    pythonLibraryDocsLambda?: LambdaConfig;
     domainSuffix: string;
     slackToken: string;
     logLevel: string;
@@ -89,6 +100,7 @@ function getConfigForLocalMode(): FdrConfig {
         dbDocsDefinitionS3: selfHostedS3Config,
         privateApiDefinitionSourceS3: selfHostedS3Config,
         libraryDocsS3: selfHostedS3Config,
+        pythonLibraryDocsLambda: getPythonLibraryDocsLambdaConfig(),
         domainSuffix: "docs.buildwithfern.com",
         slackToken: "local",
         logLevel: "info",
@@ -138,6 +150,7 @@ export function getConfig(): FdrConfig {
             bucketRegion: getEnvironmentVariableOrThrow(LIBRARY_DOCS_S3_BUCKET_REGION_ENV_VAR),
             urlOverride: process.env[LIBRARY_DOCS_S3_URL_OVERRIDE_ENV_VAR]
         },
+        pythonLibraryDocsLambda: getPythonLibraryDocsLambdaConfig(),
         domainSuffix: getEnvironmentVariableOrThrow(DOMAIN_SUFFIX_ENV_VAR),
         slackToken: getEnvironmentVariableOrThrow(SLACK_TOKEN_ENV_VAR),
         logLevel: process.env[LOG_LEVEL_ENV_VAR] ?? "info",
@@ -147,6 +160,18 @@ export function getConfig(): FdrConfig {
         redisClusteringEnabled: process.env[REDIS_CLUSTERING_ENABLED_ENV_VAR] === "true",
         applicationEnvironment: getEnvironmentVariableOrThrow(APPLICATION_ENVIRONMENT_ENV_VAR),
         cdnPublicDocsUrl: getEnvironmentVariableOrThrow(PUBLIC_DOCS_CDN_URL)
+    };
+}
+
+function getPythonLibraryDocsLambdaConfig(): LambdaConfig | undefined {
+    const functionName = process.env[PYTHON_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME_ENV_VAR];
+    if (functionName == null) {
+        return undefined;
+    }
+    return {
+        functionName,
+        region: process.env[PYTHON_LIBRARY_DOCS_LAMBDA_REGION_ENV_VAR] ?? "us-east-1",
+        endpoint: process.env[PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT_ENV_VAR]
     };
 }
 

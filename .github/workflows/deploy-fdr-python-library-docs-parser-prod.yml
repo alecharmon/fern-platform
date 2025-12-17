@@ -1,0 +1,59 @@
+name: Deploy FDR Python Library Docs Parser Prod
+
+on:
+  push:
+    tags:
+      - "fdr-python-library-docs-parser@*"
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+jobs:
+  deploy_prod:
+    if: github.ref_type == 'tag' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/fdr-python-library-docs-parser@')
+    runs-on: ubuntu-latest
+    environment: Fern Prod
+    env:
+      APPLICATION_ENVIRONMENT: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📥 Install
+        uses: ./.github/actions/install
+
+      - name: 🐳 Verify Docker build
+        run: |
+          cd servers/fdr-python-library-docs-parser
+          docker build -t fdr-python-library-docs-parser:test .
+
+      - name: 🧪 Run Tests
+        run: |
+          cd servers/fdr-python-library-docs-parser
+          # Install Poetry and dependencies
+          pip install poetry
+          poetry install --with dev 2>/dev/null || poetry install
+          # Run tests if they exist
+          if [ -d "tests" ] && [ "$(ls -A tests/*.py 2>/dev/null)" ]; then
+            poetry run pytest -v
+          else
+            echo "No tests found, skipping..."
+          fi
+
+      - name: 💻 Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: 🚀 Deploy to Production
+        run: |
+          git_version="$(git rev-parse --short HEAD)"
+          npm install -g aws-cdk
+          cd servers/fdr-python-library-docs-parser-deploy
+          VERSION="${git_version}" pnpm deploy:prod

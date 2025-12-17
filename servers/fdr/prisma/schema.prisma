@@ -102,7 +102,7 @@ model LibraryDocsGeneration {
   packagePath String?
   status      LibraryDocsGenerationStatus
   error       Bytes?
-  resultS3Key String? // S3 key where result JSON is stored (temporary until CLI fetches)
+  irS3Key     String? // S3 key where IR JSON is stored (from Lambda)
   createdAt   DateTime                    @default(now())
   updatedAt   DateTime                    @updatedAt
 
@@ -116,9 +116,7 @@ enum LibraryDocsLanguage {
 
 enum LibraryDocsGenerationStatus {
   PENDING
-  CLONING
   PARSING
-  GENERATING
   COMPLETED
   FAILED
 }

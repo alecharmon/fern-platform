@@ -45,9 +45,10 @@ echo ""
 echo "✅ Infrastructure is ready!"
 echo ""
 echo "📝 Services running:"
-echo "  - PostgreSQL:  localhost:5432"
-echo "  - Redis:       localhost:6379"
-echo "  - S3 Mock:     localhost:9090 (API), localhost:9191 (UI)"
+echo "  - PostgreSQL:     localhost:5432"
+echo "  - Redis:          localhost:6379"
+echo "  - S3 Mock:        localhost:9090 (API), localhost:9191 (UI)"
+echo "  - Python Lambda:  localhost:9001"
 echo ""
 echo "🚀 Starting FDR server on http://localhost:8080..."
 echo ""
@@ -64,6 +65,14 @@ export MINIO_URL=http://localhost:9090
 export MINIO_BUCKET_NAME=fdr
 export S3_FORCE_PATH_STYLE=true
 export LOG_LEVEL="$LOG_LEVEL"
+
+# Python library docs Lambda (local Docker RIE)
+export PYTHON_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME=function
+export PYTHON_LIBRARY_DOCS_LAMBDA_REGION=us-east-1
+export PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT=http://localhost:9001
+# Dummy AWS credentials for local Lambda invocation (Docker RIE doesn't verify)
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
 
 echo "🔍 Log level set to: $LOG_LEVEL"
 echo ""
