@@ -18,7 +18,7 @@
     "chromatic": "pnpx chromatic --project-token=chpt_48b3c560025e978",
     "depcheck": "depcheck",
     "docs:build": "NODE_OPTIONS=\"--max-old-space-size=8192\" next build",
-    "docs:build:local": "NODE_OPTIONS=\"--max-old-space-size=8192\" NEXT_PUBLIC_IS_LOCAL=1 NEXT_PUBLIC_DOCS_BUNDLE_VERSION=local next build && pnpm tsc --project tsconfig.local.json",
+    "docs:build:local": "NODE_OPTIONS=\"--max-old-space-size=8192\" NEXT_PUBLIC_IS_LOCAL=1 next build && pnpm tsc --project tsconfig.local.json",
     "docs:build:selfhosted": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production QSTASH_TOKEN=abc NEXT_PUBLIC_IS_SELF_HOSTED=1 next build && pnpm tsc --project tsconfig.local.json",
     "docs:clean:local": "rm -rf .next next-env.d.ts dist .turbo",
     "docs:dev": "NODE_OPTIONS=\"--max-old-space-size=16384\" NEXT_PUBLIC_IS_DOCS_DEV=true next dev",

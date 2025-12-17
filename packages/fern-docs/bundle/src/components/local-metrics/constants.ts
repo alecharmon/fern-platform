@@ -1,10 +1,10 @@
 /**
  * Get the docs bundle version from environment variable.
  * This is set during the build process from the release tag (e.g., docs@1.2.3).
- * Falls back to "unknown" if not set.
+ * Falls back to "local" for local development builds.
  */
 function getDocsBundleVersion(): string {
-    return process.env.NEXT_PUBLIC_DOCS_BUNDLE_VERSION ?? "unknown";
+    return process.env.NEXT_PUBLIC_DOCS_BUNDLE_VERSION ?? "local";
 }
 
 export const LOCAL_METRICS_CONFIG = {
