@@ -16,10 +16,7 @@ export default function RootPage() {
             }}
         >
             <h1 style={{ marginBottom: "1rem", color: "#dc2626" }}>Error: Host Not Found</h1>
-            <p style={{ maxWidth: "600px" }}>
-                The requested host could not be found. This error occurs when no documentation host has been configured
-                for this domain.
-            </p>
+            <p style={{ maxWidth: "600px" }}>The requested host could not be found. Please restart the server.</p>
         </div>
     );
 }
