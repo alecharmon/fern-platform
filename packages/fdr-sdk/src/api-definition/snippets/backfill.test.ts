@@ -3,7 +3,8 @@ import { join } from "path";
 import { describe, expect, it } from "vitest";
 
 import { type ApiDefinition, ApiDefinitionId, EndpointId, EnvironmentId, PropertyKey } from "../latest";
-import { backfillSnippets, type HttpSnippetLanguage } from "./backfill";
+import { backfillSnippets } from "./backfill";
+import type { HttpSnippetLanguage } from "./types";
 
 // Load actual fixtures at runtime
 const fixturesDir = join(__dirname, "fixtures", "demo");
