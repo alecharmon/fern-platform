@@ -42,8 +42,11 @@ jobs:
           
           cd ../..
           
-          # Check if there are any changes
-          if git diff --quiet packages/snippets/package.json; then
+          # Run format on snippets package to fix any linting issues
+          pnpm exec biome check --write packages/snippets
+          
+          # Check if there are any changes to snippets package or lockfile
+          if git diff --quiet packages/snippets/package.json pnpm-lock.yaml; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "No dependency updates available"
           else
