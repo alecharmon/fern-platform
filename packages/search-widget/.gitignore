@@ -1,0 +1,12 @@
+# Build output
+dist/
+.turbo/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Test app
+react-app/

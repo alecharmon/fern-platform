@@ -1,0 +1,55 @@
+{
+  "extends": "@fern-platform/configs/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["node", "next", "vitest/globals"],
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "plugins": [{ "name": "next" }],
+    "moduleResolution": "bundler",
+    "module": "esnext"
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"],
+  "references": [
+    {
+      "path": "../commons/core-utils"
+    },
+    {
+      "path": "../commons/docs-auth"
+    },
+    {
+      "path": "../commons/docs-server"
+    },
+    {
+      "path": "../commons/docs-utils"
+    },
+    {
+      "path": "../commons/fdr-utils"
+    },
+    {
+      "path": "../fai-sdk"
+    },
+    {
+      "path": "../fdr-sdk"
+    },
+    {
+      "path": "../fern-docs/components"
+    },
+    {
+      "path": "../fern-docs/edge-config"
+    },
+    {
+      "path": "../fern-docs/mdx"
+    },
+    {
+      "path": "../fern-docs/search-server/keyword"
+    },
+    {
+      "path": "../fern-docs/search-server/ask-fern"
+    }
+  ]
+}

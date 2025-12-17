@@ -6,6 +6,7 @@ import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { ArrowLeft } from "lucide-react";
+
 import {
     type ComponentPropsWithoutRef,
     forwardRef,
@@ -76,7 +77,17 @@ const DesktopCommand = forwardRef<
 DesktopCommand.displayName = "DesktopCommand";
 
 export const DesktopCommandContent = memo(
-    ({ children, asChild, lang }: { children: React.ReactNode; asChild?: boolean; lang: string }) => {
+    ({
+        children,
+        asChild,
+        modal,
+        lang
+    }: {
+        children: React.ReactNode;
+        asChild?: boolean;
+        modal?: boolean;
+        lang: string;
+    }) => {
         const inputRef = useRef<HTMLInputElement>(null);
         const scrollRef = useRef<HTMLDivElement>(null);
         return (
@@ -87,7 +98,7 @@ export const DesktopCommandContent = memo(
                         inputRef.current?.focus();
                     }}
                 >
-                    <DesktopCommandBadges lang={lang} />
+                    <DesktopCommandBadges modal={modal} lang={lang} />
 
                     <div data-cmdk-fern-header="">
                         <beforeInput.Out />

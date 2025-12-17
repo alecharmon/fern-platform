@@ -17,13 +17,15 @@ export const CommandSearchHits = ({
     onSelect,
     prefetch,
     currentVersion,
-    currentProduct
+    currentProduct,
+    forceWindowOpen
 }: {
     domain: string;
     onSelect: (path: string) => void;
     prefetch?: (path: string) => void | Promise<void>;
     currentVersion?: string;
     currentProduct?: string;
+    forceWindowOpen?: boolean;
 }): ReactNode => {
     const isQueryEmpty = Command.useCommandState((state) => state.search.trimStart().length === 0);
     const { items, isLastPage, showMore } = useInfiniteSearchHits();
@@ -66,6 +68,7 @@ export const CommandSearchHits = ({
             sentinelRef={sentinelRef}
             currentVersion={currentVersion}
             currentProduct={currentProduct}
+            forceWindowOpen={forceWindowOpen}
         />
     );
 };
@@ -78,7 +81,8 @@ const MemoizedCommandSearchHits = memo(
         prefetch,
         sentinelRef,
         currentVersion,
-        currentProduct
+        currentProduct,
+        forceWindowOpen
     }: {
         domain: string;
         items: AlgoliaRecordHit[];
@@ -87,6 +91,7 @@ const MemoizedCommandSearchHits = memo(
         sentinelRef: React.RefObject<HTMLLIElement | null>;
         currentVersion?: string;
         currentProduct?: string;
+        forceWindowOpen?: boolean;
     }) => {
         const groups = generateHits(items, currentVersion, currentProduct);
 
@@ -103,6 +108,7 @@ const MemoizedCommandSearchHits = memo(
                                 domain={domain}
                                 currentVersion={currentVersion}
                                 currentProduct={currentProduct}
+                                forceWindowOpen={forceWindowOpen}
                             />
                         ))}
                     </Command.Group>
@@ -119,7 +125,8 @@ function CommandHit({
     onSelect,
     prefetch,
     currentVersion,
-    currentProduct
+    currentProduct,
+    forceWindowOpen
 }: {
     hit: GroupedHit;
     domain: string;
@@ -130,6 +137,7 @@ function CommandHit({
     prefetch?: (path: string) => void | Promise<void>;
     currentVersion?: string;
     currentProduct?: string;
+    forceWindowOpen?: boolean;
 }) {
     const sendEvent = useSendEvent();
     if (!hit.record) {
@@ -150,6 +158,7 @@ function CommandHit({
                     onSelect(value);
                 }}
                 domain={domain}
+                forceWindowOpen={forceWindowOpen}
             >
                 <PageIcon
                     icon={hit.icon}

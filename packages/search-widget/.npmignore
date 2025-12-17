@@ -1,0 +1,20 @@
+# Source files
+src/
+react-app/
+
+
+# Config files
+*.config.*
+!postcss.config.mjs
+!tailwind.config.ts
+tsconfig*.json
+webpack.config.cjs
+
+# Development
+node_modules/
+.turbo/
+*.log
+.gitignore
+
+# Only publish dist/
+# Everything else is excluded by default

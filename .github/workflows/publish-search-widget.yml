@@ -1,0 +1,60 @@
+name: publish-search-widget
+
+on:
+  push:
+    tags:
+      - 'search-widget@*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (without search-widget@ prefix)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/install
+        with:
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION=$(bash scripts/search-widget-version.sh)
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+
+      - name: Update package version
+        working-directory: packages/search-widget
+        run: npm version "${{ steps.version.outputs.VERSION }}" --no-git-tag-version
+
+      - name: Build search-widget
+        run: pnpm --filter=@fern-api/search-widget build
+
+      - name: Publish to npm
+        working-directory: packages/search-widget
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.FERN_SEARCH_WIDGET_NPM_TOKEN }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken $NODE_AUTH_TOKEN
+          pnpm publish --access public --tag latest --no-git-checks
+
+      - name: Notify on success
+        if: success()
+        run: echo "✅ Successfully published @fern-api/search-widget@${{ steps.version.outputs.VERSION }}"
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "::error::Failed to publish @fern-api/search-widget@${{ steps.version.outputs.VERSION }}"

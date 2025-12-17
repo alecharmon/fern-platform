@@ -61,7 +61,6 @@ import { DesktopCommandRoot } from "./desktop-command-root";
 import { FilterDropdownMenu, FilterManager } from "./filter-components";
 import { FootnoteCommands } from "./footnote-commands";
 import { HideHeadersInUserMessage } from "./hide-headers-in-user-messages";
-import { Suggestions } from "./suggestions";
 
 type PropsWithElement<T> = T & { node?: HastElement };
 
@@ -71,7 +70,6 @@ export const DesktopAskAiPanel = forwardRef<
     HTMLDivElement,
     Omit<ComponentPropsWithoutRef<typeof DesktopCommandRoot>, "children"> & {
         api?: string;
-        suggestionsApi?: string;
         body?: object;
         headers?: Record<string, string>;
         chatId?: string;
@@ -106,7 +104,6 @@ export const DesktopAskAiPanel = forwardRef<
         {
             children,
             api,
-            suggestionsApi,
             body,
             headers,
             chatId,
@@ -156,7 +153,6 @@ export const DesktopAskAiPanel = forwardRef<
                     useConversationId={useConversationId}
                     useQueryId={useQueryId}
                     api={api}
-                    suggestionsApi={suggestionsApi}
                     body={body}
                     headers={headers}
                     filters={filters}
@@ -198,7 +194,6 @@ const DesktopAskAIContent = (props: {
         resetQueryId: () => void;
     };
     api?: string;
-    suggestionsApi?: string;
     body?: object;
     filters?: readonly FacetFilter[];
     headers?: Record<string, string>;
@@ -229,7 +224,6 @@ const DesktopAskAIChat = ({
     useConversationId,
     useQueryId,
     api,
-    suggestionsApi,
     body,
     headers,
     filters,
@@ -260,7 +254,6 @@ const DesktopAskAIChat = ({
         resetQueryId: () => void;
     };
     api?: string;
-    suggestionsApi?: string;
     body?: object;
     headers?: Record<string, string>;
     filters?: readonly FacetFilter[];
@@ -577,9 +570,7 @@ const DesktopAskAIChat = ({
                     renderActions={renderActions}
                     messageQueryIds={messageQueryIds}
                     lang={lang}
-                >
-                    {suggestionsApi && <Suggestions api={suggestionsApi} body={body} headers={headers} askAI={askAI} />}
-                </AskAICommandItems>
+                />
             </Command.List>
             <AskAiContextPill pageContext={pageContext} onRemove={onRemovePageContext} onSelectHit={onSelectHit} />
             <AskAIComposer

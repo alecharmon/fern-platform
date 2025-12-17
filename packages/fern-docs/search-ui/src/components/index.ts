@@ -1,4 +1,5 @@
+export * from "./chatbot";
+export * from "./code-block";
 export * from "./desktop";
-export * from "./mobile";
 export * from "./search/index";
 export * from "./shared";

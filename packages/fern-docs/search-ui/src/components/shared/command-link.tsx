@@ -14,18 +14,21 @@ export const CommandLink = forwardRef<
         target?: string;
         rel?: string;
         prefetch?: (href: string) => void | Promise<void>;
+        forceWindowOpen?: boolean;
     }
->(({ href, target, rel, onSelect, prefetch, domain, ...props }, forwardedRef) => {
+>(({ href, target, rel, onSelect, prefetch, domain, forceWindowOpen, ...props }, forwardedRef) => {
     const ref = useRef<HTMLAnchorElement>(null);
     const isSelected = Command.useCommandState((state) => state.value === href);
     const handleSelect = useCallback(() => {
         const url = new URL(href, withDefaultProtocol(domain));
-        if (url.host === domain) {
+        if (forceWindowOpen) {
+            window.open(url.toString(), target);
+        } else if (url.host === domain) {
             onSelect?.(`${url.pathname}${url.search}${url.hash}`);
         } else {
             window.open(href, target);
         }
-    }, [href, onSelect, target, domain]);
+    }, [href, onSelect, target, domain, forceWindowOpen]);
 
     const getPathname = useCallback(() => {
         try {

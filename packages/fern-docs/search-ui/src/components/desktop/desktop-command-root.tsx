@@ -88,7 +88,10 @@ export const DesktopCommandRoot = forwardRef<
                         inputRef.current?.focus();
                     }
                 })}
-                className={cn(props["data-mode" as keyof typeof props] === "ask-ai" && "h-full")}
+                className={cn(
+                    props["data-mode" as keyof typeof props] === "ask-ai" &&
+                        (props["data-location" as keyof typeof props] === "modal" ? "h-[70%]" : "h-full")
+                )}
             >
                 {children}
             </Command.Root>

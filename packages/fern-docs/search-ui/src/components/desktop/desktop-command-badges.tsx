@@ -13,9 +13,9 @@ export const aboveInput = tunnel();
 
 export const DesktopCommandBadges = forwardRef<
     HTMLDivElement,
-    DesktopCommandBadgesProps & ComponentPropsWithoutRef<"div">
+    DesktopCommandBadgesProps & ComponentPropsWithoutRef<"div"> & { modal?: boolean }
 >((props, ref) => {
-    const { onDropdownClose, children, lang, ...rest } = props;
+    const { onDropdownClose, children, lang, modal, ...rest } = props;
     const { filters, setFilters } = useFacetFilters();
     const hasChildren = aboveInput.useHasChildren();
 
@@ -27,7 +27,7 @@ export const DesktopCommandBadges = forwardRef<
         <div ref={ref} className="flex items-center gap-2 p-2 pb-0" {...rest}>
             {filters?.map((filter) => (
                 <DesktopFilterDropdownMenu
-                    key={`${filter.facet}:${filter.value}`}
+                    key={modal ? `${filter.facet}:${filter.value}:${modal}` : `${filter.facet}:${filter.value}`}
                     filter={filter}
                     filters={filters}
                     removeFilter={() => {
