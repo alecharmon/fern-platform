@@ -168,9 +168,12 @@ export const OpenWithCursor = async ({
 
     const decodedDomain = resolveParam(domain);
 
+    // Normalize basePath: treat "/" or empty/undefined as no base path
+    const normalizedBasePath = basePath && basePath !== "/" ? basePath : "";
+
     const mcpServerConfig = {
         name: decodedDomain,
-        url: urlJoin(`https://${decodedDomain}`, basePath || "/", "_mcp/server")
+        url: urlJoin(`https://${decodedDomain}`, normalizedBasePath, "_mcp/server")
     };
     const mcpServerConfigBase64 = btoa(JSON.stringify(mcpServerConfig));
 
