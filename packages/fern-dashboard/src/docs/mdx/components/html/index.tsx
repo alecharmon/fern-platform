@@ -32,7 +32,8 @@ export function Ul({ className, ...rest }: React.ComponentProps<"ul">) {
             {...rest}
             className={cn(
                 className,
-                "[&>li]:before:text-(color:--grayscale-a10) mb-3 list-none pl-3 [&>li]:pl-3 [&>li]:before:absolute [&>li]:before:ml-[-22px] [&>li]:before:mt-[-1px] [&>li]:before:content-['⦁'] [&>li]:before:self-center"
+                // [&>li]:relative is required so the absolutely positioned bullet marker (::before) stays anchored
+                "[&>li]:relative [&>li]:before:text-(color:--grayscale-a10) mb-3 list-none pl-3 [&>li]:pl-3 [&>li]:before:absolute [&>li]:before:ml-[-22px] [&>li]:before:mt-[-1px] [&>li]:before:content-['⦁'] [&>li]:before:self-center"
             )}
         />
     );
