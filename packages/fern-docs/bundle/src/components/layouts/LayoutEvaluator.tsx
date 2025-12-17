@@ -58,6 +58,7 @@ export async function LayoutEvaluator({
     const extractedStyles = mdx?.styles ?? [];
 
     const files = await loader.getFiles();
+    const metadata = await loader.getMetadata();
 
     const pageActions = frontmatter?.["hide-page-actions"]
         ? undefined
@@ -66,7 +67,8 @@ export async function LayoutEvaluator({
               domain: loader.domain,
               slug,
               lang,
-              files
+              files,
+              basePath: metadata.basePath
           });
 
     const pageHeader = (

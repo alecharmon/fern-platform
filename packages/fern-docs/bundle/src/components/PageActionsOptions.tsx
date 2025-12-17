@@ -7,6 +7,7 @@ import { Copy, ExternalLink } from "lucide-react";
 import type { ParamValue } from "next/dist/server/request/params";
 import Image from "next/image";
 import type { ReactNode } from "react";
+import urlJoin from "url-join";
 import { isSelfHosted } from "@/server/isSelfHosted";
 
 import { ClaudeIcon, CursorIcon, MarkdownIcon, OpenAIIcon, SparklesIconHollow, TextIcon } from "./PageActionsAssets";
@@ -146,10 +147,12 @@ export const OpenWithLLM = ({
 
 export const OpenWithCursor = async ({
     domain,
+    basePath,
     lang,
     defaultOption
 }: {
     domain: ParamValue;
+    basePath?: string;
     lang: string;
     defaultOption?: boolean;
 }): Promise<FernDropdown.ValueOption> => {
@@ -167,7 +170,7 @@ export const OpenWithCursor = async ({
 
     const mcpServerConfig = {
         name: decodedDomain,
-        url: `https://${decodedDomain}/_mcp/server`
+        url: urlJoin(`https://${decodedDomain}`, basePath || "/", "_mcp/server")
     };
     const mcpServerConfigBase64 = btoa(JSON.stringify(mcpServerConfig));
 
@@ -259,13 +262,15 @@ export async function constructPageOptions({
     domain,
     slug,
     lang,
-    files
+    files,
+    basePath
 }: {
     pageActionConfig: Omit<DocsV1Read.DocsConfig, "navigation" | "root">;
     domain: ParamValue;
     slug: ParamValue;
     lang: string;
     files?: Record<string, FileData>;
+    basePath?: string;
 }): Promise<FernDropdown.PageActionOption[] | undefined> {
     const options: FernDropdown.PageActionOption[] = [];
     if (pageActionConfig.pageActions?.options?.copyPage !== false) {
@@ -333,7 +338,12 @@ export async function constructPageOptions({
 
     if (pageActionConfig.pageActions?.options?.cursor !== false) {
         options.push(
-            await OpenWithCursor({ domain, lang, defaultOption: pageActionConfig.pageActions?.default === "cursor" })
+            await OpenWithCursor({
+                domain,
+                basePath,
+                lang,
+                defaultOption: pageActionConfig.pageActions?.default === "cursor"
+            })
         );
     }
 
