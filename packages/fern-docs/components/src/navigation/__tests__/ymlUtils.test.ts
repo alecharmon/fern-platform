@@ -464,4 +464,202 @@ describe("buildDocsYmlContentFromChanges", () => {
             expect(v2YmlResult).toContain("../../pages/platform/getting-started.mdx");
         });
     });
+
+    describe("nested section creation", () => {
+        it("should create nested sections correctly with parentSectionPathTitles", () => {
+            const baseContent = `navigation: []`;
+
+            const changes = new Map<string, NavigationChange>();
+
+            changes.set("pages/page-1.mdx", {
+                type: "add_page",
+                sectionTitle: "section 1",
+                pageEntry: { page: "page 1", path: "pages/page-1.mdx" },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: [], // Root level
+                createdAt: Date.now()
+            });
+
+            changes.set("pages/page-1-1.mdx", {
+                type: "add_page",
+                sectionTitle: "section 1.1",
+                pageEntry: { page: "page 1.1", path: "pages/page-1-1.mdx" },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["section 1"], // Nested under "section 1"
+                createdAt: Date.now() + 1
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            expect(resultString).toContain("section 1");
+            expect(resultString).toContain("section 1.1");
+            expect(resultString).toContain("page 1");
+            expect(resultString).toContain("page 1.1");
+
+            // Parse the YAML to verify nesting structure
+            const lines = resultString.split("\n");
+            const section1Index = lines.findIndex((line) => line.includes("section: section 1"));
+            const section11Index = lines.findIndex((line) => line.includes("section: section 1.1"));
+
+            expect(section11Index).toBeGreaterThan(section1Index);
+
+            const section1Indent = lines[section1Index]?.match(/^(\s*)/)?.[1]?.length ?? 0;
+            const section11Indent = lines[section11Index]?.match(/^(\s*)/)?.[1]?.length ?? 0;
+            expect(section11Indent).toBeGreaterThan(section1Indent);
+        });
+
+        it("should create deeply nested sections with multiple levels", () => {
+            const baseContent = `navigation: []`;
+
+            const changes = new Map<string, NavigationChange>();
+
+            // Create "section 1" at root
+            changes.set("pages/page-1.mdx", {
+                type: "add_page",
+                sectionTitle: "section 1",
+                pageEntry: { page: "page 1", path: "pages/page-1.mdx" },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: [],
+                createdAt: Date.now()
+            });
+
+            // Create "section 1.1" under "section 1"
+            changes.set("pages/page-1-1.mdx", {
+                type: "add_page",
+                sectionTitle: "section 1.1",
+                pageEntry: { page: "page 1.1", path: "pages/page-1-1.mdx" },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["section 1"],
+                createdAt: Date.now() + 1
+            });
+
+            // Create "section 1.1.1" under "section 1" > "section 1.1"
+            changes.set("pages/page-1-1-1.mdx", {
+                type: "add_page",
+                sectionTitle: "section 1.1.1",
+                pageEntry: { page: "page 1.1.1", path: "pages/page-1-1-1.mdx" },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["section 1", "section 1.1"],
+                createdAt: Date.now() + 2
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            expect(resultString).toContain("section 1");
+            expect(resultString).toContain("section 1.1");
+            expect(resultString).toContain("section 1.1.1");
+            expect(resultString).toContain("page 1");
+            expect(resultString).toContain("page 1.1");
+            expect(resultString).toContain("page 1.1.1");
+
+            const lines = resultString.split("\n");
+            const section1Index = lines.findIndex(
+                (line) => line.includes("section: section 1") && !line.includes("1.1")
+            );
+            const section11Index = lines.findIndex(
+                (line) => line.includes("section: section 1.1") && !line.includes("1.1.1")
+            );
+            const section111Index = lines.findIndex((line) => line.includes("section: section 1.1.1"));
+
+            // Verify order
+            expect(section11Index).toBeGreaterThan(section1Index);
+            expect(section111Index).toBeGreaterThan(section11Index);
+
+            const section1Indent = lines[section1Index]?.match(/^(\s*)/)?.[1]?.length ?? 0;
+            const section11Indent = lines[section11Index]?.match(/^(\s*)/)?.[1]?.length ?? 0;
+            const section111Indent = lines[section111Index]?.match(/^(\s*)/)?.[1]?.length ?? 0;
+            expect(section11Indent).toBeGreaterThan(section1Indent);
+            expect(section111Indent).toBeGreaterThan(section11Indent);
+        });
+
+        it("should create nested sections in tabs correctly", () => {
+            const baseContent = `navigation:
+  - tab: guides
+    layout: []`;
+
+            const changes = new Map<string, NavigationChange>();
+
+            // Create "section 1" in tab "guides"
+            changes.set("pages/page-1.mdx", {
+                type: "add_page",
+                sectionTitle: "section 1",
+                tabSlug: "guides",
+                pageEntry: { page: "page 1", path: "pages/page-1.mdx" },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: [],
+                createdAt: Date.now()
+            });
+
+            // Create "section 1.1" nested under "section 1" in tab "guides"
+            changes.set("pages/page-1-1.mdx", {
+                type: "add_page",
+                sectionTitle: "section 1.1",
+                tabSlug: "guides",
+                pageEntry: { page: "page 1.1", path: "pages/page-1-1.mdx" },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["section 1"],
+                createdAt: Date.now() + 1
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // Verify structure
+            expect(resultString).toContain("tab: guides");
+            expect(resultString).toContain("section 1");
+            expect(resultString).toContain("section 1.1");
+            expect(resultString).toContain("page 1");
+            expect(resultString).toContain("page 1.1");
+
+            const lines = resultString.split("\n");
+            const tabIndex = lines.findIndex((line) => line.includes("tab: guides"));
+            const section1Index = lines.findIndex((line) => line.includes("section: section 1"));
+            const section11Index = lines.findIndex((line) => line.includes("section: section 1.1"));
+
+            expect(section1Index).toBeGreaterThan(tabIndex);
+            expect(section11Index).toBeGreaterThan(tabIndex);
+
+            expect(section11Index).toBeGreaterThan(section1Index);
+            const section1Indent = lines[section1Index]?.match(/^(\s*)/)?.[1]?.length ?? 0;
+            const section11Indent = lines[section11Index]?.match(/^(\s*)/)?.[1]?.length ?? 0;
+            expect(section11Indent).toBeGreaterThan(section1Indent);
+        });
+
+        it("should handle backward compatibility when parentSectionPathTitles is undefined", () => {
+            const baseContent = `navigation: []`;
+
+            const changes = new Map<string, NavigationChange>();
+
+            // Create section without parentSectionPathTitles (old behavior)
+            changes.set("pages/page-1.mdx", {
+                type: "add_page",
+                sectionTitle: "section 1",
+                pageEntry: { page: "page 1", path: "pages/page-1.mdx" },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // Should create section at root level
+            expect(resultString).toContain("section 1");
+            expect(resultString).toContain("page 1");
+
+            const lines = resultString.split("\n");
+            const section1Index = lines.findIndex((line) => line.includes("section: section 1"));
+            const section1Indent = lines[section1Index]?.match(/^(\s*)/)?.[1]?.length ?? 0;
+            expect(section1Indent).toBeLessThanOrEqual(2); // Root level sections have minimal indent
+        });
+    });
 });

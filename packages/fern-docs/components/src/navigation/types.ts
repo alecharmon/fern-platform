@@ -361,6 +361,13 @@ export type NavigationChange =
            * Examples: "docs.yml", "versions/v2.yml", "platform/docs.yml"
            */
           docsYmlFilePath: DocsYmlFilePath;
+          /**
+           * Optional array of parent section titles for nested sections.
+           * Used when creating a new section that should be nested under existing sections.
+           * Example: ["Platform", "Guides"] means the new section should be created under Platform > Guides
+           * Empty array or undefined means the section should be created at root level.
+           */
+          parentSectionPathTitles?: string[];
       }
     | {
           type: "remove_page";

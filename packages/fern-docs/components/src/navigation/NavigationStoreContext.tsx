@@ -76,6 +76,7 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     resolveInitialPageData: NavigationStore["resolveInitialPageData"];
     registerPage: NavigationStore["registerPage"];
     createClientPage: NavigationStore["createClientPage"];
+    createClientPageInNewSection: NavigationStore["createClientPageInNewSection"];
     updatePage: NavigationStore["updatePage"];
     updatePageFrontmatter: NavigationStore["updatePageFrontmatter"];
     updatePageHtml: NavigationStore["updatePageHtml"];
@@ -103,6 +104,7 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         resolveInitialPageData: store.resolveInitialPageData.bind(store),
         registerPage: store.registerPage.bind(store),
         createClientPage: store.createClientPage.bind(store),
+        createClientPageInNewSection: store.createClientPageInNewSection.bind(store),
         updatePage: store.updatePage.bind(store),
         updatePageFrontmatter: store.updatePageFrontmatter.bind(store),
         updatePageHtml: store.updatePageHtml.bind(store),

@@ -14,7 +14,9 @@ import {
     extractParentSectionId,
     findPageByPageId,
     findSectionById,
+    findSectionByTitleInContainer,
     injectPageIntoSection,
+    injectSectionIntoContainer,
     updateSectionTitle
 } from "./navigationTreeUtils";
 import { extractDocsYmlFilePathFromFoundNode, resolvePageData } from "./pageUtils";
@@ -525,6 +527,182 @@ export class NavigationStore {
                 this._rootNode,
                 newPageNode,
                 targetSectionId,
+                "atIndex",
+                insertionIndex
+            );
+        }
+
+        this._setStorageAndNotify();
+    }
+
+    /** Creates a new client page in a new section */
+    createClientPageInNewSection(
+        filename: PageFilename,
+        deps: ClientPageDataWriteDependencies & {
+            newSectionTitle: string;
+            parentContainerId: FernNavigation.NodeId;
+            parentContainerContext: SerializableFoundNode;
+        }
+    ): void {
+        const { html, frontmatter } = mdxToHtml(deps.initialMdx);
+        const pageTitle = String(frontmatter?.title ?? "");
+        const pageSlug = FernNavigation.Slug(String(frontmatter?.slug ?? ""));
+
+        // Generate section slug from section title
+        const sectionSlug = FernNavigation.Slug(
+            deps.newSectionTitle
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")
+        );
+
+        // Check if a section with this title already exists under the parent container
+        let newSectionNode: FernNavigation.SectionNode;
+        let newSectionId: FernNavigation.NodeId;
+
+        if (this._rootNode) {
+            const existingSection = findSectionByTitleInContainer(
+                this._rootNode,
+                deps.parentContainerId,
+                deps.newSectionTitle
+            );
+
+            if (existingSection) {
+                newSectionNode = existingSection;
+                newSectionId = existingSection.id;
+            } else {
+                // Create new section node
+                newSectionId = FernNavigation.NodeId(`client-section-${Math.random().toString(36).substring(2, 15)}`);
+                newSectionNode = {
+                    type: "section",
+                    id: newSectionId,
+                    title: deps.newSectionTitle,
+                    slug: sectionSlug,
+                    canonicalSlug: sectionSlug,
+                    icon: undefined,
+                    hidden: undefined,
+                    authed: undefined,
+                    viewers: undefined,
+                    orphaned: undefined,
+                    noindex: undefined,
+                    featureFlags: undefined,
+                    overviewPageId: undefined,
+                    collapsed: undefined,
+                    children: [],
+                    availability: undefined,
+                    pointsTo: undefined
+                };
+
+                // Inject the new section into the parent container in rootNode
+                this._rootNode = injectSectionIntoContainer(
+                    this._rootNode,
+                    newSectionNode,
+                    deps.parentContainerId,
+                    "append"
+                );
+            }
+        } else {
+            throw new Error("Cannot create section: rootNode not available");
+        }
+
+        // Create the new page node
+        const newPageNode: FernNavigation.PageNode = {
+            type: "page",
+            id: FernNavigation.NodeId(`client-${Math.random().toString(36).substring(2, 15)}`),
+            pageId: FernNavigation.PageId(filename),
+            title: pageTitle,
+            slug: pageSlug,
+            canonicalSlug: pageSlug,
+            icon: undefined,
+            hidden: undefined,
+            authed: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            noindex: undefined,
+            featureFlags: undefined,
+            availability: undefined
+        };
+
+        // Create page entry in registry
+        this._createPageEntry(filename, {
+            pageData: {
+                source: "client",
+                filename: filename,
+                mdx: deps.initialMdx,
+                html: html,
+                frontmatter: frontmatter,
+                foundNode: {
+                    ...deps.baseFoundNode,
+                    node: newPageNode
+                }
+            },
+            status: "changed",
+            isMarkedForDeletion: false,
+            lastModified: Date.now(),
+            parentSectionId: newSectionId,
+            initialMdx: deps.initialMdx
+        });
+
+        const newSectionResult = findSectionById(this._rootNode, newSectionId);
+
+        let docsYmlFilePath = "docs.yml"; // default fallback
+        let tabSlug: string | undefined;
+
+        if (newSectionResult) {
+            // Use the new section's version/product/tab context to determine the correct file
+            docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+                {
+                    currentVersion: newSectionResult.version,
+                    currentProduct: newSectionResult.product,
+                    currentTab: newSectionResult.tabSlug ? { slug: newSectionResult.tabSlug } : undefined
+                },
+                this._slugToDocsYmlFilePath
+            );
+            tabSlug = newSectionResult.tabSlug;
+        } else {
+            // Fallback to parentContainerContext if we can't find the new section
+            docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+                deps.parentContainerContext,
+                this._slugToDocsYmlFilePath
+            );
+            tabSlug = this._extractTabSlug(deps.parentContainerContext);
+        }
+
+        // Calculate insertion index for the page within the new section
+        const insertionIndex = calculateInsertionIndex(this._rootNode, newSectionId);
+
+        // Extract parent section path titles from the target section path
+        // targetSectionPath contains the ancestors of the parent container where the new section will be created
+        const parentSectionPathTitles = (deps.targetSectionPath ?? [])
+            .filter((ancestor) => ancestor.type === "section")
+            .map((ancestor) => ancestor.title)
+            .filter((title): title is string => title != null);
+
+        // Create a new Map to trigger React re-renders
+        this._navigationChanges = new Map(this._navigationChanges);
+        this._navigationChanges.set(filename, {
+            type: "add_page",
+            // Store the stable section ID - we'll look up the current title when generating YAML
+            // This way renames automatically work without needing to update the change
+            sectionId: newSectionId,
+            // Store the section title as a fallback for when rootNode is unavailable
+            // This handles the case where YAML is generated before rootNode is available
+            sectionTitle: deps.newSectionTitle,
+            tabSlug: tabSlug,
+            pageEntry: { page: pageTitle, path: filename },
+            insertionMode: "atIndex",
+            insertionIndex,
+            docsYmlFilePath,
+            parentSectionPathTitles,
+            createdAt: Date.now()
+        });
+
+        // Inject the new page into the new section in rootNode
+        if (this._rootNode) {
+            this._rootNode = injectPageIntoSection(
+                this._rootNode,
+                newPageNode,
+                newSectionId,
                 "atIndex",
                 insertionIndex
             );

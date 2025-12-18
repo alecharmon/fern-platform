@@ -93,7 +93,8 @@ function _buildDocsYmlContentFromChanges(
                         pageEntry: change.pageEntry,
                         insertionMode: change.insertionMode,
                         insertionIndex: change.insertionIndex,
-                        ymlFilePath: filePath
+                        ymlFilePath: filePath,
+                        parentSectionPathTitles: change.parentSectionPathTitles
                     },
                     rootNode
                 );
@@ -277,6 +278,7 @@ function _applyAddOperation(
         insertionMode?: "atIndex" | "prepend" | "append";
         insertionIndex?: number;
         ymlFilePath: DocsYmlFilePath;
+        parentSectionPathTitles?: string[];
     },
     rootNode?: FernNavigation.RootNode
 ) {
@@ -287,7 +289,8 @@ function _applyAddOperation(
         pageEntry,
         insertionMode,
         insertionIndex,
-        ymlFilePath
+        ymlFilePath,
+        parentSectionPathTitles
     } = update;
     docsConfig.navigation ??= [];
 
@@ -316,10 +319,19 @@ function _applyAddOperation(
             pageEntry,
             insertionMode,
             insertionIndex,
-            ymlFilePath
+            ymlFilePath,
+            parentSectionPathTitles
         );
     } else {
-        _addToRootNavigation(docsConfig, sectionTitle, pageEntry, insertionMode, insertionIndex, ymlFilePath);
+        _addToRootNavigation(
+            docsConfig,
+            sectionTitle,
+            pageEntry,
+            insertionMode,
+            insertionIndex,
+            ymlFilePath,
+            parentSectionPathTitles
+        );
     }
 }
 
@@ -330,7 +342,8 @@ function _addToRootNavigation(
     pageEntry: { page: string; path: string },
     insertionMode?: "atIndex" | "prepend" | "append",
     insertionIndex?: number,
-    ymlFilePath?: DocsYmlFilePath
+    ymlFilePath?: DocsYmlFilePath,
+    parentSectionPathTitles?: string[]
 ) {
     if (!docsConfig.navigation) {
         return;
@@ -339,7 +352,7 @@ function _addToRootNavigation(
     if (sectionTitle == null) {
         _addPageToContainer(docsConfig.navigation, pageEntry, insertionMode, insertionIndex, ymlFilePath);
     } else {
-        const section = _findOrCreateSection(docsConfig.navigation, sectionTitle);
+        const section = _findOrCreateSectionPath(docsConfig.navigation, sectionTitle, parentSectionPathTitles);
         if (section.contents) {
             _addPageToContainer(section.contents, pageEntry, insertionMode, insertionIndex, ymlFilePath);
         }
@@ -354,7 +367,8 @@ function _addToTabbedNavigation(
     pageEntry: { page: string; path: string },
     insertionMode?: "atIndex" | "prepend" | "append",
     insertionIndex?: number,
-    ymlFilePath?: DocsYmlFilePath
+    ymlFilePath?: DocsYmlFilePath,
+    parentSectionPathTitles?: string[]
 ) {
     if (!docsConfig.navigation) {
         return;
@@ -372,7 +386,7 @@ function _addToTabbedNavigation(
         }
     } else {
         if (tab.layout) {
-            const section = _findOrCreateSection(tab.layout, sectionTitle);
+            const section = _findOrCreateSectionPath(tab.layout, sectionTitle, parentSectionPathTitles);
             if (section.contents) {
                 _addPageToContainer(section.contents, pageEntry, insertionMode, insertionIndex, ymlFilePath);
             }
@@ -409,6 +423,30 @@ function _findOrCreateSection(container: YmlNavigationItem[], sectionTitle: stri
 
     section.contents ??= [];
     return section;
+}
+
+/**
+ * Finds or creates a section at a specific path in the navigation hierarchy.
+ * If parentSectionPathTitles is provided, navigates through the parent sections first,
+ * creating them if they don't exist, then creates the target section within the final parent.
+ * If parentSectionPathTitles is empty or undefined, creates the section at the root level.
+ */
+function _findOrCreateSectionPath(
+    container: YmlNavigationItem[],
+    sectionTitle: string,
+    parentSectionPathTitles?: string[]
+): YmlSectionItem {
+    if (!parentSectionPathTitles || parentSectionPathTitles.length === 0) {
+        return _findOrCreateSection(container, sectionTitle);
+    }
+
+    let currentContainer = container;
+    for (const parentTitle of parentSectionPathTitles) {
+        const parentSection = _findOrCreateSection(currentContainer, parentTitle);
+        currentContainer = parentSection.contents ?? [];
+    }
+
+    return _findOrCreateSection(currentContainer, sectionTitle);
 }
 
 /**
