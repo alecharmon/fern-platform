@@ -1,1 +1,1 @@
-export { type DeleteDocsSiteRequest } from "./DeleteDocsSiteRequest.js";
+export type { DeleteDocsSiteRequest } from "./DeleteDocsSiteRequest.js";

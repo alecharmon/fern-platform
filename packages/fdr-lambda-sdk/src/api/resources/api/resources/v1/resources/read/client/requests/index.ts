@@ -1,1 +1,1 @@
-export { type GetEndpointByLocatorRequest } from "./GetEndpointByLocatorRequest.js";
+export type { GetEndpointByLocatorRequest } from "./GetEndpointByLocatorRequest.js";

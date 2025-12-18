@@ -33,7 +33,7 @@ groups:
       - fdr-lambda
     generators:
       - name: fernapi/fern-typescript-node-sdk
-        version: 0.51.0
+        version: 3.33.0
         output:
           location: local-file-system
           path: ../../../packages/fdr-lambda-sdk/src
