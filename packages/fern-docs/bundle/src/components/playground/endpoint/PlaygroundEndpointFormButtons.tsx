@@ -51,6 +51,7 @@ export function PlaygroundEndpointFormButtons({
                         }}
                         lang={lang}
                         placeholder={t(lang).playground.selectExample}
+                        forceDropdown={true}
                     />
                 )}
                 <FernButton onClick={resetWithoutExample} size="small" variant="minimal">

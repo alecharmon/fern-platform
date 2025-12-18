@@ -10,7 +10,7 @@ import { useEventCallback, useIsMobile } from "@fern-ui/react-commons";
 import { mapValues } from "es-toolkit/object";
 import { useAtomValue, useSetAtom } from "jotai";
 import { SendHorizonal } from "lucide-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const MOBILE_TAB_REQUEST = "0";
 const MOBILE_TAB_RESPONSE = "1";
@@ -22,8 +22,8 @@ import {
     usePlaygroundEndpointFormState,
     useResolvedPlaygroundState
 } from "@/state/playground";
-
 import { track } from "../../analytics";
+import { filterExamplesForExplorer } from "../../api-reference/endpoints/filterExamplesForExplorer";
 import { executeProxyRest } from "../fetch-utils/executeProxyRest";
 import { executeProxyStream } from "../fetch-utils/executeProxyStream";
 import type { ProxyRequest } from "../types";
@@ -92,12 +92,35 @@ export const PlaygroundEndpoint = ({
 
     const [formState, setFormState] = usePlaygroundEndpointFormState(context);
 
-    const hasExamples = (context.endpoint.examples?.length ?? 0) > 0;
-    const [selectedExampleIndex, setSelectedExampleIndex] = useState<number | undefined>(hasExamples ? 0 : undefined);
+    const { filteredExamples, indexMapping } = useMemo(
+        () => filterExamplesForExplorer(context.endpoint.examples),
+        [context.endpoint.examples]
+    );
 
-    const onSelectExample = useEventCallback((exampleIndex: number) => {
-        const example = context.endpoint.examples?.[exampleIndex];
-        setSelectedExampleIndex(exampleIndex);
+    const hasExamples = filteredExamples.length > 0;
+    const [selectedExampleIndex, setSelectedExampleIndex] = useState<number | undefined>(hasExamples ? 0 : undefined);
+    const didAutoSelectRef = useRef(false);
+
+    useEffect(() => {
+        if (hasExamples && !didAutoSelectRef.current) {
+            didAutoSelectRef.current = true;
+            const originalIndex = indexMapping[0];
+            if (originalIndex !== undefined) {
+                const example = context.endpoint.examples?.[originalIndex];
+                setSelectedExampleIndex(0);
+                setFormState(getInitialEndpointRequestFormStateWithExample(context, example, resolvedPlaygroundState));
+            }
+        }
+    }, [hasExamples, indexMapping, context, setFormState, resolvedPlaygroundState]);
+
+    const onSelectExample = useEventCallback((filteredIndex: number) => {
+        const originalIndex = indexMapping[filteredIndex];
+        if (originalIndex === undefined) {
+            resetWithoutExample();
+            return;
+        }
+        const example = context.endpoint.examples?.[originalIndex];
+        setSelectedExampleIndex(filteredIndex);
         setFormState(getInitialEndpointRequestFormStateWithExample(context, example, resolvedPlaygroundState));
     });
 
@@ -348,6 +371,7 @@ export const PlaygroundEndpoint = ({
                         context={context}
                         formState={formState}
                         setFormState={setFormState}
+                        filteredExamples={filteredExamples}
                         selectedExampleIndex={selectedExampleIndex}
                         onSelectExample={onSelectExample}
                         resetWithoutExample={resetWithoutExample}

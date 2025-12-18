@@ -16,6 +16,7 @@ export interface ExampleSelectorProps {
     lang: string;
     totalLabelLengthOverride?: number;
     placeholder?: string;
+    forceDropdown?: boolean;
 }
 
 export function ExampleSelector({
@@ -24,7 +25,8 @@ export function ExampleSelector({
     onSelect,
     lang,
     totalLabelLengthOverride,
-    placeholder
+    placeholder,
+    forceDropdown
 }: ExampleSelectorProps): ReactElement<any> | null {
     if (options.length === 0) {
         return null;
@@ -32,7 +34,7 @@ export function ExampleSelector({
 
     const selectedOption = options.find((opt) => opt.key === selectedKey);
     const totalLabelLength = totalLabelLengthOverride ?? options.map((opt) => opt.label).join("").length;
-    const shouldUseDropdown = options.length >= 8 || totalLabelLength >= 80;
+    const shouldUseDropdown = forceDropdown === true || options.length >= 8 || totalLabelLength >= 80;
     const hasSelection = selectedKey !== undefined && selectedOption !== undefined;
 
     if (shouldUseDropdown) {
