@@ -4,9 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to publish"
-        required: false
+        description: "Version to publish (must match a docs@ release version)"
+        required: true
         type: string
+  push:
+    tags:
+      - "docs@*"
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -30,44 +33,21 @@ jobs:
         id: determine_version
         run: |
           PROVIDED_VERSION="${{ github.event.inputs.version }}"
+          GIT_REF="${{ github.ref }}"
           BASE_PATH="/docs"
-
+          
           if [ -n "$PROVIDED_VERSION" ]; then
+            # Manual dispatch with version provided
             echo "Using provided version: $PROVIDED_VERSION"
             echo "version=$PROVIDED_VERSION" >> $GITHUB_OUTPUT
+          elif [[ "$GIT_REF" == refs/tags/docs@* ]]; then
+            # Triggered by docs@ tag - extract version from tag
+            TAG_VERSION="${GIT_REF#refs/tags/docs@}"
+            echo "Using version from docs@ tag: $TAG_VERSION"
+            echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
           else
-            echo "No version provided, determining next version..."
-
-            # Get Docker Hub token
-            USR="fernapi"
-            IMG="fern-self-hosted-with-docs-basepath"
-            TOKEN=$(curl -fsSL -u "$USR:${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}" \
-              "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$USR/$IMG:pull" | \
-              jq -r .token)
-
-            # Get latest tag from Docker Hub registry
-            LATEST_TAG=$(curl -fsSL -H "Authorization: Bearer $TOKEN" \
-              "https://registry-1.docker.io/v2/$USR/$IMG/tags/list" | \
-              jq -r '.tags | map(select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))) | sort_by(split(".") | map(tonumber)) | reverse | .[0]')
-
-            if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "null" ]; then
-              echo "No existing tags found for $IMG, starting with 0.1.0"
-              NEW_TAG="0.1.0"
-            else
-              echo "Current latest tag is $LATEST_TAG"
-
-              # Validate semver format (major.minor.patch)
-              if [[ ! "$LATEST_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-                echo "Error: LATEST_TAG '$LATEST_TAG' does not match semver format (major.minor.patch). Manually publish new version to unblock automatic publishing."
-                exit 1
-              fi
-
-              # Increment minor version
-              NEW_TAG=$(echo $LATEST_TAG | awk -F. '{print $1"."$2+1".0"}')
-            fi
-
-            echo "New tag is $NEW_TAG"
-            echo "version=$NEW_TAG" >> $GITHUB_OUTPUT
+            echo "ERROR: Version must be provided via workflow_dispatch input or docs@ tag"
+            exit 1
           fi
 
           echo "base_path=$BASE_PATH" >> $GITHUB_OUTPUT
