@@ -4,6 +4,10 @@ export const LibraryDocsErrorCode = {
     CloneFailed: "CLONE_FAILED",
     ParseFailed: "PARSE_FAILED",
     GenerationFailed: "GENERATION_FAILED",
+    LambdaError: "LAMBDA_ERROR",
+    LambdaNoIr: "LAMBDA_NO_IR",
+    LambdaFunctionError: "LAMBDA_FUNCTION_ERROR",
+    LambdaNoResponse: "LAMBDA_NO_RESPONSE",
     Timeout: "TIMEOUT",
     InvalidProject: "INVALID_PROJECT",
 } as const;

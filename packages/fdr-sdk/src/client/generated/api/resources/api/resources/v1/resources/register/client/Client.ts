@@ -129,7 +129,9 @@ export class RegisterClient {
      *     await client.api.v1.register.getSdkDynamicIrUploadUrls({
      *         orgId: FernRegistry.OrgId("orgId"),
      *         version: "version",
-     *         snippetConfiguration: {"typescript": "my-api-ts", "python": "my-api-py"}
+     *         snippetConfiguration: {
+     *             "snippetConfiguration": "snippetConfiguration"
+     *         }
      *     })
      */
     public getSdkDynamicIrUploadUrls(
@@ -215,6 +217,112 @@ export class RegisterClient {
             data: {
                 ok: false,
                 error: FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
+    /**
+     * Check if SDK dynamic IR exists in S3 for the given languages/snippets. Returns download URLs for existing dynamic IRs.
+     *
+     * @param {FernRegistry.api.v1.register.CheckSdkDynamicIrExistsRequest} request
+     * @param {RegisterClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.api.v1.register.checkSdkDynamicIrExists({
+     *         orgId: FernRegistry.OrgId("orgId"),
+     *         snippetConfiguration: {
+     *             "snippetConfiguration": {
+     *                 packageName: "packageName",
+     *                 version: "version"
+     *             }
+     *         }
+     *     })
+     */
+    public checkSdkDynamicIrExists(
+        request: FernRegistry.api.v1.register.CheckSdkDynamicIrExistsRequest,
+        requestOptions?: RegisterClient.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<
+            FernRegistry.api.v1.register.CheckSdkDynamicIrExistsResponse,
+            FernRegistry.api.v1.register.checkSdkDynamicIrExists.Error
+        >
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__checkSdkDynamicIrExists(request, requestOptions));
+    }
+
+    private async __checkSdkDynamicIrExists(
+        request: FernRegistry.api.v1.register.CheckSdkDynamicIrExistsRequest,
+        requestOptions?: RegisterClient.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<
+                FernRegistry.api.v1.register.CheckSdkDynamicIrExistsResponse,
+                FernRegistry.api.v1.register.checkSdkDynamicIrExists.Error
+            >
+        >
+    > {
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                "/registry/api/check-sdk-dynamic-ir",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs:
+                requestOptions?.timeoutInSeconds != null
+                    ? requestOptions.timeoutInSeconds * 1000
+                    : this._options?.timeoutInSeconds != null
+                      ? this._options?.timeoutInSeconds * 1000
+                      : undefined,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FernRegistry.api.v1.register.CheckSdkDynamicIrExistsResponse,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FernRegistry.api.v1.register.checkSdkDynamicIrExists.Error)?.error) {
+                case "UnauthorizedError":
+                case "UserNotInOrgError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FernRegistry.api.v1.register.checkSdkDynamicIrExists.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.api.v1.register.checkSdkDynamicIrExists.Error._unknown(_response.error),
                 rawResponse: _response.rawResponse,
             },
             rawResponse: _response.rawResponse,

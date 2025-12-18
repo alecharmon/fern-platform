@@ -5,6 +5,5 @@ import type * as FernRegistry from "../../../../../../../../index";
 export interface GetSdkDynamicIrUploadUrlsRequest {
     orgId: FernRegistry.OrgId;
     version: string;
-    /** A mapping of languages to snippet names (e.g., {"typescript": "my-api-ts", "python": "my-api-py"}) */
     snippetConfiguration: Record<string, string>;
 }

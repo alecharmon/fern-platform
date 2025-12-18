@@ -2,9 +2,7 @@
 
 export const LibraryDocsGenerationStatusType = {
     Pending: "PENDING",
-    Cloning: "CLONING",
     Parsing: "PARSING",
-    Generating: "GENERATING",
     Completed: "COMPLETED",
     Failed: "FAILED",
 } as const;

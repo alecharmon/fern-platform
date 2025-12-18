@@ -4,6 +4,5 @@ import type * as FernRegistry from "../../../../../../../../index";
 
 export interface CheckSdkDynamicIrExistsRequest {
     orgId: FernRegistry.OrgId;
-    /** A mapping of languages to snippet info (package name and version) */
     snippetConfiguration: Record<string, FernRegistry.api.v1.register.SnippetInfo>;
 }

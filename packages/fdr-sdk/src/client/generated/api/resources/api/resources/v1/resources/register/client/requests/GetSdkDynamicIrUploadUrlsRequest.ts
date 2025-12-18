@@ -7,7 +7,9 @@ import type * as FernRegistry from "../../../../../../../../index.js";
  *     {
  *         orgId: FernRegistry.OrgId("orgId"),
  *         version: "version",
- *         snippetConfiguration: {"typescript": "my-api-ts", "python": "my-api-py"}
+ *         snippetConfiguration: {
+ *             "snippetConfiguration": "snippetConfiguration"
+ *         }
  *     }
  */
 export interface GetSdkDynamicIrUploadUrlsRequest {

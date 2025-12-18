@@ -1,6 +1,5 @@
 export * from "./ApiAuth";
 export * from "./ApiDefinition";
-export * from "./CheckSdkDynamicIrExistsResponse";
 export * from "./ApiDefinitionPackage";
 export * from "./ApiDefinitionSubpackage";
 export * from "./ApiNavigationConfigItem";
@@ -8,6 +7,7 @@ export * from "./ApiNavigationConfigRoot";
 export * from "./ApiNavigationConfigSubpackage";
 export * from "./BasicAuth";
 export * from "./BearerAuth";
+export * from "./CheckSdkDynamicIrExistsResponse";
 export * from "./ComposerPackage";
 export * from "./CratesPackage";
 export * from "./DynamicIr";
