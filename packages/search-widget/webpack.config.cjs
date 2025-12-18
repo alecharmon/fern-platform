@@ -140,6 +140,14 @@ module.exports = {
             /^@fern-docs\/mdx$/,
             path.resolve(__dirname, './src/stubs/fern-docs-mdx.ts')
         ),
+        // Replace shiki with shiki/bundle/web for browser compatibility
+        new webpack.NormalModuleReplacementPlugin(
+            /^shiki$/,
+            (resource) => {
+                console.log('[WEBPACK] Replacing shiki:', resource.request);
+                resource.request = path.resolve(__dirname, './src/stubs/shiki.ts');
+            }
+        ),
 
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify('production'),
