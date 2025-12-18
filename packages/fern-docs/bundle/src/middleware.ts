@@ -116,7 +116,7 @@ export const middleware: NextMiddleware = async (request) => {
 
         // Validate that the first segment matches the current domain exactly
         // This prevents cross-tenant file access attacks
-        if (firstSegment !== domain) {
+        if (!isSelfHosted() && firstSegment !== domain) {
             return new NextResponse("Forbidden", { status: 403 });
         }
 
