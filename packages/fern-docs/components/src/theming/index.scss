@@ -27,7 +27,11 @@
         }
 
         &[data-state="active"] {
-          @apply text-(color:--accent-11) font-semibold;
+          @apply text-(color:--accent-11);
+
+          > span {
+            -webkit-text-stroke: 0.5px currentcolor;
+          }
 
           &::after {
             @apply opacity-100;

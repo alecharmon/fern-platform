@@ -73,10 +73,14 @@
     }
 
     &[data-state="active"] {
-      @apply text-(color:--accent-a11) bg-(color:--accent-a3) font-medium;
+      @apply text-(color:--accent-a11) bg-(color:--accent-a3);
 
       svg {
         @apply text-(color:--accent-a9);
+      }
+
+      .fern-sidebar-link-title-inner {
+        -webkit-text-stroke: 0.5px currentcolor;
       }
     }
   }
