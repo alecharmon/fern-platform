@@ -110,6 +110,16 @@ export const middleware: NextMiddleware = async (request) => {
     if (pathname.includes("/_files/")) {
         const filePath = pathname.replace("https:/", "https://"); // pathnames normalize urls, so we need restore the protocol //
         const removeBase = filePath.replace(/(.*)_files\//, ""); // clean all content before and including file marker
+
+        // Extract the first path segment (should be the domain)
+        const firstSegment = removeBase.split("/")[0];
+
+        // Validate that the first segment matches the current domain exactly
+        // This prevents cross-tenant file access attacks
+        if (firstSegment !== domain) {
+            return new NextResponse("Forbidden", { status: 403 });
+        }
+
         const cdnUrl = `${getFileCDN()}/${removeBase}`;
 
         // preserve query parameters if they exist
