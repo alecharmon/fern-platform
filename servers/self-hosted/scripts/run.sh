@@ -13,6 +13,23 @@ add_timestamps() {
     done
 }
 
+# Check for build-time seeded data
+SEED_DIR="/opt/fern-seed"
+SEED_MARKER="$SEED_DIR/.seeded"
+SEED_MINIO_DIR="$SEED_DIR/minio"
+SEED_POSTGRES_DUMP="$SEED_DIR/postgres.dump"
+USE_SEEDED_DATA=false
+
+if [ -f "$SEED_MARKER" ]; then
+    log "=========================================="
+    log "Detected build-time seeded data at $SEED_DIR"
+    log "=========================================="
+    cat "$SEED_MARKER" 2>/dev/null | while IFS= read -r line; do log "  $line"; done
+    USE_SEEDED_DATA=true
+    log "Will restore seeded data instead of running fern generate --docs"
+    log "=========================================="
+fi
+
 if [ ! -d "/fern" ]; then
     log "Fern folder not found. Please ensure you are mounting yours in."
     exit 1
@@ -20,9 +37,24 @@ fi
 
 export ORG_NAME=$(jq -r '.organization' < /fern/fern.config.json)
 CUSTOM_DOMAIN=$(yq '.instances[0]."custom-domain"' /fern/docs.yml 2>/dev/null | tr -d '"')
-if [ -n "$CUSTOM_DOMAIN" ] && [ "$CUSTOM_DOMAIN" != "null" ]; then
+
+# Check if custom domain is a valid value (not null, not empty, not a template placeholder like ${VAR})
+is_valid_custom_domain() {
+    local domain="$1"
+    # Empty or null
+    [ -z "$domain" ] && return 1
+    [ "$domain" = "null" ] && return 1
+    # Template placeholder (contains ${ or $()
+    case "$domain" in
+        *'${'*|*'$('*) return 1 ;;
+    esac
+    return 0
+}
+
+if is_valid_custom_domain "$CUSTOM_DOMAIN"; then
     export NEXT_PUBLIC_DOCS_DOMAIN_URL="$CUSTOM_DOMAIN"
 else
+    CUSTOM_DOMAIN=""  # Clear it so we don't try to use it later
     export NEXT_PUBLIC_DOCS_DOMAIN_URL="${ORG_NAME}.docs.buildwithfern.com"
 fi
 
@@ -150,7 +182,23 @@ run_prisma_migrations() {
     }
 }
 
-run_prisma_migrations
+# If seeded data exists, restore from dump instead of running migrations
+if [ "$USE_SEEDED_DATA" = "true" ] && [ -f "$SEED_POSTGRES_DUMP" ]; then
+    log "Restoring PostgreSQL from seeded dump..."
+    CURRENT_UID=$(id -u)
+    if [ "$CURRENT_UID" -eq 0 ]; then
+        su - postgres -c "pg_restore -h /tmp -p 5432 -U postgres -d fdr --clean --if-exists '$SEED_POSTGRES_DUMP'" 2>&1 | add_timestamps || {
+            log "Warning: pg_restore had some errors (this may be normal for clean restore)"
+        }
+    else
+        pg_restore -h /tmp -p 5432 -U postgres -d fdr --clean --if-exists "$SEED_POSTGRES_DUMP" 2>&1 | add_timestamps || {
+            log "Warning: pg_restore had some errors (this may be normal for clean restore)"
+        }
+    fi
+    log "PostgreSQL restored from seeded dump"
+else
+    run_prisma_migrations
+fi
 # -----------  End Postgres setup  -----------
 
 # -----------  Start MeiliSearch setup  -----------
@@ -232,6 +280,22 @@ fi
 # -----------  End Jaeger setup  -----------
 
 # -----------  Start MINIO setup  -----------
+
+# Clean up any existing MinIO system files to avoid overlay filesystem issues
+# MinIO's .minio.sys can cause "rename across devices" errors if it exists from a previous layer
+log "Cleaning up MinIO system files..."
+rm -rf /data/.minio.sys 2>/dev/null || true
+
+# If seeded data exists, restore MinIO data before starting
+if [ "$USE_SEEDED_DATA" = "true" ] && [ -d "$SEED_MINIO_DIR" ]; then
+    log "Restoring MinIO data from seeded backup..."
+    # Copy seeded data to MinIO data directory (use /. to include hidden files if any)
+    cp -r "$SEED_MINIO_DIR"/. /data/ 2>/dev/null || true
+    # Remove .minio.sys again in case it was in the seed (it shouldn't be, but just in case)
+    rm -rf /data/.minio.sys 2>/dev/null || true
+    log "MinIO data restored from $SEED_MINIO_DIR"
+fi
+
 log "Starting MinIO server..."
 minio server ${MINIO_VOLUMES} --console-address ":9001" 2>&1 | tee /tmp/minio.log | add_timestamps &
 minio_pid=$!
@@ -248,20 +312,24 @@ log "MinIO is ready!"
 # Initialize MinIO
 mc alias set minio ${MINIO_URL} ${MINIO_USERNAME} ${MINIO_PASSWORD} 2>&1 | add_timestamps
 
-# Always create the .docs.buildwithfern.com bucket
-mc mb minio/${ORG_NAME}.docs.buildwithfern.com 2>&1 | add_timestamps
+# Create buckets (use || true to handle case where bucket already exists from seeded data)
+mc mb minio/${ORG_NAME}.docs.buildwithfern.com 2>&1 | add_timestamps || true
 mc anonymous set download minio/${ORG_NAME}.docs.buildwithfern.com 2>&1 | add_timestamps
 export MINIO_BUCKET_NAME=${ORG_NAME}.docs.buildwithfern.com
 
-# Also create the custom domain bucket if specified and not null
-if [ -n "$CUSTOM_DOMAIN" ] && [ "$CUSTOM_DOMAIN" != "null" ]; then
+# Also create the custom domain bucket if specified (CUSTOM_DOMAIN is cleared if invalid)
+if [ -n "$CUSTOM_DOMAIN" ]; then
     # Remove any slashes from the custom domain bucket name
     # Only grab the host part of the custom domain (strip protocol and path)
     CUSTOM_DOMAIN_CLEANED=$(echo "$CUSTOM_DOMAIN" | sed -E 's#^https?://##' | cut -d'/' -f1 | tr -d ':')
-    # Use the cleaned custom domain for bucket creation and export
-    mc mb minio/${CUSTOM_DOMAIN_CLEANED} 2>&1 | add_timestamps
-    mc anonymous set download minio/${CUSTOM_DOMAIN_CLEANED} 2>&1 | add_timestamps
-    export MINIO_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
+    # Use the cleaned custom domain for bucket creation and export (use || true for seeded case)
+    mc mb minio/${CUSTOM_DOMAIN_CLEANED} 2>&1 | add_timestamps || true
+    if mc anonymous set download minio/${CUSTOM_DOMAIN_CLEANED} 2>&1 | add_timestamps; then
+        export MINIO_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
+        log "Using custom domain bucket: ${CUSTOM_DOMAIN_CLEANED}"
+    else
+        log "WARNING: Failed to set anonymous download on custom domain bucket, using default bucket"
+    fi
 fi
 
 # Always use path-style S3 access for self-hosted mode (simpler and more reliable)
@@ -290,18 +358,71 @@ log "FDR is up and running at localhost:8080/health"
 
 # --------------  Generate docs and insert into MinIO via FDR --------------
 
-log "running fern generate --docs"
+# Track docs generation status for readiness checks
+DOCS_GENERATION_STATUS_FILE="/tmp/docs-generation-status"
 
-log "Disk usage before fern generate:"
-df -h 2>&1 | add_timestamps || true
-log "Inode usage:"
-df -i 2>&1 | add_timestamps || true
-log "MinIO data directory size:"
-du -sh /data 2>&1 | add_timestamps || true
+# Skip docs generation if using seeded data (docs were pre-generated at build time)
+if [ "$USE_SEEDED_DATA" = "true" ]; then
+    log "=========================================="
+    log "Skipping fern generate --docs (using seeded data)"
+    log "=========================================="
+    log "Docs were pre-generated at build time and restored from seeded data."
+    log "No network access required for docs generation."
+    echo '{"timestamp": "'$(date -Iseconds)'", "status": "success", "source": "seeded"}' > "$DOCS_GENERATION_STATUS_FILE"
+else
+    log "running fern generate --docs"
 
-FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080  FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level debug --no-prompt 2>&1 | add_timestamps
+    log "Disk usage before fern generate:"
+    df -h 2>&1 | add_timestamps || true
+    log "Inode usage:"
+    df -i 2>&1 | add_timestamps || true
+    log "MinIO data directory size:"
+    du -sh /data 2>&1 | add_timestamps || true
 
-log " docs generated successfully"
+    # Run fern generate --docs with error handling to prevent container crash on egress failures
+    # This allows the container to stay running even if docs generation fails (e.g., due to network restrictions)
+    set +e
+    FERN_GENERATE_OUTPUT=$(FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level debug --no-prompt 2>&1)
+    FERN_GENERATE_EXIT_CODE=$?
+    echo "$FERN_GENERATE_OUTPUT" | add_timestamps
+    set -e
+
+    if [ $FERN_GENERATE_EXIT_CODE -eq 0 ]; then
+        log "Docs generated successfully"
+        echo '{"timestamp": "'$(date -Iseconds)'", "status": "success"}' > "$DOCS_GENERATION_STATUS_FILE"
+    else
+        log "ERROR: fern generate --docs failed with exit code $FERN_GENERATE_EXIT_CODE"
+        
+        # Check if the error is related to network/egress issues (Buf BSR, remote URLs, etc.)
+        if echo "$FERN_GENERATE_OUTPUT" | grep -qi "server hosted at that remote is unavailable\|buf.build\|api.buf.build\|network\|ECONNREFUSED\|ETIMEDOUT\|getaddrinfo"; then
+            log "============================================================"
+            log "NETWORK/EGRESS ERROR DETECTED"
+            log "============================================================"
+            log "The docs generation failed due to network connectivity issues."
+            log "This is common in air-gapped or egress-restricted environments."
+            log ""
+            log "Possible causes:"
+            log "  1. Your Fern project has protobuf dependencies that reference buf.build"
+            log "     (e.g., buf.build/googleapis/googleapis in your buf.yaml deps)"
+            log "  2. Your API specs reference remote URLs (https://...) instead of local files"
+            log "  3. Egress to external services is blocked by network policies"
+            log ""
+            log "Solutions:"
+            log "  1. Vendor protobuf dependencies locally in your repo"
+            log "  2. Use local file paths instead of URLs for API specs"
+            log "  3. Pre-generate docs at build time using /scripts/generate.sh"
+            log "  4. Add required Buf modules to BUF_BSR_MODULES build-arg when building the image"
+            log "============================================================"
+            echo '{"timestamp": "'$(date -Iseconds)'", "status": "failed", "reason": "network_egress_error", "exit_code": '$FERN_GENERATE_EXIT_CODE'}' > "$DOCS_GENERATION_STATUS_FILE"
+        else
+            log "Docs generation failed for a non-network reason. Check the logs above for details."
+            echo '{"timestamp": "'$(date -Iseconds)'", "status": "failed", "reason": "generation_error", "exit_code": '$FERN_GENERATE_EXIT_CODE'}' > "$DOCS_GENERATION_STATUS_FILE"
+        fi
+        
+        log "WARNING: Container will continue running, but docs may not be available."
+        log "WARNING: The readiness check will fail until docs are successfully generated."
+    fi
+fi
 
 # --------------  Finish generate docs --------------
 
@@ -400,25 +521,16 @@ fi
 # --------------  Start cache warmup --------------
 # Warm up the cache by fetching all pages
 # This ensures the first real user request is fast
-# Run in background so we can report progress while it runs
+# Run in background - container is ready immediately, warmup is a performance optimization
+
 if [ "${SKIP_WARMUP:-false}" != "true" ]; then
-    log "Starting cache warmup (this may take a few minutes)..."
+    log "Starting cache warmup in background (this may take a few minutes)..."
     bash /scripts/warmup.sh 2>&1 | add_timestamps &
     warmup_pid=$!
     log "Warmup PID: $warmup_pid"
-    
-    # Wait for warmup to complete
-    if wait $warmup_pid; then
-        log "Cache warmup completed successfully"
-    else
-        log "WARNING: Cache warmup failed, but continuing..."
-        # Create marker anyway so readiness check passes
-        # The cache will be populated on-demand
-        echo '{"timestamp": "'$(date -Iseconds)'", "status": "skipped", "reason": "warmup_failed"}' > /tmp/warmup-complete
-    fi
+    log "Warmup running in background - container is ready for traffic"
 else
     log "Skipping cache warmup (SKIP_WARMUP=true)"
-    echo '{"timestamp": "'$(date -Iseconds)'", "status": "skipped", "reason": "SKIP_WARMUP=true"}' > /tmp/warmup-complete
 fi
 # --------------  End cache warmup --------------
 

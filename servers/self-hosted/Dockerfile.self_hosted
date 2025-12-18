@@ -32,6 +32,10 @@ RUN git clone --depth 1 --branch v1.61.0 https://github.com/bufbuild/buf.git /tm
     go build -o $GOPATH/bin/buf ./cmd/buf && \
     rm -rf /tmp/buf
 
+# Build protoc-gen-openapi for converting protobuf specs to OpenAPI
+# Required by Fern CLI when processing protobuf-based API specs
+RUN go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@latest
+
 # ----------- End Go build stage -----------
 # ----------- Main image -----------
 FROM cgr.dev/chainguard/wolfi-base:latest
@@ -89,6 +93,12 @@ RUN log "Installing Prisma..." && \
     npm install -g prisma@5.13.0 2>&1 | add-timestamps
 
 COPY servers/fdr/prisma /prisma
+
+# Run Prisma migrations at build time and save schema dump
+# This allows customer builds and runtime to restore from dump instead of running migrations
+RUN log "Running base image database seeding..." && \
+    chmod +x /scripts/base-seed-db.sh && \
+    /scripts/base-seed-db.sh 2>&1 | add-timestamps
 
 # -----------  End Postgres setup  -----------
 
@@ -205,6 +215,8 @@ EXPOSE 16686
 # ----------- Start Buf CLI setup -----------
 # Copy Buf CLI from build stage (built with patched Go to fix CVE-2025-61729)
 COPY --from=go-builder /go/bin/buf /usr/local/bin/buf
+# Copy protoc-gen-openapi for converting protobuf specs to OpenAPI (required by Fern CLI)
+COPY --from=go-builder /go/bin/protoc-gen-openapi /usr/local/bin/protoc-gen-openapi
 
 # Pre-install buf's npm dependencies into a reusable location
 RUN log "Pre-installing Buf npm dependencies..." && \
@@ -298,6 +310,8 @@ RUN log "Configuring permissions for non-root execution..." && \
     mkdir -p /tmp/fdr /tmp/nextapp /tmp/postgresql /tmp/minio-data /tmp/.next && chmod -R 777 /tmp/fdr /tmp/nextapp /tmp/postgresql /tmp/minio-data /tmp/.next && \
     # Make scripts executable by all
     chmod +x /scripts/*.sh /scripts/*.js && \
+    # Create fern-generate alias for cleaner customer Dockerfiles
+    ln -sf /scripts/generate.sh /usr/local/bin/fern-generate && \
     # Ensure /etc/hosts can be modified (for local domain mapping)
     # Note: This won't work with readOnlyRootFilesystem, but won't break the container
     chmod 666 /etc/hosts 2>/dev/null || true

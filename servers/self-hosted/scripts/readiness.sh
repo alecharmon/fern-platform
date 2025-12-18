@@ -44,6 +44,30 @@ check_warmup_complete() {
     fi
 }
 
+check_docs_generation() {
+    local status_file="/tmp/docs-generation-status"
+    
+    if [ ! -f "$status_file" ]; then
+        echo "✗ Docs generation not yet complete (waiting for $status_file)"
+        return 1
+    fi
+    
+    local status=$(jq -r '.status' "$status_file" 2>/dev/null || echo "unknown")
+    
+    if [ "$status" = "success" ]; then
+        echo "✓ Docs generation completed successfully"
+        return 0
+    elif [ "$status" = "failed" ]; then
+        local reason=$(jq -r '.reason' "$status_file" 2>/dev/null || echo "unknown")
+        echo "✗ Docs generation failed (reason: $reason)"
+        echo "  Check container logs for details and troubleshooting steps"
+        return 1
+    else
+        echo "✗ Docs generation status unknown: $status"
+        return 1
+    fi
+}
+
 FAILED=0
 
 if ! check_postgres; then
@@ -69,19 +93,21 @@ if ! check_http_endpoint "http://localhost:8080/health" "FDR"; then
     FAILED=1
 fi
 
+# Check if docs generation completed successfully
+# This is critical - if docs generation failed (e.g., due to egress restrictions), the site won't work
+if ! check_docs_generation; then
+    FAILED=1
+fi
+
 # Check Next.js Docs with optional BASE_PATH
 NEXTJS_URL="http://localhost:3000${NEXT_PUBLIC_BASE_PATH:-}"
 if ! check_http_endpoint "$NEXTJS_URL" "Next.js Docs"; then
     FAILED=1
 fi
 
-# Check if cache warmup is complete (ensures first request after ready is fast)
-# Skip warmup check if SKIP_WARMUP is set
-if [ "${SKIP_WARMUP:-false}" != "true" ]; then
-    if ! check_warmup_complete; then
-        FAILED=1
-    fi
-fi
+# Note: Cache warmup runs in background and does not block readiness
+# The container is ready for traffic as soon as core services are up
+# Warmup is a performance optimization, not a requirement for readiness
 
 if [ $FAILED -eq 1 ]; then
     echo "Readiness check FAILED: One or more critical services are not ready"
