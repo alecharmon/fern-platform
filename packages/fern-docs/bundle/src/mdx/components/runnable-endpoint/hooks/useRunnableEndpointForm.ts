@@ -1,5 +1,6 @@
 import type { EndpointDefinition, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { filterExamplesForExplorer } from "@/components/api-reference/endpoints/filterExamplesForExplorer";
 import type { PlaygroundEndpointRequestFormState } from "@/components/playground/types";
 import { getInitialEndpointRequestFormStateWithExample } from "@/components/playground/utils";
 import { useResolvedPlaygroundState } from "@/state/playground";
@@ -49,14 +50,27 @@ export function useRunnableEndpointForm({
         [endpoint, types, globalHeaders]
     );
 
-    // Find the example if specified
+    // Filter examples to only show those with request-side data and user-defined examples when available
+    const { filteredExamples, indexMapping } = useMemo(
+        () => filterExamplesForExplorer(endpoint.examples),
+        [endpoint.examples]
+    );
+
+    // Find the example if specified, using the filtered set
     const initialExampleIndex = useMemo(() => {
-        if (!example || !endpoint.examples) {
+        if (filteredExamples.length === 0) {
             return 0;
         }
-        const foundIndex = endpoint.examples.findIndex((ex) => ex.name === example);
-        return foundIndex !== -1 ? foundIndex : 0;
-    }, [endpoint.examples, example]);
+        if (example) {
+            // Try to find the specified example in the filtered set
+            const filteredIndex = filteredExamples.findIndex((ex) => ex.name === example);
+            if (filteredIndex !== -1) {
+                return indexMapping[filteredIndex] ?? 0;
+            }
+        }
+        // Default to the first filtered example's original index
+        return indexMapping[0] ?? 0;
+    }, [filteredExamples, indexMapping, example]);
 
     const [selectedExampleIndex, setSelectedExampleIndex] = useState<number>(initialExampleIndex);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -147,17 +161,20 @@ export function useRunnableEndpointForm({
         setFormState(resetFormState);
     }, [endpoint.examples, selectedExampleIndex, minimalContext, resolvedPlaygroundState]);
 
-    // Example options
+    // Example options - use filtered examples with original indices as values
     const exampleOptions = useMemo(() => {
-        if (!endpoint.examples || endpoint.examples.length === 0) {
+        if (filteredExamples.length === 0) {
             return [];
         }
-        return endpoint.examples.map((ex, index) => ({
-            type: "value" as const,
-            label: ex.name || `Example ${index + 1}`,
-            value: String(index)
-        }));
-    }, [endpoint.examples]);
+        return filteredExamples.map((ex, filteredIndex) => {
+            const originalIndex = indexMapping[filteredIndex] ?? filteredIndex;
+            return {
+                type: "value" as const,
+                label: ex.name || `Example ${originalIndex + 1}`,
+                value: String(originalIndex)
+            };
+        });
+    }, [filteredExamples, indexMapping]);
 
     const hasMultipleExamples = exampleOptions.length > 1;
 
