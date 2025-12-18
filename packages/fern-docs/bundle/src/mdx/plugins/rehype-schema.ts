@@ -10,6 +10,7 @@ import {
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";
+import { gunzipSync } from "zlib";
 
 import {
     serializeAllTypeDefinitionDescriptions,
@@ -18,6 +19,30 @@ import {
 
 export interface RehypeSchemaOptions {
     loader: DocsLoader;
+}
+
+interface MergeSupportedFieldsData {
+    model: string;
+    integrations: Array<{
+        integrationName: string;
+        integrationImage: string;
+        deletionDetection: "NATIVE" | "ENHANCED";
+        supportedFields: string[];
+    }>;
+}
+
+/**
+ * Decodes base64 gzip JSON data for MergeSupportedFieldsByIntegrationWidget.
+ */
+function decodeWidgetData(data: string): MergeSupportedFieldsData | null {
+    try {
+        const binaryString = Buffer.from(data, "base64");
+        const decompressed = gunzipSync(binaryString);
+        return JSON.parse(decompressed.toString("utf-8")) as MergeSupportedFieldsData;
+    } catch (error) {
+        console.error("Failed to decode MergeSupportedFieldsByIntegrationWidget data:", error);
+        return null;
+    }
 }
 
 /**
@@ -92,6 +117,65 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
 
                 return SKIP;
             }
+
+            // Handle MergeSupportedFieldsByIntegrationWidget separately - extract model from data prop
+            if (node.name === "MergeSupportedFieldsByIntegrationWidget") {
+                const { props } = hastMdxJsxElementHastToProps(node);
+
+                if (typeof props.data !== "string") {
+                    return CONTINUE;
+                }
+
+                const decodedData = decodeWidgetData(props.data);
+                if (decodedData == null) {
+                    return CONTINUE;
+                }
+
+                const typeName = decodedData.model;
+
+                promises.push(
+                    (async () => {
+                        try {
+                            const typeDefinitions = await loader.getTypes();
+
+                            for (const typeEntry of Object.entries(typeDefinitions)) {
+                                const [_typeEntryId, typeEntryDef] = typeEntry;
+                                if (typeEntryDef.name === typeName) {
+                                    const referencedTypes = filterReferencedTypes(typeEntryDef.shape, typeDefinitions);
+
+                                    const [serializedTypeDef, serializedTypes] = await Promise.all([
+                                        serializeTypeDefinitionDescriptions(typeEntryDef),
+                                        serializeAllTypeDefinitionDescriptions(referencedTypes)
+                                    ]);
+                                    node.attributes.push(
+                                        unknownToMdxJsxAttribute("typeDefinition", serializedTypeDef),
+                                        unknownToMdxJsxAttribute("types", serializedTypes),
+                                        // Inject decoded data so component doesn't need to decode at runtime
+                                        unknownToMdxJsxAttribute("decodedData", decodedData)
+                                    );
+                                    return;
+                                }
+                            }
+
+                            console.error(
+                                `Could not find type with name "${typeName}" for MergeSupportedFieldsByIntegrationWidget. Available types: ${Object.entries(
+                                    typeDefinitions
+                                )
+                                    .map(([_, def]) => def.name)
+                                    .join(", ")}`
+                            );
+                        } catch (e) {
+                            console.error(
+                                `Could not find type "${typeName}" for MergeSupportedFieldsByIntegrationWidget`,
+                                e
+                            );
+                        }
+                    })()
+                );
+
+                return SKIP;
+            }
+
             return CONTINUE;
         });
         if (promises.length > 0) {
