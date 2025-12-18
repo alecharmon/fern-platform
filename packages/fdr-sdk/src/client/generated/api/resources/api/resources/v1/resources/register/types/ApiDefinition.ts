@@ -4,6 +4,7 @@ import type * as FernRegistry from "../../../../../../../index.js";
 
 export interface ApiDefinition {
     rootPackage: FernRegistry.api.v1.register.ApiDefinitionPackage;
+    apiName: string | undefined;
     types: Record<FernRegistry.TypeId, FernRegistry.api.v1.register.TypeDefinition>;
     subpackages: Record<FernRegistry.api.v1.SubpackageId, FernRegistry.api.v1.register.ApiDefinitionSubpackage>;
     auth: FernRegistry.api.v1.register.ApiAuth | undefined;

@@ -15,6 +15,7 @@ export class ApiDefinitionPruner {
 
         return {
             id: this.api.id,
+            apiName: this.api.apiName,
             rootPackage,
             subpackages,
             snippetsConfiguration: this.api.snippetsConfiguration,

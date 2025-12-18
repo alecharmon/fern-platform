@@ -178,7 +178,10 @@ export async function batchGetCommonMetadata(
     config: Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root"> | null;
     root: FernNavigation.RootNode | null;
     files: Record<string, FileData> | null;
-    colors: { light: FernColorTheme | undefined; dark: FernColorTheme | undefined } | null;
+    colors: {
+        light: FernColorTheme | undefined;
+        dark: FernColorTheme | undefined;
+    } | null;
     logoUrls: { light?: FileData; dark?: FileData } | null;
     fonts: FernFonts | null;
     mdxBundlerFiles: Record<string, string> | null;
@@ -209,7 +212,11 @@ export async function batchGetCommonMetadata(
                 light: FernColorTheme | undefined;
                 dark: FernColorTheme | undefined;
             }) ?? null,
-        logoUrls: (results.get(CACHE_KEY_LOGO_URLS) as { light?: FileData; dark?: FileData }) ?? null,
+        logoUrls:
+            (results.get(CACHE_KEY_LOGO_URLS) as {
+                light?: FileData;
+                dark?: FileData;
+            }) ?? null,
         fonts: (results.get(CACHE_KEY_FONTS) as FernFonts) ?? null,
         mdxBundlerFiles: (results.get(CACHE_KEY_MDX_BUNDLER_FILES) as Record<string, string>) ?? null,
         askAiEnabled: (results.get(CACHE_KEY_ASK_AI_ENABLED) as boolean) ?? null

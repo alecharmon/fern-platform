@@ -29,6 +29,7 @@ types:
   ApiDefinition:
     properties:
       id: rootCommons.ApiDefinitionId
+      apiName: optional<string>
       endpoints: map<rootCommons.EndpointId, endpoint.EndpointDefinition>
       websockets: map<rootCommons.WebSocketId, websocket.WebSocketChannel>
       webhooks: map<rootCommons.WebhookId, webhook.WebhookDefinition>

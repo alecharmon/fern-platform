@@ -181,6 +181,7 @@ export class Transformer {
 
         return {
             id: api.id,
+            apiName: api.apiName,
             endpoints: Object.fromEntries(endpoints),
             websockets: Object.fromEntries(websockets),
             webhooks: Object.fromEntries(webhooks),

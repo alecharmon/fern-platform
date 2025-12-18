@@ -15,6 +15,7 @@ export function convertDbAPIDefinitionsToRead(dbApiDefinitions: Record<string, A
 export function convertDbAPIDefinitionToRead(dbShape: APIV1Db.DbApiDefinition): APIV1Read.ApiDefinition {
     return {
         id: dbShape.id,
+        apiName: dbShape.apiName,
         rootPackage: {
             endpoints: dbShape.rootPackage.endpoints.map((endpoint) => transformEndpoint({ dbShape: endpoint })),
             subpackages: dbShape.rootPackage.subpackages,

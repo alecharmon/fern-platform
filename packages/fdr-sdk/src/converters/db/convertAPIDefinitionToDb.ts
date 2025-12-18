@@ -27,6 +27,7 @@ export function convertAPIDefinitionToDb(
     const context = new ApiDefinitionTransformationContext();
     return {
         id,
+        apiName: writeShape.apiName,
         rootPackage: {
             endpoints: writeShape.rootPackage.endpoints.map(
                 (endpoint) =>

@@ -2,6 +2,7 @@
 
 exports[`transformApiDefinitionToDb > {"name":"candid"} 1`] = `
 {
+  "apiName": undefined,
   "auth": {
     "tokenName": "token",
     "type": "bearerAuth",
@@ -79920,6 +79921,7 @@ Example: 1.1 is valid, 1.11 is not.
 
 exports[`transformApiDefinitionToDb > {"name":"cyclical-1"} 1`] = `
 {
+  "apiName": undefined,
   "auth": {
     "headerWireValue": "Authorization",
     "nameOverride": "secretKey",
@@ -80144,6 +80146,7 @@ exports[`transformApiDefinitionToDb > {"name":"cyclical-1"} 1`] = `
 
 exports[`transformApiDefinitionToDb > {"name":"realtime"} 1`] = `
 {
+  "apiName": undefined,
   "auth": {
     "tokenName": "token",
     "type": "bearerAuth",
@@ -80316,6 +80319,7 @@ exports[`transformApiDefinitionToDb > {"name":"realtime"} 1`] = `
 
 exports[`transformApiDefinitionToDb > {"name":"string"} 1`] = `
 {
+  "apiName": undefined,
   "auth": {
     "headerWireValue": "Authorization",
     "nameOverride": "MyAuthScheme",
@@ -81185,6 +81189,7 @@ This must be a 5 or 9 digit numerical code.  If 9 digits, you must include a hyp
 
 exports[`transformApiDefinitionToDb > {"name":"vellum"} 1`] = `
 {
+  "apiName": undefined,
   "auth": {
     "headerWireValue": "X_API_KEY",
     "nameOverride": "apiKey",

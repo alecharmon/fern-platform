@@ -205,6 +205,7 @@ const authScheme: Latest.AuthScheme = {
 
 const api: Latest.ApiDefinition = {
     id: Latest.ApiDefinitionId("api"),
+    apiName: undefined,
     endpoints: {
         [endpoint1.id]: endpoint1,
         [endpoint2.id]: endpoint2

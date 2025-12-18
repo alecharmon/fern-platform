@@ -15,6 +15,7 @@ types:
   DbApiDefinition:
     properties:
       id: rootCommons.ApiDefinitionId
+      apiName: optional<string>
       rootPackage: DbApiDefinitionPackage
       types: map<rootCommons.TypeId, readType.TypeDefinition>
       subpackages: map<commons.SubpackageId, DbApiDefinitionSubpackage>

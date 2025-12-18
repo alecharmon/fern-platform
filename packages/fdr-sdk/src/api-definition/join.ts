@@ -14,6 +14,7 @@ export function joiner(
     return (first, ...apis) => {
         const joined: Latest.ApiDefinition = {
             id: first.id,
+            apiName: first.apiName,
             endpoints: { ...first.endpoints },
             websockets: { ...first.websockets },
             webhooks: { ...first.webhooks },

@@ -96,6 +96,7 @@ export class ApiDefinitionV1ToLatest {
 
         return {
             id: this.v1.id,
+            apiName: this.v1.apiName,
             endpoints: this.endpoints,
             websockets: this.websockets,
             webhooks: this.webhooks,

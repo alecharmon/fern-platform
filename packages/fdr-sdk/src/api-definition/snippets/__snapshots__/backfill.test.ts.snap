@@ -264,6 +264,7 @@ main();
 
 exports[`backfillSnippets > should backfill dynamic snippets for all pinnacle endpoints and languages 1`] = `
 {
+  "apiName": undefined,
   "auths": {},
   "endpoints": {
     "buyPhoneNumber": {

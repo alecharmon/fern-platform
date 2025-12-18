@@ -26,6 +26,7 @@ describe("backfillSnippets", () => {
     it("should backfill snippets only for specified languages when httpSnippets is an array", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("search")]: {
                     id: EndpointId("search"),
@@ -125,6 +126,7 @@ describe("backfillSnippets", () => {
     it("should always include curl even when httpSnippets is false", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("search")]: {
                     id: EndpointId("search"),
@@ -223,6 +225,7 @@ describe("backfillSnippets", () => {
     it("should not include curl when not specified in the language list", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("search")]: {
                     id: EndpointId("search"),
@@ -323,6 +326,7 @@ describe("backfillSnippets", () => {
     it("should backfill snippets for a search endpoint example", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("search")]: {
                     id: EndpointId("search"),
@@ -458,6 +462,7 @@ describe("backfillSnippets", () => {
     it("should backfill dynamic snippets for typescript", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("createUser")]: {
                     id: EndpointId("createUser"),
@@ -581,6 +586,7 @@ describe("backfillSnippets", () => {
     it("should backfill dynamic snippets with multiple examples for typescript", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("createUser")]: {
                     id: EndpointId("createUser"),
@@ -761,6 +767,7 @@ describe("backfillSnippets", () => {
     it("should backfill dynamic snippets with multiple examples and error example for typescript", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("createUser")]: {
                     id: EndpointId("createUser"),
@@ -954,6 +961,7 @@ describe("backfillSnippets", () => {
     it("should backfill dynamic snippets for typescript and python", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("createUser")]: {
                     id: EndpointId("createUser"),
@@ -1080,6 +1088,7 @@ describe("backfillSnippets", () => {
     it("should backfill dynamic snippets for all languages", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("createUser")]: {
                     id: EndpointId("createUser"),
@@ -1216,6 +1225,7 @@ describe("backfillSnippets", () => {
     it("should skip head method for dynamic snippets", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("test-api"),
+            apiName: undefined,
             endpoints: {
                 [EndpointId("checkUserExists")]: {
                     id: EndpointId("checkUserExists"),
@@ -1337,6 +1347,7 @@ describe("backfillSnippets", () => {
     it("should backfill dynamic snippets for all pinnacle endpoints and languages", async () => {
         const apiDefinition: ApiDefinition = {
             id: ApiDefinitionId("pinnacle-api"),
+            apiName: undefined,
             endpoints: {
                 // Contacts endpoints
                 [EndpointId("createContact")]: {

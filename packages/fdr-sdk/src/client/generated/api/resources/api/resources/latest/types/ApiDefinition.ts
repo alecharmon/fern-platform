@@ -4,6 +4,7 @@ import type * as FernRegistry from "../../../../../index.js";
 
 export interface ApiDefinition {
     id: FernRegistry.ApiDefinitionId;
+    apiName: string | undefined;
     endpoints: Record<FernRegistry.EndpointId, FernRegistry.api.latest.EndpointDefinition>;
     websockets: Record<FernRegistry.WebSocketId, FernRegistry.api.latest.WebSocketChannel>;
     webhooks: Record<FernRegistry.WebhookId, FernRegistry.api.latest.WebhookDefinition>;
