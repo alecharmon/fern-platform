@@ -55,6 +55,29 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                 uploadUrls: dynamicIrUploads
             });
         },
+        checkSdkDynamicIrExists: async (req, res) => {
+            app.logger.debug(`Checking SDK dynamic IR existence for org ${req.body.orgId}`);
+
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: req.headers.authorization,
+                orgId: req.body.orgId
+            });
+
+            const existingDynamicIrs = await app.services.s3.checkSdkDynamicIrExists({
+                orgId: req.body.orgId,
+                snippetConfiguration: req.body.snippetConfiguration
+            });
+
+            const result: Record<string, { downloadUrl: string }> = {};
+            for (const [language, downloadUrl] of Object.entries(existingDynamicIrs)) {
+                result[language] = { downloadUrl };
+            }
+
+            app.logger.debug(`Found ${Object.keys(result).length} existing SDK dynamic IRs for org ${req.body.orgId}`);
+            return res.send({
+                existingDynamicIrs: result
+            });
+        },
         registerApiDefinition: async (req, res) => {
             const startTime = Date.now();
             let lastOperationTime = startTime;

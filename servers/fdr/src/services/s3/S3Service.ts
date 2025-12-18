@@ -95,6 +95,14 @@ export interface S3Service {
         snippetConfiguration: Record<string, string>;
     }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>>;
 
+    checkSdkDynamicIrExists({
+        orgId,
+        snippetConfiguration
+    }: {
+        orgId: FernRegistry.OrgId;
+        snippetConfiguration: Record<string, { packageName: string; version: string }>;
+    }): Promise<Record<string, string>>;
+
     getPresignedApiDefinitionSourceDownloadUrl({ key }: { key: string }): Promise<string>;
 }
 
@@ -494,6 +502,57 @@ export class S3ServiceImpl implements S3Service {
                 presignedUrl: url,
                 key
             };
+        }
+
+        return result;
+    }
+
+    async checkSdkDynamicIrExists({
+        orgId,
+        snippetConfiguration
+    }: {
+        orgId: FernRegistry.OrgId;
+        snippetConfiguration: Record<string, { packageName: string; version: string }>;
+    }): Promise<Record<string, string>> {
+        const result: Record<string, string> = {};
+
+        for (const [language, snippetInfo] of Object.entries(snippetConfiguration)) {
+            const key = this.constructS3DynamicIrKeyForSdk({
+                orgId,
+                snippetName: snippetInfo.packageName,
+                version: snippetInfo.version,
+                language
+            });
+
+            try {
+                await this.privateApiDefinitionSourceS3.send(
+                    new HeadObjectCommand({
+                        Bucket: this.config.privateApiDefinitionSourceS3.bucketName,
+                        Key: key
+                    })
+                );
+
+                // File exists, generate a presigned download URL
+                const command = new GetObjectCommand({
+                    Bucket: this.config.privateApiDefinitionSourceS3.bucketName,
+                    Key: key
+                });
+                const downloadUrl = await getSignedUrl(this.privateApiDefinitionSourceS3, command, {
+                    expiresIn: 3600
+                });
+                result[language] = downloadUrl;
+            } catch (error) {
+                // File doesn't exist or other error - skip this language
+                if (
+                    (error as { name?: string }).name === "NotFound" ||
+                    (error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === 404
+                ) {
+                    // File doesn't exist, which is expected - just skip
+                    continue;
+                }
+                // Log other errors but don't fail
+                this.app.logger.warn(`Error checking SDK dynamic IR existence for ${language}: ${key}`, error);
+            }
         }
 
         return result;

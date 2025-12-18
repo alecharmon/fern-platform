@@ -49,8 +49,25 @@ service:
               docs: The version of the SDK being generated
             snippetConfiguration:
               type: map<string, string>
-              docs: A mapping of languages to snippet names (e.g., {"typescript": "my-api-ts", "python": "my-api-py"})
+              docs: "A mapping of languages to snippet names (e.g., {\"typescript\": \"my-api-ts\", \"python\": \"my-api-py\"})"
       response: GetSdkDynamicIrUploadUrlsResponse
+      errors:
+        - rootCommons.UnauthorizedError
+        - rootCommons.UserNotInOrgError
+
+    checkSdkDynamicIrExists:
+      docs: Check if SDK dynamic IR exists in S3 for the given languages/snippets. Returns download URLs for existing dynamic IRs.
+      path: /check-sdk-dynamic-ir
+      method: POST
+      request:
+        name: CheckSdkDynamicIrExistsRequest
+        body:
+          properties:
+            orgId: rootCommons.OrgId
+            snippetConfiguration:
+              type: map<string, SnippetInfo>
+              docs: A mapping of languages to snippet info (package name and version)
+      response: CheckSdkDynamicIrExistsResponse
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
@@ -73,6 +90,28 @@ types:
       uploadUrls:
         type: map<string, DynamicIRUpload>
         docs: A mapping of languages to their upload URLs.
+
+  SnippetInfo:
+    docs: Information about a snippet package for a specific language
+    properties:
+      packageName:
+        type: string
+        docs: The package name (e.g., "my-api-ts" for TypeScript, "my-api-py" for Python)
+      version:
+        type: string
+        docs: The version of the SDK
+
+  CheckSdkDynamicIrExistsResponse:
+    properties:
+      existingDynamicIrs:
+        type: map<string, SdkDynamicIrDownload>
+        docs: A mapping of languages to their download URLs for existing SDK dynamic IRs
+
+  SdkDynamicIrDownload:
+    properties:
+      downloadUrl:
+        type: string
+        docs: The presigned URL to download the SDK dynamic IR from S3
 
   DynamicIRUpload:
     properties:

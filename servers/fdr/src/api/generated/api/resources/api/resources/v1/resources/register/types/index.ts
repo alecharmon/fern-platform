@@ -1,5 +1,6 @@
 export * from "./ApiAuth";
 export * from "./ApiDefinition";
+export * from "./CheckSdkDynamicIrExistsResponse";
 export * from "./ApiDefinitionPackage";
 export * from "./ApiDefinitionSubpackage";
 export * from "./ApiNavigationConfigItem";
@@ -23,6 +24,8 @@ export * from "./OAuthClientCredentialsReferencedEndpoint";
 export * from "./PythonPackage";
 export * from "./RegisterApiDefinitionResponse";
 export * from "./RubyGem";
+export * from "./SdkDynamicIrDownload";
+export * from "./SnippetInfo";
 export * from "./SnippetsConfig";
 export * from "./Source";
 export * from "./SourceId";
