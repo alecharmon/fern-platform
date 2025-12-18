@@ -60,7 +60,7 @@
     "iron-session": "^8.0.4",
     "jose": "catalog:",
     "next": "catalog:",
-    "posthog-node": "^5.10.0",
+    "posthog-node": "^5.14.0",
     "react": "catalog:",
     "server-only": "^0.0.1",
     "ts-essentials": "catalog:",

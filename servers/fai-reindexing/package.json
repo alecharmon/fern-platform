@@ -28,7 +28,7 @@
     "es-toolkit": "^1.39.7",
     "gpt-tokenizer": "2.9.0",
     "gray-matter": "^4.0.3",
-    "posthog-node": "^5.10.0",
+    "posthog-node": "^5.14.0",
     "winston": "^3.10.0",
     "zod": "^3.25.49"
   },
