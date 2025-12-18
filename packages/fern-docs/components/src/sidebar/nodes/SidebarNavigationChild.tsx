@@ -30,16 +30,16 @@ export function SidebarNavigationChild({
     lang
 }: SidebarNavigationChildProps): ReactNode {
     const forceClientRender = renderOptions.forceClientRender ?? false;
+    const icon = processIcon({
+        node,
+        forceClientRender,
+        files: renderOptions?.files,
+        preResolvedIcons: renderOptions?.preResolvedIcons
+    });
     switch (node.type) {
         case "apiReference":
             return (
-                <SidebarApiPackageNode
-                    node={node}
-                    depth={depth}
-                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
-                    renderOptions={renderOptions}
-                    lang={lang}
-                >
+                <SidebarApiPackageNode node={node} depth={depth} icon={icon} renderOptions={renderOptions} lang={lang}>
                     {node.children.map((node: FernNavigation.ApiPackageChild) => (
                         <SidebarApiPackageChild
                             key={node.id}
@@ -56,7 +56,7 @@ export function SidebarNavigationChild({
             return (
                 <SidebarSectionNode
                     node={node}
-                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
+                    icon={icon}
                     depth={depth}
                     className={cn({
                         "!text-body font-semibold": root
@@ -75,31 +75,11 @@ export function SidebarNavigationChild({
                 </SidebarSectionNode>
             );
         case "page":
-            return (
-                <SidebarPageNode
-                    node={node}
-                    depth={depth}
-                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
-                    renderOptions={renderOptions}
-                />
-            );
+            return <SidebarPageNode node={node} depth={depth} icon={icon} renderOptions={renderOptions} />;
         case "link":
-            return (
-                <SidebarLinkNode
-                    node={node}
-                    depth={depth}
-                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
-                />
-            );
+            return <SidebarLinkNode node={node} depth={depth} icon={icon} />;
         case "changelog":
-            return (
-                <SidebarChangelogNode
-                    node={node}
-                    depth={depth}
-                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
-                    lang={lang}
-                />
-            );
+            return <SidebarChangelogNode node={node} depth={depth} icon={icon} lang={lang} />;
         case "varianted":
             return <SidebarVariantedNode node={node} depth={depth} renderOptions={renderOptions} lang={lang} />;
         default:

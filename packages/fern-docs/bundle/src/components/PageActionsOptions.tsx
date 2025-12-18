@@ -2,6 +2,7 @@ import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FaIcon } from "@fern-docs/components/fa-icon";
+import { processIconString } from "@fern-docs/components/util/processIconString";
 import { t } from "@fern-docs/i18n";
 import { Copy, ExternalLink } from "lucide-react";
 import type { ParamValue } from "next/dist/server/request/params";
@@ -9,9 +10,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import urlJoin from "url-join";
 import { isSelfHosted } from "@/server/isSelfHosted";
-
 import { ClaudeIcon, CursorIcon, MarkdownIcon, OpenAIIcon, SparklesIconHollow, TextIcon } from "./PageActionsAssets";
-import { processIconString } from "./util/processIconString";
 
 export const Separator = (): FernDropdown.SeparatorOption => {
     return {

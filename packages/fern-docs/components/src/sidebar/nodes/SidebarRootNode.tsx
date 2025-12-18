@@ -3,8 +3,52 @@ import { createFileResolver } from "@fern-api/docs-server/file-resolver";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import Image from "next/image";
 
+import { processIconServer } from "../../processIconServer";
 import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarRootNodeImpl } from "./SidebarRootNodeImpl";
+
+/**
+ * Recursively collects all nodes that have icons from the sidebar tree
+ */
+function collectAllNodesWithIcons(root: FernNavigation.SidebarRootNode): FernNavigation.NavigationNode[] {
+    const nodesWithIcons: FernNavigation.NavigationNode[] = [];
+
+    function processChild(
+        child: FernNavigation.SidebarRootChild | FernNavigation.NavigationChild | FernNavigation.ApiPackageChild
+    ): void {
+        // Check if this node has an icon
+        if ("icon" in child && child.icon) {
+            nodesWithIcons.push(child as FernNavigation.NavigationNode);
+        }
+
+        // Recursively process children
+        if (child.type === "sidebarGroup") {
+            child.children.forEach(processChild);
+        } else if (child.type === "section") {
+            child.children.forEach(processChild);
+        } else if (child.type === "apiReference" || child.type === "apiPackage") {
+            child.children.forEach(processChild);
+            if (child.type === "apiReference" && child.changelog) {
+                processChild(child.changelog);
+            }
+        } else if (child.type === "varianted") {
+            child.children.forEach((variant) => {
+                if (variant.icon) {
+                    nodesWithIcons.push(variant);
+                }
+                variant.children.forEach((variantChild) => {
+                    processChild(variantChild as FernNavigation.NavigationChild);
+                });
+            });
+        }
+    }
+
+    root.children.forEach((child) => {
+        processChild(child);
+    });
+
+    return nodesWithIcons;
+}
 
 /**
  * Recursively collects all VariantNodes from the sidebar tree
@@ -64,8 +108,10 @@ export async function SidebarRootNode({
     const authState = await loader.getAuthState();
     const edgeFlags = await loader.getEdgeFlags();
 
-    // Resolve variant images on the server and get files for icons
+    // Resolve variant images and icons on the server
     let variantImages: Record<FernNavigation.VariantId, React.ReactNode> = {};
+    let preResolvedIcons: Record<FernNavigation.NodeId, React.ReactNode> = {};
+
     if (root && renderOptions?.files) {
         const resolveFileSrc = createFileResolver(renderOptions?.files);
 
@@ -92,6 +138,18 @@ export async function SidebarRootNode({
                 })
                 .filter(([, imageNode]) => imageNode != null)
         );
+
+        // Collect all nodes with icons and pre-resolve them server-side
+        const nodesWithIcons = collectAllNodesWithIcons(root);
+
+        // Resolve all icons in parallel
+        const iconPromises = nodesWithIcons.map(async (node) => {
+            const icon = await processIconServer({ node, files: renderOptions.files });
+            return [node.id, icon] as const;
+        });
+
+        const resolvedIcons = await Promise.all(iconPromises);
+        preResolvedIcons = Object.fromEntries(resolvedIcons.filter(([, icon]) => icon != null));
     }
 
     return (
@@ -103,6 +161,7 @@ export async function SidebarRootNode({
             renderOptions={{
                 ...renderOptions,
                 variantImages,
+                preResolvedIcons,
                 files: renderOptions?.files
             }}
             lang={lang}

@@ -1,32 +1,34 @@
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
-import { FernImage } from "@fern-docs/components/FernImage";
-import { FernSvgIcon } from "@fern-docs/components/FernSvgIcon";
 import type { ReactNode } from "react";
+import { FernImage } from "../FernImage";
+import { FernSvgIconServer } from "../FernSvgIconServer";
 
-export interface ProcessIconStringOptions {
+export interface ProcessIconStringServerOptions {
     icon: string;
     files?: Record<string, FileData>;
     className?: string;
-    renderFaIcon: (icon: string) => ReactNode;
+    renderFaIcon: (icon: string) => ReactNode | Promise<ReactNode>;
     wrap?: (content: ReactNode) => ReactNode;
 }
 
-export const processIconString = ({
+export async function processIconStringServer({
     icon,
     files,
     className = "size-5",
     renderFaIcon,
     wrap = (content) => content
-}: ProcessIconStringOptions): ReactNode | undefined => {
+}: ProcessIconStringServerOptions): Promise<ReactNode | undefined> {
     if (icon.startsWith("file:")) {
         const fileId = icon.slice(5);
         const fileData = files?.[fileId];
 
         if (fileData) {
             if (fileData.src.endsWith(".svg")) {
-                return wrap(<FernSvgIcon src={fileData.src} alt={fileData.alt ?? ""} className={className} />);
+                // Use server-side SVG rendering
+                return wrap(await FernSvgIconServer({ src: fileData.src, alt: fileData.alt ?? "", className }));
             }
 
+            // Use FernImage for non-SVG files (can be server-rendered)
             return wrap(
                 <FernImage
                     src={fileData.src}
@@ -43,8 +45,11 @@ export const processIconString = ({
     }
 
     if (icon.startsWith("<") && icon.endsWith(">")) {
+        // Inline HTML/SVG can be server-rendered
         return wrap(<span className={className} dangerouslySetInnerHTML={{ __html: icon }} />);
     }
 
-    return renderFaIcon(icon);
-};
+    // Font Awesome icons - await if async
+    const faIcon = renderFaIcon(icon);
+    return faIcon instanceof Promise ? await faIcon : faIcon;
+}

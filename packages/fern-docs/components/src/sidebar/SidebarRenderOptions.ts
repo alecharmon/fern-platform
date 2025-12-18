@@ -14,6 +14,8 @@ export interface SidebarRenderOptions {
     currentVariantId?: FernNavigation.VariantId;
     /** Pre-resolved variant images (FileIds resolved to ReactNodes on the server) */
     variantImages?: Record<FernNavigation.VariantId, ReactNode>;
+    /** Pre-resolved icons (NodeIds mapped to ReactNodes, resolved server-side for better performance) */
+    preResolvedIcons?: Record<FernNavigation.NodeId, ReactNode>;
     /** Files data for resolving file: prefixed icons */
     files?: Record<string, FileData>;
 }

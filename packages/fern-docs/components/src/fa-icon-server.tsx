@@ -1,6 +1,6 @@
 /// <reference types="next" />
 
-import React from "react";
+import type React from "react";
 
 import { FaIcon } from "./fa-icon";
 import { getIconUrl, parseSvg } from "./util/fa";
@@ -64,9 +64,5 @@ export function FaIconServer(
     }
 
     // Otherwise, use the async server component with Suspense
-    return (
-        <React.Suspense fallback={<FaIcon {...svgProps} />}>
-            <FaIconServerInternal {...svgProps} />
-        </React.Suspense>
-    );
+    return <FaIconServerInternal {...svgProps} />;
 }

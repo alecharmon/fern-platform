@@ -89,6 +89,7 @@ export function SidebarRootNodeImpl({
                                     wrapSectionNode,
                                     wrapPageNode,
                                     currentVariantId,
+                                    preResolvedIcons: renderOptions?.preResolvedIcons,
                                     files: renderOptions?.files
                                 }}
                                 lang={lang}

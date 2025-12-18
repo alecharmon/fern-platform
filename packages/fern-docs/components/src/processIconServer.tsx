@@ -5,45 +5,36 @@ import type { ReactNode } from "react";
 
 import { NoZoom } from "./contexts/NoZoom";
 import { FaIconServer } from "./fa-icon-server";
-import { processIconString } from "./util/processIconString";
+import { processIconStringServer } from "./util/processIconStringServer";
 
-export interface ProcessIconOptions {
+export interface ProcessIconServerOptions {
     node: NavigationNode;
     fallback?: string;
-    forceClientRender?: boolean;
     files?: Record<string, FileData>;
-    preResolvedIcons?: Record<string, ReactNode>;
 }
 
-export const processIcon = ({
+export async function processIconServer({
     node,
     fallback,
-    forceClientRender,
-    files,
-    preResolvedIcons
-}: ProcessIconOptions): ReactNode | undefined => {
+    files
+}: ProcessIconServerOptions): Promise<ReactNode | undefined> {
     if (!hasMetadata(node) && node.type !== "link" && node.type !== "productLink") {
         return undefined;
     }
 
-    // If icon was pre-resolved server-side, use it directly
-    if (preResolvedIcons && node.id in preResolvedIcons) {
-        return preResolvedIcons[node.id];
-    }
-
     if (node.icon) {
-        return processIconString({
+        return await processIconStringServer({
             icon: node.icon,
             files,
             className: "fern-file-icon size-5",
-            renderFaIcon: (icon) => <FaIconServer icon={icon} forceClientRender={forceClientRender} />,
+            renderFaIcon: (icon) => <FaIconServer icon={icon} forceClientRender={false} />,
             wrap: (content) => <NoZoom>{content}</NoZoom>
         });
     }
 
     if (fallback) {
-        return <FaIconServer icon={fallback} forceClientRender={forceClientRender} />;
+        return <FaIconServer icon={fallback} forceClientRender={false} />;
     }
 
     return undefined;
-};
+}

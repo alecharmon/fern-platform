@@ -28,12 +28,14 @@ export function SidebarApiPackageChild({
 }: SidebarApiPackageChild): ReactNode {
     const forceClientRender = renderOptions.forceClientRender ?? false;
     const files = renderOptions.files;
+    const preResolvedIcons = renderOptions.preResolvedIcons;
+    const icon = processIcon({ node, forceClientRender, files, preResolvedIcons });
 
     switch (node.type) {
         case "page":
             return (
                 <SidebarPageNode
-                    icon={processIcon({ node, forceClientRender, files })}
+                    icon={icon}
                     node={node}
                     depth={depth}
                     shallow={shallow}
@@ -41,7 +43,7 @@ export function SidebarApiPackageChild({
                 />
             );
         case "link":
-            return <SidebarLinkNode icon={processIcon({ node, forceClientRender, files })} node={node} depth={depth} />;
+            return <SidebarLinkNode icon={icon} node={node} depth={depth} />;
         case "endpoint":
         case "webSocket":
         case "webhook":
@@ -58,13 +60,7 @@ export function SidebarApiPackageChild({
                 })();
             }
             return (
-                <SidebarApiPackageNode
-                    node={node}
-                    depth={depth}
-                    icon={processIcon({ node, forceClientRender, files })}
-                    renderOptions={renderOptions}
-                    lang={lang}
-                >
+                <SidebarApiPackageNode node={node} depth={depth} icon={icon} renderOptions={renderOptions} lang={lang}>
                     {node.children.map((node: FernNavigation.ApiPackageChild) => (
                         <SidebarApiPackageChild
                             key={node.id}
@@ -78,14 +74,7 @@ export function SidebarApiPackageChild({
                 </SidebarApiPackageNode>
             );
         case "changelog":
-            return (
-                <SidebarChangelogNode
-                    node={node}
-                    depth={depth}
-                    icon={processIcon({ node, forceClientRender, files })}
-                    lang={lang}
-                />
-            );
+            return <SidebarChangelogNode node={node} depth={depth} icon={icon} lang={lang} />;
         default:
             throw new UnreachableCaseError(node);
     }

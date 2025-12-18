@@ -18,29 +18,21 @@ export function SidebarRootChild({
     lang: string;
 }) {
     const forceClientRender = renderOptions.forceClientRender ?? false;
+    const icon = processIcon({
+        node,
+        forceClientRender,
+        files: renderOptions?.files,
+        preResolvedIcons: renderOptions?.preResolvedIcons
+    });
 
     switch (node.type) {
         case "sidebarGroup":
             return <SidebarGroupNode node={node} renderOptions={renderOptions} lang={lang} />;
         case "apiReference":
         case "apiPackage":
-            return (
-                <SidebarRootApiPackageNode
-                    node={node}
-                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
-                    renderOptions={renderOptions}
-                    lang={lang}
-                />
-            );
+            return <SidebarRootApiPackageNode node={node} icon={icon} renderOptions={renderOptions} lang={lang} />;
         case "section":
-            return (
-                <SidebarRootSectionNode
-                    node={node}
-                    icon={processIcon({ node, forceClientRender, files: renderOptions?.files })}
-                    renderOptions={renderOptions}
-                    lang={lang}
-                />
-            );
+            return <SidebarRootSectionNode node={node} icon={icon} renderOptions={renderOptions} lang={lang} />;
         case "varianted":
             return <SidebarVariantedNode node={node} depth={0} renderOptions={renderOptions} lang={lang} />;
         default:

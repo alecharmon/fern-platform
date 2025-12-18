@@ -48,7 +48,12 @@ export function SidebarVariantedNode({ node, depth, renderOptions, lang }: Sideb
 
     // Prepare the icon/image for the trigger
     const triggerIcon = currentVariant.icon
-        ? processIcon({ node: currentVariant, forceClientRender, files: renderOptions.files })
+        ? processIcon({
+              node: currentVariant,
+              forceClientRender,
+              files: renderOptions.files,
+              preResolvedIcons: renderOptions.preResolvedIcons
+          })
         : undefined;
 
     // Get pre-resolved image from renderOptions (resolved on server)
@@ -90,7 +95,12 @@ export function SidebarVariantedNode({ node, depth, renderOptions, lang }: Sideb
                                     const href = slugToHref(variant.pointsTo ?? variant.slug);
                                     // Process icon properly by passing the full variant object
                                     const icon = variant.icon
-                                        ? processIcon({ node: variant, forceClientRender, files: renderOptions.files })
+                                        ? processIcon({
+                                              node: variant,
+                                              forceClientRender,
+                                              files: renderOptions.files,
+                                              preResolvedIcons: renderOptions.preResolvedIcons
+                                          })
                                         : undefined;
                                     // Get pre-resolved image from renderOptions (resolved on server)
                                     const image = renderOptions.variantImages?.[variant.variantId];
