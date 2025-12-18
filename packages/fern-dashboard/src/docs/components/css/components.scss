@@ -54,10 +54,22 @@
 
   .fern-api-property-key {
     @apply text-body font-mono text-sm font-semibold;
+
+    flex-shrink: 0;
   }
 
   .fern-api-property-meta {
-    @apply text-(color:--grayscale-a11) inline-flex items-baseline gap-2 text-xs;
+    @apply text-(color:--grayscale-a11) inline-flex items-center gap-2 text-xs;
+
+    flex: 1 1 0%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .fern-api-property-constraint {
+    display: inline-block;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .custom-backdrop [data-rmiz-modal-overlay="visible"] {

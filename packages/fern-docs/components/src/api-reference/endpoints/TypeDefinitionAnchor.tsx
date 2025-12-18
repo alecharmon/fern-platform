@@ -40,7 +40,7 @@ export function TypeDefinitionAnchor({ children, sideOffset }: { children: React
         return (
             <FernAnchor href={href} sideOffset={sideOffset} asChild>
                 <div
-                    className="inline-flex items-center gap-2"
+                    className="inline-flex max-w-full min-w-0 items-center gap-2"
                     onPointerEnter={handlePointerEnter}
                     onPointerLeave={handlePointerLeave}
                 >
@@ -52,7 +52,7 @@ export function TypeDefinitionAnchor({ children, sideOffset }: { children: React
 
     return (
         <div
-            className="inline-flex items-center gap-2"
+            className="inline-flex max-w-full min-w-0 items-center gap-2"
             onPointerEnter={handlePointerEnter}
             onPointerLeave={handlePointerLeave}
         >
