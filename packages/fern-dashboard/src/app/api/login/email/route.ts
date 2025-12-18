@@ -1,8 +1,8 @@
+import { postToSlack } from "@fern-api/docs-server/slack";
 import { type EmailLoginSupportedPlatform, getEmailLoginConfig } from "@fern-docs/edge-config";
-import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import z from "zod";
-import { Auth0ManagementError, type Auth0User, getUserByEmail } from "@/app/services/auth0/management";
+import { type Auth0User, getAllUsersByEmail } from "@/app/services/auth0/management";
 import { Auth0OrgID, Auth0UserID } from "@/app/services/auth0/types";
 import getMyOrganizations from "../../get-my-organizations/handler";
 
@@ -51,6 +51,67 @@ function isSupportedIdentity(
     );
 }
 
+/**
+ * Returns a sort priority for a provider - lower numbers come first.
+ * Google and GitHub connections should be sorted last (higher priority number).
+ */
+function getProviderSortPriority(provider: string | undefined): number {
+    if (provider === "google-oauth2" || provider === "github") {
+        return 1; // Sort last
+    }
+    return 0; // Sort first (SSO/enterprise connections)
+}
+
+/**
+ * Sorts users by their identity connections, with Google and GitHub connections last.
+ * Users with enterprise SSO connections will be prioritized.
+ */
+function sortUsersByConnectionPriority(users: Auth0User[]): Auth0User[] {
+    return [...users].sort((a, b) => {
+        const aMinPriority = Math.min(
+            ...(a.identities ?? []).map((id) => getProviderSortPriority(id.provider)),
+            Infinity
+        );
+        const bMinPriority = Math.min(
+            ...(b.identities ?? []).map((id) => getProviderSortPriority(id.provider)),
+            Infinity
+        );
+        return aMinPriority - bMinPriority;
+    });
+}
+
+/**
+ * Sends a Slack alert when multiple Auth0 accounts are found for a single email.
+ * This typically indicates duplicate accounts that should be consolidated.
+ */
+function alertDuplicateAccounts(email: string, users: Auth0User[]): void {
+    const userDetails = users
+        .map((u) => {
+            const providers = (u.identities ?? []).map((id) => id.provider).join(", ");
+            return `• \`${u.user_id}\` (${providers || "no identities"})`;
+        })
+        .join("\n");
+
+    const ssoUser = users.find((u) =>
+        (u.identities ?? []).some((id) => id.provider !== "google-oauth2" && id.provider !== "github")
+    );
+    const nonSsoUsers = users.filter((u) =>
+        (u.identities ?? []).every((id) => id.provider === "google-oauth2" || id.provider === "github")
+    );
+
+    let recommendation = "";
+    if (ssoUser && nonSsoUsers.length > 0) {
+        const nonSsoIds = nonSsoUsers.map((u) => `\`${u.user_id}\``).join(", ");
+        recommendation = `\n\n:warning: *Recommendation:* Keep SSO account \`${ssoUser.user_id}\` and delete non-SSO account(s): ${nonSsoIds}`;
+    }
+
+    postToSlack(
+        "#dashboard-notifs",
+        `:warning: *Duplicate accounts detected for email:* \`${email}\`\n\n*Found ${users.length} accounts:*\n${userDetails}${recommendation}`,
+        "duplicate-account"
+    );
+}
+
 function buildRedirectUrl(
     connection: string,
     email: string,
@@ -78,17 +139,15 @@ export async function POST(request: Request) {
         const { supportedPlatforms, connectionToOrg, byEmailDomain } = await getEmailLoginConfig();
         const cleanedEmail = email.trim().toLowerCase();
 
-        let user: Auth0User | undefined;
-        try {
-            user = await getUserByEmail(cleanedEmail);
-        } catch (error) {
-            if (error instanceof Auth0ManagementError && error.errorCode === "MULTIPLE_USERS_FOUND") {
-                Sentry.captureException(error);
-                return NextResponse.json({ error: "multiple_users_found" }, { status: 409 });
-            } else {
-                throw error;
-            }
+        const users = await getAllUsersByEmail(cleanedEmail);
+
+        // Alert if multiple accounts exist for the same email
+        if (users.length > 1) {
+            alertDuplicateAccounts(cleanedEmail, users);
         }
+
+        const sortedUsers = sortUsersByConnectionPriority(users);
+        const user = sortedUsers[0];
 
         if (!user) {
             // No user found - check for default email domain mapping

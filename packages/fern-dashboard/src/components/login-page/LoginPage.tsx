@@ -4,6 +4,7 @@ import { GithubLoginButton, GoogleLoginButton } from "../auth/LoginButton";
 import { ThemedFernLogo } from "../theme/ThemedFernLogo";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { Button } from "../ui/button";
+import { EmailLoginForm } from "./EmailLoginForm";
 import { LoginImage } from "./LoginImage";
 import { AdobeLogo } from "./logos/AdobeLogo";
 import { Auth0Logo } from "./logos/Auth0Logo";
@@ -34,6 +35,12 @@ export const LoginPage = () => {
                         <GoogleLoginButton />
                         <GithubLoginButton />
                     </div>
+                    <div className="flex items-center gap-3 my-4">
+                        <div className="h-px flex-1 bg-border" />
+                        <span className="text-sm text-gray-900">or</span>
+                        <div className="h-px flex-1 bg-border" />
+                    </div>
+                    <EmailLoginForm />
                 </div>
                 <div className="absolute bottom-16 left-0 right-0 mx-[15%] mx-auto px-4 text-center text-xs text-gray-900 md:max-w-[400px]">
                     By continuing, you agree to Fern&apos;s{" "}

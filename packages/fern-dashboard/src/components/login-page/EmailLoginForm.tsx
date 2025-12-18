@@ -1,17 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { LAST_USED_LOGIN_KEY } from "../auth/LoginButton";
 import { getPylon } from "../pylon/getPylon";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Kbd } from "../ui/kbd";
 
 const GENERIC_ERROR = "We couldn't start SSO for that email. Please try again, or";
-const DUPLICATE_EMAIL_ERROR = "Multiple users found with that email. Please try again, or";
 
 export function EmailLoginForm({ redirectOnLogin }: { redirectOnLogin?: string }) {
     const [email, setEmail] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLastUsed, setIsLastUsed] = useState(false);
+    const [hasMounted, setHasMounted] = useState(false);
+
+    useEffect(() => {
+        setHasMounted(true);
+        try {
+            const lastUsed = localStorage.getItem(LAST_USED_LOGIN_KEY);
+            setIsLastUsed(lastUsed === "enterprise-sso");
+        } catch {
+            setIsLastUsed(false);
+        }
+    }, []);
 
     const openSupportChat = () => {
         getPylon()?.("show");
@@ -36,17 +49,14 @@ export function EmailLoginForm({ redirectOnLogin }: { redirectOnLogin?: string }
             });
 
             if (!response.ok) {
-                console.log("Email SSO request failed", { status: response });
-                if (response.status === 409) {
-                    setError(DUPLICATE_EMAIL_ERROR);
-                    setIsSubmitting(false);
-                    return;
-                }
                 throw new Error("Request failed");
             }
 
             const data = (await response.json()) as { redirectUrl?: string };
             if (data.redirectUrl) {
+                try {
+                    localStorage.setItem(LAST_USED_LOGIN_KEY, "enterprise-sso");
+                } catch {}
                 window.location.href = data.redirectUrl;
                 return;
             }
@@ -62,12 +72,11 @@ export function EmailLoginForm({ redirectOnLogin }: { redirectOnLogin?: string }
     return (
         <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
             <label className="flex flex-col gap-2 text-sm font-medium text-gray-1100">
-                Work email
                 <Input
                     required
                     type="email"
                     inputMode="email"
-                    placeholder="name@company.com"
+                    placeholder="Enter email address"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     autoComplete="email"
@@ -76,7 +85,17 @@ export function EmailLoginForm({ redirectOnLogin }: { redirectOnLogin?: string }
                 />
             </label>
             <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Authenticating..." : "Continue"}
+                <div className="w-full grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+                    <div aria-hidden="true" />
+                    <span>{isSubmitting ? "Authenticating..." : "Continue"}</span>
+                    {hasMounted && isLastUsed ? (
+                        <Kbd className="justify-self-end -mr-1" useBodyFont>
+                            last used
+                        </Kbd>
+                    ) : (
+                        <div aria-hidden="true" />
+                    )}
+                </div>
             </Button>
             {error && (
                 <div

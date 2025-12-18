@@ -17,9 +17,9 @@ function useHasMounted() {
 }
 
 // Connection options for authentication providers
-export type AuthConnection = "google-oauth2" | "github";
+export type AuthConnection = "google-oauth2" | "github" | "enterprise-sso";
 
-const LAST_USED_LOGIN_KEY = "fern-last-used-login";
+export const LAST_USED_LOGIN_KEY = "fern-last-used-login";
 
 // Base login button component that can be used for different providers
 const BaseLoginButton = ({

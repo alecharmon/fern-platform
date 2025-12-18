@@ -15,7 +15,8 @@ type PostToSlackContext =
     | "turbopuffer-reindex"
     | "algolia-reindex"
     | "request-org-access"
-    | "org-member-change";
+    | "org-member-change"
+    | "duplicate-account";
 
 // contexts that should be allowed to post on dev and bypass rate limiting
 const alwaysAllowToPost: PostToSlackContext[] = ["request-org-access", "org-member-change"];

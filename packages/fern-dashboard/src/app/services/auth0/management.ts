@@ -572,13 +572,19 @@ export async function getUserGithubToken(userId: Auth0UserID): Promise<string | 
     return user.identities.find((identity) => identity.provider === "github")?.access_token;
 }
 
-export async function getUserByEmail(email: string): Promise<Auth0User | undefined> {
+export async function getAllUsersByEmail(email: string): Promise<Auth0User[]> {
     const auth0 = getAuth0ManagementClient();
     const users = (
         await auth0.usersByEmail.getByEmail({
             email
         })
     ).data;
+
+    return users as Auth0User[];
+}
+
+export async function getUserByEmail(email: string): Promise<Auth0User | undefined> {
+    const users = await getAllUsersByEmail(email);
 
     if (users.length === 0) {
         return undefined;
