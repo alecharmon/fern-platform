@@ -16,7 +16,32 @@ export interface KvCache {
 }
 
 /**
- * In-memory cache implementation for local development
+ * No-op cache implementation for local CLI development (fern docs dev)
+ * This ensures hot reload works by never caching any data
+ */
+class NoOpKvCache implements KvCache {
+    async get<T>(_domainKey: string, _key: string, _cacheKeySuffix?: string): Promise<T | null> {
+        // Never return cached data - always fetch fresh
+        return null;
+    }
+
+    async mget(_domainKey: string, _keys: string[], _cacheKeySuffix?: string): Promise<Map<string, unknown>> {
+        // Never return cached data - always fetch fresh
+        return new Map();
+    }
+
+    set(_domainKey: string, _key: string, _value: unknown, _ttl?: number, _cacheKeySuffix?: string): void {
+        // Don't cache anything
+    }
+
+    async clear(_domainKey: string): Promise<void> {
+        // Nothing to clear
+    }
+}
+
+/**
+ * In-memory cache implementation for local development (pnpm docs:dev in monorepo)
+ * When isLocal() is true (fern docs dev CLI), all operations are no-ops to enable hot reload
  */
 class InMemoryKvCache implements KvCache {
     private cache = new Map<string, { value: unknown; expiration?: number }>();
@@ -403,8 +428,20 @@ class UpstashKvCache implements KvCache {
 
 /**
  * Factory function to create the appropriate cache implementation
+ *
+ * - isLocalDev() = true (fern docs dev CLI): No caching at all for hot reload to work
+ * - isDocsDev = true (pnpm docs:dev in monorepo): In-memory cache
+ * - Production: Upstash KV cache
  */
 export function createKvCache(isDocsDev: boolean): KvCache {
+    // For local CLI development (fern docs dev), disable all caching
+    // This ensures hot reload works by fetching fresh data on every request
+    // Use local check instead of imported isLocal() to avoid Next.js env var inlining issues
+    if (isLocal()) {
+        console.debug("[KvCache] Using no-op cache for local CLI development (hot reload enabled)");
+        return new NoOpKvCache();
+    }
+    // For monorepo docs development (pnpm docs:dev), use in-memory cache
     if (isDocsDev) {
         console.debug("[KvCache] Using in-memory cache for docs development");
         return new InMemoryKvCache();

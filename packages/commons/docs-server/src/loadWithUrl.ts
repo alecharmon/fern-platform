@@ -26,17 +26,38 @@ setGlobalDispatcher(
 );
 
 // In-memory cache for docs dev mode to avoid Next.js 2MB cache limit
-const docsDevCache = new Map<string, FdrAPI.docs.v2.read.LoadDocsForUrlResponse>();
+// Stores both the response and the timestamp for time-based invalidation
+interface CacheEntry {
+    response: FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
+    timestamp: number;
+}
+const docsDevCache = new Map<string, CacheEntry>();
 const pendingRequests = new Map<string, Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse>>();
 
+// Cache TTL for local development (2 seconds) to allow hot reload while maintaining some caching
+const LOCAL_CACHE_TTL_MS = 2000;
+
 export const loadWithUrl = async (domain: string): Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse> => {
-    // In docs dev mode, use in-memory cache instead of unstable_cache
+    // In docs dev mode (including local CLI), use in-memory cache with time-based invalidation
     if (isDocsDev()) {
-        // Check if we have a cached response
+        const now = Date.now();
         const cached = docsDevCache.get(domain);
+
+        // For local CLI development, use shorter TTL for hot reload
+        const ttl = isLocal() ? LOCAL_CACHE_TTL_MS : Infinity;
+
+        // Check if we have a valid cached response (not expired)
+        if (cached && now - cached.timestamp < ttl) {
+            console.debug(`[DocsDevCache] Cache hit for domain: ${domain} (age: ${now - cached.timestamp}ms)`);
+            return cached.response;
+        }
+
+        // If cache is stale, delete it
         if (cached) {
-            console.debug(`[DocsDevCache] Cache hit for domain: ${domain}`);
-            return cached;
+            console.debug(
+                `[DocsDevCache] Cache expired for domain: ${domain} (age: ${now - cached.timestamp}ms, ttl: ${ttl}ms)`
+            );
+            docsDevCache.delete(domain);
         }
 
         // Check if there's already a pending request for this domain
@@ -51,8 +72,8 @@ export const loadWithUrl = async (domain: string): Promise<FdrAPI.docs.v2.read.L
         const requestPromise = (async () => {
             try {
                 const response = await uncachedLoadWithUrl(domain);
-                // Once resolved, store in cache and remove from pending
-                docsDevCache.set(domain, response);
+                // Once resolved, store in cache with timestamp and remove from pending
+                docsDevCache.set(domain, { response, timestamp: Date.now() });
                 pendingRequests.delete(domain);
                 console.debug(`[DocsDevCache] Cached and cleaned up pending request for domain: ${domain}`);
                 return response;
