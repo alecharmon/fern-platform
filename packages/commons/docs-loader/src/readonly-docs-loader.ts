@@ -1313,7 +1313,7 @@ const getTypes = () =>
         // Get all types from apisV2
         for (const apiId of Object.keys(response.definition.apisV2)) {
             const api = response.definition.apisV2[ApiDefinitionId(apiId)];
-            if (api?.types && apiName != null && api.apiName === apiName) {
+            if (api?.types && (apiName == null || api.apiName === apiName)) {
                 Object.assign(allTypes, api.types);
             }
         }
@@ -1321,10 +1321,12 @@ const getTypes = () =>
         // Get all types from apis (v1)
         for (const apiId of Object.keys(response.definition.apis)) {
             const v1Api = response.definition.apis[ApiDefinitionId(apiId)];
-            if (v1Api && apiName != null && v1Api.apiName === apiName) {
+            if (v1Api != null) {
                 const migratedApi = ApiDefinitionV1ToLatest.from(v1Api).migrate();
-                if (migratedApi.types) {
-                    Object.assign(allTypes, migratedApi.types);
+                if (apiName == null || migratedApi.apiName === apiName) {
+                    if (migratedApi.types) {
+                        Object.assign(allTypes, migratedApi.types);
+                    }
                 }
             }
         }
