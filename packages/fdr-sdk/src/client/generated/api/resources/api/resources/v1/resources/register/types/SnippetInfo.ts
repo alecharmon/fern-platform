@@ -6,6 +6,6 @@
 export interface SnippetInfo {
     /** The package name (e.g., "my-api-ts" for TypeScript, "my-api-py" for Python) */
     packageName: string;
-    /** The version of the SDK */
-    version: string;
+    /** The version of the SDK. If not specified, the latest version will be used. */
+    version: string | undefined;
 }

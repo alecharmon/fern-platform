@@ -97,12 +97,22 @@ export interface S3Service {
         snippetConfiguration: Record<string, string>;
     }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>>;
 
+    updateSdkDynamicIrLatestPointer({
+        orgId,
+        version,
+        snippetConfiguration
+    }: {
+        orgId: FernRegistry.OrgId;
+        version: string;
+        snippetConfiguration: Record<string, string>;
+    }): Promise<void>;
+
     checkSdkDynamicIrExists({
         orgId,
         snippetConfiguration
     }: {
         orgId: FernRegistry.OrgId;
-        snippetConfiguration: Record<string, { packageName: string; version: string }>;
+        snippetConfiguration: Record<string, { packageName: string; version?: string }>;
     }): Promise<Record<string, string>>;
 
     getPresignedApiDefinitionSourceDownloadUrl({ key }: { key: string }): Promise<string>;
@@ -511,34 +521,111 @@ export class S3ServiceImpl implements S3Service {
         return result;
     }
 
+    async updateSdkDynamicIrLatestPointer({
+        orgId,
+        version,
+        snippetConfiguration
+    }: {
+        orgId: FernRegistry.OrgId;
+        version: string;
+        snippetConfiguration: Record<string, string>;
+    }): Promise<void> {
+        const bucketName = this.config.privateApiDefinitionSourceS3.bucketName;
+
+        for (const [language, snippetName] of Object.entries(snippetConfiguration)) {
+            const pointerKey = this.constructS3DynamicIrLatestPointerKey({
+                orgId,
+                snippetName,
+                language
+            });
+
+            try {
+                // Write the version string to the "latest" pointer file
+                const putCommand = new PutObjectCommand({
+                    Bucket: bucketName,
+                    Key: pointerKey,
+                    Body: version,
+                    ContentType: "text/plain"
+                });
+                await this.privateApiDefinitionSourceS3.send(putCommand);
+            } catch (error) {
+                this.app.logger.warn(
+                    `Failed to update SDK dynamic IR latest pointer for ${language}: ${pointerKey}`,
+                    error
+                );
+            }
+        }
+    }
+
     async checkSdkDynamicIrExists({
         orgId,
         snippetConfiguration
     }: {
         orgId: FernRegistry.OrgId;
-        snippetConfiguration: Record<string, { packageName: string; version: string }>;
+        snippetConfiguration: Record<string, { packageName: string; version?: string }>;
     }): Promise<Record<string, string>> {
         const result: Record<string, string> = {};
+        const bucketName = this.config.privateApiDefinitionSourceS3.bucketName;
 
         for (const [language, snippetInfo] of Object.entries(snippetConfiguration)) {
+            let version = snippetInfo.version;
+
+            // If no version specified, read the "latest" pointer to get the version
+            if (version == null) {
+                const pointerKey = this.constructS3DynamicIrLatestPointerKey({
+                    orgId,
+                    snippetName: snippetInfo.packageName,
+                    language
+                });
+
+                try {
+                    const getCommand = new GetObjectCommand({
+                        Bucket: bucketName,
+                        Key: pointerKey
+                    });
+                    const response = await this.privateApiDefinitionSourceS3.send(getCommand);
+                    const body = await response.Body?.transformToString();
+                    if (body) {
+                        version = body.trim();
+                    }
+                } catch (error) {
+                    // Pointer doesn't exist - no latest version available
+                    if (
+                        (error as { name?: string }).name === "NoSuchKey" ||
+                        (error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === 404
+                    ) {
+                        continue;
+                    }
+                    this.app.logger.warn(
+                        `Error reading SDK dynamic IR latest pointer for ${language}: ${pointerKey}`,
+                        error
+                    );
+                    continue;
+                }
+            }
+
+            if (version == null) {
+                continue;
+            }
+
             const key = this.constructS3DynamicIrKeyForSdk({
                 orgId,
                 snippetName: snippetInfo.packageName,
-                version: snippetInfo.version,
+                version,
                 language
             });
 
             try {
                 await this.privateApiDefinitionSourceS3.send(
                     new HeadObjectCommand({
-                        Bucket: this.config.privateApiDefinitionSourceS3.bucketName,
+                        Bucket: bucketName,
                         Key: key
                     })
                 );
 
                 // File exists, generate a presigned download URL
                 const command = new GetObjectCommand({
-                    Bucket: this.config.privateApiDefinitionSourceS3.bucketName,
+                    Bucket: bucketName,
                     Key: key
                 });
                 const downloadUrl = await getSignedUrl(this.privateApiDefinitionSourceS3, command, {
@@ -548,7 +635,7 @@ export class S3ServiceImpl implements S3Service {
             } catch (error) {
                 // File doesn't exist or other error - skip this language
                 if (
-                    (error as { name?: string }).name === "NotFound" ||
+                    (error as { name?: string }).name === "NoSuchKey" ||
                     (error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === 404
                 ) {
                     // File doesn't exist, which is expected - just skip
@@ -798,6 +885,20 @@ export class S3ServiceImpl implements S3Service {
     }): string {
         // Format: <org-name>/<language>/<snippet-name>/<version>.json
         return `${orgId}/${language}/${snippetName}/${version}.json`;
+    }
+
+    constructS3DynamicIrLatestPointerKey({
+        orgId,
+        snippetName,
+        language
+    }: {
+        orgId: FernRegistry.OrgId;
+        snippetName: string;
+        language: string;
+    }): string {
+        // Format: <org-name>/<language>/<snippet-name>/latest
+        // This file contains the version string (e.g., "1.0.0")
+        return `${orgId}/${language}/${snippetName}/latest`;
     }
 
     constructS3ApiDefinitionSourceKey({

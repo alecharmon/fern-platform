@@ -98,8 +98,8 @@ types:
         type: string
         docs: The package name (e.g., "my-api-ts" for TypeScript, "my-api-py" for Python)
       version:
-        type: string
-        docs: The version of the SDK
+        type: optional<string>
+        docs: The version of the SDK. If not specified, the latest version will be used.
 
   CheckSdkDynamicIrExistsResponse:
     properties:

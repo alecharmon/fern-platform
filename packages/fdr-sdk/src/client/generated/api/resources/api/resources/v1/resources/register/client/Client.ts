@@ -235,7 +235,7 @@ export class RegisterClient {
      *         snippetConfiguration: {
      *             "snippetConfiguration": {
      *                 packageName: "packageName",
-     *                 version: "version"
+     *                 version: undefined
      *             }
      *         }
      *     })

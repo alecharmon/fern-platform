@@ -9,7 +9,7 @@ import type * as FernRegistry from "../../../../../../../../index.js";
  *         snippetConfiguration: {
  *             "snippetConfiguration": {
  *                 packageName: "packageName",
- *                 version: "version"
+ *                 version: undefined
  *             }
  *         }
  *     }
