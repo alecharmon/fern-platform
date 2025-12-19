@@ -175,6 +175,7 @@ const SearchModalInner = forwardRef<HTMLButtonElement, SearchButtonProps>(
                             api={chatEndpoint}
                             body={{ algoliaSearchKey: apiKey }}
                             lang={lang}
+                            onEscapeKeyDown={() => setOpen(false)}
                         >
                             {children}
                         </AskAiStandaloneModal>
