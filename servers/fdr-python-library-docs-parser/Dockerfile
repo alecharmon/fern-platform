@@ -1,5 +1,8 @@
 FROM public.ecr.aws/lambda/python:3.12
 
+# Install git for cloning repositories
+RUN dnf install -y git && dnf clean all
+
 RUN pip3 install poetry
 
 COPY pyproject.toml poetry.lock* ./

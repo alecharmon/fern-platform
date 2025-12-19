@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
+
+# Shared IR types for library documentation generation.
+# These types are language-agnostic and shared across all language-specific IRs.
+
+types:
+  # Metadata - genuinely shared (every language has package name, source URL)
+  IRMetadata:
+    properties:
+      packageName: string
+      language: string
+      sourceUrl: optional<string>
+      branch: optional<string>
+      version: optional<string>
+
+  # Docstring - similar structure across languages (most have doc comments)
+  DocstringIR:
+    properties:
+      summary: optional<string>
+      description: optional<string>
+      params: list<DocstringParamIR>
+      returns: optional<DocstringReturnsIR>
+      raises: list<DocstringRaisesIR>
+      examples: list<DocstringExampleIR>
+      notes: list<string>
+      warnings: list<string>
+
+  DocstringParamIR:
+    properties:
+      name: string
+      type: optional<string>
+      description: optional<string>
+      default: optional<string>
+
+  DocstringReturnsIR:
+    properties:
+      type: optional<string>
+      description: optional<string>
+
+  DocstringRaisesIR:
+    properties:
+      type: string
+      description: optional<string>
+
+  DocstringExampleIR:
+    properties:
+      code: string
+      description: optional<string>
+
+  # Attribute/Constant - similar across languages
+  AttributeIR:
+    properties:
+      name: string
+      path: string
+      type: optional<string>
+      value: optional<string>
+      docstring: optional<DocstringIR>

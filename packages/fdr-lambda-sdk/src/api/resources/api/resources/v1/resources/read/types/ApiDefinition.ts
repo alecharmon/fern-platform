@@ -4,6 +4,7 @@ import type * as FdrLambda from "../../../../../../../index.js";
 
 export interface ApiDefinition {
     id: FdrLambda.ApiDefinitionId;
+    apiName: string | undefined;
     rootPackage: FdrLambda.api.v1.read.ApiDefinitionPackage;
     types: Record<FdrLambda.TypeId, FdrLambda.api.v1.read.TypeDefinition>;
     subpackages: Record<FdrLambda.api.v1.SubpackageId, FdrLambda.api.v1.read.ApiDefinitionSubpackage>;

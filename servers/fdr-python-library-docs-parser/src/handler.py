@@ -13,21 +13,32 @@ Input (from FDR via AWS SDK invoke):
 Output:
 Success: { "status": "success", "irS3Key": "library-docs-ir/libdocs_xxx.json" }
 Error:   { "status": "error", "error": { "code": "...", "message": "..." } }
+
+The result JSON contains a PythonLibraryDocsIR object which can be rendered
+to MDX by FDR TypeScript.
 """
 
-import json
 import os
+import traceback
 from datetime import datetime, timezone
 
+from .git_clone import clone_repo, find_package_root, cleanup_repo, CloneError
+from .parser import parse_package, ParseError
+from .extractor import extract_python_ir
 from .s3_client import upload_ir_to_s3
 
 
 def handler(event: dict, context) -> dict:
     """Lambda entry point."""
+    repo_path = None
+
     try:
+        # Validate input
         job_id = event.get("jobId")
         github_url = event.get("githubUrl")
         language = event.get("language", "PYTHON")
+        branch = event.get("branch")
+        package_path = event.get("packagePath")
 
         if not job_id or not github_url:
             return {
@@ -38,70 +49,97 @@ def handler(event: dict, context) -> dict:
                 },
             }
 
-        # Generate stub IR (will be replaced with real griffe parsing later)
-        ir = generate_stub_ir(github_url, language)
+        if language != "PYTHON":
+            return {
+                "status": "error",
+                "error": {
+                    "code": "UNSUPPORTED_LANGUAGE",
+                    "message": f"Language {language} is not supported. Only PYTHON is currently supported.",
+                },
+            }
 
-        # Upload IR to S3
+        # 1. Clone repository
+        try:
+            repo_path = clone_repo(github_url, branch)
+        except CloneError as e:
+            return {
+                "status": "error",
+                "error": {
+                    "code": "CLONE_FAILED",
+                    "message": e.message,
+                    "details": e.details,
+                },
+            }
+
+        # 2. Find Python package
+        try:
+            pkg_path = find_package_root(repo_path, package_path)
+        except CloneError as e:
+            return {
+                "status": "error",
+                "error": {
+                    "code": "PACKAGE_NOT_FOUND",
+                    "message": e.message,
+                    "details": e.details,
+                },
+            }
+
+        # 3. Parse with Griffe
+        try:
+            module = parse_package(pkg_path)
+        except ParseError as e:
+            return {
+                "status": "error",
+                "error": {
+                    "code": "PARSE_FAILED",
+                    "message": e.message,
+                    "details": e.details,
+                },
+            }
+
+        # 4. Extract IR (Griffe → PythonLibraryDocsIR)
+        ir = extract_python_ir(
+            griffe_module=module,
+            source_url=github_url,
+            branch=branch,
+        )
+
+        # 5. Build result with IR and job metadata
+        result = {
+            "ir": ir.model_dump(mode="json", by_alias=True),
+            "metadata": {
+                "jobId": job_id,
+                "sourceUrl": github_url,
+                "branch": branch,
+                "packagePath": package_path,
+                "packageName": module.name,
+                "parsedAt": datetime.now(timezone.utc).isoformat(),
+                "parserVersion": "griffe-extractor-1.0.0",
+            },
+        }
+
+        # 6. Upload to S3
         bucket = os.environ.get("LIBRARY_DOCS_S3_BUCKET", "fdr")
         s3_key = f"library-docs-ir/{job_id}.json"
 
-        upload_ir_to_s3(bucket, s3_key, ir)
+        upload_ir_to_s3(bucket, s3_key, result)
 
         return {"status": "success", "irS3Key": s3_key}
 
     except Exception as e:
+        # Log full traceback for debugging
+        traceback.print_exc()
+
         return {
             "status": "error",
-            "error": {"code": "INTERNAL_ERROR", "message": str(e)},
+            "error": {
+                "code": "INTERNAL_ERROR",
+                "message": str(e),
+                "traceback": traceback.format_exc(),
+            },
         }
 
-
-def generate_stub_ir(github_url: str, language: str) -> dict:
-    """Generate stub IR for testing infrastructure."""
-    # Extract repo name from URL for the library name
-    repo_name = github_url.rstrip("/").split("/")[-1]
-
-    return {
-        "name": repo_name,
-        "language": language,
-        "modules": [
-            {
-                "name": repo_name,
-                "docstring": f"Main module for {repo_name}",
-                "members": [
-                    {
-                        "name": "ExampleClass",
-                        "kind": "class",
-                        "docstring": "An example class from the library.",
-                        "members": [
-                            {
-                                "name": "__init__",
-                                "kind": "function",
-                                "docstring": "Initialize the example class.",
-                            },
-                            {
-                                "name": "example_method",
-                                "kind": "function",
-                                "docstring": "An example method.",
-                            },
-                        ],
-                    },
-                    {
-                        "name": "example_function",
-                        "kind": "function",
-                        "docstring": "An example function from the library.",
-                    },
-                    {
-                        "name": "EXAMPLE_CONSTANT",
-                        "kind": "constant",
-                        "docstring": "An example constant.",
-                    },
-                ],
-            }
-        ],
-        "metadata": {
-            "sourceUrl": github_url,
-            "parsedAt": datetime.now(timezone.utc).isoformat(),
-            "parserVersion": "0.1.0-stub",
-        },
-    }
+    finally:
+        # Clean up cloned repo
+        if repo_path:
+            cleanup_repo(repo_path)

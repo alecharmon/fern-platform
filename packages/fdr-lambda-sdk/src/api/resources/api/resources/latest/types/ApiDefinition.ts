@@ -4,6 +4,7 @@ import type * as FdrLambda from "../../../../../index.js";
 
 export interface ApiDefinition {
     id: FdrLambda.ApiDefinitionId;
+    apiName: string | undefined;
     endpoints: Record<FdrLambda.EndpointId, FdrLambda.api.latest.EndpointDefinition>;
     websockets: Record<FdrLambda.WebSocketId, FdrLambda.api.latest.WebSocketChannel>;
     webhooks: Record<FdrLambda.WebhookId, FdrLambda.api.latest.WebhookDefinition>;
