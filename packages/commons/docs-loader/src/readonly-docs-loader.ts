@@ -1303,9 +1303,9 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
 
 // we already cache the API definitions, so no need to cache the types as well
 const getTypes = () =>
-    cache(async (domainKey: string): Promise<Record<TypeId, TypeDefinition>> => {
+    cache(async (domainKey: string, apiName?: string): Promise<Record<TypeId, TypeDefinition>> => {
         "use cache";
-        unstable_cacheTag(domainKey, "getTypes");
+        unstable_cacheTag(domainKey, "getTypes", apiName || "");
 
         const response = await loadWithUrl(domainKey);
         const allTypes: Record<TypeId, TypeDefinition> = {};
@@ -1313,7 +1313,7 @@ const getTypes = () =>
         // Get all types from apisV2
         for (const apiId of Object.keys(response.definition.apisV2)) {
             const api = response.definition.apisV2[ApiDefinitionId(apiId)];
-            if (api?.types) {
+            if (api?.types && apiName != null && api.apiName === apiName) {
                 Object.assign(allTypes, api.types);
             }
         }
@@ -1321,7 +1321,7 @@ const getTypes = () =>
         // Get all types from apis (v1)
         for (const apiId of Object.keys(response.definition.apis)) {
             const v1Api = response.definition.apis[ApiDefinitionId(apiId)];
-            if (v1Api) {
+            if (v1Api && apiName != null && v1Api.apiName === apiName) {
                 const migratedApi = ApiDefinitionV1ToLatest.from(v1Api).migrate();
                 if (migratedApi.types) {
                     Object.assign(allTypes, migratedApi.types);
@@ -1477,7 +1477,7 @@ const createCachedDocsLoaderImpl = async (
             const m = await metadata;
             return getDynamicIr(config)(m.org, m.domain, apiName);
         },
-        getTypes: () => getTypes()(domainKey),
+        getTypes: (apiName?: string) => getTypes()(domainKey, apiName),
         clearKvCache: () => clearKvCache(domainKey),
         isAskAiEnabledForDocs: async () => {
             const prefetched = await prefetchPromise;

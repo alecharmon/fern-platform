@@ -23,6 +23,7 @@ export interface RehypeSchemaOptions {
 
 interface MergeSupportedFieldsData {
     model: string;
+    apiName?: string;
     integrations: Array<{
         integrationName: string;
         integrationImage: string;
@@ -132,11 +133,12 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                 }
 
                 const typeName = decodedData.model;
+                const apiName = decodedData.apiName;
 
                 promises.push(
                     (async () => {
                         try {
-                            const typeDefinitions = await loader.getTypes();
+                            const typeDefinitions = await loader.getTypes(apiName);
 
                             for (const typeEntry of Object.entries(typeDefinitions)) {
                                 const [_typeEntryId, typeEntryDef] = typeEntry;

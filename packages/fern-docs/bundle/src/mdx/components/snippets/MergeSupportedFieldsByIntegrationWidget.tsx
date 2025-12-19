@@ -30,6 +30,7 @@ interface Integration {
 interface MergeSupportedFieldsData {
     model: string;
     integrations: Integration[];
+    apiName: string;
     supportedFieldsHref?: string;
     linkedAccountsHref?: string;
     passthroughRequestsHref?: string;

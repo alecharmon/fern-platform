@@ -176,5 +176,5 @@ export interface DocsLoader<IsAsync extends boolean = true> {
     /**
      * @returns all types defined by all APIs (not pruned)
      */
-    getTypes: () => MaybePromise<Record<TypeId, TypeDefinition>, IsAsync>;
+    getTypes: (apiName?: string) => MaybePromise<Record<TypeId, TypeDefinition>, IsAsync>;
 }
