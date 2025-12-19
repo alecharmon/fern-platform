@@ -3,6 +3,7 @@
   "installCommand": "pnpm install",
   "buildCommand": "pnpm turbo docs:build",
   "devCommand": "pnpm turbo docs:dev",
+  "ignoreCommand": "bash ../../../scripts/vercel-ignore-docs-bundle.sh",
   "git": {
     "deploymentEnabled": true
   },

@@ -7,12 +7,14 @@ on:
     paths:
       - "servers/dashboard-deploy/**"
       - ".github/workflows/deploy-dashboard-infrastructure-dev.yml"
+      - "pnpm-lock.yaml"
   pull_request:
     branches:
       - app
     paths:
       - "servers/dashboard-deploy/**"
       - ".github/workflows/deploy-dashboard-infrastructure-dev.yml"
+      - "pnpm-lock.yaml"
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}

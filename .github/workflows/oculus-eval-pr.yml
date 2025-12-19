@@ -5,6 +5,7 @@ on:
     types: [opened]
     paths:
       - 'packages/fern-docs/search-server/ask-fern/**'
+      - 'pnpm-lock.yaml'
   issue_comment:
     types: [created]
   workflow_dispatch:
