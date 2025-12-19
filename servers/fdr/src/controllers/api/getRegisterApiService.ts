@@ -50,6 +50,14 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                 };
             }
 
+            // Update the "latest" pointer for each language so that future requests
+            // without a version can resolve to this version
+            await app.services.s3.updateSdkDynamicIrLatestPointer({
+                orgId: req.body.orgId,
+                version: req.body.version,
+                snippetConfiguration: req.body.snippetConfiguration
+            });
+
             app.logger.debug(`Successfully prepared dynamic IR upload URLs for SDK generation`);
             return res.send({
                 uploadUrls: dynamicIrUploads
