@@ -77,7 +77,6 @@
     "@tanstack/form-core": "^0.42.1",
     "@tanstack/react-form": "^0.42.1",
     "@tanstack/zod-form-adapter": "^0.42.1",
-    "@tiptap/starter-kit": "^3.0.5",
     "@types/estree": "1.0.6",
     "@types/node": "^22.0.0",
     "@types/node-fetch": "^2.6.3",
