@@ -159,7 +159,8 @@ export function getDocsReadV2Service(app: FdrApplication): DocsV2ReadService {
                     limit: req.query.limit,
                     page: req.query.page,
                     customOnly: req.query.custom,
-                    domainSuffix: app.config.domainSuffix
+                    domainSuffix: app.config.domainSuffix,
+                    preview: req.query.preview
                 })
             );
         },

@@ -79,6 +79,7 @@ export interface ReadServiceMethods {
                 page?: number;
                 limit?: number;
                 custom?: boolean;
+                preview?: boolean;
             }
         >,
         res: {

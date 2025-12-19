@@ -161,7 +161,7 @@ service:
       path: /delete
       audiences:
         - fdr-lambda
-      docs: Delete a docs site and all associated data including S3 assets
+      docs: Delete a preview docs site. Only preview sites can be deleted through this endpoint.
       request:
         name: DeleteDocsSiteRequest
         body:
@@ -170,6 +170,7 @@ service:
       errors:
         - DocsNotFoundError
         - rootCommons.UnauthorizedError
+        - CannotDeleteNonPreviewSiteError
 
     # Library Documentation Generation Endpoints
     startLibraryDocsGeneration:
@@ -363,6 +364,10 @@ errors:
   ReindexNotAllowedError:
     status-code: 403
     docs: Reindexing is not allowed for this domain.
+
+  CannotDeleteNonPreviewSiteError:
+    status-code: 400
+    docs: Only preview sites can be deleted. Production docs sites cannot be deleted through this endpoint.
 
   # Library Documentation Generation Errors
   InvalidGithubUrlError:

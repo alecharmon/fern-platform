@@ -101,6 +101,7 @@ export interface DocsV2Dao {
         page?: number;
         customOnly?: boolean;
         domainSuffix: string;
+        preview?: boolean;
     }): Promise<DocsV2Read.ListAllDocsUrlsResponse>;
 
     listDocsUrlsUpdatedWithin(opts: {
@@ -118,6 +119,8 @@ export interface DocsV2Dao {
     addAlgoliaPreviewWhitelistEntry(domain: string): Promise<void>;
     removeAlgoliaPreviewWhitelistEntry(domain: string): Promise<void>;
     listAlgoliaPreviewWhitelist(): Promise<string[]>;
+
+    deleteDocsSite({ url }: { url: ParsedBaseUrl }): Promise<void>;
 }
 
 export class DocsV2DaoImpl implements DocsV2Dao {
@@ -431,12 +434,14 @@ export class DocsV2DaoImpl implements DocsV2Dao {
         limit = 1000,
         page = 1,
         customOnly = false,
-        domainSuffix
+        domainSuffix,
+        preview = false
     }: {
         limit?: number;
         page?: number;
         customOnly?: boolean;
         domainSuffix: string;
+        preview?: boolean;
     }): Promise<DocsV2Read.ListAllDocsUrlsResponse> {
         limit = Math.min(limit, 1000);
         const response = await this.prisma.docsV2.findMany({
@@ -447,7 +452,7 @@ export class DocsV2DaoImpl implements DocsV2Dao {
                 updatedTime: true
             },
             where: {
-                isPreview: false,
+                isPreview: preview,
                 authType: "PUBLIC",
                 domain: customOnly ? { not: { endsWith: domainSuffix } } : undefined
             },
@@ -595,6 +600,17 @@ export class DocsV2DaoImpl implements DocsV2Dao {
             select: { domain: true }
         });
         return whitelist.map((entry) => entry.domain);
+    }
+
+    public async deleteDocsSite({ url }: { url: ParsedBaseUrl }): Promise<void> {
+        await this.prisma.docsV2.delete({
+            where: {
+                domain_path: {
+                    domain: url.hostname,
+                    path: url.path ?? ""
+                }
+            }
+        });
     }
 }
 

@@ -15,6 +15,7 @@ import {
 import { DocsRegistrationIdNotFound } from "../../../api/generated/api/resources/docs/resources/v1/resources/write/errors";
 import { DomainNotRegisteredError } from "../../../api/generated/api/resources/docs/resources/v2/resources/read";
 import {
+    CannotDeleteNonPreviewSiteError,
     InvalidDomainError,
     LibraryDocsGenerationNotCompleteError,
     LibraryDocsJobNotFoundError,
@@ -429,17 +430,32 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
         },
         deleteDocsSite: async (req, res) => {
             const url = ParsedBaseUrl.parse(req.body.url);
-            const orgId = await app.dao.docsV2().getOrgIdForDocsUrl(url.toURL());
-            if (orgId == null) {
+
+            // Load docs metadata to check if it's a preview site
+            const docsMetadata = await app.dao.docsV2().loadDocsMetadata(url.toURL());
+            if (docsMetadata == null) {
                 throw new DomainNotRegisteredError();
+            }
+
+            // Only allow deletion of preview sites
+            if (!docsMetadata.isPreview) {
+                throw new CannotDeleteNonPreviewSiteError();
             }
 
             await app.services.auth.checkUserBelongsToOrg({
                 authHeader: req.headers.authorization,
-                orgId
+                orgId: docsMetadata.orgId
             });
 
-            app.logger.info(`Stub: Delete docs site called for ${url.getFullUrl()}`);
+            app.logger.info(`Deleting preview docs site for ${url.getFullUrl()}`);
+
+            // Delete S3 assets first (before DB record)
+            const domain = url.hostname;
+            const { deletedCount } = await app.services.s3.deleteDocsAssetsByDomain({ domain });
+            app.logger.info(`Deleted ${deletedCount} S3 objects for domain ${domain}`);
+
+            // Delete the database record
+            await app.dao.docsV2().deleteDocsSite({ url });
 
             return res.send();
         },

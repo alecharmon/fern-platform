@@ -1,6 +1,8 @@
 import {
+    DeleteObjectsCommand,
     GetObjectCommand,
     HeadObjectCommand,
+    ListObjectsV2Command,
     PutObjectCommand,
     type PutObjectCommandInput,
     type PutObjectCommandOutput,
@@ -104,6 +106,8 @@ export interface S3Service {
     }): Promise<Record<string, string>>;
 
     getPresignedApiDefinitionSourceDownloadUrl({ key }: { key: string }): Promise<string>;
+
+    deleteDocsAssetsByDomain({ domain }: { domain: string }): Promise<{ deletedCount: number }>;
 }
 
 export class S3ServiceImpl implements S3Service {
@@ -659,6 +663,83 @@ export class S3ServiceImpl implements S3Service {
             }),
             key
         };
+    }
+
+    async deleteDocsAssetsByDomain({ domain }: { domain: string }): Promise<{ deletedCount: number }> {
+        let totalDeleted = 0;
+        const prefix = `${domain}/`;
+
+        // Delete from public docs bucket
+        totalDeleted += await this.deleteObjectsByPrefix({
+            s3Client: this.publicDocsS3,
+            bucketName: this.config.publicDocsS3.bucketName,
+            prefix
+        });
+
+        // Delete from private docs bucket
+        totalDeleted += await this.deleteObjectsByPrefix({
+            s3Client: this.privateDocsS3,
+            bucketName: this.config.privateDocsS3.bucketName,
+            prefix
+        });
+
+        // Delete from docs definition bucket
+        totalDeleted += await this.deleteObjectsByPrefix({
+            s3Client: this.dbDocsDefinitionS3,
+            bucketName: this.config.dbDocsDefinitionS3.bucketName,
+            prefix
+        });
+
+        return { deletedCount: totalDeleted };
+    }
+
+    private async deleteObjectsByPrefix({
+        s3Client,
+        bucketName,
+        prefix
+    }: {
+        s3Client: S3Client;
+        bucketName: string;
+        prefix: string;
+    }): Promise<number> {
+        let totalDeleted = 0;
+        let continuationToken: string | undefined;
+
+        do {
+            // List objects with the given prefix
+            const listResponse = await s3Client.send(
+                new ListObjectsV2Command({
+                    Bucket: bucketName,
+                    Prefix: prefix,
+                    ContinuationToken: continuationToken
+                })
+            );
+
+            const objects = listResponse.Contents;
+            if (objects == null || objects.length === 0) {
+                break;
+            }
+
+            // Delete objects in batches of up to 1000
+            const keysToDelete = objects.map((obj) => ({ Key: obj.Key })).filter((obj) => obj.Key != null);
+
+            if (keysToDelete.length > 0) {
+                await s3Client.send(
+                    new DeleteObjectsCommand({
+                        Bucket: bucketName,
+                        Delete: {
+                            Objects: keysToDelete,
+                            Quiet: true
+                        }
+                    })
+                );
+                totalDeleted += keysToDelete.length;
+            }
+
+            continuationToken = listResponse.NextContinuationToken;
+        } while (continuationToken != null);
+
+        return totalDeleted;
     }
 
     constructS3DocsKey({

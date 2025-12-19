@@ -1,3 +1,4 @@
+export * from "./CannotDeleteNonPreviewSiteError";
 export * from "./DocsNotFoundError";
 export * from "./InvalidCustomDomainError";
 export * from "./InvalidDomainError";
