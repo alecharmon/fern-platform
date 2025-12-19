@@ -71,6 +71,7 @@ export const DesktopCommandWithAskAI = forwardRef<
                 onEscapeKeyDown={props.onEscapeKeyDown}
                 escapeKeyShouldPopState={filters.length > 0}
                 data-fern-search="desktop-command"
+                data-location="modal"
                 data-mode={"search"}
                 lang={lang}
             >
