@@ -173,8 +173,8 @@ export const AskAiStandaloneModal = forwardRef<
                 {...props}
                 lang={lang}
                 ref={composeRefs(forwardedRef, ref)}
-                shouldFilter={true}
-                disableAutoSelection={false}
+                shouldFilter={!askAI}
+                disableAutoSelection={askAI}
                 onPopState={composeEventHandlers(props.onPopState, handlePopFilters, {
                     checkForDefaultPrevented: false
                 })}
