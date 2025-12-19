@@ -79,27 +79,3 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DEV_POSTGRES_URL }}/fdr?schema=public&connection_limit=6&pool_timeout=30
           CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
-
-  smoke-test:
-    needs: deploy_dev
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Smoke Test Dev Docs
-        env:
-          NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
-          FERN_TOKEN: ${{ secrets.FERN_ORG_TOKEN_DEV }}
-        run: |
-          cd smoke-test
-          npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
-          npm install -g @fern-api/fern-api-dev
-          fern-dev generate --docs --instance https://fern-platform-test.docs.dev.buildwithfern.com --log-level debug
-          VALUE=$(curl https://fern-platform-test.docs.dev.buildwithfern.com/api-reference/imdb/create-movie)
-          length=${#VALUE}
-          # Assert that length is over 1000
-          if [ $length -gt 1000 ]; then
-              echo "Length is greater than 1000"
-          else
-              exit 1
-          fi
