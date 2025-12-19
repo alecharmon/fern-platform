@@ -12,6 +12,7 @@ export * as generators from "./generators/index.js";
 export * from "./git/client/requests/index.js";
 export * as git from "./git/index.js";
 export * from "./git/types/index.js";
+export * as libraryDocs from "./libraryDocs/index.js";
 export * as navigation from "./navigation/index.js";
 export * as sdks from "./sdks/index.js";
 export * from "./snippets/client/requests/index.js";

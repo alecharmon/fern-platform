@@ -13,6 +13,7 @@ export * as git from "./git";
 export * from "./git/errors";
 export * from "./git/service/requests";
 export * from "./git/types";
+export * as libraryDocs from "./libraryDocs";
 export * as navigation from "./navigation";
 export * as sdks from "./sdks";
 export * as snippets from "./snippets";
