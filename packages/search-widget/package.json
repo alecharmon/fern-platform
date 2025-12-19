@@ -1,29 +1,29 @@
 {
   "name": "@fern-api/search-widget",
   "version": "0.0.2",
+  "private": false,
   "description": "Fern AI-powered search widget for documentation sites",
   "keywords": ["search", "widget", "documentation", "react", "fern", "ai"],
   "homepage": "https://github.com/fern-api/fern-platform/tree/app/packages/search-widget",
+  "bugs": {
+    "url": "https://github.com/fern-api/fern-platform/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/fern-api/fern-platform.git",
     "directory": "packages/search-widget"
   },
-  "bugs": {
-    "url": "https://github.com/fern-api/fern-platform/issues"
-  },
-  "author": "Fern",
   "license": "Apache-2.0",
-  "private": false,
+  "author": "Fern",
   "type": "module",
-  "main": "./dist/search.bundle.js",
-  "module": "./dist/search.bundle.js",
   "exports": {
     ".": {
       "import": "./dist/search.bundle.js"
     },
     "./styles": "./dist/search.css"
   },
+  "main": "./dist/search.bundle.js",
+  "module": "./dist/search.bundle.js",
   "files": ["dist"],
   "scripts": {
     "build": "webpack --mode production",
