@@ -8,6 +8,10 @@
 # 2. The pnpm-lock.yaml file changes (dependency updates)
 # 3. This is the first deployment (no previous SHA available)
 
+# Change to git root directory to ensure pathspecs work correctly
+# (Vercel may run this script from the project's rootDirectory, not the repo root)
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
 echo "Checking if build should proceed..."
 echo "Current SHA: $VERCEL_GIT_COMMIT_SHA"
 echo "Previous SHA: $VERCEL_GIT_PREVIOUS_SHA"
