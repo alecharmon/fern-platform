@@ -34,7 +34,13 @@ RUN git clone --depth 1 --branch v1.61.0 https://github.com/bufbuild/buf.git /tm
 
 # Build protoc-gen-openapi for converting protobuf specs to OpenAPI
 # Required by Fern CLI when processing protobuf-based API specs
-RUN go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@latest
+# Clone, update google.golang.org/protobuf to fix GHSA-8r3f-844c-mc37 (infinite loop in protojson.Unmarshal), and build from source
+RUN git clone --depth 1 https://github.com/fern-api/protoc-gen-openapi.git /tmp/protoc-gen-openapi && \
+    cd /tmp/protoc-gen-openapi && \
+    go get google.golang.org/protobuf@v1.36.6 && \
+    go mod tidy && \
+    go build -o $GOPATH/bin/protoc-gen-openapi ./cmd/protoc-gen-openapi && \
+    rm -rf /tmp/protoc-gen-openapi
 
 # ----------- End Go build stage -----------
 # ----------- Main image -----------
