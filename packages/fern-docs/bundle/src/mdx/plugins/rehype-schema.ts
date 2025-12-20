@@ -1,5 +1,5 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
-import { filterReferencedTypes } from "@fern-api/fdr-sdk/api-definition";
+import { filterReferencedTypes, type TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import {
     CONTINUE,
     type Hast,
@@ -32,6 +32,19 @@ interface MergeSupportedFieldsData {
     }>;
 }
 
+interface MergeAccessedThirdPartyEndpointsData {
+    endpoints: Array<{
+        method: string;
+        path: string;
+        apiName: string;
+        models: Array<{
+            name: string;
+            fields: string[];
+        }>;
+    }>;
+    apiName?: string;
+}
+
 /**
  * Decodes base64 gzip JSON data for MergeSupportedFieldsByIntegrationWidget.
  */
@@ -42,6 +55,27 @@ function decodeWidgetData(data: string): MergeSupportedFieldsData | null {
         return JSON.parse(decompressed.toString("utf-8")) as MergeSupportedFieldsData;
     } catch (error) {
         console.error("Failed to decode MergeSupportedFieldsByIntegrationWidget data:", error);
+        return null;
+    }
+}
+
+/**
+ * Decodes base64 gzip JSON data for MergeAccessedThirdPartyEndpointsWidget.
+ */
+function decodeEndpointsWidgetData(data: string): MergeAccessedThirdPartyEndpointsData | null {
+    try {
+        const binaryString = Buffer.from(data, "base64");
+        const decompressed = gunzipSync(binaryString);
+        // The data is an array of endpoints, wrap it in an object
+        const endpoints = JSON.parse(decompressed.toString("utf-8"));
+        if (Array.isArray(endpoints)) {
+            // Extract apiName from first endpoint if available
+            const apiName = endpoints[0]?.apiName;
+            return { endpoints, apiName };
+        }
+        return endpoints as MergeAccessedThirdPartyEndpointsData;
+    } catch (error) {
+        console.error("Failed to decode MergeAccessedThirdPartyEndpointsWidget data:", error);
         return null;
     }
 }
@@ -171,6 +205,88 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                                 `Could not find type "${typeName}" for MergeSupportedFieldsByIntegrationWidget`,
                                 e
                             );
+                        }
+                    })()
+                );
+
+                return SKIP;
+            }
+
+            // Handle MergeAccessedThirdPartyEndpointsWidget - extract multiple models from data prop
+            if (node.name === "MergeAccessedThirdPartyEndpointsWidget") {
+                const { props } = hastMdxJsxElementHastToProps(node);
+
+                if (typeof props.data !== "string") {
+                    return CONTINUE;
+                }
+
+                const decodedData = decodeEndpointsWidgetData(props.data);
+                if (decodedData == null) {
+                    return CONTINUE;
+                }
+
+                // Collect all unique model names from all endpoints
+                const modelNames = new Set<string>();
+                for (const endpoint of decodedData.endpoints) {
+                    for (const model of endpoint.models) {
+                        modelNames.add(model.name);
+                    }
+                }
+
+                const apiName = decodedData.apiName;
+
+                promises.push(
+                    (async () => {
+                        try {
+                            const typeDefinitions = await loader.getTypes(apiName);
+
+                            // Build a map of model name to type definition
+                            const modelTypeDefinitions: Record<string, TypeDefinition> = {};
+                            let allReferencedTypes: typeof typeDefinitions = {};
+
+                            for (const modelName of modelNames) {
+                                for (const typeEntry of Object.entries(typeDefinitions)) {
+                                    const [_typeEntryId, typeEntryDef] = typeEntry;
+                                    if (typeEntryDef.name === modelName) {
+                                        modelTypeDefinitions[modelName] = typeEntryDef;
+                                        // Collect referenced types for this model
+                                        const referencedTypes = filterReferencedTypes(
+                                            typeEntryDef.shape,
+                                            typeDefinitions
+                                        );
+                                        allReferencedTypes = { ...allReferencedTypes, ...referencedTypes };
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // Check if we found all models
+                            const missingModels = [...modelNames].filter((name) => !modelTypeDefinitions[name]);
+                            if (missingModels.length > 0) {
+                                console.error(
+                                    `Could not find types for models: ${missingModels.join(", ")} for MergeAccessedThirdPartyEndpointsWidget. Available types: ${Object.entries(
+                                        typeDefinitions
+                                    )
+                                        .map(([_, def]) => def.name)
+                                        .join(", ")}`
+                                );
+                            }
+
+                            // Serialize all type definitions
+                            const serializedModelTypeDefs: Record<string, unknown> = {};
+                            for (const [modelName, typeDef] of Object.entries(modelTypeDefinitions)) {
+                                serializedModelTypeDefs[modelName] = await serializeTypeDefinitionDescriptions(typeDef);
+                            }
+
+                            const serializedTypes = await serializeAllTypeDefinitionDescriptions(allReferencedTypes);
+
+                            node.attributes.push(
+                                unknownToMdxJsxAttribute("typeDefinitions", serializedModelTypeDefs),
+                                unknownToMdxJsxAttribute("types", serializedTypes),
+                                unknownToMdxJsxAttribute("decodedData", decodedData)
+                            );
+                        } catch (e) {
+                            console.error(`Failed to process MergeAccessedThirdPartyEndpointsWidget`, e);
                         }
                     })()
                 );

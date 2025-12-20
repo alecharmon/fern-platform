@@ -49,6 +49,7 @@ import { RunnableEndpoint } from "./runnable-endpoint";
 import {
     EndpointRequestSnippet,
     EndpointResponseSnippet,
+    MergeAccessedThirdPartyEndpointsWidget,
     MergeSupportedFieldsByIntegrationWidget,
     Schema,
     SchemaSnippet
@@ -97,6 +98,7 @@ const FERN_COMPONENTS = {
     Icon,
     If,
     Json,
+    MergeAccessedThirdPartyEndpointsWidget,
     MergeSupportedFieldsByIntegrationWidget,
     Mermaid,
     ParamField,

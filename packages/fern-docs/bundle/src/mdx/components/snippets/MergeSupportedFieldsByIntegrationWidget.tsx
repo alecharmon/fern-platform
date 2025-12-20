@@ -10,7 +10,7 @@ import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname
 import { ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { TypeDefinitionSlotsServer } from "@/components/api-reference/type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "@/components/api-reference/type-definitions/TypeReferenceDefinitions";
@@ -84,6 +84,24 @@ function IntegrationRow({
     passthroughRequestsHref?: string;
     deletedDataDetectionHref?: string;
 }) {
+    const rowRef = useRef<HTMLDivElement>(null);
+    const expandableRef = useRef<HTMLDivElement>(null);
+
+    const handleToggle = () => {
+        const expandable = expandableRef.current;
+        if (expandable) {
+            const onTransitionEnd = () => {
+                expandable.removeEventListener("transitionend", onTransitionEnd);
+                rowRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            };
+            expandable.addEventListener("transitionend", onTransitionEnd);
+        }
+        onToggle();
+    };
+
     // Filter the shape's properties to only show supported fields
     let filteredShape = typeDefinition.shape;
     if (filteredShape.type === "object") {
@@ -99,10 +117,10 @@ function IntegrationRow({
     const schemaName = typeDefinition.displayName || typeDefinition.name || "schema";
 
     return (
-        <div className="border-b border-[#e0e0e0] last:border-b-0">
+        <div ref={rowRef} className="scroll-mt-4 border-b border-[#e0e0e0] last:border-b-0">
             <button
                 type="button"
-                onClick={onToggle}
+                onClick={handleToggle}
                 className="flex w-full cursor-pointer items-center gap-3 py-2 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
             >
                 {integration.integrationImage && (
@@ -121,6 +139,7 @@ function IntegrationRow({
                 />
             </button>
             <div
+                ref={expandableRef}
                 className="grid transition-[grid-template-rows] duration-200 ease-in-out"
                 style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
             >
