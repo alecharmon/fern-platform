@@ -1409,6 +1409,10 @@ const createCachedDocsLoaderImpl = async (
             return prefetched.files ?? (await getFiles(config)(domainKey));
         },
         getMdxBundlerFiles: async () => {
+            const edgeFlags = await cachedGetEdgeFlags(domainKey);
+            if (!edgeFlags.isCustomReactEnabled) {
+                return {};
+            }
             const prefetched = await prefetchPromise;
             return prefetched.mdxBundlerFiles ?? (await getMdxBundlerFiles(config)(domainKey));
         },
