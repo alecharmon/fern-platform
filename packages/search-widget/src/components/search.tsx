@@ -19,7 +19,7 @@ import { useApiRoute } from "@/hooks/useApiRoute";
 import { searchDialogOpenAtom, useConversationId } from "@/state/search";
 import { generateQueryId } from "@/utils/generateQueryId";
 
-import "../styles/desktop.scss";
+import "../styles/search-modal.scss";
 import { atomWithStorageString } from "../utils/atomWithStorageString";
 
 const SEARCH_INDEX = "fern_docs_search";

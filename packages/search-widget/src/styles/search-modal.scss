@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+@config "../../../fern-docs/bundle/src/app/tailwind.config.ts";
+
+@source "../components";
+@source "../../../fern-docs/components/src";
+@source "../../../fern-docs/search-ui/src/components";
+
+@import "../../../fern-docs/components/src/colors.css";
+@import "../../../fern-docs/components/src/badges/index.scss";
+@import "../../../fern-docs/components/src/FernButton.scss";
+@import "../../../fern-docs/components/src/FernInput.scss";
+@import "../../../fern-docs/components/src/FernScrollArea.scss";
+@import "./minimal-theme.css";
+@import "../../../fern-docs/search-ui/src/index.css";
+@import "../../../fern-docs/search-ui/src/components/desktop/desktop.scss";
+
+@import "./fern-accent.scss";
+@import "../../../fern-docs/components/src/syntax-highlighter/index.css";
