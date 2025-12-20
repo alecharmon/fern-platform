@@ -212,17 +212,14 @@ export const PlaygroundEndpoint = ({
 
                 if (res.headers.get("content-type")?.includes("audio/")) {
                     const reader = stream.getReader();
-                    const chunks: Uint8Array<ArrayBuffer>[] = [];
+                    const chunks: Uint8Array[] = [];
 
                     while (true) {
                         const { done, value } = await reader.read();
                         if (done) {
                             break;
                         }
-                        const buffer = new ArrayBuffer(value.length);
-                        const copy = new Uint8Array(buffer);
-                        copy.set(value);
-                        chunks.push(copy);
+                        chunks.push(value);
                     }
 
                     const audioBlob = new Blob(chunks, {

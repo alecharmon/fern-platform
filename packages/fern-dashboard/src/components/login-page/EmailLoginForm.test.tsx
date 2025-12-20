@@ -90,12 +90,10 @@ describe("EmailLoginForm", () => {
         });
 
         // Mock window.location.href setter
-        const originalHref = window.location.href;
-        Object.defineProperty(window, "location", {
-            value: { ...window.location, href: "" },
-            writable: true,
-            configurable: true
-        });
+        const originalLocation = window.location;
+        // @ts-expect-error - mocking location
+        delete window.location;
+        window.location = { ...originalLocation, href: "" } as Location;
 
         render(<EmailLoginForm />);
 
@@ -109,11 +107,7 @@ describe("EmailLoginForm", () => {
             expect(localStorage.getItem(LAST_USED_LOGIN_KEY)).toBe("enterprise-sso");
         });
 
-        Object.defineProperty(window, "location", {
-            value: { ...window.location, href: originalHref },
-            writable: true,
-            configurable: true
-        });
+        window.location = originalLocation;
     });
 
     it("does not save to localStorage when form submission fails", async () => {

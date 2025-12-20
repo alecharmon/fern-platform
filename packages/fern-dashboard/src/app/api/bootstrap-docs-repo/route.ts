@@ -214,7 +214,7 @@ export const POST = withZodValidation(
 
             const zipBuffer = await createZipArchive(organizationName, openapiSpec, openapiFileName, marketingSite);
 
-            return new NextResponse(new Uint8Array(zipBuffer), {
+            return new NextResponse(zipBuffer, {
                 status: 200,
                 headers: {
                     "Content-Type": "application/zip",
