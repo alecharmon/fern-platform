@@ -35,7 +35,7 @@ async function FernSvgIconServerInternal({ src, alt, className }: FernSvgIconSer
             }
         }
 
-        return <span dangerouslySetInnerHTML={{ __html: modifiedSvgContent }} />;
+        return <span className={className} dangerouslySetInnerHTML={{ __html: modifiedSvgContent }} />;
     } catch (error) {
         console.error(`[FernSvgIconServer] Failed to fetch SVG: ${src}`, error);
         // Fallback to Next.js Image on error

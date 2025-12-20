@@ -9,6 +9,15 @@ export interface ProcessIconStringOptions {
     className?: string;
     renderFaIcon: (icon: string) => ReactNode;
     wrap?: (content: ReactNode) => ReactNode;
+    renderUrlIcon?: (url: string, isSvg: boolean) => ReactNode;
+}
+
+function isUrlIcon(icon: string): boolean {
+    return icon.startsWith("http://") || icon.startsWith("https://") || icon.startsWith("/");
+}
+
+function isSvgUrl(url: string): boolean {
+    return url.toLowerCase().endsWith(".svg");
 }
 
 export const processIconString = ({
@@ -16,14 +25,15 @@ export const processIconString = ({
     files,
     className = "size-5",
     renderFaIcon,
-    wrap = (content) => content
+    wrap = (content) => content,
+    renderUrlIcon
 }: ProcessIconStringOptions): ReactNode | undefined => {
     if (icon.startsWith("file:")) {
         const fileId = icon.slice(5);
         const fileData = files?.[fileId];
 
         if (fileData) {
-            if (fileData.src.endsWith(".svg")) {
+            if (fileData.src.toLowerCase().endsWith(".svg")) {
                 return wrap(<FernSvgIcon src={fileData.src} alt={fileData.alt ?? ""} className={className} />);
             }
 
@@ -40,6 +50,10 @@ export const processIconString = ({
             );
         }
         return undefined;
+    }
+
+    if (renderUrlIcon && isUrlIcon(icon)) {
+        return wrap(renderUrlIcon(icon, isSvgUrl(icon)));
     }
 
     if (icon.startsWith("<") && icon.endsWith(">")) {

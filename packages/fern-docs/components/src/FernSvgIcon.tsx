@@ -46,5 +46,5 @@ export const FernSvgIcon: React.FC<FernSvgIconProps> = ({ src, alt, className })
         return <span className={className} />;
     }
 
-    return <span dangerouslySetInnerHTML={{ __html: modifiedSvgContent }} />;
+    return <span className={className} dangerouslySetInnerHTML={{ __html: modifiedSvgContent }} />;
 };

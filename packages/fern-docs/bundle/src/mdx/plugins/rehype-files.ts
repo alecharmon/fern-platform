@@ -56,6 +56,7 @@ export const rehypeFiles: Unified.Plugin<[RehypeFilesOptions?], Hast.Root> = ({ 
 
                 // TODO: do we need to add support for `href` and `<object data=...>`?
                 const srcAttribute = attributes.find((attr) => attr.name === "src");
+                const iconAttribute = attributes.find((attr) => attr.name === "icon");
 
                 // TODO: handle more gracefully, temporary fix for jambonz
                 const playsInlineAttribute = attributes.find((attr) => attr.name === "playsinline");
@@ -63,33 +64,42 @@ export const rehypeFiles: Unified.Plugin<[RehypeFilesOptions?], Hast.Root> = ({ 
                     playsInlineAttribute.name = "playsInline";
                 }
 
-                if (srcAttribute == null) {
-                    return;
+                // Handle src attribute
+                if (srcAttribute != null) {
+                    const src = mdxJsxAttributeToString(srcAttribute);
+                    if (!src) {
+                        console.warn(`[rehype-files]: src attribute is not parseable for ${node.name}`);
+                    } else {
+                        const { src: newSrc, height, width, blurDataURL } = replaceSrc?.(src, node.name) ?? {};
+
+                        if (newSrc != null) {
+                            srcAttribute.value = newSrc;
+                        }
+
+                        setDimension(node, attributes, width, height);
+
+                        if (
+                            blurDataURL &&
+                            node.name?.toLowerCase().startsWith("im") &&
+                            !attributes.find((attr) => attr.name === "blurDataURL")
+                        ) {
+                            node.attributes.unshift({
+                                name: "blurDataURL",
+                                value: blurDataURL,
+                                type: "mdxJsxAttribute"
+                            });
+                        }
+                    }
                 }
 
-                const src = mdxJsxAttributeToString(srcAttribute);
-                if (!src) {
-                    console.warn(`[rehype-files]: src attribute is not parseable for ${node.name}`);
-                    return;
-                }
-                const { src: newSrc, height, width, blurDataURL } = replaceSrc?.(src, node.name) ?? {};
-
-                if (newSrc != null) {
-                    srcAttribute.value = newSrc;
-                }
-
-                setDimension(node, attributes, width, height);
-
-                if (
-                    blurDataURL &&
-                    node.name?.toLowerCase().startsWith("im") &&
-                    !attributes.find((attr) => attr.name === "blurDataURL")
-                ) {
-                    node.attributes.unshift({
-                        name: "blurDataURL",
-                        value: blurDataURL,
-                        type: "mdxJsxAttribute"
-                    });
+                if (iconAttribute != null) {
+                    const icon = mdxJsxAttributeToString(iconAttribute);
+                    if (icon?.startsWith("file:")) {
+                        const { src: newSrc } = replaceSrc?.(icon, node.name) ?? {};
+                        if (newSrc != null) {
+                            iconAttribute.value = newSrc;
+                        }
+                    }
                 }
             } else if (node.type === "element") {
                 // TODO: do we need to add support for `href` and `<object data=...>`?

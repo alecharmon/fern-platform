@@ -3,7 +3,9 @@ import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
 import { DisableFernAnchor } from "@fern-docs/components/FernAnchor";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { FernImage } from "@fern-docs/components/FernImage";
+import { FernSvgIcon } from "@fern-docs/components/FernSvgIcon";
 import { FaIcon } from "@fern-docs/components/fa-icon";
+import { processIconString } from "@fern-docs/components/util/processIconString";
 import { isValidElement } from "react";
 import { FernLinkCard } from "@/components/FernLinkCard";
 
@@ -79,6 +81,35 @@ export const Card: React.FC<Card.Props> = ({
         }
     }
 
+    const renderIcon = () => {
+        if (typeof icon === "string") {
+            return processIconString({
+                icon,
+                className: "card-icon",
+                renderFaIcon: (faIcon) => <FaIcon className="card-icon" icon={faIcon} />,
+                renderUrlIcon: (url, isSvg) =>
+                    isSvg ? (
+                        <NoZoom>
+                            <FernSvgIcon src={url} alt="" className="card-icon" />
+                        </NoZoom>
+                    ) : (
+                        <NoZoom>
+                            <FernImage src={url} alt="" className="card-icon" />
+                        </NoZoom>
+                    ),
+                wrap: (content) => <NoZoom>{content}</NoZoom>
+            });
+        }
+        if (isValidElement(icon)) {
+            return (
+                <span className="card-icon">
+                    <NoZoom>{icon}</NoZoom>
+                </span>
+            );
+        }
+        return null;
+    };
+
     const cardContent = (
         <>
             {badge != null && (
@@ -105,13 +136,7 @@ export const Card: React.FC<Card.Props> = ({
             }
           `}
                 </style>
-                {typeof icon === "string" ? (
-                    <FaIcon className="card-icon" icon={icon} />
-                ) : isValidElement(icon) ? (
-                    <span className="card-icon">
-                        <NoZoom>{icon}</NoZoom>
-                    </span>
-                ) : null}
+                {renderIcon()}
                 <div className="w-full space-y-1 overflow-hidden">
                     <div className="text-body text-base font-semibold">{title}</div>
                     {children != null && <div className="text-(color:--grayscale-a11)">{children}</div>}
