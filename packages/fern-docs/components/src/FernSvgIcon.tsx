@@ -30,9 +30,15 @@ export const FernSvgIcon: React.FC<FernSvgIconProps> = ({ src, alt, className })
         const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
         const svgElement = svgDoc.querySelector("svg");
 
-        if (svgElement && className) {
-            const existingClass = svgElement.getAttribute("class");
-            svgElement.setAttribute("class", existingClass ? `${existingClass} ${className}` : className);
+        if (svgElement) {
+            if (className) {
+                const existingClass = svgElement.getAttribute("class");
+                svgElement.setAttribute("class", existingClass ? `${existingClass} ${className}` : className);
+            }
+
+            // size of svg should be set by parent element
+            svgElement.setAttribute("width", "100%");
+            svgElement.setAttribute("height", "100%");
         }
 
         return svgElement ? new XMLSerializer().serializeToString(svgElement) : svgContent;
