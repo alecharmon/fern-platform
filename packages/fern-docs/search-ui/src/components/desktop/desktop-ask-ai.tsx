@@ -32,6 +32,14 @@ export const DesktopCommandWithAskAI = forwardRef<
         };
         openSearchPanel?: () => void;
         lang: string;
+        /**
+         * Initial query to pre-populate the search input (for deep linking).
+         */
+        initialQuery?: string;
+        /**
+         * Callback to clear the initial query after it has been applied.
+         */
+        onInitialQueryApplied?: () => void;
     }
 >(
     (
@@ -51,6 +59,8 @@ export const DesktopCommandWithAskAI = forwardRef<
             useConversationId,
             openSearchPanel,
             lang,
+            initialQuery,
+            onInitialQueryApplied,
             ...props
         },
         forwardedRef
@@ -75,7 +85,12 @@ export const DesktopCommandWithAskAI = forwardRef<
                 data-mode={"search"}
                 lang={lang}
             >
-                <DesktopCommandContent asChild={asChild} lang={lang}>
+                <DesktopCommandContent
+                    asChild={asChild}
+                    lang={lang}
+                    initialQuery={initialQuery}
+                    onInitialQueryApplied={onInitialQueryApplied}
+                >
                     <CommandAskAIGroup
                         onAskAI={(initialInput) => {
                             setInitialInput?.(initialInput);

@@ -6,7 +6,6 @@ import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { ArrowLeft } from "lucide-react";
-
 import {
     type ComponentPropsWithoutRef,
     forwardRef,
@@ -29,6 +28,15 @@ export interface DesktopCommandProps {
     onPopState?: (e: KeyboardEvent<HTMLDivElement>) => void;
     placeholder?: string;
     lang: string;
+    /**
+     * Initial query to pre-populate the search input (for deep linking).
+     * This will be applied once when the component mounts.
+     */
+    initialQuery?: string;
+    /**
+     * Callback to clear the initial query after it has been applied.
+     */
+    onInitialQueryApplied?: () => void;
 }
 
 export const beforeInput = tunnel();
@@ -40,40 +48,50 @@ export const afterInput = tunnel();
 const DesktopCommand = forwardRef<
     HTMLDivElement,
     DesktopCommandProps & ComponentPropsWithoutRef<typeof DesktopCommandRoot>
->(({ onPopState, children, placeholder, asChild, lang, ...props }, forwardedRef) => {
-    const { filters, handlePopState: handlePopFilters } = useFacetFilters();
-    const ref = useRef<HTMLDivElement>(null);
+>(
+    (
+        { onPopState, children, placeholder, asChild, lang, initialQuery, onInitialQueryApplied, ...props },
+        forwardedRef
+    ) => {
+        const { filters, handlePopState: handlePopFilters } = useFacetFilters();
+        const ref = useRef<HTMLDivElement>(null);
 
-    // animate on presence
-    useEffect(() => {
-        if (ref.current) {
-            ref.current.animate(
-                { transform: ["scale(0.96)", "scale(1)"] },
-                { duration: 100, easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)" }
-            );
-        }
-    }, []);
+        // animate on presence
+        useEffect(() => {
+            if (ref.current) {
+                ref.current.animate(
+                    { transform: ["scale(0.96)", "scale(1)"] },
+                    { duration: 100, easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)" }
+                );
+            }
+        }, []);
 
-    return (
-        <DesktopCommandRoot
-            label={t(lang).search.search}
-            {...props}
-            ref={composeRefs(forwardedRef, ref)}
-            onPopState={composeEventHandlers(onPopState, handlePopFilters, {
-                checkForDefaultPrevented: false
-            })}
-            escapeKeyShouldPopState={filters.length > 0}
-            data-fern-search="desktop-command"
-            data-location="modal"
-            data-mode={"search"}
-            lang={lang}
-        >
-            <DesktopCommandContent asChild={asChild} lang={lang}>
-                {children}
-            </DesktopCommandContent>
-        </DesktopCommandRoot>
-    );
-});
+        return (
+            <DesktopCommandRoot
+                label={t(lang).search.search}
+                {...props}
+                ref={composeRefs(forwardedRef, ref)}
+                onPopState={composeEventHandlers(onPopState, handlePopFilters, {
+                    checkForDefaultPrevented: false
+                })}
+                escapeKeyShouldPopState={filters.length > 0}
+                data-fern-search="desktop-command"
+                data-location="modal"
+                data-mode={"search"}
+                lang={lang}
+            >
+                <DesktopCommandContent
+                    asChild={asChild}
+                    lang={lang}
+                    initialQuery={initialQuery}
+                    onInitialQueryApplied={onInitialQueryApplied}
+                >
+                    {children}
+                </DesktopCommandContent>
+            </DesktopCommandRoot>
+        );
+    }
+);
 
 DesktopCommand.displayName = "DesktopCommand";
 
@@ -82,12 +100,16 @@ export const DesktopCommandContent = memo(
         children,
         asChild,
         modal,
-        lang
+        lang,
+        initialQuery,
+        onInitialQueryApplied
     }: {
         children: React.ReactNode;
         asChild?: boolean;
         modal?: boolean;
         lang: string;
+        initialQuery?: string;
+        onInitialQueryApplied?: () => void;
     }) => {
         const inputRef = useRef<HTMLInputElement>(null);
         const scrollRef = useRef<HTMLDivElement>(null);
@@ -105,7 +127,12 @@ export const DesktopCommandContent = memo(
                         <beforeInput.Out />
 
                         <DesktopCommandInputError asChild>
-                            <DesktopCommandInputSearch ref={inputRef} lang={lang} />
+                            <DesktopCommandInputSearch
+                                ref={inputRef}
+                                lang={lang}
+                                initialQuery={initialQuery}
+                                onInitialQueryApplied={onInitialQueryApplied}
+                            />
                         </DesktopCommandInputError>
 
                         <afterInput.Out />
@@ -123,34 +150,50 @@ export const DesktopCommandContent = memo(
 DesktopCommandContent.displayName = "DesktopCommandContent";
 
 const DesktopCommandInputSearch = memo(
-    forwardRef<HTMLInputElement, ComponentPropsWithoutRef<typeof DesktopCommandInput> & { lang: string }>(
-        ({ lang, ...props }, forwardedRef) => {
-            const inputRef = useRef<HTMLInputElement>(null);
-            const { query, refine } = useSearchBox();
-            useEffect(() => {
-                setTimeout(() => {
-                    if (document.activeElement !== inputRef.current) {
-                        inputRef.current?.focus();
-                    }
-                });
-            });
-            return (
-                <DesktopCommandInput
-                    inputMode="search"
-                    autoFocus
-                    value={query}
-                    maxLength={100}
-                    placeholder={t(lang).search.search}
-                    {...props}
-                    ref={composeRefs(inputRef, forwardedRef)}
-                    onValueChange={(value) => {
-                        refine(value);
-                        props.onValueChange?.(value);
-                    }}
-                />
-            );
+    forwardRef<
+        HTMLInputElement,
+        ComponentPropsWithoutRef<typeof DesktopCommandInput> & {
+            lang: string;
+            initialQuery?: string;
+            onInitialQueryApplied?: () => void;
         }
-    )
+    >(({ lang, initialQuery, onInitialQueryApplied, ...props }, forwardedRef) => {
+        const inputRef = useRef<HTMLInputElement>(null);
+        const { query, refine } = useSearchBox();
+        const initialQueryAppliedRef = useRef(false);
+
+        // Apply initial query from deep linking (one-time, via props)
+        useEffect(() => {
+            if (initialQuery && !initialQueryAppliedRef.current && initialQuery !== query) {
+                initialQueryAppliedRef.current = true;
+                refine(initialQuery);
+                onInitialQueryApplied?.();
+            }
+        }, [initialQuery, query, refine, onInitialQueryApplied]);
+
+        useEffect(() => {
+            setTimeout(() => {
+                if (document.activeElement !== inputRef.current) {
+                    inputRef.current?.focus();
+                }
+            });
+        });
+        return (
+            <DesktopCommandInput
+                inputMode="search"
+                autoFocus
+                value={query}
+                maxLength={100}
+                placeholder={t(lang).search.search}
+                {...props}
+                ref={composeRefs(inputRef, forwardedRef)}
+                onValueChange={(value) => {
+                    refine(value);
+                    props.onValueChange?.(value);
+                }}
+            />
+        );
+    })
 );
 
 DesktopCommandInputSearch.displayName = "DesktopCommandInputSearch";

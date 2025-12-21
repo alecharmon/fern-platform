@@ -22,7 +22,7 @@ import {
 import { useEventCallback } from "@fern-ui/react-commons";
 import { isEqual } from "es-toolkit/predicate";
 import { atom, useAtom, useSetAtom } from "jotai";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { z } from "zod";
 import { useApiRoute } from "@/components/hooks/useApiRoute";
@@ -86,6 +86,7 @@ export const SearchV2 = React.memo(function SearchV2({
 
     const [open, setOpen] = useCommandTrigger();
     const [initialInput, setInitialInput] = useAtom(searchPanelInitialInputAtom);
+    const [initialQuery, setInitialQuery] = React.useState<string | undefined>(undefined);
     const openSearchPanel = useOpenSearchPanel();
     const conversationIdHook = useConversationId();
     const queryIdHook = useQueryId();
@@ -143,6 +144,50 @@ export const SearchV2 = React.memo(function SearchV2({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname]);
 
+    // Handle deep linking via URL parameters
+    const searchParams = useSearchParams();
+    const deepLinkHandledRef = React.useRef(false);
+    React.useEffect(() => {
+        if (deepLinkHandledRef.current || !data) {
+            return;
+        }
+
+        const searchType = searchParams.get("searchType");
+        const query = searchParams.get("query");
+
+        // If neither searchType nor query is provided, don't open search
+        if (!searchType && !query) {
+            return;
+        }
+
+        deepLinkHandledRef.current = true;
+
+        if (searchType === "ai" && isAskAiEnabled) {
+            // Open the AI search panel with the query
+            if (query) {
+                setInitialInput(query);
+            }
+            openSearchPanel();
+        } else {
+            // Open the regular search dialog for:
+            // - searchType=semantic
+            // - searchType=ai when AI is not enabled (fallback)
+            // - No searchType provided (default to semantic)
+            if (query) {
+                setInitialQuery(query);
+            }
+            setOpen(true);
+        }
+
+        // Clean up URL parameters after handling
+        if (typeof window !== "undefined") {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("searchType");
+            url.searchParams.delete("query");
+            window.history.replaceState({}, "", url.toString());
+        }
+    }, [searchParams, data, isAskAiEnabled, setInitialInput, openSearchPanel, setOpen]);
+
     if (!data) {
         return null;
     }
@@ -194,7 +239,13 @@ export const SearchV2 = React.memo(function SearchV2({
                 initialFilters={Object.keys(initialFilters).length > 0 ? initialFilters : undefined}
             >
                 <DesktopSearchDialog open={open} onOpenChange={setOpen} lang={lang}>
-                    <DesktopCommand onEscapeKeyDown={() => setOpen(false)} className="shadow-xl" lang={lang}>
+                    <DesktopCommand
+                        onEscapeKeyDown={() => setOpen(false)}
+                        className="shadow-xl"
+                        lang={lang}
+                        initialQuery={initialQuery}
+                        onInitialQueryApplied={() => setInitialQuery(undefined)}
+                    >
                         {children}
                     </DesktopCommand>
                 </DesktopSearchDialog>
@@ -250,11 +301,19 @@ export const SearchV2 = React.memo(function SearchV2({
                         className="shadow-xl"
                         openSearchPanel={openSearchPanel}
                         lang={lang}
+                        initialQuery={initialQuery}
+                        onInitialQueryApplied={() => setInitialQuery(undefined)}
                     >
                         {children}
                     </DesktopCommandWithAskAI>
                 ) : (
-                    <DesktopCommand onEscapeKeyDown={() => setOpen(false)} className="shadow-xl" lang={lang}>
+                    <DesktopCommand
+                        onEscapeKeyDown={() => setOpen(false)}
+                        className="shadow-xl"
+                        lang={lang}
+                        initialQuery={initialQuery}
+                        onInitialQueryApplied={() => setInitialQuery(undefined)}
+                    >
                         {children}
                     </DesktopCommand>
                 )}
