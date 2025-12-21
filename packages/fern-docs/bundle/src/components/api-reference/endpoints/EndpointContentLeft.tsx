@@ -123,9 +123,12 @@ export async function EndpointContentLeft({
                         >
                             <WithSeparator>
                                 {endpoint.pathParameters.map((parameter) => (
-                                    <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
-                                        <ObjectProperty property={parameter} types={types} lang={lang} />
-                                    </TypeDefinitionAnchorPart>
+                                    <ObjectProperty
+                                        key={parameter.key}
+                                        property={parameter}
+                                        types={types}
+                                        lang={lang}
+                                    />
                                 ))}
                             </WithSeparator>
                         </EndpointSection>
@@ -136,9 +139,12 @@ export async function EndpointContentLeft({
                         <EndpointSection title={t(lang).apiReference.headers} className="fern-endpoint-section-headers">
                             <WithSeparator>
                                 {headers.map((parameter) => (
-                                    <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
-                                        <ObjectProperty property={parameter} types={types} lang={lang} />
-                                    </TypeDefinitionAnchorPart>
+                                    <ObjectProperty
+                                        key={parameter.key}
+                                        property={parameter}
+                                        types={types}
+                                        lang={lang}
+                                    />
                                 ))}
                             </WithSeparator>
                         </EndpointSection>
@@ -152,9 +158,12 @@ export async function EndpointContentLeft({
                         >
                             <WithSeparator>
                                 {endpoint.queryParameters.map((parameter) => (
-                                    <TypeDefinitionAnchorPart key={parameter.key} part={parameter.key}>
-                                        <ObjectProperty property={parameter} types={types} lang={lang} />
-                                    </TypeDefinitionAnchorPart>
+                                    <ObjectProperty
+                                        key={parameter.key}
+                                        property={parameter}
+                                        types={types}
+                                        lang={lang}
+                                    />
                                 ))}
                             </WithSeparator>
                         </EndpointSection>
