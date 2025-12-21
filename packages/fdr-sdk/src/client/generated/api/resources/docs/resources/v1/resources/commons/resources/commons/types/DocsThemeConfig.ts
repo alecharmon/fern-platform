@@ -9,4 +9,5 @@ export interface DocsThemeConfig {
     footerNav: FernRegistry.docs.v1.commons.FooterNavConfig | undefined;
     "page-actions": FernRegistry.docs.v1.commons.DocsPageActionsConfig | undefined;
     "language-switcher": FernRegistry.docs.v1.commons.LanguageSwitcherConfig | undefined;
+    "product-switcher": FernRegistry.docs.v1.commons.ProductSwitcherConfig | undefined;
 }

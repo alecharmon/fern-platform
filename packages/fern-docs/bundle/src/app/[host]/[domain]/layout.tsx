@@ -200,7 +200,12 @@ export default async function Layout({
                             />
                             <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>
                                 <ErrorBoundaryProvider ErrorBoundary={ErrorBoundary}>
-                                    <div data-body-theme={theme?.body}>{children}</div>
+                                    <div
+                                        data-body-theme={theme?.body}
+                                        data-product-switcher-theme={theme?.productSwitcher}
+                                    >
+                                        {children}
+                                    </div>
                                 </ErrorBoundaryProvider>
                             </FeatureFlagProvider>
                             <React.Suspense fallback={null}>

@@ -65,6 +65,7 @@ export * from "./PageWidthSizeConfig";
 export * from "./PirschConfig";
 export * from "./PlausibleConfig";
 export * from "./PostHogConfig";
+export * from "./ProductSwitcherConfig";
 export * from "./ProgrammingLanguage";
 export * from "./RedirectConfig";
 export * from "./RgbaColor";

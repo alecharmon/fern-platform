@@ -217,6 +217,7 @@ types:
       footerNav: optional<FooterNavConfig>
       page-actions: optional<DocsPageActionsConfig>
       language-switcher: optional<LanguageSwitcherConfig>
+      product-switcher: optional<ProductSwitcherConfig>
       
   FooterNavConfig:
     enum:
@@ -247,6 +248,11 @@ types:
     enum:
       - default
       - minimal
+
+  ProductSwitcherConfig:
+    enum:
+      - default
+      - toggle
 
   DocsSettingsConfig:
     properties:

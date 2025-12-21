@@ -65,6 +65,7 @@ export * from "./PageWidthSizeConfig.js";
 export * from "./PirschConfig.js";
 export * from "./PlausibleConfig.js";
 export * from "./PostHogConfig.js";
+export * from "./ProductSwitcherConfig.js";
 export * from "./ProgrammingLanguage.js";
 export * from "./RedirectConfig.js";
 export * from "./RgbaColor.js";

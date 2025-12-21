@@ -799,7 +799,8 @@ const getTheme = (cacheConfig: Required<CacheConfig>) =>
         return {
             sidebar: theme?.sidebar ?? "default",
             tabs: theme?.tabs ?? "default",
-            body: theme?.body ?? "default"
+            body: theme?.body ?? "default",
+            productSwitcher: theme?.["product-switcher"] ?? "default"
         };
     });
 
