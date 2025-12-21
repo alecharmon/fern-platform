@@ -1,6 +1,7 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { createFileResolver } from "@fern-api/docs-server/file-resolver";
 import { getProducts } from "@fern-api/docs-server/handle-node-fallbacks";
+import type { ProductSwitcherThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import Image from "next/image";
 import { processIcon } from "../processIcon";
@@ -13,11 +14,13 @@ export declare namespace ProductDropdown {
 export async function ProductDropdown({
     loader,
     fallbackProduct,
-    useDenseLayout = false
+    useDenseLayout = false,
+    productSwitcherTheme
 }: {
     loader: DocsLoader;
     fallbackProduct: FernNavigation.ProductNode;
     useDenseLayout?: boolean;
+    productSwitcherTheme?: ProductSwitcherThemeConfig;
 }) {
     const root = await loader.getRoot();
     if (root.child.type !== "productgroup") {
@@ -71,6 +74,7 @@ export async function ProductDropdown({
             fallbackProduct={fallbackProduct}
             useDenseLayout={useDenseLayout}
             lang={lang}
+            productSwitcherTheme={productSwitcherTheme}
         />
     );
 }

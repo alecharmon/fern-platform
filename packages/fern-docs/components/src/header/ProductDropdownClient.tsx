@@ -1,11 +1,13 @@
 "use client";
 
 import { slugToHref } from "@fern-api/docs-utils";
+import type { ProductSwitcherThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { useIsDesktop } from "@fern-ui/react-commons";
 import { ChevronDown, ChevronsUpDown } from "lucide-react";
 import { cn } from "../cn";
 import { FernDropdown } from "../FernDropdown";
+import { FernLink } from "../FernLink";
 import { FernSelectionItem } from "../FernSelectionItem";
 import { useCurrentProductId, useCurrentProductSlug } from "../state/navigation";
 
@@ -26,12 +28,14 @@ export function ProductDropdownClient({
     products,
     fallbackProduct,
     useDenseLayout = false,
-    lang
+    lang,
+    productSwitcherTheme
 }: {
     products: ProductDropdownItem[];
     fallbackProduct: FernNavigation.ProductNode;
     useDenseLayout?: boolean;
     lang: string;
+    productSwitcherTheme?: ProductSwitcherThemeConfig;
 }) {
     const isDesktop = useIsDesktop();
     const currentProductId = useCurrentProductId();
@@ -44,6 +48,38 @@ export function ProductDropdownClient({
 
     if (!currentProduct) {
         return null;
+    }
+
+    const isToggleTheme = productSwitcherTheme === "toggle";
+
+    if (isToggleTheme && isDesktop) {
+        return (
+            <div className="fern-product-selector" data-testid="product-toggle">
+                {products.map((product) => {
+                    const productHref =
+                        product.href ??
+                        slugToHref(
+                            pickProductSlug({
+                                currentProductSlug,
+                                defaultSlug: product.defaultSlug,
+                                slug: product.slug ?? ""
+                            })
+                        );
+                    const isActive = product.productId === currentProductId;
+                    return (
+                        <FernLink
+                            key={product.productId}
+                            href={productHref}
+                            target={product.target}
+                            className="product-dropdown-trigger"
+                            data-active={isActive}
+                        >
+                            {product.title}
+                        </FernLink>
+                    );
+                })}
+            </div>
+        );
     }
 
     return (
