@@ -13,12 +13,14 @@ import { DesktopCommandAfterInput } from "./desktop-command";
 
 const overlayVariants = {
     hidden: { opacity: 0, backdropFilter: "blur(0px)" },
-    visible: { opacity: 1, backdropFilter: "blur(12px)" }
+    visible: { opacity: 1, backdropFilter: "blur(12px)" },
+    exit: { opacity: 0, backdropFilter: "blur(0px)" }
 };
 
 const contentVariants = {
-    hidden: { opacity: 0, scale: 0.85 },
-    visible: { opacity: 1, scale: 1 }
+    hidden: { opacity: 1, scale: 0.85 },
+    visible: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.85 }
 };
 
 const transition = {
@@ -101,7 +103,7 @@ export const DesktopSearchDialog = memo(
                                     variants={overlayVariants}
                                     initial="hidden"
                                     animate="visible"
-                                    exit="hidden"
+                                    exit="exit"
                                     transition={transition}
                                 />
                             </Dialog.Overlay>
@@ -123,7 +125,7 @@ export const DesktopSearchDialog = memo(
                                     variants={contentVariants}
                                     initial="hidden"
                                     animate="visible"
-                                    exit="hidden"
+                                    exit="exit"
                                     transition={transition}
                                 >
                                     {children}

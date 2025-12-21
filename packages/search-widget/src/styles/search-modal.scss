@@ -16,5 +16,15 @@
 @import "../../../fern-docs/search-ui/src/index.css";
 @import "../../../fern-docs/search-ui/src/components/desktop/desktop.scss";
 
+#fern-search-dialog-overlay {
+    z-index: 60 !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+
+#fern-search-dialog {
+    z-index: 70 !important;
+}
+
 @import "./fern-accent.scss";
 @import "../../../fern-docs/components/src/syntax-highlighter/index.css";

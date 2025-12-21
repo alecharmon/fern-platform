@@ -363,3 +363,13 @@
 @utility bg-search-dialog {
   background-color: var(--bg-color-search-dialog, var(--color-background-a9));
 }
+
+/* 
+ * Radix portals render to body outside the dialog container.
+ * This sibling selector targets only portals created by the widget
+ * and ensures they appear above the modal overlay.
+ * The selector starts with #fern-search-dialog so it won't be rewritten by the PostCSS scoping plugin.
+ */
+#fern-search-dialog ~ [data-radix-popper-content-wrapper] {
+  z-index: 100 !important;
+}
