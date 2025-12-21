@@ -40,7 +40,8 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
 
 export const DEFAULT_LOCAL_EDGE_FLAGS: EdgeFlags = {
     ...DEFAULT_EDGE_FLAGS,
-    isAuthenticatedPagesDiscoverable: true
+    isAuthenticatedPagesDiscoverable: true,
+    isCustomReactEnabled: true
 };
 
 export const DEFAULT_SELF_HOSTED_EDGE_FLAGS: EdgeFlags = {
