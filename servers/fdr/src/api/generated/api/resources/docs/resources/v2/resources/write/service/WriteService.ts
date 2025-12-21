@@ -513,6 +513,7 @@ export class WriteService {
                     switch (error.errorName) {
                         case "DocsNotFoundError":
                         case "UnauthorizedError":
+                        case "CannotDeleteNonPreviewSiteError":
                             break;
                         default:
                             console.warn(

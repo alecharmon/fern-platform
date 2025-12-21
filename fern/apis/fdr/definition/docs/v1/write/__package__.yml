@@ -132,6 +132,18 @@ types:
       # page actions
       pageActions: optional<commons.PageActionsConfig>
 
+      # custom components
+      header:
+        type: optional<string>
+        docs: |
+          Compiled JavaScript module for a custom React component that replaces the default header.
+          The Fern CLI transpiles the user's TSX/JSX source file and uploads the compiled JS to FDR.
+      footer:
+        type: optional<string>
+        docs: |
+          Compiled JavaScript module for a custom React component that replaces the default footer.
+          The Fern CLI transpiles the user's TSX/JSX source file and uploads the compiled JS to FDR.
+
       # deprecated
       backgroundImage: optional<rootCommons.FileId>
       logoV2: optional<commons.ThemedFileId>

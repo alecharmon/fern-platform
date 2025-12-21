@@ -6,6 +6,7 @@ import type * as FernRegistry from "../../../../../../../index.js";
 export type Error =
     | FernRegistry.docs.v2.write.deleteDocsSite.Error.DocsNotFoundError
     | FernRegistry.docs.v2.write.deleteDocsSite.Error.UnauthorizedError
+    | FernRegistry.docs.v2.write.deleteDocsSite.Error.CannotDeleteNonPreviewSiteError
     | FernRegistry.docs.v2.write.deleteDocsSite.Error._Unknown;
 
 export namespace Error {
@@ -18,6 +19,10 @@ export namespace Error {
         content: string;
     }
 
+    export interface CannotDeleteNonPreviewSiteError {
+        error: "CannotDeleteNonPreviewSiteError";
+    }
+
     export interface _Unknown {
         error: void;
         content: core.Fetcher.Error;
@@ -26,6 +31,7 @@ export namespace Error {
     export interface _Visitor<_Result> {
         docsNotFoundError: () => _Result;
         unauthorizedError: (value: string) => _Result;
+        cannotDeleteNonPreviewSiteError: () => _Result;
         _other: (value: core.Fetcher.Error) => _Result;
     }
 }
@@ -44,6 +50,13 @@ export const Error = {
         };
     },
 
+    cannotDeleteNonPreviewSiteError:
+        (): FernRegistry.docs.v2.write.deleteDocsSite.Error.CannotDeleteNonPreviewSiteError => {
+            return {
+                error: "CannotDeleteNonPreviewSiteError",
+            };
+        },
+
     _unknown: (fetcherError: core.Fetcher.Error): FernRegistry.docs.v2.write.deleteDocsSite.Error._Unknown => {
         return {
             error: undefined,
@@ -60,6 +73,8 @@ export const Error = {
                 return visitor.docsNotFoundError();
             case "UnauthorizedError":
                 return visitor.unauthorizedError(value.content);
+            case "CannotDeleteNonPreviewSiteError":
+                return visitor.cannotDeleteNonPreviewSiteError();
             default:
                 return visitor._other(value.content);
         }

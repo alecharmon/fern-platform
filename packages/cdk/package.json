@@ -16,13 +16,13 @@
   "scripts": {
     "build": "tsc",
     "cdk": "cdk",
-    "deploy-app:dev2": "pnpm build && cdk deploy local-preview-bundle4-dev2 --require-approval never --progress events",
-    "deploy-app:prod": "pnpm build && cdk deploy local-preview-bundle4-prod --require-approval never --progress events",
     "deploy:dev2": "pnpm build && cdk deploy local-preview-bundle2-dev2 --require-approval never --progress events",
     "deploy:prod": "pnpm build && cdk deploy local-preview-bundle2-prod --require-approval never --progress events",
+    "deploy-app:dev2": "pnpm build && cdk deploy local-preview-bundle4-dev2 --require-approval never --progress events",
+    "deploy-app:prod": "pnpm build && cdk deploy local-preview-bundle4-prod --require-approval never --progress events",
     "docs:local:zipBundle": "ts-node --compiler-options='{\"module\":\"commonjs\"}' scripts/zipLocalBundle.ts",
-    "synth-app:dev2": "pnpm build && cdk synth local-preview-bundle4-dev2",
-    "synth:dev2": "pnpm build && cdk synth local-preview-bundle2-dev2"
+    "synth:dev2": "pnpm build && cdk synth local-preview-bundle2-dev2",
+    "synth-app:dev2": "pnpm build && cdk synth local-preview-bundle4-dev2"
   },
   "dependencies": {
     "@fern-fern/fern-cloud-sdk": "^0.0.305",

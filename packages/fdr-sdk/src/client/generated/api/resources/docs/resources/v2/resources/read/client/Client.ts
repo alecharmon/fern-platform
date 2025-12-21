@@ -535,7 +535,7 @@ export class ReadClient {
             >
         >
     > {
-        const { page, limit, custom } = request;
+        const { page, limit, custom, preview } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (page != null) {
             _queryParams.page = page.toString();
@@ -547,6 +547,10 @@ export class ReadClient {
 
         if (custom != null) {
             _queryParams.custom = custom.toString();
+        }
+
+        if (preview != null) {
+            _queryParams.preview = preview.toString();
         }
 
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(

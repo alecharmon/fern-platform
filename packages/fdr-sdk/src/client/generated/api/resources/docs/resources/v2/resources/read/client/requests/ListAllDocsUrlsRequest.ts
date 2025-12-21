@@ -9,4 +9,6 @@ export interface ListAllDocsUrlsRequest {
     limit?: number;
     /** If true, filters to only docs with a custom URL. */
     custom?: boolean;
+    /** If true, returns only preview docs. If false or omitted, returns only non-preview docs. */
+    preview?: boolean;
 }

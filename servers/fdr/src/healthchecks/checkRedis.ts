@@ -44,6 +44,8 @@ const HEALTHCHECK_DOCS_RESPONSE: CachedDocsResponse = {
                 integrations: undefined,
                 css: undefined,
                 js: undefined,
+                header: undefined,
+                footer: undefined,
                 aiChatConfig: undefined,
                 pageActions: undefined
             },

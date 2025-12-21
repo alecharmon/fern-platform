@@ -147,6 +147,8 @@ export class WriteClient {
      *                 js: undefined,
      *                 aiChatConfig: undefined,
      *                 pageActions: undefined,
+     *                 header: undefined,
+     *                 footer: undefined,
      *                 backgroundImage: undefined,
      *                 logoV2: undefined,
      *                 logo: undefined,

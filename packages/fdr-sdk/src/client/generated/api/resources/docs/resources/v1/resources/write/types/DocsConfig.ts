@@ -29,6 +29,10 @@ export interface DocsConfig {
     js: FernRegistry.docs.v1.commons.JsConfig | undefined;
     aiChatConfig: FernRegistry.docs.v1.commons.AiChatConfig | undefined;
     pageActions: FernRegistry.docs.v1.commons.PageActionsConfig | undefined;
+    /** Path to a custom React component that replaces the default header. */
+    header: string | undefined;
+    /** Path to a custom React component that replaces the default footer. */
+    footer: string | undefined;
     backgroundImage: FernRegistry.FileId | undefined;
     logoV2: FernRegistry.docs.v1.commons.ThemedFileId | undefined;
     logo: FernRegistry.FileId | undefined;

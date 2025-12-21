@@ -43,6 +43,8 @@ export class DefinitionObjectFactory {
                 integrations: undefined,
                 css: undefined,
                 js: undefined,
+                header: undefined,
+                footer: undefined,
                 aiChatConfig: undefined,
                 pageActions: undefined
             },

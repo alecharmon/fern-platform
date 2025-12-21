@@ -270,6 +270,8 @@ export class WriteClient {
      *                 js: undefined,
      *                 aiChatConfig: undefined,
      *                 pageActions: undefined,
+     *                 header: undefined,
+     *                 footer: undefined,
      *                 backgroundImage: undefined,
      *                 logoV2: undefined,
      *                 logo: undefined,
@@ -905,7 +907,7 @@ export class WriteClient {
     }
 
     /**
-     * Delete a docs site and all associated data including S3 assets
+     * Delete a preview docs site. Only preview sites can be deleted through this endpoint.
      *
      * @param {FernRegistry.docs.v2.write.DeleteDocsSiteRequest} request
      * @param {WriteClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -971,6 +973,7 @@ export class WriteClient {
             switch ((_response.error.body as FernRegistry.docs.v2.write.deleteDocsSite.Error)?.error) {
                 case "DocsNotFoundError":
                 case "UnauthorizedError":
+                case "CannotDeleteNonPreviewSiteError":
                     return {
                         data: {
                             ok: false,
