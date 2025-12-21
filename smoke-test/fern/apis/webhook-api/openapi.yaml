@@ -1,0 +1,564 @@
+openapi: 3.1.0
+info:
+  title: Plant Store Webhook API
+  version: 1.0.0
+  description: |
+    Webhook API for the Plant Store. Configure webhook endpoints in your account settings to receive real-time notifications about events in your store.
+
+    ### Webhook Security
+    All webhook requests include a signature header (`X-Webhook-Signature`) that you can use to verify the authenticity of the request.
+
+    ### Retry Policy
+    Failed webhook deliveries are retried up to 5 times with exponential backoff.
+
+servers:
+  - url: https://api.plantstore.dev/v1
+    description: Production server
+
+webhooks:
+  orderCreated:
+    post:
+      tags:
+        - orders
+      summary: New order created
+      description: |
+        Triggered when a new order is placed in your store.
+        
+        **Use Cases**:
+        - Send order confirmation emails
+        - Update inventory management systems
+        - Trigger fulfillment workflows
+      operationId: onOrderCreated
+      requestBody:
+        description: New order event payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderCreatedEvent"
+            examples:
+              newOrder:
+                summary: New order placed
+                value:
+                  event: "order.created"
+                  timestamp: "2024-01-15T10:30:00Z"
+                  data:
+                    orderId: "ord_12345"
+                    customerId: "cust_67890"
+                    items:
+                      - plantId: "plant_001"
+                        plantName: "Monstera Deliciosa"
+                        quantity: 2
+                        unitPrice: 45.99
+                      - plantId: "plant_002"
+                        plantName: "Snake Plant"
+                        quantity: 1
+                        unitPrice: 29.99
+                    totalAmount: 121.97
+                    currency: "USD"
+                    shippingAddress:
+                      street: "123 Garden Lane"
+                      city: "Portland"
+                      state: "OR"
+                      zipCode: "97201"
+                      country: "US"
+      responses:
+        "200":
+          description: Webhook received successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookAcknowledgement"
+        "400":
+          description: Invalid webhook payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookError"
+      security:
+        - webhookSignature: []
+
+  orderShipped:
+    post:
+      tags:
+        - orders
+      summary: Order shipped
+      description: |
+        Triggered when an order has been shipped and tracking information is available.
+        
+        **Use Cases**:
+        - Send shipping notification emails
+        - Update order tracking dashboards
+        - Notify customers via SMS
+      operationId: onOrderShipped
+      requestBody:
+        description: Order shipped event payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderShippedEvent"
+            examples:
+              shipped:
+                summary: Order shipped with tracking
+                value:
+                  event: "order.shipped"
+                  timestamp: "2024-01-16T14:00:00Z"
+                  data:
+                    orderId: "ord_12345"
+                    trackingNumber: "1Z999AA10123456784"
+                    carrier: "UPS"
+                    estimatedDelivery: "2024-01-19T18:00:00Z"
+                    shippingMethod: "Ground"
+      responses:
+        "200":
+          description: Webhook received successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookAcknowledgement"
+      security:
+        - webhookSignature: []
+
+  orderDelivered:
+    post:
+      tags:
+        - orders
+      summary: Order delivered
+      description: |
+        Triggered when an order has been successfully delivered to the customer.
+      operationId: onOrderDelivered
+      requestBody:
+        description: Order delivered event payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderDeliveredEvent"
+            examples:
+              delivered:
+                summary: Order delivered
+                value:
+                  event: "order.delivered"
+                  timestamp: "2024-01-19T15:30:00Z"
+                  data:
+                    orderId: "ord_12345"
+                    deliveredAt: "2024-01-19T15:30:00Z"
+                    signedBy: "J. Smith"
+      responses:
+        "200":
+          description: Webhook received successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookAcknowledgement"
+      security:
+        - webhookSignature: []
+
+  inventoryLow:
+    post:
+      tags:
+        - inventory
+      summary: Low inventory alert
+      description: |
+        Triggered when a plant's inventory falls below the configured threshold.
+        
+        **Use Cases**:
+        - Trigger reorder workflows
+        - Alert inventory managers
+        - Update product availability on storefront
+      operationId: onInventoryLow
+      requestBody:
+        description: Low inventory alert payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InventoryLowEvent"
+            examples:
+              lowStock:
+                summary: Plant running low on stock
+                value:
+                  event: "inventory.low"
+                  timestamp: "2024-01-15T09:00:00Z"
+                  data:
+                    plantId: "plant_001"
+                    plantName: "Monstera Deliciosa"
+                    currentQuantity: 5
+                    threshold: 10
+                    reorderSuggested: true
+      responses:
+        "200":
+          description: Webhook received successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookAcknowledgement"
+      security:
+        - webhookSignature: []
+
+  plantPriceChanged:
+    post:
+      tags:
+        - plants
+      summary: Plant price changed
+      description: |
+        Triggered when a plant's price is updated.
+        
+        **Use Cases**:
+        - Update pricing in external systems
+        - Notify customers watching the product
+        - Sync with marketplace listings
+      operationId: onPlantPriceChanged
+      requestBody:
+        description: Price change event payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PriceChangedEvent"
+            examples:
+              priceReduced:
+                summary: Price reduction
+                value:
+                  event: "plant.price_changed"
+                  timestamp: "2024-01-15T12:00:00Z"
+                  data:
+                    plantId: "plant_001"
+                    plantName: "Monstera Deliciosa"
+                    previousPrice: 49.99
+                    newPrice: 45.99
+                    currency: "USD"
+                    changeReason: "seasonal_sale"
+      responses:
+        "200":
+          description: Webhook received successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookAcknowledgement"
+      security:
+        - webhookSignature: []
+
+  customerCreated:
+    post:
+      tags:
+        - customers
+      summary: New customer registered
+      description: |
+        Triggered when a new customer account is created.
+        
+        **Use Cases**:
+        - Send welcome emails
+        - Add to CRM systems
+        - Trigger onboarding workflows
+      operationId: onCustomerCreated
+      requestBody:
+        description: New customer event payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerCreatedEvent"
+            examples:
+              newCustomer:
+                summary: New customer registered
+                value:
+                  event: "customer.created"
+                  timestamp: "2024-01-15T08:00:00Z"
+                  data:
+                    customerId: "cust_67890"
+                    email: "jane.doe@example.com"
+                    firstName: "Jane"
+                    lastName: "Doe"
+                    marketingOptIn: true
+      responses:
+        "200":
+          description: Webhook received successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookAcknowledgement"
+      security:
+        - webhookSignature: []
+
+components:
+  securitySchemes:
+    webhookSignature:
+      type: apiKey
+      in: header
+      name: X-Webhook-Signature
+      description: HMAC-SHA256 signature of the request body using your webhook secret
+
+  schemas:
+    OrderCreatedEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: ["order.created"]
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          $ref: "#/components/schemas/OrderCreatedData"
+      required:
+        - event
+        - timestamp
+        - data
+
+    OrderCreatedData:
+      type: object
+      properties:
+        orderId:
+          type: string
+        customerId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        totalAmount:
+          type: number
+          format: double
+        currency:
+          type: string
+        shippingAddress:
+          $ref: "#/components/schemas/Address"
+      required:
+        - orderId
+        - customerId
+        - items
+        - totalAmount
+        - currency
+
+    OrderItem:
+      type: object
+      properties:
+        plantId:
+          type: string
+        plantName:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+          format: double
+      required:
+        - plantId
+        - quantity
+        - unitPrice
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+      required:
+        - street
+        - city
+        - country
+
+    OrderShippedEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: ["order.shipped"]
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          $ref: "#/components/schemas/OrderShippedData"
+      required:
+        - event
+        - timestamp
+        - data
+
+    OrderShippedData:
+      type: object
+      properties:
+        orderId:
+          type: string
+        trackingNumber:
+          type: string
+        carrier:
+          type: string
+        estimatedDelivery:
+          type: string
+          format: date-time
+        shippingMethod:
+          type: string
+      required:
+        - orderId
+        - trackingNumber
+        - carrier
+
+    OrderDeliveredEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: ["order.delivered"]
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          $ref: "#/components/schemas/OrderDeliveredData"
+      required:
+        - event
+        - timestamp
+        - data
+
+    OrderDeliveredData:
+      type: object
+      properties:
+        orderId:
+          type: string
+        deliveredAt:
+          type: string
+          format: date-time
+        signedBy:
+          type: string
+      required:
+        - orderId
+        - deliveredAt
+
+    InventoryLowEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: ["inventory.low"]
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          $ref: "#/components/schemas/InventoryLowData"
+      required:
+        - event
+        - timestamp
+        - data
+
+    InventoryLowData:
+      type: object
+      properties:
+        plantId:
+          type: string
+        plantName:
+          type: string
+        currentQuantity:
+          type: integer
+        threshold:
+          type: integer
+        reorderSuggested:
+          type: boolean
+      required:
+        - plantId
+        - currentQuantity
+        - threshold
+
+    PriceChangedEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: ["plant.price_changed"]
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          $ref: "#/components/schemas/PriceChangedData"
+      required:
+        - event
+        - timestamp
+        - data
+
+    PriceChangedData:
+      type: object
+      properties:
+        plantId:
+          type: string
+        plantName:
+          type: string
+        previousPrice:
+          type: number
+          format: double
+        newPrice:
+          type: number
+          format: double
+        currency:
+          type: string
+        changeReason:
+          type: string
+      required:
+        - plantId
+        - previousPrice
+        - newPrice
+        - currency
+
+    CustomerCreatedEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: ["customer.created"]
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          $ref: "#/components/schemas/CustomerCreatedData"
+      required:
+        - event
+        - timestamp
+        - data
+
+    CustomerCreatedData:
+      type: object
+      properties:
+        customerId:
+          type: string
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        marketingOptIn:
+          type: boolean
+      required:
+        - customerId
+        - email
+
+    WebhookAcknowledgement:
+      type: object
+      properties:
+        received:
+          type: boolean
+        processedAt:
+          type: string
+          format: date-time
+      required:
+        - received
+
+    WebhookError:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: string
+      required:
+        - error
+        - code

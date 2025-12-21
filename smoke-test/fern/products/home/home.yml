@@ -17,6 +17,9 @@ tabs:
   grpc-api:
     display-name: gRPC API
     icon: code
+  webhook-api:
+    display-name: Webhook API
+    icon: webhook
   changelog:
     display-name: Changelog
     icon: clock
@@ -54,4 +57,8 @@ navigation:
     layout:
       - api: gRPC API
         api-name: grpc-api
+  - tab: webhook-api
+    layout:
+      - api: Webhook API
+        api-name: webhook-api
   - tab: changelog
