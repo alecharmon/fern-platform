@@ -24,7 +24,81 @@ interface Integration {
     integrationImage: string;
     deletionDetection: DeletionDetection;
     supportedFields: string[];
+    requiredParameters?: string[];
     passthroughAvailable: boolean;
+}
+
+/**
+ * Checks if a TypeShapeOrReference is a TypeShape (not a TypeReference).
+ * TypeShape types: alias, enum, undiscriminatedUnion, discriminatedUnion, object
+ * TypeReference types: id, primitive, optional, nullable, list, set, map, literal, unknown
+ */
+function isTypeShape(shape: ApiDefinition.TypeShapeOrReference): shape is ApiDefinition.TypeShape {
+    return (
+        shape.type === "alias" ||
+        shape.type === "enum" ||
+        shape.type === "undiscriminatedUnion" ||
+        shape.type === "discriminatedUnion" ||
+        shape.type === "object"
+    );
+}
+
+/**
+ * Converts a TypeShapeOrReference to a TypeShape by wrapping TypeReferences in an alias.
+ */
+function toTypeShape(shape: ApiDefinition.TypeShapeOrReference): ApiDefinition.TypeShape {
+    if (isTypeShape(shape)) {
+        return shape;
+    }
+    // Wrap TypeReference in an alias to make it a TypeShape
+    return { type: "alias", value: shape };
+}
+
+/**
+ * Checks if a shape is optional (either directly or wrapped in an alias).
+ */
+function isOptionalShape(shape: ApiDefinition.TypeShapeOrReference): boolean {
+    if (shape.type === "optional" || shape.type === "nullable") {
+        return true;
+    }
+    // Check if it's an alias wrapping an optional
+    if (shape.type === "alias" && (shape.value.type === "optional" || shape.value.type === "nullable")) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Wraps a type shape in an optional wrapper if it's not already optional/nullable.
+ */
+function wrapAsOptional(shape: ApiDefinition.TypeShapeOrReference): ApiDefinition.TypeShapeOrReference {
+    if (isOptionalShape(shape)) {
+        return shape;
+    }
+    // Wrap in an alias containing an optional
+    return {
+        type: "alias",
+        value: { type: "optional", shape: toTypeShape(shape), default: undefined }
+    };
+}
+
+/**
+ * Unwraps an optional type shape, returning the inner shape.
+ * Handles both direct optional wrappers and aliases containing optionals.
+ */
+function unwrapOptional(shape: ApiDefinition.TypeShapeOrReference): ApiDefinition.TypeShapeOrReference {
+    if (shape.type === "optional") {
+        return shape.shape;
+    }
+    // Handle alias wrapping an optional - return the inner TypeShape directly
+    if (shape.type === "alias" && shape.value.type === "optional") {
+        return shape.value.shape;
+    }
+    // Handle alias wrapping a nullable - return the inner TypeShape directly
+    if (shape.type === "alias" && shape.value.type === "nullable") {
+        return shape.value.shape;
+    }
+    return shape;
 }
 
 interface MergeSupportedFieldsData {
@@ -102,17 +176,44 @@ function IntegrationRow({
         onToggle();
     };
 
-    // Filter the shape's properties to only show supported fields
-    let filteredShape = typeDefinition.shape;
-    if (filteredShape.type === "object") {
-        const filteredProperties = filteredShape.properties.filter((property) =>
-            integration.supportedFields.includes(property.key)
+    const requiredParams = new Set(integration.requiredParameters ?? []);
+
+    // Filter the shape's properties to only show supported fields,
+    // and transform valueShape based on requiredParameters
+    const { filteredShape, additionalRequiredParams } = (() => {
+        const shape = typeDefinition.shape;
+        if (shape.type !== "object") {
+            return { filteredShape: shape, additionalRequiredParams: [] as string[] };
+        }
+
+        const supportedFieldKeys = new Set(integration.supportedFields);
+        // Convert PropertyKey to string for comparison
+        const schemaPropertyKeys = new Set(shape.properties.map((p) => String(p.key)));
+
+        // Find required parameters that don't exist in the schema
+        const additionalParams = (integration.requiredParameters ?? []).filter(
+            (param) => !schemaPropertyKeys.has(param)
         );
-        filteredShape = {
-            ...filteredShape,
-            properties: filteredProperties
+
+        const filteredProperties = shape.properties
+            .filter((property) => supportedFieldKeys.has(String(property.key)))
+            .map((property) => {
+                const propertyKey = String(property.key);
+                const isRequired = requiredParams.has(propertyKey);
+                return {
+                    ...property,
+                    valueShape: isRequired ? unwrapOptional(property.valueShape) : wrapAsOptional(property.valueShape)
+                };
+            });
+
+        return {
+            filteredShape: {
+                ...shape,
+                properties: filteredProperties
+            } as ApiDefinition.TypeShape,
+            additionalRequiredParams: additionalParams
         };
-    }
+    })();
 
     const schemaName = typeDefinition.displayName || typeDefinition.name || "schema";
 
@@ -165,17 +266,49 @@ function IntegrationRow({
                         ) : (
                             <div className="mt-2" />
                         )}
-                        <TypeDefinitionAnchorPart part={schemaName}>
-                            <SectionContainer>
-                                <TypeReferenceDefinitions
-                                    shape={filteredShape}
-                                    types={types}
-                                    lang={lang}
-                                    exclude={[]}
-                                    excludeDeprecated={false}
-                                />
-                            </SectionContainer>
-                        </TypeDefinitionAnchorPart>
+                        <div className="rounded-2 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
+                            <div className="border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
+                                <span className="text-xs font-semibold">
+                                    {requestType === "GET"
+                                        ? "Supported response fields"
+                                        : `Supported ${requestType} model parameters`}
+                                </span>
+                            </div>
+                            <div className="px-3 py-2">
+                                <TypeDefinitionAnchorPart part={schemaName}>
+                                    <SectionContainer>
+                                        <TypeReferenceDefinitions
+                                            shape={filteredShape}
+                                            types={types}
+                                            lang={lang}
+                                            exclude={[]}
+                                            excludeDeprecated={false}
+                                        />
+                                    </SectionContainer>
+                                </TypeDefinitionAnchorPart>
+                            </div>
+                        </div>
+                        {additionalRequiredParams.length > 0 && (
+                            <div className="rounded-2 mt-6 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
+                                <div className="border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
+                                    <span className="text-xs font-semibold">
+                                        {requestType === "GET"
+                                            ? "Additional parameters"
+                                            : `Additional ${requestType} parameters`}
+                                    </span>
+                                </div>
+                                <div className="space-y-1 px-3 py-2">
+                                    {additionalRequiredParams.map((param) => (
+                                        <div key={param} className="flex items-center gap-2 text-sm">
+                                            <code className="bg-tag-default rounded px-1.5 py-0.5 font-mono text-xs">
+                                                {param}
+                                            </code>
+                                            <span className="text-(color:--red-a11) text-xs">Required</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
