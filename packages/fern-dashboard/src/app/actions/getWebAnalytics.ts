@@ -4,8 +4,8 @@ import { z } from "zod";
 
 import type { AnalyticsField, AnalyticsSortDir } from "@/components/web-analytics/constants";
 
-import { insertAnalyticsForSite } from "../services/analyticsCron/insert";
-import type { DateRangePeriod } from "../services/analyticsCron/types";
+import { insertAnalyticsForSite } from "../services/analytics/cron/insert";
+import type { DateRangePeriod } from "../services/analytics/cron/types";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { getAnalyticsService } from "../services/posthog";
 import { type CachedAnalytics, getCachedAnalytics } from "../services/posthog/cache";
@@ -65,7 +65,7 @@ const GetWebAnalyticsSchema = z.object({
 
 const TableRequestSchema = GetWebAnalyticsSchema.extend({
     limit: z.number().int().min(1).max(100).optional(),
-    orderBy: z.enum(["visitors", "views"]).optional(),
+    orderBy: z.enum(["visitors", "views", "count", "numSuccesses", "numFailures"]).optional(),
     order: z.enum(["asc", "desc"]).optional()
 });
 
@@ -114,6 +114,8 @@ export interface AllAnalyticsResponse {
         endpoint: string;
         name: string;
         count: number;
+        numSuccesses: number;
+        numFailures: number;
     }[];
     llmBotTraffic: { provider: string; count: number }[];
     pages404: { path: string; count: number }[];
@@ -293,7 +295,9 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
                 method: a.method,
                 endpoint: a.endpoint,
                 name: a.name,
-                count: a.count
+                count: a.count,
+                numSuccesses: a.numSuccesses || 0,
+                numFailures: a.numFailures || 0
             })),
             llmBotTraffic: supabaseCache.topLlmBotTraffic,
             pages404: [],
@@ -383,7 +387,9 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
             method: a.method,
             endpoint: a.endpoint,
             name: a.name,
-            count: a.requests
+            count: a.requests,
+            numSuccesses: a.numSuccesses,
+            numFailures: a.numFailures
         })),
         llmBotTraffic: llmBotTraffic.map((b) => ({ provider: b.provider, count: b.requests })),
         pages404: [], // Not implemented in Redshift
@@ -461,7 +467,7 @@ export async function getTopPages(
     const validated = TableRequestSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
     const limit = validated.limit || 10;
-    const orderBy = validated.orderBy || "views";
+    const orderBy = validated.orderBy === "visitors" || validated.orderBy === "views" ? validated.orderBy : "views";
     const order = validated.order || "desc";
 
     const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
@@ -497,7 +503,7 @@ export async function getTopCountries(request: TableRequest): Promise<{
     const validated = TableRequestSchema.parse(request);
     const dateRange = validated.dateRange || DEFAULT_DATE_RANGE;
     const limit = validated.limit || 10;
-    const orderBy = validated.orderBy || "visitors";
+    const orderBy = validated.orderBy === "visitors" || validated.orderBy === "views" ? validated.orderBy : "visitors";
     const order = validated.order || "desc";
 
     const handler = getHandler(validated.docsUrl, dateRange, validated.selectedDomain);
@@ -580,11 +586,12 @@ export async function getChannels(request: TableRequest): Promise<{
 
     const live = await getLiveAnalytics(validated.docsUrl);
     const analytics = live.getAnalytics();
+    const orderBy = validated.orderBy === "visitors" || validated.orderBy === "views" ? validated.orderBy : "visitors";
     const channels = await analytics.getChannels({
         dateRange,
         includeInternal: validated.includeInternal,
         limit: validated.limit || 20,
-        orderBy: validated.orderBy || "visitors",
+        orderBy,
         order: validated.order || "desc"
     });
 
@@ -609,11 +616,12 @@ export async function getDeviceTypes(request: TableRequest): Promise<{
 
     const live = await getLiveAnalytics(validated.docsUrl);
     const analytics = live.getAnalytics();
+    const orderBy = validated.orderBy === "visitors" || validated.orderBy === "views" ? validated.orderBy : "visitors";
     const deviceTypes = await analytics.getDeviceTypes({
         dateRange,
         includeInternal: validated.includeInternal,
         limit: validated.limit || 10,
-        orderBy: validated.orderBy || "visitors",
+        orderBy,
         order: validated.order || "desc"
     });
 
@@ -638,11 +646,12 @@ export async function getReferringDomains(request: TableRequest): Promise<{
 
     const live = await getLiveAnalytics(validated.docsUrl);
     const analytics = live.getAnalytics();
+    const orderBy = validated.orderBy === "visitors" || validated.orderBy === "views" ? validated.orderBy : "visitors";
     const referringDomains = await analytics.getReferringDomains({
         dateRange,
         includeInternal: validated.includeInternal,
         limit: validated.limit || 10,
-        orderBy: validated.orderBy || "visitors",
+        orderBy,
         order: validated.order || "desc"
     });
 
@@ -673,6 +682,8 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
         endpoint: string;
         name: string;
         count: number;
+        numSuccesses: number;
+        numFailures: number;
     }[];
 }> {
     const validated = TableRequestSchema.parse(request);
@@ -689,7 +700,9 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
                 method: a.method,
                 endpoint: a.endpoint,
                 name: a.name,
-                count: a.count
+                count: a.count,
+                numSuccesses: a.numSuccesses || 0,
+                numFailures: a.numFailures || 0
             }))
         };
     }
@@ -699,7 +712,11 @@ export async function getAPIExplorerRequests(request: TableRequest): Promise<{
     const apiExplorerRequests = await analytics.getAPIExplorerRequests({
         dateRange,
         limit: validated.limit || 20,
-        order: validated.order || "desc"
+        order: validated.order || "desc",
+        orderBy:
+            validated.orderBy === "count" || validated.orderBy === "numSuccesses" || validated.orderBy === "numFailures"
+                ? validated.orderBy
+                : "count"
     });
 
     return { apiExplorerRequests };

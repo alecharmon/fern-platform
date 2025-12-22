@@ -173,7 +173,7 @@ function AnalyticsTables({ docsUrl, dateRange, orgName, gitUrl, baseBranch }: An
                 />
             </div>
 
-            {/* Fifth row: API Explorer Requests and LLM Bot Traffic */}
+            {/* Fifth row: API Explorer Requests */}
             <div className="flex flex-col gap-4 lg:flex-row">
                 <APIExplorerRequestsTable />
                 <LLMBotProvidersTable />

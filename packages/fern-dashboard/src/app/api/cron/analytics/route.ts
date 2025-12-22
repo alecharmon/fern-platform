@@ -8,8 +8,8 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 
-import { runAnalyticsCronForAllPeriods } from "@/app/services/analyticsCron/run";
-import type { DateRangePeriod } from "@/app/services/analyticsCron/types";
+import { runAnalyticsCronForAllPeriods } from "@/app/services/analytics/cron/run";
+import type { DateRangePeriod } from "@/app/services/analytics/cron/types";
 
 /**
  * GET /api/cron/analytics

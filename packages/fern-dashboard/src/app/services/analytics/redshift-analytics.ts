@@ -1,4 +1,4 @@
-import type { DateRangePeriod } from "../analyticsCron/types";
+import type { DateRangePeriod } from "./cron/types";
 import { getRedshiftPool } from "./redshift-client";
 
 export interface RedshiftDateRange {
@@ -463,62 +463,147 @@ export class RedshiftAnalytics {
     }
 
     /**
-     * Get API Explorer requests by endpoint
+     * Get API Explorer requests by endpoint with status code breakdown
      */
     async getAPIExplorerRequests(options: {
         dateRange: RedshiftDateRange;
         limit: number;
-    }): Promise<Array<{ method: string; endpoint: string; name: string; requests: number }>> {
+        orderBy?: "count" | "numSuccesses" | "numFailures";
+    }): Promise<
+        Array<{
+            method: string;
+            endpoint: string;
+            name: string;
+            requests: number;
+            numSuccesses: number;
+            numFailures: number;
+        }>
+    > {
         const pool = getRedshiftPool();
-        const { startDate, endDate } = options.dateRange;
+        const { dateRange, orderBy = "count" } = options;
+        const { startDate, endDate } = dateRange;
 
-        // Fetch raw events and parse in TypeScript (Redshift SUPER column limitations)
-        const query = `
+        // Fetch both sent and received events
+        // api_playground_request_sent has the request details (method, endpoint, name)
+        // api_playground_request_received has the response status
+
+        // Build common WHERE clause for both queries
+        const commonWhereClause = `
+            (
+                properties."$host"::VARCHAR = $1
+                OR properties."$host"::VARCHAR = $2
+            )
+            AND timestamp >= $3
+            AND timestamp < $4
+        `;
+
+        const sentQuery = `
             SELECT
                 JSON_SERIALIZE(properties) as props_json
             FROM posthog.events
             WHERE
                 event = 'api_playground_request_sent'
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
-            LIMIT 10000
+                AND ${commonWhereClause}
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString()
+        const receivedQuery = `
+            SELECT
+                JSON_SERIALIZE(properties) as props_json
+            FROM posthog.events
+            WHERE
+                event = 'api_playground_request_received'
+                AND ${commonWhereClause}
+        `;
+
+        const [sentResult, receivedResult] = await Promise.all([
+            pool.query(sentQuery, [this.domain, `www.${this.domain}`, startDate.toISOString(), endDate.toISOString()]),
+            pool.query(receivedQuery, [
+                this.domain,
+                `www.${this.domain}`,
+                startDate.toISOString(),
+                endDate.toISOString()
+            ])
         ]);
 
-        // Parse and aggregate in TypeScript
-        const counts = new Map<string, { method: string; endpoint: string; name: string; count: number }>();
+        // Build a mapping of docsRoute -> endpointRoute from sent events
+        // This allows us to match received events (which only have docsRoute) to the correct endpoint
+        const docsRouteToEndpoint = new Map<string, { endpointRoute: string; endpointName: string; method: string }>();
+        for (const row of sentResult.rows) {
+            const props = JSON.parse(row.props_json);
+            const docsRoute = props.docsRoute || "";
+            const endpointRoute = props.endpointRoute || "";
+            const endpointName = props.endpointName || "";
+            const method = props.method || "";
+            if (docsRoute) {
+                docsRouteToEndpoint.set(docsRoute, { endpointRoute, endpointName, method });
+            }
+        }
 
-        for (const row of result.rows) {
+        // Aggregate by endpointRoute (the API path template) to avoid duplicates
+        const counts = new Map<
+            string,
+            { method: string; endpoint: string; name: string; count: number; numSuccesses: number; numFailures: number }
+        >();
+
+        for (const row of sentResult.rows) {
             const props = JSON.parse(row.props_json);
             const method = props.method || "";
             const endpointRoute = props.endpointRoute || "";
             const endpointName = props.endpointName || "";
 
+            // Aggregate by endpointRoute to group all requests to the same API endpoint
             const key = `${method}|${endpointRoute}|${endpointName}`;
-            const existing = counts.get(key) || { method, endpoint: endpointRoute, name: endpointName, count: 0 };
+            const existing = counts.get(key) || {
+                method,
+                endpoint: endpointRoute,
+                name: endpointName,
+                count: 0,
+                numSuccesses: 0,
+                numFailures: 0
+            };
             existing.count++;
             counts.set(key, existing);
         }
 
-        // Sort by count and limit
+        // Add status codes from received events
+        // Match using docsRoute -> endpointRoute mapping
+        for (const row of receivedResult.rows) {
+            const props = JSON.parse(row.props_json);
+            const docsRoute = props.docsRoute || "";
+            const responseStatus = props.responseStatus;
+
+            // Look up the endpointRoute for this docsRoute
+            const mappedEndpoint = docsRouteToEndpoint.get(docsRoute);
+            if (!mappedEndpoint) {
+                continue;
+            }
+
+            const key = `${mappedEndpoint.method}|${mappedEndpoint.endpointRoute}|${mappedEndpoint.endpointName}`;
+            const existing = counts.get(key);
+
+            if (existing) {
+                // Count by status code ranges (2xx = success, 4xx/5xx = failure)
+                if (responseStatus >= 200 && responseStatus < 300) {
+                    existing.numSuccesses++;
+                } else if (responseStatus >= 400) {
+                    existing.numFailures++;
+                }
+            }
+        }
+
+        // Sort by the specified field and limit
+        const sortField =
+            orderBy === "numSuccesses" ? "numSuccesses" : orderBy === "numFailures" ? "numFailures" : "count";
         return Array.from(counts.values())
-            .sort((a, b) => b.count - a.count)
+            .sort((a, b) => b[sortField] - a[sortField])
             .slice(0, options.limit)
             .map((item) => ({
                 method: item.method,
                 endpoint: item.endpoint || "Unknown", // Use endpointRoute (path)
                 name: item.name || item.endpoint || "", // Use endpointName (description)
-                requests: item.count
+                requests: item.count,
+                numSuccesses: item.numSuccesses,
+                numFailures: item.numFailures
             }));
     }
 

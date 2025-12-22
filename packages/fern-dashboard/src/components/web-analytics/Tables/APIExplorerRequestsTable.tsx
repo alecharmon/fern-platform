@@ -17,14 +17,37 @@ const METHOD_COLORS: Record<string, "blue" | "green" | "yellow" | "red"> = {
 
 export default function APIExplorerRequestsTable() {
     const { data, isLoading, error } = useAnalyticsData();
-    const { sortState, handleSort } = useAnalyticsTable();
+    const { sortState, handleSort } = useAnalyticsTable({
+        defaultSortField: "count",
+        validSortFields: ["count", "numSuccesses", "numFailures"]
+    });
 
     const sortedAPIExplorerRequests = useMemo(() => {
         if (!data?.apiExplorerRequests) {
             return undefined;
         }
         const requests = [...data.apiExplorerRequests];
-        requests.sort((a, b) => (sortState.order === ANALYTICS_SORT_DIR.DESC ? b.count - a.count : a.count - b.count));
+
+        // Sort based on the current sort field
+        requests.sort((a, b) => {
+            let aValue: number;
+            let bValue: number;
+
+            if (sortState.field === "numSuccesses") {
+                aValue = a.numSuccesses;
+                bValue = b.numSuccesses;
+            } else if (sortState.field === "numFailures") {
+                aValue = a.numFailures;
+                bValue = b.numFailures;
+            } else {
+                // Default to count
+                aValue = a.count;
+                bValue = b.count;
+            }
+
+            return sortState.order === ANALYTICS_SORT_DIR.DESC ? bValue - aValue : aValue - bValue;
+        });
+
         return requests;
     }, [data?.apiExplorerRequests, sortState]);
 
@@ -60,6 +83,20 @@ export default function APIExplorerRequestsTable() {
             }
         },
         {
+            key: "numSuccesses",
+            label: "Successes",
+            width: "100px",
+            sortable: true,
+            format: (value: number) => value.toLocaleString()
+        },
+        {
+            key: "numFailures",
+            label: "Failures",
+            width: "100px",
+            sortable: true,
+            format: (value: number) => value.toLocaleString()
+        },
+        {
             key: "count",
             label: "Count",
             width: "90px",
@@ -78,13 +115,14 @@ export default function APIExplorerRequestsTable() {
     return (
         <AnalyticsMiniTable
             title="API Explorer requests"
+            titleInfo="Success and failure data has only recently been collected. There may be discrepancies in count totals."
             data={dataWithVariant}
             isLoading={isLoading}
             error={error}
             columns={columns}
             getItemKey={(item) => `${item.method}-${item.endpoint}-${item.name}`}
             showGradient={true}
-            gradientKey="count"
+            gradientKey={sortState.field || "count"}
             onSort={handleSort}
             maxLength={60}
             defaultSortField={"count"}

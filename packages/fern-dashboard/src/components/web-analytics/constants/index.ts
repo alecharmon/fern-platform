@@ -1,6 +1,9 @@
 export const ANALYTICS_SORT_FIELDS = {
     VISITORS: "visitors",
-    VIEWS: "views"
+    VIEWS: "views",
+    COUNT: "count",
+    NUM_SUCCESSES: "numSuccesses",
+    NUM_FAILURES: "numFailures"
 };
 
 export const ANALYTICS_FIELDS = {

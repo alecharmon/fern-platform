@@ -730,11 +730,11 @@ export class AnalyticsService {
     }
 
     /**
-     * Get most common API Explorer requests by endpoint and method
-     * Returns endpoints with their HTTP methods and call counts
+     * Get most common API Explorer requests by endpoint and method with status code breakdown
+     * Returns endpoints with their HTTP methods and call counts (total, 200s, 400s)
      */
     async getAPIExplorerRequests(options: APIExplorerOptions = {}): Promise<APIExplorerEndpoint[]> {
-        const { limit = 100, host, order = "desc" } = options;
+        const { limit = 100, host, order = "desc", orderBy = "count" } = options;
         const { whereClause } = this.buildDateAndFilterClause(options);
 
         const hostOnly = this.getHostOnly();
@@ -749,7 +749,15 @@ export class AnalyticsService {
             hostFilter = `(properties.$host = '${this.config.baseSiteUrl}' OR properties.$host = 'www.${this.config.baseSiteUrl}')`;
         }
 
-        const query = `
+        // Common WHERE clause for both queries (ensures identical filtering)
+        const commonFilters = `
+        AND ${hostFilter}
+        AND properties.method IS NOT NULL
+        ${whereClause}
+    `;
+
+        // Query sent events for total counts (has full request details)
+        const sentQuery = `
       SELECT
         properties.$host as host,
         properties.method as method,
@@ -760,32 +768,102 @@ export class AnalyticsService {
       FROM events
       WHERE
         event = 'api_playground_request_sent'
-        AND ${hostFilter}
-        AND properties.method IS NOT NULL
+        ${commonFilters}
         AND properties.endpointRoute IS NOT NULL
-        ${whereClause}
       GROUP BY
         properties.$host,
         properties.method,
         properties.endpointRoute,
         properties.endpointName
-      ORDER BY
-        count ${order.toUpperCase()}
-      LIMIT ${limit}
     `;
 
-        const response = await this.client.query<[string, string, string, string, number, string]>(query, {
-            name: `api-explorer-requests-${this.getQueryNameSuffix(options)}-${host || this.config.baseSiteUrl}`
+        // Query received events to build docsRoute mapping and get status codes
+        // Note: received events use 'docsRoute' and we need to map to endpointRoute
+        const receivedQuery = `
+      SELECT
+        properties.$host as host,
+        properties.method as method,
+        properties.docsRoute as docsRoute,
+        properties.endpointName as name,
+        properties.responseStatus as responseStatus
+      FROM events
+      WHERE
+        event = 'api_playground_request_received'
+        ${commonFilters}
+        AND properties.docsRoute IS NOT NULL
+    `;
+
+        const [sentResponse, receivedResponse] = await Promise.all([
+            this.client.query<[string, string, string, string, number, string]>(sentQuery, {
+                name: `api-explorer-sent-${this.getQueryNameSuffix(options)}-${host || this.config.baseSiteUrl}`
+            }),
+            this.client.query<[string, string, string, string, number]>(receivedQuery, {
+                name: `api-explorer-received-${this.getQueryNameSuffix(options)}-${host || this.config.baseSiteUrl}`
+            })
+        ]);
+
+        // First pass: just get the sent data into a map for easy lookup
+        const sentByEndpoint = new Map<
+            string,
+            { host: string; method: string; endpoint: string; name: string; count: number; currentUrl: string }
+        >();
+        for (const row of sentResponse.results) {
+            const key = `${row[0]}|${row[1]}|${row[2]}|${row[3]}`;
+            sentByEndpoint.set(key, {
+                host: row[0] || "",
+                method: row[1] || "",
+                endpoint: row[2] || "",
+                name: row[3] || "",
+                count: row[4],
+                currentUrl: row[5] || ""
+            });
+        }
+
+        // Build status counts by endpointRoute (matching via the sent data we have)
+        const statusCounts = new Map<string, { numSuccesses: number; numFailures: number }>();
+
+        for (const row of receivedResponse.results) {
+            const responseStatus = row[4];
+
+            // Find matching sent event with same host, method, name to get endpointRoute
+            const matchingKey = Array.from(sentByEndpoint.keys()).find((key) => {
+                const sent = sentByEndpoint.get(key)!;
+                return sent.host === row[0] && sent.method === row[1] && sent.name === row[3];
+            });
+
+            if (matchingKey) {
+                const existing = statusCounts.get(matchingKey) || { numSuccesses: 0, numFailures: 0 };
+                if (responseStatus >= 200 && responseStatus < 300) {
+                    existing.numSuccesses++;
+                } else if (responseStatus >= 400) {
+                    existing.numFailures++;
+                }
+                statusCounts.set(matchingKey, existing);
+            }
+        }
+
+        // Merge sent results with status counts
+        const merged = sentResponse.results.map((row) => {
+            const key = `${row[0]}|${row[1]}|${row[2]}|${row[3]}`;
+            const status = statusCounts.get(key) || { numSuccesses: 0, numFailures: 0 };
+            return {
+                host: row[0] || "",
+                method: row[1] || "",
+                endpoint: row[2] || "",
+                name: row[3] || "",
+                count: row[4],
+                numSuccesses: status.numSuccesses,
+                numFailures: status.numFailures,
+                currentUrl: row[5] || ""
+            };
         });
 
-        return response.results.map((row) => ({
-            host: row[0] || "",
-            method: row[1] || "",
-            endpoint: row[2] || "",
-            name: row[3] || "",
-            count: row[4],
-            currentUrl: row[5] || ""
-        }));
+        // Sort by the specified field
+        const sortField =
+            orderBy === "numSuccesses" ? "numSuccesses" : orderBy === "numFailures" ? "numFailures" : "count";
+        merged.sort((a, b) => (order === "desc" ? b[sortField] - a[sortField] : a[sortField] - b[sortField]));
+
+        return merged.slice(0, limit);
     }
 
     /**

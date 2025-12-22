@@ -325,7 +325,7 @@ export async function runAnalyticsCronForAllPeriods(
 }
 
 // CLI Support - Only run if executed directly
-if (process.argv[1]?.includes("analyticsCron/run.ts")) {
+if (process.argv[1]?.includes("analytics/cron/run.ts")) {
     // Load environment variables and run CLI
     (async () => {
         try {
@@ -337,7 +337,7 @@ if (process.argv[1]?.includes("analyticsCron/run.ts")) {
             const __filename = fileURLToPath(import.meta.url);
             const __dirname = path.dirname(__filename);
             dotenv.config({
-                path: path.resolve(__dirname, "../../../../.env.local")
+                path: path.resolve(__dirname, "../../../../../.env.local")
             });
 
             const { values } = parseArgs({
@@ -356,7 +356,7 @@ if (process.argv[1]?.includes("analyticsCron/run.ts")) {
 Analytics Cron Runner
 
 Usage:
-  NODE_ENV=test npx tsx src/app/services/analyticsCron/run.ts [options]
+  NODE_ENV=test npx tsx src/app/services/analytics/cron/run.ts [options]
 
 Options:
   --site <domain>     Specific docs site domain (e.g., "docs.vapi.ai")
@@ -370,13 +370,13 @@ Options:
 
 Examples:
   # All domains with all periods (default behavior)
-  NODE_ENV=test npx tsx src/app/services/analyticsCron/run.ts
+  NODE_ENV=test npx tsx src/app/services/analytics/cron/run.ts
 
   # Specific site with all periods
-  NODE_ENV=test npx tsx src/app/services/analyticsCron/run.ts --site=docs.vapi.ai
+  NODE_ENV=test npx tsx src/app/services/analytics/cron/run.ts --site=docs.vapi.ai
 
   # Multiple domains with single period
-  NODE_ENV=test npx tsx src/app/services/analyticsCron/run.ts --domain=docs.vapi.ai --domain=openrouter.ai --period=7
+  NODE_ENV=test npx tsx src/app/services/analytics/cron/run.ts --domain=docs.vapi.ai --domain=openrouter.ai --period=7
 
 Note: When processing multiple periods, domains are processed in batches of 3 with all
       periods completed sequentially per domain to maximize PostHog cache efficiency.

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Info } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { WebAnalyticsTooltip, WebAnalyticsTooltipProvider } from "../WebAnalyticsTooltip";
@@ -14,6 +14,7 @@ const COLOR_MAP = {
 
 interface AnalyticsMiniTableProps<T extends Record<string, any>> {
     title: string;
+    titleInfo?: string;
     data: T[] | undefined;
     isLoading: boolean;
     error: Error | null;
@@ -38,6 +39,7 @@ type SortDirection = "asc" | "desc";
 
 export default function AnalyticsMiniTable<T extends Record<string, any>>({
     title,
+    titleInfo,
     data,
     isLoading,
     error,
@@ -107,7 +109,16 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
             <div className="space-y-1">
                 {/* Header */}
                 <div className="flex justify-between border-b px-4 py-4">
-                    <span className="flex-1">{title}</span>
+                    <span className="flex flex-1 items-center gap-1.5">
+                        {title}
+                        {titleInfo && (
+                            <WebAnalyticsTooltipProvider>
+                                <WebAnalyticsTooltip content={titleInfo} delayDuration={0}>
+                                    <Info className="text-muted-foreground h-4 w-4 cursor-help" />
+                                </WebAnalyticsTooltip>
+                            </WebAnalyticsTooltipProvider>
+                        )}
+                    </span>
                     {columns.slice(1).map((column) =>
                         column.sortable ? (
                             <button

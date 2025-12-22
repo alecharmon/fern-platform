@@ -81,6 +81,8 @@ export interface APIExplorerEndpoint {
     endpoint: string;
     name: string;
     count: number;
+    numSuccesses: number;
+    numFailures: number;
     currentUrl: string;
 }
 
@@ -88,4 +90,5 @@ export interface APIExplorerOptions extends AnalyticsQueryOptions {
     limit?: number;
     host?: string;
     order?: "asc" | "desc";
+    orderBy?: "count" | "numSuccesses" | "numFailures";
 }

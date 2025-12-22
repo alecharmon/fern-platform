@@ -68,7 +68,7 @@ Options:
     const source = values["force-fdr"] ? "FDR (forced)" : hasKV ? "KV store" : "FDR";
     console.log(`Using ${source} to fetch domains...\n`);
 
-    const getAllProductionDomainsModule = await import("../src/app/services/analyticsCron/getAllProductionDomains");
+    const getAllProductionDomainsModule = await import("../src/app/services/analytics/cron/getAllProductionDomains");
 
     try {
         if (values["include-previews"]) {

@@ -72,6 +72,8 @@ export interface TopAPIExplorerEntry {
     endpoint: string;
     name: string;
     count: number;
+    numSuccesses: number;
+    numFailures: number;
 }
 
 export interface TopLLMBotTrafficEntry {

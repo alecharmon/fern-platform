@@ -1,6 +1,6 @@
-import { RedshiftAnalytics } from "../analytics/redshift-analytics";
-import { getSupabaseClient } from "../supabase";
-import type { AnalyticsRecordInsert } from "../supabase/types";
+import { getSupabaseClient } from "../../supabase";
+import type { AnalyticsRecordInsert } from "../../supabase/types";
+import { RedshiftAnalytics } from "../redshift-analytics";
 import type { DateRangePeriod, InsertAnalyticsResult } from "./types";
 
 /**
@@ -142,7 +142,9 @@ export async function insertAnalyticsForSite(
                 method: a.method,
                 endpoint: a.endpoint,
                 name: a.name,
-                count: a.requests
+                count: a.requests,
+                numSuccesses: a.numSuccesses,
+                numFailures: a.numFailures
             })),
             top_llm_bot_traffic: llmBotTraffic.map((b) => ({
                 provider: b.provider,
