@@ -49,6 +49,10 @@ const config: Config = {
                         "--tw-prose-quotes": "var(--grayscale-a11)",
                         "--tw-prose-td-borders": "var(--color-border-default)",
 
+                        "h1, h2, h3, h4, h5, h6": {
+                            letterSpacing: "-0.02em"
+                        },
+
                         "tbody td[rowspan]:first-child, tfoot td[rowspan]:first-child": {
                             paddingRight: em(8, 14)
                         },
