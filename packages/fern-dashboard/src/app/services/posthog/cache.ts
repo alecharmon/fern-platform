@@ -43,6 +43,7 @@ export interface CachedAnalytics {
     topLlmTxts: TopLLMTxtsEntry[];
     topApiExplorer: TopAPIExplorerEntry[];
     topLlmBotTraffic: TopLLMBotTrafficEntry[];
+    pages404: Array<{ path: string; count: number }>;
 }
 
 export interface GetCachedAnalyticsOptions {
@@ -69,7 +70,8 @@ function mapRecordToCachedAnalytics(record: AnalyticsRecord): CachedAnalytics {
         topReferringDomains: record.top_referring_domains || [],
         topLlmTxts: record.top_llm_txts || [],
         topApiExplorer: record.top_api_explorer || [],
-        topLlmBotTraffic: record.top_llm_bot_traffic || []
+        topLlmBotTraffic: record.top_llm_bot_traffic || [],
+        pages404: record.pages_404 || []
     };
 }
 

@@ -709,7 +709,7 @@ export class AnalyticsService {
         count(*) as count
       FROM events
       WHERE
-        event = 'not_found'
+        (event = 'not_found' OR event = 'not_found_redirected')
         AND ${hostFilter}
         AND properties.pathname IS NOT NULL
         AND properties.pathname != ''

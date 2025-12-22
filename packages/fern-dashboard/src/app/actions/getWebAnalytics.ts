@@ -300,7 +300,7 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
                 numFailures: a.numFailures || 0
             })),
             llmBotTraffic: supabaseCache.topLlmBotTraffic,
-            pages404: [],
+            pages404: supabaseCache.pages404,
             pageViewsTimeSeries: supabaseCache.viewChart,
             visitorsTimeSeries: supabaseCache.visitorChart,
             baseSiteUrl: supabaseCache.docsSite,
@@ -352,6 +352,7 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
         llmFileViews,
         apiExplorerRequests,
         llmBotTraffic,
+        pages404,
         pageViewsTimeSeries,
         visitorsTimeSeries
     ] = await Promise.all([
@@ -364,6 +365,7 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
         analytics.getLLMFileViews({ dateRange: redshiftDateRange, limit: 20 }),
         analytics.getAPIExplorerRequests({ dateRange: redshiftDateRange, limit: 20 }),
         analytics.getLLMBotTrafficByProvider({ dateRange: redshiftDateRange, limit: 20 }),
+        analytics.get404Pages({ dateRange: redshiftDateRange, limit: 20 }),
         analytics.getPageViewsTimeSeries({ dateRange: redshiftDateRange }),
         analytics.getVisitorsTimeSeries({ dateRange: redshiftDateRange })
     ]);
@@ -392,7 +394,7 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
             numFailures: a.numFailures
         })),
         llmBotTraffic: llmBotTraffic.map((b) => ({ provider: b.provider, count: b.requests })),
-        pages404: [], // Not implemented in Redshift
+        pages404,
         pageViewsTimeSeries: pageViewsTimeSeries.map((t) => ({ date: t.date, value: t.count })),
         visitorsTimeSeries: visitorsTimeSeries.map((t) => ({ date: t.date, value: t.count })),
         baseSiteUrl: baseDomain,

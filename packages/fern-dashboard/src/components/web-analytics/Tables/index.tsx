@@ -156,13 +156,7 @@ function AnalyticsTables({ docsUrl, dateRange, orgName, gitUrl, baseBranch }: An
                 <DeviceTypesTable />
             </div>
 
-            {/* Third row: Referring Domains and LLM File Views */}
-            <div className="flex flex-col gap-4 lg:flex-row">
-                <ReferringDomainsTable />
-                <LLMFileViewsTable />
-            </div>
-
-            {/* Fourth row: 404 Pages */}
+            {/* Third row: 404 Pages and Referring Domains */}
             <div className="flex flex-col gap-4 lg:flex-row">
                 <NotFoundPagesTable
                     docsUrl={docsUrl}
@@ -171,6 +165,12 @@ function AnalyticsTables({ docsUrl, dateRange, orgName, gitUrl, baseBranch }: An
                     gitUrl={gitUrl}
                     baseBranch={baseBranch}
                 />
+                <ReferringDomainsTable />
+            </div>
+
+            {/* Fourth row: LLM File Views */}
+            <div className="flex flex-col gap-4 lg:flex-row">
+                <LLMFileViewsTable />
             </div>
 
             {/* Fifth row: API Explorer Requests */}

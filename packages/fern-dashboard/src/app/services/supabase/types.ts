@@ -23,6 +23,7 @@ export interface AnalyticsRecord {
     top_llm_txts: TopLLMTxtsEntry[] | null;
     top_api_explorer: TopAPIExplorerEntry[] | null;
     top_llm_bot_traffic: TopLLMBotTrafficEntry[] | null;
+    pages_404: Array<{ path: string; count: number }> | null;
     docs_site: string | null;
     docs_org: string | null;
     total_visitors: number | null;

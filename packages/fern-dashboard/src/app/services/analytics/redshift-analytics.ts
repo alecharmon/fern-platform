@@ -608,6 +608,50 @@ export class RedshiftAnalytics {
     }
 
     /**
+     * Get 404 pages (not found events)
+     */
+    async get404Pages(options: {
+        dateRange: RedshiftDateRange;
+        limit: number;
+    }): Promise<Array<{ path: string; count: number }>> {
+        const pool = getRedshiftPool();
+        const { startDate, endDate } = options.dateRange;
+
+        const query = `
+            SELECT
+                properties."pathname"::VARCHAR as path,
+                COUNT(*) as count
+            FROM posthog.events
+            WHERE
+                (event = 'not_found' OR event = 'not_found_redirected')
+                AND (
+                    properties."$host"::VARCHAR = $1
+                    OR properties."$host"::VARCHAR = $2
+                )
+                AND timestamp >= $3
+                AND timestamp < $4
+                AND properties."pathname" IS NOT NULL
+                AND properties."pathname"::VARCHAR != ''
+            GROUP BY properties."pathname"::VARCHAR
+            ORDER BY count DESC
+            LIMIT $5
+        `;
+
+        const result = await pool.query(query, [
+            this.domain,
+            `www.${this.domain}`,
+            startDate.toISOString(),
+            endDate.toISOString(),
+            options.limit
+        ]);
+
+        return result.rows.map((row) => ({
+            path: row.path || "/",
+            count: parseInt(row.count) || 0
+        }));
+    }
+
+    /**
      * Get LLM bot traffic by provider (from static_content_served events)
      * Note: Fetches raw events and filters in TypeScript due to Redshift SUPER column limitations
      */

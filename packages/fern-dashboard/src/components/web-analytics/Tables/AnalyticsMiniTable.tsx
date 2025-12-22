@@ -1,7 +1,9 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ArrowUpDown, Info } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { useMemo, useState } from "react";
+
+import { Button } from "@/components/ui/button";
 
 import { WebAnalyticsTooltip, WebAnalyticsTooltipProvider } from "../WebAnalyticsTooltip";
 
@@ -33,6 +35,7 @@ interface AnalyticsMiniTableProps<T extends Record<string, any>> {
     onSort?: (field: string, direction: "asc" | "desc") => void;
     maxLength?: number;
     defaultSortField?: string | null;
+    emptyStateMessage?: string;
 }
 
 type SortDirection = "asc" | "desc";
@@ -50,10 +53,13 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
     barVariant = "green",
     onSort,
     maxLength = 45,
-    defaultSortField = null
+    defaultSortField = null,
+    emptyStateMessage = "No data available for the selected period"
 }: AnalyticsMiniTableProps<T>) {
     const [sortField, setSortField] = useState<string | null>(defaultSortField);
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+    const [showAll, setShowAll] = useState(false);
+    const INITIAL_COUNT = 10;
     const sortedData = useMemo(() => {
         if (!data || !sortField) {
             return data || [];
@@ -159,7 +165,7 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                 ) : (
                     <div className="px-4 pb-2">
                         {sortedData.length > 0 ? (
-                            sortedData.map((item, index) => {
+                            (showAll ? sortedData : sortedData.slice(0, INITIAL_COUNT)).map((item, index) => {
                                 const percentage = showGradient
                                     ? Math.max(7, (item[gradientKey] / maxGradientValue) * 100)
                                     : 0;
@@ -253,10 +259,31 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                                 );
                             })
                         ) : (
-                            <div className="text-muted-foreground py-8 text-center text-sm">
-                                No data available for the selected period
-                            </div>
+                            <div className="text-muted-foreground py-8 text-center text-sm">{emptyStateMessage}</div>
                         )}
+                    </div>
+                )}
+
+                {/* View all button */}
+                {!isLoading && sortedData.length > INITIAL_COUNT && (
+                    <div className="border-t">
+                        <Button
+                            variant="ghost"
+                            className="text-muted-foreground hover:text-foreground w-full rounded-none rounded-b-lg transition-colors"
+                            onClick={() => setShowAll(!showAll)}
+                        >
+                            {showAll ? (
+                                <>
+                                    Show less
+                                    <ChevronUp className="ml-2 h-4 w-4" />
+                                </>
+                            ) : (
+                                <>
+                                    View all
+                                    <ChevronDown className="ml-2 h-4 w-4" />
+                                </>
+                            )}
+                        </Button>
                     </div>
                 )}
             </div>

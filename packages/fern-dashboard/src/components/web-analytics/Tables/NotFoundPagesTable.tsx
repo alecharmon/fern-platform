@@ -35,7 +35,7 @@ export default function NotFoundPagesTable({
 
     const sortedPages404 = useMemo(() => {
         if (!data?.pages404) {
-            return undefined;
+            return [];
         }
         const pages = [...data.pages404];
         pages.sort((a, b) => (sortState.order === ANALYTICS_SORT_DIR.DESC ? b.count - a.count : a.count - b.count));
@@ -79,10 +79,6 @@ export default function NotFoundPagesTable({
         }
     ];
 
-    if (!sortedPages404 || sortedPages404.length === 0) {
-        return null;
-    }
-
     return (
         <>
             <AnalyticsMiniTable
@@ -98,6 +94,7 @@ export default function NotFoundPagesTable({
                 onSort={handleSort}
                 maxLength={45}
                 defaultSortField={"count"}
+                emptyStateMessage="No 404s found"
             />
             {canCreateRedirects && (
                 <CreateRedirectModal

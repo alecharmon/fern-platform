@@ -85,6 +85,7 @@ export async function insertAnalyticsForSite(
             llmFileViews,
             apiExplorerRequests,
             llmBotTraffic,
+            pages404,
             metrics,
             pageviewsTimeSeries,
             visitorsTimeSeries
@@ -97,6 +98,7 @@ export async function insertAnalyticsForSite(
             analytics.getLLMFileViews({ dateRange, limit: 10 }),
             analytics.getAPIExplorerRequests({ dateRange, limit: 20 }),
             analytics.getLLMBotTrafficByProvider({ dateRange, limit: 10 }),
+            analytics.get404Pages({ dateRange, limit: 20 }),
             analytics.getMetrics({ dateRange }),
             analytics.getPageViewsTimeSeries({ dateRange }),
             analytics.getVisitorsTimeSeries({ dateRange })
@@ -149,6 +151,10 @@ export async function insertAnalyticsForSite(
             top_llm_bot_traffic: llmBotTraffic.map((b) => ({
                 provider: b.provider,
                 count: b.requests
+            })),
+            pages_404: pages404.map((p) => ({
+                path: p.path,
+                count: p.count
             })),
             total_visitors: metrics.visitors,
             total_views: metrics.pageviews,
