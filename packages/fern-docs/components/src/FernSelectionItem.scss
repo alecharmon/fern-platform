@@ -25,13 +25,18 @@
     }
   }
 
-  &.dense .fern-selection-item-icon {
-    @apply m-0.5 h-[36px] w-[36px] p-0.5;
-  }
+        &.dense .fern-selection-item-icon {
+          @apply m-0.5 h-[36px] w-[36px] p-0.5;
 
-  .fern-selection-item-end-icon {
-    @apply text-(color:--grayscale-a11);
-  }
+          svg,
+          .fern-file-icon {
+            @apply h-5 w-5;
+          }
+        }
+
+    .fern-selection-item-end-icon {
+      @apply text-(color:--grayscale-a11);
+    }
 
   &:hover {
     @apply text-(color:--accent) bg-(color:--grayscale-a3);

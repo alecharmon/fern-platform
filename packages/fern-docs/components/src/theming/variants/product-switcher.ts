@@ -42,12 +42,13 @@ ${options.scopeSelector} [data-product-switcher-theme="toggle"] .fern-product-se
   height: 100%;
 }
 
-${options.scopeSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger:hover {
+${options.scopeSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger:not([data-active="true"]):hover {
   background-color: var(--grayscale-4);
 }
 
 ${options.scopeSelector} [data-product-switcher-theme="toggle"] .fern-product-selector[data-state="open"] .product-dropdown-trigger,
-${options.scopeSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger[data-active="true"] {
+${options.scopeSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger[data-active="true"],
+${options.scopeSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger[data-active="true"]:hover {
   background-color: var(--background);
   color: var(--grayscale-12);
 }
@@ -61,12 +62,13 @@ ${options.darkSelector} [data-product-switcher-theme="toggle"] .fern-product-sel
   background-color: var(--grayscale-4);
 }
 
-${options.darkSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger:hover {
+${options.darkSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger:not([data-active="true"]):hover {
   background-color: var(--grayscale-5);
 }
 
 ${options.darkSelector} [data-product-switcher-theme="toggle"] .fern-product-selector[data-state="open"] .product-dropdown-trigger,
-${options.darkSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger[data-active="true"] {
+${options.darkSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger[data-active="true"],
+${options.darkSelector} [data-product-switcher-theme="toggle"] .fern-product-selector .product-dropdown-trigger[data-active="true"]:hover {
   background-color: var(--grayscale-6);
 }
         `.trim();
