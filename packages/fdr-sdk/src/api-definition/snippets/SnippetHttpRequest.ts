@@ -1,4 +1,4 @@
-import { sanitizeUrl } from "@fern-api/ui-core-utils";
+import { sanitizeUrl, unknownToString } from "@fern-api/ui-core-utils";
 import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedUnion";
 import { compact } from "es-toolkit/array";
 import { noop } from "ts-essentials";
@@ -6,6 +6,25 @@ import urljoin from "url-join";
 
 import type * as Latest from "../latest";
 import { preprocessQueryParameters } from "../url";
+
+function buildPathForSnippet(
+    path: Latest.PathPart[] | undefined,
+    pathParameters: Record<string, unknown> | undefined
+): string {
+    if (path == null) {
+        return "";
+    }
+    return path
+        .map((part) => {
+            if (part.type === "pathParameter") {
+                const key = part.value;
+                const value = unknownToString(pathParameters?.[key]);
+                return value.length > 0 ? value : `{${key}}`;
+            }
+            return part.value;
+        })
+        .join("");
+}
 
 interface SnippetHttpRequestBodyJson {
     type: "json";
@@ -74,7 +93,21 @@ export function toSnippetHttpRequest(
     )?.baseUrl;
     const sanitizedEnvironment = sanitizeUrl(environmentUrl);
 
-    const url = urljoin(compact([sanitizedEnvironment, example.path]));
+    const endpointPathRaw = buildPathForSnippet(endpoint.path, example.pathParameters);
+    const examplePathRaw = example.path ? (example.path.startsWith("/") ? example.path : `/${example.path}`) : "";
+
+    // Normalize for comparison only (strip trailing slash, treat empty as "/")
+    const normalize = (p: string): string => (p.endsWith("/") ? p.slice(0, -1) : p) || "/";
+    const endpointPath = normalize(endpointPathRaw);
+    const examplePath = normalize(examplePathRaw);
+
+    // Use endpoint.path if it equals or extends example.path (has base path prefix)
+    const useEndpointPath =
+        endpointPath === examplePath ||
+        (endpointPath.length > examplePath.length && endpointPath.endsWith(examplePath));
+    const fullPath = useEndpointPath ? endpointPathRaw : examplePathRaw;
+
+    const url = urljoin(compact([sanitizedEnvironment, fullPath]));
 
     const headers: Record<string, unknown> = { ...example.headers };
 
