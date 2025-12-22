@@ -111,6 +111,83 @@ interface MergeSupportedFieldsData {
     deletedDataDetectionHref?: string;
 }
 
+/**
+ * Parses requiredParameters to extract parent-child relationships.
+ * e.g., ["integration_params.foo", "integration_params.bar", "other_param"]
+ * returns { nestedParams: { integration_params: ["foo", "bar"] }, flatParams: ["other_param"] }
+ */
+function parseNestedParams(requiredParameters: string[]): {
+    nestedParams: Record<string, string[]>;
+    flatParams: string[];
+} {
+    const nestedParams: Record<string, string[]> = {};
+    const flatParams: string[] = [];
+
+    for (const param of requiredParameters) {
+        const dotIndex = param.indexOf(".");
+        if (dotIndex !== -1) {
+            const parent = param.substring(0, dotIndex);
+            const child = param.substring(dotIndex + 1);
+            if (!nestedParams[parent]) {
+                nestedParams[parent] = [];
+            }
+            nestedParams[parent].push(child);
+        } else {
+            flatParams.push(param);
+        }
+    }
+
+    return { nestedParams, flatParams };
+}
+
+/**
+ * Creates a TypeShape for a primitive string type (wrapped in alias since primitives are TypeReferences).
+ */
+function createStringTypeShape(): ApiDefinition.TypeShape {
+    return {
+        type: "alias",
+        value: {
+            type: "primitive",
+            value: {
+                type: "string",
+                format: undefined,
+                regex: undefined,
+                minLength: undefined,
+                maxLength: undefined,
+                default: undefined
+            }
+        }
+    };
+}
+
+/**
+ * Creates an object type shape with nested string properties for additional required parameters.
+ */
+function createNestedObjectShape(parentKey: string, children: string[]): ApiDefinition.ObjectProperty {
+    const childProperties: ApiDefinition.ObjectProperty[] = children.map((child) => ({
+        key: child as ApiDefinition.PropertyKey,
+        valueShape: createStringTypeShape(),
+        description: undefined,
+        availability: undefined,
+        propertyAccess: undefined
+    }));
+
+    const objectShape: ApiDefinition.TypeShape = {
+        type: "object",
+        properties: childProperties,
+        extends: [],
+        extraProperties: undefined
+    };
+
+    return {
+        key: parentKey as ApiDefinition.PropertyKey,
+        valueShape: objectShape,
+        description: undefined,
+        availability: undefined,
+        propertyAccess: undefined
+    };
+}
+
 type MergeSupportedFieldsByIntegrationWidgetProps = {
     /**
      * Base64 gzip-encoded JSON data containing model and integrations.
@@ -180,20 +257,22 @@ function IntegrationRow({
 
     // Filter the shape's properties to only show supported fields,
     // and transform valueShape based on requiredParameters
-    const { filteredShape, additionalRequiredParams } = (() => {
+    const { filteredShape, additionalParamsShape } = (() => {
         const shape = typeDefinition.shape;
         if (shape.type !== "object") {
-            return { filteredShape: shape, additionalRequiredParams: [] as string[] };
+            return { filteredShape: shape, additionalParamsShape: null };
         }
 
         const supportedFieldKeys = new Set(integration.supportedFields);
         // Convert PropertyKey to string for comparison
         const schemaPropertyKeys = new Set(shape.properties.map((p) => String(p.key)));
 
-        // Find required parameters that don't exist in the schema
-        const additionalParams = (integration.requiredParameters ?? []).filter(
-            (param) => !schemaPropertyKeys.has(param)
-        );
+        // Parse required parameters to separate flat params from nested (dot-notation) params
+        const allRequiredParams = integration.requiredParameters ?? [];
+        const { nestedParams, flatParams } = parseNestedParams(allRequiredParams);
+
+        // Find flat required parameters that don't exist in the schema
+        const additionalFlatParams = flatParams.filter((param) => !schemaPropertyKeys.has(param));
 
         const filteredProperties = shape.properties
             .filter((property) => supportedFieldKeys.has(String(property.key)))
@@ -206,12 +285,41 @@ function IntegrationRow({
                 };
             });
 
+        // Build additional params shape: nested object params + flat string params
+        const additionalProperties: ApiDefinition.ObjectProperty[] = [];
+
+        // Add nested object parameters (e.g., integration_params with children foo, bar)
+        for (const [parentKey, children] of Object.entries(nestedParams)) {
+            additionalProperties.push(createNestedObjectShape(parentKey, children));
+        }
+
+        // Add flat required parameters as simple string types
+        for (const param of additionalFlatParams) {
+            additionalProperties.push({
+                key: param as ApiDefinition.PropertyKey,
+                valueShape: createStringTypeShape(),
+                description: undefined,
+                availability: undefined,
+                propertyAccess: undefined
+            });
+        }
+
+        const additionalParamsShape: ApiDefinition.TypeShape | null =
+            additionalProperties.length > 0
+                ? {
+                      type: "object",
+                      properties: additionalProperties,
+                      extends: [],
+                      extraProperties: undefined
+                  }
+                : null;
+
         return {
             filteredShape: {
                 ...shape,
                 properties: filteredProperties
             } as ApiDefinition.TypeShape,
-            additionalRequiredParams: additionalParams
+            additionalParamsShape
         };
     })();
 
@@ -288,7 +396,7 @@ function IntegrationRow({
                                 </TypeDefinitionAnchorPart>
                             </div>
                         </div>
-                        {additionalRequiredParams.length > 0 && (
+                        {additionalParamsShape && (
                             <div className="rounded-2 mt-6 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
                                 <div className="border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
                                     <span className="text-xs font-semibold">
@@ -297,15 +405,18 @@ function IntegrationRow({
                                             : `Additional ${requestType} parameters`}
                                     </span>
                                 </div>
-                                <div className="space-y-1 px-3 py-2">
-                                    {additionalRequiredParams.map((param) => (
-                                        <div key={param} className="flex items-center gap-2 text-sm">
-                                            <code className="bg-tag-default rounded px-1.5 py-0.5 font-mono text-xs">
-                                                {param}
-                                            </code>
-                                            <span className="text-(color:--red-a11) text-xs">Required</span>
-                                        </div>
-                                    ))}
+                                <div className="px-3 py-2">
+                                    <TypeDefinitionAnchorPart part="additional-params">
+                                        <SectionContainer>
+                                            <TypeReferenceDefinitions
+                                                shape={additionalParamsShape}
+                                                types={types}
+                                                lang={lang}
+                                                exclude={[]}
+                                                excludeDeprecated={false}
+                                            />
+                                        </SectionContainer>
+                                    </TypeDefinitionAnchorPart>
                                 </div>
                             </div>
                         )}
