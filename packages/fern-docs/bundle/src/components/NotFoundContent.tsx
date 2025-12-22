@@ -9,6 +9,7 @@ import Link from "next/link";
 import type React from "react";
 import { useMemo } from "react";
 import { z } from "zod";
+import { NotFound404Tracker } from "./analytics/NotFound404Tracker";
 import { useApiRouteSWR } from "./hooks/useApiRouteSWR";
 
 export interface RouteSuggestion {
@@ -84,7 +85,7 @@ export default function NotFoundContent({
 
     return (
         <>
-            {tracker}
+            {tracker ?? <NotFound404Tracker />}
             <HiddenSidebar />
             <div
                 className={cn(
