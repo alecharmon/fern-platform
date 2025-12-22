@@ -13,7 +13,7 @@ export function CardGroup({
 
     return (
         <div
-            className={cn("fern-card-group my-6 grid gap-4 first:mt-0 sm:gap-6", {
+            className={cn("fern-card-group my-6 grid gap-3 first:mt-0 sm:gap-4", {
                 "grid-cols-1": cols <= 1,
                 "grid-cols-1 sm:grid-cols-2": cols === 2,
                 "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3": cols === 3,
