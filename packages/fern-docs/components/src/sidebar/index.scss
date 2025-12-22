@@ -69,7 +69,7 @@
     }
 
     .expand-indicator {
-      @apply data-[state=active]:text-(color:--accent-a11) data-[state=active]:bg-(color:--accent-a3) data-[state=active]:rounded-1 cursor-default transition-transform;
+      @apply data-[state=active]:text-(color:--accent-a11) data-[state=active]:bg-(color:--accent-a3) data-[state=active]:rounded-1 cursor-default;
     }
 
     &[data-state="active"] {

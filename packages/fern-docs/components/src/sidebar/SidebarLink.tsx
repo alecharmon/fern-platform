@@ -128,7 +128,7 @@ const SidebarLinkInternal = React.forwardRef<HTMLAnchorElement, SidebarLinkProps
 
     const expandButton = (!!onToggleExpand || expanded) && (
         <ChevronDown
-            className={cn("expand-indicator", expanded ? "rotate-0" : "-rotate-90")}
+            className={cn("expand-indicator", expanded ? "rotate-180" : "rotate-0")}
             data-state={showIndicator ? "active" : "inactive"}
             onClickCapture={(e) => {
                 e.preventDefault();
