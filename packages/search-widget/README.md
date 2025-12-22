@@ -34,8 +34,8 @@ This package requires **React 19 only**:
 First, import the component and styles in your application:
 
 ```jsx
-import { SearchModal } from '@fern-platform/search-widget';
-import '@fern-platform/search-widget/styles';
+import { SearchModal } from '@fern-api/search-widget';
+import '@fern-api/search-widget/styles';
 ```
 
 Then use the SearchModal component:
@@ -62,12 +62,13 @@ The `SearchModal` component accepts the following props:
 #### Required Props
 
 - `domain` (string): The documentation domain to search against (e.g., `"https://buildwithfern.com/learn"`)
-- `lang` (string): Language code for the search interface (e.g., `"en"`)
 
 #### Optional Props
 
 All standard HTML button props are supported and will be forwarded to the trigger button:
 
+- `lang` (string): Language code for the search interface (e.g., `"en"`). Defaults to `"en"`
+- `icon` (React.ReactNode): Icon element to display in the button
 - `className`: Additional CSS classes for the button
 - `style`: Inline styles for the button
 - `onClick`: Additional click handler (runs before opening modal)
@@ -135,8 +136,8 @@ The button has a `fern-search-button` class that you can target:
 ### Complete Example
 
 ```jsx
-import { SearchModal } from '@fern-platform/search-widget';
-import '@fern-platform/search-widget/styles';
+import { SearchModal } from '@fern-api/search-widget';
+import '@fern-api/search-widget/styles';
 
 function App() {
   return (
@@ -180,7 +181,7 @@ export default App;
 Make sure you import the CSS file:
 
 ```jsx
-import '@fern-platform/search-widget/styles';
+import '@fern-api/search-widget/styles';
 ```
 
 ### Button Not Visible
@@ -218,11 +219,11 @@ This package bundles all dependencies except React:
 
 ## Bundle Size
 
-- **CSS:** ~463 KiB
-- **JavaScript:** ~1.27 MiB (minified)
-- **Total:** ~1.73 MiB
+- **CSS:** ~652 KiB
+- **JavaScript:** ~1.37 MiB (minified)
+- **Total:** ~2.03 MiB
 
-The bundle includes code-splitting with 286 lazy-loaded chunks for optimal performance.
+The bundle includes code-splitting with 116 lazy-loaded chunks for optimal performance.
 
 ## License
 
