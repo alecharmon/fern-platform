@@ -46,6 +46,21 @@
       "dependsOn": ["^build", "^compile"],
       "inputs": ["$TURBO_DEFAULT$", ".env.production.local", ".env.local", ".env.production", ".env"]
     },
+    "dashboard:dev": {
+      "persistent": true,
+      "dependsOn": ["^compile"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"]
+    },
+    "dashboard:dev:inspect": {
+      "persistent": true,
+      "dependsOn": ["^compile"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"]
+    },
+    "dashboard:dev:turbopack": {
+      "persistent": true,
+      "dependsOn": ["^compile"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"]
+    },
     "docs:build": {
       "dependsOn": ["^build", "^compile", "^docs:build"],
       "env": [

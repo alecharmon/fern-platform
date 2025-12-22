@@ -89,7 +89,12 @@ let nextConfig: NextConfig = {
         ],
         qualities: [75, 100]
     },
-    webpack: (config, { isServer }) => {
+    webpack: (config, { isServer, dev }) => {
+        // Enable source maps for debugging in development
+        if (dev) {
+            config.devtool = "source-map";
+        }
+
         config.externals.push(
             "sharp",
             // mongodb subdependencies are optional, and need to be externalized for rspack.

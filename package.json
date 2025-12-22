@@ -5,15 +5,17 @@
   "repository": "https://github.com/fern-api/fern-platform",
   "author": "Birch Solutions, Inc.",
   "scripts": {
+    "add-translation": "pnpm tsx scripts/add-translation.ts",
     "aws:up": "pnpm up -r \"@aws-sdk/*\"",
     "build": "turbo build",
     "check": "pnpm exec biome check",
-    "check:fix": "pnpm exec biome check --write",
     "check-docs-release-blockers": "pnpm tsx packages/scripts/src/cli.ts -- fern-scripts check-docs-release-blockers",
+    "check:fix": "pnpm exec biome check --write",
     "clean": "turbo clean",
     "codegen": "turbo codegen",
     "compile": "turbo compile",
     "dashboard:dev": "turbo dashboard:dev",
+    "dashboard:dev:inspect": "turbo dashboard:dev:inspect",
     "dashboard:dev:turbopack": "turbo dashboard:dev:turbopack",
     "dashboard:pull": "VERCEL_ORG_ID=team_6FKOM5nw037hv8g2mTk3gaH7 VERCEL_PROJECT_ID=prj_7PayvneDidzQ3RW6SUFMTN88chaa vercel pull --environment=development && cp .vercel/.env.development.local packages/fern-dashboard/.env.local",
     "depcheck": "turbo depcheck",
@@ -50,10 +52,9 @@
     "lint:eslint": "turbo lint:eslint",
     "lint:eslint:fix": "turbo lint:eslint:fix",
     "lint:fix": "pnpm root-package:fix && pnpm lint:biome:fix && pnpm lint:style:fix && pnpm format",
+    "lint:i18n": "pnpm eslint --config eslint.i18n.config.mjs \"packages/fern-docs/**/*.{ts,tsx}\" --quiet",
     "lint:style": "turbo lint:style",
     "lint:style:fix": "turbo lint:style:fix",
-    "lint:i18n": "pnpm eslint --config eslint.i18n.config.mjs \"packages/fern-docs/**/*.{ts,tsx}\" --quiet",
-    "add-translation": "pnpm tsx scripts/add-translation.ts",
     "playwright:build": "turbo --filter='playwright-*' --filter='@fern-docs/local-preview-bundle' build",
     "playwright:test": "pnpm exec playwright test",
     "publish": "pnpm -r --filter=!private --parallel exec -- npm publish --access public",
@@ -214,9 +215,9 @@
       "workerd"
     ],
     "overrides": {
+      "@walletconnect/logger": "3.0.0",
       "vite": "^6.4.1",
-      "webpack-bundle-analyzer>ws": "^7.5.10",
-      "@walletconnect/logger": "3.0.0"
+      "webpack-bundle-analyzer>ws": "^7.5.10"
     }
   },
   "nextBundleAnalysis": {
