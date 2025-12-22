@@ -132,7 +132,7 @@ ENV MINIO_VOLUMES="/data" \
 # ----------- Start MeiliSearch setup -----------
 RUN log "Installing MeiliSearch..." && \
     apk add --no-cache curl bash strace 2>&1 | add-timestamps && \
-    bash -c 'for i in {1..5}; do curl -L https://install.meilisearch.com 2>&1 | sh | add-timestamps && break || { log "MeiliSearch install failed, retrying ($i/5)..."; sleep 5; }; done' && \
+    bash -c 'for i in {1..6}; do curl -L https://install.meilisearch.com 2>&1 | sh | add-timestamps && break || { log "MeiliSearch install failed, retrying ($i/6)..."; sleep 10; }; done' && \
     chmod 755 /meilisearch
 
 # ----------- End MeiliSearch setup -----------
