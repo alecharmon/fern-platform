@@ -12,10 +12,31 @@
 #   COPY fern/ /fern/
 #   RUN /scripts/generate.sh
 #
+# Options:
+#   --only-deps    Start services (Postgres, MinIO, FDR) but skip fern generate.
+#                  Use this when you want to defer docs generation to runtime.
+#                  The container will run fern generate --docs at startup.
+#
 # The seeded data is stored in /opt/fern-seed/ and will be restored at runtime.
 # This allows the container to run in air-gapped environments without network access.
 
 set -euo pipefail
+
+# Parse command line arguments
+ONLY_DEPS=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --only-deps)
+            ONLY_DEPS=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [--only-deps]"
+            exit 1
+            ;;
+    esac
+done
 
 # Base image artifacts (created during base image build)
 BASE_SEED_DIR="/opt/fern-base"
@@ -291,6 +312,25 @@ for i in {1..30}; do
 done
 
 # -----------  Generate Docs  -----------
+if [ "$ONLY_DEPS" = "true" ]; then
+    log "=========================================="
+    log "--only-deps mode: Skipping fern generate --docs"
+    log "=========================================="
+    log "Services (Postgres, MinIO, FDR) have been started and are ready."
+    log "Docs generation will happen at runtime instead."
+    log ""
+    log "Note: If your project uses BSR dependencies (buf.build modules),"
+    log "you may need to vendor them locally for air-gapped environments."
+    log "=========================================="
+    
+    # Clean up services before exiting
+    log "Cleaning up services..."
+    rm -rf /data/* /data/.minio.sys 2>/dev/null || true
+    
+    # Cleanup is handled by trap
+    exit 0
+fi
+
 log "=========================================="
 log "Running fern generate --docs"
 log "=========================================="
