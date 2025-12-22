@@ -34,6 +34,10 @@
   --tw-prose-links: var(--accent-a11);
   --tw-prose-quote-borders: var(--accent-a6);
 
+  .fern-sidebar-link {
+    @apply text-(color:--grayscale-a12);
+  }
+
   .fern-background-image {
     overflow: hidden;
     position: absolute;
