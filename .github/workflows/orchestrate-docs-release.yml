@@ -15,3 +15,91 @@ jobs:
             -H "Authorization: token ${{ secrets.FERN_GITHUB_TOKEN }}" \
             https://api.github.com/repos/fern-api/docs/dispatches \
             -d '{"event_type":"docs_release","client_payload":{"version":"${{ github.ref_name }}"}}'
+
+  notify-slack:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.release.tag_name, 'docs@')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get previous docs release tag
+        id: prev_tag
+        run: |
+          CURRENT_TAG="${{ github.event.release.tag_name }}"
+          # Get all docs@ tags sorted by version, find the one before current
+          PREV_TAG=$(git tag -l 'docs@*' | sort -V | grep -B1 "^${CURRENT_TAG}$" | head -1)
+          if [ "$PREV_TAG" = "$CURRENT_TAG" ]; then
+            # Current tag is the first one, use the first commit
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD | head -1)
+          fi
+          echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
+          echo "Previous tag: $PREV_TAG"
+
+      - name: Get PRs between releases
+        id: get_prs
+        env:
+          GH_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+        run: |
+          CURRENT_TAG="${{ github.event.release.tag_name }}"
+          PREV_TAG="${{ steps.prev_tag.outputs.prev_tag }}"
+          
+          echo "Getting PRs between $PREV_TAG and $CURRENT_TAG"
+          
+          # Get all commits between the two tags (handles both merge commits and squash merges)
+          # Squash merge commits typically have PR numbers in format "title (#123)"
+          COMMITS=$(git log --oneline "$PREV_TAG".."$CURRENT_TAG" 2>/dev/null || echo "")
+          
+          if [ -z "$COMMITS" ]; then
+            echo "pr_list=No PRs found in this release" >> $GITHUB_OUTPUT
+            echo "pr_count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Extract PR numbers from commit messages (matches both "(#123)" and "Merge pull request #123")
+          PR_NUMBERS=$(echo "$COMMITS" | grep -oE '\(#[0-9]+\)|#[0-9]+' | grep -oE '[0-9]+' | sort -u)
+          
+          if [ -z "$PR_NUMBERS" ]; then
+            echo "pr_list=No PRs found in this release" >> $GITHUB_OUTPUT
+            echo "pr_count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Build PR list with titles
+          PR_LIST=""
+          PR_COUNT=0
+          for PR_NUM in $PR_NUMBERS; do
+            PR_INFO=$(gh pr view "$PR_NUM" --json title,url,author --jq '"\(.title) by @\(.author.login)"' 2>/dev/null || echo "")
+            if [ -n "$PR_INFO" ]; then
+              PR_URL="https://github.com/${{ github.repository }}/pull/$PR_NUM"
+              PR_TITLE=$(gh pr view "$PR_NUM" --json title --jq '.title' 2>/dev/null || echo "PR #$PR_NUM")
+              PR_AUTHOR=$(gh pr view "$PR_NUM" --json author --jq '.author.login' 2>/dev/null || echo "unknown")
+              PR_LIST="${PR_LIST}\n- <${PR_URL}|#${PR_NUM}> ${PR_TITLE} (@${PR_AUTHOR})"
+              PR_COUNT=$((PR_COUNT + 1))
+            fi
+          done
+          
+          if [ -z "$PR_LIST" ]; then
+            PR_LIST="No PRs found in this release"
+          fi
+          
+          # Use EOF delimiter for multiline output
+          {
+            echo "pr_list<<EOF"
+            echo -e "$PR_LIST"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          echo "pr_count=$PR_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v2
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "*Docs Release: ${{ github.event.release.tag_name }}*\n\n${{ steps.get_prs.outputs.pr_count }} PR(s) included in this release:\n${{ steps.get_prs.outputs.pr_list }}\n\n<${{ github.event.release.html_url }}|View Release>"
+            }
