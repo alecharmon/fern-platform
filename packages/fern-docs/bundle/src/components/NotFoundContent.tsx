@@ -32,7 +32,6 @@ const RouteSuggestionsSchema = z.array(
 
 export default function NotFoundContent({
     lang,
-    tracker,
     actionButton,
     disableSuggestions = false,
     className,
@@ -42,7 +41,6 @@ export default function NotFoundContent({
     branch
 }: {
     lang: string;
-    tracker?: React.ReactNode;
     actionButton?: React.ReactNode;
     disableSuggestions?: boolean;
     className?: string;
@@ -85,7 +83,7 @@ export default function NotFoundContent({
 
     return (
         <>
-            {tracker ?? <NotFound404Tracker />}
+            <NotFound404Tracker />
             <HiddenSidebar />
             <div
                 className={cn(
