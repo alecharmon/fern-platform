@@ -70,7 +70,7 @@ For domain fetching (tries Docs KV first, falls back to FDR):
 
     try {
         // Import the analytics cron runner
-        const { runAnalyticsCronForAllPeriods } = await import("../src/app/services/analyticsCron/run");
+        const { runAnalyticsCronForAllPeriods } = await import("../src/app/services/analytics/cron/run");
 
         const resultsByPeriod = await runAnalyticsCronForAllPeriods({ periods });
 
