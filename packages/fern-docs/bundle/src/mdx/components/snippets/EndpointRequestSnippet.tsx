@@ -15,7 +15,8 @@ export function EndpointRequestSnippet({
     endpointDefinition,
     slugs,
     lang,
-    className
+    className,
+    highlight
 }: {
     /**
      * The endpoint locator to use for the request snippet.
@@ -35,6 +36,10 @@ export function EndpointRequestSnippet({
     slugs?: string[];
     lang?: string;
     className?: string;
+    /**
+     * Sets the lines to highlight
+     */
+    highlight?: number | number[];
 }) {
     if (endpointDefinition == null) {
         return null;
@@ -47,6 +52,7 @@ export function EndpointRequestSnippet({
             example={example}
             className={className}
             lang={lang ?? "en"}
+            highlight={highlight}
         />
     );
 }
@@ -56,13 +62,15 @@ function EndpointRequestSnippetInternal({
     example,
     slugs,
     className,
-    lang
+    lang,
+    highlight
 }: {
     endpoint: ApiDefinition.EndpointDefinition;
     example: string | undefined;
     slugs: string[];
     lang: string;
     className?: string;
+    highlight?: number | number[];
 }): ReactElement<any> | null {
     const slug = useCurrentSlug(slugs);
     const { selectedExample, selectedExampleKey, availableLanguages, setSelectedExampleKey } = useExampleSelection(
@@ -114,6 +122,7 @@ function EndpointRequestSnippetInternal({
                 language={selectedExampleKey.language}
                 json={EMPTY_OBJECT}
                 scrollAreaStyle={{ maxHeight: "500px" }}
+                highlight={highlight}
             />
         </div>
     );

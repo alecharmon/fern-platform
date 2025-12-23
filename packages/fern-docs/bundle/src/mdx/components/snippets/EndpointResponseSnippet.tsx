@@ -10,7 +10,8 @@ export function EndpointResponseSnippet({
     endpointDefinition,
     slug,
     className,
-    lang
+    lang,
+    highlight
 }: {
     /**
      * The endpoint locator to use for the request snippet.
@@ -30,6 +31,10 @@ export function EndpointResponseSnippet({
     slug: string;
     className?: string;
     lang?: string;
+    /**
+     * Sets the lines to highlight
+     */
+    highlight?: number | number[];
 }) {
     if (endpointDefinition == null) {
         return null;
@@ -42,6 +47,7 @@ export function EndpointResponseSnippet({
             slug={slug}
             className={className}
             lang={lang ?? "en"}
+            highlight={highlight}
         />
     );
 }
@@ -51,13 +57,15 @@ function EndpointResponseSnippetInternal({
     example,
     slug,
     className,
-    lang
+    lang,
+    highlight
 }: {
     slug: string;
     endpoint: EndpointDefinition;
     example: string | undefined;
     className?: string;
     lang: string;
+    highlight?: number | number[];
 }) {
     const { selectedExample } = useExampleSelection(endpoint, example);
 
@@ -81,6 +89,7 @@ function EndpointResponseSnippetInternal({
                 slug={slug}
                 isResponse
                 lang={lang}
+                highlight={highlight}
             />
         </div>
     );

@@ -7,7 +7,8 @@ export function WebhookPayloadSnippet({
     webhookDefinition,
     slug,
     className,
-    lang
+    lang,
+    highlight
 }: {
     /**
      * The webhook locator to use for the payload snippet.
@@ -24,6 +25,10 @@ export function WebhookPayloadSnippet({
     slug: string | undefined;
     className?: string;
     lang?: string;
+    /**
+     * Sets the lines to highlight
+     */
+    highlight?: number | number[];
 }) {
     if (webhookDefinition == null) {
         return null;
@@ -35,6 +40,7 @@ export function WebhookPayloadSnippet({
             slug={slug}
             className={className}
             lang={lang ?? "en"}
+            highlight={highlight}
         />
     );
 }
@@ -43,12 +49,14 @@ function WebhookPayloadSnippetInternal({
     webhook,
     slug,
     className,
-    lang
+    lang,
+    highlight
 }: {
     slug: string | undefined;
     webhook: ApiDefinition.WebhookDefinition;
     className?: string;
     lang: string;
+    highlight?: number | number[];
 }) {
     const example = webhook.examples?.[0];
 
@@ -74,6 +82,7 @@ function WebhookPayloadSnippetInternal({
                 scrollAreaStyle={{ maxHeight: "500px" }}
                 slug={slug}
                 lang={lang}
+                highlight={highlight}
             />
         </div>
     );

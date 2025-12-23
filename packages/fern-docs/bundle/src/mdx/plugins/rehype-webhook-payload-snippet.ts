@@ -9,6 +9,7 @@ import {
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";
+import { expandHighlightRanges } from "./expand-highlight-ranges";
 
 /**
  * This rehype plugin processes `WebhookPayloadSnippet` components in MDX content.
@@ -32,6 +33,7 @@ export const rehypeWebhookPayloadSnippet: Unified.Plugin<[{ loader: DocsLoader }
             const isWebhookPayloadSnippet = node.name === "WebhookPayloadSnippet";
 
             if (isWebhookPayloadSnippet) {
+                expandHighlightRanges(node);
                 const { props } = hastMdxJsxElementHastToProps(node);
 
                 // cannot parse non-string webhook prop

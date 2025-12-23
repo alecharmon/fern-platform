@@ -23,9 +23,13 @@ type SchemaSnippetProps = {
      */
     title?: string;
     className?: string;
+    /**
+     * Line numbers to highlight. Supports range syntax like `highlight={[1-5, 7, 9]}`.
+     */
+    highlight?: number | number[];
 };
 
-export function SchemaSnippet({ typeDefinition, types, lang, title, className }: SchemaSnippetProps) {
+export function SchemaSnippet({ typeDefinition, types, lang, title, className, highlight }: SchemaSnippetProps) {
     const language = lang ?? "en";
 
     const example = useMemo(() => {
@@ -50,6 +54,7 @@ export function SchemaSnippet({ typeDefinition, types, lang, title, className }:
                 json={example}
                 scrollAreaStyle={{ maxHeight: "500px" }}
                 lang={language}
+                highlight={highlight}
             />
         </div>
     );

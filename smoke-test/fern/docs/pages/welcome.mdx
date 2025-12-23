@@ -45,25 +45,25 @@ import { CustomCard } from "../components/CustomCard"
 ## Example Request Snippet
 
 <div>
-  <EndpointRequestSnippet endpoint="POST /plant" />
+  <EndpointRequestSnippet endpoint="POST /plant" highlight={2} />
 </div>
 
 ## Example Response Snippet
 
 <div>
-  <EndpointResponseSnippet endpoint="POST /plant" />
+  <EndpointResponseSnippet endpoint="POST /plant" highlight={[2-4, 6-7]} />
 </div>
 
 ## Example Webhook Payload Snippet
 
 <div>
-  <WebhookPayloadSnippet webhook="onOrderCreated" />
+  <WebhookPayloadSnippet webhook="onOrderCreated" highlight={[3, 5]} />
 </div>
 
 ## Example Schema Snippet
 
 <div>
-  <SchemaSnippet type="Plant" />
+  <SchemaSnippet type="Plant" highlight={3} />
 </div>
 
 <Markdown src="/docs/snippets/water-warning.mdx"/>

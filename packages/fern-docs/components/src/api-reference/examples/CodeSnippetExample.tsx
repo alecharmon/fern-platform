@@ -10,6 +10,8 @@ import type { JsonPropertyPath } from "./JsonPropertyPath";
 import { TitledExample } from "./TitledExample";
 import { useHighlightJsonLines } from "./useHighlightJsonLines";
 
+type HighlightLine = number | [number, number];
+
 export declare namespace CodeSnippetExample {
     export interface Props extends Omit<TitledExample.Props, "copyToClipboardText"> {
         id?: string;
@@ -21,6 +23,10 @@ export declare namespace CodeSnippetExample {
         measureHeight?: (height: number) => void;
         slug?: string;
         isResponse?: boolean;
+        /**
+         * Sets the lines to highlight
+         */
+        highlight?: number | number[];
     }
 }
 
@@ -35,6 +41,7 @@ const CodeSnippetExampleInternal: FC<CodeSnippetExample.Props> = ({
     className,
     slug,
     isResponse = false,
+    highlight,
     ...props
 }) => {
     const codeBlockRef = createRef<HTMLPreElement>();
@@ -74,20 +81,26 @@ const CodeSnippetExampleInternal: FC<CodeSnippetExample.Props> = ({
         };
     }, [slug, isResponse]);
 
-    const requestHighlightLines = useHighlightJsonLines(json, hoveredPropertyPath, jsonStartLine);
+    const hoverHighlightLines = useHighlightJsonLines(json, hoveredPropertyPath, jsonStartLine);
+
+    // Convert highlight prop to array format (same as CodeBlock), typed as HighlightLine[] for compatibility with hoverHighlightLines
+    const userHighlightLines: HighlightLine[] =
+        highlight == null ? [] : typeof highlight === "number" ? [highlight] : highlight;
+
+    // Use hover highlight lines when actively hovering, otherwise use user-provided highlight lines
+    const effectiveHighlightLines = hoverHighlightLines.length > 0 ? hoverHighlightLines : userHighlightLines;
 
     useEffect(() => {
-        if (viewportRef.current != null && requestHighlightLines[0] != null) {
-            const lineNumber = Array.isArray(requestHighlightLines[0])
-                ? requestHighlightLines[0][0]
-                : requestHighlightLines[0];
+        if (viewportRef.current != null && effectiveHighlightLines[0] != null) {
+            const first = effectiveHighlightLines[0];
+            const lineNumber = Array.isArray(first) ? first[0] : first;
             const offsetTop = (lineNumber - 1) * 19.5 - viewportRef.current.clientHeight / 4;
             viewportRef.current.scrollTo({
                 top: offsetTop,
                 behavior: "smooth"
             });
         }
-    }, [requestHighlightLines, viewportRef]);
+    }, [effectiveHighlightLines, viewportRef]);
 
     // Scroll to top when code changes
     // biome-ignore lint/correctness/useExhaustiveDependencies: only run when code changes
@@ -109,7 +122,7 @@ const CodeSnippetExampleInternal: FC<CodeSnippetExample.Props> = ({
                 viewportRef={viewportRef}
                 language={language}
                 fontSize="sm"
-                highlightLines={requestHighlightLines}
+                highlightLines={effectiveHighlightLines}
                 code={code}
             />
         </TitledExample>

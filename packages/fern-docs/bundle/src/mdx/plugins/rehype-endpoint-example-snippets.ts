@@ -11,6 +11,7 @@ import {
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";
+import { expandHighlightRanges } from "./expand-highlight-ranges";
 
 /**
  * The code below copies the `example` prop of an
@@ -49,6 +50,7 @@ export const rehypeEndpointExampleSnippets: Unified.Plugin<[{ loader: DocsLoader
 
             // check that the current node is a request or response snippet
             if (isRequestSnippet || isResponseSnippet) {
+                expandHighlightRanges(node);
                 const { props } = hastMdxJsxElementHastToProps(node);
 
                 // cannot parse non-string endpoint prop

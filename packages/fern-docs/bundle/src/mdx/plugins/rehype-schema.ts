@@ -11,6 +11,7 @@ import {
     visit
 } from "@fern-docs/mdx";
 import { gunzipSync } from "zlib";
+import { expandHighlightRanges } from "./expand-highlight-ranges";
 
 import {
     serializeAllTypeDefinitionDescriptions,
@@ -103,6 +104,7 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
             }
 
             if (node.name != null && (node.name === "Schema" || node.name === "SchemaSnippet")) {
+                expandHighlightRanges(node);
                 const { props } = hastMdxJsxElementHastToProps(node);
 
                 if (typeof props.type !== "string") {

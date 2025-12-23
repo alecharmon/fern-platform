@@ -10,6 +10,7 @@ import {
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";
+import { expandHighlightRanges } from "./expand-highlight-ranges";
 
 /**
  * This plugin is used to add the `endpointDefinition`, `slugs`, and `types`
@@ -32,6 +33,7 @@ export const rehypeEndpointSchemaSnippets: Unified.Plugin<[{ loader: DocsLoader 
 
             // check that the current node is an endpoint snippet
             if (node.name != null && node.name === "EndpointSchemaSnippet") {
+                expandHighlightRanges(node);
                 const { props } = hastMdxJsxElementHastToProps(node);
 
                 // cannot parse non-string endpoint prop
