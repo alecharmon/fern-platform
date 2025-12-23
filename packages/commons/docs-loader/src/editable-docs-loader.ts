@@ -37,6 +37,8 @@ class EditableDocsLoader implements DocsLoader {
     getEndpointByLocator = (method: HttpMethod, path: string, example?: string) =>
         this.readOnlyDocsLoader.getEndpointByLocator(method, path, example);
 
+    getWebhookByLocator = (webhookId: string) => this.readOnlyDocsLoader.getWebhookByLocator(webhookId);
+
     getRoot = () => this.readOnlyDocsLoader.getRoot();
 
     getNavigationNode = (id: string) => this.readOnlyDocsLoader.getNavigationNode(id);

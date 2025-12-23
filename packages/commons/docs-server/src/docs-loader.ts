@@ -105,6 +105,19 @@ export interface DocsLoader<IsAsync extends boolean = true> {
     >;
 
     /**
+     * @returns the webhook definition for the given webhook locator (ID or path), or undefined if not found
+     */
+    getWebhookByLocator: (webhookId: string) => MaybePromise<
+        | {
+              apiDefinitionId: ApiDefinition.ApiDefinitionId;
+              webhook: ApiDefinition.WebhookDefinition;
+              slug: Slug | undefined;
+          }
+        | undefined,
+        IsAsync
+    >;
+
+    /**
      * @returns the root node of the docs (aware of authentication)
      */
     getRoot: () => MaybePromise<FernNavigation.RootNode, IsAsync>;

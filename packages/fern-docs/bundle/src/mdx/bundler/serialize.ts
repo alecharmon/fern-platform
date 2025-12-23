@@ -62,6 +62,7 @@ import { rehypeSchema } from "../plugins/rehype-schema";
 import { rehypeSteps } from "../plugins/rehype-steps";
 import { rehypeTable } from "../plugins/rehype-table";
 import { rehypeTabs } from "../plugins/rehype-tabs";
+import { rehypeWebhookPayloadSnippet } from "../plugins/rehype-webhook-payload-snippet";
 import { remarkExtractTitle } from "../plugins/remark-extract-title";
 import { trackCustomComponents } from "./track-custom-components";
 
@@ -254,6 +255,7 @@ async function serializeMdxImpl(
                     rehypeButtons,
                     [rehypeEndpointSchemaSnippets, { loader }],
                     [rehypeEndpointExampleSnippets, { loader }],
+                    [rehypeWebhookPayloadSnippet, { loader }],
                     [rehypeSchema, { loader }],
                     [rehypeRunnableEndpoint, { loader }],
                     [rehypeLang, { loader }],

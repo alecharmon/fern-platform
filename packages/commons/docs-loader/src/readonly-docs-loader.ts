@@ -7,6 +7,7 @@ import {
     type DynamicIRsByLanguage,
     type FernFonts,
     findEndpoint,
+    findWebhook,
     generateFernColorPalette,
     generateFonts,
     getDocsUrlMetadata,
@@ -629,6 +630,52 @@ const getEndpointByLocator = async (
     }
     console.error(`Could not find endpoint ${method} ${path}`);
     notFound();
+};
+
+const getWebhookByLocator = async (
+    domainKey: string,
+    webhookId: string
+): Promise<
+    | {
+          apiDefinitionId: ApiDefinition.ApiDefinitionId;
+          webhook: ApiDefinition.WebhookDefinition;
+          slug: Slug | undefined;
+      }
+    | undefined
+> => {
+    const root = await unsafe_getFullRoot(domainKey);
+
+    const apiIds = new Set<string>();
+    FernNavigation.traverseBF(root, (node) => {
+        if (FernNavigation.hasMetadata(node) && "apiDefinitionId" in node && node.apiDefinitionId) {
+            apiIds.add(node.apiDefinitionId);
+        }
+        return CONTINUE;
+    });
+
+    for (const apiId of apiIds) {
+        const api = await getApi(domainKey, apiId);
+        const webhook = findWebhook({
+            apiDefinition: api,
+            webhookId
+        });
+        if (webhook != null) {
+            const webhookNode = FernNavigation.NodeCollector.collect(root)
+                .getNodesInOrder()
+                .filter(FernNavigation.hasMetadata)
+                .find(
+                    (node) =>
+                        node.type === "webhook" && node.apiDefinitionId === api.id && node.webhookId === webhook.id
+                );
+            return {
+                apiDefinitionId: api.id,
+                webhook,
+                slug: webhookNode?.slug
+            };
+        }
+    }
+    console.error(`Could not find webhook ${webhookId}`);
+    return undefined;
 };
 
 export function convertResponseToRootNode(response: DocsV2Read.LoadDocsForUrlResponse, edgeFlags: EdgeFlags) {
@@ -1432,6 +1479,13 @@ const createCachedDocsLoaderImpl = async (
                     getEndpointByLocator(domainKey, method, path, example),
                 [domainKey, config.cacheKeySuffix],
                 { tags: [domainKey, "endpointByLocator"] }
+            )
+        ),
+        getWebhookByLocator: cache(
+            unstable_cache(
+                (webhookId: string) => getWebhookByLocator(domainKey, webhookId),
+                [domainKey, config.cacheKeySuffix],
+                { tags: [domainKey, "webhookByLocator"] }
             )
         ),
         getRoot: async () => {

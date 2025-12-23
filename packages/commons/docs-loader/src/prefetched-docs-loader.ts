@@ -140,6 +140,16 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         return this.notSupported("getEndpointByLocator");
     }
 
+    getWebhookByLocator(_webhookId: string):
+        | {
+              apiDefinitionId: ApiDefinition.ApiDefinitionId;
+              webhook: ApiDefinition.WebhookDefinition;
+              slug: Slug | undefined;
+          }
+        | undefined {
+        return this.notSupported("getWebhookByLocator");
+    }
+
     getRoot(): FernNavigation.RootNode {
         return this.notSupported("getRoot");
     }

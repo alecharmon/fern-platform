@@ -52,7 +52,8 @@ import {
     MergeAccessedThirdPartyEndpointsWidget,
     MergeSupportedFieldsByIntegrationWidget,
     Schema,
-    SchemaSnippet
+    SchemaSnippet,
+    WebhookPayloadSnippet
 } from "./snippets";
 import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
 import { Step, StepGroup } from "./steps";
@@ -106,6 +107,7 @@ const FERN_COMPONENTS = {
     Schema,
     SchemaSnippet,
     SearchBar: SearchV2Trigger,
+    WebhookPayloadSnippet,
     Step,
     StepGroup,
     Tab,
