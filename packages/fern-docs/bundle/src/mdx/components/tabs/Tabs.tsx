@@ -3,6 +3,7 @@ import { cn } from "@fern-docs/components/cn";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 import { useProgrammingLanguage } from "@fern-docs/components/state/language";
 import * as RadixTabs from "@radix-ui/react-tabs";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { unwrapChildren } from "../../common/unwrap-children";
@@ -19,14 +20,56 @@ export interface TabProps {
 export interface TabGroupProps {
     toc?: boolean;
     className?: string;
+    /**
+     * the query parameter name to use for tab selection (e.g., "tab")
+     * when set, the selected tab will be synced with the URL query parameter
+     */
+    paramName?: string;
 }
 
-export function TabGroup({ children, className }: { toc?: boolean; children?: ReactNode; className?: string }) {
+export function TabGroup({
+    children,
+    className,
+    paramName
+}: {
+    toc?: boolean;
+    children?: ReactNode;
+    className?: string;
+    /**
+     * the query parameter name to use for tab selection (e.g., "tab")
+     * when set, the selected tab will be synced with the URL query parameter
+     */
+    paramName?: string;
+}) {
     const items = unwrapChildren(children, Tab);
 
-    const [activeTab, setActiveTab] = useState(() => items[0]?.props.id);
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const tabParam = paramName ? searchParams.get(paramName) : null;
+
+    const [activeTab, setActiveTab] = useState(() => {
+        // Priority: query param > first tab
+        if (tabParam != null) {
+            const matchingTab = items.find((item) => item.props.id === tabParam);
+            if (matchingTab) {
+                return tabParam;
+            }
+        }
+        return items[0]?.props.id;
+    });
     const anchor = useCurrentAnchor();
     const [selectedLanguage, setSelectedLanguage] = useProgrammingLanguage();
+
+    // Sync with query parameter when it changes
+    useEffect(() => {
+        if (tabParam != null) {
+            const matchingTab = items.find((item) => item.props.id === tabParam);
+            if (matchingTab) {
+                setActiveTab(tabParam);
+            }
+        }
+    }, [tabParam, items]);
 
     useEffect(() => {
         if (anchor != null) {
@@ -58,6 +101,15 @@ export function TabGroup({ children, className }: { toc?: boolean; children?: Re
 
     const handleTabChange = (tabId: string) => {
         setActiveTab(tabId);
+
+        // Update URL with query parameter when paramName is specified
+        if (paramName) {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set(paramName, tabId);
+            const newURL = `${pathname}?${params.toString()}`;
+            router.replace(newURL, { scroll: false });
+        }
+
         const selectedTab = items.find((item) => item.props.id === tabId);
         const cleanedLanguage = selectedTab?.props.language
             ? ApiDefinition.cleanLanguage(selectedTab.props.language)
