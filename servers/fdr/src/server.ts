@@ -71,7 +71,7 @@ void startServer();
 async function startServer(): Promise<void> {
     try {
         await app.initialize();
-        expressApp.use(express.json({ limit: "50mb" }));
+        expressApp.use(express.json({ limit: "100mb" }));
         register(expressApp, {
             docs: {
                 v1: {
