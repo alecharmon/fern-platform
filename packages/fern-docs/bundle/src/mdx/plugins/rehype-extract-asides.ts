@@ -1,5 +1,6 @@
 import {
     type Estree,
+    extractJsx,
     extractJsxFromEstree,
     type Hast,
     isMdxJsxElementHast,
@@ -14,6 +15,12 @@ import { toEstree } from "hast-util-to-estree";
  */
 export const rehypeExtractAsides: Unified.Plugin<[], Hast.Root> = () => {
     return (ast) => {
+        // Extract module-level ESM bindings from the full AST before extracting the Aside content.
+        // This includes imports and other top-level declarations that define component names.
+        // We need to filter these out to avoid shadowing imported custom components.
+        const moduleBindings = extractJsx(ast);
+        const moduleEsmBindings = new Set(moduleBindings.esmElements);
+
         const asides: Hast.ElementContent[] = [];
         visit(ast, (node, index, parent) => {
             if (!isMdxJsxElementHast(node) || node.name !== "Aside" || index == null || parent == null) {
@@ -47,7 +54,11 @@ export const rehypeExtractAsides: Unified.Plugin<[], Hast.Root> = () => {
             if (!jsxFragment || jsxFragment.type !== "JSXFragment") {
                 throw new Error("No JSXFragment found");
             }
-            ast.children.push(mdxJsEsmExport("Aside", jsxFragment, extracted.jsxElements));
+            // Filter out JSX elements that are already defined at module scope (e.g., imported custom components).
+            // This prevents the generated Aside component from shadowing these imports with undefined values
+            // from useMDXComponents(), which would cause "Something went wrong!" errors.
+            const jsxElementsToDestructure = extracted.jsxElements.filter((name) => !moduleEsmBindings.has(name));
+            ast.children.push(mdxJsEsmExport("Aside", jsxFragment, jsxElementsToDestructure));
         } catch (e) {
             console.error(String(e));
         }
