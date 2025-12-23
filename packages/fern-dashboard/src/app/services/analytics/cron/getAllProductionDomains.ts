@@ -1,4 +1,3 @@
-import { FdrClient } from "@fern-api/fdr-sdk/client";
 import { uniq } from "es-toolkit/array";
 
 /* eslint-disable turbo/no-undeclared-env-vars */
@@ -120,6 +119,8 @@ export async function getAllProductionDomainsFromFDR(): Promise<ProductionDomain
 
     console.log(`[getAllProductionDomainsFromFDR] Fetching from ${fdrServerUrl}...`);
 
+    // Lazy import FDR client only when needed (avoids build requirement)
+    const { FdrClient } = await import("@fern-api/fdr-sdk/client");
     const fdr = new FdrClient({
         environment: fdrServerUrl,
         token: fernToken
