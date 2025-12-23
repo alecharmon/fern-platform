@@ -65,7 +65,7 @@ export function ProductDropdownClient({
                                 slug: product.slug ?? ""
                             })
                         );
-                    const isActive = product.productId === currentProductId;
+                    const isActive = product.productId === currentProduct.productId;
                     return (
                         <FernLink
                             key={product.productId}
