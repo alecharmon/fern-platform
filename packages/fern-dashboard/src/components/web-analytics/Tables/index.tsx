@@ -168,14 +168,14 @@ function AnalyticsTables({ docsUrl, dateRange, orgName, gitUrl, baseBranch }: An
                 <ReferringDomainsTable />
             </div>
 
-            {/* Fourth row: LLM File Views */}
+            {/* Fourth row: LLM File Views and API Explorer Requests */}
             <div className="flex flex-col gap-4 lg:flex-row">
                 <LLMFileViewsTable />
+                <APIExplorerRequestsTable />
             </div>
 
-            {/* Fifth row: API Explorer Requests */}
+            {/* Fifth row: LLM Bot Traffic by Provider */}
             <div className="flex flex-col gap-4 lg:flex-row">
-                <APIExplorerRequestsTable />
                 <LLMBotProvidersTable />
             </div>
         </div>

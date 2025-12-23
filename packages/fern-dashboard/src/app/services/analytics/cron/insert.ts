@@ -14,6 +14,21 @@ if (process.env.NODE_ENV !== "test") {
     require("server-only");
 }
 
+// Timeout for Redshift queries (5 minutes per period)
+const REDSHIFT_QUERY_TIMEOUT_MS = 300000;
+
+/**
+ * Wrap a promise with a timeout
+ */
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operationName: string): Promise<T> {
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) =>
+            setTimeout(() => reject(new Error(`${operationName} timed out after ${timeoutMs}ms`)), timeoutMs)
+        )
+    ]);
+}
+
 /**
  * Calculate start and end dates for a given period (UTC start of day)
  * End date is start of today (exclusive), so data is for complete days only
@@ -75,7 +90,7 @@ export async function insertAnalyticsForSite(
         // No rate limits since we're querying our own database!
         const analytics = new RedshiftAnalytics(docsSite);
 
-        // Fetch all analytics data in parallel - no rate limiting needed!
+        // Fetch all analytics data in parallel with timeout - no rate limiting needed!
         const [
             topPages,
             topCountries,
@@ -89,20 +104,24 @@ export async function insertAnalyticsForSite(
             metrics,
             pageviewsTimeSeries,
             visitorsTimeSeries
-        ] = await Promise.all([
-            analytics.getTopPages({ dateRange, limit: 10 }),
-            analytics.getTopCountries({ dateRange, limit: 10 }),
-            analytics.getChannels({ dateRange, limit: 10 }),
-            analytics.getDeviceTypes({ dateRange, limit: 10 }),
-            analytics.getReferringDomains({ dateRange, limit: 10 }),
-            analytics.getLLMFileViews({ dateRange, limit: 10 }),
-            analytics.getAPIExplorerRequests({ dateRange, limit: 20 }),
-            analytics.getLLMBotTrafficByProvider({ dateRange, limit: 10 }),
-            analytics.get404Pages({ dateRange, limit: 20 }),
-            analytics.getMetrics({ dateRange }),
-            analytics.getPageViewsTimeSeries({ dateRange }),
-            analytics.getVisitorsTimeSeries({ dateRange })
-        ]);
+        ] = await withTimeout(
+            Promise.all([
+                analytics.getTopPages({ dateRange, limit: 10 }),
+                analytics.getTopCountries({ dateRange, limit: 10 }),
+                analytics.getChannels({ dateRange, limit: 10 }),
+                analytics.getDeviceTypes({ dateRange, limit: 10 }),
+                analytics.getReferringDomains({ dateRange, limit: 10 }),
+                analytics.getLLMFileViews({ dateRange, limit: 10 }),
+                analytics.getAPIExplorerRequests({ dateRange, limit: 20 }),
+                analytics.getLLMBotTrafficByProvider({ dateRange, limit: 10 }),
+                analytics.get404Pages({ dateRange, limit: 20 }),
+                analytics.getMetrics({ dateRange }),
+                analytics.getPageViewsTimeSeries({ dateRange }),
+                analytics.getVisitorsTimeSeries({ dateRange })
+            ]),
+            REDSHIFT_QUERY_TIMEOUT_MS,
+            `Redshift queries for ${docsSite}`
+        );
 
         // Prepare the record for insertion
         const record: AnalyticsRecordInsert = {
