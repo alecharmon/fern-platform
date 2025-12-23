@@ -6,11 +6,5 @@
   "git": {
     "deploymentEnabled": true
   },
-  "regions": ["iad1", "sfo1", "bom1", "syd1", "sin1"],
-  "crons": [
-    {
-      "path": "/api/cron/analytics",
-      "schedule": "0 5 * * *"
-    }
-  ]
+  "regions": ["iad1", "sfo1", "bom1", "syd1", "sin1"]
 }
