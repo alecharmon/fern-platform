@@ -1,6 +1,7 @@
 import { createPruneKey } from "@fern-api/docs-loader";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
+import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
@@ -54,6 +55,20 @@ function shouldIncludeLanguage(language: string, sdkLanguageFilter?: SdkLanguage
     }
     const allowedLanguages = SDK_LANGUAGE_MAPPINGS[sdkLanguageFilter];
     return allowedLanguages.includes(language.toLowerCase());
+}
+
+/**
+ * Replaces file:UUID patterns in markdown with their corresponding URLs from filesV2.
+ * This handles patterns like `file:abc123-def456-...` and replaces them with the actual file URL.
+ */
+function replaceFileReferences(markdown: string, files: Record<string, FileData>): string {
+    return markdown.replace(/file:([a-f0-9-]+)/gi, (match, fileId) => {
+        const fileData = files[fileId];
+        if (fileData?.src) {
+            return fileData.src;
+        }
+        return match;
+    });
 }
 
 function generateEndpointSections(
@@ -183,15 +198,18 @@ export async function getMarkdownForPath(
                 return undefined;
             }
 
-            const page = await runAsyncSpan("docs.loader.getPage", () => loader.getPage(pageId), {
-                "fern.docs.pageId": pageId
-            });
+            const [page, files] = await Promise.all([
+                runAsyncSpan("docs.loader.getPage", () => loader.getPage(pageId), {
+                    "fern.docs.pageId": pageId
+                }),
+                runAsyncSpan("docs.loader.getFiles", () => loader.getFiles(), {})
+            ]);
             if (!page) {
                 return undefined;
             }
 
             const contentType = pageId.endsWith(".mdx") ? "mdx" : "markdown";
-            const content = runSyncSpan(
+            let content = runSyncSpan(
                 "docs.convertToMarkdown",
                 () =>
                     convertToLlmTxtMarkdown(page.markdown, node.title, contentType === "mdx" ? "mdx" : "md", userRoles),
@@ -200,6 +218,8 @@ export async function getMarkdownForPath(
                     "fern.docs.contentType": contentType
                 }
             );
+
+            content = replaceFileReferences(content, files);
 
             return {
                 content,
