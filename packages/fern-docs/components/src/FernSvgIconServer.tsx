@@ -8,9 +8,29 @@ interface FernSvgIconServerProps {
     className?: string;
 }
 
+function getAbsoluteUrl(src: string): string {
+    // If already absolute, return as-is
+    if (src.startsWith("http://") || src.startsWith("https://")) {
+        return src;
+    }
+
+    // For /_local/ paths in local dev, use NEXT_PUBLIC_FDR_ORIGIN
+    // Node.js fetch() requires absolute URLs, but /_local/ paths are relative
+    if (src.startsWith("/_local/")) {
+        const fdrOrigin = process.env.NEXT_PUBLIC_FDR_ORIGIN;
+        if (fdrOrigin) {
+            return new URL(src, fdrOrigin).toString();
+        }
+    }
+
+    return src;
+}
+
 async function FernSvgIconServerInternal({ src, alt, className }: FernSvgIconServerProps) {
+    const fetchUrl = getAbsoluteUrl(src);
+
     try {
-        const res = await fetch(src, {
+        const res = await fetch(fetchUrl, {
             cache: "force-cache",
             next: { tags: ["svg-icon", src] }
         });
