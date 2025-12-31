@@ -47,11 +47,12 @@ export default async function DocsSiteNavbar({
         { title: "Overview", href: "" },
         { title: "Web Analytics", href: "web-analytics" },
         { title: "Search", href: "search" },
+        { title: "Link Checker", href: "link-checker" },
         { title: "Feedback", href: "feedback" }
     ];
 
     if (askAiStatus?.ask_ai_enabled || askAiStatus?.job_id) {
-        navItems.splice(3, 0, { title: "Ask Fern", href: "ask-fern" });
+        navItems.splice(4, 0, { title: "Ask Fern", href: "ask-fern" });
     }
 
     if (isEmployee) {
