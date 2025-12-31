@@ -7,6 +7,7 @@ import type { LinkCheckProgress } from "./types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 480; // 8 minutes - link checking can be slow for large sites
 
 export async function GET(req: NextRequest) {
     const session = await getCurrentSession();
