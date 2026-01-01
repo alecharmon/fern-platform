@@ -607,4 +607,8 @@ jobs:
           container_name: fai-reindexing
           github_token: ${{ secrets.GITHUB_TOKEN }}
           slack_token: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
-          ignored_cves: ""
+          # CVE-2025-60876: BusyBox wget HTTP request smuggling vulnerability
+          # No upstream fix available in Alpine Linux (busybox 1.37.0-r30)
+          # Risk accepted: fai-reindexing container does not use wget functionality
+          ignored_cves: |
+            CVE-2025-60876
