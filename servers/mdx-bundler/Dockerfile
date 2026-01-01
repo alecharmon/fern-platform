@@ -16,7 +16,8 @@ RUN npm install
 # Final stage: use Chainguard Wolfi base for security
 FROM cgr.dev/chainguard/wolfi-base:latest
 
-# Install Node.js, npm, and wget (needed for health checks)
+# Install Node.js, npm, and GNU wget (needed for health checks)
+# GNU wget is explicitly installed to avoid CVE-2025-60876 in busybox wget
 RUN apk add --no-cache nodejs npm wget
 
 WORKDIR /mdx-bundler
