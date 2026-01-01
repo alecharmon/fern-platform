@@ -202,9 +202,8 @@ ARG TARGETARCH
 
 RUN if [ "$ENABLE_JAEGER" = "true" ]; then \
         log "Installing Jaeger for architecture: ${TARGETARCH:-amd64}..." && \
-        apk add --no-cache wget 2>&1 | add-timestamps && \
         JAEGER_ARCH="${TARGETARCH:-amd64}" && \
-        wget "https://download.jaegertracing.io/v1.75.0/jaeger-2.12.0-linux-${JAEGER_ARCH}.tar.gz" -O /tmp/jaeger.tar.gz 2>&1 | add-timestamps && \
+        curl -L "https://download.jaegertracing.io/v1.75.0/jaeger-2.12.0-linux-${JAEGER_ARCH}.tar.gz" -o /tmp/jaeger.tar.gz 2>&1 | add-timestamps && \
         tar -xzf /tmp/jaeger.tar.gz -C /tmp && \
         mv "/tmp/jaeger-2.12.0-linux-${JAEGER_ARCH}/jaeger" /usr/local/bin/jaeger && \
         chmod +x /usr/local/bin/jaeger && \
