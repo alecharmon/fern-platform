@@ -492,7 +492,11 @@ jobs:
           container_name: self-hosted
           github_token: ${{ secrets.GITHUB_TOKEN }}
           slack_token: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
-          ignored_cves: ""
+          # CVE-2025-60876: BusyBox wget HTTP request smuggling vulnerability
+          # No upstream fix available (busybox 1.37.0-r50)
+          # Risk accepted: Wolfi busybox is compiled without wget applet, container uses curl for HTTP downloads
+          ignored_cves: |
+            CVE-2025-60876
 
   create-grype-pr-fai:
     name: Run grype scan - fai
