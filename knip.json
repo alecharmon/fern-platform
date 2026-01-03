@@ -1,0 +1,168 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.ts"],
+      "project": ["scripts/**/*.ts"],
+      "ignore": ["node_modules/**", "**/dist/**", "**/lib/**", "**/.next/**", "**/generated/**"],
+      "ignoreDependencies": ["@yarnpkg/sdks", "husky", "ts-node"]
+    },
+    "packages/*": {
+      "ignore": ["**/dist/**", "**/lib/**", "**/__test__/**"]
+    },
+    "packages/commons/*": {
+      "ignore": ["**/dist/**", "**/lib/**", "**/__test__/**"]
+    },
+    "packages/fern-docs/bundle": {
+      "entry": ["src/app/**/*.{ts,tsx}", "src/pages/**/*.{ts,tsx}", "server.ts"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["**/.next/**", "**/dist/**"],
+      "ignoreDependencies": [
+        "@storybook/*",
+        "critters",
+        "glslify-loader",
+        "glslify-import",
+        "raw-loader",
+        "@chromatic-com/storybook"
+      ]
+    },
+    "packages/fern-docs/components": {
+      "entry": ["src/**/*.tsx", "src/**/*.ts"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["**/dist/**", "**/__test__/**"]
+    },
+    "packages/fern-docs/mdx": {
+      "ignore": ["**/dist/**"]
+    },
+    "packages/fern-docs/edge-config": {
+      "ignore": ["**/dist/**"]
+    },
+    "packages/fern-docs/icons-cdn": {
+      "ignore": ["**/dist/**"]
+    },
+    "packages/fern-docs/search-ui": {
+      "ignore": ["**/dist/**"]
+    },
+    "packages/fern-docs/search-server/*": {
+      "ignore": ["**/dist/**"]
+    },
+    "packages/fern-dashboard": {
+      "entry": ["src/app/**/*.{ts,tsx}", "sentry.*.config.ts"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["**/.next/**", "**/dist/**"],
+      "ignoreDependencies": ["glslify-loader", "glslify-import", "raw-loader"]
+    },
+    "packages/fdr-sdk": {
+      "ignore": ["**/dist/**", "**/__test__/**"]
+    },
+    "packages/fai-sdk": {
+      "ignore": ["**/dist/**"]
+    },
+    "packages/fdr-lambda-sdk": {
+      "ignore": ["**/dist/**"]
+    },
+    "packages/cdk": {
+      "entry": ["src/**/*.ts", "scripts/**/*.ts"],
+      "project": ["src/**/*.ts", "scripts/**/*.ts"],
+      "ignore": ["**/dist/**", "**/cdk.out/**"]
+    },
+    "packages/snippets": {
+      "ignore": ["**/dist/**"]
+    },
+    "packages/search-widget": {
+      "entry": ["src/**/*.{ts,tsx}"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": ["postcss-nesting", "style-loader"]
+    },
+    "packages/configs": {
+      "ignore": ["**/*"]
+    },
+    "packages/migration-lambda-docs": {
+      "ignore": ["**/dist/**"]
+    },
+    "packages/workers/proxy": {
+      "ignore": ["**/dist/**"]
+    },
+    "servers/fdr": {
+      "ignore": ["**/dist/**", "**/__test__/**"],
+      "ignoreDependencies": ["nodemon", "@sentry/cli"]
+    },
+    "servers/fdr-lambda": {
+      "ignore": ["**/dist/**"]
+    },
+    "servers/fdr-lambda-docs": {
+      "ignore": ["**/dist/**"]
+    },
+    "servers/fern-bot": {
+      "entry": ["src/functions/**/*.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["**/dist/**"]
+    },
+    "servers/mdx-bundler": {
+      "entry": ["src/**/*.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["**/dist/**"]
+    },
+    "servers/self-hosted": {
+      "entry": ["src/**/*.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["**/dist/**", "**/__test__/**"]
+    },
+    "servers/fai-reindexing": {
+      "entry": ["src/**/*.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["**/dist/**"]
+    },
+    "servers/*-deploy": {
+      "entry": ["bin/**/*.ts"],
+      "project": ["bin/**/*.ts"],
+      "ignore": ["**/cdk.out/**"]
+    }
+  },
+  "ignore": [
+    "**/*.d.ts",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/lib/**",
+    "**/.next/**",
+    "**/generated/**",
+    "**/cdk.out/**",
+    "servers/fai/**",
+    "servers/fai-discord/**",
+    "fern/**",
+    "**/*.config.{js,mjs,cjs,ts}",
+    "**/.storybook/**",
+    "playwright-*/**"
+  ],
+  "ignoreDependencies": [
+    "@types/*",
+    "vitest",
+    "eslint-*",
+    "stylelint-*",
+    "depcheck",
+    "dotenv",
+    "globals",
+    "@babel/*",
+    "@tailwindcss/*",
+    "tailwindcss",
+    "jsdom",
+    "@testing-library/*",
+    "vite"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "includeEntryExports": true,
+  "rules": {
+    "files": "error",
+    "dependencies": "error",
+    "devDependencies": "error",
+    "unlisted": "error",
+    "exports": "error",
+    "types": "error",
+    "duplicates": "error",
+    "unresolved": "off",
+    "binaries": "off",
+    "enumMembers": "off",
+    "classMembers": "off"
+  }
+}
