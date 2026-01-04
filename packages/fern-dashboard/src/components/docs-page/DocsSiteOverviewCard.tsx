@@ -6,6 +6,7 @@ import type { DocsUrl } from "@/utils/types";
 
 import Card from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
+import { CustomDomainSection } from "./CustomDomainSection";
 import { DocsSiteAttribute } from "./DocsSiteAttribute";
 import { DocsSiteLink } from "./DocsSiteLink";
 import { DocsSiteImageServer } from "./docs-site-image/DocsSiteImageServer";
@@ -36,6 +37,13 @@ export async function DocsSiteOverviewCard({
                                 <DocsSiteLink key={`${url.domain}${url.path}`} docsSiteUrl={url} />
                             ))}
                         </div>
+                        <Suspense fallback={<Skeleton className="h-8 w-40" />}>
+                            <CustomDomainSection
+                                docsUrl={docsUrl}
+                                orgName={orgName}
+                                allDomains={docsSite.urls.map((url) => url.domain)}
+                            />
+                        </Suspense>
                     </div>
                     <div className="flex flex-wrap gap-x-10 gap-y-4">
                         <DocsSiteAttribute name="Source">

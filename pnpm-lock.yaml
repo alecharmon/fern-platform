@@ -1554,9 +1554,6 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
-      dotenv-cli:
-        specifier: ^6.0.0
-        version: 6.0.0
       glslify-import:
         specifier: ^3.1.0
         version: 3.1.0
@@ -1572,9 +1569,6 @@ importers:
       next-rspack:
         specifier: ^15.5.3
         version: 15.5.6(@swc/helpers@0.5.15)(webpack-hot-middleware@2.26.1)
-      prisma:
-        specifier: 5.13.0
-        version: 5.13.0
       raw-loader:
         specifier: ^4.0.2
         version: 4.0.2(webpack@5.98.0(@swc/core@1.13.5)(esbuild@0.27.0))

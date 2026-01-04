@@ -83,3 +83,25 @@ export interface TopLLMBotTrafficEntry {
 }
 
 export type AnalyticsRecordInsert = Omit<AnalyticsRecord, "id" | "created_at">;
+
+/**
+ * Custom Domain Verification Types
+ */
+
+export type DomainVerificationStatus = "PENDING" | "VERIFIED" | "FAILED" | "EXPIRED";
+
+export interface CustomDomainVerificationRow {
+    id: string;
+    domain: string;
+    docsUrl: string;
+    orgId: string;
+    verificationValue: string;
+    status: DomainVerificationStatus;
+    vercelDomainId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    verifiedAt: string | null;
+    expiresAt: string;
+}
+
+export type CustomDomainVerificationInsert = Omit<CustomDomainVerificationRow, "createdAt" | "updatedAt">;

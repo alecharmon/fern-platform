@@ -51,15 +51,7 @@ async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, doc
         try {
             // Parallelize validation and metadata fetching for better performance
             const [validation, sourceRepo] = await Promise.all([
-                validateGitRepoAccess(
-                    orgName,
-                    docsUrl,
-                    {
-                        type: "url",
-                        gitUrl
-                    },
-                    true // Skip cache for now, since this cache was causing issues with validating repos
-                ),
+                validateGitRepoAccess(orgName, docsUrl, { type: "url", gitUrl }),
                 // Optimistically fetch metadata in parallel (will be used if validation succeeds)
                 getGithubSourceMetadata({
                     githubUrl: gitUrl,

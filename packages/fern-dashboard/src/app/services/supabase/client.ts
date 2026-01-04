@@ -5,7 +5,7 @@ if (process.env.NODE_ENV !== "test") {
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-import type { AnalyticsRecordInsert } from "./types";
+import type { AnalyticsRecordInsert, CustomDomainVerificationInsert } from "./types";
 
 // Using generic type for more flexibility with table operations
 type SupabaseDatabase = {
@@ -16,10 +16,17 @@ type SupabaseDatabase = {
                 Insert: AnalyticsRecordInsert;
                 Update: Partial<AnalyticsRecordInsert>;
             };
+            CustomDomainVerification: {
+                Row: Record<string, unknown>;
+                Insert: CustomDomainVerificationInsert;
+                Update: Partial<CustomDomainVerificationInsert>;
+            };
         };
         Views: Record<string, never>;
         Functions: Record<string, never>;
-        Enums: Record<string, never>;
+        Enums: {
+            DomainVerificationStatus: "PENDING" | "VERIFIED" | "FAILED" | "EXPIRED";
+        };
     };
 };
 
