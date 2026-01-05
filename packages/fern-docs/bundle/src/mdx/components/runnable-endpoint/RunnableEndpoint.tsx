@@ -79,6 +79,12 @@ interface RunnableEndpointProps {
      * This allows overriding the default environment on a per-endpoint basis.
      */
     defaultEnvironment?: string;
+
+    /**
+     * Whether the component should be collapsed by default.
+     * When true, the form section will be hidden initially.
+     */
+    collapsed?: boolean;
 }
 
 export function RunnableEndpoint({
@@ -92,7 +98,8 @@ export function RunnableEndpoint({
     readonly,
     disableProxy,
     lang,
-    defaultEnvironment
+    defaultEnvironment,
+    collapsed
 }: RunnableEndpointProps) {
     const endpointSlug = useCurrentSlug(endpointSlugs);
 
@@ -113,6 +120,7 @@ export function RunnableEndpoint({
             disableProxy={disableProxy}
             lang={lang ?? "en"}
             defaultEnvironment={defaultEnvironment}
+            collapsed={collapsed}
         />
     );
 }
@@ -143,7 +151,8 @@ function RunnableEndpointInternal({
     readonly,
     disableProxy,
     lang,
-    defaultEnvironment
+    defaultEnvironment,
+    collapsed
 }: {
     endpoint: EndpointDefinition;
     types: Record<string, TypeDefinition>;
@@ -156,8 +165,9 @@ function RunnableEndpointInternal({
     disableProxy?: boolean;
     lang: string;
     defaultEnvironment?: string;
+    collapsed?: boolean;
 }) {
-    const [formExpanded, setFormExpanded] = useState(true);
+    const [formExpanded, setFormExpanded] = useState(!collapsed);
     const [responseExpanded, setResponseExpanded] = useState(true);
 
     const endpointWithDefaultEnv = useMemo<EndpointDefinition>(() => {
