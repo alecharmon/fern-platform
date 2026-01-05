@@ -61,3 +61,17 @@ redirects:
 experimental:
   mdx-components:
     - docs/components
+
+footer-links:
+  github: https://github.com/your-org/your-repo
+  slack: https://your-community.slack.com
+  x: https://x.com/yourhandle
+  twitter: https://twitter.com/yourhandle
+  linkedin: https://www.linkedin.com/company/your-company
+  youtube: https://www.youtube.com/@yourchannel
+  instagram: https://www.instagram.com/yourhandle
+  facebook: https://www.facebook.com/yourpage
+  discord: https://discord.gg/yourinvite
+  hackernews: https://news.ycombinator.com/user?id=yourusername
+  medium: https://medium.com/@yourhandle
+  website: https://yourwebsite.com
