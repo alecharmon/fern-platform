@@ -23,7 +23,14 @@ check_http_endpoint() {
 }
 
 check_postgres() {
-    if pg_isready -h /tmp -p 5432 > /dev/null 2>&1; then
+    # Read the PostgreSQL socket directory from the file written by run.sh
+    # This supports UID-scoped directories used for non-root compatibility
+    local pg_socket_dir="/tmp"
+    if [ -f /tmp/postgres-socket-dir ]; then
+        pg_socket_dir=$(cat /tmp/postgres-socket-dir)
+    fi
+    
+    if pg_isready -h "$pg_socket_dir" -p 5432 > /dev/null 2>&1; then
         echo "✓ PostgreSQL is ready"
         return 0
     else

@@ -173,32 +173,35 @@ log "Base path: ${NEXT_PUBLIC_BASE_PATH:-'(none)'}"
 # -----------  Start PostgreSQL  -----------
 log "Starting PostgreSQL for seeding..."
 
-export PGDATA=/tmp/postgresql/data
-export PGHOST=/tmp
+# Use UID-scoped directories to avoid permission conflicts
+# This prevents issues when build runs with different UIDs
+CURRENT_UID=$(id -u)
+export PGBASE="/tmp/postgresql-${CURRENT_UID}"
+export PGDATA="${PGBASE}/data"
+export PGHOST="${PGBASE}"
 
-rm -rf "$PGDATA" 2>/dev/null || true
+rm -rf "$PGBASE" 2>/dev/null || true
 mkdir -p "$PGDATA"
 
 # Ensure postgres user owns the data directory (needed when running as root)
-if [ "$(id -u)" = "0" ]; then
-    chown -R postgres:postgres "$PGDATA"
-    chown postgres:postgres /tmp
+if [ "$CURRENT_UID" = "0" ]; then
+    chown -R postgres:postgres "$PGBASE"
 fi
 
-log "Initializing PostgreSQL cluster..."
+log "Initializing PostgreSQL cluster in $PGDATA (UID: $CURRENT_UID)..."
 run_as_postgres "PGDATA=$PGDATA initdb -D $PGDATA --auth-local=trust --auth-host=trust --username=postgres" 2>&1 || {
     log "ERROR: Failed to initialize PostgreSQL"
     exit 1
 }
 
-run_as_postgres "PGDATA=$PGDATA pg_ctl -D $PGDATA -o \"-c listen_addresses='localhost' -c unix_socket_directories='/tmp' -c shared_buffers=128MB -c max_connections=200\" -l $PGDATA/logfile start" 2>&1 || {
+run_as_postgres "PGDATA=$PGDATA pg_ctl -D $PGDATA -o \"-c listen_addresses='localhost' -c unix_socket_directories='$PGBASE' -c shared_buffers=128MB -c max_connections=200\" -l $PGDATA/logfile start" 2>&1 || {
     log "ERROR: Failed to start PostgreSQL"
     exit 1
 }
 
-# Wait for PostgreSQL to be ready
+# Wait for PostgreSQL to be ready (use UID-scoped socket directory)
 for i in {1..30}; do
-    if pg_isready -h /tmp -p 5432 2>/dev/null; then
+    if pg_isready -h "$PGBASE" -p 5432 2>/dev/null; then
         log "PostgreSQL is ready"
         break
     fi
@@ -206,19 +209,19 @@ for i in {1..30}; do
     sleep 1
 done
 
-# Create database
-run_as_postgres "createdb -h /tmp -p 5432 -U postgres fdr" 2>&1 | add_timestamps || log "Database 'fdr' may already exist"
+# Create database (use UID-scoped socket directory)
+run_as_postgres "createdb -h $PGBASE -p 5432 -U postgres fdr" 2>&1 | add_timestamps || log "Database 'fdr' may already exist"
 
 # Restore schema from base image dump or run migrations
 if [ "$USE_BASE_SCHEMA" = "true" ]; then
     log "Restoring database schema from base image dump..."
-    run_as_postgres "pg_restore -h /tmp -p 5432 -U postgres -d fdr --clean --if-exists $BASE_SCHEMA_DUMP" 2>&1 | add_timestamps || {
+    run_as_postgres "pg_restore -h $PGBASE -p 5432 -U postgres -d fdr --clean --if-exists $BASE_SCHEMA_DUMP" 2>&1 | add_timestamps || {
         log "Warning: pg_restore had some errors (this may be normal for clean restore)"
     }
     log "Schema restored from base image dump"
 else
     log "Running Prisma migrations..."
-    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fdr \
+    DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fdr?host=${PGBASE}" \
         prisma migrate deploy --schema /prisma/schema.prisma 2>&1 | add_timestamps || {
         log "ERROR: Prisma migrations failed"
         exit 1
@@ -246,6 +249,12 @@ done
 
 # -----------  Start MinIO  -----------
 log "Starting MinIO for seeding..."
+
+# Configure MinIO client (mc) to use a writable config directory
+# When running as an arbitrary UID that doesn't exist in /etc/passwd,
+# $HOME may default to "/" which isn't writable, causing "mc alias set" to fail.
+export MC_CONFIG_DIR="/tmp/mc-config"
+mkdir -p "$MC_CONFIG_DIR" 2>/dev/null || true
 
 # Use /data for MinIO (will be copied to seed dir later)
 minio server /data --console-address ":9001" 2>&1 &
@@ -357,7 +366,7 @@ log "=========================================="
 
 # Dump PostgreSQL database (full data, not just schema)
 log "Dumping PostgreSQL database..."
-run_as_postgres "pg_dump -h /tmp -p 5432 -U postgres -Fc fdr" > "$SEED_POSTGRES_DUMP" || {
+run_as_postgres "pg_dump -h $PGBASE -p 5432 -U postgres -Fc fdr" > "$SEED_POSTGRES_DUMP" || {
     log "ERROR: Failed to dump PostgreSQL database"
     exit 1
 }

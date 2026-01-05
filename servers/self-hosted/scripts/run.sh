@@ -68,22 +68,33 @@ log "Starting PostgreSQL service..."
 start_postgresql() {
     local CURRENT_UID=$(id -u)
 
-    # Always use /tmp for PostgreSQL to work with any UID
-    export PGDATA=/tmp/postgresql/data
-    export PGHOST=/tmp
+    # Use UID-scoped directories to avoid permission conflicts when container
+    # is restarted with a different UID (e.g., root -> non-root or vice versa)
+    # This prevents "Permission denied" errors from stale directories owned by other UIDs
+    export PGBASE="/tmp/postgresql-${CURRENT_UID}"
+    export PGDATA="${PGBASE}/data"
+    export PGHOST="${PGBASE}"
 
-    # Clean up any previous attempts
+    # Clean up any previous attempts for THIS UID
     rm -rf "$PGDATA" 2>/dev/null || true
+    rm -rf "$PGBASE" 2>/dev/null || true
     mkdir -p "$PGDATA"
 
     log "Initializing PostgreSQL cluster in $PGDATA (UID: $CURRENT_UID)..."
+
+    # Verify we have proper access to the directory
+    if [ ! -w "$PGDATA" ] || [ ! -x "$PGDATA" ]; then
+        log "ERROR: Cannot write to or execute in $PGDATA"
+        ls -ld "$PGBASE" "$PGDATA" 2>&1 | add_timestamps || true
+        return 1
+    fi
 
     # Check if running as root - root cannot run initdb directly
     if [ "$CURRENT_UID" -eq 0 ]; then
         log "Running as root, using 'su - postgres' to initialize and run PostgreSQL..."
 
         # Change ownership of the data directory to postgres user
-        chown -R postgres:postgres "$PGDATA"
+        chown -R postgres:postgres "$PGBASE"
 
         # Initialize as postgres user
         if ! su - postgres -c "initdb -D $PGDATA --auth-local=trust --auth-host=trust --username=postgres" 2>&1 | add_timestamps; then
@@ -91,8 +102,8 @@ start_postgresql() {
             return 1
         fi
 
-        # Start PostgreSQL as postgres user
-        if ! su - postgres -c "pg_ctl -D $PGDATA -o \"-c listen_addresses='localhost' -c unix_socket_directories='/tmp' -c shared_buffers=128MB -c max_connections=200 -c logging_collector=on -c log_line_prefix='%t '\" -l $PGDATA/logfile start" 2>&1 | add_timestamps; then
+        # Start PostgreSQL as postgres user with UID-scoped socket directory
+        if ! su - postgres -c "pg_ctl -D $PGDATA -o \"-c listen_addresses='localhost' -c unix_socket_directories='$PGBASE' -c shared_buffers=128MB -c max_connections=200 -c logging_collector=on -c log_line_prefix='%t '\" -l $PGDATA/logfile start" 2>&1 | add_timestamps; then
             log "ERROR: Failed to start PostgreSQL"
             cat "$PGDATA/logfile" 2>/dev/null | add_timestamps
             return 1
@@ -106,9 +117,9 @@ start_postgresql() {
             return 1
         fi
 
-        # Start PostgreSQL
+        # Start PostgreSQL with UID-scoped socket directory
         if ! pg_ctl -D "$PGDATA" \
-            -o "-c listen_addresses='localhost' -c unix_socket_directories='/tmp' -c shared_buffers=128MB -c max_connections=200 -c logging_collector=on -c log_line_prefix='%t '" \
+            -o "-c listen_addresses='localhost' -c unix_socket_directories='$PGBASE' -c shared_buffers=128MB -c max_connections=200 -c logging_collector=on -c log_line_prefix='%t '" \
             -l "$PGDATA/logfile" \
             start 2>&1 | add_timestamps; then
             log "ERROR: Failed to start PostgreSQL"
@@ -119,9 +130,9 @@ start_postgresql() {
 
     log "PostgreSQL started successfully"
 
-    # Wait for PostgreSQL to be ready
+    # Wait for PostgreSQL to be ready (use UID-scoped socket directory)
     for i in {1..30}; do
-        if pg_isready -h /tmp -p 5432 2>/dev/null; then
+        if pg_isready -h "$PGBASE" -p 5432 2>/dev/null; then
             log "PostgreSQL is ready"
             break
         fi
@@ -129,17 +140,20 @@ start_postgresql() {
         sleep 1
     done
 
-    # Create the database
+    # Create the database (use UID-scoped socket directory)
     log "Creating database 'fdr'..."
     if [ "$CURRENT_UID" -eq 0 ]; then
-        su - postgres -c "createdb -h /tmp -U postgres fdr" 2>&1 | add_timestamps || true
+        su - postgres -c "createdb -h $PGBASE -U postgres fdr" 2>&1 | add_timestamps || true
     else
-        createdb -h /tmp -U postgres fdr 2>&1 | add_timestamps || true
+        createdb -h "$PGBASE" -U postgres fdr 2>&1 | add_timestamps || true
     fi
 
-    # Update DATABASE_URL for Prisma to use the Unix socket
-    export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fdr?host=/tmp"
-    log "DATABASE_URL configured for Unix socket in /tmp"
+    # Update DATABASE_URL for Prisma to use the UID-scoped Unix socket
+    export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fdr?host=${PGBASE}"
+    log "DATABASE_URL configured for Unix socket in $PGBASE"
+
+    # Write PGBASE to a known file so health check scripts can find the socket directory
+    echo "$PGBASE" > /tmp/postgres-socket-dir
 
     return 0
 }
@@ -187,11 +201,11 @@ if [ "$USE_SEEDED_DATA" = "true" ] && [ -f "$SEED_POSTGRES_DUMP" ]; then
     log "Restoring PostgreSQL from seeded dump..."
     CURRENT_UID=$(id -u)
     if [ "$CURRENT_UID" -eq 0 ]; then
-        su - postgres -c "pg_restore -h /tmp -p 5432 -U postgres -d fdr --clean --if-exists '$SEED_POSTGRES_DUMP'" 2>&1 | add_timestamps || {
+        su - postgres -c "pg_restore -h $PGBASE -p 5432 -U postgres -d fdr --clean --if-exists '$SEED_POSTGRES_DUMP'" 2>&1 | add_timestamps || {
             log "Warning: pg_restore had some errors (this may be normal for clean restore)"
         }
     else
-        pg_restore -h /tmp -p 5432 -U postgres -d fdr --clean --if-exists "$SEED_POSTGRES_DUMP" 2>&1 | add_timestamps || {
+        pg_restore -h "$PGBASE" -p 5432 -U postgres -d fdr --clean --if-exists "$SEED_POSTGRES_DUMP" 2>&1 | add_timestamps || {
             log "Warning: pg_restore had some errors (this may be normal for clean restore)"
         }
     fi
@@ -280,6 +294,13 @@ fi
 # -----------  End Jaeger setup  -----------
 
 # -----------  Start MINIO setup  -----------
+
+# Configure MinIO client (mc) to use a writable config directory
+# When running as an arbitrary UID (e.g., 65532) that doesn't exist in /etc/passwd,
+# $HOME may default to "/" which isn't writable, causing "mc alias set" to fail.
+# Setting MC_CONFIG_DIR ensures mc can write its config regardless of the UID.
+export MC_CONFIG_DIR="/tmp/mc-config"
+mkdir -p "$MC_CONFIG_DIR" 2>/dev/null || true
 
 # Clean up any existing MinIO system files to avoid overlay filesystem issues
 # MinIO's .minio.sys can cause "rename across devices" errors if it exists from a previous layer

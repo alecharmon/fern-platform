@@ -86,14 +86,18 @@ describe("Self-hosted container with security restrictions", () => {
                 );
                 console.log(relevantLogs.join("\n"));
 
-                // Check for successful PostgreSQL initialization in /tmp
-                expect(logs).toContain("Initializing PostgreSQL cluster in /tmp/postgresql/data");
+                // Check for successful PostgreSQL initialization in UID-scoped /tmp directory
+                // The path is now /tmp/postgresql-{UID}/data to avoid permission conflicts
+                expect(logs).toMatch(/Initializing PostgreSQL cluster in \/tmp\/postgresql-\d+\/data/);
                 expect(logs).toContain("PostgreSQL started successfully");
 
                 // Check if PostgreSQL is actually running
+                // Extract the PGBASE path from logs to use for pg_isready
+                const pgbaseMatch = logs.match(/DATABASE_URL configured for Unix socket in (\/tmp\/postgresql-\d+)/);
+                const pgbase = pgbaseMatch ? pgbaseMatch[1] : "/tmp/postgresql-65532";
                 const { stdout: psOutput } = await execa(
                     "docker",
-                    ["exec", containerId, "pg_isready", "-h", "/tmp", "-p", "5432"],
+                    ["exec", containerId, "pg_isready", "-h", pgbase, "-p", "5432"],
                     {
                         reject: false
                     }
@@ -191,8 +195,9 @@ describe("Self-hosted container with security restrictions", () => {
                 // Check for successful startup indicators
                 console.log("Checking for successful startup indicators...");
 
-                // PostgreSQL should initialize in /tmp
-                expect(logs).toContain("Initializing PostgreSQL cluster in /tmp/postgresql/data");
+                // PostgreSQL should initialize in UID-scoped /tmp directory
+                // The path is now /tmp/postgresql-{UID}/data to avoid permission conflicts
+                expect(logs).toMatch(/Initializing PostgreSQL cluster in \/tmp\/postgresql-\d+\/data/);
                 expect(logs).toContain("PostgreSQL started successfully");
 
                 // Check if key services started

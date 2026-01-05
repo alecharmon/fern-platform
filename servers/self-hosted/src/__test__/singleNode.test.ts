@@ -33,10 +33,16 @@ describe("Self-hosted docs has a running Postgres instance", () => {
         const containerId = await getSingleNodeContainerId();
         expect(containerId).toBeTruthy();
 
+        // Use TCP connection (-h localhost) instead of Unix socket for robustness
+        // The socket directory is UID-scoped and may vary between runs
         const { stdout: postgresStatus } = await execa("docker", [
             "exec",
             containerId,
             "pg_isready",
+            "-h",
+            "localhost",
+            "-p",
+            "5432",
             "-U",
             "postgres",
             "-d",
@@ -49,12 +55,17 @@ describe("Self-hosted docs has a running Postgres instance", () => {
         const containerId = await getSingleNodeContainerId();
         expect(containerId).toBeTruthy();
 
+        // Use TCP connection (-h localhost) instead of Unix socket for robustness
         const { stdout: dbList } = await execa("docker", [
             "exec",
             "-e",
             "PGPASSWORD=postgres",
             containerId,
             "psql",
+            "-h",
+            "localhost",
+            "-p",
+            "5432",
             "-U",
             "postgres",
             "-d",
@@ -71,6 +82,10 @@ describe("Self-hosted docs has a running Postgres instance", () => {
             "PGPASSWORD=postgres",
             containerId,
             "psql",
+            "-h",
+            "localhost",
+            "-p",
+            "5432",
             "-U",
             "postgres",
             "-d",
@@ -86,7 +101,16 @@ describe("Self-hosted docs has a running Postgres instance", () => {
     it("Minio Bucket has docs", async () => {
         const containerId = await getSingleNodeContainerId();
         expect(containerId).toBeTruthy();
-        const { stdout: minioStatus } = await execa("docker", ["exec", containerId, "mc", "ls", "minio"]);
+        // Pass MC_CONFIG_DIR to docker exec since run.sh configures mc with this custom config directory
+        const { stdout: minioStatus } = await execa("docker", [
+            "exec",
+            "-e",
+            "MC_CONFIG_DIR=/tmp/mc-config",
+            containerId,
+            "mc",
+            "ls",
+            "minio"
+        ]);
         const orgName = "example-org"; // this comes from the fern folder we mount
         expect(minioStatus).toContain(`${orgName}.docs.buildwithfern.com`);
     });
