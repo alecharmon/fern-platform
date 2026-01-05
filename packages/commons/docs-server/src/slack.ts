@@ -7,7 +7,12 @@ import { RateLimiterManager } from "./rate-limiter";
 
 const RATE_LIMITER_MANAGER = RateLimiterManager.getInstance();
 
-type PostToSlackChannel = "#docs-notifs" | "#search-notifs" | "#dashboard-access-notifs" | "#dashboard-notifs";
+type PostToSlackChannel =
+    | "#docs-notifs"
+    | "#search-notifs"
+    | "#dashboard-access-notifs"
+    | "#dashboard-notifs"
+    | "#dashboard-custom-domain-notifs";
 
 type PostToSlackContext =
     | "default"
@@ -16,7 +21,8 @@ type PostToSlackContext =
     | "algolia-reindex"
     | "request-org-access"
     | "org-member-change"
-    | "duplicate-account";
+    | "duplicate-account"
+    | "custom-domain";
 
 // contexts that should be allowed to post on dev and bypass rate limiting
 const alwaysAllowToPost: PostToSlackContext[] = ["request-org-access", "org-member-change"];
