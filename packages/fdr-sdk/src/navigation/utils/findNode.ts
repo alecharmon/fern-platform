@@ -101,6 +101,15 @@ export function findNode(root: FernNavigation.RootNode, slug: FernNavigation.Slu
             }
         }
 
+        // if we still haven't found a matching product or version, check if the slug matches
+        // the productgroup's landing page (only if no product matched to avoid collisions)
+        if (!foundProductNode && isProductGroupNode(root.child) && root.child.landingPage != null) {
+            const landingPageSlug = root.child.landingPage.slug;
+            if (slug === landingPageSlug) {
+                return { type: "redirect", redirect: landingPageSlug };
+            }
+        }
+
         return {
             type: "notFound",
             // External product links don't have pointsTo, only internal products and versions do
