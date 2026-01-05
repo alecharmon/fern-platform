@@ -24,7 +24,7 @@ export const PlaygroundSendRequestButton: FC<PlaygroundSendRequestButtonProps> =
         <FernTooltipProvider>
             <FernTooltip content={disabled ? t(lang).playground.cannotSendToLocalhost : undefined}>
                 <FernButton
-                    className={cn("group relative overflow-hidden font-semibold", {
+                    className={cn("fern-explorer-send-request-button group relative overflow-hidden font-semibold", {
                         "after:animate-shine after:absolute after:inset-y-0 after:w-8 after:bg-white/50 after:blur after:content-['']":
                             !!sendRequest
                     })}

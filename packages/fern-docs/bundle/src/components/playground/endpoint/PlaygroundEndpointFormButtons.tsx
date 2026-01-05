@@ -40,10 +40,11 @@ export function PlaygroundEndpointFormButtons({
     const hasExamples = exampleOptions.length > 0;
 
     return (
-        <div className="flex items-center justify-between">
+        <div className="fern-explorer-form-buttons flex items-center justify-between">
             <div className="flex items-center gap-2">
                 {hasExamples && (
                     <ExampleSelector
+                        className="fern-explorer-example-selector"
                         options={exampleOptions}
                         selectedKey={selectedExampleIndex !== undefined ? String(selectedExampleIndex) : undefined}
                         onSelect={(key) => {
@@ -54,7 +55,12 @@ export function PlaygroundEndpointFormButtons({
                         forceDropdown={true}
                     />
                 )}
-                <FernButton onClick={resetWithoutExample} size="small" variant="minimal">
+                <FernButton
+                    className="fern-explorer-clear-form-button"
+                    onClick={resetWithoutExample}
+                    size="small"
+                    variant="minimal"
+                >
                     {t(lang).buttons.clearForm}
                 </FernButton>
             </div>
@@ -62,7 +68,7 @@ export function PlaygroundEndpointFormButtons({
             <FernLink
                 href={`/${node.slug}`}
                 shallow={apiReferenceId === node.apiDefinitionId}
-                className="text-(color:--grayscale-a11) hover:text-(color:--accent) inline-flex items-center gap-1 text-sm font-semibold underline decoration-1 underline-offset-4 hover:decoration-2"
+                className="fern-explorer-api-reference-link text-(color:--grayscale-a11) hover:text-(color:--accent) inline-flex items-center gap-1 text-sm font-semibold underline decoration-1 underline-offset-4 hover:decoration-2"
                 scroll={true}
             >
                 <span>{t(lang).apiReference.apiReference}</span>

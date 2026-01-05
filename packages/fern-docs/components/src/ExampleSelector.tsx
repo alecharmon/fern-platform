@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import type { ReactElement } from "react";
+import { cn } from "./cn";
 import { FernButton, FernButtonGroup } from "./FernButton";
 import { FernDropdown } from "./FernDropdown";
 
@@ -17,6 +18,7 @@ export interface ExampleSelectorProps {
     totalLabelLengthOverride?: number;
     placeholder?: string;
     forceDropdown?: boolean;
+    className?: string;
 }
 
 export function ExampleSelector({
@@ -26,7 +28,8 @@ export function ExampleSelector({
     lang,
     totalLabelLengthOverride,
     placeholder,
-    forceDropdown
+    forceDropdown,
+    className
 }: ExampleSelectorProps): ReactElement<any> | null {
     if (options.length === 0) {
         return null;
@@ -39,7 +42,7 @@ export function ExampleSelector({
 
     if (shouldUseDropdown) {
         return (
-            <div className="w-full min-w-0">
+            <div className={cn("w-full min-w-0", className)}>
                 <FernDropdown
                     options={options.map((opt) => ({
                         type: "value",
@@ -66,7 +69,7 @@ export function ExampleSelector({
     }
 
     return (
-        <div className="w-full min-w-0">
+        <div className={cn("w-full min-w-0", className)}>
             <FernButtonGroup className="w-full min-w-0">
                 {options.map((opt) => {
                     const isSelected = opt.key === selectedKey;
