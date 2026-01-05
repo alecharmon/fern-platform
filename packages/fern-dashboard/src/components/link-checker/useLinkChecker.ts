@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 
 import type {
+    BatchCompleteData,
     BrokenLink,
     CompleteData,
     ErrorData,
@@ -11,6 +12,7 @@ import type {
     LinkProgressUpdateData,
     LinksCheckStartedData,
     PageScrapedData,
+    ScrapeCompleteData,
     SitemapFetchedData
 } from "@/app/api/link-checker/types";
 
@@ -61,6 +63,7 @@ const initialState: LinkCheckerState = {
 export function useLinkChecker() {
     const [state, setState] = useState<LinkCheckerState>(initialState);
     const eventSourceRef = useRef<EventSource | null>(null);
+    const domainRef = useRef<string>("");
 
     const addLog = useCallback((message: string, type: LogEntry["type"]) => {
         setState((prev) => ({
@@ -69,25 +72,15 @@ export function useLinkChecker() {
         }));
     }, []);
 
-    const start = useCallback(
-        (domain: string) => {
+    const startCheckPhase = useCallback(
+        (domain: string, jobId: string) => {
             if (eventSourceRef.current) {
                 eventSourceRef.current.close();
             }
 
-            setState({
-                ...initialState,
-                status: "fetching_sitemap",
-                logs: [
-                    {
-                        message: `Starting link check for ${domain}...`,
-                        timestamp: new Date().toISOString(),
-                        type: "info"
-                    }
-                ]
-            });
-
-            const eventSource = new EventSource(`/api/link-checker?domain=${encodeURIComponent(domain)}`);
+            const eventSource = new EventSource(
+                `/api/link-checker?domain=${encodeURIComponent(domain)}&phase=check&jobId=${encodeURIComponent(jobId)}`
+            );
             eventSourceRef.current = eventSource;
 
             eventSource.onmessage = (event) => {
@@ -95,25 +88,6 @@ export function useLinkChecker() {
                     const progress: LinkCheckProgress = JSON.parse(event.data);
 
                     switch (progress.type) {
-                        case "sitemap_fetched": {
-                            const data = progress.data as SitemapFetchedData;
-                            setState((prev) => ({
-                                ...prev,
-                                status: "scraping_pages",
-                                totalPages: data.totalPages
-                            }));
-                            addLog(`Found ${data.totalPages} pages in sitemap`, "success");
-                            break;
-                        }
-                        case "page_scraped": {
-                            const data = progress.data as PageScrapedData;
-                            setState((prev) => ({
-                                ...prev,
-                                pagesScraped: data.pageIndex,
-                                totalLinks: prev.totalLinks + data.linksFound
-                            }));
-                            break;
-                        }
                         case "links_check_started": {
                             const data = progress.data as LinksCheckStartedData;
                             setState((prev) => ({
@@ -169,27 +143,36 @@ export function useLinkChecker() {
                             addLog(`Blocked link: ${data.url} (403)`, "warning");
                             break;
                         }
+                        case "batch_complete": {
+                            const data = progress.data as BatchCompleteData;
+                            if (data.hasMore) {
+                                addLog(`Batch complete, continuing with next batch...`, "info");
+                                eventSource.close();
+                                startCheckPhase(domain, data.jobId);
+                            }
+                            break;
+                        }
                         case "complete": {
                             const data = progress.data as CompleteData;
-                            setState((prev) => ({
-                                ...prev,
-                                status: "complete",
-                                totalPages: data.totalPages,
-                                totalLinks: data.totalLinks,
-                                brokenLinks: data.brokenLinks,
-                                blockedLinks: data.blockedLinks,
-                                workingLinks: data.workingLinks,
-                                skippedLinks: data.skippedLinks,
-                                duration: data.duration
-                            }));
-                            const blockedMsg =
-                                data.blockedLinks.length > 0
-                                    ? ` (${data.blockedLinks.length} blocked by bot detection)`
-                                    : "";
-                            addLog(
-                                `Complete! Found ${data.brokenLinks.length} broken links out of ${data.totalLinks} total links${blockedMsg}`,
-                                "success"
-                            );
+                            setState((prev) => {
+                                const totalBroken = prev.brokenLinks.length;
+                                const totalBlocked = prev.blockedLinks.length;
+                                const blockedMsg =
+                                    totalBlocked > 0 ? ` (${totalBlocked} blocked by bot detection)` : "";
+                                addLog(
+                                    `Complete! Found ${totalBroken} broken links out of ${data.totalLinks} total links${blockedMsg}`,
+                                    "success"
+                                );
+                                return {
+                                    ...prev,
+                                    status: "complete",
+                                    totalPages: data.totalPages,
+                                    totalLinks: data.totalLinks,
+                                    workingLinks: data.workingLinks,
+                                    skippedLinks: data.skippedLinks,
+                                    duration: data.duration
+                                };
+                            });
                             eventSource.close();
                             break;
                         }
@@ -221,6 +204,94 @@ export function useLinkChecker() {
             };
         },
         [addLog]
+    );
+
+    const start = useCallback(
+        (domain: string) => {
+            if (eventSourceRef.current) {
+                eventSourceRef.current.close();
+            }
+
+            domainRef.current = domain;
+
+            setState({
+                ...initialState,
+                status: "fetching_sitemap",
+                logs: [
+                    {
+                        message: `Starting link check for ${domain}...`,
+                        timestamp: new Date().toISOString(),
+                        type: "info"
+                    }
+                ]
+            });
+
+            const eventSource = new EventSource(`/api/link-checker?domain=${encodeURIComponent(domain)}&phase=scrape`);
+            eventSourceRef.current = eventSource;
+
+            eventSource.onmessage = (event) => {
+                try {
+                    const progress: LinkCheckProgress = JSON.parse(event.data);
+
+                    switch (progress.type) {
+                        case "sitemap_fetched": {
+                            const data = progress.data as SitemapFetchedData;
+                            setState((prev) => ({
+                                ...prev,
+                                status: "scraping_pages",
+                                totalPages: data.totalPages
+                            }));
+                            addLog(`Found ${data.totalPages} pages in sitemap`, "success");
+                            break;
+                        }
+                        case "page_scraped": {
+                            const data = progress.data as PageScrapedData;
+                            setState((prev) => ({
+                                ...prev,
+                                pagesScraped: data.pageIndex,
+                                totalLinks: prev.totalLinks + data.linksFound
+                            }));
+                            break;
+                        }
+                        case "scrape_complete": {
+                            const data = progress.data as ScrapeCompleteData;
+                            setState((prev) => ({
+                                ...prev,
+                                totalLinks: data.totalLinks
+                            }));
+                            addLog(`Scraping complete. Found ${data.totalLinks} unique links.`, "success");
+                            eventSource.close();
+                            startCheckPhase(domain, data.jobId);
+                            break;
+                        }
+                        case "error": {
+                            const data = progress.data as ErrorData;
+                            setState((prev) => ({
+                                ...prev,
+                                status: "error",
+                                error: data.message
+                            }));
+                            addLog(`Error: ${data.message}`, "error");
+                            eventSource.close();
+                            break;
+                        }
+                    }
+                } catch (err) {
+                    console.error("Failed to parse SSE message:", err);
+                }
+            };
+
+            eventSource.onerror = () => {
+                setState((prev) => ({
+                    ...prev,
+                    status: "error",
+                    error: "Connection lost to server"
+                }));
+                addLog("Connection lost to server", "error");
+                eventSource.close();
+            };
+        },
+        [addLog, startCheckPhase]
     );
 
     const stop = useCallback(() => {

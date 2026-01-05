@@ -62,6 +62,16 @@ export interface AlgoliaAnalyticsData {
     timeSeries?: { date: string; value: number }[];
 }
 
+export interface LinkCheckerJob {
+    domain: string;
+    totalPages: number;
+    links: { url: string; sourcePages: string[] }[];
+    cursor: number;
+    startTime: number;
+    workingLinks: number;
+    skippedLinks: number;
+}
+
 export type RedisCacheKey<T extends RedisCacheKeyType> = string & {
     __type: T;
 };
@@ -78,7 +88,8 @@ export const RedisCacheKeyType = {
     GITHUB_PR_FOR_BRANCH: "GITHUB_PR_FOR_BRANCH",
     WEB_ANALYTICS: "WEB_ANALYTICS",
     DOCS_SITE_ACCESS: "DOCS_SITE_ACCESS",
-    ALGOLIA_ANALYTICS: "ALGOLIA_ANALYTICS"
+    ALGOLIA_ANALYTICS: "ALGOLIA_ANALYTICS",
+    LINK_CHECKER_JOB: "LINK_CHECKER_JOB"
 } as const;
 
 export type RedisCacheKeyType = (typeof RedisCacheKeyType)[keyof typeof RedisCacheKeyType];
@@ -96,6 +107,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.WEB_ANALYTICS]: WebAnalyticsData;
     [RedisCacheKeyType.DOCS_SITE_ACCESS]: FdrAPI.dashboard.DocsSite;
     [RedisCacheKeyType.ALGOLIA_ANALYTICS]: AlgoliaAnalyticsData;
+    [RedisCacheKeyType.LINK_CHECKER_JOB]: LinkCheckerJob;
 };
 
 export const RedisCacheKey = {
@@ -120,7 +132,8 @@ export const RedisCacheKey = {
         cacheKey(RedisCacheKeyType.WEB_ANALYTICS)(`web-analytics-${endpoint}-${domain}-${params}`),
     docsSiteAccess: (domain: string) => cacheKey(RedisCacheKeyType.DOCS_SITE_ACCESS)(`docs-site-access-${domain}`),
     algoliaAnalytics: (endpoint: string, params: string) =>
-        cacheKey(RedisCacheKeyType.ALGOLIA_ANALYTICS)(`algolia-analytics-${endpoint}-${params}`)
+        cacheKey(RedisCacheKeyType.ALGOLIA_ANALYTICS)(`algolia-analytics-${endpoint}-${params}`),
+    linkCheckerJob: (jobId: string) => cacheKey(RedisCacheKeyType.LINK_CHECKER_JOB)(`link-checker-job-${jobId}`)
 };
 
 function cacheKey<T extends RedisCacheKeyType>(_type: T) {

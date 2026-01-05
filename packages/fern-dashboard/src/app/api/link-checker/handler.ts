@@ -1,5 +1,9 @@
 import pLimit from "p-limit";
 
+import type { LinkCheckerJob } from "@/app/services/redis/cacheKey";
+import { RedisCacheKey } from "@/app/services/redis/cacheKey";
+import { redisDel, redisGet, redisSet } from "@/app/services/redis/redis";
+
 import type { BrokenLink, CompleteData, SendEventFn } from "./types";
 
 const PAGE_CONCURRENCY = 3;
@@ -8,6 +12,8 @@ const REQUEST_TIMEOUT = 15000;
 const MAX_REDIRECTS = 5;
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
+const LINKS_PER_BATCH = 500;
+const JOB_TTL_SECONDS = 3600; // 1 hour
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -323,6 +329,222 @@ export async function checkLink(url: string): Promise<{ statusCode: number | nul
     }
 
     return { statusCode: null, error: "Too many redirects" };
+}
+
+export async function scrapeAndStoreLinks(
+    domain: string,
+    jobId: string,
+    sendEvent: SendEventFn
+): Promise<{ totalPages: number; totalLinks: number }> {
+    const startTime = Date.now();
+
+    let pages: string[];
+    try {
+        pages = await fetchSitemap(domain);
+        sendEvent({
+            type: "sitemap_fetched",
+            data: {
+                totalPages: pages.length,
+                sitemapUrl: `https://${domain}/sitemap.xml`
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        sendEvent({
+            type: "error",
+            data: {
+                message: error instanceof Error ? error.message : "Failed to fetch sitemap",
+                code: "SITEMAP_FETCH_ERROR"
+            },
+            timestamp: new Date().toISOString()
+        });
+        throw error;
+    }
+
+    const allLinks = new Map<string, Set<string>>();
+    const pageLimit = pLimit(PAGE_CONCURRENCY);
+
+    let pagesScraped = 0;
+    await Promise.all(
+        pages.map((pageUrl) =>
+            pageLimit(async () => {
+                try {
+                    const links = await scrapePage(pageUrl);
+
+                    for (const link of links) {
+                        const existing = allLinks.get(link);
+                        if (existing) {
+                            existing.add(pageUrl);
+                        } else {
+                            allLinks.set(link, new Set([pageUrl]));
+                        }
+                    }
+
+                    pagesScraped++;
+                    sendEvent({
+                        type: "page_scraped",
+                        data: {
+                            pageUrl,
+                            linksFound: links.length,
+                            pageIndex: pagesScraped,
+                            totalPages: pages.length
+                        },
+                        timestamp: new Date().toISOString()
+                    });
+                } catch (error) {
+                    console.error(`[link-checker] error scraping ${pageUrl}: ${error}`);
+                    pagesScraped++;
+                    sendEvent({
+                        type: "page_scraped",
+                        data: {
+                            pageUrl,
+                            linksFound: 0,
+                            pageIndex: pagesScraped,
+                            totalPages: pages.length
+                        },
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            })
+        )
+    );
+
+    const linksArray = Array.from(allLinks.entries()).map(([url, sourcePages]) => ({
+        url,
+        sourcePages: Array.from(sourcePages)
+    }));
+
+    const job: LinkCheckerJob = {
+        domain,
+        totalPages: pages.length,
+        links: linksArray,
+        cursor: 0,
+        startTime,
+        workingLinks: 0,
+        skippedLinks: 0
+    };
+
+    await redisSet(RedisCacheKey.linkCheckerJob(jobId), job, { ttlInSeconds: JOB_TTL_SECONDS });
+
+    return { totalPages: pages.length, totalLinks: linksArray.length };
+}
+
+export async function checkLinksBatch(
+    jobId: string,
+    sendEvent: SendEventFn
+): Promise<{ hasMore: boolean; cursor: number }> {
+    const job = await redisGet(RedisCacheKey.linkCheckerJob(jobId));
+    if (!job) {
+        sendEvent({
+            type: "error",
+            data: {
+                message: "Job not found or expired",
+                code: "JOB_NOT_FOUND"
+            },
+            timestamp: new Date().toISOString()
+        });
+        throw new Error("Job not found");
+    }
+
+    const { domain, links, cursor, totalPages, startTime } = job;
+    const totalLinks = links.length;
+    const endIndex = Math.min(cursor + LINKS_PER_BATCH, totalLinks);
+    const batchLinks = links.slice(cursor, endIndex);
+
+    if (cursor === 0) {
+        sendEvent({
+            type: "links_check_started",
+            data: { totalLinks },
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    const linkLimit = pLimit(LINK_CONCURRENCY);
+    let batchWorkingLinks = 0;
+    let batchSkippedLinks = 0;
+    let linksChecked = cursor;
+
+    await Promise.all(
+        batchLinks.map((linkInfo) =>
+            linkLimit(async () => {
+                const result = await checkLink(linkInfo.url);
+                linksChecked++;
+
+                if (linksChecked % 10 === 0 || linksChecked === totalLinks) {
+                    sendEvent({
+                        type: "link_check_progress",
+                        data: { linksChecked, totalLinks },
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                if (result.error === "blocked") {
+                    sendEvent({
+                        type: "link_blocked",
+                        data: {
+                            url: linkInfo.url,
+                            statusCode: null,
+                            isInternal: isInternalLink(linkInfo.url, domain),
+                            sourcePages: linkInfo.sourcePages,
+                            error: "blocked"
+                        },
+                        timestamp: new Date().toISOString()
+                    });
+                    return;
+                }
+
+                if (result.statusCode === null) {
+                    batchSkippedLinks++;
+                    return;
+                }
+
+                if (result.statusCode >= 400) {
+                    sendEvent({
+                        type: "link_checked",
+                        data: {
+                            url: linkInfo.url,
+                            statusCode: result.statusCode,
+                            isInternal: isInternalLink(linkInfo.url, domain),
+                            sourcePages: linkInfo.sourcePages,
+                            error: result.error
+                        },
+                        timestamp: new Date().toISOString()
+                    });
+                } else {
+                    batchWorkingLinks++;
+                }
+            })
+        )
+    );
+
+    const hasMore = endIndex < totalLinks;
+
+    job.cursor = endIndex;
+    job.workingLinks += batchWorkingLinks;
+    job.skippedLinks += batchSkippedLinks;
+
+    if (hasMore) {
+        await redisSet(RedisCacheKey.linkCheckerJob(jobId), job, { ttlInSeconds: JOB_TTL_SECONDS });
+    } else {
+        await redisDel(RedisCacheKey.linkCheckerJob(jobId));
+        const duration = Date.now() - startTime;
+        const completeData: CompleteData = {
+            totalPages,
+            totalLinks,
+            brokenLinks: [],
+            blockedLinks: [],
+            workingLinks: job.workingLinks,
+            skippedLinks: job.skippedLinks,
+            duration
+        };
+        sendEvent({
+            type: "complete",
+            data: completeData,
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    return { hasMore, cursor: endIndex };
 }
 
 export async function runLinkChecker(domain: string, sendEvent: SendEventFn): Promise<void> {
