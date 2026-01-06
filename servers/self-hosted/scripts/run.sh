@@ -218,10 +218,23 @@ fi
 # -----------  Start MeiliSearch setup  -----------
 export MEILI_HTTP_ADDR=0.0.0.0:7700
 
-log "Starting MeiliSearch..."
-# Change to /tmp so MeiliSearch's default data directory (./data.ms) is created there
-cd /tmp
-/meilisearch --master-key="fern123!" 2>&1 | tee /tmp/meilisearch.log | add_timestamps &
+# Use UID-scoped directory for MeiliSearch data to avoid permission conflicts
+# When running as an arbitrary UID (e.g., 65532), we can't use directories
+# that may have been created by root during build time due to /tmp sticky bit
+CURRENT_UID=$(id -u)
+MEILI_DB_PATH="/tmp/meilisearch-${CURRENT_UID}"
+
+# Clean up any previous MeiliSearch data for this UID and create fresh directory
+rm -rf "$MEILI_DB_PATH" 2>/dev/null || true
+mkdir -p "$MEILI_DB_PATH"
+
+# Change to the MeiliSearch data directory before starting
+# MeiliSearch may use relative paths for dumps, snapshots, and other files
+# so we need to ensure the working directory is writable by the current UID
+cd "$MEILI_DB_PATH"
+
+log "Starting MeiliSearch with db-path: $MEILI_DB_PATH..."
+/meilisearch --master-key="fern123!" --db-path "$MEILI_DB_PATH" 2>&1 | tee /tmp/meilisearch.log | add_timestamps &
 meili_pid=$!
 log "MeiliSearch PID: $meili_pid"
 
@@ -302,22 +315,46 @@ fi
 export MC_CONFIG_DIR="/tmp/mc-config"
 mkdir -p "$MC_CONFIG_DIR" 2>/dev/null || true
 
+# Determine MinIO data directory - use UID-scoped directory to avoid permission conflicts
+# When running as an arbitrary UID (e.g., 65532), /data may not be writable if:
+# 1. It's a mounted volume with restrictive permissions
+# 2. Seeded data was copied with restrictive permissions
+# Fall back to /data only if it's writable, otherwise use UID-scoped /tmp directory
+CURRENT_UID=$(id -u)
+MINIO_DATA_DIR="/tmp/minio-data-${CURRENT_UID}"
+
+# Check if /data is writable by trying to create a test file
+if touch /data/.write-test 2>/dev/null; then
+    rm -f /data/.write-test
+    MINIO_DATA_DIR="/data"
+    log "Using /data for MinIO (writable)"
+else
+    log "Using UID-scoped directory for MinIO: $MINIO_DATA_DIR (/data is not writable)"
+    mkdir -p "$MINIO_DATA_DIR"
+fi
+
 # Clean up any existing MinIO system files to avoid overlay filesystem issues
 # MinIO's .minio.sys can cause "rename across devices" errors if it exists from a previous layer
 log "Cleaning up MinIO system files..."
-rm -rf /data/.minio.sys 2>/dev/null || true
+rm -rf "$MINIO_DATA_DIR/.minio.sys" 2>/dev/null || true
 
 # If seeded data exists, restore MinIO data before starting
 if [ "$USE_SEEDED_DATA" = "true" ] && [ -d "$SEED_MINIO_DIR" ]; then
     log "Restoring MinIO data from seeded backup..."
     # Copy seeded data to MinIO data directory (use /. to include hidden files if any)
-    cp -r "$SEED_MINIO_DIR"/. /data/ 2>/dev/null || true
+    if cp -r "$SEED_MINIO_DIR"/. "$MINIO_DATA_DIR/" 2>&1 | add_timestamps; then
+        log "MinIO data restored from $SEED_MINIO_DIR to $MINIO_DATA_DIR"
+    else
+        log "WARNING: Failed to restore MinIO data from $SEED_MINIO_DIR"
+    fi
     # Remove .minio.sys again in case it was in the seed (it shouldn't be, but just in case)
-    rm -rf /data/.minio.sys 2>/dev/null || true
-    log "MinIO data restored from $SEED_MINIO_DIR"
+    rm -rf "$MINIO_DATA_DIR/.minio.sys" 2>/dev/null || true
 fi
 
-log "Starting MinIO server..."
+# Update MINIO_VOLUMES to use the determined data directory
+export MINIO_VOLUMES="$MINIO_DATA_DIR"
+
+log "Starting MinIO server with data directory: $MINIO_DATA_DIR..."
 minio server ${MINIO_VOLUMES} --console-address ":9001" 2>&1 | tee /tmp/minio.log | add_timestamps &
 minio_pid=$!
 log "MinIO PID: $minio_pid"

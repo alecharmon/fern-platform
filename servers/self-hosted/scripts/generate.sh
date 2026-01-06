@@ -95,6 +95,12 @@ cleanup() {
         wait "$meili_pid" 2>/dev/null || true
     fi
     
+    # Clean up MeiliSearch data directory to avoid leaving root-owned state
+    if [ -n "${MEILI_DB_PATH:-}" ] && [ -d "$MEILI_DB_PATH" ]; then
+        log "Cleaning up MeiliSearch data directory: $MEILI_DB_PATH"
+        rm -rf "$MEILI_DB_PATH" 2>/dev/null || true
+    fi
+    
     # Stop PostgreSQL (must run as postgres user if we started as root)
     if [ -n "${PGDATA:-}" ] && [ -d "$PGDATA" ]; then
         log "Stopping PostgreSQL..."
@@ -232,10 +238,19 @@ fi
 log "Starting MeiliSearch for seeding..."
 export MEILI_HTTP_ADDR=0.0.0.0:7700
 
-cd /tmp
-/meilisearch --master-key="fern123!" 2>&1 &
+# Use UID-scoped directory for MeiliSearch data to avoid leaving root-owned state in /tmp
+# This prevents permission issues at runtime when container runs as a different UID
+MEILI_DB_PATH="/tmp/meilisearch-seed-${CURRENT_UID}"
+rm -rf "$MEILI_DB_PATH" 2>/dev/null || true
+mkdir -p "$MEILI_DB_PATH"
+
+# Change to the MeiliSearch data directory before starting
+# MeiliSearch may use relative paths for dumps, snapshots, and other files
+cd "$MEILI_DB_PATH"
+
+/meilisearch --master-key="fern123!" --db-path "$MEILI_DB_PATH" 2>&1 &
 meili_pid=$!
-log "MeiliSearch PID: $meili_pid"
+log "MeiliSearch PID: $meili_pid (db-path: $MEILI_DB_PATH)"
 
 # Wait for MeiliSearch
 for i in {1..30}; do
