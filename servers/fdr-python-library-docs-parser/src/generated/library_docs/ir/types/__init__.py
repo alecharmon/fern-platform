@@ -13,6 +13,7 @@ if typing.TYPE_CHECKING:
     from .docstring_raises_ir import DocstringRaisesIr
     from .docstring_returns_ir import DocstringReturnsIr
     from .ir_metadata import IrMetadata
+    from .type_info import TypeInfo
 _dynamic_imports: typing.Dict[str, str] = {
     "AttributeIr": ".attribute_ir",
     "DocstringExampleIr": ".docstring_example_ir",
@@ -21,6 +22,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DocstringRaisesIr": ".docstring_raises_ir",
     "DocstringReturnsIr": ".docstring_returns_ir",
     "IrMetadata": ".ir_metadata",
+    "TypeInfo": ".type_info",
 }
 
 
@@ -53,4 +55,5 @@ __all__ = [
     "DocstringRaisesIr",
     "DocstringReturnsIr",
     "IrMetadata",
+    "TypeInfo",
 ]

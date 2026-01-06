@@ -3,13 +3,16 @@
 import typing
 
 import pydantic
+import typing_extensions
 from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ....core.serialization import FieldMetadata
+from ...ir.types.type_info import TypeInfo
 from .python_parameter_kind import PythonParameterKind
 
 
 class PythonParameterIr(UniversalBaseModel):
     name: str
-    type: typing.Optional[str] = None
+    type_info: typing_extensions.Annotated[typing.Optional[TypeInfo], FieldMetadata(alias="typeInfo")] = None
     default: typing.Optional[str] = None
     description: typing.Optional[str] = None
     kind: PythonParameterKind

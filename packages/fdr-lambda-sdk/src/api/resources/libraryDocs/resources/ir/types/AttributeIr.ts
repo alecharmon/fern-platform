@@ -5,7 +5,7 @@ import type * as FdrLambda from "../../../../../index.js";
 export interface AttributeIr {
     name: string;
     path: string;
-    type: string | undefined;
+    typeInfo: FdrLambda.libraryDocs.TypeInfo | undefined;
     value: string | undefined;
     docstring: FdrLambda.libraryDocs.DocstringIr | undefined;
 }

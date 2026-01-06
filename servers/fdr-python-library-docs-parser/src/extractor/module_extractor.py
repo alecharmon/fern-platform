@@ -13,7 +13,8 @@ from src.generated.library_docs import (
 
 from .class_extractor import extract_class
 from .docstring_extractor import extract_docstring
-from .function_extractor import extract_function, _format_annotation
+from .function_extractor import extract_function
+from .type_resolver import make_type_info
 
 
 def extract_python_ir(
@@ -84,7 +85,7 @@ def extract_module(griffe_module: Module) -> PythonModuleIr:
                 attr_ir = AttributeIr(
                     name=name,
                     path=member.path,
-                    type=_format_annotation(member.annotation) if member.annotation else None,
+                    type_info=make_type_info(member.annotation),
                     value=str(member.value) if member.value is not None else None,
                     docstring=extract_docstring(member.docstring),
                 )

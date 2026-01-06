@@ -14,6 +14,7 @@ if typing.TYPE_CHECKING:
         DocstringRaisesIr,
         DocstringReturnsIr,
         IrMetadata,
+        TypeInfo,
     )
 _dynamic_imports: typing.Dict[str, str] = {
     "AttributeIr": ".types",
@@ -23,6 +24,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DocstringRaisesIr": ".types",
     "DocstringReturnsIr": ".types",
     "IrMetadata": ".types",
+    "TypeInfo": ".types",
 }
 
 
@@ -55,4 +57,5 @@ __all__ = [
     "DocstringRaisesIr",
     "DocstringReturnsIr",
     "IrMetadata",
+    "TypeInfo",
 ]

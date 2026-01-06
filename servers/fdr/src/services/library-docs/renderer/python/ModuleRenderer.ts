@@ -6,6 +6,7 @@ import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
 import { createFrontmatter, escapeMdx, renderSimpleDocstring } from "../base/index.js";
 import { renderClass } from "./ClassRenderer.js";
 import { renderFunction } from "./FunctionRenderer.js";
+import { getTypeDisplay } from "./TypeLinkResolver.js";
 
 export interface RenderConfig {
     baseSlug: string;
@@ -60,7 +61,7 @@ export function renderModulePage(
         lines.push("<AccordionGroup>");
         lines.push("");
         for (const cls of module.classes) {
-            lines.push(renderClass(cls));
+            lines.push(renderClass(cls, config.baseSlug));
             lines.push("");
         }
         lines.push("</AccordionGroup>");
@@ -99,8 +100,9 @@ function renderModuleAttribute(attr: FdrLambda.libraryDocs.AttributeIr): string 
     lines.push(`#### ${attr.name}`);
     lines.push("");
 
-    if (attr.type) {
-        lines.push(`**Type:** \`${escapeMdx(attr.type)}\``);
+    const attrTypeDisplay = getTypeDisplay(attr.typeInfo);
+    if (attrTypeDisplay) {
+        lines.push(`**Type:** \`${escapeMdx(attrTypeDisplay)}\``);
         lines.push("");
     }
 

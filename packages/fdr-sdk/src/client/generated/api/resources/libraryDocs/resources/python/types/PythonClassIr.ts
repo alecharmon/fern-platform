@@ -6,7 +6,7 @@ export interface PythonClassIr {
     name: string;
     path: string;
     kind: FernRegistry.libraryDocs.PythonClassKind;
-    bases: string[];
+    bases: FernRegistry.libraryDocs.BaseClassRef[];
     docstring: FernRegistry.libraryDocs.DocstringIr | undefined;
     constructorParams: FernRegistry.libraryDocs.PythonParameterIr[];
     methods: FernRegistry.libraryDocs.PythonFunctionIr[];

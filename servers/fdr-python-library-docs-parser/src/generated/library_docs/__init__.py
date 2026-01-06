@@ -15,8 +15,10 @@ if typing.TYPE_CHECKING:
         DocstringRaisesIr,
         DocstringReturnsIr,
         IrMetadata,
+        TypeInfo,
     )
     from .python import (
+        BaseClassRef,
         EnumMemberIr,
         PythonClassIr,
         PythonClassKind,
@@ -29,6 +31,7 @@ if typing.TYPE_CHECKING:
     )
 _dynamic_imports: typing.Dict[str, str] = {
     "AttributeIr": ".ir",
+    "BaseClassRef": ".python",
     "DocstringExampleIr": ".ir",
     "DocstringIr": ".ir",
     "DocstringParamIr": ".ir",
@@ -43,6 +46,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PythonModuleIr": ".python",
     "PythonParameterIr": ".python",
     "PythonParameterKind": ".python",
+    "TypeInfo": ".ir",
     "TypedDictFieldIr": ".python",
     "ir": ".ir",
     "python": ".python",
@@ -72,6 +76,7 @@ def __dir__():
 
 __all__ = [
     "AttributeIr",
+    "BaseClassRef",
     "DocstringExampleIr",
     "DocstringIr",
     "DocstringParamIr",
@@ -86,6 +91,7 @@ __all__ = [
     "PythonModuleIr",
     "PythonParameterIr",
     "PythonParameterKind",
+    "TypeInfo",
     "TypedDictFieldIr",
     "ir",
     "python",

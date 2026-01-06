@@ -6,14 +6,12 @@ import pydantic
 import typing_extensions
 from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ....core.serialization import FieldMetadata
-from ...ir.types.type_info import TypeInfo
 
 
-class TypedDictFieldIr(UniversalBaseModel):
-    name: str
-    type_info: typing_extensions.Annotated[typing.Optional[TypeInfo], FieldMetadata(alias="typeInfo")] = None
-    description: typing.Optional[str] = None
-    required: bool
+class TypeInfo(UniversalBaseModel):
+    display: typing.Optional[str] = None
+    resolved_path: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="resolvedPath")] = None
+    base_path: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="basePath")] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

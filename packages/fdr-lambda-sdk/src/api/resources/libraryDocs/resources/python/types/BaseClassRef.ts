@@ -2,9 +2,7 @@
 
 import type * as FdrLambda from "../../../../../index.js";
 
-export interface TypedDictFieldIr {
+export interface BaseClassRef {
     name: string;
     typeInfo: FdrLambda.libraryDocs.TypeInfo | undefined;
-    description: string | undefined;
-    required: boolean;
 }

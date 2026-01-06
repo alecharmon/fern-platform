@@ -4,7 +4,7 @@ import type * as FernRegistry from "../../../../../index.js";
 
 export interface PythonParameterIr {
     name: string;
-    type: string | undefined;
+    typeInfo: FernRegistry.libraryDocs.TypeInfo | undefined;
     default: string | undefined;
     description: string | undefined;
     kind: FernRegistry.libraryDocs.PythonParameterKind;

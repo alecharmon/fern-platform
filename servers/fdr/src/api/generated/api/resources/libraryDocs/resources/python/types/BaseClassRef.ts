@@ -2,9 +2,7 @@
 
 import type * as FernRegistry from "../../../../../index";
 
-export interface TypedDictFieldIr {
+export interface BaseClassRef {
     name: string;
     typeInfo: FernRegistry.libraryDocs.TypeInfo | undefined;
-    description: string | undefined;
-    required: boolean;
 }

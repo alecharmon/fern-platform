@@ -27,6 +27,7 @@ from src.generated.library_docs import (
     DocstringRaisesIr,
     DocstringReturnsIr,
     IrMetadata,
+    TypeInfo,
     # Python-specific types
     EnumMemberIr,
     PythonClassIr,
@@ -51,6 +52,7 @@ __all__ = [
     "DocstringRaisesIr",
     "DocstringReturnsIr",
     "IrMetadata",
+    "TypeInfo",
     # Python-specific types
     "EnumMemberIr",
     "PythonClassIr",

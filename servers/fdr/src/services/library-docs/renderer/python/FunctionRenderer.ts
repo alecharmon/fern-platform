@@ -4,6 +4,7 @@
 
 import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
 import { formatTypeAnnotation, generateAnchorId, renderDocstring } from "../base/index.js";
+import { getTypeDisplay } from "./TypeLinkResolver.js";
 
 /**
  * Render a function or method to MDX (full form for module-level functions).
@@ -34,14 +35,16 @@ export function renderFunction(func: FdrLambda.libraryDocs.PythonFunctionIr): st
     // Build param annotations map for docstring rendering
     const paramAnnotations: Record<string, string> = {};
     for (const param of func.parameters) {
-        if (param.type) {
-            paramAnnotations[param.name] = param.type;
+        const typeDisplay = getTypeDisplay(param.typeInfo);
+        if (typeDisplay) {
+            paramAnnotations[param.name] = typeDisplay;
         }
     }
 
     // Docstring with parameters
+    const returnTypeDisplay = getTypeDisplay(func.returnTypeInfo);
     if (func.docstring) {
-        const docstringMdx = renderDocstring(func.docstring, paramAnnotations, func.returnType ?? undefined);
+        const docstringMdx = renderDocstring(func.docstring, paramAnnotations, returnTypeDisplay || undefined);
         if (docstringMdx) {
             lines.push(docstringMdx);
             lines.push("");
@@ -78,14 +81,16 @@ export function renderMethodCompact(func: FdrLambda.libraryDocs.PythonFunctionIr
     // Build param annotations map
     const paramAnnotations: Record<string, string> = {};
     for (const param of func.parameters) {
-        if (param.type) {
-            paramAnnotations[param.name] = param.type;
+        const typeDisplay = getTypeDisplay(param.typeInfo);
+        if (typeDisplay) {
+            paramAnnotations[param.name] = typeDisplay;
         }
     }
 
     // Docstring
+    const methodReturnTypeDisplay = getTypeDisplay(func.returnTypeInfo);
     if (func.docstring) {
-        const docstringMdx = renderDocstring(func.docstring, paramAnnotations, func.returnType ?? undefined);
+        const docstringMdx = renderDocstring(func.docstring, paramAnnotations, methodReturnTypeDisplay || undefined);
         if (docstringMdx) {
             lines.push(docstringMdx);
         }
@@ -103,7 +108,8 @@ export function renderProperty(func: FdrLambda.libraryDocs.PythonFunctionIr): st
     const anchorId = generateAnchorId(func.path);
 
     // Property as inline signature
-    const returnType = func.returnType ? `: ${formatTypeAnnotation(func.returnType)}` : "";
+    const propReturnTypeDisplay = getTypeDisplay(func.returnTypeInfo);
+    const returnType = propReturnTypeDisplay ? `: ${formatTypeAnnotation(propReturnTypeDisplay)}` : "";
 
     lines.push(`<Anchor id="${anchorId}">`);
     lines.push(`##### \`${func.name}${returnType}\``);
@@ -135,15 +141,17 @@ function formatMethodSignatureCompact(func: FdrLambda.libraryDocs.PythonFunction
     const paramStrs = params.map((p) => {
         let s = p.name;
         // Only add type if compact enough
-        if (p.type && p.type.length < 20) {
-            s += `: ${p.type}`;
+        const pTypeDisplay = getTypeDisplay(p.typeInfo);
+        if (pTypeDisplay && pTypeDisplay.length < 20) {
+            s += `: ${pTypeDisplay}`;
         }
         return s;
     });
 
     const paramsStr = paramStrs.join(", ");
     const asyncPrefix = func.isAsync ? "async " : "";
-    const returnStr = func.returnType ? ` → ${formatTypeAnnotation(func.returnType)}` : "";
+    const sigReturnTypeDisplay = getTypeDisplay(func.returnTypeInfo);
+    const returnStr = sigReturnTypeDisplay ? ` → ${formatTypeAnnotation(sigReturnTypeDisplay)}` : "";
 
     // Truncate if too long
     if (paramsStr.length > 40) {

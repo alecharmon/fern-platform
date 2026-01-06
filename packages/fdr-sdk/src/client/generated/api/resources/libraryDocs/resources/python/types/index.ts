@@ -1,3 +1,4 @@
+export * from "./BaseClassRef.js";
 export * from "./EnumMemberIr.js";
 export * from "./PythonClassIr.js";
 export * from "./PythonClassKind.js";

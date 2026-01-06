@@ -8,7 +8,7 @@ export interface PythonFunctionIr {
     signature: string;
     docstring: FdrLambda.libraryDocs.DocstringIr | undefined;
     parameters: FdrLambda.libraryDocs.PythonParameterIr[];
-    returnType: string | undefined;
+    returnTypeInfo: FdrLambda.libraryDocs.TypeInfo | undefined;
     isAsync: boolean;
     decorators: string[];
     isClassmethod: boolean;

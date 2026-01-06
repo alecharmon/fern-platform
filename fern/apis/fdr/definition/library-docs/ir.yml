@@ -4,6 +4,16 @@
 # These types are language-agnostic and shared across all language-specific IRs.
 
 types:
+  # Type information - reusable struct for all type annotations
+  TypeInfo:
+    properties:
+      # Human-readable type string for display (e.g., "NotRequired[bool]")
+      display: optional<string>
+      # Fully-qualified path including generics (e.g., "typing.NotRequired[bool]")
+      resolvedPath: optional<string>
+      # Base type path without generics, for generating valid anchor links (e.g., "typing.NotRequired")
+      basePath: optional<string>
+
   # Metadata - genuinely shared (every language has package name, source URL)
   IRMetadata:
     properties:
@@ -52,6 +62,6 @@ types:
     properties:
       name: string
       path: string
-      type: optional<string>
+      typeInfo: optional<TypeInfo>
       value: optional<string>
       docstring: optional<DocstringIR>

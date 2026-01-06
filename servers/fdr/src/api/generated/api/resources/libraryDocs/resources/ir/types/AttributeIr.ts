@@ -5,7 +5,7 @@ import type * as FernRegistry from "../../../../../index";
 export interface AttributeIr {
     name: string;
     path: string;
-    type: string | undefined;
+    typeInfo: FernRegistry.libraryDocs.TypeInfo | undefined;
     value: string | undefined;
     docstring: FernRegistry.libraryDocs.DocstringIr | undefined;
 }

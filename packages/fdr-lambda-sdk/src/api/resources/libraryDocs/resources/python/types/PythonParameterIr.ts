@@ -4,7 +4,7 @@ import type * as FdrLambda from "../../../../../index.js";
 
 export interface PythonParameterIr {
     name: string;
-    type: string | undefined;
+    typeInfo: FdrLambda.libraryDocs.TypeInfo | undefined;
     default: string | undefined;
     description: string | undefined;
     kind: FdrLambda.libraryDocs.PythonParameterKind;

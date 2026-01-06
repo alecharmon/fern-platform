@@ -5,3 +5,4 @@ export * from "./DocstringParamIr";
 export * from "./DocstringRaisesIr";
 export * from "./DocstringReturnsIr";
 export * from "./IrMetadata";
+export * from "./TypeInfo";

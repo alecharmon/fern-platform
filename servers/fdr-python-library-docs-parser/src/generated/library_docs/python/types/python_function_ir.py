@@ -7,6 +7,7 @@ import typing_extensions
 from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ....core.serialization import FieldMetadata
 from ...ir.types.docstring_ir import DocstringIr
+from ...ir.types.type_info import TypeInfo
 from .python_parameter_ir import PythonParameterIr
 
 
@@ -16,7 +17,9 @@ class PythonFunctionIr(UniversalBaseModel):
     signature: str
     docstring: typing.Optional[DocstringIr] = None
     parameters: typing.List[PythonParameterIr]
-    return_type: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="returnType")] = None
+    return_type_info: typing_extensions.Annotated[typing.Optional[TypeInfo], FieldMetadata(alias="returnTypeInfo")] = (
+        None
+    )
     is_async: typing_extensions.Annotated[bool, FieldMetadata(alias="isAsync")]
     decorators: typing.List[str]
     is_classmethod: typing_extensions.Annotated[bool, FieldMetadata(alias="isClassmethod")]

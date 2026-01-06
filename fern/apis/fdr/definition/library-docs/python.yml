@@ -26,13 +26,19 @@ types:
       attributes: list<ir.AttributeIR>
       submodules: list<PythonModuleIR>
 
+  # Reference to a base class with type info for cross-linking
+  BaseClassRef:
+    properties:
+      name: string  # Simple identifier for filtering (e.g., "EnvironmentInterface")
+      typeInfo: optional<ir.TypeInfo>  # Full type info when resolvable
+
   # Python class - complete with all Python-specific fields
   PythonClassIR:
     properties:
       name: string
       path: string
       kind: PythonClassKind
-      bases: list<string>
+      bases: list<BaseClassRef>
       docstring: optional<ir.DocstringIR>
       constructorParams: list<PythonParameterIR>
       methods: list<PythonFunctionIR>
@@ -61,7 +67,7 @@ types:
       signature: string
       docstring: optional<ir.DocstringIR>
       parameters: list<PythonParameterIR>
-      returnType: optional<string>
+      returnTypeInfo: optional<ir.TypeInfo>
       isAsync: boolean
       decorators: list<string>
       isClassmethod: boolean
@@ -72,7 +78,7 @@ types:
   PythonParameterIR:
     properties:
       name: string
-      type: optional<string>
+      typeInfo: optional<ir.TypeInfo>
       default: optional<string>
       description: optional<string>
       kind: PythonParameterKind
@@ -89,7 +95,7 @@ types:
   TypedDictFieldIR:
     properties:
       name: string
-      type: optional<string>
+      typeInfo: optional<ir.TypeInfo>
       description: optional<string>
       required: boolean
 

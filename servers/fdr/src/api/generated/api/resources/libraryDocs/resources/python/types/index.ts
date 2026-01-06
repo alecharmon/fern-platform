@@ -1,3 +1,4 @@
+export * from "./BaseClassRef";
 export * from "./EnumMemberIr";
 export * from "./PythonClassIr";
 export * from "./PythonClassKind";

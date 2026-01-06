@@ -4,6 +4,7 @@ from griffe import Class, Function, Attribute
 
 from src.generated.library_docs import (
     AttributeIr,
+    BaseClassRef,
     EnumMemberIr,
     PythonClassIr,
     PythonFunctionIr,
@@ -12,7 +13,8 @@ from src.generated.library_docs import (
 )
 
 from .docstring_extractor import extract_docstring
-from .function_extractor import extract_function, _extract_parameter, _format_annotation
+from .function_extractor import extract_function, _extract_parameter
+from .type_resolver import make_type_info
 
 
 def extract_class(cls: Class) -> PythonClassIr:
@@ -27,10 +29,11 @@ def extract_class(cls: Class) -> PythonClassIr:
     """
     kind = _detect_class_kind(cls)
     decorators = _extract_decorators(cls)
-    bases = [str(b) for b in cls.bases] if cls.bases else []
+    bases = _extract_bases(cls)
 
-    # Detect class properties
-    is_abstract = any("ABC" in b or "ABCMeta" in b for b in bases) or any(
+    # Detect class properties (use base names for checks)
+    base_names = [b.name for b in bases]
+    is_abstract = any("ABC" in b or "ABCMeta" in b for b in base_names) or any(
         "abstractmethod" in d for d in decorators
     )
     has_slots = hasattr(cls, "__slots__") or any(
@@ -129,6 +132,19 @@ def _extract_decorators(cls: Class) -> list[str]:
     return decorators
 
 
+def _extract_bases(cls: Class) -> list[BaseClassRef]:
+    """Extract base classes with type info for cross-linking."""
+    if not cls.bases:
+        return []
+
+    bases = []
+    for base in cls.bases:
+        name = str(base)
+        type_info = make_type_info(base)
+        bases.append(BaseClassRef(name=name, type_info=type_info))
+    return bases
+
+
 def _extract_constructor_params(cls: Class) -> list[PythonParameterIr]:
     """Extract constructor parameters from __init__."""
     init_method = cls.members.get("__init__")
@@ -174,7 +190,7 @@ def _extract_attributes(cls: Class) -> list[AttributeIr]:
             attr_ir = AttributeIr(
                 name=name,
                 path=member.path,
-                type=_format_annotation(member.annotation) if member.annotation else None,
+                type_info=make_type_info(member.annotation),
                 value=str(member.value) if member.value is not None else None,
                 docstring=extract_docstring(member.docstring),
             )
@@ -189,12 +205,15 @@ def _extract_typeddict_fields(cls: Class) -> list[TypedDictFieldIr]:
 
     for name, member in cls.members.items():
         if isinstance(member, Attribute):
-            annotation = (
-                _format_annotation(member.annotation) if member.annotation else None
-            )
+            # Skip dunder fields like __extra__
+            if name.startswith("_"):
+                continue
 
-            # Check if NotRequired
-            required = annotation is None or "NotRequired" not in annotation
+            type_info = make_type_info(member.annotation)
+
+            # Check if NotRequired based on resolved path
+            resolved = type_info.resolved_path if type_info else None
+            required = resolved is None or "NotRequired" not in resolved
 
             # Get description from docstring
             description = None
@@ -204,7 +223,7 @@ def _extract_typeddict_fields(cls: Class) -> list[TypedDictFieldIr]:
             fields.append(
                 TypedDictFieldIr(
                     name=name,
-                    type=annotation,
+                    type_info=type_info,
                     description=description,
                     required=required,
                 )

@@ -12,25 +12,26 @@ import {
     renderSimpleDocstring
 } from "../base/index.js";
 import { renderMethodCompact } from "./FunctionRenderer.js";
+import { getTypeDisplay, linkTypeInfo } from "./TypeLinkResolver.js";
 
 /**
  * Render a class to MDX.
  */
-export function renderClass(cls: FdrLambda.libraryDocs.PythonClassIr): string {
+export function renderClass(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
     switch (cls.kind) {
         case "TYPEDDICT":
-            return renderTypedDict(cls);
+            return renderTypedDict(cls, baseSlug);
         case "ENUM":
             return renderEnum(cls);
         default:
-            return renderRegularClass(cls);
+            return renderRegularClass(cls, baseSlug);
     }
 }
 
 /**
  * Render a regular class, protocol, dataclass, or exception.
  */
-function renderRegularClass(cls: FdrLambda.libraryDocs.PythonClassIr): string {
+function renderRegularClass(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
     const lines: string[] = [];
 
     // Anchor for the class
@@ -72,9 +73,17 @@ function renderRegularClass(cls: FdrLambda.libraryDocs.PythonClassIr): string {
 
     // Base classes (if interesting)
     if (cls.bases.length > 0 && !["TYPEDDICT", "ENUM"].includes(cls.kind)) {
-        const interestingBases = cls.bases.filter((b) => !["object", "ABC", "Protocol", "TypedDict"].includes(b));
+        const interestingBases = cls.bases.filter((b) => !["object", "ABC", "Protocol", "TypedDict"].includes(b.name));
         if (interestingBases.length > 0) {
-            const basesStr = interestingBases.map((b) => `\`${b}\``).join(", ");
+            const basesStr = interestingBases
+                .map((b) => {
+                    // Use typeInfo for linking if available, otherwise fall back to name
+                    if (b.typeInfo) {
+                        return linkTypeInfo(b.typeInfo, baseSlug);
+                    }
+                    return `\`${b.name}\``;
+                })
+                .join(", ");
             lines.push(`**Inherits from:** ${basesStr}`);
             lines.push("");
         }
@@ -85,8 +94,9 @@ function renderRegularClass(cls: FdrLambda.libraryDocs.PythonClassIr): string {
         // Build param annotations from constructor params
         const paramAnnotations: Record<string, string> = {};
         for (const param of cls.constructorParams) {
-            if (param.type) {
-                paramAnnotations[param.name] = param.type;
+            const typeDisplay = getTypeDisplay(param.typeInfo);
+            if (typeDisplay) {
+                paramAnnotations[param.name] = typeDisplay;
             }
         }
 
@@ -127,7 +137,7 @@ function renderRegularClass(cls: FdrLambda.libraryDocs.PythonClassIr): string {
 /**
  * Render a TypedDict class.
  */
-function renderTypedDict(cls: FdrLambda.libraryDocs.PythonClassIr): string {
+function renderTypedDict(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
     const lines: string[] = [];
 
     const anchorId = generateAnchorId(cls.path);
@@ -154,8 +164,8 @@ function renderTypedDict(cls: FdrLambda.libraryDocs.PythonClassIr): string {
         lines.push("| Field | Type | Required | Description |");
         lines.push("|-------|------|----------|-------------|");
         for (const field of cls.typedDictFields) {
-            // Escape pipe characters in type annotations (they break markdown tables)
-            const typeStr = field.type ? `\`${escapeTableCell(field.type)}\`` : "-";
+            // Use linkTypeInfo which handles basePath for anchors and resolvedPath for display
+            const typeStr = linkTypeInfo(field.typeInfo, baseSlug);
             const reqStr = field.required ? "Yes" : "No";
             const descStr = field.description ? escapeTableCell(field.description) : "-";
             lines.push(`| \`${field.name}\` | ${typeStr} | ${reqStr} | ${descStr} |`);
@@ -236,8 +246,9 @@ function formatClassSignature(cls: FdrLambda.libraryDocs.PythonClassIr): string 
     const paramStrs: string[] = [];
     for (const param of cls.constructorParams) {
         let paramStr = param.name;
-        if (param.type) {
-            paramStr += `: ${formatTypeAnnotation(param.type)}`;
+        const typeDisplay = getTypeDisplay(param.typeInfo);
+        if (typeDisplay) {
+            paramStr += `: ${formatTypeAnnotation(typeDisplay)}`;
         }
         if (param.default) {
             let defaultStr = param.default;
@@ -273,7 +284,8 @@ function isAttributeMeaningful(attr: FdrLambda.libraryDocs.AttributeIr): boolean
     }
 
     // Keep if it has a meaningful type annotation
-    if (attr.type && attr.type !== "Any") {
+    const typeDisplay = getTypeDisplay(attr.typeInfo);
+    if (typeDisplay && typeDisplay !== "Any") {
         return true;
     }
 
@@ -302,7 +314,8 @@ function renderAttributeCompact(attr: FdrLambda.libraryDocs.AttributeIr): string
     const anchorId = generateAnchorId(attr.path);
 
     // Inline signature
-    const typeStr = attr.type ? `: ${formatTypeAnnotation(attr.type)}` : "";
+    const attrTypeDisplay = getTypeDisplay(attr.typeInfo);
+    const typeStr = attrTypeDisplay ? `: ${formatTypeAnnotation(attrTypeDisplay)}` : "";
     const valueStr = attr.value && attr.value.length <= 30 ? ` = ${attr.value}` : "";
 
     lines.push(`<Anchor id="${anchorId}">`);

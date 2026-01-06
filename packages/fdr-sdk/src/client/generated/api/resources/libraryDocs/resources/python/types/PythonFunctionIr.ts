@@ -8,7 +8,7 @@ export interface PythonFunctionIr {
     signature: string;
     docstring: FernRegistry.libraryDocs.DocstringIr | undefined;
     parameters: FernRegistry.libraryDocs.PythonParameterIr[];
-    returnType: string | undefined;
+    returnTypeInfo: FernRegistry.libraryDocs.TypeInfo | undefined;
     isAsync: boolean;
     decorators: string[];
     isClassmethod: boolean;

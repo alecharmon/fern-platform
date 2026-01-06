@@ -8,6 +8,7 @@ from src.generated.library_docs import (
 )
 
 from .docstring_extractor import extract_docstring
+from .type_resolver import make_type_info
 
 
 def extract_function(func: Function) -> PythonFunctionIr:
@@ -35,16 +36,13 @@ def extract_function(func: Function) -> PythonFunctionIr:
     # Build signature
     signature = _build_signature(func)
 
-    # Extract return type
-    return_type = _format_annotation(func.returns) if func.returns else None
-
     return PythonFunctionIr(
         name=func.name,
         path=func.path,
         signature=signature,
         docstring=extract_docstring(func.docstring),
         parameters=parameters,
-        return_type=return_type,
+        return_type_info=make_type_info(func.returns),
         is_async=is_async,
         decorators=decorators,
         is_classmethod=is_classmethod,
@@ -79,7 +77,7 @@ def _extract_parameter(param) -> PythonParameterIr:
     return PythonParameterIr(
         name=param.name,
         kind=kind,
-        type=_format_annotation(param.annotation) if param.annotation else None,
+        type_info=make_type_info(param.annotation),
         default=default,
         description=None,  # Filled from docstring later if needed
     )

@@ -7,6 +7,7 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .types import (
+        BaseClassRef,
         EnumMemberIr,
         PythonClassIr,
         PythonClassKind,
@@ -18,6 +19,7 @@ if typing.TYPE_CHECKING:
         TypedDictFieldIr,
     )
 _dynamic_imports: typing.Dict[str, str] = {
+    "BaseClassRef": ".types",
     "EnumMemberIr": ".types",
     "PythonClassIr": ".types",
     "PythonClassKind": ".types",
@@ -52,6 +54,7 @@ def __dir__():
 
 
 __all__ = [
+    "BaseClassRef",
     "EnumMemberIr",
     "PythonClassIr",
     "PythonClassKind",

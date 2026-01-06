@@ -8,6 +8,7 @@ from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ....core.serialization import FieldMetadata
 from ...ir.types.attribute_ir import AttributeIr
 from ...ir.types.docstring_ir import DocstringIr
+from .base_class_ref import BaseClassRef
 from .enum_member_ir import EnumMemberIr
 from .python_class_kind import PythonClassKind
 from .python_function_ir import PythonFunctionIr
@@ -19,7 +20,7 @@ class PythonClassIr(UniversalBaseModel):
     name: str
     path: str
     kind: PythonClassKind
-    bases: typing.List[str]
+    bases: typing.List[BaseClassRef]
     docstring: typing.Optional[DocstringIr] = None
     constructor_params: typing_extensions.Annotated[
         typing.List[PythonParameterIr], FieldMetadata(alias="constructorParams")

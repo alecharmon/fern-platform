@@ -6,7 +6,7 @@ export interface PythonClassIr {
     name: string;
     path: string;
     kind: FdrLambda.libraryDocs.PythonClassKind;
-    bases: string[];
+    bases: FdrLambda.libraryDocs.BaseClassRef[];
     docstring: FdrLambda.libraryDocs.DocstringIr | undefined;
     constructorParams: FdrLambda.libraryDocs.PythonParameterIr[];
     methods: FdrLambda.libraryDocs.PythonFunctionIr[];
