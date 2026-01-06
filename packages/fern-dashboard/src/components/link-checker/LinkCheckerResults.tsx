@@ -3,6 +3,7 @@
 import {
     AlertTriangleIcon,
     CheckCircleIcon,
+    DownloadIcon,
     ExternalLinkIcon,
     FileIcon,
     LinkIcon,
@@ -11,8 +12,11 @@ import {
 import { useState } from "react";
 
 import type { BrokenLink } from "@/app/api/link-checker/types";
+import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+import { exportLinkCheckerToCSV } from "./exportLinkCheckerToCSV";
 
 interface LinkCheckerResultsProps {
     totalPages: number;
@@ -108,7 +112,20 @@ export default function LinkCheckerResults({
                 />
             </div>
 
-            <p className="text-sm text-foreground/70">Completed in {formatDuration(duration)}</p>
+            <div className="flex items-center justify-between">
+                <p className="text-sm text-foreground/70">Completed in {formatDuration(duration)}</p>
+                {(brokenLinks.length > 0 || blockedLinks.length > 0) && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => exportLinkCheckerToCSV({ brokenLinks, blockedLinks })}
+                        className="gap-2"
+                    >
+                        <DownloadIcon className="h-4 w-4" />
+                        Export CSV
+                    </Button>
+                )}
+            </div>
 
             {brokenLinks.length > 0 ? (
                 <div className="space-y-3">
