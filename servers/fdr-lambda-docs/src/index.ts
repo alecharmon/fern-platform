@@ -1,5 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { Pool } from "pg";
+import { getDocsScore, triggerDocsScoreCalculation } from "./services/docsScore";
 import { type EnhanceExampleRequest, enhanceExample } from "./services/enhanceExample";
 import { getCachedExample, getConnectionDetails, normalizeRequest, storeCachedExample } from "./services/exampleCache";
 import { validateCliJwt } from "./utils/jwt";
@@ -297,6 +298,124 @@ export const handler = async (event: LambdaEvent, context: Context): Promise<API
             } catch (error: unknown) {
                 // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
                 console.error(`[Handler] Error in get-db-examples:`, error);
+                return {
+                    statusCode: 500,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        error: "InternalError",
+                        message: error instanceof Error ? error.message : "An unexpected error occurred",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+        }
+
+        // Route: GET /docs-score - Get docs score for a domain
+        if ((path === "/docs-score" || path === "/v2/registry/docs/score") && method === "GET") {
+            const domain = event.queryStringParameters?.domain;
+
+            if (!domain) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        error: "ValidationError",
+                        message: "Missing required query parameter: domain",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            const dbPool = await getPool();
+            const score = await getDocsScore(domain, dbPool);
+
+            if (!score) {
+                return {
+                    statusCode: 404,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        error: "NotFound",
+                        message: `No score found for domain: ${domain}`,
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify({
+                    ...score,
+                    requestId: context.awsRequestId
+                })
+            };
+        }
+
+        // Route: POST /docs-score - Trigger docs score calculation for a domain
+        if ((path === "/docs-score" || path === "/v2/registry/docs/score") && method === "POST") {
+            try {
+                const body = JSON.parse(event.body || "{}");
+
+                if (!body.domain) {
+                    return {
+                        statusCode: 400,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        },
+                        body: JSON.stringify({
+                            error: "ValidationError",
+                            message: "Missing required field: domain",
+                            requestId: context.awsRequestId
+                        })
+                    };
+                }
+
+                const dbPool = await getPool();
+                const score = await triggerDocsScoreCalculation(body.domain, dbPool);
+
+                if (!score) {
+                    return {
+                        statusCode: 500,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        },
+                        body: JSON.stringify({
+                            error: "InternalError",
+                            message: "Failed to trigger score calculation",
+                            requestId: context.awsRequestId
+                        })
+                    };
+                }
+
+                return {
+                    statusCode: 200,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Score calculation triggered",
+                        ...score,
+                        requestId: context.awsRequestId
+                    })
+                };
+            } catch (error: unknown) {
+                // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
+                console.error(`[Handler] Error in docs-score POST:`, error);
                 return {
                     statusCode: 500,
                     headers: {

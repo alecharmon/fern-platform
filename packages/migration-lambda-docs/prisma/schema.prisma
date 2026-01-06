@@ -34,3 +34,13 @@ enum HttpMethod {
   DELETE
   HEAD
 }
+
+model DocsScore {
+  domain       String   @id
+  score        Int?
+  isProcessing Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+  data         Json?
+
+  @@map("docs_scores")
+}
