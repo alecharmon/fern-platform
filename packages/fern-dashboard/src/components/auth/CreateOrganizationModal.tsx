@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import type { Auth0OrgID, Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -14,6 +15,7 @@ import {
     DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import orgRedirect from "@/utils/orgRedirect";
 
 interface CreateOrganizationModalProps {
     accessToken: string;
@@ -54,7 +56,13 @@ export function CreateOrganizationModal({ accessToken, open, onOpenChange }: Cre
             const data = await response.json();
             onOpenChange(false);
             setIsLoading(false);
-            router.push(`/${data.organizationId}/docs`);
+            // Use orgRedirect to properly authenticate with the new organization
+            router.push(
+                orgRedirect({
+                    id: data.orgId as Auth0OrgID,
+                    name: data.organizationId as Auth0OrgName
+                })
+            );
         } catch (err) {
             setError(err instanceof Error ? err.message : "An error occurred");
             setIsLoading(false);

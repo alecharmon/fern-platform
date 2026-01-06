@@ -1,6 +1,8 @@
 "use client";
 
-import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
+import type { ComponentProps, ReactNode } from "react";
+
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 
 export function DashboardTooltip({
     children,
@@ -9,15 +11,15 @@ export function DashboardTooltip({
     hideInnerSpan = false,
     ...props
 }: {
-    children: React.ReactNode;
+    children: ReactNode;
     hideInnerSpan?: boolean;
-} & React.ComponentProps<typeof FernTooltip>) {
+} & ComponentProps<typeof Tooltip>) {
     return (
-        <FernTooltipProvider>
-            <FernTooltip content={content} delayDuration={delayDuration} variant="dashboard" {...props}>
+        <TooltipProvider>
+            <Tooltip content={content} delayDuration={delayDuration} {...props}>
                 {/* Additional span ensures disabled children still have pointer events */}
                 {hideInnerSpan ? children : <span className="pointer-events-auto">{children}</span>}
-            </FernTooltip>
-        </FernTooltipProvider>
+            </Tooltip>
+        </TooltipProvider>
     );
 }

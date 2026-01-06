@@ -10,7 +10,9 @@ export const PosthogFeatureFlag = {
     ENABLE_WEB_ANALYTICS_TAB: "dashboard-enable-web-analytics-tab",
     ENABLE_INCIDENTS_PAGE: "dashboard-enable-incidents-page",
     ENABLE_CREATE_DOCS_NEW_SITE: "dashboard-create-new-docs-site",
-    ENABLE_FERN_EDITOR_PREVIEW: "dashboard-access-editor-without-repo"
+    ENABLE_FERN_EDITOR_PREVIEW: "dashboard-access-editor-without-repo",
+    ENABLE_FINE_GRAINED_PERMISSIONS: "dashboard-enable-fine-grained-permissions",
+    ENFORCE_PERMISSIONS: "dashboard-enforce-permissions"
 } as const;
 
 export type PosthogFeatureFlag = (typeof PosthogFeatureFlag)[keyof typeof PosthogFeatureFlag];

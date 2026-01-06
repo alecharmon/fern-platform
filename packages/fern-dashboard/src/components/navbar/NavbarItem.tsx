@@ -30,6 +30,11 @@ export declare namespace NavbarItem {
          */
         href: `/${string}`;
         hrefForActualLinking?: string;
+
+        /**
+         * When true, the item is visually disabled and not clickable.
+         */
+        disabled?: boolean;
     }
 }
 
@@ -41,7 +46,8 @@ export const NavbarItem = ({
     icon,
     iconType,
     href,
-    hrefForActualLinking = href
+    hrefForActualLinking = href,
+    disabled = false
 }: NavbarItem.Props) => {
     const ANIMATION_DURATION_MS = 1400;
     const [hoverAnimating, setHoverAnimating] = React.useState(false);
@@ -50,7 +56,7 @@ export const NavbarItem = ({
     const [isMobile, setIsMobile] = React.useState(false);
 
     const handleMouseEnter = () => {
-        if (isMobile) {
+        if (isMobile || disabled) {
             return;
         }
         setIsHovered(true);
@@ -97,12 +103,18 @@ export const NavbarItem = ({
     const [isCollapsed] = useIsSidebarCollapsed();
 
     const isSelected = pathname.startsWith(href);
-    const isClickable = !isSelected;
-    const strokeColor = isSelected ? "var(--green-1100)" : isHovered ? "var(--gray-1100)" : "var(--gray-900)";
+    const isClickable = !isSelected && !disabled;
+    const strokeColor = disabled
+        ? "var(--gray-600)"
+        : isSelected
+          ? "var(--green-1100)"
+          : isHovered
+            ? "var(--gray-1100)"
+            : "var(--gray-900)";
 
     const className = cn(
         "group flex flex-1 flex-col items-center gap-2 py-2 text-sm transition md:flex-row focus:ring-0 focus:outline-none px-2 md:px-0",
-        isSelected ? "text-primary" : "text-gray-900",
+        disabled ? "text-gray-600 cursor-not-allowed opacity-50" : isSelected ? "text-primary" : "text-gray-900",
         isClickable && "hover:text-gray-1100",
         hoverAnimating && "hover-animating",
         isCollapsed && "md:justify-center"

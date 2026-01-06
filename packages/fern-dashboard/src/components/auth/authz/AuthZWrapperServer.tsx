@@ -1,0 +1,172 @@
+import {
+    type AuthZPermission,
+    getPermissionsFromSession,
+    hasPermission,
+    hasResourcePermission,
+    type ResourceType
+} from "@fern-api/user-permissions";
+import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { getOrgIdFromName } from "@/app/services/auth0/management";
+import { Auth0OrgName } from "@/app/services/auth0/types";
+import AccessDeniedContent from "@/components/auth/AccessDeniedContent";
+import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
+import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
+import type { PermissionScope } from ".";
+
+interface AuthZWrapperServerProps {
+    permission: AuthZPermission;
+    children: ReactNode;
+    fallback?: ReactNode;
+
+    /**
+     * If true, calls notFound() when permission is denied instead of rendering fallback.
+     * This is useful because notFound() must be called lazily (not passed as a prop value).
+     */
+    notFoundOnDeny?: boolean;
+
+    /**
+     * If true, shows an "Access Denied" message when permission is denied.
+     * Takes precedence over notFoundOnDeny.
+     */
+    showAccessDenied?: boolean;
+
+    /**
+     * Custom message to show in the access denied content.
+     * Only used when showAccessDenied is true.
+     */
+    accessDeniedMessage?: React.ReactNode;
+
+    /**
+     * Optional resource scope for fine-grained permission checks.
+     * When provided, checks if user has the permission for this specific resource.
+     * If fine-grained permissions are enabled (via feature flag), this will check
+     * Supabase-backed resource permissions.
+     */
+    permissionScope?: PermissionScope;
+
+    /**
+     * Org name for feature flag and Supabase permission checks.
+     * Required when using permissionScope with fine-grained permissions.
+     */
+    orgName?: string;
+}
+
+/**
+ * Server-side wrapper component that only renders children if the user has the given permission.
+ * Uses the session directly instead of a client-side hook.
+ *
+ * Permission checking order:
+ * 1. Org-level permission (from Auth0 session)
+ * 2. If fine-grained permissions enabled: Supabase resource permissions
+ * 3. Fall back to scoped permission strings in session
+ */
+export async function AuthZWrapperServer({
+    permission,
+    children,
+    fallback = null,
+    notFoundOnDeny = false,
+    showAccessDenied = false,
+    accessDeniedMessage,
+    permissionScope,
+    orgName
+}: AuthZWrapperServerProps): Promise<ReactNode> {
+    const session = await getCurrentSession();
+
+    if (!session) {
+        return fallback;
+    }
+
+    const sessionPermissions = session.permissions ?? [];
+    let allowed: boolean;
+    let isEnforcePermissions = false;
+
+    // Check enforce permissions flag for this org
+    if (orgName) {
+        try {
+            isEnforcePermissions =
+                (await isFeatureFlagEnabledForUser(
+                    PosthogFeatureFlag.ENFORCE_PERMISSIONS,
+                    session.user.sub,
+                    Auth0OrgName(orgName)
+                )) ?? false;
+        } catch (error) {
+            console.error("[AuthZWrapperServer] Failed to check enforce permissions flag:", error);
+        }
+    }
+
+    if (permissionScope && orgName) {
+        // Check if fine-grained permissions are enabled
+        let isFineGrainedEnabled = false;
+        try {
+            isFineGrainedEnabled =
+                (await isFeatureFlagEnabledForUser(
+                    PosthogFeatureFlag.ENABLE_FINE_GRAINED_PERMISSIONS,
+                    session.user.sub,
+                    Auth0OrgName(orgName)
+                )) ?? false;
+        } catch (error) {
+            console.error("[AuthZWrapperServer] Failed to check fine-grained permissions flag:", error);
+        }
+
+        // Use centralized permission check from commons package
+        try {
+            const orgId = await getOrgIdFromName(Auth0OrgName(orgName));
+            allowed = await hasResourcePermission({
+                sessionPermissions,
+                userId: session.user.sub,
+                orgId,
+                permissionToCheck: permission,
+                resourceType: permissionScope.type as ResourceType,
+                resourceId: permissionScope.id,
+                forceFineGrained: isFineGrainedEnabled
+            });
+
+            console.debug("[AuthZWrapperServer] Permission check:", {
+                permission,
+                resourceType: permissionScope.type,
+                resourceId: permissionScope.id,
+                isFineGrainedEnabled,
+                isEnforcePermissions,
+                allowed
+            });
+        } catch (error) {
+            console.error("[AuthZWrapperServer] Failed to check permissions:", error);
+            allowed = false;
+        }
+    } else {
+        // Org-level permission check only
+        const orgPermissions = getPermissionsFromSession({ sessionPermissions });
+        allowed = hasPermission(orgPermissions, permission);
+    }
+
+    console.debug("[AuthZWrapperServer] Final result:", {
+        permission,
+        allowed,
+        isEnforcePermissions,
+        orgName,
+        permissionScope
+    });
+
+    // If enforcement is disabled, always allow access (logging only)
+    if (!isEnforcePermissions) {
+        return children;
+    }
+
+    if (allowed) {
+        return children;
+    }
+
+    // showAccessDenied takes precedence over notFoundOnDeny
+    if (showAccessDenied) {
+        return <AccessDeniedContent message={accessDeniedMessage} />;
+    }
+
+    // Call notFound() lazily here instead of accepting it as a prop value
+    if (notFoundOnDeny) {
+        notFound();
+    }
+
+    return fallback;
+}

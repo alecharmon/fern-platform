@@ -2,12 +2,13 @@ import "server-only";
 
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { getDocsGitUrl } from "@/app/services/dal/github/getDocsGitUrl";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
+import { docsPermissionScope } from "@/components/auth/authz";
+import { AuthZWrapperServer } from "@/components/auth/authz/AuthZWrapperServer";
 import { DocsPageTracker } from "@/components/docs-page/DocsPageTracker";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
 import { TransferRepoOwnershipBanner } from "@/components/docs-page/TransferRepoOwnershipBanner";
@@ -54,10 +55,16 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
 
     return (
         <div className="flex w-full flex-col gap-4">
-            <TransferRepoOwnershipBanner docsUrl={docsUrl} sourceRepoOwner={sourceRepoOwner} />
             <DocsPageTracker orgName={orgName} docsUrl={docsUrl} userEmail={session.user.email ?? ""} />
-            <FinishDocsSetupBanner docsUrl={docsUrl} orgName={orgName} gitUrl={gitUrl} />
-            <CriticalUpdateWarning orgName={orgName} docsUrl={docsUrl} gitUrl={gitUrl} />
+            <AuthZWrapperServer
+                permission="manage-settings"
+                permissionScope={docsPermissionScope(docsUrl)}
+                orgName={orgName}
+            >
+                <TransferRepoOwnershipBanner docsUrl={docsUrl} sourceRepoOwner={sourceRepoOwner} />
+                <FinishDocsSetupBanner docsUrl={docsUrl} orgName={orgName} gitUrl={gitUrl} />
+                <CriticalUpdateWarning orgName={orgName} docsUrl={docsUrl} gitUrl={gitUrl} />
+            </AuthZWrapperServer>
             <DocsSiteOverviewCard docsUrl={docsUrl} docsSite={currentDocsSite} orgName={orgName} />
             <Suspense fallback={<VisualEditorLoadingCard />}>
                 <VisualEditorSection docsUrl={docsUrl} session={session} orgName={orgName} />

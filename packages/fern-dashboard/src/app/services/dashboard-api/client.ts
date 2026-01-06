@@ -1,19 +1,28 @@
+import type { getAuthZPermissions } from "@/app/api/authz/[orgName]/permissions/route";
 import type { generatePrDescription } from "@/app/api/generate-pr-description/route";
 import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
+import type { getDocsSites } from "@/app/api/get-docs-sites/route";
 import type { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
 import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
 import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
 import type { getOrgMembers } from "@/app/api/get-org-members/route";
+import type { getUserResourceRoles } from "@/app/api/get-user-resource-roles/route";
 import type { validateGithubBranch } from "@/app/api/get-validate-github-branch/route";
 import type { postDocsGithubSource } from "@/app/api/post-docs-github-source/route";
 import type { postCreatePr } from "@/app/api/post-git-create-pr/route";
 import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
 import type { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
 import type { updatePrTitle } from "@/app/api/update-pr-title/route";
+import type { updateUserRoles } from "@/app/api/update-user-roles/route";
 import type { ValidateGithubRepoAccess } from "@/app/api/validate-github-repo-access/route";
 import type { ValidateGitlabRepoAccess } from "@/app/api/validate-gitlab-repo-access/route";
 
 export const DashboardApiClient = {
+    getAuthZPermissions: (orgName: string) =>
+        typedFetch<getAuthZPermissions.Response>(`/api/authz/${encodeURIComponent(orgName)}/permissions`),
+    getDocsSites: (request: getDocsSites.Request) => typedFetch<getDocsSites.Response>("/api/get-docs-sites", request),
+    getUserResourceRoles: (request: getUserResourceRoles.Request) =>
+        typedFetch<getUserResourceRoles.Response>("/api/get-user-resource-roles", request),
     getMyOrganizations: () => typedFetch<getMyOrganizations.Response>("/api/get-my-organizations"),
     getOrgInvitations: (request: getOrgInvitations.Request) =>
         typedFetch<getOrgInvitations.Response>("/api/get-org-invitations", request),
@@ -40,7 +49,9 @@ export const DashboardApiClient = {
     generateSignedUploadUrl: (request: generateSignedUploadUrl.Request) =>
         typedFetch<generateSignedUploadUrl.Response>("/api/signed-image-url/generate", request),
     getSignedImageUrl: (request: getSignedImageUrl.Request) =>
-        typedFetch<getSignedImageUrl.Response>("/api/signed-image-url/get", request)
+        typedFetch<getSignedImageUrl.Response>("/api/signed-image-url/get", request),
+    updateUserRoles: (request: updateUserRoles.Request) =>
+        typedFetch<updateUserRoles.Response>("/api/update-user-roles", request)
 };
 
 export class ApiError extends Error {

@@ -10,11 +10,13 @@ import { ReactQueryKey } from "./queryKeys";
 
 export function useOrgMembers() {
     const orgName = useOrgNameFromPathname();
+    const query = useQuery({
+        queryKey: ReactQueryKey.orgMembers(orgName),
+        queryFn: () => DashboardApiClient.getOrgMembers({ orgName })
+    });
 
-    return convertQueryResultToLoadable(
-        useQuery({
-            queryKey: ReactQueryKey.orgMembers(orgName),
-            queryFn: () => DashboardApiClient.getOrgMembers({ orgName })
-        })
-    );
+    return {
+        members: convertQueryResultToLoadable(query),
+        refetch: query.refetch
+    };
 }

@@ -16,10 +16,11 @@ export declare namespace MembersPage {
     export interface Props {
         session: Auth0SessionData;
         isFernAdmin: boolean;
+        isFineGrainedPermissionsEnabled?: boolean;
     }
 }
 
-export function MembersPage({ session, isFernAdmin }: MembersPage.Props) {
+export function MembersPage({ session, isFernAdmin, isFineGrainedPermissionsEnabled = false }: MembersPage.Props) {
     const org = useCurrentOrganization();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -36,7 +37,7 @@ export function MembersPage({ session, isFernAdmin }: MembersPage.Props) {
     }, [emailToInvite, router, searchParams]);
 
     const invitations = useOrgInvitations();
-    const members = useOrgMembers();
+    const { members } = useOrgMembers();
 
     return (
         <div className="flex min-w-0 flex-1 flex-col">
@@ -54,7 +55,12 @@ export function MembersPage({ session, isFernAdmin }: MembersPage.Props) {
                     </div>
                 }
             />
-            <MembersTable members={members} invitations={invitations} userId={session.user.sub} />
+            <MembersTable
+                members={members}
+                invitations={invitations}
+                userId={session.user.sub}
+                isFineGrainedPermissionsEnabled={isFineGrainedPermissionsEnabled}
+            />
         </div>
     );
 }

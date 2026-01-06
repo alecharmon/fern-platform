@@ -5,6 +5,8 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
+import { docsPermissionScope } from "@/components/auth/authz";
+import { AuthZWrapperServer } from "@/components/auth/authz/AuthZWrapperServer";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
@@ -58,12 +60,20 @@ export default async function DocsLayout({
     }
     console.debug(`[DocsLayout] Successfully validated access to ${docsUrl} for org ${orgName}`);
     return (
-        <div className="flex min-w-0 flex-1 flex-col gap-3">
-            {header}
-            <div className="flex flex-col gap-4">
-                {navbar}
-                <div className="flex">{children}</div>
+        <AuthZWrapperServer
+            permission="view"
+            permissionScope={docsPermissionScope(docsUrl)}
+            orgName={orgName}
+            showAccessDenied
+            accessDeniedMessage={`You don't have permission to view this documentation site.`}
+        >
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
+                {header}
+                <div className="flex flex-col gap-4">
+                    {navbar}
+                    <div className="flex">{children}</div>
+                </div>
             </div>
-        </div>
+        </AuthZWrapperServer>
     );
 }

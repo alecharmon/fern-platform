@@ -11,6 +11,7 @@ import { SearchableDropdown, type SearchableDropdownRef } from "@/components/ui/
 import { WrapWithKeyboardShortcut } from "@/components/ui/WrapWithKeyboardShortcut";
 import { useOrganizations } from "@/state/useOrganizations";
 import { getOrgDisplayName } from "@/utils/getOrgDisplayName";
+import orgRedirect from "@/utils/orgRedirect";
 import { addRecentOrg, getRecentOrgs } from "@/utils/recentOrgs";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
@@ -120,20 +121,6 @@ const OrgSwitcherClientInternal = forwardRef<
         return `/${newOrgName}${getRedirectPathname(pathname)}`;
     };
 
-    const buildOrgLoginUrl = (organization: OrgDropdownItem) => {
-        const searchParams = new URLSearchParams({
-            redirect_on_login: getRedirectPathForOrg(organization.name),
-            organization: organization.id,
-            scope: "openid profile email read:docs write:docs"
-        });
-
-        if (process.env.NEXT_PUBLIC_VENUS_AUDIENCE) {
-            searchParams.set("audience", process.env.NEXT_PUBLIC_VENUS_AUDIENCE);
-        }
-
-        return `/auth/login?${searchParams.toString()}`;
-    };
-
     const onSelectOrg = (organization: OrgDropdownItem) => {
         if (organization.name !== orgName) {
             setLocalOrgName(organization.name);
@@ -147,7 +134,7 @@ const OrgSwitcherClientInternal = forwardRef<
             return;
         }
 
-        router.push(buildOrgLoginUrl(organization));
+        router.push(orgRedirect(organization));
     };
 
     const currentOrg = organizations.find((org) => org.name === localOrgName);

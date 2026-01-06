@@ -1,12 +1,14 @@
+import { addRoles, getRoles } from "@fern-api/user-permissions";
 import { getEmailLoginConfig } from "@fern-docs/edge-config";
 import { redirect } from "next/navigation";
 import z from "zod";
-
 import getMyOrganizations from "@/app/api/get-my-organizations/handler";
+import { getAuth0Client } from "@/app/services/auth0/auth0";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { addUserToOrgById } from "@/app/services/auth0/management";
-import { Auth0OrgID, Auth0UserID } from "@/app/services/auth0/types";
+import { Auth0OrgID, Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
+import orgRedirect from "@/utils/orgRedirect";
 
 const QuerySchema = z.object({
     connection: z.string(),
@@ -96,6 +98,42 @@ export default async function PostSsoRedirectPage({
             orgId,
             userId
         });
+    }
+
+    const currentRoles = await getRoles({ userId: userId, orgId: orgId });
+    if (currentRoles.ok!) {
+        console.error("Failed to check sso roles", {
+            orgId,
+            userId
+        });
+    }
+
+    if (currentRoles.data.length === 0) {
+        // Add default roles
+        const addRoleResult = await addRoles({
+            userId: userId,
+            orgId: orgId,
+            // for now these are admin roles but will be downgraded
+            // to viewer at some point
+            roleNames: ["admin", "cli"]
+        });
+
+        if (addRoleResult.ok === false) {
+            // Attempt to continue anyways
+            console.error("Failed to add roles to user", {
+                orgId,
+                userId
+            });
+        }
+        const auth0 = await getAuth0Client();
+        await auth0.getAccessToken({ refresh: true });
+
+        redirect(
+            orgRedirect({
+                name: Auth0OrgName(orgMapping.org_name),
+                id: Auth0OrgID(orgMapping.org_id)
+            })
+        );
     }
 
     redirect(destination);

@@ -102,22 +102,30 @@ function SelectLabel({ className, ...props }: React.ComponentProps<typeof Select
     );
 }
 
-function SelectItem({ className, children, ...props }: React.ComponentProps<typeof SelectPrimitive.Item>) {
+function SelectItem({
+    className,
+    children,
+    description,
+    ...props
+}: React.ComponentProps<typeof SelectPrimitive.Item> & { description?: React.ReactNode }) {
     return (
         <SelectPrimitive.Item
             data-slot="select-item"
             className={cn(
-                "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground outline-hidden *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm py-1.5 pl-2 pr-8 text-sm data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground outline-hidden *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 relative flex w-full cursor-pointer select-none items-start gap-2 rounded-sm py-1.5 pl-2 pr-8 text-sm data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
                 className
             )}
             {...props}
         >
-            <span className="absolute right-2 flex size-3.5 items-center justify-center">
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 flex size-3.5 items-center justify-center">
                 <SelectPrimitive.ItemIndicator>
                     <CheckIcon className="size-4" />
                 </SelectPrimitive.ItemIndicator>
             </span>
-            <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+            <div className="flex flex-col gap-0.5">
+                <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+                {description ? <span className="text-muted-foreground text-xs leading-snug">{description}</span> : null}
+            </div>
         </SelectPrimitive.Item>
     );
 }

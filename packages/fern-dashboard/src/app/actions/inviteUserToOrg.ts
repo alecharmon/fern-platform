@@ -1,6 +1,7 @@
 "use server";
 
 import { postToSlack } from "@fern-api/docs-server/slack";
+import { getRoleMapping, type Roles } from "@fern-api/user-permissions";
 
 import * as auth0Management from "@/app/services/auth0/management";
 
@@ -10,16 +11,29 @@ import { getAuth0ManagementClient } from "../services/auth0/management";
 import type { Auth0OrgName } from "../services/auth0/types";
 import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 
-export async function inviteUserToOrg({ inviteeEmail, orgName }: { inviteeEmail: string; orgName: Auth0OrgName }) {
+export async function inviteUserToOrg({
+    inviteeEmail,
+    orgName,
+    roles = ["viewer"]
+}: {
+    inviteeEmail: string;
+    orgName: Auth0OrgName;
+    roles?: Roles[];
+}) {
     const auth0 = getAuth0ManagementClient();
     const session = await getCurrentSessionOrThrow();
     await assertUserHasOrganizationAccess(session.accessToken, orgName);
+
+    // Convert role names to Auth0 role IDs
+    const roleMap = getRoleMapping();
+    const roleIds = roles.map((role) => roleMap[role]);
 
     const invitation = await auth0.organizations.createInvitation(
         { id: await auth0Management.getOrgIdFromName(orgName) },
         {
             inviter: { name: session.user.name ?? "" },
             invitee: { email: inviteeEmail },
+            roles: roleIds,
             client_id: getAuth0ClientId(),
             send_invitation_email: true
         }
@@ -31,7 +45,7 @@ export async function inviteUserToOrg({ inviteeEmail, orgName }: { inviteeEmail:
 
     postToSlack(
         "#dashboard-notifs",
-        `*[${orgName}]* *<mailto:${inviteeEmail}|${inviteeEmail}>* was invited to organization by ${actorName}`,
+        `*[${orgName}]* *<mailto:${inviteeEmail}|${inviteeEmail}>* was invited to organization with roles [${roles.join(", ")}] by ${actorName}`,
         "org-member-change"
     );
 

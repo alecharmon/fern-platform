@@ -16,10 +16,16 @@ export declare namespace MembersTable {
         userId: Auth0UserID;
         members: Loadable<GetMembers200ResponseOneOfInner[]>;
         invitations: Loadable<OrgInvitation[]>;
+        isFineGrainedPermissionsEnabled?: boolean;
     }
 }
 
-export function MembersTable({ userId, members, invitations }: MembersTable.Props) {
+export function MembersTable({
+    userId,
+    members,
+    invitations,
+    isFineGrainedPermissionsEnabled = false
+}: MembersTable.Props) {
     const loadedInvitations = getLoadableValue(invitations);
     const loadedMembers = getLoadableValue(members);
 
@@ -37,7 +43,14 @@ export function MembersTable({ userId, members, invitations }: MembersTable.Prop
             ...loadedInvitations.map((invitation) => (
                 <InviteeRow key={invitation.id ?? invitation.inviteeEmail} invitation={invitation} />
             )),
-            ...loadedMembers.map((member) => <MemberRow key={member.user_id} member={member} currentUserId={userId} />)
+            ...loadedMembers.map((member) => (
+                <MemberRow
+                    key={member.user_id}
+                    member={member}
+                    currentUserId={userId}
+                    isFineGrainedPermissionsEnabled={isFineGrainedPermissionsEnabled}
+                />
+            ))
         ];
     };
 

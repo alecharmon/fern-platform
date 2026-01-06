@@ -1,6 +1,7 @@
 "use server";
 
 import { postToSlack } from "@fern-api/docs-server/slack";
+import { addRoles, type Roles } from "@fern-api/user-permissions";
 
 import * as auth0Management from "@/app/services/auth0/management";
 
@@ -14,10 +15,12 @@ export type AddUserDirectlyResult =
 
 export async function addUserDirectlyToOrg({
     email,
-    orgName
+    orgName,
+    roles = ["viewer"]
 }: {
     email: string;
     orgName: Auth0OrgName;
+    roles?: Roles[];
 }): Promise<AddUserDirectlyResult> {
     const session = await getCurrentSessionOrThrow();
 
@@ -56,11 +59,15 @@ export async function addUserDirectlyToOrg({
 
     await auth0Management.addUserToOrg(userId, orgName);
 
+    // Assign roles to the user
+    const orgId = await auth0Management.getOrgIdFromName(orgName);
+    await addRoles({ userId, orgId, roleNames: roles });
+
     const actorName = session.user.name ?? session.user.email ?? session.user.sub;
 
     postToSlack(
         "#dashboard-notifs",
-        `*[${orgName}]* *<mailto:${email}|${email}>* was added to organization by ${actorName} (direct add)`,
+        `*[${orgName}]* *<mailto:${email}|${email}>* was added to organization with roles [${roles.join(", ")}] by ${actorName} (direct add)`,
         "org-member-change"
     );
 

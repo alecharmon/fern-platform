@@ -14,13 +14,15 @@ export async function POST(req: NextRequest) {
     if (maybeSessionData.errorResponse != null) {
         return maybeSessionData.errorResponse;
     }
-    const { token } = maybeSessionData.data;
-
+    const { token, userId } = maybeSessionData.data;
     try {
         const body = await req.json();
-        const result = await handler(token, body);
+        console.log("BODY Create organization input:", body);
+        const result = await handler(token, userId, body);
+        console.log("Create organization result:", result);
         return NextResponse.json(result);
     } catch (error) {
-        return NextResponse.json({ error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
+        console.error("Error creating organization:", error);
+        return NextResponse.json({ error: "Failed to create organization" }, { status: 500 });
     }
 }

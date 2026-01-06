@@ -19,6 +19,7 @@ import { CopyableText } from "../ui/CopyableText";
 import { DialogBody, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { RoleSelectionGroup, type UserRole } from "./RoleSelection";
 
 export declare namespace InviteUserDialogContent {
     export interface Props {
@@ -47,12 +48,22 @@ export function InviteUserDialogContent({
     const [inviteLink, setInviteLink] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<"link" | "email">(initialTab ?? "link");
     const [isClosing, setIsClosing] = useState(false);
+    const [selectedRole, setSelectedRole] = useState<UserRole>("viewer");
+    const [cliEnabled, setCliEnabled] = useState(false);
 
     const isValidEmail = useMemo(() => EMAIL_REGEX.test(email), [email]);
 
     const queryClient = useQueryClient();
+    const getRoles = () => {
+        const roles: ("admin" | "editor" | "viewer" | "cli")[] = [selectedRole];
+        if (cliEnabled) {
+            roles.push("cli");
+        }
+        return roles;
+    };
+
     const inviteUser = useMutation({
-        mutationFn: () => inviteUserToOrg({ orgName, inviteeEmail: email }),
+        mutationFn: () => inviteUserToOrg({ orgName, inviteeEmail: email, roles: getRoles() }),
         onMutate: async () => {
             await queryClient.cancelQueries({ queryKey });
 
@@ -101,7 +112,7 @@ export function InviteUserDialogContent({
     });
 
     const addUserDirectly = useMutation<AddUserDirectlyResult>({
-        mutationFn: () => addUserDirectlyToOrg({ email, orgName }),
+        mutationFn: () => addUserDirectlyToOrg({ email, orgName, roles: getRoles() }),
         onSuccess: async (result) => {
             if (!result.ok) {
                 toast.error(result.message);
@@ -170,23 +181,33 @@ export function InviteUserDialogContent({
                         </div>
                     </TabsContent>
                     <TabsContent value="email">
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <p className="text-muted-foreground text-sm">
                                 Send a user an email to invite them to your organization.
                             </p>
-                            <div className="text-gray-1100 mb-2 text-sm">Email</div>
-                            <Input
-                                autoFocus={true}
-                                placeholder="marty_mcfly@buildwithfern.com"
+                            <div>
+                                <div className="text-gray-1100 mb-2 text-sm">Email</div>
+                                <Input
+                                    autoFocus={true}
+                                    placeholder="marty_mcfly@buildwithfern.com"
+                                    disabled={isInviting || isAddingDirectly}
+                                    value={email}
+                                    onChange={(e) => {
+                                        setEmail(e.currentTarget.value.trim());
+                                    }}
+                                />
+                                <p className="text-muted-foreground mt-2 text-xs">
+                                    The invited user&apos;s account email must match the invitation email address.
+                                </p>
+                            </div>
+                            <RoleSelectionGroup
+                                role={selectedRole}
+                                onRoleChange={setSelectedRole}
+                                cliEnabled={cliEnabled}
+                                onCliEnabledChange={setCliEnabled}
                                 disabled={isInviting || isAddingDirectly}
-                                value={email}
-                                onChange={(e) => {
-                                    setEmail(e.currentTarget.value.trim());
-                                }}
+                                id="invite-user"
                             />
-                            <p className="text-muted-foreground mt-2 text-xs">
-                                The invited user&apos;s account email must match the invitation email address.
-                            </p>
                         </div>
                     </TabsContent>
                 </Tabs>

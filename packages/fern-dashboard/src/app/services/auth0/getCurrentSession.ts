@@ -1,27 +1,39 @@
 import jwt from "jsonwebtoken";
 import { cache } from "react";
 import { getAuth0Client } from "@/app/services/auth0/auth0";
+
 import { type Auth0User, Auth0UserID } from "./types";
 
 export interface Auth0SessionData {
     user: Auth0User;
     accessToken: string;
+    permissions?: string[];
 }
 
 export const getCurrentSession = cache(async (): Promise<Auth0SessionData | undefined> => {
     const auth0 = await getAuth0Client();
     const session = await auth0.getSession();
+
     if (session == null) {
         console.debug("[getCurrentSession] No active session found");
         return undefined;
     }
+
+    console.debug("[getCurrentSession] Decoded accessToken:", jwt.decode(session.tokenSet.accessToken));
+    console.debug(
+        "[getCurrentSession] permissions from accessToken:",
+        (jwt.decode(session.tokenSet.accessToken) as any)?.permissions
+    );
     console.debug(`[getCurrentSession] Active session found for user: ${session.user.sub}`);
     return {
         user: {
             ...session.user,
             sub: Auth0UserID(session.user.sub)
         },
-        accessToken: session.tokenSet.accessToken
+        accessToken: session.tokenSet.accessToken,
+        permissions: session.tokenSet.accessToken
+            ? ((jwt.decode(session.tokenSet.accessToken) as any)?.permissions ?? [])
+            : []
     };
 });
 
@@ -35,6 +47,7 @@ export async function getCurrentSessionOrThrow(): Promise<Auth0SessionData> {
 
 export function decodeAccessToken(token: string) {
     const jwtPayload = jwt.decode(token);
+    console.error("Decoded JWT payload:", jwtPayload);
     if (jwtPayload == null) {
         throw new Error("accessToken JWT payload is not defined");
     }

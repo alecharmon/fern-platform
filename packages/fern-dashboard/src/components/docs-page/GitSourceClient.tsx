@@ -11,7 +11,8 @@ import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
 import type { GitSourceRepo } from "@/app/services/github/types";
 import { ReactQueryKey } from "@/state/queryKeys";
 import type { DocsUrl } from "@/utils/types";
-
+import { docsPermissionScope } from "../auth/authz";
+import { AuthZWrapper } from "../auth/authz/AuthZWrapper";
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
@@ -70,32 +71,37 @@ export function GitSourceClient({
                                 >
                                     {getRepoDisplayNameFromUrl(resolvedGitUrl)}
                                 </a>
-                                <div className="shrink-0">
-                                    <SetGitSourcePopover
-                                        docsUrl={docsUrl}
-                                        setIsSaving={setIsSaving}
-                                        initialUrl={resolvedGitUrl}
-                                    >
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            disabled={isSaving}
-                                            className="h-6 px-2 text-xs"
+                                <AuthZWrapper
+                                    permission="manage-settings"
+                                    permissionScope={docsPermissionScope(docsUrl)}
+                                >
+                                    <div className="shrink-0">
+                                        <SetGitSourcePopover
+                                            docsUrl={docsUrl}
+                                            setIsSaving={setIsSaving}
+                                            initialUrl={resolvedGitUrl}
                                         >
-                                            {isSaving ? (
-                                                <>
-                                                    <Loader2 className="mr-1 size-3 animate-spin" />
-                                                    Saving...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Pencil className="mr-1 size-3" />
-                                                    Edit
-                                                </>
-                                            )}
-                                        </Button>
-                                    </SetGitSourcePopover>
-                                </div>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                disabled={isSaving}
+                                                className="h-6 px-2 text-xs"
+                                            >
+                                                {isSaving ? (
+                                                    <>
+                                                        <Loader2 className="mr-1 size-3 animate-spin" />
+                                                        Saving...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Pencil className="mr-1 size-3" />
+                                                        Edit
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </SetGitSourcePopover>
+                                    </div>
+                                </AuthZWrapper>
                             </>
                         ) : (
                             <ConnectGithubRepoButton

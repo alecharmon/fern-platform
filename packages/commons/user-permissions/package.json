@@ -1,0 +1,42 @@
+{
+  "name": "@fern-api/user-permissions",
+  "version": "0.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fern-api/fern-platform.git",
+    "directory": "packages/commons/user-permissions"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "clean": "rm -rf ./lib ./dist && tsc --build --clean",
+    "compile": "tsc --build",
+    "depcheck": "depcheck",
+    "dev": "tsc --watch",
+    "format": "prettier --write --ignore-unknown \"**\"",
+    "format:check": "prettier --check --ignore-unknown \"**\"",
+    "lint:eslint": "eslint --max-warnings 0 .",
+    "lint:eslint:fix": "pnpm lint:eslint --fix",
+    "test": "vitest --run --passWithNoTests --globals"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.87.2",
+    "auth0": "^4.0.0",
+    "neverthrow": "^8.2.0"
+  },
+  "devDependencies": {
+    "@fern-platform/configs": "workspace:*",
+    "@types/node": "catalog:",
+    "depcheck": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -37,6 +37,7 @@
     "@aws-sdk/client-s3": "^3.744.0",
     "@aws-sdk/s3-request-presigner": "^3.744.0",
     "@bprogress/next": "^3.2.11",
+    "@fern-api/user-permissions": "workspace:*",
     "@fern-api/docs-auth": "workspace:*",
     "@fern-api/docs-loader": "workspace:*",
     "@fern-api/docs-server": "workspace:*",

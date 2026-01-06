@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-
 import { buildErrorPageSearchParams } from "./app/error/searchParams";
 import { getAuth0Client } from "./app/services/auth0/auth0";
+import { checkRoutePermissions } from "./route-permissions";
 
 export async function middleware(req: NextRequest) {
     if (req.nextUrl.pathname.startsWith("/ingest")) {
@@ -20,6 +20,14 @@ export async function middleware(req: NextRequest) {
             );
         }
         return await applyAuth0Middleware(req);
+    }
+
+    if (!req.nextUrl.pathname.startsWith("/login/")) {
+        // Check permission-based access for protected routes
+        const permissionCheck = await checkRoutePermissions(req);
+        if (permissionCheck) {
+            return permissionCheck;
+        }
     }
 
     return NextResponse.next();

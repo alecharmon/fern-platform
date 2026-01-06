@@ -11,7 +11,8 @@ import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import preloadEditorData from "@/app/services/docs-loader/preloadEditorData";
 import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
-import { Button } from "../ui/button";
+import { docsPermissionScope } from "../auth/authz";
+import { AuthZButton } from "../auth/authz/AuthZButton";
 
 export function GoToEditorButton({
     docsUrl,
@@ -71,7 +72,12 @@ export function GoToEditorButton({
                     className="bg-gray-1200 rounded-md text-white"
                 >
                     <span className="pointer-events-auto">
-                        <Button disabled={isLoading || disabled || isValidatingSource} asChild={!disabled}>
+                        <AuthZButton
+                            permission="edit"
+                            disabled={isLoading || disabled || isValidatingSource}
+                            loading={isLoading}
+                            permissionScope={docsPermissionScope(docsUrl)}
+                        >
                             <Link
                                 className="flex flex-row items-center gap-1"
                                 href={editorSlug}
@@ -87,7 +93,7 @@ export function GoToEditorButton({
                                     </>
                                 )}
                             </Link>
-                        </Button>
+                        </AuthZButton>
                     </span>
                 </FernTooltip>
             </FernTooltipProvider>

@@ -1,35 +1,45 @@
 "use client";
 
+import type { Roles } from "@fern-api/user-permissions";
+import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import UserMinusIcon from "@heroicons/react/24/outline/UserMinusIcon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { GetMembers200ResponseOneOfInner } from "auth0";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
-
 import { removeUserFromOrg } from "@/app/actions/removeUserFromOrg";
 import { Auth0UserID } from "@/app/services/auth0/types";
 import { type inferQueryData, ReactQueryKey } from "@/state/queryKeys";
 import { useOrganizations } from "@/state/useOrganizations";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
-
-import { DropdownMenuItem } from "../ui/dropdown-menu";
+import { DropdownMenuItem, DropdownMenuSeparator } from "../ui/dropdown-menu";
+import { EditPermissionsDialog } from "./EditPermissionsDialog";
 import { MemberOrInviteeRow } from "./MemberOrInviteeRow";
 
 export declare namespace MemberRow {
     export interface Props {
         member: GetMembers200ResponseOneOfInner;
         currentUserId: Auth0UserID;
+        isFineGrainedPermissionsEnabled?: boolean;
     }
 }
 
-export function MemberRow({ member, currentUserId }: MemberRow.Props) {
+const VALID_ROLES: Roles[] = ["admin", "editor", "viewer", "cli"];
+
+export function MemberRow({ member, currentUserId, isFineGrainedPermissionsEnabled = false }: MemberRow.Props) {
     const orgName = useOrgNameFromPathname();
     const queryKey = ReactQueryKey.orgMembers(orgName);
     const router = useRouter();
     const organizations = useOrganizations();
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
     const queryClient = useQueryClient();
     const isCurrentUser = currentUserId === member.user_id;
+
+    const memberRoles = member.roles
+        .map((role) => role.name)
+        .filter((role): role is Roles => VALID_ROLES.includes(role as Roles));
 
     const removeMember = useMutation({
         mutationFn: () =>
@@ -80,20 +90,44 @@ export function MemberRow({ member, currentUserId }: MemberRow.Props) {
     });
 
     return (
-        <MemberOrInviteeRow
-            title={member.name}
-            subtitle={member.email}
-            pictureUrl={member.picture}
-            dropdownMenuItems={
-                <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => {
-                        removeMember.mutate();
-                    }}
-                >
-                    <UserMinusIcon /> {isCurrentUser ? "Leave organization" : "Remove member"}
-                </DropdownMenuItem>
-            }
-        />
+        <>
+            <MemberOrInviteeRow
+                title={member.name}
+                subtitle={member.email}
+                roles={memberRoles}
+                pictureUrl={member.picture}
+                dropdownMenuItems={
+                    <>
+                        {!isCurrentUser && (
+                            <>
+                                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                                    <PencilIcon /> Edit permissions
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                            </>
+                        )}
+                        <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => {
+                                removeMember.mutate();
+                            }}
+                        >
+                            <UserMinusIcon /> {isCurrentUser ? "Leave organization" : "Remove member"}
+                        </DropdownMenuItem>
+                    </>
+                }
+            />
+            {!isCurrentUser && (
+                <EditPermissionsDialog
+                    open={isEditDialogOpen}
+                    onOpenChange={setIsEditDialogOpen}
+                    orgName={orgName}
+                    userId={Auth0UserID(member.user_id)}
+                    userName={member.name}
+                    currentRoles={memberRoles}
+                    isFineGrainedPermissionsEnabled={isFineGrainedPermissionsEnabled}
+                />
+            )}
+        </>
     );
 }

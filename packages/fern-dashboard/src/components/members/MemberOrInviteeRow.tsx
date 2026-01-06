@@ -1,6 +1,9 @@
+import type { Roles } from "@fern-api/user-permissions";
 import EllipsisHorizontalIcon from "@heroicons/react/24/outline/EllipsisHorizontalIcon";
 import Image from "next/image";
 import type React from "react";
+
+import { cn } from "@/utils/utils";
 
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
@@ -13,7 +16,45 @@ export declare namespace MemberOrInviteeRow {
         rightContent?: React.JSX.Element;
         dropdownMenuItems?: React.JSX.Element;
         forceShowDropownMenuTrigger?: boolean;
+        roles?: Roles[];
     }
+}
+
+const ROLE_CONFIG: Record<Roles, { label: string; className: string }> = {
+    admin: {
+        label: "Admin",
+        className: "bg-purple-200 text-purple-900 border-purple-400"
+    },
+    editor: {
+        label: "Editor",
+        className: "bg-blue-200 text-blue-900 border-blue-400"
+    },
+    viewer: {
+        label: "Viewer",
+        className: "bg-gray-200 text-gray-900 border-gray-400"
+    },
+    cli: {
+        label: "CLI",
+        className: "bg-amber-100 text-amber-800 border-amber-400 font-mono"
+    },
+    fine_grain: {
+        label: "Fine-grained",
+        className: "bg-green-100 text-green-800 border-green-400"
+    }
+};
+
+function RoleBadge({ role }: { role: Roles }) {
+    const config = ROLE_CONFIG[role];
+    return (
+        <span
+            className={cn(
+                "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium",
+                config.className
+            )}
+        >
+            {config.label}
+        </span>
+    );
 }
 
 export function MemberOrInviteeRow({
@@ -22,9 +63,21 @@ export function MemberOrInviteeRow({
     pictureUrl,
     rightContent,
     dropdownMenuItems,
-    forceShowDropownMenuTrigger = false
+    forceShowDropownMenuTrigger = false,
+    roles
 }: MemberOrInviteeRow.Props) {
     const shouldShowDropdownMenuTrigger = dropdownMenuItems != null || forceShowDropownMenuTrigger;
+
+    // Sort roles so CLI always appears last
+    const sortedRoles = roles?.slice().sort((a, b) => {
+        if (a === "cli") {
+            return 1;
+        }
+        if (b === "cli") {
+            return -1;
+        }
+        return 0;
+    });
 
     return (
         <div className="border-border flex justify-between border-b p-4 last:border-b-0">
@@ -45,7 +98,16 @@ export function MemberOrInviteeRow({
                     ) : null}
                 </div>
                 <div className="flex min-w-0 flex-col gap-1">
-                    <div className="flex font-bold">{title}</div>
+                    <div className="flex items-center gap-2">
+                        <span className="font-bold">{title}</span>
+                        {sortedRoles && sortedRoles.length > 0 && (
+                            <div className="flex gap-1">
+                                {sortedRoles.map((role) => (
+                                    <RoleBadge key={role} role={role} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     <div className="flex text-gray-900">{subtitle}</div>
                 </div>
             </div>

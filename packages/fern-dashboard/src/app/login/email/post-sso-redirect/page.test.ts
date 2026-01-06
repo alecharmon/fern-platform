@@ -17,7 +17,10 @@ const mocks = vi.hoisted(() => {
         mockGetMyOrganizations: vi.fn(),
         mockGetVenusClient: vi.fn(),
         mockAddUserToOrgById: vi.fn(),
-        mockGetEmailLoginConfig: vi.fn()
+        mockGetEmailLoginConfig: vi.fn(),
+        mockGetAuth0Client: vi.fn(),
+        mockGetRoles: vi.fn(),
+        mockAddRoles: vi.fn()
     };
 });
 
@@ -48,6 +51,15 @@ vi.mock("@fern-docs/edge-config", () => ({
     getEmailLoginConfig: mocks.mockGetEmailLoginConfig
 }));
 
+vi.mock("@/app/services/auth0/auth0", () => ({
+    getAuth0Client: mocks.mockGetAuth0Client
+}));
+
+vi.mock("@fern-api/user-permissions", () => ({
+    getRoles: mocks.mockGetRoles,
+    addRoles: mocks.mockAddRoles
+}));
+
 vi.mock("@/app/services/auth0/types", () => ({
     Auth0OrgID: (id: string) => id,
     Auth0UserID: (id: string) => id
@@ -59,6 +71,11 @@ describe("post-sso-redirect page", () => {
         mocks.mockRedirect.mockImplementation((url: string) => {
             throw new RedirectError(url);
         });
+        mocks.mockGetAuth0Client.mockResolvedValue({
+            getSession: vi.fn().mockResolvedValue(null),
+            getAccessToken: vi.fn(),
+            updateSession: vi.fn()
+        });
         mocks.mockGetEmailLoginConfig.mockResolvedValue({
             supportedPlatforms: [],
             connectionToOrg: {
@@ -69,6 +86,8 @@ describe("post-sso-redirect page", () => {
             },
             byEmailDomain: {}
         });
+        mocks.mockGetRoles.mockResolvedValue({ ok: true, data: ["viewer"] });
+        mocks.mockAddRoles.mockResolvedValue({ ok: true });
     });
 
     it("adds user to org when missing and redirects to provided path", async () => {

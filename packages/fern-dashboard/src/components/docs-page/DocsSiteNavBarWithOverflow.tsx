@@ -1,10 +1,11 @@
 "use client";
 
+import type { AuthZPermission } from "@fern-api/user-permissions";
 import Link from "next/link";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useMemo, useRef } from "react";
-
 import { captureDocsTabViewed } from "@/components/posthog/events";
+import { useAuthZ } from "@/hooks/useAuthZ";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
@@ -12,9 +13,10 @@ import { cn } from "@/utils/utils";
 export interface NavItem {
     title: string;
     href: string;
+    permission?: AuthZPermission;
 }
 
-const DOCS_PATHNAME_REGEX = /^(\/docs\/[^/]+)\/?([^/]*)\/?$/;
+const DOCS_PATHNAME_REGEX = /^(\/docs\/([^/]+))\/?([^/]*)\/?$/;
 
 export function DocsSiteNavBarWithOverflow({
     items,
@@ -30,15 +32,17 @@ export function DocsSiteNavBarWithOverflow({
     const posthog = usePostHog();
     const containerRef = useRef<HTMLDivElement>(null);
     const itemRefs = useRef<(HTMLElement | null)[]>([]);
+    const authZ = useAuthZ(orgName);
 
-    const { pathnameForDocsSite, tabPathname } = useMemo(() => {
+    const { pathnameForDocsSite, docsSiteId, tabPathname } = useMemo(() => {
         const match = DOCS_PATHNAME_REGEX.exec(pathname);
         const pathnameForDocsSite = match?.[1];
-        const tabPathname = match?.[2];
-        if (pathnameForDocsSite == null || tabPathname == null) {
+        const docsSiteId = match?.[2];
+        const tabPathname = match?.[3];
+        if (pathnameForDocsSite == null || docsSiteId == null || tabPathname == null) {
             throw new Error(`Failed to parse tab pathname (pathname=${pathname})`);
         }
-        return { pathnameForDocsSite, tabPathname };
+        return { pathnameForDocsSite, docsSiteId, tabPathname };
     }, [pathname]);
 
     useEffect(() => {
@@ -66,7 +70,22 @@ export function DocsSiteNavBarWithOverflow({
         }
     }, [items, tabPathname, posthog, siteHasGitHubAppInstalled, siteHasConnectedRepo]);
 
+    const hasPermission = (permission: AuthZPermission | undefined): boolean => {
+        if (permission == null) {
+            return true;
+        }
+        if (authZ.type !== "loaded") {
+            return false; // Hide while loading
+        }
+        return authZ.value.hasResource(permission, "docs", docsSiteId);
+    };
+
     const renderNavItem = (item: NavItem, index: number) => {
+        // Hide items that require permission the user doesn't have
+        if (!hasPermission(item.permission)) {
+            return null;
+        }
+
         const isSelected = tabPathname === item.href;
         const isClickable = !isSelected;
 
@@ -97,6 +116,7 @@ export function DocsSiteNavBarWithOverflow({
                 </Link>
             );
         }
+
         return (
             <div
                 key={index}

@@ -104,6 +104,10 @@ export async function invalidateCachesAfterRemovingOrgMember(
     ]);
 }
 
+export async function invalidateCachesAfterUpdatingMemberRoles(orgName: Auth0OrgName): Promise<void> {
+    await ORGANIZATION_MEMBERS_CACHE.invalidate(RedisCacheKey.organizationMembers(orgName));
+}
+
 export async function invalidateCachesAfterCreatingInvitation(orgName: Auth0OrgName): Promise<void> {
     await ORGANIZATION_INVITATIONS_CACHE.invalidate(RedisCacheKey.organizationInvitations(orgName));
 }
