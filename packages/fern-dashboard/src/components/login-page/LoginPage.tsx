@@ -8,9 +8,9 @@ import { EmailLoginForm } from "./EmailLoginForm";
 import { LoginImage } from "./LoginImage";
 import { AdobeLogo } from "./logos/AdobeLogo";
 import { Auth0Logo } from "./logos/Auth0Logo";
-import { BloombergLogo } from "./logos/BloombergLogo";
 import { ElevenLabsLogo } from "./logos/ElevenLabsLogo";
 import { SquareLogo } from "./logos/SquareLogo";
+import { TwilioLogo } from "./logos/TwilioLogo";
 
 export const LoginPage = () => {
     return (
@@ -84,7 +84,7 @@ export const LoginPage = () => {
                         </div>
                         <div className="flex flex-wrap items-center sm:gap-3 md:gap-6 lg:gap-8">
                             <SquareLogo />
-                            <BloombergLogo />
+                            <TwilioLogo />
                             <AdobeLogo />
                             <ElevenLabsLogo />
                             <Auth0Logo />
