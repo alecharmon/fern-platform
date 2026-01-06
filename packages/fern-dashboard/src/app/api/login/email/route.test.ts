@@ -207,6 +207,49 @@ describe("login/email API", () => {
         );
     });
 
+    it("redirects existing users to SSO when email domain is in byEmailDomain", async () => {
+        mockGetEmailLoginConfig.mockResolvedValueOnce({
+            supportedPlatforms: ["samlp", "google-oauth2"],
+            connectionToOrg: {},
+            byEmailDomain: {
+                "example.com": {
+                    org_id: "org_default",
+                    org_name: "example",
+                    connection: "oktahey"
+                }
+            }
+        });
+
+        // User exists with Google identity, but email domain is mapped to SSO
+        mockGetAllUsersByEmail.mockResolvedValue([
+            {
+                user_id: "auth0|google-user",
+                email: "user@example.com",
+                identities: [
+                    {
+                        connection: "google-oauth2",
+                        provider: "google-oauth2"
+                    }
+                ]
+            } as any
+        ]);
+
+        const request = new NextRequest("http://localhost:3000/api/login/email", {
+            method: "POST",
+            body: JSON.stringify({ email: "user@example.com" })
+        });
+
+        const response = await POST(request);
+        const body = (await response.json()) as { redirectUrl: string };
+
+        expect(response.status).toBe(200);
+        // Should redirect to SSO connection from byEmailDomain, not Google
+        expect(body.redirectUrl).toContain("connection=oktahey");
+        expect(body.redirectUrl).not.toContain("connection=google-oauth2");
+        // Should NOT call getAllUsersByEmail since we short-circuit on email domain match
+        expect(mockGetAllUsersByEmail).not.toHaveBeenCalled();
+    });
+
     it("returns 404 when user is not found", async () => {
         mockGetAllUsersByEmail.mockResolvedValue([]);
 

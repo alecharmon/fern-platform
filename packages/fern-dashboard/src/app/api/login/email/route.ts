@@ -139,6 +139,20 @@ export async function POST(request: Request) {
         const { supportedPlatforms, connectionToOrg, byEmailDomain } = await getEmailLoginConfig();
         const cleanedEmail = email.trim().toLowerCase();
 
+        // Check for email domain mapping first - if present, always redirect to SSO
+        const emailDomain = cleanedEmail.split("@")[1];
+        if (emailDomain !== undefined && byEmailDomain[emailDomain] !== undefined) {
+            const orgEntry = byEmailDomain[emailDomain]!;
+            const postSsoRedirect = buildPostSsoNewUserRedirect(
+                orgEntry.connection,
+                orgEntry.org_name,
+                redirect_on_login
+            );
+
+            // Redirect to SSO login with post-SSO redirect to add them to the org if needed
+            return jsonRedirect(orgEntry.connection, email, postSsoRedirect, `/${orgEntry.org_name}`);
+        }
+
         const users = await getAllUsersByEmail(cleanedEmail);
 
         // Alert if multiple accounts exist for the same email
@@ -150,21 +164,8 @@ export async function POST(request: Request) {
         const user = sortedUsers[0];
 
         if (!user) {
-            // No user found - check for default email domain mapping
-            const emailDomain = cleanedEmail.split("@")[1];
-            if (emailDomain === undefined || byEmailDomain[emailDomain] === undefined) {
-                return NextResponse.json({ error: "user_not_found" }, { status: 404 });
-            }
-
-            const orgEntry = byEmailDomain[emailDomain]!;
-            const postSsoRedirect = buildPostSsoNewUserRedirect(
-                orgEntry.connection,
-                orgEntry.org_name,
-                redirect_on_login
-            );
-
-            // Since its the user's first time logging in, we redirect to the SSO login with a post-SO redirect to add them to the org
-            return jsonRedirect(orgEntry.connection, email, postSsoRedirect, `/${orgEntry.org_name}`);
+            // No user found and no email domain mapping
+            return NextResponse.json({ error: "user_not_found" }, { status: 404 });
         }
 
         const providers = new Set<EmailLoginSupportedPlatform>(supportedPlatforms);
