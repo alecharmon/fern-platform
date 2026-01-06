@@ -350,7 +350,7 @@ FERN_SELF_HOSTED=true \
 FERN_TOKEN=dummy \
 OVERRIDE_FDR_ORIGIN=http://localhost:8080 \
 FERN_NO_VERSION_REDIRECTION=true \
-fern generate --docs --log-level debug --no-prompt 2>&1 || {
+fern generate --docs --log-level "${FERN_LOG_LEVEL:-debug}" --no-prompt 2>&1 || {
     log "ERROR: fern generate --docs failed"
     log "This may be due to network issues fetching dependencies."
     log "Ensure your build environment has network access."

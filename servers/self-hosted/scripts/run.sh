@@ -402,8 +402,9 @@ else
 
     # Run fern generate --docs with error handling to prevent container crash on egress failures
     # This allows the container to stay running even if docs generation fails (e.g., due to network restrictions)
+    # FERN_LOG_LEVEL can be set to control verbosity (debug, info, warn, error). Defaults to debug for backwards compatibility.
     set +e
-    FERN_GENERATE_OUTPUT=$(FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level debug --no-prompt 2>&1)
+    FERN_GENERATE_OUTPUT=$(FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL:-debug}" --no-prompt 2>&1)
     FERN_GENERATE_EXIT_CODE=$?
     echo "$FERN_GENERATE_OUTPUT" | add_timestamps
     set -e
