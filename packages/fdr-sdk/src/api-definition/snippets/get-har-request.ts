@@ -26,11 +26,19 @@ export function getHarRequest(
         cookies: [],
         bodySize: -1
     };
-    request.url = buildEndpointUrl({
+    const builtUrl = buildEndpointUrl({
         endpoint,
         // omit query parameters here because they are included in the `queryString` field
         pathParameters: example.pathParameters
     });
+
+    // HTTPSnippet requires a full URL with protocol and host
+    // If the built URL is a relative path, prepend a placeholder base URL
+    request.url =
+        builtUrl.startsWith("http://") || builtUrl.startsWith("https://")
+            ? builtUrl
+            : `https://api.example.com${builtUrl.startsWith("/") ? "" : "/"}${builtUrl}`;
+
     request.method = endpoint.method;
 
     // Preprocess query parameters based on explode metadata
