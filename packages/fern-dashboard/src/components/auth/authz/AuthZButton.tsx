@@ -46,8 +46,9 @@ export function AuthZButton({
 
     const isLoadingPermissions = authz.type === "loading" || authz.type === "notStartedLoading";
     const hasError = authz.type === "failed";
+    const enforcePermissions = authz.type === "loaded" && authz.value.isEnforcePermissions;
 
-    const disabled = disabledProp === true || !isAllowed || isLoadingPermissions || hasError;
+    const disabled = disabledProp === true || (enforcePermissions && !isAllowed) || isLoadingPermissions || hasError;
     const loading = loadingProp || isLoadingPermissions;
 
     const computedTitle = disabled && !isAllowed ? (title ?? missingPermissionTitle) : title;
@@ -60,7 +61,7 @@ export function AuthZButton({
         </Button>
     );
 
-    if (disabled && !isAllowed) {
+    if (enforcePermissions && disabled && !isAllowed) {
         return (
             <DashboardTooltip
                 content={
