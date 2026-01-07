@@ -11,6 +11,7 @@ export function FooterLayout({
     bottomNavigation,
     pathname,
     className,
+    footerLinks,
     hasMultipleLanguages,
     lastUpdated
 }: {
@@ -21,6 +22,7 @@ export function FooterLayout({
     bottomNavigation?: React.ReactNode;
     pathname?: string;
     className?: string;
+    footerLinks?: React.ReactNode;
     hasMultipleLanguages?: boolean;
     lastUpdated?: string;
 }) {
@@ -38,6 +40,7 @@ export function FooterLayout({
                     )}
                 </div>
             }
+            footerLinks={footerLinks}
             builtWithFern={<BuiltWithFern className="mx-auto mt-12 w-fit" lang={lang} />}
             lastUpdated={lastUpdated}
         />

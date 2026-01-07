@@ -9,6 +9,7 @@ export function AbstractFooterLayout({
     editThisPageUrl,
     bottomNavigation,
     className,
+    footerLinks,
     builtWithFern,
     lastUpdated
 }: {
@@ -19,6 +20,7 @@ export function AbstractFooterLayout({
     bottomNavigation?: React.ReactNode;
     pathname?: string;
     className?: string;
+    footerLinks?: React.ReactNode;
     builtWithFern?: React.ReactNode;
     lastUpdated?: string;
 }) {
@@ -45,6 +47,7 @@ export function AbstractFooterLayout({
 
             {!hideNavLinks && bottomNavigation}
             {builtWithFern}
+            {footerLinks}
         </footer>
     );
 }

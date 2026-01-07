@@ -4,6 +4,7 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { type Availability, AvailabilityBadge } from "@fern-docs/components/badges/availability-badge";
+import { FooterLinks } from "@fern-docs/components/footer/FooterLinks";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
 import type React from "react";
 
@@ -93,6 +94,7 @@ export async function LayoutEvaluator({
             hideNavLinks={frontmatter?.["hide-nav-links"] ?? config.layout?.hideNavLinks}
             editThisPageUrl={frontmatter?.["edit-this-page-url"]}
             bottomNavigation={bottomNavigation}
+            footerLinks={<FooterLinks loader={loader} className="mt-8" />}
             lang={lang}
             hasMultipleLanguages={config.languages != null && config.languages.length > 1}
             lastUpdated={frontmatter?.["last-updated"]}
