@@ -90,6 +90,14 @@ export type AnalyticsRecordInsert = Omit<AnalyticsRecord, "id" | "created_at">;
 
 export type DomainVerificationStatus = "PENDING" | "VERIFIED" | "FAILED" | "EXPIRED";
 
+export type DomainSetupStep =
+    | "enter-domain"
+    | "update-config"
+    | "verify-ownership"
+    | "verify-dns"
+    | "configure-proxy"
+    | "complete";
+
 export interface CustomDomainVerificationRow {
     id: string;
     domain: string;
@@ -102,6 +110,7 @@ export interface CustomDomainVerificationRow {
     updatedAt: string;
     verifiedAt: string | null;
     expiresAt: string;
+    setupStep: DomainSetupStep | null;
 }
 
 export type CustomDomainVerificationInsert = Omit<CustomDomainVerificationRow, "createdAt" | "updatedAt">;

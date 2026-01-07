@@ -44,7 +44,8 @@ export async function createVerification(data: {
         status: "PENDING",
         vercelDomainId: null,
         verifiedAt: null,
-        expiresAt: expiresAt.toISOString()
+        expiresAt: expiresAt.toISOString(),
+        setupStep: "update-config"
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -251,6 +252,7 @@ export function formatVerificationInfo(verification: CustomDomainVerification) {
         id: verification.id,
         domain: verification.domain,
         status: verification.status,
+        setupStep: verification.setupStep,
         verificationRecord: {
             type: "TXT" as const,
             host: getVerificationHost(verification.domain),
@@ -260,4 +262,28 @@ export function formatVerificationInfo(verification: CustomDomainVerification) {
         expiresAt: new Date(verification.expiresAt),
         verifiedAt: verification.verifiedAt ? new Date(verification.verifiedAt) : null
     };
+}
+
+/**
+ * Updates the setup step for a domain
+ */
+export async function updateSetupStep(
+    id: string,
+    setupStep: CustomDomainVerification["setupStep"]
+): Promise<CustomDomainVerification> {
+    const supabase = getSupabaseClient();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+        .from("CustomDomainVerification")
+        .update({ setupStep })
+        .eq("id", id)
+        .select()
+        .single();
+
+    if (error) {
+        throw new Error(`Failed to update setup step: ${error.message}`);
+    }
+
+    return data as unknown as CustomDomainVerification;
 }

@@ -27,6 +27,11 @@ export {
     removeCustomDomain
 } from "./removeCustomDomain";
 export {
+    type UpdateSetupStepRequest,
+    type UpdateSetupStepResponse,
+    updateDomainSetupStep
+} from "./updateSetupStep";
+export {
     type VerifyCustomDomainRequest,
     type VerifyCustomDomainResponse,
     verifyCustomDomain

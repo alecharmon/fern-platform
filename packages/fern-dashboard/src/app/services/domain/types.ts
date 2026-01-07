@@ -1,6 +1,6 @@
-import type { CustomDomainVerificationRow, DomainVerificationStatus } from "../supabase";
+import type { CustomDomainVerificationRow, DomainSetupStep, DomainVerificationStatus } from "../supabase";
 
-export type { CustomDomainVerificationRow, DomainVerificationStatus };
+export type { CustomDomainVerificationRow, DomainSetupStep, DomainVerificationStatus };
 
 // Alias for easier usage
 export type CustomDomainVerification = CustomDomainVerificationRow;
@@ -45,6 +45,7 @@ export interface CustomDomainInfo {
     id: string;
     domain: string;
     status: DomainVerificationStatus;
+    setupStep: DomainSetupStep | null;
     verificationRecord: {
         type: "TXT";
         host: string;
