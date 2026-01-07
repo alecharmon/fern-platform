@@ -504,8 +504,14 @@ jobs:
           # CVE-2025-60876: BusyBox wget HTTP request smuggling vulnerability
           # No upstream fix available (busybox 1.37.0-r50)
           # Risk accepted: Wolfi busybox is compiled without wget applet, container uses curl for HTTP downloads
+          # CVE-2024-10041: linux-pam speculative execution vulnerability
+          # No upstream fix available (linux-pam 1.7.1-r4)
+          # Risk accepted: Wolfi advisory marks this as "pending upstream fix" - requires changes from linux-pam maintainers
+          # Attack requires local access, specific branch predictor training, and breaking ASLR via Spectre techniques
+          # Self-hosted container runs in isolated environments with limited local access
           ignored_cves: |
             CVE-2025-60876
+            CVE-2024-10041
 
   create-grype-pr-fai:
     name: Run grype scan - fai
