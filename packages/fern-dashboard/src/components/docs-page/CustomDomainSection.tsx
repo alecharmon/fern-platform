@@ -12,7 +12,7 @@ interface CustomDomainSectionProps {
 }
 
 export async function CustomDomainSection({ docsUrl, orgName, allDomains }: CustomDomainSectionProps) {
-    const result = await getCustomDomainStatus({ docsUrl, orgName });
+    const result = await getCustomDomainStatus({ docsUrl, orgName, detectedDomains: allDomains });
 
     return (
         <CustomDomainButton

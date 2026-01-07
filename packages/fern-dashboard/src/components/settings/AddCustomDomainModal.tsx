@@ -278,7 +278,8 @@ export function AddCustomDomainModal({
         try {
             const result = await verifyCustomDomain({
                 docsUrl,
-                orgName
+                orgName,
+                domain: domainInfo?.domain || domain
             });
 
             if (result.requiresCheckout) {

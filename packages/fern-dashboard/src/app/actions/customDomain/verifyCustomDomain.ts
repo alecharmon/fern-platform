@@ -10,6 +10,7 @@ import {
     addDomainToVercelProject,
     formatVerificationInfo,
     getVerificationByDocsUrl,
+    getVerificationByDomain,
     getVerificationHost,
     hasSubpath,
     updateVerificationStatus,
@@ -20,6 +21,7 @@ import { assertRateLimit, DNS_VERIFICATION_RATE_LIMIT, RateLimitError } from "@/
 export interface VerifyCustomDomainRequest {
     docsUrl: string;
     orgName: Auth0OrgName;
+    domain?: string; // Optional domain for fallback lookup when docsUrl changes after publishing
 }
 
 export interface VerifyCustomDomainResponse {
@@ -32,7 +34,8 @@ export interface VerifyCustomDomainResponse {
 
 export async function verifyCustomDomain({
     docsUrl,
-    orgName
+    orgName,
+    domain
 }: VerifyCustomDomainRequest): Promise<VerifyCustomDomainResponse> {
     const session = await getCurrentSessionOrThrow();
     await assertUserHasOrganizationAccess(session.accessToken, orgName);
@@ -48,7 +51,13 @@ export async function verifyCustomDomain({
     }
 
     // Get existing verification record
-    const verification = await getVerificationByDocsUrl(docsUrl);
+    // First try by docsUrl, then fallback to domain if provided
+    // This handles the case where docsUrl changes after publishing the custom domain
+    let verification = await getVerificationByDocsUrl(docsUrl);
+
+    if (!verification && domain) {
+        verification = await getVerificationByDomain(domain);
+    }
 
     if (!verification) {
         return {

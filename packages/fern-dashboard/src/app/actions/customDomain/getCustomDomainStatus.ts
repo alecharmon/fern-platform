@@ -4,11 +4,17 @@ import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import type { CustomDomainInfo } from "@/app/services/domain";
-import { formatVerificationInfo, getVerificationByDocsUrl, updateVerificationStatus } from "@/app/services/domain";
+import {
+    formatVerificationInfo,
+    getVerificationByDocsUrl,
+    getVerificationByDomain,
+    updateVerificationStatus
+} from "@/app/services/domain";
 
 export interface GetCustomDomainStatusRequest {
     docsUrl: string;
     orgName: Auth0OrgName;
+    detectedDomains?: string[];
 }
 
 export interface GetCustomDomainStatusResponse {
@@ -20,12 +26,30 @@ export interface GetCustomDomainStatusResponse {
 
 export async function getCustomDomainStatus({
     docsUrl,
-    orgName
+    orgName,
+    detectedDomains = []
 }: GetCustomDomainStatusRequest): Promise<GetCustomDomainStatusResponse> {
     const session = await getCurrentSessionOrThrow();
     await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
-    const verification = await getVerificationByDocsUrl(docsUrl);
+    // First, try to find verification by docsUrl
+    let verification = await getVerificationByDocsUrl(docsUrl);
+
+    // If not found by docsUrl, try to find by detected custom domains
+    // This handles the case where the user started verification but the docsUrl changed after publishing
+    if (!verification && detectedDomains.length > 0) {
+        for (const domain of detectedDomains) {
+            // Skip Fern-managed domains
+            if (domain.endsWith(".docs.buildwithfern.com")) {
+                continue;
+            }
+            const domainVerification = await getVerificationByDomain(domain);
+            if (domainVerification) {
+                verification = domainVerification;
+                break;
+            }
+        }
+    }
 
     if (!verification) {
         return {
