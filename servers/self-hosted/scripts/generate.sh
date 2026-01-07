@@ -268,8 +268,11 @@ log "Starting MinIO for seeding..."
 # Configure MinIO client (mc) to use a writable config directory
 # When running as an arbitrary UID that doesn't exist in /etc/passwd,
 # $HOME may default to "/" which isn't writable, causing "mc alias set" to fail.
-export MC_CONFIG_DIR="/tmp/mc-config"
-mkdir -p "$MC_CONFIG_DIR" 2>/dev/null || true
+# Use UID-scoped directory to avoid permission conflicts in Kubernetes environments.
+CURRENT_UID=$(id -u)
+export MC_CONFIG_DIR="/tmp/mc-config-${CURRENT_UID}"
+mkdir -p "$MC_CONFIG_DIR"
+chmod 700 "$MC_CONFIG_DIR" 2>/dev/null || true
 
 # Use /data for MinIO (will be copied to seed dir later)
 minio server /data --console-address ":9001" 2>&1 &

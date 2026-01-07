@@ -312,15 +312,19 @@ fi
 # When running as an arbitrary UID (e.g., 65532) that doesn't exist in /etc/passwd,
 # $HOME may default to "/" which isn't writable, causing "mc alias set" to fail.
 # Setting MC_CONFIG_DIR ensures mc can write its config regardless of the UID.
-export MC_CONFIG_DIR="/tmp/mc-config"
-mkdir -p "$MC_CONFIG_DIR" 2>/dev/null || true
+# Use UID-scoped directory to avoid permission conflicts in Kubernetes environments
+# where /tmp/mc-config might exist but be owned by a different user from build time.
+CURRENT_UID=$(id -u)
+export MC_CONFIG_DIR="/tmp/mc-config-${CURRENT_UID}"
+mkdir -p "$MC_CONFIG_DIR"
+chmod 700 "$MC_CONFIG_DIR" 2>/dev/null || true
 
 # Determine MinIO data directory - use UID-scoped directory to avoid permission conflicts
 # When running as an arbitrary UID (e.g., 65532), /data may not be writable if:
 # 1. It's a mounted volume with restrictive permissions
 # 2. Seeded data was copied with restrictive permissions
 # Fall back to /data only if it's writable, otherwise use UID-scoped /tmp directory
-CURRENT_UID=$(id -u)
+# Note: CURRENT_UID is already set above when configuring MC_CONFIG_DIR
 MINIO_DATA_DIR="/tmp/minio-data-${CURRENT_UID}"
 
 # Check if /data is writable by trying to create a test file

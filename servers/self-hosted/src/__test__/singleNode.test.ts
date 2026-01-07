@@ -101,11 +101,15 @@ describe("Self-hosted docs has a running Postgres instance", () => {
     it("Minio Bucket has docs", async () => {
         const containerId = await getSingleNodeContainerId();
         expect(containerId).toBeTruthy();
+        // Get the UID the container is running as to find the correct MC_CONFIG_DIR
+        // run.sh uses UID-scoped directories to avoid permission conflicts
+        const { stdout: containerUid } = await execa("docker", ["exec", containerId, "id", "-u"]);
+        const uid = containerUid.trim();
         // Pass MC_CONFIG_DIR to docker exec since run.sh configures mc with this custom config directory
         const { stdout: minioStatus } = await execa("docker", [
             "exec",
             "-e",
-            "MC_CONFIG_DIR=/tmp/mc-config",
+            `MC_CONFIG_DIR=/tmp/mc-config-${uid}`,
             containerId,
             "mc",
             "ls",

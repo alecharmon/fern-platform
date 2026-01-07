@@ -302,17 +302,15 @@ RUN rm -rf /tmp/patches
 
 # ----------- Setup for non-root execution -----------
 # Ensure /tmp directory has proper permissions (sticky bit + world writable)
+# Note: Service-specific directories (postgresql, minio-data, meilisearch, mc-config, prisma)
+# are created at RUNTIME with UID-scoped paths (e.g., /tmp/postgresql-${UID})
+# to avoid permission conflicts when running as arbitrary non-root UIDs
 RUN log "Configuring permissions for non-root execution..." && \
     chmod 1777 /tmp && \
-    # Create directories that may need write access at runtime
-    mkdir -p /tmp/postgresql /tmp/minio-data /tmp/prisma && \
-    chmod 777 /tmp/postgresql /tmp/minio-data /tmp/prisma && \
     # Make log directory writable
     mkdir -p /var/log && chmod 777 /var/log && \
-    # Note: /tmp/meilisearch is NOT created at build time - it will be created by MeiliSearch at runtime
-    # to ensure proper ownership for the user running the container
-    # Create additional temp directories for services
-    mkdir -p /tmp/fdr /tmp/nextapp /tmp/postgresql /tmp/minio-data /tmp/.next && chmod -R 777 /tmp/fdr /tmp/nextapp /tmp/postgresql /tmp/minio-data /tmp/.next && \
+    # Create temp directories for Next.js and FDR
+    mkdir -p /tmp/fdr /tmp/nextapp /tmp/.next && chmod -R 777 /tmp/fdr /tmp/nextapp /tmp/.next && \
     # Make scripts executable by all
     chmod +x /scripts/*.sh /scripts/*.js && \
     # Create fern-generate alias for cleaner customer Dockerfiles

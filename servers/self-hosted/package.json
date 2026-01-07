@@ -15,6 +15,9 @@
     "docker:run:nonroot": "docker run -p 9000:9000 -p 9001:9001 -p 8080:8080 -p 3000:3000 -p 7700:7700 -it --user 65532:65532 -v $(pwd)/fern:/fern:ro fern-self-hosted:latest",
     "docker:run:restricted": "docker run -p 9000:9000 -p 9001:9001 -p 8080:8080 -p 3000:3000 -p 7700:7700 --network fern-network --name fern-container -it --user 65532:65532 --security-opt no-new-privileges --cap-drop ALL -v $(pwd)/fern:/fern:ro fern-self-hosted:latest",
     "fdr:build": "pnpm --filter @fern-platform/fdr build:tsup:cjs",
+    "k8s:start": "sh kubernetes-example/k8s-start.sh",
+    "k8s:stop": "sh kubernetes-example/k8s-delete.sh",
+    "k8s:logs": "kubectl logs -f -l app=fern-docs",
     "perf": "tsx scripts/perf-test.ts",
     "test:self-hosted": "vitest src/__test__ --globals --config src/__test__/vitest.config.ts"
   },
