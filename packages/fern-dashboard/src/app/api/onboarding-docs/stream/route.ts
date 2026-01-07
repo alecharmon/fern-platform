@@ -14,6 +14,7 @@ import { createFernProject } from "../utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 180; // 3 minutes
 
 /**
  * Checks if a file is binary based on its extension
