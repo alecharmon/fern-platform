@@ -1,0 +1,15 @@
+/* Mermaid sequence diagram autonumber fix
+ * Mermaid uses sequenceNumberColor for both the circle fill AND the text color,
+ * making numbers invisible. We use element-specific selectors to override the
+ * text fill color to contrast with the circle background.
+ */
+
+/* Light mode: dark circles need light text */
+:is(.mermaid-container, .mermaid-container-expanded) text.sequenceNumber {
+    fill: #f8fafc !important;
+}
+
+/* Dark mode: light circles need dark text */
+:is(.dark, [data-theme="dark"]) :is(.mermaid-container, .mermaid-container-expanded) text.sequenceNumber {
+    fill: #1e293b !important;
+}
