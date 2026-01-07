@@ -13,6 +13,46 @@ import { type ComponentProps, type ReactNode, type RefObject, useEffect, useRef 
 import { CodeBlockFeedbackButton } from "./CodeBlockFeedbackButton";
 import { applyTemplates, useTemplate } from "./Template";
 
+/**
+ * Hook to scroll a code block to a specific line when it becomes active.
+ * Uses double requestAnimationFrame to ensure the content is fully visible before scrolling.
+ *
+ * @param viewportRef - Ref to the scroll handle exposed by FernSyntaxHighlighter
+ * @param startLine - 1-based line number to scroll to
+ * @param isActive - Whether the code block is currently active/visible (defaults to true for standalone blocks)
+ */
+export function useScrollToStartLine(
+    viewportRef: RefObject<ScrollToHandle | null>,
+    startLine: number | undefined,
+    isActive: boolean = true
+): void {
+    useEffect(() => {
+        if (!isActive || startLine == null) {
+            return;
+        }
+        // Use double requestAnimationFrame to ensure the content is fully visible
+        // before scrolling. The first RAF waits for the current frame to complete,
+        // the second ensures any visibility transitions have applied.
+        let cancelled = false;
+        requestAnimationFrame(() => {
+            if (cancelled) {
+                return;
+            }
+            requestAnimationFrame(() => {
+                if (cancelled) {
+                    return;
+                }
+                if (viewportRef.current) {
+                    viewportRef.current.scrollToLine(startLine - 1); // Convert to 0-based index
+                }
+            });
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [viewportRef, startLine, isActive]);
+}
+
 export function CodeBlock(props: {
     className?: string;
     /**
@@ -79,14 +119,7 @@ export function CodeBlock(props: {
     const tooltips = { ...useTemplate().tooltips, ...tooltipsProp };
 
     const viewportRef = useRef<ScrollToHandle>(null);
-
-    useEffect(() => {
-        const { current } = viewportRef;
-        if (current && props.startLine != null) {
-            // Convert to 0-based index
-            current.scrollToLine(props.startLine - 1);
-        }
-    }, [props.startLine]);
+    useScrollToStartLine(viewportRef, props.startLine);
 
     if (!code) {
         return null;

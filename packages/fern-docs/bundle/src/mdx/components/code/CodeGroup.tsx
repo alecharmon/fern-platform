@@ -5,12 +5,12 @@ import { cn } from "@fern-docs/components/cn";
 import { HorizontalOverflowMask } from "@fern-docs/components/HorizontalOverflowMask";
 import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
 import { useProgrammingLanguage } from "@fern-docs/components/state/language";
-import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
+import { FernSyntaxHighlighter, type ScrollToHandle } from "@fern-docs/components/syntax-highlighter";
 import * as Tabs from "@radix-ui/react-tabs";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { unwrapChildren } from "../../common/unwrap-children";
-import { CodeBlock, toSyntaxHighlighterProps } from "./CodeBlock";
+import { CodeBlock, toSyntaxHighlighterProps, useScrollToStartLine } from "./CodeBlock";
 import { CodeBlockFeedbackButton } from "./CodeBlockFeedbackButton";
 import { applyTemplates, Template, useTemplate } from "./Template";
 
@@ -152,21 +152,53 @@ export function CodeGroup({
                 </div>
             </div>
             {items.map((item, idx) => (
-                <Tabs.Content
-                    value={idx.toString()}
+                <CodeGroupTab
                     key={idx}
-                    className="fern-code-content fern-code-group-content rounded-b-[inherit] rounded-t-none"
-                    asChild
-                >
-                    <FernSyntaxHighlighter
-                        {...toSyntaxHighlighterProps({
-                            ...item.props,
-                            template,
-                            tooltips
-                        })}
-                    />
-                </Tabs.Content>
+                    idx={idx}
+                    item={item}
+                    template={template}
+                    tooltips={tooltips}
+                    isActive={idx === selectedTabIndex}
+                />
             ))}
         </Tabs.Root>
+    );
+}
+
+/**
+ * A wrapper component for each tab's content that manages its own viewport ref
+ * and handles scrollToLine when it becomes active.
+ */
+function CodeGroupTab({
+    idx,
+    item,
+    template,
+    tooltips,
+    isActive
+}: {
+    idx: number;
+    item: React.ReactElement<React.ComponentProps<typeof CodeBlock>>;
+    template: Record<string, string>;
+    tooltips: Record<string, React.ReactNode>;
+    isActive: boolean;
+}) {
+    const viewportRef = useRef<ScrollToHandle>(null);
+    useScrollToStartLine(viewportRef, item.props.startLine, isActive);
+
+    return (
+        <Tabs.Content
+            value={idx.toString()}
+            className="fern-code-content fern-code-group-content rounded-b-[inherit] rounded-t-none"
+            asChild
+        >
+            <FernSyntaxHighlighter
+                {...toSyntaxHighlighterProps({
+                    ...item.props,
+                    template,
+                    tooltips,
+                    viewportRef
+                })}
+            />
+        </Tabs.Content>
     );
 }
