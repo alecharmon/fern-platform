@@ -52,7 +52,7 @@ export default async function createOrganization(
         const addRoleResult = await addRoles({
             userId: userId,
             orgId: org.id,
-            roleNames: ["admin", "cli"]
+            roleNames: ["admin"]
         });
 
         if (addRoleResult.ok === false) {

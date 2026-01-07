@@ -17,10 +17,16 @@ export declare namespace MembersPage {
         session: Auth0SessionData;
         isFernAdmin: boolean;
         isFineGrainedPermissionsEnabled?: boolean;
+        isEnforcePermissionsEnabled?: boolean;
     }
 }
 
-export function MembersPage({ session, isFernAdmin, isFineGrainedPermissionsEnabled = false }: MembersPage.Props) {
+export function MembersPage({
+    session,
+    isFernAdmin,
+    isFineGrainedPermissionsEnabled = false,
+    isEnforcePermissionsEnabled = false
+}: MembersPage.Props) {
     const org = useCurrentOrganization();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -51,6 +57,7 @@ export function MembersPage({ session, isFernAdmin, isFineGrainedPermissionsEnab
                             initialEmail={emailToInvite ?? undefined}
                             defaultOpen={emailToInvite != null}
                             isFernAdmin={isFernAdmin}
+                            isEnforcePermissionsEnabled={isEnforcePermissionsEnabled}
                         />
                     </div>
                 }

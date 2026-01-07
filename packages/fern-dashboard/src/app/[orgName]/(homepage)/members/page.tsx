@@ -28,11 +28,22 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
         console.error("Failed to check fine-grained permissions feature flag", error);
     }
 
+    // Check if permissions enforcement is enabled
+    let isEnforcePermissionsEnabled = false;
+    try {
+        isEnforcePermissionsEnabled =
+            (await isFeatureFlagEnabledForUser(PosthogFeatureFlag.ENFORCE_PERMISSIONS, session.user.sub, orgName)) ??
+            false;
+    } catch (error) {
+        console.error("Failed to check enforce permissions feature flag", error);
+    }
+
     return (
         <MembersPage
             session={session}
             isFernAdmin={isFernAdmin}
             isFineGrainedPermissionsEnabled={isFineGrainedPermissionsEnabled}
+            isEnforcePermissionsEnabled={isEnforcePermissionsEnabled}
         />
     );
 }
