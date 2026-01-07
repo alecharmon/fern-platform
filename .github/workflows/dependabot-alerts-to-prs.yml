@@ -220,24 +220,33 @@ jobs:
               const branchName = `dependabot-alert-${alert.number}-devin`;
               const filePath = `.github/dependabot-alerts/alert-${alert.number}.md`;
 
-              // Check if branch already exists - if so, delete it (it's from a closed PR)
+              // Check if branch already exists
+              let branchExists = false;
               try {
                 await github.rest.git.getRef({
                   owner,
                   repo,
                   ref: `heads/${branchName}`,
                 });
-                // Branch exists but no open PR (we already checked for open PRs above)
-                // Delete the old branch so we can create a fresh one
+                branchExists = true;
+              } catch (e) {
+                if (e.status !== 404) throw e;
+              }
+
+              if (branchExists) {
+                // Check if there's an open PR using this branch as the head
+                const prForBranch = existingPRs.find(pr => pr.head.ref === branchName);
+                if (prForBranch) {
+                  console.log(`Skipping alert #${alert.number}: branch ${branchName} has an open PR #${prForBranch.number}`);
+                  continue;
+                }
+                // No open PR for this branch, delete it so we can create a fresh one
                 console.log(`Deleting old branch ${branchName} from closed PR...`);
                 await github.rest.git.deleteRef({
                   owner,
                   repo,
                   ref: `heads/${branchName}`,
                 });
-              } catch (e) {
-                if (e.status !== 404) throw e;
-                // Branch doesn't exist, which is fine
               }
 
               const prTitle = `[Dependabot Alert #${alert.number}] ${severity.toUpperCase()}: ${packageName} vulnerability`;
