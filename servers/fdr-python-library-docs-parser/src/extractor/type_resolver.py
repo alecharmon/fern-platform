@@ -23,6 +23,9 @@ def make_type_info(annotation: Expr | str | None) -> TypeInfo | None:
     """
     Create a TypeInfo object from a Griffe type annotation.
 
+    Note: This is the standalone version. Use PythonExtractor.make_type_info()
+    for internal type filtering based on loaded modules.
+
     Args:
         annotation: Griffe Expr or string annotation.
 

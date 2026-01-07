@@ -1,4 +1,7 @@
-"""Extract PythonFunctionIr from Griffe functions."""
+"""Function extraction for Python library docs."""
+
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 from griffe import Function
 
@@ -8,52 +11,132 @@ from src.generated.library_docs import (
 )
 
 from .docstring_extractor import extract_docstring
-from .type_resolver import make_type_info
+from .type_resolver import resolve_annotation
+
+if TYPE_CHECKING:
+    from .python_extractor import PythonExtractor
 
 
-def extract_function(func: Function) -> PythonFunctionIr:
-    """
-    Extract PythonFunctionIr from a Griffe Function.
+class FunctionExtractor:
+    """Extracts function/method IR from Griffe Function objects."""
 
-    Args:
-        func: Griffe Function object.
+    def __init__(self, parent: PythonExtractor):
+        self.parent = parent
 
-    Returns:
-        PythonFunctionIr with all function information.
-    """
-    # Extract parameters
-    parameters = [_extract_parameter(param) for param in func.parameters]
+    def extract(self, func: Function) -> PythonFunctionIr:
+        """Extract PythonFunctionIr from a Griffe Function."""
+        parameters = [self._extract_parameter(param) for param in func.parameters]
+        decorators = _extract_decorators(func)
 
-    # Extract decorators
-    decorators = _extract_decorators(func)
+        is_async = "async" in getattr(func, "labels", set())
+        is_classmethod = any("classmethod" in d for d in decorators)
+        is_staticmethod = any("staticmethod" in d for d in decorators)
+        is_property = any("property" in d for d in decorators)
 
-    # Determine function properties
-    is_async = hasattr(func, "labels") and "async" in func.labels
-    is_classmethod = any("classmethod" in d for d in decorators)
-    is_staticmethod = any("staticmethod" in d for d in decorators)
-    is_property = any("property" in d for d in decorators)
+        signature = self._build_signature(func)
 
-    # Build signature
-    signature = _build_signature(func)
+        return PythonFunctionIr(
+            name=func.name,
+            path=func.path,
+            signature=signature,
+            docstring=extract_docstring(func.docstring),
+            parameters=parameters,
+            return_type_info=self.parent.make_type_info(func.returns),
+            is_async=is_async,
+            decorators=decorators,
+            is_classmethod=is_classmethod,
+            is_staticmethod=is_staticmethod,
+            is_property=is_property,
+        )
 
-    return PythonFunctionIr(
-        name=func.name,
-        path=func.path,
-        signature=signature,
-        docstring=extract_docstring(func.docstring),
-        parameters=parameters,
-        return_type_info=make_type_info(func.returns),
-        is_async=is_async,
-        decorators=decorators,
-        is_classmethod=is_classmethod,
-        is_staticmethod=is_staticmethod,
-        is_property=is_property,
-    )
+    def _extract_parameter(self, param) -> PythonParameterIr:
+        """Extract a single parameter."""
+        kind = _get_param_kind(param)
+        default = _format_default(param.default, max_len=100)
+
+        return PythonParameterIr(
+            name=param.name,
+            kind=kind,
+            type_info=self.parent.make_type_info(param.annotation),
+            default=default,
+            description=None,
+        )
+
+    def _build_signature(self, func: Function) -> str:
+        """Build a signature string for display."""
+        parts = []
+
+        if "async" in getattr(func, "labels", set()):
+            parts.append("async ")
+
+        parts.append(f"def {func.name}(")
+
+        param_strs = [self._format_param(p) for p in func.parameters]
+        params_joined = ", ".join(param_strs)
+
+        if len(param_strs) > 3 or len(params_joined) > 60:
+            # Multiline format
+            parts.append("\n")
+            parts.append(",\n".join(f"    {ps}" for ps in param_strs))
+            parts.append("\n)")
+        else:
+            parts.append(params_joined)
+            parts.append(")")
+
+        if func.returns:
+            return_str = resolve_annotation(func.returns, use_short_names=True)
+            if return_str:
+                parts.append(f" -> {return_str}")
+
+        return "".join(parts)
+
+    def _format_param(self, param) -> str:
+        """Format a parameter for signature display."""
+        kind_name = _get_param_kind_name(param)
+
+        if kind_name == "var_positional":
+            result = f"*{param.name}"
+        elif kind_name == "var_keyword":
+            result = f"**{param.name}"
+        else:
+            result = param.name
+
+        if param.annotation:
+            ann_str = resolve_annotation(param.annotation, use_short_names=True)
+            if ann_str:
+                result += f": {ann_str}"
+
+        default = _format_default(param.default, max_len=50)
+        if default:
+            result += f" = {default}"
+
+        return result
 
 
-def _extract_parameter(param) -> PythonParameterIr:
-    """Extract a single parameter."""
-    # Map Griffe parameter kind to string literals
+# -----------------------------------------------------------------------------
+# Utility functions (shared)
+# -----------------------------------------------------------------------------
+
+def _extract_decorators(obj) -> list[str]:
+    """Extract decorator names from a class or function."""
+    decorators = []
+    for decorator in obj.decorators:
+        dec_str = str(decorator.value) if hasattr(decorator, "value") else str(decorator)
+        if dec_str.startswith("@"):
+            dec_str = dec_str[1:]
+        decorators.append(dec_str)
+    return decorators
+
+
+def _get_param_kind_name(param) -> str:
+    """Get the parameter kind name as lowercase string."""
+    if hasattr(param.kind, "name"):
+        return param.kind.name.lower()
+    return "positional_or_keyword"
+
+
+def _get_param_kind(param) -> str:
+    """Map Griffe parameter kind to IR kind."""
     kind_map = {
         "positional_only": "POSITIONAL",
         "positional_or_keyword": "POSITIONAL",
@@ -61,129 +144,14 @@ def _extract_parameter(param) -> PythonParameterIr:
         "keyword_only": "KEYWORD_ONLY",
         "var_keyword": "VAR_KEYWORD",
     }
-
-    kind_name = param.kind.name.lower() if hasattr(param.kind, "name") else "positional_or_keyword"
-    kind = kind_map.get(kind_name, "POSITIONAL")
-
-    # Format default value
-    default = None
-    if param.default is not None and str(param.default) != "":
-        default_str = str(param.default)
-        # Truncate very long defaults
-        if len(default_str) > 100:
-            default_str = default_str[:97] + "..."
-        default = default_str
-
-    return PythonParameterIr(
-        name=param.name,
-        kind=kind,
-        type_info=make_type_info(param.annotation),
-        default=default,
-        description=None,  # Filled from docstring later if needed
-    )
+    return kind_map.get(_get_param_kind_name(param), "POSITIONAL")
 
 
-def _extract_decorators(func: Function) -> list[str]:
-    """Extract decorator names from a function."""
-    decorators = []
-    for decorator in func.decorators:
-        dec_str = str(decorator.value) if hasattr(decorator, "value") else str(decorator)
-        # Clean up the decorator string
-        if dec_str.startswith("@"):
-            dec_str = dec_str[1:]
-        decorators.append(dec_str)
-    return decorators
-
-
-def _format_annotation(annotation) -> str:
-    """Format a type annotation as a string."""
-    if annotation is None:
-        return ""
-
-    # Handle string annotations directly
-    if isinstance(annotation, str):
-        return annotation
-
-    # Try to get a clean string representation
-    ann_str = str(annotation)
-
-    # Clean up common patterns
-    if ann_str.startswith("<"):
-        # Handle <class 'type'> patterns
-        if "'" in ann_str:
-            return ann_str.split("'")[1].split(".")[-1]
-        return ann_str
-
-    return ann_str
-
-
-def _build_signature(func: Function) -> str:
-    """Build a signature string for display."""
-    parts = []
-
-    # Add async prefix if needed
-    if hasattr(func, "labels") and "async" in func.labels:
-        parts.append("async ")
-
-    parts.append(f"def {func.name}(")
-
-    # Format parameters
-    param_strs = []
-    for param in func.parameters:
-        param_str = _format_param_for_signature(param)
-        param_strs.append(param_str)
-
-    # Decide on multiline or single line
-    params_joined = ", ".join(param_strs)
-    if len(param_strs) > 3 or len(params_joined) > 60:
-        # Multiline format
-        parts.append("\n")
-        for i, ps in enumerate(param_strs):
-            parts.append(f"    {ps}")
-            if i < len(param_strs) - 1:
-                parts.append(",\n")
-            else:
-                parts.append("\n")
-        parts.append(")")
-    else:
-        parts.append(params_joined)
-        parts.append(")")
-
-    # Add return type
-    if func.returns:
-        return_str = _format_annotation(func.returns)
-        if return_str:
-            parts.append(f" -> {return_str}")
-
-    return "".join(parts)
-
-
-def _format_param_for_signature(param) -> str:
-    """Format a parameter for the signature display."""
-    parts = []
-
-    # Handle *args and **kwargs
-    kind_name = param.kind.name.lower() if hasattr(param.kind, "name") else ""
-    if kind_name == "var_positional":
-        parts.append(f"*{param.name}")
-    elif kind_name == "var_keyword":
-        parts.append(f"**{param.name}")
-    else:
-        parts.append(param.name)
-
-    result = parts[0]
-
-    # Add type annotation
-    if param.annotation:
-        ann_str = _format_annotation(param.annotation)
-        if ann_str:
-            result += f": {ann_str}"
-
-    # Add default value
-    if param.default is not None and str(param.default) != "":
-        default_str = str(param.default)
-        if len(default_str) > 50:
-            default_str = default_str[:47] + "..."
-        result += f" = {default_str}"
-
-    return result
+def _format_default(default, max_len: int) -> str | None:
+    """Format a default value, truncating if too long."""
+    if default is None or str(default) == "":
+        return None
+    default_str = str(default)
+    if len(default_str) > max_len:
+        return default_str[: max_len - 3] + "..."
+    return default_str
