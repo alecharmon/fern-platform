@@ -76,12 +76,11 @@ jobs:
               PR_URL="https://github.com/${{ github.repository }}/pull/$PR_NUM"
               PR_TITLE=$(gh pr view "$PR_NUM" --json title --jq '.title' 2>/dev/null || echo "PR #$PR_NUM")
               PR_AUTHOR=$(gh pr view "$PR_NUM" --json author --jq '.author.login' 2>/dev/null || echo "unknown")
-              # Build list with actual newlines for proper Slack formatting
+              # Build list with bullet points - use printf for proper newline handling
               if [ -z "$PR_LIST" ]; then
-                PR_LIST="• <${PR_URL}|#${PR_NUM}> ${PR_TITLE} (@${PR_AUTHOR})"
+                PR_LIST=$(printf '• <%s|#%s> %s (@%s)' "$PR_URL" "$PR_NUM" "$PR_TITLE" "$PR_AUTHOR")
               else
-                PR_LIST="${PR_LIST}
-• <${PR_URL}|#${PR_NUM}> ${PR_TITLE} (@${PR_AUTHOR})"
+                PR_LIST=$(printf '%s\n• <%s|#%s> %s (@%s)' "$PR_LIST" "$PR_URL" "$PR_NUM" "$PR_TITLE" "$PR_AUTHOR")
               fi
               PR_COUNT=$((PR_COUNT + 1))
             fi
@@ -91,7 +90,7 @@ jobs:
             PR_LIST="No PRs found in this release"
           fi
           
-          # Use EOF delimiter for multiline output (no echo -e needed since we use actual newlines)
+          # Use EOF delimiter for multiline output
           {
             echo "pr_list<<EOF"
             echo "$PR_LIST"
