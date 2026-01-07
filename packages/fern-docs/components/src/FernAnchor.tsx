@@ -1,6 +1,6 @@
 "use client";
 
-import { useCopyToClipboard } from "@fern-ui/react-commons";
+import { useCopyToClipboard, useIsMobile } from "@fern-ui/react-commons";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Check, Link2 } from "lucide-react";
 import { AnimatePresence, domAnimation, LazyMotion } from "motion/react";
@@ -26,6 +26,8 @@ export function useIsFernAnchorDisabled() {
     return React.useContext(DisableFernAnchorCtx);
 }
 
+const mobilePadding = 16;
+
 export function FernAnchor({
     href,
     sideOffset = 12,
@@ -34,7 +36,12 @@ export function FernAnchor({
     fullTarget = false
 }: React.PropsWithChildren<FernAnchorProps>) {
     const isDisabled = useIsFernAnchorDisabled();
+    const isMobile = useIsMobile();
     const { copyToClipboard, wasJustCopied } = useCopyToClipboard(() => String(new URL(href, window.location.href)));
+
+    // Responsive tooltip positioning
+    const tooltipSide = isMobile ? "right" : "left";
+    const tooltipSideOffset = isMobile ? -mobilePadding : sideOffset;
 
     const [forceMount, setIsMounted] = useState<true | undefined>(wasJustCopied ? true : undefined);
 
@@ -61,13 +68,21 @@ export function FernAnchor({
             <Tooltip.Root delayDuration={0}>
                 <Tooltip.Trigger
                     asChild={asChild}
-                    style={fullTarget ? { cursor: "pointer" } : undefined}
+                    style={{
+                        ...(fullTarget ? { cursor: "pointer" } : undefined),
+                        // Add padding on mobile to prevent tooltip from overlapping trigger content
+                        paddingRight: isMobile ? mobilePadding : undefined
+                    }}
                     onClick={fullTarget ? handleClick : undefined}
                 >
                     {children}
                 </Tooltip.Trigger>
                 <Tooltip.Portal forceMount={forceMount}>
-                    <Tooltip.Content sideOffset={sideOffset} collisionPadding={6} side="left">
+                    <Tooltip.Content
+                        side={tooltipSide}
+                        sideOffset={tooltipSideOffset}
+                        collisionPadding={{ top: 6, bottom: 6, left: 6, right: isMobile ? -mobilePadding : 6 }}
+                    >
                         <FernLink
                             className="fern-anchor"
                             href={href}
