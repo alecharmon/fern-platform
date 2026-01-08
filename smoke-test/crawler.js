@@ -78,7 +78,23 @@ async function crawlSite(startUrl) {
         // API endpoints (some require auth)
         { url: `${baseUrlString}/api/fern-docs/search/v2/key`, expectedStatus: 200 },
         { url: `${baseUrlString}/api/fern-docs/get-jwt`, expectedStatus: 401 }, // Expected to require auth
-        { url: `${baseUrlString}/_mcp/server`, expectedStatus: 200 }
+        { url: `${baseUrlString}/_mcp/server`, expectedStatus: 200 },
+        // SEO and discovery endpoints
+        { url: `${baseUrlString}/sitemap.xml`, expectedStatus: 200, expectedContentType: "xml" },
+        { url: `${baseUrlString}/robots.txt`, expectedStatus: 200, expectedContentType: "text/plain" },
+        // MCP API endpoint (direct access)
+        { url: `${baseUrlString}/api/fern-docs/mcp`, expectedStatus: 200, expectedContentType: "text/plain" },
+        // Markdown endpoints (.md and .mdx extensions for LLM consumption)
+        { url: `${baseUrlString}/home/welcome.mdx`, expectedStatus: 200, expectedContentType: "text/plain" },
+        // API endpoint markdown format (for LLM consumption of API docs)
+        {
+            url: `${baseUrlString}/home/rest-api/rest-api/plant/add-plant.mdx`,
+            expectedStatus: 200,
+            expectedContentType: "text/plain"
+        },
+        // Nested llms.txt for product sections
+        { url: `${baseUrlString}/home/llms.txt`, expectedStatus: 200 },
+        { url: `${baseUrlString}/second-product/llms.txt`, expectedStatus: 200 }
     ];
 
     // URL expectations map for easy lookup
