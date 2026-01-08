@@ -15,6 +15,8 @@ async function createHandler(host: string, domain: string): Promise<McpHandler> 
         cacheKeySuffix: ""
     })(domain);
 
+    const streamableHttpEndpoint = `/${host}/${domain}/api/fern-docs/mcp`;
+
     const mcpHandler = await createMcpHandler(
         async (server) => {
             server.tool(
@@ -133,7 +135,7 @@ async function createHandler(host: string, domain: string): Promise<McpHandler> 
         },
         {},
         {
-            streamableHttpEndpoint: "/_mcp/server",
+            streamableHttpEndpoint,
             verboseLogs: true,
             maxDuration: 60,
             disableSse: true
