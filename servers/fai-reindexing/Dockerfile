@@ -1,6 +1,6 @@
 FROM node:22-alpine AS base
 
-RUN npm install -g pnpm@10.27.0
+RUN npm install -g pnpm@10.25.0
 
 WORKDIR /app
 
@@ -56,7 +56,7 @@ RUN ls -lh dist-bundle/
 FROM node:22-alpine AS runner
 WORKDIR /app
 
-RUN npm install -g pnpm@10.27.0 && \
+RUN npm install -g pnpm@10.25.0 && \
     pnpm add \
         @aws-sdk/client-ecs@^3.709.0 \
         @aws-sdk/client-sqs@^3.709.0 \

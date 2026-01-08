@@ -62,7 +62,7 @@ RUN log "Installing turbo..." && \
 
 COPY . .
 RUN log "Installing pnpm..." && \
-    npm install -g pnpm@10.27.0 2>&1 | add-timestamps
+    npm install -g pnpm@10.11.0 2>&1 | add-timestamps
 RUN log "Cleaning up fern directory..." && \
     rm -rf fern/
 
