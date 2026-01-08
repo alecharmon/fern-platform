@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { Language, SnippetInput } from "@fern-api/snippets";
 import { SnippetResolver } from "@fern-api/snippets";
 
 import type { EndpointDefinition } from "../latest";
-import type { DynamicIRsByLanguage, SDK_SNIPPET_LANGUAGES, SdkSnippetLanguage, SnippetGenerators } from "./types";
+import type { DynamicIRsByLanguage, SnippetGenerators } from "./types";
 
 /**
  * Build the endpoint path string used for snippet generation
@@ -48,10 +49,8 @@ export function createSnippetGenerators({
 /**
  * Collect snippet inputs from dynamic IR for available languages
  */
-function collectSnippetInputs(
-    dynamicIr: DynamicIRsByLanguage
-): Array<{ language: (typeof SDK_SNIPPET_LANGUAGES)[number]; ir: any }> {
-    const inputs: Array<{ language: SdkSnippetLanguage; ir: any }> = [];
+function collectSnippetInputs(dynamicIr: DynamicIRsByLanguage): SnippetInput[] {
+    const inputs: Array<{ language: Language; ir: any }> = [];
 
     if (dynamicIr.typescript) {
         inputs.push({ language: "typescript", ir: dynamicIr.typescript as any });
