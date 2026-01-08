@@ -3127,8 +3127,8 @@ importers:
         specifier: 19.0.4
         version: 19.0.4(@types/react@19.0.10)
       ai:
-        specifier: 5.0.0-beta.2
-        version: 5.0.0-beta.2(zod@3.25.76)
+        specifier: 5.0.86
+        version: 5.0.86(zod@3.25.76)
       algoliasearch:
         specifier: ^5.20.3
         version: 5.45.0
