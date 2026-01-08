@@ -52,8 +52,8 @@ const TERMINAL_INCIDENT_STATES = ["declined", "merged", "canceled", "learning", 
 
 // Severity IDs - adjust based on your incident.io configuration
 const INCIDENT_SEVERITY_MINOR = "01HR85VFNX9NYZG6B5Z40K8Y9V";
-const INCIDENT_SEVERITY_MAJOR = "01HR85VFNXC9RRXSH2BNW3PHA8";
-const INCIDENT_SEVERITY_CRITICAL = "01HR85VFNX14XJNB34VMN8HY1A";
+const INCIDENT_SEVERITY_MAJOR = "01HR85VFNXR6H5YPKJTE79YHG4";
+const INCIDENT_SEVERITY_CRITICAL = "01HR85VFNXA1RTYRR744G9FN6J";
 
 // Number of core checks per site (sitemap, whoami, homepage, llms.txt, llms-full.txt)
 const CORE_CHECKS_PER_SITE = 5;
