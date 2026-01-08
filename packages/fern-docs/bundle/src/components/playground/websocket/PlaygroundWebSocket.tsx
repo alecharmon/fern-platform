@@ -159,7 +159,10 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                 if (!websocketMessageLimit || activeSessionMessageCount < websocketMessageLimit) {
                     pushMessage({
                         type: "received",
-                        data: maybeParsedData(),
+                        data: {
+                            type: "json",
+                            data: maybeParsedData()
+                        },
                         origin: "server",
                         displayName: undefined
                     });
