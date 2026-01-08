@@ -81,7 +81,12 @@ export async function backfillSnippetsForExample(
         existingSnippets: snippets
     });
     for (const snippet of httpSnippets) {
-        pushSnippet(snippet);
+        // Replace existing curl snippets when regenerating (targeted repair for wrong auth headers)
+        if (snippet.language === "curl" && snippets.curl?.length) {
+            snippets.curl = [snippet];
+        } else {
+            pushSnippet(snippet);
+        }
     }
 
     return { ...example, snippets };
@@ -129,7 +134,12 @@ export async function generateSnippetsForExample(
         existingSnippets: snippets
     });
     for (const snippet of httpSnippets) {
-        pushSnippet(snippet);
+        // Replace existing curl snippets when regenerating (targeted repair for wrong auth headers)
+        if (snippet.language === "curl" && snippets.curl?.length) {
+            snippets.curl = [snippet];
+        } else {
+            pushSnippet(snippet);
+        }
     }
 
     return snippets;

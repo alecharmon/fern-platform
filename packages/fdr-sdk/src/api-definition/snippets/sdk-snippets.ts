@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ApiDefinition, CodeSnippet, EndpointDefinition, ExampleEndpointCall } from "../latest";
+import { getFirstAuthScheme } from "./auth-scheme";
 import type { SnippetGenerators } from "./types";
 
 /**
@@ -12,17 +13,16 @@ export function buildSdkSnippetRequest(
     endpoint: EndpointDefinition,
     example: ExampleEndpointCall
 ): any {
-    // Build auth configuration
+    // Build auth configuration using multiAuth-aware selection
     let auth: any;
-    const endpointAuth = endpoint.auth?.[0];
-    if (endpointAuth) {
-        const authDefinition = apiDefinition.auths[endpointAuth];
-        if (authDefinition?.type === "bearerAuth") {
+    const authDefinition = getFirstAuthScheme(endpoint, apiDefinition.auths);
+    if (authDefinition) {
+        if (authDefinition.type === "bearerAuth") {
             auth = {
                 type: "bearer",
                 token: "YOUR_TOKEN_HERE"
             };
-        } else if (authDefinition) {
+        } else {
             auth = authDefinition;
         }
     }

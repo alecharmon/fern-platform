@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
 
-import { type ApiDefinition, ApiDefinitionId, EndpointId, EnvironmentId, PropertyKey } from "../latest";
+import { type ApiDefinition, ApiDefinitionId, AuthSchemeId, EndpointId, EnvironmentId, PropertyKey } from "../latest";
 import { backfillSnippets } from "./backfill";
 import type { HttpSnippetLanguage } from "./types";
 
@@ -1835,5 +1835,421 @@ describe("backfillSnippets", () => {
 
         // Snapshot the entire result to capture all endpoints with all languages
         expect(result).toMatchSnapshot();
+    });
+
+    it("should use multiAuth to select the correct auth scheme for curl snippets", async () => {
+        const apiDefinition: ApiDefinition = {
+            id: ApiDefinitionId("test-api"),
+            apiName: undefined,
+            endpoints: {
+                [EndpointId("merchantEndpoint")]: {
+                    id: EndpointId("merchantEndpoint"),
+                    method: "GET",
+                    path: [{ type: "literal", value: "/merchant/withdraws" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: [AuthSchemeId("wallet"), AuthSchemeId("merchant")],
+                    multiAuth: [
+                        {
+                            schemes: [AuthSchemeId("merchant")]
+                        }
+                    ],
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.example.com"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    includeInApiExplorer: undefined,
+                    examples: [
+                        {
+                            name: "Get Withdraws",
+                            description: "",
+                            path: "/merchant/withdraws",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: undefined,
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: { status: "completed" }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                }
+            },
+            auths: {
+                [AuthSchemeId("wallet")]: {
+                    type: "header",
+                    headerWireValue: "x-custom-api-key",
+                    nameOverride: undefined,
+                    prefix: undefined,
+                    description: undefined
+                },
+                [AuthSchemeId("merchant")]: {
+                    type: "bearerAuth",
+                    tokenName: undefined,
+                    description: undefined
+                }
+            },
+            websockets: {},
+            webhooks: {},
+            types: {},
+            globalHeaders: [],
+            subpackages: {},
+            snippetsConfiguration: undefined
+        };
+
+        const flags = {
+            httpSnippets: true,
+            alwaysEnableJavaScriptFetch: true
+        };
+
+        const result = await backfillSnippets(apiDefinition, undefined, flags);
+
+        const endpoint = result.endpoints[EndpointId("merchantEndpoint")];
+        expect(endpoint).toBeDefined();
+        const examples = endpoint?.examples;
+        expect(examples).toHaveLength(1);
+
+        const example = examples?.[0];
+        expect(example).toBeDefined();
+
+        const snippets = example?.snippets;
+        expect(snippets).toBeDefined();
+
+        const curlSnippets = snippets?.curl;
+        expect(curlSnippets).toBeDefined();
+        expect(curlSnippets).toHaveLength(1);
+
+        const curlSnippet = curlSnippets?.[0];
+        expect(curlSnippet?.language).toBe("curl");
+        expect(curlSnippet?.code).toContain("Authorization:");
+        expect(curlSnippet?.code).not.toContain("x-custom-api-key");
+    });
+
+    it("should regenerate curl snippet when existing snippet has wrong auth header", async () => {
+        const apiDefinition: ApiDefinition = {
+            id: ApiDefinitionId("test-api"),
+            apiName: undefined,
+            endpoints: {
+                [EndpointId("merchantEndpoint")]: {
+                    id: EndpointId("merchantEndpoint"),
+                    method: "GET",
+                    path: [{ type: "literal", value: "/merchant/withdraws" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: [AuthSchemeId("wallet"), AuthSchemeId("merchant")],
+                    multiAuth: [
+                        {
+                            schemes: [AuthSchemeId("merchant")]
+                        }
+                    ],
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.example.com"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    includeInApiExplorer: undefined,
+                    examples: [
+                        {
+                            name: "Get Withdraws",
+                            description: "",
+                            path: "/merchant/withdraws",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: undefined,
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: { status: "completed" }
+                            },
+                            snippets: {
+                                curl: [
+                                    {
+                                        name: undefined,
+                                        language: "curl",
+                                        install: undefined,
+                                        code: 'curl https://api.example.com/merchant/withdraws \\\n  -H "x-custom-api-key: <apiKey>"',
+                                        generated: true,
+                                        description: undefined
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            auths: {
+                [AuthSchemeId("wallet")]: {
+                    type: "header",
+                    headerWireValue: "x-custom-api-key",
+                    nameOverride: undefined,
+                    prefix: undefined,
+                    description: undefined
+                },
+                [AuthSchemeId("merchant")]: {
+                    type: "bearerAuth",
+                    tokenName: undefined,
+                    description: undefined
+                }
+            },
+            websockets: {},
+            webhooks: {},
+            types: {},
+            globalHeaders: [],
+            subpackages: {},
+            snippetsConfiguration: undefined
+        };
+
+        const flags = {
+            httpSnippets: true,
+            alwaysEnableJavaScriptFetch: true
+        };
+
+        const result = await backfillSnippets(apiDefinition, undefined, flags);
+
+        const endpoint = result.endpoints[EndpointId("merchantEndpoint")];
+        expect(endpoint).toBeDefined();
+        const examples = endpoint?.examples;
+        expect(examples).toHaveLength(1);
+
+        const example = examples?.[0];
+        expect(example).toBeDefined();
+
+        const snippets = example?.snippets;
+        expect(snippets).toBeDefined();
+
+        const curlSnippets = snippets?.curl;
+        expect(curlSnippets).toBeDefined();
+        expect(curlSnippets).toHaveLength(1);
+
+        const curlSnippet = curlSnippets?.[0];
+        expect(curlSnippet?.language).toBe("curl");
+        expect(curlSnippet?.code).toContain("Authorization:");
+        expect(curlSnippet?.code).not.toContain("x-custom-api-key");
+    });
+
+    it("should not regenerate curl snippet when existing snippet has correct auth header", async () => {
+        const existingCurlCode =
+            'curl https://api.example.com/merchant/withdraws \\\n  -H "Authorization: Bearer <token>"';
+        const apiDefinition: ApiDefinition = {
+            id: ApiDefinitionId("test-api"),
+            apiName: undefined,
+            endpoints: {
+                [EndpointId("merchantEndpoint")]: {
+                    id: EndpointId("merchantEndpoint"),
+                    method: "GET",
+                    path: [{ type: "literal", value: "/merchant/withdraws" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: [AuthSchemeId("wallet"), AuthSchemeId("merchant")],
+                    multiAuth: [
+                        {
+                            schemes: [AuthSchemeId("merchant")]
+                        }
+                    ],
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.example.com"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    includeInApiExplorer: undefined,
+                    examples: [
+                        {
+                            name: "Get Withdraws",
+                            description: "",
+                            path: "/merchant/withdraws",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: undefined,
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: { status: "completed" }
+                            },
+                            snippets: {
+                                curl: [
+                                    {
+                                        name: undefined,
+                                        language: "curl",
+                                        install: undefined,
+                                        code: existingCurlCode,
+                                        generated: true,
+                                        description: undefined
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            auths: {
+                [AuthSchemeId("wallet")]: {
+                    type: "header",
+                    headerWireValue: "x-custom-api-key",
+                    nameOverride: undefined,
+                    prefix: undefined,
+                    description: undefined
+                },
+                [AuthSchemeId("merchant")]: {
+                    type: "bearerAuth",
+                    tokenName: undefined,
+                    description: undefined
+                }
+            },
+            websockets: {},
+            webhooks: {},
+            types: {},
+            globalHeaders: [],
+            subpackages: {},
+            snippetsConfiguration: undefined
+        };
+
+        const flags = {
+            httpSnippets: true,
+            alwaysEnableJavaScriptFetch: true
+        };
+
+        const result = await backfillSnippets(apiDefinition, undefined, flags);
+
+        const endpoint = result.endpoints[EndpointId("merchantEndpoint")];
+        const curlSnippet = endpoint?.examples?.[0]?.snippets?.curl?.[0];
+        expect(curlSnippet?.code).toBe(existingCurlCode);
+    });
+
+    it("should fall back to endpoint.auth when multiAuth is not defined", async () => {
+        const apiDefinition: ApiDefinition = {
+            id: ApiDefinitionId("test-api"),
+            apiName: undefined,
+            endpoints: {
+                [EndpointId("walletEndpoint")]: {
+                    id: EndpointId("walletEndpoint"),
+                    method: "GET",
+                    path: [{ type: "literal", value: "/wallet/balance" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: [AuthSchemeId("wallet")],
+                    multiAuth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.example.com"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    includeInApiExplorer: undefined,
+                    examples: [
+                        {
+                            name: "Get Balance",
+                            description: "",
+                            path: "/wallet/balance",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: undefined,
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: { balance: 100 }
+                            },
+                            snippets: undefined
+                        }
+                    ]
+                }
+            },
+            auths: {
+                [AuthSchemeId("wallet")]: {
+                    type: "header",
+                    headerWireValue: "x-custom-api-key",
+                    nameOverride: undefined,
+                    prefix: undefined,
+                    description: undefined
+                },
+                [AuthSchemeId("merchant")]: {
+                    type: "bearerAuth",
+                    tokenName: undefined,
+                    description: undefined
+                }
+            },
+            websockets: {},
+            webhooks: {},
+            types: {},
+            globalHeaders: [],
+            subpackages: {},
+            snippetsConfiguration: undefined
+        };
+
+        const flags = {
+            httpSnippets: true,
+            alwaysEnableJavaScriptFetch: true
+        };
+
+        const result = await backfillSnippets(apiDefinition, undefined, flags);
+
+        const endpoint = result.endpoints[EndpointId("walletEndpoint")];
+        expect(endpoint).toBeDefined();
+
+        const curlSnippet = endpoint?.examples?.[0]?.snippets?.curl?.[0];
+        expect(curlSnippet?.language).toBe("curl");
+        expect(curlSnippet?.code).toContain("x-custom-api-key:");
+        expect(curlSnippet?.code).not.toContain("Authorization:");
     });
 });

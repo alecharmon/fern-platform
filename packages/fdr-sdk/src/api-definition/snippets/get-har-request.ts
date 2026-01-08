@@ -9,6 +9,7 @@ import {
     type ExampleEndpointRequest,
     preprocessQueryParameters
 } from "../";
+import { getFirstAuthScheme } from "./auth-scheme";
 
 export function getHarRequest(
     endpoint: EndpointDefinition,
@@ -119,7 +120,7 @@ export function getHarRequest(
         }
     }
 
-    const auth = endpoint.auth?.[0] != null ? auths[endpoint.auth[0]] : undefined;
+    const auth = getFirstAuthScheme(endpoint, auths);
 
     if (auth != null) {
         visitDiscriminatedUnion(auth)._visit({

@@ -1,6 +1,7 @@
 import { HTTPSnippet } from "httpsnippet-lite";
 
 import type { ApiDefinition, CodeSnippet, EndpointDefinition, ExampleEndpointCall } from "../latest";
+import { getAuthHeaderName, getFirstAuthScheme, shouldRegenerateCurlSnippet } from "./auth-scheme";
 import { HTTP_SNIPPET_CLIENTS } from "./constants";
 import { convertToCurl } from "./curl";
 import { getHarRequest } from "./get-har-request";
@@ -27,10 +28,8 @@ export function generateCurlSnippet(
     endpoint: EndpointDefinition,
     example: ExampleEndpointCall
 ): CodeSnippet {
-    const endpointAuth = endpoint.auth?.[0];
-    const curlCode = convertToCurl(
-        toSnippetHttpRequest(endpoint, example, endpointAuth != null ? apiDefinition.auths[endpointAuth] : undefined)
-    );
+    const authScheme = getFirstAuthScheme(endpoint, apiDefinition.auths);
+    const curlCode = convertToCurl(toSnippetHttpRequest(endpoint, example, authScheme));
 
     return {
         name: undefined,
@@ -65,8 +64,13 @@ export async function generateHttpSnippets(
         return httpSnippetLanguages == null || httpSnippetLanguages.includes(language as HttpSnippetLanguage);
     };
 
-    // Generate curl snippet if needed
-    if (!existingSnippets.curl?.length && shouldIncludeLanguage("curl")) {
+    // Generate or regenerate curl snippet if needed
+    // Regenerate if existing snippet has wrong auth header (targeted repair for pre-stored snippets)
+    const authScheme = getFirstAuthScheme(endpoint, apiDefinition.auths);
+    const expectedHeaderName = getAuthHeaderName(authScheme);
+    const needsCurlRegeneration = shouldRegenerateCurlSnippet(existingSnippets.curl, expectedHeaderName);
+
+    if (needsCurlRegeneration && shouldIncludeLanguage("curl")) {
         snippets.push(generateCurlSnippet(apiDefinition, endpoint, example));
     }
 
