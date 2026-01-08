@@ -30,6 +30,7 @@ types:
       path: EndpointPath
       queryParameters: list<QueryParameter>
       headers: list<Header>
+      responseHeaders: optional<list<Header>>
       request: optional<HttpRequest>
       requestsV2: optional<HttpRequestsV2>
       response: optional<HttpResponse>
@@ -93,7 +94,7 @@ types:
     properties:
       contentType: string
       type: HttpRequestBodyShape
-  
+
   HttpRequestsV2:
     properties:
       requests: optional<list<HttpRequest>>
@@ -153,7 +154,7 @@ types:
       terminator:
         type: optional<string>
         docs: |
-          The terminator for each message. For example, for OpenAPI 
+          The terminator for each message. For example, for OpenAPI
           the terminator is [DATA].
       shape: JsonBodyShape
 

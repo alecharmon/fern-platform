@@ -238,6 +238,7 @@ function transformEndpoint({
         path: writeShape.path,
         queryParameters: writeShape.queryParameters,
         headers: writeShape.headers,
+        responseHeaders: writeShape.responseHeaders,
         request: writeShape.request != null ? transformHttpRequestToDb({ writeShape: writeShape.request }) : undefined,
         requestsV2:
             writeShape.requestsV2 != null

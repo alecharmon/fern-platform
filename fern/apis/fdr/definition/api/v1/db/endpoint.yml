@@ -27,6 +27,7 @@ types:
       path: readEndpoint.EndpointPath
       queryParameters: list<readEndpoint.QueryParameter>
       headers: list<readEndpoint.Header>
+      responseHeaders: optional<list<readEndpoint.Header>>
       request: optional<DbHttpRequest>
       requestsV2: optional<DbHttpRequestsV2>
       response: optional<readEndpoint.HttpResponse>

@@ -19,6 +19,7 @@ export interface DbEndpointDefinition
     path: FernRegistry.api.v1.read.EndpointPath;
     queryParameters: FernRegistry.api.v1.read.QueryParameter[];
     headers: FernRegistry.api.v1.read.Header[];
+    responseHeaders: FernRegistry.api.v1.read.Header[] | undefined;
     request: FernRegistry.api.v1.db.DbHttpRequest | undefined;
     requestsV2: FernRegistry.api.v1.db.DbHttpRequestsV2 | undefined;
     response: FernRegistry.api.v1.read.HttpResponse | undefined;

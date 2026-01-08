@@ -35,6 +35,7 @@ types:
       path: EndpointPath
       queryParameters: list<QueryParameter>
       headers: list<Header>
+      responseHeaders: optional<list<Header>>
       request: optional<HttpRequest>
       requestsV2: optional<HttpRequestsV2>
       response: optional<HttpResponse>
@@ -91,7 +92,7 @@ types:
     extends: commons.WithDescription
     properties:
       type: HttpRequestBodyShape
-  
+
   HttpRequestsV2:
     properties:
       requests: optional<list<HttpRequest>>
@@ -135,7 +136,7 @@ types:
         docs: |
           When true, indicates that the statusCode represents a wildcard pattern (e.g., 4XX or 5XX).
           The statusCode field will contain the base value (400 for 4XX, 500 for 5XX).
-  
+
   HttpResponsesV2:
     properties:
       responses: optional<list<HttpResponse>>
@@ -188,7 +189,7 @@ types:
       terminator:
         type: optional<string>
         docs: |
-          The terminator for each message. For example, for OpenAPI 
+          The terminator for each message. For example, for OpenAPI
           the terminator is [DATA].
       shape: JsonBodyShape
 

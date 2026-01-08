@@ -80,6 +80,7 @@ export function transformEndpoint({
         path: dbShape.path,
         queryParameters: dbShape.queryParameters,
         headers: dbShape.headers,
+        responseHeaders: dbShape.responseHeaders,
         request: dbShape.request != null ? transformHttpRequest({ dbShape: dbShape.request }) : undefined,
         requestsV2: (() => {
             if (dbShape.requestsV2 == null) {

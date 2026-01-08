@@ -157,7 +157,7 @@ export class ApiDefinitionV1ToLatest {
             pathParameters: this.migratePathOrQueryParameters(v1.path.pathParameters),
             queryParameters: this.migratePathOrQueryParameters(v1.queryParameters),
             requestHeaders: this.migrateParameters(v1.headers),
-            responseHeaders: undefined,
+            responseHeaders: this.migrateParameters(v1.responseHeaders),
             requests: (() => {
                 const requests = v1.requestsV2?.requests
                     ?.map((request) => this.migrateHttpRequest(request))
