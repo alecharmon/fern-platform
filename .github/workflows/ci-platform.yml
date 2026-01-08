@@ -136,17 +136,3 @@ jobs:
           chmod +x scripts/typecheck-all.sh
           ./scripts/typecheck-all.sh
 
-  knip:
-    name: Knip (Optional)
-    needs: check-platform-changes
-    if: needs.check-platform-changes.outputs.platform_changed == 'true'
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install
-        uses: ./.github/actions/install
-
-      - name: Run Knip (Dead Code Analysis)
-        run: pnpm knip

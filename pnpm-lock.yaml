@@ -1242,12 +1242,6 @@ importers:
       '@opentelemetry/sdk-trace-base':
         specifier: ^2.2.0
         version: 2.2.0(@opentelemetry/api@1.9.0)
-      '@radix-ui/primitive':
-        specifier: 'catalog:'
-        version: 1.1.1
-      '@radix-ui/react-compose-refs':
-        specifier: 'catalog:'
-        version: 1.1.2(@types/react@19.0.10)(react@19.0.1)
       '@radix-ui/react-dialog':
         specifier: 'catalog:'
         version: 1.1.6(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)
@@ -1359,9 +1353,6 @@ importers:
       '@types/archiver':
         specifier: ^6.0.2
         version: 6.0.4
-      '@types/css-tree':
-        specifier: ^2.3.10
-        version: 2.3.11
       '@types/pg':
         specifier: ^8.15.6
         version: 8.15.6
@@ -1419,9 +1410,6 @@ importers:
       countup.js:
         specifier: ^2.9.0
         version: 2.9.0
-      css-tree:
-        specifier: ^3.1.0
-        version: 3.1.0
       dayjs:
         specifier: ^1.11.18
         version: 1.11.19
@@ -1437,9 +1425,6 @@ importers:
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
-      github-slugger:
-        specifier: ^2.0.0
-        version: 2.0.0
       jotai:
         specifier: 'catalog:'
         version: 2.15.1(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.0.10)(react@19.0.1)
@@ -1455,9 +1440,6 @@ importers:
       libsodium-wrappers:
         specifier: ^0.7.15
         version: 0.7.15
-      lowlight:
-        specifier: ^3.3.0
-        version: 3.3.0
       lucide-react:
         specifier: ^0.460.0
         version: 0.460.0(react@19.0.1)
@@ -1539,9 +1521,6 @@ importers:
       unzipper:
         specifier: ^0.12.3
         version: 0.12.3
-      url-join:
-        specifier: 'catalog:'
-        version: 5.0.0
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -1639,12 +1618,6 @@ importers:
       '@algolia/client-search':
         specifier: ^5.20.3
         version: 5.45.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.744.0
-        version: 3.940.0
-      '@aws-sdk/s3-request-presigner':
-        specifier: ^3.744.0
-        version: 3.940.0
       '@fern-api/docs-auth':
         specifier: workspace:*
         version: link:../../commons/docs-auth
@@ -1696,12 +1669,6 @@ importers:
       '@fern-docs/search-utils':
         specifier: workspace:*
         version: link:../search-server/utils
-      '@fern-fern/fern-docs-sdk':
-        specifier: 0.0.5
-        version: 0.0.5
-      '@fern-platform/fdr-utils':
-        specifier: workspace:*
-        version: link:../../commons/fdr-utils
       '@fern-ui/loadable':
         specifier: workspace:*
         version: link:../../commons/loadable
@@ -1819,9 +1786,6 @@ importers:
       jotai:
         specifier: ^2.12.1
         version: 2.15.1(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.0.10)(react@19.0.1)
-      jotai-effect:
-        specifier: ^1.1.6
-        version: 1.1.6(jotai@2.15.1(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.0.10)(react@19.0.1))
       js-yaml:
         specifier: ^4.1.1
         version: 4.1.1
@@ -11862,9 +11826,6 @@ packages:
   '@types/cors@2.8.19':
     resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
 
-  '@types/css-tree@2.3.11':
-    resolution: {integrity: sha512-aEokibJOI77uIlqoBOkVbaQGC9zII0A+JH1kcTNKW2CwyYWD8KM6qdo+4c77wD3wZOQfJuNWAr9M4hdk+YhDIg==}
-
   '@types/d3-array@3.2.1':
     resolution: {integrity: sha512-Y2Jn2idRrLzUfAKV2LyRImR+y4oa2AntrgID95SHJxuMUrkNXmanDSed71sRNZysveJVt1hLLemQZIady0FpEg==}
 
@@ -16652,10 +16613,6 @@ packages:
   hermes-parser@0.32.0:
     resolution: {integrity: sha512-g4nBOWFpuiTqjR3LZdRxKUkij9iyveWeuks7INEsMX741f3r9xxrOe8TeQfUxtda0eXmiIFiMQzoeSQEno33Hw==}
 
-  highlight.js@11.11.1:
-    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
-    engines: {node: '>=12.0.0'}
-
   hls.js@1.5.17:
     resolution: {integrity: sha512-wA66nnYFvQa1o4DO/BFgLNRKnBTVXpNeldGRBJ2Y0SvFtdwvFKCbqa9zhHoZLoxHhZ+jYsj3aIBkWQQCPNOhMw==}
 
@@ -17502,12 +17459,6 @@ packages:
   jose@5.10.0:
     resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
 
-  jotai-effect@1.1.6:
-    resolution: {integrity: sha512-ZPLNZgRSxuTjyzMqLE9ervx1YjH6FwcaEC0kw77W7sEpZLgqjRm6UZTHjsyAxUWUCSwKQ8A3ai3Vkz0tZxSPgw==}
-    engines: {node: '>=12.20.0'}
-    peerDependencies:
-      jotai: '>=2.5.0'
-
   jotai@2.15.1:
     resolution: {integrity: sha512-yHT1HAZ3ba2Q8wgaUQ+xfBzEtcS8ie687I8XVCBinfg4bNniyqLIN+utPXWKQE93LMF5fPbQSVRZqgpcN5yd6Q==}
     engines: {node: '>=12.20.0'}
@@ -18124,9 +18075,6 @@ packages:
   lowercase-keys@2.0.0:
     resolution: {integrity: sha512-tqNXrS78oMOE73NMxK4EMLQsQowWf8jKooH9g7xPavRT706R6bkQJ6DY2Te7QukaZsulxa30wQ7bk0pm4XiHmA==}
     engines: {node: '>=8'}
-
-  lowlight@3.3.0:
-    resolution: {integrity: sha512-0JNhgFoPvP6U6lE/UdVsSq99tn6DhjjpAj5MxG49ewd2mOBVtwWYIT8ClyABhq198aXXODMU6Ox8DrGy/CpTZQ==}
 
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
@@ -34812,8 +34760,6 @@ snapshots:
     dependencies:
       '@types/node': 22.19.1
 
-  '@types/css-tree@2.3.11': {}
-
   '@types/d3-array@3.2.1': {}
 
   '@types/d3-axis@3.0.6':
@@ -41459,8 +41405,6 @@ snapshots:
     dependencies:
       hermes-estree: 0.32.0
 
-  highlight.js@11.11.1: {}
-
   hls.js@1.5.17: {}
 
   hmac-drbg@1.0.1:
@@ -42549,10 +42493,6 @@ snapshots:
 
   jose@5.10.0: {}
 
-  jotai-effect@1.1.6(jotai@2.15.1(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.0.10)(react@19.0.1)):
-    dependencies:
-      jotai: 2.15.1(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.0.10)(react@19.0.1)
-
   jotai@2.15.1(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.0.10)(react@19.0.1):
     optionalDependencies:
       '@babel/core': 7.28.5
@@ -43220,12 +43160,6 @@ snapshots:
       tslib: 2.8.1
 
   lowercase-keys@2.0.0: {}
-
-  lowlight@3.3.0:
-    dependencies:
-      '@types/hast': 3.0.4
-      devlop: 1.1.0
-      highlight.js: 11.11.1
 
   lru-cache@10.4.3: {}
 

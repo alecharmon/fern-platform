@@ -43,8 +43,6 @@ catalog:
   "@radix-ui/react-use-controllable-state": "^1.1.0"
   "@radix-ui/react-visually-hidden": "^1.1.2"
   "@vitejs/plugin-react": "^4.3.4"
-  "@swc/cli": "^0.7.8"
-  "@swc/core": "^1.13.5"
   "@types/hast": "^3.0.4"
   "@types/js-yaml": "^4.0.9"
   "@types/mdast": "^4.0.4"

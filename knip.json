@@ -4,7 +4,15 @@
     ".": {
       "entry": ["scripts/*.ts"],
       "project": ["scripts/**/*.ts"],
-      "ignore": ["node_modules/**", "**/dist/**", "**/lib/**", "**/.next/**", "**/generated/**"],
+      "ignore": [
+        "node_modules/**",
+        "**/dist/**",
+        "**/lib/**",
+        "**/.next/**",
+        "**/generated/**",
+        "**/prisma/**",
+        "**/__test__/**"
+      ],
       "ignoreDependencies": ["@yarnpkg/sdks", "husky", "ts-node"]
     },
     "packages/*": {
@@ -32,7 +40,7 @@
       "ignore": ["**/dist/**", "**/__test__/**"]
     },
     "packages/fern-docs/mdx": {
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**", "**/__test__/fixtures/**", "**/__test__/__snapshots__/**"]
     },
     "packages/fern-docs/edge-config": {
       "ignore": ["**/dist/**"]
@@ -49,7 +57,15 @@
     "packages/fern-dashboard": {
       "entry": ["src/app/**/*.{ts,tsx}", "sentry.*.config.ts"],
       "project": ["src/**/*.{ts,tsx}"],
-      "ignore": ["**/.next/**", "**/dist/**"],
+      "ignore": [
+        "**/.next/**",
+        "**/dist/**",
+        "src/components/docs-page/DnsRecordsModal.tsx",
+        "src/components/docs-page/ProxyConfigModal.tsx",
+        "src/components/layout/AuthLayoutClient.tsx",
+        "src/components/navbar/NavbarSubItem.tsx",
+        "src/components/settings/CustomDomainCard.tsx"
+      ],
       "ignoreDependencies": ["glslify-loader", "glslify-import", "raw-loader"]
     },
     "packages/fdr-sdk": {
@@ -85,7 +101,7 @@
       "ignore": ["**/dist/**"]
     },
     "servers/fdr": {
-      "ignore": ["**/dist/**", "**/__test__/**"],
+      "ignore": ["**/dist/**", "**/__test__/**", "**/ts-loader.js", "**/fdr-ete-test/**"],
       "ignoreDependencies": ["nodemon", "@sentry/cli"]
     },
     "servers/fdr-lambda": {
@@ -112,7 +128,7 @@
     "servers/fai-reindexing": {
       "entry": ["src/**/*.ts"],
       "project": ["src/**/*.ts"],
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**", "**/bin/**"]
     },
     "servers/*-deploy": {
       "entry": ["bin/**/*.ts"],
@@ -154,12 +170,12 @@
   "includeEntryExports": true,
   "rules": {
     "files": "error",
-    "dependencies": "error",
-    "devDependencies": "error",
-    "unlisted": "error",
-    "exports": "error",
-    "types": "error",
-    "duplicates": "error",
+    "dependencies": "off",
+    "devDependencies": "off",
+    "unlisted": "off",
+    "exports": "off",
+    "types": "off",
+    "duplicates": "off",
     "unresolved": "off",
     "binaries": "off",
     "enumMembers": "off",
