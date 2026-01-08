@@ -17,28 +17,36 @@ import {
 } from "lucide-react";
 
 import type { WizardFormData } from "@/providers/OnboardingProvider";
+import { cn } from "@/utils/utils";
 
 interface CodeWidgetProps {
     wizardFormData: WizardFormData;
+    className?: string;
 }
 
-export function CodeWidget({ wizardFormData }: CodeWidgetProps) {
+export function CodeWidget({ wizardFormData, className }: CodeWidgetProps) {
     const companyName = wizardFormData.docsSiteName || "Your Company";
     const docsUrl = wizardFormData.docsSiteUrl
         ? `${wizardFormData.docsSiteUrl}.docs.buildwithfern.com`
-        : "mydocs.buildwithfern.com";
+        : "your-company.docs.buildwithfern.com";
     const logoUrl = wizardFormData.logoUrl;
+    const faviconUrl = wizardFormData.faviconUrl;
 
     return (
-        <div className="border-border h-[450px] w-[57%] min-w-[720px] overflow-hidden rounded-xl border bg-white shadow-lg lg:block dark:border-gray-700 dark:bg-transparent">
+        <div
+            className={cn(
+                "border-border overflow-hidden rounded-xl border bg-background shadow-lg lg:block",
+                className
+            )}
+        >
             {/* Browser Chrome */}
             <div className="border-b-border flex h-10 items-center justify-between gap-2 border-b bg-white px-4 py-2 dark:border-b-gray-700 dark:bg-transparent">
                 {/* Traffic lights */}
                 <div className="flex items-center gap-4">
-                    <div className="flex gap-2">
-                        <div className="h-3 w-3 rounded-full bg-[#ED6B5D]" />
-                        <div className="h-3 w-3 rounded-full bg-[#F4BE50]" />
-                        <div className="h-3 w-3 rounded-full bg-[#61C554]" />
+                    <div className="flex gap-1">
+                        <div className="size-3 rounded-full bg-[#ED6B5D]" />
+                        <div className="size-3 rounded-full bg-[#F4BE50]" />
+                        <div className="size-3 rounded-full bg-[#61C554]" />
                     </div>
                     <div className="flex items-center gap-3">
                         <ChevronLeftIcon className="h-4 w-4 text-gray-600 dark:text-white" />
@@ -47,10 +55,19 @@ export function CodeWidget({ wizardFormData }: CodeWidgetProps) {
                 </div>
 
                 {/* URL bar */}
-                <div className="flex items-center justify-between gap-8 rounded-md border border-gray-900 bg-gray-200 px-3 py-1 dark:bg-gray-800">
-                    <LockIcon className="h-3 w-3 text-gray-600 dark:text-white" />
-                    <span className="text-xs text-gray-600 dark:text-white">{docsUrl}</span>
-                    <RotateCwIcon className="h-3 w-3 text-gray-600 dark:text-white" />
+                <div className="flex items-center justify-between gap-8 rounded-md border text-gray-1000 border-gray-300 bg-gray-200 px-3 py-1 dark:bg-gray-800">
+                    <div className="flex items-center gap-1">
+                        {faviconUrl ? (
+                            <div className="flex items-center">
+                                {/* biome-ignore lint/performance/noImgElement: false positive */}
+                                <img src={faviconUrl} alt="Favicon" className="h-3 w-3 object-contain" />
+                            </div>
+                        ) : (
+                            <LockIcon className="size-3" />
+                        )}
+                    </div>
+                    <span className="text-xs">{docsUrl}</span>
+                    <RotateCwIcon className="size-3" />
                 </div>
                 <div className="flex items-center gap-2">
                     <UploadIcon className="h-4 w-4 text-gray-600 dark:text-white" />
@@ -63,14 +80,7 @@ export function CodeWidget({ wizardFormData }: CodeWidgetProps) {
                     {logoUrl ? (
                         <div className="flex items-center gap-2">
                             {/* biome-ignore lint/performance/noImgElement: false positive */}
-                            <img
-                                src={logoUrl}
-                                alt={companyName}
-                                className="h-6 w-auto max-w-[70px] rounded-lg object-contain"
-                            />
-                            {companyName && (
-                                <span className="text-sm text-gray-700 dark:text-white">{companyName}</span>
-                            )}
+                            <img src={logoUrl} alt={companyName} className="h-6 w-auto max-w-[70px] object-contain" />
                         </div>
                     ) : (
                         <>
@@ -80,18 +90,18 @@ export function CodeWidget({ wizardFormData }: CodeWidgetProps) {
                     )}
                 </div>
                 <div className="mx-auto max-w-md flex-1">
-                    <div className="flex items-center justify-between rounded-md border border-gray-900 bg-gray-200 px-3 py-1 dark:bg-gray-800">
+                    <div className="flex items-center justify-between text-gray-700 rounded-md border border-gray-300 px-3 py-1">
                         <div className="flex items-center gap-2">
-                            <SearchIcon className="h-3 w-3 text-gray-600 dark:text-white" />
-                            <span className="text-xs text-gray-600 dark:text-white">Search</span>
+                            <SearchIcon className="size-3" />
+                            <span className="text-xs">Search</span>
                         </div>
-                        <div className="dark:border-gray-1100 flex h-4 w-4 items-center justify-center gap-2 rounded-md border border-gray-900 bg-gray-200 dark:bg-gray-400">
-                            <SlashIcon className="h-2 w-2 text-gray-600 dark:text-white" />
+                        <div className="dark:border-gray-1100 flex size-4 items-center justify-center gap-2 rounded-md border border-gray-300 bg-gray-200 dark:bg-gray-400">
+                            <SlashIcon className="size-2" />
                         </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <SunIcon className="h-4 w-4 text-gray-600 dark:text-white" />
+                    <SunIcon className="size-4 text-gray-600 dark:text-white" />
                     <div className="min-h-4 min-w-10 rounded-lg bg-gray-200 dark:bg-gray-400" />
                 </div>
             </div>
@@ -99,7 +109,7 @@ export function CodeWidget({ wizardFormData }: CodeWidgetProps) {
             {/* Content area */}
             <div className="flex h-[calc(100%-33px)]">
                 {/* Sidebar */}
-                <div className="min-w-[220px] border-r border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-transparent">
+                <div className="min-w-[180px] w-1/5 border-r border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-transparent">
                     {/* Top nav items with icons */}
                     <div className="mb-4 space-y-1">
                         <div className="flex items-center gap-3 rounded bg-gray-100 px-3 py-2.5 dark:bg-gray-800">
@@ -137,7 +147,7 @@ export function CodeWidget({ wizardFormData }: CodeWidgetProps) {
                                 (endpoint, i) => (
                                     <div key={i} className="flex items-center gap-2 px-3 py-1.5">
                                         <div
-                                            className={`min-w-[35px] rounded bg-gray-800 px-1.5 py-0.5 text-center font-mono text-[10px] tracking-wide text-white dark:bg-gray-400`}
+                                            className={`min-w-[35px] rounded bg-gray-400 px-1.5 py-0.5 text-center font-mono text-[10px] tracking-wide text-white dark:bg-gray-400`}
                                         >
                                             {endpoint.method}
                                         </div>

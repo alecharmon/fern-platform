@@ -92,7 +92,7 @@ export function DocsUrl({ value, onChange }: DocsUrlProps) {
                 <Input
                     id="docs-url"
                     type="text"
-                    placeholder="docs.myorg.com"
+                    placeholder="your-company"
                     value={localValue}
                     onChange={(e) => setLocalValue(e.target.value)}
                     className="w-full"

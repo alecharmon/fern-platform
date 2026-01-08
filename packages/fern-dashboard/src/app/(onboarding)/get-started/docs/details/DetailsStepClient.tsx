@@ -91,7 +91,7 @@ export function DetailsStepClient() {
                     <Input
                         id="company-site"
                         type="text"
-                        placeholder="plantstore.com"
+                        placeholder="Your Company"
                         value={formData.docsSiteName}
                         onChange={(e) => {
                             const newName = e.target.value;
@@ -119,6 +119,18 @@ export function DetailsStepClient() {
                     />
                     {validationErrors.docsSiteUrl && (
                         <p className="text-xs text-red-600">{validationErrors.docsSiteUrl}</p>
+                    )}
+                </div>
+
+                {/* Primary Color */}
+                <div className="flex flex-col gap-1">
+                    <ColorPicker
+                        label="Primary color"
+                        color={formData.primaryColorHex}
+                        onColorChange={(color) => form.setFieldValue("primaryColorHex", color)}
+                    />
+                    {validationErrors.primaryColorHex && (
+                        <p className="text-xs text-red-600">{validationErrors.primaryColorHex}</p>
                     )}
                 </div>
 
@@ -151,18 +163,6 @@ export function DetailsStepClient() {
                     size="large"
                     accept="image/png,image/gif,image/svg+xml"
                 />
-
-                {/* Primary Color */}
-                <div className="flex flex-col gap-1">
-                    <ColorPicker
-                        label="Primary color"
-                        color={formData.primaryColorHex}
-                        onColorChange={(color) => form.setFieldValue("primaryColorHex", color)}
-                    />
-                    {validationErrors.primaryColorHex && (
-                        <p className="text-xs text-red-600">{validationErrors.primaryColorHex}</p>
-                    )}
-                </div>
             </div>
         </OnboardingStepCard>
     );

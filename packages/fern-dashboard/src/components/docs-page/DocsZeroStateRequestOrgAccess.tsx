@@ -15,6 +15,7 @@ import { Label } from "../ui/label";
 export declare namespace DocsZeroStateRequestOrgAccess {
     export interface Props {
         user: User;
+        hideLabel?: boolean;
     }
 }
 
@@ -30,7 +31,7 @@ function isValidUrl(url: string): boolean {
     return urlPattern.test(trimmed);
 }
 
-export function DocsZeroStateRequestOrgAccess({ user }: DocsZeroStateRequestOrgAccess.Props) {
+export function DocsZeroStateRequestOrgAccess({ user, hideLabel = false }: DocsZeroStateRequestOrgAccess.Props) {
     const posthog = usePostHog();
     const [docsUrl, setDocsUrl] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -171,7 +172,7 @@ export function DocsZeroStateRequestOrgAccess({ user }: DocsZeroStateRequestOrgA
 
     return (
         <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-3">
-            <Label>Enter your Fern docs site URL</Label>
+            {!hideLabel && <Label>Enter your Fern docs site URL</Label>}
             <Input
                 autoFocus={true}
                 type="text"
