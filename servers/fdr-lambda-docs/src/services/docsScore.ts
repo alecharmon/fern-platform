@@ -42,37 +42,37 @@ export async function getDocsScore(domain: string, pool: Pool | null): Promise<D
 }
 
 export async function triggerDocsScoreCalculation(domain: string, pool: Pool | null): Promise<DocsScoreRecord | null> {
-    if (!pool) {
-        return null;
-    }
-
     try {
-        const existingResult = await pool.query(
-            `SELECT "domain", "isProcessing" FROM "docs_scores" WHERE "domain" = $1 LIMIT 1`,
-            [domain]
-        );
+        // If we have a DB connection, check for existing processing
+        if (pool) {
+            const existingResult = await pool.query(
+                `SELECT "domain", "isProcessing" FROM "docs_scores" WHERE "domain" = $1 LIMIT 1`,
+                [domain]
+            );
 
-        if (existingResult.rows.length > 0 && existingResult.rows[0].isProcessing) {
-            const current = await getDocsScore(domain, pool);
-            if (current) {
-                return current;
+            if (existingResult.rows.length > 0 && existingResult.rows[0].isProcessing) {
+                const current = await getDocsScore(domain, pool);
+                if (current) {
+                    return current;
+                }
             }
         }
 
-        // Generate score using stub function
-        // TODO: Replace with actual scraping/calculation logic
-        const calculatedScore = generateDocsScore(domain);
+        // Generate score by scraping sitemap and processing pages
+        const calculatedScore = await generateDocsScore(domain);
         const now = new Date();
 
-        // Insert the calculated score into the database
-        await pool.query(
-            `INSERT INTO "docs_scores" ("domain", "score", "isProcessing", "updatedAt", "data")
-             VALUES ($1, $2, false, $3, $4)
-             ON CONFLICT ("domain") DO UPDATE SET "score" = $2, "isProcessing" = false, "updatedAt" = $3, "data" = $4`,
-            [domain, calculatedScore.score, now, JSON.stringify(calculatedScore.data)]
-        );
+        // If we have a DB connection, store the result
+        if (pool) {
+            await pool.query(
+                `INSERT INTO "docs_scores" ("domain", "score", "isProcessing", "updatedAt", "data")
+                 VALUES ($1, $2, false, $3, $4)
+                 ON CONFLICT ("domain") DO UPDATE SET "score" = $2, "isProcessing" = false, "updatedAt" = $3, "data" = $4`,
+                [domain, calculatedScore.score, now, JSON.stringify(calculatedScore.data)]
+            );
+        }
 
-        // Return the inserted record directly instead of re-querying
+        // Return the calculated score (works with or without DB)
         return {
             domain,
             score: calculatedScore.score,
