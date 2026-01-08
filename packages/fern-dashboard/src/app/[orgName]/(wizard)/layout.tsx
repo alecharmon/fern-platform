@@ -3,6 +3,7 @@ import { ThemeProvider } from "next-themes";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
+import { OnboardingProvider } from "@/providers/OnboardingProvider";
 
 import type { Auth0OrgName } from "../../services/auth0/types";
 import { OrgNameProvider } from "../context/OrgNameContext";
@@ -25,7 +26,9 @@ export default async function WizardLayout({
         <>
             <ServerSidePylonSetup />
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                <OrgNameProvider orgName={orgName}>{children}</OrgNameProvider>
+                <OrgNameProvider orgName={orgName}>
+                    <OnboardingProvider>{children}</OnboardingProvider>
+                </OrgNameProvider>
             </ThemeProvider>
         </>
     );

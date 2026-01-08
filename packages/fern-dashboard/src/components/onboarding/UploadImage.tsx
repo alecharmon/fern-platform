@@ -5,10 +5,7 @@ import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { cn } from "@/utils/utils";
-
-import { uploadOnboardingAsset } from "./api";
 
 type ImageSize = "small" | "large";
 
@@ -16,31 +13,29 @@ interface UploadImageProps {
     label: string;
     description: string;
     imageUrl: string | null;
-    onImageUpload: (url: string) => void;
+    onFileSelect: (file: File) => void;
     size?: ImageSize;
     accept?: string;
     defaultImageUrl?: string | null;
 }
 
-export default function UploadImage({
+export function UploadImage({
     label,
     description,
     imageUrl,
-    onImageUpload,
+    onFileSelect,
     defaultImageUrl = "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
     size = "large",
     accept = "image/*"
 }: UploadImageProps) {
-    const orgName = useOrgNameFromPathname();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [isUploading, setIsUploading] = useState(false);
     const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
 
     // If parent clears imageUrl (explicit null), ignore local preview and fall back to default.
     const effectivePreview =
         imageUrl === null ? (defaultImageUrl ?? null) : (imageUrl ?? localPreviewUrl ?? defaultImageUrl ?? null);
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) {
             return;
@@ -49,24 +44,13 @@ export default function UploadImage({
         // Create a local preview immediately
         const localPreview = URL.createObjectURL(file);
         setLocalPreviewUrl(localPreview);
-        setIsUploading(true);
 
-        try {
-            const { assetUrl } = await uploadOnboardingAsset(file, orgName);
-            onImageUpload(assetUrl);
-            setLocalPreviewUrl(assetUrl);
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            setLocalPreviewUrl(null);
-            // TODO: Show error message to user
-        } finally {
-            setIsUploading(false);
-            // Clean up the local preview URL
-            URL.revokeObjectURL(localPreview);
-            // Reset the file input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
+        // Notify parent - file will be uploaded during submission
+        onFileSelect(file);
+
+        // Reset the file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
         }
     };
 
@@ -107,17 +91,15 @@ export default function UploadImage({
                         className="hidden"
                         accept={accept}
                         onChange={handleFileChange}
-                        disabled={isUploading}
                     />
                     <Button
                         variant="outline"
                         className="flex w-fit items-center gap-1 text-xs"
                         size="default"
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
                     >
                         <UploadCloudIcon className="mr-2 h-4 w-4" />
-                        <span>{isUploading ? "Uploading..." : "Upload"}</span>
+                        <span>Upload</span>
                     </Button>
                     <p className="text-gray-1000 text-xs">{description}</p>
                 </div>

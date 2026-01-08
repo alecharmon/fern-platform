@@ -4,7 +4,6 @@ import { LogoutButton } from "@/components/auth/LogoutButton";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { FadeInTransition } from "@/components/transitions/FadeInTransition";
-import { SlideRightTransition } from "@/components/transitions/SlideRightTransition";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -28,30 +27,32 @@ export default async function DefaultOnboardingOverlaySlot() {
             </FadeInTransition>
 
             {/* Bottom left content */}
-            <div className="absolute left-2 bottom-4 flex flex-col gap-4 max-w-[200px]">
-                <SlideRightTransition>
-                    <div className="flex flex-col gap-1">
-                        <Button asChild variant="ghost" className="w-fit">
-                            <a href="https://buildwithfern.com/learn" target="_blank" rel="noopener">
-                                <HelpCircle />
-                                Support
-                            </a>
-                        </Button>
-                        <Button asChild variant="ghost" className="w-fit">
-                            <a href="https://buildwithfern.com/learn" target="_blank" rel="noopener">
-                                <BookOpen />
-                                Documentation
-                            </a>
-                        </Button>
-                    </div>
+            <div className="absolute left-2 bottom-4 max-w-[200px]">
+                <FadeInTransition>
+                    <div className="flex flex-col gap-5">
+                        <div className="flex flex-col gap-1">
+                            <Button asChild variant="ghost" className="w-fit">
+                                <a href="https://buildwithfern.com/learn" target="_blank" rel="noopener">
+                                    <HelpCircle />
+                                    Support
+                                </a>
+                            </Button>
+                            <Button asChild variant="ghost" className="w-fit">
+                                <a href="https://buildwithfern.com/learn" target="_blank" rel="noopener">
+                                    <BookOpen />
+                                    Documentation
+                                </a>
+                            </Button>
+                        </div>
 
-                    <div className="flex flex-col gap-4">
-                        <p className="px-3 text-xs text-muted-foreground">
-                            Signed in as <b>{session.user.email}</b>
-                        </p>
-                        <LogoutButton className="ml-3 w-fit" />
+                        <div className="flex flex-col gap-3">
+                            <p className="px-3 text-xs text-muted-foreground">
+                                Signed in as <b>{session.user.email}</b>
+                            </p>
+                            <LogoutButton className="ml-3 w-fit" />
+                        </div>
                     </div>
-                </SlideRightTransition>
+                </FadeInTransition>
             </div>
         </>
     );

@@ -3,8 +3,11 @@
 import { XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
+import { ConfirmScreen } from "@/components/onboarding/ConfirmScreen";
+import { LoaderScreen } from "@/components/onboarding/LoaderScreen";
+import { useDocsSubmission } from "@/components/onboarding/useDocsSubmission";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,121 +18,48 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog";
+import { useOnboarding, type WizardFormData } from "@/providers/OnboardingProvider";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
-import { uploadOnboardingAsset } from "./api";
-import ConfirmScreen from "./ConfirmScreen";
-import LoaderScreen from "./LoaderScreen";
 import UploadForm from "./UploadForm";
 
-export interface WizardFormData {
-    docsSiteName: string;
-    docsSiteUrl: string;
-    docsSiteUrlAvailable: boolean | null;
-    faviconUrl: string | null;
-    logoUrl: string | null;
-    primaryColorHex: string | null;
-    existingDocsSite: string;
-    openApiSpecUrls: { fileName: string; assetUrl: string }[];
-}
+// Re-export for backward compatibility
+export type { WizardFormData };
 
 export default function NewDocsWizardPage() {
     const orgName = useOrgNameFromPathname();
+    const { form, formData, validationErrors, validateForm } = useOnboarding();
+    const { submitDocs, isSubmitting, sessionId, error } = useDocsSubmission(orgName);
     const [currentStep, setCurrentStep] = useState<"docsSiteInfo" | "confirmation">("docsSiteInfo");
     const [showExitDialog, setShowExitDialog] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [sessionId, setSessionId] = useState<string | null>(null);
-    const [formData, setFormData] = useState<WizardFormData>({
-        docsSiteName: "",
-        docsSiteUrl: "",
-        docsSiteUrlAvailable: null,
-        faviconUrl:
-            "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
-        logoUrl:
-            "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
-        primaryColorHex: null,
-        existingDocsSite: "",
-        openApiSpecUrls: []
-    });
 
-    const handleExitClick = () => {
+    const handleExitClick = useCallback(() => {
         setShowExitDialog(true);
-    };
+    }, []);
 
-    const DEFAULT_IMAGE_FALLBACK =
-        "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633";
-
-    const ensureUploadedImage = async (url: string | null, fileName: string) => {
-        const sourceUrl = url ?? DEFAULT_IMAGE_FALLBACK;
-        if (!sourceUrl) {
-            return url;
-        }
-
-        const response = await fetch(sourceUrl);
-        if (!response.ok) {
-            throw new Error("Failed to fetch default image");
-        }
-        const blob = await response.blob();
-        const file = new File([blob], fileName, { type: blob.type || "image/png" });
-        const { assetUrl } = await uploadOnboardingAsset(file, orgName);
-        return assetUrl;
-    };
-
-    async function onSubmitForm(values: WizardFormData) {
-        if (currentStep === "docsSiteInfo") {
-            setIsLoading(true);
-            setError(null);
-
-            // Generate a unique session ID for streaming
-            const newSessionId = `session-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-            setSessionId(newSessionId);
-
-            try {
-                const [resolvedFaviconUrl, resolvedLogoUrl] = await Promise.all([
-                    ensureUploadedImage(values.faviconUrl, "favicon-default.png"),
-                    ensureUploadedImage(values.logoUrl, "logo-default.png")
-                ]);
-
-                const resolvedValues = {
-                    ...values,
-                    faviconUrl: resolvedFaviconUrl,
-                    logoUrl: resolvedLogoUrl
-                };
-
-                setFormData(resolvedValues);
-
-                const response = await fetch("/api/onboarding-docs", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        ...resolvedValues,
-                        orgName,
-                        sessionId: newSessionId
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || "Failed to create documentation");
+    const handleSubmitForm = useCallback(
+        async (values: WizardFormData) => {
+            if (currentStep === "docsSiteInfo") {
+                // Validate form before submitting
+                if (!validateForm()) {
+                    return;
                 }
 
-                // Response will just confirm streaming started
-                // Actual results come through the LoaderScreen's onComplete callback
-            } catch (err) {
-                console.error("Error creating docs:", err);
-                setError(err instanceof Error ? err.message : "An unexpected error occurred");
-                setIsLoading(false);
+                try {
+                    // Submit using shared hook
+                    await submitDocs(values);
+                } catch (err) {
+                    // Error is already handled by the hook
+                    console.error("Submission error:", err);
+                }
             }
-        }
-    }
+        },
+        [currentStep, submitDocs, validateForm]
+    );
 
-    function handleStreamComplete() {
+    const handleStreamComplete = useCallback(() => {
         // Navigate to confirmation screen
-        setIsLoading(false);
         setCurrentStep("confirmation");
-    }
+    }, []);
 
     return (
         <div className="relative flex min-h-screen w-full flex-col items-center overflow-hidden">
@@ -165,7 +95,7 @@ export default function NewDocsWizardPage() {
                         filterUnits="userSpaceOnUse"
                         colorInterpolationFilters="sRGB"
                     >
-                        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                        <feFlood floodOpacity="0" result="BackgroundImageFix" />
                         <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
                         <feGaussianBlur stdDeviation="66" result="effect1_foregroundBlur" />
                     </filter>
@@ -187,7 +117,7 @@ export default function NewDocsWizardPage() {
                 </div>
             </div>
             <AnimatePresence mode="wait">
-                {isLoading ? (
+                {isSubmitting ? (
                     <motion.div
                         key="loaderScreen"
                         initial={{ opacity: 0 }}
@@ -214,10 +144,11 @@ export default function NewDocsWizardPage() {
                         className="relative z-10 flex w-full flex-1 flex-col items-center"
                     >
                         <UploadForm
-                            wizardFormData={formData}
-                            setWizardFormData={setFormData}
-                            onSubmitForm={onSubmitForm}
-                            isLoading={isLoading}
+                            form={form}
+                            formData={formData}
+                            validationErrors={validationErrors}
+                            onSubmitForm={handleSubmitForm}
+                            isLoading={isSubmitting}
                             error={error}
                         />
                     </motion.div>
@@ -230,7 +161,7 @@ export default function NewDocsWizardPage() {
                         transition={{ duration: 0.3 }}
                         className="relative z-10 flex w-full flex-1"
                     >
-                        <ConfirmScreen docsUrl={formData.docsSiteUrl} wizardFormData={formData} />
+                        <ConfirmScreen orgName={orgName} docsUrl={formData.docsSiteUrl} wizardFormData={formData} />
                     </motion.div>
                 ) : null}
             </AnimatePresence>

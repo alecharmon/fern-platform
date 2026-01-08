@@ -13,7 +13,7 @@ export interface SplitLayoutProps {
     backgroundContent: ReactNode;
 
     /**
-     * When true, animates the card to the center of the screen
+     * When true, animates the card to expand and fill the screen minus 400px on the left
      * @default false
      */
     centerCard?: boolean;
@@ -47,16 +47,11 @@ export const SplitLayout = ({
     overlay,
     cardClassName,
     backgroundClassName,
-    animationDuration = 700
+    animationDuration = 1200
 }: SplitLayoutProps) => {
     return (
         <div
-            className={cn(
-                "relative flex flex-1",
-                "transition-all ease-in-out",
-                // When card is centered, make the container center its children
-                centerCard && "md:justify-center"
-            )}
+            className={cn("relative flex flex-1", "transition-all ease-in-out")}
             style={{
                 transitionDuration: `${animationDuration}ms`
             }}
@@ -87,12 +82,13 @@ export const SplitLayout = ({
                     "md:border-x md:border-t md:border-border md:shadow-md",
                     // Default state: left side of screen
                     !centerCard && "md:ml-2 md:w-[40%] md:min-w-[350px]",
-                    // Centered state: middle of screen - no margins, container handles centering
-                    centerCard && "md:w-[60%] md:max-w-[800px] md:mx-2",
+                    // Expanded state: fills space with 300px left margin
+                    centerCard && "md:ml-[300px] md:mr-2",
                     cardClassName
                 )}
                 style={{
-                    transition: `all ${animationDuration}ms ease-in-out`
+                    transition: `all ${animationDuration}ms ease-in-out`,
+                    ...(centerCard ? { width: "calc(100% - 300px - 0.5rem)" } : {})
                 }}
             >
                 {cardContent}

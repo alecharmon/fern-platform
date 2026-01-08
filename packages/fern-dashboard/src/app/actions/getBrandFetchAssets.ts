@@ -86,7 +86,7 @@ export const getBrandAssetsWithUpload = async ({
     organizationId
 }: {
     identifier: string;
-    organizationId: string;
+    organizationId?: string;
 }): Promise<{ success: true; updates: AutoPopulateUpdates } | { success: false; error: string }> => {
     const brandResult = await getBrandFetchAssetsService(identifier);
     if (!brandResult.success) {
@@ -104,20 +104,28 @@ export const getBrandAssetsWithUpload = async ({
 
     const iconItem = getIconItem(brandData.logos);
     if (iconItem?.src) {
-        try {
-            const uploadedUrl = await uploadImageToOnboardingAssets({
-                imageUrl: iconItem.src,
-                organizationId,
-                fileName: `logo.${iconItem.format || "png"}`,
-                contentType: iconItem.format ? `image/${iconItem.format}` : "application/octet-stream"
-            });
+        // If organizationId is provided, upload to S3
+        // Otherwise, just use the BrandFetch URL directly
+        if (organizationId) {
+            try {
+                const uploadedUrl = await uploadImageToOnboardingAssets({
+                    imageUrl: iconItem.src,
+                    organizationId,
+                    fileName: `logo.${iconItem.format || "png"}`,
+                    contentType: iconItem.format ? `image/${iconItem.format}` : "application/octet-stream"
+                });
 
-            if (uploadedUrl) {
-                updates.logoUrl = uploadedUrl;
-                updates.faviconUrl = updates.faviconUrl ?? uploadedUrl;
+                if (uploadedUrl) {
+                    updates.logoUrl = uploadedUrl;
+                    updates.faviconUrl = updates.faviconUrl ?? uploadedUrl;
+                }
+            } catch (error) {
+                console.error("Failed to process logo upload for brand fetch:", error);
             }
-        } catch (error) {
-            console.error("Failed to process logo upload for brand fetch:", error);
+        } else {
+            // No org ID - use BrandFetch URL directly, will be uploaded during submission
+            updates.logoUrl = iconItem.src;
+            updates.faviconUrl = updates.faviconUrl ?? iconItem.src;
         }
     }
 

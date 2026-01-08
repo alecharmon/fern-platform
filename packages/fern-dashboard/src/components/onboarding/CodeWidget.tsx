@@ -16,13 +16,13 @@ import {
     UploadIcon
 } from "lucide-react";
 
-import type { WizardFormData } from "./page";
+import type { WizardFormData } from "@/providers/OnboardingProvider";
 
 interface CodeWidgetProps {
     wizardFormData: WizardFormData;
 }
 
-export default function CodeWidget({ wizardFormData }: CodeWidgetProps) {
+export function CodeWidget({ wizardFormData }: CodeWidgetProps) {
     const companyName = wizardFormData.docsSiteName || "Your Company";
     const docsUrl = wizardFormData.docsSiteUrl
         ? `${wizardFormData.docsSiteUrl}.docs.buildwithfern.com`

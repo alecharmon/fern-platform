@@ -29,7 +29,7 @@ export default async function GetStartedCardSlot() {
                 <SlideUpTransition>
                     <p className="text-sm text-muted-foreground">
                         Looking for an existing Fern organization?{" "}
-                        <Link href="/login" className="fern-link">
+                        <Link href="/get-started/search" className="fern-link">
                             Find it →
                         </Link>
                     </p>

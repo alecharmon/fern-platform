@@ -9,7 +9,7 @@ import { maybeGetCurrentSession } from "../../utils/maybeGetCurrentSession";
 
 const AutoPopulateRequest = z.object({
     identifier: z.string().min(1),
-    organizationId: z.string().min(1)
+    organizationId: z.string().min(1).optional()
 });
 
 const AutoPopulateResponse = z.object({

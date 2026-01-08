@@ -31,7 +31,7 @@ export const POST = withZodValidation(
     async (req: NextRequest, validatedBody: z.infer<typeof GenerateOnboardingAssetUploadUrlRequest>) => {
         const maybeSessionData = await maybeGetCurrentSession(req);
         if (maybeSessionData.errorResponse != null) {
-            return maybeSessionData.errorResponse;
+            return NextResponse.json({ error: maybeSessionData.errorResponse }, { status: 401 });
         }
 
         const { organizationId, contentType, docsSite, fileName, fileHash } = validatedBody;

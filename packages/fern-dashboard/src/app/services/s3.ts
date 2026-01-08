@@ -7,12 +7,18 @@ let s3: S3Client | undefined;
 
 export function getS3Client() {
     if (s3 == null) {
+        console.log("[getS3Client] Initializing S3 client...");
+
         if (process.env.S3_ACCESS_KEY_ID == null) {
+            console.error("[getS3Client] S3_ACCESS_KEY_ID is not defined in environment");
             throw new Error("S3_ACCESS_KEY_ID is not defined in the environment");
         }
         if (process.env.S3_SECRET_ACCESS_KEY == null) {
+            console.error("[getS3Client] S3_SECRET_ACCESS_KEY is not defined in environment");
             throw new Error("S3_SECRET_ACCESS_KEY is not defined in the environment");
         }
+
+        console.log("[getS3Client] Creating S3Client with region: us-east-1");
         s3 = new S3Client({
             region: "us-east-1",
             credentials: {
@@ -20,6 +26,7 @@ export function getS3Client() {
                 secretAccessKey: process.env.S3_SECRET_ACCESS_KEY
             }
         });
+        console.log("[getS3Client] S3 client initialized successfully");
     }
     return s3;
 }

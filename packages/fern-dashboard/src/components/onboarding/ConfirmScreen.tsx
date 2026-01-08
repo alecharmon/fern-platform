@@ -5,18 +5,17 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
+import type { WizardFormData } from "@/providers/OnboardingProvider";
 
-import CodeWidget from "./CodeWidget";
-import type { WizardFormData } from "./page";
+import { CodeWidget } from "./CodeWidget";
 
 interface ConfirmScreenProps {
+    orgName: string;
     docsUrl: string;
     wizardFormData: WizardFormData;
 }
 
-export default function ConfirmScreen({ docsUrl, wizardFormData }: ConfirmScreenProps) {
-    const orgName = useOrgNameFromPathname();
+export function ConfirmScreen({ orgName, docsUrl, wizardFormData }: ConfirmScreenProps) {
     const [_copied, setCopied] = useState(false);
     const fullUrl = `${docsUrl}.docs.buildwithfern.com`;
 

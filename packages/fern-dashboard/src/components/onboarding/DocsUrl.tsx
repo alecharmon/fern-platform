@@ -12,7 +12,7 @@ interface DocsUrlProps {
     onChange: (value: string, available: boolean) => void;
 }
 
-export default function DocsUrl({ value, onChange }: DocsUrlProps) {
+export function DocsUrl({ value, onChange }: DocsUrlProps) {
     const [isChecking, setIsChecking] = useState(false);
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);

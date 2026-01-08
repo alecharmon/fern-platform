@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 
 import { EnableNoiseAnimation } from "@/components/EnableNoiseAnimation";
 import { SplitLayout } from "@/components/layout/SplitLayout";
+import { OnboardingProvider } from "@/providers/OnboardingProvider";
 
 /**
  * Shared layout for authentication pages using parallel routes.
@@ -29,16 +30,19 @@ export default function AuthLayout({
 }) {
     const pathname = usePathname();
     const centerCard = !pathname.includes("login");
+
     return (
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <EnableNoiseAnimation />
-            <SplitLayout
-                cardContent={children}
-                backgroundContent={background}
-                overlay={overlay}
-                centerCard={centerCard}
-                animationDuration={500}
-            />
+            <OnboardingProvider>
+                <SplitLayout
+                    cardContent={children}
+                    backgroundContent={background}
+                    overlay={overlay}
+                    centerCard={centerCard}
+                    animationDuration={500}
+                />
+            </OnboardingProvider>
         </ThemeProvider>
     );
 }

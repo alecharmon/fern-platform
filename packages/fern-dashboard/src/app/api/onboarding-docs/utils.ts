@@ -133,12 +133,10 @@ export async function createFernProject(
                 if (logoFilesToRemove.some((prefix) => file.startsWith(prefix))) {
                     const filePath = path.join(assetsDir, file);
                     await fs.unlink(filePath);
-                    console.log(`Removed default logo: ${file}`);
                 }
             }
 
             const ext = getFileExtensionFromUrl(data.logoUrl);
-            console.log("!!!Downloading logo from", data.logoUrl, "to", path.join(assetsDir, `logo.${ext}`));
             await downloadFile(data.logoUrl, path.join(assetsDir, `logo.${ext}`));
             hasLogo = true;
         } catch (error) {
@@ -154,7 +152,6 @@ export async function createFernProject(
                 if (file.startsWith("favicon.")) {
                     const filePath = path.join(assetsDir, file);
                     await fs.unlink(filePath);
-                    console.log(`Removed default favicon: ${file}`);
                 }
             }
 

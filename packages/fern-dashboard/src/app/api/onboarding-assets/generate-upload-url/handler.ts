@@ -38,7 +38,11 @@ export default async function generateOnboardingAssetUploadUrlHandler({
             data: result
         };
     } catch (error) {
-        console.error("Error creating pre-signed URL for onboarding asset:", error);
+        console.error("[generateUploadUrl handler] Error creating pre-signed URL:", {
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+            errorType: error?.constructor?.name
+        });
         return {
             errorResponse: NextResponse.json({ error: "Failed to create upload URL" }, { status: 500 })
         };

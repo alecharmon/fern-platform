@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { BackArrow } from "../BackArrow";
-import { BrandingStepClient } from "./BrandingStepClient";
+import { BackArrow } from "../../BackArrow";
+import { ApiSpecStepClient } from "./ApiSpecStepClient";
 
-export default async function DocsOnboardingStep1Page() {
+export default async function DocsOnboardingStep2Page() {
     const session = await getCurrentSession();
     if (session == null) {
         redirect("/login");
@@ -11,8 +11,8 @@ export default async function DocsOnboardingStep1Page() {
 
     return (
         <>
-            <BackArrow href="/get-started" />
-            <BrandingStepClient />
+            <BackArrow href="/get-started/docs" />
+            <ApiSpecStepClient />
         </>
     );
 }

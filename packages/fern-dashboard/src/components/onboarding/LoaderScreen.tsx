@@ -4,7 +4,7 @@ import { Loader2Icon } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-import type { WizardFormData } from "./page";
+import type { WizardFormData } from "@/providers/OnboardingProvider";
 
 interface LoaderScreenProps {
     wizardFormData: WizardFormData;
@@ -21,7 +21,7 @@ interface LogEntry {
     timestamp: string;
 }
 
-export default function LoaderScreen({
+export function LoaderScreen({
     wizardFormData,
     orgName,
     loadingMessage = "Reading your docs.yml...",

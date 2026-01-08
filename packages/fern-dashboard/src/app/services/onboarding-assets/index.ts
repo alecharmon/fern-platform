@@ -72,35 +72,45 @@ export const OnboardS3Service = {
 
         const key = pathParts.join("/");
 
-        // Create a pre-signed URL for uploading to S3
-        const s3Client = getS3Client();
-        const bucketName = getOnboardingAssetsBucketName();
+        try {
+            // Create a pre-signed URL for uploading to S3
+            const s3Client = getS3Client();
+            const bucketName = getOnboardingAssetsBucketName();
 
-        const putCommand = new PutObjectCommand({
-            Bucket: bucketName,
-            Key: key,
-            ContentType: contentType
-        });
+            const putCommand = new PutObjectCommand({
+                Bucket: bucketName,
+                Key: key,
+                ContentType: contentType
+            });
 
-        const uploadUrl = await getSignedUrl(s3Client, putCommand, {
-            expiresIn: 60 * 10 // 10 minutes expiry
-        });
+            const uploadUrl = await getSignedUrl(s3Client, putCommand, {
+                expiresIn: 60 * 10 // 10 minutes expiry
+            });
 
-        // Generate a presigned GET URL for accessing the asset after upload
-        const getCommand = new GetObjectCommand({
-            Bucket: bucketName,
-            Key: key
-        });
+            // Generate a presigned GET URL for accessing the asset after upload
+            const getCommand = new GetObjectCommand({
+                Bucket: bucketName,
+                Key: key
+            });
 
-        const assetUrl = await getSignedUrl(s3Client, getCommand, {
-            expiresIn: 60 * 60 * 24 * 7 // 7 days expiry (maximum allowed)
-        });
+            const assetUrl = await getSignedUrl(s3Client, getCommand, {
+                expiresIn: 60 * 60 * 24 * 7 // 7 days expiry (maximum allowed)
+            });
 
-        return {
-            uploadUrl,
-            assetUrl,
-            key
-        };
+            return {
+                uploadUrl,
+                assetUrl,
+                key
+            };
+        } catch (error) {
+            console.error("[OnboardS3Service] Error in generateUploadUrl:", {
+                error: error instanceof Error ? error.message : String(error),
+                stack: error instanceof Error ? error.stack : undefined,
+                errorType: error?.constructor?.name,
+                errorDetails: error
+            });
+            throw error;
+        }
     },
 
     /**

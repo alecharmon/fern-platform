@@ -1,67 +1,33 @@
-import { useForm, useStore } from "@tanstack/react-form";
+import type { useForm } from "@tanstack/react-form";
 import { ArrowRightIcon, Loader2Icon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-
+import { useCallback } from "react";
+import { AutoPopulate } from "@/components/onboarding/AutoPopulate";
+import { CodeWidget } from "@/components/onboarding/CodeWidget";
+import { ColorPicker } from "@/components/onboarding/ColorPicker";
+import { DocsUrl } from "@/components/onboarding/DocsUrl";
+import { OpenAPISpecs } from "@/components/onboarding/OpenAPISpecs";
+import { UploadImage } from "@/components/onboarding/UploadImage";
+import { nameToUrl, validateDocsSiteName, validateDocsSiteUrl } from "@/components/onboarding/validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import AutoPopulate from "./AutoPopulate";
-import CodeWidget from "./CodeWidget";
-import ColorPicker from "./ColorPicker";
-import DocsUrl from "./DocsUrl";
-import OpenAPISpecs from "./OpenAPISpecs";
-import type { WizardFormData } from "./page";
-import UploadImage from "./UploadImage";
+import type { ValidationErrors, WizardFormData } from "@/providers/OnboardingProvider";
 
 function UploadForm({
-    wizardFormData,
-    setWizardFormData,
+    form,
+    formData,
+    validationErrors,
     onSubmitForm,
     isLoading = false,
     error = null
 }: {
-    wizardFormData: WizardFormData;
-    setWizardFormData: (data: WizardFormData) => void;
+    form: ReturnType<typeof useForm<WizardFormData>>;
+    formData: WizardFormData;
+    validationErrors: ValidationErrors;
     onSubmitForm: (values: WizardFormData) => void | Promise<void>;
     isLoading?: boolean;
     error?: string | null;
 }) {
-    const [submitErrors, setSubmitErrors] = useState<{
-        openApiSpecUrls?: string;
-        primaryColorHex?: string;
-    }>({});
-
-    const form = useForm<WizardFormData>({
-        defaultValues: wizardFormData,
-        onSubmit: async ({ value }) => {
-            const errors: {
-                openApiSpecUrls?: string;
-                primaryColorHex?: string;
-            } = {};
-
-            if (!value.openApiSpecUrls || value.openApiSpecUrls.length === 0) {
-                errors.openApiSpecUrls = "Add at least one API spec. Use the default if you don't have one yet.";
-            }
-
-            if (!value.primaryColorHex || value.primaryColorHex.length === 0) {
-                errors.primaryColorHex = "Primary color is required.";
-            } else if (!/^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(value.primaryColorHex)) {
-                errors.primaryColorHex = "Invalid color hex code.";
-            }
-
-            if (Object.keys(errors).length > 0) {
-                setSubmitErrors(errors);
-                return;
-            }
-
-            setSubmitErrors({});
-            setWizardFormData(value);
-            await onSubmitForm(value);
-        }
-    });
-
-    const formValues = useStore(form.store, (state) => state.values);
-
     const applyAutoPopulateUpdates = useCallback(
         (updates: Partial<WizardFormData>) => {
             Object.entries(updates).forEach(([key, value]) => {
@@ -71,22 +37,11 @@ function UploadForm({
         [form]
     );
 
-    useEffect(() => {
-        setWizardFormData(formValues);
-    }, [formValues, setWizardFormData]);
-
-    const nameToUrl = (name: string): string => {
-        return name
-            .toLowerCase()
-            .replace(/\s+/g, "-") // Replace spaces with hyphens
-            .replace(/[^a-z0-9-]/g, ""); // Remove any non-alphanumeric characters except hyphens
-    };
-
     return (
         <form
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
                 event.preventDefault();
-                void form.handleSubmit();
+                await onSubmitForm(formData);
             }}
             className="flex w-full items-start justify-center overflow-y-hidden px-2"
         >
@@ -108,16 +63,7 @@ function UploadForm({
                                     <form.Field
                                         name="docsSiteName"
                                         validators={{
-                                            onSubmit: ({ value }) => {
-                                                const trimmed = value.trim();
-                                                if (!trimmed) {
-                                                    return "Site title is required.";
-                                                }
-                                                if (trimmed.length < 3) {
-                                                    return "Site title must be at least 3 characters.";
-                                                }
-                                                return undefined;
-                                            }
+                                            onSubmit: ({ value }) => validateDocsSiteName(value)
                                         }}
                                     >
                                         {(field) => (
@@ -150,42 +96,9 @@ function UploadForm({
                                     <form.Field
                                         name="docsSiteUrl"
                                         validators={{
-                                            onChange: ({ value }) => {
-                                                if (value.length > 63) {
-                                                    return "Subdomain must be 63 characters or fewer.";
-                                                }
-                                                if (!/^[a-z0-9-_]+$/.test(value)) {
-                                                    return "Use lowercase letters, numbers, underscores,and hyphens only.";
-                                                }
-                                                if (/--/.test(value)) {
-                                                    return "Consecutive hyphens are not allowed.";
-                                                }
-                                                if (/^[-_]|[-_]$/.test(value)) {
-                                                    return "Cannot start or end with a hyphen or underscore.";
-                                                }
-                                                return undefined;
-                                            },
-                                            onSubmit: ({ value }) => {
-                                                if (!value) {
-                                                    return "Subdomain is required.";
-                                                }
-                                                if (value.length < 3) {
-                                                    return "Subdomain must be at least 3 characters.";
-                                                }
-                                                if (value.length > 63) {
-                                                    return "Subdomain must be 63 characters or fewer.";
-                                                }
-                                                if (!/^[a-z0-9-_]+$/.test(value)) {
-                                                    return "Use lowercase letters, numbers, underscores,and hyphens only.";
-                                                }
-                                                if (/--/.test(value)) {
-                                                    return "Consecutive hyphens are not allowed.";
-                                                }
-                                                if (/^[-_]|[-_]$/.test(value)) {
-                                                    return "Cannot start or end with a hyphen or underscore.";
-                                                }
-                                                return undefined;
-                                            }
+                                            onChange: ({ value }) => validateDocsSiteUrl(value),
+                                            onSubmit: ({ value }) =>
+                                                validateDocsSiteUrl(value, formData.docsSiteUrlAvailable)
                                         }}
                                     >
                                         {(field) => (
@@ -201,46 +114,42 @@ function UploadForm({
                                         )}
                                     </form.Field>
 
-                                    <form.Field name="openApiSpecUrls">
+                                    <form.Field name="openApiSpecFiles">
                                         {(field) => (
                                             <div className="flex flex-col gap-1">
                                                 <OpenAPISpecs
-                                                    uploadedSpecs={field.state.value}
-                                                    defaultSpec={{
-                                                        fileName: "Sample OpenAPI (Petstore).json",
-                                                        assetUrl: "https://petstore3.swagger.io/api/v3/openapi.json"
-                                                    }}
-                                                    setUploadedSpecs={(specs) => field.setValue(specs)}
+                                                    uploadedFiles={field.state.value}
+                                                    setUploadedFiles={(files) => field.setValue(files)}
                                                 />
-                                                {submitErrors.openApiSpecUrls && (
+                                                {validationErrors.openApiSpecFiles && (
                                                     <p className="text-xs text-red-600">
-                                                        {submitErrors.openApiSpecUrls}
+                                                        {validationErrors.openApiSpecFiles}
                                                     </p>
                                                 )}
                                             </div>
                                         )}
                                     </form.Field>
 
-                                    <form.Field name="faviconUrl">
+                                    <form.Field name="faviconFile">
                                         {(field) => (
                                             <UploadImage
                                                 label="Favicon"
                                                 description="Upload a 32 x 32 pixel ICO, PNG, GIF, or JPG to display in browser tabs."
-                                                imageUrl={field.state.value}
-                                                onImageUpload={(url) => field.setValue(url)}
+                                                imageUrl={formData.faviconUrl}
+                                                onFileSelect={(file) => field.setValue(file)}
                                                 size="small"
                                                 accept="image/x-icon,image/png,image/gif"
                                             />
                                         )}
                                     </form.Field>
 
-                                    <form.Field name="logoUrl">
+                                    <form.Field name="logoFile">
                                         {(field) => (
                                             <UploadImage
                                                 label="Logo"
                                                 description="This will be used as the main logo on the top-left corner of the Docs site."
-                                                imageUrl={field.state.value}
-                                                onImageUpload={(url) => field.setValue(url)}
+                                                imageUrl={formData.logoUrl}
+                                                onFileSelect={(file) => field.setValue(file)}
                                                 size="large"
                                                 accept="image/png,image/gif,image/svg+xml"
                                             />
@@ -255,9 +164,9 @@ function UploadForm({
                                                     color={field.state.value}
                                                     onColorChange={(color) => field.setValue(color)}
                                                 />
-                                                {submitErrors.primaryColorHex && (
+                                                {validationErrors.primaryColorHex && (
                                                     <p className="text-xs text-red-600">
-                                                        {submitErrors.primaryColorHex}
+                                                        {validationErrors.primaryColorHex}
                                                     </p>
                                                 )}
                                             </div>
@@ -290,7 +199,7 @@ function UploadForm({
                         </div>
                     </div>
                 </div>
-                <CodeWidget wizardFormData={wizardFormData} />
+                <CodeWidget wizardFormData={formData} />
             </div>
         </form>
     );

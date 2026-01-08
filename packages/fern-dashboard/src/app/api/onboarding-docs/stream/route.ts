@@ -339,15 +339,6 @@ export async function GET(req: NextRequest) {
                             // Read all files from the entire project (including README.md at root)
                             const files = await readAllFilesFromDirectory(tempDir);
 
-                            // Log binary files for debugging
-                            const binaryFiles = files.filter((f) => f.encoding === "base64");
-                            if (binaryFiles.length > 0) {
-                                console.log(
-                                    `[Wizard] Found ${binaryFiles.length} binary files:`,
-                                    binaryFiles.map((f) => f.path)
-                                );
-                            }
-
                             const repoName = data.docsSiteUrl.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
                             const demoCreationBotOwner = process.env.FERN_DEMO_CREATION_BOT_OWNER;
 
@@ -431,8 +422,6 @@ export async function GET(req: NextRequest) {
                 // Link GitHub repo to docs site if created
                 if (githubRepoUrl && session.accessToken) {
                     try {
-                        console.log(`[Wizard] Linking GitHub repo with user session token`);
-
                         const postDocsGithubSourceHandler = (await import("@/app/api/post-docs-github-source/handler"))
                             .default;
 

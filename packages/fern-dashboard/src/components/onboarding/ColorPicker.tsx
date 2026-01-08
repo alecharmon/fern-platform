@@ -12,7 +12,7 @@ interface ColorPickerProps {
     onColorChange: (color: string) => void;
 }
 
-export default function ColorPicker({ label, color, onColorChange }: ColorPickerProps) {
+export function ColorPicker({ label, color, onColorChange }: ColorPickerProps) {
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [currentColor, setCurrentColor] = useState<string | null>(color);
     const pickerRef = useRef<HTMLDivElement>(null);
