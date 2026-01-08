@@ -110,7 +110,7 @@ export default function TemplatesPage() {
                     </Link>
                     <Link
                         href="/create-docs"
-                        className="flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                        className="flex items-center gap-2 text-sm text-text-description transition-colors hover:text-gray-1200"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Back
@@ -146,7 +146,7 @@ export default function TemplatesPage() {
                                     </div>
                                 )}
                                 <span className="font-medium text-gray-900 dark:text-white">{template.name}</span>
-                                <span className="text-sm text-gray-700 dark:text-gray-300">{template.description}</span>
+                                <span className="text-sm text-text-description">{template.description}</span>
                             </button>
                         ))}
                     </div>

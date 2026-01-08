@@ -91,7 +91,7 @@ export default function CreateDocsPage() {
                                     <h2 className="text-lg font-medium text-gray-900 dark:text-white">
                                         Select from templates
                                     </h2>
-                                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    <p className="mt-1 text-sm text-text-muted">
                                         Choose a pre-built template to get started quickly
                                     </p>
                                 </div>
@@ -117,7 +117,7 @@ export default function CreateDocsPage() {
                                 <h2 className="text-lg font-medium text-gray-900 dark:text-white">
                                     Enter an existing site
                                 </h2>
-                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                <p className="mt-1 text-sm text-text-muted">
                                     Import configuration from an existing docs site
                                 </p>
                             </div>

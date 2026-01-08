@@ -118,6 +118,10 @@
   /* editor toolbar heights */
   --header-toolbar-height: 54px;
   --header-toolbar-height-mobile: 108px;
+
+  /* semantic text colors for create-docs wizard */
+  --text-description: var(--gray-1100);  /* descriptions and helper text */
+  --text-muted: var(--gray-1000);         /* hints and secondary info */
 }
 
 .dark {
@@ -319,6 +323,10 @@
 
   /* fern brand */
   --color-fern: #51c233;
+
+  /* semantic text colors */
+  --color-text-description: var(--text-description);
+  --color-text-muted: var(--text-muted);
 }
 
 @layer base {

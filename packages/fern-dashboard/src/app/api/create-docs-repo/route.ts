@@ -18,12 +18,15 @@ interface CreateDocsRepoRequest {
     orgName: string;
     urlPrefix: string; // The subdomain prefix (e.g., "my-company" for my-company.docs.buildwithfern.com)
     templateId: "classic" | "minimal" | "products" | "no-top-bar";
+    companyName?: string; // Replaces "Fern" throughout the docs
     primaryColorHex?: string;
     fonts?: {
         headings?: string;
         body?: string;
         code?: string;
     };
+    logoBase64?: string; // Base64 data URL for logo image
+    faviconBase64?: string; // Base64 data URL for favicon image
 }
 
 /**
@@ -89,8 +92,124 @@ async function readAllFilesFromDirectory(
     return files;
 }
 
+/**
+ * Extracts the file extension from a base64 data URL
+ */
+function getExtensionFromBase64(base64: string): string {
+    const match = base64.match(/^data:image\/([^;]+);base64,/);
+    if (match?.[1]) {
+        const mimeType = match[1];
+        // Map common MIME types to extensions
+        const mimeToExt: Record<string, string> = {
+            png: "png",
+            jpeg: "jpg",
+            jpg: "jpg",
+            gif: "gif",
+            "svg+xml": "svg",
+            "x-icon": "ico",
+            "vnd.microsoft.icon": "ico"
+        };
+        return mimeToExt[mimeType] || "png";
+    }
+    return "png";
+}
+
+/**
+ * Converts a base64 data URL to a Buffer
+ */
+function base64ToBuffer(base64: string): Buffer {
+    const base64Data = base64.replace(/^data:image\/[^;]+;base64,/, "");
+    return Buffer.from(base64Data, "base64");
+}
+
+/**
+ * Downloads a Google Font and returns the woff2 buffer for the latin subset.
+ * Google Fonts returns multiple subsets (cyrillic, greek, latin, etc.) - we specifically
+ * extract the "latin" subset which covers standard ASCII characters (U+0000-00FF).
+ */
+async function downloadGoogleFont(fontName: string, weight: number = 400): Promise<Buffer | null> {
+    try {
+        // Request CSS from Google Fonts with a modern user-agent to get woff2
+        const cssUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, "+")}:wght@${weight}&display=swap`;
+        const cssResponse = await fetch(cssUrl, {
+            headers: {
+                // Modern user-agent to get woff2 format
+                "User-Agent":
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+        });
+
+        if (!cssResponse.ok) {
+            console.error(`Failed to fetch font CSS for ${fontName}: ${cssResponse.statusText}`);
+            return null;
+        }
+
+        const css = await cssResponse.text();
+
+        // Extract the woff2 URL specifically from the "latin" subset block.
+        // Google Fonts CSS has comments like "/* latin */" before each @font-face block.
+        // The latin subset covers U+0000-00FF which includes standard ASCII characters.
+        const latinBlockMatch = css.match(
+            /\/\*\s*latin\s*\*\/\s*@font-face\s*\{[^}]*src:\s*url\((https:\/\/fonts\.gstatic\.com\/[^)]+\.woff2)\)[^}]*unicode-range:\s*U\+0000-00FF/
+        );
+
+        if (!latinBlockMatch) {
+            // Fallback: try to find any woff2 URL if latin block not found
+            console.warn(`Could not find latin subset for ${fontName}, trying fallback`);
+            const fallbackMatch = css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+\.woff2)\)/);
+            if (!fallbackMatch) {
+                console.error(`Could not find any woff2 URL in CSS for ${fontName}`);
+                return null;
+            }
+            const fontResponse = await fetch(fallbackMatch[1]!);
+            if (!fontResponse.ok) {
+                console.error(`Failed to download font file for ${fontName}: ${fontResponse.statusText}`);
+                return null;
+            }
+            return Buffer.from(await fontResponse.arrayBuffer());
+        }
+
+        // Download the woff2 file for the latin subset
+        const fontResponse = await fetch(latinBlockMatch[1]!);
+        if (!fontResponse.ok) {
+            console.error(`Failed to download font file for ${fontName}: ${fontResponse.statusText}`);
+            return null;
+        }
+
+        return Buffer.from(await fontResponse.arrayBuffer());
+    } catch (err) {
+        console.error(`Error downloading font ${fontName}:`, err);
+        return null;
+    }
+}
+
+/**
+ * Recursively replaces "Welcome to Fern" in all markdown files in a directory
+ */
+async function replaceWelcomeTextInMarkdownFiles(dirPath: string, companyName: string): Promise<void> {
+    const entries = await fs.readdir(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+
+        if (entry.isDirectory()) {
+            await replaceWelcomeTextInMarkdownFiles(fullPath, companyName);
+        } else if (entry.name.endsWith(".md") || entry.name.endsWith(".mdx")) {
+            const content = await fs.readFile(fullPath, "utf-8");
+            const updatedContent = content.replace(/Welcome to Fern/gi, `Welcome to ${companyName}`);
+            if (content !== updatedContent) {
+                await fs.writeFile(fullPath, updatedContent);
+            }
+        }
+    }
+}
+
 async function customizeTemplate(data: CreateDocsRepoRequest, projectDir: string): Promise<void> {
     const fernDir = path.join(projectDir, "fern");
+    const assetsDir = path.join(fernDir, "assets");
+
+    // Create assets directory if it doesn't exist
+    await fs.mkdir(assetsDir, { recursive: true });
 
     // Update fern.config.json with org name
     const fernConfigPath = path.join(fernDir, "fern.config.json");
@@ -115,6 +234,11 @@ async function customizeTemplate(data: CreateDocsRepoRequest, projectDir: string
         docsConfigAny.instances.push({ url: `${data.urlPrefix}.docs.buildwithfern.com` });
     }
 
+    // Set title if company name is provided
+    if (data.companyName) {
+        docsConfigAny.title = `${data.companyName} | Documentation`;
+    }
+
     // Add colors if provided
     if (data.primaryColorHex) {
         docsConfigAny.colors = {
@@ -126,18 +250,50 @@ async function customizeTemplate(data: CreateDocsRepoRequest, projectDir: string
         };
     }
 
-    // Add typography/fonts if provided
+    // Add typography/fonts if provided - download fonts and save to assets
     if (data.fonts) {
-        const typography: Record<string, { name: string }> = {};
+        const fontsDir = path.join(fernDir, "docs", "assets", "fonts");
+        await fs.mkdir(fontsDir, { recursive: true });
 
+        const typography: Record<string, { name: string; path: string }> = {};
+
+        // Download and save headings font
         if (data.fonts.headings && data.fonts.headings !== "default") {
-            typography.headingsFont = { name: data.fonts.headings };
+            const fontBuffer = await downloadGoogleFont(data.fonts.headings, 600);
+            if (fontBuffer) {
+                const fileName = `${data.fonts.headings.replace(/ /g, "-")}-SemiBold.woff2`;
+                await fs.writeFile(path.join(fontsDir, fileName), fontBuffer);
+                typography.headingsFont = {
+                    name: data.fonts.headings,
+                    path: `./docs/assets/fonts/${fileName}`
+                };
+            }
         }
+
+        // Download and save body font
         if (data.fonts.body && data.fonts.body !== "default") {
-            typography.bodyFont = { name: data.fonts.body };
+            const fontBuffer = await downloadGoogleFont(data.fonts.body, 400);
+            if (fontBuffer) {
+                const fileName = `${data.fonts.body.replace(/ /g, "-")}-Regular.woff2`;
+                await fs.writeFile(path.join(fontsDir, fileName), fontBuffer);
+                typography.bodyFont = {
+                    name: data.fonts.body,
+                    path: `./docs/assets/fonts/${fileName}`
+                };
+            }
         }
+
+        // Download and save code font
         if (data.fonts.code && data.fonts.code !== "default") {
-            typography.codeFont = { name: data.fonts.code };
+            const fontBuffer = await downloadGoogleFont(data.fonts.code, 400);
+            if (fontBuffer) {
+                const fileName = `${data.fonts.code.replace(/ /g, "-")}-Regular.woff2`;
+                await fs.writeFile(path.join(fontsDir, fileName), fontBuffer);
+                typography.codeFont = {
+                    name: data.fonts.code,
+                    path: `./docs/assets/fonts/${fileName}`
+                };
+            }
         }
 
         if (Object.keys(typography).length > 0) {
@@ -145,11 +301,48 @@ async function customizeTemplate(data: CreateDocsRepoRequest, projectDir: string
         }
     }
 
+    // Save logo file and update docs.yml if provided
+    if (data.logoBase64) {
+        const logoExt = getExtensionFromBase64(data.logoBase64);
+        const logoFileName = `logo.${logoExt}`;
+        const logoPath = path.join(assetsDir, logoFileName);
+        await fs.writeFile(logoPath, base64ToBuffer(data.logoBase64));
+
+        // Set logo in docs.yml (use same file for light and dark)
+        docsConfigAny.logo = {
+            light: `./assets/${logoFileName}`,
+            dark: `./assets/${logoFileName}`,
+            height: 30
+        };
+    }
+
+    // Save favicon file and update docs.yml if provided
+    if (data.faviconBase64) {
+        const faviconExt = getExtensionFromBase64(data.faviconBase64);
+        const faviconFileName = `favicon.${faviconExt}`;
+        const faviconPath = path.join(assetsDir, faviconFileName);
+        await fs.writeFile(faviconPath, base64ToBuffer(data.faviconBase64));
+
+        // Set favicon in docs.yml
+        docsConfigAny.favicon = `./assets/${faviconFileName}`;
+    }
+
     // Write updated docs.yml
     await fs.writeFile(
         docsYmlPath,
         `# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json\n\n${yaml.dump(docsConfig)}`
     );
+
+    // Replace "Welcome to Fern" with company name in markdown files
+    if (data.companyName) {
+        const docsDir = path.join(fernDir, "docs");
+        try {
+            await replaceWelcomeTextInMarkdownFiles(docsDir, data.companyName);
+        } catch (_err) {
+            // Docs directory might not exist in all templates
+            console.log("No docs directory found, skipping text replacement");
+        }
+    }
 
     // Create GitHub Actions workflow to auto-publish docs on push
     const workflowDir = path.join(projectDir, ".github", "workflows");

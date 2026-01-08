@@ -1,15 +1,18 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UploadCloudIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { ChromePicker } from "react-color";
 
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+import { TemplatePreview } from "./TemplatePreview";
 
 const TEMPLATES = [
     { id: "classic", name: "Classic", previewUrl: "https://docs-templates-classic.docs.buildwithfern.com" },
@@ -52,6 +55,18 @@ const CODE_FONTS = [
     { label: "Ubuntu Mono", value: "Ubuntu Mono" }
 ];
 
+/**
+ * Convert a File to a base64 data URL for storage in sessionStorage
+ */
+async function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
 function CustomizePageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -59,12 +74,37 @@ function CustomizePageContent() {
 
     const template = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0]!;
 
+    const [companyName, setCompanyName] = useState("");
     const [primaryColor, setPrimaryColor] = useState<string | null>(null);
     const [headingsFont, setHeadingsFont] = useState("");
     const [bodyFont, setBodyFont] = useState("");
     const [codeFont, setCodeFont] = useState("");
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const pickerRef = useRef<HTMLDivElement>(null);
+
+    // Logo and favicon
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+    const [faviconFile, setFaviconFile] = useState<File | null>(null);
+    const [faviconPreviewUrl, setFaviconPreviewUrl] = useState<string | null>(null);
+    const logoInputRef = useRef<HTMLInputElement>(null);
+    const faviconInputRef = useRef<HTMLInputElement>(null);
+
+    const handleLogoSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setLogoFile(file);
+            setLogoPreviewUrl(URL.createObjectURL(file));
+        }
+    }, []);
+
+    const handleFaviconSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setFaviconFile(file);
+            setFaviconPreviewUrl(URL.createObjectURL(file));
+        }
+    }, []);
 
     // Close picker when clicking outside
     useEffect(() => {
@@ -83,16 +123,23 @@ function CustomizePageContent() {
         };
     }, [isPickerOpen]);
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
+        // Convert files to base64 for storage in sessionStorage
+        const logoBase64 = logoFile ? await fileToBase64(logoFile) : null;
+        const faviconBase64 = faviconFile ? await fileToBase64(faviconFile) : null;
+
         // Store customization in sessionStorage for the setup page to read
         sessionStorage.setItem(
             "docsCustomization",
             JSON.stringify({
                 templateId,
+                companyName: companyName || null,
                 primaryColor,
                 headingsFont,
                 bodyFont,
-                codeFont
+                codeFont,
+                logoBase64,
+                faviconBase64
             })
         );
 
@@ -154,7 +201,7 @@ function CustomizePageContent() {
                     </Link>
                     <Link
                         href={`/create-docs/templates`}
-                        className="flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                        className="flex items-center gap-2 text-sm text-text-description transition-colors hover:text-gray-1200"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Back
@@ -172,13 +219,106 @@ function CustomizePageContent() {
                     className="flex w-80 flex-shrink-0 flex-col"
                 >
                     <h1 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">Customize your docs</h1>
-                    <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mb-6 text-sm text-text-description">
                         All fields are optional. You can customize these later.
                     </p>
 
-                    <div className="flex flex-col gap-6">
-                        {/* Primary Color */}
+                    <div className="max-h-[calc(100vh-280px)] flex-col gap-6 overflow-y-auto pr-2">
+                        {/* Company Name */}
                         <div className="flex flex-col gap-2">
+                            <Label className="text-sm font-medium text-gray-900 dark:text-white">Company Name</Label>
+                            <Input
+                                type="text"
+                                placeholder="Acme Inc."
+                                value={companyName}
+                                onChange={(e) => setCompanyName(e.target.value)}
+                                className="w-full"
+                            />
+                            <p className="text-xs text-text-muted">
+                                This will replace &quot;Fern&quot; throughout your docs.
+                            </p>
+                        </div>
+
+                        {/* Logo Upload */}
+                        <div className="mt-6 flex flex-col gap-2">
+                            <Label className="text-sm font-medium text-gray-900 dark:text-white">Logo</Label>
+                            <div className="flex items-center gap-3">
+                                <div
+                                    className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 bg-gray-50 transition-all hover:border-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500"
+                                    onClick={() => logoInputRef.current?.click()}
+                                >
+                                    {logoPreviewUrl ? (
+                                        // biome-ignore lint/performance/noImgElement: blob URL preview
+                                        <img
+                                            src={logoPreviewUrl}
+                                            alt="Logo preview"
+                                            className="h-full w-full object-contain p-1"
+                                        />
+                                    ) : (
+                                        <UploadCloudIcon className="h-4 w-4 text-gray-400" />
+                                    )}
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => logoInputRef.current?.click()}
+                                        className="text-left text-sm text-text-description hover:text-gray-1200"
+                                    >
+                                        {logoPreviewUrl ? "Change logo" : "Upload logo"}
+                                    </button>
+                                    <p className="text-xs text-text-muted">PNG, SVG, or GIF</p>
+                                </div>
+                                <input
+                                    ref={logoInputRef}
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/png,image/gif,image/svg+xml"
+                                    onChange={handleLogoSelect}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Favicon Upload */}
+                        <div className="mt-6 flex flex-col gap-2">
+                            <Label className="text-sm font-medium text-gray-900 dark:text-white">Favicon</Label>
+                            <div className="flex items-center gap-3">
+                                <div
+                                    className="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 bg-gray-50 transition-all hover:border-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500"
+                                    onClick={() => faviconInputRef.current?.click()}
+                                >
+                                    {faviconPreviewUrl ? (
+                                        // biome-ignore lint/performance/noImgElement: blob URL preview
+                                        <img
+                                            src={faviconPreviewUrl}
+                                            alt="Favicon preview"
+                                            className="h-full w-full object-contain p-1"
+                                        />
+                                    ) : (
+                                        <UploadCloudIcon className="h-4 w-4 text-gray-400" />
+                                    )}
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => faviconInputRef.current?.click()}
+                                        className="text-left text-sm text-text-description hover:text-gray-1200"
+                                    >
+                                        {faviconPreviewUrl ? "Change favicon" : "Upload favicon"}
+                                    </button>
+                                    <p className="text-xs text-text-muted">32x32 ICO, PNG, or GIF</p>
+                                </div>
+                                <input
+                                    ref={faviconInputRef}
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/x-icon,image/png,image/gif"
+                                    onChange={handleFaviconSelect}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Primary Color */}
+                        <div className="mt-6 flex flex-col gap-2">
                             <Label className="text-sm font-medium text-gray-900 dark:text-white">Primary Color</Label>
                             <div className="relative flex items-center gap-3">
                                 <div
@@ -210,12 +350,12 @@ function CustomizePageContent() {
                         </div>
 
                         {/* Fonts Section */}
-                        <div className="flex flex-col gap-4">
+                        <div className="mt-6 flex flex-col gap-4">
                             <Label className="text-sm font-medium text-gray-900 dark:text-white">Typography</Label>
 
                             {/* Headings Font */}
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs text-gray-600 dark:text-gray-400">Headings</label>
+                                <label className="text-xs text-text-description">Headings</label>
                                 <Select value={headingsFont} onValueChange={setHeadingsFont}>
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Default" />
@@ -232,7 +372,7 @@ function CustomizePageContent() {
 
                             {/* Body Font */}
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs text-gray-600 dark:text-gray-400">Body</label>
+                                <label className="text-xs text-text-description">Body</label>
                                 <Select value={bodyFont} onValueChange={setBodyFont}>
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Default" />
@@ -249,7 +389,7 @@ function CustomizePageContent() {
 
                             {/* Code Font */}
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs text-gray-600 dark:text-gray-400">Code</label>
+                                <label className="text-xs text-text-description">Code</label>
                                 <Select value={codeFont} onValueChange={setCodeFont}>
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Default" />
@@ -264,7 +404,7 @@ function CustomizePageContent() {
                                 </Select>
                             </div>
 
-                            <p className="text-xs text-gray-500 dark:text-gray-500">
+                            <p className="text-xs text-text-muted">
                                 Want a custom font? You can configure this manually in your docs.yml later.
                             </p>
                         </div>
@@ -273,7 +413,8 @@ function CustomizePageContent() {
                     {/* Continue button */}
                     <button
                         onClick={handleContinue}
-                        className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-3 font-medium text-white transition-colors hover:bg-green-600"
+                        className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-3 font-medium text-white transition-all hover:brightness-90"
+                        style={primaryColor ? { backgroundColor: primaryColor } : undefined}
                     >
                         Continue
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,10 +425,22 @@ function CustomizePageContent() {
                     {/* Skip link */}
                     <button
                         onClick={() => {
-                            sessionStorage.setItem("docsCustomization", JSON.stringify({ templateId }));
+                            sessionStorage.setItem(
+                                "docsCustomization",
+                                JSON.stringify({
+                                    templateId,
+                                    companyName: null,
+                                    primaryColor: null,
+                                    headingsFont: "",
+                                    bodyFont: "",
+                                    codeFont: "",
+                                    logoBase64: null,
+                                    faviconBase64: null
+                                })
+                            );
                             router.push("/create-docs/setup");
                         }}
-                        className="mt-3 text-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                        className="mt-3 text-center text-sm text-text-muted transition-colors hover:text-gray-1200"
                     >
                         Skip customization
                     </button>
@@ -329,12 +482,17 @@ function CustomizePageContent() {
                         </div>
                     </div>
 
-                    {/* Iframe */}
+                    {/* Preview */}
                     <div className="relative flex-1 overflow-hidden rounded-b-xl border border-t-0 border-gray-200 bg-white dark:border-gray-700">
-                        <iframe
-                            src={template.previewUrl}
+                        <TemplatePreview
+                            templateId={templateId}
+                            primaryColor={primaryColor}
+                            headingsFont={headingsFont}
+                            bodyFont={bodyFont}
+                            codeFont={codeFont}
+                            logoUrl={logoPreviewUrl}
+                            companyName={companyName || null}
                             className="h-full w-full"
-                            title={`Preview of ${template.name}`}
                         />
                     </div>
                 </motion.div>

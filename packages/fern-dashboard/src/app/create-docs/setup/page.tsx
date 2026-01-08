@@ -18,10 +18,13 @@ import { CreateOrganizationModalInline } from "./CreateOrganizationModalInline";
 
 interface DocsCustomization {
     templateId: "classic" | "minimal" | "products" | "no-top-bar";
-    primaryColor?: string;
+    companyName?: string | null;
+    primaryColor?: string | null;
     headingsFont?: string;
     bodyFont?: string;
     codeFont?: string;
+    logoBase64?: string | null;
+    faviconBase64?: string | null;
 }
 
 export default function SetupPage() {
@@ -143,12 +146,15 @@ export default function SetupPage() {
                     orgName: selectedOrgName,
                     urlPrefix,
                     templateId: customization.templateId,
+                    companyName: customization.companyName,
                     primaryColorHex: customization.primaryColor,
                     fonts: {
                         headings: customization.headingsFont,
                         body: customization.bodyFont,
                         code: customization.codeFont
-                    }
+                    },
+                    logoBase64: customization.logoBase64,
+                    faviconBase64: customization.faviconBase64
                 })
             });
 
@@ -242,7 +248,7 @@ export default function SetupPage() {
                     </Link>
                     <Link
                         href="/create-docs/customize"
-                        className="flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                        className="flex items-center gap-2 text-sm text-text-description transition-colors hover:text-gray-1200"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Back
@@ -262,7 +268,7 @@ export default function SetupPage() {
                         <h1 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">
                             Set up your docs site
                         </h1>
-                        <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+                        <p className="mb-6 text-sm text-text-description">
                             Choose a URL and organization for your documentation.
                         </p>
 
@@ -278,7 +284,7 @@ export default function SetupPage() {
                                         onChange={(e) => setUrlPrefix(e.target.value.toLowerCase())}
                                         className="flex-1"
                                     />
-                                    <span className="flex items-center gap-2 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="flex items-center gap-2 whitespace-nowrap text-sm text-text-description">
                                         .docs.buildwithfern.com
                                         {isCheckingUrl && <Loader2 className="h-4 w-4 animate-spin text-gray-500" />}
                                         {!isCheckingUrl && isUrlAvailable === false && (
@@ -300,12 +306,12 @@ export default function SetupPage() {
                                 {isLoading ? (
                                     <div className="flex h-10 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 dark:border-gray-700 dark:bg-gray-800">
                                         <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                                        <span className="text-sm text-gray-500">Loading organizations...</span>
+                                        <span className="text-sm text-text-muted">Loading organizations...</span>
                                     </div>
                                 ) : orgs.length === 0 ? (
                                     <div className="flex h-10 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 dark:border-gray-700 dark:bg-gray-800">
                                         <Building2 className="h-4 w-4 text-gray-500" />
-                                        <span className="text-sm text-gray-500">No organizations found</span>
+                                        <span className="text-sm text-text-muted">No organizations found</span>
                                     </div>
                                 ) : (
                                     <Select value={selectedOrgName} onValueChange={setSelectedOrgName}>
@@ -337,9 +343,9 @@ export default function SetupPage() {
                             {/* Template info */}
                             {customization && (
                                 <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    <p className="text-xs text-text-muted">
                                         Template:{" "}
-                                        <span className="font-medium text-gray-700 dark:text-gray-300 capitalize">
+                                        <span className="font-medium text-text-description capitalize">
                                             {customization.templateId.replace(/-/g, " ")}
                                         </span>
                                     </p>
@@ -371,7 +377,7 @@ export default function SetupPage() {
                                 )}
                             </Button>
 
-                            <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-center text-xs text-text-muted">
                                 A private GitHub repository will be created with your documentation template.
                             </p>
                         </div>
