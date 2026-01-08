@@ -1478,7 +1478,7 @@ importers:
         version: 8.16.3
       posthog-js:
         specifier: ^1.298.0
-        version: 1.298.0
+        version: 1.315.1
       posthog-node:
         specifier: ^5.14.0
         version: 5.14.0
@@ -1854,7 +1854,7 @@ importers:
         version: 1.3.0
       posthog-js:
         specifier: ^1.298.0
-        version: 1.298.0
+        version: 1.315.1
       pretty-bytes:
         specifier: ^6.1.1
         version: 6.1.1
@@ -8051,6 +8051,12 @@ packages:
 
   '@posthog/core@1.6.0':
     resolution: {integrity: sha512-Tbh8UACwbb7jFdDC7wwXHtfNzO+4wKh3VbyMHmp2UBe6w1jliJixexTJNfkqdGZm+ht3M10mcKvGGPnoZ2zLBg==}
+
+  '@posthog/core@1.9.0':
+    resolution: {integrity: sha512-j7KSWxJTUtNyKynLt/p0hfip/3I46dWU2dk+pt7dKRoz2l5CYueHuHK4EO7Wlgno5yo1HO4sc4s30MXMTICHJw==}
+
+  '@posthog/types@1.315.1':
+    resolution: {integrity: sha512-m2NggfJRYby3AkAES6yHMLURvTeK+rxN+5nmkuaCbOXQPdtWacSFIG5ZwN8d3crSx+WpiFauCDdr1sc3ZFkTHg==}
 
   '@prisma/client@5.13.0':
     resolution: {integrity: sha512-uYdfpPncbZ/syJyiYBwGZS8Gt1PTNoErNYMuqHDa2r30rNSFtgTA/LXsSk55R7pdRTMi5pHkeP9B14K6nHmwkg==}
@@ -19770,8 +19776,8 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.298.0:
-    resolution: {integrity: sha512-Zwzsf7TO8qJ6DFLuUlQSsT/5OIOcxSBZlKOSk3satkEnwKdmnBXUuxgVXRHrvq1kj7OB2PVAPgZiQ8iHHj9DRA==}
+  posthog-js@1.315.1:
+    resolution: {integrity: sha512-ambT1azidu4hKhSmB95KdLY6yHfj9vvz1XNn68syh8DtkQ0uSdjpRY6tjMp96EQtPqCrDKr+8QpcusT1KQEZSA==}
 
   posthog-node@5.14.0:
     resolution: {integrity: sha512-cKY2Wdtjx5wlIWL9/Im5/FT+zeKaYjtG94rfrIFKTVoCdwV7S9PaU8frLD/8TpGx1SwOFgw7QTjhpa/vnxTlww==}
@@ -19780,8 +19786,8 @@ packages:
   potpack@1.0.2:
     resolution: {integrity: sha512-choctRBIV9EMT9WGAZHn3V7t0Z2pMQyl0EZE6pFc/6ml3ssw7Dlf/oAOvFwjm1HVsqfQN8GfeFyJ+d8tRzqueQ==}
 
-  preact@10.27.2:
-    resolution: {integrity: sha512-5SYSgFKSyhCbk6SrXyMpqjb5+MQBgfvEKE/OC+PujcY34sOpqtr+0AZQtPYx5IA6VxynQ7rUPCtKzyovpj9Bpg==}
+  preact@10.27.3:
+    resolution: {integrity: sha512-ZieIP3zQHiQsNF3BA+SNVS8dcuRIg/nsxlkFbCMBLS2L1Ww4Bkxd9n6Md2A1crfTZsEbQPADV0neYmh/EElgeQ==}
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -26323,7 +26329,7 @@ snapshots:
       eth-json-rpc-filters: 6.0.1
       eventemitter3: 5.0.1
       keccak: 3.0.4
-      preact: 10.27.2
+      preact: 10.27.3
       sha.js: 2.4.12
     transitivePeerDependencies:
       - supports-color
@@ -26333,7 +26339,7 @@ snapshots:
       '@noble/hashes': 1.8.0
       clsx: 1.2.1
       eventemitter3: 5.0.1
-      preact: 10.27.2
+      preact: 10.27.3
 
   '@colors/colors@1.6.0': {}
 
@@ -29096,6 +29102,12 @@ snapshots:
   '@posthog/core@1.6.0':
     dependencies:
       cross-spawn: 7.0.5
+
+  '@posthog/core@1.9.0':
+    dependencies:
+      cross-spawn: 7.0.5
+
+  '@posthog/types@1.315.1': {}
 
   '@prisma/client@5.13.0(prisma@5.13.0)':
     optionalDependencies:
@@ -41552,7 +41564,7 @@ snapshots:
       hogan.js: 3.0.2
       htm: 3.1.1
       instantsearch-ui-components: 0.15.0(react@19.0.1)
-      preact: 10.27.2
+      preact: 10.27.3
       qs: 6.14.1
       react: 19.0.1
       search-insights: 2.17.2
@@ -45246,12 +45258,13 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.298.0:
+  posthog-js@1.315.1:
     dependencies:
-      '@posthog/core': 1.6.0
+      '@posthog/core': 1.9.0
+      '@posthog/types': 1.315.1
       core-js: 3.40.0
       fflate: 0.4.8
-      preact: 10.27.2
+      preact: 10.27.3
       web-vitals: 4.2.4
 
   posthog-node@5.14.0:
@@ -45260,7 +45273,7 @@ snapshots:
 
   potpack@1.0.2: {}
 
-  preact@10.27.2: {}
+  preact@10.27.3: {}
 
   prelude-ls@1.2.1: {}
 
