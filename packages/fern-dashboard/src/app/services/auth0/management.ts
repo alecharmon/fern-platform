@@ -576,6 +576,44 @@ export async function getUserGithubToken(userId: Auth0UserID): Promise<string | 
     return user.identities.find((identity) => identity.provider === "github")?.access_token;
 }
 
+export async function getUserGithubUsername(userId: Auth0UserID): Promise<string | undefined> {
+    const auth0 = getAuth0ManagementClient();
+    const user = (await auth0.users.get({ id: userId })).data;
+    const githubIdentity = user.identities.find((identity) => identity.provider === "github");
+
+    if (!githubIdentity) {
+        return undefined;
+    }
+
+    // The profileData contains the GitHub username in the 'login' field
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const profileData = (githubIdentity as any).profileData;
+    if (profileData?.login) {
+        return profileData.login;
+    }
+
+    // Fallback: if profileData is not available, we need to fetch from GitHub API
+    // using the access token
+    if (githubIdentity.access_token) {
+        try {
+            const response = await fetch("https://api.github.com/user", {
+                headers: {
+                    Authorization: `Bearer ${githubIdentity.access_token}`,
+                    Accept: "application/vnd.github.v3+json"
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                return data.login;
+            }
+        } catch (error) {
+            console.error("Failed to fetch GitHub username:", error);
+        }
+    }
+
+    return undefined;
+}
+
 export async function getAllUsersByEmail(email: string): Promise<Auth0User[]> {
     const auth0 = getAuth0ManagementClient();
     const users = (

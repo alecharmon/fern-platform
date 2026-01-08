@@ -88,8 +88,7 @@ export async function setFernTokenSecret(params: {
         // Parse token from output (format: "Generated a FERN_TOKEN for X: fern_...")
         // Strip ANSI escape codes
         const cleanOutput = tokenOutput.replace(/\x1b\[[0-9;]*m/g, "");
-        console.log("Token output:", cleanOutput);
-        const tokenMatch = cleanOutput.match(/fern_[a-zA-Z0-9]+/);
+        const tokenMatch = cleanOutput.match(/fern_[a-zA-Z0-9_-]+/);
         if (!tokenMatch) {
             return {
                 success: false,
@@ -99,8 +98,7 @@ export async function setFernTokenSecret(params: {
                 }
             };
         }
-        const generatedToken = tokenMatch[0];
-
+        const generatedToken = tokenMatch[0].trim();
         console.log("✓ Generated FERN_TOKEN");
 
         // Get the repo's public key for encrypting secrets
@@ -113,8 +111,8 @@ export async function setFernTokenSecret(params: {
         });
 
         // Encrypt the token using libsodium's sealed box
-        const messageBytes = Buffer.from(generatedToken);
-        const keyBytes = Buffer.from(publicKeyData.key, "base64");
+        const messageBytes = sodium.from_string(generatedToken);
+        const keyBytes = new Uint8Array(Buffer.from(publicKeyData.key, "base64"));
         const encryptedBytes = sodium.crypto_box_seal(messageBytes, keyBytes);
         const encryptedValue = Buffer.from(encryptedBytes).toString("base64");
 
@@ -127,7 +125,7 @@ export async function setFernTokenSecret(params: {
             key_id: publicKeyData.key_id
         });
 
-        console.log("✓ Set FERN_TOKEN secret in repository");
+        console.log(`✓ Set FERN_TOKEN secret for ${owner}/${repoName}`);
 
         return {
             success: true,

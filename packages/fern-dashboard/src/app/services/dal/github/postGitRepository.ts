@@ -105,6 +105,7 @@ export default async function postGitRepository(request: {
             if (tokenResult.success) {
                 fernToken = tokenResult.token;
                 console.log("✓ FERN_TOKEN generated and set successfully");
+                // Note: Workflow will be triggered from the success page to avoid blocking
             } else {
                 console.error("Failed to set FERN_TOKEN:", tokenResult.error);
                 // Don't fail the entire operation if token generation fails
