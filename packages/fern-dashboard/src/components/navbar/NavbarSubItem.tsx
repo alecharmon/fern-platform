@@ -48,7 +48,7 @@ export const NavbarSubItem = ({ title, icon, href, docsUrlParam }: NavbarSubItem
         return <div className={className}>{children}</div>;
     } else {
         return (
-            <Link href={`/${orgName}/${href}`} className={className}>
+            <Link href={`/${orgName}${href}`} className={className}>
                 {children}
             </Link>
         );

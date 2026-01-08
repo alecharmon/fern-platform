@@ -45,7 +45,7 @@ export function DocsNavbarSubItem({ title, href, urlParam }: DocsNavbarSubItemPr
     }
 
     return (
-        <Link href={`/${orgName}/${href}`} className={className}>
+        <Link href={`/${orgName}${href}`} className={className}>
             {children}
         </Link>
     );

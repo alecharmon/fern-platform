@@ -146,7 +146,7 @@ export const NavbarItem = ({
         return (
             <Link
                 className={className}
-                href={`/${orgName}/${hrefForActualLinking}`}
+                href={`/${orgName}${hrefForActualLinking}`}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 onTouchEnd={handleTouchEnd}
