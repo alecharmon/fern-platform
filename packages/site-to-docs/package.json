@@ -1,0 +1,51 @@
+{
+  "name": "@fern-api/site-to-docs",
+  "version": "0.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fern-api/fern-platform.git",
+    "directory": "packages/site-to-docs"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "bin": {
+    "site-to-docs": "./dist/cli.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "clean": "rm -rf ./dist && tsc --build --clean",
+    "compile": "tsc --build",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest --run --passWithNoTests --globals"
+  },
+  "dependencies": {
+    "ai": "^4.0.0",
+    "@ai-sdk/anthropic": "^1.0.0",
+    "@mozilla/readability": "^0.6.0",
+    "commander": "^12.0.0",
+    "dotenv": "^16.4.7",
+    "jsdom": "^25.0.0",
+    "rehype-parse": "^9.0.0",
+    "rehype-remark": "^10.0.0",
+    "remark-gfm": "^4.0.0",
+    "remark-stringify": "^11.0.0",
+    "unified": "^11.0.0",
+    "yaml": "^2.0.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@fern-platform/configs": "workspace:*",
+    "@types/jsdom": "^21.1.0",
+    "@types/node": "catalog:",
+    "tsx": "^4.0.0",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

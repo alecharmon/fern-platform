@@ -188,6 +188,7 @@
         "packages/fdr-sdk/src/**/*",
         "packages/fern-dashboard/**/*",
         "packages/fern-docs/**/*",
+        "packages/site-to-docs/**/*",
         "packages/workers/proxy/src/websocket.ts",
         "scripts/monitor/**/*.ts",
         "servers/fern-bot/**/*",
