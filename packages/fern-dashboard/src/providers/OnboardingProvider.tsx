@@ -15,6 +15,9 @@ export interface WizardFormData {
     // File objects from user uploads (will be uploaded during submission)
     faviconFile: File | null;
     logoFile: File | null;
+    // Original filenames for uploaded files (to preserve extension info)
+    faviconFileName: string | null;
+    logoFileName: string | null;
     primaryColorHex: string | null;
     existingDocsSite: string;
     // File objects for API specs (will be uploaded during submission)
@@ -25,7 +28,7 @@ export interface WizardFormData {
     sitePublishUrl: string | null;
 }
 
-export type OnboardingStep = "branding" | "api-spec" | "details" | "complete";
+export type OnboardingStep = "branding" | "api-spec" | "details" | "publishing" | "complete";
 
 export interface ValidationErrors {
     docsSiteName?: string;
@@ -47,10 +50,10 @@ interface OnboardingContextValue {
 
     // Step navigation
     currentStep: OnboardingStep;
-    goToNextStep: () => void;
+    goToNextStep: (options?: { replace?: boolean }) => void;
     goToPreviousStep: () => void;
     skipStep: () => void;
-    setStep: (step: OnboardingStep) => void;
+    setStep: (step: OnboardingStep, options?: { replace?: boolean }) => void;
 }
 
 const DEFAULT_FORM_DATA: WizardFormData = {
@@ -62,6 +65,8 @@ const DEFAULT_FORM_DATA: WizardFormData = {
     logoUrl: "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
     faviconFile: null,
     logoFile: null,
+    faviconFileName: null,
+    logoFileName: null,
     primaryColorHex: null,
     existingDocsSite: "",
     openApiSpecFiles: [],
@@ -71,12 +76,13 @@ const DEFAULT_FORM_DATA: WizardFormData = {
 
 const OnboardingContext = createContext<OnboardingContextValue | undefined>(undefined);
 
-const STEP_ORDER: OnboardingStep[] = ["branding", "api-spec", "details", "complete"];
+const STEP_ORDER: OnboardingStep[] = ["branding", "api-spec", "details", "publishing", "complete"];
 
 const STEP_ROUTES: Record<OnboardingStep, string> = {
     branding: "/get-started/docs",
     "api-spec": "/get-started/docs/api-spec",
     details: "/get-started/docs/details",
+    publishing: "/get-started/docs/publishing",
     complete: "/get-started/docs/complete"
 };
 
@@ -137,7 +143,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }, [form]);
 
     const setStep = useCallback(
-        (step: OnboardingStep) => {
+        (step: OnboardingStep, options?: { replace?: boolean }) => {
             // Prevent concurrent navigation
             if (isNavigating) {
                 console.warn("[OnboardingProvider] setStep blocked - already navigating");
@@ -145,7 +151,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
             }
 
             // Safeguard: prevent accessing "complete" step without successful publication
-            if (step === "complete" && !formData.sitePublishUrl) {
+            // Check the current form store state directly for the most up-to-date value
+            const currentFormState = form.store.state.values;
+            if (step === "complete" && !currentFormState.sitePublishUrl) {
                 console.warn(
                     "[OnboardingProvider] Attempted to navigate to complete page without successful site publication"
                 );
@@ -154,29 +162,39 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
             setIsNavigating(true);
             // Don't manually set currentStep - let the useEffect sync it from the URL
-            router.push(STEP_ROUTES[step]);
+            // Use replace for publishing and complete steps to prevent back navigation
+            const shouldReplace = options?.replace ?? (step === "publishing" || step === "complete");
+
+            if (shouldReplace) {
+                router.replace(STEP_ROUTES[step]);
+            } else {
+                router.push(STEP_ROUTES[step]);
+            }
 
             // Reset navigation lock after a short delay to allow router to process
             setTimeout(() => setIsNavigating(false), 500);
         },
-        [router, isNavigating, formData.sitePublishUrl]
+        [router, isNavigating, form.store]
     );
 
-    const goToNextStep = useCallback(() => {
-        // Prevent concurrent navigation
-        if (isNavigating) {
-            console.warn("[OnboardingProvider] Navigation already in progress, skipping");
-            return;
-        }
-
-        const currentIndex = STEP_ORDER.indexOf(currentStep);
-        if (currentIndex >= 0 && currentIndex < STEP_ORDER.length - 1) {
-            const nextStep = STEP_ORDER[currentIndex + 1];
-            if (nextStep) {
-                setStep(nextStep);
+    const goToNextStep = useCallback(
+        (options?: { replace?: boolean }) => {
+            // Prevent concurrent navigation
+            if (isNavigating) {
+                console.warn("[OnboardingProvider] Navigation already in progress, skipping");
+                return;
             }
-        }
-    }, [currentStep, setStep, isNavigating]);
+
+            const currentIndex = STEP_ORDER.indexOf(currentStep);
+            if (currentIndex >= 0 && currentIndex < STEP_ORDER.length - 1) {
+                const nextStep = STEP_ORDER[currentIndex + 1];
+                if (nextStep) {
+                    setStep(nextStep, options);
+                }
+            }
+        },
+        [currentStep, setStep, isNavigating]
+    );
 
     const goToPreviousStep = useCallback(() => {
         // Prevent concurrent navigation

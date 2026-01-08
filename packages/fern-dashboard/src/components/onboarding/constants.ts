@@ -11,3 +11,7 @@ export const DEFAULT_SPECS = [
         assetUrl: "https://raw.githubusercontent.com/asyncapi/spec/master/examples/streetlights-mqtt-asyncapi.yml"
     }
 ] as const;
+
+export const CALENDLY_URL = "https://calendly.com/d/ckyd-3fj-2wk/fern-product-demo";
+
+export const CALENDLY_URL_EMBED = `${CALENDLY_URL}?hide_event_type_details=1&hide_gdpr_banner=1`;

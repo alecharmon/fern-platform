@@ -10,7 +10,9 @@ const CreateOnboardingDocsRequest = z.object({
     docsSiteUrl: z.string().min(1),
     docsSiteUrlAvailable: z.boolean().nullable(),
     faviconUrl: z.string().url().nullable(),
+    faviconFileName: z.string().nullable(),
     logoUrl: z.string().url().nullable(),
+    logoFileName: z.string().nullable(),
     primaryColorHex: z
         .string()
         .regex(/^#[0-9A-Fa-f]{6}$/)

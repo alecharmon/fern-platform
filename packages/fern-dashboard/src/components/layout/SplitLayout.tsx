@@ -19,6 +19,12 @@ export interface SplitLayoutProps {
     centerCard?: boolean;
 
     /**
+     * When true, removes the card styling (border, shadow, rounded corners) for a full-screen appearance
+     * @default false
+     */
+    hideCard?: boolean;
+
+    /**
      * Optional overlay content that appears on top of everything (e.g., logo, buttons)
      */
     overlay?: ReactNode;
@@ -44,6 +50,7 @@ export const SplitLayout = ({
     cardContent,
     backgroundContent,
     centerCard = false,
+    hideCard = false,
     overlay,
     cardClassName,
     backgroundClassName,
@@ -74,21 +81,24 @@ export const SplitLayout = ({
             {/* Left card section */}
             <div
                 className={cn(
-                    "bg-background relative z-10 flex items-center justify-center px-4",
+                    "relative z-10 flex items-center justify-center px-4",
                     // Mobile: full width, no border/shadow
                     "flex-1",
-                    // Desktop: card styling with border and shadow
-                    "md:mt-2 md:flex-initial md:rounded-t-2xl",
-                    "md:border-x md:border-t md:border-border md:shadow-md",
-                    // Default state: left side of screen
-                    !centerCard && "md:ml-2 md:w-[40%] md:min-w-[350px]",
-                    // Expanded state: fills space with 300px left margin
-                    centerCard && "md:ml-[300px] md:mr-2",
+                    // Desktop: card styling with border and shadow (only when card is visible)
+                    !hideCard && "md:mt-2 md:flex-initial md:rounded-t-2xl",
+                    !hideCard && "md:border-x md:border-t md:border-border md:shadow-md",
+                    !hideCard && "bg-background",
+                    // Default state: left side of screen (only when card is visible)
+                    !centerCard && !hideCard && "md:ml-2 md:w-[40%] md:min-w-[350px]",
+                    // Expanded state: fills space with 300px left margin (only when card is visible)
+                    centerCard && !hideCard && "md:ml-[300px] md:mr-2",
+                    // Center content when card is hidden (account for 300px sidebar)
+                    hideCard && "md:ml-[150px]",
                     cardClassName
                 )}
                 style={{
                     transition: `all ${animationDuration}ms ease-in-out`,
-                    ...(centerCard ? { width: "calc(100% - 300px - 0.5rem)" } : {})
+                    ...(centerCard && !hideCard ? { width: "calc(100% - 300px - 0.5rem)" } : {})
                 }}
             >
                 {cardContent}

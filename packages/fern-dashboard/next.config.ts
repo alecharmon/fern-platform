@@ -12,7 +12,7 @@ const isSentryEnabled = process.env.NODE_ENV === "production";
 
 const CSP_HEADER = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' *.usepylon.com *.posthog.com *.pusher.com d3vl36l12sfx26.cloudfront.net cdn.jsdelivr.net va.vercel-scripts.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' *.usepylon.com *.posthog.com *.pusher.com d3vl36l12sfx26.cloudfront.net cdn.jsdelivr.net va.vercel-scripts.com assets.calendly.com;
   worker-src 'self' blob:;
   connect-src 'self' * ws:;
   style-src 'self' 'unsafe-inline' *;

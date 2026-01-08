@@ -91,7 +91,7 @@ export function OnboardingStepCard({
             </div>
 
             {/* Footer with action buttons */}
-            <div className="absolute bottom-0 left-0 w-full border-t border-border p-4 bg-background">
+            <div className="absolute bottom-0 left-0 w-full p-4 bg-background">
                 <SlideUpTransition>
                     <div className="w-full space-y-2 max-w-[450px] mx-auto">
                         {error && (

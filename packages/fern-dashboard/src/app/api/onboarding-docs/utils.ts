@@ -119,6 +119,8 @@ export async function createFernProject(
     // Download and save custom assets if provided
     let hasLogo = false;
     let hasFavicon = false;
+    let logoFileName: string | null = null;
+    let faviconFileName: string | null = null;
 
     const assetsDir = path.join(fernDir, "docs", "assets");
 
@@ -136,9 +138,34 @@ export async function createFernProject(
                 }
             }
 
-            const ext = getFileExtensionFromUrl(data.logoUrl);
-            await downloadFile(data.logoUrl, path.join(assetsDir, `logo.${ext}`));
-            hasLogo = true;
+            // Use provided filename if available, otherwise extract from URL
+            const ext = data.logoFileName
+                ? data.logoFileName.split(".").pop()?.toLowerCase() || "png"
+                : getFileExtensionFromUrl(data.logoUrl);
+            logoFileName = `logo.${ext}`;
+            const logoPath = path.join(assetsDir, logoFileName);
+
+            console.log("[createFernProject] Downloading logo:", {
+                url: data.logoUrl,
+                fileName: data.logoFileName,
+                extractedExt: ext,
+                finalFileName: logoFileName,
+                outputPath: logoPath
+            });
+
+            await downloadFile(data.logoUrl, logoPath);
+
+            // Verify the file was created
+            const fileExists = await fs
+                .access(logoPath)
+                .then(() => true)
+                .catch(() => false);
+            console.log("[createFernProject] Logo download complete:", {
+                fileName: logoFileName,
+                exists: fileExists
+            });
+
+            hasLogo = fileExists;
         } catch (error) {
             console.error("Failed to download logo:", error);
         }
@@ -155,8 +182,12 @@ export async function createFernProject(
                 }
             }
 
-            const ext = getFileExtensionFromUrl(data.faviconUrl);
-            await downloadFile(data.faviconUrl, path.join(assetsDir, `favicon.${ext}`));
+            // Use provided filename if available, otherwise extract from URL
+            const ext = data.faviconFileName
+                ? data.faviconFileName.split(".").pop()?.toLowerCase() || "png"
+                : getFileExtensionFromUrl(data.faviconUrl);
+            faviconFileName = `favicon.${ext}`;
+            await downloadFile(data.faviconUrl, path.join(assetsDir, faviconFileName));
             hasFavicon = true;
         } catch (error) {
             console.error("Failed to download favicon:", error);
@@ -169,19 +200,17 @@ export async function createFernProject(
     const docsConfig = yaml.load(docsYmlContent) as any;
 
     // Add logo if downloaded
-    if (hasLogo && data.logoUrl) {
-        const ext = getFileExtensionFromUrl(data.logoUrl);
+    if (hasLogo && logoFileName) {
         docsConfig.logo = {
-            dark: `docs/assets/logo.${ext}`,
-            light: `docs/assets/logo.${ext}`,
+            dark: `docs/assets/${logoFileName}`,
+            light: `docs/assets/${logoFileName}`,
             height: 20
         };
     }
 
     // Add favicon if downloaded
-    if (hasFavicon && data.faviconUrl) {
-        const ext = getFileExtensionFromUrl(data.faviconUrl);
-        docsConfig.favicon = `docs/assets/favicon.${ext}`;
+    if (hasFavicon && faviconFileName) {
+        docsConfig.favicon = `docs/assets/${faviconFileName}`;
     }
 
     // Add colors if provided

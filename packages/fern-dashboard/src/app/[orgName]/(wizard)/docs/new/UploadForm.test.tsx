@@ -82,23 +82,52 @@ vi.mock("next/navigation", () => ({
     useParams: () => ({ orgName: "acme" })
 }));
 
+// Create mock Field component outside to reuse
+const createMockField = (formData: any) => {
+    return ({ name, children }: any) => {
+        const field = {
+            name,
+            state: {
+                value: formData[name],
+                meta: { errors: [] }
+            },
+            setValue: (value: any) => {
+                formData[name] = value;
+            },
+            handleChange: (value: any) => {
+                formData[name] = value;
+            },
+            handleBlur: () => {}
+        };
+        return children(field);
+    };
+};
+
+// Create a shared form data object
+const sharedFormData = {
+    docsSiteName: "",
+    docsSiteUrl: "",
+    docsSiteUrlAvailable: null,
+    faviconUrl: null,
+    logoUrl: null,
+    faviconFile: null,
+    logoFile: null,
+    primaryColorHex: null,
+    existingDocsSite: "",
+    openApiSpecFiles: [],
+    openApiSpecUrls: [],
+    sitePublishUrl: null
+};
+
 // Mock the OnboardingProvider and hooks
 vi.mock("@/providers/OnboardingProvider", () => ({
     OnboardingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     useOnboarding: () => ({
-        formData: {
-            docsSiteName: "",
-            docsSiteUrl: "",
-            docsSiteUrlAvailable: null,
-            faviconUrl: null,
-            logoUrl: null,
-            faviconFile: null,
-            logoFile: null,
-            primaryColorHex: null,
-            existingDocsSite: "",
-            openApiSpecFiles: [],
-            openApiSpecUrls: [],
-            sitePublishUrl: null
+        formData: sharedFormData,
+        form: {
+            Field: createMockField(sharedFormData),
+            setFieldValue: vi.fn(),
+            setFieldMeta: vi.fn()
         },
         updateFormData: vi.fn(),
         resetFormData: vi.fn(),
@@ -136,6 +165,8 @@ const defaultWizardData = {
     logoUrl: DEFAULT_BRANDFETCH,
     faviconFile: null,
     logoFile: null,
+    faviconFileName: null,
+    logoFileName: null,
     primaryColorHex: "#123abc",
     existingDocsSite: "",
     openApiSpecFiles: [],
@@ -150,19 +181,7 @@ const mockForm = {
         state: { values: defaultWizardData },
         subscribe: vi.fn(() => () => {})
     },
-    Field: ({ name, children }: any) => {
-        const field = {
-            name,
-            state: {
-                value: (defaultWizardData as any)[name],
-                meta: { errors: [] }
-            },
-            setValue: (value: any) => {
-                (defaultWizardData as any)[name] = value;
-            }
-        };
-        return children(field);
-    }
+    Field: createMockField(defaultWizardData)
 } as any;
 
 describe("UploadForm validations", () => {

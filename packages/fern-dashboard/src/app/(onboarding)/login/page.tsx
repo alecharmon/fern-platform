@@ -1,16 +1,14 @@
-// import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { GithubLoginButton, GoogleLoginButton } from "@/components/auth/LoginButton";
 import { EmailLoginForm } from "@/components/login-page/EmailLoginForm";
-import { TestAnimationButton } from "@/components/login-page/TestAnimationButton";
 
 export default async function LoginCardSlot() {
     const session = await getCurrentSession();
 
     if (session != null) {
-        // TODO: Uncomment this before merging
-        // redirect("/");
+        redirect("/");
     }
 
     return (
@@ -27,8 +25,6 @@ export default async function LoginCardSlot() {
                     <div className="h-px flex-1 bg-border" />
                 </div>
                 <EmailLoginForm />
-                {/* TODO: Remove this test button after testing animation */}
-                <TestAnimationButton />
             </div>
             <div className="absolute bottom-16 left-0 right-0 mx-auto px-4 text-center text-xs text-gray-900 md:max-w-[400px]">
                 By continuing, you agree to Fern&apos;s{" "}

@@ -18,13 +18,22 @@ export function BrandingStepClient() {
         [form]
     );
 
-    const handleContinue = useCallback(() => {
+    const handleContinue = useCallback(async () => {
+        // Validate the existingDocsSite field (this is where the domain is stored)
+        await form.validateField("existingDocsSite", "change");
+
+        const fieldMeta = form.getFieldMeta("existingDocsSite");
+        if (fieldMeta?.errors && fieldMeta?.errors?.length > 0) {
+            // Validation failed, don't proceed
+            return;
+        }
+
         // Proceed to next step
         goToNextStep();
-    }, [goToNextStep]);
+    }, [form, goToNextStep]);
 
     const handleSkip = useCallback(() => {
-        // Skip to next step (same behavior as continue for this step)
+        // Skip to next step (no validation required)
         goToNextStep();
     }, [goToNextStep]);
 
@@ -32,7 +41,6 @@ export function BrandingStepClient() {
         <OnboardingStepCard
             title="What is your current company site?"
             description="We'll automatically fetch your brand assets. You will get a chance to review and adjust them later."
-            skipText="Manually configure"
             onContinue={handleContinue}
             onSkip={handleSkip}
             showSkip

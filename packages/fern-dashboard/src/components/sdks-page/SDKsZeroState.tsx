@@ -1,13 +1,11 @@
-import type { User } from "@auth0/nextjs-auth0/types";
-import { PlusIcon } from "lucide-react";
-
+import type { Auth0User } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
-
+import { CALENDLY_URL } from "../onboarding/constants";
 import { SDKsZeroStateImage } from "./SDKsZeroStateImage";
 
 export declare namespace SDKsZeroState {
     export interface Props {
-        user: User;
+        user: Auth0User;
     }
 }
 
@@ -18,24 +16,31 @@ export async function SDKsZeroState({ user }: SDKsZeroState.Props) {
         welcomeString += ", " + firstName;
     }
 
+    const calendlyUrl = new URL(CALENDLY_URL);
+    calendlyUrl.searchParams.set("email", user.email ?? "");
+    calendlyUrl.searchParams.set("name", user.name ?? "");
+
     return (
         <div className="flex flex-1 flex-col">
             <div className="text-xl font-bold">{welcomeString}</div>
             <div className="mt-2 text-sm text-gray-900">SDKs that are designed by language experts.</div>
             <div className="mt-12">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-12 justify-center items-center">
                     {/* Placeholder for an SDK-specific illustration if needed */}
                     <SDKsZeroStateImage />
-                    <div className="flex justify-center">
+                    <div className="flex flex-col gap-2 justify-center w-[300px]">
                         <Button variant="default" asChild>
                             <a
                                 href="https://buildwithfern.com/learn/sdks/overview/quickstart"
                                 target="_blank"
-                                className="flex items-center gap-2"
                                 rel="noopener"
                             >
-                                <PlusIcon className="h-4 w-4" />
-                                Create your first SDK
+                                View SDK Quickstart
+                            </a>
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <a href={calendlyUrl.toString()} target="_blank" rel="noopener">
+                                Book a call
                             </a>
                         </Button>
                     </div>
@@ -45,10 +50,7 @@ export async function SDKsZeroState({ user }: SDKsZeroState.Props) {
     );
 }
 
-function getFirstName(user: User) {
-    if (user.given_name != null) {
-        return user.given_name;
-    }
+function getFirstName(user: Auth0User) {
     if (user.name != null) {
         return user.name.split(" ")[0];
     }

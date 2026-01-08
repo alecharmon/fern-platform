@@ -9,7 +9,6 @@ import type { WizardFormData } from "@/providers/OnboardingProvider";
 interface LoaderScreenProps {
     wizardFormData: WizardFormData;
     orgName?: string;
-    loadingMessage?: string;
     showLogs?: boolean;
     sessionId?: string;
     onComplete?: (result: { url: string; fernDocsDownloadUrl?: string; githubRepoUrl?: string }) => void;
@@ -21,26 +20,40 @@ interface LogEntry {
     timestamp: string;
 }
 
-export function LoaderScreen({
-    wizardFormData,
-    orgName,
-    loadingMessage = "Reading your docs.yml...",
-    showLogs = false,
-    sessionId,
-    onComplete
-}: LoaderScreenProps) {
+export function LoaderScreen({ wizardFormData, orgName, showLogs = false, sessionId, onComplete }: LoaderScreenProps) {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [isComplete, setIsComplete] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const logsEndRef = useRef<HTMLDivElement>(null);
+
+    // Use refs to capture the latest values without triggering re-renders
+    const onCompleteRef = useRef(onComplete);
+    const wizardFormDataRef = useRef(wizardFormData);
+    const hasConnectedRef = useRef(false);
+
+    // Keep refs in sync with latest values
+    useEffect(() => {
+        onCompleteRef.current = onComplete;
+    }, [onComplete]);
+
+    useEffect(() => {
+        wizardFormDataRef.current = wizardFormData;
+    }, [wizardFormData]);
 
     useEffect(() => {
         if (!showLogs || !sessionId || !orgName) {
             return;
         }
 
+        // Prevent multiple connections with the same sessionId
+        if (hasConnectedRef.current) {
+            return;
+        }
+        hasConnectedRef.current = true;
+
         // Encode the wizard data to pass to the stream endpoint
-        const dataParam = encodeURIComponent(JSON.stringify({ ...wizardFormData, orgName }));
+        // Use the ref value to get the data at mount time
+        const dataParam = encodeURIComponent(JSON.stringify({ ...wizardFormDataRef.current, orgName }));
         const eventSource = new EventSource(`/api/onboarding-docs/stream?sessionId=${sessionId}&data=${dataParam}`);
 
         eventSource.onmessage = (event) => {
@@ -50,10 +63,10 @@ export function LoaderScreen({
                 if (data.type === "complete") {
                     setIsComplete(true);
                     eventSource.close();
-                    if (onComplete) {
+                    if (onCompleteRef.current) {
                         // Parse the completion message which contains the result data
                         const result = JSON.parse(data.message);
-                        onComplete(result);
+                        onCompleteRef.current(result);
                     }
                 } else if (data.type === "error") {
                     setError(data.message);
@@ -74,8 +87,9 @@ export function LoaderScreen({
 
         return () => {
             eventSource.close();
+            hasConnectedRef.current = false;
         };
-    }, [showLogs, sessionId, onComplete, orgName, wizardFormData]);
+    }, [showLogs, sessionId, orgName]);
 
     // Auto-scroll to bottom when new logs arrive
     // biome-ignore lint/correctness/useExhaustiveDependencies: We want to scroll on every log change

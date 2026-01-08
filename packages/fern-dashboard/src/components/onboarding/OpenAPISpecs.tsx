@@ -4,15 +4,15 @@ import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";
 import { CodeXmlIcon, XIcon } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { DEFAULT_SPECS } from "./constants";
 
 interface OpenAPISpecsProps {
     uploadedFiles: File[];
     setUploadedFiles: (files: File[]) => void;
+    validationError?: string;
 }
 
-export function OpenAPISpecs({ uploadedFiles, setUploadedFiles }: OpenAPISpecsProps) {
+export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError }: OpenAPISpecsProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [error, setError] = useState<string | null>(null);
     const effectiveDefaultSpecs = DEFAULT_SPECS;
@@ -87,8 +87,6 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles }: OpenAPISpecsPr
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-                <Label className="text-gray-1200 dark:text-gray-1100 text-sm font-normal">Upload API specs</Label>
-
                 {/* Upload area */}
                 <input
                     ref={fileInputRef}
@@ -106,32 +104,19 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles }: OpenAPISpecsPr
                 >
                     <div className="flex flex-col items-center gap-1 text-muted-foreground">
                         <div className="flex items-center gap-1">
-                            <CloudArrowUpIcon className="size-6" /> Drop your spec or click to upload
+                            <CloudArrowUpIcon className="size-6" /> Drop or click to upload
                         </div>
                         <div className="text-xs">yaml, yml, or json</div>
                     </div>
                 </button>
+                {(validationError || error) && (
+                    <p className="text-xs text-red-600 dark:text-red-400">{validationError || error}</p>
+                )}
             </div>
-
-            <div className="flex flex-col border-l border-border pl-3 py-1 text-xs gap-2">
-                <p className="text-muted-foreground">Starter specs</p>
-
-                {DEFAULT_SPECS.map((spec, index) => (
-                    <DisplayDefaultSpec
-                        key={index}
-                        spec={spec}
-                        onAdd={() => handleUseDefaultSpec(index)}
-                        added={specWasAdded(spec.fileName)}
-                        onRemove={() => handleRemoveFile(spec.fileName)}
-                    />
-                ))}
-            </div>
-
-            {error && <div className="text-xs text-red-600">{error}</div>}
 
             {/* Uploaded files list */}
             {customUploadedFiles.length > 0 && (
-                <div className="mt-4 space-y-2">
+                <div className="space-y-2">
                     {customUploadedFiles.map((file, index) => (
                         <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3 py-3">
                             <div className="flex items-center gap-3">
@@ -151,6 +136,20 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles }: OpenAPISpecsPr
                     ))}
                 </div>
             )}
+
+            <div className="flex flex-col border-l border-border pl-3 py-1 text-xs gap-2">
+                <p className="text-muted-foreground">Don't have a spec? Add an example.</p>
+
+                {DEFAULT_SPECS.map((spec, index) => (
+                    <DisplayDefaultSpec
+                        key={index}
+                        spec={spec}
+                        onAdd={() => handleUseDefaultSpec(index)}
+                        added={specWasAdded(spec.fileName)}
+                        onRemove={() => handleRemoveFile(spec.fileName)}
+                    />
+                ))}
+            </div>
         </div>
     );
 }

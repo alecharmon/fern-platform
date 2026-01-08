@@ -10,8 +10,10 @@ export function ApiSpecStepClient() {
     const { form, formData, goToNextStep } = useOnboarding();
 
     const handleFilesChange = useCallback(
-        (files: File[]) => {
+        async (files: File[]) => {
             form.setFieldValue("openApiSpecFiles", files);
+            // Trigger validation to clear error when files are added
+            await form.validateField("openApiSpecFiles", "change");
         },
         [form]
     );
@@ -24,9 +26,21 @@ export function ApiSpecStepClient() {
         form.setFieldValue("openApiSpecFiles", defaultMarkerFiles);
     }, [form]);
 
-    // Both skip and continue actions add the default specs if no specs are present and continue
-    const handleContinue = useCallback(() => {
+    const handleContinue = useCallback(async () => {
         // Validate that at least one spec file is selected
+        await form.validateField("openApiSpecFiles", "change");
+
+        const fieldMeta = form.getFieldMeta("openApiSpecFiles");
+        if (fieldMeta?.errors && fieldMeta.errors.length > 0) {
+            // Validation failed, don't proceed
+            return;
+        }
+
+        goToNextStep();
+    }, [form, goToNextStep]);
+
+    const handleSkip = useCallback(() => {
+        // When skipping, add default specs and proceed
         if (formData.openApiSpecFiles.length === 0) {
             handleAddDefaultSpecs();
         }
@@ -35,13 +49,35 @@ export function ApiSpecStepClient() {
 
     return (
         <OnboardingStepCard
-            title="Upload your API spec"
-            description="Add your OpenAPI, AsyncAPI, gRPC, or other API specification."
+            title="Do you have an API spec?"
+            description="Add your OpenAPI or AsyncAPI specs to view your API reference."
             onContinue={handleContinue}
-            onSkip={handleContinue}
+            onSkip={handleSkip}
             showSkip
         >
-            <OpenAPISpecs uploadedFiles={formData.openApiSpecFiles} setUploadedFiles={handleFilesChange} />
+            <form.Field
+                name="openApiSpecFiles"
+                validators={{
+                    onChange: ({ value }) => {
+                        if (!value || value.length === 0) {
+                            return "Please upload at least one API spec";
+                        }
+                        return undefined;
+                    }
+                }}
+            >
+                {(field) => (
+                    <OpenAPISpecs
+                        uploadedFiles={field.state.value}
+                        setUploadedFiles={handleFilesChange}
+                        validationError={
+                            field.state.meta.errors.length > 0 && typeof field.state.meta.errors[0] === "string"
+                                ? field.state.meta.errors[0]
+                                : undefined
+                        }
+                    />
+                )}
+            </form.Field>
         </OnboardingStepCard>
     );
 }

@@ -1,10 +1,9 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { uploadOnboardingAsset } from "@/components/onboarding/api";
 import { ColorPicker } from "@/components/onboarding/ColorPicker";
 import { DocsUrl } from "@/components/onboarding/DocsUrl";
-import { LoaderScreen } from "@/components/onboarding/LoaderScreen";
 import { OnboardingStepCard } from "@/components/onboarding/OnboardingStepCard";
 import { UploadImage } from "@/components/onboarding/UploadImage";
 import { useDocsSubmission } from "@/components/onboarding/useDocsSubmission";
@@ -13,10 +12,27 @@ import { nameToUrl } from "@/components/onboarding/validation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useOnboarding } from "@/providers/OnboardingProvider";
+import { saveOnboardingFormData, saveOnboardingSession } from "@/utils/onboardingSession";
 
 export function DetailsStepClient() {
     const { form, formData, validationErrors, validateForm, goToNextStep } = useOnboarding();
     const { submitDocs, isSubmitting, sessionId, error } = useDocsSubmission();
+    const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+    const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
+
+    // When sessionId is set (submission started), save to sessionStorage and navigate to publishing
+    useEffect(() => {
+        if (sessionId && isSubmitting) {
+            const orgName = generateOrgIdFromDocsUrl(formData.docsSiteUrl);
+
+            // Save session data to sessionStorage
+            saveOnboardingSession(sessionId, orgName);
+            saveOnboardingFormData(formData);
+
+            // Navigate to publishing step
+            goToNextStep();
+        }
+    }, [sessionId, isSubmitting, formData, goToNextStep]);
 
     const handleSubmit = useCallback(async () => {
         // Validate form with current formData
@@ -29,49 +45,40 @@ export function DetailsStepClient() {
         try {
             // Use shared submission hook
             await submitDocs(formData);
+
+            // After successful submission, save session data and navigate to publishing
+            // Note: sessionId is set by submitDocs when submission starts
         } catch (err) {
             // Error is handled by the hook
             console.error("Submission error:", err);
         }
     }, [formData, submitDocs, validateForm, validationErrors]);
 
-    const handleStreamComplete = useCallback(
-        (result: { url: string; fernDocsDownloadUrl?: string; githubRepoUrl?: string }) => {
-            // Store the published URL in form state to enable access to complete page
-            form.setFieldValue("sitePublishUrl", result.url);
+    const handleLogoUpload = useCallback(
+        async (file: File) => {
+            setIsUploadingLogo(true);
+            setLogoUploadError(null);
 
-            // Navigate to confirmation screen
-            goToNextStep();
+            try {
+                // Generate org ID from current docs URL for upload
+                const orgId = generateOrgIdFromDocsUrl(formData.docsSiteUrl);
+
+                // Upload file to S3
+                const { assetUrl } = await uploadOnboardingAsset(file, orgId);
+
+                // Store the S3 URL and filename in form state
+                form.setFieldValue("logoUrl", assetUrl);
+                form.setFieldValue("logoFileName", file.name);
+                form.setFieldValue("logoFile", file); // Keep file for reference
+            } catch (err) {
+                console.error("Failed to upload logo:", err);
+                setLogoUploadError(err instanceof Error ? err.message : "Failed to upload logo");
+            } finally {
+                setIsUploadingLogo(false);
+            }
         },
-        [goToNextStep, form]
+        [form, formData.docsSiteUrl]
     );
-
-    // Show loader screen during submission
-    if (isSubmitting && sessionId) {
-        // Generate org name from docs URL for the loader screen
-        const orgName = generateOrgIdFromDocsUrl(formData.docsSiteUrl);
-
-        return (
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key="loaderScreen"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="relative z-10 flex w-full flex-1 items-center justify-center"
-                >
-                    <LoaderScreen
-                        wizardFormData={formData}
-                        orgName={orgName}
-                        showLogs={true}
-                        sessionId={sessionId}
-                        onComplete={handleStreamComplete}
-                    />
-                </motion.div>
-            </AnimatePresence>
-        );
-    }
 
     return (
         <OnboardingStepCard
@@ -134,8 +141,8 @@ export function DetailsStepClient() {
                     )}
                 </div>
 
-                {/* Favicon */}
-                <UploadImage
+                {/* TODO: Favicon to an advanced configuration step */}
+                {/* <UploadImage
                     label="Favicon"
                     description="Upload a 32 x 32 pixel ICO, PNG, GIF, or JPG to display in browser tabs."
                     imageUrl={formData.faviconUrl}
@@ -147,22 +154,19 @@ export function DetailsStepClient() {
                     }}
                     size="small"
                     accept="image/x-icon,image/png,image/gif"
-                />
+                /> */}
 
                 {/* Logo */}
                 <UploadImage
                     label="Logo"
                     description="This will be used as the main logo on the top-left corner of the Docs site."
                     imageUrl={formData.logoUrl}
-                    onFileSelect={(file) => {
-                        form.setFieldValue("logoFile", file);
-                        // Create a preview URL for the uploaded file
-                        const previewUrl = URL.createObjectURL(file);
-                        form.setFieldValue("logoUrl", previewUrl);
-                    }}
+                    onFileSelect={handleLogoUpload}
                     size="large"
                     accept="image/png,image/gif,image/svg+xml"
                 />
+                {logoUploadError && <p className="text-xs text-red-600">{logoUploadError}</p>}
+                {isUploadingLogo && <p className="text-xs text-gray-600">Uploading logo...</p>}
             </div>
         </OnboardingStepCard>
     );

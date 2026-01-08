@@ -30,6 +30,8 @@ export default function AuthLayout({
 }) {
     const pathname = usePathname();
     const centerCard = !pathname.includes("login");
+    // Hide card background for publishing and complete pages
+    const hideCard = pathname.includes("/publishing") || pathname.includes("/complete");
 
     return (
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
@@ -40,6 +42,7 @@ export default function AuthLayout({
                     backgroundContent={background}
                     overlay={overlay}
                     centerCard={centerCard}
+                    hideCard={hideCard}
                     animationDuration={500}
                 />
             </OnboardingProvider>

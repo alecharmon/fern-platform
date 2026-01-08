@@ -66,12 +66,23 @@ export function SDKsZeroStateImage() {
     const intrinsicHeight = imgLight.height;
 
     return (
-        <CrossfadeThemeImage
-            light={exampleSDKsLight}
-            dark={exampleSDKsDark}
-            alt="example SDKs image"
-            width={intrinsicWidth}
-            height={intrinsicHeight}
-        />
+        <div
+            style={{
+                transform: "perspective(1200px) rotateX(7deg) rotateY(12deg) rotateZ(-5deg)",
+                transformStyle: "preserve-3d",
+                maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",
+                WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",
+                width: "100%",
+                height: "100%"
+            }}
+        >
+            <CrossfadeThemeImage
+                light={exampleSDKsLight}
+                dark={exampleSDKsDark}
+                alt="example SDKs image"
+                width={intrinsicWidth}
+                height={intrinsicHeight}
+            />
+        </div>
     );
 }

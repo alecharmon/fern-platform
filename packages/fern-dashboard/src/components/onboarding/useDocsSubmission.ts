@@ -94,30 +94,48 @@ export function useDocsSubmission(organizationId?: string): UseDocsSubmissionRes
 
                 // Resolve image URLs - either upload files or use URLs from BrandFetch
                 let resolvedFaviconUrl: string | null;
+                let resolvedFaviconFileName: string | null = null;
                 let resolvedLogoUrl: string | null;
+                let resolvedLogoFileName: string | null = null;
 
-                // Favicon: prioritize file upload, otherwise use URL (will be uploaded if external)
-                if (formData.faviconFile) {
+                // Favicon: check if already uploaded to S3, otherwise upload
+                if (formData.faviconUrl && formData.faviconFileName) {
+                    // Favicon was already uploaded to S3 in the details form
+                    resolvedFaviconUrl = formData.faviconUrl;
+                    resolvedFaviconFileName = formData.faviconFileName;
+                } else if (formData.faviconFile) {
+                    // Fallback: upload file if it exists but wasn't uploaded yet
                     const { assetUrl } = await uploadOnboardingAsset(formData.faviconFile, effectiveOrgId);
                     resolvedFaviconUrl = assetUrl;
-                } else if (formData.faviconUrl) {
+                    resolvedFaviconFileName = formData.faviconFileName || formData.faviconFile.name;
+                } else if (formData.faviconUrl && !formData.faviconUrl.startsWith("blob:")) {
                     // Upload external URL to our S3 (from BrandFetch or other sources)
+                    // Skip blob URLs as they can't be fetched from server
                     resolvedFaviconUrl = await ensureUploadedImage(
                         formData.faviconUrl,
                         "favicon-default.png",
                         effectiveOrgId
                     );
+                    resolvedFaviconFileName = "favicon-default.png";
                 } else {
                     resolvedFaviconUrl = null;
                 }
 
-                // Logo: prioritize file upload, otherwise use URL (will be uploaded if external)
-                if (formData.logoFile) {
+                // Logo: check if already uploaded to S3, otherwise upload
+                if (formData.logoUrl && formData.logoFileName) {
+                    // Logo was already uploaded to S3 in the details form
+                    resolvedLogoUrl = formData.logoUrl;
+                    resolvedLogoFileName = formData.logoFileName;
+                } else if (formData.logoFile) {
+                    // Fallback: upload file if it exists but wasn't uploaded yet
                     const { assetUrl } = await uploadOnboardingAsset(formData.logoFile, effectiveOrgId);
                     resolvedLogoUrl = assetUrl;
-                } else if (formData.logoUrl) {
+                    resolvedLogoFileName = formData.logoFileName || formData.logoFile.name;
+                } else if (formData.logoUrl && !formData.logoUrl.startsWith("blob:")) {
                     // Upload external URL to our S3 (from BrandFetch or other sources)
+                    // Skip blob URLs as they can't be fetched from server
                     resolvedLogoUrl = await ensureUploadedImage(formData.logoUrl, "logo-default.png", effectiveOrgId);
+                    resolvedLogoFileName = "logo-default.png";
                 } else {
                     resolvedLogoUrl = null;
                 }
@@ -128,7 +146,9 @@ export function useDocsSubmission(organizationId?: string): UseDocsSubmissionRes
                     docsSiteUrl: formData.docsSiteUrl,
                     docsSiteUrlAvailable: formData.docsSiteUrlAvailable,
                     faviconUrl: resolvedFaviconUrl,
+                    faviconFileName: resolvedFaviconFileName,
                     logoUrl: resolvedLogoUrl,
+                    logoFileName: resolvedLogoFileName,
                     primaryColorHex: formData.primaryColorHex,
                     existingDocsSite: formData.existingDocsSite,
                     openApiSpecUrls: uploadedSpecUrls

@@ -4,7 +4,9 @@ export interface OnboardingDocsRequest {
     docsSiteUrl: string;
     docsSiteUrlAvailable: boolean | null;
     faviconUrl: string | null;
+    faviconFileName: string | null;
     logoUrl: string | null;
+    logoFileName: string | null;
     primaryColorHex: string | null;
     existingDocsSite: string;
     openApiSpecUrls: Array<{
