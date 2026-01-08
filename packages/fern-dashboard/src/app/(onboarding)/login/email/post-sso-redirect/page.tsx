@@ -107,7 +107,6 @@ export default async function PostSsoRedirectPage({
             userId
         });
     }
-
     if (currentRoles.data.length === 0) {
         // Add default roles
         const addRoleResult = await addRoles({
@@ -117,7 +116,6 @@ export default async function PostSsoRedirectPage({
             // to viewer at some point
             roleNames: ["admin", "cli"]
         });
-
         if (addRoleResult.ok === false) {
             // Attempt to continue anyways
             console.error("Failed to add roles to user", {
@@ -127,7 +125,6 @@ export default async function PostSsoRedirectPage({
         }
         const auth0 = await getAuth0Client();
         await auth0.getAccessToken({ refresh: true });
-
         redirect(
             orgRedirect({
                 name: Auth0OrgName(orgMapping.org_name),

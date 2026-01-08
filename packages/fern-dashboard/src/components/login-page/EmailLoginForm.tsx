@@ -70,7 +70,7 @@ export function EmailLoginForm({ redirectOnLogin }: { redirectOnLogin?: string }
     };
 
     return (
-        <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
+        <form className="flex w-full flex-col gap-2" onSubmit={handleSubmit}>
             <label className="flex flex-col gap-2 text-sm font-medium text-gray-1100">
                 <Input
                     required

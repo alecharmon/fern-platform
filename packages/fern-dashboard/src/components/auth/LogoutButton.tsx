@@ -2,9 +2,15 @@ import type { VariantProps } from "class-variance-authority";
 
 import { Button, type buttonVariants } from "../ui/button";
 
-export const LogoutButton = ({ variant = "outline" }: { variant?: VariantProps<typeof buttonVariants>["variant"] }) => {
+export const LogoutButton = ({
+    variant = "outline",
+    className
+}: {
+    variant?: VariantProps<typeof buttonVariants>["variant"];
+    className?: string;
+}) => {
     return (
-        <Button variant={variant} asChild>
+        <Button variant={variant} asChild className={className}>
             <a href="/auth/logout">Logout</a>
         </Button>
     );

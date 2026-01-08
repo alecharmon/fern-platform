@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// Mock next/font/local before importing components
+vi.mock("next/font/local", () => ({
+    default: () => ({
+        className: "mock-font",
+        style: { fontFamily: "mock-font" }
+    })
+}));
+
 import PostSsoRedirectPage from "./page";
 
 class RedirectError extends Error {
@@ -54,7 +62,6 @@ vi.mock("@fern-docs/edge-config", () => ({
 vi.mock("@/app/services/auth0/auth0", () => ({
     getAuth0Client: mocks.mockGetAuth0Client
 }));
-
 vi.mock("@fern-api/user-permissions", () => ({
     getRoles: mocks.mockGetRoles,
     addRoles: mocks.mockAddRoles

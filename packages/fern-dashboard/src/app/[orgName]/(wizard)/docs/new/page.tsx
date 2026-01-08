@@ -39,9 +39,6 @@ export default function NewDocsWizardPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
-    // NOTE: These are not in use. We should delete these if we can.
-    const [_fernDocsDownloadUrl, setFernDocsDownloadUrl] = useState<string | undefined>(undefined);
-    const [_githubRepoUrl, setGithubRepoUrl] = useState<string | undefined>(undefined);
     const [formData, setFormData] = useState<WizardFormData>({
         docsSiteName: "",
         docsSiteUrl: "",
@@ -128,58 +125,11 @@ export default function NewDocsWizardPage() {
         }
     }
 
-    function handleStreamComplete(result: { url: string; fernDocsDownloadUrl?: string; githubRepoUrl?: string }) {
-        // Store the results from the stream
-        if (result.fernDocsDownloadUrl) {
-            setFernDocsDownloadUrl(result.fernDocsDownloadUrl);
-        }
-        if (result.githubRepoUrl) {
-            setGithubRepoUrl(result.githubRepoUrl);
-        }
-
+    function handleStreamComplete() {
         // Navigate to confirmation screen
         setIsLoading(false);
         setCurrentStep("confirmation");
     }
-
-    // NOTE: This was passed as an invalid prop, but am not sure where this should be used.
-    // Would like to delete this if we can.
-    // async function handlePublishToGithub() {
-    //     if (!fernDocsDownloadUrl) {
-    //         console.error("No download URL available");
-    //         return;
-    //     }
-
-    //     try {
-    //         const response = await fetch("/api/publish-to-github", {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json"
-    //             },
-    //             body: JSON.stringify({
-    //                 orgName,
-    //                 docsSiteUrl: formData.docsSiteUrl,
-    //                 docsSiteName: formData.docsSiteName,
-    //                 fernDocsDownloadUrl
-    //             })
-    //         });
-
-    //         if (!response.ok) {
-    //             const errorData = await response.json();
-    //             throw new Error(errorData.error || "Failed to publish to GitHub");
-    //         }
-
-    //         const result = await response.json();
-
-    //         // Update the GitHub repo URL
-    //         if (result.githubRepoUrl) {
-    //             setGithubRepoUrl(result.githubRepoUrl);
-    //         }
-    //     } catch (err) {
-    //         console.error("Error publishing to GitHub:", err);
-    //         throw err; // Re-throw so the ConfirmScreen can handle it
-    //     }
-    // }
 
     return (
         <div className="relative flex min-h-screen w-full flex-col items-center overflow-hidden">
@@ -215,7 +165,7 @@ export default function NewDocsWizardPage() {
                         filterUnits="userSpaceOnUse"
                         colorInterpolationFilters="sRGB"
                     >
-                        <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                        <feFlood flood-opacity="0" result="BackgroundImageFix" />
                         <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
                         <feGaussianBlur stdDeviation="66" result="effect1_foregroundBlur" />
                     </filter>
