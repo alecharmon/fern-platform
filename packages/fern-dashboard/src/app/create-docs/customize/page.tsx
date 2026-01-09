@@ -90,13 +90,102 @@ function CustomizePageContent() {
     const logoInputRef = useRef<HTMLInputElement>(null);
     const faviconInputRef = useRef<HTMLInputElement>(null);
 
-    const handleLogoSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setLogoFile(file);
-            setLogoPreviewUrl(URL.createObjectURL(file));
-        }
+    // Extract dominant color from an image (preferring colorful over gray/white)
+    const extractDominantColor = useCallback((imageUrl: string): Promise<string | null> => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    resolve(null);
+                    return;
+                }
+
+                // Scale down for performance
+                const maxSize = 50;
+                const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+                canvas.width = Math.max(1, img.width * scale);
+                canvas.height = Math.max(1, img.height * scale);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imageData.data;
+
+                // Count color occurrences (quantized to group similar colors)
+                const colorCounts: Record<string, { count: number; r: number; g: number; b: number }> = {};
+
+                for (let i = 0; i < pixels.length; i += 4) {
+                    const r = pixels[i]!;
+                    const g = pixels[i + 1]!;
+                    const b = pixels[i + 2]!;
+                    const a = pixels[i + 3]!;
+
+                    // Skip transparent pixels
+                    if (a < 128) {
+                        continue;
+                    }
+
+                    // Skip very light (white-ish) and very dark (black-ish) colors
+                    const brightness = (r + g + b) / 3;
+                    if (brightness > 240 || brightness < 15) {
+                        continue;
+                    }
+
+                    // Quantize to group similar colors (clamp to 0-255)
+                    const qr = Math.min(255, Math.round(r / 32) * 32);
+                    const qg = Math.min(255, Math.round(g / 32) * 32);
+                    const qb = Math.min(255, Math.round(b / 32) * 32);
+                    const key = `${qr},${qg},${qb}`;
+
+                    const existing = colorCounts[key];
+                    if (existing) {
+                        existing.count += 1;
+                    } else {
+                        colorCounts[key] = { count: 1, r: qr, g: qg, b: qb };
+                    }
+                }
+
+                // Find the most common color
+                let maxCount = 0;
+                let dominantColor: { r: number; g: number; b: number } | null = null;
+
+                for (const data of Object.values(colorCounts)) {
+                    if (data.count > maxCount) {
+                        maxCount = data.count;
+                        dominantColor = data;
+                    }
+                }
+
+                if (dominantColor) {
+                    const hex = `#${dominantColor.r.toString(16).padStart(2, "0")}${dominantColor.g.toString(16).padStart(2, "0")}${dominantColor.b.toString(16).padStart(2, "0")}`;
+                    resolve(hex);
+                } else {
+                    resolve(null);
+                }
+            };
+            img.onerror = () => resolve(null);
+            img.src = imageUrl;
+        });
     }, []);
+
+    const handleLogoSelect = useCallback(
+        async (e: React.ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                setLogoFile(file);
+                const objectUrl = URL.createObjectURL(file);
+                setLogoPreviewUrl(objectUrl);
+
+                // Extract dominant color and set as primary if not already set
+                const dominantColor = await extractDominantColor(objectUrl);
+                if (dominantColor) {
+                    setPrimaryColor(dominantColor);
+                }
+            }
+        },
+        [extractDominantColor]
+    );
 
     const handleFaviconSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -234,9 +323,6 @@ function CustomizePageContent() {
                                 onChange={(e) => setCompanyName(e.target.value)}
                                 className="w-full"
                             />
-                            <p className="text-xs text-text-muted">
-                                This will replace &quot;Fern&quot; throughout your docs.
-                            </p>
                         </div>
 
                         {/* Logo Upload */}
@@ -331,7 +417,7 @@ function CustomizePageContent() {
                                     />
                                 </div>
                                 <span
-                                    className="cursor-pointer font-mono text-sm text-gray-700 dark:text-gray-300"
+                                    className="cursor-pointer font-mono text-sm text-gray-900 dark:text-white"
                                     onClick={() => setIsPickerOpen(!isPickerOpen)}
                                 >
                                     {primaryColor ? primaryColor.toUpperCase() : "Not set"}
@@ -455,7 +541,7 @@ function CustomizePageContent() {
                 >
                     {/* Template name badge */}
                     <div className="mb-3 flex items-center gap-2">
-                        <span className="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                        <span className="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-gray-900 dark:bg-gray-700 dark:text-white">
                             {template.name} template
                         </span>
                     </div>

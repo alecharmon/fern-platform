@@ -266,14 +266,6 @@ function SuccessPageContent() {
                             </div>
                         </div>
 
-                        {/* View Repository button */}
-                        <Button asChild className="mb-4 w-full bg-green-500 hover:bg-green-600">
-                            <a href={repoUrl} target="_blank" rel="noopener noreferrer">
-                                <Github className="mr-2 h-4 w-4" />
-                                View Repository
-                            </a>
-                        </Button>
-
                         {/* Site URL info */}
                         {siteUrl && (
                             <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-left dark:border-blue-800 dark:bg-blue-900/20">
@@ -282,37 +274,49 @@ function SuccessPageContent() {
                                         ? "Your docs are live at:"
                                         : "Your docs will be live at:"}
                                 </p>
-                                <a
-                                    href={publishedUrl || `https://${siteUrl}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="mt-1 flex items-center gap-1 font-mono text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                >
-                                    https://{siteUrl}
-                                    <ExternalLink className="h-3 w-3" />
-                                </a>
+                                {publishStatus === "completed" ? (
+                                    <a
+                                        href={publishedUrl || `https://${siteUrl}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="mt-1 flex items-center gap-1 font-mono text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                    >
+                                        https://{siteUrl}
+                                        <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                ) : (
+                                    <span className="mt-1 flex items-center gap-1 font-mono text-sm text-blue-600/70 dark:text-blue-400/70">
+                                        https://{siteUrl}
+                                    </span>
+                                )}
                             </div>
                         )}
-
-                        {/* Link back to dashboard */}
-                        <Link
-                            href="/"
-                            className="mt-auto inline-block text-center text-sm text-text-description transition-colors hover:text-gray-1200"
-                        >
-                            Back to Dashboard
-                        </Link>
                     </div>
 
                     {/* Right column - Publishing stream or iframe */}
                     <div className="flex min-h-[500px] flex-col">
                         {publishStatus === "publishing" && repoName && siteUrl ? (
-                            <PublishingStream
-                                repoName={repoName}
-                                siteUrl={siteUrl}
-                                repoUrl={repoUrl}
-                                onComplete={handlePublishComplete}
-                                onError={handlePublishError}
-                            />
+                            <>
+                                {/* Publishing header - matching left column style */}
+                                <div className="mb-6 text-center lg:text-left">
+                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 lg:mx-0 dark:bg-blue-900/30">
+                                        <div className="h-7 w-7 animate-spin rounded-full border-3 border-blue-500 border-t-transparent" />
+                                    </div>
+                                    <h1 className="mb-2 text-2xl font-semibold text-gray-1200">
+                                        Publishing your docs...
+                                    </h1>
+                                    <p className="text-text-description">
+                                        This usually takes 1-2 minutes. You can watch the progress below.
+                                    </p>
+                                </div>
+                                <PublishingStream
+                                    repoName={repoName}
+                                    siteUrl={siteUrl}
+                                    repoUrl={repoUrl}
+                                    onComplete={handlePublishComplete}
+                                    onError={handlePublishError}
+                                />
+                            </>
                         ) : publishStatus === "failed" ? (
                             <motion.div
                                 initial={{ opacity: 0 }}
@@ -398,7 +402,7 @@ function SuccessPageContent() {
                                     {orgName && siteUrl && (
                                         <Button asChild variant="outline" className="w-full">
                                             <a
-                                                href={`https://buildwithfern.com/${orgName}/docs/${siteUrl}`}
+                                                href={`https://dashboard.buildwithfern.com/${orgName}/docs/${siteUrl}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >

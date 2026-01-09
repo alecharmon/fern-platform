@@ -180,7 +180,7 @@ export function injectCustomStyles(html: string, options: StyleOptions): string 
     }
 
     // Only inject if there are actual customizations
-    if (cssRules.length === 0 && !fontImports) {
+    if (cssRules.length === 0 && !fontImports && !options.companyName && !options.logoUrl) {
         return html;
     }
 

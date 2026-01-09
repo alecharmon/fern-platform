@@ -32,31 +32,22 @@ export function TemplatePreview({
     const [iframeKey, setIframeKey] = useState(0);
 
     // Track values that should trigger a fade transition (visual changes)
-    const visualValues = `${logoUrl || ""}-${headingsFont}-${bodyFont}-${codeFont}-${primaryColor || ""}`;
+    const visualValues = `${logoUrl || ""}-${headingsFont}-${bodyFont}-${codeFont}-${primaryColor || ""}-${companyName || ""}`;
     const prevVisualValuesRef = useRef(visualValues);
 
-    // Fade transition only for visual changes (not text replacements which are instant)
+    // Fade transition for visual changes
     useEffect(() => {
         if (prevVisualValuesRef.current !== visualValues) {
+            prevVisualValuesRef.current = visualValues;
             setOpacity(0);
             const timer = setTimeout(() => {
                 setIframeKey((k) => k + 1);
-                prevVisualValuesRef.current = visualValues;
                 setTimeout(() => setOpacity(1), 50);
             }, 150);
             return () => clearTimeout(timer);
         }
         return undefined;
     }, [visualValues]);
-
-    // Force iframe refresh when company name changes (text replacement needs remount)
-    const prevCompanyNameRef = useRef(companyName);
-    useEffect(() => {
-        if (prevCompanyNameRef.current !== companyName) {
-            prevCompanyNameRef.current = companyName;
-            setIframeKey((k) => k + 1);
-        }
-    }, [companyName]);
 
     // Fetch the template HTML when template changes
     const fetchTemplate = useCallback(async (template: string) => {
