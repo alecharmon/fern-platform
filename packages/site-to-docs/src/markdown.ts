@@ -147,9 +147,13 @@ function cleanupMarkdown(markdown: string): string {
     // Remove HTML comments (<!-- ... -->)
     result = result.replace(/<!--[\s\S]*?-->/g, "");
 
-    // Escape curly braces outside of code blocks/inline code to prevent MDX parsing errors
-    // MDX interprets {} as JSX expressions, so we need to escape them
-    result = escapeCurlyBraces(result);
+    // Remove orphaned backtick sequences at the start of lines that don't form valid code blocks
+    // These can break MDX parsing (e.g., `` followed by non-code content)
+    result = removeOrphanedBackticks(result);
+
+    // Escape MDX-sensitive characters outside of code blocks using HTML entities
+    // This is more robust than backslash escaping which has complex interaction rules
+    result = escapeMdxCharacters(result);
 
     // Remove excessive blank lines (more than 2 consecutive)
     result = result.replace(/\n{3,}/g, "\n\n");
@@ -169,51 +173,102 @@ function cleanupMarkdown(markdown: string): string {
 }
 
 /**
- * Escapes curly braces in markdown content that are outside of code blocks and inline code.
- * This prevents MDX from interpreting them as JSX expressions.
+ * Removes orphaned backtick sequences that could break MDX parsing.
+ * Handles cases like:
+ * - Lines with just `` (double backtick) that don't close
+ * - Lines with ` followed by whitespace/newline (unclosed inline code)
  */
-function escapeCurlyBraces(markdown: string): string {
+function removeOrphanedBackticks(markdown: string): string {
+    const lines = markdown.split("\n");
+    const result: string[] = [];
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]!;
+        const trimmed = line.trim();
+
+        // Skip lines that are just backticks (orphaned code markers)
+        // e.g., `` or ` on their own line
+        if (/^`{1,2}$/.test(trimmed)) {
+            continue;
+        }
+
+        // Check for lines starting with `` followed by non-code content (broken inline code)
+        // e.g., ``| which indicates a broken conversion
+        if (/^``[^`]/.test(trimmed) && !trimmed.includes("```")) {
+            // Remove the leading ``
+            result.push(line.replace(/^(\s*)``/, "$1"));
+            continue;
+        }
+
+        result.push(line);
+    }
+
+    return result.join("\n");
+}
+
+/**
+ * Escapes MDX-sensitive characters in markdown content that are outside of code blocks.
+ * Uses HTML entities which are more robust than backslash escaping.
+ *
+ * MDX interprets:
+ * - `{` and `}` as JSX expressions
+ * - `<` and `>` as JSX tags (when followed by letters)
+ *
+ * HTML entities are unambiguous and work in all contexts (text, tables, etc.)
+ */
+function escapeMdxCharacters(markdown: string): string {
     const result: string[] = [];
     let i = 0;
+    let inFencedCodeBlock = false;
+    let inInlineCode = false;
+
+    // Helper to check if position is escaped (preceded by odd number of backslashes)
+    const isEscaped = (pos: number): boolean => {
+        let backslashCount = 0;
+        let checkPos = pos - 1;
+        while (checkPos >= 0 && markdown[checkPos] === "\\") {
+            backslashCount++;
+            checkPos--;
+        }
+        return backslashCount % 2 === 1;
+    };
 
     while (i < markdown.length) {
-        // Check for fenced code block (```)
-        if (markdown.slice(i, i + 3) === "```") {
-            const endIndex = markdown.indexOf("```", i + 3);
-            if (endIndex !== -1) {
-                // Include the entire code block as-is
-                result.push(markdown.slice(i, endIndex + 3));
-                i = endIndex + 3;
-                continue;
-            }
-        }
-
-        // Check for inline code (`)
-        if (markdown[i] === "`") {
-            // Find the closing backtick
-            const endIndex = markdown.indexOf("`", i + 1);
-            if (endIndex !== -1) {
-                // Include the entire inline code as-is
-                result.push(markdown.slice(i, endIndex + 1));
-                i = endIndex + 1;
-                continue;
-            }
-        }
-
-        // Escape curly braces outside of code
-        if (markdown[i] === "{") {
-            result.push("\\{");
-            i++;
+        // Track fenced code blocks (```) - only UNESCAPED ones
+        if (markdown.slice(i, i + 3) === "```" && !inInlineCode && !isEscaped(i)) {
+            inFencedCodeBlock = !inFencedCodeBlock;
+            result.push("```");
+            i += 3;
             continue;
         }
-        if (markdown[i] === "}") {
-            result.push("\\}");
+
+        // Track inline code (`) - only UNESCAPED ones, not inside fenced blocks
+        if (markdown[i] === "`" && !inFencedCodeBlock && !isEscaped(i)) {
+            inInlineCode = !inInlineCode;
+            result.push("`");
             i++;
             continue;
         }
 
-        // Regular character
-        result.push(markdown[i]!);
+        // Inside code blocks/inline code - pass through unchanged
+        if (inFencedCodeBlock || inInlineCode) {
+            result.push(markdown[i]!);
+            i++;
+            continue;
+        }
+
+        // Outside code: escape MDX-sensitive characters using HTML entities
+        // This is more robust than backslash escaping
+        switch (markdown[i]) {
+            case "{":
+                result.push("&#123;");
+                break;
+            case "}":
+                result.push("&#125;");
+                break;
+            default:
+                result.push(markdown[i]!);
+        }
         i++;
     }
 
