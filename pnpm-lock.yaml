@@ -1179,6 +1179,9 @@ importers:
       '@fern-api/fdr-sdk':
         specifier: workspace:*
         version: link:../fdr-sdk
+      '@fern-api/site-to-docs':
+        specifier: workspace:*
+        version: link:../site-to-docs
       '@fern-api/ui-core-utils':
         specifier: workspace:*
         version: link:../commons/core-utils

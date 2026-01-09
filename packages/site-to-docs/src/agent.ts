@@ -108,6 +108,13 @@ async function saveCrawlCache(
 /**
  * Configuration options for running the site-to-docs agent.
  */
+/** Progress event types for streaming progress updates */
+export type ProgressEvent =
+    | { stage: "crawl"; crawled: number; queued: number }
+    | { stage: "classify"; classified: number; total: number }
+    | { stage: "convert"; converted: number; total: number }
+    | { stage: "step"; step: number; message: string };
+
 export interface SiteToDocsOptions {
     /** The root URL to start crawling from */
     url: string;
@@ -131,6 +138,10 @@ export interface SiteToDocsOptions {
     crawlerCache?: boolean;
     /** Use cached classifier results if available (useful for development) */
     classifierCache?: boolean;
+    /** Skip the CWD safety check (for programmatic use in serverless environments) */
+    allowOutsideCwd?: boolean;
+    /** Callback for progress updates (for streaming progress to clients) */
+    onProgress?: (event: ProgressEvent) => void;
 }
 
 /**
@@ -160,7 +171,9 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
         verbose = false,
         title,
         crawlerCache = false,
-        classifierCache = false
+        classifierCache = false,
+        allowOutsideCwd = false,
+        onProgress
     } = options;
 
     // Validate cache flag combination
@@ -186,6 +199,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
 
     // Step 1: Crawl the site using BFS (or load from cache if --crawler-cache)
     log("\n[Step 1] Crawling site...");
+    onProgress?.({ stage: "step", step: 1, message: "Crawling site..." });
     // Cache directory is a sibling of output dir (not inside it) so it survives output clearing
     const cacheDir = path.join(path.dirname(path.resolve(outputDir)), ".cache");
     let crawlResult: CrawlResult;
@@ -195,6 +209,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
         if (cached) {
             crawlResult = cached;
             log(`  Loaded ${crawlResult.pages.size} pages from cache`);
+            onProgress?.({ stage: "crawl", crawled: crawlResult.pages.size, queued: 0 });
         } else {
             crawlResult = await crawlSite({
                 rootUrl: url,
@@ -202,6 +217,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
                 maxDepth,
                 onProgress: (crawled, queued) => {
                     log(`  Crawled ${crawled} pages, ${queued} in queue`);
+                    onProgress?.({ stage: "crawl", crawled, queued });
                 }
             });
             await saveCrawlCache(cacheDir, url, crawlResult);
@@ -214,6 +230,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
             maxDepth,
             onProgress: (crawled, queued) => {
                 log(`  Crawled ${crawled} pages, ${queued} in queue`);
+                onProgress?.({ stage: "crawl", crawled, queued });
             }
         });
         log(`  Crawl complete: ${crawlResult.pages.size} pages found`);
@@ -228,6 +245,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
 
     // Step 2: Classify pages using LLM (or load from cache if --classifier-cache)
     log("\n[Step 2] Classifying pages...");
+    onProgress?.({ stage: "step", step: 2, message: "Classifying pages..." });
 
     let siteStructure: import("./types.js").SiteStructure | undefined;
 
@@ -237,6 +255,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
             // Replace crawlResult with the cached classified version
             crawlResult = cachedClassified;
             log(`  Loaded ${crawlResult.pages.size} classified pages from cache`);
+            onProgress?.({ stage: "classify", classified: crawlResult.pages.size, total: crawlResult.pages.size });
             // Note: siteStructure is not cached, so ordering won't be applied from cache
         } else {
             const model = anthropic("claude-sonnet-4-20250514");
@@ -245,6 +264,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
                 maxGroupSize,
                 onProgress: (classified, total) => {
                     log(`  Classified ${classified}/${total} pages`);
+                    onProgress?.({ stage: "classify", classified, total });
                 }
             });
             warnings.push(...classificationResult.warnings);
@@ -263,6 +283,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
             maxGroupSize,
             onProgress: (classified, total) => {
                 log(`  Classified ${classified}/${total} pages`);
+                onProgress?.({ stage: "classify", classified, total });
             }
         });
         warnings.push(...classificationResult.warnings);
@@ -274,14 +295,19 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
 
     // Step 3: Assign filenames and slugs
     log("\n[Step 3] Assigning filenames and slugs...");
+    onProgress?.({ stage: "step", step: 3, message: "Assigning filenames and slugs..." });
     assignFilenamesAndSlugs(crawlResult.pages);
     log(`  Assigned filenames to ${crawlResult.pages.size} pages`);
 
     // Step 4: Convert HTML to markdown (skip API reference pages - they go to OpenAPI only)
     log("\n[Step 4] Converting HTML to markdown...");
+    onProgress?.({ stage: "step", step: 4, message: "Converting HTML to markdown..." });
     const urlToSlugMap = buildUrlToSlugMap(crawlResult.pages);
     let converted = 0;
     let skippedApiPages = 0;
+    const totalToConvert = Array.from(crawlResult.pages.values()).filter(
+        (p) => !p.classification?.isApiReference
+    ).length;
     for (const page of crawlResult.pages.values()) {
         // Skip API reference pages - they only contribute to OpenAPI stub
         if (page.classification?.isApiReference) {
@@ -291,8 +317,11 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
         try {
             await convertPageToMarkdown(page, urlToSlugMap, url);
             converted++;
-            if (verbose && converted % 10 === 0) {
-                log(`  Converted ${converted}/${crawlResult.pages.size - skippedApiPages} pages`);
+            if (converted % 10 === 0 || converted === totalToConvert) {
+                if (verbose) {
+                    log(`  Converted ${converted}/${totalToConvert} pages`);
+                }
+                onProgress?.({ stage: "convert", converted, total: totalToConvert });
             }
         } catch (error) {
             warnings.push(
@@ -301,19 +330,22 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
         }
     }
     log(`  Converted ${converted} pages to markdown (skipped ${skippedApiPages} API reference pages)`);
+    onProgress?.({ stage: "convert", converted, total: totalToConvert });
 
     // Step 5: Build Fern navigation tree
     log("\n[Step 5] Building navigation tree...");
+    onProgress?.({ stage: "step", step: 5, message: "Building navigation tree..." });
     const fernNavigation = buildFernNavigation(crawlResult, siteStructure);
     log(`  Navigation tree built`);
 
     // Step 6: Write files to output directory
     log("\n[Step 6] Writing files...");
+    onProgress?.({ stage: "step", step: 6, message: "Writing files..." });
 
-    // Safety: output directory must be inside current working directory
+    // Safety: output directory must be inside current working directory (unless allowOutsideCwd is set)
     const cwd = process.cwd();
     const resolvedOutputDir = path.resolve(outputDir);
-    if (!resolvedOutputDir.startsWith(cwd + path.sep) && resolvedOutputDir !== cwd) {
+    if (!allowOutsideCwd && !resolvedOutputDir.startsWith(cwd + path.sep) && resolvedOutputDir !== cwd) {
         throw new Error(`Output directory must be inside current working directory. Got: ${resolvedOutputDir}`);
     }
 

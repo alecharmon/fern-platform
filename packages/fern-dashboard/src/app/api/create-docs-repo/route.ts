@@ -17,7 +17,10 @@ export const dynamic = "force-dynamic";
 interface CreateDocsRepoRequest {
     orgName: string;
     urlPrefix: string; // The subdomain prefix (e.g., "my-company" for my-company.docs.buildwithfern.com)
-    templateId: "classic" | "minimal" | "products" | "no-top-bar";
+    sourceType?: "template" | "site-to-docs"; // Type of source, defaults to "template"
+
+    // Template flow fields
+    templateId?: "classic" | "minimal" | "products" | "no-top-bar";
     companyName?: string; // Replaces "Fern" throughout the docs
     primaryColorHex?: string;
     fonts?: {
@@ -27,6 +30,10 @@ interface CreateDocsRepoRequest {
     };
     logoBase64?: string; // Base64 data URL for logo image
     faviconBase64?: string; // Base64 data URL for favicon image
+
+    // Site-to-docs flow fields
+    siteToDocsFiles?: Array<{ path: string; content: string; encoding?: "utf-8" | "base64" }>;
+    sourceUrl?: string; // Original URL that was converted
 }
 
 /**
@@ -375,6 +382,95 @@ jobs:
     await fs.writeFile(path.join(workflowDir, "publish-docs.yml"), publishWorkflow);
 }
 
+/**
+ * Writes site-to-docs files to the project directory and updates configuration
+ */
+async function writeSiteToDocsFiles(
+    files: Array<{ path: string; content: string; encoding?: "utf-8" | "base64" }>,
+    projectDir: string,
+    orgName: string,
+    urlPrefix: string
+): Promise<void> {
+    // Write all files from site-to-docs output
+    for (const file of files) {
+        const filePath = path.join(projectDir, file.path);
+        const dir = path.dirname(filePath);
+        await fs.mkdir(dir, { recursive: true });
+
+        if (file.encoding === "base64") {
+            const buffer = Buffer.from(file.content, "base64");
+            await fs.writeFile(filePath, buffer);
+        } else {
+            await fs.writeFile(filePath, file.content, "utf-8");
+        }
+    }
+
+    // Update fern.config.json with actual organization
+    const fernConfigPath = path.join(projectDir, "fern", "fern.config.json");
+    try {
+        const fernConfigContent = await fs.readFile(fernConfigPath, "utf-8");
+        const fernConfig = JSON.parse(fernConfigContent);
+        fernConfig.organization = orgName;
+        await fs.writeFile(fernConfigPath, JSON.stringify(fernConfig, null, 2));
+    } catch (err) {
+        console.warn("Could not update fern.config.json:", err);
+    }
+
+    // Update docs.yml with actual site URL
+    const docsYmlPath = path.join(projectDir, "fern", "docs.yml");
+    try {
+        const docsYmlContent = await fs.readFile(docsYmlPath, "utf-8");
+        const docsConfig = yaml.load(docsYmlContent) as any;
+
+        // Update or add the instances with the correct URL
+        if (!docsConfig.instances) {
+            docsConfig.instances = [];
+        }
+        if (docsConfig.instances.length > 0) {
+            docsConfig.instances[0].url = `${urlPrefix}.docs.buildwithfern.com`;
+        } else {
+            docsConfig.instances.push({ url: `${urlPrefix}.docs.buildwithfern.com` });
+        }
+
+        await fs.writeFile(
+            docsYmlPath,
+            `# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json\n\n${yaml.dump(docsConfig)}`
+        );
+    } catch (err) {
+        console.warn("Could not update docs.yml:", err);
+    }
+
+    // Create GitHub Actions workflow to auto-publish docs on push
+    const workflowDir = path.join(projectDir, ".github", "workflows");
+    await fs.mkdir(workflowDir, { recursive: true });
+
+    const publishWorkflow = `name: Publish Docs
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Fern
+        run: npm install -g fern-api
+
+      - name: Publish Docs
+        env:
+          FERN_TOKEN: \${{ secrets.FERN_TOKEN }}
+        run: fern generate --docs
+`;
+
+    await fs.writeFile(path.join(workflowDir, "publish-docs.yml"), publishWorkflow);
+}
+
 export async function POST(req: NextRequest) {
     const session = await getCurrentSession();
     if (!session) {
@@ -388,9 +484,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
+    // Determine source type (default to template for backwards compatibility)
+    const sourceType = data.sourceType ?? "template";
+
     // Validate required fields
-    if (!data.orgName || !data.templateId || !data.urlPrefix) {
-        return NextResponse.json({ error: "orgName, urlPrefix, and templateId are required" }, { status: 400 });
+    if (!data.orgName || !data.urlPrefix) {
+        return NextResponse.json({ error: "orgName and urlPrefix are required" }, { status: 400 });
     }
 
     // Validate urlPrefix format (subdomain rules)
@@ -399,10 +498,24 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Invalid URL prefix format" }, { status: 400 });
     }
 
-    // Validate templateId
-    const validTemplates = ["classic", "minimal", "products", "no-top-bar"];
-    if (!validTemplates.includes(data.templateId)) {
-        return NextResponse.json({ error: "Invalid template ID" }, { status: 400 });
+    // Validate based on source type
+    if (sourceType === "template") {
+        if (!data.templateId) {
+            return NextResponse.json({ error: "templateId is required for template source" }, { status: 400 });
+        }
+        const validTemplates = ["classic", "minimal", "products", "no-top-bar"];
+        if (!validTemplates.includes(data.templateId)) {
+            return NextResponse.json({ error: "Invalid template ID" }, { status: 400 });
+        }
+    } else if (sourceType === "site-to-docs") {
+        if (!data.siteToDocsFiles || data.siteToDocsFiles.length === 0) {
+            return NextResponse.json(
+                { error: "siteToDocsFiles are required for site-to-docs source" },
+                { status: 400 }
+            );
+        }
+    } else {
+        return NextResponse.json({ error: "Invalid sourceType" }, { status: 400 });
     }
 
     let tempDir: string | null = null;
@@ -410,49 +523,58 @@ export async function POST(req: NextRequest) {
     try {
         // Create temp directory
         tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "fern-docs-repo-"));
-
-        // Download docs-templates repo tarball
-        const tarballUrl = "https://github.com/fern-api/docs-templates/archive/refs/heads/main.tar.gz";
-        const response = await fetch(tarballUrl);
-
-        if (!response.ok) {
-            throw new Error(`Failed to download templates: ${response.statusText}`);
-        }
-
-        const tarballPath = path.join(tempDir, "templates.tar.gz");
-        const tarballBuffer = Buffer.from(await response.arrayBuffer());
-        await fs.writeFile(tarballPath, tarballBuffer);
-
-        // Extract tarball
-        const extractDir = path.join(tempDir, "extracted");
-        await fs.mkdir(extractDir, { recursive: true });
-        await extract({ file: tarballPath, cwd: extractDir });
-        await fs.unlink(tarballPath);
-
-        // Find the extracted folder (docs-templates-main or similar)
-        const extractedContents = await fs.readdir(extractDir);
-        const repoFolder = extractedContents.find((f) => f.startsWith("docs-templates"));
-        if (!repoFolder) {
-            throw new Error("Could not find extracted template folder");
-        }
-
-        // Copy selected template to project directory
-        const templateSrc = path.join(extractDir, repoFolder, data.templateId);
         const projectDir = path.join(tempDir, "project");
+        await fs.mkdir(projectDir, { recursive: true });
 
-        try {
-            await fs.access(templateSrc);
-        } catch {
-            throw new Error(`Template '${data.templateId}' not found in repository`);
+        let files: Array<{ path: string; content: string; encoding?: "utf-8" | "base64" }>;
+
+        if (sourceType === "site-to-docs") {
+            // Site-to-docs flow: write files from siteToDocsFiles and update configuration
+            await writeSiteToDocsFiles(data.siteToDocsFiles!, projectDir, data.orgName, data.urlPrefix);
+            files = await readAllFilesFromDirectory(projectDir);
+        } else {
+            // Template flow: download and customize template
+            const tarballUrl = "https://github.com/fern-api/docs-templates/archive/refs/heads/main.tar.gz";
+            const response = await fetch(tarballUrl);
+
+            if (!response.ok) {
+                throw new Error(`Failed to download templates: ${response.statusText}`);
+            }
+
+            const tarballPath = path.join(tempDir, "templates.tar.gz");
+            const tarballBuffer = Buffer.from(await response.arrayBuffer());
+            await fs.writeFile(tarballPath, tarballBuffer);
+
+            // Extract tarball
+            const extractDir = path.join(tempDir, "extracted");
+            await fs.mkdir(extractDir, { recursive: true });
+            await extract({ file: tarballPath, cwd: extractDir });
+            await fs.unlink(tarballPath);
+
+            // Find the extracted folder (docs-templates-main or similar)
+            const extractedContents = await fs.readdir(extractDir);
+            const repoFolder = extractedContents.find((f) => f.startsWith("docs-templates"));
+            if (!repoFolder) {
+                throw new Error("Could not find extracted template folder");
+            }
+
+            // Copy selected template to project directory
+            const templateSrc = path.join(extractDir, repoFolder, data.templateId!);
+
+            try {
+                await fs.access(templateSrc);
+            } catch {
+                throw new Error(`Template '${data.templateId}' not found in repository`);
+            }
+
+            await fs.cp(templateSrc, projectDir, { recursive: true });
+
+            // Customize the template (update org name, colors, fonts)
+            await customizeTemplate(data as CreateDocsRepoRequest & { templateId: string }, projectDir);
+
+            // Read all files from the project directory
+            files = await readAllFilesFromDirectory(projectDir);
         }
-
-        await fs.cp(templateSrc, projectDir, { recursive: true });
-
-        // Customize the template (update org name, colors, fonts)
-        await customizeTemplate(data, projectDir);
-
-        // Read all files from the project directory
-        const files = await readAllFilesFromDirectory(projectDir);
 
         // Generate repo name from URL prefix (e.g., "my-company" becomes "my-company-docs")
         const repoName = `${data.urlPrefix}-docs`.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
@@ -463,12 +585,17 @@ export async function POST(req: NextRequest) {
         }
 
         // Create GitHub repository and automatically set FERN_TOKEN secret
+        const description =
+            sourceType === "site-to-docs" && data.sourceUrl
+                ? `Fern documentation imported from ${data.sourceUrl}`
+                : `Fern documentation for ${data.urlPrefix}.docs.buildwithfern.com`;
+
         console.log(`Creating GitHub repo with setFernToken enabled, projectDir: ${projectDir}`);
         const result = await postGitRepository({
             orgName: Auth0OrgName(data.orgName),
             owner: demoCreationBotOwner,
             repoName,
-            description: `Fern documentation for ${data.urlPrefix}.docs.buildwithfern.com`,
+            description,
             isPrivate: true,
             files,
             site: `${data.urlPrefix}.docs.buildwithfern.com`,

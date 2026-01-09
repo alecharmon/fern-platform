@@ -1,9 +1,9 @@
 "use client";
 
-import { ArrowLeft, Building2, Check, Loader2, Plus, X } from "lucide-react";
+import { ArrowLeft, Building2, Check, Globe, Loader2, Plus, X } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
@@ -27,13 +27,24 @@ interface DocsCustomization {
     faviconBase64?: string | null;
 }
 
+interface SiteToDocsOutput {
+    files: Array<{ path: string; content: string; encoding?: "utf-8" | "base64" }>;
+    sourceUrl: string;
+    pagesConverted: number;
+    totalFiles: number;
+    warnings: string[];
+}
+
 export default function SetupPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const organizations = useOrganizations();
     const invalidateOrganizations = useInvalidateOrganizations();
 
     const [selectedOrgName, setSelectedOrgName] = useState<string>("");
     const [customization, setCustomization] = useState<DocsCustomization | null>(null);
+    const [siteToDocsOutput, setSiteToDocsOutput] = useState<SiteToDocsOutput | null>(null);
+    const [flowType, setFlowType] = useState<"template" | "site-to-docs">("template");
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
@@ -104,13 +115,35 @@ export default function SetupPage() {
         return () => clearTimeout(timeoutId);
     }, [urlPrefix, validateSubdomain]);
 
-    // Read customization from sessionStorage on mount
+    // Read customization or site-to-docs output from sessionStorage on mount
     useEffect(() => {
+        const source = searchParams.get("source");
+
+        // Check for site-to-docs flow first
+        if (source === "site-to-docs") {
+            try {
+                const stored = sessionStorage.getItem("siteToDocsOutput");
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    setSiteToDocsOutput(parsed);
+                    setFlowType("site-to-docs");
+                    return;
+                }
+            } catch (e) {
+                console.error("Failed to read site-to-docs output from sessionStorage:", e);
+            }
+            // If no site-to-docs output found, redirect back
+            router.push("/create-docs/import");
+            return;
+        }
+
+        // Template flow
         try {
             const stored = sessionStorage.getItem("docsCustomization");
             if (stored) {
                 const parsed = JSON.parse(stored);
                 setCustomization(parsed);
+                setFlowType("template");
             } else {
                 // No customization found, redirect back to templates
                 router.push("/create-docs/templates");
@@ -119,7 +152,7 @@ export default function SetupPage() {
             console.error("Failed to read customization from sessionStorage:", e);
             router.push("/create-docs/templates");
         }
-    }, [router]);
+    }, [router, searchParams]);
 
     // Auto-select first org when loaded
     useEffect(() => {
@@ -129,7 +162,14 @@ export default function SetupPage() {
     }, [organizations, selectedOrgName]);
 
     const handleCreateRepo = async () => {
-        if (!selectedOrgName || !customization || !urlPrefix || !isUrlAvailable) {
+        // Validate based on flow type
+        if (!selectedOrgName || !urlPrefix || !isUrlAvailable) {
+            return;
+        }
+        if (flowType === "template" && !customization) {
+            return;
+        }
+        if (flowType === "site-to-docs" && !siteToDocsOutput) {
             return;
         }
 
@@ -137,25 +177,38 @@ export default function SetupPage() {
         setError(null);
 
         try {
+            // Build request body based on flow type
+            const body =
+                flowType === "site-to-docs"
+                    ? {
+                          orgName: selectedOrgName,
+                          urlPrefix,
+                          sourceType: "site-to-docs",
+                          siteToDocsFiles: siteToDocsOutput!.files,
+                          sourceUrl: siteToDocsOutput!.sourceUrl
+                      }
+                    : {
+                          orgName: selectedOrgName,
+                          urlPrefix,
+                          sourceType: "template",
+                          templateId: customization!.templateId,
+                          companyName: customization!.companyName,
+                          primaryColorHex: customization!.primaryColor,
+                          fonts: {
+                              headings: customization!.headingsFont,
+                              body: customization!.bodyFont,
+                              code: customization!.codeFont
+                          },
+                          logoBase64: customization!.logoBase64,
+                          faviconBase64: customization!.faviconBase64
+                      };
+
             const response = await fetch("/api/create-docs-repo", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    orgName: selectedOrgName,
-                    urlPrefix,
-                    templateId: customization.templateId,
-                    companyName: customization.companyName,
-                    primaryColorHex: customization.primaryColor,
-                    fonts: {
-                        headings: customization.headingsFont,
-                        body: customization.bodyFont,
-                        code: customization.codeFont
-                    },
-                    logoBase64: customization.logoBase64,
-                    faviconBase64: customization.faviconBase64
-                })
+                body: JSON.stringify(body)
             });
 
             if (!response.ok) {
@@ -165,8 +218,13 @@ export default function SetupPage() {
 
             const result = await response.json();
 
-            // Clear customization from sessionStorage
-            sessionStorage.removeItem("docsCustomization");
+            // Clear data from sessionStorage
+            if (flowType === "site-to-docs") {
+                sessionStorage.removeItem("siteToDocsOutput");
+                sessionStorage.removeItem("siteToDocsInput");
+            } else {
+                sessionStorage.removeItem("docsCustomization");
+            }
 
             // Navigate to success page with the GitHub repo URL and collaborator status
             const params = new URLSearchParams({
@@ -247,7 +305,7 @@ export default function SetupPage() {
                         <ThemedFernLogo className="w-16" />
                     </Link>
                     <Link
-                        href="/create-docs/customize"
+                        href={flowType === "site-to-docs" ? "/create-docs/import" : "/create-docs/customize"}
                         className="flex items-center gap-2 text-sm text-text-description transition-colors hover:text-gray-1200"
                     >
                         <ArrowLeft className="h-4 w-4" />
@@ -340,8 +398,22 @@ export default function SetupPage() {
                                 </button>
                             </div>
 
-                            {/* Template info */}
-                            {customization && (
+                            {/* Source info */}
+                            {flowType === "site-to-docs" && siteToDocsOutput && (
+                                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                                    <div className="flex items-center gap-2 text-xs text-text-muted">
+                                        <Globe className="h-3.5 w-3.5" />
+                                        <span>Imported from:</span>
+                                        <span className="truncate font-medium text-text-description">
+                                            {siteToDocsOutput.sourceUrl}
+                                        </span>
+                                    </div>
+                                    <p className="mt-1 text-xs text-text-muted">
+                                        {siteToDocsOutput.pagesConverted} pages converted
+                                    </p>
+                                </div>
+                            )}
+                            {flowType === "template" && customization && (
                                 <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
                                     <p className="text-xs text-text-muted">
                                         Template:{" "}
@@ -363,7 +435,12 @@ export default function SetupPage() {
                             <Button
                                 onClick={handleCreateRepo}
                                 disabled={
-                                    !selectedOrgName || isCreating || !customization || !urlPrefix || !isUrlAvailable
+                                    !selectedOrgName ||
+                                    isCreating ||
+                                    !urlPrefix ||
+                                    !isUrlAvailable ||
+                                    (flowType === "template" && !customization) ||
+                                    (flowType === "site-to-docs" && !siteToDocsOutput)
                                 }
                                 className="w-full bg-green-500 hover:bg-green-600"
                             >
@@ -378,7 +455,7 @@ export default function SetupPage() {
                             </Button>
 
                             <p className="text-center text-xs text-text-muted">
-                                A private GitHub repository will be created with your documentation template.
+                                A private GitHub repository will be created with your documentation.
                             </p>
                         </div>
                     </div>

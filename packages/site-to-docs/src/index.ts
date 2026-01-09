@@ -17,7 +17,7 @@
  * ```
  */
 
-export type { SiteToDocsOptions } from "./agent.js";
+export type { ProgressEvent, SiteToDocsOptions } from "./agent.js";
 // Agent exports
 export { runAgent, testTools, ValidationError } from "./agent.js";
 export type { ClassifyPagesOptions, GroupPagesOptions, GroupPagesResult } from "./classifier.js";

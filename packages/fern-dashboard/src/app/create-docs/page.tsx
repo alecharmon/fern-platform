@@ -99,29 +99,27 @@ export default function CreateDocsPage() {
                         </Link>
                     </motion.div>
 
-                    {/* Existing site option (coming soon) */}
+                    {/* Existing site option */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: 0.3 }}
                     >
-                        <div className="relative flex h-48 w-72 cursor-not-allowed flex-col items-center justify-center gap-4 rounded-xl border border-gray-200 bg-white/50 p-6 opacity-60 dark:border-gray-700 dark:bg-gray-800/50">
-                            {/* Coming soon badge */}
-                            <span className="absolute right-3 top-3 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                                Coming soon
-                            </span>
-                            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500">
-                                <Globe className="h-7 w-7" />
+                        <Link href="/create-docs/import">
+                            <div className="group relative flex h-48 w-72 cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:border-gray-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                                    <Globe className="h-7 w-7" />
+                                </div>
+                                <div className="text-center">
+                                    <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                                        Enter an existing site
+                                    </h2>
+                                    <p className="mt-1 text-sm text-text-muted">
+                                        Import configuration from an existing docs site
+                                    </p>
+                                </div>
                             </div>
-                            <div className="text-center">
-                                <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-                                    Enter an existing site
-                                </h2>
-                                <p className="mt-1 text-sm text-text-muted">
-                                    Import configuration from an existing docs site
-                                </p>
-                            </div>
-                        </div>
+                        </Link>
                     </motion.div>
                 </div>
             </div>
