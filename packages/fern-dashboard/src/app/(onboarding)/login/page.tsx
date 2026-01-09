@@ -2,19 +2,29 @@ import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { GithubLoginButton, GoogleLoginButton } from "@/components/auth/LoginButton";
+import { CITestLoginForm } from "@/components/login-page/CITestLoginForm";
 import { EmailLoginForm } from "@/components/login-page/EmailLoginForm";
 
-export default async function LoginCardSlot() {
+interface LoginPageProps {
+    searchParams: Promise<{ FERN_CI_AUTOMATED_TESTING?: string }>;
+}
+
+export default async function LoginCardSlot({ searchParams }: LoginPageProps) {
     const session = await getCurrentSession();
 
     if (session != null) {
         redirect("/");
     }
 
+    const { FERN_CI_AUTOMATED_TESTING } = await searchParams;
+    const showCITestLogin =
+        !!process.env.FERN_CI_AUTOMATED_TESTING && FERN_CI_AUTOMATED_TESTING === process.env.FERN_CI_AUTOMATED_TESTING;
+
     return (
         <>
             <div className="mx-4 flex w-full max-w-[400px] flex-1 flex-col items-stretch md:mx-auto">
                 <div className="mb-8 text-center text-xl font-bold">Log in to Fern</div>
+                {showCITestLogin && <CITestLoginForm />}
                 <div className="flex flex-col gap-2">
                     <GoogleLoginButton />
                     <GithubLoginButton />

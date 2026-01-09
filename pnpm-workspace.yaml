@@ -1,4 +1,5 @@
 packages:
+  - "playwright"
   - "servers/**"
   - "clis/**"
   - "packages/**"

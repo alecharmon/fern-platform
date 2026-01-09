@@ -1,0 +1,11 @@
+# Playwright artifacts
+playwright-report/
+test-results/
+.playwright/
+
+# Build output
+dist/
+
+# Local env files
+.env
+.env.local

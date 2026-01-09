@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 import { cache } from "react";
 import { getAuth0Client } from "@/app/services/auth0/auth0";
 
@@ -10,7 +11,73 @@ export interface Auth0SessionData {
     permissions?: string[];
 }
 
+interface CITestSession {
+    user: {
+        sub: string;
+        name?: string;
+        nickname?: string;
+        picture?: string;
+        email?: string;
+        email_verified?: boolean;
+    };
+    accessToken: string;
+    idToken: string;
+    refreshToken?: string;
+    expiresAt: number;
+}
+
+/**
+ * Attempts to get a session from the CI test cookie.
+ * This is only used when FERN_CI_AUTOMATED_TESTING is enabled.
+ */
+async function getCITestSession(): Promise<Auth0SessionData | undefined> {
+    // Only check for CI session if CI testing is enabled
+    if (!process.env.FERN_CI_AUTOMATED_TESTING) {
+        return undefined;
+    }
+
+    try {
+        const cookieStore = await cookies();
+        const ciSessionCookie = cookieStore.get("ci_test_session");
+
+        if (!ciSessionCookie?.value) {
+            return undefined;
+        }
+
+        const sessionData = JSON.parse(Buffer.from(ciSessionCookie.value, "base64").toString()) as CITestSession;
+
+        // Check if session has expired
+        if (sessionData.expiresAt < Math.floor(Date.now() / 1000)) {
+            console.debug("[getCITestSession] CI test session has expired");
+            return undefined;
+        }
+
+        console.debug(`[getCITestSession] Found valid CI test session for user: ${sessionData.user.sub}`);
+
+        return {
+            user: {
+                ...sessionData.user,
+                sub: Auth0UserID(sessionData.user.sub)
+            },
+            accessToken: sessionData.accessToken,
+            permissions: sessionData.accessToken
+                ? ((jwt.decode(sessionData.accessToken) as any)?.permissions ?? [])
+                : []
+        };
+    } catch (error) {
+        console.debug("[getCITestSession] Failed to parse CI test session:", error);
+        return undefined;
+    }
+}
+
 export const getCurrentSession = cache(async (): Promise<Auth0SessionData | undefined> => {
+    // First, try to get a CI test session (only works if CI testing is enabled)
+    const ciSession = await getCITestSession();
+    if (ciSession) {
+        return ciSession;
+    }
+
+    // Fall back to standard Auth0 session
     const auth0 = await getAuth0Client();
     const session = await auth0.getSession();
 

@@ -37,6 +37,10 @@
     "test-ete": {
       "dependsOn": ["compile"]
     },
+    "test:e2e": {
+      "cache": false,
+      "env": ["DASHBOARD_URL", "DOCS_URL", "FERN_CI_AUTOMATED_TESTING"]
+    },
     "test:self-hosted": {},
     "dev": {
       "persistent": true

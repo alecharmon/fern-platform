@@ -11,7 +11,7 @@ export const LogoutButton = ({
 }) => {
     return (
         <Button variant={variant} asChild className={className}>
-            <a href="/auth/logout">Logout</a>
+            <a href="/api/logout">Logout</a>
         </Button>
     );
 };
