@@ -22,7 +22,7 @@ code .
 pnpm install
 ```
 
-(If pnpm is not installed, installing specific version `10.11.0` is recommended using `curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=10.11.0 sh -`)
+(If pnpm is not installed, installing specific version `10.27.0` is recommended using `curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=10.27.0 sh -`)
 
 ### Compiling
 

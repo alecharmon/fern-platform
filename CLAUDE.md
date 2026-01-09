@@ -213,7 +213,7 @@ https://docs.buildwithfern.com -> https://fern.docs.staging.buildwithfern.com
 ## Package Manager and Node Version
 
 - **Node**: `>=22.0.0` (required)
-- **Package Manager**: `pnpm 10.11.0` (enforced via `packageManager` field)
+- **Package Manager**: `pnpm 10.27.0` (enforced via `packageManager` field)
 - **Preinstall hook**: Enforces pnpm usage only
 
 ## Testing Philosophy

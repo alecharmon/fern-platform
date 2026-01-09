@@ -11,7 +11,7 @@ RUN turbo prune @fern-platform/fdr --docker
 
 # Add lockfile and package.json's
 FROM base AS installer
-RUN npm install -g pnpm@10.11.0 fern-api
+RUN npm install -g pnpm@10.27.0 fern-api
 WORKDIR /app
 
 # Install deps
