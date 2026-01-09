@@ -116,6 +116,7 @@
     "queryParameters": "쿼리 매개변수",
     "bodyParameters": "본문 매개변수",
     "headers": "헤더",
+    "responseHeaders": "응답 헤더",
     "body": "본문",
     "optionalBody": "선택적 본문",
     "payload": "페이로드",

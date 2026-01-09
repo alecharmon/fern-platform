@@ -116,6 +116,7 @@
     "queryParameters": "クエリパラメータ",
     "bodyParameters": "ボディパラメータ",
     "headers": "ヘッダー",
+    "responseHeaders": "レスポンスヘッダー",
     "body": "ボディ",
     "optionalBody": "オプションのボディ",
     "payload": "ペイロード",

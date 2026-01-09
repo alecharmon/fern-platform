@@ -116,6 +116,7 @@
     "queryParameters": "Spørringsparametere",
     "bodyParameters": "Body-parametere",
     "headers": "Headers",
+    "responseHeaders": "Responsheaders",
     "body": "Body",
     "optionalBody": "Valgfri body",
     "payload": "Payload",

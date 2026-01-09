@@ -116,6 +116,7 @@
     "queryParameters": "Parámetros de consulta",
     "bodyParameters": "Parámetros del cuerpo",
     "headers": "Encabezados",
+    "responseHeaders": "Encabezados de respuesta",
     "body": "Cuerpo",
     "optionalBody": "Cuerpo opcional",
     "payload": "Carga útil",

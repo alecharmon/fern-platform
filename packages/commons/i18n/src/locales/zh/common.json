@@ -116,6 +116,7 @@
     "queryParameters": "查询参数",
     "bodyParameters": "请求体参数",
     "headers": "请求头",
+    "responseHeaders": "响应头",
     "body": "请求体",
     "optionalBody": "可选请求体",
     "payload": "有效负载",

@@ -116,6 +116,7 @@
     "queryParameters": "Parâmetros de consulta",
     "bodyParameters": "Parâmetros do corpo",
     "headers": "Cabeçalhos",
+    "responseHeaders": "Cabeçalhos de resposta",
     "body": "Corpo",
     "optionalBody": "Corpo opcional",
     "payload": "Payload",

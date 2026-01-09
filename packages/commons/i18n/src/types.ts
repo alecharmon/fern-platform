@@ -119,6 +119,7 @@ export type Translations = {
         queryParameters: string;
         bodyParameters: string;
         headers: string;
+        responseHeaders: string;
         body: string;
         optionalBody: string;
         payload: string;

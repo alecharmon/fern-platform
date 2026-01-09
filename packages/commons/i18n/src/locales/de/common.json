@@ -116,6 +116,7 @@
     "queryParameters": "Abfrageparameter",
     "bodyParameters": "Body-Parameter",
     "headers": "Header",
+    "responseHeaders": "Antwort-Header",
     "body": "Body",
     "optionalBody": "Optionaler Body",
     "payload": "Payload",

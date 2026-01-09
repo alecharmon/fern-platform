@@ -116,6 +116,7 @@
     "queryParameters": "Parametri di query",
     "bodyParameters": "Parametri del corpo",
     "headers": "Header",
+    "responseHeaders": "Header di risposta",
     "body": "Corpo",
     "optionalBody": "Corpo opzionale",
     "payload": "Payload",

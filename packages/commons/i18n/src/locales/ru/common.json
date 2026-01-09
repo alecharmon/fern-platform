@@ -116,6 +116,7 @@
     "queryParameters": "Параметры запроса",
     "bodyParameters": "Параметры тела",
     "headers": "Заголовки",
+    "responseHeaders": "Заголовки ответа",
     "body": "Тело",
     "optionalBody": "Необязательное тело",
     "payload": "Полезная нагрузка",

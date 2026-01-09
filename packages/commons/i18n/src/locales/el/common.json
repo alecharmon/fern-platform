@@ -116,6 +116,7 @@
     "queryParameters": "Παράμετροι ερωτήματος",
     "bodyParameters": "Παράμετροι σώματος",
     "headers": "Κεφαλίδες",
+    "responseHeaders": "Κεφαλίδες απόκρισης",
     "body": "Σώμα",
     "optionalBody": "Προαιρετικό σώμα",
     "payload": "Φορτίο",

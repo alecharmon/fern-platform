@@ -116,6 +116,7 @@
     "queryParameters": "Sorgu parametreleri",
     "bodyParameters": "Gövde parametreleri",
     "headers": "Başlıklar",
+    "responseHeaders": "Yanıt başlıkları",
     "body": "Gövde",
     "optionalBody": "İsteğe bağlı gövde",
     "payload": "Payload",

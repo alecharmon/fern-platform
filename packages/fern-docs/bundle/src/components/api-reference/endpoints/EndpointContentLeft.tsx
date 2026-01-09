@@ -240,6 +240,20 @@ export async function EndpointContentLeft({
             </TypeDefinitionAnchorPart>
             <TypeDefinitionResponse key="response">
                 <TypeDefinitionAnchorPart part="response">
+                    {endpoint.responseHeaders && endpoint.responseHeaders.length > 0 && (
+                        <TypeDefinitionAnchorPart part="response-header">
+                            <EndpointSection
+                                title={t(lang).apiReference.responseHeaders}
+                                className="fern-endpoint-section-response-headers"
+                            >
+                                <WithSeparator>
+                                    {endpoint.responseHeaders.map((header) => (
+                                        <ObjectProperty key={header.key} property={header} types={types} lang={lang} />
+                                    ))}
+                                </WithSeparator>
+                            </EndpointSection>
+                        </TypeDefinitionAnchorPart>
+                    )}
                     {endpoint.responses?.[0] != null ? (
                         endpoint.responses.length > 1 ? (
                             <EndpointMultipleResponseSection

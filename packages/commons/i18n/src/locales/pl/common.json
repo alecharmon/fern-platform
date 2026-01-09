@@ -116,6 +116,7 @@
     "queryParameters": "Parametry zapytania",
     "bodyParameters": "Parametry treści",
     "headers": "Nagłówki",
+    "responseHeaders": "Nagłówki odpowiedzi",
     "body": "Treść",
     "optionalBody": "Opcjonalna treść",
     "payload": "Ładunek",

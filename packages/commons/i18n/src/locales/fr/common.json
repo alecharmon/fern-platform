@@ -116,6 +116,7 @@
     "queryParameters": "Paramètres de requête",
     "bodyParameters": "Paramètres du corps",
     "headers": "En-têtes",
+    "responseHeaders": "En-têtes de réponse",
     "body": "Corps",
     "optionalBody": "Corps optionnel",
     "payload": "Charge utile",
