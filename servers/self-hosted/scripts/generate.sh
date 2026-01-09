@@ -132,6 +132,25 @@ if [ ! -f "/fern/fern.config.json" ]; then
     exit 1
 fi
 
+# -----------  Fix permissions on customer-provided directories  -----------
+# Make all customer-copied directories readable by any UID.
+# This is critical for Kubernetes environments that run containers as
+# arbitrary non-root UIDs (e.g., via runAsNonRoot security context).
+# Without this, files copied with restrictive permissions cause EACCES errors.
+log "Ensuring customer directories are readable by all UIDs..."
+chmod -R a+rX /fern 2>/dev/null || log "Warning: Could not fix permissions on /fern"
+# /protos - protobuf dependencies (common for buf.build projects)
+if [ -d "/protos" ]; then
+    log "Found /protos directory, fixing permissions..."
+    chmod -R a+rX /protos 2>/dev/null || log "Warning: Could not fix permissions on /protos"
+fi
+# /api - API specs directory (alternative location)
+if [ -d "/api" ]; then
+    log "Found /api directory, fixing permissions..."
+    chmod -R a+rX /api 2>/dev/null || log "Warning: Could not fix permissions on /api"
+fi
+# -----------  End permission fixes  -----------
+
 # Check for base image schema dump
 if [ ! -f "$BASE_SCHEMA_DUMP" ]; then
     log "WARNING: Base image schema dump not found at $BASE_SCHEMA_DUMP"

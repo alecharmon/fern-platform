@@ -38,16 +38,18 @@ mkdir -p "$BASE_SEED_DIR"
 # -----------  Start PostgreSQL  -----------
 log "Starting temporary PostgreSQL for schema migration..."
 
-export PGDATA=/tmp/postgresql/data
+export PGBASE=/tmp/postgresql
+export PGDATA=$PGBASE/data
 export PGHOST=/tmp
 
-rm -rf "$PGDATA" 2>/dev/null || true
+rm -rf "$PGBASE" 2>/dev/null || true
 mkdir -p "$PGDATA"
 
-# Ensure postgres user owns the data directory (needed when running as root)
+# Ensure postgres user owns the base directory (needed when running as root)
+# We chown the entire /tmp/postgresql directory, not just /data,
+# so postgres can access the parent directory
 if [ "$(id -u)" = "0" ]; then
-    chown -R postgres:postgres "$PGDATA"
-    chown postgres:postgres /tmp
+    chown -R postgres:postgres "$PGBASE"
 fi
 
 log "Initializing PostgreSQL cluster..."

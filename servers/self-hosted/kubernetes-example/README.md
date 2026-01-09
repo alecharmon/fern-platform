@@ -9,7 +9,8 @@ kubernetes-example/
 ├── README.md                    # This file
 ├── deployment.yaml              # Kubernetes Deployment
 ├── service.yaml                 # Kubernetes Service
-├── k8s-start.sh                 # Script to start deployment with custom image (supports --local flag)
+├── networkpolicy.yaml           # NetworkPolicy for air-gapped deployments
+├── k8s-start.sh                 # Script to start deployment with custom image (supports --local and --air-gapped flags)
 └── k8s-delete.sh                # Script to delete deployment
 ```
 
@@ -50,6 +51,9 @@ pnpm k8s:start --image your-registry/fern-docs:latest
 # Deploy with a local image (e.g., built with docker:build)
 pnpm k8s:start --image fern-self-hosted:latest --local
 
+# Deploy in air-gapped mode (blocks Internet access at runtime)
+pnpm k8s:start --image your-registry/fern-docs:latest --air-gapped
+
 # View logs from the running pods
 pnpm k8s:logs
 
@@ -62,6 +66,7 @@ Or run the scripts directly:
 ```bash
 ./kubernetes-example/k8s-start.sh --image your-registry/fern-docs:latest
 ./kubernetes-example/k8s-start.sh --image fern-self-hosted:latest --local  # for local images
+./kubernetes-example/k8s-start.sh --image your-registry/fern-docs:latest --air-gapped  # air-gapped mode
 ./kubernetes-example/k8s-delete.sh
 ```
 
@@ -197,6 +202,58 @@ The container takes 2-3 minutes to fully start. Check the readiness status:
 ```bash
 kubectl get pods -l app=fern-docs -o wide
 kubectl exec -it <pod-name> -- curl http://localhost:8081/readiness
+```
+
+## Air-Gapped Deployments
+
+For environments that require network isolation (e.g., secure enterprise environments), you can deploy Fern docs in air-gapped mode. This applies a NetworkPolicy that blocks all egress traffic to the public Internet while allowing internal cluster communication.
+
+### Requirements
+
+1. Your Kubernetes cluster must have a CNI that supports NetworkPolicy (e.g., Calico, Cilium, Weave Net, or cloud provider CNIs like AWS VPC CNI)
+2. The fern-docs container must be built with all documentation pre-baked (no runtime fetching from external sources)
+
+### Deploy in Air-Gapped Mode
+
+```bash
+pnpm k8s:start --image your-registry/fern-docs:latest --air-gapped
+```
+
+Or apply the NetworkPolicy manually:
+
+```bash
+kubectl apply -f kubernetes-example/networkpolicy.yaml
+```
+
+### What the NetworkPolicy Does
+
+The `networkpolicy.yaml` creates a policy that:
+
+1. Allows all ingress traffic (so users can access the docs)
+2. Allows egress only to cluster DNS (kube-dns/coredns) for internal name resolution
+3. Blocks all other egress traffic (no Internet access at runtime)
+
+### Verify Air-Gapped Mode
+
+To verify the container cannot reach the Internet:
+
+```bash
+# Get the pod name
+POD=$(kubectl get pods -l app=fern-docs -o jsonpath='{.items[0].metadata.name}')
+
+# Try to reach an external site (should fail/timeout)
+kubectl exec $POD -- curl -s --connect-timeout 5 https://google.com || echo "Blocked as expected"
+
+# Verify DNS still works for internal services
+kubectl exec $POD -- nslookup kubernetes.default.svc.cluster.local
+```
+
+### Remove Air-Gapped Restrictions
+
+To remove the NetworkPolicy and restore Internet access:
+
+```bash
+kubectl delete networkpolicy fern-docs-air-gapped
 ```
 
 ## Scaling

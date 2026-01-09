@@ -1,0 +1,40 @@
+# Air-Gapped Network Policy for Fern Self-Hosted
+#
+# This NetworkPolicy restricts the fern-docs pods to only communicate within
+# the Kubernetes cluster, blocking all egress to the public Internet.
+#
+# Requirements:
+# - Your Kubernetes cluster must have a CNI that supports NetworkPolicy
+#   (e.g., Calico, Cilium, Weave Net, or cloud provider CNIs like AWS VPC CNI)
+# - The fern-docs container must be built with all documentation pre-baked
+#   (no runtime fetching from external sources)
+#
+# This policy:
+# - Allows all ingress traffic (so users can access the docs)
+# - Allows egress only to cluster DNS (kube-dns/coredns) for internal resolution
+# - Blocks all other egress traffic (no Internet access)
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fern-docs-air-gapped
+  labels:
+    app: fern-docs
+spec:
+  podSelector:
+    matchLabels:
+      app: fern-docs
+  policyTypes:
+    - Egress
+  egress:
+    # Allow DNS resolution within the cluster
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

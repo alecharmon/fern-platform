@@ -35,6 +35,27 @@ if [ ! -d "/fern" ]; then
     exit 1
 fi
 
+# -----------  Fix permissions on customer-provided directories  -----------
+# When running as a non-root UID (common in Kubernetes), directories copied
+# during build time may have restrictive permissions (e.g., owned by root).
+# This makes them readable by the runtime UID to avoid EACCES errors.
+# Only attempt chmod if running as root (which can change any permissions).
+CURRENT_UID=$(id -u)
+if [ "$CURRENT_UID" = "0" ]; then
+    log "Running as root, ensuring customer directories are readable..."
+    # /fern - main Fern project directory
+    chmod -R a+rX /fern 2>/dev/null || log "Warning: Could not fix permissions on /fern"
+    # /protos - protobuf dependencies (if exists)
+    if [ -d "/protos" ]; then
+        chmod -R a+rX /protos 2>/dev/null || log "Warning: Could not fix permissions on /protos"
+    fi
+    # /api - API specs (if exists)
+    if [ -d "/api" ]; then
+        chmod -R a+rX /api 2>/dev/null || log "Warning: Could not fix permissions on /api"
+    fi
+fi
+# -----------  End permission fixes  -----------
+
 export ORG_NAME=$(jq -r '.organization' < /fern/fern.config.json)
 CUSTOM_DOMAIN=$(yq '.instances[0]."custom-domain"' /fern/docs.yml 2>/dev/null | tr -d '"')
 
