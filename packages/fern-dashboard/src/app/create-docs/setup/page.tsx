@@ -49,6 +49,9 @@ export default function SetupPage() {
     const [error, setError] = useState<string | null>(null);
     const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
 
+    // Progress state
+    const [progress, setProgress] = useState<{ step: number; totalSteps: number; message: string } | null>(null);
+
     // URL input state
     const [urlPrefix, setUrlPrefix] = useState<string>("");
     const [isCheckingUrl, setIsCheckingUrl] = useState(false);
@@ -175,6 +178,7 @@ export default function SetupPage() {
 
         setIsCreating(true);
         setError(null);
+        setProgress(null);
 
         try {
             // Build request body based on flow type
@@ -203,42 +207,82 @@ export default function SetupPage() {
                           faviconBase64: customization!.faviconBase64
                       };
 
-            const response = await fetch("/api/create-docs-repo", {
+            // Use SSE endpoint for progress updates
+            const response = await fetch("/api/create-docs-repo/stream", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body)
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to create repository");
+                throw new Error("Failed to start repository creation");
             }
 
-            const result = await response.json();
-
-            // Clear data from sessionStorage
-            if (flowType === "site-to-docs") {
-                sessionStorage.removeItem("siteToDocsOutput");
-                sessionStorage.removeItem("siteToDocsInput");
-            } else {
-                sessionStorage.removeItem("docsCustomization");
+            const reader = response.body?.getReader();
+            if (!reader) {
+                throw new Error("No response body");
             }
 
-            // Navigate to success page with the GitHub repo URL and collaborator status
-            const params = new URLSearchParams({
-                repo: result.githubRepoUrl,
-                repoName: result.repoName,
-                collaboratorAdded: String(result.collaboratorAdded),
-                siteUrl: `${urlPrefix}.docs.buildwithfern.com`,
-                fernTokenSet: String(result.fernTokenSet ?? false)
-            });
-            router.push(`/create-docs/success?${params.toString()}`);
+            const decoder = new TextDecoder();
+            let buffer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop() || "";
+
+                for (const line of lines) {
+                    if (line.startsWith("data: ")) {
+                        try {
+                            const event = JSON.parse(line.slice(6));
+
+                            if (event.type === "progress") {
+                                setProgress({
+                                    step: event.step,
+                                    totalSteps: event.totalSteps,
+                                    message: event.message
+                                });
+                            } else if (event.type === "complete") {
+                                const result = event.data;
+
+                                // Clear data from sessionStorage
+                                if (flowType === "site-to-docs") {
+                                    sessionStorage.removeItem("siteToDocsOutput");
+                                    sessionStorage.removeItem("siteToDocsInput");
+                                } else {
+                                    sessionStorage.removeItem("docsCustomization");
+                                }
+
+                                // Navigate to success page
+                                const params = new URLSearchParams({
+                                    repo: result.githubRepoUrl,
+                                    repoName: result.repoName,
+                                    collaboratorAdded: String(result.collaboratorAdded),
+                                    siteUrl: `${urlPrefix}.docs.buildwithfern.com`,
+                                    fernTokenSet: String(result.fernTokenSet ?? false),
+                                    orgName: selectedOrgName
+                                });
+                                router.push(`/create-docs/success?${params.toString()}`);
+                                return;
+                            } else if (event.type === "error") {
+                                throw new Error(event.message);
+                            }
+                        } catch (_parseError) {
+                            // Ignore parse errors for partial data
+                        }
+                    }
+                }
+            }
         } catch (err) {
             console.error("Error creating repo:", err);
             setError(err instanceof Error ? err.message : "An unexpected error occurred");
             setIsCreating(false);
+            setProgress(null);
         }
     };
 
@@ -432,31 +476,50 @@ export default function SetupPage() {
                             )}
 
                             {/* Create Repository button */}
-                            <Button
-                                onClick={handleCreateRepo}
-                                disabled={
-                                    !selectedOrgName ||
-                                    isCreating ||
-                                    !urlPrefix ||
-                                    !isUrlAvailable ||
-                                    (flowType === "template" && !customization) ||
-                                    (flowType === "site-to-docs" && !siteToDocsOutput)
-                                }
-                                className="w-full bg-green-500 hover:bg-green-600"
-                            >
-                                {isCreating ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Creating repository...
-                                    </>
-                                ) : (
-                                    "Create Repository"
-                                )}
-                            </Button>
+                            <div className="flex flex-col gap-3">
+                                <Button
+                                    onClick={handleCreateRepo}
+                                    disabled={
+                                        !selectedOrgName ||
+                                        isCreating ||
+                                        !urlPrefix ||
+                                        !isUrlAvailable ||
+                                        (flowType === "template" && !customization) ||
+                                        (flowType === "site-to-docs" && !siteToDocsOutput)
+                                    }
+                                    className="w-full bg-green-500 hover:bg-green-600"
+                                >
+                                    {isCreating ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Creating repository...
+                                        </>
+                                    ) : (
+                                        "Create Repository"
+                                    )}
+                                </Button>
 
-                            <p className="text-center text-xs text-text-muted">
-                                A private GitHub repository will be created with your documentation.
-                            </p>
+                                {/* Progress bar */}
+                                {isCreating && progress && (
+                                    <div className="flex flex-col gap-2">
+                                        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                                            <div
+                                                className="h-full rounded-full bg-green-500 transition-all duration-300 ease-out"
+                                                style={{
+                                                    width: `${(progress.step / progress.totalSteps) * 100}%`
+                                                }}
+                                            />
+                                        </div>
+                                        <p className="text-center text-xs text-text-muted">{progress.message}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {!isCreating && (
+                                <p className="text-center text-xs text-text-muted">
+                                    A private GitHub repository will be created with your documentation.
+                                </p>
+                            )}
                         </div>
                     </div>
                 </motion.div>

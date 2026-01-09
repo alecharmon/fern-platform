@@ -1,11 +1,12 @@
 "use client";
 
-import { CheckCircle2, ExternalLink, Github, Key, Loader2, Play, UserPlus } from "lucide-react";
+import { AlertCircle, CheckCircle2, ExternalLink, Github, LayoutDashboard, Loader2, UserPlus } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useState } from "react";
 
+import { PublishingStream } from "@/components/create-docs/PublishingStream";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,6 +120,8 @@ function CollaboratorSection({
     );
 }
 
+type PublishStatus = "publishing" | "completed" | "failed";
+
 function SuccessPageContent() {
     const searchParams = useSearchParams();
     const repoUrl = searchParams.get("repo");
@@ -126,39 +129,28 @@ function SuccessPageContent() {
     const collaboratorAdded = searchParams.get("collaboratorAdded") === "true";
     const siteUrl = searchParams.get("siteUrl");
     const fernTokenSet = searchParams.get("fernTokenSet") === "true";
+    const orgName = searchParams.get("orgName");
 
-    // Trigger the workflow in the background when the page loads
-    const workflowTriggered = useRef(false);
-    useEffect(() => {
-        if (!repoName || !fernTokenSet || workflowTriggered.current) {
-            return;
-        }
-        workflowTriggered.current = true;
+    // Publishing state
+    const [publishStatus, setPublishStatus] = useState<PublishStatus>(fernTokenSet ? "publishing" : "completed");
+    const [publishedUrl, setPublishedUrl] = useState<string | null>(siteUrl ? `https://${siteUrl}` : null);
+    const [actionsUrl, setActionsUrl] = useState<string | null>(null);
 
-        // Fire and forget - trigger workflow in background
-        fetch("/api/trigger-docs-workflow", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ repoName })
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.success) {
-                    console.log("✓ Publish workflow triggered successfully");
-                } else {
-                    console.error("Failed to trigger workflow:", data.error);
-                }
-            })
-            .catch((err) => {
-                console.error("Failed to trigger workflow:", err);
-            });
-    }, [repoName, fernTokenSet]);
+    const handlePublishComplete = (result: { url: string; githubRepoUrl: string }) => {
+        setPublishedUrl(result.url);
+        setPublishStatus("completed");
+    };
+
+    const handlePublishError = (url: string) => {
+        setActionsUrl(url);
+        setPublishStatus("failed");
+    };
 
     if (!repoUrl) {
         return (
             <div className="relative flex min-h-screen w-full flex-col items-center justify-center">
                 <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-400">No repository URL found.</p>
+                    <p className="text-text-description">No repository URL found.</p>
                     <Link href="/create-docs/templates" className="mt-4 text-green-500 hover:text-green-600">
                         Start over
                     </Link>
@@ -222,179 +214,209 @@ function SuccessPageContent() {
                 </div>
             </motion.div>
 
-            {/* Main content */}
-            <div className="relative z-10 flex flex-1 items-center justify-center px-8 pb-8">
+            {/* Main content - Two column layout */}
+            <div className="relative z-10 flex flex-1 items-start justify-center px-8 pb-8 pt-4">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 }}
-                    className="w-full max-w-lg text-center"
+                    className="grid w-full max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2"
                 >
-                    {/* Success icon */}
-                    <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", delay: 0.2, duration: 0.5 }}
-                        className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
-                    >
-                        <CheckCircle2 className="h-8 w-8 text-green-500" />
-                    </motion.div>
-
-                    <h1 className="mb-2 text-3xl font-semibold text-gray-900 dark:text-white">Repository created!</h1>
-                    <p className="mb-8 text-gray-600 dark:text-gray-400">
-                        Your documentation repository has been created successfully.
-                    </p>
-
-                    {/* Collaborator access section */}
-                    {repoName && (
-                        <CollaboratorSection repoName={repoName} initialCollaboratorAdded={collaboratorAdded} />
-                    )}
-
-                    {/* GitHub repo link card */}
-                    <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                        <div className="flex items-start gap-4">
-                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
-                                <Github className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-                            </div>
-                            <div className="flex-1 overflow-hidden">
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">GitHub Repository</p>
-                                <a
-                                    href={repoUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="mt-1 flex items-center gap-1 truncate text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                                >
-                                    {repoUrl}
-                                    <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* View Repository button */}
-                    <Button asChild className="mb-8 w-full bg-green-500 hover:bg-green-600">
-                        <a href={repoUrl} target="_blank" rel="noopener noreferrer">
-                            <Github className="mr-2 h-4 w-4" />
-                            View Repository
-                        </a>
-                    </Button>
-
-                    {/* Site URL preview */}
-                    {siteUrl && (
-                        <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-left dark:border-blue-800 dark:bg-blue-900/20">
-                            <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                                Your docs will be live at:
+                    {/* Left column - GitHub info */}
+                    <div className="flex flex-col">
+                        {/* Success header */}
+                        <div className="mb-6 text-center lg:text-left">
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", delay: 0.2, duration: 0.5 }}
+                                className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 lg:mx-0 dark:bg-green-900/30"
+                            >
+                                <CheckCircle2 className="h-7 w-7 text-green-500" />
+                            </motion.div>
+                            <h1 className="mb-2 text-2xl font-semibold text-gray-1200">Repository created!</h1>
+                            <p className="text-text-description">
+                                Your documentation repository has been created successfully.
                             </p>
-                            <p className="mt-1 font-mono text-sm text-blue-600 dark:text-blue-400">https://{siteUrl}</p>
                         </div>
-                    )}
 
-                    {/* Next steps */}
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-left dark:border-gray-700 dark:bg-gray-800/50">
-                        <h2 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
-                            {fernTokenSet ? "Your Docs Are Publishing!" : "Publish Your Docs"}
-                        </h2>
-                        {fernTokenSet ? (
-                            <>
-                                <div className="mb-4 flex items-center gap-2 rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
-                                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                                    <p className="text-sm text-green-800 dark:text-green-300">
-                                        FERN_TOKEN was automatically configured. Your docs will publish shortly!
-                                    </p>
+                        {/* Collaborator access section */}
+                        {repoName && (
+                            <CollaboratorSection repoName={repoName} initialCollaboratorAdded={collaboratorAdded} />
+                        )}
+
+                        {/* GitHub repo link card */}
+                        <div className="mb-4 rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                                    <Github className="h-5 w-5 text-gray-700 dark:text-gray-300" />
                                 </div>
-                                <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                                    A GitHub Action is running now to publish your docs. Check the{" "}
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium text-gray-1200">GitHub Repository</p>
                                     <a
-                                        href={`${repoUrl}/actions`}
+                                        href={repoUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-green-600 hover:text-green-700 dark:text-green-400"
+                                        className="mt-1 flex items-center gap-1 truncate text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                                     >
-                                        Actions tab
-                                    </a>{" "}
-                                    to see the progress.
+                                        {repoUrl}
+                                        <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* View Repository button */}
+                        <Button asChild className="mb-4 w-full bg-green-500 hover:bg-green-600">
+                            <a href={repoUrl} target="_blank" rel="noopener noreferrer">
+                                <Github className="mr-2 h-4 w-4" />
+                                View Repository
+                            </a>
+                        </Button>
+
+                        {/* Site URL info */}
+                        {siteUrl && (
+                            <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-left dark:border-blue-800 dark:bg-blue-900/20">
+                                <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                                    {publishStatus === "completed"
+                                        ? "Your docs are live at:"
+                                        : "Your docs will be live at:"}
                                 </p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    Once complete, your docs will be live at{" "}
-                                    <span className="font-medium">https://{siteUrl}</span>
-                                </p>
-                            </>
-                        ) : (
-                            <>
-                                <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                                    Your repo includes a GitHub Action that automatically publishes docs on push. Just
-                                    add your Fern token:
-                                </p>
-                                <ol className="space-y-4 text-sm text-gray-600 dark:text-gray-400">
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                                            <Key className="h-3 w-3" />
-                                        </span>
-                                        <div>
-                                            <p className="font-medium text-gray-900 dark:text-white">
-                                                Add FERN_TOKEN secret
-                                            </p>
-                                            <p className="mt-1 text-gray-500 dark:text-gray-400">
-                                                Go to{" "}
-                                                <a
-                                                    href={`${repoUrl}/settings/secrets/actions/new`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-green-600 hover:text-green-700 dark:text-green-400"
-                                                >
-                                                    Repository Settings → Secrets
-                                                </a>{" "}
-                                                and add{" "}
-                                                <code className="rounded bg-gray-200 px-1 dark:bg-gray-700">
-                                                    FERN_TOKEN
-                                                </code>{" "}
-                                                with your token from{" "}
-                                                <a
-                                                    href="https://app.buildwithfern.com/tokens"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-green-600 hover:text-green-700 dark:text-green-400"
-                                                >
-                                                    Fern Dashboard
-                                                </a>
-                                                .
-                                            </p>
-                                        </div>
-                                    </li>
-                                    <li className="flex gap-3">
-                                        <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                                            <Play className="h-3 w-3" />
-                                        </span>
-                                        <div>
-                                            <p className="font-medium text-gray-900 dark:text-white">
-                                                Trigger the workflow
-                                            </p>
-                                            <p className="mt-1 text-gray-500 dark:text-gray-400">
-                                                Go to{" "}
-                                                <a
-                                                    href={`${repoUrl}/actions`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-green-600 hover:text-green-700 dark:text-green-400"
-                                                >
-                                                    Actions tab
-                                                </a>{" "}
-                                                and re-run the failed workflow, or push a change to trigger a new run.
-                                            </p>
-                                        </div>
-                                    </li>
-                                </ol>
-                            </>
+                                <a
+                                    href={publishedUrl || `https://${siteUrl}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-1 flex items-center gap-1 font-mono text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                >
+                                    https://{siteUrl}
+                                    <ExternalLink className="h-3 w-3" />
+                                </a>
+                            </div>
                         )}
+
+                        {/* Link back to dashboard */}
+                        <Link
+                            href="/"
+                            className="mt-auto inline-block text-center text-sm text-text-description transition-colors hover:text-gray-1200"
+                        >
+                            Back to Dashboard
+                        </Link>
                     </div>
 
-                    {/* Link back to dashboard */}
-                    <Link
-                        href="/"
-                        className="mt-6 inline-block text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                    >
-                        Back to Dashboard
-                    </Link>
+                    {/* Right column - Publishing stream or iframe */}
+                    <div className="flex min-h-[500px] flex-col">
+                        {publishStatus === "publishing" && repoName && siteUrl ? (
+                            <PublishingStream
+                                repoName={repoName}
+                                siteUrl={siteUrl}
+                                repoUrl={repoUrl}
+                                onComplete={handlePublishComplete}
+                                onError={handlePublishError}
+                            />
+                        ) : publishStatus === "failed" ? (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="flex h-full flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-8 dark:border-red-800 dark:bg-red-900/20"
+                            >
+                                <AlertCircle className="mb-4 h-12 w-12 text-red-500" />
+                                <h3 className="mb-2 text-lg font-semibold text-red-800 dark:text-red-300">
+                                    Publishing failed
+                                </h3>
+                                <p className="mb-4 text-center text-sm text-red-600 dark:text-red-400">
+                                    There was an issue publishing your docs. Check the GitHub Actions logs for details.
+                                </p>
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
+                                >
+                                    <a
+                                        href={actionsUrl || `${repoUrl}/actions`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <ExternalLink className="mr-2 h-4 w-4" />
+                                        View Actions Log
+                                    </a>
+                                </Button>
+                            </motion.div>
+                        ) : publishedUrl ? (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="flex h-full flex-col"
+                            >
+                                {/* Success header - matching left column style */}
+                                <div className="mb-6 text-center lg:text-left">
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ type: "spring", delay: 0.2, duration: 0.5 }}
+                                        className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 lg:mx-0 dark:bg-green-900/30"
+                                    >
+                                        <CheckCircle2 className="h-7 w-7 text-green-500" />
+                                    </motion.div>
+                                    <h1 className="mb-2 text-2xl font-semibold text-gray-1200">Docs published!</h1>
+                                    <p className="text-text-description">
+                                        Your documentation site is now live and ready to share.
+                                    </p>
+                                </div>
+
+                                {/* Browser frame thumbnail */}
+                                <div className="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-gray-100 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                                    {/* Browser chrome */}
+                                    <div className="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
+                                        <div className="flex gap-1.5">
+                                            <div className="h-3 w-3 rounded-full bg-red-400" />
+                                            <div className="h-3 w-3 rounded-full bg-yellow-400" />
+                                            <div className="h-3 w-3 rounded-full bg-green-400" />
+                                        </div>
+                                        <div className="flex-1 rounded-md bg-white px-3 py-1 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                                            {publishedUrl}
+                                        </div>
+                                    </div>
+                                    {/* Site preview - scaled down thumbnail */}
+                                    <div className="relative h-[280px] overflow-hidden bg-white dark:bg-gray-900">
+                                        <iframe
+                                            src={publishedUrl}
+                                            className="absolute left-0 top-0 h-[800px] w-[1280px] origin-top-left scale-[0.35] border-0"
+                                            title="Published documentation"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Action buttons */}
+                                <div className="flex flex-col gap-3">
+                                    <Button asChild className="w-full bg-green-500 hover:bg-green-600">
+                                        <a href={publishedUrl} target="_blank" rel="noopener noreferrer">
+                                            <ExternalLink className="mr-2 h-4 w-4" />
+                                            Open Docs Site
+                                        </a>
+                                    </Button>
+
+                                    {orgName && siteUrl && (
+                                        <Button asChild variant="outline" className="w-full">
+                                            <a
+                                                href={`https://buildwithfern.com/${orgName}/docs/${siteUrl}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <LayoutDashboard className="mr-2 h-4 w-4" />
+                                                Open in Dashboard
+                                            </a>
+                                        </Button>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <div className="flex h-full items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
+                                <p className="text-sm text-text-description">
+                                    Documentation preview will appear here once published.
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </motion.div>
             </div>
         </div>
