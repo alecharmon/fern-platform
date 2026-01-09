@@ -150,7 +150,7 @@ export const FernSyntaxHighlighterTokens = memo(
                 id={id}
             >
                 <FernScrollArea ref={scrollAreaRef} style={{ maxHeight: getMaxHeight(fontSize, maxLines) }}>
-                    <code
+                    <div
                         className={cn("code-block", {
                             "text-xs": fontSize === "sm",
                             "text-sm": fontSize === "base",
@@ -193,7 +193,7 @@ export const FernSyntaxHighlighterTokens = memo(
                                 </tbody>
                             </table>
                         </div>
-                    </code>
+                    </div>
                 </FernScrollArea>
             </pre>
         );

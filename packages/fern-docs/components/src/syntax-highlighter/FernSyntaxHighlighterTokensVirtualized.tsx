@@ -31,7 +31,7 @@ const CodeBlockTable = forwardRef<HTMLTableElement, FernScrollArea.Props & { con
         const plaintext = lang === "plaintext" || lang === "text" || lang === "txt";
 
         return (
-            <code
+            <div
                 className={cn("code-block", {
                     "text-xs": fontSize === "sm",
                     "text-sm": fontSize === "base",
@@ -56,7 +56,7 @@ const CodeBlockTable = forwardRef<HTMLTableElement, FernScrollArea.Props & { con
                         {children}
                     </table>
                 </div>
-            </code>
+            </div>
         );
     }
 );
