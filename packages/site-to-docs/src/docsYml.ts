@@ -5,7 +5,8 @@ import type {
     FernProduct,
     FernProductFile,
     FernTabDefinition,
-    FernVersion
+    FernVersion,
+    SiteBranding
 } from "./types.js";
 
 /**
@@ -14,12 +15,14 @@ import type {
 export interface DocsYmlOptions {
     /** Title for the documentation site */
     title?: string;
-    /** Path to favicon */
+    /** Path to favicon (deprecated - use branding.favicon instead) */
     favicon?: string;
     /** Whether to include the schema reference comment */
     includeSchema?: boolean;
     /** Site ID for docs instance URL */
     siteId: string;
+    /** Site branding (logo, favicon, colors) */
+    branding?: SiteBranding;
 }
 
 /**
@@ -156,6 +159,51 @@ function productToObject(product: FernProduct): Record<string, unknown> {
 }
 
 /**
+ * Converts logo configuration to plain object for YAML.
+ */
+function logoToObject(logo: SiteBranding["logo"]): Record<string, string> | undefined {
+    if (!logo) {
+        return undefined;
+    }
+
+    const obj: Record<string, string> = {};
+
+    if (logo.href) {
+        obj.href = logo.href;
+    }
+    if (logo.light) {
+        obj.light = logo.light;
+    }
+    if (logo.dark) {
+        obj.dark = logo.dark;
+    }
+
+    return Object.keys(obj).length > 0 ? obj : undefined;
+}
+
+/**
+ * Converts accent color configuration to plain object for YAML.
+ */
+function colorsToObject(accentColor: SiteBranding["accentColor"]): Record<string, unknown> | undefined {
+    if (!accentColor || (!accentColor.light && !accentColor.dark)) {
+        return undefined;
+    }
+
+    const accentPrimary: Record<string, string> = {};
+
+    if (accentColor.light) {
+        accentPrimary.light = accentColor.light;
+    }
+    if (accentColor.dark) {
+        accentPrimary.dark = accentColor.dark;
+    }
+
+    return {
+        "accent-primary": accentPrimary
+    };
+}
+
+/**
  * Generates Fern docs.yml YAML content from a FernNavigation structure.
  *
  * @param navigation - The navigation structure to convert
@@ -163,7 +211,7 @@ function productToObject(product: FernProduct): Record<string, unknown> {
  * @returns YAML string content for docs.yml
  */
 export function generateDocsYml(navigation: FernNavigation, options: DocsYmlOptions): string {
-    const { title, favicon, includeSchema = true, siteId } = options;
+    const { title, favicon, includeSchema = true, siteId, branding } = options;
     const instanceUrl = `${siteId}.docs.buildwithfern.com`;
 
     const doc: Record<string, unknown> = {};
@@ -173,9 +221,26 @@ export function generateDocsYml(navigation: FernNavigation, options: DocsYmlOpti
         doc.title = title;
     }
 
-    // Add favicon if provided
-    if (favicon) {
-        doc.favicon = favicon;
+    // Add favicon - prefer branding.favicon over legacy favicon option
+    const effectiveFavicon = branding?.favicon ?? favicon;
+    if (effectiveFavicon) {
+        doc.favicon = effectiveFavicon;
+    }
+
+    // Add logo if provided in branding
+    if (branding?.logo) {
+        const logoObj = logoToObject(branding.logo);
+        if (logoObj) {
+            doc.logo = logoObj;
+        }
+    }
+
+    // Add colors if provided in branding
+    if (branding?.accentColor) {
+        const colorsObj = colorsToObject(branding.accentColor);
+        if (colorsObj) {
+            doc.colors = colorsObj;
+        }
     }
 
     // Add tab definitions if present

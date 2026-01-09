@@ -2,13 +2,12 @@ import type { LanguageModelV1 } from "ai";
 import { generateObject } from "ai";
 import { z } from "zod";
 import type {
-    AggregatedSignals,
     CrawlResult,
-    OrderedNavLink,
+    DiscoveredTab,
+    NavigationExtractionResult,
+    NavigationHints,
     PageContext,
     PageNode,
-    PageType,
-    SidebarSignal,
     SiteStructure
 } from "./types.js";
 
@@ -49,456 +48,87 @@ export function extractTextPreview(html: string, maxLength: number = 2000): stri
 }
 
 /**
- * Extracts breadcrumb path from HTML.
- * Tries multiple common patterns in priority order:
- * 1. aria-label="breadcrumb" nav elements
- * 2. .breadcrumb or .breadcrumbs containers
- * 3. Schema.org BreadcrumbList structured data
+ * Extracts navigation structure from HTML, including section/page ordering.
+ * Looks for the pattern: section heading (text element) followed by a container with links.
  *
- * @returns Array of breadcrumb items, or empty array if none found
- */
-export function extractBreadcrumbPath(html: string): string[] {
-    const breadcrumbs: string[] = [];
-
-    // Strategy 1: aria-label="breadcrumb" (most accessible pattern)
-    const ariaMatch = html.match(/<nav[^>]*aria-label=["'](?:b|B)readcrumb["'][^>]*>([\s\S]*?)<\/nav>/i);
-    if (ariaMatch) {
-        const navContent = ariaMatch[1] ?? "";
-        // Extract text from list items or links
-        const items = navContent.matchAll(/<(?:li|a)[^>]*>([^<]+)</gi);
-        for (const item of items) {
-            const text = (item[1] ?? "").trim();
-            if (text && !isSeparator(text)) {
-                breadcrumbs.push(text);
-            }
-        }
-        if (breadcrumbs.length > 0) {
-            return breadcrumbs;
-        }
-    }
-
-    // Strategy 2: .breadcrumb or .breadcrumbs class
-    const classMatch = html.match(
-        /<(?:nav|div|ol|ul)[^>]*class=["'][^"']*breadcrumbs?[^"']*["'][^>]*>([\s\S]*?)<\/(?:nav|div|ol|ul)>/i
-    );
-    if (classMatch) {
-        const container = classMatch[1] ?? "";
-        const items = container.matchAll(/<(?:li|a|span)[^>]*>([^<]+)</gi);
-        for (const item of items) {
-            const text = (item[1] ?? "").trim();
-            if (text && !isSeparator(text)) {
-                breadcrumbs.push(text);
-            }
-        }
-        if (breadcrumbs.length > 0) {
-            return breadcrumbs;
-        }
-    }
-
-    // Strategy 3: Schema.org BreadcrumbList
-    const schemaMatch = html.match(/<[^>]*itemtype=["'][^"']*BreadcrumbList["'][^>]*>([\s\S]*?)<\/(?:ol|ul|nav|div)>/i);
-    if (schemaMatch) {
-        const container = schemaMatch[1] ?? "";
-        // Look for itemprop="name" or just link text
-        const items = container.matchAll(/itemprop=["']name["'][^>]*>([^<]+)</gi);
-        for (const item of items) {
-            const text = (item[1] ?? "").trim();
-            if (text && !isSeparator(text)) {
-                breadcrumbs.push(text);
-            }
-        }
-        if (breadcrumbs.length > 0) {
-            return breadcrumbs;
-        }
-
-        // Fallback: just extract link text from schema container
-        const links = container.matchAll(/<a[^>]*>([^<]+)</gi);
-        for (const link of links) {
-            const text = (link[1] ?? "").trim();
-            if (text && !isSeparator(text)) {
-                breadcrumbs.push(text);
-            }
-        }
-    }
-
-    return breadcrumbs;
-}
-
-/**
- * Checks if a string is likely a breadcrumb separator.
- */
-function isSeparator(text: string): boolean {
-    const separators = ["/", ">", "›", "»", "→", "·", "|", "-"];
-    return separators.includes(text.trim()) || text.length === 0;
-}
-
-/**
- * Extracts top-level site navigation links from HTML.
- * Looks for primary navigation patterns:
- * 1. header nav links
- * 2. [role="navigation"] top-level links
- * 3. .sidebar or .nav-sidebar first-level items
- *
- * Filters out external links, social icons, and utility links.
- *
- * @returns Array of navigation link labels
- */
-export function extractSiteNavigationLinks(html: string): string[] {
-    const navLinks: string[] = [];
-    const seen = new Set<string>();
-
-    // Helper to add unique, filtered links
-    const addLink = (text: string, href: string | null) => {
-        const cleaned = text.trim();
-        // Filter out common non-nav items
-        if (!cleaned || cleaned.length > 50) {
-            return;
-        }
-        if (seen.has(cleaned.toLowerCase())) {
-            return;
-        }
-        // Skip external links
-        if (href?.startsWith("http") && !href.includes(getBaseDomain(html))) {
-            return;
-        }
-        // Skip utility links
-        const utilityPatterns =
-            /^(login|sign\s*in|sign\s*up|register|search|settings|profile|account|logout|sign\s*out)$/i;
-        if (utilityPatterns.test(cleaned)) {
-            return;
-        }
-        // Skip social icons (typically single characters or emoji)
-        if (cleaned.length <= 2) {
-            return;
-        }
-
-        seen.add(cleaned.toLowerCase());
-        navLinks.push(cleaned);
-    };
-
-    // Strategy 1: Header nav links (highest priority)
-    const headerNavMatch = html.match(/<header[^>]*>([\s\S]*?)<\/header>/i);
-    if (headerNavMatch) {
-        const headerContent = headerNavMatch[1] ?? "";
-        const navMatch = headerContent.match(/<nav[^>]*>([\s\S]*?)<\/nav>/i);
-        if (navMatch) {
-            const navContent = navMatch[1] ?? "";
-            const links = navContent.matchAll(/<a[^>]*(?:href=["']([^"']+)["'])?[^>]*>([^<]+)</gi);
-            for (const link of links) {
-                addLink(link[2] ?? "", link[1] ?? null);
-            }
-        }
-    }
-
-    // Strategy 2: [role="navigation"] top-level links
-    const roleNavMatches = html.matchAll(/<[^>]*role=["']navigation["'][^>]*>([\s\S]*?)<\/(?:nav|div|ul)>/gi);
-    for (const match of roleNavMatches) {
-        // Only get direct links (not nested in sub-lists)
-        const content = match[1] ?? "";
-        // Remove nested lists to get only top-level
-        const topLevel = content.replace(/<ul[^>]*>[\s\S]*?<\/ul>/gi, "");
-        const links = topLevel.matchAll(/<a[^>]*(?:href=["']([^"']+)["'])?[^>]*>([^<]+)</gi);
-        for (const link of links) {
-            addLink(link[2] ?? "", link[1] ?? null);
-        }
-    }
-
-    // Strategy 3: Sidebar navigation (first-level only)
-    const sidebarMatch = html.match(
-        /<(?:aside|nav|div)[^>]*class=["'][^"']*(?:sidebar|nav-sidebar|side-nav)[^"']*["'][^>]*>([\s\S]*?)<\/(?:aside|nav|div)>/i
-    );
-    if (sidebarMatch && navLinks.length === 0) {
-        const content = sidebarMatch[1] ?? "";
-        // Get first-level list items only
-        const firstLevelPattern = /<li[^>]*>\s*<a[^>]*(?:href=["']([^"']+)["'])?[^>]*>([^<]+)</gi;
-        const links = content.matchAll(firstLevelPattern);
-        for (const link of links) {
-            addLink(link[2] ?? "", link[1] ?? null);
-        }
-    }
-
-    return navLinks;
-}
-
-/**
- * Extracts ordered sidebar navigation links from HTML.
- * Preserves DOM order and includes hrefs for matching against page URLs.
- *
- * Targets common sidebar patterns:
- * 1. <aside> elements containing navigation
- * 2. Elements with .sidebar, .side-nav, .nav-sidebar classes
- * 3. [role="navigation"] elements that appear to be sidebars
+ * Supports:
+ * - `<heading>Section</heading><ul>..links..</ul>` (classic lists)
+ * - `<heading>Section</heading><ol>..links..</ol>` (ordered lists)
+ * - `<heading>Section</heading><div>..links..</div>` (card groups, nav containers)
  *
  * @param html - The HTML content to extract from
  * @param baseUrl - The base URL for resolving relative hrefs
- * @returns Array of OrderedNavLink objects preserving DOM order
+ * @returns NavigationExtractionResult with URL-to-section mapping and navigation hints
  */
-export function extractOrderedSidebarLinks(html: string, baseUrl: string): OrderedNavLink[] {
-    const links: OrderedNavLink[] = [];
-    const seenHrefs = new Set<string>();
+export function extractNavigationStructure(html: string, baseUrl: string): NavigationExtractionResult {
+    const urlToSection = new Map<string, string>();
+    const sections: string[] = [];
+    const pagesBySection = new Map<string, string[]>();
 
-    // Helper to resolve relative URLs to absolute
-    const resolveUrl = (href: string): string | null => {
+    const resolvePathname = (href: string): string | undefined => {
         if (!href || href.startsWith("#") || href.startsWith("javascript:")) {
-            return null;
+            return undefined;
         }
         try {
-            return new URL(href, baseUrl).href;
+            return new URL(href, baseUrl).pathname;
         } catch {
-            return null;
+            return undefined;
         }
     };
 
-    // Helper to add a link if valid and not duplicate
-    const addLink = (text: string, href: string) => {
-        const cleaned = text.trim();
-        // Filter out empty or very long text
-        if (!cleaned || cleaned.length > 100) {
-            return;
+    // Helper to extract links from content and add to map, preserving order
+    const extractLinks = (sectionName: string, content: string) => {
+        // Track section order (first time we see this section)
+        if (!pagesBySection.has(sectionName)) {
+            sections.push(sectionName);
+            pagesBySection.set(sectionName, []);
         }
-        // Filter out single characters (likely icons)
-        if (cleaned.length <= 2) {
-            return;
-        }
+        const sectionPages = pagesBySection.get(sectionName)!;
 
-        const resolvedHref = resolveUrl(href);
-        if (!resolvedHref) {
-            return;
-        }
-
-        // Skip duplicates (same URL)
-        if (seenHrefs.has(resolvedHref)) {
-            return;
-        }
-        seenHrefs.add(resolvedHref);
-
-        links.push({ text: cleaned, href: resolvedHref });
-    };
-
-    // Helper to extract links from HTML content
-    const extractLinksFromContent = (content: string) => {
-        // Match <a> elements with href and text
-        const linkPattern = /<a[^>]*href=["']([^"']+)["'][^>]*>([^<]*(?:<[^/a][^>]*>[^<]*<\/[^>]+>[^<]*)*)</gi;
-        let match;
-        while ((match = linkPattern.exec(content)) !== null) {
-            const href = match[1] ?? "";
-            // Extract text content, removing nested tags
-            const rawText = match[2] ?? "";
-            const text = rawText.replace(/<[^>]+>/g, "").trim();
-            if (text) {
-                addLink(text, href);
+        const linkPattern = /<a[^>]*href=["']([^"']+)["']/gi;
+        let linkMatch;
+        while ((linkMatch = linkPattern.exec(content)) !== null) {
+            const pathname = resolvePathname(linkMatch[1] ?? "");
+            if (pathname && !urlToSection.has(pathname)) {
+                urlToSection.set(pathname, sectionName);
+                sectionPages.push(pathname);
             }
         }
     };
 
-    // Strategy 1: <aside> elements (most specific for sidebars)
-    const asideMatches = html.matchAll(/<aside[^>]*>([\s\S]*?)<\/aside>/gi);
-    for (const match of asideMatches) {
-        const content = match[1] ?? "";
-        // Only process if it looks like navigation (contains multiple links)
-        if ((content.match(/<a[^>]*href/gi) || []).length >= 3) {
-            extractLinksFromContent(content);
+    // Pattern 1: Text heading followed by <ul> or <ol> with links
+    const listPattern =
+        /<(?:span|div|strong|b|h[2-6])[^>]*>([A-Z][^<]{1,40})<\/(?:span|div|strong|b|h[2-6])>\s*(?:<[^uo][^>]*>)*\s*<(?:ul|ol)[^>]*>([\s\S]*?)<\/(?:ul|ol)>/gi;
+    let match;
+    while ((match = listPattern.exec(html)) !== null) {
+        const sectionName = (match[1] ?? "").trim();
+        const listContent = match[2] ?? "";
+        if (sectionName && listContent.includes("href=")) {
+            extractLinks(sectionName, listContent);
         }
     }
 
-    // Strategy 2: Elements with sidebar-related classes
-    if (links.length === 0) {
-        const sidebarClassPattern =
-            /<(?:nav|div|section)[^>]*class=["'][^"']*(?:sidebar|side-nav|nav-sidebar|docs-nav|toc-nav)[^"']*["'][^>]*>([\s\S]*?)<\/(?:nav|div|section)>/gi;
-        const sidebarMatches = html.matchAll(sidebarClassPattern);
-        for (const match of sidebarMatches) {
-            const content = match[1] ?? "";
-            extractLinksFromContent(content);
+    // Pattern 2: Text heading followed by <div> or <nav> with multiple links (card groups, nav containers)
+    // More restrictive: requires at least 2 links to avoid false positives
+    const containerPattern =
+        /<(?:span|div|strong|b|h[2-6])[^>]*>([A-Z][^<]{1,40})<\/(?:span|div|strong|b|h[2-6])>\s*(?:<[^dn][^>]*>)*\s*<(?:div|nav)[^>]*>([\s\S]*?)<\/(?:div|nav)>/gi;
+    while ((match = containerPattern.exec(html)) !== null) {
+        const sectionName = (match[1] ?? "").trim();
+        const containerContent = match[2] ?? "";
+        // Require at least 2 links to reduce false positives
+        const linkCount = (containerContent.match(/href=/gi) || []).length;
+        if (sectionName && linkCount >= 2) {
+            extractLinks(sectionName, containerContent);
         }
     }
 
-    // Strategy 3: [role="navigation"] that appears to be a sidebar (not header nav)
-    if (links.length === 0) {
-        // First, remove header content to avoid picking up header navigation
-        const htmlWithoutHeader = html.replace(/<header[^>]*>[\s\S]*?<\/header>/gi, "");
-        const roleNavMatches = htmlWithoutHeader.matchAll(
-            /<(?:nav|div)[^>]*role=["']navigation["'][^>]*>([\s\S]*?)<\/(?:nav|div)>/gi
-        );
-        for (const match of roleNavMatches) {
-            const content = match[1] ?? "";
-            // Only use if it has multiple links (likely a sidebar, not a simple nav)
-            if ((content.match(/<a[^>]*href/gi) || []).length >= 5) {
-                extractLinksFromContent(content);
-                break; // Use first substantial navigation found
-            }
+    return {
+        urlToSection,
+        hints: {
+            sections,
+            pagesBySection
         }
-    }
-
-    // Strategy 4: Look for navigation lists with doc-like structure
-    if (links.length === 0) {
-        const navListPattern =
-            /<(?:ul|ol)[^>]*class=["'][^"']*(?:nav|menu|docs|pages)[^"']*["'][^>]*>([\s\S]*?)<\/(?:ul|ol)>/gi;
-        const navListMatches = html.matchAll(navListPattern);
-        for (const match of navListMatches) {
-            const content = match[1] ?? "";
-            if ((content.match(/<a[^>]*href/gi) || []).length >= 5) {
-                extractLinksFromContent(content);
-                break;
-            }
-        }
-    }
-
-    return links;
-}
-
-/**
- * Extracts the base domain from HTML (from canonical or og:url).
- */
-function getBaseDomain(html: string): string {
-    const canonicalMatch = html.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["']/i);
-    if (canonicalMatch?.[1]) {
-        try {
-            return new URL(canonicalMatch[1]).hostname;
-        } catch {
-            // Invalid URL
-        }
-    }
-    const ogUrlMatch = html.match(/<meta[^>]*property=["']og:url["'][^>]*content=["']([^"']+)["']/i);
-    if (ogUrlMatch?.[1]) {
-        try {
-            return new URL(ogUrlMatch[1]).hostname;
-        } catch {
-            // Invalid URL
-        }
-    }
-    return "";
-}
-
-/**
- * Detects the current version displayed on the page.
- * Looks for:
- * 1. Selected option in version <select> dropdown
- * 2. [data-version] attribute value
- * 3. .version-badge or .version-selector text
- * 4. Version patterns in prominent badges
- *
- * @returns Version string (e.g., "v2") or undefined if not found
- */
-export function detectVersion(html: string): string | undefined {
-    // Strategy 1: Version select dropdown with selected option
-    const selectMatch = html.match(
-        /<select[^>]*(?:class|id|name)=["'][^"']*version[^"']*["'][^>]*>([\s\S]*?)<\/select>/i
-    );
-    if (selectMatch?.[1]) {
-        const selectedMatch = selectMatch[1].match(/<option[^>]*selected[^>]*>([^<]+)</i);
-        if (selectedMatch?.[1]) {
-            const version = extractVersionString(selectedMatch[1]);
-            if (version) {
-                return version;
-            }
-        }
-    }
-
-    // Strategy 2: data-version attribute
-    const dataVersionMatch = html.match(/data-version=["']([^"']+)["']/i);
-    if (dataVersionMatch?.[1]) {
-        const version = extractVersionString(dataVersionMatch[1]);
-        if (version) {
-            return version;
-        }
-    }
-
-    // Strategy 3: .version-badge or .version-selector class
-    const badgeMatch = html.match(/<[^>]*class=["'][^"']*version-(?:badge|selector|tag|pill)[^"']*["'][^>]*>([^<]+)</i);
-    if (badgeMatch?.[1]) {
-        const version = extractVersionString(badgeMatch[1]);
-        if (version) {
-            return version;
-        }
-    }
-
-    // Strategy 4: Version in a button or dropdown trigger near "version" text
-    const versionTriggerMatch = html.match(/(?:version|release)[^>]*>([^<]*v\d[^<]*)</i);
-    if (versionTriggerMatch?.[1]) {
-        const version = extractVersionString(versionTriggerMatch[1]);
-        if (version) {
-            return version;
-        }
-    }
-
-    return undefined;
-}
-
-/**
- * Extracts a version string from text.
- * Matches patterns like: v1, v2.0, v1.2.3, 2.0, latest
- */
-function extractVersionString(text: string): string | undefined {
-    const trimmed = text.trim();
-
-    // Match "latest" as a version
-    if (/^latest$/i.test(trimmed)) {
-        return "latest";
-    }
-
-    // Match v-prefixed versions: v1, v2, v1.0, v2.0.1
-    const vMatch = trimmed.match(/\b(v\d+(?:\.\d+)*)/i);
-    if (vMatch?.[1]) {
-        return vMatch[1].toLowerCase();
-    }
-
-    // Match bare version numbers: 1.0, 2.0.1
-    const numMatch = trimmed.match(/\b(\d+\.\d+(?:\.\d+)?)\b/);
-    if (numMatch?.[1]) {
-        return numMatch[1];
-    }
-
-    return undefined;
-}
-
-/**
- * Infers the page type based on content patterns.
- * Uses heuristics to classify as:
- * - "reference": API docs, endpoint references, schema documentation
- * - "guide": How-to guides, tutorials, step-by-step instructions
- * - "overview": Landing pages, introductions, index pages
- * - "unknown": Cannot determine
- *
- * @returns Inferred PageType
- */
-export function inferPageType(html: string): PageType {
-    const text = extractTextPreview(html, 1000);
-
-    // Reference indicators: HTTP methods, parameter tables, code-heavy
-    const hasHttpMethods = /\b(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s+[/\w]/.test(html);
-    const hasParamTable = /<table[^>]*>[\s\S]*?(?:parameter|param|field|type|required|optional)/i.test(html);
-    const hasCodeBlocks = (html.match(/<pre/gi) || []).length > 2;
-    const hasEndpointPath = /["'`]\/[a-z]+\/\{[a-z_]+\}["'`]/i.test(html);
-
-    if (hasHttpMethods || hasEndpointPath || (hasParamTable && hasCodeBlocks)) {
-        return "reference";
-    }
-
-    // Guide indicators: step-by-step, how-to, tutorial language
-    const hasSteps = /step\s*[1-9]|step\s*\d+:/i.test(text);
-    const hasHowTo = /how\s+to\b/i.test(text);
-    const hasNumberedList = /<ol[^>]*>[\s\S]*?<li/i.test(html);
-    const hasTutorialLanguage = /\b(tutorial|walkthrough|getting\s+started|quick\s*start)\b/i.test(text);
-
-    if (hasSteps || hasHowTo || (hasNumberedList && hasTutorialLanguage)) {
-        return "guide";
-    }
-
-    // Overview indicators: short content, many links, intro language
-    const linkCount = (html.match(/<a\s+href/gi) || []).length;
-    const hasOverviewLanguage = /\b(overview|introduction|welcome|about|what\s+is)\b/i.test(text);
-    const isShort = text.length < 500;
-
-    if (isShort && linkCount > 5 && hasOverviewLanguage) {
-        return "overview";
-    }
-
-    // Additional check: if page has overview language but isn't short, still might be overview
-    if (hasOverviewLanguage && linkCount > 8) {
-        return "overview";
-    }
-
-    return "unknown";
+    };
 }
 
 /**
@@ -519,74 +149,30 @@ export function extractUrlPathSegments(url: string): string[] {
  * Extracts all signals needed for classification.
  */
 export function extractPageContext(page: PageNode): PageContext {
+    // Extract navigation sections to find which section this page belongs to
+    const { urlToSection } = extractNavigationStructure(page.html, page.url);
+    let navSection: string | undefined;
+    try {
+        const pathname = new URL(page.url).pathname;
+        navSection = urlToSection.get(pathname);
+    } catch {
+        // Invalid URL, skip navigation section lookup
+    }
+
     return {
         url: page.url,
         urlPathSegments: extractUrlPathSegments(page.url),
         pageTitle: page.title,
-        breadcrumbPath: extractBreadcrumbPath(page.html),
-        siteNavigationLinks: extractSiteNavigationLinks(page.html),
-        detectedVersion: detectVersion(page.html),
-        inferredPageType: inferPageType(page.html),
+        pageDescription: page.description,
+        navSection,
         contentSnippet: extractTextPreview(page.html, 400)
     };
 }
 
 // ============================================================================
 // Phase 1: Site Structure Discovery
-// Aggregates signals from ALL pages and uses LLM to identify products, versions, tabs.
+// Analyzes ALL page URLs to identify products, versions, tabs.
 // ============================================================================
-
-/**
- * Aggregates navigation signals from all pages.
- * Extracts and deduplicates breadcrumbs, nav links, versions, sidebar signals,
- * header navigation items (tabs), and sidebar section groupings.
- */
-export function aggregateNavigationSignals(pages: Map<string, PageNode>): AggregatedSignals {
-    const breadcrumbRoots = new Set<string>();
-    const navLinks = new Set<string>();
-    const versions = new Set<string>();
-    const breadcrumbPaths: string[][] = [];
-    const sidebarSignals: SidebarSignal[] = [];
-
-    for (const page of pages.values()) {
-        const breadcrumbs = extractBreadcrumbPath(page.html);
-        if (breadcrumbs.length > 0) {
-            // Collect the root (first non-home item) for structure analysis
-            const root = breadcrumbs.find((b) => b.toLowerCase() !== "home" && b.toLowerCase() !== "docs");
-            if (root) {
-                breadcrumbRoots.add(root);
-            }
-            // Keep a sample of full paths (limit to 20)
-            if (breadcrumbPaths.length < 20) {
-                breadcrumbPaths.push(breadcrumbs);
-            }
-        }
-
-        const pageNavLinks = extractSiteNavigationLinks(page.html);
-        for (const link of pageNavLinks) {
-            navLinks.add(link);
-        }
-
-        const version = detectVersion(page.html);
-        if (version) {
-            versions.add(version);
-        }
-
-        // Extract ordered sidebar links for navigation ordering
-        const sidebarLinks = extractOrderedSidebarLinks(page.html, page.url);
-        if (sidebarLinks.length > 0) {
-            sidebarSignals.push({ url: page.url, links: sidebarLinks });
-        }
-    }
-
-    return {
-        uniqueBreadcrumbRoots: Array.from(breadcrumbRoots),
-        uniqueNavLinks: Array.from(navLinks),
-        uniqueVersions: Array.from(versions),
-        sampleBreadcrumbPaths: breadcrumbPaths,
-        sidebarSignals
-    };
-}
 
 /**
  * Schema for Phase 1 site structure analysis.
@@ -614,7 +200,10 @@ const siteStructureSchema = z.object({
         .array(
             z.object({
                 name: z.string().describe("Display name (e.g., 'Guides', 'API Reference')"),
-                urlPattern: z.string().optional().describe("URL keyword if present (e.g., 'guides', 'api')")
+                urlPattern: z.string().optional().describe("URL keyword if present (e.g., 'guides', 'api')"),
+                icon: z
+                    .string()
+                    .describe("Font Awesome icon name (short form, no 'fa-' prefix) that best represents this tab")
             })
         )
         .describe("Major navigation categories found in nav links or breadcrumbs"),
@@ -628,95 +217,50 @@ const siteStructureSchema = z.object({
                     ),
                 orderedUrls: z
                     .array(z.string())
-                    .describe("Page URLs in the intended navigation order for this context, based on sidebar signals")
+                    .describe(
+                        "Page URLs in the intended navigation order for this context, based on navigation signals"
+                    )
             })
         )
         .describe(
-            "Page ordering per navigation context. Use sidebar navigation signals to determine the correct order. " +
+            "Page ordering per navigation context. Use navigation signals to determine the correct order. " +
                 "Each unique combination of product/version/tab should have its own ordering. " +
                 "For simple sites, use a single entry with empty contextKey."
         )
 });
 
 /**
- * Formats sidebar signals for the LLM prompt.
- * Groups by URL and shows the ordered navigation links.
+ * Formats navigation hints for the LLM prompt.
  */
-function formatSidebarSignals(sidebarSignals: SidebarSignal[], maxSignals: number = 10): string {
-    if (sidebarSignals.length === 0) {
-        return "(no sidebar navigation found)";
+function formatNavigationHints(hints: NavigationHints): string {
+    if (hints.sections.length === 0) {
+        return "";
     }
 
-    // Sample a representative subset of sidebar signals
-    const sampled = sidebarSignals.slice(0, maxSignals);
-    const lines: string[] = [];
+    const lines: string[] = [
+        "\n=== NAVIGATION ORDER HINTS (from HTML structure, use as suggestions) ===",
+        `Sections in order: ${hints.sections.join(", ")}`
+    ];
 
-    for (const signal of sampled) {
-        lines.push(`Page: ${signal.url}`);
-        for (let i = 0; i < Math.min(signal.links.length, 15); i++) {
-            const link = signal.links[i];
-            if (link) {
-                lines.push(`  ${i + 1}. ${link.href} - ${link.text}`);
-            }
-        }
-        if (signal.links.length > 15) {
-            lines.push(`  ... and ${signal.links.length - 15} more links`);
-        }
-        lines.push("");
-    }
-
-    if (sidebarSignals.length > maxSignals) {
-        lines.push(`... and ${sidebarSignals.length - maxSignals} more pages with sidebar navigation`);
-    }
-
-    return lines.join("\n");
-}
-
-/**
- * Formats all unique navigation links for the LLM prompt.
- * Groups links by URL prefix to help identify tabs and sections.
- */
-function formatAllNavLinks(sidebarSignals: SidebarSignal[]): string {
-    if (sidebarSignals.length === 0) {
-        return "(no navigation links found)";
-    }
-
-    // Collect all unique links across all pages
-    const allLinks = new Map<string, string>(); // href -> text
-    for (const signal of sidebarSignals) {
-        for (const link of signal.links) {
-            if (!allLinks.has(link.href)) {
-                allLinks.set(link.href, link.text);
-            }
+    // Show URLs per section (limit to avoid prompt bloat)
+    for (const section of hints.sections.slice(0, 10)) {
+        const urls = hints.pagesBySection.get(section) ?? [];
+        if (urls.length > 0) {
+            const displayUrls = urls.slice(0, 8);
+            const suffix = urls.length > 8 ? ` (+${urls.length - 8} more)` : "";
+            lines.push(`Pages in "${section}": ${displayUrls.join(", ")}${suffix}`);
         }
     }
 
-    // Group by first URL segment to show structure
-    const byPrefix = new Map<string, Array<{ href: string; text: string }>>();
-    for (const [href, text] of allLinks) {
-        try {
-            const pathname = new URL(href).pathname;
-            const segments = pathname.split("/").filter(Boolean);
-            const prefix = segments[0] ?? "(root)";
-            if (!byPrefix.has(prefix)) {
-                byPrefix.set(prefix, []);
-            }
-            byPrefix.get(prefix)!.push({ href: pathname, text });
-        } catch {
-            // Skip invalid URLs
-        }
+    if (hints.sections.length > 10) {
+        lines.push(`... and ${hints.sections.length - 10} more sections`);
     }
 
-    const lines: string[] = [];
-    for (const [prefix, links] of byPrefix) {
-        lines.push(`\n/${prefix}/:`);
-        for (const link of links.slice(0, 15)) {
-            lines.push(`  - "${link.text}" → ${link.href}`);
-        }
-        if (links.length > 15) {
-            lines.push(`  ... and ${links.length - 15} more`);
-        }
-    }
+    lines.push(
+        "",
+        "NOTE: These are heuristic suggestions extracted from HTML navigation.",
+        "Use them as hints when determining contextOrderings, but you may adjust based on URL patterns."
+    );
 
     return lines.join("\n");
 }
@@ -724,13 +268,13 @@ function formatAllNavLinks(sidebarSignals: SidebarSignal[]): string {
 /**
  * Builds the Phase 1 prompt for site structure analysis.
  * @param allUrls - All page URLs (as pathnames)
- * @param aggregatedSignals - Aggregated navigation signals from all pages
  * @param entryPointUrl - The entry point URL where the crawl started (as pathname)
+ * @param navigationHints - Optional navigation hints from HTML (heuristic)
  */
 export function buildSiteStructurePrompt(
     allUrls: string[],
-    aggregatedSignals: AggregatedSignals,
-    entryPointUrl?: string
+    entryPointUrl?: string,
+    navigationHints?: NavigationHints
 ): string {
     // Extract unique top-level path segments for product hint
     const topLevelSegments = new Set<string>();
@@ -740,6 +284,9 @@ export function buildSiteStructurePrompt(
             topLevelSegments.add(segments[0]);
         }
     }
+
+    // Format navigation hints if provided
+    const hintsSection = navigationHints ? formatNavigationHints(navigationHints) : "";
 
     return `Analyze this documentation site's structure to identify products, versions, tabs, and determine page ordering.
 
@@ -751,43 +298,27 @@ ${allUrls.slice(0, 100).join("\n")}
 ${allUrls.length > 100 ? `\n... and ${allUrls.length - 100} more pages` : ""}
 
 TOP-LEVEL URL SEGMENTS: ${Array.from(topLevelSegments).join(", ")}
+${hintsSection}
+=== HOW TO IDENTIFY TABS vs SECTIONS ===
 
-=== ALL NAVIGATION LINKS (grouped by URL prefix) ===
-These are all unique links found in navigation, grouped by their first URL segment:
-${formatAllNavLinks(aggregatedSignals.sidebarSignals)}
+You have two key signals:
+1. **TOP-LEVEL URL SEGMENTS** (shown above) → Typically indicate **tabs**
+2. **NAVIGATION HINTS** (if shown above) → Typically indicate **sections within a tab**
 
-=== OTHER NAVIGATION SIGNALS ===
-- Unique breadcrumb roots: ${aggregatedSignals.uniqueBreadcrumbRoots.length > 0 ? aggregatedSignals.uniqueBreadcrumbRoots.join(", ") : "(none found)"}
-- Unique nav links: ${aggregatedSignals.uniqueNavLinks.length > 0 ? aggregatedSignals.uniqueNavLinks.join(", ") : "(none found)"}
-- Versions detected: ${aggregatedSignals.uniqueVersions.length > 0 ? aggregatedSignals.uniqueVersions.join(", ") : "(none found)"}
+**TABS** are top-level navigation categories (shown in the tab bar):
+- Tabs represent major content divisions (e.g., main docs tab, API Reference tab)
+- Tabs typically correspond to distinct top-level URL segments (e.g., /api/, /docs/)
+- A site typically has 2-4 tabs
 
-SAMPLE BREADCRUMB PATHS:
-${
-    aggregatedSignals.sampleBreadcrumbPaths
-        .slice(0, 10)
-        .map((p) => "  " + p.join(" > "))
-        .join("\n") || "(none found)"
-}
+**SECTIONS** are groupings WITHIN a tab (shown in the sidebar):
+- Sections group related pages within a tab
+- Navigation hints typically represent sections, NOT tabs
+- If something appears in navigation hints but doesn't have its own distinct top-level URL segment, it's typically a section within another tab
 
-SIDEBAR NAVIGATION ORDER (for page ordering):
-${formatSidebarSignals(aggregatedSignals.sidebarSignals)}
-
-=== HOW TO IDENTIFY TABS ===
-Tabs are the top-level navigation categories. Identify them by analyzing:
-
-1. **Content types** - Different content types often get their own tab:
-   - Landing/Welcome pages → "Docs" or "Home" tab
-   - Tutorials and how-to guides → "Guides" tab
-   - API endpoint documentation → "API Reference" tab
-   - Release notes → "Changelog" tab
-
-2. **Link text** - Navigation text like "Docs", "Guides", "API Reference" indicates tabs
-
-3. **URL groupings** - Pages sharing a URL prefix may belong to the same tab
-
-A tab can contain a single page (like a Welcome page) or many sections with multiple pages.
-
-**SECTIONS** are groupings WITHIN a tab (determined in Phase 2, not here).
+**Example**:
+- TOP-LEVEL URL SEGMENTS: overview, quickstart, capabilities, tutorials, api
+- NAVIGATION HINTS: "Get Started", "Capabilities", "Tutorials"
+- Result: "api" segment → separate API Reference tab; navigation hints → sections within the main documentation tab
 
 INSTRUCTIONS:
 1. **Products**: Look at TOP-LEVEL URL SEGMENTS for distinct documentation areas.
@@ -797,31 +328,34 @@ INSTRUCTIONS:
 2. **Versions**: Look for URL patterns like /v1/, /v-1/, /latest/
    - urlPattern MUST be the exact URL segment
 
-3. **Tabs**: Identify top-level navigation categories
-   - Analyze both link text AND URL patterns
+3. **Tabs**: Identify from TOP-LEVEL URL SEGMENTS, not navigation hints
+   - Only create a tab if there's a distinct URL segment OR fundamentally different content type (like API Reference)
+   - Navigation hints typically represent sections WITHIN tabs, not tabs themselves
    - urlPattern is optional - use if there's a clear URL segment
-   - Don't miss landing/home pages - they often deserve their own "Docs" or "Home" tab
-   - A site with Welcome + Guides + API typically has 3 tabs, not 2
+   - **icon**: Choose an appropriate Font Awesome icon name (short form, no "fa-" prefix) based on the tab's purpose
 
 4. **Context Orderings**: Determine page order per tab
-   - Use SIDEBAR NAVIGATION ORDER for page sequence
    - A context is "product:version:tab" (empty string for simple sites)
-   - Order introductory content first
+   - Order introductory content first (overview, getting-started, quickstart)
+   - Group related pages together
+   - **Use NAVIGATION ORDER HINTS above as suggestions** for section/page ordering within tabs
 
-Return JSON with products, versions, tabs, and contextOrderings arrays.`;
+Return JSON with products, versions, tabs (including icons), and contextOrderings arrays.`;
 }
 
 /**
- * Phase 1: Analyzes the site structure from all URLs and aggregated signals.
+ * Phase 1: Analyzes the site structure from all URLs.
  * Returns the discovered products, versions, tabs, and context orderings.
  * @param pages - Map of URL to PageNode
  * @param model - Language model for LLM analysis
  * @param entryPointUrl - Optional entry point URL where crawl started
+ * @param navigationHints - Optional navigation hints from HTML (heuristic)
  */
 export async function analyzeSiteStructure(
     pages: Map<string, PageNode>,
     model: LanguageModelV1,
-    entryPointUrl?: string
+    entryPointUrl?: string,
+    navigationHints?: NavigationHints
 ): Promise<SiteStructure> {
     // Collect all URLs as pathnames
     const allUrls = Array.from(pages.keys()).map((url) => {
@@ -842,14 +376,11 @@ export async function analyzeSiteStructure(
         }
     }
 
-    // Aggregate signals from all pages
-    const aggregatedSignals = aggregateNavigationSignals(pages);
-
     // Call LLM to analyze structure
     const { object } = await generateObject({
         model,
         schema: siteStructureSchema,
-        prompt: buildSiteStructurePrompt(allUrls, aggregatedSignals, entryPointPathname)
+        prompt: buildSiteStructurePrompt(allUrls, entryPointPathname, navigationHints)
     });
 
     return {
@@ -857,12 +388,15 @@ export async function analyzeSiteStructure(
         versions: object.versions,
         tabs: object.tabs.map((t) => ({
             name: t.name,
-            urlPattern: t.urlPattern
+            urlPattern: t.urlPattern,
+            icon: t.icon
         })),
         contextOrderings: object.contextOrderings.map((co) => ({
             contextKey: co.contextKey,
             orderedUrls: co.orderedUrls
-        }))
+        })),
+        // Pass through section order from navigation hints (extracted from HTML)
+        sectionOrder: navigationHints?.sections
     };
 }
 
@@ -928,44 +462,49 @@ export function deriveFromStructure(
 // ============================================================================
 
 /**
- * Schema for Phase 2 classification.
- * Classifies tab, section, and isApiReference for each page.
+ * Creates the schema for Phase 2 classification with discovered tabs and sections in the description.
+ * This ensures the LLM has context about available tabs and sections at the schema level.
  */
-const sectionClassificationSchema = z.object({
-    pages: z
-        .array(
-            z.object({
-                url: z.string().describe("The URL of the page being classified"),
-                tab: z
-                    .string()
-                    .describe(
-                        "Tab name from discovered tabs. Use exact tab name. " +
-                            "Assign 'Docs' or 'Home' tabs ONLY to landing/welcome pages. " +
-                            "Assign 'Guides' to main documentation content. " +
-                            "Assign 'API Reference' to API docs."
-                    ),
-                section: z
-                    .string()
-                    .describe(
-                        "Section name for grouping (e.g., 'Getting Started', 'Authentication'). " +
-                            "Use empty string '' for standalone pages that should appear at top level."
-                    ),
-                isApiReference: z
-                    .boolean()
-                    .describe("Whether this is an API reference page (endpoint docs, schemas, etc.)"),
-                cleanTitle: z
-                    .string()
-                    .describe(
-                        "Clean page title with extraneous info removed: " +
-                            "strip site name suffixes (e.g., ' | My Docs'), " +
-                            "remove redundant product/version prefixes already in structure, " +
-                            "remove boilerplate like 'Docs:', 'Guide:', 'Reference:'. " +
-                            "Keep concise and descriptive."
-                    )
-            })
-        )
-        .describe("Tab, section, API classification, and cleaned title for each page")
-});
+function createSectionClassificationSchema(discoveredTabs: DiscoveredTab[], sectionOrder?: string[]) {
+    const tabNames = discoveredTabs.map((t) => t.name);
+    const tabDescription =
+        tabNames.length > 0
+            ? `Tab name. Strongly prefer one of: ${tabNames.join(", ")}. ` +
+              `Use "${tabNames[0]}" for general documentation content. ` +
+              `Only create a NEW tab name if content is fundamentally different from ALL discovered tabs.`
+            : "Tab name for this page. Use a descriptive name like 'Documentation', 'API Reference', 'Guides', etc.";
+
+    const sectionDescription =
+        `Section name for grouping related pages. Group pages with similar topics together. ` +
+        `Use empty string '' only for truly standalone pages like a welcome/landing page.`;
+
+    return z.object({
+        pages: z
+            .array(
+                z.object({
+                    url: z.string().describe("The URL of the page being classified"),
+                    tab: z.string().describe(tabDescription),
+                    section: z.string().describe(sectionDescription),
+                    isApiReference: z
+                        .boolean()
+                        .describe(
+                            "TRUE only for actual HTTP endpoint documentation (e.g., GET /users). " +
+                                "FALSE for intro pages, auth guides, tutorials even if in API section."
+                        ),
+                    cleanTitle: z
+                        .string()
+                        .describe(
+                            "Clean page title with extraneous info removed: " +
+                                "strip site name suffixes (e.g., ' | My Docs'), " +
+                                "remove redundant product/version prefixes already in structure, " +
+                                "remove boilerplate like 'Docs:', 'Guide:', 'Reference:'. " +
+                                "Keep concise and descriptive."
+                        )
+                })
+            )
+            .describe("Tab, section, API classification, and cleaned title for each page")
+    });
+}
 
 /**
  * Context for Phase 2 classification, includes derived product/version.
@@ -977,6 +516,35 @@ interface Phase2PageContext extends PageContext {
 }
 
 /**
+ * Extracts a suggested section name from URL path segments.
+ * The second-to-last segment often indicates the section.
+ * E.g., /docs/tutorials/searching-plants -> "tutorials"
+ */
+function getSuggestedSectionFromUrl(segments: string[]): string | undefined {
+    if (segments.length < 2) {
+        return undefined;
+    }
+    // Get second-to-last segment as potential section name
+    const potentialSection = segments[segments.length - 2];
+    if (!potentialSection) {
+        return undefined;
+    }
+    // Skip common non-section segments
+    const skipSegments = ["docs", "guides", "api", "v1", "v2", "latest", "pages"];
+    if (skipSegments.includes(potentialSection.toLowerCase())) {
+        // Try third-to-last if second-to-last is skipped
+        if (segments.length >= 3) {
+            const alternative = segments[segments.length - 3];
+            if (alternative && !skipSegments.includes(alternative.toLowerCase())) {
+                return alternative;
+            }
+        }
+        return undefined;
+    }
+    return potentialSection;
+}
+
+/**
  * Renders a page context for the Phase 2 LLM prompt.
  */
 function renderPhase2Context(ctx: Phase2PageContext, index: number): string {
@@ -985,6 +553,13 @@ function renderPhase2Context(ctx: Phase2PageContext, index: number): string {
         `    Title: ${ctx.pageTitle}`,
         `    Path: ${ctx.urlPathSegments.join(" / ") || "(root)"}`
     ];
+
+    // Add page description if available
+    if (ctx.pageDescription) {
+        lines.push(
+            `    Description: ${ctx.pageDescription.slice(0, 150)}${ctx.pageDescription.length > 150 ? "..." : ""}`
+        );
+    }
 
     // Show what was derived from structure (product/version only - tab assigned by LLM)
     const derived: string[] = [];
@@ -998,11 +573,19 @@ function renderPhase2Context(ctx: Phase2PageContext, index: number): string {
         lines.push(`    Derived: ${derived.join(", ")}`);
     }
 
-    if (ctx.breadcrumbPath.length > 0) {
-        lines.push(`    Breadcrumbs: ${ctx.breadcrumbPath.join(" > ")}`);
+    // Add possible section (heuristic - extracted from HTML structure)
+    if (ctx.navSection) {
+        lines.push(`    Possible section (from HTML): "${ctx.navSection}"`);
     }
 
-    lines.push(`    Page type hint: ${ctx.inferredPageType}`);
+    // Add URL-based section hint as fallback
+    const suggestedSection = getSuggestedSectionFromUrl(ctx.urlPathSegments);
+    if (suggestedSection && !ctx.navSection) {
+        // Only show URL hint if no navigation section found
+        const titleCase = suggestedSection.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+        lines.push(`    Section (from URL): "${titleCase}"`);
+    }
+
     lines.push(`    Content: ${ctx.contentSnippet.slice(0, 150)}...`);
 
     return lines.join("\n");
@@ -1029,11 +612,17 @@ export function buildSectionClassificationPrompt(contexts: Phase2PageContext[], 
         structureSummary.push(`Versions: ${structure.versions.map((v) => v.name).join(", ")}`);
     }
 
+    // Build section hints for the prompt
+    const sectionHints =
+        structure.sectionOrder && structure.sectionOrder.length > 0
+            ? `\nDISCOVERED SECTIONS (from site navigation, in display order):\n${structure.sectionOrder.map((s) => `- "${s}"`).join("\n")}\n`
+            : "";
+
     return `Classify these ${contexts.length} documentation pages into tabs and sections.
 
 DISCOVERED TABS:
 ${tabDescriptions || "No tabs discovered - use 'default' as tab name"}
-
+${sectionHints}
 ${structureSummary.length > 0 ? `SITE STRUCTURE:\n${structureSummary.join("\n")}\n` : ""}
 PAGES TO CLASSIFY:
 ${pagesContext}
@@ -1042,26 +631,28 @@ INSTRUCTIONS:
 For each page, determine:
 
 1. **tab**: Which tab does this page belong to?
-   CRITICAL TAB ASSIGNMENT RULES:
-   - "Docs" or "Home" tabs are ONLY for landing/welcome pages (typically 1-2 pages)
-   - "Guides" tabs get the BULK of documentation content:
-     * Getting Started, Overview, Quickstart pages
-     * Tutorials and how-to guides  
-     * Feature documentation (capabilities, concepts)
-     * Changelog entries
-   - "API Reference" tabs are for API endpoint documentation
-   - When in doubt between "Docs" and "Guides", choose "Guides" (it's the main content tab)
-   - Use the exact tab name from DISCOVERED TABS above
+   - STRONGLY PREFER using one of the exact tab names from DISCOVERED TABS above
+   - Use the FIRST discovered tab for general documentation content (guides, tutorials, overviews)
+   - Only use other discovered tabs if the content clearly belongs there (e.g., API reference pages go in API tabs)
+   - If unsure or content could fit multiple tabs, use the first discovered tab
+   - Only create a NEW tab name if content is fundamentally different from ALL discovered tabs
+   - If no tabs were discovered, use "default" for all pages
 
 2. **section**: Group related pages together OR use empty string "" for standalone pages
-   - Use section names like "Getting Started", "Capabilities", "Tutorials" to group related pages
-   - Use empty string "" for standalone pages at tab's top level
-   - Use breadcrumbs as hints for section names
-   - Common sections: "Getting Started", "Capabilities", "Tutorials", "Changelog"
+   - If "Possible section (from HTML)" is shown for a page, use it as a strong hint
+   - If "Section (from URL)" is shown, use it as a hint
+   - If DISCOVERED SECTIONS are listed above, prefer using those exact names when they match
+   - Group pages with similar topics/purposes together under a descriptive section name
+   - Introductory pages (overview, quickstart, introduction) should be grouped together
+   - Only use empty string "" for truly standalone pages like a Welcome/landing page
 
-3. **isApiReference**: Is this an API reference page?
-   - TRUE for: endpoint documentation, API schemas, method references
-   - FALSE for: guides about APIs, tutorials, conceptual docs
+3. **isApiReference**: Is this an ACTUAL API endpoint documentation page?
+   - TRUE ONLY for pages that document specific HTTP endpoints (e.g., "GET /users", "POST /plants")
+   - Look for: HTTP methods in title (GET, POST, PUT, DELETE, PATCH), endpoint paths, request/response schemas
+   - FALSE for: Introduction pages, authentication guides, quickstarts, tutorials about APIs
+   - IMPORTANT: Being in an "API Reference" URL path does NOT automatically make it isApiReference
+   - Example FALSE: "Introduction", "Authentication", "Getting Started with the API"
+   - Example TRUE: "Get Users", "Create Plant", "Delete Resource"
 
 4. **cleanTitle**: Clean up the page title
    - Remove site name suffixes (e.g., "Auth | MyCompany Docs" → "Auth")
@@ -1251,6 +842,8 @@ export interface ClassifyPagesOptions {
     onProgress?: (classified: number, total: number) => void;
     /** Maximum pages per batch group (default: 16) */
     maxGroupSize?: number;
+    /** Navigation hints extracted from HTML (heuristic, optional) */
+    navigationHints?: NavigationHints;
 }
 
 /**
@@ -1270,6 +863,7 @@ export interface ClassificationResult {
 /**
  * Phase 2: Classifies a batch of pages to determine tab, section, isApiReference, and cleanTitle.
  * Product/version are derived from URL patterns; tab is assigned by LLM based on content.
+ * Uses dynamic schema with discovered tabs to provide context to the LLM.
  */
 async function classifySectionBatch(
     contexts: Phase2PageContext[],
@@ -1278,9 +872,12 @@ async function classifySectionBatch(
 ): Promise<Map<string, { tab: string; section: string; isApiReference: boolean; cleanTitle: string }>> {
     const results = new Map<string, { tab: string; section: string; isApiReference: boolean; cleanTitle: string }>();
 
+    // Create schema dynamically with discovered tabs and sections in the description
+    const schema = createSectionClassificationSchema(structure.tabs, structure.sectionOrder);
+
     const { object } = await generateObject({
         model,
-        schema: sectionClassificationSchema,
+        schema,
         prompt: buildSectionClassificationPrompt(contexts, structure)
     });
 
@@ -1315,7 +912,7 @@ export async function classifyPages(
     model: LanguageModelV1,
     options: ClassifyPagesOptions = {}
 ): Promise<ClassificationResult> {
-    const { concurrency = 3, onProgress, maxGroupSize = 16 } = options;
+    const { concurrency = 3, onProgress, maxGroupSize = 16, navigationHints } = options;
     const { pages, rootUrl } = crawlResult;
 
     const total = pages.size;
@@ -1325,21 +922,25 @@ export async function classifyPages(
     // ========================================================================
     // PHASE 1: Site Structure Discovery
     // ========================================================================
-    const structure = await analyzeSiteStructure(pages, model, rootUrl);
+    const structure = await analyzeSiteStructure(pages, model, rootUrl, navigationHints);
     llmCalls += 1;
 
-    // Log discovered structure (info, not warnings)
-    console.log(
-        `[classifier] Phase 1 discovered: ${structure.products.length} product(s), ${structure.versions.length} version(s), ${structure.tabs.length} tab(s)`
-    );
+    // Log discovered structure
+    const parts: string[] = [];
     if (structure.products.length > 0) {
-        console.log(`  Products: ${structure.products.map((p) => `${p.name} (/${p.urlPrefix}/)`).join(", ")}`);
+        parts.push(`${structure.products.length} product(s)`);
     }
     if (structure.versions.length > 0) {
-        console.log(`  Versions: ${structure.versions.map((v) => `${v.name} (/${v.urlPattern}/)`).join(", ")}`);
+        parts.push(`${structure.versions.length} version(s)`);
     }
     if (structure.tabs.length > 0) {
-        console.log(`  Tabs: ${structure.tabs.map((t) => t.name).join(", ")}`);
+        parts.push(`${structure.tabs.length} tab(s)`);
+    }
+    if (parts.length > 0) {
+        console.log(`  Discovered: ${parts.join(", ")}`);
+    }
+    if (structure.tabs.length > 0) {
+        console.log(`  Tabs: ${structure.tabs.map((t) => `${t.name} (${t.icon ?? "no icon"})`).join(", ")}`);
     }
 
     // ========================================================================

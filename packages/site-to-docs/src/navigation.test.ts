@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildFernNavigation, collectApiReferencePages } from "./navigation.js";
-import type { CrawlResult, PageClassification, PageNode } from "./types.js";
+import type { CrawlResult, PageClassification, PageNode, SiteStructure } from "./types.js";
 
 function createMockPage(url: string, slug: string, title: string, classification: PageClassification): PageNode {
     return {
@@ -9,6 +9,7 @@ function createMockPage(url: string, slug: string, title: string, classification
         slug,
         title,
         html: "<html></html>",
+        markdown: "# Mock content", // Required for pages to be included in navigation
         fernFilename: `pages/${slug || "index"}.mdx`,
         fernSlug: slug,
         classification,
@@ -222,6 +223,161 @@ describe("buildFernNavigation", () => {
         const productNames = navigation.products?.map((p) => p.displayName);
         expect(productNames).toContain("Platform");
         expect(productNames).toContain("SDK");
+    });
+
+    it("should order sections by URL order from contextOrderings, not alphabetically", () => {
+        // Create pages in sections that would be alphabetically ordered as:
+        // "Capabilities" < "Getting Started" < "Tutorials"
+        const pages = [
+            createMockPage("https://example.com/overview", "overview", "Overview", {
+                section: "Getting Started",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/quickstart", "quickstart", "Quickstart", {
+                section: "Getting Started",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/plants", "plants", "Plant Management", {
+                section: "Capabilities",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/orders", "orders", "Order Processing", {
+                section: "Capabilities",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/tutorial-1", "tutorial-1", "First Tutorial", {
+                section: "Tutorials",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/tutorial-2", "tutorial-2", "Second Tutorial", {
+                section: "Tutorials",
+                isApiReference: false
+            })
+        ];
+        const crawlResult = createCrawlResult(pages);
+
+        // Provide contextOrderings that puts "Getting Started" first, then "Capabilities", then "Tutorials"
+        // (This is different from alphabetical: Capabilities < Getting Started < Tutorials)
+        const siteStructure: SiteStructure = {
+            products: [],
+            versions: [],
+            tabs: [],
+            contextOrderings: [
+                {
+                    contextKey: "",
+                    orderedUrls: [
+                        "/overview", // Getting Started
+                        "/quickstart", // Getting Started
+                        "/plants", // Capabilities
+                        "/orders", // Capabilities
+                        "/tutorial-1", // Tutorials
+                        "/tutorial-2" // Tutorials
+                    ]
+                }
+            ]
+        };
+
+        const navigation = buildFernNavigation(crawlResult, siteStructure);
+
+        // Should have 3 sections
+        expect(navigation.navigation?.length).toBe(3);
+
+        // Extract section names in order
+        const sectionNames = navigation.navigation?.map((n) => n.section).filter(Boolean);
+
+        // Should be ordered by URL appearance, NOT alphabetically
+        // URL order: Getting Started (overview, quickstart) → Capabilities (plants, orders) → Tutorials
+        expect(sectionNames).toEqual(["Getting Started", "Capabilities", "Tutorials"]);
+
+        // Alphabetical would have been: ["Capabilities", "Getting Started", "Tutorials"]
+    });
+
+    it("should fall back to alphabetical order when no contextOrderings provided", () => {
+        const pages = [
+            createMockPage("https://example.com/overview", "overview", "Overview", {
+                section: "Getting Started",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/quickstart", "quickstart", "Quickstart", {
+                section: "Getting Started",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/plants", "plants", "Plant Management", {
+                section: "Capabilities",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/orders", "orders", "Order Processing", {
+                section: "Capabilities",
+                isApiReference: false
+            })
+        ];
+        const crawlResult = createCrawlResult(pages);
+
+        // No siteStructure provided
+        const navigation = buildFernNavigation(crawlResult);
+
+        // Should have 2 sections
+        expect(navigation.navigation?.length).toBe(2);
+
+        // Extract section names in order
+        const sectionNames = navigation.navigation?.map((n) => n.section).filter(Boolean);
+
+        // Should be alphabetical: Capabilities < Getting Started
+        expect(sectionNames).toEqual(["Capabilities", "Getting Started"]);
+    });
+
+    it("should merge per-tab orderings when no global ordering exists", () => {
+        // This tests the fallback behavior where LLM creates per-tab orderings
+        // instead of a global ordering with empty contextKey
+        const pages = [
+            createMockPage("https://example.com/overview", "overview", "Overview", {
+                section: "Getting Started",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/quickstart", "quickstart", "Quickstart", {
+                section: "Getting Started",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/plants", "plants", "Plant Management", {
+                section: "Capabilities",
+                isApiReference: false
+            }),
+            createMockPage("https://example.com/orders", "orders", "Order Processing", {
+                section: "Capabilities",
+                isApiReference: false
+            })
+        ];
+        const crawlResult = createCrawlResult(pages);
+
+        // Provide per-tab orderings with non-empty context keys (simulating LLM behavior)
+        // Note: LLM might create keys like "::Guides" instead of "" for simple sites
+        const siteStructure: SiteStructure = {
+            products: [],
+            versions: [],
+            tabs: [],
+            contextOrderings: [
+                {
+                    contextKey: "::Guides", // Per-tab key, won't match "" lookup
+                    orderedUrls: [
+                        "/overview", // Getting Started
+                        "/quickstart", // Getting Started
+                        "/plants", // Capabilities
+                        "/orders" // Capabilities
+                    ]
+                }
+            ]
+        };
+
+        const navigation = buildFernNavigation(crawlResult, siteStructure);
+
+        // Should have 2 sections
+        expect(navigation.navigation?.length).toBe(2);
+
+        // Extract section names in order
+        const sectionNames = navigation.navigation?.map((n) => n.section).filter(Boolean);
+
+        // Should use merged orderings: Getting Started (overview=0) → Capabilities (plants=2)
+        expect(sectionNames).toEqual(["Getting Started", "Capabilities"]);
     });
 });
 

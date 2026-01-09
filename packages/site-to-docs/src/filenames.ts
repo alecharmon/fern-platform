@@ -1,13 +1,37 @@
 import type { PageNode } from "./types.js";
 
 /**
+ * Sanitizes a slug by replacing filesystem-unsafe characters with dashes.
+ * This handles characters that are invalid on various filesystems (Windows, macOS, Linux).
+ *
+ * @example
+ * sanitizeSlug("step-1:-setup") → "step-1-setup"
+ * sanitizeSlug("need-inspiration?") → "need-inspiration"
+ * sanitizeSlug("foo::bar") → "foo-bar"
+ */
+export function sanitizeSlug(slug: string): string {
+    return (
+        slug
+            // Replace filesystem-unsafe characters with dashes
+            // Includes: : " ? * < > | \
+            .replace(/[:"?*<>|\\]/g, "-")
+            // Collapse multiple consecutive dashes into one
+            .replace(/-+/g, "-")
+            // Remove leading/trailing dashes
+            .replace(/^-+|-+$/g, "")
+    );
+}
+
+/**
  * Generates a Fern filename from the page's source slug.
  * The filename preserves the URL structure from the source site.
+ * Sanitizes filesystem-unsafe characters.
  *
  * @example
  * generateFernFilename({ slug: "platform/guides/overview" }) → "pages/platform/guides/overview.mdx"
  * generateFernFilename({ slug: "" }) → "pages/index.mdx"
  * generateFernFilename({ slug: "getting-started" }) → "pages/getting-started.mdx"
+ * generateFernFilename({ slug: "step-1:-setup" }) → "pages/step-1-setup.mdx"
  */
 export function generateFernFilename(page: PageNode): string {
     const slug = page.slug.trim();
@@ -20,21 +44,42 @@ export function generateFernFilename(page: PageNode): string {
     // Ensure slug doesn't have leading/trailing slashes
     const cleanSlug = slug.replace(/^\/+|\/+$/g, "");
 
-    return `pages/${cleanSlug}.mdx`;
+    // Sanitize each path segment separately to preserve directory structure
+    const sanitizedSlug = cleanSlug
+        .split("/")
+        .map((segment) => sanitizeSlug(segment))
+        .filter((segment) => segment.length > 0)
+        .join("/");
+
+    // Handle edge case where sanitization removes everything
+    if (!sanitizedSlug) {
+        return "pages/index.mdx";
+    }
+
+    return `pages/${sanitizedSlug}.mdx`;
 }
 
 /**
  * Generates a Fern slug from the page's source slug.
  * Preserves the source site's URL structure.
+ * Sanitizes filesystem-unsafe characters.
  *
  * @example
  * generateFernSlug({ slug: "platform/guides/overview" }) → "platform/guides/overview"
  * generateFernSlug({ slug: "" }) → ""
  * generateFernSlug({ slug: "getting-started" }) → "getting-started"
+ * generateFernSlug({ slug: "step-1:-setup" }) → "step-1-setup"
  */
 export function generateFernSlug(page: PageNode): string {
-    // Use the source slug directly, just clean it up
-    return page.slug.replace(/^\/+|\/+$/g, "");
+    // Clean up leading/trailing slashes
+    const cleanSlug = page.slug.replace(/^\/+|\/+$/g, "");
+
+    // Sanitize each path segment separately to preserve directory structure
+    return cleanSlug
+        .split("/")
+        .map((segment) => sanitizeSlug(segment))
+        .filter((segment) => segment.length > 0)
+        .join("/");
 }
 
 /**

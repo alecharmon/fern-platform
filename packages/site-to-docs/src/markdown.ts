@@ -7,6 +7,51 @@ import remarkStringify from "remark-stringify";
 import { unified } from "unified";
 
 /**
+ * Result of content extraction, including the HTML content and metadata.
+ */
+export interface ExtractedContent {
+    /** The extracted HTML content */
+    html: string;
+    /** Plain text version for analysis */
+    textContent: string;
+    /** Whether this appears to be a 404 error page */
+    isSoft404: boolean;
+}
+
+/**
+ * Detects if extracted content appears to be a soft 404 page.
+ * This is checked AFTER Readability extraction, so we're looking at the
+ * actual page content without navigation/footer noise.
+ *
+ * A soft 404 is detected when:
+ * - Content is very short (< 200 chars) AND contains "404" or "not found"
+ *
+ * @param textContent - Plain text content extracted from the page
+ * @returns true if the content appears to be a 404 error page
+ */
+export function isSoft404Content(textContent: string): boolean {
+    const trimmed = textContent.trim();
+    const lowerContent = trimmed.toLowerCase();
+
+    // Very short content with 404 indicators is a soft 404
+    // 200 chars is roughly 1-2 sentences - a real page would have more
+    if (trimmed.length < 200) {
+        if (
+            lowerContent.includes("404") ||
+            lowerContent.includes("not found") ||
+            lowerContent.includes("page doesn't exist") ||
+            lowerContent.includes("page does not exist") ||
+            lowerContent.includes("couldn't find") ||
+            lowerContent.includes("could not find")
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Extracts the main content from a full HTML page using Mozilla Readability.
  * This is the same algorithm that powers Firefox's Reader Mode.
  *
@@ -15,9 +60,9 @@ import { unified } from "unified";
  *
  * @param html - Full HTML page content
  * @param url - Optional URL for resolving relative links
- * @returns HTML string containing just the main content
+ * @returns Extracted content with HTML, text, and soft 404 detection
  */
-export function extractMainContent(html: string, url?: string): string {
+export function extractMainContent(html: string, url?: string): ExtractedContent {
     // Parse HTML with JSDOM
     const dom = new JSDOM(html, { url });
 
@@ -33,11 +78,32 @@ export function extractMainContent(html: string, url?: string): string {
     const article = reader.parse();
 
     if (article?.content) {
-        return article.content;
+        const textContent = article.textContent ?? "";
+        return {
+            html: article.content,
+            textContent,
+            isSoft404: isSoft404Content(textContent)
+        };
     }
 
     // Fallback: return body content if Readability fails
-    return dom.window.document.body?.innerHTML ?? html;
+    const bodyHtml = dom.window.document.body?.innerHTML ?? html;
+    const bodyText = dom.window.document.body?.textContent ?? "";
+    return {
+        html: bodyHtml,
+        textContent: bodyText,
+        isSoft404: isSoft404Content(bodyText)
+    };
+}
+
+/**
+ * Result of HTML to markdown conversion.
+ */
+export interface MarkdownConversionResult {
+    /** The converted markdown content */
+    markdown: string;
+    /** Whether the source page was detected as a soft 404 */
+    isSoft404: boolean;
 }
 
 /**
@@ -45,14 +111,14 @@ export function extractMainContent(html: string, url?: string): string {
  *
  * @param html - HTML content to convert
  * @param url - Optional URL for resolving relative links during extraction
- * @returns Markdown string
+ * @returns Markdown conversion result with soft 404 detection
  */
-export async function htmlToMarkdown(html: string, url?: string): Promise<string> {
+export async function htmlToMarkdown(html: string, url?: string): Promise<MarkdownConversionResult> {
     // Use Readability for content extraction
-    const mainContent = extractMainContent(html, url);
+    const extracted = extractMainContent(html, url);
 
     // Wrap in a div to ensure valid HTML structure for parsing
-    const wrappedContent = `<div>${mainContent}</div>`;
+    const wrappedContent = `<div>${extracted.html}</div>`;
 
     const processor = unified()
         .use(rehypeParse, { fragment: true })
@@ -66,7 +132,10 @@ export async function htmlToMarkdown(html: string, url?: string): Promise<string
     // Clean up common artifacts
     markdown = cleanupMarkdown(markdown);
 
-    return markdown;
+    return {
+        markdown,
+        isSoft404: extracted.isSoft404
+    };
 }
 
 /**
@@ -240,22 +309,42 @@ function escapeYamlString(str: string): string {
 }
 
 /**
+ * Result of converting a page to markdown.
+ */
+export interface PageConversionResult {
+    /** Whether the page was successfully converted (false if soft 404) */
+    success: boolean;
+    /** Whether the page was detected as a soft 404 */
+    isSoft404: boolean;
+}
+
+/**
  * Converts a page's HTML to markdown and assigns it to the page.
+ * If the page is detected as a soft 404, markdown will not be set.
  *
  * @param page - PageNode with html property
  * @param urlToSlugMap - Map for link rewriting
  * @param baseUrl - Base URL for resolving relative links
+ * @returns Conversion result indicating success and soft 404 detection
  */
 export async function convertPageToMarkdown(
     page: { html: string; markdown?: string; url: string; title: string; description?: string },
     urlToSlugMap: Map<string, string>,
     baseUrl: string
-): Promise<void> {
+): Promise<PageConversionResult> {
     // Pass URL for better relative link resolution
-    const markdown = await htmlToMarkdown(page.html, page.url);
-    const rewrittenMarkdown = rewriteInternalLinks(markdown, urlToSlugMap, baseUrl);
+    const result = await htmlToMarkdown(page.html, page.url);
+
+    // Don't set markdown for soft 404 pages - they'll be skipped during file writing
+    if (result.isSoft404) {
+        return { success: false, isSoft404: true };
+    }
+
+    const rewrittenMarkdown = rewriteInternalLinks(result.markdown, urlToSlugMap, baseUrl);
 
     // Prepend frontmatter with title and subtitle
     const frontmatter = generateFrontmatter(page.title, page.description);
     page.markdown = frontmatter + rewrittenMarkdown;
+
+    return { success: true, isSoft404: false };
 }

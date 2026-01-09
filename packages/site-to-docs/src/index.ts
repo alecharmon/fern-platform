@@ -23,24 +23,19 @@ export { runAgent, testTools, ValidationError } from "./agent.js";
 export type { ClassifyPagesOptions, GroupPagesOptions, GroupPagesResult } from "./classifier.js";
 // Classifier exports
 export {
-    aggregateNavigationSignals,
     analyzeSiteStructure,
     buildClassificationPrompt,
     buildSectionClassificationPrompt,
     buildSiteStructurePrompt,
     classifyPages,
     deriveFromStructure,
-    detectVersion,
     enforceConsistency,
-    extractBreadcrumbPath,
-    extractOrderedSidebarLinks,
+    extractNavigationStructure,
     extractPageContext,
-    extractSiteNavigationLinks,
     extractTextPreview,
     extractUrlPathSegments,
     extractUrlPrefix,
-    groupPagesByPrefix,
-    inferPageType
+    groupPagesByPrefix
 } from "./classifier.js";
 
 // Crawler exports
@@ -78,6 +73,7 @@ export {
 } from "./markdown.js";
 
 // Navigation tree exports
+export type { BuildNavigationOptions } from "./navigation.js";
 export { buildFernNavigation, collectApiReferencePages } from "./navigation.js";
 
 // OpenAPI stub exports
@@ -87,7 +83,6 @@ export type { Tools } from "./tools.js";
 export { createTools } from "./tools.js";
 // Type exports
 export type {
-    AggregatedSignals,
     ContextOrdering,
     ConversionResult,
     CrawlOptions,
@@ -102,12 +97,11 @@ export type {
     FernProductFile,
     FernTabDefinition,
     FernVersion,
-    OrderedNavLink,
+    NavigationExtractionResult,
+    NavigationHints,
     PageClassification,
     PageContext,
     PageNode,
-    PageType,
-    SidebarSignal,
     SiteStructure
 } from "./types.js";
 // Utils exports

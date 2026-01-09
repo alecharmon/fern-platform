@@ -4,7 +4,8 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { anthropic } from "@ai-sdk/anthropic";
 
-import { classifyPages } from "./classifier.js";
+import { downloadImage, extractBranding, getExtensionFromUrl } from "./branding.js";
+import { classifyPages, extractNavigationStructure } from "./classifier.js";
 import { crawlSite, normalizeUrl } from "./crawler.js";
 import { generateDocsYml, generateProductFileYml } from "./docsYml.js";
 import { generateFernConfigJson } from "./fernConfig.js";
@@ -14,7 +15,14 @@ import { convertPageToMarkdown } from "./markdown.js";
 import { buildFernNavigation, collectApiReferencePages } from "./navigation.js";
 import { generateEmptyOpenApiStub, generateOpenApiStub } from "./openapi.js";
 import { createTools } from "./tools.js";
-import type { ConversionResult, CrawlResult, FernDocsConfig, PageNode } from "./types.js";
+import type {
+    ConversionResult,
+    CrawlResult,
+    FernDocsConfig,
+    NavigationHints,
+    PageNode,
+    SiteBranding
+} from "./types.js";
 
 /**
  * Custom error for expected/validation errors.
@@ -243,9 +251,60 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
         throw new Error("No pages were crawled");
     }
 
-    // Step 2: Classify pages using LLM (or load from cache if --classifier-cache)
-    log("\n[Step 2] Classifying pages...");
-    onProgress?.({ stage: "step", step: 2, message: "Classifying pages..." });
+    // Step 2: Extract navigation heuristics
+    log("\n[Step 2] Extracting navigation heuristics...");
+    onProgress?.({ stage: "step", step: 2, message: "Extracting navigation heuristics..." });
+
+    // Aggregate navigation hints across all pages
+    // Strategy: prefer the entry point page's ordering, then merge in other pages
+    const aggregatedHints: NavigationHints = {
+        sections: [],
+        pagesBySection: new Map()
+    };
+    const seenSections = new Set<string>();
+    let totalMappings = 0;
+
+    // Process entry point page first (if available) to establish base ordering
+    const entryPage = crawlResult.pages.get(crawlResult.rootUrl);
+    const pagesToProcess = entryPage
+        ? [entryPage, ...Array.from(crawlResult.pages.values()).filter((p) => p.url !== crawlResult.rootUrl)]
+        : Array.from(crawlResult.pages.values());
+
+    for (const page of pagesToProcess) {
+        const { urlToSection, hints } = extractNavigationStructure(page.html, page.url);
+        totalMappings += urlToSection.size;
+
+        // Merge sections in order (first seen wins for section order)
+        for (const section of hints.sections) {
+            if (!seenSections.has(section)) {
+                seenSections.add(section);
+                aggregatedHints.sections.push(section);
+                aggregatedHints.pagesBySection.set(section, []);
+            }
+
+            // Merge URLs within section (preserve order, skip duplicates)
+            const existingUrls = aggregatedHints.pagesBySection.get(section)!;
+            const existingUrlSet = new Set(existingUrls);
+            const newUrls = hints.pagesBySection.get(section) ?? [];
+            for (const url of newUrls) {
+                if (!existingUrlSet.has(url)) {
+                    existingUrls.push(url);
+                    existingUrlSet.add(url);
+                }
+            }
+        }
+    }
+
+    if (seenSections.size > 0) {
+        log(`  Found ${seenSections.size} possible sections: ${aggregatedHints.sections.join(", ")}`);
+        log(`  Extracted ${totalMappings} navigation links (may include duplicates)`);
+    } else {
+        log(`  No section structure detected`);
+    }
+
+    // Step 3: Classify pages using LLM (or load from cache if --classifier-cache)
+    log("\n[Step 3] Classifying pages...");
+    onProgress?.({ stage: "step", step: 3, message: "Classifying pages..." });
 
     let siteStructure: import("./types.js").SiteStructure | undefined;
 
@@ -262,6 +321,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
             const classificationResult = await classifyPages(crawlResult, model, {
                 concurrency: 3,
                 maxGroupSize,
+                navigationHints: aggregatedHints,
                 onProgress: (classified, total) => {
                     log(`  Classified ${classified}/${total} pages`);
                     onProgress?.({ stage: "classify", classified, total });
@@ -281,6 +341,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
         const classificationResult = await classifyPages(crawlResult, model, {
             concurrency: 3,
             maxGroupSize,
+            navigationHints: aggregatedHints,
             onProgress: (classified, total) => {
                 log(`  Classified ${classified}/${total} pages`);
                 onProgress?.({ stage: "classify", classified, total });
@@ -293,18 +354,19 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
         );
     }
 
-    // Step 3: Assign filenames and slugs
-    log("\n[Step 3] Assigning filenames and slugs...");
-    onProgress?.({ stage: "step", step: 3, message: "Assigning filenames and slugs..." });
+    // Step 4: Assign filenames and slugs
+    log("\n[Step 4] Assigning filenames and slugs...");
+    onProgress?.({ stage: "step", step: 4, message: "Assigning filenames and slugs..." });
     assignFilenamesAndSlugs(crawlResult.pages);
     log(`  Assigned filenames to ${crawlResult.pages.size} pages`);
 
-    // Step 4: Convert HTML to markdown (skip API reference pages - they go to OpenAPI only)
-    log("\n[Step 4] Converting HTML to markdown...");
-    onProgress?.({ stage: "step", step: 4, message: "Converting HTML to markdown..." });
+    // Step 5: Convert HTML to markdown (skip API reference pages - they go to OpenAPI only)
+    log("\n[Step 5] Converting HTML to markdown...");
+    onProgress?.({ stage: "step", step: 5, message: "Converting HTML to markdown..." });
     const urlToSlugMap = buildUrlToSlugMap(crawlResult.pages);
     let converted = 0;
     let skippedApiPages = 0;
+    let skipped404Pages = 0;
     const totalToConvert = Array.from(crawlResult.pages.values()).filter(
         (p) => !p.classification?.isApiReference
     ).length;
@@ -315,7 +377,12 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
             continue;
         }
         try {
-            await convertPageToMarkdown(page, urlToSlugMap, url);
+            const result = await convertPageToMarkdown(page, urlToSlugMap, url);
+            if (result.isSoft404) {
+                // Page was detected as a soft 404 - skip it
+                skipped404Pages++;
+                continue;
+            }
             converted++;
             if (converted % 10 === 0 || converted === totalToConvert) {
                 if (verbose) {
@@ -329,18 +396,43 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
             );
         }
     }
-    log(`  Converted ${converted} pages to markdown (skipped ${skippedApiPages} API reference pages)`);
+    log(
+        `  Converted ${converted} pages to markdown (skipped ${skippedApiPages} API reference pages, ${skipped404Pages} soft 404 pages)`
+    );
     onProgress?.({ stage: "convert", converted, total: totalToConvert });
 
-    // Step 5: Build Fern navigation tree
-    log("\n[Step 5] Building navigation tree...");
-    onProgress?.({ stage: "step", step: 5, message: "Building navigation tree..." });
-    const fernNavigation = buildFernNavigation(crawlResult, siteStructure);
+    // Step 6: Build Fern navigation tree
+    log("\n[Step 6] Building navigation tree...");
+    onProgress?.({ stage: "step", step: 6, message: "Building navigation tree..." });
+    const fernNavigation = buildFernNavigation(crawlResult, siteStructure, { verbose });
     log(`  Navigation tree built`);
 
-    // Step 6: Write files to output directory
-    log("\n[Step 6] Writing files...");
-    onProgress?.({ stage: "step", step: 6, message: "Writing files..." });
+    // Step 7: Extract site branding (logo, colors)
+    log("\n[Step 7] Extracting site branding...");
+    onProgress?.({ stage: "step", step: 7, message: "Extracting site branding..." });
+    const entryPageForBranding = crawlResult.pages.get(crawlResult.rootUrl);
+    let siteBranding: SiteBranding = {};
+    if (entryPageForBranding) {
+        siteBranding = extractBranding(entryPageForBranding.html, crawlResult.rootUrl);
+        if (siteBranding.logo?.light || siteBranding.logo?.dark) {
+            log(`  Found logo: ${siteBranding.logo.light ?? siteBranding.logo.dark}`);
+        }
+        if (siteBranding.favicon) {
+            log(`  Found favicon: ${siteBranding.favicon}`);
+        }
+        if (siteBranding.accentColor?.light) {
+            log(`  Found accent color: ${siteBranding.accentColor.light}`);
+        }
+        if (!siteBranding.logo && !siteBranding.favicon && !siteBranding.accentColor) {
+            log(`  No branding elements found`);
+        }
+    } else {
+        log(`  Entry page not found, skipping branding extraction`);
+    }
+
+    // Step 8: Write files to output directory
+    log("\n[Step 8] Writing files...");
+    onProgress?.({ stage: "step", step: 8, message: "Writing files..." });
 
     // Safety: output directory must be inside current working directory (unless allowOutsideCwd is set)
     const cwd = process.cwd();
@@ -355,7 +447,81 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
     // Create output directory structure
     await fs.mkdir(resolvedOutputDir, { recursive: true });
     await fs.mkdir(path.join(resolvedOutputDir, "fern"), { recursive: true });
+    await fs.mkdir(path.join(resolvedOutputDir, "fern", "assets"), { recursive: true });
     await fs.mkdir(path.join(resolvedOutputDir, "pages"), { recursive: true });
+
+    // Download and save branding assets (logo, favicon)
+    const localBranding: SiteBranding = { ...siteBranding };
+
+    if (siteBranding.logo) {
+        localBranding.logo = { href: siteBranding.logo.href };
+
+        // Download light logo
+        if (siteBranding.logo.light) {
+            const ext = getExtensionFromUrl(siteBranding.logo.light);
+            const lightLogoPath = `assets/logo-light.${ext}`;
+            const imageBuffer = await downloadImage(siteBranding.logo.light);
+            if (imageBuffer) {
+                await fs.writeFile(path.join(resolvedOutputDir, "fern", lightLogoPath), imageBuffer);
+                localBranding.logo.light = lightLogoPath;
+                writtenFiles.push(`fern/${lightLogoPath}`);
+                log(`  Downloaded light logo to ${lightLogoPath}`);
+            } else {
+                // Skip logo if download fails - don't include invalid URL in docs.yml
+                warnings.push(
+                    `Failed to download light logo from ${siteBranding.logo.light}, skipping logo in docs.yml`
+                );
+            }
+        }
+
+        // Download dark logo (only if different from light)
+        if (siteBranding.logo.dark && siteBranding.logo.dark !== siteBranding.logo.light) {
+            const ext = getExtensionFromUrl(siteBranding.logo.dark);
+            const darkLogoPath = `assets/logo-dark.${ext}`;
+            const imageBuffer = await downloadImage(siteBranding.logo.dark);
+            if (imageBuffer) {
+                await fs.writeFile(path.join(resolvedOutputDir, "fern", darkLogoPath), imageBuffer);
+                localBranding.logo.dark = darkLogoPath;
+                writtenFiles.push(`fern/${darkLogoPath}`);
+                log(`  Downloaded dark logo to ${darkLogoPath}`);
+            } else {
+                // Skip dark logo if download fails
+                warnings.push(
+                    `Failed to download dark logo from ${siteBranding.logo.dark}, skipping dark logo in docs.yml`
+                );
+            }
+        } else if (siteBranding.logo.dark === siteBranding.logo.light && localBranding.logo.light) {
+            // Same logo for both modes - reuse the light logo path
+            localBranding.logo.dark = localBranding.logo.light;
+        }
+
+        // If no logos were successfully downloaded, remove the logo object entirely
+        if (!localBranding.logo.light && !localBranding.logo.dark) {
+            localBranding.logo = undefined;
+        }
+    }
+
+    // Download favicon
+    if (siteBranding.favicon) {
+        const ext = getExtensionFromUrl(siteBranding.favicon);
+        const faviconPath = `assets/favicon.${ext}`;
+        const imageBuffer = await downloadImage(siteBranding.favicon);
+        if (imageBuffer) {
+            await fs.writeFile(path.join(resolvedOutputDir, "fern", faviconPath), imageBuffer);
+            localBranding.favicon = faviconPath;
+            writtenFiles.push(`fern/${faviconPath}`);
+            log(`  Downloaded favicon to ${faviconPath}`);
+        } else {
+            // Skip favicon if download fails - don't include invalid URL in docs.yml
+            localBranding.favicon = undefined;
+            warnings.push(`Failed to download favicon from ${siteBranding.favicon}, skipping favicon in docs.yml`);
+        }
+    }
+
+    // Copy accent color as-is
+    if (siteBranding.accentColor) {
+        localBranding.accentColor = siteBranding.accentColor;
+    }
 
     // Write markdown files (skip API reference pages - they only go to OpenAPI)
     for (const page of crawlResult.pages.values()) {
@@ -389,7 +555,8 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
     const docsYml = generateDocsYml(fernNavigation, {
         title: siteTitle,
         includeSchema: true,
-        siteId
+        siteId,
+        branding: localBranding
     });
     const docsYmlPath = path.join(resolvedOutputDir, "fern", "docs.yml");
     await fs.writeFile(docsYmlPath, docsYml, "utf-8");
@@ -433,8 +600,9 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
     writtenFiles.push("fern/generators.yml");
     log(`  Wrote generators.yml`);
 
-    // Step 7: Validate output with fern generate --docs --preview
-    log("\n[Step 7] Validating output with fern generate --docs --preview...");
+    // Step 9: Validate output with fern generate --docs --preview
+    log("\n[Step 9] Validating output with fern generate --docs --preview...");
+    onProgress?.({ stage: "step", step: 9, message: "Validating output..." });
     const fernDir = path.join(resolvedOutputDir, "fern");
     try {
         execSync("fern generate --docs --preview", {

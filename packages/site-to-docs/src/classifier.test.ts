@@ -1,20 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
-    aggregateNavigationSignals,
     buildClassificationPrompt,
     buildSectionClassificationPrompt,
     buildSiteStructurePrompt,
     deriveFromStructure,
-    detectVersion,
     enforceConsistency,
-    extractBreadcrumbPath,
+    extractNavigationStructure,
     extractPageContext,
-    extractSiteNavigationLinks,
     extractTextPreview,
     extractUrlPathSegments,
     extractUrlPrefix,
-    groupPagesByPrefix,
-    inferPageType
+    groupPagesByPrefix
 } from "./classifier.js";
 import type { PageNode, SiteStructure } from "./types.js";
 
@@ -89,278 +85,6 @@ describe("extractTextPreview", () => {
 });
 
 // ============================================================================
-// extractBreadcrumbPath tests
-// ============================================================================
-
-describe("extractBreadcrumbPath", () => {
-    it("extracts breadcrumbs from aria-label nav", () => {
-        const html = `
-            <nav aria-label="Breadcrumb">
-                <ol>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/docs">Docs</a></li>
-                    <li><a href="/docs/guides">Guides</a></li>
-                    <li>Current Page</li>
-                </ol>
-            </nav>
-        `;
-        const result = extractBreadcrumbPath(html);
-        expect(result).toEqual(["Home", "Docs", "Guides", "Current Page"]);
-    });
-
-    it("extracts breadcrumbs from .breadcrumb class", () => {
-        const html = `
-            <div class="breadcrumb">
-                <a href="/">Home</a> > 
-                <a href="/docs">Documentation</a> >
-                <span>Getting Started</span>
-            </div>
-        `;
-        const result = extractBreadcrumbPath(html);
-        expect(result).toContain("Home");
-        expect(result).toContain("Documentation");
-        expect(result).toContain("Getting Started");
-    });
-
-    it("extracts breadcrumbs from Schema.org BreadcrumbList", () => {
-        const html = `
-            <ol itemtype="https://schema.org/BreadcrumbList">
-                <li itemprop="itemListElement">
-                    <a itemprop="item"><span itemprop="name">Home</span></a>
-                </li>
-                <li itemprop="itemListElement">
-                    <a itemprop="item"><span itemprop="name">Products</span></a>
-                </li>
-            </ol>
-        `;
-        const result = extractBreadcrumbPath(html);
-        expect(result).toContain("Home");
-        expect(result).toContain("Products");
-    });
-
-    it("filters out separator characters", () => {
-        const html = `
-            <nav aria-label="breadcrumb">
-                <ol>
-                    <li><a>Home</a></li>
-                    <li>></li>
-                    <li><a>Docs</a></li>
-                    <li>/</li>
-                    <li>Page</li>
-                </ol>
-            </nav>
-        `;
-        const result = extractBreadcrumbPath(html);
-        expect(result).not.toContain(">");
-        expect(result).not.toContain("/");
-        expect(result).toContain("Home");
-        expect(result).toContain("Docs");
-    });
-
-    it("returns empty array when no breadcrumbs found", () => {
-        const html = "<html><body><h1>Just a page</h1></body></html>";
-        const result = extractBreadcrumbPath(html);
-        expect(result).toEqual([]);
-    });
-});
-
-// ============================================================================
-// extractSiteNavigationLinks tests
-// ============================================================================
-
-describe("extractSiteNavigationLinks", () => {
-    it("extracts links from header nav", () => {
-        const html = `
-            <header>
-                <nav>
-                    <a href="/guides">Guides</a>
-                    <a href="/api">API Reference</a>
-                    <a href="/sdks">SDKs</a>
-                </nav>
-            </header>
-        `;
-        const result = extractSiteNavigationLinks(html);
-        expect(result).toContain("Guides");
-        expect(result).toContain("API Reference");
-        expect(result).toContain("SDKs");
-    });
-
-    it("extracts links from role=navigation", () => {
-        const html = `
-            <div role="navigation">
-                <a href="/docs">Documentation</a>
-                <a href="/blog">Blog</a>
-            </div>
-        `;
-        const result = extractSiteNavigationLinks(html);
-        expect(result).toContain("Documentation");
-        expect(result).toContain("Blog");
-    });
-
-    it("filters out utility links", () => {
-        const html = `
-            <header>
-                <nav>
-                    <a href="/guides">Guides</a>
-                    <a href="/login">Login</a>
-                    <a href="/signup">Sign Up</a>
-                    <a href="/search">Search</a>
-                </nav>
-            </header>
-        `;
-        const result = extractSiteNavigationLinks(html);
-        expect(result).toContain("Guides");
-        expect(result).not.toContain("Login");
-        expect(result).not.toContain("Sign Up");
-        expect(result).not.toContain("Search");
-    });
-
-    it("deduplicates links", () => {
-        const html = `
-            <header>
-                <nav>
-                    <a href="/guides">Guides</a>
-                    <a href="/guides">guides</a>
-                </nav>
-            </header>
-        `;
-        const result = extractSiteNavigationLinks(html);
-        expect(result).toHaveLength(1);
-    });
-
-    it("returns empty array when no nav found", () => {
-        const html = "<html><body><p>No navigation here</p></body></html>";
-        const result = extractSiteNavigationLinks(html);
-        expect(result).toEqual([]);
-    });
-});
-
-// ============================================================================
-// detectVersion tests
-// ============================================================================
-
-describe("detectVersion", () => {
-    it("detects version from select dropdown", () => {
-        const html = `
-            <select class="version-selector">
-                <option value="v1">v1</option>
-                <option value="v2" selected>v2</option>
-            </select>
-        `;
-        const result = detectVersion(html);
-        expect(result).toBe("v2");
-    });
-
-    it("detects version from data-version attribute", () => {
-        const html = '<div data-version="v1.5">Content</div>';
-        const result = detectVersion(html);
-        expect(result).toBe("v1.5");
-    });
-
-    it("detects version from version badge", () => {
-        const html = '<span class="version-badge">v3.0.1</span>';
-        const result = detectVersion(html);
-        expect(result).toBe("v3.0.1");
-    });
-
-    it("detects latest as version", () => {
-        const html = '<span class="version-tag">Latest</span>';
-        const result = detectVersion(html);
-        expect(result).toBe("latest");
-    });
-
-    it("detects bare version numbers", () => {
-        const html = '<span class="version-badge">2.0</span>';
-        const result = detectVersion(html);
-        expect(result).toBe("2.0");
-    });
-
-    it("returns undefined when no version found", () => {
-        const html = "<html><body>No version info</body></html>";
-        const result = detectVersion(html);
-        expect(result).toBeUndefined();
-    });
-});
-
-// ============================================================================
-// inferPageType tests
-// ============================================================================
-
-describe("inferPageType", () => {
-    it("identifies reference pages with HTTP methods", () => {
-        const html = `
-            <html><body>
-                <h1>Get User</h1>
-                <pre>GET /users/{id}</pre>
-                <table>
-                    <tr><th>Parameter</th><th>Type</th></tr>
-                    <tr><td>id</td><td>string</td></tr>
-                </table>
-            </body></html>
-        `;
-        const result = inferPageType(html);
-        expect(result).toBe("reference");
-    });
-
-    it("identifies reference pages with endpoint paths", () => {
-        const html = `
-            <html><body>
-                <code>"/users/{user_id}"</code>
-                <pre>Response: { "id": "123" }</pre>
-                <pre>Request body</pre>
-                <pre>Headers</pre>
-            </body></html>
-        `;
-        const result = inferPageType(html);
-        expect(result).toBe("reference");
-    });
-
-    it("identifies guide pages with how-to content", () => {
-        const html = `
-            <html><body>
-                <h1>How to Set Up Authentication</h1>
-                <p>In this tutorial, we'll walk through setting up auth.</p>
-                <ol>
-                    <li>Step 1: Install the SDK</li>
-                    <li>Step 2: Configure credentials</li>
-                </ol>
-            </body></html>
-        `;
-        const result = inferPageType(html);
-        expect(result).toBe("guide");
-    });
-
-    it("identifies overview pages", () => {
-        const html = `
-            <html><body>
-                <h1>Welcome to Our Docs</h1>
-                <p>Introduction to our platform.</p>
-                <a href="/guide1">Guide 1</a>
-                <a href="/guide2">Guide 2</a>
-                <a href="/guide3">Guide 3</a>
-                <a href="/guide4">Guide 4</a>
-                <a href="/guide5">Guide 5</a>
-                <a href="/guide6">Guide 6</a>
-            </body></html>
-        `;
-        const result = inferPageType(html);
-        expect(result).toBe("overview");
-    });
-
-    it("returns unknown for ambiguous content", () => {
-        const html = `
-            <html><body>
-                <h1>Some Page</h1>
-                <p>This is just regular content without clear signals.</p>
-                <p>More content here.</p>
-            </body></html>
-        `;
-        const result = inferPageType(html);
-        expect(result).toBe("unknown");
-    });
-});
-
-// ============================================================================
 // extractUrlPathSegments tests
 // ============================================================================
 
@@ -417,7 +141,7 @@ describe("extractUrlPrefix", () => {
 // ============================================================================
 
 describe("extractPageContext", () => {
-    it("extracts full context from a page", () => {
+    it("extracts essential context from a page", () => {
         const page: PageNode = {
             url: "https://example.com/docs/guides/auth",
             slug: "docs/guides/auth",
@@ -425,22 +149,8 @@ describe("extractPageContext", () => {
             html: `
                 <html>
                 <body>
-                    <nav aria-label="breadcrumb">
-                        <ol>
-                            <li><a>Home</a></li>
-                            <li><a>Docs</a></li>
-                            <li><a>Guides</a></li>
-                        </ol>
-                    </nav>
-                    <header>
-                        <nav>
-                            <a href="/guides">Guides</a>
-                            <a href="/api">API</a>
-                        </nav>
-                    </header>
-                    <span class="version-badge">v2</span>
                     <h1>How to Set Up Authentication</h1>
-                    <ol><li>Step 1</li><li>Step 2</li></ol>
+                    <p>This guide explains authentication.</p>
                 </body>
                 </html>
             `,
@@ -452,12 +162,7 @@ describe("extractPageContext", () => {
         expect(context.url).toBe("https://example.com/docs/guides/auth");
         expect(context.urlPathSegments).toEqual(["docs", "guides", "auth"]);
         expect(context.pageTitle).toBe("Authentication Guide");
-        expect(context.breadcrumbPath).toContain("Docs");
-        expect(context.breadcrumbPath).toContain("Guides");
-        expect(context.siteNavigationLinks).toContain("Guides");
-        expect(context.siteNavigationLinks).toContain("API");
-        expect(context.detectedVersion).toBe("v2");
-        expect(context.inferredPageType).toBe("guide");
+        expect(context.contentSnippet).toContain("authentication");
     });
 });
 
@@ -650,20 +355,12 @@ describe("buildClassificationPrompt", () => {
                 url: "https://example.com/docs/intro",
                 urlPathSegments: ["docs", "intro"],
                 pageTitle: "Introduction",
-                breadcrumbPath: ["Docs", "Intro"],
-                siteNavigationLinks: ["Guides", "API"],
-                detectedVersion: undefined,
-                inferredPageType: "guide" as const,
                 contentSnippet: "Welcome to the docs"
             },
             {
                 url: "https://example.com/docs/setup",
                 urlPathSegments: ["docs", "setup"],
                 pageTitle: "Setup",
-                breadcrumbPath: ["Docs", "Setup"],
-                siteNavigationLinks: ["Guides", "API"],
-                detectedVersion: undefined,
-                inferredPageType: "guide" as const,
                 contentSnippet: "How to set up"
             }
         ];
@@ -679,10 +376,6 @@ describe("buildClassificationPrompt", () => {
                 url: "https://example.com/docs/auth",
                 urlPathSegments: ["docs", "auth"],
                 pageTitle: "Authentication",
-                breadcrumbPath: [],
-                siteNavigationLinks: [],
-                detectedVersion: undefined,
-                inferredPageType: "guide" as const,
                 contentSnippet: "How to authenticate"
             }
         ];
@@ -693,54 +386,12 @@ describe("buildClassificationPrompt", () => {
         expect(prompt).toContain("Authentication");
     });
 
-    it("includes breadcrumbs when present", () => {
-        const contexts = [
-            {
-                url: "https://example.com/docs/auth",
-                urlPathSegments: ["docs", "auth"],
-                pageTitle: "Auth",
-                breadcrumbPath: ["Home", "Docs", "Authentication"],
-                siteNavigationLinks: [],
-                detectedVersion: undefined,
-                inferredPageType: "guide" as const,
-                contentSnippet: "Content"
-            }
-        ];
-
-        const prompt = buildClassificationPrompt(contexts);
-
-        expect(prompt).toContain("Breadcrumbs: Home > Docs > Authentication");
-    });
-
-    it("includes page type hint", () => {
-        const contexts = [
-            {
-                url: "https://example.com/docs/auth",
-                urlPathSegments: ["docs", "auth"],
-                pageTitle: "Auth",
-                breadcrumbPath: [],
-                siteNavigationLinks: ["Guides", "API Reference", "SDKs"],
-                detectedVersion: undefined,
-                inferredPageType: "guide" as const,
-                contentSnippet: "Content"
-            }
-        ];
-
-        const prompt = buildClassificationPrompt(contexts);
-
-        expect(prompt).toContain("Page type hint: guide");
-    });
-
     it("includes content preview", () => {
         const contexts = [
             {
                 url: "https://example.com/docs/auth",
                 urlPathSegments: ["docs", "auth"],
                 pageTitle: "Auth",
-                breadcrumbPath: [],
-                siteNavigationLinks: [],
-                detectedVersion: "v2",
-                inferredPageType: "guide" as const,
                 contentSnippet: "Authentication content here"
             }
         ];
@@ -756,10 +407,6 @@ describe("buildClassificationPrompt", () => {
                 url: "https://example.com/docs/page",
                 urlPathSegments: ["docs", "page"],
                 pageTitle: "Page",
-                breadcrumbPath: [],
-                siteNavigationLinks: [],
-                detectedVersion: undefined,
-                inferredPageType: "unknown" as const,
                 contentSnippet: "Content"
             }
         ];
@@ -772,127 +419,174 @@ describe("buildClassificationPrompt", () => {
 });
 
 // ============================================================================
-// Phase 1: aggregateNavigationSignals tests
+// extractNavigationStructure tests
 // ============================================================================
 
-describe("aggregateNavigationSignals", () => {
-    function createPageWithHtml(url: string, html: string): PageNode {
-        return {
-            url,
-            slug: url.replace("https://example.com/", ""),
-            title: "Page",
-            html,
-            children: []
-        };
-    }
+describe("extractNavigationStructure", () => {
+    it("extracts sections from structural patterns (text before ul)", () => {
+        const html = `
+            <div>
+                <strong>API Reference</strong>
+                <ul>
+                    <li><a href="/api/users">Users</a></li>
+                    <li><a href="/api/posts">Posts</a></li>
+                </ul>
+            </div>
+        `;
 
-    it("aggregates breadcrumb roots from all pages", () => {
-        const pages = new Map<string, PageNode>([
-            [
-                "https://example.com/guides/intro",
-                createPageWithHtml(
-                    "https://example.com/guides/intro",
-                    `<nav aria-label="breadcrumb"><ol><li><a>Home</a></li><li><a>Guides</a></li></ol></nav>`
-                )
-            ],
-            [
-                "https://example.com/api/users",
-                createPageWithHtml(
-                    "https://example.com/api/users",
-                    `<nav aria-label="breadcrumb"><ol><li><a>Home</a></li><li><a>API Reference</a></li></ol></nav>`
-                )
-            ]
-        ]);
+        const result = extractNavigationStructure(html, "https://example.com");
 
-        const signals = aggregateNavigationSignals(pages);
-
-        expect(signals.uniqueBreadcrumbRoots).toContain("Guides");
-        expect(signals.uniqueBreadcrumbRoots).toContain("API Reference");
+        expect(result.urlToSection.size).toBe(2);
+        expect(result.urlToSection.get("/api/users")).toBe("API Reference");
+        expect(result.urlToSection.get("/api/posts")).toBe("API Reference");
     });
 
-    it("aggregates nav links from all pages", () => {
-        const pages = new Map<string, PageNode>([
-            [
-                "https://example.com/page1",
-                createPageWithHtml(
-                    "https://example.com/page1",
-                    `<header><nav><a href="/guides">Guides</a><a href="/api">API</a></nav></header>`
-                )
-            ],
-            [
-                "https://example.com/page2",
-                createPageWithHtml(
-                    "https://example.com/page2",
-                    `<header><nav><a href="/guides">Guides</a><a href="/sdks">SDKs</a></nav></header>`
-                )
-            ]
-        ]);
+    it("resolves relative URLs correctly", () => {
+        const html = `
+            <div>Getting Started</div>
+            <ul>
+                <li><a href="intro">Introduction</a></li>
+                <li><a href="../other">Other</a></li>
+            </ul>
+        `;
 
-        const signals = aggregateNavigationSignals(pages);
+        const result = extractNavigationStructure(html, "https://example.com/docs/page");
 
-        expect(signals.uniqueNavLinks).toContain("Guides");
-        expect(signals.uniqueNavLinks).toContain("API");
-        expect(signals.uniqueNavLinks).toContain("SDKs");
+        expect(result.urlToSection.get("/docs/intro")).toBe("Getting Started");
+        expect(result.urlToSection.get("/other")).toBe("Getting Started");
     });
 
-    it("aggregates detected versions from all pages", () => {
-        const pages = new Map<string, PageNode>([
-            [
-                "https://example.com/v1/page",
-                createPageWithHtml("https://example.com/v1/page", `<span class="version-badge">v1</span>`)
-            ],
-            [
-                "https://example.com/v2/page",
-                createPageWithHtml("https://example.com/v2/page", `<span class="version-badge">v2</span>`)
-            ]
-        ]);
+    it("ignores hash and javascript links", () => {
+        const html = `
+            <strong>Section</strong>
+            <ul>
+                <li><a href="#section">Anchor</a></li>
+                <li><a href="javascript:void(0)">Script</a></li>
+                <li><a href="/real-page">Real Page</a></li>
+            </ul>
+        `;
 
-        const signals = aggregateNavigationSignals(pages);
+        const result = extractNavigationStructure(html, "https://example.com");
 
-        expect(signals.uniqueVersions).toContain("v1");
-        expect(signals.uniqueVersions).toContain("v2");
+        expect(result.urlToSection.size).toBe(1);
+        expect(result.urlToSection.get("/real-page")).toBe("Section");
     });
 
-    it("deduplicates signals", () => {
-        const pages = new Map<string, PageNode>([
-            [
-                "https://example.com/page1",
-                createPageWithHtml(
-                    "https://example.com/page1",
-                    `<header><nav><a href="/guides">Guides</a></nav></header><span class="version-badge">v1</span>`
-                )
-            ],
-            [
-                "https://example.com/page2",
-                createPageWithHtml(
-                    "https://example.com/page2",
-                    `<header><nav><a href="/guides">Guides</a></nav></header><span class="version-badge">v1</span>`
-                )
-            ]
-        ]);
+    it("returns empty map when no sections found", () => {
+        const html = `<html><body><p>No navigation here</p></body></html>`;
 
-        const signals = aggregateNavigationSignals(pages);
+        const result = extractNavigationStructure(html, "https://example.com");
 
-        expect(signals.uniqueNavLinks.filter((l) => l === "Guides")).toHaveLength(1);
-        expect(signals.uniqueVersions.filter((v) => v === "v1")).toHaveLength(1);
+        expect(result.urlToSection.size).toBe(0);
+        expect(result.hints.sections).toHaveLength(0);
     });
 
-    it("limits sample breadcrumb paths to 20", () => {
-        const pages = new Map<string, PageNode>();
-        for (let i = 0; i < 30; i++) {
-            const url = `https://example.com/page-${i}`;
-            pages.set(
-                url,
-                createPageWithHtml(
-                    url,
-                    `<nav aria-label="breadcrumb"><ol><li><a>Home</a></li><li><a>Section ${i}</a></li></ol></nav>`
-                )
-            );
-        }
+    it("does not duplicate URLs across sections", () => {
+        const html = `
+            <strong>First</strong>
+            <ul>
+                <li><a href="/page">Page</a></li>
+            </ul>
+            <strong>Second</strong>
+            <ul>
+                <li><a href="/page">Same Page</a></li>
+            </ul>
+        `;
 
-        const signals = aggregateNavigationSignals(pages);
+        const result = extractNavigationStructure(html, "https://example.com");
 
-        expect(signals.sampleBreadcrumbPaths.length).toBeLessThanOrEqual(20);
+        // Should only have one entry - first one wins
+        expect(result.urlToSection.size).toBe(1);
+        expect(result.urlToSection.get("/page")).toBe("First");
+    });
+
+    it("extracts sections from div containers with multiple links (card groups)", () => {
+        const html = `
+            <h2>Get Started</h2>
+            <div class="card-group">
+                <a href="/quickstart">Quickstart</a>
+                <a href="/overview">Overview</a>
+            </div>
+        `;
+
+        const result = extractNavigationStructure(html, "https://example.com");
+
+        expect(result.urlToSection.size).toBe(2);
+        expect(result.urlToSection.get("/quickstart")).toBe("Get Started");
+        expect(result.urlToSection.get("/overview")).toBe("Get Started");
+    });
+
+    it("requires at least 2 links for div containers to avoid false positives", () => {
+        const html = `
+            <h2>Single Link Section</h2>
+            <div>
+                <a href="/only-one">Only One Link</a>
+            </div>
+        `;
+
+        const result = extractNavigationStructure(html, "https://example.com");
+
+        // Should not match - only 1 link in div
+        expect(result.urlToSection.size).toBe(0);
+    });
+
+    // Tests for ordering preservation
+    it("preserves section order in hints", () => {
+        const html = `
+            <strong>First Section</strong>
+            <ul>
+                <li><a href="/a">Page A</a></li>
+            </ul>
+            <strong>Second Section</strong>
+            <ul>
+                <li><a href="/b">Page B</a></li>
+            </ul>
+            <strong>Third Section</strong>
+            <ul>
+                <li><a href="/c">Page C</a></li>
+            </ul>
+        `;
+
+        const result = extractNavigationStructure(html, "https://example.com");
+
+        expect(result.hints.sections).toEqual(["First Section", "Second Section", "Third Section"]);
+    });
+
+    it("preserves URL order within sections", () => {
+        const html = `
+            <strong>API Reference</strong>
+            <ul>
+                <li><a href="/api/users">Users</a></li>
+                <li><a href="/api/posts">Posts</a></li>
+                <li><a href="/api/comments">Comments</a></li>
+            </ul>
+        `;
+
+        const result = extractNavigationStructure(html, "https://example.com");
+
+        const urls = result.hints.pagesBySection.get("API Reference");
+        expect(urls).toEqual(["/api/users", "/api/posts", "/api/comments"]);
+    });
+
+    it("tracks URLs per section correctly with multiple sections", () => {
+        const html = `
+            <strong>Getting Started</strong>
+            <ul>
+                <li><a href="/intro">Introduction</a></li>
+                <li><a href="/quickstart">Quickstart</a></li>
+            </ul>
+            <strong>Advanced</strong>
+            <ul>
+                <li><a href="/config">Configuration</a></li>
+                <li><a href="/plugins">Plugins</a></li>
+            </ul>
+        `;
+
+        const result = extractNavigationStructure(html, "https://example.com");
+
+        expect(result.hints.sections).toEqual(["Getting Started", "Advanced"]);
+        expect(result.hints.pagesBySection.get("Getting Started")).toEqual(["/intro", "/quickstart"]);
+        expect(result.hints.pagesBySection.get("Advanced")).toEqual(["/config", "/plugins"]);
     });
 });
 
@@ -901,18 +595,10 @@ describe("aggregateNavigationSignals", () => {
 // ============================================================================
 
 describe("buildSiteStructurePrompt", () => {
-    const baseSignals = {
-        uniqueBreadcrumbRoots: [],
-        uniqueNavLinks: [],
-        uniqueVersions: [],
-        sampleBreadcrumbPaths: [],
-        sidebarSignals: []
-    };
-
     it("includes all URLs in prompt", () => {
         const urls = ["/guides/intro", "/guides/setup", "/api/users"];
 
-        const prompt = buildSiteStructurePrompt(urls, baseSignals);
+        const prompt = buildSiteStructurePrompt(urls);
 
         expect(prompt).toContain("/guides/intro");
         expect(prompt).toContain("/guides/setup");
@@ -922,80 +608,83 @@ describe("buildSiteStructurePrompt", () => {
     it("includes page count", () => {
         const urls = Array.from({ length: 50 }, (_, i) => `/page-${i}`);
 
-        const prompt = buildSiteStructurePrompt(urls, baseSignals);
+        const prompt = buildSiteStructurePrompt(urls);
 
         expect(prompt).toContain("50 pages");
-    });
-
-    it("includes aggregated nav signals", () => {
-        const urls = ["/page"];
-        const signals = {
-            ...baseSignals,
-            uniqueBreadcrumbRoots: ["Guides", "API Reference"],
-            uniqueNavLinks: ["Documentation", "Blog"],
-            uniqueVersions: ["v1", "v2"],
-            sampleBreadcrumbPaths: [["Home", "Guides", "Intro"]]
-        };
-
-        const prompt = buildSiteStructurePrompt(urls, signals);
-
-        expect(prompt).toContain("Guides, API Reference");
-        expect(prompt).toContain("Documentation, Blog");
-        expect(prompt).toContain("v1, v2");
-        expect(prompt).toContain("Home > Guides > Intro");
     });
 
     it("truncates URLs beyond 100", () => {
         const urls = Array.from({ length: 150 }, (_, i) => `/page-${i}`);
 
-        const prompt = buildSiteStructurePrompt(urls, baseSignals);
+        const prompt = buildSiteStructurePrompt(urls);
 
         expect(prompt).toContain("150 pages");
         expect(prompt).toContain("and 50 more pages");
     });
 
-    it("includes sidebar signals in prompt", () => {
+    it("includes entry point URL when provided", () => {
         const urls = ["/docs/intro", "/docs/setup"];
-        const signals = {
-            ...baseSignals,
-            sidebarSignals: [
-                {
-                    url: "https://example.com/docs/intro",
-                    links: [
-                        { text: "Introduction", href: "https://example.com/docs/intro" },
-                        { text: "Setup", href: "https://example.com/docs/setup" }
-                    ]
-                }
-            ]
-        };
 
-        const prompt = buildSiteStructurePrompt(urls, signals);
+        const prompt = buildSiteStructurePrompt(urls, "/docs/intro");
 
-        expect(prompt).toContain("SIDEBAR NAVIGATION ORDER");
-        expect(prompt).toContain("https://example.com/docs/intro");
-        expect(prompt).toContain("Introduction");
+        expect(prompt).toContain("ENTRY POINT URL: /docs/intro");
     });
 
-    it("includes navigation links grouped by URL prefix", () => {
-        const urls = ["/docs/intro", "/api/users"];
-        const signals = {
-            ...baseSignals,
-            sidebarSignals: [
-                {
-                    url: "https://example.com/docs/intro",
-                    links: [
-                        { text: "Introduction", href: "https://example.com/docs/intro" },
-                        { text: "Users API", href: "https://example.com/api/users" }
-                    ]
-                }
-            ]
+    it("shows top-level URL segments", () => {
+        const urls = ["/docs/intro", "/api/users", "/guides/setup"];
+
+        const prompt = buildSiteStructurePrompt(urls);
+
+        expect(prompt).toContain("TOP-LEVEL URL SEGMENTS:");
+        expect(prompt).toContain("docs");
+        expect(prompt).toContain("api");
+        expect(prompt).toContain("guides");
+    });
+
+    it("includes navigation hints when provided", () => {
+        const urls = ["/intro", "/quickstart", "/api/users"];
+        const hints = {
+            sections: ["Getting Started", "API Reference"],
+            pagesBySection: new Map([
+                ["Getting Started", ["/intro", "/quickstart"]],
+                ["API Reference", ["/api/users"]]
+            ])
         };
 
-        const prompt = buildSiteStructurePrompt(urls, signals);
+        const prompt = buildSiteStructurePrompt(urls, undefined, hints);
 
-        expect(prompt).toContain("ALL NAVIGATION LINKS");
-        expect(prompt).toContain("/docs/");
-        expect(prompt).toContain("/api/");
+        expect(prompt).toContain("NAVIGATION ORDER HINTS");
+        expect(prompt).toContain("Sections in order: Getting Started, API Reference");
+        expect(prompt).toContain('Pages in "Getting Started": /intro, /quickstart');
+        expect(prompt).toContain('Pages in "API Reference": /api/users');
+    });
+
+    it("omits navigation hints section when hints are empty", () => {
+        const urls = ["/intro", "/quickstart"];
+        const emptyHints = {
+            sections: [],
+            pagesBySection: new Map()
+        };
+
+        const prompt = buildSiteStructurePrompt(urls, undefined, emptyHints);
+
+        // Should not contain the "from HTML structure" hints section (but may mention hints in instructions)
+        expect(prompt).not.toContain("from HTML structure");
+        expect(prompt).not.toContain("Sections in order:");
+    });
+
+    it("truncates navigation hints for many sections", () => {
+        const urls = ["/page"];
+        const sections = Array.from({ length: 15 }, (_, i) => `Section ${i}`);
+        const hints = {
+            sections: sections,
+            pagesBySection: new Map(sections.map((s) => [s, [`/${s.toLowerCase().replace(" ", "-")}`]]))
+        };
+
+        const prompt = buildSiteStructurePrompt(urls, undefined, hints);
+
+        expect(prompt).toContain("NAVIGATION ORDER HINTS");
+        expect(prompt).toContain("and 5 more sections");
     });
 });
 
@@ -1080,14 +769,9 @@ describe("buildSectionClassificationPrompt", () => {
                 url: "https://example.com/platform/guides/intro",
                 urlPathSegments: ["platform", "guides", "intro"],
                 pageTitle: "Introduction",
-                breadcrumbPath: [],
-                siteNavigationLinks: [],
-                detectedVersion: undefined,
-                inferredPageType: "guide" as const,
                 contentSnippet: "Welcome",
                 derivedProduct: "Platform",
                 derivedVersion: undefined
-                // Note: derivedTab removed - tabs assigned by LLM in Phase 2
             }
         ];
 
@@ -1107,14 +791,9 @@ describe("buildSectionClassificationPrompt", () => {
                 url: "https://example.com/platform/v-2/guides/auth",
                 urlPathSegments: ["platform", "v-2", "guides", "auth"],
                 pageTitle: "Auth",
-                breadcrumbPath: [],
-                siteNavigationLinks: [],
-                detectedVersion: "v2",
-                inferredPageType: "guide" as const,
                 contentSnippet: "Auth content",
                 derivedProduct: "Platform",
                 derivedVersion: "v2"
-                // Note: derivedTab is no longer used - tabs are assigned by LLM in Phase 2
             }
         ];
 
@@ -1130,10 +809,6 @@ describe("buildSectionClassificationPrompt", () => {
                 url: "https://example.com/page",
                 urlPathSegments: ["page"],
                 pageTitle: "Page",
-                breadcrumbPath: [],
-                siteNavigationLinks: [],
-                detectedVersion: undefined,
-                inferredPageType: "unknown" as const,
                 contentSnippet: "Content"
             }
         ];

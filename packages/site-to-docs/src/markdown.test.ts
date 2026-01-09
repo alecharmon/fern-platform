@@ -17,11 +17,11 @@ describe("extractMainContent", () => {
             </body>
             </html>
         `;
-        const content = extractMainContent(html);
+        const result = extractMainContent(html);
         // Readability wraps in a page div
-        expect(content).toContain("readability-page-1");
-        expect(content).toContain("Title");
-        expect(content).toContain("Content");
+        expect(result.html).toContain("readability-page-1");
+        expect(result.html).toContain("Title");
+        expect(result.html).toContain("Content");
     });
 
     it("should remove script tags", () => {
@@ -33,8 +33,8 @@ describe("extractMainContent", () => {
             </body>
             </html>
         `;
-        const content = extractMainContent(html);
-        expect(content).not.toContain("console.log");
+        const result = extractMainContent(html);
+        expect(result.html).not.toContain("console.log");
     });
 
     it("should remove style tags", () => {
@@ -46,8 +46,8 @@ describe("extractMainContent", () => {
             </body>
             </html>
         `;
-        const content = extractMainContent(html);
-        expect(content).not.toContain("color: red");
+        const result = extractMainContent(html);
+        expect(result.html).not.toContain("color: red");
     });
 
     it("should handle pages with sufficient content for readability analysis", () => {
@@ -69,53 +69,53 @@ describe("extractMainContent", () => {
             </body>
             </html>
         `;
-        const content = extractMainContent(html);
-        expect(content).toContain("Main Article Title");
-        expect(content).toContain("first paragraph");
+        const result = extractMainContent(html);
+        expect(result.html).toContain("Main Article Title");
+        expect(result.html).toContain("first paragraph");
     });
 
     it("should return body content as fallback for minimal HTML", () => {
         // For very minimal HTML, Readability may return null and we fall back to body
         const html = "<body><p>Simple</p></body>";
-        const content = extractMainContent(html);
-        expect(content).toContain("Simple");
+        const result = extractMainContent(html);
+        expect(result.html).toContain("Simple");
     });
 });
 
 describe("htmlToMarkdown", () => {
     it("should convert simple HTML to markdown", async () => {
         const html = "<h1>Title</h1><p>Paragraph</p>";
-        const markdown = await htmlToMarkdown(html);
-        expect(markdown).toContain("Title");
-        expect(markdown).toContain("Paragraph");
+        const result = await htmlToMarkdown(html);
+        expect(result.markdown).toContain("Title");
+        expect(result.markdown).toContain("Paragraph");
     });
 
     it("should convert links to markdown", async () => {
         const html = '<p>Click <a href="https://example.com">here</a></p>';
-        const markdown = await htmlToMarkdown(html);
+        const result = await htmlToMarkdown(html);
         // Link text and URL should be present
-        expect(markdown).toContain("here");
-        expect(markdown).toContain("example.com");
+        expect(result.markdown).toContain("here");
+        expect(result.markdown).toContain("example.com");
     });
 
     it("should convert code blocks", async () => {
         const html = "<pre><code>const x = 1;</code></pre>";
-        const markdown = await htmlToMarkdown(html);
-        expect(markdown).toContain("const x = 1;");
+        const result = await htmlToMarkdown(html);
+        expect(result.markdown).toContain("const x = 1;");
     });
 
     it("should convert lists", async () => {
         const html = "<ul><li>Item 1</li><li>Item 2</li></ul>";
-        const markdown = await htmlToMarkdown(html);
-        expect(markdown).toContain("Item 1");
-        expect(markdown).toContain("Item 2");
+        const result = await htmlToMarkdown(html);
+        expect(result.markdown).toContain("Item 1");
+        expect(result.markdown).toContain("Item 2");
     });
 
     it("should handle empty HTML", async () => {
         const html = "";
-        const markdown = await htmlToMarkdown(html);
+        const result = await htmlToMarkdown(html);
         // Empty HTML produces empty markdown (trimmed)
-        expect(markdown.trim()).toBe("");
+        expect(result.markdown.trim()).toBe("");
     });
 });
 
@@ -183,27 +183,27 @@ describe("htmlToMarkdown with fixture", () => {
         const fixturePath = path.join(__dirname, "fixtures", "fern-docs-acmeco-platform-concepts.html");
         const html = await fs.readFile(fixturePath, "utf-8");
 
-        const markdown = await htmlToMarkdown(html);
+        const result = await htmlToMarkdown(html);
 
         // Should produce non-empty markdown
-        expect(markdown.length).toBeGreaterThan(100);
+        expect(result.markdown.length).toBeGreaterThan(100);
 
         // Should not contain raw HTML tags in output
-        expect(markdown).not.toContain("<script");
-        expect(markdown).not.toContain("<style");
+        expect(result.markdown).not.toContain("<script");
+        expect(result.markdown).not.toContain("<style");
     });
 
     it("should extract main content from real page and not include navigation", async () => {
         const fixturePath = path.join(__dirname, "fixtures", "fern-docs-acmeco-platform-concepts.html");
         const html = await fs.readFile(fixturePath, "utf-8");
 
-        const markdown = await htmlToMarkdown(html);
+        const result = await htmlToMarkdown(html);
 
         // Should contain actual article content
-        expect(markdown).toContain("Plant");
+        expect(result.markdown).toContain("Plant");
 
         // Readability should strip navigation elements - these are sidebar nav items
         // Note: Exact behavior depends on Readability's analysis of the page structure
-        expect(markdown.length).toBeLessThan(html.length / 2); // Markdown should be much smaller than raw HTML
+        expect(result.markdown.length).toBeLessThan(html.length / 2); // Markdown should be much smaller than raw HTML
     });
 });

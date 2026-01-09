@@ -219,21 +219,37 @@ export interface ConversionResult {
 }
 
 // ============================================================================
+// Navigation Structure Extraction
+// Types for preserving page/section order extracted from HTML navigation.
+// ============================================================================
+
+/**
+ * Navigation structure hints extracted from HTML.
+ * These are heuristics - the LLM may choose to deviate from them.
+ */
+export interface NavigationHints {
+    /** Sections in their intended display order */
+    sections: string[];
+    /** Page URLs per section, in their intended display order */
+    pagesBySection: Map<string, string[]>;
+}
+
+/**
+ * Result of extracting navigation structure from HTML.
+ * Includes both the URL-to-section mapping and navigation hints.
+ */
+export interface NavigationExtractionResult {
+    /** Map of URL pathname to section name (for quick lookup) */
+    urlToSection: Map<string, string>;
+    /** Navigation structure hints for LLM ordering */
+    hints: NavigationHints;
+}
+
+// ============================================================================
 // Site Structure Types (Phase 1 Output)
 // These types capture the global structure discovered by analyzing all URLs
 // and navigation signals from the entire site.
 // ============================================================================
-
-/**
- * Represents an ordered navigation link extracted from a sidebar.
- * Preserves both the display text and the href for matching against page URLs.
- */
-export interface OrderedNavLink {
-    /** Display text of the navigation link */
-    text: string;
-    /** Absolute URL the link points to */
-    href: string;
-}
 
 /**
  * Represents the page ordering for a specific navigation context.
@@ -274,6 +290,8 @@ export interface DiscoveredTab {
     name: string;
     /** URL pattern or keyword that identifies this tab */
     urlPattern?: string;
+    /** Font Awesome icon name (e.g., "book", "code", "puzzle") */
+    icon?: string;
 }
 
 /**
@@ -289,44 +307,14 @@ export interface SiteStructure {
     tabs: DiscoveredTab[];
     /** LLM-decided page orderings per navigation context */
     contextOrderings: ContextOrdering[];
-}
-
-/**
- * Sidebar signal from a single page, containing ordered navigation links.
- */
-export interface SidebarSignal {
-    /** URL of the page this sidebar was extracted from */
-    url: string;
-    /** Ordered navigation links from the sidebar */
-    links: OrderedNavLink[];
-}
-
-/**
- * Aggregated navigation signals from all pages.
- * Used as input to Phase 1 structure analysis.
- */
-export interface AggregatedSignals {
-    /** All unique breadcrumb paths found (top-level items) */
-    uniqueBreadcrumbRoots: string[];
-    /** All unique site navigation links found */
-    uniqueNavLinks: string[];
-    /** All unique versions detected */
-    uniqueVersions: string[];
-    /** Sample of full breadcrumb paths for context */
-    sampleBreadcrumbPaths: string[][];
-    /** Ordered sidebar links per page for navigation ordering */
-    sidebarSignals: SidebarSignal[];
+    /** Section names in their intended display order (from HTML navigation hints) */
+    sectionOrder?: string[];
 }
 
 // ============================================================================
 // Page Context for Classification
 // These types are used by the classifier to provide rich signals per page.
 // ============================================================================
-
-/**
- * Heuristic page type inferred from content patterns.
- */
-export type PageType = "guide" | "reference" | "overview" | "unknown";
 
 /**
  * Rich context extracted from a page for classification.
@@ -343,20 +331,54 @@ export interface PageContext {
     // === HTML-derived: Basic metadata ===
     /** Page title from <title> or <h1> */
     pageTitle: string;
+    /** Page description from meta description tag */
+    pageDescription?: string;
 
-    // === HTML-derived: Navigation structure ===
-    /** Breadcrumb trail showing page hierarchy: ["Home", "Docs", "Guides", "Overview"] */
-    breadcrumbPath: string[];
-    /** Top-level navigation links visible on the page: ["Guides", "API Reference", "SDKs"] */
-    siteNavigationLinks: string[];
-    /** Version detected from selector/badge on the page: "v2" */
-    detectedVersion: string | undefined;
-
-    // === HTML-derived: Content analysis ===
-    /** Heuristic guess at page type based on content patterns */
-    inferredPageType: PageType;
+    // === HTML-derived: Navigation section ===
+    /** Section name extracted from navigation (e.g., "Tutorials", "Capabilities") */
+    navSection?: string;
 
     // === Content preview ===
     /** Truncated text content for LLM context */
     contentSnippet: string;
+}
+
+// ============================================================================
+// Site Branding Types
+// Types for extracted logo and color information from the site.
+// ============================================================================
+
+/**
+ * Logo configuration extracted from a site.
+ */
+export interface SiteLogo {
+    /** URL to link to when logo is clicked (typically the site root) */
+    href?: string;
+    /** Path to light mode logo image */
+    light?: string;
+    /** Path to dark mode logo image */
+    dark?: string;
+}
+
+/**
+ * Accent color configuration with light and dark mode variants.
+ */
+export interface AccentColor {
+    /** Hex color for light mode (e.g., "#635BFF") */
+    light?: string;
+    /** Hex color for dark mode (e.g., "#9B90FF") */
+    dark?: string;
+}
+
+/**
+ * Site branding information extracted from HTML.
+ * Used to configure logo and colors in generated docs.yml.
+ */
+export interface SiteBranding {
+    /** Logo configuration */
+    logo?: SiteLogo;
+    /** Path to favicon */
+    favicon?: string;
+    /** Primary accent color for the site */
+    accentColor?: AccentColor;
 }

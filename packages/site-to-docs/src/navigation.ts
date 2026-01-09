@@ -1,6 +1,7 @@
 import type {
     ContextOrdering,
     CrawlResult,
+    DiscoveredTab,
     FernNavigation,
     FernNavigationItem,
     FernProduct,
@@ -27,6 +28,8 @@ interface StructureAnalysis {
 
 /**
  * Analyzes the structure of crawled pages to determine what navigation elements are needed.
+ * Only includes pages that have markdown content (filters out soft 404s).
+ * API reference pages are still counted even without markdown (they're handled via OpenAPI).
  */
 function analyzeStructure(pages: Map<string, PageNode>): StructureAnalysis {
     const products = new Set<string>();
@@ -40,6 +43,17 @@ function analyzeStructure(pages: Map<string, PageNode>): StructureAnalysis {
             continue;
         }
 
+        // API reference pages are handled separately via OpenAPI, count them regardless of markdown
+        if (classification.isApiReference) {
+            hasApiReference = true;
+            continue;
+        }
+
+        // Skip pages without markdown (soft 404s or failed conversions)
+        if (!page.markdown) {
+            continue;
+        }
+
         if (classification.product) {
             products.add(classification.product);
         }
@@ -48,9 +62,6 @@ function analyzeStructure(pages: Map<string, PageNode>): StructureAnalysis {
         }
         if (classification.tab) {
             tabs.add(classification.tab);
-        }
-        if (classification.isApiReference) {
-            hasApiReference = true;
         }
     }
 
@@ -74,6 +85,7 @@ interface PagesByHierarchy {
 
 /**
  * Groups pages by their product, version, tab, and section.
+ * Only includes pages that have markdown content (filters out soft 404s).
  */
 function groupPagesByHierarchy(pages: Map<string, PageNode>): PagesByHierarchy {
     const byProduct = new Map<string, Map<string, Map<string, Map<string, PageNode[]>>>>();
@@ -87,6 +99,11 @@ function groupPagesByHierarchy(pages: Map<string, PageNode>): PagesByHierarchy {
 
         // Skip API reference pages - they get their own section
         if (classification.isApiReference) {
+            continue;
+        }
+
+        // Skip pages without markdown (soft 404s or failed conversions)
+        if (!page.markdown) {
             continue;
         }
 
@@ -137,6 +154,7 @@ function buildContextKey(product?: string, version?: string, tab?: string): stri
 /**
  * Looks up the ordered URLs for a given context from contextOrderings.
  * Falls back to more general contexts if exact match not found.
+ * As a last resort, merges all orderings to preserve some ordering information.
  */
 function getOrderedUrlsForContext(
     contextOrderings: ContextOrdering[],
@@ -169,6 +187,24 @@ function getOrderedUrlsForContext(
     const globalMatch = contextOrderings.find((co) => co.contextKey === "");
     if (globalMatch && globalMatch.orderedUrls.length > 0) {
         return globalMatch.orderedUrls;
+    }
+
+    // Fallback: merge all orderings (preserves some ordering even if context keys don't match)
+    // This handles cases where LLM creates per-tab orderings instead of a global one
+    if (contextOrderings.length > 0) {
+        const seen = new Set<string>();
+        const merged: string[] = [];
+        for (const co of contextOrderings) {
+            for (const url of co.orderedUrls) {
+                if (!seen.has(url)) {
+                    seen.add(url);
+                    merged.push(url);
+                }
+            }
+        }
+        if (merged.length > 0) {
+            return merged;
+        }
     }
 
     return [];
@@ -204,6 +240,52 @@ function buildUrlOrderMap(orderedUrls: string[]): Map<string, number> {
 }
 
 /**
+ * Derives tab order from page order.
+ * Tab's order = position of its first page in the global page ordering.
+ * @param globalPageOrder - URLs in their intended navigation order
+ * @param pageTabMap - Map of URL pathname to tab name
+ * @returns Tab names in derived display order
+ */
+function deriveTabOrderFromPageOrder(globalPageOrder: string[], pageTabMap: Map<string, string>): string[] {
+    const seenTabs = new Set<string>();
+    const tabOrder: string[] = [];
+
+    for (const url of globalPageOrder) {
+        const pathname = extractPathname(url);
+        const tab = pageTabMap.get(pathname);
+        if (tab && !seenTabs.has(tab.toLowerCase())) {
+            seenTabs.add(tab.toLowerCase());
+            tabOrder.push(tab);
+        }
+    }
+
+    return tabOrder;
+}
+
+/**
+ * Sorts tab names by their derived order from page ordering.
+ * Tabs not in derivedOrder are sorted alphabetically and placed at the end.
+ * @param tabs - All tab names to sort
+ * @param derivedOrder - Tab names in derived display order (from page ordering)
+ */
+function sortTabsByDerivedOrder(tabs: string[], derivedOrder: string[]): string[] {
+    // Build order map from derived order (case-insensitive)
+    const orderMap = new Map<string, number>();
+    for (let i = 0; i < derivedOrder.length; i++) {
+        orderMap.set(derivedOrder[i]!.toLowerCase(), i);
+    }
+
+    return [...tabs].sort((a, b) => {
+        const orderA = orderMap.get(a.toLowerCase()) ?? Infinity;
+        const orderB = orderMap.get(b.toLowerCase()) ?? Infinity;
+        if (orderA !== orderB) {
+            return orderA - orderB;
+        }
+        return a.localeCompare(b); // fallback for tabs not in derived list
+    });
+}
+
+/**
  * Creates a navigation item for a page.
  * @param page - The page node
  * @param pathPrefix - Prefix for paths (e.g., "../" for docs.yml in fern/, "../../" for product files in fern/products/)
@@ -222,15 +304,75 @@ function createPageItem(page: PageNode, pathPrefix: string = "../"): FernNavigat
  * @param sectionMap - Map of section name to pages
  * @param pathPrefix - Prefix for paths (e.g., "../" for docs.yml in fern/, "../../" for product files in fern/products/)
  * @param urlOrderMap - Map of URL pathname to sort order (from LLM contextOrderings)
+ * @param sectionOrder - Optional section names in intended display order (from HTML navigation hints)
+ * @param log - Optional logging function for verbose output
  */
 function createSectionItems(
     sectionMap: Map<string, PageNode[]>,
     pathPrefix: string,
-    urlOrderMap: Map<string, number>
+    urlOrderMap: Map<string, number>,
+    sectionOrder?: string[],
+    log?: (msg: string) => void
 ): FernNavigationItem[] {
     const items: FernNavigationItem[] = [];
+    const sectionNames = Array.from(sectionMap.keys());
 
+    // Phase 1: Derive section order from URL order (section's order = minimum page order within it)
+    const sectionMinOrder = new Map<string, number>();
     for (const [sectionName, pages] of sectionMap) {
+        let minOrder = Infinity;
+        for (const page of pages) {
+            const order = urlOrderMap.get(extractPathname(page.url));
+            if (order !== undefined && order < minOrder) {
+                minOrder = order;
+            }
+        }
+        sectionMinOrder.set(sectionName, minOrder);
+    }
+
+    // Sort sections by their minimum page order (sections with no ordered pages come last)
+    let sortedSectionNames = sectionNames.sort((a, b) => {
+        const orderA = sectionMinOrder.get(a) ?? Infinity;
+        const orderB = sectionMinOrder.get(b) ?? Infinity;
+        if (orderA !== orderB) {
+            return orderA - orderB;
+        }
+        // Fall back to alphabetical if same order (or both have no order)
+        return a.localeCompare(b);
+    });
+
+    // Phase 2: Re-sort known sections by sectionOrder and place at first known index
+    if (sectionOrder && sectionOrder.length > 0) {
+        const sectionOrderMap = new Map(sectionOrder.map((s, i) => [s.toLowerCase(), i]));
+
+        // Find known sections and their indices in the page-ordered list
+        const knownIndices: number[] = [];
+        for (let i = 0; i < sortedSectionNames.length; i++) {
+            if (sectionOrderMap.has(sortedSectionNames[i]!.toLowerCase())) {
+                knownIndices.push(i);
+            }
+        }
+
+        if (knownIndices.length > 0) {
+            const firstKnownIndex = knownIndices[0]!;
+            // Extract known sections, sort by sectionOrder
+            const knownSections = knownIndices
+                .map((i) => sortedSectionNames[i]!)
+                .sort((a, b) => sectionOrderMap.get(a.toLowerCase())! - sectionOrderMap.get(b.toLowerCase())!);
+            // Remove known sections from original positions
+            const withoutKnown = sortedSectionNames.filter((_, i) => !knownIndices.includes(i));
+            // Insert sorted known sections at first known index
+            withoutKnown.splice(firstKnownIndex, 0, ...knownSections);
+            sortedSectionNames = withoutKnown;
+        }
+    }
+
+    // Log final section order (show section names, with "(root)" for empty string)
+    const displaySections = sortedSectionNames.map((s) => (s === "" ? "(root)" : s));
+    log?.(`    Sections: ${displaySections.join(" → ")}`);
+
+    for (const sectionName of sortedSectionNames) {
+        const pages = sectionMap.get(sectionName) ?? [];
         // Sort pages by LLM ordering, then alphabetically by slug
         const sortedPages = pages.sort((a, b) => {
             // Check LLM-provided ordering (normalize URL to pathname for matching)
@@ -278,30 +420,57 @@ function createSectionItems(
 /**
  * Creates navigation items for tabs containing sections.
  * @param pathPrefix - Prefix for paths (e.g., "../" for docs.yml in fern/, "../../" for product files in fern/products/)
- * @param urlOrderMap - Map of URL pathname to sort order (from LLM contextOrderings)
+ * @param contextOrderings - Context orderings from LLM for page ordering per tab
+ * @param discoveredTabs - Optional discovered tabs from site structure (with icons)
+ * @param log - Optional logging function for verbose output
  */
 function createTabNavigation(
     tabMap: Map<string, Map<string, PageNode[]>>,
     tabs: string[],
     hasApiReference: boolean,
     pathPrefix: string,
-    urlOrderMap: Map<string, number>
+    contextOrderings: ContextOrdering[],
+    discoveredTabs?: DiscoveredTab[],
+    sectionOrder?: string[],
+    log?: (msg: string) => void
 ): { tabDefinitions: Record<string, FernTabDefinition>; navigation: FernNavigationItem[] } {
     const tabDefinitions: Record<string, FernTabDefinition> = {};
     const navigation: FernNavigationItem[] = [];
+
+    // Build a map of tab names to their discovered icons (case-insensitive)
+    const tabIconMap = new Map<string, string>();
+    if (discoveredTabs) {
+        for (const discoveredTab of discoveredTabs) {
+            if (discoveredTab.icon) {
+                tabIconMap.set(discoveredTab.name.toLowerCase(), discoveredTab.icon);
+            }
+        }
+    }
+
+    log?.(`Tabs: ${tabs.join(", ")}`);
 
     for (const tabName of tabs) {
         const tabSlug = tabName.toLowerCase().replace(/\s+/g, "-");
         const sectionMap = tabMap.get(tabName);
 
+        // Look up icon from discovered tabs (case-insensitive match)
+        const icon = tabIconMap.get(tabName.toLowerCase());
+
         tabDefinitions[tabSlug] = {
-            displayName: tabName
+            displayName: tabName,
+            ...(icon && { icon })
         };
+
+        // Build URL order map for THIS tab's context (empty product/version, just tab)
+        const tabOrderedUrls = getOrderedUrlsForContext(contextOrderings, undefined, undefined, tabName);
+        const tabUrlOrderMap = buildUrlOrderMap(tabOrderedUrls);
+
+        log?.(`  Tab "${tabName}" (${tabOrderedUrls.length} pages ordered)`);
 
         const tabContent: FernNavigationItem[] = [];
 
         if (sectionMap) {
-            tabContent.push(...createSectionItems(sectionMap, pathPrefix, urlOrderMap));
+            tabContent.push(...createSectionItems(sectionMap, pathPrefix, tabUrlOrderMap, sectionOrder, log));
         }
 
         // Add API reference to appropriate tab (usually "API Reference" or "API")
@@ -318,7 +487,8 @@ function createTabNavigation(
     // If no API tab found but we have API references, add them to the end
     if (hasApiReference && !tabs.some((t) => t.toLowerCase().includes("api"))) {
         const apiTabSlug = "api-reference";
-        tabDefinitions[apiTabSlug] = { displayName: "API Reference" };
+        // Use "code" as default icon for API reference tab
+        tabDefinitions[apiTabSlug] = { displayName: "API Reference", icon: "code" };
         navigation.push({
             tab: apiTabSlug,
             layout: [{ api: "API Reference" }]
@@ -332,14 +502,17 @@ function createTabNavigation(
  * Creates simple navigation (no tabs) from sections.
  * @param pathPrefix - Prefix for paths (e.g., "../" for docs.yml in fern/, "../../" for product files in fern/products/)
  * @param urlOrderMap - Map of URL pathname to sort order (from LLM contextOrderings)
+ * @param log - Optional logging function for verbose output
  */
 function createSimpleNavigation(
     sectionMap: Map<string, PageNode[]>,
     hasApiReference: boolean,
     pathPrefix: string,
-    urlOrderMap: Map<string, number>
+    urlOrderMap: Map<string, number>,
+    sectionOrder?: string[],
+    log?: (msg: string) => void
 ): FernNavigationItem[] {
-    const items = createSectionItems(sectionMap, pathPrefix, urlOrderMap);
+    const items = createSectionItems(sectionMap, pathPrefix, urlOrderMap, sectionOrder, log);
 
     if (hasApiReference) {
         items.push({ api: "API Reference" });
@@ -352,31 +525,61 @@ function createSimpleNavigation(
  * Builds Fern navigation for a single version (or unversioned content).
  * Tabs are derived from actual page content - only creates tab structure if 2+ tabs have content.
  * @param pathPrefix - Prefix for paths (e.g., "../" for docs.yml in fern/, "../../" for product files in fern/products/)
- * @param urlOrderMap - Map of URL pathname to sort order (from LLM contextOrderings)
+ * @param contextOrderings - Context orderings from LLM for page ordering per tab
+ * @param discoveredTabs - Optional discovered tabs from site structure (with icons)
+ * @param log - Optional logging function for verbose output
  */
 function buildVersionNavigation(
     versionMap: Map<string, Map<string, PageNode[]>>,
     hasApiReference: boolean,
     pathPrefix: string,
-    urlOrderMap: Map<string, number>
+    contextOrderings: ContextOrdering[],
+    discoveredTabs?: DiscoveredTab[],
+    sectionOrder?: string[],
+    log?: (msg: string) => void
 ): { tabs?: Record<string, FernTabDefinition>; navigation: FernNavigationItem[] } {
     // Derive tabs from actual content in this version (emergent tabs)
     // Filter out empty string tab (pages with no tab assignment)
     const actualTabs = Array.from(versionMap.keys()).filter((t) => t && t !== "");
 
+    // Build URL-to-tab map from pages in this version
+    const pageTabMap = new Map<string, string>();
+    for (const [tabName, sectionMap] of versionMap) {
+        if (tabName) {
+            for (const pagesInSection of sectionMap.values()) {
+                for (const page of pagesInSection) {
+                    const pathname = extractPathname(page.url);
+                    pageTabMap.set(pathname, tabName);
+                }
+            }
+        }
+    }
+
+    // Derive tab order from page order (tab's order = first page appearance)
+    const globalPageOrder = getOrderedUrlsForContext(contextOrderings);
+    const derivedTabOrder = deriveTabOrderFromPageOrder(globalPageOrder, pageTabMap);
+    // Sort tabs by derived order (falls back to alphabetical for tabs not in derived order)
+    const sortedTabs = sortTabsByDerivedOrder(actualTabs, derivedTabOrder);
+
     // Only use tab structure if there are 2+ actual tabs with content
-    if (actualTabs.length >= 2) {
+    if (sortedTabs.length >= 2) {
         const { tabDefinitions, navigation } = createTabNavigation(
             versionMap,
-            actualTabs,
+            sortedTabs,
             hasApiReference,
             pathPrefix,
-            urlOrderMap
+            contextOrderings,
+            discoveredTabs,
+            sectionOrder,
+            log
         );
         return { tabs: tabDefinitions, navigation };
     }
 
     // No tabs or single tab - use simple navigation (flatten all content)
+    // Use global ordering (empty context key) for simple navigation
+    const orderedUrls = getOrderedUrlsForContext(contextOrderings);
+    const urlOrderMap = buildUrlOrderMap(orderedUrls);
     const allSections = new Map<string, PageNode[]>();
     for (const sectionMap of versionMap.values()) {
         for (const [section, pages] of sectionMap) {
@@ -385,7 +588,9 @@ function buildVersionNavigation(
         }
     }
 
-    return { navigation: createSimpleNavigation(allSections, hasApiReference, pathPrefix, urlOrderMap) };
+    return {
+        navigation: createSimpleNavigation(allSections, hasApiReference, pathPrefix, urlOrderMap, sectionOrder, log)
+    };
 }
 
 /**
@@ -440,7 +645,10 @@ function buildProductNavigation(
     productSlug: string,
     productName: string,
     allPages: Map<string, PageNode>,
-    contextOrderings: ContextOrdering[]
+    contextOrderings: ContextOrdering[],
+    discoveredTabs?: DiscoveredTab[],
+    sectionOrder?: string[],
+    log?: (msg: string) => void
 ): ProductNavigationResult {
     // Check which versions actually have content for this product
     const nonEmptyVersions = versions.filter((v) => productMap.has(v));
@@ -459,17 +667,16 @@ function buildProductNavigation(
             // fern/products/platform/ -> ../ -> fern/products/ -> ../ -> fern/ -> ../ -> output/ -> pages/
             const versionPathPrefix = "../../../";
 
-            // Get ordering for this product/version context
-            const orderedUrls = getOrderedUrlsForContext(contextOrderings, productName, versionName);
-            const urlOrderMap = buildUrlOrderMap(orderedUrls);
-
             // Build navigation for this version (tabs emergent, API ref from original pages)
             const hasApiRef = hasApiReferenceForContext(allPages, productName, versionName);
             const { tabs: tabDefs, navigation } = buildVersionNavigation(
                 versionMap,
                 hasApiRef,
                 versionPathPrefix,
-                urlOrderMap
+                contextOrderings,
+                discoveredTabs,
+                sectionOrder,
+                log
             );
 
             // Create version file content
@@ -522,13 +729,17 @@ function buildProductNavigation(
         }
     }
 
-    // Get ordering for this product context
-    const orderedUrls = getOrderedUrlsForContext(contextOrderings, productName);
-    const urlOrderMap = buildUrlOrderMap(orderedUrls);
-
     // Check for API references in this product (from original pages)
     const hasApiRef = hasApiReferenceForContext(allPages, productName);
-    const { tabs: tabDefs, navigation } = buildVersionNavigation(allVersionData, hasApiRef, pathPrefix, urlOrderMap);
+    const { tabs: tabDefs, navigation } = buildVersionNavigation(
+        allVersionData,
+        hasApiRef,
+        pathPrefix,
+        contextOrderings,
+        discoveredTabs,
+        sectionOrder,
+        log
+    );
 
     const fileContent: FernProductFile = {
         tabs: tabDefs,
@@ -546,14 +757,33 @@ function buildProductNavigation(
 }
 
 /**
+ * Options for building Fern navigation.
+ */
+export interface BuildNavigationOptions {
+    /** Whether to log verbose debugging information */
+    verbose?: boolean;
+}
+
+/**
  * Builds the Fern navigation structure from crawl results.
  * This is the main entry point for navigation generation.
  *
  * @param crawlResult - The result from crawling the site
  * @param siteStructure - Optional site structure with contextOrderings from LLM analysis
+ * @param options - Optional options for navigation building
  * @returns FernNavigation structure for docs.yml, including separate product files
  */
-export function buildFernNavigation(crawlResult: CrawlResult, siteStructure?: SiteStructure): FernNavigation {
+export function buildFernNavigation(
+    crawlResult: CrawlResult,
+    siteStructure?: SiteStructure,
+    options?: BuildNavigationOptions
+): FernNavigation {
+    const verbose = options?.verbose ?? false;
+    const log = (msg: string) => {
+        if (verbose) {
+            console.log(`  ${msg}`);
+        }
+    };
     const { pages } = crawlResult;
     const structure = analyzeStructure(pages);
     const { byProduct, global } = groupPagesByHierarchy(pages);
@@ -579,7 +809,10 @@ export function buildFernNavigation(crawlResult: CrawlResult, siteStructure?: Si
                 productSlug,
                 productName,
                 pages,
-                contextOrderings
+                contextOrderings,
+                siteStructure?.tabs,
+                siteStructure?.sectionOrder,
+                log
             );
             product.displayName = productName;
             products.push(product);
@@ -628,10 +861,21 @@ export function buildFernNavigation(crawlResult: CrawlResult, siteStructure?: Si
 
         // Check for API references in all pages (no product/version filter)
         const hasApiRefInContent = hasApiReferenceForContext(pages);
-        return { navigation: createSimpleNavigation(allSections, hasApiRefInContent, "../", urlOrderMap) };
+        return {
+            navigation: createSimpleNavigation(
+                allSections,
+                hasApiRefInContent,
+                "../",
+                urlOrderMap,
+                siteStructure?.sectionOrder,
+                log
+            )
+        };
     }
 
-    // Case 4: Check for tabs (emergent from content)
+    // Case 4: Check for tabs
+    // Phase 1 discovers MINIMUM tabs; Phase 2 is additive only
+    // Final tabs = discoveredTabs ∪ emergentTabs (union)
     const allTabs = new Map<string, Map<string, PageNode[]>>();
     for (const versionMap of targetMap.values()) {
         for (const [tab, sectionMap] of versionMap) {
@@ -645,17 +889,43 @@ export function buildFernNavigation(crawlResult: CrawlResult, siteStructure?: Si
         }
     }
 
-    // Derive tabs from actual content (emergent tabs)
-    const actualTabs = Array.from(allTabs.keys()).filter((t) => t && t !== "");
+    // Get discovered tabs (minimum set from Phase 1)
+    const discoveredTabs = siteStructure?.tabs ?? [];
+    const discoveredTabNames = discoveredTabs.map((t) => t.name);
+
+    // Get emergent tabs from page classifications (additive)
+    const emergentTabs = Array.from(allTabs.keys()).filter((t) => t && t !== "");
+
+    // Union: discovered (minimum) + emergent (additive)
+    const allTabNames = new Set([...discoveredTabNames, ...emergentTabs]);
+
+    // Build URL-to-tab map from classified pages
+    const pageTabMap = new Map<string, string>();
+    for (const page of pages.values()) {
+        if (page.classification?.tab) {
+            const pathname = extractPathname(page.url);
+            pageTabMap.set(pathname, page.classification.tab);
+        }
+    }
+
+    // Derive tab order from page order (tab's order = first page appearance)
+    const globalPageOrder = getOrderedUrlsForContext(contextOrderings);
+    const derivedTabOrder = deriveTabOrderFromPageOrder(globalPageOrder, pageTabMap);
+    // Sort tabs by derived order (falls back to alphabetical for tabs not in derived order)
+    const tabsToUse = sortTabsByDerivedOrder(Array.from(allTabNames), derivedTabOrder);
+
     // Check for API references in all pages (no product/version filter for non-product cases)
     const hasApiRefInContent = hasApiReferenceForContext(pages);
-    if (actualTabs.length >= 2) {
+    if (tabsToUse.length >= 2) {
         const { tabDefinitions, navigation } = createTabNavigation(
             allTabs,
-            actualTabs,
+            tabsToUse,
             hasApiRefInContent,
             "../",
-            urlOrderMap
+            contextOrderings,
+            discoveredTabs,
+            siteStructure?.sectionOrder,
+            log
         );
         return { tabs: tabDefinitions, navigation };
     }
@@ -670,7 +940,16 @@ export function buildFernNavigation(crawlResult: CrawlResult, siteStructure?: Si
         }
     }
 
-    return { navigation: createSimpleNavigation(allSections, hasApiRefInContent, "../", urlOrderMap) };
+    return {
+        navigation: createSimpleNavigation(
+            allSections,
+            hasApiRefInContent,
+            "../",
+            urlOrderMap,
+            siteStructure?.sectionOrder,
+            log
+        )
+    };
 }
 
 /**

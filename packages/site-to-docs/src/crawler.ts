@@ -80,15 +80,19 @@ export function extractDescription(html: string): string | undefined {
 
 /**
  * Extracts the URL slug from a URL path.
+ * Decodes URL-encoded characters (e.g., %3A -> :, %3F -> ?).
  * Examples:
  *   https://docs.example.com/getting-started -> "getting-started"
+ *   https://docs.example.com/step-1%3A-setup -> "step-1:-setup"
  *   https://docs.example.com/ -> ""
  */
 export function extractSlug(url: string): string {
     const parsed = new URL(url);
     const path = parsed.pathname;
+    // Decode URL-encoded characters (e.g., %3A -> :, %3F -> ?)
+    const decoded = decodeURIComponent(path);
     // Remove leading/trailing slashes and return
-    return path.replace(/^\/+|\/+$/g, "");
+    return decoded.replace(/^\/+|\/+$/g, "");
 }
 
 /**
@@ -257,7 +261,7 @@ export async function crawlSite(options: CrawlOptions): Promise<CrawlResult> {
             // Fetch the page
             const response = await fetch(url, {
                 headers: {
-                    "User-Agent": "fern/site-to-docs/1.0",
+                    "User-Agent": "site-to-docs/1.0",
                     Accept: "text/html,application/xhtml+xml"
                 }
             });
