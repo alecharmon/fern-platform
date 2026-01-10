@@ -49,7 +49,7 @@ for domain in project_domains:
 
 
 # Skip domains in the list below
-skip_list = ["*.ferndocs.app","staging.ferndocs.com","twoslash.ferndocs.com","app.buildwithfern.com","app.ferndocs.com","canary.ferndocs.com","prod.ferndocs.com","docs.staging.paradex.trade","next-remote.ferndocs.com","stable.ferndocs.com","experimental.ferndocs.com", "developers-beta.cash.app", "developers-beta.afterpay.com","partner.tradovate.com","ddn.ferndocs.com","docs-staging.azure.nominal.io","docs-sai.gov.nominal.io","docs-thernfrst.eu.nominal.io","docs-staging.gov.nominal.io"]
+skip_list = ["*.ferndocs.app","staging.ferndocs.com","twoslash.ferndocs.com","app.buildwithfern.com","app.ferndocs.com","canary.ferndocs.com","prod.ferndocs.com","docs.staging.paradex.trade","next-remote.ferndocs.com","stable.ferndocs.com","experimental.ferndocs.com", "developers-beta.cash.app", "developers-beta.afterpay.com","partner.tradovate.com","ddn.ferndocs.com","docs-staging.azure.nominal.io","docs-sai.gov.nominal.io","docs-thernfrst.eu.nominal.io","docs-staging.gov.nominal.io","de.megaport.ferndocs.com","fr.megaport.ferndocs.com","it.megaport.ferndocs.com","ja.megaport.ferndocs.com","pt.megaport.ferndocs.com","dropbox.ferndocs.com"]
 
 # Write domains out to file
 print(f"Found {len(domains)} domains to check.")
