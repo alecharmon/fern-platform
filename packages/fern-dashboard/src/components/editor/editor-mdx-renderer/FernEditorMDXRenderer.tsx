@@ -13,7 +13,7 @@ import { getMDXComponent } from "mdx-bundler/client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { EditorComponentChildrenProvider } from "@/components/editor/editor-component/EditorComponentChildrenContext";
 import { EditorComponentProvider } from "@/components/editor/editor-component/EditorComponentContext";
-import { CustomElementHoverWrapper } from "@/components/editor/NodeHoverWrapper";
+import { CustomElementHoverWrapper, FilesHoverWrapper } from "@/components/editor/NodeHoverWrapper";
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import { ErrorBoundary } from "@/docs/components/error-boundary";
 import type { EncodedDocsUrl } from "@/utils/types";
@@ -175,32 +175,39 @@ const CustomErrorFallback = ({ mdx, inline }: { mdx: string; inline?: boolean })
     return <UnsupportedContentDisplayOnly>{displayMessage}</UnsupportedContentDisplayOnly>;
 };
 
+// Helper function to check if MDX starts with a specific element
+function startsWithElement(mdx: string, elementName: string): boolean {
+    const trimmed = mdx.trim();
+    const openingTag = `<${elementName}`;
+    if (!trimmed.startsWith(openingTag)) {
+        return false;
+    }
+
+    // Check the character immediately after the element name
+    const nextCharIndex = openingTag.length;
+    if (nextCharIndex >= trimmed.length) {
+        return false; // String ends before we can check next character - incomplete tag
+    }
+
+    const nextChar = trimmed[nextCharIndex];
+    if (nextChar === undefined) {
+        return false;
+    }
+    // Valid boundary is:
+    // 1. '>' (opening tag)
+    // 2. '/' (self-closing tag like <div/>)
+    // 3. whitespace (attributes like <div class="test">)
+    return nextChar === ">" || nextChar === "/" || /\s/.test(nextChar);
+}
+
 // Helper function to check if MDX starts with a boundary element
 function isBoundaryElement(mdx: string): boolean {
-    const trimmed = mdx.trim();
-    // Check if MDX starts with any boundary element
-    return boundaryElements.some((element) => {
-        const openingTag = `<${element}`;
-        if (!trimmed.startsWith(openingTag)) {
-            return false;
-        }
+    return boundaryElements.some((element) => startsWithElement(mdx, element));
+}
 
-        // Check the character immediately after the element name
-        const nextCharIndex = openingTag.length;
-        if (nextCharIndex >= trimmed.length) {
-            return false; // String ends before we can check next character - incomplete tag
-        }
-
-        const nextChar = trimmed[nextCharIndex];
-        if (nextChar === undefined) {
-            return false;
-        }
-        // Valid boundary is:
-        // 1. '>' (opening tag)
-        // 2. '/' (self-closing tag like <div/>)
-        // 3. whitespace (attributes like <div class="test">)
-        return nextChar === ">" || nextChar === "/" || /\s/.test(nextChar);
-    });
+// Helper function to check if MDX is a Files component
+function isFilesElement(mdx: string): boolean {
+    return startsWithElement(mdx, "Files");
 }
 
 const MDXRenderer = React.memo(({ mdx, docsUrl, branch, skipWrapper = false, inline = false }: MDXRendererProps) => {
@@ -209,6 +216,7 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch, skipWrapper = false, inl
     });
     const components = useMDXComponents();
     const isBoundary = useMemo(() => isBoundaryElement(mdx), [mdx]);
+    const isFiles = useMemo(() => isFilesElement(mdx), [mdx]);
 
     useEffect(() => {
         let cancelled = false;
@@ -254,9 +262,14 @@ const MDXRenderer = React.memo(({ mdx, docsUrl, branch, skipWrapper = false, inl
         );
     }, [state, mdx, components, inline]);
 
-    if (isBoundary && !skipWrapper) {
-        // Only wrap with CustomElementHoverWrapper if it's a boundary element and wrapper is not skipped
-        return <CustomElementHoverWrapper>{content}</CustomElementHoverWrapper>;
+    if (!skipWrapper) {
+        // Use FilesHoverWrapper for Files component, CustomElementHoverWrapper for other boundary elements
+        if (isFiles) {
+            return <FilesHoverWrapper>{content}</FilesHoverWrapper>;
+        }
+        if (isBoundary) {
+            return <CustomElementHoverWrapper>{content}</CustomElementHoverWrapper>;
+        }
     }
     return content;
 });
@@ -485,6 +498,10 @@ const ParsedElementRenderer = React.memo(
                     return childrenContent;
                 }
 
+                // Use FilesHoverWrapper for Files component, CustomElementHoverWrapper for other boundary elements
+                if (isFilesElement(element.originalMdx)) {
+                    return <FilesHoverWrapper>{childrenContent}</FilesHoverWrapper>;
+                }
                 return <CustomElementHoverWrapper>{childrenContent}</CustomElementHoverWrapper>;
             }
             // Regular terminal element without children

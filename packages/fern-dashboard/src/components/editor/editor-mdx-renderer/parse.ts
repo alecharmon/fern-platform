@@ -35,7 +35,8 @@ const editableComponents = [...richTextComponents, ...componentsWithoutChildren]
 const contentDraggingDisabledComponents = ["Button"];
 
 // HTML elements that mark boundaries - these and all their children will be treated as terminal/non-editable
-const boundaryElements = ["div", "span", "section", "article", "body", "aside"];
+// Files component is also a boundary element since it's not inline editable yet
+const boundaryElements = ["div", "span", "section", "article", "body", "aside", "Files"];
 
 const IGNORED_COMPONENTS = new Set(["InterceptedChildren"]);
 

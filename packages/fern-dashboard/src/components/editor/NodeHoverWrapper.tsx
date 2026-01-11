@@ -1,6 +1,6 @@
 "use client";
 
-import { Code2, Sigma } from "lucide-react";
+import { Code2, FolderTree, Sigma } from "lucide-react";
 import type React from "react";
 import { useRef, useState } from "react";
 import { EditInDevModeButton } from "./EditInDevModeButton";
@@ -79,6 +79,18 @@ export const MathNodeWrapper = ({ children, inline = false }: { children: React.
             icon={<Sigma className="size-4" />}
             actions={<EditInDevModeButton variant="default" size="sm" />}
             enableHoverBridge={!inline}
+        >
+            {children}
+        </NodeHoverWrapper>
+    );
+};
+
+export const FilesHoverWrapper = ({ children }: { children: React.ReactNode }) => {
+    return (
+        <NodeHoverWrapper
+            name="Files"
+            icon={<FolderTree className="size-4" />}
+            actions={<EditInDevModeButton variant="default" size="sm" />}
         >
             {children}
         </NodeHoverWrapper>

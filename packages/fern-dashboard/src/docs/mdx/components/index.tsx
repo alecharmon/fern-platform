@@ -31,6 +31,9 @@ import { CodeGroup } from "./code/CodeGroup";
 import { Template } from "./code/Template";
 import { Column, ColumnGroup } from "./columns";
 import { Feature } from "./feature";
+// import { EndpointRequestSnippet, EndpointResponseSnippet } from "./snippets";
+// import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
+import { File, Files, Folder, Indent } from "./files";
 import { Frame } from "./frame";
 import { A, HeadingRenderer, Image, Li, Ol, Strong, Ul } from "./html";
 import { Table } from "./html-table";
@@ -43,8 +46,6 @@ import { ParamField } from "./parameters/ParamField";
 import { EndpointRequestSnippet } from "./snippets/EndpointRequestSnippet";
 import { EndpointResponseSnippet } from "./snippets/EndpointResponseSnippet";
 import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
-// import { EndpointRequestSnippet, EndpointResponseSnippet } from "./snippets";
-// import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
 import { Step, StepGroup } from "./steps";
 import { Tab, TabGroup } from "./tabs";
 
@@ -74,9 +75,13 @@ const FERN_COMPONENTS = {
     EndpointResponseSnippet,
     EndpointSchemaSnippet,
     Feature,
+    File,
+    Files,
+    Folder,
     Frame,
     Icon,
     If,
+    Indent,
     Json,
     // Markdown,
     Mermaid,
