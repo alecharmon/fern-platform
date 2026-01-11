@@ -20,14 +20,16 @@ jobs:
   test:
     uses: ./.github/workflows/run-self-hosted-tests.yml
 
-  build-and-publish:
+  build-js-bundle:
     runs-on: seed
     needs: test
     timeout-minutes: 30
+    outputs:
+      version: ${{ steps.determine_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2 # This helps turbo resolve changes faster
+          fetch-depth: 2
 
       - name: Determine version to publish
         id: determine_version
@@ -36,11 +38,9 @@ jobs:
           GIT_REF="${{ github.ref }}"
           
           if [ -n "$PROVIDED_VERSION" ]; then
-            # Manual dispatch with version provided
             echo "Using provided version: $PROVIDED_VERSION"
             echo "version=$PROVIDED_VERSION" >> $GITHUB_OUTPUT
           elif [[ "$GIT_REF" == refs/tags/docs@* ]]; then
-            # Triggered by docs@ tag - extract version from tag
             TAG_VERSION="${GIT_REF#refs/tags/docs@}"
             echo "Using version from docs@ tag: $TAG_VERSION"
             echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
@@ -67,6 +67,27 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: pnpm docs:self-hosted-bundle:build
 
+      - name: Upload JS bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-bundle
+          path: docs_bundle.tar.gz
+          retention-days: 1
+
+  build-docker-amd64:
+    runs-on: seed
+    needs: build-js-bundle
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Download JS bundle artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-bundle
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -76,17 +97,85 @@ jobs:
           username: fernapi
           password: ${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}
 
-      - name: Build and push multi-platform Docker image
+      - name: Build and push amd64 Docker image
         working-directory: servers/self-hosted
         run: |
-          VERSION="${{ steps.determine_version.outputs.version }}"
-          echo "Building and publishing version: $VERSION for linux/amd64 and linux/arm64"
+          VERSION="${{ needs.build-js-bundle.outputs.version }}"
+          echo "Building version: $VERSION for linux/amd64 (native)"
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            --cache-from type=gha \
-            --cache-to type=gha,mode=max \
+            --platform linux/amd64 \
+            --cache-from type=gha,scope=amd64 \
+            --cache-to type=gha,mode=max,scope=amd64 \
             --push \
             -f Dockerfile.self_hosted \
-            -t fernapi/fern-self-hosted:$VERSION \
-            -t fernenterprise/fern-self-hosted:$VERSION \
+            -t fernapi/fern-self-hosted:$VERSION-amd64 \
+            -t fernenterprise/fern-self-hosted:$VERSION-amd64 \
             ../..
+
+  build-docker-arm64:
+    runs-on: ubuntu-24.04-arm64
+    needs: build-js-bundle
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Download JS bundle artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-bundle
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: fernapi
+          password: ${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}
+
+      - name: Build and push arm64 Docker image
+        working-directory: servers/self-hosted
+        run: |
+          VERSION="${{ needs.build-js-bundle.outputs.version }}"
+          echo "Building version: $VERSION for linux/arm64 (native)"
+          docker buildx build \
+            --platform linux/arm64 \
+            --cache-from type=gha,scope=arm64 \
+            --cache-to type=gha,mode=max,scope=arm64 \
+            --push \
+            -f Dockerfile.self_hosted \
+            -t fernapi/fern-self-hosted:$VERSION-arm64 \
+            -t fernenterprise/fern-self-hosted:$VERSION-arm64 \
+            ../..
+
+  create-manifest:
+    runs-on: ubuntu-latest
+    needs: [build-js-bundle, build-docker-amd64, build-docker-arm64]
+    timeout-minutes: 10
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: fernapi
+          password: ${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}
+
+      - name: Create and push multi-platform manifest
+        run: |
+          VERSION="${{ needs.build-js-bundle.outputs.version }}"
+          echo "Creating multi-platform manifest for version: $VERSION"
+          
+          docker manifest create fernapi/fern-self-hosted:$VERSION \
+            fernapi/fern-self-hosted:$VERSION-amd64 \
+            fernapi/fern-self-hosted:$VERSION-arm64
+          docker manifest push fernapi/fern-self-hosted:$VERSION
+          
+          docker manifest create fernenterprise/fern-self-hosted:$VERSION \
+            fernenterprise/fern-self-hosted:$VERSION-amd64 \
+            fernenterprise/fern-self-hosted:$VERSION-arm64
+          docker manifest push fernenterprise/fern-self-hosted:$VERSION
+          
+          echo "Successfully published multi-platform images:"
+          echo "  - fernapi/fern-self-hosted:$VERSION"
+          echo "  - fernenterprise/fern-self-hosted:$VERSION"
