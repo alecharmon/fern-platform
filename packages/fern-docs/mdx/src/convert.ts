@@ -438,7 +438,7 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
     const placeholders: Record<string, string> = {};
 
     // Default handler for base elements
-    const baseElementHandler: ToMdastHandle = (state, element) => {
+    const baseElementHandler: ToMdastHandle = (state, element, _parent) => {
         // Handle math nodes (inline and block)
         const dataType = element?.properties?.["data-type"] || element?.properties?.dataType;
         const dataLatex = element?.properties?.["data-latex"] || element?.properties?.dataLatex;
@@ -547,6 +547,56 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
         return { type: "html", value: placeholder } as any;
     };
 
+    // Handler for list items - detects Tiptap task items and handles them specially
+    const listItemHandler: ToMdastHandle = (state, element, parent) => {
+        const dataType = element?.properties?.["data-type"] || element?.properties?.dataType;
+        const dataChecked = element?.properties?.["data-checked"] || element?.properties?.dataChecked;
+
+        // Check if this is a Tiptap task item
+        if (dataType === "taskItem" && dataChecked !== undefined) {
+            const isChecked = dataChecked === "true" || dataChecked === true;
+
+            // Filter out checkbox-related elements (label, input) and extract actual content
+            const filteredElement = {
+                ...element,
+                children: (element.children || [])
+                    .filter((child: any) => {
+                        if (child.type === "element") {
+                            if (child.tagName === "label" || child.tagName === "input") {
+                                return false;
+                            }
+                            // Unwrap div wrapper - Tiptap wraps content in a div
+                            if (child.tagName === "div" && child.children) {
+                                return true;
+                            }
+                        }
+                        return true;
+                    })
+                    .flatMap((child: any) => {
+                        // Unwrap div children
+                        if (child.type === "element" && child.tagName === "div" && child.children) {
+                            return child.children;
+                        }
+                        return [child];
+                    })
+            };
+
+            // Use the default handler to process the filtered element
+            const result = getToMdastDefaultHandler("li")(state, filteredElement as any);
+
+            // Ensure the result has the checked property set
+            if (result && typeof result === "object" && !Array.isArray(result)) {
+                (result as any).checked = isChecked;
+                (result as any).spread = false;
+            }
+
+            return result;
+        }
+
+        // Fall back to default handler for non-task list items
+        return baseElementHandler(state, element, parent);
+    };
+
     // Get mdast from hast (and handle custom elements)
     // TODO: fix types
     const mdast = toMdast(hast, {
@@ -602,7 +652,7 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
             ul: baseElementHandler,
             ol: baseElementHandler,
             dir: baseElementHandler,
-            li: baseElementHandler,
+            li: listItemHandler,
             dl: baseElementHandler,
             dt: baseElementHandler,
             dd: baseElementHandler,
