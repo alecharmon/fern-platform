@@ -7,6 +7,7 @@ export type Error =
     | FernRegistry.docs.v2.write.finishDocsRegister.Error.UnauthorizedError
     | FernRegistry.docs.v2.write.finishDocsRegister.Error.UserNotInOrgError
     | FernRegistry.docs.v2.write.finishDocsRegister.Error.DocsRegistrationIdNotFound
+    | FernRegistry.docs.v2.write.finishDocsRegister.Error.LibraryDocsJobInvalidForRegistrationError
     | FernRegistry.docs.v2.write.finishDocsRegister.Error._Unknown;
 
 export namespace Error {
@@ -24,6 +25,11 @@ export namespace Error {
         error: "DocsRegistrationIdNotFound";
     }
 
+    export interface LibraryDocsJobInvalidForRegistrationError {
+        error: "LibraryDocsJobInvalidForRegistrationError";
+        content: string;
+    }
+
     export interface _Unknown {
         error: void;
         content: core.Fetcher.Error;
@@ -33,6 +39,7 @@ export namespace Error {
         unauthorizedError: (value: string) => _Result;
         userNotInOrgError: (value: string) => _Result;
         docsRegistrationIdNotFound: () => _Result;
+        libraryDocsJobInvalidForRegistrationError: (value: string) => _Result;
         _other: (value: core.Fetcher.Error) => _Result;
     }
 }
@@ -58,6 +65,15 @@ export const Error = {
         };
     },
 
+    libraryDocsJobInvalidForRegistrationError: (
+        value: string,
+    ): FernRegistry.docs.v2.write.finishDocsRegister.Error.LibraryDocsJobInvalidForRegistrationError => {
+        return {
+            content: value,
+            error: "LibraryDocsJobInvalidForRegistrationError",
+        };
+    },
+
     _unknown: (fetcherError: core.Fetcher.Error): FernRegistry.docs.v2.write.finishDocsRegister.Error._Unknown => {
         return {
             error: undefined,
@@ -76,6 +92,8 @@ export const Error = {
                 return visitor.userNotInOrgError(value.content);
             case "DocsRegistrationIdNotFound":
                 return visitor.docsRegistrationIdNotFound();
+            case "LibraryDocsJobInvalidForRegistrationError":
+                return visitor.libraryDocsJobInvalidForRegistrationError(value.content);
             default:
                 return visitor._other(value.content);
         }

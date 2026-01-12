@@ -56,4 +56,9 @@ import type * as FernRegistry from "../../../../../../../../index.js";
 export interface RegisterDocsRequest {
     docsDefinition: FernRegistry.docs.v1.write.DocsDefinition;
     excludeApis?: boolean;
+    /**
+     * Configuration for merging library docs into the docs definition.
+     * If provided with a valid jobId, generated library documentation will be merged.
+     */
+    libraryDocs?: FernRegistry.docs.v2.write.LibraryDocsRegistrationConfig;
 }

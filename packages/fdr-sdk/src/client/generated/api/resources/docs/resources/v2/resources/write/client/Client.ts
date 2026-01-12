@@ -344,6 +344,7 @@ export class WriteClient {
                 case "UnauthorizedError":
                 case "UserNotInOrgError":
                 case "DocsRegistrationIdNotFound":
+                case "LibraryDocsJobInvalidForRegistrationError":
                     return {
                         data: {
                             ok: false,

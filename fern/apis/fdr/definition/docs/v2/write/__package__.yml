@@ -3,6 +3,7 @@
 imports:
   rootCommons: ../../../commons.yml
   v1DocsWrite: ../../v1/write/__package__.yml
+  navigationV1: ../../../navigation/v1/__package__.yml
 
 service:
   base-path: /v2/registry/docs
@@ -73,10 +74,16 @@ service:
           properties:
             docsDefinition: v1DocsWrite.DocsDefinition
             excludeApis: optional<boolean>
+            libraryDocs:
+              type: optional<LibraryDocsRegistrationConfig>
+              docs: |
+                Configuration for merging library docs into the docs definition.
+                If provided with a valid jobId, generated library documentation will be merged.
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
         - v1DocsWrite.DocsRegistrationIdNotFound
+        - LibraryDocsJobInvalidForRegistrationError
 
     transferOwnershipOfDomain:
       auth: true
@@ -348,6 +355,31 @@ types:
         type: string
         docs: Presigned S3 URL to download the full result. Expires in 1 hour.
 
+  LibraryDocsRegistrationConfig:
+    docs: Configuration for merging library docs during docs registration.
+    properties:
+      jobId:
+        type: LibraryDocsJobId
+        docs: Job ID from a completed library docs generation.
+      slug:
+        type: optional<string>
+        docs: URL slug prefix for library docs pages. Defaults to "library-docs".
+      title:
+        type: optional<string>
+        docs: Navigation section title for library docs. Defaults to "Library Reference".
+
+  RenderedLibraryDocs:
+    docs: |
+      Rendered library documentation ready for merging into a docs definition.
+      Contains generated pages and a navigation section node.
+    properties:
+      pages:
+        type: map<rootCommons.PageId, v1DocsWrite.PageContent>
+        docs: Pages to merge into docsDefinition.pages, keyed by pageId.
+      sectionNode:
+        type: navigationV1.SectionNode
+        docs: Navigation section node to insert into the navigation tree.
+
 errors:
   InvalidDomainError:
     status-code: 400
@@ -384,4 +416,13 @@ errors:
   LibraryDocsGenerationNotCompleteError:
     status-code: 400
     type: string
+
+  LibraryDocsJobInvalidForRegistrationError:
+    status-code: 400
+    type: string
+    docs: |
+      The library docs job is invalid for registration. This can happen if:
+      - The job does not exist
+      - The job is not completed
+      - The job belongs to a different organization
 

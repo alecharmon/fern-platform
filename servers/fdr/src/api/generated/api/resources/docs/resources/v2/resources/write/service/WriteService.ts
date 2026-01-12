@@ -278,6 +278,7 @@ export class WriteService {
                         case "UnauthorizedError":
                         case "UserNotInOrgError":
                         case "DocsRegistrationIdNotFound":
+                        case "LibraryDocsJobInvalidForRegistrationError":
                             break;
                         default:
                             console.warn(

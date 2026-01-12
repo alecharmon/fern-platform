@@ -18,11 +18,13 @@ import {
     CannotDeleteNonPreviewSiteError,
     InvalidDomainError,
     LibraryDocsGenerationNotCompleteError,
+    LibraryDocsJobInvalidForRegistrationError,
     LibraryDocsJobNotFoundError,
     UnsupportedLanguageError
 } from "../../../api/generated/api/resources/docs/resources/v2/resources/write/errors";
 import { LibraryDocsJobId } from "../../../api/generated/api/resources/docs/resources/v2/resources/write/types/LibraryDocsJobId";
 import type { FdrApplication } from "../../../app";
+import { appendSectionToSidebarRoots } from "../../../services/library-docs/navigationUtils";
 import type { S3DocsFileInfo } from "../../../services/s3";
 import { ParsedBaseUrl } from "../../../util/ParsedBaseUrl";
 
@@ -224,6 +226,55 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                     authHeader: req.headers.authorization,
                     orgId: docsRegistrationInfo.orgId
                 });
+
+                // Handle library docs integration if config is provided
+                if (req.body.libraryDocs != null) {
+                    app.logger.debug(
+                        `[${docsRegistrationInfo.fernUrl.getFullUrl()}] Processing library docs job ${req.body.libraryDocs.jobId}`
+                    );
+
+                    let renderedLibraryDocs;
+                    try {
+                        renderedLibraryDocs = await app.services.libraryDocs.renderGeneration({
+                            jobId: req.body.libraryDocs.jobId,
+                            expectedOrgId: docsRegistrationInfo.orgId,
+                            slug: req.body.libraryDocs.slug,
+                            title: req.body.libraryDocs.title
+                        });
+                    } catch (error) {
+                        throw new LibraryDocsJobInvalidForRegistrationError(
+                            error instanceof Error
+                                ? error.message
+                                : `Failed to render library docs for job ${req.body.libraryDocs.jobId}`
+                        );
+                    }
+
+                    // Merge pages into docsDefinition
+                    for (const [pageId, pageContent] of Object.entries(renderedLibraryDocs.pages)) {
+                        const typedPageId = pageId as FdrAPI.PageId;
+                        if (req.body.docsDefinition.pages[typedPageId] != null) {
+                            throw new LibraryDocsJobInvalidForRegistrationError(
+                                `Page ID collision: ${pageId} already exists in docs definition`
+                            );
+                        }
+                        req.body.docsDefinition.pages[typedPageId] = pageContent;
+                    }
+
+                    // Merge navigation into config.root
+                    if (req.body.docsDefinition.config.root != null) {
+                        appendSectionToSidebarRoots(
+                            req.body.docsDefinition.config.root,
+                            renderedLibraryDocs.sectionNode
+                        );
+                        app.logger.info(
+                            `[${docsRegistrationInfo.fernUrl.getFullUrl()}] Merged ${Object.keys(renderedLibraryDocs.pages).length} library docs pages`
+                        );
+                    } else {
+                        app.logger.warn(
+                            `[${docsRegistrationInfo.fernUrl.getFullUrl()}] No config.root found, skipping navigation merge`
+                        );
+                    }
+                }
 
                 app.logger.debug(`[${docsRegistrationInfo.fernUrl.getFullUrl()}] Transforming Docs Definition to DB`);
                 const dbDocsDefinition = convertDocsDefinitionToDb({

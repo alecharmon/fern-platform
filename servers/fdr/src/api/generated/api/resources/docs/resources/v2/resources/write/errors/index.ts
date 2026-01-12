@@ -4,6 +4,7 @@ export * from "./InvalidCustomDomainError";
 export * from "./InvalidDomainError";
 export * from "./InvalidGithubUrlError";
 export * from "./LibraryDocsGenerationNotCompleteError";
+export * from "./LibraryDocsJobInvalidForRegistrationError";
 export * from "./LibraryDocsJobNotFoundError";
 export * from "./ReindexNotAllowedError";
 export * from "./UnsupportedLanguageError";

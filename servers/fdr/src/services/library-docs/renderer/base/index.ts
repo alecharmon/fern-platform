@@ -3,7 +3,7 @@
  */
 
 export { renderDocstring, renderSimpleDocstring } from "./DocstringRenderer.js";
-export type { NavigationItem, NavigationPage, NavigationSection, RenderedOutput } from "./types.js";
+export type { NavNode, NavPageNode, NavSectionNode, RenderedOutput } from "./types.js";
 export {
     createFrontmatter,
     escapeMdx,

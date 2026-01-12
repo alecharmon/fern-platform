@@ -35,4 +35,22 @@ export class ResultStorage {
             expiresIn: PRESIGNED_URL_EXPIRY_SECONDS
         });
     }
+
+    /**
+     * Fetch IR content directly from S3.
+     */
+    async getIRContent<T>(s3Key: string): Promise<T> {
+        const command = new GetObjectCommand({
+            Bucket: this.bucketName,
+            Key: s3Key
+        });
+
+        const response = await this.s3Client.send(command);
+        if (response.Body == null) {
+            throw new Error(`Failed to fetch IR from S3: empty body for key ${s3Key}`);
+        }
+
+        const bodyString = await response.Body.transformToString();
+        return JSON.parse(bodyString) as T;
+    }
 }
