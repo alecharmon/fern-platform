@@ -10,12 +10,22 @@ type CopyableTextProps = {
     successMessage?: string;
     variant?: "default" | "innerCopy";
     /**
+     * Custom className to apply to the wrapper element
+     */
+    wrapperClassName?: string;
+    /**
      * Custom className to apply to the input element
      */
     className?: string;
 };
 
-export function CopyableText({ text, successMessage, variant = "default", className }: CopyableTextProps) {
+export function CopyableText({
+    text,
+    successMessage,
+    variant = "default",
+    wrapperClassName,
+    className
+}: CopyableTextProps) {
     const [copied, setCopied] = useState(false);
 
     const copyToClipboard = async () => {
@@ -40,26 +50,20 @@ export function CopyableText({ text, successMessage, variant = "default", classN
     };
 
     return variant === "default" ? (
-        <div className="flex items-center space-x-2">
+        <div className={cn("flex items-center space-x-2", wrapperClassName)}>
             <Input value={text} readOnly className={cn("flex-1", className)} />
             <Button variant="outline" onClick={() => void copyToClipboard()}>
                 {copied ? <CheckIcon className="text-primary size-4" /> : <CopyIcon className="size-4" />}
             </Button>
         </div>
     ) : (
-        <div className={cn("group relative inline-flex items-center w-auto hover:opacity-100")}>
-            <Input
-                value={text}
-                readOnly
-                size={text.length}
-                className={cn("pr-10 w-auto min-w-0", className)}
-                style={{ width: `${text.length * 0.6}ch` }}
-            />
+        <div className={cn("group relative flex items-center", wrapperClassName)}>
+            <Input value={text} readOnly className={cn("flex-1 group-hover:pr-8", className)} />
             <button
                 type="button"
                 onClick={() => void copyToClipboard()}
                 className={cn(
-                    "absolute right-1 px-1.5 cursor-pointer text-muted-foreground hover:text-foreground transition-colors bg-background opacity-0 group-hover:opacity-100"
+                    "absolute right-0.5 p-2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors bg-background opacity-0 group-hover:opacity-100"
                 )}
             >
                 {copied ? <CheckIcon className="text-primary size-4" /> : <CopyIcon className="size-4" />}

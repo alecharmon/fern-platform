@@ -1,7 +1,7 @@
 "use client";
 
-import { Rocket } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ExternalLinkIcon, Rocket } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
@@ -35,6 +35,12 @@ export function EditorNextStepsModal({ open, onOpenChange }: EditorNextStepsModa
         }
     }, [open, showConfetti, startConfetti]);
 
+    const handleOpenPr = useCallback(() => {
+        if (gitPrUrl) {
+            window.open(gitPrUrl, "_blank", "noopener,noreferrer");
+        }
+    }, [gitPrUrl]);
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md">
@@ -52,7 +58,17 @@ export function EditorNextStepsModal({ open, onOpenChange }: EditorNextStepsModa
 
                         <Step number={2} title={`Send your ${providerName} link to your team for review!`}>
                             {gitPrUrl ? (
-                                <CopyableText text={gitPrUrl} successMessage="URL copied to clipboard!" />
+                                <div className="flex items-center space-x-2">
+                                    <CopyableText
+                                        text={gitPrUrl}
+                                        variant="innerCopy"
+                                        successMessage="URL copied to clipboard!"
+                                        wrapperClassName="flex-1"
+                                    />
+                                    <Button variant="outline" onClick={handleOpenPr}>
+                                        <ExternalLinkIcon className="size-4" />
+                                    </Button>
+                                </div>
                             ) : (
                                 <Skeleton className="h-10 w-full" />
                             )}
