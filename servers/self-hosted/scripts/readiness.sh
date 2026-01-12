@@ -6,9 +6,10 @@ check_http_endpoint() {
     local url=$1
     local service_name=$2
     local max_attempts=${3:-1}
+    local timeout=${4:-5}
     
     for attempt in $(seq 1 $max_attempts); do
-        if curl -f -s --max-time 30 "$url" > /dev/null 2>&1; then
+        if curl -f -s --max-time "$timeout" "$url" > /dev/null 2>&1; then
             echo "✓ $service_name is ready"
             return 0
         fi

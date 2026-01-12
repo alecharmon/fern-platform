@@ -1,5 +1,6 @@
 import { execa } from "execa";
 import path from "path";
+import { SELF_HOSTED_IMAGE_TAG_NAME } from "./setupSharedDocker";
 
 export const MULTINODE_COMPOSE_FILE = "docker-compose.multinode.yml";
 export const MULTINODE_PROJECT_NAME = "fern-self-hosted-multinode";
@@ -21,10 +22,22 @@ async function removeComposeVolumes(_projectName: string) {
 }
 
 export async function setup() {
-    // Build the Docker image first
-    console.log("Building Docker image for multi-node tests...");
-    await execa("pnpm", ["docker:build"], { stdio: "inherit" });
-    console.log("Docker image built successfully");
+    // Check if Docker image already exists (e.g., loaded from CI artifact)
+    try {
+        const { stdout: imageId } = await execa("docker", ["images", "-q", SELF_HOSTED_IMAGE_TAG_NAME]);
+        if (imageId.trim()) {
+            console.log(`Docker image ${SELF_HOSTED_IMAGE_TAG_NAME} already exists, skipping build`);
+        } else {
+            console.log("Building Docker image for multi-node tests...");
+            await execa("pnpm", ["docker:build"], { stdio: "inherit" });
+            console.log("Docker image built successfully");
+        }
+    } catch {
+        // If check fails, try to build anyway
+        console.log("Building Docker image for multi-node tests...");
+        await execa("pnpm", ["docker:build"], { stdio: "inherit" });
+        console.log("Docker image built successfully");
+    }
 
     // Create the fern-network if it doesn't exist
     console.log("Creating fern-network...");

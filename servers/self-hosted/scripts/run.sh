@@ -124,7 +124,8 @@ start_postgresql() {
         fi
 
         # Start PostgreSQL as postgres user with UID-scoped socket directory
-        if ! su - postgres -c "pg_ctl -D $PGDATA -o \"-c listen_addresses='localhost' -c unix_socket_directories='$PGBASE' -c shared_buffers=128MB -c max_connections=200 -c logging_collector=on -c log_line_prefix='%t '\" -l $PGDATA/logfile start" 2>&1 | add_timestamps; then
+        # Use mmap for dynamic shared memory to avoid /dev/shm size issues in Kubernetes
+        if ! su - postgres -c "pg_ctl -D $PGDATA -o \"-c listen_addresses='localhost' -c unix_socket_directories='$PGBASE' -c shared_buffers=128MB -c max_connections=200 -c logging_collector=on -c log_line_prefix='%t ' -c dynamic_shared_memory_type=mmap\" -l $PGDATA/logfile start" 2>&1 | add_timestamps; then
             log "ERROR: Failed to start PostgreSQL"
             cat "$PGDATA/logfile" 2>/dev/null | add_timestamps
             return 1
@@ -139,8 +140,9 @@ start_postgresql() {
         fi
 
         # Start PostgreSQL with UID-scoped socket directory
+        # Use mmap for dynamic shared memory to avoid /dev/shm size issues in Kubernetes
         if ! pg_ctl -D "$PGDATA" \
-            -o "-c listen_addresses='localhost' -c unix_socket_directories='$PGBASE' -c shared_buffers=128MB -c max_connections=200 -c logging_collector=on -c log_line_prefix='%t '" \
+            -o "-c listen_addresses='localhost' -c unix_socket_directories='$PGBASE' -c shared_buffers=128MB -c max_connections=200 -c logging_collector=on -c log_line_prefix='%t ' -c dynamic_shared_memory_type=mmap" \
             -l "$PGDATA/logfile" \
             start 2>&1 | add_timestamps; then
             log "ERROR: Failed to start PostgreSQL"

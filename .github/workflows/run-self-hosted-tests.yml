@@ -4,50 +4,53 @@ on:
   push:
     branches:
       - app
+    paths:
+      - "servers/self-hosted/**"
+      - ".github/workflows/run-self-hosted-tests.yml"
   pull_request:
+    paths:
+      - "servers/self-hosted/**"
+      - ".github/workflows/run-self-hosted-tests.yml"
   workflow_call:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/app' }}
 
 jobs:
-  run-self-hosted-tests:
+  build:
     runs-on: Seed
     timeout-minutes: 30
+    outputs:
+      run_all_tests: ${{ steps.detect_changes.outputs.run_all_tests }}
 
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch full history to detect changes
+          fetch-depth: 0
 
       - name: Detect changed files
         id: detect_changes
         run: |
-          # For workflow_call (releases), always run all tests
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event_name }}" = "workflow_call" ]; then
             echo "run_all_tests=true" >> $GITHUB_OUTPUT
             echo "Release workflow detected - will run all tests"
             exit 0
           fi
 
-          # For pushes to app branch, compare with previous commit
           if [ "${{ github.event_name }}" = "push" ]; then
             BASE_REF="${{ github.event.before }}"
             HEAD_REF="${{ github.sha }}"
-          # For pull requests, compare with base branch
           elif [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE_REF="${{ github.event.pull_request.base.sha }}"
             HEAD_REF="${{ github.event.pull_request.head.sha }}"
           else
-            # Default to running all tests for unknown event types
             echo "run_all_tests=true" >> $GITHUB_OUTPUT
             echo "Unknown event type - will run all tests"
             exit 0
           fi
 
-          # Check if BASE_REF is the null SHA (happens on first push to a new branch or force-push)
-          # or if the commit is unreachable (e.g., after force-push where old commit was garbage collected)
           if [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
             echo "run_all_tests=true" >> $GITHUB_OUTPUT
             echo "BASE_REF is null SHA (new branch or force-push) - will run all tests"
@@ -60,7 +63,6 @@ jobs:
             exit 0
           fi
 
-          # Check if servers/self-hosted has changes
           CHANGED_FILES=$(git diff --name-only "$BASE_REF" "$HEAD_REF")
           echo "Changed files:"
           echo "$CHANGED_FILES"
@@ -75,7 +77,7 @@ jobs:
 
       - name: Update Engines
         run: |
-          node -e 'const fs = require("fs"); const pkg = require("./package.json"); console.log("Before modification:", JSON.stringify(pkg.engines, null, 2)); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "10.27.0"; pkg.packageManager = "pnpm@10.27.0"; console.log("After modification:", JSON.stringify(pkg.engines, null, 2)); fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
+          node -e 'const fs = require("fs"); const pkg = require("./package.json"); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "10.27.0"; pkg.packageManager = "pnpm@10.27.0"; fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
 
       - name: Install
         uses: ./.github/actions/install
@@ -93,10 +95,347 @@ jobs:
       - name: Build docs bundle
         run: pnpm docs:self-hosted-bundle:build
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: fernapi
+          password: ${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          cd servers/self-hosted
+          pnpm docker:build
+        env:
+          DOCKER_BUILDKIT: 1
+
+      - name: Save Docker image
+        run: |
+          docker save fern-self-hosted:latest -o /tmp/fern-self-hosted.tar
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp/fern-self-hosted.tar
+          retention-days: 1
+
+      - name: Upload workspace for tests
+        uses: actions/upload-artifact@v4
+        with:
+          name: workspace
+          path: |
+            servers/self-hosted/fern
+            servers/self-hosted/kubernetes-example
+          retention-days: 1
+
+  run-self-hosted-tests:
+    runs-on: Seed
+    needs: build
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update Engines
+        run: |
+          node -e 'const fs = require("fs"); const pkg = require("./package.json"); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "10.27.0"; pkg.packageManager = "pnpm@10.27.0"; fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load Docker image
+        run: |
+          docker load -i /tmp/fern-self-hosted.tar
+          echo "Docker image loaded:"
+          docker images fern-self-hosted
+
       - name: Run all self-hosted tests
-        if: steps.detect_changes.outputs.run_all_tests == 'true'
-        run: pnpm turbo build test:self-hosted --filter=@fern-platform/self-hosted
+        if: needs.build.outputs.run_all_tests == 'true'
+        run: pnpm --filter=@fern-platform/self-hosted test:self-hosted
 
       - name: Run single self-hosted test (singleNode only)
-        if: steps.detect_changes.outputs.run_all_tests == 'false'
+        if: needs.build.outputs.run_all_tests == 'false'
         run: pnpm --filter=@fern-platform/self-hosted exec -- vitest src/__test__/singleNode.test.ts --globals --config src/__test__/vitest.config.ts
+
+  run-k8s-tests:
+    runs-on: Seed
+    needs: build
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load Docker image
+        run: |
+          docker load -i /tmp/fern-self-hosted.tar
+
+      - name: Download workspace artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace
+          path: servers/self-hosted
+
+      - name: Install kind
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+
+      - name: Create kind cluster
+        run: |
+          cat <<EOF | kind create cluster --config=-
+          kind: Cluster
+          apiVersion: kind.x-k8s.io/v1alpha4
+          nodes:
+          - role: control-plane
+            extraPortMappings:
+            - containerPort: 30080
+              hostPort: 30080
+              protocol: TCP
+          EOF
+
+      - name: Load Docker image into kind
+        run: |
+          kind load docker-image fern-self-hosted:latest
+
+      - name: Copy fern folder to kind node
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -la servers/self-hosted/fern/
+          
+          docker cp servers/self-hosted/fern kind-control-plane:/fern
+          
+          echo "Verifying fern folder was copied to kind node..."
+          docker exec kind-control-plane ls -la /fern
+          docker exec kind-control-plane ls -la /fern/docs/ || echo "docs folder not found"
+
+      - name: Deploy to Kubernetes
+        run: |
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: fern-docs
+            labels:
+              app: fern-docs
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: fern-docs
+            template:
+              metadata:
+                labels:
+                  app: fern-docs
+              spec:
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 65532
+                  runAsGroup: 65532
+                  fsGroup: 65532
+                  fsGroupChangePolicy: OnRootMismatch
+                containers:
+                  - name: fern-docs
+                    image: fern-self-hosted:latest
+                    imagePullPolicy: Never
+                    ports:
+                      - name: docs
+                        containerPort: 3000
+                        protocol: TCP
+                      - name: health
+                        containerPort: 8081
+                        protocol: TCP
+                    env:
+                      - name: SKIP_WARMUP
+                        value: "false"
+                      - name: FERN_LOG_LEVEL
+                        value: "info"
+                      - name: TMPDIR
+                        value: /tmp
+                    volumeMounts:
+                      - name: fern-config
+                        mountPath: /fern
+                        readOnly: true
+                    resources:
+                      requests:
+                        memory: "2Gi"
+                        cpu: "1000m"
+                      limits:
+                        memory: "4Gi"
+                        cpu: "2000m"
+                    livenessProbe:
+                      httpGet:
+                        path: /liveness
+                        port: 8081
+                      initialDelaySeconds: 120
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3
+                    readinessProbe:
+                      httpGet:
+                        path: /readiness
+                        port: 8081
+                      initialDelaySeconds: 60
+                      periodSeconds: 5
+                      timeoutSeconds: 5
+                      failureThreshold: 6
+                    securityContext:
+                      allowPrivilegeEscalation: false
+                      runAsNonRoot: true
+                      runAsUser: 65532
+                      runAsGroup: 65532
+                      privileged: false
+                      readOnlyRootFilesystem: false
+                      capabilities:
+                        drop:
+                          - ALL
+                volumes:
+                  - name: fern-config
+                    hostPath:
+                      path: /fern
+                      type: Directory
+                terminationGracePeriodSeconds: 30
+          EOF
+          kubectl apply -f servers/self-hosted/kubernetes-example/service.yaml
+
+      - name: Wait for pod to be ready
+        run: |
+          echo "Waiting for pod to be scheduled..."
+          kubectl wait --for=condition=PodScheduled pod -l app=fern-docs --timeout=120s || true
+          
+          echo "Waiting for pod to be ready (this may take 3-5 minutes)..."
+          for i in {1..60}; do
+            POD_STATUS=$(kubectl get pods -l app=fern-docs -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "Pending")
+            READY=$(kubectl get pods -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null || echo "false")
+            echo "Attempt $i/60: Pod status=$POD_STATUS, Ready=$READY"
+            
+            if [ "$READY" = "true" ]; then
+              echo "Pod is ready!"
+              break
+            fi
+            
+            if [ "$POD_STATUS" = "Failed" ] || [ "$POD_STATUS" = "Error" ]; then
+              echo "Pod failed to start. Checking logs..."
+              kubectl logs -l app=fern-docs --tail=100 || true
+              kubectl describe pod -l app=fern-docs || true
+              exit 1
+            fi
+            
+            sleep 10
+          done
+          
+          READY=$(kubectl get pods -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null || echo "false")
+          if [ "$READY" != "true" ]; then
+            echo "Pod failed to become ready within timeout"
+            kubectl logs -l app=fern-docs --tail=200 || true
+            kubectl describe pod -l app=fern-docs || true
+            exit 1
+          fi
+
+      - name: Test health endpoints
+        run: |
+          echo "Testing liveness endpoint..."
+          LIVENESS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:30080/liveness 2>/dev/null || echo "000")
+          echo "Liveness status: $LIVENESS"
+          
+          POD_NAME=$(kubectl get pods -l app=fern-docs -o jsonpath='{.items[0].metadata.name}')
+          
+          echo "Testing internal liveness endpoint..."
+          kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/liveness
+          
+          echo "Testing internal readiness endpoint..."
+          kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/readiness
+          
+          echo "Testing internal FDR health..."
+          kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health
+          
+          echo "Testing internal MinIO health..."
+          kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:9000/minio/health/live
+
+      - name: Test PostgreSQL
+        run: |
+          POD_NAME=$(kubectl get pods -l app=fern-docs -o jsonpath='{.items[0].metadata.name}')
+          
+          echo "Testing PostgreSQL connection..."
+          kubectl exec $POD_NAME -- pg_isready -h localhost -p 5432 -U postgres -d postgres
+          
+          echo "Checking fdr database exists..."
+          DB_EXISTS=$(kubectl exec $POD_NAME -- psql -h localhost -p 5432 -U postgres -d postgres -t -c "SELECT 1 FROM pg_database WHERE datname='fdr'" 2>/dev/null | tr -d ' ')
+          if [ "$DB_EXISTS" != "1" ]; then
+            echo "ERROR: fdr database does not exist"
+            exit 1
+          fi
+          echo "fdr database exists"
+          
+          echo "Checking fdr database has tables..."
+          TABLE_COUNT=$(kubectl exec $POD_NAME -- psql -h localhost -p 5432 -U postgres -d fdr -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'" 2>/dev/null | tr -d ' ')
+          if [ "$TABLE_COUNT" -le 0 ]; then
+            echo "ERROR: fdr database has no tables"
+            exit 1
+          fi
+          echo "fdr database has $TABLE_COUNT tables"
+
+      - name: Test docs UI via NodePort
+        run: |
+          echo "Testing docs UI via NodePort (localhost:30080)..."
+          
+          for i in {1..30}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:30080 2>/dev/null || echo "000")
+            echo "Attempt $i/30: HTTP status=$HTTP_CODE"
+            
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Docs UI is accessible!"
+              break
+            fi
+            sleep 5
+          done
+          
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:30080 2>/dev/null || echo "000")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "ERROR: Docs UI not accessible (HTTP $HTTP_CODE)"
+            kubectl logs -l app=fern-docs --tail=100 || true
+            exit 1
+          fi
+          
+          CONTENT=$(curl -s http://localhost:30080 2>/dev/null | head -20)
+          if ! echo "$CONTENT" | grep -q "<!DOCTYPE html>\|<html"; then
+            echo "ERROR: Docs UI did not return HTML"
+            echo "Content received:"
+            echo "$CONTENT"
+            exit 1
+          fi
+          echo "Docs UI returned valid HTML"
+
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+          echo "=== Pod Status ==="
+          kubectl get pods -l app=fern-docs -o wide || true
+          
+          echo "=== Pod Description ==="
+          kubectl describe pod -l app=fern-docs || true
+          
+          echo "=== Pod Logs ==="
+          kubectl logs -l app=fern-docs --tail=500 || true
+          
+          echo "=== Events ==="
+          kubectl get events --sort-by='.lastTimestamp' || true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          kind delete cluster || true

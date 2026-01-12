@@ -46,10 +46,22 @@ async function removeNetwork(networkName: string) {
 }
 
 export async function setup() {
-    // Build the Docker image once for all tests
-    console.log("Building Docker image for tests...");
-    await execa("pnpm", ["docker:build"], { stdio: "inherit" });
-    console.log("Docker image built successfully");
+    // Check if Docker image already exists (e.g., loaded from CI artifact)
+    try {
+        const { stdout } = await execa("docker", ["images", "-q", SELF_HOSTED_IMAGE_TAG_NAME]);
+        if (stdout.trim()) {
+            console.log(`Docker image ${SELF_HOSTED_IMAGE_TAG_NAME} already exists, skipping build`);
+        } else {
+            console.log("Building Docker image for tests...");
+            await execa("pnpm", ["docker:build"], { stdio: "inherit" });
+            console.log("Docker image built successfully");
+        }
+    } catch {
+        // If check fails, try to build anyway
+        console.log("Building Docker image for tests...");
+        await execa("pnpm", ["docker:build"], { stdio: "inherit" });
+        console.log("Docker image built successfully");
+    }
 
     // Create the fern-network for all tests
     console.log("Creating fern-network...");
