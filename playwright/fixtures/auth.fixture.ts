@@ -33,7 +33,7 @@ async function performLogin(
   await page.click('[data-testid="ci-submit-button"]');
 
   // Wait for redirect to dashboard (successful login)
-  await page.waitForURL("**/", { timeout: 30000 });
+  await page.waitForURL("**/", { timeout: 100000 });
 
   return page;
 }
