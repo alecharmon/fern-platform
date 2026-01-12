@@ -121,7 +121,7 @@ export async function GET(
     return new NextResponse(markdown.content, {
         status: 200,
         headers: {
-            "Content-Type": `text/${markdown.contentType}`,
+            "Content-Type": "text/plain; charset=utf-8",
             "X-Robots-Tag": "noindex", // prevent search engines from indexing this page
             "Cache-Control": "no-store"
         }
