@@ -17,6 +17,7 @@ import { Button } from "../ui/button";
 import { DashboardTooltip } from "./DashboardTooltip";
 import { DevModeSwitcher } from "./DevModeSwitcher";
 import { EditorNextStepsModal } from "./EditorNextStepsModal";
+import { FeedbackButton } from "./FeedbackButton";
 import { FilesDropdown } from "./FilesDropdown";
 import { CelebrationRocketButton } from "./git/CelebrationRocketButton";
 import { ClickablePrNumber } from "./git/ClickablePrNumber";
@@ -25,7 +26,7 @@ import { PRStatusDropdown } from "./git/PRStatusDropdown";
 import { PRTitleEditor } from "./git/PRTitleEditor";
 
 export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData; docsUrl: DocsUrl }) {
-    const { name, picture } = session.user;
+    const { name, picture, email } = session.user;
     const { gitPrUrl, setPrUrl } = useGitPrInfo();
     const { branch } = useBranch();
     const isEditingDisabled = useEditingDisabled();
@@ -111,6 +112,7 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
                     </DashboardTooltip>
                 </div>
                 <div className="flex items-center justify-end gap-2 sm:flex-1 sm:shrink-0">
+                    <FeedbackButton userEmail={email} orgName={orgName} docsUrl={docsUrl} />
                     <DashboardTooltip
                         content={
                             isDevModeDisabled

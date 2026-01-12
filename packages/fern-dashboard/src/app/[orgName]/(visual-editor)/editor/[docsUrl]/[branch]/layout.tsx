@@ -10,6 +10,7 @@ import { EditorProvidersWrapper } from "@/components/editor/EditorProvidersWrapp
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { NeedsSetupBanner } from "@/components/editor/NeedsSetupBanner";
 import { PreviewOnlyNotification } from "@/components/editor/PreviewOnlyNotification";
+import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
 import { BranchProvider } from "@/providers/BranchContext";
 import { CurrentPageProvider } from "@/providers/CurrentPageContext";
 import { DevModeProvider } from "@/providers/DevModeProvider";
@@ -38,27 +39,30 @@ export default async function EditorLayout({
     const { session } = await assertAuthAndFetchGithubUrl(orgName, docsUrl);
 
     return (
-        <EditorShell>
-            <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false} disableTransitionOnChange>
-                <OrgNameProvider orgName={orgName}>
-                    <BranchProvider branch={branch}>
-                        <EditorProvidersWrapper branch={branch} orgName={orgName} docsUrl={docsUrl}>
-                            <CurrentPageProvider>
-                                <ClientMDXProvider>
-                                    <DevModeProvider>
-                                        <EditorProvider>
-                                            <NeedsSetupBanner docsUrl={docsUrl} orgName={orgName} />
-                                            <HeaderToolbar session={session} docsUrl={docsUrl} />
-                                            <PreviewOnlyNotification />
-                                            {children}
-                                        </EditorProvider>
-                                    </DevModeProvider>
-                                </ClientMDXProvider>
-                            </CurrentPageProvider>
-                        </EditorProvidersWrapper>
-                    </BranchProvider>
-                </OrgNameProvider>
-            </ThemeProvider>
-        </EditorShell>
+        <>
+            <ServerSidePylonSetup />
+            <EditorShell>
+                <ThemeProvider attribute="class" forcedTheme="light" enableSystem={false} disableTransitionOnChange>
+                    <OrgNameProvider orgName={orgName}>
+                        <BranchProvider branch={branch}>
+                            <EditorProvidersWrapper branch={branch} orgName={orgName} docsUrl={docsUrl}>
+                                <CurrentPageProvider>
+                                    <ClientMDXProvider>
+                                        <DevModeProvider>
+                                            <EditorProvider>
+                                                <NeedsSetupBanner docsUrl={docsUrl} orgName={orgName} />
+                                                <HeaderToolbar session={session} docsUrl={docsUrl} />
+                                                <PreviewOnlyNotification />
+                                                {children}
+                                            </EditorProvider>
+                                        </DevModeProvider>
+                                    </ClientMDXProvider>
+                                </CurrentPageProvider>
+                            </EditorProvidersWrapper>
+                        </BranchProvider>
+                    </OrgNameProvider>
+                </ThemeProvider>
+            </EditorShell>
+        </>
     );
 }
