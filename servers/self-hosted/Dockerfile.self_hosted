@@ -1,68 +1,17 @@
-# ----------- Build stage for Go binaries -----------
-# Use Chainguard Go image with Go 1.24.11+ to fix CVE-2025-61729
-# (excessive resource consumption in crypto/x509 HostnameError.Error())
-FROM cgr.dev/chainguard/go:latest AS go-builder
+# Self-hosted Fern docs container
+# This Dockerfile uses a pre-built base image that contains heavy dependencies
+# (Go binaries, PostgreSQL, MeiliSearch, Node.js, etc.) to speed up builds.
+#
+# The base image is built from Dockerfile.base and pushed to DockerHub.
+# When base dependencies change, rebuild and push the base image first.
 
-# Set up Go environment
-ENV GOPATH=/go
-ENV PATH=$PATH:/go/bin
+# Use the pre-built base image with all heavy dependencies
+# ARG allows overriding the base image tag at build time
+ARG BASE_IMAGE=fernapi/fern-self-hosted-base:latest
+FROM ${BASE_IMAGE}
 
-# Build MinIO with updated golang.org/x/crypto to fix GHSA-j5w8-q4qc-rx2x and GHSA-f6x5-jh6r-wrfv
-# and updated paho.mqtt.golang to fix CVE-2025-10543 (GHSA-32fw-gq77-f2f2)
-# Clone, update dependencies, and build from source
-RUN git clone --depth 1 --branch RELEASE.2025-10-15T17-29-55Z https://github.com/minio/minio.git /tmp/minio && \
-    cd /tmp/minio && \
-    go get golang.org/x/crypto@v0.45.0 && \
-    go get github.com/eclipse/paho.mqtt.golang@v1.5.1 && \
-    go mod tidy && \
-    go build -o $GOPATH/bin/minio . && \
-    rm -rf /tmp/minio
-
-# Get most secure mc commit: https://github.com/minio/mc/pull/5264
-# This commit already uses golang.org/x/crypto v0.45.0
-RUN go install -v github.com/minio/mc@4f6310723f43b117ca2ab746c6533949d777a5bb
-
-# Build Buf CLI v1.61.0 from source with patched Go to fix CVE-2025-61729
-# and updated quic-go to fix CVE-2025-64702 (GHSA-g754-hx8w-x2g6 - HTTP/3 QPACK Header Expansion DoS)
-# Clone, update dependencies, and build from source
-RUN git clone --depth 1 --branch v1.61.0 https://github.com/bufbuild/buf.git /tmp/buf && \
-    cd /tmp/buf && \
-    go get github.com/quic-go/quic-go@v0.57.0 && \
-    go mod tidy && \
-    go build -o $GOPATH/bin/buf ./cmd/buf && \
-    rm -rf /tmp/buf
-
-# Build protoc-gen-openapi for converting protobuf specs to OpenAPI
-# Required by Fern CLI when processing protobuf-based API specs
-# Clone, update google.golang.org/protobuf to fix GHSA-8r3f-844c-mc37 (infinite loop in protojson.Unmarshal), and build from source
-RUN git clone --depth 1 https://github.com/fern-api/protoc-gen-openapi.git /tmp/protoc-gen-openapi && \
-    cd /tmp/protoc-gen-openapi && \
-    go get google.golang.org/protobuf@v1.36.6 && \
-    go mod tidy && \
-    go build -o $GOPATH/bin/protoc-gen-openapi ./cmd/protoc-gen-openapi && \
-    rm -rf /tmp/protoc-gen-openapi
-
-# ----------- End Go build stage -----------
-# ----------- Main image -----------
-FROM cgr.dev/chainguard/wolfi-base:latest
-
-# Create timestamp logging utilities for build process
-RUN mkdir -p /usr/local/bin && \
-    printf '#!/bin/sh\necho "[$(date +%%Y-%%m-%%d\ %%H:%%M:%%S)] $*"\n' > /usr/local/bin/log && \
-    chmod +x /usr/local/bin/log && \
-    printf '#!/bin/sh\nwhile IFS= read -r line; do echo "[$(date +%%Y-%%m-%%d\ %%H:%%M:%%S)] $line"; done\n' > /usr/local/bin/add-timestamps && \
-    chmod +x /usr/local/bin/add-timestamps
-
-# Install Node.js and npm
-RUN log "Installing Node.js and npm..." && \
-    apk add --no-cache nodejs npm 2>&1 | add-timestamps
-
-RUN log "Installing turbo..." && \
-    npm install -g turbo@2.0.1 2>&1 | add-timestamps
-
+# Copy source code and run turbo prune
 COPY . .
-RUN log "Installing pnpm..." && \
-    npm install -g pnpm@10.27.0 2>&1 | add-timestamps
 RUN log "Cleaning up fern directory..." && \
     rm -rf fern/
 
@@ -72,32 +21,7 @@ RUN log "Running turbo prune..." && \
 ARG CACHEBUST=1
 COPY servers/self-hosted/scripts /scripts
 
-# -----------  Start Postgres setup  -----------
-
-# Create postgres user first
-RUN log "Creating postgres user..." && \
-    addgroup -g 70 -S postgres && \
-    adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres
-
-# Install PostgreSQL packages
-RUN log "Installing PostgreSQL..." && \
-    apk add --no-cache postgresql postgresql-contrib postgresql-dev 2>&1 | add-timestamps && \
-    mkdir -p /run/postgresql /var/lib/postgresql/data && \
-    chown -R postgres:postgres /run/postgresql /var/lib/postgresql
-
-# Set default Postgres user and password
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=postgres
-ENV DATABASE_NAME=fdr
-
-# Note: PostgreSQL will be initialized at runtime in /tmp to avoid permission conflicts
-# This allows the container to work with any UID (root or arbitrary non-root UIDs)
-
-ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fdr
-
-RUN log "Installing Prisma..." && \
-    npm install -g prisma@5.13.0 2>&1 | add-timestamps
-
+# -----------  Start Postgres schema setup  -----------
 COPY servers/fdr/prisma /prisma
 
 # Run Prisma migrations at build time and save schema dump
@@ -106,40 +30,9 @@ RUN log "Running base image database seeding..." && \
     chmod +x /scripts/base-seed-db.sh && \
     /scripts/base-seed-db.sh 2>&1 | add-timestamps
 
-# -----------  End Postgres setup  -----------
-
-# ----------- Start MINIO setup  -----------
-# Copy MinIO binary from build stage
-COPY --from=go-builder /go/bin/minio /usr/local/bin/minio
-COPY --from=go-builder /go/bin/mc /usr/local/bin/mc
-
-# Set up MinIO user and data directory
-RUN log "Setting up MinIO..." && \
-    adduser -D -s /bin/sh minio-user || true && \
-    mkdir -p /data && \
-    # Make data directory accessible to all users
-    chmod 777 /data
-
-ENV MINIO_VOLUMES="/data" \
-    MINIO_URL="http://localhost:9000" \
-    MINIO_ROOT_USER="minioadmin" \
-    MINIO_ROOT_PASSWORD="minioadmin" \
-    MINIO_USERNAME="minioadmin" \
-    MINIO_PASSWORD="minioadmin"
-
-# ----------- End MINIO setup  -----------
-
-# ----------- Start MeiliSearch setup -----------
-RUN log "Installing MeiliSearch..." && \
-    apk add --no-cache curl bash strace 2>&1 | add-timestamps && \
-    bash -c 'for i in {1..6}; do curl -L https://install.meilisearch.com 2>&1 | sh | add-timestamps && break || { log "MeiliSearch install failed, retrying ($i/6)..."; sleep 10; }; done' && \
-    chmod 755 /meilisearch
-
-# ----------- End MeiliSearch setup -----------
+# -----------  End Postgres schema setup  -----------
 
 # ----------- Start FDR setup -----------
-ENV LOCAL_MODE_OVERRIDE=true
-ENV S3_FORCE_PATH_STYLE=true
 COPY servers/fdr/cjs /fdr
 COPY servers/fdr/prisma /fdr/prisma
 
@@ -162,12 +55,8 @@ RUN log "Pre-generating Prisma engines..." && \
 WORKDIR /
 
 # ----------- Start fern cli installation -----------
-# Configure npm to use writable directories for non-root users
-ENV NPM_CONFIG_PREFIX=/tmp/npm-global
-ENV NPM_CONFIG_CACHE=/tmp/npm-cache
-ENV PATH=$PATH:/tmp/npm-global/bin
+# NPM_CONFIG_PREFIX and NPM_CONFIG_CACHE are already set in base image
 RUN log "Installing Fern CLI..." && \
-    mkdir -p /tmp/npm-global /tmp/npm-cache && \
     npm install -g fern-api 2>&1 | add-timestamps && \
     chmod -R 777 /tmp/npm-global /tmp/npm-cache
 # ----------- End fern cli installation -----------
@@ -180,17 +69,11 @@ RUN log "Setting up Next.js app..." && \
     tar -xzf docs_bundle.tar.gz -C /nextapp && \
     cd /nextapp && \
     node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));" && \
-    # Install esbuild globally with --ignore-scripts to avoid ETXTBSY race condition
-    npm i -g esbuild@0.27.0 --ignore-scripts 2>&1 | add-timestamps && \
-    # Ensure Next.js cache directory exists and is writable for restricted mode
     mkdir -p /nextapp/packages/fern-docs/bundle/.next/cache && \
     chmod -R 777 /nextapp/packages/fern-docs/bundle/.next && \
-    mv /tmp/npm-global/lib/node_modules/esbuild /nextapp/node_modules/
+    mv /usr/local/lib/node_modules/esbuild /nextapp/node_modules/
 
 # ----------- End nextapp setup -------------
-
-RUN log "Installing jq and yq..." && \
-    apk add --no-cache jq yq 2>&1 | add-timestamps
 
 # ----------- Start Jaeger setup (optional, for debugging) -----------
 # Set ENABLE_JAEGER=true during docker build to include Jaeger tracing
@@ -217,64 +100,12 @@ EXPOSE 16686
 
 # ----------- End Jaeger setup -----------
 
-# ----------- Start Buf CLI setup -----------
-# Copy Buf CLI from build stage (built with patched Go to fix CVE-2025-61729)
-COPY --from=go-builder /go/bin/buf /usr/local/bin/buf
-# Copy protoc-gen-openapi for converting protobuf specs to OpenAPI (required by Fern CLI)
-COPY --from=go-builder /go/bin/protoc-gen-openapi /usr/local/bin/protoc-gen-openapi
-
-# Pre-install buf's npm dependencies into a reusable location
-RUN log "Pre-installing Buf npm dependencies..." && \
-    mkdir -p /opt/buf-modules && \
-    cd /opt/buf-modules && \
-    echo '{"dependencies":{"@bufbuild/protobuf":"^2.2.5","@bufbuild/protoplugin":"2.2.5"}}' > package.json && \
-    NPM_CONFIG_USERCONFIG=/dev/null npm install --no-audit --no-fund 2>&1 | add-timestamps && \
-    chmod -R 777 /opt/buf-modules
-
-# Replace npm with a wrapper that provides pre-installed modules for buf
-RUN log "Creating npm wrapper for Buf..." && \
-    mv /usr/bin/npm /usr/bin/npm-real && \
-    printf '#!/bin/sh\n' > /usr/bin/npm && \
-    printf 'if [ "$1" = "install" ] && [ -f "package.json" ] && grep -q "@bufbuild/protobuf" package.json 2>/dev/null; then\n' >> /usr/bin/npm && \
-    printf '  if [ -d "/opt/buf-modules/node_modules" ]; then\n' >> /usr/bin/npm && \
-    printf '    cp -r /opt/buf-modules/node_modules . 2>/dev/null && exit 0\n' >> /usr/bin/npm && \
-    printf '  fi\n' >> /usr/bin/npm && \
-    printf 'fi\n' >> /usr/bin/npm && \
-    printf 'exec /usr/bin/npm-real "$@"\n' >> /usr/bin/npm && \
-    chmod +x /usr/bin/npm
-
-# Verify buf can export with the wrapper
-RUN log "Verifying Buf CLI installation..." && \
-    mkdir -p /tmp/buf-test && \
-    cd /tmp/buf-test && \
-    echo 'syntax = "proto3"; package test; message TestMessage { string field = 1; }' > test.proto && \
-    echo 'version: v2' > buf.yaml && \
-    buf export . --output /tmp/buf-output 2>&1 | add-timestamps && \
-    cd / && rm -rf /tmp/buf-test /tmp/buf-output
-# ----------- End Buf CLI setup -----------
-
-# ----------- Start npm vulnerability patches -----------
-# Patch glob and brace-expansion to fix GHSA-5j98-mcp5-4vw2 and GHSA-v6h2-p8h4-qcjw
-# Using npm pack + tar approach to replace vulnerable packages without running npm install
-
-# Helper function to patch glob in a node_modules directory
-# glob 10.x -> 10.5.0, glob 11.x -> 11.1.0
-RUN log "Patching npm vulnerabilities..." && \
-    cd /tmp && \
-    npm-real pack glob@10.5.0 2>&1 | add-timestamps && \
-    npm-real pack glob@11.1.0 2>&1 | add-timestamps && \
-    npm-real pack brace-expansion@2.0.2 2>&1 | add-timestamps && \
-    mkdir -p /tmp/patches/glob-10 /tmp/patches/glob-11 /tmp/patches/brace-expansion && \
-    tar -xzf glob-10.5.0.tgz -C /tmp/patches/glob-10 && \
-    tar -xzf glob-11.1.0.tgz -C /tmp/patches/glob-11 && \
-    tar -xzf brace-expansion-2.0.2.tgz -C /tmp/patches/brace-expansion && \
-    rm -f glob-*.tgz brace-expansion-*.tgz
-
-# Patch glob and brace-expansion across all node_modules directories
-# This covers: npm, pnpm, turbo, prisma, esbuild, fern-api CLI, FDR, nextapp, buf-modules
+# ----------- Start npm vulnerability patches for app-specific modules -----------
+# Patch glob and brace-expansion in app-specific directories
+# The base image already has patches prepared in /tmp/patches/
 # Only patch vulnerable versions: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0, brace-expansion 2.0.x -> 2.0.2
-RUN log "Patching glob/brace-expansion across all node_modules..." && \
-    for root in /usr/local/lib/node_modules /usr/lib/node_modules /tmp/npm-global/lib/node_modules /fdr /nextapp /opt/buf-modules; do \
+RUN log "Patching glob/brace-expansion in app-specific node_modules..." && \
+    for root in /tmp/npm-global/lib/node_modules /fdr /nextapp; do \
         if [ -d "$root" ]; then \
             find "$root" -path "*/node_modules/glob/package.json" -o -path "*/dist/node_modules/glob/package.json" 2>/dev/null | while read -r pkg; do \
                 dir=$(dirname "$pkg"); \
