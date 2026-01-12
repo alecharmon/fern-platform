@@ -6,8 +6,7 @@ import * as Sentry from "@sentry/nextjs";
 type SentryBaseConfig = Parameters<typeof Sentry.init>[0];
 
 export const baseConfig: SentryBaseConfig = {
-    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-    environment: process.env.NODE_ENV,
+    environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
     sendDefaultPii: true,
     tracesSampleRate: 0,
     skipOpenTelemetrySetup: true,

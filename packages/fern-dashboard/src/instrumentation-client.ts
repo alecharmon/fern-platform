@@ -10,6 +10,7 @@ import { baseConfig } from "../sentry.base.config";
 
 if (isProduction()) {
     Sentry.init({
+        dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
         ...baseConfig,
         initialScope: (scope) => {
             const buildTimestamp = getBuildTimestamp();
