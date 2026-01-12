@@ -508,6 +508,24 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
             // Delete the database record
             await app.dao.docsV2().deleteDocsSite({ url });
 
+            // Invalidate Vercel cache so the site stops being served
+            if (!app.config.localModeOverride) {
+                try {
+                    const invalidateUrl = `https://${url.getFullUrl()}/api/fern-docs/invalidate`;
+                    app.logger.info(`Invalidating Vercel cache at ${invalidateUrl}`);
+                    const response = await fetch(invalidateUrl);
+                    if (!response.ok) {
+                        app.logger.warn(
+                            `Failed to invalidate Vercel cache for ${url.getFullUrl()}: ${response.status} ${response.statusText}`
+                        );
+                    } else {
+                        app.logger.info(`Successfully invalidated Vercel cache for ${url.getFullUrl()}`);
+                    }
+                } catch (e) {
+                    app.logger.warn(`Error invalidating Vercel cache for ${url.getFullUrl()}`, e);
+                }
+            }
+
             return res.send();
         },
 
