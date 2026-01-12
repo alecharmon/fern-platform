@@ -104,6 +104,7 @@ jobs:
           echo "Building version: $VERSION for linux/amd64 (native)"
           docker buildx build \
             --platform linux/amd64 \
+            --provenance=false \
             --cache-from type=gha,scope=amd64 \
             --cache-to type=gha,mode=max,scope=amd64 \
             --push \
@@ -142,6 +143,7 @@ jobs:
           echo "Building version: $VERSION for linux/arm64 (native)"
           docker buildx build \
             --platform linux/arm64 \
+            --provenance=false \
             --cache-from type=gha,scope=arm64 \
             --cache-to type=gha,mode=max,scope=arm64 \
             --push \
