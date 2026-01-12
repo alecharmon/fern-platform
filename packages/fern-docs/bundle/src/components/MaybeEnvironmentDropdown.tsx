@@ -1,3 +1,4 @@
+import { removeTrailingSlash } from "@fern-api/docs-utils";
 import type { APIV1Read, FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { sanitizeUrl } from "@fern-api/ui-core-utils";
 import { cn } from "@fern-docs/components/cn";
@@ -70,7 +71,7 @@ export function MaybeEnvironmentDropdown({
     const urlProtocol = url ? url.protocol : "";
     const fullyQualifiedDomainAndBasePath = url
         ? url.pathname != null && url.pathname !== "/"
-            ? `${url.host}${url.pathname}`
+            ? removeTrailingSlash(`${url.host}${url.pathname}`)
             : url.host
         : "";
 

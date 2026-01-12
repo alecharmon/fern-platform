@@ -1,6 +1,6 @@
 "use client";
 
-import type { HttpOrWssOrGrpc } from "@fern-api/docs-utils";
+import { type HttpOrWssOrGrpc, removeTrailingSlash } from "@fern-api/docs-utils";
 import type { APIV1Read } from "@fern-api/fdr-sdk";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { sanitizeUrl, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
@@ -148,7 +148,9 @@ export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<En
                 })}
             </span>
         ) : showEnvironment && baseUrl ? (
-            <span className="text-(color:--grayscale-a11) whitespace-nowrap max-sm:hidden">{baseUrl}</span>
+            <span className="text-(color:--grayscale-a11) whitespace-nowrap max-sm:hidden">
+                {removeTrailingSlash(baseUrl)}
+            </span>
         ) : null;
 
     return (
@@ -185,7 +187,9 @@ export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<En
                                 >
                                     {environmentDropdownContent}
                                     {!showEnvironment && environmentBasepath && environmentBasepath !== "/" && (
-                                        <span className="text-(color:--grayscale-a11)">{environmentBasepath}</span>
+                                        <span className="text-(color:--grayscale-a11)">
+                                            {removeTrailingSlash(environmentBasepath)}
+                                        </span>
                                     )}
                                     {pathParts}
                                 </span>
