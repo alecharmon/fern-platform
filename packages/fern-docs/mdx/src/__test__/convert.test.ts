@@ -684,3 +684,71 @@ tags:
         expect(mdxResult.mdx).not.toContain("- Real bullet");
     });
 });
+
+describe("Heading anchor preservation", () => {
+    it("htmlToMdx: round-trip preserves explicit anchor IDs in headings", () => {
+        const mdxWithAnchor = `## My Heading [#custom-anchor]
+
+Some content below the heading.`;
+
+        const { html, frontmatter } = mdxToHtml(mdxWithAnchor);
+        const mdxResult = htmlToMdx(html, { frontmatter });
+
+        expect(mdxResult.mdx).toContain("## My Heading [#custom-anchor]");
+    });
+
+    it("htmlToMdx: round-trip preserves multiple headings with anchors", () => {
+        const mdxWithMultipleAnchors = `# Title [#title-anchor]
+
+## Section One [#section-one]
+
+Content for section one.
+
+## Section Two [#section-two]
+
+Content for section two.
+
+### Subsection [#subsection-anchor]
+
+More content.`;
+
+        const { html, frontmatter } = mdxToHtml(mdxWithMultipleAnchors);
+        const mdxResult = htmlToMdx(html, { frontmatter });
+
+        expect(mdxResult.mdx).toContain("# Title [#title-anchor]");
+        expect(mdxResult.mdx).toContain("## Section One [#section-one]");
+        expect(mdxResult.mdx).toContain("## Section Two [#section-two]");
+        expect(mdxResult.mdx).toContain("### Subsection [#subsection-anchor]");
+    });
+
+    it("htmlToMdx: headings without explicit anchors remain unchanged", () => {
+        const mdxWithoutAnchor = `## Regular Heading
+
+Some content.`;
+
+        const { html, frontmatter } = mdxToHtml(mdxWithoutAnchor);
+        const mdxResult = htmlToMdx(html, { frontmatter });
+
+        expect(mdxResult.mdx).toContain("## Regular Heading");
+        expect(mdxResult.mdx).not.toContain("[#");
+    });
+
+    it("htmlToMdx: preserves anchors when changedNodes marks heading as changed", () => {
+        const mdxWithAnchor = `## My Heading [#custom-anchor]
+
+Some content.`;
+
+        const { html, frontmatter } = mdxToHtml(mdxWithAnchor);
+
+        // Extract the heading's data-id from the HTML
+        const dataIdMatch = html.match(/h2[^>]*fve-data-id="([^"]+)"/);
+        const headingId = dataIdMatch?.[1];
+
+        // Mark the heading as changed
+        const changedNodes = headingId ? { [headingId]: true } : {};
+
+        const mdxResult = htmlToMdx(html, { frontmatter, changedNodes });
+
+        expect(mdxResult.mdx).toContain("## My Heading [#custom-anchor]");
+    });
+});

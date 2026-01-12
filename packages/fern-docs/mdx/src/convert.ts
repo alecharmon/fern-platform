@@ -22,6 +22,7 @@ import { gfm } from "micromark-extension-gfm";
 import { math } from "micromark-extension-math";
 import { mdxjs } from "micromark-extension-mdxjs";
 import { visit } from "unist-util-visit";
+import { extractAnchorFromHeadingText } from "./handlers/custom-headings";
 import { isInlineComponent } from "./inline-allowlist";
 
 // Options for how yaml is written to the frontmatter
@@ -479,6 +480,56 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
         return getToMdastDefaultHandler(element.tagName as any)(state, element);
     };
 
+    // Track heading anchors to be restored after markdown generation
+    const headingAnchorPlaceholders: Record<string, string> = {};
+
+    // Custom handler for headings that detects and preserves explicit anchor IDs
+    // Uses extractAnchorFromHeadingText for consistent anchor detection with fern-docs
+    const headingElementHandler: ToMdastHandle = (state, element) => {
+        // First check if we should use the original MDX content (unchanged node)
+        if (
+            changedNodes != null &&
+            typeof element.properties?.["fve-mdx-b64"] === "string" &&
+            typeof element.properties?.["fve-data-id"] === "string" &&
+            !changedNodes[element.properties["fve-data-id"]]
+        ) {
+            const originalMdx = Buffer.from(element.properties["fve-mdx-b64"], "base64").toString("utf-8");
+
+            const id = Math.random().toString().slice(2, 14);
+            const placeholder = `PLACEHOLDERV2_${id}`;
+            placeholders[placeholder] = originalMdx;
+
+            return { type: "html", value: placeholder } as any;
+        }
+
+        // Use the default handler to convert the heading
+        const result = getToMdastDefaultHandler(element.tagName as any)(state, element);
+
+        // Check if the heading text contains an explicit anchor pattern [#anchor-id]
+        // If so, replace it with a placeholder to prevent escaping during markdown generation
+        if (result && typeof result === "object" && "type" in result) {
+            const headingNode = result as { type: string; children?: any[] };
+            if (headingNode.type === "heading" && Array.isArray(headingNode.children)) {
+                // Find the last text node and check for anchor pattern
+                const lastChild = headingNode.children[headingNode.children.length - 1];
+                if (lastChild && lastChild.type === "text" && typeof lastChild.value === "string") {
+                    const { text, anchor } = extractAnchorFromHeadingText(lastChild.value);
+                    if (anchor != null) {
+                        // Create a unique placeholder for this anchor
+                        const placeholderId = Math.random().toString().slice(2, 14);
+                        const anchorPlaceholder = `HEADINGANCHORv2${placeholderId}`;
+                        headingAnchorPlaceholders[anchorPlaceholder] = `[#${anchor}]`;
+
+                        // Replace the text with the anchor-free text plus placeholder
+                        lastChild.value = `${text} ${anchorPlaceholder}`;
+                    }
+                }
+            }
+        }
+
+        return result;
+    };
+
     const customElementv2Handler: ToMdastHandle = (_, element) => {
         // Parse fve-data-* properties into MDX attributes and extract name/type/hash
         const props = element.properties || {};
@@ -501,13 +552,13 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
     const mdast = toMdast(hast, {
         handlers: {
             // All HTML tags that have MDX representations
-            // Headings
-            h1: baseElementHandler,
-            h2: baseElementHandler,
-            h3: baseElementHandler,
-            h4: baseElementHandler,
-            h5: baseElementHandler,
-            h6: baseElementHandler,
+            // Headings - use custom handler to preserve explicit anchor IDs
+            h1: headingElementHandler,
+            h2: headingElementHandler,
+            h3: headingElementHandler,
+            h4: headingElementHandler,
+            h5: headingElementHandler,
+            h6: headingElementHandler,
 
             // Text formatting
             p: baseElementHandler,
@@ -690,6 +741,12 @@ export function htmlToMdx(html: string, options?: HtmlToMdxOptions): HtmlToMdxRe
         const escapedContent = content.replace(/\$/g, "$$$$");
         // Replace all occurrences of the placeholder with the escaped content
         finalMdx = finalMdx.replaceAll(placeholder, escapedContent);
+    });
+
+    // Replace heading anchor placeholders with actual anchor syntax
+    // These placeholders were used to prevent the brackets from being escaped during markdown generation
+    Object.entries(headingAnchorPlaceholders).forEach(([placeholder, anchor]) => {
+        finalMdx = finalMdx.replaceAll(placeholder, anchor);
     });
 
     return { mdx: finalMdx };
