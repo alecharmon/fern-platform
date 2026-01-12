@@ -38,6 +38,7 @@ export type DocsMetadata = z.infer<typeof DocsMetadataSchema>;
 
 export interface DocsLoader<IsAsync extends boolean = true> {
     getAuthConfig: () => MaybePromise<AuthEdgeConfig | undefined, IsAsync>;
+    getAuthConfigs: () => MaybePromise<AuthEdgeConfig[], IsAsync>;
     getMetadata: () => MaybePromise<DocsMetadata, IsAsync>;
 }
 
@@ -46,6 +47,7 @@ export interface DocsLoader<IsAsync extends boolean = true> {
     fern_token: string | undefined;
 
     getAuthConfig: () => MaybePromise<AuthEdgeConfig | undefined, IsAsync>;
+    getAuthConfigs: () => MaybePromise<AuthEdgeConfig[], IsAsync>;
 
     /**
      * @returns the metadata for the given url, including the domain, base path, url, org, and isPreview

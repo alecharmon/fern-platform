@@ -89,7 +89,8 @@ async function toSessionUserInfo(session?: WorkOSSession): Promise<WorkOSUserInf
             role,
             permissions,
             impersonator: session.impersonator,
-            accessToken: session.accessToken
+            accessToken: session.accessToken,
+            authMethod: session.authMethod
         };
     }
 

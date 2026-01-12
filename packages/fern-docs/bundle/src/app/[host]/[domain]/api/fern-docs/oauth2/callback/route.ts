@@ -1,4 +1,4 @@
-import { type FernUser, OAuthTokenResponseSchema } from "@fern-api/docs-auth";
+import { type FernUser, getAuthMethodId, OAuthTokenResponseSchema } from "@fern-api/docs-auth";
 import {
     getAllowedRedirectUrls,
     getDocsDomainEdge,
@@ -159,7 +159,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             payload,
             issuer,
             expires_in: parsedToken.data.expires_in,
-            refresh_token: parsedToken.data.refresh_token
+            refresh_token: parsedToken.data.refresh_token,
+            authMethod: getAuthMethodId(config)
         });
 
         const res = redirectLocation
@@ -191,15 +192,18 @@ async function mintJwtToken({
     payload,
     issuer,
     expires_in,
-    refresh_token
+    refresh_token,
+    authMethod
 }: {
     payload: FernUser;
     issuer: string;
     expires_in: number;
     refresh_token: string | undefined;
+    authMethod: string;
 }): Promise<string> {
     const jwtPayload = {
         fern: payload,
+        auth_method: authMethod,
         ...(refresh_token && { refresh_token })
     };
 

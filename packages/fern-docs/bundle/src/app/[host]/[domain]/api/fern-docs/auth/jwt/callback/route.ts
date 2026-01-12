@@ -1,5 +1,6 @@
+import { getAuthMethodId } from "@fern-api/docs-auth";
 import { getAllowedRedirectUrls } from "@fern-api/docs-server/auth/allowed-redirects";
-import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
+import { safeVerifyFernJWTConfig, signFernJWT } from "@fern-api/docs-server/auth/FernJWT";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
@@ -44,6 +45,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
     }
 
+    // Re-sign the token with auth method included
+    const authMethod = getAuthMethodId(edgeConfig);
+    const newToken = await signFernJWT(fernUser, { authMethod });
+
     const res = redirectLocation
         ? FernNextResponse.redirect(req, {
               destination: redirectLocation,
@@ -52,7 +57,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         : NextResponse.next();
 
     const cookieJar = await cookies();
-    cookieJar.set(COOKIE_FERN_TOKEN, token, withSecureCookie(withDefaultProtocol(host)));
+    cookieJar.set(COOKIE_FERN_TOKEN, newToken, withSecureCookie(withDefaultProtocol(host)));
 
     return res;
 }

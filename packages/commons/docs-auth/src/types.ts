@@ -101,6 +101,21 @@ export const PathnameViewerRulesSchema = z.object({
         .optional()
 });
 
+export const AuthMethodIdSchema = z.object({
+    id: z
+        .string()
+        .optional()
+        .describe(
+            "Unique identifier for this auth method. Used to identify which auth method was used when a site has multiple auth methods configured. If not provided, defaults to type:partner format."
+        ),
+    name: z
+        .string()
+        .optional()
+        .describe(
+            "Display name for this auth method. Used in the login dropdown when multiple auth methods are configured. If not provided, a default name based on the auth type will be used."
+        )
+});
+
 // WorkOS is our only SSO provider for now, and is meant for private docs.
 export const SSOWorkOSSchema = z
     .object({
@@ -115,6 +130,7 @@ export const SSOWorkOSSchema = z
         domainHint: z.string().optional().describe("Domain hint for social login"),
         loginHint: z.string().optional().describe("Login hint for social login")
     })
+    .merge(AuthMethodIdSchema)
     .merge(PathnameViewerRulesSchema);
 
 export const APIPlaygroundEdgeConfigSchema = z.object({
@@ -130,6 +146,7 @@ export const OAuth2SharedSchema = z
         clientSecret: z.string(),
         redirectUri: z.string().optional()
     })
+    .merge(AuthMethodIdSchema)
     .merge(APIPlaygroundEdgeConfigSchema)
     .merge(PathnameViewerRulesSchema);
 
@@ -176,6 +193,7 @@ export const BasicTokenVerificationSchema = z
                 "By default, this is 'state' because most auth platforms are able to support carrying over the state query parameter. Override this to `return_to` if the state parameter conflicts with the customer's auth provider in any way."
             )
     })
+    .merge(AuthMethodIdSchema)
     .merge(APIPlaygroundEdgeConfigSchema)
     .merge(PathnameViewerRulesSchema);
 
@@ -184,6 +202,7 @@ export const PasswordAuthSchema = z
         type: z.literal("password"),
         password: z.string()
     })
+    .merge(AuthMethodIdSchema)
     .merge(PathnameViewerRulesSchema);
 
 export const AuthEdgeConfigSchema = z.union([
@@ -192,6 +211,12 @@ export const AuthEdgeConfigSchema = z.union([
     BasicTokenVerificationSchema,
     PasswordAuthSchema
 ]);
+
+export const AuthEdgeConfigOrListSchema = z
+    .union([AuthEdgeConfigSchema, z.array(AuthEdgeConfigSchema)])
+    .describe(
+        "Authentication configuration for a domain. Can be a single auth config (backward compatible) or an array of auth configs for sites with multiple authentication methods."
+    );
 
 export const OAuthTokenResponseSchema = z.object({
     access_token: z.string(),
@@ -253,6 +278,7 @@ export type ApiKeyDemo = z.infer<typeof ApiKeySchema>;
 export type FernUser = z.infer<typeof FernUserSchema>;
 export type PlaygroundState = z.infer<typeof PlaygroundStateSchema>;
 export type AuthEdgeConfig = z.infer<typeof AuthEdgeConfigSchema>;
+export type AuthEdgeConfigOrList = z.infer<typeof AuthEdgeConfigOrListSchema>;
 export type SSOWorkOS = z.infer<typeof SSOWorkOSSchema>;
 export type PasswordAuth = z.infer<typeof PasswordAuthSchema>;
 export type OAuth2Ory = z.infer<typeof OAuth2OrySchema>;
@@ -265,3 +291,43 @@ export type OryAccessToken = z.infer<typeof OryAccessTokenSchema>;
 export type Jwk = z.infer<typeof JwkSchema>;
 export type Jwks = z.infer<typeof JwksSchema>;
 export type PathnameViewerRules = z.infer<typeof PathnameViewerRulesSchema>;
+
+export function getAuthMethodId(config: AuthEdgeConfig): string {
+    if (config.id) {
+        return config.id;
+    }
+    if (config.type === "oauth2") {
+        return `oauth2:${config.partner}`;
+    }
+    if (config.type === "sso") {
+        return `sso:${config.partner}`;
+    }
+    return config.type;
+}
+
+export function getAuthMethodDisplayName(config: AuthEdgeConfig): string {
+    if (config.name) {
+        return config.name;
+    }
+    if (config.type === "oauth2") {
+        return `Login with ${config.partner.charAt(0).toUpperCase() + config.partner.slice(1)}`;
+    }
+    if (config.type === "sso") {
+        return "Single Sign-On";
+    }
+    if (config.type === "basic_token_verification") {
+        return "Login";
+    }
+    if (config.type === "password") {
+        return "Password Login";
+    }
+    return "Login";
+}
+
+export function normalizeAuthConfigs(config: AuthEdgeConfigOrList): AuthEdgeConfig[] {
+    return Array.isArray(config) ? config : [config];
+}
+
+export function findAuthConfigById(configs: AuthEdgeConfig[], authMethodId: string): AuthEdgeConfig | undefined {
+    return configs.find((c) => getAuthMethodId(c) === authMethodId);
+}

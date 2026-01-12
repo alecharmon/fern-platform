@@ -2,6 +2,7 @@ export {
     getApiKeyInjectionDemoConfig,
     getApiKeyInjectionEdgeConfig,
     getAuthEdgeConfig,
+    getAuthEdgeConfigs,
     getWorkOSOrganizationDomains
 } from "./getAuthEdgeConfig";
 export { getCanonicalUrl } from "./getCanonicalUrl";

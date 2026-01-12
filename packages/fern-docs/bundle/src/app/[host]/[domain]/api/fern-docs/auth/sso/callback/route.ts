@@ -1,3 +1,4 @@
+import { getAuthMethodId } from "@fern-api/docs-auth";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
@@ -95,11 +96,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             throw new Error("response is missing tokens");
         }
 
+        // Get auth config to determine auth method ID
+        const authConfig = await getAuthEdgeConfig(domain);
+        const authMethod = authConfig ? getAuthMethodId(authConfig) : undefined;
+
         const session = await encryptSession({
             accessToken,
             refreshToken,
             user,
-            impersonator
+            impersonator,
+            authMethod
         });
 
         // TODO: check if we need to run `getAllowedRedirectUrls(config)` because we don't have the edge config imported here

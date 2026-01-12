@@ -54,7 +54,7 @@ import { ApiDefinitionId, EndpointId, type PageId, type Slug, type TypeId } from
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, isPlainObject } from "@fern-api/ui-core-utils";
 import { visualEditorStorage } from "@fern-api/visual-editor-server";
-import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig, getAuthEdgeConfigs, getEdgeFlags } from "@fern-docs/edge-config";
 import { createHash } from "crypto";
 import { mapValues } from "es-toolkit";
 import { unstable_cache, unstable_cacheTag } from "next/cache";
@@ -1313,6 +1313,7 @@ function calcDefaultPageWidth(sidebarWidth: number, contentWidth: number) {
 }
 
 const getAuthConfig = getAuthEdgeConfig;
+const getAuthConfigs = getAuthEdgeConfigs;
 
 const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domain: string) => {
@@ -1448,6 +1449,7 @@ const createCachedDocsLoaderImpl = async (
         domain: deriveDomainFromDomainKey(domainKey),
         fern_token,
         getAuthConfig: () => authConfig,
+        getAuthConfigs: () => (options?.skipAuth ? Promise.resolve([]) : getAuthConfigs(domainKey)),
         getMetadata: async () => {
             const prefetched = await prefetchPromise;
             return prefetched.metadata ?? (await metadata);

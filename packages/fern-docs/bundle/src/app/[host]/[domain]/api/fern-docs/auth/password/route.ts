@@ -1,3 +1,4 @@
+import { getAuthMethodId } from "@fern-api/docs-auth";
 import { signPasswordAuthJWT } from "@fern-api/docs-server/auth/password-auth";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
@@ -54,7 +55,8 @@ export async function POST(
         }
 
         // Password is correct - sign a JWT with standard fern structure
-        const token = await signPasswordAuthJWT({ secret: jwtSecret });
+        const authMethod = getAuthMethodId(authConfig);
+        const token = await signPasswordAuthJWT({ secret: jwtSecret, authMethod });
 
         // Determine the browser's actual host using standard proxy headers
         const browserHost =

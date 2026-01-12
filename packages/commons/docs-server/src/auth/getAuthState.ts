@@ -252,7 +252,7 @@ export async function createGetAuthState(
     };
 }
 
-function getAuthorizationUrl(
+export function getAuthorizationUrl(
     authConfig: AuthEdgeConfig,
     // TODO: we'll need to pass in the basepath here for any customers who are using a non-root basepath.
     host: string,
@@ -323,7 +323,7 @@ function getAuthorizationUrl(
     return undefined;
 }
 
-function getPasswordAuthorizationUrl(host: string, domain: string, pathname?: string): string {
+export function getPasswordAuthorizationUrl(host: string, domain: string, pathname?: string): string {
     // Decode URI components in case the host contains encoded characters (e.g., localhost%3A3000)
     const decodedHost = decodeURIComponent(host);
     const decodedDomain = decodeURIComponent(domain);

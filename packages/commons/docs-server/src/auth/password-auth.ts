@@ -4,10 +4,11 @@ const PASSWORD_AUTH_ROLE = "authenticated";
 
 interface SignPasswordAuthOptions {
     secret: string;
+    authMethod?: string;
 }
 
-export async function signPasswordAuthJWT({ secret }: SignPasswordAuthOptions): Promise<string> {
-    return signFernJWT({ roles: [PASSWORD_AUTH_ROLE] }, { secret });
+export async function signPasswordAuthJWT({ secret, authMethod }: SignPasswordAuthOptions): Promise<string> {
+    return signFernJWT({ roles: [PASSWORD_AUTH_ROLE] }, { secret, authMethod });
 }
 
 export async function verifyPasswordAuthJWT(
