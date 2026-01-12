@@ -322,7 +322,9 @@
     "batch": "Partia",
     "myEndpoint": "Mój endpoint",
     "optionalExtraProperties": "Opcjonalne dodatkowe właściwości",
-    "all": "Wszystkie"
+    "all": "Wszystkie",
+    "jsonPlaceholder": "Wprowadź JSON...",
+    "invalidJson": "Nieprawidłowy format JSON"
   },
   "httpMethods": {
     "get": "GET",

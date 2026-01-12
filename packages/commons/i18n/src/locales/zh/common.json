@@ -322,7 +322,9 @@
     "batch": "批处理",
     "myEndpoint": "我的端点",
     "optionalExtraProperties": "可选的额外属性",
-    "all": "全部"
+    "all": "全部",
+    "jsonPlaceholder": "输入 JSON...",
+    "invalidJson": "无效的 JSON 格式"
   },
   "httpMethods": {
     "get": "GET",

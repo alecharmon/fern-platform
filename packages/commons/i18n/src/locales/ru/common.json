@@ -322,7 +322,9 @@
     "batch": "Пакет",
     "myEndpoint": "Мой эндпоинт",
     "optionalExtraProperties": "Необязательные дополнительные свойства",
-    "all": "Все"
+    "all": "Все",
+    "jsonPlaceholder": "Введите JSON...",
+    "invalidJson": "Неверный формат JSON"
   },
   "httpMethods": {
     "get": "GET",

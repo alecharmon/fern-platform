@@ -322,7 +322,9 @@
     "batch": "Batch",
     "myEndpoint": "Min endpoint",
     "optionalExtraProperties": "Valfria extra egenskaper",
-    "all": "Alla"
+    "all": "Alla",
+    "jsonPlaceholder": "Ange JSON...",
+    "invalidJson": "Ogiltigt JSON-format"
   },
   "httpMethods": {
     "get": "GET",

@@ -322,7 +322,9 @@
     "batch": "Batch",
     "myEndpoint": "My endpoint",
     "optionalExtraProperties": "Optional extra properties",
-    "all": "All"
+    "all": "All",
+    "jsonPlaceholder": "Enter JSON...",
+    "invalidJson": "Invalid JSON format"
   },
   "httpMethods": {
     "get": "GET",

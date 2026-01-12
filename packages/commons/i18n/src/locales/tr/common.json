@@ -322,7 +322,9 @@
     "batch": "Toplu",
     "myEndpoint": "Benim endpoint'im",
     "optionalExtraProperties": "İsteğe bağlı ekstra özellikler",
-    "all": "Tümü"
+    "all": "Tümü",
+    "jsonPlaceholder": "JSON girin...",
+    "invalidJson": "Geçersiz JSON formatı"
   },
   "httpMethods": {
     "get": "GET",

@@ -338,6 +338,8 @@ export type Translations = {
         myEndpoint: string;
         optionalExtraProperties: string;
         all: string;
+        jsonPlaceholder: string;
+        invalidJson: string;
     };
 
     httpMethods: {

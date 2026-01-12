@@ -4,6 +4,7 @@ import {
     type ObjectProperty,
     type TypeDefinition,
     type TypeShapeOrReference,
+    unwrapObjectType,
     unwrapReference
 } from "@fern-api/fdr-sdk/api-definition";
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
@@ -32,6 +33,7 @@ import {
     usePlaygroundTypeReferenceFormContext
 } from "./PlaygroundTypeReferenceFormContext";
 import { PlaygroundUniscriminatedUnionForm } from "./PlaygroundUniscriminatedUnionForm";
+import { PlaygroundUnknownForm } from "./PlaygroundUnknownForm";
 
 interface PlaygroundTypeReferenceFormProps {
     id: string;
@@ -58,29 +60,58 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
         onChange(undefined);
     }, [onChange]);
     return visitDiscriminatedUnion(unwrapReference(shape, types).shape)._visit<ReactElement<any> | null>({
-        object: (object) => (
-            <WithLabel
-                property={property}
-                value={value}
-                onChange={onChange}
-                onRemove={onRemove}
-                types={types}
-                isNullSelected={isNullSelected}
-                lang={lang}
-            >
-                <span className={cn("block w-full", isNullSelected && "hidden")}>
-                    <PlaygroundObjectForm
-                        shape={object}
-                        onChange={onChange}
+        object: (object) => {
+            const { properties } = unwrapObjectType(object, types);
+            const isFreeformObject = properties.length === 0;
+
+            if (isFreeformObject) {
+                return (
+                    <WithLabel
+                        property={property}
                         value={value}
-                        indent={indent}
-                        id={id}
+                        onChange={onChange}
+                        onRemove={onRemove}
                         types={types}
+                        isNullSelected={isNullSelected}
                         lang={lang}
-                    />
-                </span>
-            </WithLabel>
-        ),
+                    >
+                        <span className={cn("block w-full", isNullSelected && "hidden")}>
+                            <PlaygroundUnknownForm
+                                id={id}
+                                onChange={onChange}
+                                value={value}
+                                disabled={disabled}
+                                lang={lang}
+                            />
+                        </span>
+                    </WithLabel>
+                );
+            }
+
+            return (
+                <WithLabel
+                    property={property}
+                    value={value}
+                    onChange={onChange}
+                    onRemove={onRemove}
+                    types={types}
+                    isNullSelected={isNullSelected}
+                    lang={lang}
+                >
+                    <span className={cn("block w-full", isNullSelected && "hidden")}>
+                        <PlaygroundObjectForm
+                            shape={object}
+                            onChange={onChange}
+                            value={value}
+                            indent={indent}
+                            id={id}
+                            types={types}
+                            lang={lang}
+                        />
+                    </span>
+                </WithLabel>
+            );
+        },
         enum: ({ values }) => (
             <WithLabel
                 property={property}
@@ -612,14 +643,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                 lang={lang}
             >
                 <span className={cn("block w-full", isNullSelected && "hidden")}>
-                    <FernTextarea
-                        id={id}
-                        className="w-full"
-                        value={typeof value === "string" ? value : ""}
-                        onValueChange={onChange}
-                        disabled={disabled}
-                        // TODO: add default value
-                    />
+                    <PlaygroundUnknownForm id={id} onChange={onChange} value={value} disabled={disabled} lang={lang} />
                 </span>
             </WithLabel>
         ),

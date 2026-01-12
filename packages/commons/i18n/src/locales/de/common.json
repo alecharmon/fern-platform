@@ -322,7 +322,9 @@
     "batch": "Stapel",
     "myEndpoint": "Mein Endpunkt",
     "optionalExtraProperties": "Optionale zusätzliche Eigenschaften",
-    "all": "Alle"
+    "all": "Alle",
+    "jsonPlaceholder": "JSON eingeben...",
+    "invalidJson": "Ungültiges JSON-Format"
   },
   "httpMethods": {
     "get": "GET",

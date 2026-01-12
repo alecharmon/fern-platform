@@ -322,7 +322,9 @@
     "batch": "Batch",
     "myEndpoint": "Mitt endepunkt",
     "optionalExtraProperties": "Valgfrie ekstra egenskaper",
-    "all": "Alle"
+    "all": "Alle",
+    "jsonPlaceholder": "Skriv inn JSON...",
+    "invalidJson": "Ugyldig JSON-format"
   },
   "httpMethods": {
     "get": "GET",

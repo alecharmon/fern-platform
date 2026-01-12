@@ -325,7 +325,9 @@
     "batch": "Lote",
     "myEndpoint": "Mi endpoint",
     "optionalExtraProperties": "Propiedades extra opcionales",
-    "all": "Todos"
+    "all": "Todos",
+    "jsonPlaceholder": "Ingrese JSON...",
+    "invalidJson": "Formato JSON inválido"
   },
   "httpMethods": {
     "get": "GET",

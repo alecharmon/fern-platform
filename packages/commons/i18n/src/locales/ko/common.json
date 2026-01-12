@@ -322,7 +322,9 @@
     "batch": "배치",
     "myEndpoint": "내 엔드포인트",
     "optionalExtraProperties": "선택적 추가 속성",
-    "all": "모두"
+    "all": "모두",
+    "jsonPlaceholder": "JSON 입력...",
+    "invalidJson": "잘못된 JSON 형식"
   },
   "httpMethods": {
     "get": "GET",

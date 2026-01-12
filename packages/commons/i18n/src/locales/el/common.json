@@ -322,7 +322,9 @@
     "batch": "Παρτίδα",
     "myEndpoint": "Το endpoint μου",
     "optionalExtraProperties": "Προαιρετικές επιπλέον ιδιότητες",
-    "all": "Όλα"
+    "all": "Όλα",
+    "jsonPlaceholder": "Εισάγετε JSON...",
+    "invalidJson": "Μη έγκυρη μορφή JSON"
   },
   "httpMethods": {
     "get": "GET",

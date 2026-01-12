@@ -322,7 +322,9 @@
     "batch": "バッチ",
     "myEndpoint": "マイエンドポイント",
     "optionalExtraProperties": "オプションの追加プロパティ",
-    "all": "すべて"
+    "all": "すべて",
+    "jsonPlaceholder": "JSONを入力...",
+    "invalidJson": "無効なJSON形式"
   },
   "httpMethods": {
     "get": "GET",
