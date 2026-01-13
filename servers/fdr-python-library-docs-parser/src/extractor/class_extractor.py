@@ -130,28 +130,42 @@ class ClassExtractor:
                 continue
             if name == "__init__":
                 continue
-            if name.startswith("_") and not (name.startswith("__") and name.endswith("__")):
+            # Skip truly private methods (double underscore prefix without trailing __)
+            # but include protected methods (single underscore) and dunder methods (__str__, etc.)
+            if name.startswith("__") and not name.endswith("__"):
                 continue
             methods.append(self.parent._func_extractor.extract(member))
 
         return sorted(methods, key=lambda m: (not m.is_property, m.name))
 
     def _extract_attributes(self, cls: Class) -> list[AttributeIr]:
-        """Extract attributes from a class."""
+        """Extract attributes from a class.
+
+        Includes protected attributes (single underscore) but excludes truly private
+        (double underscore prefix without trailing __).
+        """
         return sorted(
             [
                 self._make_attribute_ir(name, member)
                 for name, member in cls.members.items()
-                if isinstance(member, Attribute) and not name.startswith("_")
+                if isinstance(member, Attribute)
+                and not (name.startswith("__") and not name.endswith("__"))
             ],
             key=lambda a: a.name,
         )
 
     def _extract_typeddict_fields(self, cls: Class) -> list[TypedDictFieldIr]:
-        """Extract TypedDict fields."""
+        """Extract TypedDict fields.
+
+        Includes protected fields (single underscore) but excludes truly private
+        (double underscore prefix without trailing __).
+        """
         fields = []
         for name, member in cls.members.items():
-            if not isinstance(member, Attribute) or name.startswith("_"):
+            if not isinstance(member, Attribute):
+                continue
+            # Skip truly private fields (double underscore prefix without trailing __)
+            if name.startswith("__") and not name.endswith("__"):
                 continue
 
             type_info = self.parent.make_type_info(member.annotation)
@@ -170,12 +184,17 @@ class ClassExtractor:
         return sorted(fields, key=lambda f: f.name)
 
     def _extract_enum_members(self, cls: Class) -> list[EnumMemberIr]:
-        """Extract enum members."""
+        """Extract enum members.
+
+        Includes protected members (single underscore) but excludes truly private
+        (double underscore prefix without trailing __).
+        """
         return sorted(
             [
                 EnumMemberIr(name=name, value=str(member.value) if member.value else "")
                 for name, member in cls.members.items()
-                if isinstance(member, Attribute) and not name.startswith("_")
+                if isinstance(member, Attribute)
+                and not (name.startswith("__") and not name.endswith("__"))
             ],
             key=lambda m: m.name,
         )

@@ -124,8 +124,14 @@ class PythonExtractor:
         )
 
     def _is_public(self, name: str, member) -> bool:
-        """Check if a member should be documented."""
-        if name.startswith("_") and not (name.startswith("__") and name.endswith("__")):
+        """Check if a member should be documented.
+
+        Includes protected members (single underscore prefix like _helper)
+        but excludes truly private members (double underscore prefix like __internal).
+        Dunder methods (__str__, __repr__) are included.
+        """
+        # Skip truly private members (double underscore prefix without trailing __)
+        if name.startswith("__") and not name.endswith("__"):
             return False
         return not (hasattr(member, "is_alias") and member.is_alias)
 

@@ -69,8 +69,11 @@ def get_public_members(module: Module) -> list[str]:
         return list(module.exports)
 
     # Filter to non-private members
+    # Include protected members (single underscore) but exclude truly private (double underscore)
     public = []
     for name in module.members:
-        if not name.startswith("_"):
-            public.append(name)
+        # Skip truly private members (double underscore prefix without trailing __)
+        if name.startswith("__") and not name.endswith("__"):
+            continue
+        public.append(name)
     return public
