@@ -1,8 +1,14 @@
+import { getManagementClientResult, getRolesResult, hasResourcePermission } from "@fern-api/user-permissions";
 import { FernVenusApi, FernVenusApiClient } from "@fern-api/venus-api-sdk";
 import type winston from "winston";
 
 import type { FernRegistryError } from "../../api/generated";
-import { UnauthorizedError, UnavailableError, UserNotInOrgError } from "../../api/generated/api";
+import {
+    UnauthorizedError,
+    UnavailableError,
+    UserDoesNotHaveCliPermissionError,
+    UserNotInOrgError
+} from "../../api/generated/api";
 import type { FdrApplication, FdrConfig } from "../../app";
 
 export type OrgIdsResponse = SuccessOrgIdsResponse | ErrorOrgIdsResponse;
@@ -39,6 +45,16 @@ export interface AuthService {
         orgId: string;
         failHard?: boolean;
     }): Promise<boolean>;
+
+    checkUserHasCliPermission({
+        authHeader,
+        orgId,
+        docsUrl
+    }: {
+        authHeader: string | undefined;
+        orgId: string;
+        docsUrl?: string;
+    }): Promise<void>;
 }
 
 export class AuthServiceImpl implements AuthService {
@@ -166,6 +182,85 @@ export class AuthServiceImpl implements AuthService {
         }
         return org.snippetTemplatesAccessEnabled;
     }
+
+    async checkUserHasCliPermission({
+        authHeader,
+        orgId,
+        docsUrl
+    }: {
+        authHeader: string | undefined;
+        orgId: string;
+        docsUrl?: string;
+    }): Promise<void> {
+        if (authHeader == null) {
+            throw new UnauthorizedError("Authorization header was not specified");
+        }
+
+        // Get user ID from Venus
+        const token = getTokenFromAuthHeader(authHeader);
+        const venus = getVenusClient({
+            config: this.app.config,
+            token
+        });
+
+        const userResponse = await venus.user.getMyself();
+        if (!userResponse.ok) {
+            this.logger.error("Failed to get user from Venus", userResponse.error);
+            throw new UnauthorizedError("Invalid authorization token");
+        }
+        const userId = userResponse.body.userId;
+
+        // Get Auth0 org ID from Fern org name
+        let auth0OrgId: string;
+        try {
+            auth0OrgId = await getAuth0OrgIdFromName(orgId);
+        } catch (error) {
+            this.logger.error(`Failed to resolve Auth0 org ID for ${orgId}`, error);
+            throw new UnavailableError("Failed to resolve organization");
+        }
+
+        // Get user's roles from Auth0
+        const rolesResult = await getRolesResult({ userId, orgId: auth0OrgId });
+        if (rolesResult.isErr()) {
+            this.logger.error(`Failed to get roles for user ${userId}`, rolesResult.error);
+            throw new UnavailableError("Failed to check user permissions");
+        }
+
+        const userRoles = rolesResult.value.data;
+
+        // Check if user has CLI role at org level
+        const hasOrgLevelCli = userRoles.includes("cli") || userRoles.includes("admin");
+
+        if (hasOrgLevelCli) {
+            this.logger.debug(`User ${userId} has org-level CLI permission for ${orgId}`);
+            return;
+        }
+
+        // If docsUrl is provided (existing site), check fine-grained permissions
+        if (docsUrl != null) {
+            const hasFineGrainedCli = await hasResourcePermission({
+                sessionPermissions: [],
+                userId,
+                orgId: auth0OrgId,
+                permissionToCheck: "cli",
+                resourceType: "docs",
+                resourceId: docsUrl,
+                forceFineGrained: true
+            });
+
+            if (hasFineGrainedCli) {
+                this.logger.debug(`User ${userId} has fine-grained CLI permission for docs ${docsUrl}`);
+                return;
+            }
+        }
+
+        this.logger.warn(
+            `User ${userId} does not have CLI permission for org ${orgId}${docsUrl ? ` or docs ${docsUrl}` : ""}`
+        );
+        throw new UserDoesNotHaveCliPermissionError(
+            "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
+        );
+    }
 }
 
 function getVenusClient({ config, token }: { config: FdrConfig; token?: string }): FernVenusApiClient {
@@ -178,4 +273,14 @@ function getVenusClient({ config, token }: { config: FdrConfig; token?: string }
 const BEARER_REGEX = /^bearer\s+/i;
 export function getTokenFromAuthHeader(authHeader: string) {
     return authHeader.replace(BEARER_REGEX, "");
+}
+
+async function getAuth0OrgIdFromName(orgName: string): Promise<string> {
+    const clientResult = getManagementClientResult();
+    if (clientResult.isErr()) {
+        throw new Error(`Auth0 not configured: ${clientResult.error.message}`);
+    }
+    const client = clientResult.value;
+    const { data: organization } = await client.organizations.getByName({ name: orgName });
+    return organization.id;
 }

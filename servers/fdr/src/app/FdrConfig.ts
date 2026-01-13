@@ -35,6 +35,7 @@ const REDIS_ENABLED_ENV_VAR = "REDIS_ENABLED";
 const REDIS_CLUSTERING_ENABLED_ENV_VAR = "REDIS_CLUSTERING_ENABLED";
 const APPLICATION_ENVIRONMENT_ENV_VAR = "APPLICATION_ENVIRONMENT";
 const PUBLIC_DOCS_CDN_URL = "PUBLIC_DOCS_CDN_URL";
+const CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR = "CLI_PERMISSION_CHECK_ORG_IDS";
 
 // Self-hosted env variables
 const MINIO_USERNAME = "MINIO_USERNAME";
@@ -76,6 +77,8 @@ export interface FdrConfig {
     redisEnabled: boolean;
     redisClusteringEnabled: boolean;
     applicationEnvironment: string;
+    /** Set of org IDs to check CLI permissions for, or "*" to check all orgs */
+    cliPermissionCheckOrgIds: Set<string> | "*";
 }
 
 function getSelfHostedS3Config(): S3Config {
@@ -109,7 +112,8 @@ function getConfigForLocalMode(): FdrConfig {
         redisEnabled: false,
         redisClusteringEnabled: false,
         applicationEnvironment: "local",
-        cdnPublicDocsUrl: "_files"
+        cdnPublicDocsUrl: "_files",
+        cliPermissionCheckOrgIds: parseOrgIdsList(process.env[CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR])
     };
 }
 
@@ -159,7 +163,8 @@ export function getConfig(): FdrConfig {
         redisEnabled: process.env[REDIS_ENABLED_ENV_VAR] === "true",
         redisClusteringEnabled: process.env[REDIS_CLUSTERING_ENABLED_ENV_VAR] === "true",
         applicationEnvironment: getEnvironmentVariableOrThrow(APPLICATION_ENVIRONMENT_ENV_VAR),
-        cdnPublicDocsUrl: getEnvironmentVariableOrThrow(PUBLIC_DOCS_CDN_URL)
+        cdnPublicDocsUrl: getEnvironmentVariableOrThrow(PUBLIC_DOCS_CDN_URL),
+        cliPermissionCheckOrgIds: parseOrgIdsList(process.env[CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR])
     };
 }
 
@@ -181,4 +186,20 @@ function getEnvironmentVariableOrThrow(environmentVariable: string): string {
         throw new Error(`Environment variable ${environmentVariable} not found`);
     }
     return value;
+}
+
+function parseOrgIdsList(value: string | undefined): Set<string> | "*" {
+    if (value == null || value.trim() === "") {
+        return new Set();
+    }
+    // "*" means check all orgs
+    if (value.trim() === "*") {
+        return "*";
+    }
+    return new Set(
+        value
+            .split(",")
+            .map((id) => id.trim())
+            .filter((id) => id !== "")
+    );
 }

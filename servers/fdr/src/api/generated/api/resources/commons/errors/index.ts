@@ -4,4 +4,5 @@ export * from "./InternalError";
 export * from "./InvalidUrlError";
 export * from "./UnauthorizedError";
 export * from "./UnavailableError";
+export * from "./UserDoesNotHaveCliPermissionError";
 export * from "./UserNotInOrgError";

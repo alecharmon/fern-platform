@@ -38,11 +38,21 @@ export class MockAlgoliaService implements AlgoliaService {
     }
 }
 
-class MockAuthService implements AuthService {
-    orgIds: string[];
+import { UserDoesNotHaveCliPermissionError } from "../api/generated/api";
 
-    constructor({ orgIds }: { orgIds: string[] }) {
+export interface MockAuthServiceConfig {
+    orgIds: string[];
+    /** Set of org IDs that should be denied CLI permission */
+    denyCliPermissionForOrgs?: Set<string>;
+}
+
+export class MockAuthService implements AuthService {
+    orgIds: string[];
+    denyCliPermissionForOrgs: Set<string>;
+
+    constructor({ orgIds, denyCliPermissionForOrgs }: MockAuthServiceConfig) {
         this.orgIds = orgIds;
+        this.denyCliPermissionForOrgs = denyCliPermissionForOrgs ?? new Set();
     }
 
     async checkUserBelongsToOrg(): Promise<void> {
@@ -82,6 +92,19 @@ class MockAuthService implements AuthService {
 
     async getWorkOSOrganization(_orgId: { orgId: string }): Promise<string | undefined> {
         return undefined;
+    }
+
+    async checkUserHasCliPermission(params: {
+        authHeader: string | undefined;
+        orgId: string;
+        docsUrl?: string;
+    }): Promise<void> {
+        if (this.denyCliPermissionForOrgs.has(params.orgId)) {
+            throw new UserDoesNotHaveCliPermissionError(
+                "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
+            );
+        }
+        return;
     }
 }
 
@@ -155,7 +178,8 @@ export const baseMockFdrConfig: FdrConfig = {
     enableCustomerNotifications: false,
     applicationEnvironment: "mock",
     redisEnabled: false,
-    redisClusteringEnabled: false
+    redisClusteringEnabled: false,
+    cliPermissionCheckOrgIds: new Set<string>()
 };
 
 export function getMockFdrConfig(overrides?: Partial<FdrConfig>): FdrConfig {
@@ -171,15 +195,18 @@ export function getMockFdrConfig(overrides?: Partial<FdrConfig>): FdrConfig {
 export function createMockFdrApplication({
     orgIds,
     services,
-    configOverrides
+    configOverrides,
+    denyCliPermissionForOrgs
 }: {
     orgIds?: string[];
     services?: Partial<FdrServices>;
     configOverrides?: Partial<FdrConfig>;
+    denyCliPermissionForOrgs?: Set<string>;
 }) {
     return new FdrApplication(getMockFdrConfig(configOverrides), {
         auth: new MockAuthService({
-            orgIds: orgIds ?? []
+            orgIds: orgIds ?? [],
+            denyCliPermissionForOrgs
         }),
         algolia: new MockAlgoliaService(),
         slack: new MockSlackService(),

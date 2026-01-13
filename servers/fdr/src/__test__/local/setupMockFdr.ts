@@ -90,10 +90,16 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         environment: `http://localhost:${port}/`,
         token: "dummy"
     });
-    const overrides: Partial<FdrConfig> = { redisEnabled: true };
+    const overrides: Partial<FdrConfig> = {
+        redisEnabled: true,
+        // Enable CLI permission check for permission-denied-org
+        cliPermissionCheckOrgIds: new Set(["permission-denied-org"])
+    };
     const fdrApplication = createMockFdrApplication({
-        orgIds: ["acme", "octoai", "dashboard-org"],
-        configOverrides: overrides
+        orgIds: ["acme", "octoai", "dashboard-org", "permission-denied-org"],
+        configOverrides: overrides,
+        // Deny CLI permission for permission-denied-org to test permission denial
+        denyCliPermissionForOrgs: new Set(["permission-denied-org"])
     });
     const app = express();
     await fdrApplication.initialize();

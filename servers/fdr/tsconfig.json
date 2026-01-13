@@ -28,6 +28,9 @@
     },
     {
       "path": "../../packages/commons/core-utils"
+    },
+    {
+      "path": "../../packages/commons/user-permissions"
     }
   ]
 }

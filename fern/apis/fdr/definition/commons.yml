@@ -140,3 +140,7 @@ errors:
   UnavailableError:
     status-code: 503
     type: string
+
+  UserDoesNotHaveCliPermissionError:
+    status-code: 403
+    type: string

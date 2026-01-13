@@ -429,3 +429,26 @@ it("no snippets generated when dynamicIR is present", async () => {
     expect(apiDefinition?.snippetsConfiguration?.pythonSdk?.package).toEqual("acme");
     expect(apiDefinition?.snippetsConfiguration?.pythonSdk?.version).toEqual("0.0.2");
 });
+
+it("returns permission error when user does not have CLI permission", async () => {
+    const fdr = getClient({ authed: true, url: inject("url") });
+    const domain = `permission-test-${Math.random()}.docs.buildwithfern.com`;
+
+    // Try to register docs with permission-denied-org, which is configured
+    // to have CLI permission check enabled but permission denied
+    const startDocsRegisterResponse = await fdr.docs.v2.write.startDocsRegister({
+        orgId: FdrAPI.OrgId("permission-denied-org"),
+        apiId: FdrAPI.ApiId("api"),
+        domain: `https://${domain}`,
+        customDomains: [],
+        filepaths: [DocsV1Write.FilePath("logo.png")]
+    });
+
+    // Expect permission denied error (403 status code)
+    expect(startDocsRegisterResponse.ok).toBe(false);
+    expect((startDocsRegisterResponse as any).error.content).toEqual({
+        body: "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access.",
+        reason: "status-code",
+        statusCode: 403
+    });
+});

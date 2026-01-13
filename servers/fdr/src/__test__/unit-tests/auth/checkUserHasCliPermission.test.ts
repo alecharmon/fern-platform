@@ -1,0 +1,359 @@
+import { err, ok } from "neverthrow";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { UnauthorizedError, UnavailableError, UserDoesNotHaveCliPermissionError } from "../../../api/generated/api";
+import { AuthServiceImpl } from "../../../services/auth/AuthService";
+
+// Mock the user-permissions module
+vi.mock("@fern-api/user-permissions", () => ({
+    getManagementClientResult: vi.fn(),
+    getRolesResult: vi.fn(),
+    hasResourcePermission: vi.fn()
+}));
+
+// Mock the venus-api-sdk module
+vi.mock("@fern-api/venus-api-sdk", () => ({
+    FernVenusApi: {
+        OrganizationId: (id: string) => id
+    },
+    FernVenusApiClient: vi.fn()
+}));
+
+import { getManagementClientResult, getRolesResult, hasResourcePermission } from "@fern-api/user-permissions";
+import { FernVenusApiClient } from "@fern-api/venus-api-sdk";
+
+const mockGetManagementClientResult = vi.mocked(getManagementClientResult);
+const mockGetRolesResult = vi.mocked(getRolesResult);
+const mockHasResourcePermission = vi.mocked(hasResourcePermission);
+const MockFernVenusApiClient = vi.mocked(FernVenusApiClient);
+
+describe("checkUserHasCliPermission", () => {
+    let authService: AuthServiceImpl;
+    let mockVenusClient: {
+        user: { getMyself: ReturnType<typeof vi.fn> };
+    };
+    let mockLogger: {
+        error: ReturnType<typeof vi.fn>;
+        warn: ReturnType<typeof vi.fn>;
+        debug: ReturnType<typeof vi.fn>;
+    };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+
+        mockLogger = {
+            error: vi.fn(),
+            warn: vi.fn(),
+            debug: vi.fn()
+        };
+
+        mockVenusClient = {
+            user: { getMyself: vi.fn() }
+        };
+
+        MockFernVenusApiClient.mockImplementation(() => mockVenusClient as any);
+
+        const mockApp = {
+            config: {
+                venusUrl: "https://venus.test.com",
+                // Allowlist of org IDs for CLI permission checks (controller uses this to gate checks)
+                cliPermissionCheckOrgIds: new Set(["test-org", "fern-org", "allowed-org"])
+            },
+            logger: mockLogger
+        } as any;
+
+        authService = new AuthServiceImpl(mockApp);
+    });
+
+    it("should throw UnauthorizedError when auth header is missing", async () => {
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: undefined,
+                orgId: "test-org"
+            })
+        ).rejects.toThrow(UnauthorizedError);
+    });
+
+    it("should throw UnauthorizedError when Venus returns error for getMyself", async () => {
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: false,
+            error: { message: "Invalid token" }
+        });
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: "Bearer test-token",
+                orgId: "test-org"
+            })
+        ).rejects.toThrow(UnauthorizedError);
+
+        expect(mockLogger.error).toHaveBeenCalledWith("Failed to get user from Venus", expect.anything());
+    });
+
+    it("should throw UnavailableError when Auth0 org lookup fails", async () => {
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: true,
+            body: { userId: "auth0|user123" }
+        });
+
+        mockGetManagementClientResult.mockReturnValue(err({ message: "Auth0 not configured" } as any));
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: "Bearer test-token",
+                orgId: "test-org"
+            })
+        ).rejects.toThrow(UnavailableError);
+
+        expect(mockLogger.error).toHaveBeenCalledWith("Failed to resolve Auth0 org ID for test-org", expect.anything());
+    });
+
+    it("should throw UnavailableError when getRolesResult fails", async () => {
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: true,
+            body: { userId: "auth0|user123" }
+        });
+
+        const mockAuth0Client = {
+            organizations: {
+                getByName: vi.fn().mockResolvedValue({
+                    data: { id: "org_abc123" }
+                })
+            }
+        };
+        mockGetManagementClientResult.mockReturnValue(ok(mockAuth0Client as any));
+
+        mockGetRolesResult.mockResolvedValue(err({ message: "Failed to get roles" } as any));
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: "Bearer test-token",
+                orgId: "test-org"
+            })
+        ).rejects.toThrow(UnavailableError);
+
+        expect(mockLogger.error).toHaveBeenCalledWith("Failed to get roles for user auth0|user123", expect.anything());
+    });
+
+    it("should succeed when user has cli role", async () => {
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: true,
+            body: { userId: "auth0|user123" }
+        });
+
+        const mockAuth0Client = {
+            organizations: {
+                getByName: vi.fn().mockResolvedValue({
+                    data: { id: "org_abc123" }
+                })
+            }
+        };
+        mockGetManagementClientResult.mockReturnValue(ok(mockAuth0Client as any));
+
+        mockGetRolesResult.mockResolvedValue(ok({ data: ["cli", "viewer"] }));
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: "Bearer test-token",
+                orgId: "test-org"
+            })
+        ).resolves.toBeUndefined();
+
+        expect(mockLogger.debug).toHaveBeenCalledWith("User auth0|user123 has org-level CLI permission for test-org");
+    });
+
+    it("should succeed when user has admin role", async () => {
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: true,
+            body: { userId: "auth0|user123" }
+        });
+
+        const mockAuth0Client = {
+            organizations: {
+                getByName: vi.fn().mockResolvedValue({
+                    data: { id: "org_abc123" }
+                })
+            }
+        };
+        mockGetManagementClientResult.mockReturnValue(ok(mockAuth0Client as any));
+
+        mockGetRolesResult.mockResolvedValue(ok({ data: ["admin"] }));
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: "Bearer test-token",
+                orgId: "test-org"
+            })
+        ).resolves.toBeUndefined();
+
+        expect(mockLogger.debug).toHaveBeenCalledWith("User auth0|user123 has org-level CLI permission for test-org");
+    });
+
+    it("should throw UserDoesNotHaveCliPermissionError when user lacks cli role and no docsUrl", async () => {
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: true,
+            body: { userId: "auth0|user123" }
+        });
+
+        const mockAuth0Client = {
+            organizations: {
+                getByName: vi.fn().mockResolvedValue({
+                    data: { id: "org_abc123" }
+                })
+            }
+        };
+        mockGetManagementClientResult.mockReturnValue(ok(mockAuth0Client as any));
+
+        mockGetRolesResult.mockResolvedValue(ok({ data: ["viewer"] }));
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: "Bearer test-token",
+                orgId: "test-org"
+            })
+        ).rejects.toThrow(UserDoesNotHaveCliPermissionError);
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+            "User auth0|user123 does not have CLI permission for org test-org"
+        );
+    });
+
+    it("should succeed when user has fine-grained cli permission for existing docs site", async () => {
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: true,
+            body: { userId: "auth0|user123" }
+        });
+
+        const mockAuth0Client = {
+            organizations: {
+                getByName: vi.fn().mockResolvedValue({
+                    data: { id: "org_abc123" }
+                })
+            }
+        };
+        mockGetManagementClientResult.mockReturnValue(ok(mockAuth0Client as any));
+
+        mockGetRolesResult.mockResolvedValue(
+            ok({ data: ["viewer"] }) // No cli or admin role
+        );
+
+        mockHasResourcePermission.mockResolvedValue(true);
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: "Bearer test-token",
+                orgId: "test-org",
+                docsUrl: "https://docs.example.com"
+            })
+        ).resolves.toBeUndefined();
+
+        expect(mockHasResourcePermission).toHaveBeenCalledWith({
+            sessionPermissions: [],
+            userId: "auth0|user123",
+            orgId: "org_abc123",
+            permissionToCheck: "cli",
+            resourceType: "docs",
+            resourceId: "https://docs.example.com",
+            forceFineGrained: true
+        });
+
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+            "User auth0|user123 has fine-grained CLI permission for docs https://docs.example.com"
+        );
+    });
+
+    it("should throw UserDoesNotHaveCliPermissionError when user lacks both org-level and fine-grained permissions", async () => {
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: true,
+            body: { userId: "auth0|user123" }
+        });
+
+        const mockAuth0Client = {
+            organizations: {
+                getByName: vi.fn().mockResolvedValue({
+                    data: { id: "org_abc123" }
+                })
+            }
+        };
+        mockGetManagementClientResult.mockReturnValue(ok(mockAuth0Client as any));
+
+        mockGetRolesResult.mockResolvedValue(
+            ok({ data: ["viewer"] }) // No cli or admin role
+        );
+
+        mockHasResourcePermission.mockResolvedValue(false);
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: "Bearer test-token",
+                orgId: "test-org",
+                docsUrl: "https://docs.example.com"
+            })
+        ).rejects.toThrow(UserDoesNotHaveCliPermissionError);
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+            "User auth0|user123 does not have CLI permission for org test-org or docs https://docs.example.com"
+        );
+    });
+
+    it("should strip Bearer prefix from auth header (case insensitive)", async () => {
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: true,
+            body: { userId: "auth0|user123" }
+        });
+
+        const mockAuth0Client = {
+            organizations: {
+                getByName: vi.fn().mockResolvedValue({
+                    data: { id: "org_abc123" }
+                })
+            }
+        };
+        mockGetManagementClientResult.mockReturnValue(ok(mockAuth0Client as any));
+
+        mockGetRolesResult.mockResolvedValue(ok({ data: ["cli"] }));
+
+        // Test with lowercase "bearer"
+        await authService.checkUserHasCliPermission({
+            authHeader: "bearer my-token",
+            orgId: "test-org"
+        });
+
+        // Verify Venus client was constructed with the token (without Bearer prefix)
+        expect(MockFernVenusApiClient).toHaveBeenCalledWith({
+            environment: "https://venus.test.com",
+            token: "my-token"
+        });
+    });
+
+    it("should work with Fern token format", async () => {
+        const fernToken = "fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC";
+
+        mockVenusClient.user.getMyself.mockResolvedValue({
+            ok: true,
+            body: { userId: "auth0|user456" }
+        });
+
+        const mockAuth0Client = {
+            organizations: {
+                getByName: vi.fn().mockResolvedValue({
+                    data: { id: "org_xyz789" }
+                })
+            }
+        };
+        mockGetManagementClientResult.mockReturnValue(ok(mockAuth0Client as any));
+
+        mockGetRolesResult.mockResolvedValue(ok({ data: ["admin"] }));
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: `Bearer ${fernToken}`,
+                orgId: "fern-org"
+            })
+        ).resolves.toBeUndefined();
+
+        expect(MockFernVenusApiClient).toHaveBeenCalledWith({
+            environment: "https://venus.test.com",
+            token: fernToken
+        });
+    });
+});

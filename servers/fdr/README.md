@@ -69,3 +69,23 @@ Runs test in each workspace.
 ```bash
 pnpm test
 ```
+
+### Environment Variables
+
+#### CLI Permission Checks (Optional)
+
+The following environment variables enable CLI permission checks when publishing documentation. Permission checks are only applied to organizations listed in `CLI_PERMISSION_CHECK_ORG_IDS`.
+
+```bash
+# Auth0 Management API (for CLI permission checks)
+AUTH0_DOMAIN=your-tenant.us.auth0.com
+AUTH0_CLIENT_ID=your-m2m-client-id
+AUTH0_CLIENT_SECRET=your-m2m-client-secret
+AUTH0_ROLES={"admin":"rol_xxx","editor":"rol_xxx","viewer":"rol_xxx","cli":"rol_xxx","fine_grain":"rol_xxx"}
+
+# Supabase (for fine-grained permissions)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+When enabled for an organization, users must have the `cli` or `admin` role in Auth0 to publish documentation. For existing docs sites, fine-grained permissions can also be checked via Supabase.

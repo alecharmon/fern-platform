@@ -115,6 +115,22 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                 customUrls: req.body.customDomains
             });
 
+            // Check CLI permission if org is in the allowlist (or if "*" is set for all orgs)
+            const shouldCheckCliPermission =
+                app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(req.body.orgId);
+            if (shouldCheckCliPermission) {
+                // Check if this is an existing docs site (for fine-grained permission check)
+                const existingDocsOrgId = await app.dao.docsV2().getOrgIdForDocsUrl(fernUrl.toURL());
+                const isExistingSite = existingDocsOrgId != null;
+
+                // Check CLI permission (org-level for new sites, fine-grained for existing)
+                await app.services.auth.checkUserHasCliPermission({
+                    authHeader: req.headers.authorization,
+                    orgId: req.body.orgId,
+                    docsUrl: isExistingSite ? fernUrl.getFullUrl() : undefined
+                });
+            }
+
             // ensure that the domains are not already registered by another org
             const { allDomainsOwned: hasOwnership, unownedDomains } = await app.dao
                 .docsV2()

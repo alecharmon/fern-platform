@@ -46,4 +46,17 @@ export class LocalAuthServiceImpl implements AuthService {
     }): Promise<boolean> {
         return false;
     }
+
+    async checkUserHasCliPermission({
+        authHeader,
+        orgId,
+        docsUrl
+    }: {
+        authHeader: string | undefined;
+        orgId: string;
+        docsUrl?: string;
+    }): Promise<void> {
+        // In local development, always allow CLI access
+        return;
+    }
 }
