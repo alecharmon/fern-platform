@@ -11,7 +11,8 @@
     "dev": "tsup --watch",
     "dev:server": "tsx src/dev-server.ts --watch",
     "package": "pnpm build && cd dist && zip -r ../lambda.zip . && cd ..",
-    "test": "vitest --run --globals",
+    "test": "vitest --run --globals --exclude 'src/__test__/*.integration.test.ts'",
+    "test:integration": "vitest --run --globals src/__test__/enhanceExample.integration.test.ts",
     "test:watch": "vitest --globals"
   },
   "dependencies": {

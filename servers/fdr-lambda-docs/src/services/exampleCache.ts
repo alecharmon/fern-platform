@@ -3,6 +3,13 @@ import { GetSecretValueCommand, SecretsManagerClient } from "@aws-sdk/client-sec
 import type { Pool } from "pg";
 import type { EnhanceExampleRequest, EnhanceExampleResponse } from "./enhanceExample";
 
+/**
+ * Cache version - increment this to invalidate all cached examples.
+ * Useful when changing the enhancement logic or prompt in ways that
+ * should regenerate all examples.
+ */
+const CACHE_VERSION = 1;
+
 interface RDSSecret {
     username: string;
     password: string;
@@ -88,6 +95,7 @@ export async function getConnectionDetails(): Promise<DbConnectionDetails | null
 
 export function computeRequestHash(request: EnhanceExampleRequest): string {
     const hashInput = {
+        version: CACHE_VERSION,
         method: request.method,
         endpointPath: request.endpointPath,
         organizationId: request.organizationId,
