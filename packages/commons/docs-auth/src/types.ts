@@ -292,15 +292,30 @@ export type Jwk = z.infer<typeof JwkSchema>;
 export type Jwks = z.infer<typeof JwksSchema>;
 export type PathnameViewerRules = z.infer<typeof PathnameViewerRulesSchema>;
 
+/**
+ * Generates a unique identifier for an auth config.
+ * If the config has an explicit `id` field, that is used.
+ * Otherwise, a default ID is generated based on the config type and distinguishing properties.
+ *
+ * For OAuth2 configs: `oauth2:{partner}:{clientId}` (clientId provides uniqueness)
+ * For SSO configs: `sso:{partner}:{organization}` (organization provides uniqueness)
+ * For Basic Token Verification: `jwt:{issuer}` (issuer provides uniqueness)
+ * For password: `password`
+ *
+ * This ensures that multiple configs of the same type/partner can be distinguished.
+ */
 export function getAuthMethodId(config: AuthEdgeConfig): string {
     if (config.id) {
         return config.id;
     }
     if (config.type === "oauth2") {
-        return `oauth2:${config.partner}`;
+        return `oauth2:${config.partner}:${config.clientId}`;
     }
     if (config.type === "sso") {
-        return `sso:${config.partner}`;
+        return `sso:${config.partner}:${config.organization}`;
+    }
+    if (config.type === "basic_token_verification") {
+        return `jwt:${config.issuer}`;
     }
     return config.type;
 }

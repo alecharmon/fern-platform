@@ -1,9 +1,9 @@
-import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
+import { safeVerifyFernJWTWithMultipleConfigs } from "@fern-api/docs-server/auth/FernJWT";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
-import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { getAuthEdgeConfigs } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -31,9 +31,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
 
         const domain = getDocsDomainEdge(req);
-        const config = await getAuthEdgeConfig(domain);
+        const configs = await getAuthEdgeConfigs(domain);
 
-        if (!config) {
+        if (configs.length === 0) {
             return NextResponse.json(
                 {
                     error: "Authentication configuration not found"
@@ -42,8 +42,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        const userInfo = await safeVerifyFernJWTConfig(fernToken, config);
-        console.log(userInfo);
+        const userInfo = await safeVerifyFernJWTWithMultipleConfigs(fernToken, configs);
 
         if (!userInfo) {
             return NextResponse.json(

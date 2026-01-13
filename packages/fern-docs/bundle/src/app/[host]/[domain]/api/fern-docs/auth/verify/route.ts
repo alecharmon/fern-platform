@@ -1,9 +1,9 @@
-import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
+import { safeVerifyFernJWTWithMultipleConfigs } from "@fern-api/docs-server/auth/FernJWT";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
-import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { getAuthEdgeConfigs } from "@fern-docs/edge-config";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 10;
@@ -45,15 +45,15 @@ export async function POST(req: NextRequest): Promise<NextResponse<VerifyAuthRes
             });
         }
 
-        const config = await getAuthEdgeConfig(domain);
+        const configs = await getAuthEdgeConfigs(domain);
 
-        if (!config) {
+        if (configs.length === 0) {
             return NextResponse.json({
                 authenticated: false
             });
         }
 
-        const userInfo = await safeVerifyFernJWTConfig(fernToken, config);
+        const userInfo = await safeVerifyFernJWTWithMultipleConfigs(fernToken, configs);
 
         if (!userInfo) {
             return NextResponse.json({

@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { AuthEdgeConfig, FernUser } from "@fern-api/docs-auth";
+import { getAuthMethodId } from "@fern-api/docs-auth";
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getPreviewUrlAuthConfig, type PreviewUrlAuth } from "@fern-docs/edge-config";
@@ -252,6 +253,27 @@ export async function createGetAuthState(
     };
 }
 
+/**
+ * Constructs the state parameter for OAuth flows, including the auth method ID
+ * to support multi-auth configurations. The auth method ID is appended as a
+ * query parameter `_fern_auth_method` to the return URL.
+ */
+function constructStateWithAuthMethod(
+    host: string,
+    domain: string,
+    authConfig: AuthEdgeConfig,
+    pathname?: string
+): string {
+    const baseUrl = `${withDefaultProtocol(
+        decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
+    )}${pathname ?? ""}`;
+
+    // Add auth method ID to enable correct config selection in callback
+    const stateUrl = new URL(baseUrl);
+    stateUrl.searchParams.set("_fern_auth_method", getAuthMethodId(authConfig));
+    return stateUrl.toString();
+}
+
 export function getAuthorizationUrl(
     authConfig: AuthEdgeConfig,
     // TODO: we'll need to pass in the basepath here for any customers who are using a non-root basepath.
@@ -261,9 +283,7 @@ export function getAuthorizationUrl(
 ): string | undefined {
     // Match the exact order of operations from handleWorkosAuth:
     // decodeURIComponent is applied AFTER removeTrailingSlash(preferPreview(host, domain))
-    const state = `${withDefaultProtocol(
-        decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
-    )}${pathname ?? ""}`;
+    const state = constructStateWithAuthMethod(host, domain, authConfig, pathname);
 
     if (authConfig.type === "basic_token_verification") {
         const destination = new URL(authConfig.redirect);
@@ -335,4 +355,29 @@ export function getPasswordAuthorizationUrl(host: string, domain: string, pathna
     loginUrl.searchParams.set("returnTo", `${baseUrl}${pathname ?? ""}`);
 
     return loginUrl.toString();
+}
+
+/**
+ * Extracts the auth method ID from the state URL parameter.
+ * Used in OAuth callbacks to determine which auth config was used to initiate the flow.
+ */
+export function extractAuthMethodFromState(stateUrl: string | null | undefined): string | undefined {
+    if (!stateUrl) {
+        return undefined;
+    }
+    try {
+        const url = new URL(stateUrl);
+        return url.searchParams.get("_fern_auth_method") ?? undefined;
+    } catch {
+        return undefined;
+    }
+}
+
+/**
+ * Removes the _fern_auth_method query parameter from a URL.
+ * Used to clean the redirect URL before redirecting the user after OAuth callback.
+ */
+export function cleanAuthMethodFromUrl(url: URL): URL {
+    url.searchParams.delete("_fern_auth_method");
+    return url;
 }

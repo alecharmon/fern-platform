@@ -73,7 +73,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/auth/jwt/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("jwt:https://f");
         }
 
         const authStateBadTokenWithPathname = await getAuthStateInternal({
@@ -93,7 +97,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/auth/jwt/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs/test");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/docs/test");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("jwt:https://f");
         }
 
         const authStateGoodToken = await getAuthStateInternal({
@@ -134,7 +142,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/oauth/ory/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("oauth2:ory:test");
         }
 
         const authStateBadTokenWithPathname = await getAuthStateInternal({
@@ -156,7 +168,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/oauth/ory/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs/test");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/docs/test");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("oauth2:ory:test");
         }
 
         const fernToken = await signFernJWT({}, { secret: TEST_JWT_SECRET, issuer: ISSUER });
@@ -200,7 +216,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/oauth/webflow/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("oauth2:webflow:test");
         }
 
         const authStateBadTokenWithPathname = await getAuthStateInternal({
@@ -222,7 +242,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/oauth/webflow/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs/test");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/docs/test");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("oauth2:webflow:test");
         }
 
         const authStateGoodToken = await getAuthStateInternal({
@@ -268,7 +292,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/oauth2/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("oauth2:custom:test_client_id");
             expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
         }
 
@@ -291,7 +319,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/oauth2/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs/test");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/docs/test");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("oauth2:custom:test_client_id");
             expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
         }
 
@@ -339,7 +371,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/oauth2/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("oauth2:custom:test_client_id");
             expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
         }
 
@@ -362,7 +398,11 @@ describe("getAuthState", () => {
             expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
                 "https://docs.test.com/api/fern-docs/oauth2/callback"
             );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs/test");
+            // State now includes _fern_auth_method for multi-auth support
+            const stateUrl = new URL(authorizationUrl.searchParams.get("state") ?? "");
+            expect(stateUrl.origin).toBe("https://docs.test.com");
+            expect(stateUrl.pathname).toBe("/docs/test");
+            expect(stateUrl.searchParams.get("_fern_auth_method")).toBe("oauth2:custom:test_client_id");
             expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
         }
 

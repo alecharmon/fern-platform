@@ -1,4 +1,4 @@
-import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
+import { safeVerifyFernJWTWithMultipleConfigs } from "@fern-api/docs-server/auth/FernJWT";
 import { algoliaAppId, algoliaSearchApikey } from "@fern-api/docs-server/env-variables";
 import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
 import { isLocal } from "@fern-api/docs-server/isLocal";
@@ -7,7 +7,7 @@ import { selectFirst } from "@fern-api/docs-server/utils/selectFirst";
 import { validateApiKeyBelongsToOrg } from "@fern-api/docs-server/venus/validateApiKeyBelongsToOrg";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, withoutStaging } from "@fern-api/docs-utils";
-import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { getAuthEdgeConfigs } from "@fern-docs/edge-config";
 import {
     DEFAULT_SEARCH_API_KEY_EXPIRATION_SECONDS,
     getSearchApiKey,
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     // JWT-based authentication
     const fern_token = req.headers.get("FERN_TOKEN") ?? (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
-    const user = await safeVerifyFernJWTConfig(fern_token, await getAuthEdgeConfig(domain));
+    const user = await safeVerifyFernJWTWithMultipleConfigs(fern_token, await getAuthEdgeConfigs(domain));
 
     const userToken = getXUserToken(req) ?? user?.api_key ?? fern_token;
 
