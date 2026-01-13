@@ -20,9 +20,6 @@ export function validateDocsSiteName(value: string): string | undefined {
     if (!trimmed) {
         return "Site title is required.";
     }
-    if (trimmed.length < 3) {
-        return "Site title must be at least 3 characters.";
-    }
     return undefined;
 }
 
@@ -32,9 +29,6 @@ export function validateDocsSiteName(value: string): string | undefined {
 export function validateDocsSiteUrl(value: string, available?: boolean | null): string | undefined {
     if (!value) {
         return "Subdomain is required.";
-    }
-    if (value.length < 3) {
-        return "Subdomain must be at least 3 characters.";
     }
     if (value.length > 63) {
         return "Subdomain must be 63 characters or fewer.";

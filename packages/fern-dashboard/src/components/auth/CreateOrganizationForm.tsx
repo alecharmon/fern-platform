@@ -23,9 +23,6 @@ function validateOrganizationId(value: string): string | undefined {
     if (!trimmed) {
         return "Organization ID is required.";
     }
-    if (trimmed.length < 3) {
-        return "Organization ID must be at least 3 characters.";
-    }
     if (!/^[a-z0-9-]+$/.test(trimmed)) {
         return "Use lowercase letters, numbers, and hyphens only.";
     }
