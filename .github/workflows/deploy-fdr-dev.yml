@@ -79,3 +79,8 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DEV_POSTGRES_URL }}/fdr?schema=public&connection_limit=6&pool_timeout=30
           CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
+          # Required for CDK synthesis (PROD stack) but not used in dev deployment
+          CLI_PERMISSION_CHECK_ORG_IDS: ""
+          AUTH0_CLIENT_SECRET: ""
+          SUPABASE_URL: ""
+          SUPABASE_SERVICE_ROLE_KEY: ""
