@@ -2,6 +2,7 @@
 name = "fdr-python-library-docs-parser"
 version = "0.1.0"
 description = "Lambda for parsing Python library documentation"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
