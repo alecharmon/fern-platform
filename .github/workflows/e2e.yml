@@ -12,8 +12,7 @@ jobs:
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event.deployment_status.state == 'success' &&
-       contains(github.event.deployment.environment, 'fern-dashboard') &&
-       !contains(github.event.deployment.environment, 'Production'))
+       github.event.deployment.environment == 'Preview – fern-dashboard')
 
     steps:
       - name: Checkout
