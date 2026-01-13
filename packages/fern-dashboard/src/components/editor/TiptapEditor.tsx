@@ -228,7 +228,8 @@ export default function TiptapEditor({
     disableDragging
 }: TiptapEditor.Props) {
     const isEditingDisabled = useEditingDisabled();
-    const skipFirstUpdateRef = useRef(true);
+    // Track whether the editor is ready to process updates (after initial normalization)
+    const isReadyForUpdatesRef = useRef(false);
 
     // Generate a unique ID for this editor instance to prevent cross-editor drag-and-drop
     const editorId = useMemo(() => Math.random().toString(36).slice(2), []);
@@ -244,13 +245,20 @@ export default function TiptapEditor({
     );
 
     const handleUpdate: EditorProviderProps["onUpdate"] = (props) => {
-        // Skip the first update event as it's always just processing the initial content
-        if (skipFirstUpdateRef.current) {
-            skipFirstUpdateRef.current = false;
+        // Skip updates until the editor is ready (after initial normalization)
+        if (!isReadyForUpdatesRef.current) {
             return;
         }
-
         debouncedOnUpdate(props);
+    };
+
+    const handleCreate: EditorProviderProps["onCreate"] = (props) => {
+        // Set ready flag after the next frame to skip any synchronous normalization updates
+        // but allow user input (which happens asynchronously) to be processed
+        requestAnimationFrame(() => {
+            isReadyForUpdatesRef.current = true;
+        });
+        onCreate?.(props);
     };
 
     return (
@@ -335,7 +343,7 @@ export default function TiptapEditor({
                 className: cn(className, "relative")
             }}
             immediatelyRender={false}
-            onCreate={onCreate}
+            onCreate={handleCreate}
             onUpdate={handleUpdate}
             onBlur={() => {
                 // Flush pending updates before blur to ensure nothing is lost
