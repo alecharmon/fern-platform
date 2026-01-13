@@ -236,7 +236,7 @@ export class FdrDeployStack extends Stack {
                     SLACK_TOKEN: getEnvironmentVariableOrThrow("FERNIE_SLACK_APP_TOKEN"),
                     LOG_LEVEL: getLogLevel(environmentType),
                     DOCS_CACHE_ENDPOINT: fernDocsCacheEndpoint,
-                    ENABLE_CUSTOMER_NOTIFICATIONS: (environmentType === "PROD").toString(),
+                    ENABLE_CUSTOMER_NOTIFICATIONS: (environmentType !== "DEV").toString(),
                     REDIS_ENABLED: options.redis.toString(),
                     REDIS_CLUSTERING_MODE_ENABLED: options.redisClusteringModeEnabled.toString(),
                     APPLICATION_ENVIRONMENT: getEnvironmentVariableOrThrow("APPLICATION_ENVIRONMENT"),
@@ -246,7 +246,23 @@ export class FdrDeployStack extends Stack {
                             : "https://files.buildwithfern.com",
                     NODE_ENV: "production",
                     PYTHON_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME: `fdr-python-library-docs-parser-${environmentType.toLowerCase()}`,
-                    PYTHON_LIBRARY_DOCS_LAMBDA_REGION: "us-east-1"
+                    PYTHON_LIBRARY_DOCS_LAMBDA_REGION: "us-east-1",
+                    // We only run this check in PROD for now
+                    // The following auth0 and supabase variables are only needed for the CLI permission check
+                    // So we set them to empty strings in non-PROD environments
+                    CLI_PERMISSION_CHECK_ORG_IDS:
+                        environmentType === "PROD" ? getEnvironmentVariableOrThrow("CLI_PERMISSION_CHECK_ORG_IDS") : "",
+                    AUTH0_DOMAIN: environmentType === "PROD" ? "fern-prod.us.auth0.com" : "",
+                    AUTH0_CLIENT_ID: environmentType === "PROD" ? "cpMvMkmORR9Z2XyRVsgfsNoTYc0ZI3GL" : "",
+                    AUTH0_CLIENT_SECRET:
+                        environmentType === "PROD" ? getEnvironmentVariableOrThrow("AUTH0_CLIENT_SECRET") : "",
+                    AUTH0_ROLES:
+                        environmentType === "PROD"
+                            ? `{"admin":"rol_l9h69vRkXYa2eZQY","editor":"rol_BmdwfyKV22T2RkAH","viewer":"rol_uTGfGUuPE9KB2iBm", "cli": "rol_a5nxqhFWy9POyaLX", "fine_grain": "rol_pXAtQq1StidG0xqW"}`
+                            : "",
+                    SUPABASE_URL: environmentType === "PROD" ? getEnvironmentVariableOrThrow("SUPABASE_URL") : "",
+                    SUPABASE_SERVICE_ROLE_KEY:
+                        environmentType === "PROD" ? getEnvironmentVariableOrThrow("SUPABASE_SERVICE_ROLE_KEY") : ""
                 },
                 containerName: CONTAINER_NAME,
                 containerPort: 8080,
