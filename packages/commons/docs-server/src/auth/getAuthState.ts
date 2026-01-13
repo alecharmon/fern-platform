@@ -259,9 +259,11 @@ export function getAuthorizationUrl(
     domain: string,
     pathname?: string
 ): string | undefined {
-    // TODO: this is currently not a correct implementation of the state parameter b/c it should be signed w/ the jwt secret
-    // however, we should not break existing customers who are consuming the state as a `return_to` param in their auth flows.
-    const state = `${withDefaultProtocol(removeTrailingSlash(preferPreview(host, domain)))}${pathname ?? ""}`;
+    // Match the exact order of operations from handleWorkosAuth:
+    // decodeURIComponent is applied AFTER removeTrailingSlash(preferPreview(host, domain))
+    const state = `${withDefaultProtocol(
+        decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
+    )}${pathname ?? ""}`;
 
     if (authConfig.type === "basic_token_verification") {
         const destination = new URL(authConfig.redirect);
@@ -269,7 +271,7 @@ export function getAuthorizationUrl(
         // note: `redirect` is allowed to override the default redirect uri, and the `return_to` param
         if (!destination.searchParams.has("redirect_uri")) {
             const redirectUri = `${withDefaultProtocol(
-                removeTrailingSlash(preferPreview(host, domain))
+                decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
             )}/api/fern-docs/auth/jwt/callback`;
 
             destination.searchParams.set("redirect_uri", redirectUri);
@@ -280,7 +282,7 @@ export function getAuthorizationUrl(
         return destination.toString();
     } else if (authConfig.type === "sso" && authConfig.partner === "workos") {
         const redirectUri = `${withDefaultProtocol(
-            removeTrailingSlash(preferPreview(host, domain))
+            decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
         )}/api/fern-docs/auth/sso/callback`;
 
         return getWorkosSSOAuthorizationUrl({
@@ -297,7 +299,7 @@ export function getAuthorizationUrl(
             return getOAuth2AuthorizationUrl(authConfig, {
                 state,
                 redirectUri: `${withDefaultProtocol(
-                    removeTrailingSlash(preferPreview(host, domain))
+                    decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
                 )}/api/fern-docs/oauth2/callback`
             });
         }
@@ -307,14 +309,14 @@ export function getAuthorizationUrl(
             return getWebflowAuthorizationUrl(authConfig, {
                 state,
                 redirectUri: `${withDefaultProtocol(
-                    removeTrailingSlash(preferPreview(host, domain))
+                    decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
                 )}/api/fern-docs/oauth/webflow/callback`
             });
         } else if (authConfig.partner === "ory") {
             return getOryAuthorizationUrl(authConfig, {
                 state,
                 redirectUri: `${withDefaultProtocol(
-                    removeTrailingSlash(preferPreview(host, domain))
+                    decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
                 )}/api/fern-docs/oauth/ory/callback`
             });
         }
@@ -324,10 +326,9 @@ export function getAuthorizationUrl(
 }
 
 export function getPasswordAuthorizationUrl(host: string, domain: string, pathname?: string): string {
-    // Decode URI components in case the host contains encoded characters (e.g., localhost%3A3000)
-    const decodedHost = decodeURIComponent(host);
-    const decodedDomain = decodeURIComponent(domain);
-    const baseUrl = withDefaultProtocol(removeTrailingSlash(preferPreview(decodedHost, decodedDomain)));
+    // Match the exact order of operations from handleWorkosAuth:
+    // decodeURIComponent is applied AFTER removeTrailingSlash(preferPreview(host, domain))
+    const baseUrl = withDefaultProtocol(decodeURIComponent(removeTrailingSlash(preferPreview(host, domain))));
     const loginUrl = new URL("/~login", baseUrl);
 
     // Include the return path so user can be redirected back after login

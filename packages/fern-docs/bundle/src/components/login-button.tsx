@@ -159,6 +159,16 @@ const getLoginUrlForConfig = (
         if (authConfig.type === "password") {
             return getPasswordAuthorizationUrl(host, domain);
         }
+        // For WorkOS SSO, use the pre-computed authorizationUrl from authState if available
+        // This ensures we use the exact same code path as handleWorkosAuth
+        if (
+            authConfig.type === "sso" &&
+            authConfig.partner === "workos" &&
+            authState.partner === "workos" &&
+            authState.authorizationUrl
+        ) {
+            return authState.authorizationUrl;
+        }
         return getAuthorizationUrl(authConfig, host, domain);
     }
 
