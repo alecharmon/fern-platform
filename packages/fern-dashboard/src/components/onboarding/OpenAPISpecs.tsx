@@ -1,8 +1,9 @@
 "use client";
 
 import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";
-import { CodeXmlIcon, XIcon } from "lucide-react";
+import { CircleCheckIcon, CodeXmlIcon, XIcon } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_SPECS } from "./constants";
 
@@ -98,8 +99,17 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError 
                 <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleDrop}
+                    onDragOver={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.classList.add("border-gray-700", "bg-gray-100");
+                    }}
+                    onDragLeave={(e) => {
+                        e.currentTarget.classList.remove("border-gray-700", "bg-gray-100");
+                    }}
+                    onDrop={(e) => {
+                        e.currentTarget.classList.remove("border-gray-700", "bg-gray-100");
+                        handleDrop(e);
+                    }}
                     className="group cursor-pointer rounded-lg border border-dashed border-border p-6 text-center transition-colors hover:border-gray-700 hover:bg-gray-100"
                 >
                     <div className="flex flex-col items-center gap-1 text-muted-foreground">
@@ -126,11 +136,11 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError 
                                     <span className="text-gray-900 text-xs">({(file.size / 1024).toFixed(1)} KB)</span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center justify-center gap-1 rounded-full bg-blue-300 px-2 py-1">
-                                    <span className="text-primary text-xs font-light">Ready</span>
-                                </div>
+                            <div className="flex items-center gap-1">
                                 <RemoveFileButton onRemove={() => handleRemoveFile(file.name)} />
+                                <Badge variant="success">
+                                    <CircleCheckIcon className="size-3" /> Uploaded
+                                </Badge>
                             </div>
                         </div>
                     ))}
@@ -166,19 +176,28 @@ const DisplayDefaultSpec = ({
     added: boolean;
 }) => {
     return (
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-1">
             <p className="flex-1 text-sm">{spec.fileName}</p>
-            <Button variant="outline" size="xs" onClick={added ? onRemove : onAdd}>
-                {added ? "Remove" : "Add"}
-            </Button>
+            {added ? (
+                <>
+                    <RemoveFileButton onRemove={onRemove} />
+                    <Badge variant="success">
+                        <CircleCheckIcon className="size-3" /> Added
+                    </Badge>
+                </>
+            ) : (
+                <Button variant="outline" size="xs" onClick={onAdd}>
+                    Add
+                </Button>
+            )}
         </div>
     );
 };
 
 const RemoveFileButton = ({ onRemove }: { onRemove: () => void }) => {
     return (
-        <Button variant="ghost" size="iconSm" onClick={onRemove}>
-            <XIcon className="size-4" />
+        <Button variant="ghost" size="iconSm" onClick={onRemove} className="size-6">
+            <XIcon className="size-3" />
         </Button>
     );
 };

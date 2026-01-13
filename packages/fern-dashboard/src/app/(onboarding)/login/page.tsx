@@ -22,7 +22,7 @@ export default async function LoginCardSlot({ searchParams }: LoginPageProps) {
 
     return (
         <>
-            <div className="mx-4 flex w-full max-w-[400px] flex-1 flex-col items-stretch md:mx-auto">
+            <div className="mx-4 flex w-full max-w-[400px] flex-col items-stretch md:mx-auto">
                 <div className="mb-8 text-center text-xl font-bold">Log in to Fern</div>
                 {showCITestLogin && <CITestLoginForm />}
                 <div className="flex flex-col gap-2">

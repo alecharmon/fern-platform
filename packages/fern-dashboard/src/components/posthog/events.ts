@@ -10,7 +10,8 @@ export const PosthogEventName = {
     DOCS_ZERO_STATE_VIEWED: "dashboard-docs-zero-state-viewed",
     DOCS_REQUEST_ACCESS_CLICKED: "dashboard-docs-request-access-clicked",
     DOCS_REQUEST_ACCESS_SUCCESS: "dashboard-docs-request-access-success",
-    DOCS_PAGE_VIEWED: "dashboard-docs-page-viewed"
+    DOCS_PAGE_VIEWED: "dashboard-docs-page-viewed",
+    SDK_DEMO_SCHEDULED: "dashboard-sdk-demo-scheduled"
 } as const;
 
 export type PosthogEventName = (typeof PosthogEventName)[keyof typeof PosthogEventName];
@@ -46,6 +47,10 @@ export type PosthogEventPayloads = {
         orgName: string;
         docsUrl: string;
         userEmail: string;
+    };
+    [PosthogEventName.SDK_DEMO_SCHEDULED]: {
+        userEmail: string;
+        userName: string;
     };
 };
 

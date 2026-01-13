@@ -14,7 +14,7 @@ export default async function SearchForSitePage() {
         <>
             <BackArrow href="/get-started" />
             <SlideLeftTransition>
-                <div className="flex w-full flex-1 flex-col max-w-[500px]">
+                <div className="flex w-full flex-col max-w-[400px]">
                     <h1 className="text-2xl font-bold">Find your Fern site</h1>
                     <p className="text-md text-muted-foreground mt-1 mb-6">
                         Enter your Fern docs site URL to request access to the Dashboard.

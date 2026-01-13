@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircleIcon, ClockIcon, PlusIcon, SettingsIcon, TrashIcon } from "lucide-react";
+import { CheckCircleIcon, CircleDashedIcon, ClockIcon, SettingsIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -8,6 +8,7 @@ import type { CustomDomainInfo } from "@/app/services/domain";
 import type { DocsUrl } from "@/utils/types";
 import { AddCustomDomainModal } from "../settings/AddCustomDomainModal";
 import { RemoveCustomDomainModal } from "../settings/RemoveCustomDomainModal";
+import { Badge } from "../ui/Badge";
 import { Button } from "../ui/button";
 
 interface CustomDomainButtonProps {
@@ -38,13 +39,13 @@ export function CustomDomainButton({ docsUrl, orgName, domainInfo, allDomains = 
         return (
             <>
                 <Button
-                    variant="outline"
-                    size="sm"
+                    variant="ghost"
+                    size="xs"
                     onClick={() => setShowAddModal(true)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-green-1100 hover:bg-green-200 hover:text-green-1100 w-fit -ml-1"
                 >
-                    <PlusIcon className="mr-1.5 size-3.5" />
-                    Add Custom Domain
+                    <CircleDashedIcon className="size-3.5 " />
+                    Add custom domain
                 </Button>
                 <AddCustomDomainModal
                     open={showAddModal}
@@ -134,19 +135,16 @@ export function CustomDomainButton({ docsUrl, orgName, domainInfo, allDomains = 
     // Earlier steps (pending verification, etc.) - show continue setup
     return (
         <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
-                <ClockIcon className="size-3" />
-                <span>{domainInfo.domain}</span>
-                <span className="text-yellow-600 dark:text-yellow-500">(pending)</span>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => setShowAddModal(true)}>
-                Continue Setup
-            </Button>
+            <button onClick={() => setShowAddModal(true)} className="cursor-pointer">
+                <Badge variant="success">
+                    <ClockIcon className="size-3" /> {domainInfo.domain} (pending)
+                </Badge>
+            </button>
             <Button
                 variant="ghost"
-                size="sm"
+                size="iconSm"
                 onClick={() => setShowRemoveModal(true)}
-                className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                className="text-muted-foreground hover:text-destructive"
             >
                 <TrashIcon className="size-3.5" />
             </Button>

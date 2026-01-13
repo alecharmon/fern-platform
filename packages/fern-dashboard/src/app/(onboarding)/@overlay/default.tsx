@@ -27,7 +27,7 @@ export default async function DefaultOnboardingOverlaySlot() {
             </FadeInTransition>
 
             {/* Bottom left content */}
-            <div className="absolute left-2 bottom-4 max-w-[200px]">
+            <div className="hidden md:block absolute left-2 bottom-4 max-w-[200px]">
                 <FadeInTransition>
                     <div className="flex flex-col gap-5">
                         <div className="flex flex-col gap-1">

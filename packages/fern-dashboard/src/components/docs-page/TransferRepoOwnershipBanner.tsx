@@ -53,7 +53,13 @@ export function TransferRepoOwnershipBanner({ docsUrl, sourceRepoOwner }: Transf
 
             <Note
                 title="Transfer your repo to your org"
-                icon={<GithubLogo />}
+                iconClassName="w-fit h-fit"
+                icon={
+                    <div className="bg-gray-400 rounded-full p-2 w-fit">
+                        <GithubLogo width={18} height={18} />
+                    </div>
+                }
+                className="items-center"
                 subtitle="We've setup a GitHub repo for you. Transfer it to your org to take ownership."
                 rightContent={
                     <Button size="sm" onClick={() => setIsTransferModalOpen(true)}>

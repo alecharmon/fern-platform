@@ -5,7 +5,7 @@ import { constructEditorSlug, generateBranchName, ROOT_SLUG_ALIAS } from "@fern-
 
 import { Loader2, Plus } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { type ComponentProps, useEffect, useMemo, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
@@ -18,13 +18,19 @@ export function GoToEditorButton({
     docsUrl,
     session,
     disabled = false,
-    isValidatingSource
+    isValidatingSource,
+    content,
+    variant = "default",
+    size
 }: {
     docsUrl: DocsUrl;
     session: Auth0SessionData;
     disabled?: boolean;
     disabledReason?: string;
     isValidatingSource?: boolean;
+    content?: React.ReactNode;
+    size?: ComponentProps<typeof AuthZButton>["size"];
+    variant?: ComponentProps<typeof AuthZButton>["variant"];
 }) {
     const orgName = useOrgName();
     const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +82,9 @@ export function GoToEditorButton({
                             permission="edit"
                             disabled={isLoading || disabled || isValidatingSource}
                             loading={isLoading}
+                            variant={variant}
                             permissionScope={docsPermissionScope(docsUrl)}
+                            size={size}
                         >
                             <Link
                                 className="flex flex-row items-center gap-1"
@@ -87,10 +95,12 @@ export function GoToEditorButton({
                                 {isLoading ? (
                                     <Loader2 className="animate-spin" />
                                 ) : (
-                                    <>
-                                        <Plus />
-                                        New session
-                                    </>
+                                    (content ?? (
+                                        <>
+                                            <Plus />
+                                            New session
+                                        </>
+                                    ))
                                 )}
                             </Link>
                         </AuthZButton>

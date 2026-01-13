@@ -34,7 +34,7 @@ export function ConfirmScreen({ orgName, docsUrl, wizardFormData }: ConfirmScree
                             className="px-3 text-sm font-mono text-muted-foreground min-w-fit"
                         />
 
-                        <Button asChild variant="default" size="sm" className="h-[36px] bg-primary">
+                        <Button asChild variant="outline" size="sm" className="h-[36px] bg-primary">
                             <a
                                 href={`https://${fullUrl}`}
                                 target="_blank"
@@ -47,7 +47,7 @@ export function ConfirmScreen({ orgName, docsUrl, wizardFormData }: ConfirmScree
                         </Button>
                     </div>
                     <Button asChild variant="outline">
-                        <Link href={`/${orgName}/docs/${encodedURI}.docs.buildwithfern.com`}>Go to Dashboard</Link>
+                        <Link href={`/${orgName}/docs/${encodedURI}.docs.buildwithfern.com`}>Continue to setup</Link>
                     </Button>
                 </div>
             </FadeInTransition>

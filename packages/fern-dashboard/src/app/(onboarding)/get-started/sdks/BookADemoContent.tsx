@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { usePostHog } from "posthog-js/react";
+import { useEffect, useRef } from "react";
 import { CALENDLY_URL_EMBED } from "@/components/onboarding/constants";
-import { Button } from "@/components/ui/button";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 
 interface BookADemoContentProps {
     email?: string;
@@ -28,7 +28,7 @@ interface CalendlyWindow extends Window {
 
 export function BookADemoContent({ email, name }: BookADemoContentProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [isBooked, setIsBooked] = useState(false);
+    const posthog = usePostHog();
 
     useEffect(() => {
         // Wait for Calendly script to load (loaded via Next.js Script component in parent)
@@ -72,7 +72,10 @@ export function BookADemoContent({ email, name }: BookADemoContentProps) {
             if (isCalendlyEvent(e)) {
                 // Check if user has scheduled an event
                 if (e.data.event === "calendly.event_scheduled") {
-                    setIsBooked(true);
+                    captureEvent(posthog, PosthogEventName.SDK_DEMO_SCHEDULED, {
+                        userEmail: email ?? "",
+                        userName: name ?? ""
+                    });
                 }
             }
         }
@@ -82,33 +85,19 @@ export function BookADemoContent({ email, name }: BookADemoContentProps) {
         return () => {
             window.removeEventListener("message", handleCalendlyEvent);
         };
-    }, [email, name]);
+    }, [email, name, posthog]);
 
     return (
-        <div className="flex flex-col gap-8">
-            <div
-                ref={containerRef}
-                id="calendly-embed"
-                className="border-0 outline outline-border rounded-xl overflow-hidden"
-                style={{
-                    minWidth: "350px",
-                    minHeight: "400px", // keep min height to avoid jump on load
-                    maxHeight: "500px",
-                    height: "500px"
-                }}
-            />
-            {isBooked && (
-                <div className="flex flex-col gap-2">
-                    <Button asChild>
-                        <Link href="/get-started/sdks/new">Set up Dashboard</Link>
-                    </Button>
-                    <Button asChild variant="outline">
-                        <Link href="https://buildwithfern.com/learn/sdks/overview/quickstart" target="_blank">
-                            View SDKs quickstart
-                        </Link>
-                    </Button>
-                </div>
-            )}
-        </div>
+        <div
+            ref={containerRef}
+            id="calendly-embed"
+            className="border-0 outline outline-border rounded-xl overflow-hidden"
+            style={{
+                minWidth: "350px",
+                minHeight: "400px", // keep min height to avoid jump on load
+                maxHeight: "500px",
+                height: "500px"
+            }}
+        />
     );
 }

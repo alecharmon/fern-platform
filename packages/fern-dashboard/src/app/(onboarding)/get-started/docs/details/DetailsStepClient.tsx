@@ -159,7 +159,7 @@ export function DetailsStepClient() {
                 {/* Logo */}
                 <UploadImage
                     label="Logo"
-                    description="This will be used as the main logo on the top-left corner of the Docs site."
+                    description="Recommended height of 60 pixels. This will be used as the main logo on the top-left corner of the Docs site."
                     imageUrl={formData.logoUrl}
                     onFileSelect={handleLogoUpload}
                     size="large"

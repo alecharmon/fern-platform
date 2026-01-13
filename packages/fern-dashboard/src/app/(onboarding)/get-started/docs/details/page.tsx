@@ -13,10 +13,10 @@ export default async function DocsOnboardingStep3Page() {
     return (
         <>
             <BackArrow href="/get-started/docs/api-spec" />
-            <div className="flex justify-center flex-1 gap-6">
+            <div className="flex justify-center gap-6">
                 <DetailsStepClient />
                 <div
-                    className="max-w-[650px] max-h-[450px] hidden lg:block md:pt-20"
+                    className="max-w-[650px] max-h-[450px] hidden lg:block md:pt-12"
                     style={{
                         maskImage:
                             "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",

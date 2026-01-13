@@ -31,20 +31,20 @@ export default function AuthBackgroundSlot() {
                     <LoginImage />
                 </FadeInTransition>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-4 p-16">
+            <div className="absolute bottom-0 left-0 right-0">
                 <SlideUpTransition>
-                    <>
+                    <div className="flex flex-col gap-3 p-16">
                         <div className="text-gray-1000 text-left text-sm">
                             Giving API superpowers to world-class companies
                         </div>
-                        <div className="flex flex-wrap items-center sm:gap-3 md:gap-6 lg:gap-8">
+                        <div className="flex flex-wrap items-center gap-y-4 sm:gap-x-3 md:gap-x-6 lg:gap-x-8 ">
                             <SquareLogo />
                             <TwilioLogo />
                             <AdobeLogo />
                             <ElevenLabsLogo />
                             <Auth0Logo />
                         </div>
-                    </>
+                    </div>
                 </SlideUpTransition>
             </div>
         </div>

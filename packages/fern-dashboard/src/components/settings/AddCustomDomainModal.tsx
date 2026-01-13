@@ -29,7 +29,6 @@ import { Button } from "../ui/button";
 import { CopyableText } from "../ui/CopyableText";
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 
 type ModalStep = "enter-domain" | "update-config" | "verify-ownership" | "verify-dns" | "configure-proxy" | "complete";
 
@@ -434,7 +433,7 @@ export function AddCustomDomainModal({
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="mx-auto w-[calc(100%-2rem)] sm:max-w-[600px] md:max-w-[600px]">
+            <DialogContent className="mx-auto w-[calc(100%-2rem)] sm:max-w-[550px]">
                 <DialogHeader>
                     <DialogTitle>
                         {step === "enter-domain" && "Add Custom Domain"}
@@ -449,18 +448,22 @@ export function AddCustomDomainModal({
                 <DialogBody>
                     {step === "enter-domain" && (
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="domain">Domain</Label>
+                            <div className="flex flex-col gap-3">
+                                <p className="text-muted-foreground text-sm">
+                                    Enter the domain you want to use for your documentation.
+                                </p>
                                 <Input
                                     id="domain"
                                     placeholder="docs.example.com"
                                     value={domain}
                                     onChange={(e) => setDomain(e.target.value)}
                                     disabled={isLoading}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            void handleInitiate();
+                                        }
+                                    }}
                                 />
-                                <p className="text-muted-foreground text-sm">
-                                    Enter the domain you want to use for your documentation.
-                                </p>
                             </div>
                         </div>
                     )}
@@ -524,22 +527,21 @@ export function AddCustomDomainModal({
                             {/* PR/MR created - show success */}
                             {gitStatus.checked && gitStatus.connected && prUrl && (
                                 <div className="space-y-4">
-                                    <div className="rounded-md border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+                                    <div className="rounded-md border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20 text-primary">
                                         <div className="flex items-start gap-3">
-                                            <CheckCircleIcon className="mt-0.5 size-5 text-green-600 dark:text-green-400" />
+                                            <CheckCircleIcon className="mt-0.5 size-5 text-primary" />
                                             <div className="space-y-2">
-                                                <p className="font-medium text-green-800 dark:text-green-200">
-                                                    {prTerminology} Created
-                                                </p>
-                                                <p className="text-green-700 text-sm dark:text-green-300">
+                                                <p className="font-medium">{prTerminology} Created</p>
+                                                <p className="text-sm">
                                                     Please review and merge the {prShortTerminology}, then click
                                                     &quot;Continue&quot;.
                                                 </p>
+
                                                 <a
                                                     href={prUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1 text-sm font-medium text-green-700 underline hover:text-green-900 dark:text-green-300 dark:hover:text-green-100"
+                                                    className="fern-link inline-flex! items-center gap-1 text-sm font-medium"
                                                 >
                                                     View {prTerminology}
                                                     <ExternalLinkIcon className="size-3" />

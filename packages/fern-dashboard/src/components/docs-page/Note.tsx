@@ -57,11 +57,21 @@ export interface NoteProps {
     title?: React.ReactNode;
     subtitle?: React.ReactNode;
     rightContent?: React.ReactNode;
+    iconClassName?: string;
 }
 
-export function Note({ variant = "default", children, className, icon, title, subtitle, rightContent }: NoteProps) {
+export function Note({
+    variant = "default",
+    children,
+    className,
+    icon,
+    title,
+    subtitle,
+    rightContent,
+    iconClassName
+}: NoteProps) {
     const iconWithStyles = icon ? (
-        <div className={iconVariants({ variant })}>{icon}</div>
+        <div className={cn(iconVariants({ variant }), iconClassName)}>{icon}</div>
     ) : variant === "bold" ? (
         <RocketIcon className={iconVariants({ variant })} />
     ) : variant === "error" || variant === "warning" ? (

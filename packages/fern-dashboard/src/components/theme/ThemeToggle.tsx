@@ -41,7 +41,6 @@ export function ThemeToggle({ className }: { className?: string }) {
                     {mountedTheme === "dark" && <Moon className="h-[1.2rem] w-[1.2rem]" />}
                     {mountedTheme === "system" && <Monitor className="h-[1.2rem] w-[1.2rem]" />}
                     <span className="sr-only">Toggle theme</span>
-                    <span className="block md:hidden">Theme</span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" collisionPadding={8}>

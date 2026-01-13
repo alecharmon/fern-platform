@@ -14,11 +14,8 @@ export default async function GetStartedCardSlot() {
     return (
         <>
             <SlideLeftTransition>
-                <div className="flex w-full flex-1 flex-col max-w-[500px]">
+                <div className="flex w-full flex-col max-w-[500px]">
                     <h1 className="text-2xl font-bold">Where do you want to start?</h1>
-                    <p className="text-md text-muted-foreground">
-                        Fern will help you automatically set up your Docs & SDKs.{" "}
-                    </p>
                     <div className="flex gap-4 mt-8">
                         <ProductCard variant="docs" />
                         <ProductCard variant="sdk" />
