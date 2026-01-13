@@ -5,7 +5,16 @@ export default function FloatingMenu() {
     return (
         <SlashDropdownMenu
             config={{
-                enabledItems: ["text", "heading_1", "heading_2", "heading_3", "bullet_list", "ordered_list", "quote"],
+                enabledItems: [
+                    "text",
+                    "heading_1",
+                    "heading_2",
+                    "heading_3",
+                    "bullet_list",
+                    "ordered_list",
+                    "task_list",
+                    "quote"
+                ],
                 customItems: slashMenuItems
             }}
         />

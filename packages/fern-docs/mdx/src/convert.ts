@@ -393,6 +393,20 @@ export function mdxToHtml(rootContent: string, options?: MdxToHtmlOptions): MdxT
         }
     });
 
+    // Remove whitespace-only text nodes from list elements to prevent Tiptap from treating them as content
+    visit(hast, "element", (node: any) => {
+        if (node.tagName === "ul" || node.tagName === "ol" || node.tagName === "li") {
+            if (node.children && Array.isArray(node.children)) {
+                node.children = node.children.filter((child: any) => {
+                    if (child.type === "text" && typeof child.value === "string") {
+                        return child.value.trim() !== "";
+                    }
+                    return true;
+                });
+            }
+        }
+    });
+
     // Get html from hast
     const html = toHtml(hast);
 

@@ -16,7 +16,8 @@ type TextBubbleMenuAction =
     | "toggleStrike"
     | "toggleCode"
     | "toggleBulletList"
-    | "toggleOrderedList";
+    | "toggleOrderedList"
+    | "toggleTaskList";
 
 type NodeType = "paragraph" | "heading1" | "heading2" | "heading3" | "heading4";
 
@@ -107,6 +108,9 @@ export default function TextBubbleMenu({ disableNodeTypeSwitching = false }: Tex
                     break;
                 case "toggleOrderedList":
                     editor.chain().focus().toggleOrderedList().run();
+                    break;
+                case "toggleTaskList":
+                    editor.chain().focus().toggleTaskList().run();
                     break;
             }
         };
@@ -254,6 +258,10 @@ export default function TextBubbleMenu({ disableNodeTypeSwitching = false }: Tex
                         <BubbleMenuItem
                             iconProps={{ variant: "ListOrdered" }}
                             onClick={menuItemClickHandler("toggleOrderedList")}
+                        />
+                        <BubbleMenuItem
+                            iconProps={{ variant: "ListCheck" }}
+                            onClick={menuItemClickHandler("toggleTaskList")}
                         />
                     </>
                 )}
