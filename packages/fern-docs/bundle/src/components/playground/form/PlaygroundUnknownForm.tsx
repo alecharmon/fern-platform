@@ -2,7 +2,7 @@
 
 import { FernTextarea } from "@fern-docs/components/FernTextarea";
 import { t } from "@fern-docs/i18n";
-import { type ReactElement, useCallback, useEffect, useState } from "react";
+import { type ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
 interface PlaygroundUnknownFormProps {
     id: string;
@@ -14,16 +14,25 @@ interface PlaygroundUnknownFormProps {
 
 function stringifyValue(value: unknown): string {
     if (value === undefined || value === null || value === "") {
-        return "";
+        return "{}";
     }
     if (typeof value === "string") {
-        return value;
+        try {
+            JSON.parse(value);
+            return value;
+        } catch {
+            return "{}";
+        }
     }
     try {
         return JSON.stringify(value, null, 2);
     } catch {
-        return "";
+        return "{}";
     }
+}
+
+function deepEqual(a: unknown, b: unknown): boolean {
+    return JSON.stringify(a) === JSON.stringify(b);
 }
 
 export function PlaygroundUnknownForm({
@@ -35,12 +44,15 @@ export function PlaygroundUnknownForm({
 }: PlaygroundUnknownFormProps): ReactElement {
     const [textValue, setTextValue] = useState(() => stringifyValue(value));
     const [isValidJson, setIsValidJson] = useState(true);
+    const lastParsedValueRef = useRef<unknown>(value);
 
-    // biome-ignore lint/correctness/useExhaustiveDependencies: Only update when value changes from outside, not when user types
     useEffect(() => {
-        const stringified = stringifyValue(value);
-        if (stringified !== textValue) {
+        // Only update textValue if the value prop changed externally (not from user input)
+        if (!deepEqual(value, lastParsedValueRef.current)) {
+            const stringified = stringifyValue(value);
             setTextValue(stringified);
+            setIsValidJson(true);
+            lastParsedValueRef.current = value;
         }
     }, [value]);
 
@@ -48,19 +60,21 @@ export function PlaygroundUnknownForm({
         (newTextValue: string) => {
             setTextValue(newTextValue);
 
-            if (newTextValue.trim() === "") {
+            const trimmed = newTextValue.trim();
+            if (trimmed === "" || trimmed === "{}") {
                 setIsValidJson(true);
-                onChange(undefined);
+                lastParsedValueRef.current = {};
+                onChange({});
                 return;
             }
 
             try {
                 const parsed = JSON.parse(newTextValue);
                 setIsValidJson(true);
+                lastParsedValueRef.current = parsed;
                 onChange(parsed);
             } catch {
                 setIsValidJson(false);
-                onChange(newTextValue);
             }
         },
         [onChange]
@@ -77,9 +91,7 @@ export function PlaygroundUnknownForm({
                 placeholder={t(lang).ui.jsonPlaceholder}
                 minLines={3}
             />
-            {!isValidJson && textValue.trim() !== "" && (
-                <p className="text-(color:--red-a11) mt-1 text-xs">{t(lang).ui.invalidJson}</p>
-            )}
+            {!isValidJson && <p className="text-(color:--red-a11) mt-1 text-xs">{t(lang).ui.invalidJson}</p>}
         </div>
     );
 }
