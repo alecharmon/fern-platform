@@ -51,6 +51,25 @@ function myFunction() {
 
 The `debugger` statement will pause execution when the Node.js inspector is attached.
 
+## Local Tracing with Jaeger
+
+To view OpenTelemetry traces locally:
+
+```bash
+# 1. Start Jaeger
+docker compose up -d
+
+# 2. Set the OTLP endpoint in your .env.local
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+
+# 3. Run the dashboard
+pnpm turbo --filter=@fern-dashboard/ui dashboard:dev
+
+# 4. View traces at http://localhost:16686
+```
+
+The dashboard uses `traceExporter: "auto"` which automatically detects and uses the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable when set. In production (on Vercel), traces go to Vercel's OTEL collector.
+
 ## Components library
 
 We're using [shadcn](https://ui.shadcn.com/) for our components. To add a
