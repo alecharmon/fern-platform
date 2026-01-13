@@ -14,6 +14,9 @@ const DROPDOWN_SELECTORS = [
 
 const EDITOR_SELECTORS = ".ProseMirror";
 
+// Mobile sidebar is rendered via Portal outside #preview-container, so we need to intercept links there too
+const MOBILE_SIDEBAR_SELECTOR = "#fern-sidebar[data-viewport='mobile']";
+
 export function EditorLinkInterceptor() {
     const { orgName, docsUrl, branch, basePath } = useEditorRouting();
     const router = useRouter();
@@ -27,11 +30,12 @@ export function EditorLinkInterceptor() {
                 return;
             }
 
-            // Check if the click is within our target containers (preview, dropdowns, or editor)
+            // Check if the click is within our target containers (preview, dropdowns, editor, or mobile sidebar)
             const isInTargetContainer =
                 link.closest("#preview-container") ||
                 link.closest(DROPDOWN_SELECTORS) ||
-                link.closest(EDITOR_SELECTORS);
+                link.closest(EDITOR_SELECTORS) ||
+                link.closest(MOBILE_SIDEBAR_SELECTOR);
 
             if (isInTargetContainer) {
                 const interceptedLink = getInterceptedLink(event, {
