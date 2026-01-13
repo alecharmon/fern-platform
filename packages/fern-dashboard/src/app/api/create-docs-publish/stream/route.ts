@@ -237,7 +237,7 @@ export async function GET(req: NextRequest) {
                                 githubUrl: githubRepoUrl
                             });
 
-                            if (linkResult.success) {
+                            if (linkResult.ok) {
                                 sendEvent({
                                     type: "log",
                                     message: "✓ Linked GitHub repository to docs site",

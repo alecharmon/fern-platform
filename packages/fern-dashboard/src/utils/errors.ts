@@ -1,4 +1,4 @@
-import type { GitRepoValidationError } from "@/app/services/dal/github/validators";
+import type { GitRepoValidationError } from "@/app/services/dal/git/validateGitRepoAccess";
 
 // Extend the Error type to include the digest property
 interface DigestibleError extends Error {
@@ -25,6 +25,7 @@ export const ERROR_DIGEST_MESSAGES: Record<ERROR_DIGEST_KEYS, string> = {
     REPO_NOT_FOUND: "We were unable to locate the repository connected to this site. Please contact support.",
     USER_NOT_IN_ORG: "You do not have access to this organization. Please contact an organization admin to be added.",
     FERN_BOT_NOT_INSTALLED: "Fern App is not installed on this repository. Please contact your repository admin.",
+    GHE_APP_NOT_INSTALLED: "Please contact Fern Support to set up this repository.",
     GITLAB_TOKEN_NOT_CONFIGURED: "Please contact Fern Support to set up a GitLab repository.",
     MALFORMED_GIT_URL:
         "The provided repository URL is not valid. Please ensure you're using a valid GitHub or GitLab repository URL.",
@@ -57,6 +58,8 @@ export function getValidationErrorMessage(error: GitRepoValidationError): string
             return ERROR_DIGEST_MESSAGES.DOMAIN_NOT_REGISTERED;
         case "FERN_BOT_NOT_INSTALLED":
             return ERROR_DIGEST_MESSAGES.FERN_BOT_NOT_INSTALLED;
+        case "GHE_APP_NOT_INSTALLED":
+            return ERROR_DIGEST_MESSAGES.GHE_APP_NOT_INSTALLED;
         case "FERN_CONFIG_JSON_ORG_MISMATCH":
             return ERROR_DIGEST_MESSAGES.FERN_CONFIG_JSON_ORG_MISMATCH;
         case "FERN_CONFIG_JSON_MISSING":

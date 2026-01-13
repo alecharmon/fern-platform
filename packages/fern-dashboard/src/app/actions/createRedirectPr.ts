@@ -7,6 +7,7 @@ import { getGitLoader } from "@/app/services/github/getGitLoader";
 import type { GithubCommitableFile } from "@/app/services/github/types";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
+
 import postCreatePr from "../api/post-git-create-pr/handler";
 import type { Auth0OrgName } from "../services/auth0/types";
 import createBranchIfNotExists from "../services/dal/github/createBranchIfNotExists";
@@ -67,7 +68,7 @@ export async function createRedirectPrAction(
     }
 
     // 4. Get GitLoader instance
-    const loader = getGitLoader(githubUrl);
+    const loader = await getGitLoader(githubUrl);
 
     // 5. Validate repository access
     const accessResult = await loader.validateAccess({
@@ -78,7 +79,10 @@ export async function createRedirectPrAction(
     });
 
     if (accessResult?.type === "error") {
-        return { success: false, error: `Access validation failed: ${accessResult.error.type}` };
+        return {
+            success: false,
+            error: `Access validation failed: ${accessResult.error.type}`
+        };
     }
 
     try {

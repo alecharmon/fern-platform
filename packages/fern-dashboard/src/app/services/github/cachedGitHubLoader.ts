@@ -1,9 +1,14 @@
 import { unstable_cache } from "next/cache";
+
 import type { DocsUrl } from "@/utils/types";
-import { GitHubLoader } from "./github-loader";
+
+import { isGheUrl } from "./ghe-config";
+import { type GitHubAuthMode, GitHubLoader } from "./github-loader";
 
 export const getCachedGitHubLoader = async (githubUrl: string) => {
-    const loader = new GitHubLoader({ githubUrl });
+    const isGhe = await isGheUrl(githubUrl);
+    const authMode: GitHubAuthMode = isGhe ? "ghe" : "fern-bot";
+    const loader = new GitHubLoader({ githubUrl }, authMode);
 
     return {
         getDocsYml: unstable_cache(
@@ -55,7 +60,9 @@ export const getCachedGitHubLoader = async (githubUrl: string) => {
  * React's cache, such as when retrying after an error or validating changes.
  */
 export async function getUncachedGitHubLoader(githubUrl: string) {
-    const loader = new GitHubLoader({ githubUrl }, "fern-bot", true);
+    const isGhe = await isGheUrl(githubUrl);
+    const authMode: GitHubAuthMode = isGhe ? "ghe" : "fern-bot";
+    const loader = new GitHubLoader({ githubUrl }, authMode, true);
 
     return {
         getDocsYml: async (owner: string, repo: string, site: DocsUrl, ref?: string, preferDefaultBranch?: boolean) => {

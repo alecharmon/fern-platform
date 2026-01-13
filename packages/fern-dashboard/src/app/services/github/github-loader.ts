@@ -24,11 +24,14 @@ import type {
     ValidateAccessRequest,
     ValidateAccessResult
 } from "@fern-api/docs-loader";
+
 import type { Octokit } from "@octokit/core";
 import { revalidateTag, unstable_cache } from "next/cache";
+
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
-import { getDemoCreationBotOctokit, getFernBotOctokitForRepo } from "../auth0/fernBotOctokit";
+
+import { getDemoCreationBotOctokit, getFernBotOctokitForRepo, getGheOctokitForRepo } from "../auth0/fernBotOctokit";
 import {
     extractReferencedYmlPaths,
     getOwnerAndRepoFromGithubUrl,
@@ -38,7 +41,7 @@ import {
 } from "../git-common";
 import type { GITHUB_FILE_MODE } from "./types";
 
-export type GitHubAuthMode = "fern-bot" | "demo-creation-bot";
+export type GitHubAuthMode = "fern-bot" | "demo-creation-bot" | "ghe";
 
 /**
  * The GitHubLoader is used to read from and write to a remote GitHub repository.
@@ -48,6 +51,7 @@ export class GitHubLoader implements GitLoader {
     private octokit: Octokit | null = null;
     private owner: string;
     private repo: string;
+    private repoUrl: string | null;
     private skipCache: boolean;
 
     constructor(
@@ -60,13 +64,16 @@ export class GitHubLoader implements GitLoader {
             const parsed = getOwnerAndRepoFromGithubUrl(params);
             this.owner = parsed.owner ?? "";
             this.repo = parsed.repo ?? "";
+            this.repoUrl = params;
         } else if ("githubUrl" in params) {
             const parsed = getOwnerAndRepoFromGithubUrl(params.githubUrl);
             this.owner = parsed.owner ?? "";
             this.repo = parsed.repo ?? "";
+            this.repoUrl = params.githubUrl;
         } else {
             this.owner = params.owner;
             this.repo = params.repo;
+            this.repoUrl = null; // No URL available when using owner/repo directly
         }
 
         this.getOctokitInstance = async () => {
@@ -76,6 +83,13 @@ export class GitHubLoader implements GitLoader {
 
             if (authMode === "demo-creation-bot") {
                 const result = getDemoCreationBotOctokit();
+                return result.ok ? result.octokit : null;
+            } else if (authMode === "ghe") {
+                if (!this.repoUrl) {
+                    console.error("[GitHubLoader] GHE auth mode requires a repo URL, not owner/repo");
+                    return null;
+                }
+                const result = await getGheOctokitForRepo(this.repoUrl, this.owner, this.repo);
                 return result.ok ? result.octokit : null;
             } else {
                 const result = await getFernBotOctokitForRepo(this.owner, this.repo);
@@ -711,8 +725,14 @@ export class GitHubLoader implements GitLoader {
 
             // For binary files, create blobs separately to ensure proper encoding
             const binaryFilesToCreate = request.files.filter(
-                (f): f is { path: string; content: string; encoding: "base64"; delete?: false } =>
-                    !f.delete && f.encoding === "base64"
+                (
+                    f
+                ): f is {
+                    path: string;
+                    content: string;
+                    encoding: "base64";
+                    delete?: false;
+                } => !f.delete && f.encoding === "base64"
             );
             const blobShaMap = new Map<string, string>();
 

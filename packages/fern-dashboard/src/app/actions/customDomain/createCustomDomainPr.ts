@@ -10,6 +10,7 @@ import type { GithubCommitableFile } from "@/app/services/github/types";
 import { assertRateLimit, PR_CREATION_RATE_LIMIT, RateLimitError } from "@/app/services/rateLimit";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
+
 import postCreatePr from "../../api/post-git-create-pr/handler";
 import type { Auth0OrgName } from "../../services/auth0/types";
 import createBranchIfNotExists from "../../services/dal/github/createBranchIfNotExists";
@@ -119,7 +120,10 @@ export async function createCustomDomainPr({
     const provider: GitProvider = parsed.provider === "gitlab" ? "gitlab" : "github";
 
     if (!parsed.owner || !parsed.repo) {
-        return { success: false, error: `Invalid ${provider === "gitlab" ? "GitLab" : "GitHub"} URL` };
+        return {
+            success: false,
+            error: `Invalid ${provider === "gitlab" ? "GitLab" : "GitHub"} URL`
+        };
     }
 
     const owner = parsed.owner;
@@ -127,7 +131,7 @@ export async function createCustomDomainPr({
     const repo = provider === "gitlab" && parsed.path ? parsed.path : parsed.repo;
 
     // 4. Get GitLoader instance
-    const loader = getGitLoader(gitUrl);
+    const loader = await getGitLoader(gitUrl);
 
     // 5. Validate repository access
     const accessResult = await loader.validateAccess({
@@ -138,7 +142,10 @@ export async function createCustomDomainPr({
     });
 
     if (accessResult?.type === "error") {
-        return { success: false, error: `Access validation failed: ${accessResult.error.type}` };
+        return {
+            success: false,
+            error: `Access validation failed: ${accessResult.error.type}`
+        };
     }
 
     try {

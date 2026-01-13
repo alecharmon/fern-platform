@@ -1,4 +1,6 @@
 import { toast } from "sonner";
+
+import type { PostDocsGithubSourceResponse } from "@/app/api/post-docs-github-source/handler";
 import type { PostGitCommitErrors } from "@/app/services/dal/github/postGitCommit";
 
 /**
@@ -14,7 +16,7 @@ export function SuccessfulCommitToast(prUrl?: string) {
                     href={prUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline hover:text-foreground"
+                    className="hover:text-foreground underline"
                     onClick={(e) => e.stopPropagation()}
                 >
                     View PR
@@ -37,6 +39,49 @@ export function SuccessfulEditSourceAndRefreshToast(refreshDelayInSeconds: numbe
 
 export function ErrorEditSourceToast() {
     return toast.error("Failed to link your repository. Please try again.");
+}
+
+type ConnectRepoError = Extract<PostDocsGithubSourceResponse, { ok: false }>["error"];
+
+export function ErrorConnectRepoToast(error?: ConnectRepoError) {
+    if (!error) {
+        return toast.error("Failed to link your repository. Please try again.");
+    }
+
+    switch (error.type) {
+        case "FERN_BOT_NOT_INSTALLED":
+            return toast.error(
+                "Fern bot is not installed on this repository. Please install it to connect the repository."
+            );
+        case "GHE_APP_NOT_INSTALLED":
+            return toast.error(
+                "GitHub Enterprise app is not installed on this repository. Please install it to connect the repository."
+            );
+        case "FERN_CONFIG_JSON_ORG_MISMATCH":
+            return toast.error("Organization mismatch: the organization in fern.config.json does not match.");
+        case "FERN_CONFIG_JSON_MISSING":
+            return toast.error("fern.config.json is missing from the repository.");
+        case "FERN_CONFIG_JSON_MALFORMED":
+            return toast.error(`fern.config.json is malformed: ${error.parsingErrorMessage}`);
+        case "MALFORMED_GIT_URL":
+            return toast.error("Invalid repository URL. Please check the URL and try again.");
+        case "EDGE_CONFIG_ERROR":
+            return toast.error(`Configuration error: ${error.message}`);
+        case "GITLAB_TOKEN_NOT_CONFIGURED":
+            return toast.error("GitLab token is not configured. Please configure a GitLab token to connect.");
+        case "REPO_NOT_FOUND":
+            return toast.error("Repository not found. Please check the URL and try again.");
+        case "SITE_NOT_FOUND":
+            return toast.error("Site not found in repository. Please check the repository configuration.");
+        case "REPO_NOT_CONNECTED":
+            return toast.error("Repository is not connected. Please connect the repository first.");
+        case "DOMAIN_NOT_REGISTERED":
+            return toast.error("Domain is not registered. Please register the domain first.");
+        case "UNEXPECTED_ERROR":
+            return toast.error(`An error occurred: ${error.message}`);
+        default:
+            return toast.error("Failed to link your repository. Please try again.");
+    }
 }
 
 export function ErrorInvalidGitUrlToast() {

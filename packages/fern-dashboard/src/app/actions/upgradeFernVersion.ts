@@ -52,7 +52,7 @@ export async function upgradeFernVersionAction(
     }
 
     // 4. Get GitLoader instance
-    const loader = getGitLoader(gitUrl);
+    const loader = await getGitLoader(gitUrl);
 
     // 5. Validate repository access
     const accessResult = await loader.validateAccess({
@@ -63,7 +63,10 @@ export async function upgradeFernVersionAction(
     });
 
     if (accessResult?.type === "error") {
-        return { success: false, error: `Access validation failed: ${accessResult.error.type}` };
+        return {
+            success: false,
+            error: `Access validation failed: ${accessResult.error.type}`
+        };
     }
 
     try {

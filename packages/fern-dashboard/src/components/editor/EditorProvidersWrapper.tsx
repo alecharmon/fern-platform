@@ -1,6 +1,7 @@
 import "server-only";
 
 import type React from "react";
+
 import { getGithubSourceMetadata } from "@/app/actions/getGithubSourceMetadata";
 import { getGitlabSourceMetadata } from "@/app/actions/getGitlabSourceMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -61,7 +62,7 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
 
         // TODO: lazy load this so we don't block the initial server render?
         // Use the factory function to get the appropriate loader (GitHub or GitLab)
-        const gitLoader = getGitLoader(gitUrl);
+        const gitLoader = await getGitLoader(gitUrl);
 
         // Use the repo's default branch by passing preferDefaultBranch=true
         const docsYmlAndReferences = await gitLoader.getDocsYmlAndReferences(

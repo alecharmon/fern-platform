@@ -1,4 +1,4 @@
-import type { GitRepoValidationError } from "@/app/services/dal/github/validators";
+import type { GitRepoValidationError } from "@/app/services/dal/git/validateGitRepoAccess";
 import { getValidationErrorMessage } from "@/utils/errors";
 
 interface ValidationErrorHandlerProps {
@@ -16,7 +16,7 @@ export function VisualEditorValidationErrorHandler({ error, githubUrl }: Validat
                 href={githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline underline-offset-3 transition-all"
+                className="text-primary underline-offset-3 transition-all hover:underline"
             >
                 here
             </a>
@@ -25,6 +25,7 @@ export function VisualEditorValidationErrorHandler({ error, githubUrl }: Validat
     ) : null;
     switch (error.type) {
         case "FERN_BOT_NOT_INSTALLED":
+        case "GHE_APP_NOT_INSTALLED":
         case "MALFORMED_GIT_URL":
         case "DOMAIN_NOT_REGISTERED":
         case "REPO_NOT_FOUND":
@@ -57,7 +58,7 @@ export function VisualEditorValidationErrorHandler({ error, githubUrl }: Validat
                             {getValidationErrorMessage(error)}
                         </p>
                         {error.foundSites && error.foundSites.length > 0 && (
-                            <ul className="list-disc pl-5 space-y-1">
+                            <ul className="list-disc space-y-1 pl-5">
                                 {error.foundSites.map((site, index) => (
                                     <li key={index}>
                                         <code>{site}</code>

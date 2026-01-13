@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
+
 import { getDocsGithubMetadata } from "@/app/actions/getDocsGithubMetadata";
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
 import { orgNameValidator } from "@/app/api/utils/validators";
@@ -100,7 +101,7 @@ export const POST = withZodValidation(
         }
 
         // 4. Get GitLoader and validate access
-        const loader = getGitLoader(repoUrl);
+        const loader = await getGitLoader(repoUrl);
         const site = parseDocsUrlParam({ docsUrl: siteRaw });
 
         const accessResult = await loader.validateAccess({

@@ -29,7 +29,7 @@ export async function getFernVersionFromRepo(repoUrl: string, docsUrl: DocsUrl):
         };
     }
 
-    const loader = getGitLoader(repoUrl);
+    const loader = await getGitLoader(repoUrl);
     const fernConfigResult = await loader.getFernConfigJson(parsed.owner, repoOrPath, docsUrl);
 
     if (fernConfigResult.type !== "ok") {

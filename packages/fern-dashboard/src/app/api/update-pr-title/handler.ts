@@ -1,4 +1,5 @@
 import type { GitOperationError } from "@fern-api/docs-loader";
+
 import { getGitLoader } from "@/app/services/github/getGitLoader";
 
 export type UpdatePrTitleErrors = GitOperationError | { type: "PR_NOT_FOUND"; message: string };
@@ -28,7 +29,7 @@ export default async function updatePrTitle(request: {
 > {
     // Get GitLoader instance
     const repoUrl = request.repoUrl || `https://github.com/${request.owner}/${request.repo}`;
-    const loader = getGitLoader(repoUrl);
+    const loader = await getGitLoader(repoUrl);
 
     try {
         // First, find the PR/MR for the branch using the centralized method
@@ -42,7 +43,10 @@ export default async function updatePrTitle(request: {
         if (!getPrResult) {
             return {
                 success: false,
-                error: { type: "UNKNOWN_ERROR", message: "getPullRequestForBranch method not available on loader" }
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: "getPullRequestForBranch method not available on loader"
+                }
             };
         }
 
@@ -64,7 +68,10 @@ export default async function updatePrTitle(request: {
         if (!updateResult) {
             return {
                 success: false,
-                error: { type: "UNKNOWN_ERROR", message: "updatePullRequest method not available on loader" }
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: "updatePullRequest method not available on loader"
+                }
             };
         }
 

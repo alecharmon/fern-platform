@@ -1,10 +1,12 @@
 "use server";
 
 import { cache } from "react";
+
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getGitLoader } from "@/app/services/github/getGitLoader";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisGet, redisSet } from "@/app/services/redis/redis";
+
 import type { Auth0OrgName } from "../../auth0/types";
 import { assertUserHasOrganizationAccess } from "../organization";
 
@@ -63,7 +65,7 @@ export const getPrForBranch = cache(
 
         // Use GitLoader to get PR/MR info
         const url = repoUrl || `https://github.com/${owner}/${repo}`;
-        const loader = getGitLoader(url);
+        const loader = await getGitLoader(url);
 
         // Call the loader's getPullRequest method if it exists
         if (typeof (loader as any).getPullRequestForBranch === "function") {

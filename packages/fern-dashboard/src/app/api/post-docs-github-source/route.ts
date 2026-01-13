@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
     }
     const { url, githubUrl } = parsedBody.data;
 
-    await handler({ token, url, githubUrl });
+    const result = await handler({ token, url, githubUrl });
 
-    // Return empty response since handler returns void
-    return NextResponse.json({});
+    // Return the full result so clients can access structured error types
+    return NextResponse.json(result, { status: result.ok ? 200 : 400 });
 }

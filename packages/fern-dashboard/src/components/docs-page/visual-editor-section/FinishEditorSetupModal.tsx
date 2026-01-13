@@ -2,13 +2,13 @@
 
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import type { ValidateGithubRepoAccessResponse } from "@/app/api/validate-github-repo-access/handler";
+
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { useConfetti } from "@/hooks/useConfetti";
 import { useConnectGitRepo } from "@/hooks/useConnectGitRepo";
 import { useValidateGitRepo } from "@/hooks/useValidateGitRepo";
 import type { DocsUrl } from "@/utils/types";
+
 import { Button } from "../../ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogTrigger } from "../../ui/dialog";
 import { FinishEditorSetupModalContent } from "./editor-setup-modal/FinishEditorSetupModalContent";
@@ -19,6 +19,7 @@ interface FinishEditorSetupModalProps {
     orgName: Auth0OrgName;
     trigger?: React.ReactNode;
     showRefreshButtonOnSuccess?: boolean;
+    initialGitUrl?: string;
 }
 
 /**
@@ -29,7 +30,8 @@ export function FinishEditorSetupModal({
     orgName,
     docsUrl,
     trigger,
-    showRefreshButtonOnSuccess
+    showRefreshButtonOnSuccess,
+    initialGitUrl
 }: FinishEditorSetupModalProps) {
     return (
         <EditorSetupModalImpl
@@ -38,6 +40,7 @@ export function FinishEditorSetupModal({
             trigger={trigger}
             isLoadingInitialData={false}
             showRefreshButtonOnSuccess={showRefreshButtonOnSuccess}
+            initialGitUrl={initialGitUrl}
         />
     );
 }
@@ -47,31 +50,51 @@ function EditorSetupModalImpl({
     orgName,
     trigger,
     isLoadingInitialData,
-    showRefreshButtonOnSuccess = false
+    showRefreshButtonOnSuccess = false,
+    initialGitUrl
 }: {
     isLoadingInitialData: boolean;
 } & FinishEditorSetupModalProps) {
-    const [gitUrl, setGitUrl] = useState<string>();
+    // gitUrl tracks the URL being validated/connected - separate from initialGitUrl which just prepopulates the input
+    const [gitUrl, setGitUrl] = useState<string | undefined>();
+    const [detectedProvider, setDetectedProvider] = useState<string>();
 
     const [open, setOpen] = useState(false);
     const { startConfetti } = useConfetti();
 
-    const { owner, repo, provider, path } = parseGitUrl(gitUrl ?? "");
-    const shouldEnableAccessCheck = open && !!owner && !!repo;
+    const shouldEnableAccessCheck = open && !!gitUrl;
 
+    // Use the unified validation hook - provider detection happens server-side
+    // Only poll for github.com repos (once we know the provider)
     const {
-        result: accessCheckResult,
+        result: validationResult,
         loading: isLoadingValidation,
         fetching: isFetchingValidation,
         refetch: refetchAccessCheck
     } = useValidateGitRepo({
         enabled: shouldEnableAccessCheck,
         docsUrl,
-        owner: owner ?? undefined,
-        repo: (provider === "gitlab" ? (path ?? repo) : repo) ?? undefined,
-        refetchInterval: shouldEnableAccessCheck && provider === "github" ? 3000 : false,
-        variant: provider === "unknown" ? "github" : provider
+        gitUrl,
+        refetchInterval: shouldEnableAccessCheck && detectedProvider === "github" ? 3000 : false
     });
+
+    // Track the detected provider when validation result changes
+    useEffect(() => {
+        if (validationResult?.provider) {
+            setDetectedProvider(validationResult.provider);
+        }
+    }, [validationResult?.provider]);
+
+    // Convert the new response format to the format expected by child components
+    const accessCheckResult = validationResult
+        ? validationResult.ok
+            ? { ok: true as const, appInstalled: true as const }
+            : {
+                  ok: false as const,
+                  appInstalled: validationResult.error.type !== "FERN_BOT_NOT_INSTALLED",
+                  error: validationResult.error
+              }
+        : undefined;
 
     // Manage the setup state machine
     const {
@@ -149,9 +172,10 @@ function EditorSetupModalImpl({
                     state={state}
                     docsUrl={docsUrl}
                     pendingGithubUrl={gitUrl}
+                    initialGitUrl={initialGitUrl}
                     orgName={orgName}
                     isLoadingInitialData={isLoadingValidation || isLoadingInitialData}
-                    accessCheckResult={(accessCheckResult as ValidateGithubRepoAccessResponse) ?? undefined}
+                    accessCheckResult={accessCheckResult}
                     isAccessCheckLoading={isLoadingValidation}
                     isAccessCheckFetching={isFetchingValidation}
                     refetchAccessCheck={refetchAccessCheck}

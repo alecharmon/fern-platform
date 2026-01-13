@@ -1,14 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+
 import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { useValidateGitRepo } from "@/hooks/useValidateGitRepo";
 import { ReactQueryKey } from "@/state/queryKeys";
 import type { DocsUrl } from "@/utils/types";
+
 import { Note } from "../Note";
 import { FinishEditorSetupModal } from "./FinishEditorSetupModal";
 
@@ -32,24 +33,25 @@ export function FinishDocsSetupBanner({ docsUrl, orgName, gitUrl }: FinishDocsSe
         retry: false
     });
 
-    const resolvedGithubUrl = githubUrlResponse?.success ? githubUrlResponse.gitUrl : gitUrl;
-    const { owner, repo, provider, path } = useMemo(() => parseGitUrl(resolvedGithubUrl ?? ""), [resolvedGithubUrl]);
+    const resolvedGitUrl = githubUrlResponse?.success ? githubUrlResponse.gitUrl : gitUrl;
 
+    // Use the unified validation hook - provider detection happens server-side
     const { result: validationResult, loading: isLoadingValidation } = useValidateGitRepo({
-        enabled: !!owner && !!repo,
+        enabled: !!resolvedGitUrl,
         docsUrl,
-        owner: owner ?? undefined,
-        repo: (provider === "gitlab" ? (path ?? repo) : repo) ?? undefined,
-        variant: provider === "unknown" ? "github" : provider
+        gitUrl: resolvedGitUrl
     });
 
-    // We only show the setup banner for GitHub repos for now
+    // Show the setup banner if:
+    // 1. We're done loading
+    // 2. Either no git URL is configured, or validation failed
+    // Note: We no longer exclude GitLab here since the server handles provider detection
     const shouldShowBanner =
-        provider !== "gitlab" &&
         !isGithubUrlLoading &&
         !isGithubUrlFetching &&
         !isLoadingValidation &&
-        !validationResult?.ok;
+        (!resolvedGitUrl || !validationResult?.ok);
+
     const [isAnimatingIn, setIsAnimatingIn] = useState(false);
 
     useEffect(() => {

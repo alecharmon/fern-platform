@@ -1,11 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Pencil } from "lucide-react";
-import { useState } from "react";
+import { Pencil } from "lucide-react";
 
 import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
-import type { GitRepoValidationResult } from "@/app/services/dal/github/validators";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+import type { ValidateGitRepoResult } from "@/app/services/dal/git/validateGitRepoAccess";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
 import type { GitSourceRepo } from "@/app/services/github/types";
@@ -16,25 +16,25 @@ import { AuthZWrapper } from "../auth/authz/AuthZWrapper";
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
-import { ConnectGithubRepoButton } from "./ConnectGithubRepoButton";
-import { SetGitSourcePopover } from "./SetGitSource";
+import { FinishEditorSetupModal } from "./visual-editor-section/FinishEditorSetupModal";
 
 export interface GitAuthState {
-    validationResult: GitRepoValidationResult;
+    validationResult: ValidateGitRepoResult;
     sourceRepo?: GitSourceRepo;
     isLoading?: boolean;
 }
 
 export function GitSourceClient({
     docsUrl,
+    orgName,
     gitUrl,
     isLoading
 }: {
     docsUrl: DocsUrl;
+    orgName: Auth0OrgName;
     gitUrl?: string;
     isLoading?: boolean;
 }) {
-    const [isSaving, setIsSaving] = useState(false);
     const {
         data: gitUrlResponse,
         isLoading: isGithubUrlLoading,
@@ -66,7 +66,7 @@ export function GitSourceClient({
                                 {/* dashboard-link uses inline-flex which prevents truncate from working – block is required for ellipsis */}
                                 <a
                                     href={resolvedGitUrl}
-                                    className="dashboard-link block! truncate min-w-0"
+                                    className="dashboard-link block! min-w-0 truncate"
                                     target="_blank"
                                 >
                                     {getRepoDisplayNameFromUrl(resolvedGitUrl)}
@@ -76,40 +76,34 @@ export function GitSourceClient({
                                     permissionScope={docsPermissionScope(docsUrl)}
                                 >
                                     <div className="shrink-0">
-                                        <SetGitSourcePopover
+                                        <FinishEditorSetupModal
                                             docsUrl={docsUrl}
-                                            setIsSaving={setIsSaving}
-                                            initialUrl={resolvedGitUrl}
-                                        >
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                disabled={isSaving}
-                                                className="h-6 px-2 text-xs"
-                                            >
-                                                {isSaving ? (
-                                                    <>
-                                                        <Loader2 className="mr-1 size-3 animate-spin" />
-                                                        Saving...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Pencil className="mr-1 size-3" />
-                                                        Edit
-                                                    </>
-                                                )}
-                                            </Button>
-                                        </SetGitSourcePopover>
+                                            orgName={orgName}
+                                            initialGitUrl={resolvedGitUrl}
+                                            trigger={
+                                                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs">
+                                                    <Pencil className="mr-1 size-3" />
+                                                    Edit
+                                                </Button>
+                                            }
+                                        />
                                     </div>
                                 </AuthZWrapper>
                             </>
                         ) : (
-                            <ConnectGithubRepoButton
+                            <FinishEditorSetupModal
                                 docsUrl={docsUrl}
-                                variant="link"
-                                buttonText="Connect repo"
-                                size="lg"
-                                buttonClasses="text-muted-foreground !pl-0 !pr-0 !pt-0 h-fit"
+                                orgName={orgName}
+                                trigger={
+                                    <Button
+                                        variant="link"
+                                        size="lg"
+                                        className="text-muted-foreground h-fit !pl-0 !pr-0 !pt-0"
+                                    >
+                                        <GithubLogo />
+                                        Connect repo
+                                    </Button>
+                                }
                             />
                         )}
                     </div>

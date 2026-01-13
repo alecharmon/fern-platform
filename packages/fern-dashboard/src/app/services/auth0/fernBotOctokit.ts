@@ -1,8 +1,42 @@
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/core";
+import { createSign } from "crypto";
 import { cache } from "react";
+
+import { getGheConfig } from "@/app/services/github/ghe-config";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisGet, redisSet } from "@/app/services/redis/redis";
+
+/**
+ * Generate a JWT for GitHub App authentication.
+ * This matches the bash script implementation using RS256 signing.
+ */
+function generateGitHubAppJwt(appId: string, privateKey: string): string {
+    const now = Math.floor(Date.now() / 1000);
+    const iat = now - 60; // issued 60 seconds ago to account for clock drift
+    const exp = now + 600; // expires in 10 minutes
+
+    const header = { alg: "RS256", typ: "JWT" };
+    const payload = { iat, exp, iss: appId };
+
+    const base64UrlEncode = (obj: object): string => {
+        return Buffer.from(JSON.stringify(obj))
+            .toString("base64")
+            .replace(/\+/g, "-")
+            .replace(/\//g, "_")
+            .replace(/=+$/, "");
+    };
+
+    const headerB64 = base64UrlEncode(header);
+    const payloadB64 = base64UrlEncode(payload);
+    const unsigned = `${headerB64}.${payloadB64}`;
+
+    const sign = createSign("RSA-SHA256");
+    sign.update(unsigned);
+    const signature = sign.sign(privateKey, "base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+    return `${unsigned}.${signature}`;
+}
 
 export type FernBotOctokitError =
     | { type: "MISSING_APP_ID" }
@@ -95,7 +129,10 @@ export const getFernBotOctokitForRepo = cache(
         } catch (e: any) {
             return {
                 ok: false,
-                error: { type: "UNKNOWN_ERROR", message: e?.message ?? "Unknown error" }
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: e?.message ?? "Unknown error"
+                }
             };
         }
     }
@@ -168,7 +205,9 @@ export async function getFernBotInstallationIdForOrg(owner: string): Promise<Get
 
                 // Cache the installation ID for 1 day
                 try {
-                    await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 });
+                    await redisSet(cacheKey, installation.id, {
+                        ttlInSeconds: 60 * 60 * 24
+                    });
                 } catch (error) {
                     console.warn("Failed to write to Redis cache for user installation ID", error);
                 }
@@ -253,7 +292,9 @@ export const getFernBotInstallationId = cache(
 
             // Cache the installation ID for 1 day
             try {
-                await redisSet(cacheKey, installation.id, { ttlInSeconds: 60 * 60 * 24 });
+                await redisSet(cacheKey, installation.id, {
+                    ttlInSeconds: 60 * 60 * 24
+                });
             } catch (error) {
                 // If cache fails, continue - we still have the installation ID
                 console.warn("Failed to write to Redis cache for installation ID", error);
@@ -316,3 +357,187 @@ export function getDemoCreationBotOctokit():
 
     return { ok: true, octokit };
 }
+
+export type GheOctokitError =
+    | { type: "NOT_CONFIGURED" }
+    | { type: "ORG_MISMATCH" }
+    | { type: "EDGE_CONFIG_ERROR" }
+    | { type: "INVALID_URL" }
+    | { type: "NO_INSTALLATION" }
+    | { type: "UNKNOWN_ERROR"; message: string };
+
+export type GetGheOctokitResult = { ok: true; octokit: Octokit } | { ok: false; error: GheOctokitError };
+
+interface GheApiContext {
+    apiBaseUrl: string;
+    headers: Record<string, string>;
+}
+
+/**
+ * Fetches the installation ID for a GitHub App on a specific repo.
+ */
+async function getGheInstallationId(
+    ctx: GheApiContext,
+    owner: string,
+    repo: string
+): Promise<{ ok: true; installationId: number } | { ok: false; error: GheOctokitError }> {
+    const url = `${ctx.apiBaseUrl}/repos/${owner}/${repo}/installation`;
+    const response = await fetch(url, {
+        method: "GET",
+        headers: ctx.headers
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        if (response.status === 404) {
+            return { ok: false, error: { type: "NO_INSTALLATION" } };
+        }
+        return {
+            ok: false,
+            error: {
+                type: "UNKNOWN_ERROR",
+                message: `Failed to get installation: ${response.status} ${errorText}`
+            }
+        };
+    }
+
+    const data = await response.json();
+    return { ok: true, installationId: data.id };
+}
+
+/**
+ * Exchanges a JWT for an installation access token.
+ */
+async function getGheInstallationToken(
+    ctx: GheApiContext,
+    installationId: number
+): Promise<{ ok: true; token: string } | { ok: false; error: GheOctokitError }> {
+    const url = `${ctx.apiBaseUrl}/app/installations/${installationId}/access_tokens`;
+    const response = await fetch(url, {
+        method: "POST",
+        headers: ctx.headers
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        return {
+            ok: false,
+            error: {
+                type: "UNKNOWN_ERROR",
+                message: `Failed to get installation token: ${response.status} ${errorText}`
+            }
+        };
+    }
+
+    const data = await response.json();
+    return { ok: true, token: data.token };
+}
+
+/**
+ * Creates an Octokit instance with CF Access headers injected into every request.
+ */
+function createGheOctokit(apiBaseUrl: string, token: string, cfHeaders: Record<string, string>): Octokit {
+    const octokit = new Octokit({
+        baseUrl: apiBaseUrl,
+        auth: token
+    });
+
+    // Use hook to inject CF Access headers into every request
+    octokit.hook.before("request", async (options) => {
+        for (const [key, value] of Object.entries(cfHeaders)) {
+            options.headers[key] = value;
+        }
+    });
+
+    return octokit;
+}
+
+/**
+ * Gets an Octokit instance authenticated with a GitHub Enterprise App.
+ * This is used for accessing repositories on GitHub Enterprise instances.
+ *
+ * The GHE App credentials are retrieved from edge config or environment variables,
+ * keyed by the host of the repo URL.
+ *
+ * @param repoUrl - The full repo URL (e.g., "https://github.mycompany.com/org/repo")
+ * @param owner - The owner (organization) of the repository
+ * @param repo - The name of the repository
+ * @returns Octokit instance or error
+ */
+export const getGheOctokitForRepo = cache(
+    async (repoUrl: string, owner: string, repo: string): Promise<GetGheOctokitResult> => {
+        const configResult = await getGheConfig(repoUrl);
+        if (!configResult.ok) {
+            return { ok: false, error: { type: configResult.error } };
+        }
+
+        const { config } = configResult;
+
+        // Decode the base64-encoded private key
+        let privateKey: string;
+        try {
+            privateKey = Buffer.from(config.privateKeyBase64, "base64").toString("utf-8");
+        } catch {
+            return {
+                ok: false,
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: "Failed to decode private key"
+                }
+            };
+        }
+
+        const formattedPrivateKey = formatPrivateKey(privateKey);
+
+        // Construct the API base URL using the proxy URL (for CF tunnel support)
+        const apiBaseUrl = config.proxyUrl.endsWith("/api/v3")
+            ? config.proxyUrl
+            : `${config.proxyUrl.replace(/\/$/, "")}/api/v3`;
+
+        // Build CF Access headers if configured
+        const cfHeaders: Record<string, string> = {};
+        if (config.cfAccessClientId && config.cfAccessClientSecret) {
+            cfHeaders["CF-Access-Client-Id"] = config.cfAccessClientId;
+            cfHeaders["CF-Access-Client-Secret"] = config.cfAccessClientSecret;
+        }
+
+        try {
+            // Generate JWT for GitHub App authentication
+            const jwtToken = generateGitHubAppJwt(config.appId, formattedPrivateKey);
+
+            // Create API context with JWT auth headers
+            const ctx: GheApiContext = {
+                apiBaseUrl,
+                headers: {
+                    ...cfHeaders,
+                    Authorization: `Bearer ${jwtToken}`,
+                    Accept: "application/vnd.github+json"
+                }
+            };
+
+            // Get installation ID for the repo
+            const installationResult = await getGheInstallationId(ctx, owner, repo);
+            if (!installationResult.ok) {
+                return installationResult;
+            }
+
+            // Exchange JWT for installation access token
+            const tokenResult = await getGheInstallationToken(ctx, installationResult.installationId);
+            if (!tokenResult.ok) {
+                return tokenResult;
+            }
+
+            // Create Octokit with installation token and CF headers
+            const octokit = createGheOctokit(apiBaseUrl, tokenResult.token, cfHeaders);
+            return { ok: true, octokit };
+        } catch (error: any) {
+            return {
+                ok: false,
+                error: {
+                    type: "UNKNOWN_ERROR",
+                    message: error?.message ?? "Unknown error"
+                }
+            };
+        }
+    }
+);

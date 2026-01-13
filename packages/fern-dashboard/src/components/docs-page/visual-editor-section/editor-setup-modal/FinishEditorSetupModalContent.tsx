@@ -1,11 +1,13 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import type { ValidateGithubRepoAccessResponse } from "@/app/api/validate-github-repo-access/handler";
+
+import type { GitRepoAccessCheckResult } from "@/app/api/validate-git-repo/handler";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DialogBody, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import type { ConnectGitRepoParams } from "@/hooks/useConnectGitRepo";
 import type { DocsUrl } from "@/utils/types";
+
 import { ConfigurationCheckContent } from "./ConfigurationCheckContent";
 import { ConnectGithubContent } from "./ConnectGithubContent";
 import { InstallGithubAppContent } from "./InstallGithubAppContent";
@@ -16,10 +18,11 @@ interface FinishEditorSetupModalContentProps {
     state: SetupState;
     docsUrl: DocsUrl;
     pendingGithubUrl?: string;
+    initialGitUrl?: string;
     orgName: Auth0OrgName;
     isLoadingInitialData: boolean;
     showRefreshButtonOnSuccess: boolean;
-    accessCheckResult?: ValidateGithubRepoAccessResponse;
+    accessCheckResult?: GitRepoAccessCheckResult;
     isAccessCheckLoading: boolean;
     isAccessCheckFetching: boolean;
     refetchAccessCheck: () => Promise<unknown>;
@@ -37,6 +40,7 @@ export function FinishEditorSetupModalContent({
     state,
     docsUrl,
     pendingGithubUrl,
+    initialGitUrl,
     isLoadingInitialData,
     showRefreshButtonOnSuccess,
     accessCheckResult,
@@ -56,7 +60,7 @@ export function FinishEditorSetupModalContent({
             <DialogBody>
                 <DialogTitle />
                 <DialogDescription />
-                <div className="h-32 flex gap-2 justify-center items-center text-center">
+                <div className="flex h-32 items-center justify-center gap-2 text-center">
                     <Loader2 className="size-4 animate-spin" />
                     <p className="text-muted-foreground text-xs">Gathering some ferns...</p>
                 </div>
@@ -67,7 +71,7 @@ export function FinishEditorSetupModalContent({
     switch (state) {
         case "CONNECT_GITHUB":
             return (
-                <ConnectGithubContent docsUrl={docsUrl} connectRepo={connectRepo} onRepoConnected={onRepoConnected} />
+                <ConnectGithubContent docsUrl={docsUrl} initialUrl={initialGitUrl} onRepoConnected={onRepoConnected} />
             );
         case "INSTALL_APP":
             return (

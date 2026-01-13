@@ -431,14 +431,14 @@ export async function GET(req: NextRequest) {
                             githubUrl: githubRepoUrl
                         });
 
-                        if (result.success) {
+                        if (result.ok) {
                             sendEvent({
                                 type: "log",
                                 message: "✓ Linked GitHub repository to docs site",
                                 timestamp: new Date().toISOString()
                             });
                         } else {
-                            console.warn(`[Wizard] Failed to link GitHub metadata: ${result.error}`);
+                            console.warn(`[Wizard] Failed to link GitHub metadata: ${result.error.type}`);
                             sendEvent({
                                 type: "log",
                                 message: "⚠ Failed to link GitHub metadata (non-critical - repo created successfully)",

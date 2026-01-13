@@ -48,7 +48,7 @@ export async function DocsSiteOverviewCard({
                     <div className="flex flex-wrap gap-x-10 gap-y-4">
                         <DocsSiteAttribute name="Source">
                             <Suspense fallback={<Skeleton className="h-6 w-24" />}>
-                                <GitSource docsUrl={docsUrl} />
+                                <GitSource docsUrl={docsUrl} orgName={orgName} />
                             </Suspense>
                         </DocsSiteAttribute>
                         <Suspense

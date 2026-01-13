@@ -24,9 +24,12 @@ import type {
     ValidateAccessRequest,
     ValidateAccessResult
 } from "@fern-api/docs-loader";
+
 import { type CommitAction, Gitlab } from "@gitbeaker/rest";
 import { revalidateTag, unstable_cache } from "next/cache";
+
 import type { DocsUrl } from "@/utils/types";
+
 import {
     extractReferencedYmlPaths,
     getOwnerAndRepoFromGitlabUrl,
@@ -200,7 +203,13 @@ export class GitLabLoader implements GitLoader {
                     return project;
                 } catch (error: any) {
                     console.error("Failed to get repository", error);
-                    if (error?.response?.status === 404) {
+                    // Handle 404 from various gitbeaker error structures
+                    const is404 =
+                        error?.cause?.response?.statusCode === 404 ||
+                        error?.response?.status === 404 ||
+                        error?.statusCode === 404 ||
+                        error?.message?.includes("404");
+                    if (is404) {
                         return null;
                     }
                     throw error;
@@ -586,7 +595,10 @@ export class GitLabLoader implements GitLoader {
         if (!gitlab) {
             return {
                 type: "error",
-                error: { type: "OPERATION_FAILED", message: "Failed to get GitLab instance" }
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitLab instance"
+                }
             };
         }
 
@@ -645,7 +657,10 @@ export class GitLabLoader implements GitLoader {
         if (!gitlab) {
             return {
                 type: "error",
-                error: { type: "OPERATION_FAILED", message: "Failed to get GitLab instance" }
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitLab instance"
+                }
             };
         }
 
@@ -711,7 +726,10 @@ export class GitLabLoader implements GitLoader {
         if (!gitlab) {
             return {
                 type: "error",
-                error: { type: "OPERATION_FAILED", message: "Failed to get GitLab instance" }
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitLab instance"
+                }
             };
         }
 
@@ -764,7 +782,10 @@ export class GitLabLoader implements GitLoader {
         if (!gitlab) {
             return {
                 type: "error",
-                error: { type: "OPERATION_FAILED", message: "Failed to get GitLab instance" }
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitLab instance"
+                }
             };
         }
 
@@ -794,7 +815,10 @@ export class GitLabLoader implements GitLoader {
         if (!gitlab) {
             return {
                 type: "error",
-                error: { type: "OPERATION_FAILED", message: "Failed to get GitLab instance" }
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitLab instance"
+                }
             };
         }
 
@@ -893,7 +917,10 @@ export class GitLabLoader implements GitLoader {
         if (!gitlab) {
             return {
                 type: "error",
-                error: { type: "OPERATION_FAILED", message: "Failed to get GitLab instance" }
+                error: {
+                    type: "OPERATION_FAILED",
+                    message: "Failed to get GitLab instance"
+                }
             };
         }
 

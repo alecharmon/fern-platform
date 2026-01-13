@@ -2,14 +2,17 @@ import "server-only";
 
 import type { FernConfigJsonErrors } from "@fern-api/docs-loader";
 
-import { getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
-import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
+import { getFernBotOctokitForRepo, getGheOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
+import { isGheUrl } from "@/app/services/github/ghe-config";
 import type { DocsUrl } from "@/utils/types";
+
 import { getCachedGitHubLoader, getUncachedGitHubLoader } from "../../github/cachedGitHubLoader";
 
 export type CheckOrgWritePermissionToRepoError =
     | { type: "MALFORMED_GIT_URL"; url: string }
     | { type: "FERN_BOT_NOT_INSTALLED" }
+    | { type: "GHE_APP_NOT_INSTALLED" }
     | { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
     | FernConfigJsonErrors;
 
@@ -19,6 +22,7 @@ export type CheckOrgWritePermissionToRepoResult =
 
 /**
  * Checks if the user has write permission to a given GitHub repository.
+ * Supports both github.com and GitHub Enterprise URLs.
  *
  * @param orgName - The organization name
  * @param site - The docs URL/site
@@ -32,7 +36,9 @@ export async function checkOrgWritePermissionToRepo(
     githubUrl: string,
     skipCache: boolean = false
 ): Promise<CheckOrgWritePermissionToRepoResult> {
-    const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+    // Use parseGitUrl which handles both github.com and GHE URLs
+    const { owner, repo } = parseGitUrl(githubUrl);
+
     if (owner == null || repo == null) {
         return {
             ok: false,
@@ -40,20 +46,35 @@ export async function checkOrgWritePermissionToRepo(
         };
     }
 
-    // Use Fern bot to check permissions
-    const fernBotResult = await getFernBotOctokitForRepo(owner, repo);
-    if (!fernBotResult.ok) {
-        if (fernBotResult.error.type === "NOT_INSTALLED") {
+    // Check if this is a GitHub Enterprise URL
+    const isGhe = await isGheUrl(githubUrl);
+
+    // Use appropriate Octokit based on whether this is GHE or github.com
+    const octokitResult = isGhe
+        ? await getGheOctokitForRepo(githubUrl, owner, repo)
+        : await getFernBotOctokitForRepo(owner, repo);
+
+    if (!octokitResult.ok) {
+        // github.com: Fern Bot app not installed
+        if (octokitResult.error.type === "NOT_INSTALLED") {
             return {
                 ok: false,
                 error: { type: "FERN_BOT_NOT_INSTALLED" }
             };
         }
 
-        // For other errors, let's treat it as an internal server error for now
+        // GHE: Customer's GitHub App not installed on this repo
+        if (octokitResult.error.type === "NO_INSTALLATION") {
+            return {
+                ok: false,
+                error: { type: "GHE_APP_NOT_INSTALLED" }
+            };
+        }
+
+        // For other errors, treat it as an internal server error
         throw new Error(
-            `Internal server error while checking Fern bot installation or permissions: ${JSON.stringify(
-                fernBotResult.error
+            `Internal server error while checking bot installation or permissions: ${JSON.stringify(
+                octokitResult.error
             )}`
         );
     }
@@ -61,7 +82,7 @@ export async function checkOrgWritePermissionToRepo(
     // Use uncached loader if skipCache is true to bypass React cache
     const githubLoader = skipCache ? await getUncachedGitHubLoader(githubUrl) : await getCachedGitHubLoader(githubUrl);
 
-    // Use the helper function to fetch fern.config.json from the repo
+    // Fetch fern.config.json from the repo
     const fernConfigResult = await githubLoader.getFernConfigJson(owner, repo, site);
 
     if (fernConfigResult.type !== "ok") {

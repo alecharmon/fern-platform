@@ -2,17 +2,19 @@
 
 import { Loader2, RotateCcwIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ValidateGithubRepoAccessResponse } from "@/app/api/validate-github-repo-access/handler";
+
+import type { GitRepoAccessCheckResult } from "@/app/api/validate-git-repo/handler";
 import { Button } from "@/components/ui/button";
 import { DialogBody, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ConnectGitRepoParams } from "@/hooks/useConnectGitRepo";
+
 import { Note } from "../../Note";
 import { VisualEditorValidationErrorHandler } from "../VisualEditorValidationErrorHandler";
 
 interface ConfigurationCheckContentProps {
     onValidationError: () => void;
     pendingGithubUrl: string;
-    accessCheckResult?: ValidateGithubRepoAccessResponse | null;
+    accessCheckResult?: GitRepoAccessCheckResult | null;
     isCheckingAccess: boolean;
     refetchAccessCheck: () => Promise<unknown>;
     connectRepo: (params: ConnectGitRepoParams) => Promise<{ success: boolean; gitUrl: string | undefined }>;
@@ -70,7 +72,7 @@ export function ConfigurationCheckContent({
         return (
             <>
                 <DialogHeader>
-                    <DialogTitle className="flex gap-2 text-primary items-center">Configuration check</DialogTitle>
+                    <DialogTitle className="text-primary flex items-center gap-2">Configuration check</DialogTitle>
                     <DialogDescription>
                         {isSaving
                             ? "Saving your repository connection..."
@@ -79,7 +81,7 @@ export function ConfigurationCheckContent({
                 </DialogHeader>
                 <DialogBody>
                     <div className="flex items-center justify-center gap-3 py-8">
-                        <Loader2 className="size-5 animate-spin text-primary" />
+                        <Loader2 className="text-primary size-5 animate-spin" />
                         <span className="text-muted-foreground text-sm">
                             {isSaving ? "Saving connection..." : "Loading..."}
                         </span>
@@ -97,7 +99,7 @@ export function ConfigurationCheckContent({
     return (
         <>
             <DialogHeader>
-                <DialogTitle className="flex gap-2 text-primary items-center">Last step!</DialogTitle>
+                <DialogTitle className="text-primary flex items-center gap-2">Last step!</DialogTitle>
                 <DialogDescription>
                     In order to finish connecting your repository, we need to validate that your repository matches your
                     Fern site.

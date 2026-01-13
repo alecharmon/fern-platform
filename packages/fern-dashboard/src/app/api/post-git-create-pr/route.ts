@@ -92,7 +92,7 @@ export const POST = withZodValidation(
         }
 
         // 4. Validate repository access (token/bot exists, org matches in fern.config.json)
-        const loader = getGitLoader(gitUrl);
+        const loader = await getGitLoader(gitUrl);
         const site = parseDocsUrlParam({ docsUrl: siteRaw });
         const accessResult = await loader.validateAccess({
             owner,

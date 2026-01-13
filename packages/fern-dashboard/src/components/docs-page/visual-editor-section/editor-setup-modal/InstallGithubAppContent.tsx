@@ -3,14 +3,16 @@
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ValidateGithubRepoAccessResponse } from "@/app/api/validate-github-repo-access/handler";
+
+import type { GitRepoAccessCheckResult } from "@/app/api/validate-git-repo/handler";
 import { DialogBody, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ConnectGitRepoParams } from "@/hooks/useConnectGitRepo";
+
 import { Button } from "../../../ui/button";
 
 interface InstallGithubAppContentProps {
     pendingGithubUrl: string;
-    accessCheckResult?: ValidateGithubRepoAccessResponse | null;
+    accessCheckResult?: GitRepoAccessCheckResult | null;
     isCheckingAccess: boolean;
     onAppInstalled: () => void;
     connectRepo: (params: ConnectGitRepoParams) => Promise<{ success: boolean; gitUrl: string | undefined }>;
@@ -67,7 +69,7 @@ export function InstallGithubAppContent({
     return (
         <>
             <DialogHeader>
-                <DialogTitle className="flex gap-2 text-primary items-center">Install the Fern GitHub App</DialogTitle>
+                <DialogTitle className="text-primary flex items-center gap-2">Install the Fern GitHub App</DialogTitle>
                 <DialogDescription className="mb-3">
                     Please grant Fern access to this repo and come back to this screen.
                 </DialogDescription>

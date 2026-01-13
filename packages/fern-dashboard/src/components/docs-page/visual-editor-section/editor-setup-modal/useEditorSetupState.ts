@@ -1,4 +1,5 @@
 import { useEffect, useReducer } from "react";
+
 import { getInitialState, type SetupState, setupStateReducer } from "./setupStateMachine";
 
 interface UseEditorSetupStateParams {
@@ -59,19 +60,23 @@ export function useEditorSetupState({
     }, [isLoadingInitialData, isOpen, state, correctInitialState]);
 
     // Handle state transitions based on validation results
-    // Only dispatch VALIDATION_ERROR automatically - VALIDATION_SUCCESS is handled
-    // explicitly by the onSuccess callback in ConfigurationCheckContent
     useEffect(() => {
-        if (!isRepoConnected || !isAppInstalled) {
+        if (!isRepoConnected) {
+            return;
+        }
+
+        // If app is not installed (GitHub FERN_BOT_NOT_INSTALLED), go to INSTALL_APP
+        if (!isAppInstalled && state === "VALIDATE_REPO") {
+            dispatch({ type: "REPO_CONNECTED", hasAppInstalled: false });
             return;
         }
 
         // Only dispatch error state automatically
-        // Success state is handled by explicit onSuccess callback
-        if (hasValidationError) {
+        // Success state is handled by explicit onSuccess callback in ConfigurationCheckContent
+        if (isAppInstalled && hasValidationError) {
             dispatch({ type: "VALIDATION_ERROR" });
         }
-    }, [isRepoConnected, isAppInstalled, hasValidationError]);
+    }, [isRepoConnected, isAppInstalled, hasValidationError, state]);
 
     // Action handlers
     const handleRepoConnected = (hasAppInstalled: boolean) => {

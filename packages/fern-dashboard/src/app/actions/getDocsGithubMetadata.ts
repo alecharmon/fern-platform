@@ -5,17 +5,19 @@ import { fernToken_admin } from "@fern-api/docs-server";
 import type { GitAuthState } from "@/components/docs-page/GitSourceClient";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
+
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { type Auth0SessionData, getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
+import { validateGitRepoAccess } from "../services/dal/git/validateGitRepoAccess";
 import { getDocsGitUrl } from "../services/dal/github/getDocsGitUrl";
-import { validateGitRepoAccess } from "../services/dal/github/validators";
 import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
 
 async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, docsUrl: DocsUrl) {
     let githubAuthState: GitAuthState = {
         validationResult: {
             ok: false,
+            provider: "unknown",
             error: {
                 type: "UNEXPECTED_ERROR",
                 message: "Domain not registered."
@@ -32,6 +34,7 @@ async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, doc
             if (urlResult.error.type === "DOMAIN_NOT_REGISTERED") {
                 githubAuthState.validationResult = {
                     ok: false,
+                    provider: "unknown",
                     error: {
                         type: "UNEXPECTED_ERROR",
                         message: "Domain not registered."
@@ -40,6 +43,7 @@ async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, doc
             } else {
                 githubAuthState.validationResult = {
                     ok: false,
+                    provider: "unknown",
                     error: urlResult.error
                 };
             }
@@ -51,7 +55,7 @@ async function getMetadata(session: Auth0SessionData, orgName: Auth0OrgName, doc
         try {
             // Parallelize validation and metadata fetching for better performance
             const [validation, sourceRepo] = await Promise.all([
-                validateGitRepoAccess(orgName, docsUrl, { type: "url", gitUrl }),
+                validateGitRepoAccess(orgName, docsUrl, gitUrl),
                 // Optimistically fetch metadata in parallel (will be used if validation succeeds)
                 getGithubSourceMetadata({
                     githubUrl: gitUrl,

@@ -14,8 +14,7 @@ import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generat
 import type { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
 import type { updatePrTitle } from "@/app/api/update-pr-title/route";
 import type { updateUserRoles } from "@/app/api/update-user-roles/route";
-import type { ValidateGithubRepoAccess } from "@/app/api/validate-github-repo-access/route";
-import type { ValidateGitlabRepoAccess } from "@/app/api/validate-gitlab-repo-access/route";
+import type { ValidateGitRepo } from "@/app/api/validate-git-repo/route";
 
 export const DashboardApiClient = {
     getAuthZPermissions: (orgName: string) =>
@@ -40,10 +39,8 @@ export const DashboardApiClient = {
         typedFetch<postDocsGithubSource.Response>("/api/post-docs-github-source", request),
     validateGithubBranch: (request: validateGithubBranch.Request) =>
         typedFetch<validateGithubBranch.Response>("/api/get-validate-github-branch", request),
-    validateGithubRepoAccess: (request: ValidateGithubRepoAccess.Request) =>
-        typedFetch<ValidateGithubRepoAccess.Response>("/api/validate-github-repo-access", request),
-    validateGitlabRepoAccess: (request: ValidateGitlabRepoAccess.Request) =>
-        typedFetch<ValidateGitlabRepoAccess.Response>("/api/validate-gitlab-repo-access", request),
+    validateGitRepo: (request: ValidateGitRepo.Request) =>
+        typedFetch<ValidateGitRepo.Response>("/api/validate-git-repo", request),
     updatePrTitle: (request: updatePrTitle.Request) =>
         typedFetch<updatePrTitle.Response>("/api/update-pr-title", request),
     generateSignedUploadUrl: (request: generateSignedUploadUrl.Request) =>

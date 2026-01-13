@@ -2,9 +2,13 @@
 
 import { unstable_cache } from "next/cache";
 
-import { getFernBotInstallationId, getFernBotOctokitForRepo } from "@/app/services/auth0/fernBotOctokit";
+import {
+    getFernBotInstallationId,
+    getFernBotOctokitForRepo,
+    getGheOctokitForRepo
+} from "@/app/services/auth0/fernBotOctokit";
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
-import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
+import { isGheUrl } from "@/app/services/github/ghe-config";
 import type { GitSourceRepo } from "@/app/services/github/types";
 
 const EMPTY_RESPONSE: GitSourceRepo = {
@@ -31,6 +35,7 @@ export async function getGithubSourceMetadata({
         }
 
         // Check if this is a GitHub URL - this function only works with GitHub
+        // Note: parseGitUrl handles both github.com and GHE URLs (e.g., github.mycompany.com)
         const parsed = parseGitUrl(githubUrl);
         if (parsed.provider !== "github") {
             // For non-GitHub URLs (GitLab, etc.), return empty response
@@ -38,14 +43,22 @@ export async function getGithubSourceMetadata({
             return EMPTY_RESPONSE;
         }
 
-        const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
+        // Use parsed result which handles both github.com and GHE URLs
+        const { owner, repo } = parsed;
 
         if (owner == null || repo == null) {
             // Don't cache this failure, so throw to skip cache
             throw new Error("NoOwnerOrRepo");
         }
 
-        const octokitResult = await getFernBotOctokitForRepo(owner, repo);
+        // Check if this is a GitHub Enterprise URL
+        const isGhe = await isGheUrl(githubUrl);
+
+        // Get the appropriate Octokit instance
+        const octokitResult = isGhe
+            ? await getGheOctokitForRepo(githubUrl, owner, repo)
+            : await getFernBotOctokitForRepo(owner, repo);
+
         if (!octokitResult.ok) {
             // Don't cache this failure, so throw to skip cache
             throw new Error(`NoOctokit: ${octokitResult.error.type}`);
@@ -57,9 +70,17 @@ export async function getGithubSourceMetadata({
                 owner,
                 repo
             });
-            // check if fern-bot is installed on this app
-            const installationResult = await getFernBotInstallationId(owner, repo);
-            const fernBotHasInstallationId = installationResult.ok;
+
+            // For GHE, we don't check fern-bot installation (they use their own GHE app)
+            // For github.com, check if fern-bot is installed
+            let fernBotHasInstallationId: boolean | undefined;
+            if (!isGhe) {
+                const installationResult = await getFernBotInstallationId(owner, repo);
+                fernBotHasInstallationId = installationResult.ok;
+            } else {
+                // For GHE, we consider the "installation" valid if we got an Octokit
+                fernBotHasInstallationId = true;
+            }
 
             return {
                 gitUrl: githubUrl,

@@ -1,6 +1,7 @@
 "use server";
 
 import type { GitOperationError, RepositoryFile } from "@fern-api/docs-loader";
+
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getGitLoader } from "@/app/services/github/getGitLoader";
 
@@ -69,7 +70,7 @@ export default async function postGitRepository(request: {
         provider === "gitlab"
             ? `https://gitlab.com/${request.owner}/${request.repoName}`
             : `https://github.com/${request.owner}/${request.repoName}`;
-    const loader = getGitLoader(repoUrl, true);
+    const loader = await getGitLoader(repoUrl, true);
 
     // 4. Perform git operation
     const result = await loader.createRepository?.({
@@ -83,7 +84,10 @@ export default async function postGitRepository(request: {
     if (!result) {
         return {
             success: false,
-            error: { type: "UNKNOWN_ERROR", message: "createRepository method not available on loader" }
+            error: {
+                type: "UNKNOWN_ERROR",
+                message: "createRepository method not available on loader"
+            }
         };
     }
 
@@ -113,7 +117,12 @@ export default async function postGitRepository(request: {
             }
         }
 
-        return { success: true, repoUrl: result.repoUrl, htmlUrl: result.htmlUrl, fernToken };
+        return {
+            success: true,
+            repoUrl: result.repoUrl,
+            htmlUrl: result.htmlUrl,
+            fernToken
+        };
     } else {
         return { success: false, error: result.error };
     }

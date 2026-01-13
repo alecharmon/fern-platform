@@ -1,4 +1,5 @@
 import type { GitOperationError } from "@fern-api/docs-loader";
+
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getGitLoader } from "@/app/services/github/getGitLoader";
 
@@ -32,7 +33,7 @@ export default async function postCreatePr(request: {
 
     // 2. Get GitLoader instance
     const gitUrl = request.gitUrl || `https://github.com/${request.owner}/${request.repo}`;
-    const loader = getGitLoader(gitUrl);
+    const loader = await getGitLoader(gitUrl);
 
     // 3. Perform git operation
     const result = await loader.createPullRequest?.({
@@ -48,7 +49,10 @@ export default async function postCreatePr(request: {
     if (!result) {
         return {
             success: false,
-            error: { type: "UNKNOWN_ERROR", message: "createPullRequest method not available on loader" }
+            error: {
+                type: "UNKNOWN_ERROR",
+                message: "createPullRequest method not available on loader"
+            }
         };
     }
 

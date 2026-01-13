@@ -1,9 +1,11 @@
 "use server";
 
 import type { GitAccessError, GitOperationError } from "@fern-api/docs-loader";
+
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getGitLoader } from "@/app/services/github/getGitLoader";
 import type { GithubCommitableFile } from "@/app/services/github/types";
+
 import type { Auth0OrgName } from "../../auth0/types";
 import { assertUserHasOrganizationAccess } from "../organization";
 
@@ -53,8 +55,8 @@ export default async function postGitCommit(request: {
 
     // 3. Get GitLoader instance
     const loader = request.gitUrl
-        ? getGitLoader(request.gitUrl)
-        : getGitLoader(`https://github.com/${request.owner}/${request.repo}`);
+        ? await getGitLoader(request.gitUrl)
+        : await getGitLoader(`https://github.com/${request.owner}/${request.repo}`);
 
     // 4. Validate repository access
     const accessResult = await loader.validateAccess({
@@ -80,7 +82,10 @@ export default async function postGitCommit(request: {
     if (!result) {
         return {
             success: false,
-            error: { type: "UNKNOWN_ERROR", message: "createCommit method not available on loader" }
+            error: {
+                type: "UNKNOWN_ERROR",
+                message: "createCommit method not available on loader"
+            }
         };
     }
 

@@ -21,7 +21,7 @@ export default async function validateGithubBranchHandler({
 }): Promise<ValidateGithubBranchResponse> {
     const url = repoUrl || `https://github.com/${owner}/${repo}`;
     const parsed = parseGitUrl(url);
-    const loader = getGitLoader(url);
+    const loader = await getGitLoader(url);
 
     if (!owner || !repo) {
         return {

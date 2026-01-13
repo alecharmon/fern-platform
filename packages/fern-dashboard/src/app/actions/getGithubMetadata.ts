@@ -1,11 +1,14 @@
 import "server-only";
+
 import { cache } from "react";
+
 import type { GitAuthState } from "@/components/docs-page/GitSourceClient";
 import type { DocsUrl } from "@/utils/types";
+
 import type { Auth0SessionData } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
+import { validateGitRepoAccess } from "../services/dal/git/validateGitRepoAccess";
 import { type GetDocsGitUrlResult, getDocsGitUrl } from "../services/dal/github/getDocsGitUrl";
-import { validateRepoAccess } from "../services/dal/github/validators";
 import { parseGitUrl } from "../services/git-common/url-utils";
 import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
 import { getGitlabSourceMetadata } from "./getGitlabSourceMetadata";
@@ -33,6 +36,7 @@ export const getGitHubAuthState = cache(
         let githubAuthState: GitAuthState = {
             validationResult: {
                 ok: false,
+                provider: "unknown",
                 error: {
                     type: "UNEXPECTED_ERROR",
                     message: ""
@@ -49,7 +53,7 @@ export const getGitHubAuthState = cache(
 
             // Parallelize validation and metadata fetching for better performance
             const [validation, sourceRepo] = await Promise.all([
-                validateRepoAccess(orgName, docsUrl, gitUrl),
+                validateGitRepoAccess(orgName, docsUrl, gitUrl),
                 // Fetch metadata based on provider
                 isGitLab
                     ? getGitlabSourceMetadata({

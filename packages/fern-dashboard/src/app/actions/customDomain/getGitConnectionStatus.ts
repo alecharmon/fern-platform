@@ -2,11 +2,12 @@
 
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { validateGitRepoAccess } from "@/app/services/dal/git/validateGitRepoAccess";
 import { getDocsGitUrl } from "@/app/services/dal/github/getDocsGitUrl";
-import { validateGitRepoAccess } from "@/app/services/dal/github/validators";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import type { DocsUrl } from "@/utils/types";
+
 import { getGithubSourceMetadata } from "../getGithubSourceMetadata";
 import { getGitlabSourceMetadata } from "../getGitlabSourceMetadata";
 
@@ -58,7 +59,7 @@ export async function getGitConnectionStatus({
         const provider: GitProvider = parsed.provider;
 
         // Validate access to the repository
-        const validation = await validateGitRepoAccess(orgName, docsUrl, { type: "url", gitUrl });
+        const validation = await validateGitRepoAccess(orgName, docsUrl, gitUrl);
 
         if (!validation.ok) {
             return {

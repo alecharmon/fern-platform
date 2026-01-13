@@ -14,8 +14,11 @@ export interface ParsedGitUrl {
 }
 
 export function parseGitUrl(url: string): ParsedGitUrl {
+    console.log(`[parseGitUrl] Parsing URL: ${url}`);
+
     // Handle empty or invalid URLs early
     if (!url || url.trim() === "") {
+        console.log(`[parseGitUrl] Empty or invalid URL`);
         return {
             owner: null,
             repo: null,
@@ -27,15 +30,20 @@ export function parseGitUrl(url: string): ParsedGitUrl {
     const lowerUrl = url.toLowerCase();
 
     let provider: "github" | "gitlab" | "unknown" = "unknown";
-    if (lowerUrl.includes("github.com")) {
-        provider = "github";
-    } else if (lowerUrl.includes("gitlab.com") || lowerUrl.includes("gitlab")) {
+    if (lowerUrl.includes("gitlab.com") || lowerUrl.includes("gitlab")) {
         provider = "gitlab";
+    } else if (lowerUrl.includes("github")) {
+        // Match github.com or any GHE instance (e.g., github.mycompany.com)
+        provider = "github";
     }
 
-    // Only parse owner/repo if we have a known provider
-    const result =
-        provider !== "unknown" ? getOwnerAndRepoFromUrl(url, provider) : { owner: null, repo: null, path: null };
+    console.log(`[parseGitUrl] Detected provider: ${provider}`);
+
+    // Parse owner/repo for any URL that looks like a git host
+    // Even if provider is "unknown", try to parse it as a generic git URL
+    const result = getOwnerAndRepoFromUrl(url, provider);
+
+    console.log(`[parseGitUrl] Parsed result: owner=${result.owner}, repo=${result.repo}, path=${result.path}`);
 
     return {
         owner: result.owner,
