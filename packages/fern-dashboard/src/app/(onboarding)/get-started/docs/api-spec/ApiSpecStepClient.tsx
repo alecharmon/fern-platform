@@ -58,7 +58,7 @@ export function ApiSpecStepClient() {
             <form.Field
                 name="openApiSpecFiles"
                 validators={{
-                    onChange: ({ value }) => {
+                    onChange: ({ value }: { value: File[] }) => {
                         if (!value || value.length === 0) {
                             return "Please upload at least one API spec";
                         }
@@ -66,7 +66,11 @@ export function ApiSpecStepClient() {
                     }
                 }}
             >
-                {(field) => (
+                {(field: {
+                    state: { value: File[]; meta: { errors: (string | undefined)[] } };
+                    handleChange: (value: File[]) => void;
+                    handleBlur: () => void;
+                }) => (
                     <OpenAPISpecs
                         uploadedFiles={field.state.value}
                         setUploadedFiles={handleFilesChange}

@@ -18,7 +18,7 @@ export function AutoPopulate({ onApplyUpdates }: AutoPopulateProps) {
     const handleAutoPopulate = useCallback(
         async (domain: string) => {
             if (!domain.trim()) {
-                form.setFieldMeta("existingDocsSite", (prev) => ({
+                form.setFieldMeta("existingDocsSite", (prev: { errors: string[] }) => ({
                     ...prev,
                     errors: ["Please enter a domain"]
                 }));
@@ -27,7 +27,7 @@ export function AutoPopulate({ onApplyUpdates }: AutoPopulateProps) {
 
             setIsLoading(true);
             // Clear any previous errors
-            form.setFieldMeta("existingDocsSite", (prev) => ({
+            form.setFieldMeta("existingDocsSite", (prev: { errors: string[] }) => ({
                 ...prev,
                 errors: []
             }));
@@ -41,7 +41,7 @@ export function AutoPopulate({ onApplyUpdates }: AutoPopulateProps) {
 
                 if (!response.ok) {
                     const { error: message } = (await response.json().catch(() => ({}))) as { error?: string };
-                    form.setFieldMeta("existingDocsSite", (prev) => ({
+                    form.setFieldMeta("existingDocsSite", (prev: { errors: string[] }) => ({
                         ...prev,
                         errors: [message ?? "Failed to fetch brand assets"]
                     }));
@@ -55,7 +55,7 @@ export function AutoPopulate({ onApplyUpdates }: AutoPopulateProps) {
                 }
             } catch (err) {
                 console.error("Error auto-populating from BrandFetch:", err);
-                form.setFieldMeta("existingDocsSite", (prev) => ({
+                form.setFieldMeta("existingDocsSite", (prev: { errors: string[] }) => ({
                     ...prev,
                     errors: [err instanceof Error ? err.message : "An unexpected error occurred"]
                 }));
@@ -70,7 +70,7 @@ export function AutoPopulate({ onApplyUpdates }: AutoPopulateProps) {
         <form.Field
             name="existingDocsSite"
             validators={{
-                onChange: ({ value }) => {
+                onChange: ({ value }: { value: string }) => {
                     if (!value || !value.trim()) {
                         return "Please enter a marketing or docs site URL";
                     }
@@ -78,7 +78,11 @@ export function AutoPopulate({ onApplyUpdates }: AutoPopulateProps) {
                 }
             }}
         >
-            {(field) => (
+            {(field: {
+                state: { value: string; meta: { errors: (string | undefined)[] } };
+                handleChange: (value: string) => void;
+                handleBlur: () => void;
+            }) => (
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="auto-populate-company-site">Marketing or docs site</Label>
                     <div className="relative">

@@ -1,4 +1,3 @@
-import type { useForm } from "@tanstack/react-form";
 import { ArrowRightIcon, Loader2Icon } from "lucide-react";
 import { useCallback } from "react";
 import { AutoPopulate } from "@/components/onboarding/AutoPopulate";
@@ -11,7 +10,7 @@ import { nameToUrl, validateDocsSiteName, validateDocsSiteUrl } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { ValidationErrors, WizardFormData } from "@/providers/OnboardingProvider";
+import type { ValidationErrors, WizardForm, WizardFormData } from "@/providers/OnboardingProvider";
 
 function UploadForm({
     form,
@@ -21,7 +20,7 @@ function UploadForm({
     isLoading = false,
     error = null
 }: {
-    form: ReturnType<typeof useForm<WizardFormData>>;
+    form: WizardForm;
     formData: WizardFormData;
     validationErrors: ValidationErrors;
     onSubmitForm: (values: WizardFormData) => void | Promise<void>;
@@ -63,10 +62,13 @@ function UploadForm({
                                     <form.Field
                                         name="docsSiteName"
                                         validators={{
-                                            onSubmit: ({ value }) => validateDocsSiteName(value)
+                                            onSubmit: ({ value }: { value: string }) => validateDocsSiteName(value)
                                         }}
                                     >
-                                        {(field) => (
+                                        {(field: {
+                                            state: { value: string; meta: { errors: (string | undefined)[] } };
+                                            setValue: (value: string) => void;
+                                        }) => (
                                             <div className="flex flex-col gap-2">
                                                 <Label
                                                     htmlFor="company-site"
@@ -96,12 +98,12 @@ function UploadForm({
                                     <form.Field
                                         name="docsSiteUrl"
                                         validators={{
-                                            onChange: ({ value }) => validateDocsSiteUrl(value),
-                                            onSubmit: ({ value }) =>
+                                            onChange: ({ value }: { value: string }) => validateDocsSiteUrl(value),
+                                            onSubmit: ({ value }: { value: string }) =>
                                                 validateDocsSiteUrl(value, formData.docsSiteUrlAvailable)
                                         }}
                                     >
-                                        {(field) => (
+                                        {(field: { state: { value: string }; setValue: (value: string) => void }) => (
                                             <div className="flex flex-col gap-1">
                                                 <DocsUrl
                                                     value={field.state.value}
@@ -115,7 +117,7 @@ function UploadForm({
                                     </form.Field>
 
                                     <form.Field name="openApiSpecFiles">
-                                        {(field) => (
+                                        {(field: { state: { value: File[] }; setValue: (value: File[]) => void }) => (
                                             <div className="flex flex-col gap-1">
                                                 <OpenAPISpecs
                                                     uploadedFiles={field.state.value}
@@ -131,7 +133,10 @@ function UploadForm({
                                     </form.Field>
 
                                     <form.Field name="faviconFile">
-                                        {(field) => (
+                                        {(field: {
+                                            state: { value: File | null };
+                                            setValue: (value: File | null) => void;
+                                        }) => (
                                             <UploadImage
                                                 label="Favicon"
                                                 description="Upload a 32 x 32 pixel ICO, PNG, GIF, or JPG to display in browser tabs."
@@ -144,7 +149,10 @@ function UploadForm({
                                     </form.Field>
 
                                     <form.Field name="logoFile">
-                                        {(field) => (
+                                        {(field: {
+                                            state: { value: File | null };
+                                            setValue: (value: File | null) => void;
+                                        }) => (
                                             <UploadImage
                                                 label="Logo"
                                                 description="This will be used as the main logo on the top-left corner of the Docs site."
@@ -157,7 +165,10 @@ function UploadForm({
                                     </form.Field>
 
                                     <form.Field name="primaryColorHex">
-                                        {(field) => (
+                                        {(field: {
+                                            state: { value: string | null };
+                                            setValue: (value: string | null) => void;
+                                        }) => (
                                             <div className="flex flex-col gap-1">
                                                 <ColorPicker
                                                     label="Primary color"

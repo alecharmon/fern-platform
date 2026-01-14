@@ -6,11 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface CreateOrgFormData {
-    organizationId: string;
-    displayName: string;
-}
-
 interface CreateOrganizationFormProps {
     accessToken: string;
     onSuccess: (organizationId: string) => void;
@@ -44,7 +39,7 @@ export function CreateOrganizationForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
-    const form = useForm<CreateOrgFormData>({
+    const form = useForm({
         defaultValues: {
             organizationId: "",
             displayName: ""

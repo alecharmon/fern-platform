@@ -37,9 +37,62 @@ export interface ValidationErrors {
     openApiSpecFiles?: string;
 }
 
+/** Field metadata for form validation errors */
+interface FieldMeta {
+    errors: (string | undefined)[];
+}
+
+/** Field API provided to render functions in form.Field */
+export interface WizardFieldApi<T> {
+    state: { value: T; meta: FieldMeta };
+    setValue: (value: T) => void;
+    handleChange: (value: T) => void;
+    handleBlur: () => void;
+}
+
+/** Validator callback parameter */
+export interface ValidatorParam<T> {
+    value: T;
+}
+
+/** Props for the Field component */
+interface FieldProps<K extends keyof WizardFormData> {
+    name: K;
+    validators?: {
+        onChange?: (params: ValidatorParam<WizardFormData[K]>) => string | undefined;
+        onSubmit?: (params: ValidatorParam<WizardFormData[K]>) => string | undefined;
+    };
+    children: (field: WizardFieldApi<WizardFormData[K]>) => ReactNode;
+}
+
+/** Form store state */
+interface FormStoreState {
+    values: WizardFormData;
+}
+
+/** Form store interface */
+interface FormStore {
+    state: FormStoreState;
+}
+
+/** Field metadata returned by getFieldMeta */
+interface FieldMetaResult {
+    errors?: (string | undefined)[];
+}
+
+/** Type for the wizard form instance returned by useForm */
+export interface WizardForm {
+    setFieldValue: <K extends keyof WizardFormData>(key: K, value: WizardFormData[K]) => void;
+    setFieldMeta: (key: keyof WizardFormData, updater: (prev: { errors: string[] }) => { errors: string[] }) => void;
+    validateField: (key: keyof WizardFormData, mode: "change" | "blur" | "submit") => Promise<void>;
+    getFieldMeta: (key: keyof WizardFormData) => FieldMetaResult | undefined;
+    store: FormStore;
+    Field: <K extends keyof WizardFormData>(props: FieldProps<K>) => ReactNode;
+}
+
 interface OnboardingContextValue {
     // Form management
-    form: ReturnType<typeof useForm<WizardFormData>>;
+    form: WizardForm;
     formData: WizardFormData;
     validationErrors: ValidationErrors;
     validateForm: () => boolean;
@@ -94,7 +147,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const [isNavigating, setIsNavigating] = useState(false);
 
     // Initialize form with @tanstack/react-form
-    const form = useForm<WizardFormData>({
+    const form = useForm({
         defaultValues: DEFAULT_FORM_DATA
     });
 
@@ -224,8 +277,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
     const value = useMemo(
         () => ({
-            // Form management
-            form,
+            // Form management - cast to WizardForm since the actual form API is a superset of our interface
+            form: form as unknown as WizardForm,
             formData,
             validationErrors,
             validateForm,
