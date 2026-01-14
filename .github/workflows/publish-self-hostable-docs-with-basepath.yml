@@ -23,7 +23,6 @@ jobs:
 
   build-js-bundle:
     runs-on: seed
-    needs: test
     timeout-minutes: 30
     outputs:
       version: ${{ steps.determine_version.outputs.version }}
@@ -84,7 +83,7 @@ jobs:
 
   build-docker-amd64:
     runs-on: seed
-    needs: build-js-bundle
+    needs: [test, build-js-bundle]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -124,7 +123,7 @@ jobs:
 
   build-docker-arm64:
     runs-on: ubuntu-24.04-arm
-    needs: build-js-bundle
+    needs: [test, build-js-bundle]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
