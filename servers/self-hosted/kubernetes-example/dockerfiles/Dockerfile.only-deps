@@ -1,0 +1,21 @@
+# Dockerfile for tests that need only buf dependencies cached
+# Used for: cached-deps-network-ok, cached-deps-airgapped
+#
+# This image runs generate.sh --only-deps at build time, which:
+# - Fetches external buf dependencies (buf.build/googleapis/googleapis)
+# - Caches the dependencies for offline use
+# - Does NOT generate the documentation (deferred to runtime)
+
+ARG BASE_IMAGE=fern-self-hosted:latest
+FROM ${BASE_IMAGE}
+
+# Copy the main fern config (includes gRPC with external buf deps)
+COPY fern/ /fern/
+
+# Run only-deps generation at build time
+# This caches buf dependencies but does NOT generate docs
+RUN /scripts/generate.sh --only-deps
+
+# Ensure /data is completely empty and writable by any user
+# This prevents MinIO permission issues when running as non-root (e.g., UID 65532)
+RUN rm -rf /data && mkdir -p /data && chmod 777 /data

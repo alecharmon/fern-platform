@@ -1,0 +1,22 @@
+# Dockerfile for tests that need pure runtime generation
+# Used for: runtime-gen-network-ok, no-cache-airgapped-fail, runtime-gen-airgapped-fail
+#
+# This image does NOT run generate.sh at build time, which means:
+# - No buf dependencies are cached
+# - No documentation is pre-generated
+# - Everything must be fetched/generated at runtime
+#
+# runtime-gen-network-ok (no network policy): Should PASS - can fetch deps at runtime
+# no-cache-airgapped-fail/runtime-gen-airgapped-fail (with network policy): Should FAIL - cannot fetch deps
+
+ARG BASE_IMAGE=fern-self-hosted:latest
+FROM ${BASE_IMAGE}
+
+# Copy the main fern config (includes gRPC with external buf deps)
+COPY fern/ /fern/
+
+# Ensure /data is completely emptyand writable by any user
+# This prevents MinIO permission issues when running as non-root (e.g., UID 65532)
+RUN rm -rf /data && mkdir -p /data && chmod 777 /data
+
+# No generate.sh - everything happens at runtime

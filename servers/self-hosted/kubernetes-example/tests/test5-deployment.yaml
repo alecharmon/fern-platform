@@ -1,0 +1,51 @@
+# Test: no-cache-airgapped-fail
+# No cache in air-gapped mode - SHOULD FAIL
+# Image: fern-test-no-gen (no pre-generation, no buf cache)
+# Network: Blocked (NetworkPolicy applied)
+# Expected: Pod fails to become ready - no cache, cannot fetch from buf.build
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fern-docs
+  namespace: no-cache-airgapped-fail
+  labels:
+    app: fern-docs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fern-docs
+  template:
+    metadata:
+      labels:
+        app: fern-docs
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+      containers:
+        - name: fern-docs
+          image: fern-test-no-gen:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+            - containerPort: 8081
+          env:
+            - name: FERN_LOG_LEVEL
+              value: "debug"
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 12

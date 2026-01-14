@@ -457,6 +457,19 @@ if [ "$USE_SEEDED_DATA" = "true" ]; then
 else
     log "running fern generate --docs"
 
+    # Ensure buf cache directory exists and is writable
+    # This is needed when running as non-root user (e.g., UID 65532)
+    # The directory may already exist from build time (generate.sh --only-deps)
+    if [ ! -d "/opt/buf-cache" ]; then
+        log "Creating buf cache directory at /opt/buf-cache..."
+        mkdir -p /opt/buf-cache 2>/dev/null || {
+            log "WARNING: Could not create /opt/buf-cache (permission denied)"
+            log "Using /tmp/buf-cache as fallback for buf cache"
+            export BUF_CACHE_DIR=/tmp/buf-cache
+            mkdir -p /tmp/buf-cache
+        }
+    fi
+
     log "Disk usage before fern generate:"
     df -h 2>&1 | add_timestamps || true
     log "Inode usage:"
@@ -464,11 +477,12 @@ else
     log "MinIO data directory size:"
     du -sh /data 2>&1 | add_timestamps || true
 
-    # Run fern generate --docs with error handling to prevent container crash on egress failures
-    # This allows the container to stay running even if docs generation fails (e.g., due to network restrictions)
+    # Run fern generate --docs - if this fails, the container will exit
     # FERN_LOG_LEVEL can be set to control verbosity (debug, info, warn, error). Defaults to debug for backwards compatibility.
+    # BUF_CACHE_DIR is set to use cached buf dependencies from build time (if available)
+    # Use the BUF_CACHE_DIR set above (either /opt/buf-cache or /tmp/buf-cache fallback)
     set +e
-    FERN_GENERATE_OUTPUT=$(FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL:-debug}" --no-prompt 2>&1)
+    FERN_GENERATE_OUTPUT=$(BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL:-debug}" --no-prompt 2>&1)
     FERN_GENERATE_EXIT_CODE=$?
     echo "$FERN_GENERATE_OUTPUT" | add_timestamps
     set -e
@@ -505,8 +519,9 @@ else
             echo '{"timestamp": "'$(date -Iseconds)'", "status": "failed", "reason": "generation_error", "exit_code": '$FERN_GENERATE_EXIT_CODE'}' > "$DOCS_GENERATION_STATUS_FILE"
         fi
         
-        log "WARNING: Container will continue running, but docs may not be available."
-        log "WARNING: The readiness check will fail until docs are successfully generated."
+        log "FATAL: Docs generation failed. Container will exit."
+        log "FATAL: There is no point in running a docs server without docs."
+        exit 1
     fi
 fi
 

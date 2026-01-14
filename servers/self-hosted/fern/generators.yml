@@ -1,4 +1,6 @@
 # yaml-language-server: $schema=https://schema.buildwithfern.dev/generators-yml.json
+# Main fern configuration for self-hosted tests
+# Includes gRPC spec with external buf dependencies to test buf cache behavior
 api:
   specs:
     - openapi: openapi.yaml
@@ -6,6 +8,14 @@ api:
         root: ./protos/
         target: ./protos/test/folder1/user_service.proto
         local-generation: true
+    # gRPC spec with external buf dependencies to test buf cache behavior
+    # This requires network access to fetch from buf.build during first generation
+    - proto:
+        root: ./protos/grpc-with-deps/
+        local-generation: true
+        from-openapi: true
+        dependencies:
+          - buf.build/googleapis/googleapis
 
 default-group: local
 groups:

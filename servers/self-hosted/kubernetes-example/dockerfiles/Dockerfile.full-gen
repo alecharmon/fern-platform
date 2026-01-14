@@ -1,0 +1,22 @@
+# Dockerfile for tests that need full docs pre-generation
+# Used for: full-gen-airgapped
+#
+# This image runs generate.sh at build time, which:
+# - Fetches external buf dependencies (buf.build/googleapis/googleapis)
+# - Generates the full documentation
+# - Caches everything so no network access is needed at runtime
+
+ARG BASE_IMAGE=fern-self-hosted:latest
+FROM ${BASE_IMAGE}
+
+# Copy the main fern config (includes gRPC with external buf deps)
+COPY fern/ /fern/
+
+# Run full generation at build time
+# This caches buf dependencies AND generates docs
+RUN /scripts/generate.sh
+
+# Ensure /data is completely empty and writable by any user
+# This prevents MinIO permission issues when running as non-root (e.g., UID 65532)
+# The generate.sh cleanup may fail silently if files have restrictive permissions
+RUN rm -rf /data && mkdir -p /data && chmod 777 /data

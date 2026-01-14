@@ -4,6 +4,9 @@ instances:
 
 title: Ariel's Plant Store
 
+experimental:
+  ai-examples: false
+
 layout:
   searchbar-placement: header
   page-width: full
@@ -25,6 +28,8 @@ navigation:
         path: docs/pages/sdks.mdx
         slug: sdks
   - api: API Reference
+    slug: api
+    flattened: true
   - changelog: ./changelog
     title: Changelog
 

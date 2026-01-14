@@ -360,18 +360,85 @@ done
 # -----------  Generate Docs  -----------
 if [ "$ONLY_DEPS" = "true" ]; then
     log "=========================================="
-    log "--only-deps mode: Skipping fern generate --docs"
+    log "--only-deps mode: Caching buf dependencies only"
     log "=========================================="
-    log "Services (Postgres, MinIO, FDR) have been started and are ready."
-    log "Docs generation will happen at runtime instead."
-    log ""
-    log "Note: If your project uses BSR dependencies (buf.build modules),"
-    log "you may need to vendor them locally for air-gapped environments."
+    log "This will fetch and cache buf.build dependencies for air-gapped use."
+    log "Docs generation will happen at runtime."
     log "=========================================="
+    
+    cd /fern
+    
+    # Set buf cache to a known location that persists and is accessible by all users
+    export BUF_CACHE_DIR=/opt/buf-cache
+    mkdir -p "$BUF_CACHE_DIR"
+    
+    # Find all proto directories with buf.yaml that have dependencies and run buf build to cache them
+    log "Searching for proto directories with buf.yaml..."
+    PROTO_DIRS=$(find . -name "buf.yaml" -type f -exec dirname {} \; 2>/dev/null || true)
+    
+    if [ -n "$PROTO_DIRS" ]; then
+        for proto_dir in $PROTO_DIRS; do
+            cd "/fern/$proto_dir"
+            
+            # Check if buf.yaml has dependencies (skip empty or no-deps buf.yaml files)
+            if [ ! -s "buf.yaml" ]; then
+                log "Skipping $proto_dir - buf.yaml is empty"
+                continue
+            fi
+            
+            # Check if buf.yaml has a deps section
+            if ! grep -q "deps:" "buf.yaml" 2>/dev/null; then
+                log "Skipping $proto_dir - buf.yaml has no dependencies"
+                continue
+            fi
+            
+            log "Caching buf dependencies in $proto_dir..."
+            
+            # First run buf dep update to ensure lock file is up to date
+            buf dep update 2>&1 || {
+                log "WARNING: buf dep update failed in $proto_dir"
+                log "This may be due to network issues or invalid buf.yaml"
+            }
+            
+            # Then run buf build to actually populate the buf cache
+            # This is what fern does internally, so we need to do the same
+            log "Running buf build to populate cache..."
+            buf build 2>&1 || {
+                log "WARNING: buf build failed in $proto_dir"
+                log "This may be due to invalid proto files"
+            }
+            
+            # Fix permissions on buf.lock file created by buf dep update
+            # This is critical for runtime when container runs as arbitrary UID
+            if [ -f "buf.lock" ]; then
+                chmod 644 "buf.lock" 2>/dev/null || true
+                log "Fixed permissions on $proto_dir/buf.lock"
+            fi
+        done
+        log "Buf dependencies cached successfully!"
+        log "Buf cache location: $BUF_CACHE_DIR"
+    else
+        log "No proto directories with buf.yaml found, skipping buf cache population"
+    fi
+    
+    # Make buf cache readable by all (for arbitrary UID runtime)
+    chmod -R 755 "$BUF_CACHE_DIR" 2>/dev/null || true
+    
+    # Re-fix permissions on /fern directory after buf dep update
+    # buf dep update may have created/modified files with restrictive permissions
+    log "Re-fixing permissions on /fern directory..."
+    chmod -R a+rX /fern 2>/dev/null || log "Warning: Could not fix permissions on /fern"
     
     # Clean up services before exiting
     log "Cleaning up services..."
     rm -rf /data/* /data/.minio.sys 2>/dev/null || true
+    
+    log "=========================================="
+    log "--only-deps mode complete!"
+    log "=========================================="
+    log "Buf dependencies have been cached in $BUF_CACHE_DIR"
+    log "At runtime, set BUF_CACHE_DIR=$BUF_CACHE_DIR to use the cached dependencies."
+    log "=========================================="
     
     # Cleanup is handled by trap
     exit 0

@@ -256,6 +256,197 @@ To remove the NetworkPolicy and restore Internet access:
 kubectl delete networkpolicy fern-docs-air-gapped
 ```
 
+## Testing Buf Cache Behavior with gRPC Dependencies
+
+The Fern API definition in this example includes a gRPC spec with external buf dependencies (`buf.build/googleapis/googleapis`). This allows testing the buf cache behavior in different deployment scenarios.
+
+### Understanding the Build Modes
+
+There are two key build-time options that affect how dependencies are handled:
+
+1. **`fern generate --docs`** (full generation): Runs complete docs generation at build time, including fetching buf dependencies and caching them in the image.
+
+2. **`fern generate --only-deps`** (dependency-only): Only fetches and caches buf dependencies at build time, deferring actual docs generation to runtime.
+
+3. **Pure runtime generation**: No build-time generation; everything happens at container startup.
+
+### Prerequisites for NetworkPolicy Testing
+
+NetworkPolicy enforcement requires a CNI (Container Network Interface) that supports it. By default, KIND clusters do not enforce NetworkPolicies because the default CNI (kindnet) does not support them.
+
+To test air-gapped scenarios with NetworkPolicy in KIND, you need to create a cluster with a CNI that supports NetworkPolicy, such as Calico or Cilium:
+
+**Option 1: KIND with Calico**
+
+```yaml
+# kind-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  disableDefaultCNI: true  # Disable kindnet
+  podSubnet: 192.168.0.0/16  # Calico default
+nodes:
+  - role: control-plane
+  - role: worker
+```
+
+```bash
+# Create cluster without default CNI
+kind create cluster --config kind-config.yaml
+
+# Install Calico
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml
+
+# Wait for Calico to be ready
+kubectl wait --for=condition=ready pod -l k8s-app=calico-node -n kube-system --timeout=90s
+```
+
+**Option 2: KIND with Cilium**
+
+```yaml
+# kind-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  disableDefaultCNI: true
+nodes:
+  - role: control-plane
+  - role: worker
+```
+
+```bash
+# Create cluster without default CNI
+kind create cluster --config kind-config.yaml
+
+# Install Cilium CLI and deploy
+cilium install
+cilium status --wait
+```
+
+For production Kubernetes clusters (EKS, GKE, AKS), NetworkPolicy is typically supported out of the box by the cloud provider's CNI.
+
+### Test Scenarios
+
+The following test scenarios validate the expected behavior of air-gapped deployments with gRPC dependencies:
+
+#### Tests That Should PASS
+
+| # | Scenario | Build Command | Network Policy | Why It Works |
+|---|----------|---------------|----------------|--------------|
+| 1 | Pure runtime generation (no network policy) | None | Disabled | Container has network access at runtime to fetch buf dependencies |
+| 2 | `--only-deps` with no buf cache (no network policy) | `RUN /scripts/generate.sh --only-deps` | Disabled | Dependencies fetched at build time, runtime has network for docs generation |
+| 3 | `--only-deps` with buf cache (prevent egress) | `RUN /scripts/generate.sh --only-deps` | Enabled | Dependencies cached at build time, no network needed at runtime |
+| 4 | Full `fern generate` (prevent egress) | `RUN /scripts/generate.sh` | Enabled | Everything generated and cached at build time, no network needed at runtime |
+
+#### Tests That Should FAIL
+
+| # | Scenario | Build Command | Network Policy | Why It Fails |
+|---|----------|---------------|----------------|--------------|
+| 5 | `--only-deps` without buf cache (prevent egress) | None | Enabled | No cached dependencies, but network blocked - cannot fetch from buf.build |
+| 6 | Pure runtime generation (prevent egress) | None | Enabled | No cached dependencies, no network access - cannot fetch from buf.build |
+
+### Running the Tests
+
+#### Test 1: Pure runtime generation (no network policy) - SHOULD PASS
+
+```dockerfile
+FROM fernapi/fern-self-hosted:latest
+COPY fern/ /fern/
+# No generate.sh - everything happens at runtime
+```
+
+```bash
+docker build -t fern-test:runtime .
+pnpm k8s:start --image fern-test:runtime --local
+# Should succeed - has network access to fetch buf dependencies
+```
+
+#### Test 2: --only-deps with no buf cache (no network policy) - SHOULD PASS
+
+```dockerfile
+FROM fernapi/fern-self-hosted:latest
+COPY fern/ /fern/
+RUN /scripts/generate.sh --only-deps
+```
+
+```bash
+docker build -t fern-test:only-deps .
+pnpm k8s:start --image fern-test:only-deps --local
+# Should succeed - dependencies cached, runtime has network for docs generation
+```
+
+#### Test 3: --only-deps with buf cache (prevent egress) - SHOULD PASS
+
+```dockerfile
+FROM fernapi/fern-self-hosted:latest
+COPY fern/ /fern/
+RUN /scripts/generate.sh --only-deps
+```
+
+```bash
+docker build -t fern-test:only-deps-cached .
+pnpm k8s:start --image fern-test:only-deps-cached --local --air-gapped
+# Should succeed - buf dependencies cached at build time, no network needed
+```
+
+#### Test 4: Full fern generate (prevent egress) - SHOULD PASS
+
+```dockerfile
+FROM fernapi/fern-self-hosted:latest
+COPY fern/ /fern/
+RUN /scripts/generate.sh
+```
+
+```bash
+docker build -t fern-test:full .
+pnpm k8s:start --image fern-test:full --local --air-gapped
+# Should succeed - everything pre-generated, no network needed at runtime
+```
+
+#### Test 5: --only-deps without buf cache (prevent egress) - SHOULD FAIL
+
+```dockerfile
+FROM fernapi/fern-self-hosted:latest
+COPY fern/ /fern/
+# No generate.sh - no cached dependencies
+```
+
+```bash
+docker build -t fern-test:no-cache .
+pnpm k8s:start --image fern-test:no-cache --local --air-gapped
+# Should FAIL - needs to fetch buf dependencies but network is blocked
+```
+
+#### Test 6: Pure runtime generation (prevent egress) - SHOULD FAIL
+
+```dockerfile
+FROM fernapi/fern-self-hosted:latest
+COPY fern/ /fern/
+# No generate.sh - everything at runtime
+```
+
+```bash
+docker build -t fern-test:runtime-blocked .
+pnpm k8s:start --image fern-test:runtime-blocked --local --air-gapped
+# Should FAIL - needs network to fetch buf dependencies but egress is blocked
+```
+
+### Verifying Test Results
+
+After deploying, check the pod status and logs:
+
+```bash
+# Check pod status
+kubectl get pods -l app=fern-docs -w
+
+# View logs to see if buf dependency fetching succeeded/failed
+kubectl logs -l app=fern-docs --tail=200
+
+# For failed tests, you should see errors like:
+# "failed to fetch buf.build/googleapis/googleapis"
+# or connection timeout errors
+```
+
 ## Scaling
 
 For production deployments, you can scale the deployment:

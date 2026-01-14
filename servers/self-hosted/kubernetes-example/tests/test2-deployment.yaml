@@ -1,0 +1,51 @@
+# Test: cached-deps-network-ok
+# Cached deps with network access - SHOULD PASS
+# Image: fern-test-only-deps (buf deps cached at build time)
+# Network: Open (no NetworkPolicy)
+# Expected: Pod becomes ready - deps cached, can generate docs at runtime
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fern-docs
+  namespace: cached-deps-network-ok
+  labels:
+    app: fern-docs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fern-docs
+  template:
+    metadata:
+      labels:
+        app: fern-docs
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+      containers:
+        - name: fern-docs
+          image: fern-test-only-deps:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+            - containerPort: 8081
+          env:
+            - name: FERN_LOG_LEVEL
+              value: "debug"
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 30
