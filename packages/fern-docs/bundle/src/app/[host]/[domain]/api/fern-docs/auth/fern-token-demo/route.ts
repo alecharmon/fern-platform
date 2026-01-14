@@ -7,7 +7,6 @@ import {
     safeUrl,
     withSecureCookie
 } from "@fern-api/docs-server";
-import { extractAuthMethodFromState } from "@fern-api/docs-server/auth/getAuthState";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getApiKeyInjectionDemoConfig } from "@fern-docs/edge-config";
 import { SignJWT } from "jose";
@@ -37,9 +36,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const return_to = req.nextUrl.searchParams.get("state");
     const redirectLocation = safeUrl(return_to) ?? safeUrl(withDefaultProtocol(preferPreview(host, domain)));
 
-    // Extract auth method from state parameter for multi-auth support
-    const authMethod = extractAuthMethodFromState(return_to);
-
     // if the key isn't found, redirect as necessary
     if (typeof apiKey !== "string") {
         return redirectWithLoginError(req, redirectLocation, "missing_api_key", "Couldn't login, please try again");
@@ -53,8 +49,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const fern_token = await mintJwtToken({
         secret: config.secret,
         apiKey,
-        payload: config.payload,
-        authMethod
+        payload: config.payload
     });
 
     // if the token isn't set properly, redirect as necessary
@@ -87,17 +82,7 @@ function getJwtTokenSecret(secret?: string): Uint8Array {
     return encoder.encode(secret ?? getJwtSecretKey());
 }
 
-async function mintJwtToken({
-    secret,
-    apiKey,
-    payload,
-    authMethod
-}: {
-    secret: string;
-    apiKey: string;
-    payload?: any;
-    authMethod?: string;
-}) {
+async function mintJwtToken({ secret, apiKey, payload }: { secret: string; apiKey: string; payload?: any }) {
     const jwtPayload = payload ?? {
         fern: {
             playground: {
@@ -109,11 +94,6 @@ async function mintJwtToken({
             }
         }
     };
-
-    // Include auth_method in the JWT payload for multi-auth support
-    if (authMethod) {
-        jwtPayload.auth_method = authMethod;
-    }
 
     return await new SignJWT(jwtPayload)
         .setProtectedHeader({ alg: "HS256", typ: "JWT" })
