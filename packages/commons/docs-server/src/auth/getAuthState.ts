@@ -1,7 +1,6 @@
 import "server-only";
 
 import type { AuthEdgeConfig, FernUser } from "@fern-api/docs-auth";
-import { getAuthMethodId } from "@fern-api/docs-auth";
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getPreviewUrlAuthConfig, type PreviewUrlAuth } from "@fern-docs/edge-config";
@@ -253,37 +252,16 @@ export async function createGetAuthState(
     };
 }
 
-/**
- * Constructs the state parameter for OAuth flows, including the auth method ID
- * to support multi-auth configurations. The auth method ID is appended as a
- * query parameter `_fern_auth_method` to the return URL.
- */
-function constructStateWithAuthMethod(
-    host: string,
-    domain: string,
-    authConfig: AuthEdgeConfig,
-    pathname?: string
-): string {
-    const baseUrl = `${withDefaultProtocol(
-        decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
-    )}${pathname ?? ""}`;
-
-    // Add auth method ID to enable correct config selection in callback
-    const stateUrl = new URL(baseUrl);
-    stateUrl.searchParams.set("_fern_auth_method", getAuthMethodId(authConfig));
-    return stateUrl.toString();
-}
-
-export function getAuthorizationUrl(
+function getAuthorizationUrl(
     authConfig: AuthEdgeConfig,
     // TODO: we'll need to pass in the basepath here for any customers who are using a non-root basepath.
     host: string,
     domain: string,
     pathname?: string
 ): string | undefined {
-    // Match the exact order of operations from handleWorkosAuth:
-    // decodeURIComponent is applied AFTER removeTrailingSlash(preferPreview(host, domain))
-    const state = constructStateWithAuthMethod(host, domain, authConfig, pathname);
+    // TODO: this is currently not a correct implementation of the state parameter b/c it should be signed w/ the jwt secret
+    // however, we should not break existing customers who are consuming the state as a `return_to` param in their auth flows.
+    const state = `${withDefaultProtocol(removeTrailingSlash(preferPreview(host, domain)))}${pathname ?? ""}`;
 
     if (authConfig.type === "basic_token_verification") {
         const destination = new URL(authConfig.redirect);
@@ -291,7 +269,7 @@ export function getAuthorizationUrl(
         // note: `redirect` is allowed to override the default redirect uri, and the `return_to` param
         if (!destination.searchParams.has("redirect_uri")) {
             const redirectUri = `${withDefaultProtocol(
-                decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
+                removeTrailingSlash(preferPreview(host, domain))
             )}/api/fern-docs/auth/jwt/callback`;
 
             destination.searchParams.set("redirect_uri", redirectUri);
@@ -302,7 +280,7 @@ export function getAuthorizationUrl(
         return destination.toString();
     } else if (authConfig.type === "sso" && authConfig.partner === "workos") {
         const redirectUri = `${withDefaultProtocol(
-            decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
+            removeTrailingSlash(preferPreview(host, domain))
         )}/api/fern-docs/auth/sso/callback`;
 
         return getWorkosSSOAuthorizationUrl({
@@ -319,7 +297,7 @@ export function getAuthorizationUrl(
             return getOAuth2AuthorizationUrl(authConfig, {
                 state,
                 redirectUri: `${withDefaultProtocol(
-                    decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
+                    removeTrailingSlash(preferPreview(host, domain))
                 )}/api/fern-docs/oauth2/callback`
             });
         }
@@ -329,14 +307,14 @@ export function getAuthorizationUrl(
             return getWebflowAuthorizationUrl(authConfig, {
                 state,
                 redirectUri: `${withDefaultProtocol(
-                    decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
+                    removeTrailingSlash(preferPreview(host, domain))
                 )}/api/fern-docs/oauth/webflow/callback`
             });
         } else if (authConfig.partner === "ory") {
             return getOryAuthorizationUrl(authConfig, {
                 state,
                 redirectUri: `${withDefaultProtocol(
-                    decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
+                    removeTrailingSlash(preferPreview(host, domain))
                 )}/api/fern-docs/oauth/ory/callback`
             });
         }
@@ -345,39 +323,15 @@ export function getAuthorizationUrl(
     return undefined;
 }
 
-export function getPasswordAuthorizationUrl(host: string, domain: string, pathname?: string): string {
-    // Match the exact order of operations from handleWorkosAuth:
-    // decodeURIComponent is applied AFTER removeTrailingSlash(preferPreview(host, domain))
-    const baseUrl = withDefaultProtocol(decodeURIComponent(removeTrailingSlash(preferPreview(host, domain))));
+function getPasswordAuthorizationUrl(host: string, domain: string, pathname?: string): string {
+    // Decode URI components in case the host contains encoded characters (e.g., localhost%3A3000)
+    const decodedHost = decodeURIComponent(host);
+    const decodedDomain = decodeURIComponent(domain);
+    const baseUrl = withDefaultProtocol(removeTrailingSlash(preferPreview(decodedHost, decodedDomain)));
     const loginUrl = new URL("/~login", baseUrl);
 
     // Include the return path so user can be redirected back after login
     loginUrl.searchParams.set("returnTo", `${baseUrl}${pathname ?? ""}`);
 
     return loginUrl.toString();
-}
-
-/**
- * Extracts the auth method ID from the state URL parameter.
- * Used in OAuth callbacks to determine which auth config was used to initiate the flow.
- */
-export function extractAuthMethodFromState(stateUrl: string | null | undefined): string | undefined {
-    if (!stateUrl) {
-        return undefined;
-    }
-    try {
-        const url = new URL(stateUrl);
-        return url.searchParams.get("_fern_auth_method") ?? undefined;
-    } catch {
-        return undefined;
-    }
-}
-
-/**
- * Removes the _fern_auth_method query parameter from a URL.
- * Used to clean the redirect URL before redirecting the user after OAuth callback.
- */
-export function cleanAuthMethodFromUrl(url: URL): URL {
-    url.searchParams.delete("_fern_auth_method");
-    return url;
 }

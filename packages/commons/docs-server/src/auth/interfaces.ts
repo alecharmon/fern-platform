@@ -6,7 +6,6 @@ export interface WorkOSSession {
     refreshToken: string;
     user: User;
     impersonator?: Impersonator;
-    authMethod?: string;
 }
 
 export interface FernJWTSession {
@@ -21,7 +20,6 @@ export interface WorkOSUserInfo {
     permissions?: string[];
     impersonator?: Impersonator;
     accessToken: string;
-    authMethod?: string;
 }
 
 export interface NoWorkOSUserInfo {

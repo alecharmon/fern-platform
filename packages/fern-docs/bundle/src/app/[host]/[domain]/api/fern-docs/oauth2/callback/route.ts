@@ -1,4 +1,4 @@
-import { type FernUser, findAuthConfigById, getAuthMethodId, OAuthTokenResponseSchema } from "@fern-api/docs-auth";
+import { type FernUser, OAuthTokenResponseSchema } from "@fern-api/docs-auth";
 import {
     getAllowedRedirectUrls,
     getDocsDomainEdge,
@@ -8,12 +8,11 @@ import {
     isSelfHosted,
     withSecureCookie
 } from "@fern-api/docs-server";
-import { cleanAuthMethodFromUrl, extractAuthMethodFromState } from "@fern-api/docs-server/auth/getAuthState";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { safeUrl } from "@fern-api/docs-server/safeUrl";
 import { withoutStaging } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { getAuthEdgeConfigs } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { decodeJwt, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
@@ -36,23 +35,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const domain = getDocsDomainEdge(req);
     const domainWithoutStaging = withoutStaging(domain);
     const host = req.nextUrl.host;
-    const authConfigs = await getAuthEdgeConfigs(domainWithoutStaging);
-
-    if (authConfigs.length === 0) {
-        console.error(`OAuth2 configuration missing for domain: ${domainWithoutStaging}`);
-        return redirectWithLoginError(
-            req,
-            new URL(domain),
-            "unexpected_config_shape",
-            "Couldn't login, please try again"
-        );
-    }
-
-    // Extract auth method ID from state to find the correct config
-    // The state parameter contains the return URL with _fern_auth_method query param
-    const stateParam = req.nextUrl.searchParams.get("state");
-    const authMethodId = extractAuthMethodFromState(stateParam);
-    const config = authMethodId ? (findAuthConfigById(authConfigs, authMethodId) ?? authConfigs[0]) : authConfigs[0];
+    const config = await getAuthEdgeConfig(domainWithoutStaging);
 
     if (!config) {
         console.error(`OAuth2 configuration missing for domain: ${domainWithoutStaging}`);
@@ -65,12 +48,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     const return_to = req.nextUrl.searchParams.get(getReturnToQueryParam(config));
-    // Clean the auth method param from the redirect URL
-    const redirectUrl = safeUrl(return_to);
-    if (redirectUrl) {
-        cleanAuthMethodFromUrl(redirectUrl);
-    }
-    const redirectLocation = redirectUrl ?? safeUrl(withDefaultProtocol(preferPreview(host, domainWithoutStaging)));
+    const redirectLocation =
+        safeUrl(return_to) ?? safeUrl(withDefaultProtocol(preferPreview(host, domainWithoutStaging)));
 
     const code = req.nextUrl.searchParams.get("code");
 
@@ -180,8 +159,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             payload,
             issuer,
             expires_in: parsedToken.data.expires_in,
-            refresh_token: parsedToken.data.refresh_token,
-            authMethod: getAuthMethodId(config)
+            refresh_token: parsedToken.data.refresh_token
         });
 
         const res = redirectLocation
@@ -213,18 +191,15 @@ async function mintJwtToken({
     payload,
     issuer,
     expires_in,
-    refresh_token,
-    authMethod
+    refresh_token
 }: {
     payload: FernUser;
     issuer: string;
     expires_in: number;
     refresh_token: string | undefined;
-    authMethod: string;
 }): Promise<string> {
     const jwtPayload = {
         fern: payload,
-        auth_method: authMethod,
         ...(refresh_token && { refresh_token })
     };
 

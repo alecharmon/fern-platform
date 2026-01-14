@@ -1,5 +1,3 @@
-import { findAuthConfigById, getAuthMethodId } from "@fern-api/docs-auth";
-import { cleanAuthMethodFromUrl, extractAuthMethodFromState } from "@fern-api/docs-server/auth/getAuthState";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
@@ -12,7 +10,7 @@ import { safeUrl } from "@fern-api/docs-server/safeUrl";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, withoutStaging } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { getAuthEdgeConfigs } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -46,19 +44,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // TODO: this is based on an incorrect implementation of the state param— we need to sign it with a JWT.
     const return_to_param = getReturnToQueryParam();
     const return_to = req.nextUrl.searchParams.get(return_to_param);
-
-    // Extract auth method ID from state to find the correct config
-    const authMethodIdFromState = extractAuthMethodFromState(return_to);
-
     const url = safeUrl(return_to) ?? safeUrl(withDefaultProtocol(preferPreview(host, domainWithoutStaging)));
 
     if (url == null) {
         console.error(`Invalid ${return_to_param} param provided:`, return_to);
         return new NextResponse(null, { status: 400 });
     }
-
-    // Clean the auth method param from the redirect URL
-    cleanAuthMethodFromUrl(url);
 
     // if the current url is legacy.ferndocs.com, we should redirect to ***.docs.buildwithfern.com
     if (req.nextUrl.host !== url.host && getDocsDomainEdge(req) !== url.host) {
@@ -77,8 +68,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const allowedDestinations = [withDefaultProtocol(getDocsDomainEdge(req))];
 
         // if the url.host exists in the edge config, we should add it to the allowed destinations
-        const hostConfigs = await getAuthEdgeConfigs(url.host);
-        if (hostConfigs.length > 0) {
+        if (await getAuthEdgeConfig(url.host)) {
             allowedDestinations.push(url.origin);
         }
 
@@ -105,20 +95,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             throw new Error("response is missing tokens");
         }
 
-        // Get auth config to determine auth method ID
-        // Use the auth method ID from state if available, otherwise fall back to first config
-        const authConfigs = await getAuthEdgeConfigs(domain);
-        const authConfig = authMethodIdFromState
-            ? (findAuthConfigById(authConfigs, authMethodIdFromState) ?? authConfigs[0])
-            : authConfigs[0];
-        const authMethod = authConfig ? getAuthMethodId(authConfig) : undefined;
-
         const session = await encryptSession({
             accessToken,
             refreshToken,
             user,
-            impersonator,
-            authMethod
+            impersonator
         });
 
         // TODO: check if we need to run `getAllowedRedirectUrls(config)` because we don't have the edge config imported here

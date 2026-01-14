@@ -1,10 +1,4 @@
-import {
-    type ApiKeyDemo,
-    ApiKeySchema,
-    type AuthEdgeConfig,
-    AuthEdgeConfigOrListSchema,
-    normalizeAuthConfigs
-} from "@fern-api/docs-auth";
+import { type ApiKeyDemo, ApiKeySchema, type AuthEdgeConfig, AuthEdgeConfigSchema } from "@fern-api/docs-auth";
 import { withoutStaging } from "@fern-api/docs-utils";
 
 import { getEdge } from "./getEdge";
@@ -29,18 +23,12 @@ export async function getWorkOSOrganizationDomains(orgName: string): Promise<str
 
     // iterate through all domains and their auth configs
     for (const [domain, authConfig] of Object.entries(domainToAuthConfigMap)) {
-        const config = AuthEdgeConfigOrListSchema.safeParse(authConfig);
+        const config = AuthEdgeConfigSchema.safeParse(authConfig);
 
-        if (config.success) {
-            const configs = normalizeAuthConfigs(config.data);
-            for (const c of configs) {
-                if (c.type === "sso" && c.partner === "workos") {
-                    // if the orgName matches the organization field, return the domain
-                    if (c.organization === orgName) {
-                        domains.push(domain);
-                        break;
-                    }
-                }
+        if (config.success && config.data.type === "sso" && config.data.partner === "workos") {
+            // if the orgName matches the organization field, return the domain
+            if (config.data.organization === orgName) {
+                domains.push(domain);
             }
         } else {
             console.error(`Could not parse AuthEdgeConfig for ${domain}`, config.error);
@@ -67,14 +55,6 @@ export async function getAuthEdgeConfig(currentDomain: string): Promise<AuthEdge
     }
 
     return getRecord(currentDomain, "authentication");
-}
-
-export async function getAuthEdgeConfigs(currentDomain: string): Promise<AuthEdgeConfig[]> {
-    if (isLocal() || isSelfHosted()) {
-        return [];
-    }
-
-    return getRecords(currentDomain, "authentication");
 }
 
 export async function getApiKeyInjectionEdgeConfig(currentDomain: string): Promise<AuthEdgeConfig | undefined> {
@@ -107,23 +87,17 @@ export async function getApiKeyInjectionDemoConfig(currentDomain: string): Promi
 }
 
 async function getRecord(currentDomain: string, key: string): Promise<AuthEdgeConfig | undefined> {
-    const records = await getRecords(currentDomain, key);
-    return records[0];
-}
-
-async function getRecords(currentDomain: string, key: string): Promise<AuthEdgeConfig[]> {
     const domainToTokenConfigMap = await getEdge<Record<string, any>>(key);
     const toRet = domainToTokenConfigMap?.[currentDomain] ?? domainToTokenConfigMap?.[withoutStaging(currentDomain)];
     if (toRet != null) {
-        const config = AuthEdgeConfigOrListSchema.safeParse(toRet);
+        const config = AuthEdgeConfigSchema.safeParse(toRet);
         // if the config is present, it should be valid.
         // if it's malformed, custom auth for this domain will not work and may leak docs to the public.
         if (!config.success) {
             console.error(`Could not parse AuthEdgeConfigSchema for ${currentDomain}`, config.error);
             // TODO: sentry
-            return [];
         }
-        return normalizeAuthConfigs(config.data);
+        return config.data;
     }
-    return [];
+    return;
 }

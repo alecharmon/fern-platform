@@ -1,5 +1,5 @@
 import { type APIKeyInjectionConfig, OryAccessTokenSchema } from "@fern-api/docs-auth";
-import { safeVerifyFernJWTWithMultipleConfigs } from "@fern-api/docs-server/auth/FernJWT";
+import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { getOAuth2AuthorizationUrl } from "@fern-api/docs-server/auth/oauth2";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { getOryAuthorizationUrl, OryOAuth2Client } from "@fern-api/docs-server/auth/ory";
@@ -12,7 +12,7 @@ import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { getApiKeyInjectionEdgeConfig, getAuthEdgeConfigs } from "@fern-docs/edge-config";
+import { getApiKeyInjectionEdgeConfig, getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { decodeJwt, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
@@ -32,8 +32,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
     const host = req.nextUrl.host;
     const cookieJar = await cookies();
 
-    const authEdgeConfigs = await getAuthEdgeConfigs(domain);
-    const authEdgeConfig = authEdgeConfigs[0];
+    const authEdgeConfig = await getAuthEdgeConfig(domain);
     const apiKeyEdgeConfig = await getApiKeyInjectionEdgeConfig(domain);
     const edgeConfig = authEdgeConfig || apiKeyEdgeConfig;
 
@@ -44,9 +43,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
     const fern_token = fernToken_admin();
     const access_token = cookieJar.get("access_token")?.value;
     const refresh_token = cookieJar.get("refresh_token")?.value;
-    // Use multi-config verification to support users who logged in via any auth method
-    const allConfigs = apiKeyEdgeConfig ? [...authEdgeConfigs, apiKeyEdgeConfig] : authEdgeConfigs;
-    const fernUser = await safeVerifyFernJWTWithMultipleConfigs(fern_token_cookie ?? fern_token, allConfigs);
+    const fernUser = await safeVerifyFernJWTConfig(fern_token_cookie ?? fern_token, edgeConfig);
 
     // if the JWT is valid, and the user has an API key, return it
     if (fernUser?.api_key != null) {

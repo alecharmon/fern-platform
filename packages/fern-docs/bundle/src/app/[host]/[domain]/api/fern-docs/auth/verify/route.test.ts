@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@fern-api/docs-server/auth/FernJWT", () => ({
-    safeVerifyFernJWTWithMultipleConfigs: vi.fn()
+    safeVerifyFernJWTConfig: vi.fn()
 }));
 
 vi.mock("@fern-api/docs-server/isLocal", () => ({
@@ -18,26 +18,26 @@ vi.mock("@fern-api/docs-server/xfernhost/edge", () => ({
 }));
 
 vi.mock("@fern-docs/edge-config", () => ({
-    getAuthEdgeConfigs: vi.fn()
+    getAuthEdgeConfig: vi.fn()
 }));
 
 vi.mock("next/headers", () => ({
     cookies: vi.fn()
 }));
 
-import { safeVerifyFernJWTWithMultipleConfigs } from "@fern-api/docs-server/auth/FernJWT";
+import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
-import { getAuthEdgeConfigs } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 
 import { POST } from "./route";
 
-const mockSafeVerifyFernJWTWithMultipleConfigs = vi.mocked(safeVerifyFernJWTWithMultipleConfigs);
+const mockSafeVerifyFernJWTConfig = vi.mocked(safeVerifyFernJWTConfig);
 const mockIsLocal = vi.mocked(isLocal);
 const mockIsSelfHosted = vi.mocked(isSelfHosted);
 const mockGetDocsDomainEdge = vi.mocked(getDocsDomainEdge);
-const mockGetAuthEdgeConfigs = vi.mocked(getAuthEdgeConfigs);
+const mockGetAuthEdgeConfig = vi.mocked(getAuthEdgeConfig);
 
 describe("auth/verify route", () => {
     beforeEach(() => {
@@ -96,7 +96,7 @@ describe("auth/verify route", () => {
     });
 
     it("should return authenticated false when no auth config found", async () => {
-        mockGetAuthEdgeConfigs.mockResolvedValue([]);
+        mockGetAuthEdgeConfig.mockResolvedValue(undefined);
 
         const request = new NextRequest("https://example.com/api/fern-docs/auth/verify", {
             method: "POST",
@@ -115,12 +115,10 @@ describe("auth/verify route", () => {
     });
 
     it("should return authenticated false when token verification fails", async () => {
-        mockGetAuthEdgeConfigs.mockResolvedValue([
-            {
-                type: "basic_token_verification"
-            } as any
-        ]);
-        mockSafeVerifyFernJWTWithMultipleConfigs.mockResolvedValue(undefined);
+        mockGetAuthEdgeConfig.mockResolvedValue({
+            type: "basic_token_verification"
+        } as any);
+        mockSafeVerifyFernJWTConfig.mockResolvedValue(undefined);
 
         const request = new NextRequest("https://example.com/api/fern-docs/auth/verify", {
             method: "POST",
@@ -139,12 +137,10 @@ describe("auth/verify route", () => {
     });
 
     it("should return user info with basic_token_verification", async () => {
-        mockGetAuthEdgeConfigs.mockResolvedValue([
-            {
-                type: "basic_token_verification"
-            } as any
-        ]);
-        mockSafeVerifyFernJWTWithMultipleConfigs.mockResolvedValue({
+        mockGetAuthEdgeConfig.mockResolvedValue({
+            type: "basic_token_verification"
+        } as any);
+        mockSafeVerifyFernJWTConfig.mockResolvedValue({
             name: "John Doe",
             email: "john@example.com",
             roles: ["admin", "viewer"]
@@ -172,13 +168,11 @@ describe("auth/verify route", () => {
     });
 
     it("should return user info with oauth2 partner", async () => {
-        mockGetAuthEdgeConfigs.mockResolvedValue([
-            {
-                type: "oauth2",
-                partner: "google"
-            } as any
-        ]);
-        mockSafeVerifyFernJWTWithMultipleConfigs.mockResolvedValue({
+        mockGetAuthEdgeConfig.mockResolvedValue({
+            type: "oauth2",
+            partner: "google"
+        } as any);
+        mockSafeVerifyFernJWTConfig.mockResolvedValue({
             name: "Jane Smith",
             email: "jane@example.com",
             roles: ["user"]
@@ -206,13 +200,11 @@ describe("auth/verify route", () => {
     });
 
     it("should return user info with workos SSO", async () => {
-        mockGetAuthEdgeConfigs.mockResolvedValue([
-            {
-                type: "sso",
-                partner: "workos"
-            } as any
-        ]);
-        mockSafeVerifyFernJWTWithMultipleConfigs.mockResolvedValue({
+        mockGetAuthEdgeConfig.mockResolvedValue({
+            type: "sso",
+            partner: "workos"
+        } as any);
+        mockSafeVerifyFernJWTConfig.mockResolvedValue({
             name: "Bob Johnson",
             email: "bob@company.com",
             roles: ["employee"]
@@ -240,12 +232,10 @@ describe("auth/verify route", () => {
     });
 
     it("should extract token from cookies when header not present", async () => {
-        mockGetAuthEdgeConfigs.mockResolvedValue([
-            {
-                type: "basic_token_verification"
-            } as any
-        ]);
-        mockSafeVerifyFernJWTWithMultipleConfigs.mockResolvedValue({
+        mockGetAuthEdgeConfig.mockResolvedValue({
+            type: "basic_token_verification"
+        } as any);
+        mockSafeVerifyFernJWTConfig.mockResolvedValue({
             name: "Cookie User",
             email: "cookie@example.com",
             roles: []

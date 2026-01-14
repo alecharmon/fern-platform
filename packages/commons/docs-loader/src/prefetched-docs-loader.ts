@@ -99,10 +99,6 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         return this.notSupported("getAuthConfig");
     }
 
-    getAuthConfigs(): AuthEdgeConfig[] {
-        return this.notSupported("getAuthConfigs");
-    }
-
     getMetadata(): DocsMetadata {
         return this.notSupported("getMetadata");
     }

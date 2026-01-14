@@ -23,8 +23,6 @@ class EditableDocsLoader implements DocsLoader {
 
     getAuthConfig = () => this.readOnlyDocsLoader.getAuthConfig();
 
-    getAuthConfigs = () => this.readOnlyDocsLoader.getAuthConfigs();
-
     getMetadata = () => this.readOnlyDocsLoader.getMetadata();
 
     getFiles = () => this.readOnlyDocsLoader.getFiles();
