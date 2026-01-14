@@ -30,6 +30,8 @@ export interface WizardFormData {
 
 export type OnboardingStep = "branding" | "api-spec" | "details" | "publishing" | "complete";
 
+export type FocusedField = "none" | "title" | "url" | "logo";
+
 export interface ValidationErrors {
     docsSiteName?: string;
     docsSiteUrl?: string;
@@ -107,6 +109,10 @@ interface OnboardingContextValue {
     goToPreviousStep: () => void;
     skipStep: () => void;
     setStep: (step: OnboardingStep, options?: { replace?: boolean }) => void;
+
+    // Field focus tracking (for CodeWidget zoom)
+    focusedField: FocusedField;
+    setFocusedField: (field: FocusedField) => void;
 }
 
 const DEFAULT_FORM_DATA: WizardFormData = {
@@ -144,6 +150,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const [currentStep, setCurrentStep] = useState<OnboardingStep>("branding");
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
     const [isNavigating, setIsNavigating] = useState(false);
+    const [focusedField, setFocusedField] = useState<FocusedField>("none");
 
     // Initialize form with @tanstack/react-form
     const form = useForm({
@@ -289,7 +296,10 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
             goToNextStep,
             goToPreviousStep,
             skipStep,
-            setStep
+            setStep,
+            // Field focus tracking
+            focusedField,
+            setFocusedField
         }),
         [
             form,
@@ -302,7 +312,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
             goToNextStep,
             goToPreviousStep,
             skipStep,
-            setStep
+            setStep,
+            focusedField
         ]
     );
 

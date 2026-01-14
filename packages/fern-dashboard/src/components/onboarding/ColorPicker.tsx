@@ -66,21 +66,11 @@ export function ColorPicker({ label, color, onColorChange }: ColorPickerProps) {
                 </div>
 
                 {/* Color value display */}
-                <div className="flex flex-col gap-2">
-                    <div
-                        className="text-gray-1200 cursor-pointer font-mono text-sm"
-                        onClick={() => setIsPickerOpen(!isPickerOpen)}
-                    >
-                        {currentColor ? currentColor.toUpperCase() : "Color not set"}
-                    </div>
-                    {!currentColor && (
-                        <p
-                            className="text-gray-1000 cursor-pointer text-xs font-light"
-                            onClick={() => setIsPickerOpen(!isPickerOpen)}
-                        >
-                            Pick a color
-                        </p>
-                    )}
+                <div
+                    className="text-gray-1200 cursor-pointer font-mono text-sm"
+                    onClick={() => setIsPickerOpen(!isPickerOpen)}
+                >
+                    {currentColor ? currentColor.toUpperCase() : "Pick a color"}
                 </div>
 
                 {/* Color picker popover */}

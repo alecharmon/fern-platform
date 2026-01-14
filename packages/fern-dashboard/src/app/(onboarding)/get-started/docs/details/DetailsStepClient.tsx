@@ -17,7 +17,7 @@ import { useOnboarding } from "@/providers/OnboardingProvider";
 import { saveOnboardingFormData, saveOnboardingSession } from "@/utils/onboardingSession";
 
 export function DetailsStepClient() {
-    const { form, formData, validationErrors, validateForm, goToNextStep } = useOnboarding();
+    const { form, formData, validationErrors, validateForm, goToNextStep, setFocusedField } = useOnboarding();
     const { submitDocs, isSubmitting, sessionId, error } = useDocsSubmission();
     const [isUploadingLogo, setIsUploadingLogo] = useState(false);
     const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
@@ -125,6 +125,8 @@ export function DetailsStepClient() {
                                 form.setFieldValue("docsSiteUrl", nameToUrl(newName));
                             }
                         }}
+                        onFocus={() => setFocusedField("title")}
+                        onBlur={() => setFocusedField("none")}
                         className="w-full"
                     />
                     {validationErrors.docsSiteName && (
@@ -140,6 +142,8 @@ export function DetailsStepClient() {
                             form.setFieldValue("docsSiteUrl", url);
                             form.setFieldValue("docsSiteUrlAvailable", available);
                         }}
+                        onFocus={() => setFocusedField("url")}
+                        onBlur={() => setFocusedField("none")}
                     />
                     {validationErrors.docsSiteUrl && (
                         <p className="text-xs text-red-600">{validationErrors.docsSiteUrl}</p>
@@ -181,6 +185,8 @@ export function DetailsStepClient() {
                     onFileSelect={handleLogoUpload}
                     size="large"
                     accept="image/png,image/gif,image/svg+xml"
+                    onFocus={() => setFocusedField("logo")}
+                    onBlur={() => setFocusedField("none")}
                 />
                 {logoUploadError && <p className="text-xs text-red-600">{logoUploadError}</p>}
                 {isUploadingLogo && <p className="text-xs text-gray-600">Uploading logo...</p>}

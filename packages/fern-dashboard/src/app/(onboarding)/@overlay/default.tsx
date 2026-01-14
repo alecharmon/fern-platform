@@ -27,7 +27,7 @@ export default async function DefaultOnboardingOverlaySlot() {
             </FadeInTransition>
 
             {/* Bottom left content */}
-            <div className="hidden md:block absolute left-2 bottom-4 max-w-[200px]">
+            <div className="hidden md:block absolute left-2 bottom-4 max-w-[280px]">
                 <FadeInTransition>
                     <div className="flex flex-col gap-5">
                         <div className="flex flex-col gap-1">
@@ -49,7 +49,10 @@ export default async function DefaultOnboardingOverlaySlot() {
                             <p className="px-3 text-xs text-muted-foreground">
                                 Signed in as <b>{session.user.email}</b>
                             </p>
-                            <LogoutButton className="ml-3 w-fit" />
+                            <div className="flex items-center justify-between w-[275px]">
+                                <LogoutButton className="ml-3 w-fit" />
+                                <ThemeToggle className="ml-2" />
+                            </div>
                         </div>
                     </div>
                 </FadeInTransition>

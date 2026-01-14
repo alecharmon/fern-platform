@@ -429,6 +429,38 @@
   }
 }
 
+/* Letter-by-letter fade in animation */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-scale-fade-in {
+  animation: scale-fade-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+  transform: scale(0.3);
+}
+
+@keyframes scale-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up {
     animation: none;
@@ -835,6 +867,43 @@ code:not(.code-block):not(#preview-container *) {
   font-weight: inherit;
 }
 
+
+/* CodeWidget gradient overlays - applied to parent container */
+.code-widget-container {
+  position: relative;
+}
+
+.code-widget-container::before {
+  content: "";
+  z-index: 31;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 70%, #fff 100%);
+  width: calc(100% + 50px);
+  height: calc(100% + 50px);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.code-widget-container::after {
+  content: "";
+  z-index: 31;
+  pointer-events: none;
+  background: linear-gradient(transparent 70%, #fff 88%);
+  width: calc(100% + 50px);
+  height: calc(100% + 50px);
+  position: absolute;
+  bottom: -20px;
+  right: -25px;
+}
+
+.dark .code-widget-container::before {
+  background: linear-gradient(90deg, transparent 70%, var(--gray-100) 100%);
+}
+
+.dark .code-widget-container::after {
+  background: linear-gradient(transparent 70%, var(--gray-100) 88%);
+}
 
 .fern-link {
   @apply text-primary no-underline relative inline-block;

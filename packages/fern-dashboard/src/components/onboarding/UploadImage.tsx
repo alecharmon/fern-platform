@@ -17,6 +17,8 @@ interface UploadImageProps {
     size?: ImageSize;
     accept?: string;
     defaultImageUrl?: string | null;
+    onFocus?: () => void;
+    onBlur?: () => void;
 }
 
 export function UploadImage({
@@ -26,7 +28,9 @@ export function UploadImage({
     onFileSelect,
     defaultImageUrl = "https://raw.githubusercontent.com/fern-api/docs-starter/main/fern/docs/assets/logo.svg",
     size = "large",
-    accept = "image/*"
+    accept = "image/*",
+    onFocus,
+    onBlur
 }: UploadImageProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
@@ -61,7 +65,12 @@ export function UploadImage({
     return (
         <div className="flex flex-col gap-2">
             <div>
-                <Label className="text-gray-1200 dark:text-gray-1100 text-sm font-normal">{label}</Label>
+                <Label
+                    className="text-gray-1200 dark:text-gray-1100 cursor-pointer text-sm font-normal"
+                    onClick={() => onFocus?.()}
+                >
+                    {label}
+                </Label>
             </div>
 
             <div className="flex items-center gap-4">
@@ -71,7 +80,10 @@ export function UploadImage({
                         containerClasses,
                         "flex cursor-pointer items-center justify-center overflow-hidden border border-dashed border-gray-500 bg-transparent p-3 transition-all duration-300 hover:border-gray-700 hover:bg-opacity-100"
                     )}
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => {
+                        onFocus?.();
+                        fileInputRef.current?.click();
+                    }}
                 >
                     {effectivePreview ? (
                         // biome-ignore lint/performance/noImgElement: false positive
@@ -96,7 +108,10 @@ export function UploadImage({
                         variant="outline"
                         className="flex w-fit items-center gap-1 text-xs"
                         size="default"
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => {
+                            onFocus?.();
+                            fileInputRef.current?.click();
+                        }}
                     >
                         <UploadCloudIcon className="mr-2 h-4 w-4" />
                         <span>Upload</span>

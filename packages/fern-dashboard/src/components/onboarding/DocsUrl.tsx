@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 interface DocsUrlProps {
     value: string;
     onChange: (value: string, available: boolean) => void;
+    onFocus?: () => void;
+    onBlur?: () => void;
 }
 
-export function DocsUrl({ value, onChange }: DocsUrlProps) {
+export function DocsUrl({ value, onChange, onFocus, onBlur }: DocsUrlProps) {
     const [isChecking, setIsChecking] = useState(false);
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -95,6 +97,8 @@ export function DocsUrl({ value, onChange }: DocsUrlProps) {
                     placeholder="your-company"
                     value={localValue}
                     onChange={(e) => setLocalValue(e.target.value)}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
                     className="w-full"
                 />
                 <span className="text-foreground flex items-center gap-2 whitespace-nowrap text-sm">
