@@ -428,6 +428,10 @@ NEXT_PUBLIC_FILES_ORIGIN="http://localhost:9000/${MINIO_BUCKET_NAME}"
 
 # -----------  End MINIO setup  -----------
 
+# Enable local mode for FDR to skip external auth calls (Venus)
+# This is required for air-gapped environments where external network access is not available
+export LOCAL_MODE_OVERRIDE=true
+
 log "Starting FDR server..."
 node /fdr/server.cjs 2>&1 | tee /tmp/fdr.log | add_timestamps &
 fdr_pid=$!

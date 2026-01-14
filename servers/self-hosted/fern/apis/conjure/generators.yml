@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://schema.buildwithfern.dev/generators-yml.json
+# Conjure API workspace for self-hosted tests
+# Tests Conjure API format (Palantir's API definition format)
+api:
+  specs:
+    conjure: ../../conjure
+
+default-group: local
+groups:
+  local:
+    generators:
+      - name: fernapi/fern-typescript-node-sdk
+        output:
+          location: local-file-system
+          path: ../../../sdks/typescript-conjure
+        version: 1.0.0

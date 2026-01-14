@@ -536,6 +536,69 @@ jobs:
           TEST_RESULTS=""
           FAILED=false
           
+          # ============================================================
+          # NETWORK POLICY VERIFICATION
+          # Verify that air-gapped namespaces actually block external traffic
+          # This ensures our tests are meaningful and catch real issues
+          # ============================================================
+          echo ""
+          echo "=========================================="
+          echo "Verifying NetworkPolicy blocks external traffic"
+          echo "=========================================="
+          
+          # Test external connectivity from an air-gapped namespace
+          # We use cached-deps-airgapped as it should have NetworkPolicy applied
+          AIRGAPPED_NS="cached-deps-airgapped"
+          AIRGAPPED_POD=$(kubectl get pods -n $AIRGAPPED_NS -l app=fern-docs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          
+          if [ -n "$AIRGAPPED_POD" ]; then
+            echo "Testing external connectivity from $AIRGAPPED_NS/$AIRGAPPED_POD..."
+            
+            # Test Venus (Fern's auth service) - should be blocked
+            echo "Testing Venus (api.buildwithfern.com)..."
+            VENUS_RESULT=$(kubectl exec -n $AIRGAPPED_NS $AIRGAPPED_POD -- curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 https://api.buildwithfern.com/health 2>&1 || echo "blocked")
+            echo "Venus result: $VENUS_RESULT"
+            
+            # Test buf.build - should be blocked
+            echo "Testing buf.build..."
+            BUF_RESULT=$(kubectl exec -n $AIRGAPPED_NS $AIRGAPPED_POD -- curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 https://buf.build 2>&1 || echo "blocked")
+            echo "buf.build result: $BUF_RESULT"
+            
+            # Test google.com - should be blocked
+            echo "Testing google.com..."
+            GOOGLE_RESULT=$(kubectl exec -n $AIRGAPPED_NS $AIRGAPPED_POD -- curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 https://google.com 2>&1 || echo "blocked")
+            echo "google.com result: $GOOGLE_RESULT"
+            
+            # Check if any external calls succeeded (they shouldn't in air-gapped mode)
+            NETWORK_BLOCKED=true
+            if [[ "$VENUS_RESULT" =~ ^[0-9]+$ ]] && [ "$VENUS_RESULT" != "000" ]; then
+              echo "WARNING: Venus call succeeded with HTTP $VENUS_RESULT - NetworkPolicy may not be enforced!"
+              NETWORK_BLOCKED=false
+            fi
+            if [[ "$BUF_RESULT" =~ ^[0-9]+$ ]] && [ "$BUF_RESULT" != "000" ]; then
+              echo "WARNING: buf.build call succeeded with HTTP $BUF_RESULT - NetworkPolicy may not be enforced!"
+              NETWORK_BLOCKED=false
+            fi
+            if [[ "$GOOGLE_RESULT" =~ ^[0-9]+$ ]] && [ "$GOOGLE_RESULT" != "000" ]; then
+              echo "WARNING: google.com call succeeded with HTTP $GOOGLE_RESULT - NetworkPolicy may not be enforced!"
+              NETWORK_BLOCKED=false
+            fi
+            
+            if [ "$NETWORK_BLOCKED" = "true" ]; then
+              echo "SUCCESS: NetworkPolicy is correctly blocking external traffic"
+              TEST_RESULTS="${TEST_RESULTS}network-policy-verification: PASS (external traffic blocked)\n"
+            else
+              echo "WARNING: NetworkPolicy may not be fully enforced - some external calls succeeded"
+              echo "This may affect the reliability of air-gapped tests"
+              TEST_RESULTS="${TEST_RESULTS}network-policy-verification: WARNING (some external traffic allowed)\n"
+            fi
+          else
+            echo "WARNING: Could not find pod in $AIRGAPPED_NS to test NetworkPolicy"
+            TEST_RESULTS="${TEST_RESULTS}network-policy-verification: SKIPPED (no pod found)\n"
+          fi
+          
+          echo ""
+          
           # Define test namespaces and descriptions
           declare -A PASS_TESTS=(
             ["runtime-gen-network-ok"]="Runtime generation with network access"
@@ -564,17 +627,57 @@ jobs:
               echo "$ns - Attempt $i/5: Ready=$POD_READY, Status=$POD_STATUS"
               
               if [ "$POD_READY" = "true" ]; then
-                READY=true
-                break
+                # Pod reports ready - verify by checking liveness endpoint directly
+                POD_NAME=$(kubectl get pods -n $ns -l app=fern-docs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+                echo "$ns - Pod $POD_NAME reports ready, verifying liveness endpoint..."
+                
+                LIVENESS_OK=false
+                for j in {1..3}; do
+                  LIVENESS_STATUS=$(kubectl exec -n $ns $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/liveness 2>/dev/null || echo "000")
+                  echo "$ns - Liveness check $j/3: HTTP $LIVENESS_STATUS"
+                  if [ "$LIVENESS_STATUS" = "200" ]; then
+                    LIVENESS_OK=true
+                    break
+                  fi
+                  sleep 2
+                done
+                
+                if [ "$LIVENESS_OK" = "true" ]; then
+                  # Also verify docs page actually loads at port 3000
+                  echo "$ns - Liveness OK, verifying docs page loads at port 3000..."
+                  DOCS_OK=false
+                  for k in {1..3}; do
+                    DOCS_STATUS=$(kubectl exec -n $ns $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/ 2>/dev/null || echo "000")
+                    echo "$ns - Docs page check $k/3: HTTP $DOCS_STATUS"
+                    if [ "$DOCS_STATUS" = "200" ]; then
+                      DOCS_OK=true
+                      break
+                    fi
+                    sleep 2
+                  done
+                  
+                  if [ "$DOCS_OK" = "true" ]; then
+                    READY=true
+                    break
+                  else
+                    echo "$ns - WARNING: Liveness OK but docs page failed to load!"
+                    echo "$ns - Checking logs for errors..."
+                    kubectl logs -n $ns -l app=fern-docs --tail=50 2>/dev/null | grep -E "ERROR|FATAL|failed|fetch failed" || true
+                  fi
+                else
+                  echo "$ns - WARNING: Pod reports ready but liveness check failed!"
+                  echo "$ns - This may indicate docs generation failed. Checking logs..."
+                  kubectl logs -n $ns -l app=fern-docs --tail=50 2>/dev/null | grep -E "ERROR|FATAL|failed|fetch failed" || true
+                fi
               fi
               sleep 10
             done
             
             if [ "$READY" = "true" ]; then
-              echo "SUCCESS: $ns passed - pod is ready"
+              echo "SUCCESS: $ns passed - pod is ready, liveness check passed, and docs page loads"
               TEST_RESULTS="${TEST_RESULTS}$ns: PASS\n"
             else
-              echo "FAILURE: $ns failed - pod did not become ready"
+              echo "FAILURE: $ns failed - pod did not become ready, liveness check failed, or docs page did not load"
               kubectl logs -n $ns -l app=fern-docs --tail=100 || true
               TEST_RESULTS="${TEST_RESULTS}$ns: FAIL (should have passed)\n"
               FAILED=true

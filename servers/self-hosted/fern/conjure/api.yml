@@ -1,0 +1,70 @@
+types:
+  definitions:
+    default-package: com.example.api
+    objects:
+      PlantId:
+        alias: string
+        docs: |
+          Unique identifier for a plant.
+      PlantStatus:
+        values:
+          - AVAILABLE
+          - PENDING
+          - SOLD
+      Plant:
+        fields:
+          id: PlantId
+          name: string
+          status: PlantStatus
+          tags: list<string>
+          description: optional<string>
+      CreatePlantRequest:
+        fields:
+          name: string
+          status: PlantStatus
+          tags: list<string>
+          description: optional<string>
+      PlantList:
+        fields:
+          plants: list<Plant>
+          nextPageToken: optional<string>
+services:
+  PlantService:
+    name: Plant Service
+    package: com.example.api
+    base-path: /plants
+    docs: |
+      Service for managing plants in the store.
+    endpoints:
+      createPlant:
+        http: POST /
+        docs: Create a new plant
+        args:
+          request: CreatePlantRequest
+        returns: Plant
+      getPlant:
+        http: GET /{plantId}
+        docs: Get a plant by ID
+        args:
+          plantId:
+            type: PlantId
+            param-type: path
+        returns: Plant
+      listPlants:
+        http: GET /
+        docs: List all plants
+        args:
+          status:
+            type: optional<PlantStatus>
+            param-type: query
+          pageToken:
+            type: optional<string>
+            param-type: query
+        returns: PlantList
+      deletePlant:
+        http: DELETE /{plantId}
+        docs: Delete a plant
+        args:
+          plantId:
+            type: PlantId
+            param-type: path
