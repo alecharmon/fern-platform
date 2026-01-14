@@ -2,10 +2,12 @@
 
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 
 import { Button } from "@/components/ui/button";
 import { CopyableText } from "@/components/ui/CopyableText";
 import type { WizardFormData } from "@/providers/OnboardingProvider";
+import { captureEvent, PosthogEventName } from "../posthog/events";
 import { FadeInTransition } from "../transitions/FadeInTransition";
 import { SlideUpTransition } from "../transitions/SlideUpTransition";
 import { CodeWidget } from "./CodeWidget";
@@ -19,6 +21,21 @@ interface ConfirmScreenProps {
 export function ConfirmScreen({ orgName, docsUrl, wizardFormData }: ConfirmScreenProps) {
     const fullUrl = `${docsUrl}.docs.buildwithfern.com`;
     const encodedURI = encodeURIComponent(docsUrl);
+    const posthog = usePostHog();
+
+    const handleViewSiteClick = () => {
+        captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_COMPLETE_ACTION, {
+            action: "view_site",
+            docsSiteUrl: docsUrl
+        });
+    };
+
+    const handleContinueToSetupClick = () => {
+        captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_COMPLETE_ACTION, {
+            action: "continue_to_setup",
+            docsSiteUrl: docsUrl
+        });
+    };
 
     return (
         <div className="flex w-full flex-col pt-24 h-screen">
@@ -40,6 +57,7 @@ export function ConfirmScreen({ orgName, docsUrl, wizardFormData }: ConfirmScree
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1.5"
+                                onClick={handleViewSiteClick}
                             >
                                 View site
                                 <ArrowUpRightIcon className="size-3.5" />
@@ -47,7 +65,12 @@ export function ConfirmScreen({ orgName, docsUrl, wizardFormData }: ConfirmScree
                         </Button>
                     </div>
                     <Button asChild variant="outline">
-                        <Link href={`/${orgName}/docs/${encodedURI}.docs.buildwithfern.com`}>Continue to setup</Link>
+                        <Link
+                            href={`/${orgName}/docs/${encodedURI}.docs.buildwithfern.com`}
+                            onClick={handleContinueToSetupClick}
+                        >
+                            Continue to setup
+                        </Link>
                     </Button>
                 </div>
             </FadeInTransition>

@@ -1,8 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect } from "react";
 import { LoaderScreen } from "@/components/onboarding/LoaderScreen";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { useOnboarding } from "@/providers/OnboardingProvider";
 import { getOnboardingFormData, getOnboardingSession, saveSitePublishUrl } from "@/utils/onboardingSession";
 
@@ -21,6 +23,7 @@ import { getOnboardingFormData, getOnboardingSession, saveSitePublishUrl } from 
 export function PublishingStepClient() {
     const router = useRouter();
     const { form, goToNextStep } = useOnboarding();
+    const posthog = usePostHog();
 
     // Check for required session data and redirect if missing
     useEffect(() => {
@@ -35,6 +38,14 @@ export function PublishingStepClient() {
 
     const handleStreamComplete = useCallback(
         (result: { url: string; fernDocsDownloadUrl?: string; githubRepoUrl?: string }) => {
+            const formData = getOnboardingFormData();
+
+            // Track successful docs site creation
+            captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_SITE_CREATED, {
+                docsSiteUrl: formData?.docsSiteUrl ?? "",
+                sitePublishUrl: result.url
+            });
+
             // Store the published URL in form state to enable access to complete page
             form.setFieldValue("sitePublishUrl", result.url);
 
@@ -49,7 +60,7 @@ export function PublishingStepClient() {
                 goToNextStep();
             }, 100);
         },
-        [goToNextStep, form]
+        [goToNextStep, form, posthog]
     );
 
     // Get session data

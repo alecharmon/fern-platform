@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { usePostHog } from "posthog-js/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { uploadOnboardingAsset } from "@/components/onboarding/api";
 import { ColorPicker } from "@/components/onboarding/ColorPicker";
 import { DocsUrl } from "@/components/onboarding/DocsUrl";
@@ -9,6 +10,7 @@ import { UploadImage } from "@/components/onboarding/UploadImage";
 import { useDocsSubmission } from "@/components/onboarding/useDocsSubmission";
 import { generateOrgIdFromDocsUrl } from "@/components/onboarding/utils";
 import { nameToUrl } from "@/components/onboarding/validation";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useOnboarding } from "@/providers/OnboardingProvider";
@@ -19,6 +21,15 @@ export function DetailsStepClient() {
     const { submitDocs, isSubmitting, sessionId, error } = useDocsSubmission();
     const [isUploadingLogo, setIsUploadingLogo] = useState(false);
     const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
+    const posthog = usePostHog();
+    const hasTrackedView = useRef(false);
+
+    useEffect(() => {
+        if (!hasTrackedView.current) {
+            captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_DETAILS_STEP_VIEWED, {});
+            hasTrackedView.current = true;
+        }
+    }, [posthog]);
 
     // When sessionId is set (submission started), save to sessionStorage and navigate to publishing
     useEffect(() => {
@@ -42,6 +53,12 @@ export function DetailsStepClient() {
             return;
         }
 
+        captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_DETAILS_STEP_SUBMITTED, {
+            docsSiteUrl: formData.docsSiteUrl,
+            hasLogoUrl: !!formData.logoUrl,
+            hasPrimaryColor: !!formData.primaryColorHex
+        });
+
         try {
             // Use shared submission hook
             await submitDocs(formData);
@@ -52,7 +69,7 @@ export function DetailsStepClient() {
             // Error is handled by the hook
             console.error("Submission error:", err);
         }
-    }, [formData, submitDocs, validateForm, validationErrors]);
+    }, [formData, posthog, submitDocs, validateForm, validationErrors]);
 
     const handleLogoUpload = useCallback(
         async (file: File) => {

@@ -11,7 +11,20 @@ export const PosthogEventName = {
     DOCS_REQUEST_ACCESS_CLICKED: "dashboard-docs-request-access-clicked",
     DOCS_REQUEST_ACCESS_SUCCESS: "dashboard-docs-request-access-success",
     DOCS_PAGE_VIEWED: "dashboard-docs-page-viewed",
-    SDK_DEMO_SCHEDULED: "dashboard-sdk-demo-scheduled"
+    SDK_DEMO_SCHEDULED: "dashboard-sdk-demo-scheduled",
+
+    // Onboarding flow events
+    ONBOARDING_PRODUCT_SELECTED: "dashboard-onboarding-product-selected",
+    ONBOARDING_DOCS_BRANDING_STEP_VIEWED: "dashboard-onboarding-docs-branding-step-viewed",
+    ONBOARDING_DOCS_BRANDING_STEP_COMPLETED: "dashboard-onboarding-docs-branding-step-completed",
+    ONBOARDING_DOCS_API_SPEC_STEP_VIEWED: "dashboard-onboarding-docs-api-spec-step-viewed",
+    ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED: "dashboard-onboarding-docs-api-spec-step-completed",
+    ONBOARDING_DOCS_DETAILS_STEP_VIEWED: "dashboard-onboarding-docs-details-step-viewed",
+    ONBOARDING_DOCS_DETAILS_STEP_SUBMITTED: "dashboard-onboarding-docs-details-step-submitted",
+    ONBOARDING_DOCS_SITE_CREATED: "dashboard-onboarding-docs-site-created",
+    ONBOARDING_DOCS_COMPLETE_ACTION: "dashboard-onboarding-docs-complete-action",
+    ONBOARDING_SDK_PAGE_VIEWED: "dashboard-onboarding-sdk-page-viewed",
+    ONBOARDING_SDK_QUICKSTART_CLICKED: "dashboard-onboarding-sdk-quickstart-clicked"
 } as const;
 
 export type PosthogEventName = (typeof PosthogEventName)[keyof typeof PosthogEventName];
@@ -52,6 +65,40 @@ export type PosthogEventPayloads = {
         userEmail: string;
         userName: string;
     };
+
+    // Onboarding flow event payloads
+    [PosthogEventName.ONBOARDING_PRODUCT_SELECTED]: {
+        product: "docs" | "sdk";
+    };
+    [PosthogEventName.ONBOARDING_DOCS_BRANDING_STEP_VIEWED]: Record<string, never>;
+    [PosthogEventName.ONBOARDING_DOCS_BRANDING_STEP_COMPLETED]: {
+        action: "continue" | "skip";
+        hasExistingDocsSite: boolean;
+        hasLogoUrl: boolean;
+        hasPrimaryColor: boolean;
+    };
+    [PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_VIEWED]: Record<string, never>;
+    [PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED]: {
+        action: "continue" | "skip";
+        specCount: number;
+        usedDefaultSpecs: boolean;
+    };
+    [PosthogEventName.ONBOARDING_DOCS_DETAILS_STEP_VIEWED]: Record<string, never>;
+    [PosthogEventName.ONBOARDING_DOCS_DETAILS_STEP_SUBMITTED]: {
+        docsSiteUrl: string;
+        hasLogoUrl: boolean;
+        hasPrimaryColor: boolean;
+    };
+    [PosthogEventName.ONBOARDING_DOCS_SITE_CREATED]: {
+        docsSiteUrl: string;
+        sitePublishUrl: string;
+    };
+    [PosthogEventName.ONBOARDING_DOCS_COMPLETE_ACTION]: {
+        action: "view_site" | "continue_to_setup";
+        docsSiteUrl: string;
+    };
+    [PosthogEventName.ONBOARDING_SDK_PAGE_VIEWED]: Record<string, never>;
+    [PosthogEventName.ONBOARDING_SDK_QUICKSTART_CLICKED]: Record<string, never>;
 };
 
 /**

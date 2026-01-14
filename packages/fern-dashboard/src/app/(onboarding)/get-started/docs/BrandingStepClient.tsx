@@ -1,12 +1,19 @@
 "use client";
 
-import { useCallback } from "react";
+import { usePostHog } from "posthog-js/react";
+import { useCallback, useEffect } from "react";
 import { AutoPopulate } from "@/components/onboarding/AutoPopulate";
 import { OnboardingStepCard } from "@/components/onboarding/OnboardingStepCard";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { useOnboarding, type WizardFormData } from "@/providers/OnboardingProvider";
 
 export function BrandingStepClient() {
     const { form, formData, goToNextStep } = useOnboarding();
+    const posthog = usePostHog();
+
+    useEffect(() => {
+        captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_BRANDING_STEP_VIEWED, {});
+    }, [posthog]);
 
     const handleApplyUpdates = useCallback(
         (updates: Partial<WizardFormData>) => {
@@ -28,14 +35,28 @@ export function BrandingStepClient() {
             return;
         }
 
+        captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_BRANDING_STEP_COMPLETED, {
+            action: "continue",
+            hasExistingDocsSite: !!formData.existingDocsSite,
+            hasLogoUrl: !!formData.logoUrl,
+            hasPrimaryColor: !!formData.primaryColorHex
+        });
+
         // Proceed to next step
         goToNextStep();
-    }, [form, goToNextStep]);
+    }, [form, formData.existingDocsSite, formData.logoUrl, formData.primaryColorHex, goToNextStep, posthog]);
 
     const handleSkip = useCallback(() => {
+        captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_BRANDING_STEP_COMPLETED, {
+            action: "skip",
+            hasExistingDocsSite: !!formData.existingDocsSite,
+            hasLogoUrl: !!formData.logoUrl,
+            hasPrimaryColor: !!formData.primaryColorHex
+        });
+
         // Skip to next step (no validation required)
         goToNextStep();
-    }, [goToNextStep]);
+    }, [formData.existingDocsSite, formData.logoUrl, formData.primaryColorHex, goToNextStep, posthog]);
 
     return (
         <OnboardingStepCard

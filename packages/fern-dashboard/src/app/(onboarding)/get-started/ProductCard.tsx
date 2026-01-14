@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 
 const variants = {
     docs: {
@@ -18,10 +22,18 @@ const variants = {
 
 export function ProductCard({ variant }: { variant: "docs" | "sdk" }) {
     const config = variants[variant];
+    const posthog = usePostHog();
+
+    const handleClick = () => {
+        captureEvent(posthog, PosthogEventName.ONBOARDING_PRODUCT_SELECTED, {
+            product: variant
+        });
+    };
 
     return (
         <Link
             href={config.href}
+            onClick={handleClick}
             className="flex flex-col gap-4 p-4 border border-border rounded-xl hover:border-green-700 hover:shadow-xs hover:shadow-green-700/30 transition-colors max-w-[220px]"
         >
             <div className="flex items-center justify-center size-[40px]">

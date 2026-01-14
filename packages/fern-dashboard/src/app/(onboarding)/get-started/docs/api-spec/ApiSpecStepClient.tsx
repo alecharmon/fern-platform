@@ -1,13 +1,20 @@
 "use client";
 
-import { useCallback } from "react";
+import { usePostHog } from "posthog-js/react";
+import { useCallback, useEffect } from "react";
 import { DEFAULT_SPECS } from "@/components/onboarding/constants";
 import { OnboardingStepCard } from "@/components/onboarding/OnboardingStepCard";
 import { OpenAPISpecs } from "@/components/onboarding/OpenAPISpecs";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { useOnboarding } from "@/providers/OnboardingProvider";
 
 export function ApiSpecStepClient() {
     const { form, formData, goToNextStep } = useOnboarding();
+    const posthog = usePostHog();
+
+    useEffect(() => {
+        captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_VIEWED, {});
+    }, [posthog]);
 
     const handleFilesChange = useCallback(
         async (files: File[]) => {
@@ -26,6 +33,13 @@ export function ApiSpecStepClient() {
         form.setFieldValue("openApiSpecFiles", defaultMarkerFiles);
     }, [form]);
 
+    const isUsingDefaultSpecs = useCallback((files: File[]) => {
+        if (files.length !== DEFAULT_SPECS.length) {
+            return false;
+        }
+        return files.every((file) => DEFAULT_SPECS.some((spec) => spec.fileName === file.name));
+    }, []);
+
     const handleContinue = useCallback(async () => {
         // Validate that at least one spec file is selected
         await form.validateField("openApiSpecFiles", "change");
@@ -36,16 +50,30 @@ export function ApiSpecStepClient() {
             return;
         }
 
+        captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED, {
+            action: "continue",
+            specCount: formData.openApiSpecFiles.length,
+            usedDefaultSpecs: isUsingDefaultSpecs(formData.openApiSpecFiles)
+        });
+
         goToNextStep();
-    }, [form, goToNextStep]);
+    }, [form, formData.openApiSpecFiles, goToNextStep, isUsingDefaultSpecs, posthog]);
 
     const handleSkip = useCallback(() => {
         // When skipping, add default specs and proceed
-        if (formData.openApiSpecFiles.length === 0) {
+        const willUseDefaults = formData.openApiSpecFiles.length === 0;
+        if (willUseDefaults) {
             handleAddDefaultSpecs();
         }
+
+        captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED, {
+            action: "skip",
+            specCount: willUseDefaults ? DEFAULT_SPECS.length : formData.openApiSpecFiles.length,
+            usedDefaultSpecs: willUseDefaults || isUsingDefaultSpecs(formData.openApiSpecFiles)
+        });
+
         goToNextStep();
-    }, [formData.openApiSpecFiles.length, handleAddDefaultSpecs, goToNextStep]);
+    }, [formData.openApiSpecFiles, handleAddDefaultSpecs, goToNextStep, isUsingDefaultSpecs, posthog]);
 
     return (
         <OnboardingStepCard
