@@ -69,6 +69,11 @@ export default function DevPanel() {
             // Show OpenAPI spec files for API reference pages
             const specFiles: DevPanelFile[] = [];
             openApiSpecs.forEach((content, path) => {
+                // Skip generators.yml if it's in the specs Map (will be added separately below
+                // with the latest content from generatorsYmlContent prop)
+                if (generatorsYmlPath && path === generatorsYmlPath) {
+                    return;
+                }
                 specFiles.push({
                     path,
                     content,
@@ -77,7 +82,7 @@ export default function DevPanel() {
                 });
             });
 
-            // Add generators.yml if available
+            // Add generators.yml if available (using separate props for latest content)
             if (generatorsYmlPath && generatorsYmlContent) {
                 specFiles.push({
                     path: generatorsYmlPath,

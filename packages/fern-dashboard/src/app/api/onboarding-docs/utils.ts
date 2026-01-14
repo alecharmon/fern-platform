@@ -1,6 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import * as yaml from "js-yaml";
+
+import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
 import type { OnboardingDocsRequest } from "./types";
 
@@ -63,7 +64,7 @@ function createGeneratorsYml(openApiSpecs: OnboardingDocsRequest["openApiSpecUrl
         }
     };
 
-    return `# yaml-language-server: $schema=https://schema.buildwithfern.dev/generators-yml.json\n\n${yaml.dump(config)}`;
+    return stringifyYaml(config, { schemaUrl: YAML_SCHEMAS.GENERATORS_YML });
 }
 
 async function _copyDirectory(src: string, dest: string): Promise<void> {
@@ -197,7 +198,8 @@ export async function createFernProject(
     // Update docs.yml with custom assets and colors if provided
     const docsYmlPath = path.join(fernDir, "docs.yml");
     const docsYmlContent = await fs.readFile(docsYmlPath, "utf-8");
-    const docsConfig = yaml.load(docsYmlContent) as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const docsConfig = parseYamlToJs<Record<string, any>>(docsYmlContent);
 
     // Add logo if downloaded
     if (hasLogo && logoFileName) {
@@ -237,10 +239,7 @@ export async function createFernProject(
     }
 
     // Write updated docs.yml
-    await fs.writeFile(
-        docsYmlPath,
-        `# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json\n\n${yaml.dump(docsConfig)}`
-    );
+    await fs.writeFile(docsYmlPath, stringifyYaml(docsConfig, { schemaUrl: YAML_SCHEMAS.DOCS_YML }));
 
     // Handle OpenAPI specs and generators.yml
     if (data.openApiSpecUrls.length > 0) {

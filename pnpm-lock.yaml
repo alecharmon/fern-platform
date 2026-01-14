@@ -1530,6 +1530,9 @@ importers:
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
+      yaml:
+        specifier: ^2.8.1
+        version: 2.8.1
       zod:
         specifier: 'catalog:'
         version: 3.25.76

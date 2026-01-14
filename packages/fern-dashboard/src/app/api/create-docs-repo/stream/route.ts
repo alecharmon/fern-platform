@@ -1,15 +1,14 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import * as yaml from "js-yaml";
 import type { NextRequest } from "next/server";
 import { extract } from "tar";
-
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getUserGithubUsername } from "@/app/services/auth0/management";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import postGitRepository from "@/app/services/dal/github/postGitRepository";
+import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -226,18 +225,20 @@ export async function POST(req: NextRequest) {
                     // Update docs.yml
                     const docsYmlPath = path.join(projectDir, "fern", "docs.yml");
                     try {
-                        const docsConfig = yaml.load(await fs.readFile(docsYmlPath, "utf-8")) as any;
+                        const docsConfig = parseYamlToJs<Record<string, unknown>>(
+                            await fs.readFile(docsYmlPath, "utf-8")
+                        ) as Record<string, unknown> & { instances?: Array<Record<string, unknown>> };
                         if (!docsConfig.instances) {
                             docsConfig.instances = [];
                         }
                         if (docsConfig.instances.length > 0) {
-                            docsConfig.instances[0].url = `${data.urlPrefix}.docs.buildwithfern.com`;
+                            docsConfig.instances[0]!.url = `${data.urlPrefix}.docs.buildwithfern.com`;
                         } else {
                             docsConfig.instances.push({ url: `${data.urlPrefix}.docs.buildwithfern.com` });
                         }
                         await fs.writeFile(
                             docsYmlPath,
-                            `# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json\n\n${yaml.dump(docsConfig)}`
+                            stringifyYaml(docsConfig, { schemaUrl: YAML_SCHEMAS.DOCS_YML })
                         );
                     } catch {
                         /* ignore */
@@ -288,7 +289,8 @@ export async function POST(req: NextRequest) {
                 // Update docs.yml
                 const docsYmlPath = path.join(fernDir, "docs.yml");
                 try {
-                    const docsConfig = yaml.load(await fs.readFile(docsYmlPath, "utf-8")) as any;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const docsConfig = parseYamlToJs<Record<string, any>>(await fs.readFile(docsYmlPath, "utf-8"));
                     if (!docsConfig.instances) {
                         docsConfig.instances = [];
                     }
@@ -368,10 +370,7 @@ export async function POST(req: NextRequest) {
                         docsConfig.favicon = `./assets/${fileName}`;
                     }
 
-                    await fs.writeFile(
-                        docsYmlPath,
-                        `# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json\n\n${yaml.dump(docsConfig)}`
-                    );
+                    await fs.writeFile(docsYmlPath, stringifyYaml(docsConfig, { schemaUrl: YAML_SCHEMAS.DOCS_YML }));
                 } catch {
                     /* ignore */
                 }

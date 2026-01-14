@@ -1,8 +1,9 @@
 import archiver from "archiver";
-import yaml from "js-yaml";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
+import { stringifyYaml } from "@/utils/yaml";
 
 const BootstrapDocsRepoRequest = z.object({
     openapiUrl: z.string().url(),
@@ -71,7 +72,7 @@ function createDocsYmlContent(organizationName: string, marketingSite?: string):
         location: ["docs"]
     };
 
-    return yaml.dump(config);
+    return stringifyYaml(config);
 }
 
 function createFernConfigContent(organizationName: string): string {
@@ -111,7 +112,7 @@ function createGeneratorsYmlContent(openapiFileName: string): string {
         }
     };
 
-    return yaml.dump(config);
+    return stringifyYaml(config);
 }
 
 function createReadmeContent(organizationName: string): string {

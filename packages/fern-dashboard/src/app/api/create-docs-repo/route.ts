@@ -1,15 +1,14 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import * as yaml from "js-yaml";
 import { type NextRequest, NextResponse } from "next/server";
 import { extract } from "tar";
-
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getUserGithubUsername } from "@/app/services/auth0/management";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import postGitRepository from "@/app/services/dal/github/postGitRepository";
+import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -227,7 +226,7 @@ async function customizeTemplate(data: CreateDocsRepoRequest, projectDir: string
     // Load and update docs.yml
     const docsYmlPath = path.join(fernDir, "docs.yml");
     const docsYmlContent = await fs.readFile(docsYmlPath, "utf-8");
-    const docsConfig = yaml.load(docsYmlContent) as Record<string, unknown>;
+    const docsConfig = parseYamlToJs<Record<string, unknown>>(docsYmlContent);
 
     // Set the site URL using the user-provided URL prefix
     const docsConfigAny = docsConfig as any;
@@ -335,10 +334,7 @@ async function customizeTemplate(data: CreateDocsRepoRequest, projectDir: string
     }
 
     // Write updated docs.yml
-    await fs.writeFile(
-        docsYmlPath,
-        `# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json\n\n${yaml.dump(docsConfig)}`
-    );
+    await fs.writeFile(docsYmlPath, stringifyYaml(docsConfig, { schemaUrl: YAML_SCHEMAS.DOCS_YML }));
 
     // Replace "Welcome to Fern" with company name in markdown files
     if (data.companyName) {
@@ -420,7 +416,8 @@ async function writeSiteToDocsFiles(
     const docsYmlPath = path.join(projectDir, "fern", "docs.yml");
     try {
         const docsYmlContent = await fs.readFile(docsYmlPath, "utf-8");
-        const docsConfig = yaml.load(docsYmlContent) as any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const docsConfig = parseYamlToJs<Record<string, any>>(docsYmlContent);
 
         // Update or add the instances with the correct URL
         if (!docsConfig.instances) {
@@ -432,10 +429,7 @@ async function writeSiteToDocsFiles(
             docsConfig.instances.push({ url: `${urlPrefix}.docs.buildwithfern.com` });
         }
 
-        await fs.writeFile(
-            docsYmlPath,
-            `# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json\n\n${yaml.dump(docsConfig)}`
-        );
+        await fs.writeFile(docsYmlPath, stringifyYaml(docsConfig, { schemaUrl: YAML_SCHEMAS.DOCS_YML }));
     } catch (err) {
         console.warn("Could not update docs.yml:", err);
     }
