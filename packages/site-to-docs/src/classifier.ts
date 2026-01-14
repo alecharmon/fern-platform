@@ -1,4 +1,4 @@
-import type { LanguageModelV1 } from "ai";
+import type { LanguageModel } from "ai";
 import { generateObject } from "ai";
 import { z } from "zod";
 import type {
@@ -353,7 +353,7 @@ Return JSON with products, versions, tabs (including icons), and contextOrdering
  */
 export async function analyzeSiteStructure(
     pages: Map<string, PageNode>,
-    model: LanguageModelV1,
+    model: LanguageModel,
     entryPointUrl?: string,
     navigationHints?: NavigationHints
 ): Promise<SiteStructure> {
@@ -868,7 +868,7 @@ export interface ClassificationResult {
 async function classifySectionBatch(
     contexts: Phase2PageContext[],
     structure: SiteStructure,
-    model: LanguageModelV1
+    model: LanguageModel
 ): Promise<Map<string, { tab: string; section: string; isApiReference: boolean; cleanTitle: string }>> {
     const results = new Map<string, { tab: string; section: string; isApiReference: boolean; cleanTitle: string }>();
 
@@ -909,7 +909,7 @@ async function classifySectionBatch(
  */
 export async function classifyPages(
     crawlResult: CrawlResult,
-    model: LanguageModelV1,
+    model: LanguageModel,
     options: ClassifyPagesOptions = {}
 ): Promise<ClassificationResult> {
     const { concurrency = 3, onProgress, maxGroupSize = 16, navigationHints } = options;

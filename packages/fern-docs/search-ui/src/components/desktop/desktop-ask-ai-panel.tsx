@@ -324,8 +324,6 @@ const DesktopAskAIChat = ({
 
     const chat = useChat({
         id: chatId,
-        // TODO: FIX THIS AND MIGRATE TO COMPATIBLE @AI and @AI-SDK/* VERSIONS
-        // @ts-expect-error - version mismatch between ai 5.0.86 and @ai-sdk/react 2.0.0-beta.2
         transport
     });
 

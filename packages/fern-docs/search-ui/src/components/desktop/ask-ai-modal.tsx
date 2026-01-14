@@ -353,7 +353,6 @@ const DesktopAskAIChat = ({
 
     const chat = useChat({
         id: chatId,
-        // @ts-expect-error - DefaultChatTransport trigger types don't match ChatTransport interface (AI SDK version mismatch)
         transport: transport
     });
 

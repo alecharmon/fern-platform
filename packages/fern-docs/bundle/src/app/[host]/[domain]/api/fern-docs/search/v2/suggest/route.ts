@@ -53,7 +53,6 @@ async function generateSuggestions(domain: string, algoliaSearchKey: string): Pr
     try {
         return await generateObject({
             model: languageModel,
-            mode: "tool",
             abortSignal: AbortSignal.timeout(25000),
             system: `You are a helpful assistant that makes suggestions of questions for the user to ask about the documentation.
 The prompt will be an array of separate search results that are JSON objects.

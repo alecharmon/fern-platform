@@ -1,6 +1,6 @@
 import * as fs from "node:fs/promises";
 import * as nodePath from "node:path";
-import { tool } from "ai";
+import { type ToolCallOptions, zodSchema } from "ai";
 import { z } from "zod";
 
 /**
@@ -24,6 +24,41 @@ function validatePath(relativePath: string, baseDir: string): string {
     return resolved;
 }
 
+// Define input/output types for each tool
+const fetchInputSchema = z.object({
+    url: z.string().url(),
+    method: z.enum(["GET", "HEAD"]).default("GET").optional(),
+    headers: z.record(z.string()).optional()
+});
+type FetchInput = z.infer<typeof fetchInputSchema>;
+type FetchOutput = { status: number; statusText: string; headers: Record<string, string>; body: string };
+
+const readFileInputSchema = z.object({
+    path: z.string().describe("Relative path (no leading slash, no ..)")
+});
+type ReadFileInput = z.infer<typeof readFileInputSchema>;
+type ReadFileOutput = { content: string };
+
+const writeFileInputSchema = z.object({
+    path: z.string().describe("Relative path (no leading slash, no ..)"),
+    content: z.string()
+});
+type WriteFileInput = z.infer<typeof writeFileInputSchema>;
+type WriteFileOutput = { success: boolean; path: string };
+
+const readdirInputSchema = z.object({
+    path: z.string().describe("Relative path (no leading slash, no ..)").default("")
+});
+type ReaddirInput = z.infer<typeof readdirInputSchema>;
+type ReaddirOutput = { entries: Array<{ name: string; isDirectory: boolean }> };
+
+// Define a simple tool type that works with the ai SDK
+interface SimpleTool<INPUT, OUTPUT> {
+    description: string;
+    inputSchema: ReturnType<typeof zodSchema>;
+    execute: (input: INPUT, options: ToolCallOptions) => Promise<OUTPUT>;
+}
+
 /**
  * Creates tools bound to a specific output directory.
  * All filesystem operations are scoped to this directory.
@@ -35,14 +70,11 @@ export function createTools(outputDir: string) {
         /**
          * Mirrors native fetch() - returns response with status, headers, text
          */
-        fetch: tool({
+        fetch: {
             description: "Fetch a URL. Returns status, headers, and body text.",
-            parameters: z.object({
-                url: z.string().url(),
-                method: z.enum(["GET", "HEAD"]).default("GET").optional(),
-                headers: z.record(z.string()).optional()
-            }),
-            execute: async ({ url, method = "GET", headers }) => {
+            inputSchema: zodSchema(fetchInputSchema),
+            execute: async (input: FetchInput, _options: ToolCallOptions): Promise<FetchOutput> => {
+                const { url, method = "GET", headers } = input;
                 const response = await fetch(url, { method, headers });
                 const body = method === "HEAD" ? "" : await response.text();
                 return {
@@ -52,52 +84,45 @@ export function createTools(outputDir: string) {
                     body
                 };
             }
-        }),
+        } satisfies SimpleTool<FetchInput, FetchOutput>,
 
         /**
          * Mirrors fs.readFile - reads file relative to output directory
          */
-        readFile: tool({
+        readFile: {
             description: "Read a file. Path must be relative to output directory.",
-            parameters: z.object({
-                path: z.string().describe("Relative path (no leading slash, no ..)")
-            }),
-            execute: async ({ path }) => {
-                const absolutePath = validatePath(path, absoluteOutputDir);
+            inputSchema: zodSchema(readFileInputSchema),
+            execute: async (input: ReadFileInput, _options: ToolCallOptions): Promise<ReadFileOutput> => {
+                const absolutePath = validatePath(input.path, absoluteOutputDir);
                 const content = await fs.readFile(absolutePath, "utf-8");
                 return { content };
             }
-        }),
+        } satisfies SimpleTool<ReadFileInput, ReadFileOutput>,
 
         /**
          * Mirrors fs.writeFile - writes file relative to output directory
          */
-        writeFile: tool({
+        writeFile: {
             description:
                 "Write a file. Path must be relative to output directory. Creates parent directories if needed.",
-            parameters: z.object({
-                path: z.string().describe("Relative path (no leading slash, no ..)"),
-                content: z.string()
-            }),
-            execute: async ({ path, content }) => {
-                const absolutePath = validatePath(path, absoluteOutputDir);
+            inputSchema: zodSchema(writeFileInputSchema),
+            execute: async (input: WriteFileInput, _options: ToolCallOptions): Promise<WriteFileOutput> => {
+                const absolutePath = validatePath(input.path, absoluteOutputDir);
                 // Create parent directories if they don't exist
                 await fs.mkdir(nodePath.dirname(absolutePath), { recursive: true });
-                await fs.writeFile(absolutePath, content, "utf-8");
+                await fs.writeFile(absolutePath, input.content, "utf-8");
                 return { success: true, path: absolutePath };
             }
-        }),
+        } satisfies SimpleTool<WriteFileInput, WriteFileOutput>,
 
         /**
          * Mirrors fs.readdir - lists directory relative to output directory
          */
-        readdir: tool({
+        readdir: {
             description: "List files in a directory. Path must be relative to output directory.",
-            parameters: z.object({
-                path: z.string().describe("Relative path (no leading slash, no ..)").default("")
-            }),
-            execute: async ({ path }) => {
-                const absolutePath = validatePath(path || ".", absoluteOutputDir);
+            inputSchema: zodSchema(readdirInputSchema),
+            execute: async (input: ReaddirInput, _options: ToolCallOptions): Promise<ReaddirOutput> => {
+                const absolutePath = validatePath(input.path || ".", absoluteOutputDir);
                 const entries = await fs.readdir(absolutePath, { withFileTypes: true });
                 return {
                     entries: entries.map((entry) => ({
@@ -106,7 +131,7 @@ export function createTools(outputDir: string) {
                     }))
                 };
             }
-        })
+        } satisfies SimpleTool<ReaddirInput, ReaddirOutput>
     };
 }
 
