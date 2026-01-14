@@ -2,11 +2,16 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
 
+/** The type of page currently being viewed */
+export type CurrentPageType = "docs" | "api-reference" | null;
+
 export const DevModeContext = createContext<{
     panelOpen: boolean;
     setPanelOpen: (panelOpen: boolean) => void;
     isDevModeDisabled: boolean;
     setDevModeDisabled: (disabled: boolean) => void;
+    currentPageType: CurrentPageType;
+    setCurrentPageType: (type: CurrentPageType) => void;
 }>({
     panelOpen: false,
     setPanelOpen: (_panelOpen: boolean) => {
@@ -15,12 +20,17 @@ export const DevModeContext = createContext<{
     isDevModeDisabled: false,
     setDevModeDisabled: (_disabled: boolean) => {
         return;
+    },
+    currentPageType: null,
+    setCurrentPageType: (_type: CurrentPageType) => {
+        return;
     }
 });
 
 export function DevModeProvider({ children }: { children: ReactNode }) {
     const [panelOpen, setPanelOpenStore] = useState<boolean>(false);
     const [isDevModeDisabled, setDevModeDisabledStore] = useState<boolean>(false);
+    const [currentPageType, setCurrentPageTypeStore] = useState<CurrentPageType>(null);
 
     const setPanelOpen = useCallback((panelOpen: boolean) => {
         setPanelOpenStore(panelOpen);
@@ -30,9 +40,13 @@ export function DevModeProvider({ children }: { children: ReactNode }) {
         setDevModeDisabledStore(disabled);
     }, []);
 
+    const setCurrentPageType = useCallback((type: CurrentPageType) => {
+        setCurrentPageTypeStore(type);
+    }, []);
+
     const value = useMemo(
-        () => ({ panelOpen, setPanelOpen, isDevModeDisabled, setDevModeDisabled }),
-        [panelOpen, setPanelOpen, isDevModeDisabled, setDevModeDisabled]
+        () => ({ panelOpen, setPanelOpen, isDevModeDisabled, setDevModeDisabled, currentPageType, setCurrentPageType }),
+        [panelOpen, setPanelOpen, isDevModeDisabled, setDevModeDisabled, currentPageType, setCurrentPageType]
     );
 
     return <DevModeContext.Provider value={value}>{children}</DevModeContext.Provider>;

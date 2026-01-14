@@ -10,6 +10,7 @@ import { EditorProvidersWrapper } from "@/components/editor/EditorProvidersWrapp
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { NeedsSetupBanner } from "@/components/editor/NeedsSetupBanner";
 import { PreviewOnlyNotification } from "@/components/editor/PreviewOnlyNotification";
+import { UnsupportedApiFormatNotification } from "@/components/editor/UnsupportedApiFormatNotification";
 import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
 import { BranchProvider } from "@/providers/BranchContext";
 import { CurrentPageProvider } from "@/providers/CurrentPageContext";
@@ -53,6 +54,7 @@ export default async function EditorLayout({
                                                 <NeedsSetupBanner docsUrl={docsUrl} orgName={orgName} />
                                                 <HeaderToolbar session={session} docsUrl={docsUrl} />
                                                 <PreviewOnlyNotification />
+                                                <UnsupportedApiFormatNotification />
                                                 {children}
                                             </EditorProvider>
                                         </DevModeProvider>

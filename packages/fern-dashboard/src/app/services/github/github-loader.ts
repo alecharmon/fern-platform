@@ -1,6 +1,7 @@
 import "server-only";
 
 import type {
+    ApiSourceType,
     CreateBranchRequest,
     CreateBranchResult,
     CreateCommitRequest,
@@ -10,6 +11,10 @@ import type {
     CreateRepositoryRequest,
     CreateRepositoryResult,
     FernProject,
+    FetchableSpecType,
+    GeneratorsYmlConfig,
+    GetApiSpecsOptions,
+    GetApiSpecsResult,
     GetDocsYmlAndReferencesResult,
     GetDocsYmlResult,
     GetFernConfigJsonResult,
@@ -26,6 +31,7 @@ import type {
 } from "@fern-api/docs-loader";
 
 import type { Octokit } from "@octokit/core";
+import yaml from "js-yaml";
 import { revalidateTag, unstable_cache } from "next/cache";
 
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
@@ -338,7 +344,6 @@ export class GitHubLoader implements GitLoader {
 
             if (docsYmlContent && project) {
                 const urls = parseUrlsFromDocsYml(docsYmlContent);
-                console.debug(`[getFernProjectBySite] Found URLs: ${urls}`);
                 allFoundSites.push(...urls);
 
                 if (!firstDocsYmlPath && urls.length > 0) {
@@ -346,15 +351,10 @@ export class GitHubLoader implements GitLoader {
                 }
 
                 const strippedUrls = urls.map(stripAndSanitizeUrl);
-
-                console.debug(`[getFernProjectBySite] Stripped URLs: ${strippedUrls}`);
-
                 const strippedSite = stripAndSanitizeUrl(site);
-                console.debug(`[getFernProjectBySite] Stripped site: ${strippedSite}`);
 
                 // Check if any URL matches the site
                 if (strippedUrls.includes(strippedSite)) {
-                    console.debug(`[getFernProjectBySite] Matching project found: ${project.docsYmlPath}`);
                     matchingProjects.push(project);
                 }
             }
@@ -384,11 +384,6 @@ export class GitHubLoader implements GitLoader {
                 }
             };
         } else {
-            console.debug(`[getFernProjectBySite] No matching Fern project found for site: ${site}`, {
-                allFoundSites,
-                firstDocsYmlPath,
-                defaultBranch
-            });
             return {
                 type: "error",
                 error: {
@@ -565,6 +560,349 @@ export class GitHubLoader implements GitLoader {
     }
 
     /**
+     * Fetches API specs from generators.yml, including any referenced files and overrides.
+     * Searches for generators.yml in the fern folder and apis/ subdirectories.
+     *
+     * @param options.fetchTypes - Spec types to fetch file contents for. Defaults to ["openapi"].
+     *                             Other types (asyncapi, openrpc) are detected but not fetched unless specified.
+     */
+    async getApiSpecs(
+        owner: string,
+        repo: string,
+        site: DocsUrl,
+        ref: string = "main",
+        preferDefaultBranch: boolean = false,
+        options: GetApiSpecsOptions = {}
+    ): Promise<GetApiSpecsResult> {
+        const { fetchTypes = ["openapi"] } = options;
+
+        // Helper to check if a spec type should be fetched
+        const shouldFetch = (type: FetchableSpecType): boolean => fetchTypes.includes(type);
+
+        // 1. Get the fern project to find the fern folder path
+        const projectResult = await this.getFernProjectBySite(owner, repo, site);
+        if (projectResult.type === "error") {
+            return { type: "error", error: projectResult.error };
+        }
+
+        const defaultBranch = projectResult.result.defaultBranch;
+        const targetRef = preferDefaultBranch ? defaultBranch : ref;
+
+        // Get the fern folder path from docs.yml location
+        const docsYmlPath = projectResult.result.project.docsYmlPath;
+        const fernFolder = docsYmlPath.substring(0, docsYmlPath.lastIndexOf("/"));
+
+        // 2. Search for generators.yml files - check both the fern folder and apis/ subdirectories
+        const generatorsYmlPaths = await this.findGeneratorsYmlFiles(owner, repo, defaultBranch, fernFolder);
+
+        if (generatorsYmlPaths.length === 0) {
+            return {
+                type: "error",
+                error: { type: "GENERATORS_YML_MISSING" }
+            };
+        }
+
+        // 3. Parse generators.yml files and collect specs
+        const specs = new Map<string, string>();
+        let detectedSourceType: ApiSourceType = "unknown";
+
+        for (const generatorsYmlPath of generatorsYmlPaths) {
+            const content = await this.getFileContent(owner, repo, targetRef, generatorsYmlPath);
+            if (!content) {
+                continue;
+            }
+
+            let generatorsYml: GeneratorsYmlConfig;
+            try {
+                generatorsYml = yaml.load(content) as GeneratorsYmlConfig;
+            } catch {
+                console.warn(`Failed to parse generators.yml at ${generatorsYmlPath}`);
+                continue;
+            }
+
+            // Get the directory containing generators.yml for resolving relative paths
+            const generatorsYmlDir = generatorsYmlPath.substring(0, generatorsYmlPath.lastIndexOf("/"));
+
+            // 4. Detect source type and conditionally fetch specs based on fetchTypes
+            if (generatorsYml?.api?.specs) {
+                for (const spec of generatorsYml.api.specs) {
+                    if (spec.openapi) {
+                        detectedSourceType = "openapi";
+                        if (shouldFetch("openapi")) {
+                            await this.fetchSpecWithRefs(owner, repo, targetRef, spec.openapi, generatorsYmlDir, specs);
+                            // Also fetch the overrides file if specified
+                            if (spec.overrides) {
+                                const overridesPath = this.resolvePath(generatorsYmlDir, spec.overrides);
+                                const overridesContent = await this.getFileContent(
+                                    owner,
+                                    repo,
+                                    targetRef,
+                                    overridesPath
+                                );
+                                if (overridesContent) {
+                                    specs.set(overridesPath, overridesContent);
+                                }
+                            }
+                        }
+                    } else if (spec.asyncapi) {
+                        if (detectedSourceType === "unknown") {
+                            detectedSourceType = "asyncapi";
+                        }
+                        if (shouldFetch("asyncapi")) {
+                            // AsyncAPI uses the same $ref format as OpenAPI
+                            await this.fetchSpecWithRefs(
+                                owner,
+                                repo,
+                                targetRef,
+                                spec.asyncapi,
+                                generatorsYmlDir,
+                                specs
+                            );
+                            if (spec.overrides) {
+                                const overridesPath = this.resolvePath(generatorsYmlDir, spec.overrides);
+                                const overridesContent = await this.getFileContent(
+                                    owner,
+                                    repo,
+                                    targetRef,
+                                    overridesPath
+                                );
+                                if (overridesContent) {
+                                    specs.set(overridesPath, overridesContent);
+                                }
+                            }
+                        }
+                    } else if (spec.openrpc) {
+                        if (detectedSourceType === "unknown") {
+                            detectedSourceType = "openrpc";
+                        }
+                        if (shouldFetch("openrpc")) {
+                            // OpenRPC uses JSON Schema $ref format
+                            await this.fetchSpecWithRefs(owner, repo, targetRef, spec.openrpc, generatorsYmlDir, specs);
+                            if (spec.overrides) {
+                                const overridesPath = this.resolvePath(generatorsYmlDir, spec.overrides);
+                                const overridesContent = await this.getFileContent(
+                                    owner,
+                                    repo,
+                                    targetRef,
+                                    overridesPath
+                                );
+                                if (overridesContent) {
+                                    specs.set(overridesPath, overridesContent);
+                                }
+                            }
+                        }
+                    } else if (spec.proto) {
+                        // TODO: Proto/gRPC support - detection only, file loading not supported
+                        if (detectedSourceType === "unknown") {
+                            detectedSourceType = "proto";
+                        }
+                    }
+                }
+            }
+
+            // TODO: Fern Definition support - detection only, file loading not supported
+            if (!generatorsYml?.api?.specs && detectedSourceType === "unknown") {
+                const definitionPath = `${generatorsYmlDir}/definition`;
+                const definitionExists = await this.getFileContent(owner, repo, targetRef, `${definitionPath}/api.yml`);
+                if (definitionExists) {
+                    detectedSourceType = "fern-definition";
+                }
+            }
+
+            // 5. Fetch openapi-overrides if present (only when fetching openapi)
+            if (shouldFetch("openapi") && generatorsYml?.["openapi-overrides"]) {
+                const overridesPath = this.resolvePath(generatorsYmlDir, generatorsYml["openapi-overrides"]);
+                const overridesContent = await this.getFileContent(owner, repo, targetRef, overridesPath);
+                if (overridesContent) {
+                    const relativePath = overridesPath.startsWith(fernFolder + "/")
+                        ? overridesPath.substring(fernFolder.length + 1)
+                        : overridesPath;
+                    specs.set(relativePath, overridesContent);
+                }
+            }
+        }
+
+        if (specs.size === 0 && detectedSourceType === "unknown") {
+            return {
+                type: "error",
+                error: { type: "NO_API_SPECS" }
+            };
+        }
+
+        return {
+            type: "ok",
+            result: {
+                specs,
+                sourceType: detectedSourceType
+            }
+        };
+    }
+
+    /**
+     * Finds all generators.yml files in the fern folder and apis/ subdirectories.
+     */
+    private async findGeneratorsYmlFiles(
+        owner: string,
+        repo: string,
+        ref: string,
+        fernFolder: string
+    ): Promise<string[]> {
+        const paths: string[] = [];
+
+        // Check for generators.yml in the fern folder root
+        const rootGeneratorsYml = `${fernFolder}/generators.yml`;
+        const rootContent = await this.getFileContent(owner, repo, ref, rootGeneratorsYml);
+        if (rootContent) {
+            paths.push(rootGeneratorsYml);
+        }
+
+        // Search for generators.yml in apis/ subdirectories using the tree API
+        try {
+            const treeResponse = await this.getTree(owner, repo, ref);
+            const apisPrefix = `${fernFolder}/apis/`;
+
+            for (const item of treeResponse.data.tree) {
+                if (
+                    item.type === "blob" &&
+                    item.path?.startsWith(apisPrefix) &&
+                    item.path?.endsWith("/generators.yml")
+                ) {
+                    paths.push(item.path);
+                }
+            }
+        } catch (error) {
+            console.warn("Failed to search for generators.yml in apis/ subdirectories:", error);
+        }
+
+        return paths;
+    }
+
+    /**
+     * Fetches an API spec file and recursively fetches any external $ref dependencies.
+     * Works for OpenAPI and AsyncAPI specs which share the same $ref format.
+     */
+    private async fetchSpecWithRefs(
+        owner: string,
+        repo: string,
+        ref: string,
+        specPath: string,
+        baseDir: string,
+        specs: Map<string, string>,
+        visited: Set<string> = new Set()
+    ): Promise<void> {
+        const fullPath = this.resolvePath(baseDir, specPath);
+        if (visited.has(fullPath)) {
+            return;
+        }
+        visited.add(fullPath);
+
+        const content = await this.getFileContent(owner, repo, ref, fullPath);
+        if (!content) {
+            console.warn(`Failed to fetch spec: ${fullPath}`);
+            return;
+        }
+
+        // Store with the full path as key
+        specs.set(fullPath, content);
+
+        // Parse for external $ref and recursively fetch
+        const externalRefs = this.extractExternalRefs(content);
+        const specDir = fullPath.substring(0, fullPath.lastIndexOf("/"));
+
+        for (const refPath of externalRefs) {
+            await this.fetchSpecWithRefs(owner, repo, ref, refPath, specDir, specs, visited);
+        }
+    }
+
+    /**
+     * Extracts external file $ref paths from OpenAPI spec content.
+     * Only returns external file references (not internal #/... refs).
+     */
+    private extractExternalRefs(content: string): string[] {
+        const refs: string[] = [];
+
+        try {
+            // Try parsing as YAML first (also works for JSON)
+            const parsed = yaml.load(content);
+            this.walkForRefs(parsed, refs);
+        } catch {
+            // If YAML parsing fails, try JSON
+            try {
+                const parsed = JSON.parse(content);
+                this.walkForRefs(parsed, refs);
+            } catch {
+                // If both fail, return empty array
+                console.warn("Failed to parse OpenAPI spec for $ref extraction");
+            }
+        }
+
+        return refs;
+    }
+
+    /**
+     * Recursively walks an object to find $ref values.
+     */
+    private walkForRefs(obj: unknown, refs: string[]): void {
+        if (!obj || typeof obj !== "object") {
+            return;
+        }
+
+        if (Array.isArray(obj)) {
+            for (const item of obj) {
+                this.walkForRefs(item, refs);
+            }
+            return;
+        }
+
+        const record = obj as Record<string, unknown>;
+
+        // Check for $ref property
+        if (typeof record.$ref === "string") {
+            const refValue = record.$ref;
+            // External ref if it doesn't start with #
+            if (!refValue.startsWith("#")) {
+                // Extract file path (before any # anchor)
+                const filePath = refValue.split("#")[0];
+                if (filePath && !refs.includes(filePath)) {
+                    refs.push(filePath);
+                }
+            }
+        }
+
+        // Recursively check all properties
+        for (const value of Object.values(record)) {
+            this.walkForRefs(value, refs);
+        }
+    }
+
+    /**
+     * Resolves a relative path against a base directory.
+     */
+    private resolvePath(baseDir: string, relativePath: string): string {
+        // Remove leading ./ if present
+        const normalizedPath = relativePath.startsWith("./") ? relativePath.substring(2) : relativePath;
+
+        // If it's an absolute path (starts with /), return as-is (without leading /)
+        if (normalizedPath.startsWith("/")) {
+            return normalizedPath.substring(1);
+        }
+
+        // Handle ../ by going up directories
+        const baseParts = baseDir.split("/").filter(Boolean);
+        const pathParts = normalizedPath.split("/");
+
+        for (const part of pathParts) {
+            if (part === "..") {
+                baseParts.pop();
+            } else if (part !== ".") {
+                baseParts.push(part);
+            }
+        }
+
+        return baseParts.join("/");
+    }
+
+    /**
      * Validates that the bot has access to the repository and that the
      * fern.config.json organization matches the expected organization.
      */
@@ -737,25 +1075,14 @@ export class GitHubLoader implements GitLoader {
             const blobShaMap = new Map<string, string>();
 
             if (binaryFilesToCreate.length > 0) {
-                console.log(
-                    `Creating ${binaryFilesToCreate.length} binary blobs separately:`,
-                    binaryFilesToCreate.map((f) => f.path)
-                );
-
                 for (const file of binaryFilesToCreate) {
-                    try {
-                        const blobResponse = await octokit.request("POST /repos/{owner}/{repo}/git/blobs", {
-                            owner: request.owner,
-                            repo: request.repo,
-                            content: file.content,
-                            encoding: "base64"
-                        });
-                        blobShaMap.set(file.path, blobResponse.data.sha);
-                        console.log(`Created blob for ${file.path}: ${blobResponse.data.sha}`);
-                    } catch (error) {
-                        console.error(`Failed to create blob for ${file.path}:`, error);
-                        throw error;
-                    }
+                    const blobResponse = await octokit.request("POST /repos/{owner}/{repo}/git/blobs", {
+                        owner: request.owner,
+                        repo: request.repo,
+                        content: file.content,
+                        encoding: "base64"
+                    });
+                    blobShaMap.set(file.path, blobResponse.data.sha);
                 }
             }
 
@@ -765,7 +1092,6 @@ export class GitHubLoader implements GitLoader {
                     if (file.delete) {
                         // Only include deletion entries for files that actually exist
                         if (!existingFiles.has(file.path)) {
-                            console.warn(`File ${file.path} does not exist in the base tree, skipping deletion`);
                             return null;
                         }
                         return {
@@ -1228,13 +1554,11 @@ export class GitHubLoader implements GitLoader {
                     });
                     baseTreeSha = commitResponse.data.tree.sha;
                     break;
-                } catch (error) {
+                } catch {
                     retries--;
                     if (retries === 0) {
-                        console.error("Failed to get base tree after all retries:", error);
                         throw new Error("Repository initialization timeout");
                     }
-                    console.log(`Waiting for repo to initialize... (${retries} retries left)`);
                 }
             }
 
@@ -1243,25 +1567,14 @@ export class GitHubLoader implements GitLoader {
             const blobShaMap = new Map<string, string>();
 
             if (binaryFiles.length > 0) {
-                console.log(
-                    `Creating ${binaryFiles.length} binary blobs separately:`,
-                    binaryFiles.map((f) => f.path)
-                );
-
                 for (const file of binaryFiles) {
-                    try {
-                        const blobResponse = await octokit.request("POST /repos/{owner}/{repo}/git/blobs", {
-                            owner: request.owner,
-                            repo: request.repoName,
-                            content: file.content,
-                            encoding: "base64"
-                        });
-                        blobShaMap.set(file.path, blobResponse.data.sha);
-                        console.log(`Created blob for ${file.path}: ${blobResponse.data.sha}`);
-                    } catch (error) {
-                        console.error(`Failed to create blob for ${file.path}:`, error);
-                        throw error;
-                    }
+                    const blobResponse = await octokit.request("POST /repos/{owner}/{repo}/git/blobs", {
+                        owner: request.owner,
+                        repo: request.repoName,
+                        content: file.content,
+                        encoding: "base64"
+                    });
+                    blobShaMap.set(file.path, blobResponse.data.sha);
                 }
             }
 

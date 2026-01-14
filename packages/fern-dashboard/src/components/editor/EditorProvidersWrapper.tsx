@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { ApiSourceType } from "@fern-api/docs-loader";
 import type React from "react";
 
 import { getGithubSourceMetadata } from "@/app/actions/getGithubSourceMetadata";
@@ -64,17 +65,26 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
         // Use the factory function to get the appropriate loader (GitHub or GitLab)
         const gitLoader = await getGitLoader(gitUrl);
 
-        // Use the repo's default branch by passing preferDefaultBranch=true
-        const docsYmlAndReferences = await gitLoader.getDocsYmlAndReferences(
-            sourceRepo.owner,
-            sourceRepo.repo,
-            docsUrl,
-            branch, // fallback branch if default branch logic fails
-            true // preferDefaultBranch = true
-        );
+        // Fetch docs.yml references and API specs in parallel
+        const [docsYmlAndReferences, apiSpecsResult] = await Promise.all([
+            gitLoader.getDocsYmlAndReferences(
+                sourceRepo.owner,
+                sourceRepo.repo,
+                docsUrl,
+                branch, // fallback branch if default branch logic fails
+                true // preferDefaultBranch = true
+            ),
+            gitLoader.getApiSpecs?.(sourceRepo.owner, sourceRepo.repo, docsUrl, branch, true)
+        ]);
+
         const latestDocsYmlAndReferences = docsYmlAndReferences.type === "ok" ? docsYmlAndReferences.result : null;
         const fernFolderPath =
             docsYmlAndReferences.type === "ok" ? docsYmlAndReferences.metadata.fernFolderPath : undefined;
+
+        // Extract API specs (optional - don't fail if not available)
+        const openApiSpecs = apiSpecsResult?.type === "ok" ? apiSpecsResult.result.specs : null;
+        const apiSourceType: ApiSourceType | null =
+            apiSpecsResult?.type === "ok" ? apiSpecsResult.result.sourceType : null;
 
         if (docsYmlAndReferences.type !== "ok") {
             console.error("[EditorProvidersWrapper] Failed to load docs.yml", docsYmlAndReferences.error);
@@ -104,6 +114,8 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
                         docsUrl={docsUrl}
                         latestDocsYmlAndReferences={latestDocsYmlAndReferences}
                         fernFolderPath={fernFolderPath}
+                        openApiSpecs={openApiSpecs}
+                        apiSourceType={apiSourceType}
                     >
                         <GitPRProvider
                             owner={sourceRepo.owner}

@@ -18,19 +18,17 @@ export interface ApiWebhookPageWrapperProps {
 }
 
 export function ApiWebhookPageWrapper({ node, apiDefinition, breadcrumb }: ApiWebhookPageWrapperProps) {
-    const { setPanelOpen, setDevModeDisabled } = useDevMode();
+    const { setCurrentPageType } = useDevMode();
 
     useEffect(() => {
-        // Disable dev mode for API reference pages
-        setDevModeDisabled(true);
-        // Close the panel if it's open
-        setPanelOpen(false);
+        // Set page type to api-reference to enable OpenAPI spec viewing in Dev Mode
+        setCurrentPageType("api-reference");
 
         return () => {
-            // Re-enable dev mode when leaving API reference pages
-            setDevModeDisabled(false);
+            // Reset page type when leaving API reference pages
+            setCurrentPageType(null);
         };
-    }, [setPanelOpen, setDevModeDisabled]);
+    }, [setCurrentPageType]);
 
     return <ApiWebhookPage node={node} apiDefinition={apiDefinition} breadcrumb={breadcrumb} lang="en" />;
 }

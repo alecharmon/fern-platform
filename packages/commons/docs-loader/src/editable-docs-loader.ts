@@ -168,6 +168,64 @@ export interface FernProject {
     fernConfigJsonPath: string;
 }
 
+// OpenAPI Specs types
+
+/** Structure of generators.yml API configuration */
+export interface GeneratorsYmlApiSpec {
+    openapi?: string;
+    asyncapi?: string;
+    openrpc?: string;
+    proto?: {
+        root: string;
+        target?: string;
+        "local-generation"?: boolean;
+    };
+    /** Path to spec-level overrides file */
+    overrides?: string;
+}
+
+export interface GeneratorsYmlConfig {
+    api?: {
+        specs?: GeneratorsYmlApiSpec[];
+    };
+    "openapi-overrides"?: string;
+}
+
+/** The source type of the API definition */
+export type ApiSourceType = "openapi" | "asyncapi" | "openrpc" | "proto" | "fern-definition" | "unknown";
+
+/** Spec types that support fetching file contents */
+export type FetchableSpecType = "openapi" | "asyncapi" | "openrpc";
+
+/** Options for getApiSpecs */
+export interface GetApiSpecsOptions {
+    /** Spec types to fetch file contents for. Defaults to ["openapi"] */
+    fetchTypes?: FetchableSpecType[];
+}
+
+export type ApiSpecsErrors =
+    | GetFernProjectErrors
+    | { type: "GENERATORS_YML_MISSING" }
+    | { type: "NO_API_SPECS" }
+    | { type: "SPEC_FETCH_FAILED"; path: string };
+
+interface GetApiSpecsSuccess {
+    type: "ok";
+    result: {
+        /** Map of file path (relative to fern folder) to file content */
+        specs: Map<string, string>;
+        /** The API source type detected from generators.yml */
+        sourceType: ApiSourceType;
+    };
+}
+
+interface GetApiSpecsError {
+    type: "error";
+    error: ApiSpecsErrors;
+}
+
+export type GetApiSpecsResult = GetApiSpecsSuccess | GetApiSpecsError;
+
 /**
  * The GitLoader is used to get docs.yml and other files from a remote git repository,
  * as well as perform write operations like creating commits, branches, and pull requests.
@@ -184,6 +242,15 @@ export interface GitLoader {
         preferDefaultBranch?: boolean
     ): Promise<GetDocsYmlAndReferencesResult>;
     getFernConfigJson(owner: string, repo: string, site: string): Promise<GetFernConfigJsonResult>;
+    /** Fetches API specs from generators.yml, including referenced files and overrides */
+    getApiSpecs?(
+        owner: string,
+        repo: string,
+        site: string,
+        ref?: string,
+        preferDefaultBranch?: boolean,
+        options?: GetApiSpecsOptions
+    ): Promise<GetApiSpecsResult>;
 
     // Authorization
     validateAccess(request: ValidateAccessRequest): Promise<ValidateAccessResult>;

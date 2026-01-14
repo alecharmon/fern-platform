@@ -924,3 +924,12 @@ code:not(.code-block):not(#preview-container *) {
     opacity: 1;
   }
 }
+/* Utility to hide scrollbar while preserving scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}

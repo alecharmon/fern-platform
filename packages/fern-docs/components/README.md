@@ -1,6 +1,6 @@
 # @fern-docs/components
 
-Shared React components for Fern documentation sites.
+Shared React components used by `@fern-docs/bundle` and `@fern-dashboard/ui`.
 
 ## API Reference Components
 

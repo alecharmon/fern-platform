@@ -2,14 +2,18 @@ import CodeEditor, { loader, type Monaco } from "@monaco-editor/react";
 import type monaco from "monaco-editor";
 import { useEffect, useState } from "react";
 
+export type EditorLanguage = "markdown" | "yaml" | "json";
+
 export default function MonacoEditor({
     currentMarkdown,
     handleEditorDidMount,
-    isEditingDisabled
+    isEditingDisabled,
+    language = "markdown"
 }: {
     currentMarkdown: string;
     handleEditorDidMount: (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => void;
     isEditingDisabled: boolean;
+    language?: EditorLanguage;
 }) {
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
@@ -27,7 +31,7 @@ export default function MonacoEditor({
             ) : (
                 <CodeEditor
                     height="100%"
-                    language="markdown"
+                    language={language}
                     value={currentMarkdown}
                     onMount={handleEditorDidMount}
                     theme="app-theme"

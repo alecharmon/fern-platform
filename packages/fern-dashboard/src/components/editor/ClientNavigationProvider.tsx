@@ -1,5 +1,6 @@
 "use client";
 
+import type { ApiSourceType } from "@fern-api/docs-loader";
 import {
     type DeletionToastCallback,
     NavigationStoreProvider,
@@ -7,6 +8,7 @@ import {
 } from "@fern-docs/components/navigation";
 
 import { PageDeletedUndoToast } from "@/components/editor/EditorToasts";
+import { OpenApiSpecsProvider } from "@/providers/OpenApiSpecsContext";
 
 export interface ClientNavigationProviderProps {
     children: React.ReactNode;
@@ -15,6 +17,8 @@ export interface ClientNavigationProviderProps {
     docsUrl: string;
     latestDocsYmlAndReferences: Map<string, string> | null;
     fernFolderPath?: string;
+    openApiSpecs?: Map<string, string> | null;
+    apiSourceType?: ApiSourceType | null;
 }
 
 export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
@@ -31,7 +35,9 @@ export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
             fernFolderPath={props.fernFolderPath}
             deletionToastCallback={deletionToastCallback}
         >
-            {props.children}
+            <OpenApiSpecsProvider specs={props.openApiSpecs ?? null} sourceType={props.apiSourceType ?? null}>
+                {props.children}
+            </OpenApiSpecsProvider>
         </NavigationStoreProvider>
     );
 }
@@ -53,7 +59,9 @@ export function PreviewClientNavigationProvider({
 }) {
     return (
         <PreviewNavigationStoreProvider branchName={branchName} orgName={orgName} docsUrl={docsUrl}>
-            {children}
+            <OpenApiSpecsProvider specs={null} sourceType={null}>
+                {children}
+            </OpenApiSpecsProvider>
         </PreviewNavigationStoreProvider>
     );
 }
