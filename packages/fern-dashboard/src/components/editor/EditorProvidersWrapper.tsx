@@ -77,16 +77,20 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
             gitLoader.getApiSpecs?.(sourceRepo.owner, sourceRepo.repo, docsUrl, branch, true)
         ]);
 
-        const latestDocsYmlAndReferences = docsYmlAndReferences.type === "ok" ? docsYmlAndReferences.result : null;
+        // NOTE: Convert Map to array for RSC serialization (Map cannot be serialized by React Server Components)
+        const latestDocsYmlAndReferences =
+            docsYmlAndReferences.type === "ok" ? Array.from(docsYmlAndReferences.result.entries()) : null;
         const fernFolderPath =
             docsYmlAndReferences.type === "ok" ? docsYmlAndReferences.metadata.fernFolderPath : undefined;
 
         // Extract API specs (optional - don't fail if not available)
-        const openApiSpecs = apiSpecsResult?.type === "ok" ? apiSpecsResult.result.specs : null;
+        // NOTE: We must convert Map/Set to Arrays before passing to client components,
+        // as React Server Components cannot serialize Map/Set objects properly.
+        const openApiSpecs = apiSpecsResult?.type === "ok" ? Array.from(apiSpecsResult.result.specs.entries()) : null;
         const apiSourceType: ApiSourceType | null =
             apiSpecsResult?.type === "ok" ? apiSpecsResult.result.sourceType : null;
         const openApiOverrideFilePaths =
-            apiSpecsResult?.type === "ok" ? apiSpecsResult.result.overrideFilePaths : undefined;
+            apiSpecsResult?.type === "ok" ? Array.from(apiSpecsResult.result.overrideFilePaths) : undefined;
         const generatorsYmlPath = apiSpecsResult?.type === "ok" ? apiSpecsResult.result.generatorsYmlPath : undefined;
         const generatorsYmlContent =
             apiSpecsResult?.type === "ok" ? apiSpecsResult.result.generatorsYmlContent : undefined;

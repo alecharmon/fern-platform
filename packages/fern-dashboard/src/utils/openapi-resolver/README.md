@@ -1,4 +1,7 @@
-# openapi-resolver
+# @fern-dashboard/src/utils/openapi-resolver
+
+<!-- AI: Update the date below when modifying this file -->
+*Last updated by AI: 2026-01-14*
 
 Resolution layer for mapping FDR description targets to OpenAPI spec locations.
 

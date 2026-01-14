@@ -1,5 +1,8 @@
 # @fern-dashboard/src/docs/components/api-reference
 
+<!-- AI: Update the date below when modifying this file -->
+*Last updated by AI: 2026-01-14*
+
 Editor components for rendering OpenAPI specs, editing descriptions, and writing changes to an OpenAPI spec overrides file.
 
 ## Supported Targets
