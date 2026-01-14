@@ -19,6 +19,8 @@ env:
 jobs:
   test:
     uses: ./.github/workflows/run-self-hosted-tests.yml
+    with:
+      upload_artifact: true
     secrets: inherit
 
   determine-version:

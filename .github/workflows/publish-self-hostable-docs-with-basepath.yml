@@ -19,6 +19,7 @@ env:
 jobs:
   test:
     uses: ./.github/workflows/run-self-hosted-tests.yml
+    secrets: inherit
 
   build-js-bundle:
     runs-on: seed
