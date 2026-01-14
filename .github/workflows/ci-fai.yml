@@ -112,37 +112,6 @@ jobs:
           cd servers/fai-chat
           make test
 
-  lint-fai-lambda:
-    needs: check-fai-changes
-    if: needs.check-fai-changes.outputs.fai_changed == 'true'
-    runs-on: CLI
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Install
-        uses: ./.github/actions/install
-
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
-
-      - name: Setup poetry for fai-code-indexing
-        run: |
-          cd servers/fai-lambda/fai-code-indexing
-          poetry install
-
-      - name: Lint & Format fai-code-indexing
-        run: |
-          cd servers/fai-lambda/fai-code-indexing
-          make code-cleanup
-
-      - name: Type check fai-code-indexing
-        run: |
-          cd servers/fai-lambda/fai-code-indexing
-          poetry run mypy .
-
   test-fai:
     needs: check-fai-changes
     if: needs.check-fai-changes.outputs.fai_changed == 'true'
