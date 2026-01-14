@@ -21,17 +21,13 @@ jobs:
     uses: ./.github/workflows/run-self-hosted-tests.yml
     secrets: inherit
 
-  build-js-bundle:
-    runs-on: seed
+  determine-version:
+    runs-on: ubuntu-latest
     needs: test
-    timeout-minutes: 30
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.determine_version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
       - name: Determine version to publish
         id: determine_version
         run: |
@@ -50,34 +46,9 @@ jobs:
             exit 1
           fi
 
-      - name: Update Engines
-        run: |
-          node -e 'const fs = require("fs"); const pkg = require("./package.json"); console.log("Before modification:", JSON.stringify(pkg.engines, null, 2)); pkg.engines.node = ">=20.0.0"; pkg.engines.pnpm = "10.27.0"; pkg.packageManager = "pnpm@10.27.0"; console.log("After modification:", JSON.stringify(pkg.engines, null, 2)); fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
-
-      - name: Install
-        uses: ./.github/actions/install
-
-      - name: Compile
-        run: pnpm compile
-
-      - name: Build FDR CJS
-        run: pnpm --filter @fern-platform/fdr build:tsup:cjs
-
-      - name: Build self-hosted bundle
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
-        run: pnpm docs:self-hosted-bundle:build
-
-      - name: Upload JS bundle artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: docs-bundle
-          path: docs_bundle.tar.gz
-          retention-days: 1
-
   build-docker-amd64:
     runs-on: seed
-    needs: build-js-bundle
+    needs: [test, determine-version]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -101,7 +72,7 @@ jobs:
       - name: Build and push amd64 Docker image
         working-directory: servers/self-hosted
         run: |
-          VERSION="${{ needs.build-js-bundle.outputs.version }}"
+          VERSION="${{ needs.determine-version.outputs.version }}"
           echo "Building version: $VERSION for linux/amd64 (native)"
           docker buildx build \
             --platform linux/amd64 \
@@ -115,8 +86,8 @@ jobs:
             ../..
 
   build-docker-arm64:
-    runs-on: ubuntu-24.04-arm64
-    needs: build-js-bundle
+    runs-on: ubuntu-24.04-arm
+    needs: [test, determine-version]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -140,7 +111,7 @@ jobs:
       - name: Build and push arm64 Docker image
         working-directory: servers/self-hosted
         run: |
-          VERSION="${{ needs.build-js-bundle.outputs.version }}"
+          VERSION="${{ needs.determine-version.outputs.version }}"
           echo "Building version: $VERSION for linux/arm64 (native)"
           docker buildx build \
             --platform linux/arm64 \
@@ -155,7 +126,7 @@ jobs:
 
   create-manifest:
     runs-on: ubuntu-latest
-    needs: [build-js-bundle, build-docker-amd64, build-docker-arm64]
+    needs: [determine-version, build-docker-amd64, build-docker-arm64]
     timeout-minutes: 10
     steps:
       - name: Login to Docker Hub
@@ -166,7 +137,7 @@ jobs:
 
       - name: Create and push multi-platform manifest
         run: |
-          VERSION="${{ needs.build-js-bundle.outputs.version }}"
+          VERSION="${{ needs.determine-version.outputs.version }}"
           echo "Creating multi-platform manifest for version: $VERSION"
           
           docker manifest create fernapi/fern-self-hosted:$VERSION \
