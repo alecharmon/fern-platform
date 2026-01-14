@@ -1,19 +1,13 @@
 import { uploadOnboardingAsset } from "./api";
 
 /**
- * Default fallback image for favicon and logo
- */
-export const DEFAULT_IMAGE_FALLBACK =
-    "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633";
-
-/**
  * Ensures an image URL is uploaded to S3 and returns the asset URL.
- * If the URL is null or doesn't exist, uses the default fallback image.
+ * If the URL is null or doesn't exist, returns null.
  *
  * @param url - The image URL to upload (can be external URL or null)
  * @param fileName - The name to give the uploaded file
  * @param organizationId - Organization ID for the upload (required)
- * @returns The S3 asset URL or null if upload fails
+ * @returns The S3 asset URL or null if url is null or upload fails
  */
 export async function ensureUploadedImage(
     url: string | null,
@@ -24,18 +18,17 @@ export async function ensureUploadedImage(
         throw new Error("organizationId is required for image upload");
     }
 
-    const sourceUrl = url ?? DEFAULT_IMAGE_FALLBACK;
-    if (!sourceUrl) {
-        return url;
+    if (!url) {
+        return null;
     }
 
     try {
-        const response = await fetch(sourceUrl);
+        const response = await fetch(url);
         if (!response.ok) {
             console.error("[ensureUploadedImage] Failed to fetch image:", {
                 status: response.status,
                 statusText: response.statusText,
-                url: sourceUrl
+                url
             });
             throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
         }

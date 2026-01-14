@@ -24,12 +24,14 @@ interface CodeWidgetProps {
     className?: string;
 }
 
+const DEFAULT_LOGO_URL = "https://raw.githubusercontent.com/fern-api/docs-starter/main/fern/docs/assets/logo.svg";
+
 export function CodeWidget({ wizardFormData, className }: CodeWidgetProps) {
     const companyName = wizardFormData.docsSiteName || "Your Company";
     const docsUrl = wizardFormData.docsSiteUrl
         ? `${wizardFormData.docsSiteUrl}.docs.buildwithfern.com`
         : "your-company.docs.buildwithfern.com";
-    const logoUrl = wizardFormData.logoUrl;
+    const logoUrl = wizardFormData.logoUrl ?? DEFAULT_LOGO_URL;
     const faviconUrl = wizardFormData.faviconUrl;
 
     return (

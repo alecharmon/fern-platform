@@ -113,9 +113,8 @@ const DEFAULT_FORM_DATA: WizardFormData = {
     docsSiteName: "",
     docsSiteUrl: "",
     docsSiteUrlAvailable: null,
-    faviconUrl:
-        "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
-    logoUrl: "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
+    faviconUrl: null,
+    logoUrl: null,
     faviconFile: null,
     logoFile: null,
     faviconFileName: null,

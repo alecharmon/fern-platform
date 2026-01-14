@@ -24,7 +24,7 @@ export function UploadImage({
     description,
     imageUrl,
     onFileSelect,
-    defaultImageUrl = "https://cdn.brandfetch.io/idPXovIzxA/w/400/h/400/id6bO_yJUx.png?c=1bxid64Mup7aczewSAYMX&t=1745869970633",
+    defaultImageUrl = "https://raw.githubusercontent.com/fern-api/docs-starter/main/fern/docs/assets/logo.svg",
     size = "large",
     accept = "image/*"
 }: UploadImageProps) {
