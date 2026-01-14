@@ -5,4 +5,6 @@ import type * as FernRegistry from "../../../../../../../index.js";
 export interface MapType {
     keyShape: FernRegistry.api.latest.TypeShape;
     valueShape: FernRegistry.api.latest.TypeShape;
+    minProperties: number | undefined;
+    maxProperties: number | undefined;
 }

@@ -163,12 +163,18 @@ types:
   ListType:
     properties:
       itemShape: TypeShape
+      minItems: optional<integer>
+      maxItems: optional<integer>
 
   SetType:
     properties:
       itemShape: TypeShape
+      minItems: optional<integer>
+      maxItems: optional<integer>
 
   MapType:
     properties:
       keyShape: TypeShape
       valueShape: TypeShape
+      minProperties: optional<integer>
+      maxProperties: optional<integer>

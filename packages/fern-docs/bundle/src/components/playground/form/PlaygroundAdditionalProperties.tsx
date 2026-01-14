@@ -50,7 +50,9 @@ const ADDITIONAL_PROPERTIES_DEFAULT_SHAPE = {
                 valueShape: {
                     type: "alias",
                     value: ADDITIONAL_PROPERTIES_VALUE_SHAPE
-                }
+                },
+                minProperties: undefined,
+                maxProperties: undefined
             }
         },
         default: undefined

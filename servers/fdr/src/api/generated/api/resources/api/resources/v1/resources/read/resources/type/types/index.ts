@@ -34,6 +34,8 @@ export * from "./TypeReference";
 export * from "./TypeReferenceId";
 export * from "./TypeReferenceIdDefault";
 export * from "./TypeShape";
+export * from "./Uint64Type";
+export * from "./UintType";
 export * from "./UndiscriminatedUnionType";
 export * from "./UndiscriminatedUnionVariant";
 export * from "./UuidType";

@@ -34,6 +34,8 @@ export * from "./TypeReference.js";
 export * from "./TypeReferenceId.js";
 export * from "./TypeReferenceIdDefault.js";
 export * from "./TypeShape.js";
+export * from "./Uint64Type.js";
+export * from "./UintType.js";
 export * from "./UndiscriminatedUnionType.js";
 export * from "./UndiscriminatedUnionVariant.js";
 export * from "./UuidType.js";

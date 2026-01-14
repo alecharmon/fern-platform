@@ -4,4 +4,6 @@ import type * as FernRegistry from "../../../../../../../index";
 
 export interface SetType {
     itemShape: FernRegistry.api.latest.TypeShape;
+    minItems: number | undefined;
+    maxItems: number | undefined;
 }

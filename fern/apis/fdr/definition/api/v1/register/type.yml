@@ -76,19 +76,25 @@ types:
       base64: Base64Type
       date: DateType
       bigInteger: BigIntegerType
-      uint: {}
-      uint64: {}
+      uint: UintType
+      uint64: Uint64Type
 
   IntegerType:
     properties:
       minimum: optional<integer>
       maximum: optional<integer>
+      exclusiveMinimum: optional<integer>
+      exclusiveMaximum: optional<integer>
+      multipleOf: optional<integer>
       default: optional<integer>
 
   DoubleType:
     properties:
       minimum: optional<double>
       maximum: optional<double>
+      exclusiveMinimum: optional<double>
+      exclusiveMaximum: optional<double>
+      multipleOf: optional<double>
       default: optional<double>
 
   StringType:
@@ -103,6 +109,9 @@ types:
     properties:
       minimum: optional<long>
       maximum: optional<long>
+      exclusiveMinimum: optional<long>
+      exclusiveMaximum: optional<long>
+      multipleOf: optional<long>
       default: optional<long>
 
   BooleanType:
@@ -130,6 +139,24 @@ types:
     properties:
       default: optional<bigint>
 
+  UintType:
+    properties:
+      minimum: optional<integer>
+      maximum: optional<integer>
+      exclusiveMinimum: optional<integer>
+      exclusiveMaximum: optional<integer>
+      multipleOf: optional<integer>
+      default: optional<integer>
+
+  Uint64Type:
+    properties:
+      minimum: optional<long>
+      maximum: optional<long>
+      exclusiveMinimum: optional<long>
+      exclusiveMaximum: optional<long>
+      multipleOf: optional<long>
+      default: optional<long>
+
   OptionalType:
     properties:
       itemType: TypeReference
@@ -142,15 +169,21 @@ types:
   ListType:
     properties:
       itemType: TypeReference
+      minItems: optional<integer>
+      maxItems: optional<integer>
 
   SetType:
     properties:
       itemType: TypeReference
+      minItems: optional<integer>
+      maxItems: optional<integer>
 
   MapType:
     properties:
       keyType: TypeReference
       valueType: TypeReference
+      minProperties: optional<integer>
+      maxProperties: optional<integer>
 
   EnumType:
     properties:

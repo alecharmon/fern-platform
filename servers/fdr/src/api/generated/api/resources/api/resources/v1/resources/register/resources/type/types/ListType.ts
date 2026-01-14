@@ -4,4 +4,6 @@ import type * as FernRegistry from "../../../../../../../../../index";
 
 export interface ListType {
     itemType: FernRegistry.api.v1.register.TypeReference;
+    minItems: number | undefined;
+    maxItems: number | undefined;
 }

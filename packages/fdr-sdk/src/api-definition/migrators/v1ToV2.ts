@@ -298,7 +298,9 @@ export class ApiDefinitionV1ToLatest {
                 valueShape: {
                     type: "alias",
                     value: this.migrateTypeReference(value.valueType)
-                }
+                },
+                minProperties: value.minProperties,
+                maxProperties: value.maxProperties
             }),
             id: (value) => ({
                 type: "id",
@@ -326,14 +328,18 @@ export class ApiDefinitionV1ToLatest {
                 itemShape: {
                     type: "alias",
                     value: this.migrateTypeReference(value.itemType)
-                }
+                },
+                minItems: value.minItems,
+                maxItems: value.maxItems
             }),
             set: (value) => ({
                 type: "set",
                 itemShape: {
                     type: "alias",
                     value: this.migrateTypeReference(value.itemType)
-                }
+                },
+                minItems: value.minItems,
+                maxItems: value.maxItems
             }),
             literal: (value) => value,
             unknown: () => ({

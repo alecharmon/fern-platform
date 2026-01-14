@@ -3,5 +3,8 @@
 export interface DoubleType {
     minimum: number | undefined;
     maximum: number | undefined;
+    exclusiveMinimum: number | undefined;
+    exclusiveMaximum: number | undefined;
+    multipleOf: number | undefined;
     default: number | undefined;
 }

@@ -57,11 +57,11 @@ export namespace PrimitiveType {
         type: "bigInteger";
     }
 
-    export interface Uint {
+    export interface Uint extends FernRegistry.api.v1.register.UintType {
         type: "uint";
     }
 
-    export interface Uint64 {
+    export interface Uint64 extends FernRegistry.api.v1.register.Uint64Type {
         type: "uint64";
     }
 }
