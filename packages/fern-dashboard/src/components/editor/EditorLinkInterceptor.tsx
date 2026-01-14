@@ -37,8 +37,9 @@ export function EditorLinkInterceptor() {
                 link.closest("#preview-container") ||
                 link.closest(DROPDOWN_SELECTORS) ||
                 link.closest(EDITOR_SELECTORS) ||
-                link.closest(MOBILE_SIDEBAR_SELECTOR);
-            link.closest(ANCHOR_SELECTORS) || link.classList.contains("fern-anchor");
+                link.closest(MOBILE_SIDEBAR_SELECTOR) ||
+                link.closest(ANCHOR_SELECTORS) ||
+                link.classList.contains("fern-anchor");
 
             if (isInTargetContainer) {
                 const interceptedLink = getInterceptedLink(event, {

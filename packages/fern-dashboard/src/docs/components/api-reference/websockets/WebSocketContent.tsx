@@ -35,11 +35,53 @@ import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import { t } from "@fern-docs/i18n";
 import { ArrowDown, ArrowUp, Wifi } from "lucide-react";
+import { useMemo } from "react";
 
+import { MouseFollowingTooltip } from "@/components/editor/MouseFollowingTooltip";
 import { MdxContent } from "@/docs/mdx/components/MdxContent";
+import { useApiEditTarget } from "@/providers/ApiEditTargetContext";
+import { type DescriptionTarget, useDescriptionEditability } from "@/providers/OpenApiSpecsContext";
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
+
+/**
+ * Editable description for WebSocket channels.
+ * Shows edit-disabled indicator since WebSocket editing is not yet supported.
+ */
+function EditableWebSocketDescription({ description }: { description: string | undefined }) {
+    const apiEditTarget = useApiEditTarget();
+
+    // Build WebSocket description target
+    const target = useMemo((): DescriptionTarget | null => {
+        if (!apiEditTarget || apiEditTarget.type !== "websocket") {
+            return null;
+        }
+        return {
+            type: "websocket",
+            path: apiEditTarget.path
+        };
+    }, [apiEditTarget]);
+
+    const { reason } = useDescriptionEditability(target);
+
+    // If no edit target, just render MdxContent
+    if (!target) {
+        return <MdxContent mdx={description} />;
+    }
+
+    // When no description, nothing to show (WebSocket is not editable)
+    if (!description) {
+        return null;
+    }
+
+    // With description, wrap in mouse-following tooltip
+    return (
+        <MouseFollowingTooltip reason={reason}>
+            <MdxContent mdx={description} />
+        </MouseFollowingTooltip>
+    );
+}
 
 export interface WebSocketContentProps {
     context: WebSocketContext;
@@ -241,7 +283,7 @@ export function WebSocketContent({ context, breadcrumb, lang }: WebSocketContent
                 </TypeDefinitionRoot>
             }
         >
-            <MdxContent mdx={channel.description} />
+            <EditableWebSocketDescription description={channel.description} />
         </ReferenceLayout>
     );
 }

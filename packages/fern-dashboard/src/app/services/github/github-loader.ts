@@ -604,12 +604,20 @@ export class GitHubLoader implements GitLoader {
 
         // 3. Parse generators.yml files and collect specs
         const specs = new Map<string, string>();
+        const overrideFilePaths = new Set<string>();
         let detectedSourceType: ApiSourceType = "unknown";
+        let primaryGeneratorsYmlPath = generatorsYmlPaths[0] ?? "";
+        let primaryGeneratorsYmlContent = "";
 
         for (const generatorsYmlPath of generatorsYmlPaths) {
             const content = await this.getFileContent(owner, repo, targetRef, generatorsYmlPath);
             if (!content) {
                 continue;
+            }
+
+            // Store the content of the first (primary) generators.yml
+            if (generatorsYmlPath === primaryGeneratorsYmlPath) {
+                primaryGeneratorsYmlContent = content;
             }
 
             let generatorsYml: GeneratorsYmlConfig;
@@ -641,6 +649,7 @@ export class GitHubLoader implements GitLoader {
                                 );
                                 if (overridesContent) {
                                     specs.set(overridesPath, overridesContent);
+                                    overrideFilePaths.add(overridesPath);
                                 }
                             }
                         }
@@ -668,6 +677,7 @@ export class GitHubLoader implements GitLoader {
                                 );
                                 if (overridesContent) {
                                     specs.set(overridesPath, overridesContent);
+                                    overrideFilePaths.add(overridesPath);
                                 }
                             }
                         }
@@ -688,6 +698,7 @@ export class GitHubLoader implements GitLoader {
                                 );
                                 if (overridesContent) {
                                     specs.set(overridesPath, overridesContent);
+                                    overrideFilePaths.add(overridesPath);
                                 }
                             }
                         }
@@ -718,6 +729,7 @@ export class GitHubLoader implements GitLoader {
                         ? overridesPath.substring(fernFolder.length + 1)
                         : overridesPath;
                     specs.set(relativePath, overridesContent);
+                    overrideFilePaths.add(relativePath);
                 }
             }
         }
@@ -733,7 +745,10 @@ export class GitHubLoader implements GitLoader {
             type: "ok",
             result: {
                 specs,
-                sourceType: detectedSourceType
+                sourceType: detectedSourceType,
+                overrideFilePaths,
+                generatorsYmlPath: primaryGeneratorsYmlPath,
+                generatorsYmlContent: primaryGeneratorsYmlContent
             }
         };
     }

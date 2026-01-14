@@ -1,5 +1,7 @@
 import "server-only";
 
+export const dynamic = "force-dynamic";
+
 import { ThemeProvider } from "next-themes";
 import type React from "react";
 import { ClientMDXProvider } from "@/app/[orgName]/context/ClientMDXProvider";

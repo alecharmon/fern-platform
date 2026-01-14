@@ -29,6 +29,7 @@ import type {
     NavigationSlug,
     NavigationSnapshot,
     NestedEditorUpdateEvent,
+    OpenApiPendingChange,
     PageData,
     PageDataDependencies,
     PageFilename,
@@ -57,6 +58,7 @@ export class NavigationStore {
     private _rootNode?: FernNavigation.RootNode;
     private _lastCommittedHash?: string;
     private _version: number;
+    private _openApiPendingChanges: Map<string, OpenApiPendingChange>;
 
     private _storage?: NavigationStorage;
     private _hydrated = false;
@@ -88,6 +90,7 @@ export class NavigationStore {
         this._rootNode = this._latestSnapshot.rootNode;
         this._lastCommittedHash = this._latestSnapshot.lastCommittedHash;
         this._version = this._latestSnapshot.version;
+        this._openApiPendingChanges = this._latestSnapshot.openApiPendingChanges ?? new Map();
     }
 
     // GETTERS
@@ -126,6 +129,11 @@ export class NavigationStore {
     /** Returns the root navigation node */
     get rootNode(): FernNavigation.RootNode | undefined {
         return this._rootNode;
+    }
+
+    /** Returns pending OpenAPI spec changes */
+    get openApiPendingChanges(): Map<string, OpenApiPendingChange> {
+        return this._openApiPendingChanges;
     }
 
     /** Returns all changed, deleted, and commit-ready files */
@@ -267,6 +275,7 @@ export class NavigationStore {
         this._rootNode = snapshotToUse.rootNode;
         this._lastCommittedHash = snapshotToUse.lastCommittedHash;
         this._version = snapshotToUse.version;
+        this._openApiPendingChanges = snapshotToUse.openApiPendingChanges ?? new Map();
 
         // Validate that navigation changes reference files that exist
         if (this._docsYmlBaseContent && this._navigationChanges.size > 0) {
@@ -1004,6 +1013,63 @@ export class NavigationStore {
         this._setStorageAndNotify();
     }
 
+    // OPENAPI CHANGES
+    // --------------------------------------------------------------------------
+
+    /** Updates or adds a pending OpenAPI spec change */
+    updateOpenApiChange(filePath: string, originalContent: string, currentContent: string): void {
+        // Create a new Map to trigger React re-renders
+        this._openApiPendingChanges = new Map(this._openApiPendingChanges);
+        this._openApiPendingChanges.set(filePath, {
+            filePath,
+            originalContent,
+            currentContent
+        });
+        this._setStorageAndNotify();
+    }
+
+    /** Resets a single OpenAPI spec change (restores to original content) */
+    resetOpenApiChange(filePath: string): void {
+        if (!this._openApiPendingChanges.has(filePath)) {
+            return;
+        }
+        // Create a new Map to trigger React re-renders
+        this._openApiPendingChanges = new Map(this._openApiPendingChanges);
+        this._openApiPendingChanges.delete(filePath);
+        this._setStorageAndNotify();
+    }
+
+    /** Clears all pending OpenAPI changes (e.g., after commit) */
+    clearOpenApiChanges(): void {
+        if (this._openApiPendingChanges.size === 0) {
+            return;
+        }
+        this._openApiPendingChanges = new Map();
+        this._setStorageAndNotify();
+    }
+
+    /**
+     * Marks all pending OpenAPI changes as committed by setting originalContent = currentContent.
+     * This preserves the files in IndexedDB so they survive page refresh, while marking them
+     * as having no uncommitted changes.
+     */
+    commitOpenApiChanges(): void {
+        if (this._openApiPendingChanges.size === 0) {
+            return;
+        }
+        // Create a new Map with originalContent set to currentContent
+        const committed = new Map<string, OpenApiPendingChange>();
+        for (const [filePath, change] of this._openApiPendingChanges) {
+            committed.set(filePath, {
+                filePath,
+                originalContent: change.currentContent,
+                currentContent: change.currentContent
+            });
+        }
+        this._openApiPendingChanges = committed;
+        this._setStorageAndNotify();
+    }
+
     /** Emits a page save event to all listeners */
     emitPageSaveEvent(event: PageSaveEvent): void {
         this._pageSaveEventListeners.forEach((listener) => listener(event));
@@ -1121,7 +1187,8 @@ export class NavigationStore {
             rootNode: this._rootNode,
             lastCommittedHash: this._lastCommittedHash,
             version: this._version,
-            slugToDocsYmlFilePath: this._slugToDocsYmlFilePath
+            slugToDocsYmlFilePath: this._slugToDocsYmlFilePath,
+            openApiPendingChanges: this._openApiPendingChanges
         };
 
         // Persist to storage (skip in preview mode)

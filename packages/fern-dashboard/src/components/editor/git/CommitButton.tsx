@@ -10,6 +10,7 @@ import { useBranch } from "@/providers/BranchContext";
 import { useIsPreviewMode } from "@/providers/EditorPreviewProvider";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useOpenApiSpecs } from "@/providers/OpenApiSpecsContext";
 import { useCommitToGitHubMutation } from "@/state/useCommitToGitHubMutation";
 import { useCreateBranchMutation } from "@/state/useCreateBranchMutation";
 import type { DocsUrl } from "@/utils/types";
@@ -57,6 +58,11 @@ export function CommitButtonWithGitHub({
     const isEditingDisabled = useEditingDisabled();
 
     const { files, handleCommitSuccess } = useNavigation();
+    const {
+        getFilesForCommit: getOpenApiFiles,
+        clearPendingChanges: clearOpenApiPendingChanges,
+        hasPendingChanges: hasOpenApiPendingChanges
+    } = useOpenApiSpecs();
 
     const commitMutation = useCommitToGitHubMutation();
     const createBranchMutation = useCreateBranchMutation();
@@ -82,10 +88,20 @@ export function CommitButtonWithGitHub({
             return;
         }
 
-        if (!files.hasChangesToCommit) {
+        // Check if there are any changes (docs.yml or OpenAPI specs)
+        const hasAnyChanges = files.hasChangesToCommit || hasOpenApiPendingChanges;
+        if (!hasAnyChanges) {
             WarningNoChangesToast();
             return;
         }
+
+        // Merge OpenAPI spec changes with docs.yml changes
+        // Note: OpenAPI spec paths are already relative to repo root (e.g., "fern/openapi.yaml")
+        const openApiSpecFiles = getOpenApiFiles().map(({ path, content }) => ({
+            path,
+            content
+        }));
+        const allFilesToCommit = [...files.forCommit, ...openApiSpecFiles];
 
         try {
             let response = await commitMutation.mutateAsync({
@@ -95,7 +111,7 @@ export function CommitButtonWithGitHub({
                 site,
                 branch,
                 message: DEFAULT_COMMIT_MESSAGE,
-                files: files.forCommit,
+                files: allFilesToCommit,
                 gitUrl
             });
 
@@ -126,7 +142,7 @@ export function CommitButtonWithGitHub({
                         site,
                         branch,
                         message: DEFAULT_COMMIT_MESSAGE,
-                        files: files.forCommit,
+                        files: allFilesToCommit,
                         gitUrl
                     });
                 } else {
@@ -139,6 +155,7 @@ export function CommitButtonWithGitHub({
             if (response.success) {
                 SuccessfulCommitToast();
                 handleCommitSuccess();
+                clearOpenApiPendingChanges();
 
                 // Show celebration modal on first commit
                 if (!hasCommittedRef.current) {
@@ -195,7 +212,10 @@ export function CommitButtonWithGitHub({
         commitMutation,
         createBranchMutation,
         onShowCelebrationModal,
-        gitUrl
+        gitUrl,
+        hasOpenApiPendingChanges,
+        getOpenApiFiles,
+        clearOpenApiPendingChanges
     ]);
 
     const commitDisabledReason = useMemo(() => {
@@ -207,12 +227,13 @@ export function CommitButtonWithGitHub({
             return "Disabled while committing";
         }
 
-        if (!files.hasChangesToCommit) {
+        // Check both docs.yml changes and OpenAPI spec changes
+        if (!files.hasChangesToCommit && !hasOpenApiPendingChanges) {
             return "No changes to commit";
         }
 
         return null;
-    }, [isEditingDisabled, commitMutation.isPending, files.hasChangesToCommit]);
+    }, [isEditingDisabled, commitMutation.isPending, files.hasChangesToCommit, hasOpenApiPendingChanges]);
 
     return (
         <CommitButtonUI

@@ -25,12 +25,54 @@ import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import { Prose } from "@fern-docs/components/mdx/prose";
 import { renderTypeShorthand } from "@fern-docs/components/type-shorthand";
 import { t } from "@fern-docs/i18n";
+import { useMemo } from "react";
 
+import { MouseFollowingTooltip } from "@/components/editor/MouseFollowingTooltip";
 import { MdxContent } from "@/docs/mdx/components/MdxContent";
+import { useApiEditTarget } from "@/providers/ApiEditTargetContext";
+import { type DescriptionTarget, useDescriptionEditability } from "@/providers/OpenApiSpecsContext";
 
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
+
+/**
+ * Editable description for Webhooks.
+ * Shows edit-disabled indicator since Webhook editing is not yet supported.
+ */
+function EditableWebhookDescription({ description }: { description: string | undefined }) {
+    const apiEditTarget = useApiEditTarget();
+
+    // Build Webhook description target
+    const target = useMemo((): DescriptionTarget | null => {
+        if (!apiEditTarget || apiEditTarget.type !== "webhook") {
+            return null;
+        }
+        return {
+            type: "webhook",
+            webhookId: apiEditTarget.webhookId
+        };
+    }, [apiEditTarget]);
+
+    const { reason } = useDescriptionEditability(target);
+
+    // If no edit target, just render MdxContent
+    if (!target) {
+        return <MdxContent mdx={description} />;
+    }
+
+    // When no description, nothing to show (Webhook is not editable)
+    if (!description) {
+        return null;
+    }
+
+    // With description, wrap in mouse-following tooltip
+    return (
+        <MouseFollowingTooltip reason={reason}>
+            <MdxContent mdx={description} />
+        </MouseFollowingTooltip>
+    );
+}
 
 export interface WebhookContentProps {
     context: ApiDefinition.WebhookContext;
@@ -133,7 +175,7 @@ export function WebhookContent({ context, breadcrumb, lang }: WebhookContentProp
                 </TypeDefinitionRoot>
             }
         >
-            <MdxContent mdx={webhook.description} />
+            <EditableWebhookDescription description={webhook.description} />
         </ReferenceLayout>
     );
 }

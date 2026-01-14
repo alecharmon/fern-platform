@@ -216,6 +216,12 @@ interface GetApiSpecsSuccess {
         specs: Map<string, string>;
         /** The API source type detected from generators.yml */
         sourceType: ApiSourceType;
+        /** Set of file paths that are override files (for edit priority) */
+        overrideFilePaths: Set<string>;
+        /** Path to generators.yml (for updating when creating new override files) */
+        generatorsYmlPath: string;
+        /** Content of generators.yml (for updating when creating new override files) */
+        generatorsYmlContent: string;
     };
 }
 

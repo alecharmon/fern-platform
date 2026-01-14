@@ -91,6 +91,12 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     emitNestedEditorUpdate: NavigationStore["emitNestedEditorUpdate"];
     subscribeNestedEditorUpdate: NavigationStore["subscribeNestedEditorUpdate"];
     handleCommitSuccess: NavigationStore["handleCommitSuccess"];
+    // OpenAPI change properties and methods
+    openApiPendingChanges: NavigationStore["openApiPendingChanges"];
+    updateOpenApiChange: NavigationStore["updateOpenApiChange"];
+    resetOpenApiChange: NavigationStore["resetOpenApiChange"];
+    clearOpenApiChanges: NavigationStore["clearOpenApiChanges"];
+    commitOpenApiChanges: NavigationStore["commitOpenApiChanges"];
 };
 
 function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSnapshot): NavigationSnapshotWithMethods {
@@ -118,7 +124,13 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         subscribePageSaveEvent: store.subscribePageSaveEvent.bind(store),
         emitNestedEditorUpdate: store.emitNestedEditorUpdate.bind(store),
         subscribeNestedEditorUpdate: store.subscribeNestedEditorUpdate.bind(store),
-        handleCommitSuccess: store.handleCommitSuccess.bind(store)
+        handleCommitSuccess: store.handleCommitSuccess.bind(store),
+        // OpenAPI change properties and methods - explicitly from store to ensure latest values
+        openApiPendingChanges: store.openApiPendingChanges,
+        updateOpenApiChange: store.updateOpenApiChange.bind(store),
+        resetOpenApiChange: store.resetOpenApiChange.bind(store),
+        clearOpenApiChanges: store.clearOpenApiChanges.bind(store),
+        commitOpenApiChanges: store.commitOpenApiChanges.bind(store)
     };
 }
 

@@ -3,6 +3,7 @@
 import type { TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { TypeDefinitionSlotsProvider } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
 import { getTypeIdWithLocation } from "@fern-docs/components/api-reference/type-definitions/utils";
+import { TypeDefinitionRequest, TypeDefinitionResponse } from "./TypeDefinitionContext";
 
 import { TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 
@@ -50,7 +51,15 @@ function createPropertyAccessTypeVariants(
 ) {
     return {
         default: <TypeReferenceDefinitions shape={type.shape} types={types} lang={lang} />,
-        request: <TypeReferenceDefinitions shape={type.shape} types={types} location="request" lang={lang} />,
-        response: <TypeReferenceDefinitions shape={type.shape} types={types} location="response" lang={lang} />
+        request: (
+            <TypeDefinitionRequest>
+                <TypeReferenceDefinitions shape={type.shape} types={types} location="request" lang={lang} />
+            </TypeDefinitionRequest>
+        ),
+        response: (
+            <TypeDefinitionResponse>
+                <TypeReferenceDefinitions shape={type.shape} types={types} location="response" lang={lang} />
+            </TypeDefinitionResponse>
+        )
     };
 }

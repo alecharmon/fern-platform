@@ -17,11 +17,53 @@ import { TypeDefinitionRoot } from "@fern-docs/components/api-reference/type-def
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { FernBreadcrumbs } from "@fern-docs/components/FernBreadcrumbs";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
+import { useMemo } from "react";
 
+import { MouseFollowingTooltip } from "@/components/editor/MouseFollowingTooltip";
 import { MdxContent } from "@/docs/mdx/components/MdxContent";
+import { useApiEditTarget } from "@/providers/ApiEditTargetContext";
+import { type DescriptionTarget, useDescriptionEditability } from "@/providers/OpenApiSpecsContext";
 
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { GrpcContentLeft } from "./GrpcContentLeft";
+
+/**
+ * Editable description for gRPC methods.
+ * Shows edit-disabled indicator since gRPC editing is not yet supported (proto format).
+ */
+function EditableGrpcDescription({ description }: { description: string | undefined }) {
+    const apiEditTarget = useApiEditTarget();
+
+    // Build gRPC description target
+    const target = useMemo((): DescriptionTarget | null => {
+        if (!apiEditTarget || apiEditTarget.type !== "grpc") {
+            return null;
+        }
+        return {
+            type: "grpc",
+            methodId: apiEditTarget.methodId
+        };
+    }, [apiEditTarget]);
+
+    const { reason } = useDescriptionEditability(target);
+
+    // If no edit target, just render MdxContent
+    if (!target) {
+        return <MdxContent mdx={description} />;
+    }
+
+    // When no description, nothing to show (gRPC is not editable)
+    if (!description) {
+        return null;
+    }
+
+    // With description, wrap in mouse-following tooltip
+    return (
+        <MouseFollowingTooltip reason={reason}>
+            <MdxContent mdx={description} />
+        </MouseFollowingTooltip>
+    );
+}
 
 export interface GrpcContentProps {
     context: GrpcContext;
@@ -50,7 +92,7 @@ export function GrpcContent({ context, breadcrumb, lang }: GrpcContentProps) {
                     </TypeDefinitionRoot>
                 }
             >
-                <MdxContent mdx={grpc.description} />
+                <EditableGrpcDescription description={grpc.description} />
             </ReferenceLayout>
         </GrpcContextProvider>
     );

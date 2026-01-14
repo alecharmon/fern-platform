@@ -85,6 +85,11 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
         const openApiSpecs = apiSpecsResult?.type === "ok" ? apiSpecsResult.result.specs : null;
         const apiSourceType: ApiSourceType | null =
             apiSpecsResult?.type === "ok" ? apiSpecsResult.result.sourceType : null;
+        const openApiOverrideFilePaths =
+            apiSpecsResult?.type === "ok" ? apiSpecsResult.result.overrideFilePaths : undefined;
+        const generatorsYmlPath = apiSpecsResult?.type === "ok" ? apiSpecsResult.result.generatorsYmlPath : undefined;
+        const generatorsYmlContent =
+            apiSpecsResult?.type === "ok" ? apiSpecsResult.result.generatorsYmlContent : undefined;
 
         if (docsYmlAndReferences.type !== "ok") {
             console.error("[EditorProvidersWrapper] Failed to load docs.yml", docsYmlAndReferences.error);
@@ -116,6 +121,9 @@ export async function EditorProvidersWrapper({ children, branch, orgName, docsUr
                         fernFolderPath={fernFolderPath}
                         openApiSpecs={openApiSpecs}
                         apiSourceType={apiSourceType}
+                        openApiOverrideFilePaths={openApiOverrideFilePaths}
+                        generatorsYmlPath={generatorsYmlPath}
+                        generatorsYmlContent={generatorsYmlContent}
                     >
                         <GitPRProvider
                             owner={sourceRepo.owner}

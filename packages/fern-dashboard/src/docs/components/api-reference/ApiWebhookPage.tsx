@@ -11,6 +11,9 @@
 
 import { type ApiDefinition, createWebhookContext, prune } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { useMemo } from "react";
+
+import { ApiEditTargetProvider, createWebhookEditTarget } from "@/providers/ApiEditTargetContext";
 
 import { WebhookContent } from "./webhooks/WebhookContent";
 
@@ -24,6 +27,16 @@ export interface ApiWebhookPageProps {
 export function ApiWebhookPage({ node, apiDefinition, breadcrumb, lang }: ApiWebhookPageProps) {
     const context = createWebhookContext(node, prune(apiDefinition, node));
 
+    // Create edit target for the Webhook
+    // Note: Webhook descriptions are not yet editable, but we need the target
+    // to show edit-disabled indicators
+    const editTarget = useMemo(() => {
+        if (!context) {
+            return null;
+        }
+        return createWebhookEditTarget(context.webhook);
+    }, [context]);
+
     if (!context) {
         return (
             <div className="flex items-center justify-center p-8 text-center">
@@ -32,5 +45,13 @@ export function ApiWebhookPage({ node, apiDefinition, breadcrumb, lang }: ApiWeb
         );
     }
 
-    return <WebhookContent context={context} breadcrumb={breadcrumb} lang={lang} />;
+    if (!editTarget) {
+        return <WebhookContent context={context} breadcrumb={breadcrumb} lang={lang} />;
+    }
+
+    return (
+        <ApiEditTargetProvider target={editTarget}>
+            <WebhookContent context={context} breadcrumb={breadcrumb} lang={lang} />
+        </ApiEditTargetProvider>
+    );
 }

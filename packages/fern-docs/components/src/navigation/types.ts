@@ -517,6 +517,8 @@ export interface NavigationSnapshot {
     rootNode?: FernNavigation.RootNode;
     /** Version of the snapshot – should be incremented when snapshot is saved */
     version: number;
+    /** Map of OpenAPI spec file paths to pending changes (description edits) */
+    openApiPendingChanges?: Map<string, OpenApiPendingChange>;
 }
 
 export function createEmptyNavigationSnapshot(
@@ -537,7 +539,8 @@ export function createEmptyNavigationSnapshot(
         navigationChanges: new Map(),
         lastCommittedHash: undefined,
         version: 0,
-        rootNode: undefined
+        rootNode: undefined,
+        openApiPendingChanges: new Map()
     };
 }
 
@@ -554,6 +557,11 @@ export function getHasUncommittedChanges(navigationStoreData: NavigationSnapshot
         }
     }
 
+    // Check for OpenAPI pending changes
+    if (navigationStoreData.openApiPendingChanges && navigationStoreData.openApiPendingChanges.size > 0) {
+        return true;
+    }
+
     return false;
 }
 
@@ -567,4 +575,20 @@ export interface PageSaveEvent {
 export interface NestedEditorUpdateEvent {
     filename: string;
     transaction?: unknown;
+}
+
+// OPENAPI CHANGES
+// ----------------------------------------------------------------------------
+
+/**
+ * Represents a pending change to an OpenAPI spec file.
+ * Used for tracking description edits before they are committed.
+ */
+export interface OpenApiPendingChange {
+    /** Path to the file that was modified */
+    filePath: string;
+    /** The original content before any changes */
+    originalContent: string;
+    /** The current modified content */
+    currentContent: string;
 }

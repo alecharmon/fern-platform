@@ -7,6 +7,7 @@ import {
     PreviewNavigationStoreProvider
 } from "@fern-docs/components/navigation";
 
+import { DescriptionEditModal } from "@/components/editor/DescriptionEditModal";
 import { PageDeletedUndoToast } from "@/components/editor/EditorToasts";
 import { OpenApiSpecsProvider } from "@/providers/OpenApiSpecsContext";
 
@@ -19,6 +20,12 @@ export interface ClientNavigationProviderProps {
     fernFolderPath?: string;
     openApiSpecs?: Map<string, string> | null;
     apiSourceType?: ApiSourceType | null;
+    /** Set of file paths that are override files (for edit priority) */
+    openApiOverrideFilePaths?: Set<string>;
+    /** Path to generators.yml (for updating when creating new override files) */
+    generatorsYmlPath?: string;
+    /** Content of generators.yml (for updating when creating new override files) */
+    generatorsYmlContent?: string;
 }
 
 export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
@@ -35,8 +42,15 @@ export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
             fernFolderPath={props.fernFolderPath}
             deletionToastCallback={deletionToastCallback}
         >
-            <OpenApiSpecsProvider specs={props.openApiSpecs ?? null} sourceType={props.apiSourceType ?? null}>
+            <OpenApiSpecsProvider
+                specs={props.openApiSpecs ?? null}
+                sourceType={props.apiSourceType ?? null}
+                overrideFilePaths={props.openApiOverrideFilePaths}
+                generatorsYmlPath={props.generatorsYmlPath}
+                generatorsYmlContent={props.generatorsYmlContent}
+            >
                 {props.children}
+                <DescriptionEditModal />
             </OpenApiSpecsProvider>
         </NavigationStoreProvider>
     );

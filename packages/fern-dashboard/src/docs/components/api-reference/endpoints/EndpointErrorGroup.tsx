@@ -15,19 +15,35 @@ import { sortBy } from "es-toolkit/array";
 
 import { EndpointError } from "./EndpointError";
 
+export interface EndpointInfo {
+    operationId?: string;
+    method: string;
+    path: string;
+}
+
 export function EndpointErrorGroup({
     errors,
     types,
-    lang
+    lang,
+    endpointInfo
 }: {
     errors: ErrorResponse[];
     types: Record<string, ApiDefinition.TypeDefinition>;
     lang: string;
+    endpointInfo?: EndpointInfo;
 }) {
     return (
         <EndpointErrorGroupClient
             errors={sortBy(errors, [(e) => e.statusCode, (e) => e.name]).map((error) => ({
-                children: <EndpointError error={error} availability={error.availability} types={types} lang={lang} />,
+                children: (
+                    <EndpointError
+                        error={error}
+                        availability={error.availability}
+                        types={types}
+                        lang={lang}
+                        endpointInfo={endpointInfo}
+                    />
+                ),
                 data: error
             }))}
         />

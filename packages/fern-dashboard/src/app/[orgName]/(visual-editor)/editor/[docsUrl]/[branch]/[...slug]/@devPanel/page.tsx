@@ -53,7 +53,7 @@ export default function DevPanel() {
     const { panelOpen, currentPageType } = useDevMode();
     const { currentFilename } = useCurrentPage();
     const { registeredPages, updatePage, emitPageSaveEvent } = useNavigation();
-    const { specs: openApiSpecs } = useOpenApiSpecs();
+    const { specs: openApiSpecs, generatorsYmlPath, generatorsYmlContent } = useOpenApiSpecs();
     const isEditingDisabled = useEditingDisabled();
 
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -76,6 +76,17 @@ export default function DevPanel() {
                     isReadOnly: true
                 });
             });
+
+            // Add generators.yml if available
+            if (generatorsYmlPath && generatorsYmlContent) {
+                specFiles.push({
+                    path: generatorsYmlPath,
+                    content: generatorsYmlContent,
+                    language: "yaml",
+                    isReadOnly: true
+                });
+            }
+
             return specFiles;
         }
 
@@ -93,7 +104,7 @@ export default function DevPanel() {
         }
 
         return [];
-    }, [currentPageType, currentFilename, registeredPages, openApiSpecs]);
+    }, [currentPageType, currentFilename, registeredPages, openApiSpecs, generatorsYmlPath, generatorsYmlContent]);
 
     // Set initial active tab when files change
     useEffect(() => {

@@ -129,10 +129,12 @@ export class NavigationStorage {
         }
 
         // Current version - deserialize Maps and Sets
-        return {
+        const deserialized: NavigationSnapshot = {
             ...(parsed as NavigationSnapshot),
             // Deserialize: Array of [key, value] tuples → Map
-            navigationChanges: new Map(Array.isArray(parsed.navigationChanges) ? parsed.navigationChanges : []),
+            navigationChanges: new Map(
+                Array.isArray(parsed.navigationChanges) ? parsed.navigationChanges : []
+            ) as NavigationSnapshot["navigationChanges"],
             // Deserialize: Array of entries → Map for multi-file, or keep as string | null for single-file
             docsYmlBaseContent:
                 Array.isArray(parsed.docsYmlBaseContent) &&
@@ -143,12 +145,20 @@ export class NavigationStorage {
             slugToDocsYmlFilePath:
                 parsed.slugToDocsYmlFilePath != null && Array.isArray(parsed.slugToDocsYmlFilePath)
                     ? new Map(parsed.slugToDocsYmlFilePath as [string, string][])
-                    : parsed.slugToDocsYmlFilePath
+                    : parsed.slugToDocsYmlFilePath,
+            // Deserialize: Array of entries → Map (OpenAPI pending changes)
+            openApiPendingChanges:
+                parsed.openApiPendingChanges != null && Array.isArray(parsed.openApiPendingChanges)
+                    ? new Map(parsed.openApiPendingChanges)
+                    : new Map()
         };
+
+        return deserialized;
     }
 
     setStore(branchName: string, orgName: string, docsUrl: string, data: NavigationSnapshot): void {
         this.checkBufferedStorageInitialized();
+
         const serializable = {
             ...data,
             metadata: {
@@ -166,8 +176,12 @@ export class NavigationStorage {
             slugToDocsYmlFilePath:
                 data.slugToDocsYmlFilePath instanceof Map
                     ? Array.from(data.slugToDocsYmlFilePath.entries())
-                    : data.slugToDocsYmlFilePath
+                    : data.slugToDocsYmlFilePath,
+            // Serialize: Map → Array of entries for JSON (OpenAPI pending changes)
+            openApiPendingChanges:
+                data.openApiPendingChanges instanceof Map ? Array.from(data.openApiPendingChanges.entries()) : []
         };
+
         const serialized = JSON.stringify(serializable);
         this._storage.set(branchName, serialized);
     }

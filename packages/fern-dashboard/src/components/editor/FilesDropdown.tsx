@@ -6,6 +6,7 @@ import { diffLines } from "diff";
 import { ChevronDownIcon, ChevronRightIcon, CodeIcon, FileIcon, Undo2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { useOpenApiSpecs } from "@/providers/OpenApiSpecsContext";
 import type { EncodedDocsUrl } from "@/utils/types";
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
@@ -15,6 +16,7 @@ import { DashboardTooltip } from "./DashboardTooltip";
 export function FilesDropdown() {
     const { branchName, metadata, files, registeredPages, navigationChanges, resetPage, unmarkPageForDeletion } =
         useNavigation();
+    const { pendingChanges: openApiPendingChanges, resetSpecChange } = useOpenApiSpecs();
     const router = useRouter();
     const [resetPopoverOpen, setResetPopoverOpen] = useState<string | null>(null);
     const [expandedYmlFiles, setExpandedYmlFiles] = useState<Set<string>>(new Set(["docs.yml"]));
@@ -36,14 +38,22 @@ export function FilesDropdown() {
         return grouped;
     }, [filteredNavigationChanges]);
 
+    // Get OpenAPI spec file paths that have pending changes
+    const openApiChangedFiles = useMemo(() => {
+        return Array.from(openApiPendingChanges.keys());
+    }, [openApiPendingChanges]);
+
     const allChangedFiles = useMemo(() => {
         const changedFilesList = Object.keys(files.changed);
         // files.deleted now only contains uncommitted deletions (committed ones are filtered out in NavigationStore)
         const allFiles = [...changedFilesList, ...files.deleted];
 
+        // Add OpenAPI spec files that have pending changes
+        const allFilesWithOpenApi = [...allFiles, ...openApiChangedFiles.filter((f) => !allFiles.includes(f))];
+
         // Separate yml files from other files
-        const ymlFiles = allFiles.filter((f) => isYmlFilePath(f));
-        const otherFiles = allFiles.filter((f) => !isYmlFilePath(f));
+        const ymlFiles = allFilesWithOpenApi.filter((f) => isYmlFilePath(f));
+        const otherFiles = allFilesWithOpenApi.filter((f) => !isYmlFilePath(f));
 
         // Sort yml files, putting docs.yml first
         ymlFiles.sort((a, b) => {
@@ -58,26 +68,44 @@ export function FilesDropdown() {
 
         // Return other files first, then yml files at the end
         return [...otherFiles, ...ymlFiles].filter((filename) => {
-            // Only include yml files if they have uncommitted changes
+            // Only include yml files if they have uncommitted changes (navigation or OpenAPI)
             if (isYmlFilePath(filename)) {
-                return changesByYmlFile.has(filename);
+                // Include if it has navigation changes OR OpenAPI pending changes
+                return changesByYmlFile.has(filename) || openApiPendingChanges.has(filename);
             }
             return true;
         });
-    }, [files.changed, files.deleted, changesByYmlFile]);
+    }, [files.changed, files.deleted, changesByYmlFile, openApiChangedFiles, openApiPendingChanges]);
 
     const changedFilesCount = allChangedFiles.length;
 
     // Calculate diff stats for each file (skip yml files as they use specialized UI)
     const fileDiffStats = useMemo(() => {
-        const stats: Record<string, { added: number; removed: number; isDeleted: boolean }> = {};
+        const stats: Record<string, { added: number; removed: number; isDeleted: boolean; isOpenApiSpec?: boolean }> =
+            {};
 
         for (const filename of allChangedFiles) {
             const pageEntry = registeredPages[filename];
             const isDeleted = files.deleted.includes(filename);
+            const openApiChange = openApiPendingChanges.get(filename);
 
             if (isDeleted) {
                 stats[filename] = { added: 0, removed: 0, isDeleted: true };
+            } else if (openApiChange) {
+                // Calculate diff for OpenAPI spec files
+                const diff = diffLines(openApiChange.originalContent, openApiChange.currentContent);
+                let added = 0;
+                let removed = 0;
+
+                for (const part of diff) {
+                    if (part.added) {
+                        added += part.count ?? 0;
+                    } else if (part.removed) {
+                        removed += part.count ?? 0;
+                    }
+                }
+
+                stats[filename] = { added, removed, isDeleted: false, isOpenApiSpec: true };
             } else if (isYmlFilePath(filename)) {
                 // Skip diff calculation for yml files - they use specialized UI
                 stats[filename] = { added: 0, removed: 0, isDeleted: false };
@@ -103,7 +131,7 @@ export function FilesDropdown() {
         }
 
         return stats;
-    }, [registeredPages, files.changed, files.deleted, allChangedFiles]);
+    }, [registeredPages, files.changed, files.deleted, allChangedFiles, openApiPendingChanges]);
 
     const handleResetClick = (filename: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -114,6 +142,8 @@ export function FilesDropdown() {
         const stats = fileDiffStats[filename];
         if (stats?.isDeleted) {
             unmarkPageForDeletion(filename);
+        } else if (stats?.isOpenApiSpec) {
+            resetSpecChange(filename);
         } else {
             resetPage(filename);
         }
@@ -263,11 +293,13 @@ export function FilesDropdown() {
                                             <div className="flex items-center gap-1 shrink-0">
                                                 {stats.isDeleted ? (
                                                     <span className="text-xs text-red-600 font-medium">Deleted</span>
-                                                ) : isYml ? (
+                                                ) : isYml && !stats.isOpenApiSpec ? (
                                                     <span className="text-xs text-muted-foreground">
                                                         {ymlChanges.length}{" "}
                                                         {ymlChanges.length === 1 ? "change" : "changes"}
                                                     </span>
+                                                ) : filename.includes("generators") ? (
+                                                    <span className="text-xs text-muted-foreground">1 change</span>
                                                 ) : (
                                                     <>
                                                         {stats.added > 0 && (
@@ -283,7 +315,7 @@ export function FilesDropdown() {
                                                     </>
                                                 )}
                                             </div>
-                                            {!isYml && (
+                                            {(!isYml || (stats.isOpenApiSpec && !filename.includes("generators"))) && (
                                                 <Popover
                                                     open={resetPopoverOpen === filename}
                                                     onOpenChange={(open) => {
@@ -352,7 +384,26 @@ export function FilesDropdown() {
                                         {/* Nested yml changes */}
                                         {isYml && isExpanded && (
                                             <div className="ml-6 border-l border-gray-400 pl-2 py-1">
-                                                {ymlChanges.length === 0 ? (
+                                                {stats.isOpenApiSpec ? (
+                                                    <div className="text-xs text-muted-foreground py-1 px-2">
+                                                        {filename.includes("generators") ? (
+                                                            "Added override file reference"
+                                                        ) : (
+                                                            <>
+                                                                {stats.added > 0 && (
+                                                                    <span className="text-green-1100">
+                                                                        +{stats.added} lines{" "}
+                                                                    </span>
+                                                                )}
+                                                                {stats.removed > 0 && (
+                                                                    <span className="text-red-600">
+                                                                        -{stats.removed} lines
+                                                                    </span>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                ) : ymlChanges.length === 0 ? (
                                                     <div className="text-xs text-muted-foreground py-1 px-2 italic">
                                                         No changes
                                                     </div>

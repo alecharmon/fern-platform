@@ -11,6 +11,9 @@
 
 import { type ApiDefinition, createEndpointContext, prune } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { useMemo } from "react";
+
+import { ApiEditTargetProvider, createEndpointEditTarget } from "@/providers/ApiEditTargetContext";
 
 import { EndpointContent } from "./endpoints/EndpointContent";
 
@@ -24,6 +27,14 @@ export interface ApiEndpointPageProps {
 export function ApiEndpointPage({ node, apiDefinition, breadcrumb, lang }: ApiEndpointPageProps) {
     const context = createEndpointContext(node, prune(apiDefinition, node));
 
+    // Create edit target for the endpoint
+    const editTarget = useMemo(() => {
+        if (!context) {
+            return null;
+        }
+        return createEndpointEditTarget(context.endpoint);
+    }, [context]);
+
     if (!context) {
         return (
             <div className="flex items-center justify-center p-8 text-center">
@@ -32,5 +43,15 @@ export function ApiEndpointPage({ node, apiDefinition, breadcrumb, lang }: ApiEn
         );
     }
 
-    return <EndpointContent context={context} breadcrumb={breadcrumb} showErrors={true} showAuth={true} lang={lang} />;
+    if (!editTarget) {
+        return (
+            <EndpointContent context={context} breadcrumb={breadcrumb} showErrors={true} showAuth={true} lang={lang} />
+        );
+    }
+
+    return (
+        <ApiEditTargetProvider target={editTarget}>
+            <EndpointContent context={context} breadcrumb={breadcrumb} showErrors={true} showAuth={true} lang={lang} />
+        </ApiEditTargetProvider>
+    );
 }

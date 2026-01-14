@@ -17,11 +17,16 @@ import { WithSeparator } from "@fern-docs/components/api-reference/type-definiti
 import { Badge } from "@fern-docs/components/badges";
 import { Separator } from "@fern-docs/components/Separator";
 import { renderTypeShorthand } from "@fern-docs/components/type-shorthand";
+import { useMemo } from "react";
 
+import { DescriptionEditButton } from "@/components/editor/DescriptionEditButton";
+import { MouseFollowingTooltip } from "@/components/editor/MouseFollowingTooltip";
 import { MdxContent } from "@/docs/mdx/components/MdxContent";
+import { type DescriptionTarget, useDescriptionEditability, useLiveDescription } from "@/providers/OpenApiSpecsContext";
 
 import { ObjectProperty } from "../type-definitions/ObjectProperty";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
+import type { EndpointInfo } from "./EndpointErrorGroup";
 
 const HEADER_BADGE = (
     <Badge size="sm" rounded>
@@ -32,32 +37,91 @@ const HEADER_BADGE = (
 export function EndpointError({
     error,
     types,
-    lang
+    lang,
+    endpointInfo
 }: {
     error: ApiDefinition.ErrorResponse;
     availability: APIV1Read.Availability | null | undefined;
     types: Record<string, ApiDefinition.TypeDefinition>;
     lang: string;
+    endpointInfo?: EndpointInfo;
 }) {
     const hasHeaders = error.headers != null && error.headers.length > 0;
     const hasShape = error.shape != null && !shouldHideShape(error.shape, types);
+
+    // Build error description target
+    const errorTarget = useMemo((): DescriptionTarget | null => {
+        if (!endpointInfo) {
+            return null;
+        }
+        return {
+            type: "response",
+            operationId: endpointInfo.operationId,
+            method: endpointInfo.method,
+            path: endpointInfo.path,
+            statusCode: error.statusCode
+        };
+    }, [endpointInfo, error.statusCode]);
+
+    const { isEditable, reason } = useDescriptionEditability(errorTarget);
+    const liveDescription = useLiveDescription(errorTarget, error.description);
 
     if (!hasHeaders && error.shape == null) {
         return null;
     }
 
+    const fallbackDescription =
+        error.shape != null
+            ? `This error returns ${renderTypeShorthand(error.shape, { withArticle: true }, types)}.`
+            : undefined;
+
+    const hasContent = liveDescription || fallbackDescription;
+
+    // Render description section based on editability
+    const renderDescriptionSection = () => {
+        if (hasContent) {
+            // Has content: editable gets edit button, non-editable gets mouse-following tooltip
+            if (isEditable && errorTarget) {
+                return (
+                    <div className="group/desc relative pr-6">
+                        <MdxContent
+                            mdx={liveDescription}
+                            fallback={fallbackDescription}
+                            size="sm"
+                            className="text-(color:--grayscale-a11)"
+                        />
+                        <div className="absolute -right-1 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/desc:opacity-100">
+                            <DescriptionEditButton target={errorTarget} currentValue={liveDescription ?? ""} />
+                        </div>
+                    </div>
+                );
+            }
+            // Non-editable with content: show with mouse-following tooltip
+            return (
+                <MouseFollowingTooltip reason={reason}>
+                    <MdxContent
+                        mdx={liveDescription}
+                        fallback={fallbackDescription}
+                        size="sm"
+                        className="text-(color:--grayscale-a11)"
+                    />
+                </MouseFollowingTooltip>
+            );
+        }
+        // No content: show "Add description" button on hover (only if editable)
+        if (isEditable && errorTarget) {
+            return (
+                <div className="group/desc opacity-0 transition-opacity hover:opacity-100">
+                    <DescriptionEditButton target={errorTarget} currentValue="" />
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <div className="-mb-2 space-y-2 pt-2 text-left">
-            <MdxContent
-                mdx={error.description}
-                fallback={
-                    error.shape != null
-                        ? `This error returns ${renderTypeShorthand(error.shape, { withArticle: true }, types)}.`
-                        : undefined
-                }
-                size="sm"
-                className="text-(color:--grayscale-a11)"
-            />
+            {renderDescriptionSection()}
             {(hasHeaders || hasShape) && <Separator />}
             <WithSeparator>
                 {error.headers?.map((header) => (

@@ -18,8 +18,13 @@ import { TypeDefinitionRoot } from "@fern-docs/components/api-reference/type-def
 import { AvailabilityBadge } from "@fern-docs/components/badges";
 import { FernBreadcrumbs } from "@fern-docs/components/FernBreadcrumbs";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
+import { useMemo } from "react";
 
+import { DescriptionEditButton } from "@/components/editor/DescriptionEditButton";
+import { MouseFollowingTooltip } from "@/components/editor/MouseFollowingTooltip";
 import { MdxContent } from "@/docs/mdx/components/MdxContent";
+import { useApiEditTarget } from "@/providers/ApiEditTargetContext";
+import { type DescriptionTarget, useDescriptionEditability, useLiveDescription } from "@/providers/OpenApiSpecsContext";
 
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { EndpointContentCodeSnippets } from "./EndpointContentCodeSnippets";
@@ -28,6 +33,73 @@ import { EndpointContentLeft } from "./EndpointContentLeft";
 function getAvailabilityBadge(endpoint: EndpointContext["endpoint"], node: EndpointContext["node"]) {
     const availability = endpoint.availability ?? node.availability;
     return availability ? <AvailabilityBadge availability={availability} rounded /> : null;
+}
+
+/**
+ * Editable description for the main endpoint description.
+ * Wraps MdxContent with edit button support for endpoint-level descriptions.
+ */
+function EditableEndpointDescription({ endpoint }: { endpoint: EndpointContext["endpoint"] }) {
+    const apiEditTarget = useApiEditTarget();
+
+    // Build the path string for the description target
+    const pathString = useMemo(() => {
+        return endpoint.path.map((part) => (part.type === "literal" ? part.value : `{${part.value}}`)).join("");
+    }, [endpoint.path]);
+
+    // Create endpoint description target
+    const target = useMemo((): DescriptionTarget | null => {
+        if (!apiEditTarget || apiEditTarget.type !== "endpoint") {
+            return null;
+        }
+        return {
+            type: "endpoint",
+            operationId: endpoint.operationId,
+            method: endpoint.method,
+            path: pathString
+        };
+    }, [apiEditTarget, endpoint.operationId, endpoint.method, pathString]);
+
+    const { isEditable, reason } = useDescriptionEditability(target);
+
+    // Get live value from specs context if available (enables UI updates after editing)
+    const liveDescription = useLiveDescription(target, endpoint.description);
+
+    // If no edit target, just render MdxContent
+    if (!target) {
+        return <MdxContent mdx={endpoint.description} />;
+    }
+
+    // When no description, show "add" button on hover (only if editable)
+    if (!liveDescription) {
+        if (isEditable) {
+            return (
+                <div className="group/desc opacity-0 transition-opacity hover:opacity-100">
+                    <DescriptionEditButton target={target} currentValue="" />
+                </div>
+            );
+        }
+        // Non-editable with no description: nothing to show
+        return null;
+    }
+
+    // Has description: editable gets edit button, non-editable gets mouse-following tooltip
+    if (isEditable) {
+        return (
+            <div className="group/desc relative pr-8">
+                <MdxContent mdx={liveDescription} />
+                <div className="absolute -right-1 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/desc:opacity-100">
+                    <DescriptionEditButton target={target} currentValue={liveDescription ?? ""} />
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <MouseFollowingTooltip reason={reason}>
+            <MdxContent mdx={liveDescription} />
+        </MouseFollowingTooltip>
+    );
 }
 
 export interface EndpointContentProps {
@@ -40,9 +112,6 @@ export interface EndpointContentProps {
 
 export function EndpointContent({ context, breadcrumb, showErrors, showAuth, lang }: EndpointContentProps) {
     const { node, endpoint, types } = context;
-
-    // Extract footer content from the description (simplified - just use description as-is)
-    const description = endpoint.description;
 
     return (
         <EndpointContextProvider endpoint={endpoint}>
@@ -72,7 +141,7 @@ export function EndpointContent({ context, breadcrumb, showErrors, showAuth, lan
                     </TypeDefinitionRoot>
                 }
             >
-                <MdxContent mdx={description} />
+                <EditableEndpointDescription endpoint={endpoint} />
             </ReferenceLayout>
         </EndpointContextProvider>
     );
