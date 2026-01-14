@@ -22,7 +22,7 @@ export class FdrPythonLibraryDocsParserStack extends Stack {
 
         const logGroup = new LogGroup(this, "log-group", {
             logGroupName: `/aws/lambda/${lambdaName}-${environmentType.toLowerCase()}`,
-            retention: RetentionDays.ONE_MONTH,
+            retention: environmentType === EnvironmentType.Prod ? RetentionDays.ONE_YEAR : RetentionDays.ONE_MONTH,
             removalPolicy: RemovalPolicy.DESTROY
         });
 
