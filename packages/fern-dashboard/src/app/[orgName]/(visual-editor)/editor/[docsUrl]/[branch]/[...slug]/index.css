@@ -7,6 +7,7 @@
 @import "@fern-docs/components/src/syntax-highlighter/index.css";
 @import "@fern-docs/components/src/api-reference/index.scss";
 @import "@fern-docs/components/src/HorizontalOverflowMask.scss";
+@import "@fern-docs/components/src/FernAnchor.scss";
 
 @source "../../../../../../../components";
 @source "../../../../../../../../../fern-docs/components/src";
@@ -19,7 +20,6 @@
   container-type: inline-size;
   @import "../../../../../../../../../fern-docs/components/src/css/base.scss";
   @import "../../../../../../../../../fern-docs/components/src/css/components.scss";
-  @import "@fern-docs/components/src/FernAnchor.scss";
   @import "../../../../../../../../../fern-docs/components/src/css/rmiz.scss";
   @import "../../../../../../../docs/mdx/components/index.scss";
 

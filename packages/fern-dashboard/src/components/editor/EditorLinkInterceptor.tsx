@@ -17,6 +17,8 @@ const EDITOR_SELECTORS = ".ProseMirror";
 // Mobile sidebar is rendered via Portal outside #preview-container, so we need to intercept links there too
 const MOBILE_SIDEBAR_SELECTOR = "#fern-sidebar[data-viewport='mobile']";
 
+const ANCHOR_SELECTORS = ".fern-anchor";
+
 export function EditorLinkInterceptor() {
     const { orgName, docsUrl, branch, basePath } = useEditorRouting();
     const router = useRouter();
@@ -30,12 +32,13 @@ export function EditorLinkInterceptor() {
                 return;
             }
 
-            // Check if the click is within our target containers (preview, dropdowns, editor, or mobile sidebar)
+            // Check if the click is within our target containers (preview, dropdowns, editor, mobile sidebar, or anchor links)
             const isInTargetContainer =
                 link.closest("#preview-container") ||
                 link.closest(DROPDOWN_SELECTORS) ||
                 link.closest(EDITOR_SELECTORS) ||
                 link.closest(MOBILE_SIDEBAR_SELECTOR);
+            link.closest(ANCHOR_SELECTORS) || link.classList.contains("fern-anchor");
 
             if (isInTargetContainer) {
                 const interceptedLink = getInterceptedLink(event, {
