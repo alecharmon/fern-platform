@@ -1,5 +1,6 @@
 import { getManagementClientResult, getRolesResult, hasResourcePermission } from "@fern-api/user-permissions";
 import { FernVenusApi, FernVenusApiClient } from "@fern-api/venus-api-sdk";
+import { decodeJwt } from "jose";
 import type winston from "winston";
 
 import type { FernRegistryError } from "../../api/generated";
@@ -198,11 +199,11 @@ export class AuthServiceImpl implements AuthService {
 
         const token = getTokenFromAuthHeader(authHeader);
 
-        // Legacy fern tokens (organization tokens) are exempt from CLI permission checks.
-        // These tokens start with "fern" prefix and represent organization-level access
-        // that was granted before the CLI permission system was introduced.
-        if (isLegacyOrgToken(token)) {
-            this.logger.debug(`Skipping CLI permission check for legacy org token for org ${orgId}`);
+        // Only check CLI permissions for Auth0 tokens (JWTs with iss matching AUTH0_DOMAIN).
+        // Non-Auth0 tokens (e.g., legacy organization tokens like FERN_TOKEN) are exempt
+        // from CLI permission checks to maintain backward compatibility.
+        if (!isAuth0Token(token)) {
+            this.logger.debug(`Skipping CLI permission check for non-Auth0 token for org ${orgId}`);
             return;
         }
 
@@ -294,14 +295,45 @@ async function getAuth0OrgIdFromName(orgName: string): Promise<string> {
     return organization.id;
 }
 
-const LEGACY_ORG_TOKEN_PREFIX = "fern";
-
 /**
- * Checks if a token is a legacy organization token.
- * Legacy org tokens start with "fern" prefix and represent organization-level access
- * that was granted before the CLI permission system was introduced.
- * These tokens should be exempt from CLI permission checks to maintain backward compatibility.
+ * Checks if a token is an Auth0 JWT by examining the `iss` claim.
+ * Auth0 JWTs have an issuer that matches the AUTH0_DOMAIN environment variable.
+ * Only Auth0 tokens should be subject to CLI permission checks.
+ *
+ * @param token - The JWT token string (without Bearer prefix)
+ * @returns true if the token is an Auth0 JWT, false otherwise
  */
-export function isLegacyOrgToken(token: string): boolean {
-    return token.startsWith(LEGACY_ORG_TOKEN_PREFIX);
+export function isAuth0Token(token: string): boolean {
+    const auth0Domain = process.env.AUTH0_DOMAIN;
+    if (!auth0Domain) {
+        // If AUTH0_DOMAIN is not configured, we can't determine if it's an Auth0 token
+        // Default to false (skip permission check) to avoid breaking existing functionality
+        return false;
+    }
+
+    try {
+        // Use jose library to decode the JWT payload (without verification)
+        const claims = decodeJwt(token);
+
+        // Check if the issuer matches the Auth0 domain
+        // Auth0 issuers are typically in the format: https://{domain}/
+        // We parse the hostname from the iss claim to compare with AUTH0_DOMAIN
+        if (!claims.iss) {
+            return false;
+        }
+
+        try {
+            const issuerUrl = new URL(claims.iss);
+            return issuerUrl.hostname === auth0Domain;
+        } catch {
+            // Failed to parse issuer URL from JWT - iss claim is not a valid URL
+            // This indicates the token is not from Auth0 (Auth0 always uses URL format for iss)
+            return false;
+        }
+    } catch {
+        // Failed to decode JWT token (JWTInvalid error from jose library)
+        // This occurs for non-JWT tokens (e.g., legacy FERN_TOKEN) or malformed JWTs
+        // Treat as non-Auth0 token and skip permission check to maintain backward compatibility
+        return false;
+    }
 }

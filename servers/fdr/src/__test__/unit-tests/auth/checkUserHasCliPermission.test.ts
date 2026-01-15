@@ -1,7 +1,25 @@
 import { err, ok } from "neverthrow";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { UnauthorizedError, UnavailableError, UserDoesNotHaveCliPermissionError } from "../../../api/generated/api";
-import { AuthServiceImpl } from "../../../services/auth/AuthService";
+import { AuthServiceImpl, isAuth0Token } from "../../../services/auth/AuthService";
+
+/**
+ * Creates a mock JWT token with the specified issuer.
+ * This is a simplified JWT structure for testing purposes.
+ */
+function createMockJwt(issuer: string): string {
+    const header = { alg: "RS256", typ: "JWT" };
+    const payload = { iss: issuer, sub: "auth0|user123", exp: Date.now() + 3600000 };
+    const signature = "mock-signature";
+
+    const base64UrlEncode = (obj: object): string => {
+        const json = JSON.stringify(obj);
+        const base64 = Buffer.from(json).toString("base64");
+        return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    };
+
+    return `${base64UrlEncode(header)}.${base64UrlEncode(payload)}.${signature}`;
+}
 
 // Mock the user-permissions module
 vi.mock("@fern-api/user-permissions", () => ({
@@ -36,9 +54,16 @@ describe("checkUserHasCliPermission", () => {
         warn: ReturnType<typeof vi.fn>;
         debug: ReturnType<typeof vi.fn>;
     };
+    let auth0Jwt: string;
+    const originalAuth0Domain = process.env.AUTH0_DOMAIN;
 
     beforeEach(() => {
         vi.clearAllMocks();
+
+        // Set AUTH0_DOMAIN for tests that need to check Auth0 tokens
+        process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
+        // Create a valid Auth0 JWT for testing
+        auth0Jwt = createMockJwt("https://fern-prod.us.auth0.com/");
 
         mockLogger = {
             error: vi.fn(),
@@ -64,6 +89,15 @@ describe("checkUserHasCliPermission", () => {
         authService = new AuthServiceImpl(mockApp);
     });
 
+    afterEach(() => {
+        // Restore original AUTH0_DOMAIN
+        if (originalAuth0Domain !== undefined) {
+            process.env.AUTH0_DOMAIN = originalAuth0Domain;
+        } else {
+            delete process.env.AUTH0_DOMAIN;
+        }
+    });
+
     it("should throw UnauthorizedError when auth header is missing", async () => {
         await expect(
             authService.checkUserHasCliPermission({
@@ -81,7 +115,7 @@ describe("checkUserHasCliPermission", () => {
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: "Bearer test-token",
+                authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
         ).rejects.toThrow(UnauthorizedError);
@@ -99,7 +133,7 @@ describe("checkUserHasCliPermission", () => {
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: "Bearer test-token",
+                authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
         ).rejects.toThrow(UnavailableError);
@@ -126,7 +160,7 @@ describe("checkUserHasCliPermission", () => {
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: "Bearer test-token",
+                authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
         ).rejects.toThrow(UnavailableError);
@@ -153,7 +187,7 @@ describe("checkUserHasCliPermission", () => {
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: "Bearer test-token",
+                authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
         ).resolves.toBeUndefined();
@@ -180,7 +214,7 @@ describe("checkUserHasCliPermission", () => {
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: "Bearer test-token",
+                authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
         ).resolves.toBeUndefined();
@@ -207,7 +241,7 @@ describe("checkUserHasCliPermission", () => {
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: "Bearer test-token",
+                authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
         ).rejects.toThrow(UserDoesNotHaveCliPermissionError);
@@ -240,7 +274,7 @@ describe("checkUserHasCliPermission", () => {
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: "Bearer test-token",
+                authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org",
                 docsUrl: "https://docs.example.com"
             })
@@ -284,7 +318,7 @@ describe("checkUserHasCliPermission", () => {
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: "Bearer test-token",
+                authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org",
                 docsUrl: "https://docs.example.com"
             })
@@ -312,20 +346,21 @@ describe("checkUserHasCliPermission", () => {
 
         mockGetRolesResult.mockResolvedValue(ok({ data: ["cli"] }));
 
-        // Test with lowercase "bearer"
+        // Test with lowercase "bearer" and Auth0 JWT
         await authService.checkUserHasCliPermission({
-            authHeader: "bearer my-token",
+            authHeader: `bearer ${auth0Jwt}`,
             orgId: "test-org"
         });
 
         // Verify Venus client was constructed with the token (without Bearer prefix)
         expect(MockFernVenusApiClient).toHaveBeenCalledWith({
             environment: "https://venus.test.com",
-            token: "my-token"
+            token: auth0Jwt
         });
     });
 
-    it("should skip CLI permission check for legacy fern tokens (organization tokens)", async () => {
+    it("should skip CLI permission check for non-Auth0 tokens (legacy org tokens)", async () => {
+        // Legacy fern tokens are not JWTs, so they should skip the permission check
         const legacyFernToken = "fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC";
 
         await expect(
@@ -336,7 +371,7 @@ describe("checkUserHasCliPermission", () => {
         ).resolves.toBeUndefined();
 
         expect(mockLogger.debug).toHaveBeenCalledWith(
-            "Skipping CLI permission check for legacy org token for org fern-org"
+            "Skipping CLI permission check for non-Auth0 token for org fern-org"
         );
 
         expect(mockVenusClient.user.getMyself).not.toHaveBeenCalled();
@@ -344,24 +379,26 @@ describe("checkUserHasCliPermission", () => {
         expect(mockGetRolesResult).not.toHaveBeenCalled();
     });
 
-    it("should skip CLI permission check for legacy fern tokens without underscore", async () => {
-        const legacyFernToken = "fernABCDEF123456";
+    it("should skip CLI permission check for JWTs from non-Auth0 issuers", async () => {
+        // Create a JWT with a different issuer (AUTH0_DOMAIN is already set in beforeEach)
+        const nonAuth0Jwt = createMockJwt("https://other-issuer.com/");
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: `Bearer ${legacyFernToken}`,
+                authHeader: `Bearer ${nonAuth0Jwt}`,
                 orgId: "test-org"
             })
         ).resolves.toBeUndefined();
 
         expect(mockLogger.debug).toHaveBeenCalledWith(
-            "Skipping CLI permission check for legacy org token for org test-org"
+            "Skipping CLI permission check for non-Auth0 token for org test-org"
         );
 
         expect(mockVenusClient.user.getMyself).not.toHaveBeenCalled();
     });
 
-    it("should still check permissions for non-fern tokens", async () => {
+    it("should check permissions for Auth0 JWTs", async () => {
+        // AUTH0_DOMAIN and auth0Jwt are already set in beforeEach
         mockVenusClient.user.getMyself.mockResolvedValue({
             ok: true,
             body: { userId: "auth0|user123" }
@@ -380,7 +417,7 @@ describe("checkUserHasCliPermission", () => {
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.user-jwt-token",
+                authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
         ).resolves.toBeUndefined();
@@ -388,5 +425,61 @@ describe("checkUserHasCliPermission", () => {
         expect(mockVenusClient.user.getMyself).toHaveBeenCalled();
         expect(mockGetManagementClientResult).toHaveBeenCalled();
         expect(mockGetRolesResult).toHaveBeenCalled();
+    });
+});
+
+describe("isAuth0Token", () => {
+    const originalEnv = process.env.AUTH0_DOMAIN;
+
+    afterEach(() => {
+        if (originalEnv !== undefined) {
+            process.env.AUTH0_DOMAIN = originalEnv;
+        } else {
+            delete process.env.AUTH0_DOMAIN;
+        }
+    });
+
+    it("should return false when AUTH0_DOMAIN is not set", () => {
+        delete process.env.AUTH0_DOMAIN;
+        const token = createMockJwt("https://fern-prod.us.auth0.com/");
+        expect(isAuth0Token(token)).toBe(false);
+    });
+
+    it("should return true for Auth0 JWT with matching issuer", () => {
+        process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
+        const token = createMockJwt("https://fern-prod.us.auth0.com/");
+        expect(isAuth0Token(token)).toBe(true);
+    });
+
+    it("should return false for JWT with non-matching issuer", () => {
+        process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
+        const token = createMockJwt("https://other-domain.auth0.com/");
+        expect(isAuth0Token(token)).toBe(false);
+    });
+
+    it("should return false for non-JWT tokens", () => {
+        process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
+        expect(isAuth0Token("fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC")).toBe(false);
+        expect(isAuth0Token("not-a-jwt")).toBe(false);
+        expect(isAuth0Token("")).toBe(false);
+    });
+
+    it("should return false for malformed JWTs", () => {
+        process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
+        expect(isAuth0Token("part1.part2")).toBe(false); // Only 2 parts
+        expect(isAuth0Token("part1.part2.part3.part4")).toBe(false); // 4 parts
+        expect(isAuth0Token("invalid.!!!.token")).toBe(false); // Invalid base64
+    });
+
+    it("should handle issuer URL parsing correctly", () => {
+        process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
+
+        // Auth0 issuers typically have trailing slash
+        const tokenWithSlash = createMockJwt("https://fern-prod.us.auth0.com/");
+        expect(isAuth0Token(tokenWithSlash)).toBe(true);
+
+        // Should also work without trailing slash (URL parsing extracts hostname)
+        const tokenWithoutSlash = createMockJwt("https://fern-prod.us.auth0.com");
+        expect(isAuth0Token(tokenWithoutSlash)).toBe(true);
     });
 });

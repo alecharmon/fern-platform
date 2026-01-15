@@ -3547,6 +3547,9 @@ importers:
       '@prisma/client':
         specifier: 5.13.0
         version: 5.13.0(prisma@5.13.0)
+      jose:
+        specifier: ^5.9.6
+        version: 5.10.0
     devDependencies:
       '@aws-sdk/client-lambda':
         specifier: ^3.744.0
