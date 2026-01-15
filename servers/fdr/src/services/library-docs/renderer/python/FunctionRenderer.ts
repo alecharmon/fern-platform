@@ -3,13 +3,39 @@
  */
 
 import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
-import { formatTypeAnnotation, generateAnchorId, renderDocstring } from "../base/index.js";
-import { getTypeDisplay } from "./TypeLinkResolver.js";
+import { generateAnchorId, renderDocstring } from "../base/index.js";
+import { buildCodeBlockLinks, getTypeDisplay, renderCodeBlockWithLinks } from "./TypeLinkResolver.js";
 
 /**
- * Render a function or method to MDX (full form for module-level functions).
+ * Collect all TypeInfos from a function's parameters and return type.
  */
-export function renderFunction(func: FdrLambda.libraryDocs.PythonFunctionIr): string {
+function collectTypeInfos(
+    func: FdrLambda.libraryDocs.PythonFunctionIr
+): (FdrLambda.libraryDocs.TypeInfo | undefined)[] {
+    const typeInfos: (FdrLambda.libraryDocs.TypeInfo | undefined)[] = [];
+
+    for (const param of func.parameters) {
+        typeInfos.push(param.typeInfo);
+    }
+
+    typeInfos.push(func.returnTypeInfo);
+
+    return typeInfos;
+}
+
+/**
+ * Extract module path from a fully qualified function/class path.
+ * e.g., "nemo_rl.algorithms.dpo._default_dpo_save_state" -> "nemo_rl.algorithms.dpo"
+ */
+function getModulePath(path: string): string {
+    const parts = path.split(".");
+    return parts.slice(0, -1).join(".");
+}
+
+/**
+ * Render a function in detailed form for the API section.
+ */
+export function renderFunctionDetailed(func: FdrLambda.libraryDocs.PythonFunctionIr, baseSlug: string): string {
     const lines: string[] = [];
 
     // Anchor for cross-referencing
@@ -17,12 +43,18 @@ export function renderFunction(func: FdrLambda.libraryDocs.PythonFunctionIr): st
     lines.push(`<Anchor id="${anchorId}">`);
     lines.push("");
 
-    // Signature in code block
-    lines.push("```python");
-    lines.push(func.signature);
-    lines.push("```");
-    lines.push("");
+    // Build links for type references in signature
+    const typeInfos = collectTypeInfos(func);
+    const currentModulePath = getModulePath(func.path);
+    const links = buildCodeBlockLinks(typeInfos, baseSlug, currentModulePath);
+
+    // Signature in code block with type links
+    lines.push(renderCodeBlockWithLinks(func.signature, links));
     lines.push("</Anchor>");
+    lines.push("");
+
+    // Wrap content in Indent for visual hierarchy
+    lines.push("<Indent>");
     lines.push("");
 
     // Badges for special method types
@@ -47,28 +79,42 @@ export function renderFunction(func: FdrLambda.libraryDocs.PythonFunctionIr): st
         const docstringMdx = renderDocstring(func.docstring, paramAnnotations, returnTypeDisplay || undefined);
         if (docstringMdx) {
             lines.push(docstringMdx);
-            lines.push("");
         }
     }
+
+    lines.push("");
+    lines.push("</Indent>");
 
     return lines.join("\n");
 }
 
 /**
- * Render a method in compact form (for inside class accordions).
+ * Render a method in detailed form (for inside class definitions).
  */
-export function renderMethodCompact(func: FdrLambda.libraryDocs.PythonFunctionIr): string {
+export function renderMethodDetailed(
+    func: FdrLambda.libraryDocs.PythonFunctionIr,
+    baseSlug: string,
+    currentModulePath?: string
+): string {
     const lines: string[] = [];
 
     const anchorId = generateAnchorId(func.path);
 
-    // Format compact signature for heading
-    const compactSig = formatMethodSignatureCompact(func);
-
-    // Method as a sub-heading with anchor
     lines.push(`<Anchor id="${anchorId}">`);
-    lines.push(`##### \`${compactSig}\``);
+    lines.push("");
+
+    // Build links for type references in signature
+    const typeInfos = collectTypeInfos(func);
+    const modulePath = currentModulePath ?? getModulePath(func.path);
+    const links = buildCodeBlockLinks(typeInfos, baseSlug, modulePath);
+
+    // Signature in code block with type links
+    lines.push(renderCodeBlockWithLinks(func.signature, links));
     lines.push("</Anchor>");
+    lines.push("");
+
+    // Wrap method content in Indent
+    lines.push("<Indent>");
     lines.push("");
 
     // Badges for special method types
@@ -96,69 +142,51 @@ export function renderMethodCompact(func: FdrLambda.libraryDocs.PythonFunctionIr
         }
     }
 
+    lines.push("");
+    lines.push("</Indent>");
+
     return lines.join("\n");
 }
 
 /**
  * Render a property to MDX.
  */
-export function renderProperty(func: FdrLambda.libraryDocs.PythonFunctionIr): string {
+export function renderProperty(
+    func: FdrLambda.libraryDocs.PythonFunctionIr,
+    baseSlug: string,
+    currentModulePath?: string
+): string {
     const lines: string[] = [];
 
     const anchorId = generateAnchorId(func.path);
 
-    // Property as inline signature
+    // Property signature
     const propReturnTypeDisplay = getTypeDisplay(func.returnTypeInfo);
-    const returnType = propReturnTypeDisplay ? `: ${formatTypeAnnotation(propReturnTypeDisplay)}` : "";
+    const returnType = propReturnTypeDisplay ? `: ${propReturnTypeDisplay}` : "";
+
+    // Build links for the property's return type
+    const modulePath = currentModulePath ?? getModulePath(func.path);
+    const links = buildCodeBlockLinks([func.returnTypeInfo], baseSlug, modulePath);
 
     lines.push(`<Anchor id="${anchorId}">`);
-    lines.push(`##### \`${func.name}${returnType}\``);
-    lines.push("</Anchor>");
     lines.push("");
-
-    lines.push(`<Badge>property</Badge>`);
+    lines.push(renderCodeBlockWithLinks(`${func.name}${returnType}`, links));
+    lines.push("</Anchor>");
     lines.push("");
 
     // Docstring (simple, no params for property)
     if (func.docstring) {
+        lines.push("<Indent>");
+        lines.push("");
         const docstringMdx = renderDocstring(func.docstring);
         if (docstringMdx) {
             lines.push(docstringMdx);
         }
+        lines.push("");
+        lines.push("</Indent>");
     }
 
     return lines.join("\n");
-}
-
-/**
- * Format a compact method signature for display.
- */
-function formatMethodSignatureCompact(func: FdrLambda.libraryDocs.PythonFunctionIr): string {
-    // Filter out self/cls
-    const params = func.parameters.filter((p) => !["self", "cls"].includes(p.name));
-
-    // Build param string
-    const paramStrs = params.map((p) => {
-        let s = p.name;
-        // Only add type if compact enough
-        const pTypeDisplay = getTypeDisplay(p.typeInfo);
-        if (pTypeDisplay && pTypeDisplay.length < 20) {
-            s += `: ${pTypeDisplay}`;
-        }
-        return s;
-    });
-
-    const paramsStr = paramStrs.join(", ");
-    const asyncPrefix = func.isAsync ? "async " : "";
-    const sigReturnTypeDisplay = getTypeDisplay(func.returnTypeInfo);
-    const returnStr = sigReturnTypeDisplay ? ` → ${formatTypeAnnotation(sigReturnTypeDisplay)}` : "";
-
-    // Truncate if too long
-    if (paramsStr.length > 40) {
-        return `${asyncPrefix}${func.name}(...)${returnStr}`;
-    }
-
-    return `${asyncPrefix}${func.name}(${paramsStr})${returnStr}`;
 }
 
 /**
@@ -186,12 +214,4 @@ function getMethodBadges(func: FdrLambda.libraryDocs.PythonFunctionIr): string[]
     }
 
     return badges;
-}
-
-/**
- * Get decorators worth mentioning (excluding ones shown as badges).
- */
-function _getNotableDecorators(func: FdrLambda.libraryDocs.PythonFunctionIr): string[] {
-    const skip = new Set(["staticmethod", "classmethod", "property", "abstractmethod"]);
-    return func.decorators.filter((d) => !skip.has(d) && !Array.from(skip).some((s) => d.includes(s)));
 }

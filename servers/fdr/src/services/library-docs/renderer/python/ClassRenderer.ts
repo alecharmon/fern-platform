@@ -1,47 +1,68 @@
 /**
  * Render PythonClassIR to MDX.
+ *
+ * Classes are rendered with:
+ * - Anchor with class signature in code block
+ * - Indent containing bases, docstring, attributes, and methods
  */
 
 import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
 import {
     escapeMdx,
-    escapeTableCell,
     formatTypeAnnotation,
     generateAnchorId,
     renderDocstring,
     renderSimpleDocstring
 } from "../base/index.js";
-import { renderMethodCompact } from "./FunctionRenderer.js";
-import { getTypeDisplay, linkTypeInfo } from "./TypeLinkResolver.js";
+import { renderMethodDetailed, renderProperty } from "./FunctionRenderer.js";
+import { buildCodeBlockLinks, getTypeDisplay, linkTypeInfo, renderCodeBlockWithLinks } from "./TypeLinkResolver.js";
 
 /**
- * Render a class to MDX.
+ * Render a class in detailed form for the API section.
  */
-export function renderClass(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
+export function renderClassDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
     switch (cls.kind) {
         case "TYPEDDICT":
-            return renderTypedDict(cls, baseSlug);
+            return renderTypedDictDetailed(cls, baseSlug);
         case "ENUM":
-            return renderEnum(cls);
+            return renderEnumDetailed(cls);
         default:
-            return renderRegularClass(cls, baseSlug);
+            return renderRegularClassDetailed(cls, baseSlug);
     }
 }
 
 /**
- * Render a regular class, protocol, dataclass, or exception.
+ * Extract module path from a fully qualified class path.
+ * e.g., "nemo_rl.algorithms.dpo.MasterConfig" -> "nemo_rl.algorithms.dpo"
  */
-function renderRegularClass(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
+function getModulePath(path: string): string {
+    const parts = path.split(".");
+    return parts.slice(0, -1).join(".");
+}
+
+/**
+ * Render a regular class, protocol, dataclass, or exception in detailed form.
+ */
+function renderRegularClassDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
     const lines: string[] = [];
+    const currentModulePath = getModulePath(cls.path);
 
     // Anchor for the class
     const anchorId = generateAnchorId(cls.path);
 
-    // Build class signature for accordion title
-    const signaturePreview = formatClassSignatureCompact(cls);
+    lines.push(`<Anchor id="${anchorId}">`);
+    lines.push("");
 
-    // Use Accordion for collapsible class view
-    lines.push(`<Accordion title="${escapeMdx(signaturePreview)}" id="${anchorId}">`);
+    // Class signature in code block
+    const fullSignature = formatClassSignature(cls);
+    lines.push("```python");
+    lines.push(fullSignature);
+    lines.push("```");
+    lines.push("</Anchor>");
+    lines.push("");
+
+    // Wrap class body content in Indent
+    lines.push("<Indent>");
     lines.push("");
 
     // Kind badge for special types
@@ -64,27 +85,19 @@ function renderRegularClass(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: 
         lines.push("");
     }
 
-    // Full signature in code block (for copy-paste)
-    const fullSignature = formatClassSignature(cls);
-    lines.push("```python");
-    lines.push(fullSignature);
-    lines.push("```");
-    lines.push("");
-
-    // Base classes (if interesting)
+    // Base classes
     if (cls.bases.length > 0 && !["TYPEDDICT", "ENUM"].includes(cls.kind)) {
         const interestingBases = cls.bases.filter((b) => !["object", "ABC", "Protocol", "TypedDict"].includes(b.name));
         if (interestingBases.length > 0) {
             const basesStr = interestingBases
                 .map((b) => {
-                    // Use typeInfo for linking if available, otherwise fall back to name
                     if (b.typeInfo) {
-                        return linkTypeInfo(b.typeInfo, baseSlug);
+                        return linkTypeInfo(b.typeInfo, baseSlug, currentModulePath);
                     }
                     return `\`${b.name}\``;
                 })
                 .join(", ");
-            lines.push(`**Inherits from:** ${basesStr}`);
+            lines.push(`**Bases:** ${basesStr}`);
             lines.push("");
         }
     }
@@ -107,45 +120,50 @@ function renderRegularClass(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: 
         }
     }
 
-    // Class attributes (filtered to only show meaningful ones)
+    // Class attributes (rendered inline with anchors and type links)
     const meaningfulAttrs = cls.attributes.filter((attr) => isAttributeMeaningful(attr));
-    if (meaningfulAttrs.length > 0) {
-        lines.push("#### Attributes");
+    for (const attr of meaningfulAttrs) {
+        lines.push(renderAttributeInline(attr, baseSlug, currentModulePath));
         lines.push("");
-        for (const attr of meaningfulAttrs) {
-            lines.push(renderAttributeCompact(attr));
-            lines.push("");
-        }
     }
 
-    // Methods
+    // Methods (rendered with anchors and indent)
     const methods = cls.methods.filter((m) => m.name !== "__init__");
-    if (methods.length > 0) {
-        lines.push("#### Methods");
-        lines.push("");
-        for (const method of methods) {
-            lines.push(renderMethodCompact(method));
-            lines.push("");
+    for (const method of methods) {
+        if (method.isProperty) {
+            lines.push(renderProperty(method, baseSlug, currentModulePath));
+        } else {
+            lines.push(renderMethodDetailed(method, baseSlug, currentModulePath));
         }
+        lines.push("");
     }
 
-    lines.push("</Accordion>");
+    lines.push("</Indent>");
 
     return lines.join("\n");
 }
 
 /**
- * Render a TypedDict class.
+ * Render a TypedDict class in detailed form.
  */
-function renderTypedDict(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
+function renderTypedDictDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
     const lines: string[] = [];
+    const currentModulePath = getModulePath(cls.path);
 
     const anchorId = generateAnchorId(cls.path);
 
-    lines.push(`<Accordion title="class ${cls.name}" id="${anchorId}">`);
+    lines.push(`<Anchor id="${anchorId}">`);
+    lines.push("");
+    lines.push("```python");
+    lines.push(`class ${cls.path}`);
+    lines.push("```");
+    lines.push("</Anchor>");
     lines.push("");
 
-    lines.push(`<Badge>TypedDict</Badge>`);
+    lines.push("<Indent>");
+    lines.push("");
+
+    lines.push(`**Bases:** \`typing.TypedDict\``);
     lines.push("");
 
     // Docstring
@@ -157,39 +175,59 @@ function renderTypedDict(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: str
         }
     }
 
-    // Fields as a table for cleaner display
+    // Fields as anchored items with type links
     if (cls.typedDictFields && cls.typedDictFields.length > 0) {
-        lines.push("**Fields:**");
-        lines.push("");
-        lines.push("| Field | Type | Required | Description |");
-        lines.push("|-------|------|----------|-------------|");
         for (const field of cls.typedDictFields) {
-            // Use linkTypeInfo which handles basePath for anchors and resolvedPath for display
-            const typeStr = linkTypeInfo(field.typeInfo, baseSlug);
-            const reqStr = field.required ? "Yes" : "No";
-            const descStr = field.description ? escapeTableCell(field.description) : "-";
-            lines.push(`| \`${field.name}\` | ${typeStr} | ${reqStr} | ${descStr} |`);
+            const fieldAnchorId = generateAnchorId(`${cls.path}.${field.name}`);
+            // Use resolvedPath for full type path display (enables CodeBlock linking)
+            const typeDisplay = field.typeInfo?.resolvedPath ?? getTypeDisplay(field.typeInfo) ?? "Any";
+            const fieldCode = `${field.name}: ${typeDisplay}`;
+
+            // Build links for the field's type
+            const links = buildCodeBlockLinks([field.typeInfo], baseSlug, currentModulePath);
+
+            lines.push(`<Anchor id="${fieldAnchorId}">`);
+            lines.push("");
+            lines.push(renderCodeBlockWithLinks(fieldCode, links));
+            lines.push("</Anchor>");
+            lines.push("");
+
+            if (field.description) {
+                lines.push("<Indent>");
+                lines.push("");
+                lines.push(escapeMdx(field.description));
+                lines.push("");
+                lines.push("</Indent>");
+                lines.push("");
+            }
         }
-        lines.push("");
     }
 
-    lines.push("</Accordion>");
+    lines.push("</Indent>");
 
     return lines.join("\n");
 }
 
 /**
- * Render an Enum class.
+ * Render an Enum class in detailed form.
  */
-function renderEnum(cls: FdrLambda.libraryDocs.PythonClassIr): string {
+function renderEnumDetailed(cls: FdrLambda.libraryDocs.PythonClassIr): string {
     const lines: string[] = [];
 
     const anchorId = generateAnchorId(cls.path);
 
-    lines.push(`<Accordion title="class ${cls.name}" id="${anchorId}">`);
+    lines.push(`<Anchor id="${anchorId}">`);
+    lines.push("");
+    lines.push("```python");
+    lines.push(`class ${cls.path}`);
+    lines.push("```");
+    lines.push("</Anchor>");
     lines.push("");
 
-    lines.push(`<Badge>Enum</Badge>`);
+    lines.push("<Indent>");
+    lines.push("");
+
+    lines.push(`**Bases:** \`enum.Enum\``);
     lines.push("");
 
     // Docstring
@@ -201,37 +239,24 @@ function renderEnum(cls: FdrLambda.libraryDocs.PythonClassIr): string {
         }
     }
 
-    // Enum members as table
+    // Enum members
     if (cls.enumMembers && cls.enumMembers.length > 0) {
-        lines.push("**Values:**");
-        lines.push("");
-        lines.push("| Name | Value |");
-        lines.push("|------|-------|");
         for (const member of cls.enumMembers) {
-            lines.push(`| \`${member.name}\` | \`${escapeMdx(member.value)}\` |`);
+            const memberAnchorId = generateAnchorId(`${cls.path}.${member.name}`);
+
+            lines.push(`<Anchor id="${memberAnchorId}">`);
+            lines.push("");
+            lines.push("```python");
+            lines.push(`${member.name} = ${member.value}`);
+            lines.push("```");
+            lines.push("</Anchor>");
+            lines.push("");
         }
-        lines.push("");
     }
 
-    lines.push("</Accordion>");
+    lines.push("</Indent>");
 
     return lines.join("\n");
-}
-
-/**
- * Format a compact class signature for accordion title.
- */
-function formatClassSignatureCompact(cls: FdrLambda.libraryDocs.PythonClassIr): string {
-    if (cls.constructorParams.length === 0) {
-        return `class ${cls.name}`;
-    }
-
-    // Just show param names, no types
-    const paramNames = cls.constructorParams.map((p) => p.name).join(", ");
-    if (paramNames.length > 50) {
-        return `class ${cls.name}(...)`;
-    }
-    return `class ${cls.name}(${paramNames})`;
 }
 
 /**
@@ -306,29 +331,42 @@ function isVariableReference(value: string): boolean {
 }
 
 /**
- * Render an attribute in compact form.
+ * Render an attribute inline (with anchor and type links, for inside class Indent).
  */
-function renderAttributeCompact(attr: FdrLambda.libraryDocs.AttributeIr): string {
+function renderAttributeInline(
+    attr: FdrLambda.libraryDocs.AttributeIr,
+    baseSlug: string,
+    currentModulePath: string
+): string {
     const lines: string[] = [];
 
     const anchorId = generateAnchorId(attr.path);
 
-    // Inline signature
-    const attrTypeDisplay = getTypeDisplay(attr.typeInfo);
-    const typeStr = attrTypeDisplay ? `: ${formatTypeAnnotation(attrTypeDisplay)}` : "";
+    // Use resolvedPath for full type path display (enables CodeBlock linking)
+    const attrTypeDisplay = attr.typeInfo?.resolvedPath ?? getTypeDisplay(attr.typeInfo);
+    const typeStr = attrTypeDisplay ? `: ${attrTypeDisplay}` : "";
     const valueStr = attr.value && attr.value.length <= 30 ? ` = ${attr.value}` : "";
+    const attrCode = `${attr.name}${typeStr}${valueStr}`;
+
+    // Build links for the attribute's type
+    const links = buildCodeBlockLinks([attr.typeInfo], baseSlug, currentModulePath);
 
     lines.push(`<Anchor id="${anchorId}">`);
-    lines.push(`**\`${attr.name}${typeStr}${valueStr}\`**`);
+    lines.push("");
+    lines.push(renderCodeBlockWithLinks(attrCode, links));
     lines.push("</Anchor>");
 
-    // Docstring on next line if present
+    // Docstring if present
     if (attr.docstring) {
+        lines.push("");
+        lines.push("<Indent>");
+        lines.push("");
         const docstringMdx = renderSimpleDocstring(attr.docstring);
         if (docstringMdx) {
-            lines.push("");
             lines.push(docstringMdx);
         }
+        lines.push("");
+        lines.push("</Indent>");
     }
 
     return lines.join("\n");

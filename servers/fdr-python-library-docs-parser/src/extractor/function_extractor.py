@@ -69,7 +69,7 @@ class FunctionExtractor:
         if "async" in getattr(func, "labels", set()):
             parts.append("async ")
 
-        parts.append(f"def {func.name}(")
+        parts.append(f"def {func.path}(")
 
         param_strs = [self._format_param(p) for p in func.parameters]
         params_joined = ", ".join(param_strs)
@@ -84,7 +84,7 @@ class FunctionExtractor:
             parts.append(")")
 
         if func.returns:
-            return_str = resolve_annotation(func.returns, use_short_names=True)
+            return_str = resolve_annotation(func.returns, use_short_names=False)
             if return_str:
                 parts.append(f" -> {return_str}")
 
@@ -102,7 +102,7 @@ class FunctionExtractor:
             result = param.name
 
         if param.annotation:
-            ann_str = resolve_annotation(param.annotation, use_short_names=True)
+            ann_str = resolve_annotation(param.annotation, use_short_names=False)
             if ann_str:
                 result += f": {ann_str}"
 

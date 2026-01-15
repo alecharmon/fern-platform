@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from griffe import Module, Class, Function, Attribute
+from griffe import Module, Class, Function, Attribute, Alias
 
 from src.generated.library_docs import (
     AttributeIr,
@@ -74,6 +74,9 @@ class PythonExtractor:
 
         Only sets basePath for internal types (within loaded modules).
         External types have basePath=None to prevent broken links.
+
+        For re-exported types (aliases), basePath is resolved to the actual
+        definition location so links point to the correct documentation page.
         """
         if annotation is None:
             return None
@@ -82,19 +85,57 @@ class PythonExtractor:
         if not resolved_path:
             return None
 
-        base_path = get_base_path(annotation)
-
-        # Filter external types
-        if base_path:
-            root = base_path.split(".")[0]
-            if root not in self.loaded_roots:
-                base_path = None
+        # Get base path and resolve through aliases to actual definition
+        base_path = self._resolve_base_path(get_base_path(annotation))
 
         return TypeInfo(
             display=resolve_annotation(annotation, use_short_names=True),
             resolved_path=resolved_path,
             base_path=base_path,
         )
+
+    def _resolve_base_path(self, base_path: Optional[str]) -> Optional[str]:
+        """
+        Resolve a base path to its actual definition location.
+
+        Handles two cases:
+        1. External types: returns None to prevent broken links
+        2. Re-exported types (aliases): resolves to the actual definition path
+
+        Example: "nemo_rl.data.datasets.AllTaskProcessedDataset" (re-export)
+        resolves to "nemo_rl.data.datasets.processed_dataset.AllTaskProcessedDataset"
+        """
+        if not base_path:
+            return None
+
+        # Try to resolve through aliases
+        resolved = self._follow_alias(base_path)
+
+        # Check if resolved path is internal
+        if resolved and self._is_internal_path(resolved):
+            return resolved
+
+        return None
+
+    def _follow_alias(self, path: str) -> Optional[str]:
+        """Follow an alias to get the actual definition path."""
+        try:
+            collection = self.griffe_module.modules_collection
+            if collection is None:
+                return path
+
+            obj = collection[path]
+            if isinstance(obj, Alias) and obj.target_path:
+                return obj.target_path
+
+            return path
+        except (KeyError, AttributeError):
+            return path
+
+    def _is_internal_path(self, path: str) -> bool:
+        """Check if a path belongs to the loaded modules."""
+        root = path.split(".")[0]
+        return root in self.loaded_roots
 
     def _extract_module(self, griffe_module: Module) -> PythonModuleIr:
         """Extract PythonModuleIr from a Griffe Module."""

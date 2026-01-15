@@ -58,12 +58,15 @@ export function renderDocstring(
         lines.push("**Returns:**");
         lines.push("");
         const type = docstring.returns.type || returnAnnotation || "";
+        lines.push(`<ParamField path="" type="">`);
         if (type) {
             lines.push(`\`${formatTypeAnnotation(type)}\``);
+            lines.push("");
         }
         if (docstring.returns.description) {
             lines.push(escapeMdx(docstring.returns.description));
         }
+        lines.push("</ParamField>");
         lines.push("");
     }
 

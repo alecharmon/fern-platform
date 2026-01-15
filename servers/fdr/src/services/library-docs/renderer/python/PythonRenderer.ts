@@ -124,6 +124,9 @@ export class PythonRenderer {
             };
             return pageNode;
         } else {
+            // Generate overview page ID for this section
+            const overviewPageId = `${node.slug}-overview.mdx` as FernRegistry.PageId;
+
             const sectionNode: FernRegistry.navigation.v1.SectionNode = {
                 type: "section",
                 id: generateNodeId(`section:${node.slug}`),
@@ -137,7 +140,7 @@ export class PythonRenderer {
                 viewers: undefined,
                 orphaned: undefined,
                 featureFlags: undefined,
-                overviewPageId: undefined,
+                overviewPageId,
                 noindex: undefined,
                 pointsTo: undefined,
                 collapsed: undefined,

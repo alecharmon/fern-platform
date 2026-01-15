@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock, MagicMock
-from griffe import Module, Function, Class, Attribute
+from griffe import Module, Function, Class, Attribute, Alias
 
 
 class TestGetPublicMembers:
@@ -256,3 +256,128 @@ class TestClassExtractorVisibility:
         result = extractor._extract_methods(cls)
 
         assert len(result) == 0
+
+
+class TestAliasResolution:
+    """Tests for alias resolution in type paths."""
+
+    def test_follow_alias_returns_target_path(self):
+        """_follow_alias should return the target path for aliases."""
+        from src.extractor.python_extractor import PythonExtractor
+
+        # Create mock module with modules_collection
+        mock_module = Mock(spec=Module)
+        mock_collection = MagicMock()
+
+        # Create mock alias
+        mock_alias = Mock(spec=Alias)
+        mock_alias.target_path = "nemo_rl.data.datasets.processed_dataset.AllTaskProcessedDataset"
+
+        mock_collection.__getitem__.return_value = mock_alias
+        mock_module.modules_collection = mock_collection
+
+        extractor = PythonExtractor.__new__(PythonExtractor)
+        extractor.griffe_module = mock_module
+
+        result = extractor._follow_alias("nemo_rl.data.datasets.AllTaskProcessedDataset")
+
+        assert result == "nemo_rl.data.datasets.processed_dataset.AllTaskProcessedDataset"
+
+    def test_follow_alias_returns_original_for_non_alias(self):
+        """_follow_alias should return the original path for non-aliases."""
+        from src.extractor.python_extractor import PythonExtractor
+
+        mock_module = Mock(spec=Module)
+        mock_collection = MagicMock()
+
+        # Return a regular class, not an alias
+        mock_class = Mock(spec=Class)
+        mock_collection.__getitem__.return_value = mock_class
+        mock_module.modules_collection = mock_collection
+
+        extractor = PythonExtractor.__new__(PythonExtractor)
+        extractor.griffe_module = mock_module
+
+        result = extractor._follow_alias("nemo_rl.data.datasets.SomeClass")
+
+        assert result == "nemo_rl.data.datasets.SomeClass"
+
+    def test_follow_alias_returns_original_on_key_error(self):
+        """_follow_alias should return original path if lookup fails."""
+        from src.extractor.python_extractor import PythonExtractor
+
+        mock_module = Mock(spec=Module)
+        mock_collection = MagicMock()
+        mock_collection.__getitem__.side_effect = KeyError("not found")
+        mock_module.modules_collection = mock_collection
+
+        extractor = PythonExtractor.__new__(PythonExtractor)
+        extractor.griffe_module = mock_module
+
+        result = extractor._follow_alias("unknown.path.SomeClass")
+
+        assert result == "unknown.path.SomeClass"
+
+    def test_is_internal_path_returns_true_for_loaded_roots(self):
+        """_is_internal_path should return True for paths in loaded_roots."""
+        from src.extractor.python_extractor import PythonExtractor
+
+        extractor = PythonExtractor.__new__(PythonExtractor)
+        extractor.loaded_roots = {"nemo_rl", "other_package"}
+
+        assert extractor._is_internal_path("nemo_rl.data.datasets.SomeClass") is True
+        assert extractor._is_internal_path("other_package.module.Class") is True
+
+    def test_is_internal_path_returns_false_for_external_paths(self):
+        """_is_internal_path should return False for external paths."""
+        from src.extractor.python_extractor import PythonExtractor
+
+        extractor = PythonExtractor.__new__(PythonExtractor)
+        extractor.loaded_roots = {"nemo_rl"}
+
+        assert extractor._is_internal_path("torch.nn.Module") is False
+        assert extractor._is_internal_path("numpy.ndarray") is False
+
+    def test_resolve_base_path_resolves_alias_to_definition(self):
+        """_resolve_base_path should resolve aliases to actual definition paths."""
+        from src.extractor.python_extractor import PythonExtractor
+
+        mock_module = Mock(spec=Module)
+        mock_collection = MagicMock()
+
+        # Setup alias that points to actual definition
+        mock_alias = Mock(spec=Alias)
+        mock_alias.target_path = "nemo_rl.data.datasets.processed_dataset.AllTaskProcessedDataset"
+        mock_collection.__getitem__.return_value = mock_alias
+        mock_module.modules_collection = mock_collection
+
+        extractor = PythonExtractor.__new__(PythonExtractor)
+        extractor.griffe_module = mock_module
+        extractor.loaded_roots = {"nemo_rl"}
+
+        result = extractor._resolve_base_path("nemo_rl.data.datasets.AllTaskProcessedDataset")
+
+        assert result == "nemo_rl.data.datasets.processed_dataset.AllTaskProcessedDataset"
+
+    def test_resolve_base_path_returns_none_for_external(self):
+        """_resolve_base_path should return None for external types."""
+        from src.extractor.python_extractor import PythonExtractor
+
+        extractor = PythonExtractor.__new__(PythonExtractor)
+        extractor.griffe_module = Mock(spec=Module)
+        extractor.griffe_module.modules_collection = None
+        extractor.loaded_roots = {"nemo_rl"}
+
+        result = extractor._resolve_base_path("torch.nn.Module")
+
+        assert result is None
+
+    def test_resolve_base_path_returns_none_for_none_input(self):
+        """_resolve_base_path should return None for None input."""
+        from src.extractor.python_extractor import PythonExtractor
+
+        extractor = PythonExtractor.__new__(PythonExtractor)
+
+        result = extractor._resolve_base_path(None)
+
+        assert result is None
