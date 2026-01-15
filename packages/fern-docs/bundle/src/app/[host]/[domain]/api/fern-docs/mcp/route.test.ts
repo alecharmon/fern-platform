@@ -19,15 +19,22 @@ vi.mock("@fern-api/docs-server/auth/getAuthStateEdge", () => ({
     )
 }));
 
-vi.mock("mcp-handler", () => ({
-    createMcpHandler: vi.fn(() => {
-        return async (request: NextRequest) => {
-            return new Response(JSON.stringify({ result: "success" }), {
+vi.mock("@modelcontextprotocol/sdk/server/mcp.js", () => ({
+    McpServer: vi.fn().mockImplementation(() => ({
+        tool: vi.fn(),
+        connect: vi.fn().mockResolvedValue(undefined)
+    }))
+}));
+
+vi.mock("@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js", () => ({
+    WebStandardStreamableHTTPServerTransport: vi.fn().mockImplementation(() => ({
+        handleRequest: vi.fn().mockResolvedValue(
+            new Response(JSON.stringify({ result: "success" }), {
                 status: 200,
                 headers: { "Content-Type": "application/json" }
-            });
-        };
-    })
+            })
+        )
+    }))
 }));
 
 describe("MCP Server Route", () => {
