@@ -5,7 +5,7 @@ instances:
 title: Ariel's Plant Store
 
 experimental:
-  ai-examples: false
+  ai-examples: true
 
 layout:
   searchbar-placement: header
@@ -29,6 +29,10 @@ navigation:
         slug: sdks
   - api: API Reference
     slug: api
+    flattened: true
+  - api: Conjure API Reference
+    api-name: conjure
+    slug: conjure-api
     flattened: true
   - changelog: ./changelog
     title: Changelog
