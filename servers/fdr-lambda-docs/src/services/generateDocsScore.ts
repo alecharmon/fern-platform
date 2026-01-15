@@ -1,54 +1,63 @@
-export interface DocsScoreIssue {
-    page: string;
-    issueType: string;
-    suggestedFix: string;
-}
+import { type BrokenLink, getBrokenLinksPerPage } from "./scoring/brokenLinksScore";
+import { checkPageSeo } from "./scoring/seoScore";
+import type { DocsScoreData, DocsScoreIssue, IssueCounts, IssueSeverity, PageData } from "./scoring/types";
+import { countWords } from "./scoring/utils";
 
-export interface DocsScoreCategory {
-    categoryName: string;
-    issues: DocsScoreIssue[];
-}
+export type { DocsScoreData, DocsScoreIssue, IssueCounts, IssueSeverity };
 
-export interface DocsScoreData {
-    categories: DocsScoreCategory[];
-}
-
-export interface PageHealthScore {
+export interface PageHealthResult {
     url: string;
-    score: number;
     issues: DocsScoreIssue[];
 }
 
 const DEFAULT_MAX_CONCURRENCY = 10;
+const DEFAULT_PAGE_LENGTH_THRESHOLD = 5000;
 
 /**
- * Placeholder function for calculating health score from HTML content.
- * This will be implemented later with actual scoring logic.
+ * Collects health issues from HTML content.
+ * Checks for SEO issues, page length, and broken links.
+ * Severity levels:
+ * - high: Broken links, Missing meta description
+ * - medium: Missing og:image, Missing alt text
+ * - low: Page length issues
  */
-export function getHealthScore(_html: string, url: string): PageHealthScore {
+export function getHealthIssues(html: string, url: string, brokenLinks: BrokenLink[] = []): PageHealthResult {
+    const issues: DocsScoreIssue[] = [];
+
+    // Check SEO issues (severity assigned in checkPageSeo)
+    const seoIssues = checkPageSeo(html, url);
+    issues.push(...seoIssues);
+
+    // Check page length (low severity)
+    const wordCount = countWords(html);
+    if (wordCount > DEFAULT_PAGE_LENGTH_THRESHOLD) {
+        issues.push({
+            page: url,
+            issueType: `Page too long (${wordCount.toLocaleString()} words)`,
+            suggestedFix: `Consider splitting this page into smaller sections (exceeds ${DEFAULT_PAGE_LENGTH_THRESHOLD.toLocaleString()} word limit)`,
+            severity: "low"
+        });
+    }
+
+    // Add broken link issues (high severity)
+    for (const brokenLink of brokenLinks) {
+        issues.push({
+            page: url,
+            issueType: `Broken link (${brokenLink.statusCode})`,
+            suggestedFix: `Fix or remove broken link: ${brokenLink.url}`,
+            severity: "high"
+        });
+    }
+
     return {
         url,
-        score: 85,
-        issues: []
+        issues
     };
-}
-
-// URL patterns to skip (auto-generated pages)
-const SKIP_URL_PATTERNS = ["/api-reference", "/api-reference/"];
-
-/**
- * Filters out URLs that should be skipped (e.g., auto-generated API reference pages).
- */
-function filterUrls(urls: string[]): string[] {
-    return urls.filter((url) => {
-        const urlPath = new URL(url).pathname;
-        return !SKIP_URL_PATTERNS.some((pattern) => urlPath.includes(pattern));
-    });
 }
 
 /**
  * Fetches and parses the sitemap.xml for a given domain.
- * Returns an array of page URLs found in the sitemap (excluding auto-generated pages).
+ * Returns an array of page URLs found in the sitemap.
  */
 async function fetchSitemap(domain: string): Promise<string[]> {
     const sitemapUrl = `https://${domain}/sitemap.xml`;
@@ -67,21 +76,16 @@ async function fetchSitemap(domain: string): Promise<string[]> {
     // Parse URLs from sitemap XML using regex
     // Sitemaps have <loc>URL</loc> tags
     const urlMatches = xml.matchAll(/<loc>([^<]+)<\/loc>/g);
-    const allUrls: string[] = [];
+    const urls: string[] = [];
 
     for (const match of urlMatches) {
         if (match[1]) {
-            allUrls.push(match[1]);
+            urls.push(match[1]);
         }
     }
 
-    // Filter out auto-generated pages
-    const urls = filterUrls(allUrls);
-
     // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
-    console.log(
-        `[fetchSitemap] Found ${allUrls.length} URLs in sitemap, ${urls.length} after filtering (skipped ${allUrls.length - urls.length} api-reference pages)`
-    );
+    console.log(`[fetchSitemap] Found ${urls.length} URLs in sitemap`);
 
     return urls;
 }
@@ -104,53 +108,47 @@ async function fetchPageHtml(url: string): Promise<string> {
 }
 
 /**
- * Processes a single URL, fetching HTML and calculating health score.
+ * Fetches a single URL and returns PageData with HTML content.
  */
-async function processUrl(url: string): Promise<PageHealthScore> {
+async function fetchUrl(url: string): Promise<PageData> {
     try {
         const html = await fetchPageHtml(url);
-        return getHealthScore(html, url);
+        return { url, html };
     } catch (error) {
         // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
-        console.error(`[processUrl] Error processing ${url}:`, error);
-        return {
-            url,
-            score: 0,
-            issues: [
-                {
-                    page: url,
-                    issueType: "Fetch Error",
-                    suggestedFix: `Failed to fetch page: ${error instanceof Error ? error.message : "Unknown error"}`
-                }
-            ]
-        };
+        console.error(`[fetchUrl] Error fetching ${url}:`, error);
+        return { url, html: "" };
     }
 }
 
 /**
- * Processes all URLs with a concurrent queue that maintains max concurrency.
+ * Fetches all URLs with a concurrent queue that maintains max concurrency.
  * Unlike batch processing, this starts a new request as soon as any completes.
  */
-async function processUrlsWithConcurrency(
+async function fetchUrlsWithConcurrency(
     urls: string[],
     maxConcurrency: number = DEFAULT_MAX_CONCURRENCY
-): Promise<PageHealthScore[]> {
-    const results: PageHealthScore[] = new Array(urls.length);
+): Promise<PageData[]> {
+    const results: PageData[] = new Array(urls.length);
     let nextIndex = 0;
     let completed = 0;
 
     // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
-    console.log(`[processUrlsWithConcurrency] Processing ${urls.length} URLs with max concurrency ${maxConcurrency}`);
+    console.log(`[fetchUrlsWithConcurrency] Fetching ${urls.length} URLs with max concurrency ${maxConcurrency}`);
 
     async function worker(): Promise<void> {
         while (nextIndex < urls.length) {
             const index = nextIndex++;
             const url = urls[index];
 
-            // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
-            console.log(`[processUrlsWithConcurrency] [${++completed}/${urls.length}] Fetching: ${url}`);
+            if (!url) {
+                continue;
+            }
 
-            results[index] = await processUrl(url);
+            // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
+            console.log(`[fetchUrlsWithConcurrency] [${++completed}/${urls.length}] Fetching: ${url}`);
+
+            results[index] = await fetchUrl(url);
         }
     }
 
@@ -163,50 +161,61 @@ async function processUrlsWithConcurrency(
 }
 
 /**
- * Aggregates individual page scores into overall score and categorized issues.
+ * Collects issues for all pages using the broken links mapping.
  */
-function aggregateResults(pageScores: PageHealthScore[]): { score: number; data: DocsScoreData } {
-    if (pageScores.length === 0) {
-        return {
-            score: 0,
-            data: { categories: [] }
-        };
-    }
+function collectPageIssues(pages: PageData[], brokenLinksPerPage: Map<string, BrokenLink[]>): PageHealthResult[] {
+    return pages.map((page) => {
+        if (page.html.length === 0) {
+            return {
+                url: page.url,
+                issues: [
+                    {
+                        page: page.url,
+                        issueType: "Fetch Error",
+                        suggestedFix: "Failed to fetch page content",
+                        severity: "high" as const
+                    }
+                ]
+            };
+        }
+        const brokenLinks = brokenLinksPerPage.get(page.url) || [];
+        return getHealthIssues(page.html, page.url, brokenLinks);
+    });
+}
 
-    // Calculate average score
-    const totalScore = pageScores.reduce((sum, page) => sum + page.score, 0);
-    const averageScore = Math.round(totalScore / pageScores.length);
+/**
+ * Aggregates individual page results into issue counts by severity.
+ */
+function aggregateResults(pageResults: PageHealthResult[]): DocsScoreData {
+    const issueCounts: IssueCounts = {
+        critical: 0,
+        high: 0,
+        medium: 0,
+        low: 0
+    };
 
-    // Group issues by type (category)
-    const issuesByCategory = new Map<string, DocsScoreIssue[]>();
+    const allIssues: DocsScoreIssue[] = [];
 
-    for (const pageScore of pageScores) {
-        for (const issue of pageScore.issues) {
-            const categoryIssues = issuesByCategory.get(issue.issueType) || [];
-            categoryIssues.push(issue);
-            issuesByCategory.set(issue.issueType, categoryIssues);
+    for (const pageResult of pageResults) {
+        for (const issue of pageResult.issues) {
+            issueCounts[issue.severity]++;
+            allIssues.push(issue);
         }
     }
 
-    // Convert to categories array
-    const categories: DocsScoreCategory[] = [];
-    for (const [categoryName, issues] of issuesByCategory) {
-        categories.push({ categoryName, issues });
-    }
-
     return {
-        score: averageScore,
-        data: { categories }
+        issueCounts,
+        issues: allIssues
     };
 }
 
 /**
- * Main function to generate docs score by scraping the sitemap and processing pages.
+ * Main function to generate docs health data by scraping the sitemap and processing pages.
  */
 export async function generateDocsScore(
     domain: string,
     maxConcurrency: number = DEFAULT_MAX_CONCURRENCY
-): Promise<{ score: number; data: DocsScoreData }> {
+): Promise<DocsScoreData> {
     try {
         // Step 1: Fetch sitemap
         const urls = await fetchSitemap(domain);
@@ -215,32 +224,39 @@ export async function generateDocsScore(
             // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
             console.log(`[generateDocsScore] No URLs found in sitemap for ${domain}`);
             return {
-                score: 0,
-                data: {
-                    categories: [
-                        {
-                            categoryName: "Sitemap",
-                            issues: [
-                                {
-                                    page: `https://${domain}/sitemap.xml`,
-                                    issueType: "Empty Sitemap",
-                                    suggestedFix: "Add pages to your sitemap.xml"
-                                }
-                            ]
-                        }
-                    ]
-                }
+                issueCounts: { critical: 0, high: 1, medium: 0, low: 0 },
+                issues: [
+                    {
+                        page: `https://${domain}/sitemap.xml`,
+                        issueType: "Empty Sitemap",
+                        suggestedFix: "Add pages to your sitemap.xml",
+                        severity: "high"
+                    }
+                ]
             };
         }
 
-        // Step 2: Process URLs with concurrent queue
-        const pageScores = await processUrlsWithConcurrency(urls, maxConcurrency);
+        // Step 2: Fetch all pages
+        const pages = await fetchUrlsWithConcurrency(urls, maxConcurrency);
+        const validPages = pages.filter((p) => p.html.length > 0);
 
-        // Step 3: Aggregate results
-        const result = aggregateResults(pageScores);
+        // Step 3: Check broken links first to build page -> broken links mapping
+        // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
+        console.log(`[generateDocsScore] Checking broken links for ${domain}...`);
+        const brokenLinksPerPage = await getBrokenLinksPerPage(validPages);
+
+        // Step 4: Collect issues for all pages using the broken links mapping
+        // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
+        console.log(`[generateDocsScore] Analyzing ${validPages.length} pages...`);
+        const pageResults = collectPageIssues(pages, brokenLinksPerPage);
+
+        // Step 5: Aggregate results
+        const result = aggregateResults(pageResults);
 
         // biome-ignore lint/suspicious/noConsole: console output is intentional for lambda logging
-        console.log(`[generateDocsScore] Completed scoring for ${domain}: ${result.score}/100`);
+        console.log(
+            `[generateDocsScore] Completed analysis for ${domain}: ${result.issueCounts.critical} critical, ${result.issueCounts.high} high, ${result.issueCounts.medium} medium, ${result.issueCounts.low} low`
+        );
 
         return result;
     } catch (error) {
@@ -248,21 +264,15 @@ export async function generateDocsScore(
         console.error(`[generateDocsScore] Error generating docs score for ${domain}:`, error);
 
         return {
-            score: 0,
-            data: {
-                categories: [
-                    {
-                        categoryName: "Error",
-                        issues: [
-                            {
-                                page: `https://${domain}`,
-                                issueType: "Scraping Error",
-                                suggestedFix: error instanceof Error ? error.message : "Unknown error occurred"
-                            }
-                        ]
-                    }
-                ]
-            }
+            issueCounts: { critical: 0, high: 1, medium: 0, low: 0 },
+            issues: [
+                {
+                    page: `https://${domain}`,
+                    issueType: "Scraping Error",
+                    suggestedFix: error instanceof Error ? error.message : "Unknown error occurred",
+                    severity: "high"
+                }
+            ]
         };
     }
 }

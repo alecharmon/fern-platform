@@ -933,3 +933,24 @@ code:not(.code-block):not(#preview-container *) {
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+/* Health tab: subtle shadow pulse for cards with issues */
+.health-card-pulse {
+  --pulse-color: rgb(0 0 0 / 0.1);
+  animation: shadow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes shadow-pulse {
+  0%, 100% {
+    box-shadow: 0 1px 2px 0 var(--pulse-color);
+  }
+  50% {
+    box-shadow: 0 3px 8px -1px var(--pulse-color);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .health-card-pulse {
+    animation: none;
+  }
+}
