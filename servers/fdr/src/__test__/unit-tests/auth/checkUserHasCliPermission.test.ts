@@ -325,35 +325,68 @@ describe("checkUserHasCliPermission", () => {
         });
     });
 
-    it("should work with Fern token format", async () => {
-        const fernToken = "fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC";
+    it("should skip CLI permission check for legacy fern tokens (organization tokens)", async () => {
+        const legacyFernToken = "fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC";
 
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: `Bearer ${legacyFernToken}`,
+                orgId: "fern-org"
+            })
+        ).resolves.toBeUndefined();
+
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+            "Skipping CLI permission check for legacy org token for org fern-org"
+        );
+
+        expect(mockVenusClient.user.getMyself).not.toHaveBeenCalled();
+        expect(mockGetManagementClientResult).not.toHaveBeenCalled();
+        expect(mockGetRolesResult).not.toHaveBeenCalled();
+    });
+
+    it("should skip CLI permission check for legacy fern tokens without underscore", async () => {
+        const legacyFernToken = "fernABCDEF123456";
+
+        await expect(
+            authService.checkUserHasCliPermission({
+                authHeader: `Bearer ${legacyFernToken}`,
+                orgId: "test-org"
+            })
+        ).resolves.toBeUndefined();
+
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+            "Skipping CLI permission check for legacy org token for org test-org"
+        );
+
+        expect(mockVenusClient.user.getMyself).not.toHaveBeenCalled();
+    });
+
+    it("should still check permissions for non-fern tokens", async () => {
         mockVenusClient.user.getMyself.mockResolvedValue({
             ok: true,
-            body: { userId: "auth0|user456" }
+            body: { userId: "auth0|user123" }
         });
 
         const mockAuth0Client = {
             organizations: {
                 getByName: vi.fn().mockResolvedValue({
-                    data: { id: "org_xyz789" }
+                    data: { id: "org_abc123" }
                 })
             }
         };
         mockGetManagementClientResult.mockReturnValue(ok(mockAuth0Client as any));
 
-        mockGetRolesResult.mockResolvedValue(ok({ data: ["admin"] }));
+        mockGetRolesResult.mockResolvedValue(ok({ data: ["cli"] }));
 
         await expect(
             authService.checkUserHasCliPermission({
-                authHeader: `Bearer ${fernToken}`,
-                orgId: "fern-org"
+                authHeader: "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.user-jwt-token",
+                orgId: "test-org"
             })
         ).resolves.toBeUndefined();
 
-        expect(MockFernVenusApiClient).toHaveBeenCalledWith({
-            environment: "https://venus.test.com",
-            token: fernToken
-        });
+        expect(mockVenusClient.user.getMyself).toHaveBeenCalled();
+        expect(mockGetManagementClientResult).toHaveBeenCalled();
+        expect(mockGetRolesResult).toHaveBeenCalled();
     });
 });

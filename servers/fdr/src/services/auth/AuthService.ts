@@ -196,8 +196,17 @@ export class AuthServiceImpl implements AuthService {
             throw new UnauthorizedError("Authorization header was not specified");
         }
 
-        // Get user ID from Venus
         const token = getTokenFromAuthHeader(authHeader);
+
+        // Legacy fern tokens (organization tokens) are exempt from CLI permission checks.
+        // These tokens start with "fern" prefix and represent organization-level access
+        // that was granted before the CLI permission system was introduced.
+        if (isLegacyOrgToken(token)) {
+            this.logger.debug(`Skipping CLI permission check for legacy org token for org ${orgId}`);
+            return;
+        }
+
+        // Get user ID from Venus
         const venus = getVenusClient({
             config: this.app.config,
             token
@@ -283,4 +292,16 @@ async function getAuth0OrgIdFromName(orgName: string): Promise<string> {
     const client = clientResult.value;
     const { data: organization } = await client.organizations.getByName({ name: orgName });
     return organization.id;
+}
+
+const LEGACY_ORG_TOKEN_PREFIX = "fern";
+
+/**
+ * Checks if a token is a legacy organization token.
+ * Legacy org tokens start with "fern" prefix and represent organization-level access
+ * that was granted before the CLI permission system was introduced.
+ * These tokens should be exempt from CLI permission checks to maintain backward compatibility.
+ */
+export function isLegacyOrgToken(token: string): boolean {
+    return token.startsWith(LEGACY_ORG_TOKEN_PREFIX);
 }
