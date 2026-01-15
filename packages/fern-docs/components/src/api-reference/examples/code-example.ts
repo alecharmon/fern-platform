@@ -25,6 +25,8 @@ export interface CodeExampleGroup {
 
 export function getIconForClient(language: string): string {
     switch (language) {
+        case "payload":
+            return "fa-solid fa-brackets-curly";
         case "curl":
         case "shell":
         case "bash":
@@ -61,6 +63,8 @@ export function getIconForClient(language: string): string {
 
 export function getLanguageDisplayName(language: string): string {
     switch (language) {
+        case "payload":
+            return "Payload";
         case "curl":
             return "cURL";
         case "go":

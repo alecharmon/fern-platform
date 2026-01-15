@@ -8,9 +8,10 @@ import { FaIcon } from "@fern-docs/components/fa-icon";
 import { useDefaultProgrammingLanguage, useProgrammingLanguage } from "@fern-docs/components/state/language";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 import { ChevronDown } from "lucide-react";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { TextInputControl } from "@/components/editor/editor-component/controls";
 import { useEditorComponent } from "@/components/editor/editor-component/EditorComponentContext";
+
 import {
     EditorComponentPopoverButton,
     EditorComponentPopoverProvider
@@ -18,6 +19,8 @@ import {
 
 import { EditorPreviewBanner } from "./EditorPreviewBanner";
 import { EndpointNotFoundState } from "./EndpointNotFoundState";
+
+const PAYLOAD_LANGUAGE = "payload";
 
 /* eslint-disable unused-imports/no-unused-vars */
 
@@ -30,7 +33,8 @@ export function EndpointRequestSnippet({
     example,
     endpointDefinition,
     slugs,
-    className
+    className,
+    languages
 }: {
     /**
      * The endpoint locator to use for the request snippet.
@@ -49,6 +53,12 @@ export function EndpointRequestSnippet({
      */
     slugs?: string[];
     className?: string;
+    /**
+     * Specifies which languages to show and in what order.
+     * If not provided, all available languages will be shown with "payload" at the end.
+     * Use "payload" to include the request payload option.
+     */
+    languages?: string[];
 }) {
     const { isWithinEditor } = useEditorComponent();
     const snippetRef = useRef<HTMLDivElement>(null);
@@ -80,6 +90,7 @@ export function EndpointRequestSnippet({
             example={example}
             className={className}
             endpointProp={endpoint}
+            languages={languages}
         />
     );
 }
@@ -88,13 +99,15 @@ function EndpointRequestSnippetInternal({
     endpoint,
     example,
     className,
-    endpointProp
+    endpointProp,
+    languages
 }: {
     endpoint: ApiDefinition.EndpointDefinition;
     example: string | undefined;
     slugs: string[];
     className?: string;
     endpointProp?: string;
+    languages?: string[];
 }) {
     const { isWithinEditor } = useEditorComponent();
     const [globalLanguage, setGlobalLanguage] = useProgrammingLanguage();
@@ -103,40 +116,90 @@ function EndpointRequestSnippetInternal({
 
     // Find the first example if no specific example is requested
     const selectedExample = endpoint.examples?.[0];
-
-    if (selectedExample == null) {
-        return null;
-    }
-
-    const snippets = selectedExample.snippets;
-    if (!snippets) {
-        return null;
-    }
+    const snippets = selectedExample?.snippets;
 
     // Get available languages from snippets
-    const availableLanguages = Object.keys(snippets);
+    const availableLanguages = snippets ? Object.keys(snippets) : [];
+
+    // Add "payload" option if there's a request body or query params
+    const hasPayload =
+        selectedExample?.requestBody != null ||
+        (selectedExample?.queryParameters != null && Object.keys(selectedExample.queryParameters).length > 0);
+
+    const languagesWithPayload = useMemo(() => {
+        // If languages prop is provided, use it to filter and order
+        if (languages != null && languages.length > 0) {
+            return languages.filter((lang) => {
+                // Include payload if it's in the list and hasPayload is true
+                if (lang === PAYLOAD_LANGUAGE) {
+                    return hasPayload;
+                }
+                // Include other languages only if they're available
+                return availableLanguages.includes(lang);
+            });
+        }
+        // Default behavior: all available languages with payload at the end
+        if (!hasPayload) {
+            return availableLanguages;
+        }
+        return [...availableLanguages, PAYLOAD_LANGUAGE];
+    }, [availableLanguages, hasPayload, languages]);
 
     // Determine which language to use: prefer globalLanguage, then defaultLanguage, then curl, then first available
-    let selectedLanguage = globalLanguage;
-    if (!availableLanguages.includes(selectedLanguage)) {
-        if (availableLanguages.includes(defaultLanguage)) {
-            selectedLanguage = defaultLanguage;
-        } else if (availableLanguages.includes("curl")) {
-            selectedLanguage = "curl";
-        } else {
-            selectedLanguage = availableLanguages[0] ?? "bash";
+    const selectedLanguage = useMemo(() => {
+        let lang = globalLanguage;
+        if (!languagesWithPayload.includes(lang)) {
+            if (languagesWithPayload.includes(defaultLanguage)) {
+                lang = defaultLanguage;
+            } else if (languagesWithPayload.includes("curl")) {
+                lang = "curl";
+            } else {
+                lang = languagesWithPayload[0] ?? "bash";
+            }
         }
-    }
+        return lang;
+    }, [globalLanguage, languagesWithPayload, defaultLanguage]);
+
+    // Determine if payload is selected
+    const isPayloadSelected = selectedLanguage === PAYLOAD_LANGUAGE;
 
     // Get the code for the selected language
-    const languageSnippets = snippets[selectedLanguage as keyof typeof snippets];
-    const code = languageSnippets?.[0]?.code ?? "";
+    const payloadCode = useMemo(() => {
+        if (!isPayloadSelected || selectedExample == null) {
+            return "";
+        }
+        const { requestBody, queryParameters } = selectedExample;
+        // For requests with a body, show the request body JSON
+        if (requestBody != null) {
+            if (requestBody.type === "json") {
+                return JSON.stringify(requestBody.value, null, 2);
+            }
+            if (requestBody.type === "form") {
+                return JSON.stringify(requestBody.value, null, 2);
+            }
+        }
+        // For GET requests or requests without a body, show query parameters
+        if (queryParameters != null && Object.keys(queryParameters).length > 0) {
+            return JSON.stringify(queryParameters, null, 2);
+        }
+        return "{}";
+    }, [isPayloadSelected, selectedExample]);
 
-    if (!code) {
+    // Early returns after all hooks
+    if (selectedExample == null || snippets == null) {
         return null;
     }
 
-    const dropdownOptions = availableLanguages.map((language) => ({
+    const languageSnippets = snippets[selectedLanguage as keyof typeof snippets];
+    const snippetCode = languageSnippets?.[0]?.code ?? "";
+    const code = isPayloadSelected ? payloadCode : snippetCode;
+    const displayLanguage = isPayloadSelected ? "json" : selectedLanguage;
+
+    if (!code && !isPayloadSelected) {
+        return null;
+    }
+
+    const dropdownOptions = languagesWithPayload.map((language) => ({
         type: "value" as const,
         label: getLanguageDisplayName(language),
         value: language,
@@ -168,7 +231,7 @@ function EndpointRequestSnippetInternal({
                         className="min-w-0 flex-1"
                         lang="en"
                     />
-                    {availableLanguages.length > 0 && (
+                    {languagesWithPayload.length > 1 && (
                         <FernDropdown
                             lang="en"
                             value={selectedLanguage}
@@ -195,7 +258,7 @@ function EndpointRequestSnippetInternal({
                 <FernSyntaxHighlighter
                     className="rounded-b-inherit rounded-t-none"
                     style={{ maxHeight: "500px" }}
-                    language={selectedLanguage}
+                    language={displayLanguage}
                     fontSize="sm"
                     code={code}
                 />
@@ -223,6 +286,8 @@ function EndpointRequestSnippetInternal({
 
 function getLanguageDisplayName(language: string): string {
     switch (language) {
+        case "payload":
+            return "Payload";
         case "curl":
             return "cURL";
         case "go":
@@ -252,6 +317,8 @@ function getLanguageDisplayName(language: string): string {
 
 function getIconForClient(language: string): string {
     switch (language) {
+        case "payload":
+            return "fa-solid fa-brackets-curly";
         case "curl":
         case "shell":
         case "bash":
