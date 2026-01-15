@@ -414,10 +414,31 @@ export class ApiDefinitionV1ToLatest {
         });
     };
 
+    migrateWebhookPayloadShape = (shape: APIV1Read.WebhookPayloadShape): V2.WebhookPayloadShape => {
+        return visitDiscriminatedUnion(shape)._visit<V2.WebhookPayloadShape>({
+            object: (obj) => ({
+                type: "object",
+                extends: obj.extends,
+                properties: this.migrateObjectProperties(obj.properties),
+                extraProperties: undefined
+            }),
+            reference: (ref) => ({
+                type: "alias",
+                value: this.migrateTypeReference(ref.value)
+            }),
+            formData: (formData) => ({
+                type: "formData",
+                description: formData.description,
+                availability: formData.availability,
+                fields: this.migrateFormDataProperties(formData.properties)
+            })
+        });
+    };
+
     migrateWebhookPayload = (payload: APIV1Read.WebhookPayload): V2.WebhookPayload => {
         return {
             description: payload.description,
-            shape: this.migrateJsonShape(payload.type)
+            shape: this.migrateWebhookPayloadShape(payload.type)
         };
     };
 

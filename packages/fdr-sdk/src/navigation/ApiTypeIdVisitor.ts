@@ -57,7 +57,18 @@ export class ApiTypeIdVisitor {
         webhook.headers.forEach((header) => {
             ApiTypeIdVisitor.visitTypeReference(header.type, visit);
         });
-        ApiTypeIdVisitor.visitObjectOrReference(webhook.payload.type, visit);
+        ApiTypeIdVisitor.visitWebhookPayloadShape(webhook.payload.type, visit);
+    }
+
+    public static visitWebhookPayloadShape(
+        payloadShape: APIV1Read.WebhookPayloadShape,
+        visit: (typeId: APIV1Read.TypeId) => void
+    ): void {
+        return visitDiscriminatedUnion(payloadShape)._visit({
+            object: (value) => ApiTypeIdVisitor.visitObjectType(value, visit),
+            reference: (value) => ApiTypeIdVisitor.visitTypeReference(value.value, visit),
+            formData: (value) => ApiTypeIdVisitor.visitFormDataRequest(value, visit)
+        });
     }
 
     public static visitHttpRequestBodyShape(

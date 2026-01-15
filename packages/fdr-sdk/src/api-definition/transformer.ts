@@ -29,6 +29,7 @@ export interface ApiDefinitionVisitor {
     // types
     TypeDefinition(type: Latest.TypeDefinition, key: string): Latest.TypeDefinition;
     TypeShape(shape: Latest.TypeShape, key: string): Latest.TypeShape;
+    WebhookPayloadShape(shape: Latest.WebhookPayloadShape, key: string): Latest.WebhookPayloadShape;
     ObjectType(property: Latest.ObjectType, key: string): Latest.ObjectType;
     ObjectProperty(property: Latest.ObjectProperty, key: string): Latest.ObjectProperty;
     EnumValue(value: Latest.EnumValue, key: string): Latest.EnumValue;
@@ -60,6 +61,7 @@ export class Transformer {
             ExampleWebSocketSession: visitor.ExampleWebSocketSession ?? identity,
             TypeDefinition: visitor.TypeDefinition ?? identity,
             TypeShape: visitor.TypeShape ?? identity,
+            WebhookPayloadShape: visitor.WebhookPayloadShape ?? identity,
             ObjectType: visitor.ObjectType ?? identity,
             ObjectProperty: visitor.ObjectProperty ?? identity,
             EnumValue: visitor.EnumValue ?? identity,
@@ -127,6 +129,7 @@ export class Transformer {
             ExampleWebSocketSession: visit,
             TypeDefinition: visit,
             TypeShape: visit,
+            WebhookPayloadShape: visit,
             ObjectType: visit,
             ObjectProperty: visit,
             EnumValue: visit,
@@ -224,6 +227,7 @@ export class Transformer {
             WebSocketMessage: (message, key) => visitor.WebSocketMessage(this.webSocketMessage(message, key), key),
             TypeDefinition: (type, key) => visitor.TypeDefinition(this.typeDefinition(type, key), key),
             TypeShape: (shape, key) => visitor.TypeShape(this.typeShape(shape, key), key),
+            WebhookPayloadShape: (shape, key) => visitor.WebhookPayloadShape(this.webhookPayloadShape(shape, key), key),
             ObjectType: (type, key) => visitor.ObjectType(this.objectType(type, key), key),
             DiscriminatedUnionVariant: (variant, key) =>
                 visitor.DiscriminatedUnionVariant(this.objectType(variant, key), key),
@@ -392,8 +396,22 @@ export class Transformer {
     };
 
     webhookPayload = (payload: Latest.WebhookPayload, parentKey: string): Latest.WebhookPayload => {
-        const shape = this.visitor.TypeShape(payload.shape, `${parentKey}/shape`);
+        const shape = this.visitor.WebhookPayloadShape(payload.shape, `${parentKey}/shape`);
         return { ...payload, shape };
+    };
+
+    webhookPayloadShape = (shape: Latest.WebhookPayloadShape, parentKey: string): Latest.WebhookPayloadShape => {
+        return visitDiscriminatedUnion(shape)._visit<Latest.WebhookPayloadShape>({
+            object: (value) => ({
+                ...value,
+                ...this.visitor.ObjectType(value, `${parentKey}/object`)
+            }),
+            alias: identity,
+            formData: (value) => ({
+                ...value,
+                ...this.visitor.FormDataRequest(value, `${parentKey}/formData`)
+            })
+        });
     };
 
     webSocketChannel = (channel: Latest.WebSocketChannel, parentKey: string): Latest.WebSocketChannel => {

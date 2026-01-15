@@ -3,5 +3,5 @@
 import type * as FernRegistry from "../../../../../../../index.js";
 
 export interface WebhookPayload extends FernRegistry.api.latest.WithDescription {
-    shape: FernRegistry.api.latest.TypeShape;
+    shape: FernRegistry.api.latest.WebhookPayloadShape;
 }

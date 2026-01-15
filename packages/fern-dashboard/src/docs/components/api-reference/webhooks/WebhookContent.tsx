@@ -12,6 +12,7 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { getMessageForStatus } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { EndpointSection } from "@fern-docs/components/api-reference/endpoints/EndpointSection";
 import {
     TypeDefinitionAnchorPart,
@@ -32,7 +33,7 @@ import { MdxContent } from "@/docs/mdx/components/MdxContent";
 import { useApiEditTarget } from "@/providers/ApiEditTargetContext";
 import { type DescriptionTarget, useDescriptionEditability } from "@/providers/OpenApiSpecsContext";
 
-import { ObjectProperty } from "../type-definitions/ObjectProperty";
+import { ObjectProperty, PropertyRenderer, PropertyWithShape } from "../type-definitions/ObjectProperty";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 
@@ -112,20 +113,7 @@ export function WebhookContent({ context, breadcrumb, lang }: WebhookContentProp
 
                             {webhook.payloads?.[0] && (
                                 <TypeDefinitionAnchorPart part="body">
-                                    <EndpointSection
-                                        title={t(lang).apiReference.payload}
-                                        description={
-                                            <Prose className="text-(color:--grayscale-a11) my-3" size="sm">
-                                                {`The payload of this webhook request is ${renderTypeShorthand(webhook.payloads[0].shape, { withArticle: true }, types)}.`}
-                                            </Prose>
-                                        }
-                                    >
-                                        <TypeReferenceDefinitions
-                                            shape={webhook.payloads[0].shape}
-                                            types={types}
-                                            lang={lang}
-                                        />
-                                    </EndpointSection>
+                                    <WebhookPayloadSection payload={webhook.payloads[0]} types={types} lang={lang} />
                                 </TypeDefinitionAnchorPart>
                             )}
                         </TypeDefinitionAnchorPart>
@@ -178,6 +166,120 @@ export function WebhookContent({ context, breadcrumb, lang }: WebhookContentProp
             <EditableWebhookDescription description={webhook.description} />
         </ReferenceLayout>
     );
+}
+
+/**
+ * Renders type shorthand for file/files form data fields.
+ * Follows the same pattern as EndpointRequestSection.
+ */
+function renderTypeShorthandFormDataField(
+    field: Exclude<ApiDefinition.FormDataField, ApiDefinition.FormDataField.Property>,
+    lang: string
+): React.ReactNode {
+    return (
+        <span className="fern-api-property-meta">
+            <span className="fern-api-property-type">{field.type}</span>
+            {field.isOptional ? (
+                <span className="fern-api-property-optional">{t(lang).apiReference.optional}</span>
+            ) : (
+                <span className="fern-api-property-required text-(color:--red-a11)">
+                    {t(lang).apiReference.required}
+                </span>
+            )}
+        </span>
+    );
+}
+
+/**
+ * Webhook payload section that handles all payload shape variants (object, alias, formData)
+ * using the same pattern as EndpointRequestSection for consistency.
+ */
+function WebhookPayloadSection({
+    payload,
+    types,
+    lang
+}: {
+    payload: ApiDefinition.WebhookPayload;
+    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    lang: string;
+}) {
+    return visitDiscriminatedUnion(payload.shape)._visit({
+        object: (obj) => (
+            <EndpointSection
+                title={t(lang).apiReference.payload}
+                description={
+                    <Prose className="text-(color:--grayscale-a11) my-3" size="sm">
+                        {`The payload of this webhook request is ${renderTypeShorthand(obj, { withArticle: true }, types)}.`}
+                    </Prose>
+                }
+            >
+                <TypeReferenceDefinitions shape={obj} types={types} lang={lang} />
+            </EndpointSection>
+        ),
+        alias: (alias) => (
+            <EndpointSection
+                title={t(lang).apiReference.payload}
+                description={
+                    <Prose className="text-(color:--grayscale-a11) my-3" size="sm">
+                        {`The payload of this webhook request is ${renderTypeShorthand(alias, { withArticle: true }, types)}.`}
+                    </Prose>
+                }
+            >
+                <TypeReferenceDefinitions shape={alias} types={types} lang={lang} />
+            </EndpointSection>
+        ),
+        formData: (formData) => (
+            <EndpointSection
+                title={t(lang).apiReference.payload}
+                description={
+                    <Prose className="text-(color:--grayscale-a11) my-3" size="sm">
+                        The payload of this webhook request is a multipart form.
+                    </Prose>
+                }
+            >
+                <WithSeparator>
+                    {formData.fields.map((field) =>
+                        visitDiscriminatedUnion(field, "type")._visit({
+                            file: (file) => (
+                                <TypeDefinitionAnchorPart part={file.key} key={file.key}>
+                                    <PropertyRenderer
+                                        name={file.key}
+                                        description={file.description}
+                                        typeShorthand={renderTypeShorthandFormDataField(file, lang)}
+                                        availability={file.availability}
+                                    />
+                                </TypeDefinitionAnchorPart>
+                            ),
+                            files: (files) => (
+                                <TypeDefinitionAnchorPart part={files.key} key={files.key}>
+                                    <PropertyRenderer
+                                        name={files.key}
+                                        description={files.description}
+                                        typeShorthand={renderTypeShorthandFormDataField(files, lang)}
+                                        availability={files.availability}
+                                    />
+                                </TypeDefinitionAnchorPart>
+                            ),
+                            property: (property) => (
+                                <TypeDefinitionAnchorPart part={property.key} key={property.key}>
+                                    <PropertyWithShape
+                                        name={property.key}
+                                        description={property.description}
+                                        shape={property.valueShape}
+                                        availability={property.availability}
+                                        types={types}
+                                        lang={lang}
+                                    />
+                                </TypeDefinitionAnchorPart>
+                            ),
+                            _other: () => null
+                        })
+                    )}
+                </WithSeparator>
+            </EndpointSection>
+        ),
+        _other: () => null
+    });
 }
 
 /**

@@ -391,3 +391,51 @@ export function extractErrorBodyProperties(
 
     return extractObjectPropertiesFromShape(shape, types, maxDepth);
 }
+
+export function extractWebhookPayloadProperties(
+    shape: ApiDefinition.WebhookPayloadShape,
+    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>,
+    maxDepth: number = 2
+): ExtractedProperty[] {
+    if (shape.type === "object") {
+        const properties: ExtractedProperty[] = [];
+        for (const prop of shape.properties) {
+            properties.push({ property: prop, breadcrumb: [] });
+
+            const nestedProperties = extractObjectPropertiesFromShape(prop.valueShape, types, maxDepth, 1, [
+                {
+                    key: prop.key,
+                    display_name: prop.key,
+                    optional: isTypeOptional(prop.valueShape)
+                }
+            ]);
+            properties.push(...nestedProperties);
+        }
+        return properties;
+    }
+
+    if (shape.type === "alias") {
+        return extractObjectPropertiesFromShape(shape.value, types, maxDepth);
+    }
+
+    if (shape.type === "formData") {
+        const properties: ExtractedProperty[] = [];
+        for (const field of shape.fields) {
+            if (field.type === "property") {
+                properties.push({
+                    property: {
+                        key: field.key,
+                        valueShape: field.valueShape,
+                        description: field.description,
+                        availability: field.availability,
+                        propertyAccess: field.propertyAccess
+                    },
+                    breadcrumb: []
+                });
+            }
+        }
+        return properties;
+    }
+
+    return [];
+}

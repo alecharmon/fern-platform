@@ -28,6 +28,7 @@ types:
     union:
       object: type.ObjectType
       reference: type.TypeReference
+      formData: type.FormDataRequest
 
   ExampleWebhookPayload:
     properties:

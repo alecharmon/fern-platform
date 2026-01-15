@@ -4,7 +4,8 @@ import type * as FernRegistry from "../../../../../../../../../index.js";
 
 export type WebhookPayloadShape =
     | FernRegistry.api.v1.read.WebhookPayloadShape.Object_
-    | FernRegistry.api.v1.read.WebhookPayloadShape.Reference;
+    | FernRegistry.api.v1.read.WebhookPayloadShape.Reference
+    | FernRegistry.api.v1.read.WebhookPayloadShape.FormData;
 
 export namespace WebhookPayloadShape {
     export interface Object_ extends FernRegistry.api.v1.read.ObjectType {
@@ -14,5 +15,9 @@ export namespace WebhookPayloadShape {
     export interface Reference {
         type: "reference";
         value: FernRegistry.api.v1.read.TypeReference;
+    }
+
+    export interface FormData extends FernRegistry.api.v1.read.FormDataRequest {
+        type: "formData";
     }
 }

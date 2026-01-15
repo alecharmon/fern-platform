@@ -13,9 +13,44 @@ export function generateWebhookPayloadExample(
             return generateExampleObject(shape, resolveTypeById, false, new Set(), 0);
         case "reference":
             return generateExampleFromTypeReference(shape.value, resolveTypeById, false, new Set(), 0);
+        case "formData":
+            return generateFormDataWebhookPayloadExample(shape, resolveTypeById);
         default:
             assertNever(shape);
     }
+}
+
+function generateFormDataWebhookPayloadExample(
+    formDataRequest: APIV1Write.FormDataRequest,
+    resolveTypeById: ResolveTypeById
+): Record<string, unknown> {
+    const example: Record<string, unknown> = {};
+    formDataRequest.properties.forEach((property) => {
+        switch (property.type) {
+            case "file": {
+                if (property.value.isOptional) {
+                    break;
+                }
+                if (property.value.type === "fileArray") {
+                    example[property.value.key] = ["<filename1>", "<filename2>"];
+                } else {
+                    example[property.value.key] = "<filename1>";
+                }
+                break;
+            }
+            case "bodyProperty": {
+                example[property.key] = generateExampleFromTypeReference(
+                    property.valueType,
+                    resolveTypeById,
+                    false,
+                    new Set(),
+                    0
+                );
+                break;
+            }
+        }
+    });
+    return example;
 }
 
 export function generateHttpRequestBodyExample(

@@ -27,7 +27,13 @@ types:
   WebhookPayload:
     extends: commons.WithDescription
     properties:
-      shape: type.TypeShape
+      shape: WebhookPayloadShape
+
+  WebhookPayloadShape:
+    union:
+      object: type.ObjectType
+      alias: type.TypeReference
+      formData: type.FormDataRequest
 
   WebhookHttpMethod:
     enum:

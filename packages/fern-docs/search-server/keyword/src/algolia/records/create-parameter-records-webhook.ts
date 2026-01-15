@@ -1,7 +1,7 @@
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 
 import type { EndpointBaseRecord, ParameterRecord } from "../types";
-import { createParameterRecord, extractObjectPropertiesFromShape } from "./create-parameter-records";
+import { createParameterRecord, extractWebhookPayloadProperties } from "./create-parameter-records";
 
 export interface CreateWebhookParameterRecordsOptions {
     endpointBase: EndpointBaseRecord;
@@ -32,7 +32,7 @@ export function createWebhookParameterRecords({
 
     const payload = webhook.payloads?.[0];
     if (payload?.shape) {
-        const payloadProperties = extractObjectPropertiesFromShape(payload.shape, types, 15);
+        const payloadProperties = extractWebhookPayloadProperties(payload.shape, types, 15);
         payloadProperties.forEach(({ property, breadcrumb }) => {
             records.push(
                 createParameterRecord({

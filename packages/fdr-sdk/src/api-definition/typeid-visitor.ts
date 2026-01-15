@@ -63,12 +63,23 @@ export class ApiTypeIdVisitor {
             ApiTypeIdVisitor.visitTypeShape(header.valueShape, visit);
         });
         if (webhook.payloads?.[0] != null) {
-            ApiTypeIdVisitor.visitTypeShape(webhook.payloads[0].shape, visit);
+            ApiTypeIdVisitor.visitWebhookPayloadShape(webhook.payloads[0].shape, visit);
         }
         webhook.responses?.forEach((response) => {
             if (response.body != null) {
                 ApiTypeIdVisitor.visitHttpResponseBodyShape(response.body, visit);
             }
+        });
+    }
+
+    public static visitWebhookPayloadShape(
+        payloadShape: Latest.WebhookPayloadShape,
+        visit: (typeId: Latest.TypeId) => void
+    ): void {
+        return visitDiscriminatedUnion(payloadShape)._visit({
+            object: (value) => ApiTypeIdVisitor.visitObjectType(value, visit),
+            alias: (value) => ApiTypeIdVisitor.visitTypeReference(value.value, visit),
+            formData: (value) => ApiTypeIdVisitor.visitFormDataRequest(value, visit)
         });
     }
 
