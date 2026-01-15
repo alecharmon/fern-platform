@@ -64,7 +64,7 @@
     "react": "catalog:",
     "server-only": "^0.0.1",
     "ts-essentials": "catalog:",
-    "undici": "^6.21.2",
+    "undici": "^6.23.0",
     "unist-util-visit": "^5.0.0",
     "url-join": "catalog:",
     "zod": "catalog:"

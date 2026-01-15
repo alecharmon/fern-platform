@@ -94,7 +94,7 @@
     "tsup": "catalog:",
     "tsx": "^4.7.1",
     "typescript": "catalog:",
-    "undici": "^6.20.1",
+    "undici": "^6.23.0",
     "url-join": "^4.0.1",
     "uuid": "catalog:",
     "vitest": "catalog:",
