@@ -9,6 +9,7 @@ export interface Auth0SessionData {
     user: Auth0User;
     accessToken: string;
     permissions?: string[];
+    orgId?: string;
 }
 
 interface CITestSession {
@@ -86,21 +87,15 @@ export const getCurrentSession = cache(async (): Promise<Auth0SessionData | unde
         return undefined;
     }
 
-    console.debug("[getCurrentSession] Decoded accessToken:", jwt.decode(session.tokenSet.accessToken));
-    console.debug(
-        "[getCurrentSession] permissions from accessToken:",
-        (jwt.decode(session.tokenSet.accessToken) as any)?.permissions
-    );
-    console.debug(`[getCurrentSession] Active session found for user: ${session.user.sub}`);
+    let decodedAccessToken = jwt.decode(session.tokenSet.accessToken) as any;
     return {
         user: {
             ...session.user,
             sub: Auth0UserID(session.user.sub)
         },
         accessToken: session.tokenSet.accessToken,
-        permissions: session.tokenSet.accessToken
-            ? ((jwt.decode(session.tokenSet.accessToken) as any)?.permissions ?? [])
-            : []
+        orgId: decodedAccessToken?.org_id,
+        permissions: session.tokenSet.accessToken ? (decodedAccessToken?.permissions ?? []) : []
     };
 });
 

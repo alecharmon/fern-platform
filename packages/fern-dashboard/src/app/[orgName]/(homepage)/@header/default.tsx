@@ -1,7 +1,6 @@
 import { PopoverArrow } from "@radix-ui/react-popover";
 import { BookOpen, ExternalLink, RotateCcw } from "lucide-react";
 import { Suspense } from "react";
-
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { LogoutButton } from "@/components/auth/LogoutButton";
