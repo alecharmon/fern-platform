@@ -431,6 +431,7 @@ class UpstashKvCache implements KvCache {
  *
  * - isLocalDev() = true (fern docs dev CLI): No caching at all for hot reload to work
  * - isDocsDev = true (pnpm docs:dev in monorepo): In-memory cache
+ * - isSelfHosted() = true: In-memory cache (no Upstash available)
  * - Production: Upstash KV cache
  */
 export function createKvCache(isDocsDev: boolean): KvCache {
@@ -441,9 +442,10 @@ export function createKvCache(isDocsDev: boolean): KvCache {
         console.debug("[KvCache] Using no-op cache for local CLI development (hot reload enabled)");
         return new NoOpKvCache();
     }
-    // For monorepo docs development (pnpm docs:dev), use in-memory cache
-    if (isDocsDev) {
-        console.debug("[KvCache] Using in-memory cache for docs development");
+    // For monorepo docs development (pnpm docs:dev) or self-hosted mode, use in-memory cache
+    // Self-hosted mode doesn't have access to Upstash, so we use in-memory cache for ISR to work
+    if (isDocsDev || isSelfHosted()) {
+        console.debug("[KvCache] Using in-memory cache for docs development or self-hosted mode");
         return new InMemoryKvCache();
     }
     return new UpstashKvCache();

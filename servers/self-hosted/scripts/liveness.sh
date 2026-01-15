@@ -16,6 +16,7 @@ MINIO_PID=$(jq -r '.minio_pid' "$PID_FILE")
 JAEGER_PID=$(jq -r '.jaeger_pid' "$PID_FILE")
 FDR_PID=$(jq -r '.fdr_pid' "$PID_FILE")
 DOCS_PID=$(jq -r '.docs_pid' "$PID_FILE")
+CACHE_PROXY_PID=$(jq -r '.cache_proxy_pid // 0' "$PID_FILE")
 
 is_process_alive() {
     local pid=$1
@@ -64,6 +65,12 @@ fi
 
 if ! is_process_alive "$DOCS_PID" "Next.js Docs"; then
     FAILED=1
+fi
+
+if [ -n "${CACHE_PROXY_PID:-}" ] && [ "$CACHE_PROXY_PID" != "0" ]; then
+    if ! is_process_alive "$CACHE_PROXY_PID" "Cache Proxy"; then
+        FAILED=1
+    fi
 fi
 
 if [ $FAILED -eq 1 ]; then

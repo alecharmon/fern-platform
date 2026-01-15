@@ -107,9 +107,14 @@ if ! check_docs_generation; then
     FAILED=1
 fi
 
-# Check Next.js Docs with optional BASE_PATH
+# Check Cache Proxy stats endpoint (confirms proxy is running)
+if ! check_http_endpoint "http://localhost:3000/__cache/stats" "Cache Proxy"; then
+    FAILED=1
+fi
+
+# Check Next.js Docs through Cache Proxy with optional BASE_PATH
 NEXTJS_URL="http://localhost:3000${NEXT_PUBLIC_BASE_PATH:-}"
-if ! check_http_endpoint "$NEXTJS_URL" "Next.js Docs"; then
+if ! check_http_endpoint "$NEXTJS_URL" "Next.js Docs (via Cache Proxy)"; then
     FAILED=1
 fi
 

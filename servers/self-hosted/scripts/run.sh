@@ -533,11 +533,15 @@ fi
 
 # --------------  Start nextapp --------------
 
-log "Waiting for docs to start at localhost:3000..."
+# Next.js runs on internal port 3001, cache proxy runs on external port 3000
+NEXTJS_INTERNAL_PORT=3001
+CACHE_PROXY_PORT=3000
+
+log "Starting Next.js on internal port ${NEXTJS_INTERNAL_PORT}..."
 
 cd /nextapp/packages/fern-docs/bundle
-HOSTNAME="0.0.0.0" \
-PORT=3000 \
+HOSTNAME="127.0.0.1" \
+PORT=${NEXTJS_INTERNAL_PORT} \
 NEXT_PUBLIC_FDR_ORIGIN_PORT=8080 \
 NEXT_PUBLIC_FDR_ORIGIN="http://localhost:8080" \
 NEXT_PUBLIC_FDR_LAMBDA_ORIGIN="http://localhost:8080" \
@@ -558,8 +562,64 @@ docs_pid=$!
 if [ $? -ne 0 ]; then
     log "Warning: Failed to start docs server (server.js), continuing anyway."
 else
-    log "docs_pid: $docs_pid"
+    log "Next.js docs_pid: $docs_pid"
 fi
+
+# Wait for Next.js to be ready before starting cache proxy
+log "Waiting for Next.js to start on port ${NEXTJS_INTERNAL_PORT}..."
+NEXTJS_ATTEMPTS=0
+MAX_NEXTJS_ATTEMPTS=30
+until curl -f -s --max-time 5 "http://127.0.0.1:${NEXTJS_INTERNAL_PORT}/" > /dev/null 2>&1; do
+    NEXTJS_ATTEMPTS=$((NEXTJS_ATTEMPTS + 1))
+    if [ $NEXTJS_ATTEMPTS -ge $MAX_NEXTJS_ATTEMPTS ]; then
+        log "WARNING: Next.js not ready after $MAX_NEXTJS_ATTEMPTS attempts, starting cache proxy anyway"
+        break
+    fi
+    log "Next.js not ready yet, waiting... ($NEXTJS_ATTEMPTS/$MAX_NEXTJS_ATTEMPTS)"
+    sleep 2
+done
+if [ $NEXTJS_ATTEMPTS -lt $MAX_NEXTJS_ATTEMPTS ]; then
+    log "Next.js is ready on port ${NEXTJS_INTERNAL_PORT}"
+fi
+
+# --------------  Start cache proxy --------------
+log "Starting cache proxy on port ${CACHE_PROXY_PORT}..."
+
+# Cache proxy configuration
+# CACHE_MAX_ENTRIES: Maximum number of pages to cache (default: 1000)
+# CACHE_MAX_ENTRY_SIZE: Maximum size per cached entry in bytes (default: 5MB)
+# CACHE_DEFAULT_TTL: Default cache TTL in seconds (default: 3600 = 1 hour)
+# CACHE_PROXY_DEBUG: Set to "1" for verbose logging
+CACHE_PROXY_PORT=${CACHE_PROXY_PORT} \
+NEXTJS_PORT=${NEXTJS_INTERNAL_PORT} \
+NEXTJS_HOST="127.0.0.1" \
+CACHE_MAX_ENTRIES="${CACHE_MAX_ENTRIES:-1000}" \
+CACHE_MAX_ENTRY_SIZE="${CACHE_MAX_ENTRY_SIZE:-5242880}" \
+CACHE_DEFAULT_TTL="${CACHE_DEFAULT_TTL:-3600}" \
+CACHE_PROXY_DEBUG="${CACHE_PROXY_DEBUG:-0}" \
+node /scripts/cache-proxy.js 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
+cache_proxy_pid=$!
+log "Cache proxy PID: $cache_proxy_pid"
+
+# Wait for cache proxy to be ready
+log "Waiting for cache proxy to start on port ${CACHE_PROXY_PORT}..."
+PROXY_ATTEMPTS=0
+MAX_PROXY_ATTEMPTS=15
+until curl -f -s --max-time 5 "http://127.0.0.1:${CACHE_PROXY_PORT}/__cache/stats" > /dev/null 2>&1; do
+    PROXY_ATTEMPTS=$((PROXY_ATTEMPTS + 1))
+    if [ $PROXY_ATTEMPTS -ge $MAX_PROXY_ATTEMPTS ]; then
+        log "WARNING: Cache proxy not ready after $MAX_PROXY_ATTEMPTS attempts"
+        break
+    fi
+    log "Cache proxy not ready yet, waiting... ($PROXY_ATTEMPTS/$MAX_PROXY_ATTEMPTS)"
+    sleep 1
+done
+if [ $PROXY_ATTEMPTS -lt $MAX_PROXY_ATTEMPTS ]; then
+    log "Cache proxy is ready on port ${CACHE_PROXY_PORT}"
+fi
+
+log "Docs available at http://localhost:${CACHE_PROXY_PORT} (with caching)"
+log "Cache stats available at http://localhost:${CACHE_PROXY_PORT}/__cache/stats"
 
 # --------------  Finish nextapp --------------
 
@@ -578,13 +638,15 @@ jq -n \
   --arg jaeger "${jaeger_pid:-0}" \
   --arg fdr "${fdr_pid:-0}" \
   --arg docs "${docs_pid:-0}" \
+  --arg cache_proxy "${cache_proxy_pid:-0}" \
   '{
     postgres_pid: ($postgres | tonumber),
     meili_pid: ($meili | tonumber),
     minio_pid: ($minio | tonumber),
     jaeger_pid: ($jaeger | tonumber),
     fdr_pid: ($fdr | tonumber),
-    docs_pid: ($docs | tonumber)
+    docs_pid: ($docs | tonumber),
+    cache_proxy_pid: ($cache_proxy | tonumber)
   }' > "$PID_FILE"
 
 log "PIDs saved to $PID_FILE"
