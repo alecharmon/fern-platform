@@ -6,9 +6,11 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { SELF_HOSTED_CONTAINER_NAME, setup, teardown } from "./setupSelfHostedDocs";
 import {
     getContainerId,
+    testCacheStatsEndpoint,
     testDocsUIAccessible,
     testDocsUIElements,
     testExternalCallsBlocked,
+    testFrontendCacheWorking,
     testServicesAfterPort3000Check
 } from "./testHelpers";
 
@@ -191,5 +193,21 @@ describe("Docs UI is functional", () => {
         expect(containerId).toBeTruthy();
 
         await testDocsUIElements(containerId);
+    });
+});
+
+describe("Frontend cache is working", () => {
+    it("cache stats endpoint is accessible and returns valid data", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testCacheStatsEndpoint(containerId);
+    });
+
+    it("cache is working and serving cached responses", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testFrontendCacheWorking(containerId);
     });
 });

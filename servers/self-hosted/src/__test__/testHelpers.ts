@@ -448,3 +448,96 @@ export async function testDocsUIElements(
 
     throw new Error(`Docs UI failed to return valid content after ${maxRetries} attempts: ${lastError?.message}`);
 }
+
+/**
+ * Cache stats response from the cache proxy
+ */
+export interface CacheStats {
+    size: number;
+    maxSize: number;
+    hits: number;
+    misses: number;
+    hitRate: string;
+}
+
+/**
+ * Get cache stats from the cache proxy
+ */
+export async function getCacheStats(
+    containerId: string,
+    endpoint: string = "http://localhost:3000/__cache/stats"
+): Promise<CacheStats> {
+    const { stdout: statsJson } = await execa("docker", ["exec", containerId, "curl", "-s", endpoint]);
+    return JSON.parse(statsJson) as CacheStats;
+}
+
+/**
+ * Test that the frontend cache is working by making requests and checking cache stats
+ */
+export async function testFrontendCacheWorking(
+    containerId: string,
+    docsEndpoint: string = "http://localhost:3000",
+    cacheStatsEndpoint: string = "http://localhost:3000/__cache/stats"
+): Promise<void> {
+    const initialStats = await getCacheStats(containerId, cacheStatsEndpoint);
+    const initialHits = initialStats.hits;
+    const initialMisses = initialStats.misses;
+
+    await execa("docker", ["exec", containerId, "curl", "-s", "-o", "/dev/null", docsEndpoint]);
+    await execa("docker", ["exec", containerId, "curl", "-s", "-o", "/dev/null", docsEndpoint]);
+    await execa("docker", ["exec", containerId, "curl", "-s", "-o", "/dev/null", docsEndpoint]);
+
+    const afterStats = await getCacheStats(containerId, cacheStatsEndpoint);
+
+    const newHits = afterStats.hits - initialHits;
+    const newMisses = afterStats.misses - initialMisses;
+
+    if (newHits === 0 && newMisses > 0) {
+        throw new Error(
+            `Cache is not working: ${newMisses} new misses but 0 new hits. ` +
+                `Expected at least 2 cache hits from 3 identical requests. ` +
+                `Stats: ${JSON.stringify(afterStats)}`
+        );
+    }
+
+    if (newHits < 2) {
+        throw new Error(
+            `Cache hit rate too low: only ${newHits} hits from 3 identical requests. ` +
+                `Expected at least 2 cache hits. Stats: ${JSON.stringify(afterStats)}`
+        );
+    }
+}
+
+/**
+ * Test that the cache stats endpoint is accessible and returns valid data
+ */
+export async function testCacheStatsEndpoint(
+    containerId: string,
+    endpoint: string = "http://localhost:3000/__cache/stats"
+): Promise<void> {
+    const { stdout: httpCode } = await execa("docker", [
+        "exec",
+        containerId,
+        "curl",
+        "-s",
+        "-o",
+        "/dev/null",
+        "-w",
+        "%{http_code}",
+        endpoint
+    ]);
+
+    if (httpCode !== "200") {
+        throw new Error(`Cache stats endpoint returned ${httpCode}, expected 200`);
+    }
+
+    const stats = await getCacheStats(containerId, endpoint);
+
+    if (typeof stats.size !== "number" || typeof stats.maxSize !== "number") {
+        throw new Error(`Cache stats missing required fields: ${JSON.stringify(stats)}`);
+    }
+
+    if (typeof stats.hits !== "number" || typeof stats.misses !== "number") {
+        throw new Error(`Cache stats missing hit/miss counters: ${JSON.stringify(stats)}`);
+    }
+}
