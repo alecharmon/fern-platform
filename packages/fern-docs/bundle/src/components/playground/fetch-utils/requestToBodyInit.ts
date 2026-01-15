@@ -17,19 +17,9 @@ export async function toBodyInit(body: ProxyRequest["body"]): Promise<BodyInit |
                         if (value.value === undefined) {
                             break;
                         }
-                        if (value.contentType === "application/json") {
-                            formData.append(
-                                key,
-                                new Blob([JSON.stringify(value.value)], {
-                                    type: "application/json"
-                                })
-                            );
-                        } else {
-                            const finalValue =
-                                typeof value.value === "string" ? value.value : JSON.stringify(value.value);
+                        const finalValue = typeof value.value === "string" ? value.value : JSON.stringify(value.value);
 
-                            formData.append(key, finalValue);
-                        }
+                        formData.append(key, finalValue);
                         break;
                     }
                     case "file":
@@ -53,18 +43,9 @@ export async function toBodyInit(body: ProxyRequest["body"]): Promise<BodyInit |
                             if (item === undefined) {
                                 continue;
                             }
-                            if (value.contentType === "application/json") {
-                                formData.append(
-                                    key,
-                                    new Blob([JSON.stringify(item)], {
-                                        type: "application/json"
-                                    })
-                                );
-                            } else {
-                                const finalValue = typeof item === "string" ? item : JSON.stringify(item);
+                            const finalValue = typeof item === "string" ? item : JSON.stringify(item);
 
-                                formData.append(key, finalValue);
-                            }
+                            formData.append(key, finalValue);
                         }
                         break;
                     default:
