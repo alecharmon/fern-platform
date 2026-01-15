@@ -15,10 +15,32 @@ export interface Resource {
     label: string;
 }
 
+const ORG_ROLE_OPTIONS: { value: UserRole; label: string; description: string }[] = [
+    { value: "viewer", label: "Viewer", description: "Read-only access to the Dashboard and Analytics." },
+    {
+        value: "editor",
+        label: "Editor",
+        description: "Can view, edit, and publish SDKs and Docs. CLI access is configurable separately."
+    },
+    {
+        value: "admin",
+        label: "Admin",
+        description: "Full control including member management and CLI access."
+    }
+];
+
 const RESOURCE_ROLE_OPTIONS: { value: ResourceRole; label: string; description: string }[] = [
-    { value: "viewer", label: "Viewer", description: "View-only access to this resource" },
-    { value: "editor", label: "Editor", description: "Can edit and publish changes" },
-    { value: "admin", label: "Admin", description: "Full control of this resource" }
+    { value: "viewer", label: "Viewer", description: "Read-only access to the Dashboard and Analytics." },
+    {
+        value: "editor",
+        label: "Editor",
+        description: "Can view, edit, and publish this Docs site. CLI access is configurable separately."
+    },
+    {
+        value: "admin",
+        label: "Admin",
+        description: "Full control to this Docs site including custom domain setup and CLI access."
+    }
 ];
 
 export declare namespace RoleSelectionGroup {
@@ -88,7 +110,7 @@ export function RoleSelectionGroup({
                                 "flex cursor-pointer items-start space-x-3 rounded-lg border p-3 transition-colors",
                                 accessType === "org"
                                     ? "border-primary bg-primary/5"
-                                    : "border-gray-200 hover:bg-gray-50",
+                                    : "border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-400",
                                 disabled && "cursor-not-allowed opacity-50"
                             )}
                         >
@@ -113,7 +135,7 @@ export function RoleSelectionGroup({
                                 "flex cursor-pointer items-start space-x-3 rounded-lg border p-3 transition-colors",
                                 accessType === "fine-grained"
                                     ? "border-primary bg-primary/5"
-                                    : "border-gray-200 hover:bg-gray-50",
+                                    : "border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-400",
                                 disabled && "cursor-not-allowed opacity-50"
                             )}
                         >
@@ -145,22 +167,16 @@ export function RoleSelectionGroup({
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="viewer" description="Read-only access to the Dashboard and analytics">
-                                <span className="font-medium text-sm">Viewer</span>
-                            </SelectItem>
-                            <SelectItem
-                                value="editor"
-                                description="Can work with SDKs and documentation, CLI access configurable separately"
-                            >
-                                <span className="font-medium text-sm">Editor</span>
-                            </SelectItem>
-                            <SelectItem
-                                value="admin"
-                                description="Full administrative access including member management and CLI access"
-                            >
-                                <span className="font-medium text-sm">Admin</span>
-                            </SelectItem>
+                        <SelectContent className="max-w-[462px]">
+                            {ORG_ROLE_OPTIONS.map((roleOption) => (
+                                <SelectItem
+                                    key={roleOption.value}
+                                    value={roleOption.value}
+                                    description={roleOption.description}
+                                >
+                                    {roleOption.label}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
@@ -174,7 +190,16 @@ export function RoleSelectionGroup({
                             CLI Access
                         </Label>
                         <p className="text-muted-foreground text-xs">
-                            Allow user to publish SDKs and documentation sites to production
+                            Allow user to publish SDKs and Docs sites to production via the{" "}
+                            <a
+                                href="https://buildwithfern.com/learn/cli-api-reference/cli-reference/overview"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline"
+                            >
+                                Fern CLI
+                            </a>
+                            .
                         </p>
                     </div>
                     <Switch
@@ -200,14 +225,14 @@ export function RoleSelectionGroup({
                             No resources found for this organization.
                         </div>
                     ) : (
-                        <div className="space-y-2">
+                        <div className="max-h-64 space-y-2 overflow-y-auto pr-1 gap-2 flex flex-col">
                             {resources.map((resource) => {
                                 const currentRole = resourceRoles?.[resource.id] ?? "none";
                                 const currentCliAccess = resourceCliAccess?.[resource.id] ?? false;
                                 const showResourceCli = currentRole === "editor";
 
                                 return (
-                                    <div key={resource.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                    <div key={resource.id} className="rounded-lg p-0 border-none">
                                         <div className="flex items-center justify-between">
                                             <div className="min-w-0 flex-1">
                                                 <div className="truncate text-sm font-medium">{resource.label}</div>
@@ -222,9 +247,13 @@ export function RoleSelectionGroup({
                                                 <SelectTrigger className="w-32">
                                                     <SelectValue />
                                                 </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="none">
-                                                        <span className="text-gray-500">No access</span>
+                                                <SelectContent className="max-w-[320px]">
+                                                    <SelectItem
+                                                        key={"no-access-none"}
+                                                        value={"none"}
+                                                        description={"User has no access to this resource."}
+                                                    >
+                                                        No access
                                                     </SelectItem>
                                                     {RESOURCE_ROLE_OPTIONS.map((roleOption) => (
                                                         <SelectItem
@@ -239,8 +268,10 @@ export function RoleSelectionGroup({
                                             </Select>
                                         </div>
                                         {showResourceCli && (
-                                            <div className="mt-2 flex items-center justify-between border-t border-gray-200 pt-2">
-                                                <div className="text-xs text-gray-600">CLI Access</div>
+                                            <div className="mt-2 flex items-center justify-between border-t border-gray-200 pt-2 dark:border-gray-600">
+                                                <div className="text-xs text-gray-600 dark:text-gray-800">
+                                                    CLI Access
+                                                </div>
                                                 <Switch
                                                     checked={currentCliAccess}
                                                     onCheckedChange={(checked) =>

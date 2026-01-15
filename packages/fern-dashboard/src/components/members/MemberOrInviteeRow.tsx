@@ -39,7 +39,7 @@ const ROLE_CONFIG: Record<Roles, { label: string; className: string }> = {
     },
     fine_grain: {
         label: "Fine-grained",
-        className: "bg-green-100 text-green-800 border-green-400"
+        className: "bg-gray-200 text-gray-900 border-gray-400"
     }
 };
 
@@ -68,16 +68,15 @@ export function MemberOrInviteeRow({
 }: MemberOrInviteeRow.Props) {
     const shouldShowDropdownMenuTrigger = dropdownMenuItems != null || forceShowDropownMenuTrigger;
 
-    // Sort roles so CLI always appears last
-    const sortedRoles = roles?.slice().sort((a, b) => {
-        if (a === "cli") {
-            return 1;
-        }
-        if (b === "cli") {
-            return -1;
-        }
-        return 0;
-    });
+    // Sort roles: primary role first, then fine_grain, then CLI last
+    const roleOrder: Record<Roles, number> = {
+        admin: 0,
+        editor: 0,
+        viewer: 0,
+        fine_grain: 1,
+        cli: 2
+    };
+    const sortedRoles = roles?.slice().sort((a, b) => roleOrder[a] - roleOrder[b]);
 
     return (
         <div className="border-border flex justify-between border-b p-4 last:border-b-0">

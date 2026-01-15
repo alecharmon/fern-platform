@@ -3,13 +3,14 @@
 import type { Roles } from "@fern-api/user-permissions";
 import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import UserMinusIcon from "@heroicons/react/24/outline/UserMinusIcon";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { GetMembers200ResponseOneOfInner } from "auth0";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { removeUserFromOrg } from "@/app/actions/removeUserFromOrg";
 import { Auth0UserID } from "@/app/services/auth0/types";
+import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { type inferQueryData, ReactQueryKey } from "@/state/queryKeys";
 import { useOrganizations } from "@/state/useOrganizations";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
@@ -25,7 +26,7 @@ export declare namespace MemberRow {
     }
 }
 
-const VALID_ROLES: Roles[] = ["admin", "editor", "viewer", "cli"];
+const VALID_ROLES: Roles[] = ["admin", "editor", "viewer", "cli", "fine_grain"];
 
 export function MemberRow({ member, currentUserId, isFineGrainedPermissionsEnabled = false }: MemberRow.Props) {
     const orgName = useOrgNameFromPathname();
@@ -37,9 +38,32 @@ export function MemberRow({ member, currentUserId, isFineGrainedPermissionsEnabl
     const queryClient = useQueryClient();
     const isCurrentUser = currentUserId === member.user_id;
 
+    // Fetch user's resource roles to check for fine-grained access
+    const userResourceRolesQuery = useQuery({
+        queryKey: ["user-resource-roles", orgName, member.user_id],
+        queryFn: async () => {
+            const response = await DashboardApiClient.getUserResourceRoles({
+                orgName,
+                userId: Auth0UserID(member.user_id)
+            });
+            if (!response.ok) {
+                return [];
+            }
+            return response.resourceRoles ?? [];
+        },
+        enabled: isFineGrainedPermissionsEnabled
+    });
+
+    const hasFineGrainedAccess =
+        isFineGrainedPermissionsEnabled && userResourceRolesQuery.data && userResourceRolesQuery.data.length > 0;
+
     const memberRoles = member.roles
         .map((role) => role.name)
         .filter((role): role is Roles => VALID_ROLES.includes(role as Roles));
+
+    // When user has fine-grained access, only show the fine_grain badge (not org-level roles)
+    // When user has org-level access, show org-level roles (admin/editor/viewer + cli if applicable)
+    const displayRoles: Roles[] = hasFineGrainedAccess ? ["fine_grain"] : memberRoles.filter((r) => r !== "fine_grain");
 
     const removeMember = useMutation({
         mutationFn: () =>
@@ -94,7 +118,7 @@ export function MemberRow({ member, currentUserId, isFineGrainedPermissionsEnabl
             <MemberOrInviteeRow
                 title={member.name}
                 subtitle={member.email}
-                roles={memberRoles}
+                roles={displayRoles}
                 pictureUrl={member.picture}
                 dropdownMenuItems={
                     <>

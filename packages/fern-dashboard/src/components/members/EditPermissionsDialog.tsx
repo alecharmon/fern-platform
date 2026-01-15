@@ -130,51 +130,96 @@ export function EditPermissionsDialog({
 
     const updateRoles = useMutation({
         mutationFn: async () => {
-            // Determine the org role based on access type
-            // When fine-grained is selected, set minimal org role (viewer) so access is controlled by resource roles
-            const orgRole: UserRole =
-                isFineGrainedPermissionsEnabled && accessType === "fine-grained" ? "viewer" : selectedRole;
+            const docsSites = docsSitesQuery.data ?? [];
 
-            const newRoles: Roles[] = [orgRole];
-            // Only add global CLI access when using org-level access AND role is editor
-            if (cliEnabled && (!isFineGrainedPermissionsEnabled || accessType === "org") && orgRole === "editor") {
-                newRoles.push("cli");
-            }
+            if (isFineGrainedPermissionsEnabled && accessType === "fine-grained") {
+                // Fine-grained access: Only update resource roles, don't update org-level roles
+                // Step 1: Clear all existing resource roles and CLI access
+                for (const site of docsSites) {
+                    const existingRole = initialResourceRoles[site.url];
+                    if (existingRole && existingRole !== "none") {
+                        await removeUserResourceRole({
+                            orgName,
+                            userId,
+                            resourceType: "docs",
+                            resourceId: site.url,
+                            role: existingRole
+                        });
+                    }
+                    if (initialResourceCliAccess[site.url]) {
+                        await removeUserResourceRole({
+                            orgName,
+                            userId,
+                            resourceType: "docs",
+                            resourceId: site.url,
+                            role: "cli" as ResourceRole
+                        });
+                    }
+                }
 
-            // Update Auth0 roles (filter out fine_grain as it's managed separately)
-            const filteredCurrentRoles = currentRoles.filter(
-                (r): r is Exclude<Roles, "fine_grain"> => r !== "fine_grain"
-            );
-            const filteredNewRoles = newRoles.filter((r): r is Exclude<Roles, "fine_grain"> => r !== "fine_grain");
-            const auth0Result = await DashboardApiClient.updateUserRoles({
-                orgName,
-                userId,
-                currentRoles: filteredCurrentRoles,
-                newRoles: filteredNewRoles
-            });
+                // Step 2: Set new resource roles
+                for (const site of docsSites) {
+                    const newRole = resourceRoles[site.url];
 
-            if (!auth0Result.ok) {
-                throw new Error(auth0Result.message ?? "Failed to update Auth0 roles");
-            }
+                    if (newRole && newRole !== "none") {
+                        await setUserResourceRole({
+                            orgName,
+                            userId,
+                            resourceType: "docs",
+                            resourceId: site.url,
+                            role: newRole
+                        });
+                    }
 
-            // Update resource roles if fine-grained permissions is enabled
-            if (isFineGrainedPermissionsEnabled) {
-                const docsSites = docsSitesQuery.data ?? [];
+                    const newCliAccess = resourceCliAccess[site.url] ?? false;
+                    if (newRole === "editor" && newCliAccess) {
+                        await setUserResourceRole({
+                            orgName,
+                            userId,
+                            resourceType: "docs",
+                            resourceId: site.url,
+                            role: "cli" as ResourceRole
+                        });
+                    }
+                }
 
-                if (accessType === "org") {
-                    // Remove all resource roles when switching to org-level access
+                return { ok: true };
+            } else {
+                // Org-level access: Only update org-level roles, clear any fine-grained roles
+                const newRoles: Roles[] = [selectedRole];
+                if (cliEnabled && selectedRole === "editor") {
+                    newRoles.push("cli");
+                }
+
+                // Update Auth0 roles
+                const filteredCurrentRoles = currentRoles.filter(
+                    (r): r is Exclude<Roles, "fine_grain"> => r !== "fine_grain"
+                );
+                const filteredNewRoles = newRoles.filter((r): r is Exclude<Roles, "fine_grain"> => r !== "fine_grain");
+                const auth0Result = await DashboardApiClient.updateUserRoles({
+                    orgName,
+                    userId,
+                    currentRoles: filteredCurrentRoles,
+                    newRoles: filteredNewRoles
+                });
+
+                if (!auth0Result.ok) {
+                    throw new Error(auth0Result.message ?? "Failed to update Auth0 roles");
+                }
+
+                // Clear all existing resource roles when switching to org-level
+                if (isFineGrainedPermissionsEnabled) {
                     for (const site of docsSites) {
-                        const currentRole = initialResourceRoles[site.url];
-                        if (currentRole && currentRole !== "none") {
+                        const existingRole = initialResourceRoles[site.url];
+                        if (existingRole && existingRole !== "none") {
                             await removeUserResourceRole({
                                 orgName,
                                 userId,
                                 resourceType: "docs",
                                 resourceId: site.url,
-                                role: currentRole
+                                role: existingRole
                             });
                         }
-                        // Also remove CLI role for this resource
                         if (initialResourceCliAccess[site.url]) {
                             await removeUserResourceRole({
                                 orgName,
@@ -185,85 +230,17 @@ export function EditPermissionsDialog({
                             });
                         }
                     }
-                } else {
-                    // Fine-grained access: update resource roles and CLI access
-                    for (const site of docsSites) {
-                        const newRole = resourceRoles[site.url];
-                        const previousRole = initialResourceRoles[site.url];
-
-                        // Handle primary role changes
-                        if (newRole !== previousRole) {
-                            if (newRole === "none" && previousRole && previousRole !== "none") {
-                                // Remove the role
-                                await removeUserResourceRole({
-                                    orgName,
-                                    userId,
-                                    resourceType: "docs",
-                                    resourceId: site.url,
-                                    role: previousRole
-                                });
-                            } else if (newRole && newRole !== "none") {
-                                // Set or update the role
-                                await setUserResourceRole({
-                                    orgName,
-                                    userId,
-                                    resourceType: "docs",
-                                    resourceId: site.url,
-                                    role: newRole,
-                                    previousRole: previousRole !== "none" ? previousRole : undefined
-                                });
-                            }
-                        }
-
-                        // Handle CLI access changes per resource (only valid when role is editor)
-                        const newCliAccess = resourceCliAccess[site.url] ?? false;
-                        const previousCliAccess = initialResourceCliAccess[site.url] ?? false;
-                        const isEditor = newRole === "editor";
-                        const wasEditor = previousRole === "editor";
-
-                        // If role changed away from editor, always remove CLI
-                        if (wasEditor && !isEditor && previousCliAccess) {
-                            await removeUserResourceRole({
-                                orgName,
-                                userId,
-                                resourceType: "docs",
-                                resourceId: site.url,
-                                role: "cli" as ResourceRole
-                            });
-                        } else if (isEditor && newCliAccess !== previousCliAccess) {
-                            // Only update CLI if role is editor
-                            if (newCliAccess) {
-                                // Add CLI access
-                                await setUserResourceRole({
-                                    orgName,
-                                    userId,
-                                    resourceType: "docs",
-                                    resourceId: site.url,
-                                    role: "cli" as ResourceRole
-                                });
-                            } else {
-                                // Remove CLI access
-                                await removeUserResourceRole({
-                                    orgName,
-                                    userId,
-                                    resourceType: "docs",
-                                    resourceId: site.url,
-                                    role: "cli" as ResourceRole
-                                });
-                            }
-                        }
-                    }
                 }
-            }
 
-            return auth0Result;
+                return auth0Result;
+            }
         },
         onSuccess: async () => {
             toast.success(`Permissions updated for ${userName}`);
             // Invalidate and refetch fresh data
             await refetch();
             await queryClient.refetchQueries({ queryKey: ReactQueryKey.orgMembers(orgName) });
-            await queryClient.invalidateQueries({ queryKey: ["user-resource-roles", orgName, userId] });
+            await queryClient.refetchQueries({ queryKey: ["user-resource-roles", orgName, userId] });
             onOpenChange(false);
         },
         onError: (error) => {
@@ -288,18 +265,30 @@ export function EditPermissionsDialog({
 
     const handleSave = () => {
         if (!hasChanges) {
-            onOpenChange(false);
+            toast.warning("The user already has this role access.");
             return;
         }
         updateRoles.mutate();
     };
 
-    // Reset state when dialog opens
+    // Reset state when dialog opens or closes without saving
     const handleOpenChange = (newOpen: boolean) => {
         if (newOpen) {
             setSelectedRole(currentPrimaryRole);
             setCliEnabled(currentCliEnabled);
             // Access type and resource roles will be set by the useEffect when data loads
+        } else {
+            // Reset all state when closing without saving
+            setSelectedRole(currentPrimaryRole);
+            setCliEnabled(currentCliEnabled);
+            setAccessType(
+                Object.values(initialResourceRoles).some((r) => r !== "none") ||
+                    Object.values(initialResourceCliAccess).some((c) => c)
+                    ? "fine-grained"
+                    : "org"
+            );
+            setResourceRoles(initialResourceRoles);
+            setResourceCliAccess(initialResourceCliAccess);
         }
         onOpenChange(newOpen);
     };
@@ -312,7 +301,17 @@ export function EditPermissionsDialog({
             <DialogContent className="max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Edit permissions for {userName}</DialogTitle>
-                    <DialogDescription>Update the role and access permissions for this member.</DialogDescription>
+                    <DialogDescription>
+                        Update the role and access permissions for this member.{" "}
+                        <a
+                            href="https://buildwithfern.com/learn/dashboard/configuration/permissions"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                        >
+                            Learn more
+                        </a>
+                    </DialogDescription>
                 </DialogHeader>
                 <DialogBody>
                     <div className="space-y-6">
@@ -351,7 +350,7 @@ export function EditPermissionsDialog({
                     <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isUpdating}>
                         Cancel
                     </Button>
-                    <Button onClick={handleSave} disabled={isUpdating || !hasChanges}>
+                    <Button onClick={handleSave} disabled={isUpdating}>
                         {isUpdating ? (
                             <>
                                 Saving...
