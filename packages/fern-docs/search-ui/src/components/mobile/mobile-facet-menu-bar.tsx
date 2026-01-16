@@ -1,10 +1,10 @@
 import { isHttpMethod } from "@fern-api/docs-utils";
 import { EMPTY_ARRAY } from "@fern-api/ui-core-utils";
 import {
+    ApiMethodBadge,
     AvailabilityBadge,
     AvailabilityDisplayNames,
     Badge,
-    HttpMethodBadge,
     isAvailability
 } from "@fern-docs/components/badges";
 import { cn } from "@fern-docs/components/cn";
@@ -148,10 +148,10 @@ const FacetBadge = forwardRef<
 >(({ facet, value, ...props }, ref) => {
     if (value != null && isHttpMethod(value)) {
         return (
-            <HttpMethodBadge ref={ref} method={value} variant="solid" interactive rounded {...props}>
+            <ApiMethodBadge ref={ref} method={value} variant="solid" interactive rounded {...props}>
                 {value}
                 <ChevronDown />
-            </HttpMethodBadge>
+            </ApiMethodBadge>
         );
     }
 

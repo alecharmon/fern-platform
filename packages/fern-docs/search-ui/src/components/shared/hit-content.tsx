@@ -1,5 +1,5 @@
 import { formatUtc } from "@fern-api/ui-core-utils";
-import { AvailabilityBadge, HttpMethodBadge } from "@fern-docs/components/badges";
+import { ApiMethodBadge, AvailabilityBadge } from "@fern-docs/components/badges";
 import { cn } from "@fern-docs/components/cn";
 import { uniq } from "es-toolkit/array";
 import { ChevronRight } from "lucide-react";
@@ -51,7 +51,7 @@ function Breadcrumb({
     );
 }
 
-type SegmentType = "markdown" | "changelog" | "parameter" | "http" | "webhook" | "websocket" | "grpc";
+type SegmentType = "markdown" | "changelog" | "parameter" | "http" | "webhook" | "websocket" | "grpc" | "graphql";
 const SEGMENT_DISPLAY_NAMES: Record<SegmentType, string> = {
     markdown: "Guide",
     changelog: "Changelog",
@@ -59,7 +59,8 @@ const SEGMENT_DISPLAY_NAMES: Record<SegmentType, string> = {
     http: "Endpoint",
     webhook: "Webhook",
     websocket: "WebSocket",
-    grpc: "gRPC"
+    grpc: "gRPC",
+    graphql: "GraphQL"
 };
 
 function HitContentWithTitle({ hit, children }: { hit: AlgoliaRecordHit; children: ReactNode }) {
@@ -148,7 +149,7 @@ function ApiReferenceHitContent({
         <HitContentWithTitle hit={hit}>
             <div className="inline-flex max-w-full items-baseline gap-1">
                 <Breadcrumb breadcrumb={breadcrumb} productAndVersion={productAndVersion} endingArrow />
-                <HttpMethodBadge method={hit.method} size="sm" className="shrink-0" variant="outlined" />
+                <ApiMethodBadge method={hit.method} size="sm" className="shrink-0" variant="outlined" />
                 <span className="fern-search-hit-endpoint-path shrink">{hit.endpoint_path}</span>
             </div>
         </HitContentWithTitle>
@@ -172,7 +173,7 @@ function ParameterHitContent({
         <HitContentWithTitle hit={hit}>
             <div className="inline-flex max-w-full items-baseline gap-1">
                 <Breadcrumb breadcrumb={breadcrumb} productAndVersion={productAndVersion} endingArrow />
-                <HttpMethodBadge method={hit.method} size="sm" className="shrink-0" variant="outlined" />
+                <ApiMethodBadge method={hit.method} size="sm" className="shrink-0" variant="outlined" />
                 <span className="fern-search-hit-endpoint-path shrink">{hit.endpoint_path}</span>
                 {sectionLabel && <span className="text-(color:--grayscale-a9) text-xs shrink-0">{sectionLabel}</span>}
                 {hit.parameter_type && (

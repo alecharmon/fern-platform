@@ -33,6 +33,8 @@ types:
 
   GrpcId: string
 
+  GraphQLOperationId: string
+
   TypeId: string
 
   PageId: string

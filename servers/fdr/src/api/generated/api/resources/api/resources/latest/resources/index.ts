@@ -4,6 +4,8 @@ export * as commons from "./commons";
 export * from "./commons/types";
 export * as endpoint from "./endpoint";
 export * from "./endpoint/types";
+export * as graphql from "./graphql";
+export * from "./graphql/types";
 export * as type_ from "./type";
 export * from "./type/types";
 export * as webhook from "./webhook";

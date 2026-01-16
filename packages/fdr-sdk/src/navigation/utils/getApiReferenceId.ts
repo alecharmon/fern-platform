@@ -39,6 +39,7 @@ export function getApiReferenceId(
         webSocket: RETURN_API_DEFINITION_ID,
         webhook: RETURN_API_DEFINITION_ID,
         grpc: RETURN_API_DEFINITION_ID,
+        graphql: RETURN_API_DEFINITION_ID,
         apiPackage: RETURN_API_DEFINITION_ID,
         unversioned: RETURN_UNDEFINED,
         landingPage: RETURN_UNDEFINED

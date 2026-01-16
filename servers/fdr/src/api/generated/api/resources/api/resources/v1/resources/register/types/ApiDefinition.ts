@@ -7,6 +7,7 @@ export interface ApiDefinition {
     apiName: string | undefined;
     types: Record<FernRegistry.TypeId, FernRegistry.api.v1.register.TypeDefinition>;
     subpackages: Record<FernRegistry.api.v1.SubpackageId, FernRegistry.api.v1.register.ApiDefinitionSubpackage>;
+    graphqlOperations: Record<FernRegistry.GraphQlOperationId, FernRegistry.api.latest.GraphQlOperation>;
     auth: FernRegistry.api.v1.register.ApiAuth | undefined;
     authSchemes: Record<FernRegistry.AuthSchemeId, FernRegistry.api.v1.register.ApiAuth> | undefined;
     globalHeaders: FernRegistry.api.v1.register.Header[] | undefined;

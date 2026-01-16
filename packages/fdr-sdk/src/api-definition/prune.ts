@@ -7,7 +7,8 @@ export type PruningNodeType =
     | { type: "endpoint"; endpointId: Latest.EndpointId }
     | { type: "webSocket"; webSocketId: Latest.WebSocketId }
     | { type: "webhook"; webhookId: Latest.WebhookId }
-    | { type: "grpc"; grpcId: Latest.GrpcId };
+    | { type: "grpc"; grpcId: Latest.GrpcId }
+    | { type: "graphql"; graphqlOperationId: Latest.GraphQlOperationId };
 
 class ApiDefinitionPruner {
     static instances = new WeakMap<Latest.ApiDefinition, ApiDefinitionPruner>();
@@ -33,6 +34,7 @@ class ApiDefinitionPruner {
             endpoints: {},
             websockets: {},
             webhooks: {},
+            graphqlOperations: {},
             types: {},
             subpackages: {},
             auths: {}
@@ -67,6 +69,12 @@ class ApiDefinitionPruner {
                 const found = this.api.endpoints[grpcIdAsEndpointId];
                 if (found) {
                     toRet.endpoints[grpcIdAsEndpointId] = found;
+                    found.namespace?.forEach((subpackageId) => namespaces.add(subpackageId));
+                }
+            } else if (node.type === "graphql") {
+                const found = this.api.graphqlOperations[node.graphqlOperationId];
+                if (found) {
+                    toRet.graphqlOperations[node.graphqlOperationId] = found;
                     found.namespace?.forEach((subpackageId) => namespaces.add(subpackageId));
                 }
             }
@@ -105,6 +113,10 @@ class ApiDefinitionPruner {
 
         for (const webhook of Object.values(partiallyPrunedApi.webhooks)) {
             ApiTypeIdVisitor.visitWebhookDefinition(webhook, (typeId) => typeIds.add(typeId));
+        }
+
+        for (const graphqlOperation of Object.values(partiallyPrunedApi.graphqlOperations)) {
+            ApiTypeIdVisitor.visitGraphQlOperation(graphqlOperation, (typeId) => typeIds.add(typeId));
         }
 
         typeIds = this.expandTypeIds(typeIds);

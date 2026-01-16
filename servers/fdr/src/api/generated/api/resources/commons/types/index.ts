@@ -8,6 +8,7 @@ export * from "./EndpointIdentifier";
 export * from "./EndpointPathLiteral";
 export * from "./EnvironmentId";
 export * from "./FileId";
+export * from "./GraphQlOperationId";
 export * from "./GrpcId";
 export * from "./GrpcMethod";
 export * from "./HttpMethod";

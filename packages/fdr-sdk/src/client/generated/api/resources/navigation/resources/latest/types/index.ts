@@ -10,6 +10,8 @@ export * from "./EndpointNode.js";
 export * from "./EndpointPairNode.js";
 export * from "./ExternalProductNode.js";
 export * from "./FeatureFlagOptions.js";
+export * from "./GraphQlNode.js";
+export * from "./GraphQlOperationType.js";
 export * from "./GrpcNode.js";
 export * from "./InternalProductNode.js";
 export * from "./LandingPageNode.js";

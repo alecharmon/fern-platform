@@ -1,12 +1,12 @@
 import { HttpMethodOrder } from "@fern-api/docs-utils";
 import type { Meta, StoryObj } from "@storybook/nextjs";
 
-import { HttpMethodBadge } from "./http-method-badge";
+import { ApiMethodBadge } from "./http-method-badge";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
-const meta: Meta<typeof HttpMethodBadge> = {
-    title: "Badges/HttpMethodBadge",
-    component: HttpMethodBadge,
+const meta: Meta<typeof ApiMethodBadge> = {
+    title: "Badges/ApiMethodBadge",
+    component: ApiMethodBadge,
     parameters: {
         // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout
         layout: "centered"
@@ -86,7 +86,7 @@ export const Primary: Story = {
                     }}
                 >
                     {HttpMethodOrder.map((method) => (
-                        <HttpMethodBadge key={method} {...args} method={method} />
+                        <ApiMethodBadge key={method} {...args} method={method} />
                     ))}
                 </div>
                 <div
@@ -100,7 +100,7 @@ export const Primary: Story = {
                     }}
                 >
                     {HttpMethodOrder.map((method) => (
-                        <HttpMethodBadge key={method} {...args} method={method} />
+                        <ApiMethodBadge key={method} {...args} method={method} />
                     ))}
                 </div>
             </div>

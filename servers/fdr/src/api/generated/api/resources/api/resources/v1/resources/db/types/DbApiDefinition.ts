@@ -8,6 +8,7 @@ export interface DbApiDefinition {
     rootPackage: FernRegistry.api.v1.db.DbApiDefinitionPackage;
     types: Record<FernRegistry.TypeId, FernRegistry.api.v1.read.TypeDefinition>;
     subpackages: Record<FernRegistry.api.v1.SubpackageId, FernRegistry.api.v1.db.DbApiDefinitionSubpackage>;
+    graphqlOperations: Record<FernRegistry.GraphQlOperationId, FernRegistry.api.latest.GraphQlOperation> | undefined;
     snippetsConfiguration: FernRegistry.api.v1.register.SnippetsConfig | undefined;
     auth: FernRegistry.api.v1.read.ApiAuth | undefined;
     authSchemes: Record<FernRegistry.AuthSchemeId, FernRegistry.api.v1.read.ApiAuth> | undefined;

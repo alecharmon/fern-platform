@@ -18,6 +18,7 @@ export function joiner(
             endpoints: { ...first.endpoints },
             websockets: { ...first.websockets },
             webhooks: { ...first.webhooks },
+            graphqlOperations: { ...first.graphqlOperations },
             types: { ...first.types },
             subpackages: { ...first.subpackages },
             auths: { ...first.auths },

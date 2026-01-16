@@ -30,4 +30,5 @@ export type NavigationNode =
     | FernNavigation.WebSocketNode
     | FernNavigation.WebhookNode
     | FernNavigation.GrpcNode
+    | FernNavigation.GraphQlNode
     | FernNavigation.ApiPackageNode;

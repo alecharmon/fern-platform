@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
+
+imports:
+  rootCommons: ../../commons.yml
+  commons: commons.yml
+  type: type.yml
+  endpoint: endpoint.yml
+
+types:
+  GraphQLOperationType:
+    enum:
+      - QUERY
+      - MUTATION
+      - SUBSCRIPTION
+
+  GraphQLOperation:
+    docs: A GraphQL operation (query, mutation, or subscription)
+    extends:
+      - commons.WithDescription
+      - commons.WithAvailability
+      - commons.WithNamespace
+    properties:
+      id: rootCommons.GraphQLOperationId
+      operationType: GraphQLOperationType
+      name: string
+      displayName: optional<string>
+      arguments: optional<list<GraphQLArgument>>
+      returnType: type.TypeShape
+      examples: optional<list<GraphQLExample>>
+      snippets: optional<map<endpoint.Language, list<endpoint.CodeSnippet>>>
+
+  GraphQLArgument:
+    docs: An argument to a GraphQL operation
+    extends:
+      - commons.WithDescription
+      - commons.WithAvailability
+    properties:
+      name: string
+      type: type.TypeShape
+      defaultValue: optional<unknown>
+
+  GraphQLExample:
+    docs: An example of a GraphQL operation call
+    extends: commons.WithDescription
+    properties:
+      name: optional<string>
+      query: string
+      variables: optional<map<string, unknown>>
+      response: optional<unknown>

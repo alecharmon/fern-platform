@@ -2283,6 +2283,7 @@ main();
     },
   },
   "globalHeaders": [],
+  "graphqlOperations": {},
   "id": "pinnacle-api",
   "snippetsConfiguration": undefined,
   "subpackages": {},

@@ -1,6 +1,6 @@
 "use client";
 
-import type { HttpOrWssOrGrpc } from "@fern-api/docs-utils";
+import type { ApiMethodType } from "@fern-api/docs-utils";
 import type { EndpointDefinition, WebSocketChannel } from "@fern-api/fdr-sdk/api-definition";
 
 import { EndpointUrlWithOverflow } from "@fern-docs/components/api-reference/endpoints/EndpointUrlWithOverflow";
@@ -17,7 +17,7 @@ export function EndpointUrlWithPlaygroundBaseUrl({
 }: {
     endpoint: WebSocketChannel | EndpointDefinition;
     className?: string;
-    method?: HttpOrWssOrGrpc;
+    method?: ApiMethodType;
     lang: string;
 }) {
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint);

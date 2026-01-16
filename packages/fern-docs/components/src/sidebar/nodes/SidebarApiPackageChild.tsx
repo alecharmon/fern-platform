@@ -48,6 +48,7 @@ export function SidebarApiPackageChild({
         case "webSocket":
         case "webhook":
         case "grpc":
+        case "graphql":
             return <SidebarApiLeafNode node={node} depth={depth} shallow={shallow} />;
         case "endpointPair":
             return <SidebarEndpointPairNode node={node} depth={depth} shallow={shallow} />;

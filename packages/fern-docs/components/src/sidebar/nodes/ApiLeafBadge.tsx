@@ -2,7 +2,7 @@
 
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 
-import { HttpMethodBadge } from "../../badges";
+import { ApiMethodBadge } from "../../badges";
 import { cn } from "../../cn";
 import { useIsSelectedSidebarNode } from "../../state/navigation";
 
@@ -10,14 +10,22 @@ export function ApiLeafBadge({ node, className }: { node: FernNavigation.Navigat
     const selected = useIsSelectedSidebarNode(node.id);
     if (node.type === "webSocket") {
         return (
-            <HttpMethodBadge method="GET" size="sm" variant={selected ? "solid" : "subtle"} className={className}>
+            <ApiMethodBadge method="GET" size="sm" variant={selected ? "solid" : "subtle"} className={className}>
                 WSS
-            </HttpMethodBadge>
+            </ApiMethodBadge>
+        );
+    } else if (node.type === "graphql") {
+        // GraphQL operations display their operation type as a badge
+        const label = node.operationType === "QUERY" ? "Q" : node.operationType === "MUTATION" ? "M" : "S";
+        return (
+            <ApiMethodBadge method="GET" size="sm" variant={selected ? "solid" : "subtle"} className={className}>
+                {label}
+            </ApiMethodBadge>
         );
     } else {
         if (node.type === "endpoint" && node.isResponseStream) {
             return (
-                <HttpMethodBadge
+                <ApiMethodBadge
                     method={node.method}
                     size="sm"
                     variant={selected ? "solid" : "subtle"}
@@ -26,12 +34,12 @@ export function ApiLeafBadge({ node, className }: { node: FernNavigation.Navigat
                     })}
                 >
                     STREAM
-                </HttpMethodBadge>
+                </ApiMethodBadge>
             );
         }
 
         return (
-            <HttpMethodBadge
+            <ApiMethodBadge
                 method={node.method}
                 size="sm"
                 variant={selected ? "solid" : "subtle"}

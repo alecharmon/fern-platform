@@ -18,6 +18,7 @@ export class ApiDefinitionPruner {
             apiName: this.api.apiName,
             rootPackage,
             subpackages,
+            graphqlOperations: this.api.graphqlOperations ?? {},
             snippetsConfiguration: this.api.snippetsConfiguration,
             types,
             auth: this.api.auth,

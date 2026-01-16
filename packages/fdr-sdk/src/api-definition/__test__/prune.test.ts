@@ -214,6 +214,7 @@ const api: Latest.ApiDefinition = {
     websockets: {
         [websocket1.id]: websocket1
     },
+    graphqlOperations: {},
     types: {
         [Latest.TypeId("type-1")]: type1,
         [Latest.TypeId("type-2")]: type2,

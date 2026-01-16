@@ -72,6 +72,16 @@ export class ApiTypeIdVisitor {
         });
     }
 
+    public static visitGraphQlOperation(
+        operation: Latest.GraphQlOperation,
+        visit: (typeId: Latest.TypeId) => void
+    ): void {
+        operation.arguments?.forEach((arg) => {
+            ApiTypeIdVisitor.visitTypeShape(arg.type, visit);
+        });
+        ApiTypeIdVisitor.visitTypeShape(operation.returnType, visit);
+    }
+
     public static visitWebhookPayloadShape(
         payloadShape: Latest.WebhookPayloadShape,
         visit: (typeId: Latest.TypeId) => void

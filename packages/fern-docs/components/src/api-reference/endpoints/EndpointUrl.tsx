@@ -1,6 +1,6 @@
 "use client";
 
-import { type HttpOrWssOrGrpc, removeTrailingSlash } from "@fern-api/docs-utils";
+import { type ApiMethodType, removeTrailingSlash } from "@fern-api/docs-utils";
 import type { APIV1Read } from "@fern-api/fdr-sdk";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { sanitizeUrl, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
@@ -9,7 +9,7 @@ import { useBooleanState, useCopyToClipboard } from "@fern-ui/react-commons";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import React, { type PropsWithChildren, type ReactElement, type ReactNode, useMemo, useRef, useState } from "react";
 import { noop } from "ts-essentials";
-import { HttpMethodBadge } from "../../badges";
+import { ApiMethodBadge } from "../../badges";
 import { CopyToClipboardButton } from "../../CopyToClipboardButton";
 import { cn } from "../../cn";
 import { FernTooltip, FernTooltipProvider } from "../../FernTooltip";
@@ -17,7 +17,7 @@ import { FernTooltip, FernTooltipProvider } from "../../FernTooltip";
 export declare namespace EndpointUrl {
     export type Props = React.PropsWithChildren<{
         path: ApiDefinition.PathPart[];
-        method: HttpOrWssOrGrpc;
+        method: ApiMethodType;
         baseUrl?: string;
         environmentId?: ApiDefinition.EnvironmentId;
         options?: APIV1Read.Environment[];
@@ -170,7 +170,7 @@ export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<En
                         }
                     }}
                 >
-                    <HttpMethodBadge method={method} />
+                    <ApiMethodBadge method={method} />
 
                     <div className={cn("flex items-center")}>
                         <span

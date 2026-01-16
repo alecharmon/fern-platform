@@ -7,6 +7,7 @@ imports:
   commons: ../commons.yml
   webhook: webhook.yml
   websocket: websocket.yml
+  graphql: ../../latest/graphql.yml
   registerRoot: ../register/__package__.yml
   latestEndpoint: ../../latest/endpoint.yml
   latestType: ../../latest/type.yml
@@ -67,6 +68,7 @@ types:
       rootPackage: ApiDefinitionPackage
       types: map<rootCommons.TypeId, type.TypeDefinition>
       subpackages: map<commons.SubpackageId, ApiDefinitionSubpackage>
+      graphqlOperations: map<rootCommons.GraphQLOperationId, graphql.GraphQLOperation>
       snippetsConfiguration: optional<registerRoot.SnippetsConfig>
       auth: optional<ApiAuth>
       authSchemes: optional<map<rootCommons.AuthSchemeId, ApiAuth>>

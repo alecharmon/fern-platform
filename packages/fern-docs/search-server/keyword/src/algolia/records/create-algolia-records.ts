@@ -4,6 +4,7 @@ import { measureBytes } from "@fern-api/ui-core-utils";
 import { groupBy } from "es-toolkit/array";
 
 import type { AlgoliaRecord } from "../types";
+import { createApiReferenceRecordGraphQl } from "./create-api-reference-record-graphql";
 import { createApiReferenceRecordGrpc } from "./create-api-reference-record-grpc";
 import { createApiReferenceRecordHttp } from "./create-api-reference-record-http";
 import { createApiReferenceRecordWebSocket } from "./create-api-reference-record-web-socket";
@@ -11,10 +12,12 @@ import { createApiReferenceRecordWebhook } from "./create-api-reference-record-w
 import { createBaseRecord } from "./create-base-record";
 import { createChangelogRecord } from "./create-changelog-record";
 import { createEndpointBaseRecordGrpc } from "./create-endpoint-record-gprc";
+import { createEndpointBaseRecordGraphQl } from "./create-endpoint-record-graphql";
 import { createEndpointBaseRecordHttp } from "./create-endpoint-record-http";
 import { createEndpointBaseRecordWebSocket } from "./create-endpoint-record-web-socket";
 import { createEndpointBaseRecordWebhook } from "./create-endpoint-record-webhook";
 import { createMarkdownRecords } from "./create-markdown-records";
+import { createGraphQlParameterRecords } from "./create-parameter-records-graphql";
 import { createGrpcParameterRecords } from "./create-parameter-records-grpc";
 import { createHttpParameterRecords } from "./create-parameter-records-http";
 import { createWebSocketParameterRecords } from "./create-parameter-records-web-socket";
@@ -201,6 +204,32 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
             });
             records.push(...createApiReferenceRecordGrpc({ grpcBase, grpc }));
             records.push(...createGrpcParameterRecords({ endpointBase: grpcBase, grpc, types: apiDefinition.types }));
+            return;
+        }
+
+        if (node.type === "graphql") {
+            const graphqlOperation = apiDefinition.graphqlOperations[node.graphqlOperationId];
+            if (!graphqlOperation) {
+                console.error(
+                    `API leaf node ${node.slug} has graphql operation id ${node.graphqlOperationId} but no graphql operation`
+                );
+                return;
+            }
+
+            const graphqlBase = createEndpointBaseRecordGraphQl({
+                base,
+                node,
+                graphqlOperation,
+                types: apiDefinition.types
+            });
+            records.push(...createApiReferenceRecordGraphQl({ graphqlBase, graphqlOperation }));
+            records.push(
+                ...createGraphQlParameterRecords({
+                    endpointBase: graphqlBase,
+                    graphqlOperation,
+                    types: apiDefinition.types
+                })
+            );
             return;
         }
     });

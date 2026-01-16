@@ -30,6 +30,7 @@ export function convertDbAPIDefinitionToRead(dbShape: APIV1Db.DbApiDefinition): 
                 return [id, transformSubpackage({ dbShape: subpackage })];
             })
         ),
+        graphqlOperations: dbShape.graphqlOperations ?? {},
         snippetsConfiguration: dbShape.snippetsConfiguration,
         auth: dbShape.auth,
         authSchemes: dbShape.authSchemes,

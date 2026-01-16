@@ -1,4 +1,4 @@
-import { AvailabilityBadge, HttpMethodBadge } from "@fern-docs/components/badges";
+import { ApiMethodBadge, AvailabilityBadge } from "@fern-docs/components/badges";
 import type { FacetsResponse } from "@fern-docs/search-keyword";
 import { type FacetName, SEARCHABLE_FACET_ATTRIBUTES } from "@fern-docs/search-keyword/types";
 import type { ReactNode } from "react";
@@ -7,19 +7,19 @@ import type { FilterOption } from "../types";
 
 const FACET_DISPLAY_MAP: Record<string, Record<string, ReactNode>> = {
     method: {
-        GET: <HttpMethodBadge method="GET" variant="subtle" />,
-        POST: <HttpMethodBadge method="POST" variant="subtle" />,
-        PUT: <HttpMethodBadge method="PUT" variant="subtle" />,
-        PATCH: <HttpMethodBadge method="PATCH" variant="subtle" />,
-        DELETE: <HttpMethodBadge method="DELETE" variant="subtle" />,
-        HEAD: <HttpMethodBadge method="HEAD" variant="subtle" />,
-        OPTIONS: <HttpMethodBadge method="OPTIONS" variant="subtle" />,
-        CONNECT: <HttpMethodBadge method="CONNECT" variant="subtle" />,
-        TRACE: <HttpMethodBadge method="TRACE" variant="subtle" />,
-        UNARY: <HttpMethodBadge method="UNARY" variant="subtle" />,
-        CLIENT_STREAM: <HttpMethodBadge method="CLIENT_STREAM" variant="subtle" />,
-        SERVER_STREAM: <HttpMethodBadge method="SERVER_STREAM" variant="subtle" />,
-        BIDIRECTIONAL_STREAM: <HttpMethodBadge method="BIDIRECTIONAL_STREAM" variant="subtle" />
+        GET: <ApiMethodBadge method="GET" variant="subtle" />,
+        POST: <ApiMethodBadge method="POST" variant="subtle" />,
+        PUT: <ApiMethodBadge method="PUT" variant="subtle" />,
+        PATCH: <ApiMethodBadge method="PATCH" variant="subtle" />,
+        DELETE: <ApiMethodBadge method="DELETE" variant="subtle" />,
+        HEAD: <ApiMethodBadge method="HEAD" variant="subtle" />,
+        OPTIONS: <ApiMethodBadge method="OPTIONS" variant="subtle" />,
+        CONNECT: <ApiMethodBadge method="CONNECT" variant="subtle" />,
+        TRACE: <ApiMethodBadge method="TRACE" variant="subtle" />,
+        UNARY: <ApiMethodBadge method="UNARY" variant="subtle" />,
+        CLIENT_STREAM: <ApiMethodBadge method="CLIENT_STREAM" variant="subtle" />,
+        SERVER_STREAM: <ApiMethodBadge method="SERVER_STREAM" variant="subtle" />,
+        BIDIRECTIONAL_STREAM: <ApiMethodBadge method="BIDIRECTIONAL_STREAM" variant="subtle" />
     },
     availability: {
         Stable: <AvailabilityBadge availability="Stable" rounded variant="subtle" />,
@@ -44,19 +44,19 @@ const FACET_DISPLAY_MAP: Record<string, Record<string, ReactNode>> = {
 
 const FACET_SMALL_DISPLAY_MAP: Record<string, Record<string, ReactNode>> = {
     method: {
-        GET: <HttpMethodBadge method="GET" size="sm" variant="outlined" />,
-        POST: <HttpMethodBadge method="POST" size="sm" variant="outlined" />,
-        PUT: <HttpMethodBadge method="PUT" size="sm" variant="outlined" />,
-        PATCH: <HttpMethodBadge method="PATCH" size="sm" variant="outlined" />,
-        DELETE: <HttpMethodBadge method="DELETE" size="sm" variant="outlined" />,
-        HEAD: <HttpMethodBadge method="HEAD" size="sm" variant="outlined" />,
-        OPTIONS: <HttpMethodBadge method="OPTIONS" size="sm" variant="outlined" />,
-        CONNECT: <HttpMethodBadge method="CONNECT" size="sm" variant="outlined" />,
-        TRACE: <HttpMethodBadge method="TRACE" size="sm" variant="outlined" />,
-        UNARY: <HttpMethodBadge method="UNARY" size="sm" variant="outlined" />,
-        CLIENT_STREAM: <HttpMethodBadge method="CLIENT_STREAM" size="sm" variant="outlined" />,
-        SERVER_STREAM: <HttpMethodBadge method="SERVER_STREAM" size="sm" variant="outlined" />,
-        BIDIRECTIONAL_STREAM: <HttpMethodBadge method="BIDIRECTIONAL_STREAM" size="sm" variant="outlined" />
+        GET: <ApiMethodBadge method="GET" size="sm" variant="outlined" />,
+        POST: <ApiMethodBadge method="POST" size="sm" variant="outlined" />,
+        PUT: <ApiMethodBadge method="PUT" size="sm" variant="outlined" />,
+        PATCH: <ApiMethodBadge method="PATCH" size="sm" variant="outlined" />,
+        DELETE: <ApiMethodBadge method="DELETE" size="sm" variant="outlined" />,
+        HEAD: <ApiMethodBadge method="HEAD" size="sm" variant="outlined" />,
+        OPTIONS: <ApiMethodBadge method="OPTIONS" size="sm" variant="outlined" />,
+        CONNECT: <ApiMethodBadge method="CONNECT" size="sm" variant="outlined" />,
+        TRACE: <ApiMethodBadge method="TRACE" size="sm" variant="outlined" />,
+        UNARY: <ApiMethodBadge method="UNARY" size="sm" variant="outlined" />,
+        CLIENT_STREAM: <ApiMethodBadge method="CLIENT_STREAM" size="sm" variant="outlined" />,
+        SERVER_STREAM: <ApiMethodBadge method="SERVER_STREAM" size="sm" variant="outlined" />,
+        BIDIRECTIONAL_STREAM: <ApiMethodBadge method="BIDIRECTIONAL_STREAM" size="sm" variant="outlined" />
     },
     availability: {
         Stable: <AvailabilityBadge availability="Stable" size="sm" variant="outlined" />,

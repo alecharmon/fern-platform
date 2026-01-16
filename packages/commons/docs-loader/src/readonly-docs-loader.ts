@@ -532,6 +532,8 @@ export function createEndpointCacheKey(pruneType: PruningNodeType) {
             return `webhook:${pruneType.webhookId}`;
         case "grpc":
             return `grpc:${pruneType.grpcId}`;
+        case "graphql":
+            return `graphql:${pruneType.graphqlOperationId}`;
         default:
             throw new UnreachableCaseError(pruneType);
     }
@@ -1657,6 +1659,11 @@ export function createPruneKey(node: FernNavigation.NavigationNodeApiLeaf): Prun
             return {
                 type: "grpc",
                 grpcId: node.grpcId
+            };
+        case "graphql":
+            return {
+                type: "graphql",
+                graphqlOperationId: node.graphqlOperationId
             };
         default:
             throw new Error(`Unknown node type: ${node}`);

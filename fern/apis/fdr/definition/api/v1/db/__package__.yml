@@ -10,6 +10,7 @@ imports:
   readWebsocket: ../read/websocket.yml
   readEndpoint: ../read/endpoint.yml
   registerRoot: ../register/__package__.yml
+  graphql: ../../latest/graphql.yml
 
 types:
   DbApiDefinition:
@@ -19,6 +20,7 @@ types:
       rootPackage: DbApiDefinitionPackage
       types: map<rootCommons.TypeId, readType.TypeDefinition>
       subpackages: map<commons.SubpackageId, DbApiDefinitionSubpackage>
+      graphqlOperations: optional<map<rootCommons.GraphQLOperationId, graphql.GraphQLOperation>>
       snippetsConfiguration: optional<registerRoot.SnippetsConfig>
       auth: optional<readRoot.ApiAuth>
       authSchemes: optional<map<rootCommons.AuthSchemeId, readRoot.ApiAuth>>

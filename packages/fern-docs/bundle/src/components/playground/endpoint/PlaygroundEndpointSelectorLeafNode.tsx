@@ -2,7 +2,7 @@
 
 import { conformExplorerRoute } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { HttpMethodBadge } from "@fern-docs/components/badges";
+import { ApiMethodBadge } from "@fern-docs/components/badges";
 import { cn } from "@fern-docs/components/cn";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
@@ -58,7 +58,7 @@ export const PlaygroundEndpointSelectorLeafNode = forwardRef<HTMLLIElement, Play
                             variant="minimal"
                             active={active}
                             icon={
-                                <HttpMethodBadge
+                                <ApiMethodBadge
                                     method={node.method}
                                     size="sm"
                                     variant={active ? "solid" : "subtle"}
@@ -67,7 +67,7 @@ export const PlaygroundEndpointSelectorLeafNode = forwardRef<HTMLLIElement, Play
                                     })}
                                 >
                                     {node.isResponseStream ? "STREAM" : undefined}
-                                </HttpMethodBadge>
+                                </ApiMethodBadge>
                             }
                         />
                     </FernTooltip>
@@ -88,14 +88,14 @@ export const PlaygroundEndpointSelectorLeafNode = forwardRef<HTMLLIElement, Play
                             variant="minimal"
                             active={active}
                             icon={
-                                <HttpMethodBadge
+                                <ApiMethodBadge
                                     method="GET"
                                     size="sm"
                                     variant={active ? "solid" : "subtle"}
                                     className="mr-1"
                                 >
                                     WSS
-                                </HttpMethodBadge>
+                                </ApiMethodBadge>
                             }
                         />
                     </FernTooltip>

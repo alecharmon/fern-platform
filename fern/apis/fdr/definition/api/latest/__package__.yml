@@ -4,6 +4,7 @@ imports:
   endpoint: endpoint.yml
   webhook: webhook.yml
   websocket: websocket.yml
+  graphql: graphql.yml
   type: type.yml
   commons: commons.yml
   rootCommons: ../../commons.yml
@@ -33,6 +34,7 @@ types:
       endpoints: map<rootCommons.EndpointId, endpoint.EndpointDefinition>
       websockets: map<rootCommons.WebSocketId, websocket.WebSocketChannel>
       webhooks: map<rootCommons.WebhookId, webhook.WebhookDefinition>
+      graphqlOperations: map<rootCommons.GraphQLOperationId, graphql.GraphQLOperation>
       types: map<rootCommons.TypeId, type.TypeDefinition>
       subpackages: map<commons.SubpackageId, commons.SubpackageMetadata>
       auths: map<rootCommons.AuthSchemeId, auth.AuthScheme>

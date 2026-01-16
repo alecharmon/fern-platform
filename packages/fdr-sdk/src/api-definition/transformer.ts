@@ -188,6 +188,7 @@ export class Transformer {
             endpoints: Object.fromEntries(endpoints),
             websockets: Object.fromEntries(websockets),
             webhooks: Object.fromEntries(webhooks),
+            graphqlOperations: api.graphqlOperations,
             types: Object.fromEntries(types),
             globalHeaders,
             auths: api.auths,

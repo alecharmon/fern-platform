@@ -24,6 +24,18 @@ export function isGrpcMethod(method: unknown): method is GrpcMethod {
     return typeof method === "string" && Object.prototype.hasOwnProperty.call(GrpcMethod, method);
 }
 
+export type GraphQlMethod = "QUERY" | "MUTATION" | "SUBSCRIPTION";
+
+export const GraphQlMethod: Record<GraphQlMethod, GraphQlMethod> = {
+    QUERY: "QUERY",
+    MUTATION: "MUTATION",
+    SUBSCRIPTION: "SUBSCRIPTION"
+} as const;
+
+export function isGraphQlMethod(method: unknown): method is GraphQlMethod {
+    return typeof method === "string" && Object.prototype.hasOwnProperty.call(GraphQlMethod, method);
+}
+
 export const HttpMethodOrder = [
     "GET",
     "POST",
@@ -42,4 +54,4 @@ export function isHttpMethod(value: string): value is HttpMethod {
 
 export type WssProtocol = "WSS";
 
-export type HttpOrWssOrGrpc = HttpMethod | WssProtocol | GrpcMethod;
+export type ApiMethodType = HttpMethod | WssProtocol | GrpcMethod | GraphQlMethod;

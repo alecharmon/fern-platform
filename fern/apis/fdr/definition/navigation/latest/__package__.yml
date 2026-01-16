@@ -92,6 +92,7 @@ types:
       - WebSocketNode
       - WebhookNode
       - GrpcNode
+      - GraphQLNode
       - PageNode
       - LinkNode
 
@@ -405,6 +406,22 @@ types:
       method: commons.GrpcMethod
       grpcId: commons.GrpcId
       # note: grpc methods do not have a playground
+
+  GraphQLNode:
+    extends:
+      - WithNodeMetadata
+      - WithApiDefinitionId
+    properties:
+      type: literal<"graphql">
+      operationType: GraphQLOperationType
+      graphqlOperationId: commons.GraphQLOperationId
+      playground: optional<PlaygroundSettings>
+
+  GraphQLOperationType:
+    enum:
+      - QUERY
+      - MUTATION
+      - SUBSCRIPTION
 
   ApiPackageNode:
     extends:

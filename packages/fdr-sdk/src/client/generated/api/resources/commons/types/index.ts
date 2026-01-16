@@ -8,6 +8,7 @@ export * from "./EndpointIdentifier.js";
 export * from "./EndpointPathLiteral.js";
 export * from "./EnvironmentId.js";
 export * from "./FileId.js";
+export * from "./GraphQlOperationId.js";
 export * from "./GrpcId.js";
 export * from "./GrpcMethod.js";
 export * from "./HttpMethod.js";

@@ -169,7 +169,7 @@ export const ChangelogRecordSchema = BaseRecordSchema.extend({
 const EndpointBaseRecordSchema = BaseRecordSchema.extend({
     api_definition_id: z.string(),
     api_endpoint_id: z.string(),
-    api_type: z.enum(["http", "webhook", "websocket", "grpc"]),
+    api_type: z.enum(["http", "webhook", "websocket", "grpc", "graphql"]),
     method: z.enum([
         "GET",
         "POST",
@@ -180,7 +180,10 @@ const EndpointBaseRecordSchema = BaseRecordSchema.extend({
         "UNARY",
         "CLIENT_STREAM",
         "SERVER_STREAM",
-        "BIDIRECTIONAL_STREAM"
+        "BIDIRECTIONAL_STREAM",
+        "QUERY",
+        "MUTATION",
+        "SUBSCRIPTION"
     ]),
     endpoint_path: z.string(),
     endpoint_path_alternates: z.array(z.string()).optional(),

@@ -70,6 +70,7 @@ export function convertAPIDefinitionToDb(
             });
             return subpackages;
         }, {}),
+        graphqlOperations: writeShape.graphqlOperations,
         snippetsConfiguration: writeShape.snippetsConfiguration,
         auth: writeShape.auth,
         authSchemes: writeShape.authSchemes,

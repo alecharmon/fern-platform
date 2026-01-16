@@ -8,6 +8,7 @@ export interface ApiDefinition {
     endpoints: Record<FernRegistry.EndpointId, FernRegistry.api.latest.EndpointDefinition>;
     websockets: Record<FernRegistry.WebSocketId, FernRegistry.api.latest.WebSocketChannel>;
     webhooks: Record<FernRegistry.WebhookId, FernRegistry.api.latest.WebhookDefinition>;
+    graphqlOperations: Record<FernRegistry.GraphQlOperationId, FernRegistry.api.latest.GraphQlOperation>;
     types: Record<FernRegistry.TypeId, FernRegistry.api.latest.TypeDefinition>;
     subpackages: Record<FernRegistry.api.latest.SubpackageId, FernRegistry.api.latest.SubpackageMetadata>;
     auths: Record<FernRegistry.AuthSchemeId, FernRegistry.api.latest.AuthScheme>;
