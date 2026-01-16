@@ -162,24 +162,30 @@ export function EditPermissionsDialog({
                     const newRole = resourceRoles[site.url];
 
                     if (newRole && newRole !== "none") {
-                        await setUserResourceRole({
+                        const result = await setUserResourceRole({
                             orgName,
                             userId,
                             resourceType: "docs",
                             resourceId: site.url,
                             role: newRole
                         });
+                        if (!result.success) {
+                            throw new Error(result.error ?? `Failed to set role for ${site.url}`);
+                        }
                     }
 
                     const newCliAccess = resourceCliAccess[site.url] ?? false;
                     if (newRole === "editor" && newCliAccess) {
-                        await setUserResourceRole({
+                        const cliResult = await setUserResourceRole({
                             orgName,
                             userId,
                             resourceType: "docs",
                             resourceId: site.url,
                             role: "cli" as ResourceRole
                         });
+                        if (!cliResult.success) {
+                            throw new Error(cliResult.error ?? `Failed to set CLI access for ${site.url}`);
+                        }
                     }
                 }
 

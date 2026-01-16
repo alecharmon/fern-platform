@@ -2,7 +2,9 @@
 
 import {
     addUserRoleForResource,
+    getRoles,
     type ResourceRole,
+    type Roles,
     removeRoles,
     removeUserRoleForResource
 } from "@fern-api/user-permissions";
@@ -36,9 +38,16 @@ export async function setUserResourceRole({
 
         const orgId = await getOrgIdFromName(orgName);
 
-        // Remove all org level roles to avoid conflicts
-        await removeRoles({ userId, orgId, roleNames: [] });
-        // Remove previous role if it exists
+        // Remove all org-level roles to avoid conflicts with fine-grained permissions
+        const currentRoles = await getRoles({ orgId, userId });
+        const orgLevelRoles = (currentRoles.data ?? []).filter(
+            (r): r is Exclude<Roles, "fine_grain"> => r !== "fine_grain"
+        );
+        if (orgLevelRoles.length > 0) {
+            await removeRoles({ userId, orgId, roleNames: orgLevelRoles });
+        }
+
+        // Remove previous resource role if it exists
         if (previousRole) {
             try {
                 await removeUserRoleForResource({

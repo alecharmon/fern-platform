@@ -16,14 +16,14 @@ export default async function OrgLayout({
     const { orgName } = await params;
     const session = await getCurrentSession();
 
+    const permissions: string[] = session?.permissions ?? [];
     // Check if user has access to this org (works even if not authenticated)
-    if (session) {
+    if (session && !permissions.includes("super-user")) {
         const organizations = await getAvailableOrgsForUser({
             userId: session.user.sub
         });
 
         const targetOrg = organizations.find((org) => org.name === orgName);
-
         // User doesn't have access to this org
         if (!targetOrg) {
             console.warn("[org] Org Id not found", targetOrg);
