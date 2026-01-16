@@ -27,10 +27,12 @@ export default async function EditPage({ searchParams }: EditPageProps) {
         // Show login UI with returnTo back to this page
         const returnTo = `/edit-page?docsUrl=${encodeURIComponent(docsUrl)}&slug=${encodeURIComponent(slug)}`;
         return (
-            <div className="flex min-h-screen items-center justify-center">
-                <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-lg border p-8 shadow-sm">
-                    <h1 className="text-xl font-semibold">Sign in to edit</h1>
-                    <p className="text-muted-foreground text-center text-sm">Please sign in to open the Fern editor.</p>
+            <div className="flex min-h-screen w-full items-center justify-center">
+                <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-lg border bg-white p-8 shadow-sm">
+                    <h1 className="text-xl font-semibold">Log in to Fern</h1>
+                    <p className="text-muted-foreground text-center text-sm">
+                        Please sign in to edit this page in Fern Editor.
+                    </p>
                     <div className="flex flex-col gap-2 w-full">
                         <GithubLoginButton returnTo={returnTo} />
                         <GoogleLoginButton returnTo={returnTo} />

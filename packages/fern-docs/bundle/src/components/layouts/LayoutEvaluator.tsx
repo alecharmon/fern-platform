@@ -89,7 +89,9 @@ export async function LayoutEvaluator({
 
     // prefer frontmatter values over global config
     // Construct full docs URL including basePath (e.g., "buildwithfern.com/learn")
-    const fullDocsUrl = metadata.basePath ? `${loader.domain}/${metadata.basePath}` : loader.domain;
+    // Strip any leading slash from basePath to avoid double slashes
+    const basePath = metadata.basePath?.replace(/^\//, "");
+    const fullDocsUrl = basePath ? `${loader.domain}/${basePath}` : loader.domain;
 
     const footer = (
         <FooterLayout
