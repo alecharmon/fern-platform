@@ -46,7 +46,8 @@ export class DefinitionObjectFactory {
                 header: undefined,
                 footer: undefined,
                 aiChatConfig: undefined,
-                pageActions: undefined
+                pageActions: undefined,
+                editThisPageLaunch: undefined
             },
             jsFiles: undefined,
             id: undefined

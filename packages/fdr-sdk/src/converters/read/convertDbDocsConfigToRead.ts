@@ -39,6 +39,7 @@ export function convertDbDocsConfigToRead({ dbShape }: { dbShape: DocsV1Db.DocsD
         announcement: dbShape.announcement,
         aiChatConfig: dbShape.aiChatConfig,
         pageActions: dbShape.pageActions,
+        editThisPageLaunch: dbShape.editThisPageLaunch,
         header: dbShape.header,
         footer: dbShape.footer
     };

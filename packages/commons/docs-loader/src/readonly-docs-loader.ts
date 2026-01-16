@@ -951,6 +951,7 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
                     filename: pageId,
                     markdown: page.markdown,
                     editThisPageUrl: page.editThisPageUrl,
+                    editThisPageLaunch: page.editThisPageLaunch,
                     css: config.css,
                     rawMarkdown: returnRawMarkdown ? page.rawMarkdown : undefined
                 };
@@ -981,6 +982,7 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
             filename: pageId,
             markdown: page.markdown,
             editThisPageUrl: page.editThisPageUrl,
+            editThisPageLaunch: page.editThisPageLaunch,
             css: response.definition.config.css,
             rawMarkdown: returnRawMarkdown ? page.rawMarkdown : undefined
         };

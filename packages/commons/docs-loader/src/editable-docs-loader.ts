@@ -52,6 +52,7 @@ class EditableDocsLoader implements DocsLoader {
         filename: string;
         markdown: string;
         editThisPageUrl?: string;
+        editThisPageLaunch?: "github" | "dashboard";
         css?: any;
         rawMarkdown?: string;
     }> {

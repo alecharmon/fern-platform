@@ -1,12 +1,15 @@
 import { t } from "@fern-docs/i18n";
 import { cn } from "../cn";
-import { EditThisPageButton } from "../EditThisPage";
+import { EditInDashboardButton, EditThisPageButton } from "../EditThisPage";
 
 export function AbstractFooterLayout({
     lang,
     feedback,
     hideNavLinks,
     editThisPageUrl,
+    editThisPageLaunch,
+    docsUrl,
+    slug,
     bottomNavigation,
     className,
     footerLinks,
@@ -17,6 +20,9 @@ export function AbstractFooterLayout({
     feedback?: React.ReactNode;
     hideNavLinks?: boolean;
     editThisPageUrl?: string;
+    editThisPageLaunch?: "github" | "dashboard";
+    docsUrl?: string;
+    slug?: string;
     bottomNavigation?: React.ReactNode;
     pathname?: string;
     className?: string;
@@ -32,18 +38,26 @@ export function AbstractFooterLayout({
         </div>
     );
 
+    const renderEditButton = () => {
+        if (editThisPageLaunch === "dashboard" && docsUrl && slug != null) {
+            return <EditInDashboardButton docsUrl={docsUrl} slug={slug} lang={lang} />;
+        }
+        if (editThisPageUrl) {
+            return <EditThisPageButton editThisPageUrl={editThisPageUrl} lang={lang} />;
+        }
+        return null;
+    };
+
+    const editButton = renderEditButton();
+
     return (
         <footer className={cn("fern-layout-footer not-prose", className)}>
             <div className="fern-layout-footer-toolbar">
                 {feedback}
-                {editThisPageUrl ? (
-                    <EditThisPageButton editThisPageUrl={editThisPageUrl} lang={lang} />
-                ) : (
-                    lastUpdatedElement
-                )}
+                {editButton ?? lastUpdatedElement}
             </div>
 
-            {editThisPageUrl && lastUpdatedElement}
+            {editButton && lastUpdatedElement}
 
             {!hideNavLinks && bottomNavigation}
             {builtWithFern}

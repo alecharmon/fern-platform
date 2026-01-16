@@ -10,6 +10,7 @@ import type * as FernRegistry from "../../../../../../../../index.js";
  *                 "pages": {
  *                     markdown: "markdown",
  *                     editThisPageUrl: undefined,
+ *                     editThisPageLaunch: undefined,
  *                     rawMarkdown: undefined
  *                 }
  *             },
@@ -40,6 +41,7 @@ import type * as FernRegistry from "../../../../../../../../index.js";
  *                 js: undefined,
  *                 aiChatConfig: undefined,
  *                 pageActions: undefined,
+ *                 editThisPageLaunch: undefined,
  *                 header: undefined,
  *                 footer: undefined,
  *                 backgroundImage: undefined,

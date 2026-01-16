@@ -568,10 +568,10 @@ types:
   CustomPageAction:
     docs: A custom page action that can be configured by the user.
     properties:
-      title: 
+      title:
         type: string
         docs: The title of the custom action.
-      subtitle: 
+      subtitle:
         type: optional<string>
         docs: The subtitle/helper text of the custom action.
       url:
@@ -583,3 +583,9 @@ types:
       default:
         type: optional<boolean>
         docs: Whether this custom action should be the default action.
+
+  EditThisPageLaunch:
+    docs: The launch method for the "Edit this page" button.
+    enum:
+      - github
+      - dashboard

@@ -63,6 +63,7 @@ export class PythonRenderer {
             pages[pageId as FernRegistry.PageId] = {
                 markdown,
                 editThisPageUrl: undefined,
+                editThisPageLaunch: undefined,
                 rawMarkdown: undefined
             };
         }

@@ -8,6 +8,9 @@ export function FooterLayout({
     hideFeedback,
     hideNavLinks,
     editThisPageUrl,
+    editThisPageLaunch,
+    docsUrl,
+    slug,
     bottomNavigation,
     pathname,
     className,
@@ -19,6 +22,9 @@ export function FooterLayout({
     hideFeedback?: boolean;
     hideNavLinks?: boolean;
     editThisPageUrl?: string;
+    editThisPageLaunch?: "github" | "dashboard";
+    docsUrl?: string;
+    slug?: string;
     bottomNavigation?: React.ReactNode;
     pathname?: string;
     className?: string;
@@ -30,6 +36,9 @@ export function FooterLayout({
         <AbstractFooterLayout
             lang={lang}
             editThisPageUrl={editThisPageUrl}
+            editThisPageLaunch={editThisPageLaunch}
+            docsUrl={docsUrl}
+            slug={slug}
             bottomNavigation={bottomNavigation}
             hideNavLinks={hideNavLinks}
             className={className}

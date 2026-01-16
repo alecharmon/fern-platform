@@ -26,6 +26,7 @@ export * from "./DocsTabsConfig.js";
 export * from "./DocsThemeConfig.js";
 export * from "./DocsTypographyConfig.js";
 export * from "./DocsTypographyConfigV2.js";
+export * from "./EditThisPageLaunch.js";
 export * from "./FathomConfig.js";
 export * from "./FileIdOrUrl.js";
 export * from "./FontConfig.js";

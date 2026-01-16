@@ -54,6 +54,7 @@
     "useExample": "Utiliser l'exemple",
     "returnHome": "Retour à l'accueil",
     "editThisPage": "Modifier cette page",
+    "editInDashboard": "Modifier dans le Dashboard",
     "clickToRefresh": "Cliquer pour actualiser",
     "viewAsMarkdown": "Afficher en Markdown",
     "readLlmsTxt": "Lire llms.txt",

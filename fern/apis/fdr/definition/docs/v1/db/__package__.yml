@@ -94,6 +94,11 @@ types:
       # page actions
       pageActions: optional<commons.PageActionsConfig>
 
+      # edit this page
+      editThisPageLaunch:
+        type: optional<commons.EditThisPageLaunch>
+        docs: The launch method for "Edit this page" button. Defaults to github.
+
       # custom components
       header:
         type: optional<string>

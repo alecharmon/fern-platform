@@ -26,6 +26,7 @@ export * from "./DocsTabsConfig";
 export * from "./DocsThemeConfig";
 export * from "./DocsTypographyConfig";
 export * from "./DocsTypographyConfigV2";
+export * from "./EditThisPageLaunch";
 export * from "./FathomConfig";
 export * from "./FileIdOrUrl";
 export * from "./FontConfig";

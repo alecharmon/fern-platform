@@ -54,6 +54,7 @@
     "useExample": "使用示例",
     "returnHome": "返回首页",
     "editThisPage": "编辑此页面",
+    "editInDashboard": "在仪表板中编辑",
     "clickToRefresh": "点击刷新",
     "viewAsMarkdown": "以 Markdown 格式查看",
     "readLlmsTxt": "读取 llms.txt",

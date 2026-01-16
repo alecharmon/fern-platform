@@ -54,6 +54,7 @@
     "useExample": "Использовать пример",
     "returnHome": "Вернуться на главную",
     "editThisPage": "Редактировать эту страницу",
+    "editInDashboard": "Редактировать в Dashboard",
     "clickToRefresh": "Нажмите для обновления",
     "viewAsMarkdown": "Просмотр в формате Markdown",
     "readLlmsTxt": "Прочитать llms.txt",

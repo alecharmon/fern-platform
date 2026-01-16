@@ -36,7 +36,7 @@ export async function LayoutEvaluator({
     slug: string;
     availability?: Availability;
 }) {
-    const { filename, markdown, editThisPageUrl } = await loader.getPage(pageId);
+    const { filename, markdown, editThisPageUrl, editThisPageLaunch } = await loader.getPage(pageId);
     const mdx = await serialize(markdown, {
         filename,
         toc: true,
@@ -88,11 +88,17 @@ export async function LayoutEvaluator({
     );
 
     // prefer frontmatter values over global config
+    // Construct full docs URL including basePath (e.g., "buildwithfern.com/learn")
+    const fullDocsUrl = metadata.basePath ? `${loader.domain}/${metadata.basePath}` : loader.domain;
+
     const footer = (
         <FooterLayout
             hideFeedback={frontmatter?.["hide-feedback"] ?? config.layout?.hideFeedback}
             hideNavLinks={frontmatter?.["hide-nav-links"] ?? config.layout?.hideNavLinks}
             editThisPageUrl={frontmatter?.["edit-this-page-url"]}
+            editThisPageLaunch={editThisPageLaunch}
+            docsUrl={fullDocsUrl}
+            slug={slug}
             bottomNavigation={bottomNavigation}
             footerLinks={<FooterLinks loader={loader} className="mt-8" />}
             lang={lang}

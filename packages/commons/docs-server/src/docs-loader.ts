@@ -147,6 +147,7 @@ export interface DocsLoader<IsAsync extends boolean = true> {
             filename: string;
             markdown: string;
             editThisPageUrl?: string;
+            editThisPageLaunch?: "github" | "dashboard";
             rawMarkdown?: string;
         },
         IsAsync

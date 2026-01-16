@@ -240,6 +240,7 @@ export class WriteClient {
      *                 "pages": {
      *                     markdown: "markdown",
      *                     editThisPageUrl: undefined,
+     *                     editThisPageLaunch: undefined,
      *                     rawMarkdown: undefined
      *                 }
      *             },
@@ -270,6 +271,7 @@ export class WriteClient {
      *                 js: undefined,
      *                 aiChatConfig: undefined,
      *                 pageActions: undefined,
+     *                 editThisPageLaunch: undefined,
      *                 header: undefined,
      *                 footer: undefined,
      *                 backgroundImage: undefined,

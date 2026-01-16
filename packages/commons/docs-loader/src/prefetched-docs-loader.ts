@@ -166,6 +166,7 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         filename: string;
         markdown: string;
         editThisPageUrl?: string;
+        editThisPageLaunch?: "github" | "dashboard";
         rawMarkdown?: string;
     } {
         return this.notSupported("getPage");

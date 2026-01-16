@@ -30,6 +30,8 @@ export interface DocsDbConfig {
     js: FernRegistry.docs.v1.commons.JsConfig | undefined;
     aiChatConfig: FernRegistry.docs.v1.commons.AiChatConfig | undefined;
     pageActions: FernRegistry.docs.v1.commons.PageActionsConfig | undefined;
+    /** The launch method for "Edit this page" button. Defaults to github. */
+    editThisPageLaunch: FernRegistry.docs.v1.commons.EditThisPageLaunch | undefined;
     /**
      * Compiled JavaScript module for a custom React component that replaces the default header.
      * The Fern CLI transpiles the user's TSX/JSX source file and uploads the compiled JS to FDR.

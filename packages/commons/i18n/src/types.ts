@@ -55,6 +55,7 @@ export type Translations = {
         useExample: string;
         returnHome: string;
         editThisPage: string;
+        editInDashboard: string;
         clickToRefresh: string;
         viewAsMarkdown: string;
         readLlmsTxt: string;

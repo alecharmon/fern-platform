@@ -83,6 +83,7 @@ types:
     properties:
       markdown: string # eventually PageContent should just be a rootCommons.FileId ?
       editThisPageUrl: optional<rootCommons.Url>
+      editThisPageLaunch: optional<commons.EditThisPageLaunch>
       rawMarkdown: optional<string>
 
   DocsConfig:
@@ -131,6 +132,11 @@ types:
 
       # page actions
       pageActions: optional<commons.PageActionsConfig>
+
+      # edit this page
+      editThisPageLaunch:
+        type: optional<commons.EditThisPageLaunch>
+        docs: The launch method for "Edit this page" button. Defaults to github.
 
       # custom components
       header:

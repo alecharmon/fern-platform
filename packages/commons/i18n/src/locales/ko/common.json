@@ -54,6 +54,7 @@
     "useExample": "예제 사용",
     "returnHome": "홈으로 돌아가기",
     "editThisPage": "이 페이지 편집",
+    "editInDashboard": "대시보드에서 편집",
     "clickToRefresh": "클릭하여 새로 고침",
     "viewAsMarkdown": "Markdown으로 보기",
     "readLlmsTxt": "llms.txt 읽기",

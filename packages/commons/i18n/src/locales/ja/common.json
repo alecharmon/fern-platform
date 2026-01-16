@@ -54,6 +54,7 @@
     "useExample": "例を使用",
     "returnHome": "ホームに戻る",
     "editThisPage": "このページを編集",
+    "editInDashboard": "ダッシュボードで編集",
     "clickToRefresh": "クリックして更新",
     "viewAsMarkdown": "Markdownとして表示",
     "readLlmsTxt": "llms.txtを読む",
