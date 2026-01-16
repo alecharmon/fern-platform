@@ -42,6 +42,8 @@ jobs:
         run: |
           pwd
           ls
+      - name: Install dependencies
+        run: pip install git+https://github.com/fern-api/incident-python.git requests
       - name: Check Sites
         env:
           INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
@@ -63,6 +65,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Domains
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install git+https://github.com/fern-api/incident-python.git requests
       - name: Check Sites
         env:
           INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
