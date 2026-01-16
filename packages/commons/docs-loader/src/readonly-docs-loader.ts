@@ -588,7 +588,8 @@ const getEndpointByLocator = async (
     domainKey: string,
     method: HttpMethod,
     path: string,
-    example?: string
+    example?: string,
+    apiName?: string
 ): Promise<{
     apiDefinitionId: ApiDefinition.ApiDefinitionId;
     endpoint: ApiDefinition.EndpointDefinition;
@@ -606,6 +607,10 @@ const getEndpointByLocator = async (
 
     for (const apiId of apiIds) {
         const api = await getApi(domainKey, apiId);
+        // If apiName is specified, only search within that API
+        if (apiName != null && api.id !== apiName) {
+            continue;
+        }
         const endpoint = findEndpoint({
             apiDefinition: api,
             method,
@@ -628,7 +633,7 @@ const getEndpointByLocator = async (
             };
         }
     }
-    console.error(`Could not find endpoint ${method} ${path}`);
+    console.error(`Could not find endpoint ${method} ${path}${apiName ? ` in API "${apiName}"` : ""}`);
     notFound();
 };
 
@@ -1355,7 +1360,7 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
 const getTypes = () =>
     cache(async (domainKey: string, apiName?: string): Promise<Record<TypeId, TypeDefinition>> => {
         "use cache";
-        unstable_cacheTag(domainKey, "getTypes", apiName || "");
+        unstable_cacheTag(domainKey, "getTypes", apiName ?? "all");
 
         const response = await loadWithUrl(domainKey);
         const allTypes: Record<TypeId, TypeDefinition> = {};
@@ -1477,8 +1482,8 @@ const createCachedDocsLoaderImpl = async (
         ),
         getEndpointByLocator: cache(
             unstable_cache(
-                (method: HttpMethod, path: string, example?: string) =>
-                    getEndpointByLocator(domainKey, method, path, example),
+                (method: HttpMethod, path: string, example?: string, apiName?: string) =>
+                    getEndpointByLocator(domainKey, method, path, example, apiName),
                 [domainKey, config.cacheKeySuffix],
                 { tags: [domainKey, "endpointByLocator"] }
             )

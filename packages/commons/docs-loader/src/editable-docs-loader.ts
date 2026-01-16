@@ -34,8 +34,8 @@ class EditableDocsLoader implements DocsLoader {
     getEndpointById = (apiDefinitionId: string, endpointId: EndpointId) =>
         this.readOnlyDocsLoader.getEndpointById(apiDefinitionId, endpointId);
 
-    getEndpointByLocator = (method: HttpMethod, path: string, example?: string) =>
-        this.readOnlyDocsLoader.getEndpointByLocator(method, path, example);
+    getEndpointByLocator = (method: HttpMethod, path: string, example?: string, apiName?: string) =>
+        this.readOnlyDocsLoader.getEndpointByLocator(method, path, example, apiName);
 
     getWebhookByLocator = (webhookId: string) => this.readOnlyDocsLoader.getWebhookByLocator(webhookId);
 
@@ -81,7 +81,7 @@ class EditableDocsLoader implements DocsLoader {
 
     getDynamicIr = (apiName: string) => this.readOnlyDocsLoader.getDynamicIr(apiName);
 
-    getTypes = () => this.readOnlyDocsLoader.getTypes();
+    getTypes = (apiName?: string) => this.readOnlyDocsLoader.getTypes(apiName);
 }
 
 interface GetFernProjectSuccess {

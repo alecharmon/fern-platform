@@ -131,7 +131,8 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
     getEndpointByLocator(
         _method: HttpMethod,
         _path: string,
-        _example?: string
+        _example?: string,
+        _apiName?: string
     ): {
         apiDefinitionId: ApiDefinition.ApiDefinitionId;
         endpoint: ApiDefinition.EndpointDefinition;
@@ -210,7 +211,7 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         return this.notSupported("getLanguage");
     }
 
-    getTypes(): Record<TypeId, TypeDefinition> {
+    getTypes(_apiName?: string): Record<TypeId, TypeDefinition> {
         return this.notSupported("getTypes");
     }
 

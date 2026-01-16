@@ -49,6 +49,7 @@ export const rehypeEndpointSchemaSnippets: Unified.Plugin<[{ loader: DocsLoader 
                 }
 
                 const { method, path } = extracted;
+                const apiName = typeof props.api === "string" ? props.api.trim() : undefined;
 
                 promises.push(
                     (async () => {
@@ -56,7 +57,8 @@ export const rehypeEndpointSchemaSnippets: Unified.Plugin<[{ loader: DocsLoader 
                             const { endpoint, apiDefinitionId } = await loader.getEndpointByLocator(
                                 method,
                                 path,
-                                typeof props.example === "string" ? props.example : undefined
+                                typeof props.example === "string" ? props.example : undefined,
+                                apiName
                             );
                             const { types, endpoint: endpointDefinition } = await loader.getEndpointById(
                                 apiDefinitionId,
@@ -68,7 +70,10 @@ export const rehypeEndpointSchemaSnippets: Unified.Plugin<[{ loader: DocsLoader 
                                 unknownToMdxJsxAttribute("types", types)
                             );
                         } catch (e) {
-                            console.error(`Could not find endpoint for ${method} ${path} ${props.example}`, e);
+                            console.error(
+                                `Could not find endpoint for ${method} ${path}${apiName ? ` in API "${apiName}"` : ""} ${props.example}`,
+                                e
+                            );
                         }
                     })()
                 );

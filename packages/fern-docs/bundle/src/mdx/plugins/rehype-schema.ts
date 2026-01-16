@@ -112,11 +112,12 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                 }
 
                 const typeName = props.type.trim();
+                const apiName = typeof props.api === "string" ? props.api.trim() : undefined;
 
                 promises.push(
                     (async () => {
                         try {
-                            const typeDefinitions = await loader.getTypes();
+                            const typeDefinitions = await loader.getTypes(apiName);
 
                             for (const typeEntry of Object.entries(typeDefinitions)) {
                                 const [_typeEntryId, typeEntryDef] = typeEntry;
@@ -140,14 +141,17 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                             }
 
                             console.error(
-                                `Could not find type with name "${typeName}". Available types: ${Object.entries(
+                                `Could not find type with name "${typeName}"${apiName ? ` in API "${apiName}"` : ""}. Available types: ${Object.entries(
                                     typeDefinitions
                                 )
                                     .map(([_, def]) => def.name)
                                     .join(", ")}`
                             );
                         } catch (e) {
-                            console.error(`Could not find type "${typeName}"`, e);
+                            console.error(
+                                `Could not find type "${typeName}"${apiName ? ` in API "${apiName}"` : ""}`,
+                                e
+                            );
                         }
                     })()
                 );

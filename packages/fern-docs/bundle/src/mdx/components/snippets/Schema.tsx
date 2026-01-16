@@ -10,6 +10,11 @@ import { TypeReferenceDefinitions } from "@/components/api-reference/type-defini
 import type { TypeDefinitionWithSerializedDescriptions } from "@/mdx/plugins/serialize-type-definition-descriptions";
 
 type SchemaProps = {
+    /**
+     * The name of the API to fetch the type from.
+     * If not specified, the type will be fetched from the first API that contains it.
+     */
+    api?: string;
     typeDefinition?: ApiDefinition.TypeDefinition | TypeDefinitionWithSerializedDescriptions;
     types?: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     lang?: string;

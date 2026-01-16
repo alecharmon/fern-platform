@@ -94,7 +94,11 @@ export interface DocsLoader<IsAsync extends boolean = true> {
          * multiple endpoints can have the same method + path
          * the example can be used to disambiguate between them
          */
-        example?: string
+        example?: string,
+        /**
+         * Optional name of the API to filter endpoints by
+         */
+        apiName?: string
     ) => MaybePromise<
         {
             apiDefinitionId: ApiDefinition.ApiDefinitionId;
@@ -188,7 +192,8 @@ export interface DocsLoader<IsAsync extends boolean = true> {
     getDynamicIr: (apiName: string) => MaybePromise<DynamicIRsByLanguage | undefined, IsAsync>;
 
     /**
-     * @returns all types defined by all APIs (not pruned)
+     * @returns all types defined by all APIs (not pruned), or types from a specific API if apiName is provided
+     * @param apiName - Optional name of the API to filter types by
      */
     getTypes: (apiName?: string) => MaybePromise<Record<TypeId, TypeDefinition>, IsAsync>;
 }

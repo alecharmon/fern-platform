@@ -23,6 +23,11 @@ export function EndpointRequestSnippet({
     languages
 }: {
     /**
+     * The name of the API to fetch the endpoint from.
+     * If not specified, the endpoint will be fetched from the first API that contains it.
+     */
+    api?: string;
+    /**
      * The endpoint locator to use for the request snippet.
      */
     endpoint?: string;

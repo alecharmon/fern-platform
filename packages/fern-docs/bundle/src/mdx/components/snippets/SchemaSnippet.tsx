@@ -7,6 +7,11 @@ import { generateExampleFromTypeDefinition } from "./generate-example-from-type"
 
 type SchemaSnippetProps = {
     /**
+     * The name of the API to fetch the type from.
+     * If not specified, the type will be fetched from the first API that contains it.
+     */
+    api?: string;
+    /**
      * @internal the rehype plugin will set this
      */
     typeDefinition?: ApiDefinition.TypeDefinition;

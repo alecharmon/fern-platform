@@ -66,6 +66,7 @@ export const rehypeEndpointExampleSnippets: Unified.Plugin<[{ loader: DocsLoader
                 }
 
                 const { method, path } = extracted;
+                const apiName = typeof props.api === "string" ? props.api.trim() : undefined;
 
                 if (isRequestSnippet) {
                     if (props.example) {
@@ -102,7 +103,8 @@ export const rehypeEndpointExampleSnippets: Unified.Plugin<[{ loader: DocsLoader
                             const { endpoint, slugs } = await loader.getEndpointByLocator(
                                 method,
                                 path,
-                                typeof props.example === "string" ? props.example : undefined
+                                typeof props.example === "string" ? props.example : undefined,
+                                apiName
                             );
 
                             node.attributes.push(
@@ -110,7 +112,10 @@ export const rehypeEndpointExampleSnippets: Unified.Plugin<[{ loader: DocsLoader
                                 unknownToMdxJsxAttribute("slugs", slugs)
                             );
                         } catch (e) {
-                            console.error(`Could not find endpoint for ${method} ${path} ${props.example}`, e);
+                            console.error(
+                                `Could not find endpoint for ${method} ${path}${apiName ? ` in API "${apiName}"` : ""} ${props.example}`,
+                                e
+                            );
                         }
                     })()
                 );
