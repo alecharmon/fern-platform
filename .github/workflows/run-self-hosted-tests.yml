@@ -355,50 +355,29 @@ jobs:
           kubectl apply -f servers/self-hosted/kubernetes-example/service.yaml
           
           # Deploy all buf cache tests in parallel (so they start warming up while main pod is being tested)
-          echo "=========================================="
-          echo "Deploying all 6 buf cache tests in parallel"
-          echo "=========================================="
-          echo ""
-          echo "Tests that SHOULD PASS:"
-          echo "  1. runtime-gen-network-ok: Runtime generation with network access"
-          echo "  2. cached-deps-network-ok: Cached deps with network access"
-          echo "  3. cached-deps-airgapped: Cached deps in air-gapped mode"
-          echo "  4. full-gen-airgapped: Full pre-generation in air-gapped mode"
-          echo ""
-          echo "Tests that SHOULD FAIL (network blocked, no cache):"
-          echo "  5. no-cache-airgapped-fail: No cache in air-gapped mode"
-          echo "  6. runtime-gen-airgapped-fail: Runtime generation in air-gapped mode"
-          echo "=========================================="
+          echo "Deploying all 6 buf cache tests in parallel..."
           
           # Test 1: Runtime generation with network access - SHOULD PASS
-          echo "Deploying Test 1 (runtime-gen-network-ok)..."
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test1-deployment.yaml
           
           # Test 2: Cached deps with network access - SHOULD PASS
-          echo "Deploying Test 2 (cached-deps-network-ok)..."
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test2-deployment.yaml
           
           # Test 3: Cached deps in air-gapped mode - SHOULD PASS
-          echo "Deploying Test 3 (cached-deps-airgapped)..."
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test3-networkpolicy.yaml
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test3-deployment.yaml
           
           # Test 4: Full pre-generation in air-gapped mode - SHOULD PASS
-          echo "Deploying Test 4 (full-gen-airgapped)..."
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test4-networkpolicy.yaml
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test4-deployment.yaml
           
           # Test 5: No cache in air-gapped mode - SHOULD FAIL
-          echo "Deploying Test 5 (no-cache-airgapped-fail)..."
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test5-networkpolicy.yaml
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test5-deployment.yaml
           
           # Test 6: Runtime generation in air-gapped mode - SHOULD FAIL
-          echo "Deploying Test 6 (runtime-gen-airgapped-fail)..."
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test6-networkpolicy.yaml
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test6-deployment.yaml
-          
-          echo "All tests deployed! They will warm up while main pod is being tested..."
 
       - name: Wait for pod to be ready
         run: |
@@ -508,6 +487,70 @@ jobs:
           fi
           echo "Docs UI returned valid HTML"
 
+      - name: Test CORS proxy endpoint
+        run: |
+          echo "Testing CORS proxy endpoint (/__proxy/)..."
+          
+          # Test GET request through the proxy
+          echo "Testing GET request through proxy..."
+          PROXY_GET_CODE=$(curl -s -o /tmp/proxy-get-response.json -w "%{http_code}" "http://localhost:30080/__proxy/https://httpbin.org/get" 2>/dev/null || echo "000")
+          echo "GET proxy status: $PROXY_GET_CODE"
+          
+          if [ "$PROXY_GET_CODE" != "200" ]; then
+            echo "ERROR: CORS proxy GET request failed (HTTP $PROXY_GET_CODE)"
+            cat /tmp/proxy-get-response.json 2>/dev/null || true
+            exit 1
+          fi
+          
+          # Verify the response contains expected httpbin data
+          if ! grep -q '"url": "https://httpbin.org/get"' /tmp/proxy-get-response.json; then
+            echo "ERROR: CORS proxy response does not contain expected httpbin data"
+            cat /tmp/proxy-get-response.json
+            exit 1
+          fi
+          echo "GET request through proxy successful"
+          
+          # Test POST request through the proxy
+          echo "Testing POST request through proxy..."
+          PROXY_POST_CODE=$(curl -s -o /tmp/proxy-post-response.json -w "%{http_code}" \
+            -X POST "http://localhost:30080/__proxy/https://httpbin.org/post" \
+            -H "Content-Type: application/json" \
+            -d '{"test": "data"}' 2>/dev/null || echo "000")
+          echo "POST proxy status: $PROXY_POST_CODE"
+          
+          if [ "$PROXY_POST_CODE" != "200" ]; then
+            echo "ERROR: CORS proxy POST request failed (HTTP $PROXY_POST_CODE)"
+            cat /tmp/proxy-post-response.json 2>/dev/null || true
+            exit 1
+          fi
+          
+          # Verify the response contains the posted data
+          if ! grep -q '"test": "data"' /tmp/proxy-post-response.json; then
+            echo "ERROR: CORS proxy POST response does not contain posted data"
+            cat /tmp/proxy-post-response.json
+            exit 1
+          fi
+          echo "POST request through proxy successful"
+          
+          # Test OPTIONS preflight request (CORS)
+          echo "Testing OPTIONS preflight request..."
+          CORS_HEADERS=$(curl -s -I -X OPTIONS "http://localhost:30080/__proxy/https://httpbin.org/post" 2>/dev/null)
+          
+          if ! echo "$CORS_HEADERS" | grep -qi "Access-Control-Allow-Origin"; then
+            echo "ERROR: CORS proxy missing Access-Control-Allow-Origin header"
+            echo "$CORS_HEADERS"
+            exit 1
+          fi
+          
+          if ! echo "$CORS_HEADERS" | grep -qi "Access-Control-Allow-Methods"; then
+            echo "ERROR: CORS proxy missing Access-Control-Allow-Methods header"
+            echo "$CORS_HEADERS"
+            exit 1
+          fi
+          echo "OPTIONS preflight request successful with CORS headers"
+          
+          echo "All CORS proxy tests passed!"
+
       # Cleanup the main deployment before running buf cache tests
       - name: Cleanup main deployment
         run: |
@@ -525,12 +568,7 @@ jobs:
 
       - name: "Wait for buf cache tests and check results"
         run: |
-          echo "=========================================="
-          echo "Waiting for all tests to complete (max 10 minutes)"
-          echo "=========================================="
-          
-          # Wait for pods to be scheduled in all namespaces
-          sleep 30
+          echo "Checking buf cache test results..."
           
           # Track results
           TEST_RESULTS=""

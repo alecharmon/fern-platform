@@ -16,13 +16,11 @@ import {
 } from "@/state/playground";
 
 import { PlaygroundEndpointPath } from "../endpoint/PlaygroundEndpointPath";
+import { getWebSocketProxyUrl } from "../fetch-utils/proxyUrl";
 import { useWebsocketMessages } from "../hooks/useWebsocketMessages";
 import { buildAuthHeaders, getAuthKey } from "../utils";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import { PlaygroundWebSocketContent } from "./PlaygroundWebSocketContent";
-
-// TODO: decide if this should be an env variable, and if we should move REST proxy to the same (or separate) cloudflare worker
-const WEBSOCKET_PROXY_URI = "wss://proxy.ferndocs.com/";
 
 interface PlaygroundWebSocketProps {
     context: WebSocketContext;
@@ -124,7 +122,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
 
             setConnectedState("opening");
 
-            socket.current = new WebSocket(urlJoin(WEBSOCKET_PROXY_URI, url));
+            socket.current = new WebSocket(urlJoin(getWebSocketProxyUrl(), url));
 
             socket.current.onopen = () => {
                 const authHeaders = buildAuthHeaders(

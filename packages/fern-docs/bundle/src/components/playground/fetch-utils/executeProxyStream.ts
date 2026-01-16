@@ -1,9 +1,8 @@
 import urljoin from "url-join";
 
 import type { ProxyRequest } from "../types";
+import { getHttpProxyUrl } from "./proxyUrl";
 import { toBodyInit } from "./requestToBodyInit";
-
-const PROXY_URL = "https://proxy.ferndocs.com/";
 
 export async function executeProxyStream(
     req: ProxyRequest,
@@ -17,7 +16,7 @@ export async function executeProxyStream(
         requestHeaders.delete("Content-Type");
     }
 
-    const response = await fetch(disableProxy ? req.url : urljoin(PROXY_URL, req.url), {
+    const response = await fetch(disableProxy ? req.url : urljoin(getHttpProxyUrl(), req.url), {
         method: req.method,
         headers: requestHeaders,
         body: await toBodyInit(req.body),

@@ -15,6 +15,8 @@
  */
 
 const http = require("http");
+const https = require("https");
+const net = require("net");
 const { URL } = require("url");
 
 // Configuration from environment
@@ -329,6 +331,145 @@ function handleCacheControl(req, res) {
     return false;
 }
 
+/**
+ * Handle CORS proxy requests.
+ * This endpoint proxies API requests from the API Explorer to external APIs,
+ * avoiding CORS issues by making the request server-side.
+ *
+ * The target URL is extracted from the path after /__proxy/
+ * For example: /__proxy/https://api.example.com/v1/users
+ */
+function handleCorsProxy(req, res) {
+    // Extract target URL from the path (everything after /__proxy/)
+    const targetUrl = req.url.slice("/__proxy/".length);
+
+    if (!targetUrl) {
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        res.end("Missing target URL");
+        return;
+    }
+
+    let parsedUrl;
+    try {
+        parsedUrl = new URL(targetUrl);
+    } catch {
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        res.end("Invalid target URL");
+        return;
+    }
+
+    // Only allow http and https protocols
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        res.end("Only HTTP and HTTPS protocols are supported");
+        return;
+    }
+
+    debug(`CORS proxy request: ${req.method} ${targetUrl}`);
+
+    // Get the list of headers to forward from the X-Fern-Proxy-Request-Headers header
+    const headersToForward = (req.headers["x-fern-proxy-request-headers"] || "").split(",").filter(Boolean);
+
+    // Build headers to forward to the target
+    const forwardHeaders = {};
+    for (const header of headersToForward) {
+        const lowerHeader = header.toLowerCase();
+        if (req.headers[lowerHeader] != null) {
+            forwardHeaders[header] = req.headers[lowerHeader];
+        }
+    }
+
+    // Also forward content-type if present (for POST/PUT requests)
+    if (req.headers["content-type"]) {
+        forwardHeaders["Content-Type"] = req.headers["content-type"];
+    }
+
+    const requestModule = parsedUrl.protocol === "https:" ? https : http;
+
+    const options = {
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port || (parsedUrl.protocol === "https:" ? 443 : 80),
+        path: parsedUrl.pathname + parsedUrl.search,
+        method: req.method,
+        headers: forwardHeaders
+    };
+
+    const startTime = Date.now();
+
+    const proxyReq = requestModule.request(options, (proxyRes) => {
+        const endTime = Date.now();
+        const responseTime = endTime - startTime;
+
+        // Collect response headers to forward back
+        const responseHeaders = {};
+        const responseHeadersList = [];
+
+        for (const [key, value] of Object.entries(proxyRes.headers)) {
+            // Skip hop-by-hop headers
+            const lowerKey = key.toLowerCase();
+            if (
+                lowerKey === "transfer-encoding" ||
+                lowerKey === "connection" ||
+                lowerKey === "keep-alive" ||
+                lowerKey === "proxy-authenticate" ||
+                lowerKey === "proxy-authorization" ||
+                lowerKey === "te" ||
+                lowerKey === "trailer" ||
+                lowerKey === "upgrade"
+            ) {
+                continue;
+            }
+            responseHeaders[key] = value;
+            responseHeadersList.push(key);
+        }
+
+        // Add proxy metadata headers
+        responseHeaders["X-Fern-Proxy-Response-Headers"] = responseHeadersList.join(",");
+        responseHeaders["X-Fern-Proxy-Response-Time"] = String(responseTime);
+        responseHeaders["X-Fern-Proxy-Origin-Latency"] = String(responseTime);
+
+        // Add CORS headers to allow the browser to read the response
+        responseHeaders["Access-Control-Allow-Origin"] = "*";
+        responseHeaders["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS";
+        responseHeaders["Access-Control-Allow-Headers"] = "*";
+        responseHeaders["Access-Control-Expose-Headers"] =
+            responseHeadersList.join(",") +
+            ",X-Fern-Proxy-Response-Headers,X-Fern-Proxy-Response-Time,X-Fern-Proxy-Origin-Latency";
+
+        debug(`CORS proxy response: ${proxyRes.statusCode} in ${responseTime}ms`);
+
+        res.writeHead(proxyRes.statusCode, responseHeaders);
+        proxyRes.pipe(res);
+    });
+
+    proxyReq.on("error", (err) => {
+        log(`CORS proxy error: ${err.message}`);
+        if (!res.headersSent) {
+            res.writeHead(502, {
+                "Content-Type": "text/plain",
+                "Access-Control-Allow-Origin": "*"
+            });
+            res.end(`Proxy error: ${err.message}`);
+        }
+    });
+
+    // Forward request body if present
+    req.pipe(proxyReq);
+}
+
+/**
+ * Handle CORS preflight (OPTIONS) requests for the proxy endpoint.
+ */
+function handleCorsPreflightProxy(req, res) {
+    res.writeHead(204, {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Max-Age": "86400"
+    });
+    res.end();
+}
+
 // Main request handler
 function handleRequest(req, res) {
     const startTime = Date.now();
@@ -338,6 +479,16 @@ function handleRequest(req, res) {
         if (handleCacheControl(req, res)) {
             return;
         }
+    }
+
+    // Handle CORS proxy requests
+    if (req.url.startsWith("/__proxy/")) {
+        if (req.method === "OPTIONS") {
+            handleCorsPreflightProxy(req, res);
+        } else {
+            handleCorsProxy(req, res);
+        }
+        return;
     }
 
     const bypassCache = shouldBypassCache(req);
@@ -374,6 +525,112 @@ function handleRequest(req, res) {
 // Start server
 const server = http.createServer(handleRequest);
 
+/**
+ * Handle WebSocket upgrade requests for the CORS proxy.
+ * This allows the API Explorer to work with WebSocket-based APIs.
+ */
+server.on("upgrade", (req, clientSocket, head) => {
+    if (!req.url.startsWith("/__proxy/")) {
+        clientSocket.end("HTTP/1.1 404 Not Found\r\n\r\n");
+        return;
+    }
+
+    // Extract target URL from the path (everything after /__proxy/)
+    const targetUrl = req.url.slice("/__proxy/".length);
+
+    if (!targetUrl) {
+        clientSocket.end("HTTP/1.1 400 Bad Request\r\n\r\nMissing target URL");
+        return;
+    }
+
+    let parsedUrl;
+    try {
+        parsedUrl = new URL(targetUrl);
+    } catch {
+        clientSocket.end("HTTP/1.1 400 Bad Request\r\n\r\nInvalid target URL");
+        return;
+    }
+
+    // Only allow ws and wss protocols (converted from http/https)
+    const isSecure = parsedUrl.protocol === "https:" || parsedUrl.protocol === "wss:";
+    const targetPort = parsedUrl.port || (isSecure ? 443 : 80);
+
+    debug(`WebSocket proxy upgrade: ${targetUrl}`);
+
+    // Create connection to target server
+    const targetSocket = isSecure
+        ? require("tls").connect(
+              {
+                  host: parsedUrl.hostname,
+                  port: targetPort,
+                  servername: parsedUrl.hostname
+              },
+              () => {
+                  // Send the upgrade request to the target
+                  const upgradeRequest =
+                      `GET ${parsedUrl.pathname}${parsedUrl.search} HTTP/1.1\r\n` +
+                      `Host: ${parsedUrl.hostname}\r\n` +
+                      `Upgrade: websocket\r\n` +
+                      `Connection: Upgrade\r\n` +
+                      `Sec-WebSocket-Key: ${req.headers["sec-websocket-key"]}\r\n` +
+                      `Sec-WebSocket-Version: ${req.headers["sec-websocket-version"]}\r\n` +
+                      (req.headers["sec-websocket-protocol"]
+                          ? `Sec-WebSocket-Protocol: ${req.headers["sec-websocket-protocol"]}\r\n`
+                          : "") +
+                      `\r\n`;
+                  targetSocket.write(upgradeRequest);
+                  if (head.length > 0) {
+                      targetSocket.write(head);
+                  }
+              }
+          )
+        : net.connect(targetPort, parsedUrl.hostname, () => {
+              // Send the upgrade request to the target
+              const upgradeRequest =
+                  `GET ${parsedUrl.pathname}${parsedUrl.search} HTTP/1.1\r\n` +
+                  `Host: ${parsedUrl.hostname}\r\n` +
+                  `Upgrade: websocket\r\n` +
+                  `Connection: Upgrade\r\n` +
+                  `Sec-WebSocket-Key: ${req.headers["sec-websocket-key"]}\r\n` +
+                  `Sec-WebSocket-Version: ${req.headers["sec-websocket-version"]}\r\n` +
+                  (req.headers["sec-websocket-protocol"]
+                      ? `Sec-WebSocket-Protocol: ${req.headers["sec-websocket-protocol"]}\r\n`
+                      : "") +
+                  `\r\n`;
+              targetSocket.write(upgradeRequest);
+              if (head.length > 0) {
+                  targetSocket.write(head);
+              }
+          });
+
+    targetSocket.on("error", (err) => {
+        log(`WebSocket proxy error: ${err.message}`);
+        clientSocket.end();
+    });
+
+    // Once we get data from target, pipe it to client and vice versa
+    targetSocket.once("data", (chunk) => {
+        // Forward the response (including upgrade response) to client
+        clientSocket.write(chunk);
+        // Now pipe bidirectionally
+        targetSocket.pipe(clientSocket);
+        clientSocket.pipe(targetSocket);
+    });
+
+    clientSocket.on("error", (err) => {
+        debug(`WebSocket client error: ${err.message}`);
+        targetSocket.end();
+    });
+
+    clientSocket.on("close", () => {
+        targetSocket.end();
+    });
+
+    targetSocket.on("close", () => {
+        clientSocket.end();
+    });
+});
+
 server.listen(PROXY_PORT, "0.0.0.0", () => {
     log(`Cache proxy listening on port ${PROXY_PORT}`);
     log(`Proxying to ${BACKEND_HOST}:${BACKEND_PORT}`);
@@ -383,6 +640,7 @@ server.listen(PROXY_PORT, "0.0.0.0", () => {
         log(`Max entry size: ${MAX_CACHE_ENTRY_SIZE} bytes`);
         log(`Default TTL: ${DEFAULT_TTL} seconds`);
     }
+    log(`CORS proxy: enabled at /__proxy/`);
     log(`Debug mode: ${DEBUG ? "enabled" : "disabled"}`);
 });
 

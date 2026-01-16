@@ -2,9 +2,8 @@ import urljoin from "url-join";
 
 import type { ProxyRequest } from "../types";
 import type { PlaygroundRestResponse } from "../types/playgroundResponse";
+import { getHttpProxyUrl } from "./proxyUrl";
 import { toBodyInit } from "./requestToBodyInit";
-
-const PROXY_URL = "https://proxy.ferndocs.com/";
 
 export async function executeProxyRest(
     req: ProxyRequest,
@@ -31,7 +30,7 @@ export async function executeProxyRest(
         fetchOptions.credentials = "include";
     }
 
-    const res = await fetch(disableProxy ? req.url : urljoin(PROXY_URL, req.url), fetchOptions);
+    const res = await fetch(disableProxy ? req.url : urljoin(getHttpProxyUrl(), req.url), fetchOptions);
 
     // Only process proxy-specific headers when using the proxy
     const responseHeadersList = disableProxy
