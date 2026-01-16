@@ -2,6 +2,8 @@ import { addRoles, type Roles, removeRoles } from "@fern-api/user-permissions";
 
 import * as auth0Management from "@/app/services/auth0/management";
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import { RedisCacheKey } from "@/app/services/redis/cacheKey";
+import { redisSet } from "@/app/services/redis/redis";
 
 export type UpdateUserRolesResult = { ok: true } | { ok: false; code: "cannot_modify_self" | "error"; message: string };
 
@@ -41,6 +43,12 @@ export default async function updateUserRolesHandler({
         if (rolesToAdd.length > 0) {
             await addRoles({ userId, orgId, roleNames: rolesToAdd });
         }
+
+        // Set Redis flag to invalidate user's session
+        // This will be checked by the TokenRefresher to log the user out
+        await redisSet(RedisCacheKey.userSessionInvalidated(userId), true, {
+            ttlInSeconds: 60 * 60 * 24 * 365 // 1 year - match token lifetime
+        });
 
         // Invalidate the members cache so the updated roles are fetched
         await auth0Management.invalidateCachesAfterUpdatingMemberRoles(orgName);

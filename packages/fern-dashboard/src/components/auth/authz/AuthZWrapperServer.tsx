@@ -122,15 +122,6 @@ export async function AuthZWrapperServer({
                 resourceId: permissionScope.id,
                 forceFineGrained: isFineGrainedEnabled
             });
-
-            console.debug("[AuthZWrapperServer] Permission check:", {
-                permission,
-                resourceType: permissionScope.type,
-                resourceId: permissionScope.id,
-                isFineGrainedEnabled,
-                isEnforcePermissions,
-                allowed
-            });
         } catch (error) {
             console.error("[AuthZWrapperServer] Failed to check permissions:", error);
             allowed = false;
@@ -140,14 +131,6 @@ export async function AuthZWrapperServer({
         const orgPermissions = getPermissionsFromSession({ sessionPermissions });
         allowed = hasPermission(orgPermissions, permission);
     }
-
-    console.debug("[AuthZWrapperServer] Final result:", {
-        permission,
-        allowed,
-        isEnforcePermissions,
-        orgName,
-        permissionScope
-    });
 
     // If enforcement is disabled, always allow access (logging only)
     if (!isEnforcePermissions) {

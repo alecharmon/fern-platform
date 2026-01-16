@@ -89,7 +89,8 @@ export const RedisCacheKeyType = {
     WEB_ANALYTICS: "WEB_ANALYTICS",
     DOCS_SITE_ACCESS: "DOCS_SITE_ACCESS",
     ALGOLIA_ANALYTICS: "ALGOLIA_ANALYTICS",
-    LINK_CHECKER_JOB: "LINK_CHECKER_JOB"
+    LINK_CHECKER_JOB: "LINK_CHECKER_JOB",
+    USER_SESSION_INVALIDATED: "USER_SESSION_INVALIDATED"
 } as const;
 
 export type RedisCacheKeyType = (typeof RedisCacheKeyType)[keyof typeof RedisCacheKeyType];
@@ -108,6 +109,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.DOCS_SITE_ACCESS]: FdrAPI.dashboard.DocsSite;
     [RedisCacheKeyType.ALGOLIA_ANALYTICS]: AlgoliaAnalyticsData;
     [RedisCacheKeyType.LINK_CHECKER_JOB]: LinkCheckerJob;
+    [RedisCacheKeyType.USER_SESSION_INVALIDATED]: boolean;
 };
 
 export const RedisCacheKey = {
@@ -133,7 +135,9 @@ export const RedisCacheKey = {
     docsSiteAccess: (domain: string) => cacheKey(RedisCacheKeyType.DOCS_SITE_ACCESS)(`docs-site-access-${domain}`),
     algoliaAnalytics: (endpoint: string, params: string) =>
         cacheKey(RedisCacheKeyType.ALGOLIA_ANALYTICS)(`algolia-analytics-${endpoint}-${params}`),
-    linkCheckerJob: (jobId: string) => cacheKey(RedisCacheKeyType.LINK_CHECKER_JOB)(`link-checker-job-${jobId}`)
+    linkCheckerJob: (jobId: string) => cacheKey(RedisCacheKeyType.LINK_CHECKER_JOB)(`link-checker-job-${jobId}`),
+    userSessionInvalidated: (userId: string) =>
+        cacheKey(RedisCacheKeyType.USER_SESSION_INVALIDATED)(`user-session-invalidated-${userId}`)
 };
 
 function cacheKey<T extends RedisCacheKeyType>(_type: T) {

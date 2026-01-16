@@ -1,10 +1,17 @@
 "use server";
 
-import { addUserRoleForResource, type ResourceRole, removeUserRoleForResource } from "@fern-api/user-permissions";
+import {
+    addUserRoleForResource,
+    type ResourceRole,
+    removeRoles,
+    removeUserRoleForResource
+} from "@fern-api/user-permissions";
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import { getOrgIdFromName } from "@/app/services/auth0/management";
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
+import { RedisCacheKey } from "@/app/services/redis/cacheKey";
+import { redisSet } from "@/app/services/redis/redis";
 
 export interface SetUserResourceRoleParams {
     orgName: Auth0OrgName;
@@ -29,6 +36,8 @@ export async function setUserResourceRole({
 
         const orgId = await getOrgIdFromName(orgName);
 
+        // Remove all org level roles to avoid conflicts
+        await removeRoles({ userId, orgId, roleNames: [] });
         // Remove previous role if it exists
         if (previousRole) {
             try {
@@ -52,6 +61,12 @@ export async function setUserResourceRole({
             resource_type: resourceType,
             resource_id: resourceId,
             role
+        });
+
+        // Set Redis flag to invalidate user's session
+        // This will be checked by the TokenRefresher to log the user out
+        await redisSet(RedisCacheKey.userSessionInvalidated(userId), true, {
+            ttlInSeconds: 60 * 60 * 24 * 365 // 1 year - match token lifetime
         });
 
         return { success: true };

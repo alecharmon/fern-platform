@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SidepanelProvider } from "@/components/layout/SidepanelContext";
 import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
-
 import type { Auth0OrgName } from "../../services/auth0/types";
 import { OrgNameProvider } from "../context/OrgNameContext";
 

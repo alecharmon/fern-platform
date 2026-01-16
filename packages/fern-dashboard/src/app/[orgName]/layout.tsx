@@ -1,0 +1,46 @@
+import { redirect } from "next/navigation";
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { getAvailableOrgsForUser } from "@/app/services/dal/fdr/getAvailableOrgsForUser";
+import { TokenRefresher } from "@/components/auth/TokenRefresher";
+import orgRedirect from "@/utils/orgRedirect";
+import NotFound from "../not-found";
+import type { Auth0OrgName } from "../services/auth0/types";
+
+export default async function OrgLayout({
+    params,
+    children
+}: Readonly<{
+    params: Promise<{ orgName: Auth0OrgName }>;
+    children: React.ReactNode;
+}>) {
+    const { orgName } = await params;
+    const session = await getCurrentSession();
+
+    // Check if user has access to this org (works even if not authenticated)
+    if (session) {
+        const organizations = await getAvailableOrgsForUser({
+            userId: session.user.sub
+        });
+
+        const targetOrg = organizations.find((org) => org.name === orgName);
+
+        // User doesn't have access to this org
+        if (!targetOrg) {
+            console.warn("[org] Org Id not found", targetOrg);
+            return NotFound();
+        }
+
+        // Session is scoped to a different org (or no org) - re-auth for the correct org
+        if (session.orgId !== targetOrg.id) {
+            console.warn("[org] Session Org ID no Equal to Page Route Org", targetOrg.id, session.orgId);
+            redirect(orgRedirect({ id: targetOrg.id, name: orgName }));
+        }
+    }
+
+    return (
+        <>
+            <TokenRefresher />
+            {children}
+        </>
+    );
+}
