@@ -10,11 +10,12 @@ interface EditPageProps {
     searchParams: Promise<{
         docsUrl?: string;
         slug?: string;
+        fallbackUrl?: string;
     }>;
 }
 
 export default async function EditPage({ searchParams }: EditPageProps) {
-    const { docsUrl, slug } = await searchParams;
+    const { docsUrl, slug, fallbackUrl } = await searchParams;
 
     // Validate required params
     if (!docsUrl || slug == null) {
@@ -25,10 +26,13 @@ export default async function EditPage({ searchParams }: EditPageProps) {
     const session = await getCurrentSession();
     if (session == null) {
         // Show login UI with returnTo back to this page
-        const returnTo = `/edit-page?docsUrl=${encodeURIComponent(docsUrl)}&slug=${encodeURIComponent(slug)}`;
+        let returnTo = `/edit-page?docsUrl=${encodeURIComponent(docsUrl)}&slug=${encodeURIComponent(slug)}`;
+        if (fallbackUrl) {
+            returnTo += `&fallbackUrl=${encodeURIComponent(fallbackUrl)}`;
+        }
         return (
             <div className="flex min-h-screen w-full items-center justify-center">
-                <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-lg border bg-white p-8 shadow-sm">
+                <div className="mx-4 flex w-full max-w-sm flex-col items-center gap-4 rounded-lg border bg-white p-8 shadow-sm sm:mx-auto">
                     <h1 className="text-xl font-semibold">Log in to Fern</h1>
                     <p className="text-muted-foreground text-center text-sm">
                         Please sign in to edit this page in Fern Editor.
@@ -56,6 +60,10 @@ export default async function EditPage({ searchParams }: EditPageProps) {
     }
 
     if (!orgName) {
+        // If user is not a member and we have a fallback URL (e.g., GitHub), redirect there
+        if (fallbackUrl) {
+            redirect(fallbackUrl);
+        }
         redirect(`/error?message=${encodeURIComponent("This docs site is not associated with a Fern organization")}`);
     }
 

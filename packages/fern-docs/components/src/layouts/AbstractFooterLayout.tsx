@@ -40,7 +40,7 @@ export function AbstractFooterLayout({
 
     const renderEditButton = () => {
         if (editThisPageLaunch === "dashboard" && docsUrl && slug != null) {
-            return <EditInDashboardButton docsUrl={docsUrl} slug={slug} lang={lang} />;
+            return <EditInDashboardButton docsUrl={docsUrl} slug={slug} lang={lang} fallbackUrl={editThisPageUrl} />;
         }
         if (editThisPageUrl) {
             return <EditThisPageButton editThisPageUrl={editThisPageUrl} lang={lang} />;
