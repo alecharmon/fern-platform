@@ -51,7 +51,7 @@ export function ConfirmScreen({ orgName, docsUrl, wizardFormData }: ConfirmScree
                             className="px-3 text-sm font-mono text-muted-foreground min-w-fit"
                         />
 
-                        <Button asChild variant="outline" size="sm" className="h-[36px] bg-primary">
+                        <Button asChild variant="outline" size="sm" className="h-[36px]">
                             <a
                                 href={`https://${fullUrl}`}
                                 target="_blank"
@@ -64,7 +64,7 @@ export function ConfirmScreen({ orgName, docsUrl, wizardFormData }: ConfirmScree
                             </a>
                         </Button>
                     </div>
-                    <Button asChild variant="outline">
+                    <Button asChild>
                         <Link
                             href={`/${orgName}/docs/${encodedURI}.docs.buildwithfern.com`}
                             onClick={handleContinueToSetupClick}
@@ -79,6 +79,7 @@ export function ConfirmScreen({ orgName, docsUrl, wizardFormData }: ConfirmScree
             <div className="flex-1 pt-6 flex w-full items-center justify-center overflow-hidden">
                 <SlideUpTransition>
                     <div
+                        className="w-dvw md:w-[80dvw]"
                         style={{
                             transform:
                                 "perspective(1200px) rotateX(10deg) rotateY(15deg) rotateZ(-10deg) translateX(35px)",

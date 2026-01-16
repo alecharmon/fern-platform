@@ -20,21 +20,30 @@ import { getOnboardingFormData, getOnboardingSession, saveSitePublishUrl } from 
  * - Redirects to details page if data is missing or expired
  * - No back arrow or onboarding step card UI
  */
-export function PublishingStepClient() {
+interface PublishingStepClientProps {
+    organizationId: string;
+}
+
+export function PublishingStepClient({ organizationId }: PublishingStepClientProps) {
     const router = useRouter();
     const { form, goToNextStep } = useOnboarding();
     const posthog = usePostHog();
 
     // Check for required session data and redirect if missing
-    useEffect(() => {
-        const sessionData = getOnboardingSession();
-        const formData = getOnboardingFormData();
+    const sessionData = getOnboardingSession();
+    const formData = getOnboardingFormData();
 
+    useEffect(() => {
         if (!sessionData || !formData) {
             console.warn("[PublishingStepClient] No valid session data found, redirecting to details");
-            router.replace("/get-started/docs/details");
+            const targetOrg = sessionData?.orgName ?? organizationId;
+            if (targetOrg) {
+                router.replace(`/get-started/${targetOrg}/docs/details`);
+            } else {
+                router.replace("/get-started");
+            }
         }
-    }, [router]);
+    }, [formData, organizationId, router, sessionData]);
 
     const handleStreamComplete = useCallback(
         (result: { url: string; fernDocsDownloadUrl?: string; githubRepoUrl?: string }) => {
@@ -64,9 +73,6 @@ export function PublishingStepClient() {
     );
 
     // Get session data
-    const sessionData = getOnboardingSession();
-    const formData = getOnboardingFormData();
-
     // Don't render until we've verified session data exists
     if (!sessionData || !formData) {
         return null;

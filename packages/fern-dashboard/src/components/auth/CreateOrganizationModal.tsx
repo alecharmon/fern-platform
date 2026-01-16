@@ -35,11 +35,7 @@ export function CreateOrganizationModal({ accessToken, open, onOpenChange }: Cre
                     <DialogDescription>Setup a new organization to manage SDKs and Docs.</DialogDescription>
                 </DialogHeader>
                 <DialogBody>
-                    <CreateOrganizationForm
-                        accessToken={accessToken}
-                        onSuccess={handleSuccess}
-                        submitButtonClassName=""
-                    />
+                    <CreateOrganizationForm accessToken={accessToken} onSuccess={handleSuccess} />
                 </DialogBody>
                 <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

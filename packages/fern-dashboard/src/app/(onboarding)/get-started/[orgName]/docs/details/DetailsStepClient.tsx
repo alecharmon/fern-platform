@@ -8,7 +8,6 @@ import { DocsUrl } from "@/components/onboarding/DocsUrl";
 import { OnboardingStepCard } from "@/components/onboarding/OnboardingStepCard";
 import { UploadImage } from "@/components/onboarding/UploadImage";
 import { useDocsSubmission } from "@/components/onboarding/useDocsSubmission";
-import { generateOrgIdFromDocsUrl } from "@/components/onboarding/utils";
 import { nameToUrl } from "@/components/onboarding/validation";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { Input } from "@/components/ui/input";
@@ -16,9 +15,13 @@ import { Label } from "@/components/ui/label";
 import { useOnboarding } from "@/providers/OnboardingProvider";
 import { saveOnboardingFormData, saveOnboardingSession } from "@/utils/onboardingSession";
 
-export function DetailsStepClient() {
+interface DetailsStepClientProps {
+    organizationId: string;
+}
+
+export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
     const { form, formData, validationErrors, validateForm, goToNextStep, setFocusedField } = useOnboarding();
-    const { submitDocs, isSubmitting, sessionId, error } = useDocsSubmission();
+    const { submitDocs, isSubmitting, sessionId, error } = useDocsSubmission(organizationId);
     const [isUploadingLogo, setIsUploadingLogo] = useState(false);
     const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
     const posthog = usePostHog();
@@ -34,16 +37,14 @@ export function DetailsStepClient() {
     // When sessionId is set (submission started), save to sessionStorage and navigate to publishing
     useEffect(() => {
         if (sessionId && isSubmitting) {
-            const orgName = generateOrgIdFromDocsUrl(formData.docsSiteUrl);
-
             // Save session data to sessionStorage
-            saveOnboardingSession(sessionId, orgName);
+            saveOnboardingSession(sessionId, organizationId);
             saveOnboardingFormData(formData);
 
             // Navigate to publishing step
             goToNextStep();
         }
-    }, [sessionId, isSubmitting, formData, goToNextStep]);
+    }, [sessionId, isSubmitting, formData, goToNextStep, organizationId]);
 
     const handleSubmit = useCallback(async () => {
         // Validate form with current formData
@@ -77,11 +78,8 @@ export function DetailsStepClient() {
             setLogoUploadError(null);
 
             try {
-                // Generate org ID from current docs URL for upload
-                const orgId = generateOrgIdFromDocsUrl(formData.docsSiteUrl);
-
                 // Upload file to S3
-                const { assetUrl } = await uploadOnboardingAsset(file, orgId);
+                const { assetUrl } = await uploadOnboardingAsset(file, organizationId);
 
                 // Store the S3 URL and filename in form state
                 form.setFieldValue("logoUrl", assetUrl);
@@ -94,7 +92,7 @@ export function DetailsStepClient() {
                 setIsUploadingLogo(false);
             }
         },
-        [form, formData.docsSiteUrl]
+        [form, organizationId]
     );
 
     return (

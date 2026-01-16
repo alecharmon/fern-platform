@@ -10,7 +10,7 @@ import { Button } from "../ui/button";
 interface DocsZeroStateButtonClientProps {
     orgName: Auth0OrgName | undefined;
     /**
-     * If true, links to internal wizard (/org/docs/new)
+     * If true, links to the new onboarding flow (/get-started/:org/docs)
      * If false, links to external documentation
      */
     useInternalWizard: boolean;
@@ -19,9 +19,9 @@ interface DocsZeroStateButtonClientProps {
 export function DocsZeroStateButtonClient({ useInternalWizard }: DocsZeroStateButtonClientProps) {
     const orgName = useOrgNameFromPathname();
 
-    const href = useInternalWizard
-        ? `/${orgName}/docs/new`
-        : "https://buildwithfern.com/learn/docs/getting-started/quickstart";
+    const internalHref = orgName != null ? `/get-started/${orgName}/docs` : "/get-started/create-org";
+
+    const href = useInternalWizard ? internalHref : "https://buildwithfern.com/learn/docs/getting-started/quickstart";
 
     const target = useInternalWizard ? undefined : "_blank";
 

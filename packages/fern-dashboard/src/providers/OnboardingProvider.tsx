@@ -134,15 +134,38 @@ const DEFAULT_FORM_DATA: WizardFormData = {
 
 const OnboardingContext = createContext<OnboardingContextValue | undefined>(undefined);
 
-const STEP_ORDER: OnboardingStep[] = ["branding", "api-spec", "details", "publishing", "complete"];
+const STEP_ORDER: OnboardingStep[] = ["api-spec", "branding", "details", "publishing", "complete"];
 
-const STEP_ROUTES: Record<OnboardingStep, string> = {
-    branding: "/get-started/docs",
-    "api-spec": "/get-started/docs/api-spec",
+const DEFAULT_STEP_ROUTES: Record<OnboardingStep, string> = {
+    "api-spec": "/get-started/docs",
+    branding: "/get-started/docs/branding",
     details: "/get-started/docs/details",
     publishing: "/get-started/docs/publishing",
     complete: "/get-started/docs/complete"
 };
+
+function buildStepRoutes(orgName?: string | null): Record<OnboardingStep, string> {
+    if (!orgName) {
+        return DEFAULT_STEP_ROUTES;
+    }
+
+    const base = `/get-started/${orgName}/docs`;
+    return {
+        "api-spec": base,
+        branding: `${base}/branding`,
+        details: `${base}/details`,
+        publishing: `${base}/publishing`,
+        complete: `${base}/complete`
+    };
+}
+
+function extractOrgNameFromPath(pathname: string | null): string | undefined {
+    if (!pathname) {
+        return undefined;
+    }
+    const match = pathname.match(/^\/get-started\/([^/]+)\/docs/);
+    return match?.[1];
+}
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
@@ -151,6 +174,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
     const [isNavigating, setIsNavigating] = useState(false);
     const [focusedField, setFocusedField] = useState<FocusedField>("none");
+    const orgNameFromPath = extractOrgNameFromPath(pathname);
+    const stepRoutes = useMemo(() => buildStepRoutes(orgNameFromPath), [orgNameFromPath]);
 
     // Initialize form with @tanstack/react-form
     const form = useForm({
@@ -163,7 +188,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     // Sync currentStep with the current URL pathname
     useEffect(() => {
         // Find the step that matches the current pathname
-        const matchedStep = (Object.entries(STEP_ROUTES) as [OnboardingStep, string][]).find(
+        const matchedStep = (Object.entries(stepRoutes) as [OnboardingStep, string][]).find(
             ([_step, route]) => pathname === route
         );
 
@@ -174,7 +199,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 setCurrentStep(step);
             }
         }
-    }, [pathname, currentStep]);
+    }, [pathname, currentStep, stepRoutes]);
 
     // Validation function
     const validateForm = useCallback(() => {
@@ -224,16 +249,17 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
             // Use replace for publishing and complete steps to prevent back navigation
             const shouldReplace = options?.replace ?? (step === "publishing" || step === "complete");
 
+            const targetRoute = stepRoutes[step];
             if (shouldReplace) {
-                router.replace(STEP_ROUTES[step]);
+                router.replace(targetRoute);
             } else {
-                router.push(STEP_ROUTES[step]);
+                router.push(targetRoute);
             }
 
             // Reset navigation lock after a short delay to allow router to process
             setTimeout(() => setIsNavigating(false), 500);
         },
-        [router, isNavigating, form.store]
+        [router, isNavigating, form.store, stepRoutes]
     );
 
     const goToNextStep = useCallback(

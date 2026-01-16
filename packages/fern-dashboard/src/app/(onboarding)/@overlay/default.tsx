@@ -21,11 +21,6 @@ export default async function DefaultOnboardingOverlaySlot() {
                 <ThemedFernLogo className="absolute top-2 left-6 mb-8 mt-4 w-14" />
             </FadeInTransition>
 
-            {/* Top right content */}
-            <FadeInTransition>
-                <ThemeToggle className="absolute top-4 right-4" />
-            </FadeInTransition>
-
             {/* Bottom left content */}
             <div className="hidden md:block absolute left-2 bottom-4 max-w-[280px]">
                 <FadeInTransition>

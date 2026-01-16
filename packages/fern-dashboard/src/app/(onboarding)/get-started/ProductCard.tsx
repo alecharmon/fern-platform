@@ -10,7 +10,7 @@ const variants = {
         title: "Docs",
         description: "Beautiful API Documentation styled to match your brand",
         icon: "/assets/onboarding/onboarding_docs.svg",
-        href: "/get-started/docs"
+        href: "/get-started/create-org?next=/get-started/:orgId/docs"
     },
     sdk: {
         title: "SDKs",

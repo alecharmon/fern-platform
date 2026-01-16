@@ -1,18 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { BackArrow } from "../BackArrow";
-import { BrandingStepClient } from "./BrandingStepClient";
 
-export default async function DocsOnboardingStep1Page() {
-    const session = await getCurrentSession();
-    if (session == null) {
-        redirect("/login");
-    }
-
-    return (
-        <>
-            <BackArrow href="/get-started" />
-            <BrandingStepClient />
-        </>
-    );
+export default function LegacyDocsEntryPoint() {
+    redirect("/get-started/create-org");
 }

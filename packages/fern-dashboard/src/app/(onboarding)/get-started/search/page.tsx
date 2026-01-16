@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
+import { BackArrow } from "@/app/(onboarding)/get-started/BackArrow";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { DocsZeroStateRequestOrgAccess } from "@/components/docs-page/DocsZeroStateRequestOrgAccess";
 import { SlideLeftTransition } from "@/components/transitions/SlideLeftTransition";
-import { BackArrow } from "../BackArrow";
 
 export default async function SearchForSitePage() {
     const session = await getCurrentSession();

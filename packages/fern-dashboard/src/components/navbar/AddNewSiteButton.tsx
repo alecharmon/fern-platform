@@ -23,7 +23,7 @@ export function AddNewSiteButton({ orgName, isCreateDocsNewSiteEnabled }: AddNew
         <Link
             href={
                 isCreateDocsNewSiteEnabled
-                    ? `/${orgName}/docs/new`
+                    ? `/get-started/${orgName}/docs`
                     : "https://buildwithfern.com/learn/docs/getting-started/quickstart"
             }
             className={cn(

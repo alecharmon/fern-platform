@@ -1,6 +1,6 @@
 import Script from "next/script";
+import { BackArrow } from "@/app/(onboarding)/get-started/BackArrow";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { BackArrow } from "../BackArrow";
 import { SdkPageClient } from "./SdkPageClient";
 
 export default async function Page() {

@@ -8,7 +8,7 @@ export function BackArrow({ href }: { href: string }) {
         <div className="absolute top-4 left-4">
             <FadeInTransition>
                 <Button asChild variant="ghost" size="icon">
-                    <Link href={href} className="flex items-center gap-2">
+                    <Link href={href} className="flex items-center gap-2" prefetch>
                         <ArrowLeftIcon className="size-4" />
                     </Link>
                 </Button>

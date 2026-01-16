@@ -1,9 +1,9 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
+import { BackArrow } from "@/app/(onboarding)/get-started/BackArrow";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { SlideLeftTransition } from "@/components/transitions/SlideLeftTransition";
-import { BackArrow } from "../../BackArrow";
 import { CreateOrganizationContentClient } from "./CreateOrganizationContentClient";
 
 export default async function NewOrganizationPage() {

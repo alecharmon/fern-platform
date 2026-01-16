@@ -154,5 +154,5 @@ export const ROUTE_PERMISSION_CONFIGS: RoutePermissionConfig[] = [
     route("/api/settings*", "manage-settings"),
     routeWithResource("/:org/docs/:docUrl/settings*", "manage-settings", "docUrl"),
     routeWithResource("/:org/docs/:docUrl/members*", "manage-users", "docUrl"),
-    route("/:org/docs/new", "manage-settings")
+    route("/get-started/:org/docs*", "manage-settings")
 ];
