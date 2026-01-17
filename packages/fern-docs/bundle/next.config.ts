@@ -75,11 +75,6 @@ const nextConfig: NextConfig = {
         "@fern-ui/react-commons"
     ],
     experimental: {
-        // Enable Subresource Integrity (SRI) for script and style tags
-        // This adds integrity hashes to Next.js-generated assets for supply-chain security
-        sri: {
-            algorithm: "sha384"
-        },
         appNavFailHandling: true,
         scrollRestoration: true,
         optimisticClientCache: true,
