@@ -63,6 +63,11 @@ export default function DevPanel() {
 
     const LoadingIndicator = "<!-- Loading content... -->";
 
+    // Extract the current markdown content to use as a dependency for the files useMemo.
+    // This ensures the useMemo recomputes when the content changes, since registeredPages
+    // is mutated in place and its object reference doesn't change.
+    const currentMarkdown = currentFilename ? registeredPages[currentFilename]?.pageData.mdx : undefined;
+
     // Build the list of files to display based on page type
     const files = useMemo((): DevPanelFile[] => {
         if (currentPageType === "api-reference" && openApiSpecs && openApiSpecs.size > 0) {
@@ -97,7 +102,7 @@ export default function DevPanel() {
 
         // Default: show markdown file for docs pages
         if (currentFilename) {
-            const markdown = registeredPages[currentFilename]?.pageData.mdx || LoadingIndicator;
+            const markdown = currentMarkdown || LoadingIndicator;
             return [
                 {
                     path: currentFilename,
@@ -109,7 +114,7 @@ export default function DevPanel() {
         }
 
         return [];
-    }, [currentPageType, currentFilename, registeredPages, openApiSpecs, generatorsYmlPath, generatorsYmlContent]);
+    }, [currentPageType, currentFilename, currentMarkdown, openApiSpecs, generatorsYmlPath, generatorsYmlContent]);
 
     // Set initial active tab when files change
     useEffect(() => {
