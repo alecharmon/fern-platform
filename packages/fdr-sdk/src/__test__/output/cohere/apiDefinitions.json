@@ -52748,6 +52748,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_v2:V2ChatStreamRequestDocumentsItem": {
         "name": "V2ChatStreamRequestDocumentsItem",
@@ -113614,6 +113615,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_embedJobs:CreateEmbedJobRequestTruncate": {
         "name": "CreateEmbedJobRequestTruncate",

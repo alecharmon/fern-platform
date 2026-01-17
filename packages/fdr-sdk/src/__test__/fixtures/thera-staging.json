@@ -1578,10 +1578,15 @@
         "id": "6e51c44e-1dc0-48b8-a9de-be9b07d5c312",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_api", "subpackage_db", "subpackage_model"],
+          "subpackages": [
+            "subpackage_api",
+            "subpackage_db",
+            "subpackage_model"
+          ],
           "types": [],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_api/aiprise/aiprise_webhook_api:AiPriseVerificationCallback": {
@@ -2420,7 +2425,7 @@
                   }
                 },
                 {
-                  "description": "I certify that:\n• The entity identified in Part I is a foreign entity that is not a financial institution;\n• Less than 50% of such entity’s gross income for the preceding calendar year is passive income; and\n• Less than 50% of the assets held by such entity are assets that produce or are held for the production of passive income (calculated as a\nweighted average of the percentage of passive assets measured quarterly) (see instructions for the definition of passive income).",
+                  "description": "I certify that:\n\u2022 The entity identified in Part I is a foreign entity that is not a financial institution;\n\u2022 Less than 50% of such entity\u2019s gross income for the preceding calendar year is passive income; and\n\u2022 Less than 50% of the assets held by such entity are assets that produce or are held for the production of passive income (calculated as a\nweighted average of the percentage of passive assets measured quarterly) (see instructions for the definition of passive income).",
                   "key": "line39",
                   "valueType": {
                     "type": "primitive",
@@ -2519,28 +2524,36 @@
                   "description": "this doc info doesn't appear in swagger",
                   "discriminantValue": "W_8BEN",
                   "additionalProperties": {
-                    "extends": ["type_api/request/thera/document:W_8BEN"],
+                    "extends": [
+                      "type_api/request/thera/document:W_8BEN"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "W_8BEN_E",
                   "additionalProperties": {
-                    "extends": ["type_api/request/thera/document:W_8BEN_E"],
+                    "extends": [
+                      "type_api/request/thera/document:W_8BEN_E"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "W9",
                   "additionalProperties": {
-                    "extends": ["type_model/thera/document:W9FormData"],
+                    "extends": [
+                      "type_model/thera/document:W9FormData"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "IRS_1099_NEC",
                   "additionalProperties": {
-                    "extends": ["type_api/request/thera/document:Irs1099NecFormRequest"],
+                    "extends": [
+                      "type_api/request/thera/document:Irs1099NecFormRequest"
+                    ],
                     "properties": []
                   }
                 }
@@ -4262,28 +4275,36 @@
                 {
                   "discriminantValue": "card",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:CardPaymentMethodResponse"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:CardPaymentMethodResponse"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "usBankAccount",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:UsBankAccountPaymentMethodResponse"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:UsBankAccountPaymentMethodResponse"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "sepaBankAccount",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:SepaPaymentMethodResponse"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:SepaPaymentMethodResponse"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "acssDebit",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:AcssDebitPaymentMethodResponse"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:AcssDebitPaymentMethodResponse"
+                    ],
                     "properties": []
                   }
                 }
@@ -4503,14 +4524,18 @@
                 {
                   "discriminantValue": "plaid",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:PlaidUsBankAccountProviderDetails"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:PlaidUsBankAccountProviderDetails"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "stripe",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:StripeUsBankAccountProviderDetails"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:StripeUsBankAccountProviderDetails"
+                    ],
                     "properties": []
                   }
                 }
@@ -5610,14 +5635,18 @@
                 {
                   "discriminantValue": "invoicePayment",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:InvoicePayment"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:InvoicePayment"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "eorPayIn",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:EorPayIn"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:EorPayIn"
+                    ],
                     "properties": []
                   }
                 }
@@ -5867,14 +5896,18 @@
                 {
                   "discriminantValue": "ach",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:AchPaymentMethod"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:AchPaymentMethod"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "offPlatform",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:OffPlatformPaymentMethod"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:OffPlatformPaymentMethod"
+                    ],
                     "properties": []
                   }
                 }
@@ -6269,21 +6302,27 @@
                 {
                   "discriminantValue": "invoicePayment",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:WorkerInvoicePaymentTransaction"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:WorkerInvoicePaymentTransaction"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "withdrawal",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:WorkerWithdrawalTransaction"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:WorkerWithdrawalTransaction"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "miscellaneous",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/bank/bank_api:MiscellaneousWorkerCreditTransaction"],
+                    "extends": [
+                      "type_api/thera/bank/bank_api:MiscellaneousWorkerCreditTransaction"
+                    ],
                     "properties": []
                   }
                 }
@@ -9134,21 +9173,27 @@
                 {
                   "discriminantValue": "onCycleInvoice",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/disbursement/disbursement_api:CreateOnCycleInvoiceDetail"],
+                    "extends": [
+                      "type_api/thera/disbursement/disbursement_api:CreateOnCycleInvoiceDetail"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "offCycleInvoice",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/disbursement/disbursement_api:CreateOffCycleInvoiceDetail"],
+                    "extends": [
+                      "type_api/thera/disbursement/disbursement_api:CreateOffCycleInvoiceDetail"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "others",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/disbursement/disbursement_api:CreateGeneralItemDetail"],
+                    "extends": [
+                      "type_api/thera/disbursement/disbursement_api:CreateGeneralItemDetail"
+                    ],
                     "properties": []
                   }
                 }
@@ -9401,7 +9446,9 @@
                 {
                   "discriminantValue": "createScheduledInvoices",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/disbursement/disbursement_webhook_api:CreateScheduledInvoiceEvent"],
+                    "extends": [
+                      "type_api/thera/disbursement/disbursement_webhook_api:CreateScheduledInvoiceEvent"
+                    ],
                     "properties": []
                   }
                 }
@@ -9837,14 +9884,18 @@
                 {
                   "discriminantValue": "workingDaysCalculationType",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/employment/employment_api:WorkingDaysCalculationType"],
+                    "extends": [
+                      "type_api/thera/employment/employment_api:WorkingDaysCalculationType"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "calendarDaysCalculationType",
                   "additionalProperties": {
-                    "extends": ["type_api/thera/employment/employment_api:CalendarDaysCalculationType"],
+                    "extends": [
+                      "type_api/thera/employment/employment_api:CalendarDaysCalculationType"
+                    ],
                     "properties": []
                   }
                 }
@@ -12908,14 +12959,18 @@
                 {
                   "discriminantValue": "limitedAllowance",
                   "additionalProperties": {
-                    "extends": ["type_db/company:LimitedAllowanceType"],
+                    "extends": [
+                      "type_db/company:LimitedAllowanceType"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "unlimitedAllowance",
                   "additionalProperties": {
-                    "extends": ["type_db/company:UnlimitedAllowanceType"],
+                    "extends": [
+                      "type_db/company:UnlimitedAllowanceType"
+                    ],
                     "properties": []
                   }
                 }
@@ -13940,7 +13995,9 @@
                 {
                   "discriminantValue": "perPaycheck",
                   "additionalProperties": {
-                    "extends": ["type_db/contract:PerPaycheckFrequency"],
+                    "extends": [
+                      "type_db/contract:PerPaycheckFrequency"
+                    ],
                     "properties": []
                   }
                 }
@@ -13974,7 +14031,9 @@
                 {
                   "discriminantValue": "deduction",
                   "additionalProperties": {
-                    "extends": ["type_db/contract:Deduction"],
+                    "extends": [
+                      "type_db/contract:Deduction"
+                    ],
                     "properties": []
                   }
                 },
@@ -14032,7 +14091,9 @@
                 {
                   "discriminantValue": "reimbursement",
                   "additionalProperties": {
-                    "extends": ["type_db/contract:Reimbursement"],
+                    "extends": [
+                      "type_db/contract:Reimbursement"
+                    ],
                     "properties": []
                   }
                 }
@@ -15183,28 +15244,36 @@
                 {
                   "discriminantValue": "usIrsW9",
                   "additionalProperties": {
-                    "extends": ["type_db/document:UsIrsW9DocumentMetadata"],
+                    "extends": [
+                      "type_db/document:UsIrsW9DocumentMetadata"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "usIrs1099NecCopyA",
                   "additionalProperties": {
-                    "extends": ["type_db/document:UsIrs1099NecDocumentMetadata"],
+                    "extends": [
+                      "type_db/document:UsIrs1099NecDocumentMetadata"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "usIrs1099NecCopyB",
                   "additionalProperties": {
-                    "extends": ["type_db/document:UsIrs1099NecDocumentMetadata"],
+                    "extends": [
+                      "type_db/document:UsIrs1099NecDocumentMetadata"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "usIrs1099NecCopyC",
                   "additionalProperties": {
-                    "extends": ["type_db/document:UsIrs1099NecDocumentMetadata"],
+                    "extends": [
+                      "type_db/document:UsIrs1099NecDocumentMetadata"
+                    ],
                     "properties": []
                   }
                 }
@@ -15927,7 +15996,9 @@
                 {
                   "discriminantValue": "plaid",
                   "additionalProperties": {
-                    "extends": ["type_db/payment_method:PlaidPaymentMethod"],
+                    "extends": [
+                      "type_db/payment_method:PlaidPaymentMethod"
+                    ],
                     "properties": []
                   }
                 },
@@ -16120,28 +16191,36 @@
                 {
                   "discriminantValue": "usBankAccount",
                   "additionalProperties": {
-                    "extends": ["type_db/payment_method:StripeUsBankAccountPaymentMethodDetails"],
+                    "extends": [
+                      "type_db/payment_method:StripeUsBankAccountPaymentMethodDetails"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "card",
                   "additionalProperties": {
-                    "extends": ["type_db/payment_method:StripeCardPaymentMethodDetails"],
+                    "extends": [
+                      "type_db/payment_method:StripeCardPaymentMethodDetails"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "sepa",
                   "additionalProperties": {
-                    "extends": ["type_db/payment_method:StripeSepaPaymentMethodDetails"],
+                    "extends": [
+                      "type_db/payment_method:StripeSepaPaymentMethodDetails"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "acssDebit",
                   "additionalProperties": {
-                    "extends": ["type_db/payment_method:StripeAcssDebitAccountPaymentMethodDetails"],
+                    "extends": [
+                      "type_db/payment_method:StripeAcssDebitAccountPaymentMethodDetails"
+                    ],
                     "properties": []
                   }
                 }
@@ -16331,7 +16410,7 @@
                   }
                 },
                 {
-                  "description": "Two-digit number representing the card’s expiration month.",
+                  "description": "Two-digit number representing the card\u2019s expiration month.",
                   "key": "expMonth",
                   "valueType": {
                     "type": "primitive",
@@ -16341,7 +16420,7 @@
                   }
                 },
                 {
-                  "description": "Four-digit number representing the card’s expiration year.",
+                  "description": "Four-digit number representing the card\u2019s expiration year.",
                   "key": "expYear",
                   "valueType": {
                     "type": "primitive",
@@ -17155,7 +17234,9 @@
                 {
                   "discriminantValue": "bankTransfer",
                   "additionalProperties": {
-                    "extends": ["type_db/user:BankTransfer"],
+                    "extends": [
+                      "type_db/user:BankTransfer"
+                    ],
                     "properties": []
                   }
                 }
@@ -18354,14 +18435,18 @@
                 {
                   "discriminantValue": "weekly",
                   "additionalProperties": {
-                    "extends": ["type_model/thera/contract:WeeklyPayCycleEnd"],
+                    "extends": [
+                      "type_model/thera/contract:WeeklyPayCycleEnd"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "biweekly",
                   "additionalProperties": {
-                    "extends": ["type_model/thera/contract:BiWeeklyPayCycleEnd"],
+                    "extends": [
+                      "type_model/thera/contract:BiWeeklyPayCycleEnd"
+                    ],
                     "properties": []
                   }
                 },
@@ -18456,7 +18541,9 @@
                 {
                   "discriminantValue": "lastDayOfMonth",
                   "additionalProperties": {
-                    "extends": ["type_model/thera/contract:LastDayOfMonth"],
+                    "extends": [
+                      "type_model/thera/contract:LastDayOfMonth"
+                    ],
                     "properties": []
                   }
                 },
@@ -18487,7 +18574,9 @@
                 {
                   "discriminantValue": "fifteenthAndEndOfMonth",
                   "additionalProperties": {
-                    "extends": ["type_model/thera/contract:FifteenthAndEndOfMonth"],
+                    "extends": [
+                      "type_model/thera/contract:FifteenthAndEndOfMonth"
+                    ],
                     "properties": []
                   }
                 },
@@ -18937,7 +19026,8 @@
             ],
             "urlSlug": "api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/aiprise": {
             "subpackageId": "subpackage_api/aiprise",
@@ -18945,10 +19035,13 @@
             "name": "aiprise",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/aiprise/aiprise_webhook_api"],
+            "subpackages": [
+              "subpackage_api/aiprise/aiprise_webhook_api"
+            ],
             "urlSlug": "aiprise",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/aiprise/aiprise_webhook_api": {
             "subpackageId": "subpackage_api/aiprise/aiprise_webhook_api",
@@ -18958,7 +19051,9 @@
               {
                 "environments": [],
                 "urlSlug": "verify",
-                "migratedFromUrlSlugs": ["verify-user-callback"],
+                "migratedFromUrlSlugs": [
+                  "verify-user-callback"
+                ],
                 "method": "POST",
                 "id": "verify",
                 "originalEndpointId": "endpoint_api/aiprise/aiprise_webhook_api.verify",
@@ -19033,7 +19128,8 @@
             "urlSlug": "aiprise-webhook-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "AiPrise Webhook"
+            "displayName": "AiPrise Webhook",
+            "graphqlOperations": []
           },
           "subpackage_api/dev": {
             "subpackageId": "subpackage_api/dev",
@@ -19041,10 +19137,13 @@
             "name": "dev",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/dev/dev"],
+            "subpackages": [
+              "subpackage_api/dev/dev"
+            ],
             "urlSlug": "dev",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/dev/dev": {
             "subpackageId": "subpackage_api/dev/dev",
@@ -19134,11 +19233,15 @@
                 "authed": false
               }
             ],
-            "types": ["type_api/dev/dev:AddEorEmployment", "type_api/dev/dev:AddEorUser"],
+            "types": [
+              "type_api/dev/dev:AddEorEmployment",
+              "type_api/dev/dev:AddEorUser"
+            ],
             "subpackages": [],
             "urlSlug": "dev",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/oneschema": {
             "subpackageId": "subpackage_api/oneschema",
@@ -19146,21 +19249,27 @@
             "name": "oneschema",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/oneschema/model"],
+            "subpackages": [
+              "subpackage_api/oneschema/model"
+            ],
             "urlSlug": "oneschema",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/oneschema/model": {
             "subpackageId": "subpackage_api/oneschema/model",
             "parent": "subpackage_api/oneschema",
             "name": "model",
             "endpoints": [],
-            "types": ["type_api/oneschema/model:OneSchemaCsvColumn"],
+            "types": [
+              "type_api/oneschema/model:OneSchemaCsvColumn"
+            ],
             "subpackages": [],
             "urlSlug": "model",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request": {
             "subpackageId": "subpackage_api/request",
@@ -19168,10 +19277,14 @@
             "name": "request",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/request/thera", "subpackage_api/request/zeal"],
+            "subpackages": [
+              "subpackage_api/request/thera",
+              "subpackage_api/request/zeal"
+            ],
             "urlSlug": "request",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/thera": {
             "subpackageId": "subpackage_api/request/thera",
@@ -19179,10 +19292,13 @@
             "name": "thera",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/request/thera/document"],
+            "subpackages": [
+              "subpackage_api/request/thera/document"
+            ],
             "urlSlug": "thera",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/thera/document": {
             "subpackageId": "subpackage_api/request/thera/document",
@@ -19201,7 +19317,8 @@
             "subpackages": [],
             "urlSlug": "document",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal": {
             "subpackageId": "subpackage_api/request/zeal",
@@ -19216,7 +19333,8 @@
             ],
             "urlSlug": "zeal",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal/check": {
             "subpackageId": "subpackage_api/request/zeal/check",
@@ -19232,7 +19350,8 @@
             ],
             "urlSlug": "check",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal/check/deduction": {
             "subpackageId": "subpackage_api/request/zeal/check/deduction",
@@ -19251,7 +19370,8 @@
             "subpackages": [],
             "urlSlug": "deduction",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal/check/employee": {
             "subpackageId": "subpackage_api/request/zeal/check/employee",
@@ -19268,7 +19388,8 @@
             "subpackages": [],
             "urlSlug": "employee",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal/check/reporting_period": {
             "subpackageId": "subpackage_api/request/zeal/check/reporting_period",
@@ -19282,7 +19403,8 @@
             "subpackages": [],
             "urlSlug": "reporting-period",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal/check/shift": {
             "subpackageId": "subpackage_api/request/zeal/check/shift",
@@ -19298,7 +19420,8 @@
             "subpackages": [],
             "urlSlug": "shift",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal/deduction": {
             "subpackageId": "subpackage_api/request/zeal/deduction",
@@ -19306,10 +19429,13 @@
             "name": "deduction",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/request/zeal/deduction/create"],
+            "subpackages": [
+              "subpackage_api/request/zeal/deduction/create"
+            ],
             "urlSlug": "deduction",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal/deduction/create": {
             "subpackageId": "subpackage_api/request/zeal/deduction/create",
@@ -19323,7 +19449,8 @@
             "subpackages": [],
             "urlSlug": "create",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal/employee": {
             "subpackageId": "subpackage_api/request/zeal/employee",
@@ -19331,10 +19458,13 @@
             "name": "employee",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/request/zeal/employee/employee"],
+            "subpackages": [
+              "subpackage_api/request/zeal/employee/employee"
+            ],
             "urlSlug": "employee",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/request/zeal/employee/employee": {
             "subpackageId": "subpackage_api/request/zeal/employee/employee",
@@ -19348,7 +19478,8 @@
             "subpackages": [],
             "urlSlug": "employee",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/response": {
             "subpackageId": "subpackage_api/response",
@@ -19356,10 +19487,13 @@
             "name": "response",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/response/thera"],
+            "subpackages": [
+              "subpackage_api/response/thera"
+            ],
             "urlSlug": "response",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/response/thera": {
             "subpackageId": "subpackage_api/response/thera",
@@ -19367,21 +19501,27 @@
             "name": "thera",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/response/thera/disbursement"],
+            "subpackages": [
+              "subpackage_api/response/thera/disbursement"
+            ],
             "urlSlug": "thera",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/response/thera/disbursement": {
             "subpackageId": "subpackage_api/response/thera/disbursement",
             "parent": "subpackage_api/response/thera",
             "name": "disbursement",
             "endpoints": [],
-            "types": ["type_api/response/thera/disbursement:CreateDocumentResponse"],
+            "types": [
+              "type_api/response/thera/disbursement:CreateDocumentResponse"
+            ],
             "subpackages": [],
             "urlSlug": "disbursement",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/services": {
             "subpackageId": "subpackage_api/services",
@@ -19389,10 +19529,13 @@
             "name": "services",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/services/file"],
+            "subpackages": [
+              "subpackage_api/services/file"
+            ],
             "urlSlug": "services",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/services/file": {
             "subpackageId": "subpackage_api/services/file",
@@ -19880,7 +20023,8 @@
             "subpackages": [],
             "urlSlug": "file",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera": {
             "subpackageId": "subpackage_api/thera",
@@ -19906,7 +20050,8 @@
             ],
             "urlSlug": "thera",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/accounting": {
             "subpackageId": "subpackage_api/thera/accounting",
@@ -19914,10 +20059,13 @@
             "name": "accounting",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/accounting/accounting_api"],
+            "subpackages": [
+              "subpackage_api/thera/accounting/accounting_api"
+            ],
             "urlSlug": "accounting",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/accounting/accounting_api": {
             "subpackageId": "subpackage_api/thera/accounting/accounting_api",
@@ -20039,7 +20187,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-accounting-integrations-info",
-                "migratedFromUrlSlugs": ["get-company-accounting-integrations-info"],
+                "migratedFromUrlSlugs": [
+                  "get-company-accounting-integrations-info"
+                ],
                 "method": "GET",
                 "id": "getAccountingIntegrationsInfo",
                 "originalEndpointId": "endpoint_api/thera/accounting/accounting_api.getAccountingIntegrationsInfo",
@@ -20299,7 +20449,8 @@
             "urlSlug": "accounting-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Accounting API"
+            "displayName": "Accounting API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/bank": {
             "subpackageId": "subpackage_api/thera/bank",
@@ -20307,10 +20458,13 @@
             "name": "bank",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/bank/bank_api"],
+            "subpackages": [
+              "subpackage_api/thera/bank/bank_api"
+            ],
             "urlSlug": "bank",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/bank/bank_api": {
             "subpackageId": "subpackage_api/thera/bank/bank_api",
@@ -20320,7 +20474,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-plaid-bank-details",
-                "migratedFromUrlSlugs": ["get-plaid-bank-account-details"],
+                "migratedFromUrlSlugs": [
+                  "get-plaid-bank-account-details"
+                ],
                 "method": "GET",
                 "id": "getPlaidBankDetails",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.getPlaidBankDetails",
@@ -20504,7 +20660,9 @@
               {
                 "environments": [],
                 "urlSlug": "generate-bank-signup",
-                "migratedFromUrlSlugs": ["generate-bank-signup-token"],
+                "migratedFromUrlSlugs": [
+                  "generate-bank-signup-token"
+                ],
                 "method": "POST",
                 "id": "generateBankSignup",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.generateBankSignup",
@@ -20646,7 +20804,9 @@
               {
                 "environments": [],
                 "urlSlug": "reattach-stripe-mandate",
-                "migratedFromUrlSlugs": ["re-attach-stripe-mandate"],
+                "migratedFromUrlSlugs": [
+                  "re-attach-stripe-mandate"
+                ],
                 "method": "POST",
                 "id": "reattachStripeMandate",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.reattachStripeMandate",
@@ -21054,7 +21214,9 @@
               {
                 "environments": [],
                 "urlSlug": "set-auto-pay",
-                "migratedFromUrlSlugs": ["set-autopay"],
+                "migratedFromUrlSlugs": [
+                  "set-autopay"
+                ],
                 "method": "POST",
                 "id": "setAutoPay",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.setAutoPay",
@@ -21311,7 +21473,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-withdrawal-limits-by-method",
-                "migratedFromUrlSlugs": ["get-worker-withdrawal-limits-by-method"],
+                "migratedFromUrlSlugs": [
+                  "get-worker-withdrawal-limits-by-method"
+                ],
                 "method": "GET",
                 "id": "getWithdrawalLimitsByMethod",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.getWithdrawalLimitsByMethod",
@@ -21428,7 +21592,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-withdrawal-minimum-by-currency",
-                "migratedFromUrlSlugs": ["get-worker-withdrawal-minimum-by-currency-deprecated-soon"],
+                "migratedFromUrlSlugs": [
+                  "get-worker-withdrawal-minimum-by-currency-deprecated-soon"
+                ],
                 "method": "GET",
                 "id": "getWithdrawalMinimumByCurrency",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.getWithdrawalMinimumByCurrency",
@@ -21496,7 +21662,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-withdrawal-minimum-by-method",
-                "migratedFromUrlSlugs": ["get-worker-withdrawal-minimum-by-method"],
+                "migratedFromUrlSlugs": [
+                  "get-worker-withdrawal-minimum-by-method"
+                ],
                 "method": "GET",
                 "id": "getWithdrawalMinimumByMethod",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.getWithdrawalMinimumByMethod",
@@ -21731,7 +21899,9 @@
               {
                 "environments": [],
                 "urlSlug": "save-withdrawal-method",
-                "migratedFromUrlSlugs": ["save-withdrawal-methods"],
+                "migratedFromUrlSlugs": [
+                  "save-withdrawal-methods"
+                ],
                 "method": "POST",
                 "id": "saveWithdrawalMethod",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.saveWithdrawalMethod",
@@ -21853,7 +22023,9 @@
               {
                 "environments": [],
                 "urlSlug": "delete-withdrawal-method",
-                "migratedFromUrlSlugs": ["delete-withdrawal-methods"],
+                "migratedFromUrlSlugs": [
+                  "delete-withdrawal-methods"
+                ],
                 "method": "DELETE",
                 "id": "deleteWithdrawalMethod",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.deleteWithdrawalMethod",
@@ -21944,7 +22116,9 @@
               {
                 "environments": [],
                 "urlSlug": "edit-withdrawal-method",
-                "migratedFromUrlSlugs": ["edit-withdrawal-methods"],
+                "migratedFromUrlSlugs": [
+                  "edit-withdrawal-methods"
+                ],
                 "method": "PATCH",
                 "id": "editWithdrawalMethod",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.editWithdrawalMethod",
@@ -22491,7 +22665,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-worker-withdrawal-delivery-estimate",
-                "migratedFromUrlSlugs": ["get-worker-transactions"],
+                "migratedFromUrlSlugs": [
+                  "get-worker-transactions"
+                ],
                 "method": "GET",
                 "id": "getWorkerWithdrawalDeliveryEstimate",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.getWorkerWithdrawalDeliveryEstimate",
@@ -23005,7 +23181,9 @@
               {
                 "environments": [],
                 "urlSlug": "set-auto-withdrawals",
-                "migratedFromUrlSlugs": ["set-auto-withdrawals-for-worker"],
+                "migratedFromUrlSlugs": [
+                  "set-auto-withdrawals-for-worker"
+                ],
                 "method": "POST",
                 "id": "setAutoWithdrawals",
                 "originalEndpointId": "endpoint_api/thera/bank/bank_api.setAutoWithdrawals",
@@ -23327,7 +23505,8 @@
             "urlSlug": "bank-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Bank API"
+            "displayName": "Bank API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/common": {
             "subpackageId": "subpackage_api/thera/common",
@@ -23335,10 +23514,13 @@
             "name": "common",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/common/common"],
+            "subpackages": [
+              "subpackage_api/thera/common/common"
+            ],
             "urlSlug": "common",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/common/common": {
             "subpackageId": "subpackage_api/thera/common/common",
@@ -23354,7 +23536,8 @@
             "subpackages": [],
             "urlSlug": "common",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/company": {
             "subpackageId": "subpackage_api/thera/company",
@@ -23368,7 +23551,8 @@
             ],
             "urlSlug": "company",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/company/company_api": {
             "subpackageId": "subpackage_api/thera/company/company_api",
@@ -23480,7 +23664,9 @@
               {
                 "environments": [],
                 "urlSlug": "invite-contractor",
-                "migratedFromUrlSlugs": ["create-contract"],
+                "migratedFromUrlSlugs": [
+                  "create-contract"
+                ],
                 "method": "POST",
                 "id": "inviteContractor",
                 "originalEndpointId": "endpoint_api/thera/company/company_api.inviteContractor",
@@ -23661,7 +23847,9 @@
                                     ]
                                   },
                                   "unpaidTimeOffsByPolicyId": {
-                                    "string": [{}]
+                                    "string": [
+                                      {}
+                                    ]
                                   }
                                 }
                               }
@@ -23963,7 +24151,9 @@
                         "teams": {
                           "string": {
                             "role": "role_admin",
-                            "permissions": ["perm_adjust_payroll_and_payments"]
+                            "permissions": [
+                              "perm_adjust_payroll_and_payments"
+                            ]
                           }
                         }
                       }
@@ -23971,7 +24161,9 @@
                     "responseBodyV3": {
                       "type": "json",
                       "value": {
-                        "failureTeamIds": ["string"],
+                        "failureTeamIds": [
+                          "string"
+                        ],
                         "userId": "string"
                       }
                     },
@@ -24114,8 +24306,12 @@
                     "responseBodyV3": {
                       "type": "json",
                       "value": {
-                        "addFailureTeamIds": ["string"],
-                        "removeFailureTeamIds": ["string"]
+                        "addFailureTeamIds": [
+                          "string"
+                        ],
+                        "removeFailureTeamIds": [
+                          "string"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -24127,7 +24323,9 @@
               {
                 "environments": [],
                 "urlSlug": "edit-org-roles",
-                "migratedFromUrlSlugs": ["edit-org-roles-org-admins-or-org-manager"],
+                "migratedFromUrlSlugs": [
+                  "edit-org-roles-org-admins-or-org-manager"
+                ],
                 "method": "POST",
                 "id": "editOrgRoles",
                 "originalEndpointId": "endpoint_api/thera/company/company_api.editOrgRoles",
@@ -24275,8 +24473,12 @@
                     "responseBodyV3": {
                       "type": "json",
                       "value": {
-                        "addFailureUserIds": ["string"],
-                        "removeFailureUserIds": ["string"]
+                        "addFailureUserIds": [
+                          "string"
+                        ],
+                        "removeFailureUserIds": [
+                          "string"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -24504,7 +24706,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-teams",
-                "migratedFromUrlSlugs": ["get-teams-for-company"],
+                "migratedFromUrlSlugs": [
+                  "get-teams-for-company"
+                ],
                 "method": "GET",
                 "id": "getTeams",
                 "originalEndpointId": "endpoint_api/thera/company/company_api.getTeams",
@@ -24574,11 +24778,15 @@
                               "name": "string"
                             },
                             "name": "string",
-                            "contractIds": ["string"],
+                            "contractIds": [
+                              "string"
+                            ],
                             "managers": {
                               "string": {
                                 "role": "role_admin",
-                                "permissions": ["perm_adjust_payroll_and_payments"]
+                                "permissions": [
+                                  "perm_adjust_payroll_and_payments"
+                                ]
                               }
                             }
                           }
@@ -24755,7 +24963,9 @@
                                         ]
                                       },
                                       "unpaidTimeOffsByPolicyId": {
-                                        "string": [{}]
+                                        "string": [
+                                          {}
+                                        ]
                                       }
                                     }
                                   }
@@ -24811,7 +25021,9 @@
                               "teams": {
                                 "string": {
                                   "role": "role_admin",
-                                  "permissions": ["perm_adjust_payroll_and_payments"]
+                                  "permissions": [
+                                    "perm_adjust_payroll_and_payments"
+                                  ]
                                 }
                               },
                               "org": [
@@ -24933,7 +25145,9 @@
                             "userId": "string",
                             "role": {
                               "role": "role_admin",
-                              "permissions": ["perm_adjust_payroll_and_payments"]
+                              "permissions": [
+                                "perm_adjust_payroll_and_payments"
+                              ]
                             }
                           }
                         ]
@@ -25286,7 +25500,9 @@
                                 "paymentsVersion": 0,
                                 "csv": true,
                                 "cards": true,
-                                "allowedPayoutCurrencies": ["string"],
+                                "allowedPayoutCurrencies": [
+                                  "string"
+                                ],
                                 "live": true,
                                 "offPlatformPayIns": true,
                                 "eorTrackerLink": "string",
@@ -25339,9 +25555,13 @@
                                       }
                                     }
                                   ],
-                                  "defaultTimeOffPolicies": ["string"],
+                                  "defaultTimeOffPolicies": [
+                                    "string"
+                                  ],
                                   "associatedUserIdsByPolicyId": {
-                                    "string": ["string"]
+                                    "string": [
+                                      "string"
+                                    ]
                                   }
                                 }
                               },
@@ -25371,7 +25591,9 @@
                                   }
                                 }
                               },
-                              "urls": ["string"],
+                              "urls": [
+                                "string"
+                              ],
                               "companyDescription": "string",
                               "tp": {
                                 "businessApplicationId": "string",
@@ -25600,7 +25822,9 @@
                             "teams": {
                               "string": {
                                 "role": "role_admin",
-                                "permissions": ["perm_adjust_payroll_and_payments"]
+                                "permissions": [
+                                  "perm_adjust_payroll_and_payments"
+                                ]
                               }
                             },
                             "orgRoleAndDetails": [
@@ -26056,7 +26280,8 @@
             "urlSlug": "company-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Company"
+            "displayName": "Company",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/company/company_w2payroll_api": {
             "subpackageId": "subpackage_api/thera/company/company_w2payroll_api",
@@ -26208,7 +26433,9 @@
               {
                 "environments": [],
                 "urlSlug": "setup-payroll",
-                "migratedFromUrlSlugs": ["setup-w-2-payroll"],
+                "migratedFromUrlSlugs": [
+                  "setup-w-2-payroll"
+                ],
                 "method": "POST",
                 "id": "setupPayroll",
                 "originalEndpointId": "endpoint_api/thera/company/company_w2payroll_api.setupPayroll",
@@ -26303,7 +26530,8 @@
             "urlSlug": "company-w-2-payroll-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "W2 Payroll"
+            "displayName": "W2 Payroll",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/contractor": {
             "subpackageId": "subpackage_api/thera/contractor",
@@ -26311,10 +26539,13 @@
             "name": "contractor",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/contractor/contractor_api"],
+            "subpackages": [
+              "subpackage_api/thera/contractor/contractor_api"
+            ],
             "urlSlug": "contractor",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/contractor/contractor_api": {
             "subpackageId": "subpackage_api/thera/contractor/contractor_api",
@@ -26324,7 +26555,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-us-contractors-tax-info",
-                "migratedFromUrlSlugs": ["get-us-contractors-tax-info-api"],
+                "migratedFromUrlSlugs": [
+                  "get-us-contractors-tax-info-api"
+                ],
                 "method": "GET",
                 "id": "getUsContractorsTaxInfo",
                 "originalEndpointId": "endpoint_api/thera/contractor/contractor_api.getUsContractorsTaxInfo",
@@ -26419,7 +26652,9 @@
               {
                 "environments": [],
                 "urlSlug": "update-us-contractor-tax-info",
-                "migratedFromUrlSlugs": ["update-us-contractors-tax-info"],
+                "migratedFromUrlSlugs": [
+                  "update-us-contractors-tax-info"
+                ],
                 "method": "PUT",
                 "id": "updateUsContractorTaxInfo",
                 "originalEndpointId": "endpoint_api/thera/contractor/contractor_api.updateUsContractorTaxInfo",
@@ -26547,7 +26782,9 @@
               {
                 "environments": [],
                 "urlSlug": "onboard-contractors-csv",
-                "migratedFromUrlSlugs": ["onboard-contractors-via-csv"],
+                "migratedFromUrlSlugs": [
+                  "onboard-contractors-via-csv"
+                ],
                 "method": "POST",
                 "id": "onboardContractorsCsv",
                 "originalEndpointId": "endpoint_api/thera/contractor/contractor_api.onboardContractorsCsv",
@@ -26705,7 +26942,8 @@
             "urlSlug": "contractor-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Contractor API"
+            "displayName": "Contractor API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/disbursement": {
             "subpackageId": "subpackage_api/thera/disbursement",
@@ -26719,7 +26957,8 @@
             ],
             "urlSlug": "disbursement",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/disbursement/disbursement_api": {
             "subpackageId": "subpackage_api/thera/disbursement/disbursement_api",
@@ -27319,7 +27558,8 @@
             "urlSlug": "disbursement-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Disbursement API"
+            "displayName": "Disbursement API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/disbursement/disbursement_webhook_api": {
             "subpackageId": "subpackage_api/thera/disbursement/disbursement_webhook_api",
@@ -27419,7 +27659,8 @@
             "urlSlug": "disbursement-webhook-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Disbursement Webhook API"
+            "displayName": "Disbursement Webhook API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/document": {
             "subpackageId": "subpackage_api/thera/document",
@@ -27427,10 +27668,13 @@
             "name": "document",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/document/document_api"],
+            "subpackages": [
+              "subpackage_api/thera/document/document_api"
+            ],
             "urlSlug": "document",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/document/document_api": {
             "subpackageId": "subpackage_api/thera/document/document_api",
@@ -27440,7 +27684,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-w-9-document",
-                "migratedFromUrlSlugs": ["get-us-irs-w-9-document-api"],
+                "migratedFromUrlSlugs": [
+                  "get-us-irs-w-9-document-api"
+                ],
                 "method": "GET",
                 "id": "getW9Document",
                 "originalEndpointId": "endpoint_api/thera/document/document_api.getW9Document",
@@ -27504,7 +27750,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-us-irs-1099-nec-document",
-                "migratedFromUrlSlugs": ["get-us-irs-1099-nec-document-metadata"],
+                "migratedFromUrlSlugs": [
+                  "get-us-irs-1099-nec-document-metadata"
+                ],
                 "method": "GET",
                 "id": "getUsIrs1099NecDocument",
                 "originalEndpointId": "endpoint_api/thera/document/document_api.getUsIrs1099NecDocument",
@@ -27646,7 +27894,9 @@
               {
                 "environments": [],
                 "urlSlug": "bulk-file-us-irs-1099-nec-document",
-                "migratedFromUrlSlugs": ["bulk-file-us-irs-1099-nec-documents"],
+                "migratedFromUrlSlugs": [
+                  "bulk-file-us-irs-1099-nec-documents"
+                ],
                 "method": "POST",
                 "id": "bulkFileUsIrs1099NecDocument",
                 "originalEndpointId": "endpoint_api/thera/document/document_api.bulkFileUsIrs1099NecDocument",
@@ -27742,7 +27992,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "userIds": ["string"],
+                        "userIds": [
+                          "string"
+                        ],
                         "companyId": "string",
                         "taxYear": 0
                       }
@@ -27750,7 +28002,9 @@
                     "responseBodyV3": {
                       "type": "json",
                       "value": {
-                        "successfulUserIds": ["string"]
+                        "successfulUserIds": [
+                          "string"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -27772,7 +28026,8 @@
             "urlSlug": "document-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Document API"
+            "displayName": "Document API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/email": {
             "subpackageId": "subpackage_api/thera/email",
@@ -27780,10 +28035,13 @@
             "name": "email",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/email/email_api"],
+            "subpackages": [
+              "subpackage_api/thera/email/email_api"
+            ],
             "urlSlug": "email",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/email/email_api": {
             "subpackageId": "subpackage_api/thera/email/email_api",
@@ -27849,7 +28107,9 @@
               {
                 "environments": [],
                 "urlSlug": "update-user-email",
-                "migratedFromUrlSlugs": ["change-user-s-email"],
+                "migratedFromUrlSlugs": [
+                  "change-user-s-email"
+                ],
                 "method": "PUT",
                 "id": "updateUserEmail",
                 "originalEndpointId": "endpoint_api/thera/email/email_api.updateUserEmail",
@@ -27942,7 +28202,8 @@
             "urlSlug": "email-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Email API"
+            "displayName": "Email API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/employment": {
             "subpackageId": "subpackage_api/thera/employment",
@@ -27950,10 +28211,13 @@
             "name": "employment",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/employment/employment_api"],
+            "subpackages": [
+              "subpackage_api/thera/employment/employment_api"
+            ],
             "urlSlug": "employment",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/employment/employment_api": {
             "subpackageId": "subpackage_api/thera/employment/employment_api",
@@ -27963,7 +28227,9 @@
               {
                 "environments": [],
                 "urlSlug": "delete-invoice-item-recurrence",
-                "migratedFromUrlSlugs": ["delete-contract-s-invoice-item-recurrence"],
+                "migratedFromUrlSlugs": [
+                  "delete-contract-s-invoice-item-recurrence"
+                ],
                 "method": "DELETE",
                 "id": "deleteInvoiceItemRecurrence",
                 "originalEndpointId": "endpoint_api/thera/employment/employment_api.deleteInvoiceItemRecurrence",
@@ -28173,7 +28439,9 @@
               {
                 "environments": [],
                 "urlSlug": "delete-contract",
-                "migratedFromUrlSlugs": ["hard-delete-contract"],
+                "migratedFromUrlSlugs": [
+                  "hard-delete-contract"
+                ],
                 "method": "DELETE",
                 "id": "deleteContract",
                 "originalEndpointId": "endpoint_api/thera/employment/employment_api.deleteContract",
@@ -28432,7 +28700,8 @@
             "urlSlug": "employment-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Contracts API"
+            "displayName": "Contracts API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/misc": {
             "subpackageId": "subpackage_api/thera/misc",
@@ -28440,10 +28709,13 @@
             "name": "misc",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/misc/misc"],
+            "subpackages": [
+              "subpackage_api/thera/misc/misc"
+            ],
             "urlSlug": "misc",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/misc/misc": {
             "subpackageId": "subpackage_api/thera/misc/misc",
@@ -28453,7 +28725,9 @@
               {
                 "environments": [],
                 "urlSlug": "regular-cron",
-                "migratedFromUrlSlugs": ["daily-cron"],
+                "migratedFromUrlSlugs": [
+                  "daily-cron"
+                ],
                 "method": "POST",
                 "id": "regularCron",
                 "originalEndpointId": "endpoint_api/thera/misc/misc.regularCron",
@@ -28610,7 +28884,9 @@
               {
                 "environments": [],
                 "urlSlug": "auto-pay-email-notification-cron",
-                "migratedFromUrlSlugs": ["email-notification-cron"],
+                "migratedFromUrlSlugs": [
+                  "email-notification-cron"
+                ],
                 "method": "POST",
                 "id": "autoPayEmailNotificationCron",
                 "originalEndpointId": "endpoint_api/thera/misc/misc.autoPayEmailNotificationCron",
@@ -28718,7 +28994,9 @@
                     "responseBodyV3": {
                       "type": "json",
                       "value": {
-                        "contractIdsToRenew": ["string"]
+                        "contractIdsToRenew": [
+                          "string"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -28738,7 +29016,8 @@
             "urlSlug": "misc",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Miscellaneous API"
+            "displayName": "Miscellaneous API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/payroll": {
             "subpackageId": "subpackage_api/thera/payroll",
@@ -28746,10 +29025,14 @@
             "name": "payroll",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/payroll/offcycle_api", "subpackage_api/thera/payroll/oncycle_api"],
+            "subpackages": [
+              "subpackage_api/thera/payroll/offcycle_api",
+              "subpackage_api/thera/payroll/oncycle_api"
+            ],
             "urlSlug": "payroll",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/payroll/offcycle_api": {
             "subpackageId": "subpackage_api/thera/payroll/offcycle_api",
@@ -28759,7 +29042,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-current-off-cycle-checks",
-                "migratedFromUrlSlugs": ["get-current-offcycle-checks"],
+                "migratedFromUrlSlugs": [
+                  "get-current-offcycle-checks"
+                ],
                 "method": "GET",
                 "id": "getCurrentOffCycleChecks",
                 "originalEndpointId": "endpoint_api/thera/payroll/offcycle_api.getCurrentOffCycleChecks",
@@ -28841,12 +29126,15 @@
                 "authed": true
               }
             ],
-            "types": ["type_api/thera/payroll/offcycle_api:CheckPayrollResponse"],
+            "types": [
+              "type_api/thera/payroll/offcycle_api:CheckPayrollResponse"
+            ],
             "subpackages": [],
             "urlSlug": "offcycle-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Offcycle API"
+            "displayName": "Offcycle API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/payroll/oncycle_api": {
             "subpackageId": "subpackage_api/thera/payroll/oncycle_api",
@@ -28936,7 +29224,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-on-cycle-checks",
-                "migratedFromUrlSlugs": ["get-oncycle-checks"],
+                "migratedFromUrlSlugs": [
+                  "get-oncycle-checks"
+                ],
                 "method": "GET",
                 "id": "getOnCycleChecks",
                 "originalEndpointId": "endpoint_api/thera/payroll/oncycle_api.getOnCycleChecks",
@@ -29085,7 +29375,8 @@
             "urlSlug": "oncycle-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Oncycle API"
+            "displayName": "Oncycle API",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/timeoff": {
             "subpackageId": "subpackage_api/thera/timeoff",
@@ -29093,10 +29384,13 @@
             "name": "timeoff",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/timeoff/timeoff_api"],
+            "subpackages": [
+              "subpackage_api/thera/timeoff/timeoff_api"
+            ],
             "urlSlug": "timeoff",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/timeoff/timeoff_api": {
             "subpackageId": "subpackage_api/thera/timeoff/timeoff_api",
@@ -29106,7 +29400,9 @@
               {
                 "environments": [],
                 "urlSlug": "associate-time-off-policy-to-contractor",
-                "migratedFromUrlSlugs": ["associate-time-off-policy-to-contractors"],
+                "migratedFromUrlSlugs": [
+                  "associate-time-off-policy-to-contractors"
+                ],
                 "method": "POST",
                 "id": "associateTimeOffPolicyToContractor",
                 "originalEndpointId": "endpoint_api/thera/timeoff/timeoff_api.associateTimeOffPolicyToContractor",
@@ -29189,7 +29485,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "contractIds": ["string"]
+                        "contractIds": [
+                          "string"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -29302,7 +29600,9 @@
               {
                 "environments": [],
                 "urlSlug": "add-time-off-policy",
-                "migratedFromUrlSlugs": ["add-timeoff-policy"],
+                "migratedFromUrlSlugs": [
+                  "add-timeoff-policy"
+                ],
                 "method": "POST",
                 "id": "addTimeOffPolicy",
                 "originalEndpointId": "endpoint_api/thera/timeoff/timeoff_api.addTimeOffPolicy",
@@ -29398,7 +29698,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-time-off-policy",
-                "migratedFromUrlSlugs": ["get-timeoff-policy"],
+                "migratedFromUrlSlugs": [
+                  "get-timeoff-policy"
+                ],
                 "method": "GET",
                 "id": "getTimeOffPolicy",
                 "originalEndpointId": "endpoint_api/thera/timeoff/timeoff_api.getTimeOffPolicy",
@@ -29507,7 +29809,9 @@
               {
                 "environments": [],
                 "urlSlug": "update-time-off-policy",
-                "migratedFromUrlSlugs": ["update-timeoff-policy"],
+                "migratedFromUrlSlugs": [
+                  "update-timeoff-policy"
+                ],
                 "method": "PUT",
                 "id": "updateTimeOffPolicy",
                 "originalEndpointId": "endpoint_api/thera/timeoff/timeoff_api.updateTimeOffPolicy",
@@ -29621,7 +29925,9 @@
               {
                 "environments": [],
                 "urlSlug": "delete-time-off-policy",
-                "migratedFromUrlSlugs": ["deletes-a-timeoff-policy"],
+                "migratedFromUrlSlugs": [
+                  "deletes-a-timeoff-policy"
+                ],
                 "method": "DELETE",
                 "id": "deleteTimeOffPolicy",
                 "originalEndpointId": "endpoint_api/thera/timeoff/timeoff_api.deleteTimeOffPolicy",
@@ -29712,7 +30018,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-contractors-time-off-history-by-company",
-                "migratedFromUrlSlugs": ["get-all-contractors-time-off-by-company"],
+                "migratedFromUrlSlugs": [
+                  "get-all-contractors-time-off-by-company"
+                ],
                 "method": "GET",
                 "id": "getContractorsTimeOffHistoryByCompany",
                 "originalEndpointId": "endpoint_api/thera/timeoff/timeoff_api.getContractorsTimeOffHistoryByCompany",
@@ -29949,7 +30257,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-contractors-policies-details-by-policy",
-                "migratedFromUrlSlugs": ["get-contractor-policies-details-by-policy"],
+                "migratedFromUrlSlugs": [
+                  "get-contractor-policies-details-by-policy"
+                ],
                 "method": "GET",
                 "id": "getContractorsPoliciesDetailsByPolicy",
                 "originalEndpointId": "endpoint_api/thera/timeoff/timeoff_api.getContractorsPoliciesDetailsByPolicy",
@@ -30035,7 +30345,9 @@
                           "string": {
                             "contractorFullName": "string",
                             "policyName": "string",
-                            "contractTypes": ["FIXED_RATE"],
+                            "contractTypes": [
+                              "FIXED_RATE"
+                            ],
                             "allowanceType": "LIMITED",
                             "balanceDaysAvailablePerTimeFrame": 1,
                             "balanceTakenForTimeFrame": 1,
@@ -30053,7 +30365,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-contractors-policies-details-by-contractor",
-                "migratedFromUrlSlugs": ["get-contractor-s-policies-details"],
+                "migratedFromUrlSlugs": [
+                  "get-contractor-s-policies-details"
+                ],
                 "method": "GET",
                 "id": "getContractorsPoliciesDetailsByContractor",
                 "originalEndpointId": "endpoint_api/thera/timeoff/timeoff_api.getContractorsPoliciesDetailsByContractor",
@@ -30139,7 +30453,9 @@
                           "string": {
                             "contractorFullName": "string",
                             "policyName": "string",
-                            "contractTypes": ["FIXED_RATE"],
+                            "contractTypes": [
+                              "FIXED_RATE"
+                            ],
                             "allowanceType": "LIMITED",
                             "balanceDaysAvailablePerTimeFrame": 1,
                             "balanceTakenForTimeFrame": 1,
@@ -30372,7 +30688,9 @@
                                   ]
                                 },
                                 "unpaidTimeOffsByPolicyId": {
-                                  "string": [{}]
+                                  "string": [
+                                    {}
+                                  ]
                                 }
                               }
                             }
@@ -30693,7 +31011,8 @@
             "urlSlug": "timeoff-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Time Off Management"
+            "displayName": "Time Off Management",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/tp": {
             "subpackageId": "subpackage_api/thera/tp",
@@ -30701,10 +31020,13 @@
             "name": "tp",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/tp/tp_api"],
+            "subpackages": [
+              "subpackage_api/thera/tp/tp_api"
+            ],
             "urlSlug": "tp",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/tp/tp_api": {
             "subpackageId": "subpackage_api/thera/tp/tp_api",
@@ -30923,7 +31245,9 @@
               {
                 "environments": [],
                 "urlSlug": "process-treasury-prime-payment",
-                "migratedFromUrlSlugs": ["process-payments-to-fbo-accounts"],
+                "migratedFromUrlSlugs": [
+                  "process-payments-to-fbo-accounts"
+                ],
                 "method": "POST",
                 "id": "processTreasuryPrimePayment",
                 "originalEndpointId": "endpoint_api/thera/tp/tp_api.processTreasuryPrimePayment",
@@ -31016,7 +31340,9 @@
               {
                 "environments": [],
                 "urlSlug": "create-counter-party-for-banking",
-                "migratedFromUrlSlugs": ["create-tp-counter-party-required-for-processing-payments"],
+                "migratedFromUrlSlugs": [
+                  "create-tp-counter-party-required-for-processing-payments"
+                ],
                 "method": "POST",
                 "id": "createCounterPartyForBanking",
                 "originalEndpointId": "endpoint_api/thera/tp/tp_api.createCounterPartyForBanking",
@@ -31105,7 +31431,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-tp-accounts-for-company",
-                "migratedFromUrlSlugs": ["get-all-accounts-for-a-given-company"],
+                "migratedFromUrlSlugs": [
+                  "get-all-accounts-for-a-given-company"
+                ],
                 "method": "GET",
                 "id": "getTpAccountsForCompany",
                 "originalEndpointId": "endpoint_api/thera/tp/tp_api.getTpAccountsForCompany",
@@ -31178,7 +31506,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-tp-account",
-                "migratedFromUrlSlugs": ["get-a-tp-account"],
+                "migratedFromUrlSlugs": [
+                  "get-a-tp-account"
+                ],
                 "method": "GET",
                 "id": "getTpAccount",
                 "originalEndpointId": "endpoint_api/thera/tp/tp_api.getTpAccount",
@@ -31269,7 +31599,9 @@
               {
                 "environments": [],
                 "urlSlug": "transfer-funds-to-omnibus-account",
-                "migratedFromUrlSlugs": ["transfer-funds-from-fbo-to-omnibus-account"],
+                "migratedFromUrlSlugs": [
+                  "transfer-funds-from-fbo-to-omnibus-account"
+                ],
                 "method": "POST",
                 "id": "transferFundsToOmnibusAccount",
                 "originalEndpointId": "endpoint_api/thera/tp/tp_api.transferFundsToOmnibusAccount",
@@ -31359,7 +31691,9 @@
               {
                 "environments": [],
                 "urlSlug": "transaction-history",
-                "migratedFromUrlSlugs": ["get-all-account-transactions"],
+                "migratedFromUrlSlugs": [
+                  "get-all-account-transactions"
+                ],
                 "method": "GET",
                 "id": "transactionHistory",
                 "originalEndpointId": "endpoint_api/thera/tp/tp_api.transactionHistory",
@@ -31480,7 +31814,9 @@
               {
                 "environments": [],
                 "urlSlug": "deatiled-tp-transaction",
-                "migratedFromUrlSlugs": ["get-a-detailed-account-transaction"],
+                "migratedFromUrlSlugs": [
+                  "get-a-detailed-account-transaction"
+                ],
                 "method": "GET",
                 "id": "deatiledTpTransaction",
                 "originalEndpointId": "endpoint_api/thera/tp/tp_api.deatiledTpTransaction",
@@ -31596,7 +31932,9 @@
               {
                 "environments": [],
                 "urlSlug": "external-transfer-fund",
-                "migratedFromUrlSlugs": ["use-for-sending-funds-to-wise-dlocal-from-omnibus-account"],
+                "migratedFromUrlSlugs": [
+                  "use-for-sending-funds-to-wise-dlocal-from-omnibus-account"
+                ],
                 "method": "POST",
                 "id": "externalTransferFund",
                 "originalEndpointId": "endpoint_api/thera/tp/tp_api.externalTransferFund",
@@ -31695,7 +32033,8 @@
             "urlSlug": "tp-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Treasury Prime"
+            "displayName": "Treasury Prime",
+            "graphqlOperations": []
           },
           "subpackage_api/thera/user": {
             "subpackageId": "subpackage_api/thera/user",
@@ -31703,10 +32042,13 @@
             "name": "user",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/thera/user/user_api"],
+            "subpackages": [
+              "subpackage_api/thera/user/user_api"
+            ],
             "urlSlug": "user",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/thera/user/user_api": {
             "subpackageId": "subpackage_api/thera/user/user_api",
@@ -31811,7 +32153,9 @@
               {
                 "environments": [],
                 "urlSlug": "get-compliance-user-setting",
-                "migratedFromUrlSlugs": ["get-user-compliance-setting"],
+                "migratedFromUrlSlugs": [
+                  "get-user-compliance-setting"
+                ],
                 "method": "GET",
                 "id": "getComplianceUserSetting",
                 "originalEndpointId": "endpoint_api/thera/user/user_api.getComplianceUserSetting",
@@ -32074,7 +32418,9 @@
                                   ]
                                 },
                                 "unpaidTimeOffsByPolicyId": {
-                                  "string": [{}]
+                                  "string": [
+                                    {}
+                                  ]
                                 }
                               }
                             }
@@ -32146,7 +32492,8 @@
             "urlSlug": "user-api",
             "webhooks": [],
             "websockets": [],
-            "displayName": "User API"
+            "displayName": "User API",
+            "graphqlOperations": []
           },
           "subpackage_api/zeal": {
             "subpackageId": "subpackage_api/zeal",
@@ -32154,10 +32501,13 @@
             "name": "zeal",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/zeal/company"],
+            "subpackages": [
+              "subpackage_api/zeal/company"
+            ],
             "urlSlug": "zeal",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/zeal/company": {
             "subpackageId": "subpackage_api/zeal/company",
@@ -32165,10 +32515,14 @@
             "name": "company",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_api/zeal/company/create", "subpackage_api/zeal/company/model"],
+            "subpackages": [
+              "subpackage_api/zeal/company/create",
+              "subpackage_api/zeal/company/model"
+            ],
             "urlSlug": "company",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/zeal/company/create": {
             "subpackageId": "subpackage_api/zeal/company/create",
@@ -32182,18 +32536,22 @@
             "subpackages": [],
             "urlSlug": "create",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_api/zeal/company/model": {
             "subpackageId": "subpackage_api/zeal/company/model",
             "parent": "subpackage_api/zeal/company",
             "name": "model",
             "endpoints": [],
-            "types": ["type_api/zeal/company/model:ZealCompany"],
+            "types": [
+              "type_api/zeal/company/model:ZealCompany"
+            ],
             "subpackages": [],
             "urlSlug": "model",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_db": {
             "subpackageId": "subpackage_db",
@@ -32212,7 +32570,8 @@
             ],
             "urlSlug": "db",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_db/company": {
             "subpackageId": "subpackage_db/company",
@@ -32267,7 +32626,8 @@
             "subpackages": [],
             "urlSlug": "company",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_db/contract": {
             "subpackageId": "subpackage_db/contract",
@@ -32303,7 +32663,8 @@
             "subpackages": [],
             "urlSlug": "contract",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_db/document": {
             "subpackageId": "subpackage_db/document",
@@ -32324,40 +32685,53 @@
             "subpackages": [],
             "urlSlug": "document",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_db/employment": {
             "subpackageId": "subpackage_db/employment",
             "parent": "subpackage_db",
             "name": "employment",
             "endpoints": [],
-            "types": ["type_db/employment:Employment"],
+            "types": [
+              "type_db/employment:Employment"
+            ],
             "subpackages": [],
             "urlSlug": "employment",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_db/generic": {
             "subpackageId": "subpackage_db/generic",
             "parent": "subpackage_db",
             "name": "generic",
             "endpoints": [],
-            "types": ["type_db/generic:GenericType", "type_db/generic:GenericTypeKey"],
+            "types": [
+              "type_db/generic:GenericType",
+              "type_db/generic:GenericTypeKey"
+            ],
             "subpackages": [],
             "urlSlug": "generic",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_db/invoice": {
             "subpackageId": "subpackage_db/invoice",
             "parent": "subpackage_db",
             "name": "invoice",
             "endpoints": [],
-            "types": ["type_db/invoice:InvoiceType", "type_db/invoice:Status", "type_db/invoice:InvoiceDeduction"],
+            "types": [
+              "type_db/invoice:InvoiceType",
+              "type_db/invoice:Status",
+              "type_db/invoice:InvoiceDeduction"
+            ],
             "subpackages": [],
             "urlSlug": "invoice",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_db/payment_method": {
             "subpackageId": "subpackage_db/payment_method",
@@ -32381,7 +32755,8 @@
             "subpackages": [],
             "urlSlug": "payment-method",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_db/user": {
             "subpackageId": "subpackage_db/user",
@@ -32430,17 +32805,21 @@
             "subpackages": [],
             "urlSlug": "user",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_model": {
             "subpackageId": "subpackage_model",
             "name": "model",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_model/thera"],
+            "subpackages": [
+              "subpackage_model/thera"
+            ],
             "urlSlug": "model",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_model/thera": {
             "subpackageId": "subpackage_model/thera",
@@ -32456,7 +32835,8 @@
             ],
             "urlSlug": "thera",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_model/thera/contract": {
             "subpackageId": "subpackage_model/thera/contract",
@@ -32482,18 +32862,22 @@
             "subpackages": [],
             "urlSlug": "contract",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_model/thera/disbursement": {
             "subpackageId": "subpackage_model/thera/disbursement",
             "parent": "subpackage_model/thera",
             "name": "disbursement",
             "endpoints": [],
-            "types": ["type_model/thera/disbursement:DisbursementItemType"],
+            "types": [
+              "type_model/thera/disbursement:DisbursementItemType"
+            ],
             "subpackages": [],
             "urlSlug": "disbursement",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_model/thera/document": {
             "subpackageId": "subpackage_model/thera/document",
@@ -32508,18 +32892,22 @@
             "subpackages": [],
             "urlSlug": "document",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_model/thera/setting": {
             "subpackageId": "subpackage_model/thera/setting",
             "parent": "subpackage_model/thera",
             "name": "setting",
             "endpoints": [],
-            "types": ["type_model/thera/setting:VerificationSetting"],
+            "types": [
+              "type_model/thera/setting:VerificationSetting"
+            ],
             "subpackages": [],
             "urlSlug": "setting",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {

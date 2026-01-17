@@ -6,7 +6,8 @@ export type ApiNavigationConfigItem =
     | FernRegistry.api.v1.register.ApiNavigationConfigItem.Subpackage
     | FernRegistry.api.v1.register.ApiNavigationConfigItem.EndpointId
     | FernRegistry.api.v1.register.ApiNavigationConfigItem.WebsocketId
-    | FernRegistry.api.v1.register.ApiNavigationConfigItem.WebhookId;
+    | FernRegistry.api.v1.register.ApiNavigationConfigItem.WebhookId
+    | FernRegistry.api.v1.register.ApiNavigationConfigItem.GraphqlOperationId;
 
 export namespace ApiNavigationConfigItem {
     export interface Subpackage extends FernRegistry.api.v1.register.ApiNavigationConfigSubpackage {
@@ -26,5 +27,10 @@ export namespace ApiNavigationConfigItem {
     export interface WebhookId {
         type: "webhookId";
         value: FernRegistry.WebhookId;
+    }
+
+    export interface GraphqlOperationId {
+        type: "graphqlOperationId";
+        value: FernRegistry.GraphQlOperationId;
     }
 }

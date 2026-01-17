@@ -34,6 +34,7 @@
         ]
       }
     },
+    "graphqlOperations": {},
     "types": {
       "Pet": {
         "name": "Pet",
@@ -125,6 +126,7 @@
         ]
       }
     },
+    "graphqlOperations": {},
     "types": {
       "Pet": {
         "name": "Pet",

@@ -8653,6 +8653,7 @@
       }
     },
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_files:UploadedFile": {
         "name": "UploadedFile",

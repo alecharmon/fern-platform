@@ -1,4 +1,4 @@
-import type { APIV1Read } from "../client/types";
+import type { APIV1Read, FdrAPI } from "../client/types";
 import { ROOT_PACKAGE_ID } from "./consts";
 import { isSubpackage } from "./utils/isSubpackage";
 import * as FernNavigation from "./versions/latest";
@@ -11,6 +11,7 @@ export class ApiDefinitionHolder {
     #endpoints = new Map<FernNavigation.EndpointId, APIV1Read.EndpointDefinition>();
     #webSockets = new Map<FernNavigation.WebSocketId, APIV1Read.WebSocketChannel>();
     #webhooks = new Map<FernNavigation.WebhookId, APIV1Read.WebhookDefinition>();
+    #graphqlOperations = new Map<FernNavigation.GraphQlOperationId, FdrAPI.api.latest.GraphQlOperation>();
 
     private constructor(public readonly api: APIV1Read.ApiDefinition) {
         [api.rootPackage, ...Object.values(api.subpackages)].forEach((package_) => {
@@ -23,6 +24,12 @@ export class ApiDefinitionHolder {
             });
             package_.webhooks.forEach((webhook) => {
                 this.#webhooks.set(ApiDefinitionHolder.createWebhookId(webhook, subpackageId), webhook);
+            });
+            package_.graphqlOperations?.forEach((graphqlOperation) => {
+                this.#graphqlOperations.set(
+                    ApiDefinitionHolder.createGraphQlOperationId(graphqlOperation),
+                    graphqlOperation
+                );
             });
         });
     }
@@ -37,6 +44,10 @@ export class ApiDefinitionHolder {
 
     get webhooks(): ReadonlyMap<FernNavigation.WebhookId, APIV1Read.WebhookDefinition> {
         return this.#webhooks;
+    }
+
+    get graphqlOperations(): ReadonlyMap<FernNavigation.GraphQlOperationId, FdrAPI.api.latest.GraphQlOperation> {
+        return this.#graphqlOperations;
     }
 
     public static createEndpointId(
@@ -65,5 +76,11 @@ export class ApiDefinitionHolder {
         subpackageId: string = ROOT_PACKAGE_ID
     ): FernNavigation.GrpcId {
         return FernNavigation.GrpcId(`${subpackageId}.${grpcEndpoint.id}`);
+    }
+
+    public static createGraphQlOperationId(
+        graphqlOperation: FdrAPI.api.latest.GraphQlOperation
+    ): FernNavigation.GraphQlOperationId {
+        return graphqlOperation.id;
     }
 }

@@ -11,7 +11,10 @@
             "id": "pages/overview.mdx",
             "title": "Overview",
             "urlSlug": "overview",
-            "fullSlug": ["", ""],
+            "fullSlug": [
+              "",
+              ""
+            ],
             "hidden": false
           },
           {
@@ -634,7 +637,8 @@
             "type_:GetAllAppointmentTasksResponse"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_:GetAllTasksForPatientResponse": {
@@ -790,7 +794,7 @@
                   }
                 },
                 {
-                  "description": "The name of the patient’s carrier as well as the plan’s specific name. Please be as specific as possible.",
+                  "description": "The name of the patient\u2019s carrier as well as the plan\u2019s specific name. Please be as specific as possible.",
                   "key": "insurancePlan",
                   "valueType": {
                     "type": "primitive",
@@ -1179,28 +1183,36 @@
                 {
                   "discriminantValue": "AVAILABLE",
                   "additionalProperties": {
-                    "extends": ["type_:AvailableAppointmentTaskResponse"],
+                    "extends": [
+                      "type_:AvailableAppointmentTaskResponse"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "CANCELED",
                   "additionalProperties": {
-                    "extends": ["type_:CanceledAppointmentTaskResponse"],
+                    "extends": [
+                      "type_:CanceledAppointmentTaskResponse"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "FAILED",
                   "additionalProperties": {
-                    "extends": ["type_:FailedAppointmentTaskResponse"],
+                    "extends": [
+                      "type_:FailedAppointmentTaskResponse"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "PROCESSING",
                   "additionalProperties": {
-                    "extends": ["type_:ProcessingAppointmentTaskResponse"],
+                    "extends": [
+                      "type_:ProcessingAppointmentTaskResponse"
+                    ],
                     "properties": []
                   }
                 }

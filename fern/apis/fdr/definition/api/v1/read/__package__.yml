@@ -68,7 +68,6 @@ types:
       rootPackage: ApiDefinitionPackage
       types: map<rootCommons.TypeId, type.TypeDefinition>
       subpackages: map<commons.SubpackageId, ApiDefinitionSubpackage>
-      graphqlOperations: map<rootCommons.GraphQLOperationId, graphql.GraphQLOperation>
       snippetsConfiguration: optional<registerRoot.SnippetsConfig>
       auth: optional<ApiAuth>
       authSchemes: optional<map<rootCommons.AuthSchemeId, ApiAuth>>
@@ -94,6 +93,7 @@ types:
       endpointId: rootCommons.EndpointId
       websocketId: rootCommons.WebSocketId
       webhookId: rootCommons.WebhookId
+      graphqlOperationId: rootCommons.GraphQlOperationId
 
   ApiNavigationConfigSubpackage:
     properties:
@@ -116,6 +116,7 @@ types:
       endpoints: list<endpoint.EndpointDefinition>
       websockets: list<websocket.WebSocketChannel>
       webhooks: list<webhook.WebhookDefinition>
+      graphqlOperations: list<graphql.GraphQlOperation>
       types: list<rootCommons.TypeId>
       subpackages: list<commons.SubpackageId>
       pointsTo:

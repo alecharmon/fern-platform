@@ -373,6 +373,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_:ExtractResponse": {
         "name": "ExtractResponse",

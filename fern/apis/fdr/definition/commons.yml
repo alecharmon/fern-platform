@@ -33,7 +33,7 @@ types:
 
   GrpcId: string
 
-  GraphQLOperationId: string
+  GraphQlOperationId: string
 
   TypeId: string
 

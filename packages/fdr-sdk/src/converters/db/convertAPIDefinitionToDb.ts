@@ -48,6 +48,7 @@ export function convertAPIDefinitionToDb(
             websockets:
                 writeShape.rootPackage.websockets?.map((websocket) => transformWebsocket({ writeShape: websocket })) ??
                 [],
+            graphqlOperations: writeShape.rootPackage.graphqlOperations ?? [],
             subpackages: writeShape.rootPackage.subpackages,
             types: writeShape.rootPackage.types,
             pointsTo: undefined
@@ -70,7 +71,6 @@ export function convertAPIDefinitionToDb(
             });
             return subpackages;
         }, {}),
-        graphqlOperations: writeShape.graphqlOperations,
         snippetsConfiguration: writeShape.snippetsConfiguration,
         auth: writeShape.auth,
         authSchemes: writeShape.authSchemes,
@@ -106,6 +106,7 @@ function transformSubpackage({
     );
     const webhooks = writeShape.webhooks?.map((webhook) => transformWebhook({ writeShape: webhook, apiDefinition }));
     const websockets = writeShape.websockets?.map((websocket) => transformWebsocket({ writeShape: websocket }));
+    const graphqlOperations = writeShape.graphqlOperations;
     // const htmlDescription = getHtmlDescription(writeShape.description);
     return {
         subpackageId: id,
@@ -113,6 +114,7 @@ function transformSubpackage({
         name: writeShape.name,
         endpoints,
         websockets: websockets ?? [],
+        graphqlOperations: graphqlOperations ?? [],
         types: writeShape.types,
         subpackages: writeShape.subpackages,
         pointsTo: writeShape.pointsTo,

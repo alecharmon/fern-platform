@@ -190,7 +190,9 @@
         "id": "c173bee9-1794-4364-93d9-780ed8d82ec7",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_tools"],
+          "subpackages": [
+            "subpackage_tools"
+          ],
           "types": [
             "type_:DataFrameParsingError",
             "type_:DataFrameRequestOutColumnsItem",
@@ -204,7 +206,8 @@
             "type_:ValidationError"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_tools:ToolsDataFrameRequestColumnsItem": {
@@ -562,7 +565,9 @@
                 "availability": "Beta",
                 "defaultEnvironment": "Production",
                 "urlSlug": "data-frame",
-                "migratedFromUrlSlugs": ["get-tabular-data-from-object"],
+                "migratedFromUrlSlugs": [
+                  "get-tabular-data-from-object"
+                ],
                 "method": "GET",
                 "id": "_data_frame",
                 "originalEndpointId": "endpoint_tools._data_frame",
@@ -723,12 +728,24 @@
                     "headers": {},
                     "responseStatusCode": 200,
                     "responseBody": {
-                      "columns": ["header1", "header2"],
-                      "data": [
-                        ["a", 1],
-                        ["b", 2]
+                      "columns": [
+                        "header1",
+                        "header2"
                       ],
-                      "index": [0, 1]
+                      "data": [
+                        [
+                          "a",
+                          1
+                        ],
+                        [
+                          "b",
+                          2
+                        ]
+                      ],
+                      "index": [
+                        0,
+                        1
+                      ]
                     },
                     "codeExamples": {
                       "nodeAxios": "",
@@ -746,12 +763,24 @@
                     "responseBodyV3": {
                       "type": "json",
                       "value": {
-                        "columns": ["header1", "header2"],
-                        "data": [
-                          ["a", 1],
-                          ["b", 2]
+                        "columns": [
+                          "header1",
+                          "header2"
                         ],
-                        "index": [0, 1]
+                        "data": [
+                          [
+                            "a",
+                            1
+                          ],
+                          [
+                            "b",
+                            2
+                          ]
+                        ],
+                        "index": [
+                          0,
+                          1
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -849,7 +878,9 @@
                       "value": {
                         "detail": [
                           {
-                            "loc": ["string"],
+                            "loc": [
+                              "string"
+                            ],
                             "msg": "string",
                             "type": "string"
                           }
@@ -903,7 +934,9 @@
                 "availability": "Beta",
                 "defaultEnvironment": "Production",
                 "urlSlug": "raw-data",
-                "migratedFromUrlSlugs": ["get-raw-file-data-from-object"],
+                "migratedFromUrlSlugs": [
+                  "get-raw-file-data-from-object"
+                ],
                 "method": "GET",
                 "id": "_raw_data",
                 "originalEndpointId": "endpoint_tools._raw_data",
@@ -1049,7 +1082,9 @@
                       "value": {
                         "detail": [
                           {
-                            "loc": ["string"],
+                            "loc": [
+                              "string"
+                            ],
                             "msg": "string",
                             "type": "string"
                           }
@@ -1063,11 +1098,14 @@
                 "authed": true
               }
             ],
-            "types": ["type_tools:ToolsDataFrameRequestColumnsItem"],
+            "types": [
+              "type_tools:ToolsDataFrameRequestColumnsItem"
+            ],
             "subpackages": [],
             "urlSlug": "tools",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -1106,10 +1144,10 @@
         "markdown": "Athena has the following tools to help you research information online:\n```python\ntools=[\n  Tools.SEARCH, \n  Tools.BROWSE, \n  Tools.WIKIPEDIA, \n  Tools.ENRICH_PERSON, \n  Tools.ENRICH_COMPANY\n  ]\n```\n\n\n<Steps>\n### Set up environment \n```python\n!pip install -U athena-intelligence\n```\n```python\nimport json\nimport pandas as pd\nimport os\n\nATHENA_API_KEY = os.environ[\"ATHENA_API_KEY\"]\n\nfrom athena import Model, Tools\nfrom athena.client import AsyncAthena\n\nathena = AsyncAthena(\n    api_key=ATHENA_API_KEY,\n)\n\n```\n\n### Research general topics with `search` & `browse` and `wikipedia` tools.\nWrite a reasearch request and add tools you want Athena to use. \n```python\nteam = \"KC Chiefs\"\nUSER_MESSAGE_INPUT = f\"\"\"\nWho plays quarterback in {team}?\n\"\"\"\n\nmessage = await athena.message.submit_and_poll(\n    content=USER_MESSAGE_INPUT,\n    model=Model.GPT_4_TURBO_PREVIEW,\n    tools=[Tools.SEARCH, Tools.BROWSE, Tools.WIKIPEDIA],\n)\n\nprint(message.content)\n```\n\n### Research specific person or company with `enrich_person` and `enrich_company` tools.\nAthena data providers APIs to gather information about individuals and companies. However, these tools might not always provide detailed information for some queries. For more consistent results, consider adding the `search` and `browse` tools as fallback options.\n```python\nperson = \"Patrick Mahomes\"\nUSER_MESSAGE_INPUT = f\"\"\"\nAnswer the question below using available tools. \n\nWho is {person}?\n\"\"\"\n\nmessage = await athena.message.submit_and_poll(\n    content=USER_MESSAGE_INPUT,\n    model=Model.GPT_4_TURBO_PREVIEW,\n    tools=[ Tools.ENRICH_PERSON, Tools. ENRICH_COMPANY, Tools.SEARCH, Tools.BROWSE],\n)\n\nprint(message.content)\n```\n</Steps>\n\n### Specifying tool order\nYou can tell Athena which tools to use first by simply passing the request in the input message: \n```python\nteam = \"KC Chiefs\"\nUSER_MESSAGE_INPUT = f\"\"\"\nAnswer the question below using available tools. \nUse the tools in the following order: \n1. Wikipedia\n2. Enrich tools\n3. Search and Browse - only use if Wikipedia didn't return results. \n\nWho plays quarterback in {team}?\n\"\"\"\n\nmessage = await athena.message.submit_and_poll(\n    content=USER_MESSAGE_INPUT,\n    model=Model.GPT_4_TURBO_PREVIEW,\n    tools=[Tools.SEARCH, Tools.BROWSE, Tools.WIKIPEDIA, Tools.ENRICH_PERSON, Tools. ENRICH_COMPANY],\n)\n\nprint(message.content)\n```\n"
       },
       "pages/examples/research_oss.mdx": {
-        "markdown": "Athena can leverage open-source models to research web and analyse results using open source models with `tools.tool_first_workflow()`\n\n\n<Steps>\n### Set up environment \n```python\n!pip install -U athena-intelligence\n```\n```python\nimport json\nimport pandas as pd\nimport os\n\nATHENA_API_KEY = os.environ[\"ATHENA_API_KEY\"]\n\nfrom athena import Model, Tools\nfrom athena.client import AsyncAthena\n\nathena = AsyncAthena(\n    api_key=ATHENA_API_KEY,\n)\n\n```\n\n### Set up search query and instructions for analysing results\nWrite a search request and what you want Athena to do with search results. \n```python\nmessage = await async_athena.tools.tool_first_workflow(\n\n    model=ToolModels.MISTRAL_LARGE_0224,\n    tool_name=\"tavily_search\",\n    content=\"Summarize information on the topic\",\n    tool_kwargs={\"query\": \"AI advances in April 2024\"},\n\n)\ndisplay(Markdown(message.output_message))\n```\n\n```markdown\nBased on the search results, it appears that Generative AI (Gen AI) is a significant technological advancement that has the potential to add up to $4.4 trillion in economic value to the global economy. However, companies are finding it challenging to capture this value. Gen AI is particularly exciting in the business world and is being used in various sectors such as manufacturing and the entertainment industry.\n\nStanford University's 2024 AI Index has charted the meteoric rise of AI tools, and AI is now outperforming humans at basic tasks, necessitating new benchmarks. The power of Gen AI, combined with traditional AI, is expected to provide even more help in the future.\n\nHowever, the use of Gen AI in the workplace is not without its challenges. Organizations must have a clear policy around Gen AI and be wary of 'shadow AI' - the unofficial use of AI in the workplace by employees without IT approval or oversight.\n\nThe Gartner Hype Cycle positions Gen AI at the 'Peak of Inflated Expectations,' on the cusp of a slide into the 'Trough of Disillusionment,' indicating a relatively underwhelming transition period. Despite this, many leaders expect substantial transformative impacts in the short term.\n\nIn terms of regulations, policymakers have been drawing up tough new regulations, with Biden’s executive order coming out in October and the European Union’s AI Act being finally agreed in December.\n\nIn conclusion, while Gen AI holds immense potential, it also presents challenges in terms of value capture, unofficial use, and regulations.\n```\n</Steps>\n"
+        "markdown": "Athena can leverage open-source models to research web and analyse results using open source models with `tools.tool_first_workflow()`\n\n\n<Steps>\n### Set up environment \n```python\n!pip install -U athena-intelligence\n```\n```python\nimport json\nimport pandas as pd\nimport os\n\nATHENA_API_KEY = os.environ[\"ATHENA_API_KEY\"]\n\nfrom athena import Model, Tools\nfrom athena.client import AsyncAthena\n\nathena = AsyncAthena(\n    api_key=ATHENA_API_KEY,\n)\n\n```\n\n### Set up search query and instructions for analysing results\nWrite a search request and what you want Athena to do with search results. \n```python\nmessage = await async_athena.tools.tool_first_workflow(\n\n    model=ToolModels.MISTRAL_LARGE_0224,\n    tool_name=\"tavily_search\",\n    content=\"Summarize information on the topic\",\n    tool_kwargs={\"query\": \"AI advances in April 2024\"},\n\n)\ndisplay(Markdown(message.output_message))\n```\n\n```markdown\nBased on the search results, it appears that Generative AI (Gen AI) is a significant technological advancement that has the potential to add up to $4.4 trillion in economic value to the global economy. However, companies are finding it challenging to capture this value. Gen AI is particularly exciting in the business world and is being used in various sectors such as manufacturing and the entertainment industry.\n\nStanford University's 2024 AI Index has charted the meteoric rise of AI tools, and AI is now outperforming humans at basic tasks, necessitating new benchmarks. The power of Gen AI, combined with traditional AI, is expected to provide even more help in the future.\n\nHowever, the use of Gen AI in the workplace is not without its challenges. Organizations must have a clear policy around Gen AI and be wary of 'shadow AI' - the unofficial use of AI in the workplace by employees without IT approval or oversight.\n\nThe Gartner Hype Cycle positions Gen AI at the 'Peak of Inflated Expectations,' on the cusp of a slide into the 'Trough of Disillusionment,' indicating a relatively underwhelming transition period. Despite this, many leaders expect substantial transformative impacts in the short term.\n\nIn terms of regulations, policymakers have been drawing up tough new regulations, with Biden\u2019s executive order coming out in October and the European Union\u2019s AI Act being finally agreed in December.\n\nIn conclusion, while Gen AI holds immense potential, it also presents challenges in terms of value capture, unofficial use, and regulations.\n```\n</Steps>\n"
       },
       "pages/examples/structured_output.mdx": {
-        "markdown": "Athena can return structured output if you pass it the desired schema using `chain.structured_parse()`:\n\n\n\n<Steps>\n### Set up environment \n```python\n!pip install -U athena-intelligence\n```\n```python\nimport json\nimport pandas as pd\nimport os\n\nATHENA_API_KEY = os.environ[\"ATHENA_API_KEY\"]\n\nfrom athena import Model, Tools\nfrom athena.client import AsyncAthena\n\nathena = AsyncAthena(\n    api_key=ATHENA_API_KEY,\n)\n\n```\n\n### Set up a sample search query: \nWrite a search request and what you want Athena to do with search results. \n```python\nmessage = await async_athena.tools.tool_first_workflow(\n\n    model=ToolModels.MISTRAL_LARGE_0224,\n    tool_name=\"tavily_search\",\n    content=\"Summarize information on the topic\",\n    tool_kwargs={\"query\": \"AI advances in April 2024\"},\n\n)\ndisplay(Markdown(message.output_message))\n```\n\n```markdown\nBased on the search results, it appears that Generative AI (Gen AI) is a significant technological advancement that has the potential to add up to $4.4 trillion in economic value to the global economy. However, companies are finding it challenging to capture this value. Gen AI is particularly exciting in the business world and is being used in various sectors such as manufacturing and the entertainment industry.\n\nStanford University's 2024 AI Index has charted the meteoric rise of AI tools, and AI is now outperforming humans at basic tasks, necessitating new benchmarks. The power of Gen AI, combined with traditional AI, is expected to provide even more help in the future.\n\nHowever, the use of Gen AI in the workplace is not without its challenges. Organizations must have a clear policy around Gen AI and be wary of 'shadow AI' - the unofficial use of AI in the workplace by employees without IT approval or oversight.\n\nThe Gartner Hype Cycle positions Gen AI at the 'Peak of Inflated Expectations,' on the cusp of a slide into the 'Trough of Disillusionment,' indicating a relatively underwhelming transition period. Despite this, many leaders expect substantial transformative impacts in the short term.\n\nIn terms of regulations, policymakers have been drawing up tough new regulations, with Biden’s executive order coming out in October and the European Union’s AI Act being finally agreed in December.\n\nIn conclusion, while Gen AI holds immense potential, it also presents challenges in terms of value capture, unofficial use, and regulations.\n```\n\n### Use structured_parse() to return structured output\n\n```python\nfrom athena import StructuredParseInParsingModel\nstructured_output = athena.chain.structured_parse(\n    text_input=message.output_message, \n    custom_type_dict={\"news\": {\"news_item_1\": \"news_content_1\", \"news_item_2\": \"news_content_2\"}},\n    parsing_model=StructuredParseInParsingModel.MISTRAL_LARGE_0224,\n)\nstructured_output.result\n```\n\n```json\n{'news': {'news_item_1': 'Generative AI (Gen AI) is a significant technological advancement that has the potential to add up to $4.4 trillion in economic value to the global economy. However, companies are finding it challenging to capture this value. Gen AI is particularly exciting in the business world and is being used in various sectors such as manufacturing and the entertainment industry.',\n  'news_item_2': \"Stanford University's 2024 AI Index has charted the meteoric rise of AI tools, and AI is now outperforming humans at basic tasks, necessitating new benchmarks. The power of Gen AI, combined with traditional AI, is expected to provide even more help in the future.\",\n  'news_item_3': \"However, the use of Gen AI in the workplace is not without its challenges. Organizations must have a clear policy around Gen AI and be wary of 'shadow AI' - the unofficial use of AI in the workplace by employees without IT approval or oversight.\",\n  'news_item_4': \"The Gartner Hype Cycle positions Gen AI at the 'Peak of Inflated Expectations,' on the cusp of a slide into the 'Trough of Disillusionment,' indicating a relatively underwhelming transition period. Despite this, many leaders expect substantial transformative impacts in the short term.\",\n  'news_item_5': 'In terms of regulations, policymakers have been drawing up tough new regulations, with Biden’s executive order coming out in October and the European Union’s AI Act being finally agreed in December.',\n  'news_item_6': 'In conclusion, while Gen AI holds immense potential, it also presents challenges in terms of value capture, unofficial use, and regulations.'}}\n  ```\n</Steps>\n"
+        "markdown": "Athena can return structured output if you pass it the desired schema using `chain.structured_parse()`:\n\n\n\n<Steps>\n### Set up environment \n```python\n!pip install -U athena-intelligence\n```\n```python\nimport json\nimport pandas as pd\nimport os\n\nATHENA_API_KEY = os.environ[\"ATHENA_API_KEY\"]\n\nfrom athena import Model, Tools\nfrom athena.client import AsyncAthena\n\nathena = AsyncAthena(\n    api_key=ATHENA_API_KEY,\n)\n\n```\n\n### Set up a sample search query: \nWrite a search request and what you want Athena to do with search results. \n```python\nmessage = await async_athena.tools.tool_first_workflow(\n\n    model=ToolModels.MISTRAL_LARGE_0224,\n    tool_name=\"tavily_search\",\n    content=\"Summarize information on the topic\",\n    tool_kwargs={\"query\": \"AI advances in April 2024\"},\n\n)\ndisplay(Markdown(message.output_message))\n```\n\n```markdown\nBased on the search results, it appears that Generative AI (Gen AI) is a significant technological advancement that has the potential to add up to $4.4 trillion in economic value to the global economy. However, companies are finding it challenging to capture this value. Gen AI is particularly exciting in the business world and is being used in various sectors such as manufacturing and the entertainment industry.\n\nStanford University's 2024 AI Index has charted the meteoric rise of AI tools, and AI is now outperforming humans at basic tasks, necessitating new benchmarks. The power of Gen AI, combined with traditional AI, is expected to provide even more help in the future.\n\nHowever, the use of Gen AI in the workplace is not without its challenges. Organizations must have a clear policy around Gen AI and be wary of 'shadow AI' - the unofficial use of AI in the workplace by employees without IT approval or oversight.\n\nThe Gartner Hype Cycle positions Gen AI at the 'Peak of Inflated Expectations,' on the cusp of a slide into the 'Trough of Disillusionment,' indicating a relatively underwhelming transition period. Despite this, many leaders expect substantial transformative impacts in the short term.\n\nIn terms of regulations, policymakers have been drawing up tough new regulations, with Biden\u2019s executive order coming out in October and the European Union\u2019s AI Act being finally agreed in December.\n\nIn conclusion, while Gen AI holds immense potential, it also presents challenges in terms of value capture, unofficial use, and regulations.\n```\n\n### Use structured_parse() to return structured output\n\n```python\nfrom athena import StructuredParseInParsingModel\nstructured_output = athena.chain.structured_parse(\n    text_input=message.output_message, \n    custom_type_dict={\"news\": {\"news_item_1\": \"news_content_1\", \"news_item_2\": \"news_content_2\"}},\n    parsing_model=StructuredParseInParsingModel.MISTRAL_LARGE_0224,\n)\nstructured_output.result\n```\n\n```json\n{'news': {'news_item_1': 'Generative AI (Gen AI) is a significant technological advancement that has the potential to add up to $4.4 trillion in economic value to the global economy. However, companies are finding it challenging to capture this value. Gen AI is particularly exciting in the business world and is being used in various sectors such as manufacturing and the entertainment industry.',\n  'news_item_2': \"Stanford University's 2024 AI Index has charted the meteoric rise of AI tools, and AI is now outperforming humans at basic tasks, necessitating new benchmarks. The power of Gen AI, combined with traditional AI, is expected to provide even more help in the future.\",\n  'news_item_3': \"However, the use of Gen AI in the workplace is not without its challenges. Organizations must have a clear policy around Gen AI and be wary of 'shadow AI' - the unofficial use of AI in the workplace by employees without IT approval or oversight.\",\n  'news_item_4': \"The Gartner Hype Cycle positions Gen AI at the 'Peak of Inflated Expectations,' on the cusp of a slide into the 'Trough of Disillusionment,' indicating a relatively underwhelming transition period. Despite this, many leaders expect substantial transformative impacts in the short term.\",\n  'news_item_5': 'In terms of regulations, policymakers have been drawing up tough new regulations, with Biden\u2019s executive order coming out in October and the European Union\u2019s AI Act being finally agreed in December.',\n  'news_item_6': 'In conclusion, while Gen AI holds immense potential, it also presents challenges in terms of value capture, unofficial use, and regulations.'}}\n  ```\n</Steps>\n"
       },
       "pages/examples/query_and_visualize.mdx": {
         "markdown": "\n\n<Steps>\n### Set up environment \n```python\n!pip install -U athena-intelligence\n```\n```python\nimport json\nimport pandas as pd\nimport os\n\nATHENA_API_KEY = os.environ[\"ATHENA_API_KEY\"]\n\nfrom athena import Model, Tools\nfrom athena.client import Athena\n\nathena = Athena(\n    api_key=ATHENA_API_KEY,\n)\n```\n\n### Query SQL with `athena.query.execute()`\nInitialize default database or specify id of another connected database. Ask Athena team if unclear. \n```python\n# default database id = 9\ndefault_database_id = 9\n```\n\nPut your query here\n```python\nquery = \"\"\"\nWITH RankedCustomers AS (\n  SELECT\n    r.route_id,\n    r.src AS route_source,\n    r.dst AS route_destination,\n    ts.passenger_id,\n    c.name AS customer_name,\n    SUM(ts.num_tickets) AS total_tickets,\n    RANK() OVER (PARTITION BY r.route_id ORDER BY SUM(ts.num_tickets) DESC) AS rank\n  FROM\n    sample_schema.train_routes r\n  JOIN sample_schema.train_trips t ON r.route_id = t.route_id\n  JOIN sample_schema.train_ticketsales ts ON t.trip_id = ts.trip_id\n  JOIN sample_schema.train_customers c ON ts.passenger_id = c.passenger_id\n  GROUP BY\n    r.route_id,\n    r.src,\n    r.dst,\n    ts.passenger_id,\n    c.name\n)\nSELECT\n  route_id,\n  route_source,\n  route_destination,\n  passenger_id,\n  customer_name,\n  total_tickets\nFROM\n  RankedCustomers\nWHERE\n  rank <= 3\nORDER BY\n  route_id,\n  rank;\n\"\"\"\n```\n\nRun the query and convert to Pandas dataframe for subsequent analysis \n```python\nquery_result = athena.query.execute(\n    sql_command = query,\n    database_id = default_database_id\n    )\n\nformatted_query_result = json.loads(query_result.json())\ndata_output = formatted_query_result['result']['data']\n\n# Convert the list of dictionaries to a DataFrame\ndf = pd.DataFrame(data_output)\n\n# Display the DataFrame to verify the contents\ndf\n\n```\n\n### Visualize data using Athena Notebooks Sidebar\nOnce you have an SQL output, you can harness the power and flexibility of visualisations or further analysis using Python. In Athena Notebooks, you can click \"Chat\" in the top right corner to ask Athena for help writing code for visualizations you need. Copy and paste a dataframe headers and 2-3 rows to give Athena all needed context. \n\n- Write code to visualize this table: \n \troute_id \troute_source \troute_destination \tpassenger_id \tcustomer_name \ttotal_tickets\n0 \t1 \tWest Sylvia \tWilliamsshire \t816 \tJaruwan Rogers \t13\n1 \t1 \tWest Sylvia \tWilliamsshire \t679 \tKaren Tapp \t9\n\n- Sure, here's the code:\n...\n\nCopy & run the code in the notebook. \n```python\nimport pandas as pd\nimport matplotlib.pyplot as plt\nimport numpy as np\n\n# Assuming 'df' is your DataFrame\n# Ensure your DataFrame is named 'df' or adjust the variable name accordingly\n\n# Visualization 1: Total Tickets Sold by Route\nroute_tickets_sum = df.groupby('route_id')['total_tickets'].sum().reset_index()\nplt.figure(figsize=(10, 6))\nplt.bar(route_tickets_sum['route_id'], route_tickets_sum['total_tickets'], color='deepskyblue')  # Changed color to 'deepskyblue'\nplt.title('Total Tickets Sold by Route')\nplt.xlabel('Route ID')\nplt.ylabel('Total Tickets Sold')\nplt.xticks(rotation=45)\nplt.tight_layout()\nplt.show()\n```\n</Steps>\n"

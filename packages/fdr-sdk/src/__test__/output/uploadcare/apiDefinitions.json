@@ -371,6 +371,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_:FileColorMode": {
         "name": "FileColorMode",
@@ -3365,6 +3366,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_upload:BaseUploadResponse": {
         "name": "BaseUploadResponse",
@@ -15863,6 +15865,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_file:FilesListRequestOrdering": {
         "name": "FilesListRequestOrdering",

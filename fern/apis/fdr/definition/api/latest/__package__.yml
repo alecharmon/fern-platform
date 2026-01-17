@@ -34,7 +34,7 @@ types:
       endpoints: map<rootCommons.EndpointId, endpoint.EndpointDefinition>
       websockets: map<rootCommons.WebSocketId, websocket.WebSocketChannel>
       webhooks: map<rootCommons.WebhookId, webhook.WebhookDefinition>
-      graphqlOperations: map<rootCommons.GraphQLOperationId, graphql.GraphQLOperation>
+      graphqlOperations: map<rootCommons.GraphQlOperationId, graphql.GraphQlOperation>
       types: map<rootCommons.TypeId, type.TypeDefinition>
       subpackages: map<commons.SubpackageId, commons.SubpackageMetadata>
       auths: map<rootCommons.AuthSchemeId, auth.AuthScheme>

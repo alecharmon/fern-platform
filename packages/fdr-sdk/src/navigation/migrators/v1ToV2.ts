@@ -802,6 +802,37 @@ export class FernNavigationV1ToLatest {
         return latest;
     };
 
+    public graphql = (
+        node: FernNavigation.V1.GraphQlNode,
+        parents: FernNavigation.V1.NavigationNode[]
+    ): FernNavigation.GraphQlNode => {
+        const apiDisambiguation = this.#createApiDisambiguationKey(parents);
+        const slug = FernNavigation.Slug(node.slug);
+        const canonicalSlug = this.#getAndSetCanonicalSlug(
+            [`${apiDisambiguation}:api:graphql:${node.id}`, this.#createTitleDisambiguationKey(node, parents)],
+            slug
+        );
+        const latest: FernNavigation.GraphQlNode = {
+            type: "graphql",
+            id: FernNavigation.NodeId(node.id),
+            title: node.title,
+            slug,
+            canonicalSlug,
+            icon: node.icon,
+            hidden: node.hidden,
+            authed: node.authed,
+            apiDefinitionId: node.apiDefinitionId,
+            graphqlOperationId: node.graphqlOperationId,
+            operationType: node.operationType,
+            playground: node.playground,
+            availability: this.#availability(node.availability),
+            viewers: node.viewers,
+            orphaned: node.orphaned,
+            featureFlags: node.featureFlags
+        };
+        return latest;
+    };
+
     #variantChild = (
         child: FernNavigation.V1.VariantChild,
         parents: FernNavigation.V1.NavigationNode[]
@@ -842,7 +873,8 @@ export class FernNavigationV1ToLatest {
             endpointPair: (value) => this.endpointPair(value, parents),
             webSocket: (value) => this.webSocket(value, parents),
             webhook: (value) => this.webhook(value, parents),
-            grpc: (value) => this.grpc(value, parents)
+            grpc: (value) => this.grpc(value, parents),
+            graphql: (value) => this.graphql(value, parents)
         });
     };
 

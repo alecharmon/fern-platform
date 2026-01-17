@@ -58618,6 +58618,7 @@
         ]
       }
     },
+    "graphqlOperations": {},
     "types": {
       "WebhooksFormSubmissionPayloadContentApplicationJsonSchemaPayloadData": {
         "name": "WebhooksFormSubmissionPayloadContentApplicationJsonSchemaPayloadData",
@@ -245256,6 +245257,7 @@
         ]
       }
     },
+    "graphqlOperations": {},
     "types": {
       "WebhooksFormSubmissionPayloadContentApplicationJsonSchemaPayloadData": {
         "name": "WebhooksFormSubmissionPayloadContentApplicationJsonSchemaPayloadData",
@@ -401801,6 +401803,7 @@
         ]
       }
     },
+    "graphqlOperations": {},
     "types": {
       "AuthorizedUser": {
         "name": "AuthorizedUser",

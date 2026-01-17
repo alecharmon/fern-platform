@@ -17,7 +17,9 @@
                 "title": "Overview",
                 "icon": "fa-regular fa-globe",
                 "urlSlug": "overview",
-                "fullSlug": ["overview"],
+                "fullSlug": [
+                  "overview"
+                ],
                 "hidden": false
               },
               {
@@ -26,7 +28,9 @@
                 "title": "FAQ",
                 "icon": "fa-regular fa-circle-question",
                 "urlSlug": "faq",
-                "fullSlug": ["faq"],
+                "fullSlug": [
+                  "faq"
+                ],
                 "hidden": false
               },
               {
@@ -42,7 +46,10 @@
                     "title": "Installation & Setup",
                     "icon": "fa-regular fa-download",
                     "urlSlug": "installation-setup",
-                    "fullSlug": ["getting-started", "setup"],
+                    "fullSlug": [
+                      "getting-started",
+                      "setup"
+                    ],
                     "hidden": false
                   },
                   {
@@ -51,7 +58,10 @@
                     "title": "Components",
                     "icon": "fa-regular fa-puzzle",
                     "urlSlug": "components",
-                    "fullSlug": ["getting-started", "components"],
+                    "fullSlug": [
+                      "getting-started",
+                      "components"
+                    ],
                     "hidden": false
                   },
                   {
@@ -60,7 +70,10 @@
                     "title": "Users",
                     "icon": "fa-regular fa-address-book",
                     "urlSlug": "users",
-                    "fullSlug": ["getting-started", "users"],
+                    "fullSlug": [
+                      "getting-started",
+                      "users"
+                    ],
                     "hidden": false
                   },
                   {
@@ -69,7 +82,10 @@
                     "title": "Going to Production",
                     "icon": "fa-regular fa-rocket",
                     "urlSlug": "going-to-production",
-                    "fullSlug": ["getting-started", "production"],
+                    "fullSlug": [
+                      "getting-started",
+                      "production"
+                    ],
                     "hidden": false
                   }
                 ],
@@ -88,7 +104,10 @@
                     "title": "The StackApp Object",
                     "icon": "fa-regular fa-folder-gear",
                     "urlSlug": "the-stack-app-object",
-                    "fullSlug": ["concepts", "stack-app"],
+                    "fullSlug": [
+                      "concepts",
+                      "stack-app"
+                    ],
                     "hidden": false
                   },
                   {
@@ -97,7 +116,10 @@
                     "title": "Custom User Data",
                     "icon": "fa-regular fa-user-pen",
                     "urlSlug": "custom-user-data",
-                    "fullSlug": ["concepts", "custom-user-data"],
+                    "fullSlug": [
+                      "concepts",
+                      "custom-user-data"
+                    ],
                     "hidden": false
                   },
                   {
@@ -106,7 +128,10 @@
                     "title": "User Onboarding",
                     "icon": "fa-regular fa-user-check",
                     "urlSlug": "user-onboarding",
-                    "fullSlug": ["concepts", "user-onboarding"],
+                    "fullSlug": [
+                      "concepts",
+                      "user-onboarding"
+                    ],
                     "hidden": false
                   },
                   {
@@ -115,7 +140,10 @@
                     "title": "Connected OAuth Accounts",
                     "icon": "fa-regular fa-link",
                     "urlSlug": "connected-o-auth-accounts",
-                    "fullSlug": ["concepts", "oauth"],
+                    "fullSlug": [
+                      "concepts",
+                      "oauth"
+                    ],
                     "hidden": false
                   },
                   {
@@ -124,7 +152,10 @@
                     "title": "Teams",
                     "icon": "fa-regular fa-users",
                     "urlSlug": "teams",
-                    "fullSlug": ["concepts", "orgs-and-teams"],
+                    "fullSlug": [
+                      "concepts",
+                      "orgs-and-teams"
+                    ],
                     "hidden": false
                   },
                   {
@@ -133,7 +164,10 @@
                     "title": "Selecting a Team",
                     "icon": "fa-regular fa-exchange",
                     "urlSlug": "selecting-a-team",
-                    "fullSlug": ["concepts", "team-selection"],
+                    "fullSlug": [
+                      "concepts",
+                      "team-selection"
+                    ],
                     "hidden": false
                   },
                   {
@@ -142,7 +176,10 @@
                     "title": "Permissions & RBAC",
                     "icon": "fa-regular fa-user-lock",
                     "urlSlug": "permissions-rbac",
-                    "fullSlug": ["concepts", "permissions"],
+                    "fullSlug": [
+                      "concepts",
+                      "permissions"
+                    ],
                     "hidden": false
                   },
                   {
@@ -151,7 +188,10 @@
                     "title": "Webhooks",
                     "icon": "fa-regular fa-webhook",
                     "urlSlug": "webhooks",
-                    "fullSlug": ["concepts", "webhooks"],
+                    "fullSlug": [
+                      "concepts",
+                      "webhooks"
+                    ],
                     "hidden": false
                   },
                   {
@@ -160,7 +200,10 @@
                     "title": "Backend Integration",
                     "icon": "fa-regular fa-network-wired",
                     "urlSlug": "backend-integration",
-                    "fullSlug": ["concepts", "backend-integration"],
+                    "fullSlug": [
+                      "concepts",
+                      "backend-integration"
+                    ],
                     "hidden": false
                   }
                 ],
@@ -179,7 +222,10 @@
                     "title": "Dark/Light Mode",
                     "icon": "fa-regular fa-circle-half-stroke",
                     "urlSlug": "dark-light-mode",
-                    "fullSlug": ["customization", "dark-mode"],
+                    "fullSlug": [
+                      "customization",
+                      "dark-mode"
+                    ],
                     "hidden": false
                   },
                   {
@@ -188,7 +234,10 @@
                     "title": "Colors and Styles",
                     "icon": "fa-regular fa-paint-brush",
                     "urlSlug": "colors-and-styles",
-                    "fullSlug": ["customization", "custom-styles"],
+                    "fullSlug": [
+                      "customization",
+                      "custom-styles"
+                    ],
                     "hidden": false
                   },
                   {
@@ -197,7 +246,10 @@
                     "title": "Internationalization",
                     "icon": "fa-regular fa-language",
                     "urlSlug": "internationalization",
-                    "fullSlug": ["customization", "internationalization"],
+                    "fullSlug": [
+                      "customization",
+                      "internationalization"
+                    ],
                     "hidden": false
                   },
                   {
@@ -206,7 +258,10 @@
                     "title": "Custom Layouts and Pages",
                     "icon": "fa-regular fa-table-layout",
                     "urlSlug": "custom-layouts-and-pages",
-                    "fullSlug": ["customization", "custom-pages"],
+                    "fullSlug": [
+                      "customization",
+                      "custom-pages"
+                    ],
                     "hidden": false
                   },
                   {
@@ -222,7 +277,11 @@
                         "id": "docs/pages/customization/page-examples/sign-in.mdx",
                         "title": "Sign In",
                         "urlSlug": "sign-in",
-                        "fullSlug": ["customization", "page-examples", "signin"],
+                        "fullSlug": [
+                          "customization",
+                          "page-examples",
+                          "signin"
+                        ],
                         "hidden": false
                       },
                       {
@@ -230,7 +289,11 @@
                         "id": "docs/pages/customization/page-examples/sign-up.mdx",
                         "title": "Sign Up",
                         "urlSlug": "sign-up",
-                        "fullSlug": ["customization", "page-examples", "signup"],
+                        "fullSlug": [
+                          "customization",
+                          "page-examples",
+                          "signup"
+                        ],
                         "hidden": false
                       }
                     ],
@@ -252,7 +315,10 @@
                     "title": "Supabase Integration",
                     "icon": "fa-regular fa-bolt",
                     "urlSlug": "supabase-integration",
-                    "fullSlug": ["others", "supabase"],
+                    "fullSlug": [
+                      "others",
+                      "supabase"
+                    ],
                     "hidden": false
                   },
                   {
@@ -261,7 +327,10 @@
                     "title": "Self-Hosting",
                     "icon": "fa-regular fa-house-laptop",
                     "urlSlug": "self-hosting",
-                    "fullSlug": ["others", "self-host"],
+                    "fullSlug": [
+                      "others",
+                      "self-host"
+                    ],
                     "hidden": false
                   }
                 ],
@@ -289,7 +358,10 @@
                     "id": "docs/pages/components/user-button.mdx",
                     "title": "<UserButton />",
                     "urlSlug": "user-button",
-                    "fullSlug": ["components", "user-button"],
+                    "fullSlug": [
+                      "components",
+                      "user-button"
+                    ],
                     "hidden": false
                   },
                   {
@@ -297,7 +369,10 @@
                     "id": "docs/pages/components/selected-team-switcher.mdx",
                     "title": "<SelectedTeamSwitcher />",
                     "urlSlug": "selected-team-switcher",
-                    "fullSlug": ["components", "selected-team-switcher"],
+                    "fullSlug": [
+                      "components",
+                      "selected-team-switcher"
+                    ],
                     "hidden": false
                   },
                   {
@@ -305,7 +380,10 @@
                     "id": "docs/pages/components/account-settings.mdx",
                     "title": "<AccountSettings />",
                     "urlSlug": "account-settings",
-                    "fullSlug": ["components", "account-settings"],
+                    "fullSlug": [
+                      "components",
+                      "account-settings"
+                    ],
                     "hidden": false
                   },
                   {
@@ -313,7 +391,10 @@
                     "id": "docs/pages/components/sign-in.mdx",
                     "title": "<SignIn />",
                     "urlSlug": "sign-in",
-                    "fullSlug": ["components", "sign-in"],
+                    "fullSlug": [
+                      "components",
+                      "sign-in"
+                    ],
                     "hidden": false
                   },
                   {
@@ -321,7 +402,10 @@
                     "id": "docs/pages/components/sign-up.mdx",
                     "title": "<SignUp />",
                     "urlSlug": "sign-up",
-                    "fullSlug": ["components", "sign-up"],
+                    "fullSlug": [
+                      "components",
+                      "sign-up"
+                    ],
                     "hidden": false
                   },
                   {
@@ -329,7 +413,10 @@
                     "id": "docs/pages/components/credential-sign-in.mdx",
                     "title": "<CredentialSignIn />",
                     "urlSlug": "credential-sign-in",
-                    "fullSlug": ["components", "credential-sign-in"],
+                    "fullSlug": [
+                      "components",
+                      "credential-sign-in"
+                    ],
                     "hidden": false
                   },
                   {
@@ -337,7 +424,10 @@
                     "id": "docs/pages/components/credential-sign-up.mdx",
                     "title": "<CredentialSignUp />",
                     "urlSlug": "credential-sign-up",
-                    "fullSlug": ["components", "credential-sign-up"],
+                    "fullSlug": [
+                      "components",
+                      "credential-sign-up"
+                    ],
                     "hidden": false
                   },
                   {
@@ -345,7 +435,10 @@
                     "id": "docs/pages/components/oauth-button.mdx",
                     "title": "<OAuthButton />",
                     "urlSlug": "o-auth-button",
-                    "fullSlug": ["components", "oauth-button"],
+                    "fullSlug": [
+                      "components",
+                      "oauth-button"
+                    ],
                     "hidden": false
                   },
                   {
@@ -353,7 +446,10 @@
                     "id": "docs/pages/components/oauth-button-group.mdx",
                     "title": "<OAuthButtonGroup />",
                     "urlSlug": "o-auth-button-group",
-                    "fullSlug": ["components", "oauth-button-group"],
+                    "fullSlug": [
+                      "components",
+                      "oauth-button-group"
+                    ],
                     "hidden": false
                   }
                 ],
@@ -371,7 +467,10 @@
                     "id": "docs/pages/components/stack-handler.mdx",
                     "title": "<StackHandler />",
                     "urlSlug": "stack-handler",
-                    "fullSlug": ["components", "stack-handler"],
+                    "fullSlug": [
+                      "components",
+                      "stack-handler"
+                    ],
                     "hidden": false
                   },
                   {
@@ -379,7 +478,10 @@
                     "id": "docs/pages/components/stack-provider.mdx",
                     "title": "<StackProvider />",
                     "urlSlug": "stack-provider",
-                    "fullSlug": ["components", "stack-provider"],
+                    "fullSlug": [
+                      "components",
+                      "stack-provider"
+                    ],
                     "hidden": false
                   },
                   {
@@ -387,7 +489,10 @@
                     "id": "docs/pages/components/stack-theme.mdx",
                     "title": "<StackTheme />",
                     "urlSlug": "stack-theme",
-                    "fullSlug": ["components", "stack-theme"],
+                    "fullSlug": [
+                      "components",
+                      "stack-theme"
+                    ],
                     "hidden": false
                   }
                 ],
@@ -415,7 +520,10 @@
                     "id": "docs/pages/sdk/user.mdx",
                     "title": "User",
                     "urlSlug": "user",
-                    "fullSlug": ["sdk", "user"],
+                    "fullSlug": [
+                      "sdk",
+                      "user"
+                    ],
                     "hidden": false
                   },
                   {
@@ -423,7 +531,10 @@
                     "id": "docs/pages/sdk/stack-app.mdx",
                     "title": "StackApp",
                     "urlSlug": "stack-app",
-                    "fullSlug": ["sdk", "stack-app"],
+                    "fullSlug": [
+                      "sdk",
+                      "stack-app"
+                    ],
                     "hidden": false
                   },
                   {
@@ -431,7 +542,10 @@
                     "id": "docs/pages/sdk/team.mdx",
                     "title": "Team",
                     "urlSlug": "team",
-                    "fullSlug": ["sdk", "team"],
+                    "fullSlug": [
+                      "sdk",
+                      "team"
+                    ],
                     "hidden": false
                   },
                   {
@@ -439,7 +553,10 @@
                     "id": "docs/pages/sdk/team-user.mdx",
                     "title": "TeamUser",
                     "urlSlug": "team-user",
-                    "fullSlug": ["sdk", "team-user"],
+                    "fullSlug": [
+                      "sdk",
+                      "team-user"
+                    ],
                     "hidden": false
                   },
                   {
@@ -447,7 +564,10 @@
                     "id": "docs/pages/sdk/team-profile.mdx",
                     "title": "TeamProfile",
                     "urlSlug": "team-profile",
-                    "fullSlug": ["sdk", "team-profile"],
+                    "fullSlug": [
+                      "sdk",
+                      "team-profile"
+                    ],
                     "hidden": false
                   },
                   {
@@ -455,7 +575,10 @@
                     "id": "docs/pages/sdk/team-permission.mdx",
                     "title": "TeamPermission",
                     "urlSlug": "team-permission",
-                    "fullSlug": ["sdk", "team-permission"],
+                    "fullSlug": [
+                      "sdk",
+                      "team-permission"
+                    ],
                     "hidden": false
                   },
                   {
@@ -463,7 +586,10 @@
                     "id": "docs/pages/sdk/project.mdx",
                     "title": "Project",
                     "urlSlug": "project",
-                    "fullSlug": ["sdk", "project"],
+                    "fullSlug": [
+                      "sdk",
+                      "project"
+                    ],
                     "hidden": false
                   },
                   {
@@ -471,7 +597,10 @@
                     "id": "docs/pages/sdk/contact-channel.mdx",
                     "title": "ContactChannel",
                     "urlSlug": "contact-channel",
-                    "fullSlug": ["sdk", "contact-channel"],
+                    "fullSlug": [
+                      "sdk",
+                      "contact-channel"
+                    ],
                     "hidden": false
                   }
                 ],
@@ -496,7 +625,10 @@
                     "id": "docs/pages/sdk/use-stack-app.mdx",
                     "title": "useStackApp()",
                     "urlSlug": "use-stack-app",
-                    "fullSlug": ["sdk", "use-stack-app"],
+                    "fullSlug": [
+                      "sdk",
+                      "use-stack-app"
+                    ],
                     "hidden": false
                   }
                 ],
@@ -518,7 +650,10 @@
                 "title": "API Overview",
                 "icon": "fa-regular fa-globe",
                 "urlSlug": "api-overview",
-                "fullSlug": ["rest-api", "auth"],
+                "fullSlug": [
+                  "rest-api",
+                  "auth"
+                ],
                 "hidden": false
               },
               {
@@ -844,7 +979,8 @@
           ],
           "types": [],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_contactChannels:GetContactChannelsResponseItemsItem": {
@@ -4107,7 +4243,8 @@
             "subpackages": [],
             "urlSlug": "contact-channels",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_oauth": {
             "subpackageId": "subpackage_oauth",
@@ -4426,7 +4563,8 @@
             "subpackages": [],
             "urlSlug": "oauth",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_otp": {
             "subpackageId": "subpackage_otp",
@@ -4853,7 +4991,8 @@
             "subpackages": [],
             "urlSlug": "otp",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_password": {
             "subpackageId": "subpackage_password",
@@ -5598,7 +5737,8 @@
             "subpackages": [],
             "urlSlug": "password",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_permissions": {
             "subpackageId": "subpackage_permissions",
@@ -5753,7 +5893,8 @@
             "subpackages": [],
             "urlSlug": "permissions",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_projects": {
             "subpackageId": "subpackage_projects",
@@ -5842,11 +5983,15 @@
                 "authed": false
               }
             ],
-            "types": ["type_projects:GetProjectsCurrentResponseConfig", "type_projects:GetProjectsCurrentResponse"],
+            "types": [
+              "type_projects:GetProjectsCurrentResponseConfig",
+              "type_projects:GetProjectsCurrentResponse"
+            ],
             "subpackages": [],
             "urlSlug": "projects",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_sessions": {
             "subpackageId": "subpackage_sessions",
@@ -6012,7 +6157,8 @@
             "subpackages": [],
             "urlSlug": "sessions",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_teams": {
             "subpackageId": "subpackage_teams",
@@ -7532,7 +7678,8 @@
             "subpackages": [],
             "urlSlug": "teams",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_users": {
             "subpackageId": "subpackage_users",
@@ -7934,7 +8081,8 @@
             "subpackages": [],
             "urlSlug": "users",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "hasMultipleBaseUrls": false,
@@ -7944,10 +8092,14 @@
         "id": "8c451807-ffb6-4876-9831-21d410bcb716",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_users", "subpackage_teams"],
+          "subpackages": [
+            "subpackage_users",
+            "subpackage_teams"
+          ],
           "types": [],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_users:UserCreatedPayloadDataSelectedTeam": {
@@ -9244,7 +9396,8 @@
                 ]
               }
             ],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_teams": {
             "subpackageId": "subpackage_teams",
@@ -9432,7 +9585,8 @@
                 ]
               }
             ],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "hasMultipleBaseUrls": false,
@@ -9596,7 +9750,8 @@
           ],
           "types": [],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_contactChannels:GetContactChannelsResponseItemsItem": {
@@ -15353,7 +15508,8 @@
             "subpackages": [],
             "urlSlug": "contact-channels",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_oauth": {
             "subpackageId": "subpackage_oauth",
@@ -15672,7 +15828,8 @@
             "subpackages": [],
             "urlSlug": "oauth",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_otp": {
             "subpackageId": "subpackage_otp",
@@ -16099,7 +16256,8 @@
             "subpackages": [],
             "urlSlug": "otp",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_password": {
             "subpackageId": "subpackage_password",
@@ -16844,7 +17002,8 @@
             "subpackages": [],
             "urlSlug": "password",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_permissions": {
             "subpackageId": "subpackage_permissions",
@@ -17386,7 +17545,8 @@
             "subpackages": [],
             "urlSlug": "permissions",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_projects": {
             "subpackageId": "subpackage_projects",
@@ -17475,11 +17635,15 @@
                 "authed": false
               }
             ],
-            "types": ["type_projects:GetProjectsCurrentResponseConfig", "type_projects:GetProjectsCurrentResponse"],
+            "types": [
+              "type_projects:GetProjectsCurrentResponseConfig",
+              "type_projects:GetProjectsCurrentResponse"
+            ],
             "subpackages": [],
             "urlSlug": "projects",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_sessions": {
             "subpackageId": "subpackage_sessions",
@@ -17753,7 +17917,8 @@
             "subpackages": [],
             "urlSlug": "sessions",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_teams": {
             "subpackageId": "subpackage_teams",
@@ -19745,7 +19910,8 @@
             "subpackages": [],
             "urlSlug": "teams",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_users": {
             "subpackageId": "subpackage_users",
@@ -21443,7 +21609,8 @@
             "subpackages": [],
             "urlSlug": "users",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "hasMultipleBaseUrls": false,
@@ -21559,7 +21726,7 @@
     },
     "pages": {
       "docs/pages/overview.mdx": {
-        "markdown": "---\nslug: overview\nsubtitle: 'Welcome to Stack Auth, the open-source authentication platform!'\n---\n\nYou can get started in five minutes with our [setup guide](/getting-started/setup), or jump straight into the documentation.\n\n<CardGroup>\n  <Card \n    title=\"Setup & Installation\"\n    icon=\"fa-regular fa-play\" \n    href=\"/getting-started/setup\"\n  >\n    Get started with Stack in 5 minutes\n  </Card>\n  <Card \n    title=\"SDK Reference\"\n    icon=\"fa-regular fa-file-lines\" \n    href=\"/sdk\"\n  >\n    Learn how to use Stack's SDKs for Next.js\n  </Card>\n  <Card \n    title=\"REST API Reference\"\n    icon=\"fa-solid fa-code\" \n    href=\"/rest-api\"\n  >\n    Explore Stack's REST API for your backends\n  </Card>\n  <Card \n    title=\"Discord\"\n    icon=\"fa-brands fa-discord\"\n    href=\"https://discord.stack-auth.com\"\n  >\n    Join our Discord community\n  </Card>\n</CardGroup>\n\n## Why Choose Stack?\n\nAuthentication is inherently difficult. Few things are more sensitive than user data and more complex than cryptography. Not surprisingly, many online businesses struggle to get it right.\n\nThe optimal authentication solution should be secure, yet approachable. If a developer has to worry about JWTs, OAuth flows, or password hashing, then we have failed. If an authentication solution uses closed-source, unauditable code for the most critical parts of your application, then we have failed.\n\nIn truth, the authentication services industry has collectively failed. It's dominated by proprietary giants with predatory \"bait-and-switch\" pricing, providing no transparency into their codebase and delivering a subpar developer experience — because they know enterprises will pay more if setting up auth systems is painful.\n\nThat's why we built Stack. Integrating secure authentication into your app should take **5 minutes**, not 5 days.\n\nAt the core of Stack are deep integrations into frontend and backend frameworks. We offer the best developer experience with Next.js. Instead of providing mediocre support for numerous frameworks, we focused on making a few integrations excellent before adding new ones. We also offer a cross-compatible REST API as a fallback.\n\nHere's an example. To get the current user, simply call:\n\n```tsx\nexport function MyComponent() {\n  const user = useUser({ or: \"redirect\" });\n  return <div>Hi, {user.displayName}</div>;\n}\n```\n\nThat's it! Stack will either return a User object or redirect the user to the login page.\n\nYou can also add a button to change the user's name:\n\n```tsx\n<button onClick={async () => await user.update({ displayName: \"New Name\" })}>\n  Change Name\n</button>\n```\n\nThe user data will update in both the frontend and backend automatically. The updated user data will be reflected in all other components on your page as well.\n\nYou also get pages and components for the authentication flow out-of-the-box. This is the sign-in page you get without writing a single line of code:\n\n![Stack sign in page](file:25f0c839-ca18-4351-83bd-956c91a467ee)\n\nNotice, there's no branding on our components. We believe we should grow by building the best product, not by forcing our brand onto your users. This means we **rely on you to spread the word about Stack**. If you like what you're reading, please take a moment to tell one or two of your friends about us.\n\nIf you prefer a fully customized UI, you can use our low-level functions like `signInWithOAuth` or `signInWithCredential` to build your own sign-in page:\n\n```tsx\nexport default function CustomOAuthSignIn() {\n  const app = useStackApp();\n  return (\n    <div>\n      <button onClick={async () => await app.signInWithOAuth('google')}>\n        Sign In with Google\n      </button>\n    </div>\n  );\n}\n```\n\nTo manage everything efficiently, there is a powerful admin dashboard:\n\n![Stack dashboard](file:aaf8f9c5-32ce-4acb-929e-c75474122d30)\n\nBest of all, Stack is **100% open-source**. This means the client, server, dashboard, and even this documentation you're reading right now. Check out our [GitHub](https://github.com/stack-auth/stack) to open an issue or pull request.\n\nThis is just a glimpse of what Stack can do. Stack also handles many other tasks like backend integration, data storage, emails, teams, permissions, and more, which you will learn about later in the documentation.\n\nIf this sounds interesting, [get started](/getting-started/setup) with our interactive setup wizard, or join [our Discord community](https://discord.stack-auth.com) to ask questions and get help from our team.\n\nWe're excited to have you on board! 🚀\n",
+        "markdown": "---\nslug: overview\nsubtitle: 'Welcome to Stack Auth, the open-source authentication platform!'\n---\n\nYou can get started in five minutes with our [setup guide](/getting-started/setup), or jump straight into the documentation.\n\n<CardGroup>\n  <Card \n    title=\"Setup & Installation\"\n    icon=\"fa-regular fa-play\" \n    href=\"/getting-started/setup\"\n  >\n    Get started with Stack in 5 minutes\n  </Card>\n  <Card \n    title=\"SDK Reference\"\n    icon=\"fa-regular fa-file-lines\" \n    href=\"/sdk\"\n  >\n    Learn how to use Stack's SDKs for Next.js\n  </Card>\n  <Card \n    title=\"REST API Reference\"\n    icon=\"fa-solid fa-code\" \n    href=\"/rest-api\"\n  >\n    Explore Stack's REST API for your backends\n  </Card>\n  <Card \n    title=\"Discord\"\n    icon=\"fa-brands fa-discord\"\n    href=\"https://discord.stack-auth.com\"\n  >\n    Join our Discord community\n  </Card>\n</CardGroup>\n\n## Why Choose Stack?\n\nAuthentication is inherently difficult. Few things are more sensitive than user data and more complex than cryptography. Not surprisingly, many online businesses struggle to get it right.\n\nThe optimal authentication solution should be secure, yet approachable. If a developer has to worry about JWTs, OAuth flows, or password hashing, then we have failed. If an authentication solution uses closed-source, unauditable code for the most critical parts of your application, then we have failed.\n\nIn truth, the authentication services industry has collectively failed. It's dominated by proprietary giants with predatory \"bait-and-switch\" pricing, providing no transparency into their codebase and delivering a subpar developer experience \u2014 because they know enterprises will pay more if setting up auth systems is painful.\n\nThat's why we built Stack. Integrating secure authentication into your app should take **5 minutes**, not 5 days.\n\nAt the core of Stack are deep integrations into frontend and backend frameworks. We offer the best developer experience with Next.js. Instead of providing mediocre support for numerous frameworks, we focused on making a few integrations excellent before adding new ones. We also offer a cross-compatible REST API as a fallback.\n\nHere's an example. To get the current user, simply call:\n\n```tsx\nexport function MyComponent() {\n  const user = useUser({ or: \"redirect\" });\n  return <div>Hi, {user.displayName}</div>;\n}\n```\n\nThat's it! Stack will either return a User object or redirect the user to the login page.\n\nYou can also add a button to change the user's name:\n\n```tsx\n<button onClick={async () => await user.update({ displayName: \"New Name\" })}>\n  Change Name\n</button>\n```\n\nThe user data will update in both the frontend and backend automatically. The updated user data will be reflected in all other components on your page as well.\n\nYou also get pages and components for the authentication flow out-of-the-box. This is the sign-in page you get without writing a single line of code:\n\n![Stack sign in page](file:25f0c839-ca18-4351-83bd-956c91a467ee)\n\nNotice, there's no branding on our components. We believe we should grow by building the best product, not by forcing our brand onto your users. This means we **rely on you to spread the word about Stack**. If you like what you're reading, please take a moment to tell one or two of your friends about us.\n\nIf you prefer a fully customized UI, you can use our low-level functions like `signInWithOAuth` or `signInWithCredential` to build your own sign-in page:\n\n```tsx\nexport default function CustomOAuthSignIn() {\n  const app = useStackApp();\n  return (\n    <div>\n      <button onClick={async () => await app.signInWithOAuth('google')}>\n        Sign In with Google\n      </button>\n    </div>\n  );\n}\n```\n\nTo manage everything efficiently, there is a powerful admin dashboard:\n\n![Stack dashboard](file:aaf8f9c5-32ce-4acb-929e-c75474122d30)\n\nBest of all, Stack is **100% open-source**. This means the client, server, dashboard, and even this documentation you're reading right now. Check out our [GitHub](https://github.com/stack-auth/stack) to open an issue or pull request.\n\nThis is just a glimpse of what Stack can do. Stack also handles many other tasks like backend integration, data storage, emails, teams, permissions, and more, which you will learn about later in the documentation.\n\nIf this sounds interesting, [get started](/getting-started/setup) with our interactive setup wizard, or join [our Discord community](https://discord.stack-auth.com) to ask questions and get help from our team.\n\nWe're excited to have you on board! \ud83d\ude80\n",
         "editThisPageUrl": "https://github.com/stack-auth/stack/blob/dev/docs/fern/docs/pages/overview.mdx"
       },
       "docs/pages/faq.mdx": {
@@ -21611,7 +21778,7 @@
         "editThisPageUrl": "https://github.com/stack-auth/stack/blob/dev/docs/fern/docs/pages/concepts/permissions.mdx"
       },
       "docs/pages/concepts/webhooks.mdx": {
-        "markdown": "---\nslug: concepts/webhooks\nsubtitle: Syncing team & user data with your backend\n---\n\nWebhooks are a powerful way to keep your backend in sync with Stack. They allow you to receive real-time updates when events occur in your Stack project, such as when a user or team is created, updated, or deleted.\n\n## Setting up webhooks\n\nIn the Stack dashboard, you can create a webhook endpoint in the \"Webhooks\" section. After creating this endpoint with your server URL, you will start receiving POST requests with a JSON payload at that endpoint. The event payload will look something like this:\n\n```json\n{\n  \"type\": \"team.created\",\n  \"data\": {\n    \"id\": \"2209422a-eef7-4668-967d-be79409972c5\",\n    \"display_name\": \"My Team\",\n    ...\n  }\n}\n```\n\n## Testing webhooks locally\n\nYou can use services like [Svix Playground](https://www.svix.com/play/) or [Webhook.site](https://webhook.site/) to test the receiving of webhooks or relay them to your local development environment.\n\n## Verifying webhooks\n\nTo ensure the webhook is coming from Stack (and not from a malicious actor) and is not prone to replay attacks, you should verify the request. \n\nStack signs the webhook payload with a secret key that you can find in the endpoint details on the dashboard. You can verify the signature using the Svix client library. Check out the [Svix documentation](https://docs.svix.com/receiving/verifying-payloads/how) for instructions on how to verify the signature in JavaScript, Python, Ruby, and other languages. Here is an quick example in JavaScript:\n\n```jsx\nimport { Webhook } from \"svix\";\n\nconst secret = \"<from the dashboard>\";\nconst headers = {\n  \"svix-id\": \"<from the webhook request headers>\",\n  \"svix-timestamp\": \"<from the webhook request headers>\",\n  \"svix-signature\": \"<from the webhook request headers>\",\n};\nconst payload = \"<the webhook request body>\";\n\nconst wh = new Webhook(secret);\n// Throws on error, returns the verified content on success\nconst payload = wh.verify(payload, headers);\n```\n\nIf you do not want to install the Svix client library or are using a language that is not supported, you can [verify the signature manually](https://docs.svix.com/receiving/verifying-payloads/how-manual).\n\n## Event types\n\nPlease refer to the webhook endpoint API reference for more details on the available event types and their payload structures.\n\n- [user.created](/rest-api/webhooks/users/user-created)\n- [user.updated](/rest-api/webhooks/users/user-updated)\n- [user.deleted](/rest-api/webhooks/users/user-deleted)\n- [team.created](/rest-api/webhooks/teams/team-created)\n- [team.updated](/rest-api/webhooks/teams/team-updated)\n- [team.deleted](/rest-api/webhooks/teams/team-deleted)\n\n## Examples\n\nSome members of the community have shared their webhook implementations. For example, [here is an example by Clark Gredoña](https://gist.github.com/clarkg/56ffad44949826ae3efe0a431b6021c4) that validates the Webhook schema and update a database user.\n",
+        "markdown": "---\nslug: concepts/webhooks\nsubtitle: Syncing team & user data with your backend\n---\n\nWebhooks are a powerful way to keep your backend in sync with Stack. They allow you to receive real-time updates when events occur in your Stack project, such as when a user or team is created, updated, or deleted.\n\n## Setting up webhooks\n\nIn the Stack dashboard, you can create a webhook endpoint in the \"Webhooks\" section. After creating this endpoint with your server URL, you will start receiving POST requests with a JSON payload at that endpoint. The event payload will look something like this:\n\n```json\n{\n  \"type\": \"team.created\",\n  \"data\": {\n    \"id\": \"2209422a-eef7-4668-967d-be79409972c5\",\n    \"display_name\": \"My Team\",\n    ...\n  }\n}\n```\n\n## Testing webhooks locally\n\nYou can use services like [Svix Playground](https://www.svix.com/play/) or [Webhook.site](https://webhook.site/) to test the receiving of webhooks or relay them to your local development environment.\n\n## Verifying webhooks\n\nTo ensure the webhook is coming from Stack (and not from a malicious actor) and is not prone to replay attacks, you should verify the request. \n\nStack signs the webhook payload with a secret key that you can find in the endpoint details on the dashboard. You can verify the signature using the Svix client library. Check out the [Svix documentation](https://docs.svix.com/receiving/verifying-payloads/how) for instructions on how to verify the signature in JavaScript, Python, Ruby, and other languages. Here is an quick example in JavaScript:\n\n```jsx\nimport { Webhook } from \"svix\";\n\nconst secret = \"<from the dashboard>\";\nconst headers = {\n  \"svix-id\": \"<from the webhook request headers>\",\n  \"svix-timestamp\": \"<from the webhook request headers>\",\n  \"svix-signature\": \"<from the webhook request headers>\",\n};\nconst payload = \"<the webhook request body>\";\n\nconst wh = new Webhook(secret);\n// Throws on error, returns the verified content on success\nconst payload = wh.verify(payload, headers);\n```\n\nIf you do not want to install the Svix client library or are using a language that is not supported, you can [verify the signature manually](https://docs.svix.com/receiving/verifying-payloads/how-manual).\n\n## Event types\n\nPlease refer to the webhook endpoint API reference for more details on the available event types and their payload structures.\n\n- [user.created](/rest-api/webhooks/users/user-created)\n- [user.updated](/rest-api/webhooks/users/user-updated)\n- [user.deleted](/rest-api/webhooks/users/user-deleted)\n- [team.created](/rest-api/webhooks/teams/team-created)\n- [team.updated](/rest-api/webhooks/teams/team-updated)\n- [team.deleted](/rest-api/webhooks/teams/team-deleted)\n\n## Examples\n\nSome members of the community have shared their webhook implementations. For example, [here is an example by Clark Gredo\u00f1a](https://gist.github.com/clarkg/56ffad44949826ae3efe0a431b6021c4) that validates the Webhook schema and update a database user.\n",
         "editThisPageUrl": "https://github.com/stack-auth/stack/blob/dev/docs/fern/docs/pages/concepts/webhooks.mdx"
       },
       "docs/pages/concepts/backend-integration.mdx": {
@@ -21647,7 +21814,7 @@
         "editThisPageUrl": "https://github.com/stack-auth/stack/blob/dev/docs/fern/docs/pages/others/supabase.mdx"
       },
       "docs/pages/others/self-host.mdx": {
-        "markdown": "---\nslug: others/self-host\nsubtitle: Self-host Stack Auth on your own server\n---\n\nStack Auth is fully open-source and can be self-hosted on your own infrastructure. This guide will introduce each component of the project and how to set them up.\n\n<Note>\nIf you are unsure whether you should self-host, here are some things to consider:\n\n- **Complexity**: Stack Auth is a complex project with many interdependent services. Self-hosting requires managing these services and ensuring they work together seamlessly.\n- **Updates**: Stack Auth is a rapidly evolving project with frequent feature and fix releases. Self-hosting requires you to manage updates and apply them timely.\n- **Reliability**: Self-hosting requires you to ensure the reliability of your infrastructure. Downtimes and outages can be costly to handle.\n- **Security**: Self-hosting requires ensuring the security of your infrastructure. A compromised service can affect your users.\n\nFor most users, we recommend using [Stack Auth's cloud hosted solution](https://app.stack-auth.com). However, if you understand the above challenges and are comfortable managing them, follow the instructions below to self-host!\n</Note>\n\n## Services\n\nOn a high level, Stack Auth is composed of the following services:\n- **API backend**: The core of Stack Auth, providing the REST API that the dashboard and your app connect to. This is what [api.stack-auth.com](https://api.stack-auth.com) provides.\n- **Dashboard**: The interface for managing users, teams, auth methods, etc. This is available at [app.stack-auth.com](https://app.stack-auth.com).\n- **Client SDK**: An SDK used to connect your app to the Stack Auth API backend, wrapping API calls and providing easy-to-use interfaces. More details [here](/getting-started/setup).\n- **Postgres database**: Used to store all user data. We use [Prisma](https://prisma.io) as the ORM and manage the database schema migrations.\n- **Svix**: Used to send webhooks. Svix is open-source and can be self-hosted, but also offers a cloud hosted solution. More on Svix [here](https://svix.com)\n- **Email server**: We use [Inbucket](https://inbucket.org) as a local email server for development and a separate SMTP server for production. Any email service supporting SMTP will work.\n\n## Local development\n\n### Setup\n\nClone the repository and check out the directory:\n\n```sh\ngit clone git@github.com:stack-auth/stack.git\ncd stack\n```\n\nPre-populated `.env` files for the setup below are available and used by default in `.env.development` in each package. Copy all the `.env.development` files to `.env.local` in the respective packages for local development.\n\nIn a terminal, start the dependencies (Postgres and Inbucket) as Docker containers:\n\n```sh\ndocker compose -f dependencies.compose.yaml up\n```\n\nThen open a new terminal:\n\n```sh\npnpm install\n\n# Build everything once\npnpm run build\n\n# Initialize the database and seed it with some data\npnpm prisma db push\npnpm prisma db seed\n\n# Run code generation (repeat this after e.g., changing the Prisma schema). This is part of the build script but faster.\npnpm run codegen\n\n# Start the dev server\npnpm run dev\n\n# In a different terminal, run tests in watch mode\npnpm run test\n```\n\nYou can now open the dashboard at [http://localhost:8101](http://localhost:8101), the API on port 8102, a demo on port 8103, docs on port 8104, Inbucket (emails) on port 8105, and Prisma Studio on port 8106.\n\nYour IDE may show errors on all `@stackframe/XYZ` imports. To fix this, restart the TypeScript language server; for example, in VSCode, you can open the command palette (Ctrl+Shift+P) and run `Developer: Reload Window` or `TypeScript: Restart TS server`.\n\n### Database migrations\n\nIf you make changes to the Prisma schema, you need to run the following command to create a migration:\n\n```sh\npnpm run prisma migrate dev\n```\n\n## Production deployment\n\n### Database, Svix, email\n\nDeploy these services with your preferred platform. Copy the URLs/API keys—you'll need them in the next step.\n\n### API backend\n\nClone the repository and check out the root directory:\n\n```sh\ngit clone git@github.com:stack-auth/stack.git\ncd stack\n```\n\nSet all the necessary environment variables (you can check out `apps/backend/.env`). Note that `STACK_BASE_URL` should be the URL of your deployed domain (e.g., https://your-backend-url.com).\n\nBuild and start the server:\n\n```sh\npnpm install\npnpm build:backend\npnpm start:backend\n```\n\n### Dashboard\n\nClone the repository (if you are running it on a separate server, or skip this step if you are using the same server as the API backend) and check out the dashboard directory:\n\n```sh\ngit clone git@github.com:stack-auth/stack.git\ncd stack\n```\n\nSet all the necessary environment variables (you can check out `apps/dashboard/.env`). Note that `NEXT_PUBLIC_STACK_URL` should be the URL of your deployed backend (e.g., https://your-backend-url.com).\n\nBuild and start the server:\n\n```sh\npnpm install\npnpm build:dashboard\npnpm start:dashboard\n```\n\n### Initialize the database\n\nYou need to initialize the database with the following command with the backend environment variables set:\n\n```sh\npnpm prisma migrate deploy\n```\n\nThe database is still empty; you need to create a project with the ID \"internal\" used by the dashboard to authenticate itself. You can do this with the following command:\n\n```sh\npnpm prisma db seed\n```\n\nNow you can go to the dashboard (e.g., https://your-dashboard-url.com) and sign up for an account.\n\nTo manage your dashboard configs with this account, manually go into the database, find the user you just created, and add `{ managedProjectIds: [\"internal\"] }` to the `serverMetadata` jsonb column.\n\nGo back to the dashboard, refresh the page, and you should see the \"Stack Dashboard\" project. We recommend disabling new user sign-ups to your internal project to avoid unauthorized account and project creations.\n\nNow, create a new project for your app and follow the [normal setup process](/getting-started/setup). Add `NEXT_PUBLIC_STACK_URL=https://your-backend-url.com` to your app's environment variables so that it connects to your API backend instead of the default Stack Auth API backend (https://api.stack-auth.com).\n",
+        "markdown": "---\nslug: others/self-host\nsubtitle: Self-host Stack Auth on your own server\n---\n\nStack Auth is fully open-source and can be self-hosted on your own infrastructure. This guide will introduce each component of the project and how to set them up.\n\n<Note>\nIf you are unsure whether you should self-host, here are some things to consider:\n\n- **Complexity**: Stack Auth is a complex project with many interdependent services. Self-hosting requires managing these services and ensuring they work together seamlessly.\n- **Updates**: Stack Auth is a rapidly evolving project with frequent feature and fix releases. Self-hosting requires you to manage updates and apply them timely.\n- **Reliability**: Self-hosting requires you to ensure the reliability of your infrastructure. Downtimes and outages can be costly to handle.\n- **Security**: Self-hosting requires ensuring the security of your infrastructure. A compromised service can affect your users.\n\nFor most users, we recommend using [Stack Auth's cloud hosted solution](https://app.stack-auth.com). However, if you understand the above challenges and are comfortable managing them, follow the instructions below to self-host!\n</Note>\n\n## Services\n\nOn a high level, Stack Auth is composed of the following services:\n- **API backend**: The core of Stack Auth, providing the REST API that the dashboard and your app connect to. This is what [api.stack-auth.com](https://api.stack-auth.com) provides.\n- **Dashboard**: The interface for managing users, teams, auth methods, etc. This is available at [app.stack-auth.com](https://app.stack-auth.com).\n- **Client SDK**: An SDK used to connect your app to the Stack Auth API backend, wrapping API calls and providing easy-to-use interfaces. More details [here](/getting-started/setup).\n- **Postgres database**: Used to store all user data. We use [Prisma](https://prisma.io) as the ORM and manage the database schema migrations.\n- **Svix**: Used to send webhooks. Svix is open-source and can be self-hosted, but also offers a cloud hosted solution. More on Svix [here](https://svix.com)\n- **Email server**: We use [Inbucket](https://inbucket.org) as a local email server for development and a separate SMTP server for production. Any email service supporting SMTP will work.\n\n## Local development\n\n### Setup\n\nClone the repository and check out the directory:\n\n```sh\ngit clone git@github.com:stack-auth/stack.git\ncd stack\n```\n\nPre-populated `.env` files for the setup below are available and used by default in `.env.development` in each package. Copy all the `.env.development` files to `.env.local` in the respective packages for local development.\n\nIn a terminal, start the dependencies (Postgres and Inbucket) as Docker containers:\n\n```sh\ndocker compose -f dependencies.compose.yaml up\n```\n\nThen open a new terminal:\n\n```sh\npnpm install\n\n# Build everything once\npnpm run build\n\n# Initialize the database and seed it with some data\npnpm prisma db push\npnpm prisma db seed\n\n# Run code generation (repeat this after e.g., changing the Prisma schema). This is part of the build script but faster.\npnpm run codegen\n\n# Start the dev server\npnpm run dev\n\n# In a different terminal, run tests in watch mode\npnpm run test\n```\n\nYou can now open the dashboard at [http://localhost:8101](http://localhost:8101), the API on port 8102, a demo on port 8103, docs on port 8104, Inbucket (emails) on port 8105, and Prisma Studio on port 8106.\n\nYour IDE may show errors on all `@stackframe/XYZ` imports. To fix this, restart the TypeScript language server; for example, in VSCode, you can open the command palette (Ctrl+Shift+P) and run `Developer: Reload Window` or `TypeScript: Restart TS server`.\n\n### Database migrations\n\nIf you make changes to the Prisma schema, you need to run the following command to create a migration:\n\n```sh\npnpm run prisma migrate dev\n```\n\n## Production deployment\n\n### Database, Svix, email\n\nDeploy these services with your preferred platform. Copy the URLs/API keys\u2014you'll need them in the next step.\n\n### API backend\n\nClone the repository and check out the root directory:\n\n```sh\ngit clone git@github.com:stack-auth/stack.git\ncd stack\n```\n\nSet all the necessary environment variables (you can check out `apps/backend/.env`). Note that `STACK_BASE_URL` should be the URL of your deployed domain (e.g., https://your-backend-url.com).\n\nBuild and start the server:\n\n```sh\npnpm install\npnpm build:backend\npnpm start:backend\n```\n\n### Dashboard\n\nClone the repository (if you are running it on a separate server, or skip this step if you are using the same server as the API backend) and check out the dashboard directory:\n\n```sh\ngit clone git@github.com:stack-auth/stack.git\ncd stack\n```\n\nSet all the necessary environment variables (you can check out `apps/dashboard/.env`). Note that `NEXT_PUBLIC_STACK_URL` should be the URL of your deployed backend (e.g., https://your-backend-url.com).\n\nBuild and start the server:\n\n```sh\npnpm install\npnpm build:dashboard\npnpm start:dashboard\n```\n\n### Initialize the database\n\nYou need to initialize the database with the following command with the backend environment variables set:\n\n```sh\npnpm prisma migrate deploy\n```\n\nThe database is still empty; you need to create a project with the ID \"internal\" used by the dashboard to authenticate itself. You can do this with the following command:\n\n```sh\npnpm prisma db seed\n```\n\nNow you can go to the dashboard (e.g., https://your-dashboard-url.com) and sign up for an account.\n\nTo manage your dashboard configs with this account, manually go into the database, find the user you just created, and add `{ managedProjectIds: [\"internal\"] }` to the `serverMetadata` jsonb column.\n\nGo back to the dashboard, refresh the page, and you should see the \"Stack Dashboard\" project. We recommend disabling new user sign-ups to your internal project to avoid unauthorized account and project creations.\n\nNow, create a new project for your app and follow the [normal setup process](/getting-started/setup). Add `NEXT_PUBLIC_STACK_URL=https://your-backend-url.com` to your app's environment variables so that it connects to your API backend instead of the default Stack Auth API backend (https://api.stack-auth.com).\n",
         "editThisPageUrl": "https://github.com/stack-auth/stack/blob/dev/docs/fern/docs/pages/others/self-host.mdx"
       },
       "docs/pages/components/user-button.mdx": {

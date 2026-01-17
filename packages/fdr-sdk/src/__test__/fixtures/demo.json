@@ -55,7 +55,8 @@
               ]
             }
           ],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "Pet": {
@@ -140,7 +141,8 @@
               ]
             }
           ],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "Pet": {
@@ -378,7 +380,7 @@
       },
       "css": {
         "inline": [
-          ".container {\n  display: flex;\n  position: relative;\n}\n.left-div {\n  width: 200px;\n  height: 200px;\n  background-color: #3498db;\n  border-top-right-radius: -100px; /* Creates the curve */\n  z-index: 1;\n  position: relative;\n}\n.right-div {\n  width: 200px;\n  height: 200px;\n  background-color: #e74c3c;\n  position: relative;\n  left: -100px; /* Adjusts the position to align with the curve */\n}\n\n.left-div:after {\n  content: \"\";\n  position: absolute;\n  top: 0px;\n  right: -40px;\n  height: 40px;\n  width: 40px;\n  background: transparent;\n\n  border-bottom-left-radius: 50%;\n\n  box-shadow: 0 20px 0 0 blue;\n  transform: rotate(90deg);\n}\n\n#fern-footer:before {\n  content: \"© 2025 Catamorphic Co.\";\n  position: relative;\n  top: 0px;\n  right: 0px;\n  height: 40px;\n  width: 100%;\n  padding: 10px;\n  background: transparent;\n}\n\n.prose {\n  font-size: 14px !important;\n}\n\nh1,\nh2,\nh3,\nh4,\nh5,\nh6 {\n  font-weight: 600 !important;\n}\n\n\n#fern-footer:before {\n  color: var(--grayscale-a11);\n  content: \"© 2025 Catamorphic Co.\";\n  position: relative;\n  top: 0px;\n  right: 0px;\n  height: 40px;\n  width: 100%;\n  padding: 10px;\n  background: transparent;\n}\n\n\n.small-image-width img {\n  width: 100px;\n}\n\n.no-break {\n  white-space: nowrap;\n}\n"
+          ".container {\n  display: flex;\n  position: relative;\n}\n.left-div {\n  width: 200px;\n  height: 200px;\n  background-color: #3498db;\n  border-top-right-radius: -100px; /* Creates the curve */\n  z-index: 1;\n  position: relative;\n}\n.right-div {\n  width: 200px;\n  height: 200px;\n  background-color: #e74c3c;\n  position: relative;\n  left: -100px; /* Adjusts the position to align with the curve */\n}\n\n.left-div:after {\n  content: \"\";\n  position: absolute;\n  top: 0px;\n  right: -40px;\n  height: 40px;\n  width: 40px;\n  background: transparent;\n\n  border-bottom-left-radius: 50%;\n\n  box-shadow: 0 20px 0 0 blue;\n  transform: rotate(90deg);\n}\n\n#fern-footer:before {\n  content: \"\u00a9 2025 Catamorphic Co.\";\n  position: relative;\n  top: 0px;\n  right: 0px;\n  height: 40px;\n  width: 100%;\n  padding: 10px;\n  background: transparent;\n}\n\n.prose {\n  font-size: 14px !important;\n}\n\nh1,\nh2,\nh3,\nh4,\nh5,\nh6 {\n  font-weight: 600 !important;\n}\n\n\n#fern-footer:before {\n  color: var(--grayscale-a11);\n  content: \"\u00a9 2025 Catamorphic Co.\";\n  position: relative;\n  top: 0px;\n  right: 0px;\n  height: 40px;\n  width: 100%;\n  padding: 10px;\n  background: transparent;\n}\n\n\n.small-image-width img {\n  width: 100px;\n}\n\n.no-break {\n  white-space: nowrap;\n}\n"
         ]
       },
       "js": {

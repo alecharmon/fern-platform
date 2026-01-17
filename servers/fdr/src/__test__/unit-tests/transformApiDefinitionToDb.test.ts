@@ -16,7 +16,8 @@ it("api register", async () => {
             subpackages: [],
             types: [APIV1Write.TypeId("type_User")],
             websockets: undefined,
-            webhooks: undefined
+            webhooks: undefined,
+            graphqlOperations: undefined
         },
         types: {
             [APIV1Write.TypeId("type_User")]: {
@@ -54,7 +55,8 @@ it("api register", async () => {
             subpackages: [],
             types: ["type_User"],
             webhooks: [],
-            websockets: []
+            websockets: [],
+            graphqlOperations: []
         },
         subpackages: {},
         types: {

@@ -1,10 +1,11 @@
-import type { EndpointNode, GrpcNode, TypeId, WebhookNode, WebSocketNode } from "../navigation";
+import type { EndpointNode, GraphQlNode, GrpcNode, TypeId, WebhookNode, WebSocketNode } from "../navigation";
 import type {
     ApiDefinition,
     AuthScheme,
     AuthSchemeId,
     EndpointDefinition,
     EndpointId,
+    GraphQlOperation,
     ObjectProperty,
     TypeDefinition,
     WebhookDefinition,
@@ -284,6 +285,31 @@ export function createGrpcContext(
     return {
         node,
         grpc,
+        types: api.types
+    };
+}
+
+export type GraphqlContext = {
+    node: GraphQlNode;
+    operation: GraphQlOperation;
+    types: Record<TypeId, TypeDefinition>;
+};
+
+export function createGraphqlContext(
+    node: GraphQlNode | undefined,
+    apiDefinition: ApiDefinition | undefined
+): GraphqlContext | undefined {
+    if (!node) {
+        return undefined;
+    }
+    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
+    const operation = api?.graphqlOperations[node.graphqlOperationId];
+    if (!operation) {
+        return undefined;
+    }
+    return {
+        node,
+        operation,
         types: api.types
     };
 }

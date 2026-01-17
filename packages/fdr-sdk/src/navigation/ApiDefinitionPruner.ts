@@ -1,5 +1,6 @@
 import type { FernNavigation } from "./..";
-import type { APIV1Read } from "../client/types";
+import { ApiTypeIdVisitor as LatestApiTypeIdVisitor } from "../api-definition/typeid-visitor";
+import type { APIV1Read, FdrAPI } from "../client/types";
 import { ApiDefinitionHolder } from "./ApiDefinitionHolder";
 import { ApiTypeIdVisitor } from "./ApiTypeIdVisitor";
 
@@ -18,7 +19,6 @@ export class ApiDefinitionPruner {
             apiName: this.api.apiName,
             rootPackage,
             subpackages,
-            graphqlOperations: this.api.graphqlOperations ?? {},
             snippetsConfiguration: this.api.snippetsConfiguration,
             types,
             auth: this.api.auth,
@@ -102,6 +102,7 @@ export class ApiDefinitionPruner {
         const endpoints = this.pruneEndpoints(node, pkg.endpoints, subpackageId);
         const websockets = this.pruneWebSockets(node, pkg.websockets, subpackageId);
         const webhooks = this.pruneWebhooks(node, pkg.webhooks, subpackageId);
+        const graphqlOperations = this.pruneGraphqlOperations(node, pkg.graphqlOperations);
         const typeIds = new Set<APIV1Read.TypeId>();
         endpoints.forEach((endpoint) => {
             ApiTypeIdVisitor.visitEndpointDefinition(endpoint, (typeId) => typeIds.add(typeId));
@@ -112,12 +113,16 @@ export class ApiDefinitionPruner {
         webhooks.forEach((webhook) => {
             ApiTypeIdVisitor.visitWebhookDefinition(webhook, (typeId) => typeIds.add(typeId));
         });
+        graphqlOperations.forEach((graphqlOperation) => {
+            LatestApiTypeIdVisitor.visitGraphQlOperation(graphqlOperation, (typeId) => typeIds.add(typeId));
+        });
         const expandedTypeIds = this.expandTypeIds(typeIds);
         return {
             ...pkg,
             endpoints,
             websockets,
             webhooks,
+            graphqlOperations,
             types: Array.from(expandedTypeIds)
         };
     }
@@ -175,6 +180,22 @@ export class ApiDefinitionPruner {
         const webhookId = node.webhookId;
         const found = webhooks.find(
             (webhook) => ApiDefinitionHolder.createWebhookId(webhook, subpackageId) === webhookId
+        );
+
+        return found ? [found] : [];
+    }
+
+    private pruneGraphqlOperations(
+        node: FernNavigation.NavigationNodeApiLeaf | FernNavigation.EndpointPairNode,
+        graphqlOperations: FdrAPI.api.latest.GraphQlOperation[] | undefined
+    ): FdrAPI.api.latest.GraphQlOperation[] {
+        if (node.type !== "graphql" || graphqlOperations == null) {
+            return [];
+        }
+
+        const graphqlOperationId = node.graphqlOperationId;
+        const found = graphqlOperations.find(
+            (graphqlOperation) => ApiDefinitionHolder.createGraphQlOperationId(graphqlOperation) === graphqlOperationId
         );
 
         return found ? [found] : [];

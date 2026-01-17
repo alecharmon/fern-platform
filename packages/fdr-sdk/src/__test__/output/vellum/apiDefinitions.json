@@ -10017,6 +10017,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_deployments:DeploymentsListRequestStatus": {
         "name": "DeploymentsListRequestStatus",

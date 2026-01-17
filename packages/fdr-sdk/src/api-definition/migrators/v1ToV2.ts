@@ -58,6 +58,7 @@ export class ApiDefinitionV1ToLatest {
     private endpoints: Record<V2.EndpointId, V2.EndpointDefinition> = {};
     private websockets: Record<V2.WebSocketId, V2.WebSocketChannel> = {};
     private webhooks: Record<V2.WebhookId, V2.WebhookDefinition> = {};
+    private graphqlOperations: Record<V2.GraphQlOperationId, V2.GraphQlOperation> = {};
     private subpackages: Record<V2.SubpackageId, V2.SubpackageMetadata> = {};
     private types: Record<string, V2.TypeDefinition> = {};
     public migrate = (): V2.ApiDefinition => {
@@ -88,6 +89,13 @@ export class ApiDefinitionV1ToLatest {
                 const id = ApiDefinitionV1ToLatest.createWebhookId(webhook, subpackageId);
                 this.webhooks[id] = this.migrateWebhook(id, webhook, namespace);
             });
+            pkg.graphqlOperations?.forEach((graphqlOp) => {
+                const id = graphqlOp.id;
+                this.graphqlOperations[id] = {
+                    ...graphqlOp,
+                    namespace: graphqlOp.namespace ?? namespace
+                };
+            });
         });
 
         Object.values(this.v1.subpackages).forEach((subpackage) => {
@@ -100,7 +108,7 @@ export class ApiDefinitionV1ToLatest {
             endpoints: this.endpoints,
             websockets: this.websockets,
             webhooks: this.webhooks,
-            graphqlOperations: this.v1.graphqlOperations,
+            graphqlOperations: this.graphqlOperations,
             types: this.types,
             subpackages: this.subpackages,
             auths: this.v1.authSchemes ? this.v1.authSchemes : this.v1.auth ? { [AUTH_SCHEME_ID]: this.v1.auth } : {},

@@ -131,7 +131,11 @@
         "id": "cb72b86f-a3ee-47b4-a201-5aa358a6713b",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_detections", "subpackage_events", "subpackage_eventTypes"],
+          "subpackages": [
+            "subpackage_detections",
+            "subpackage_events",
+            "subpackage_eventTypes"
+          ],
           "types": [
             "type_:ListEventTypesResponse",
             "type_:EventTypeObject",
@@ -152,7 +156,8 @@
             "type_:ErrorSchema"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_:ListEventTypesResponse": {
@@ -883,7 +888,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-detection",
-                "migratedFromUrlSlugs": ["get-a-detection-by-id"],
+                "migratedFromUrlSlugs": [
+                  "get-a-detection-by-id"
+                ],
                 "method": "GET",
                 "id": "getDetection",
                 "name": "Get a detection by ID",
@@ -1150,7 +1157,8 @@
             "description": "Given entities, returns Tags whether the entity violates your platform's policies",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Detections"
+            "displayName": "Detections",
+            "graphqlOperations": []
           },
           "subpackage_events": {
             "subpackageId": "subpackage_events",
@@ -1165,7 +1173,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-event-sync",
-                "migratedFromUrlSlugs": ["create-an-event-synchronously"],
+                "migratedFromUrlSlugs": [
+                  "create-an-event-synchronously"
+                ],
                 "method": "POST",
                 "id": "createEventSync",
                 "name": "Create an Event synchronously",
@@ -1571,7 +1581,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-event-async",
-                "migratedFromUrlSlugs": ["create-an-event-asynchronously"],
+                "migratedFromUrlSlugs": [
+                  "create-an-event-asynchronously"
+                ],
                 "method": "POST",
                 "id": "createEventAsync",
                 "name": "Create an Event asynchronously",
@@ -1953,7 +1965,8 @@
             "description": "Events are the primary way that data is sent to Intrinsic",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Events"
+            "displayName": "Events",
+            "graphqlOperations": []
           },
           "subpackage_eventTypes": {
             "subpackageId": "subpackage_eventTypes",
@@ -1968,7 +1981,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-event-types",
-                "migratedFromUrlSlugs": ["list-all-event-types"],
+                "migratedFromUrlSlugs": [
+                  "list-all-event-types"
+                ],
                 "method": "GET",
                 "id": "getEventTypes",
                 "name": "List all event types",
@@ -2164,7 +2179,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-event-type",
-                "migratedFromUrlSlugs": ["create-an-event-type"],
+                "migratedFromUrlSlugs": [
+                  "create-an-event-type"
+                ],
                 "method": "POST",
                 "id": "createEventType",
                 "name": "Create an event type",
@@ -2429,7 +2446,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "patch-event-type",
-                "migratedFromUrlSlugs": ["add-fields-to-an-event-type"],
+                "migratedFromUrlSlugs": [
+                  "add-fields-to-an-event-type"
+                ],
                 "method": "PATCH",
                 "id": "patchEventType",
                 "name": "Add fields to an event type",
@@ -2684,7 +2703,8 @@
             "description": "Configure schemas for events and how they are processed in Intrinsic",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Event Types"
+            "displayName": "Event Types",
+            "graphqlOperations": []
           }
         },
         "auth": {

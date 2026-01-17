@@ -1625,6 +1625,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_:ListEventTypesResponse": {
         "name": "ListEventTypesResponse",

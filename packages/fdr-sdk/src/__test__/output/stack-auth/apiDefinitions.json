@@ -5059,6 +5059,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_contactChannels:GetContactChannelsResponseItemsItem": {
         "name": "GetContactChannelsResponseItemsItem",
@@ -8275,6 +8276,7 @@
         ]
       }
     },
+    "graphqlOperations": {},
     "types": {
       "type_users:UserCreatedPayloadDataSelectedTeam": {
         "name": "UserCreatedPayloadDataSelectedTeam",
@@ -17212,6 +17214,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_contactChannels:GetContactChannelsResponseItemsItem": {
         "name": "GetContactChannelsResponseItemsItem",

@@ -12,7 +12,9 @@
             "title": "Introduction",
             "icon": "fa-solid house",
             "urlSlug": "introduction",
-            "fullSlug": ["introduction"],
+            "fullSlug": [
+              "introduction"
+            ],
             "hidden": false
           },
           {
@@ -21,7 +23,9 @@
             "title": "URL and Path Parameters",
             "icon": "fa-solid fa-link",
             "urlSlug": "url-and-path-parameters",
-            "fullSlug": ["url-paths"],
+            "fullSlug": [
+              "url-paths"
+            ],
             "hidden": false
           },
           {
@@ -30,7 +34,9 @@
             "title": "Authentication",
             "icon": "fa-solid fa-key",
             "urlSlug": "authentication",
-            "fullSlug": ["authenticate"],
+            "fullSlug": [
+              "authenticate"
+            ],
             "hidden": false
           },
           {
@@ -39,7 +45,9 @@
             "title": "Errors",
             "icon": "fa-solid fa-bug",
             "urlSlug": "errors",
-            "fullSlug": ["errors"],
+            "fullSlug": [
+              "errors"
+            ],
             "hidden": false
           },
           {
@@ -56,7 +64,9 @@
             "title": "Crane",
             "icon": "fa-brands fa-docker",
             "urlSlug": "crane",
-            "fullSlug": ["crane"],
+            "fullSlug": [
+              "crane"
+            ],
             "hidden": true
           },
           {
@@ -747,7 +757,9 @@
               ],
               "pointsTo": "api-reference/system-services",
               "playground": {
-                "environments": ["Production"]
+                "environments": [
+                  "Production"
+                ]
               }
             }
           }
@@ -823,7 +835,7 @@
         "files": []
       },
       "announcement": {
-        "text": "🚀 The site is under construction currently ... We are going live during the next days! 🚀"
+        "text": "\ud83d\ude80 The site is under construction currently ... We are going live during the next days! \ud83d\ude80"
       }
     },
     "apis": {
@@ -840,7 +852,8 @@
           ],
           "types": [],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_global-api-types:ApiVersionDate": {
@@ -1957,7 +1970,9 @@
             "name": "MembershipDTO",
             "shape": {
               "type": "object",
-              "extends": ["type_memberships/types/types-composite:MembershipEntity"],
+              "extends": [
+                "type_memberships/types/types-composite:MembershipEntity"
+              ],
               "properties": [
                 {
                   "key": "members",
@@ -2011,7 +2026,9 @@
             "name": "MemberDTO",
             "shape": {
               "type": "object",
-              "extends": ["type_memberships/types/types-composite:MemberEntityResponse"],
+              "extends": [
+                "type_memberships/types/types-composite:MemberEntityResponse"
+              ],
               "properties": [
                 {
                   "key": "memberships",
@@ -2065,7 +2082,9 @@
             "name": "MemberCardDTOResponse",
             "shape": {
               "type": "object",
-              "extends": ["type_memberships/types/types-composite:MemberCardEntity"],
+              "extends": [
+                "type_memberships/types/types-composite:MemberCardEntity"
+              ],
               "properties": [
                 {
                   "key": "member",
@@ -2089,7 +2108,9 @@
             "name": "MemberWithCardDTORequest",
             "shape": {
               "type": "object",
-              "extends": ["type_memberships/types/types-composite:MemberEntityRequest"],
+              "extends": [
+                "type_memberships/types/types-composite:MemberEntityRequest"
+              ],
               "properties": [
                 {
                   "key": "cards",
@@ -2112,7 +2133,9 @@
             "name": "MemberWithCardDTOResponse",
             "shape": {
               "type": "object",
-              "extends": ["type_memberships/types/types-composite:MemberEntityResponse"],
+              "extends": [
+                "type_memberships/types/types-composite:MemberEntityResponse"
+              ],
               "properties": [
                 {
                   "key": "cards",
@@ -2132,7 +2155,9 @@
             "name": "MembershipToCardDTO",
             "shape": {
               "type": "object",
-              "extends": ["type_memberships/types/types-composite:MembershipEntity"],
+              "extends": [
+                "type_memberships/types/types-composite:MembershipEntity"
+              ],
               "properties": [
                 {
                   "key": "cards",
@@ -2384,7 +2409,9 @@
             "name": "MemberEntityResponse",
             "shape": {
               "type": "object",
-              "extends": ["type_memberships/types/types-composite:MemberEntityRequest"],
+              "extends": [
+                "type_memberships/types/types-composite:MemberEntityRequest"
+              ],
               "properties": [
                 {
                   "key": "memberId",
@@ -2466,7 +2493,9 @@
             "name": "MembershipLifecycleDTO",
             "shape": {
               "type": "object",
-              "extends": ["type_memberships/types/types-composite:MembershipEntity"],
+              "extends": [
+                "type_memberships/types/types-composite:MembershipEntity"
+              ],
               "properties": [
                 {
                   "key": "entries",
@@ -3881,7 +3910,9 @@
             "name": "AdmissionCapacity",
             "shape": {
               "type": "object",
-              "extends": ["type_ticketing/types-composite:AdmissionBase"],
+              "extends": [
+                "type_ticketing/types-composite:AdmissionBase"
+              ],
               "properties": [
                 {
                   "key": "customerNumber",
@@ -4364,7 +4395,9 @@
             "name": "AdmissionCatalog",
             "shape": {
               "type": "object",
-              "extends": ["type_ticketing/types-composite:AdmissionBase"],
+              "extends": [
+                "type_ticketing/types-composite:AdmissionBase"
+              ],
               "properties": [
                 {
                   "key": "capacityControl",
@@ -4626,7 +4659,9 @@
             "name": "AdmissionDetailsFull",
             "shape": {
               "type": "object",
-              "extends": ["type_ticketing/types-composite:AdmissionDetails"],
+              "extends": [
+                "type_ticketing/types-composite:AdmissionDetails"
+              ],
               "properties": [
                 {
                   "key": "reschedulePolicy",
@@ -5178,7 +5213,9 @@
             "name": "AdmissionDetails",
             "shape": {
               "type": "object",
-              "extends": ["type_ticketing/types-composite:AdmissionBase"],
+              "extends": [
+                "type_ticketing/types-composite:AdmissionBase"
+              ],
               "properties": [
                 {
                   "key": "scheduleDetails",
@@ -6184,7 +6221,8 @@
             "subpackages": [],
             "urlSlug": "errors",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_global-api-types": {
             "subpackageId": "subpackage_global-api-types",
@@ -6199,7 +6237,8 @@
             "subpackages": [],
             "urlSlug": "global-api-types",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_memberships": {
             "subpackageId": "subpackage_memberships",
@@ -6217,7 +6256,8 @@
             ],
             "urlSlug": "memberships",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_memberships/service-card": {
             "subpackageId": "subpackage_memberships/service-card",
@@ -6653,7 +6693,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-card-id",
-                "migratedFromUrlSlugs": ["get-using-id"],
+                "migratedFromUrlSlugs": [
+                  "get-using-id"
+                ],
                 "method": "GET",
                 "id": "getCardId",
                 "originalEndpointId": "endpoint_memberships/service-card.getCardId",
@@ -6866,7 +6908,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-card-number",
-                "migratedFromUrlSlugs": ["get-using-number"],
+                "migratedFromUrlSlugs": [
+                  "get-using-number"
+                ],
                 "method": "GET",
                 "id": "getCardNumber",
                 "originalEndpointId": "endpoint_memberships/service-card.getCardNumber",
@@ -7421,7 +7465,8 @@
             "urlSlug": "service-card",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Card"
+            "displayName": "Card",
+            "graphqlOperations": []
           },
           "subpackage_memberships/service-catalog": {
             "subpackageId": "subpackage_memberships/service-catalog",
@@ -7598,12 +7643,15 @@
                 "authed": false
               }
             ],
-            "types": ["type_memberships/service-catalog:StoreCatalogResponse"],
+            "types": [
+              "type_memberships/service-catalog:StoreCatalogResponse"
+            ],
             "subpackages": [],
             "urlSlug": "service-catalog",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Catalog"
+            "displayName": "Catalog",
+            "graphqlOperations": []
           },
           "subpackage_memberships/service-lifecycle": {
             "subpackageId": "subpackage_memberships/service-lifecycle",
@@ -9476,7 +9524,8 @@
             "urlSlug": "service-lifecycle",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Lifecycle"
+            "displayName": "Lifecycle",
+            "graphqlOperations": []
           },
           "subpackage_memberships/service-member": {
             "subpackageId": "subpackage_memberships/service-member",
@@ -9781,7 +9830,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-member-id",
-                "migratedFromUrlSlugs": ["get-using-id"],
+                "migratedFromUrlSlugs": [
+                  "get-using-id"
+                ],
                 "method": "GET",
                 "id": "getMemberId",
                 "originalEndpointId": "endpoint_memberships/service-member.getMemberId",
@@ -10010,7 +10061,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-member-number",
-                "migratedFromUrlSlugs": ["get-using-number"],
+                "migratedFromUrlSlugs": [
+                  "get-using-number"
+                ],
                 "method": "GET",
                 "id": "getMemberNumber",
                 "originalEndpointId": "endpoint_memberships/service-member.getMemberNumber",
@@ -11117,7 +11170,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "Create or update the image associated with a member. Use this endpoint to upload a new photo or update an existing one linked to the member’s profile.",
+                "description": "Create or update the image associated with a member. Use this endpoint to upload a new photo or update an existing one linked to the member\u2019s profile.",
                 "authed": false
               },
               {
@@ -11442,7 +11495,8 @@
             "urlSlug": "service-member",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Lifecycle"
+            "displayName": "Lifecycle",
+            "graphqlOperations": []
           },
           "subpackage_memberships/service-membership": {
             "subpackageId": "subpackage_memberships/service-membership",
@@ -11628,7 +11682,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-membership-id",
-                "migratedFromUrlSlugs": ["get-using-id"],
+                "migratedFromUrlSlugs": [
+                  "get-using-id"
+                ],
                 "method": "GET",
                 "id": "getMembershipId",
                 "originalEndpointId": "endpoint_memberships/service-membership.getMembershipId",
@@ -11783,7 +11839,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "This endpoint retrieves the details of a specific membership using its unique membership ID. It’s useful for checking the status, validity, and other details of an existing membership.",
+                "description": "This endpoint retrieves the details of a specific membership using its unique membership ID. It\u2019s useful for checking the status, validity, and other details of an existing membership.",
                 "authed": false
               },
               {
@@ -11795,7 +11851,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-membership-number",
-                "migratedFromUrlSlugs": ["get-using-number"],
+                "migratedFromUrlSlugs": [
+                  "get-using-number"
+                ],
                 "method": "GET",
                 "id": "getMembershipNumber",
                 "originalEndpointId": "endpoint_memberships/service-membership.getMembershipNumber",
@@ -12526,7 +12584,8 @@
             "urlSlug": "service-membership",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Memberships"
+            "displayName": "Memberships",
+            "graphqlOperations": []
           },
           "subpackage_memberships/service-misc": {
             "subpackageId": "subpackage_memberships/service-misc",
@@ -12542,7 +12601,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "resolve-identifier",
-                "migratedFromUrlSlugs": ["resolve-member-identifier"],
+                "migratedFromUrlSlugs": [
+                  "resolve-member-identifier"
+                ],
                 "method": "GET",
                 "id": "resolveIdentifier",
                 "originalEndpointId": "endpoint_memberships/service-misc.resolveIdentifier",
@@ -12695,12 +12756,15 @@
                 "authed": false
               }
             ],
-            "types": ["type_memberships/service-misc:ResolveMemberIdentifierResponse"],
+            "types": [
+              "type_memberships/service-misc:ResolveMemberIdentifierResponse"
+            ],
             "subpackages": [],
             "urlSlug": "service-misc",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Miscellaneous"
+            "displayName": "Miscellaneous",
+            "graphqlOperations": []
           },
           "subpackage_memberships/types": {
             "subpackageId": "subpackage_memberships/types",
@@ -12714,7 +12778,8 @@
             ],
             "urlSlug": "types",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_memberships/types/types-composite": {
             "subpackageId": "subpackage_memberships/types/types-composite",
@@ -12742,7 +12807,8 @@
             "subpackages": [],
             "urlSlug": "types-composite",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_memberships/types/types-simple": {
             "subpackageId": "subpackage_memberships/types/types-simple",
@@ -12831,17 +12897,22 @@
             "subpackages": [],
             "urlSlug": "types-simple",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_systemservices": {
             "subpackageId": "subpackage_systemservices",
             "name": "systemservices",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_systemservices/companies", "subpackage_systemservices/helloworld"],
+            "subpackages": [
+              "subpackage_systemservices/companies",
+              "subpackage_systemservices/helloworld"
+            ],
             "urlSlug": "systemservices",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_systemservices/companies": {
             "subpackageId": "subpackage_systemservices/companies",
@@ -12857,7 +12928,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-companies",
-                "migratedFromUrlSlugs": ["get-all-companies"],
+                "migratedFromUrlSlugs": [
+                  "get-all-companies"
+                ],
                 "method": "GET",
                 "id": "getCompanies",
                 "originalEndpointId": "endpoint_systemservices/companies.getCompanies",
@@ -12978,11 +13051,15 @@
                 "authed": true
               }
             ],
-            "types": ["type_systemservices/companies:CompanyResponse", "type_systemservices/companies:Companies"],
+            "types": [
+              "type_systemservices/companies:CompanyResponse",
+              "type_systemservices/companies:Companies"
+            ],
             "subpackages": [],
             "urlSlug": "companies",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_systemservices/helloworld": {
             "subpackageId": "subpackage_systemservices/helloworld",
@@ -12998,7 +13075,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-hello-world",
-                "migratedFromUrlSlugs": ["hello-world"],
+                "migratedFromUrlSlugs": [
+                  "hello-world"
+                ],
                 "method": "GET",
                 "id": "getHelloWorld",
                 "originalEndpointId": "endpoint_systemservices/helloworld.getHelloWorld",
@@ -13109,11 +13188,14 @@
                 "authed": true
               }
             ],
-            "types": ["type_systemservices/helloworld:HelloWorld"],
+            "types": [
+              "type_systemservices/helloworld:HelloWorld"
+            ],
             "subpackages": [],
             "urlSlug": "helloworld",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_ticketing": {
             "subpackageId": "subpackage_ticketing",
@@ -13131,7 +13213,8 @@
             ],
             "urlSlug": "ticketing",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_ticketing/service-capacity": {
             "subpackageId": "subpackage_ticketing/service-capacity",
@@ -13484,7 +13567,8 @@
             "description": "I am testing new feature...",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Capacity"
+            "displayName": "Capacity",
+            "graphqlOperations": []
           },
           "subpackage_ticketing/service-catalog": {
             "subpackageId": "subpackage_ticketing/service-catalog",
@@ -13731,7 +13815,8 @@
             "urlSlug": "service-catalog",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Catalog"
+            "displayName": "Catalog",
+            "graphqlOperations": []
           },
           "subpackage_ticketing/service-reservations": {
             "subpackageId": "subpackage_ticketing/service-reservations",
@@ -14710,7 +14795,10 @@
                           "itemNumber": "31001",
                           "quantity": 2,
                           "ticket": {
-                            "ticketNumbers": ["TICKET123", "TICKET124"],
+                            "ticketNumbers": [
+                              "TICKET123",
+                              "TICKET124"
+                            ],
                             "validFrom": "2024-10-15T00:00:00Z",
                             "validUntil": "2024-10-15T23:59:59Z",
                             "pinCode": "12-34",
@@ -14771,7 +14859,10 @@
                             "itemNumber": "31001",
                             "quantity": 2,
                             "ticket": {
-                              "ticketNumbers": ["TICKET123", "TICKET124"],
+                              "ticketNumbers": [
+                                "TICKET123",
+                                "TICKET124"
+                              ],
                               "validFrom": "2024-10-15T00:00:00Z",
                               "validUntil": "2024-10-15T23:59:59Z",
                               "pinCode": "12-34",
@@ -15065,7 +15156,10 @@
                           "itemNumber": "31001",
                           "quantity": 2,
                           "ticket": {
-                            "ticketNumbers": ["TICKET123", "TICKET124"],
+                            "ticketNumbers": [
+                              "TICKET123",
+                              "TICKET124"
+                            ],
                             "validFrom": "2024-10-15T00:00:00Z",
                             "validUntil": "2024-10-15T23:59:59Z",
                             "pinCode": "12-34",
@@ -15119,7 +15213,10 @@
                             "itemNumber": "31001",
                             "quantity": 2,
                             "ticket": {
-                              "ticketNumbers": ["TICKET123", "TICKET124"],
+                              "ticketNumbers": [
+                                "TICKET123",
+                                "TICKET124"
+                              ],
                               "validFrom": "2024-10-15T00:00:00Z",
                               "validUntil": "2024-10-15T23:59:59Z",
                               "pinCode": "12-34",
@@ -15416,7 +15513,8 @@
             "urlSlug": "service-reservations",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Reservations"
+            "displayName": "Reservations",
+            "graphqlOperations": []
           },
           "subpackage_ticketing/service-ticket": {
             "subpackageId": "subpackage_ticketing/service-ticket",
@@ -16752,7 +16850,8 @@
             "urlSlug": "service-ticket",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Tickets"
+            "displayName": "Tickets",
+            "graphqlOperations": []
           },
           "subpackage_ticketing/types-composite": {
             "subpackageId": "subpackage_ticketing/types-composite",
@@ -16770,7 +16869,8 @@
             "subpackages": [],
             "urlSlug": "types-composite",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_ticketing/types-errors": {
             "subpackageId": "subpackage_ticketing/types-errors",
@@ -16785,7 +16885,8 @@
             "subpackages": [],
             "urlSlug": "types-errors",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_ticketing/types-simple": {
             "subpackageId": "subpackage_ticketing/types-simple",
@@ -16845,7 +16946,8 @@
             "subpackages": [],
             "urlSlug": "types-simple",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -16936,7 +17038,7 @@
         "markdown": "---\ntitle: Introduction\n---\n\r\nexport const GetVerbOld = () => (\r\n  <span style={{marginRight: '0.5rem', padding: '0.25rem 0.8rem',borderRadius: '0.25rem', backgroundColor: '#49cc90'}}>GET</span>\r\n);\r\nexport const PostVerbOld = ({children}) => (\r\n  <span style={{marginRight: '0.5rem', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', backgroundColor: '#61affe'}}>{children}</span>\r\n);\r\nexport const PutVerbOld = ({children}) => (\r\n  <span style={{marginRight: '0.5rem', padding: '0.25rem 0.8rem',borderRadius: '0.25rem', backgroundColor: '#fca130'}}>{children}</span>\r\n);\r\n\r\n\r\nexport const GetVerb = () => (\r\n    <span class=\"fern-sidebar-icon\"><span class=\"fern-tag small green-solid uppercase w-10 font-bold\">GET</span></span>\r\n);\r\nexport const PostVerb = () => (\r\n    <span class=\"fern-sidebar-icon\"><span class=\"fern-tag small bg-blue-a10 text-blue-1 dark:text-blue-12 uppercase w-10 font-bold\">POST</span></span>\r\n);\r\nexport const PutVerb = () => (\r\n    <span class=\"fern-sidebar-icon\"><span class=\"fern-tag small amber-solid uppercase w-10 font-bold\">PUT</span></span>\r\n);\r\n\r\n<Aside>\r\n| Endpoints||\r\n| :-| :---------------|\r\n|<PostVerb/>|[/ticketing/reservation](/api-reference/ticketing/service-reservations/create-reservation) |\r\n|<PutVerb/>|[ticketing/reservation/:token](/api-reference/ticketing/service-reservations/update-reservation)|\r\n|<PostVerb/>|[ticketing/reservation/:token/cancel](/api-reference/ticketing/service-reservations/cancel-reservation)|\r\n|<PostVerb/>|[ticketing/reservation/:token/pre-confirm](/api-reference/ticketing/service-reservations/pre-confirm-reservation)|\r\n|<PostVerb/>|[ticketing/reservation/:token/confirm](/api-reference/ticketing/service-reservations/confirm-reservation)|\r\n|<GetVerb/>|[ticketing/reservation/:token](/api-reference/ticketing/service-reservations/get-reservation)|\r\n|<GetVerb/>|[ticketing/reservation/:token/tickets](/api-reference/ticketing/service-reservations/get-tickets)|\r\n</Aside>\r\n\r\nThe Reservation API is designed to manage the lifecycle of reservations for tickets. \r\n\r\n## Key Concepts\r\n\r\n- Reservation Token: A unique identifier assigned to each reservation. This token is used in most operations to reference a specific reservation.\r\n- Reservation States: A reservation can be in different states, such as:\r\n  * \"registered\" (initially created)\r\n  * \"confirmed\" (finalized)\r\n  * \"cancelled\"\r\n  * \"expired\"\r\n- Expiration: Reservations have a limited lifespan to prevent indefinite holds on tickets. Cancelled and Expired reservation will be purged from the system.\r\n- Item Numbers: These represent specific products or ticket types in the system.\r\n- Admission Codes and Schedule IDs: These are used to specify particular admissions and time slots for reservations.\n"
       },
       "docs\\pages\\memberships\\overview.mdx": {
-        "markdown": "---\ntitle: Introduction to Memberships\n---\n\r\nAt a high level, the membership, member, and card entities form the core building blocks of a flexible system designed to manage the relationships between individuals and the memberships they hold. Each entity has a specific role within the system, and they are interrelated in a way that accommodates a wide range of use cases, such as family memberships, guardianship, and individual access management.\r\n\r\n## Membership ##\r\nA membership represents a defined relationship between an individual or a group of individuals (members) and an organization or service. Each membership can have one or more members, and it includes important information such as the type of membership, its associated benefits, and most importantly, a validity period that defines when the membership is active. A membership may also include complex structures like family memberships where multiple individuals (e.g., parents and children) are grouped together under the same membership umbrella.\r\n\r\nThe validity of a membership is tied to time periods, which dictate when the membership is active. Time periods can be manipulated through actions like renewals (adding time after the current period), upgrades (changing the benefits while maintaining the same time frame), and extensions (terminating the current period early and starting a new one from today). These actions ensure that memberships are flexible and can adapt to different needs and life situations.\r\n\r\n## Member ##\r\nA member is an individual associated with one or more memberships. In many cases, a member will have a single membership, but they can hold multiple memberships concurrently, especially in scenarios like family memberships or guardianship relationships. For example, a parent may hold their own individual membership but also be a guardian on their child's membership, where they can manage and oversee the child's membership.\r\n\r\nThe member entity is primarily focused on the person—their personal details, contact information, and their association with one or more memberships. The ability to link members to multiple memberships allows for flexibility in managing groups or families where a person may need to oversee or participate in different memberships simultaneously.\r\n\r\n## Card ##\r\nA card is a physical or virtual representation of a member’s access to their membership. Each member can have zero or more cards, and the cards are tied to specific memberships. Cards are primarily used to authenticate the member's access to services associated with the membership, such as gaining entry to a facility, participating in an event or getting membership benefits such as discounts.\r\n\r\nA card is linked to a specific member and a specific membership, providing a bridge between the person and their ability to interact with the membership benefits. Cards can be added, replaced, or removed as needed, and in cases where a card is lost or damaged, it can be replaced with a new one while blocking the old one. Not all members may have cards (for example, in cases where physical access is not required), but the option to assign cards provides flexibility in how memberships are managed.\r\n\r\n## Time Periods and Membership Lifecycle Actions ##\r\nA membership must have a valid time period that defines when it is active. This period ensures that members are only able to use their membership benefits during specific times. Various actions can manipulate these time periods:\r\n\r\n- **Renewals:** A renewal adds additional time after the current period, ensuring the membership continues without interruption once the current period ends.\r\n\r\n- **Upgrades:** An upgrade does not alter the time period but modifies the membership’s benefits by transitioning it to a higher or lower tier. The current period is terminated, but the overall duration remains the same.\r\n\r\n- **Extensions:** An extension creates a new period starting from today, terminating the current period early and ensuring the new period is longer than the original. This action increases the overall membership duration.\r\n\r\nThese time period adjustments allow memberships to evolve over time, adapting to the changing needs of the member or the organization, while maintaining clarity over when a membership is valid and usable.\r\n\r\n"
+        "markdown": "---\ntitle: Introduction to Memberships\n---\n\r\nAt a high level, the membership, member, and card entities form the core building blocks of a flexible system designed to manage the relationships between individuals and the memberships they hold. Each entity has a specific role within the system, and they are interrelated in a way that accommodates a wide range of use cases, such as family memberships, guardianship, and individual access management.\r\n\r\n## Membership ##\r\nA membership represents a defined relationship between an individual or a group of individuals (members) and an organization or service. Each membership can have one or more members, and it includes important information such as the type of membership, its associated benefits, and most importantly, a validity period that defines when the membership is active. A membership may also include complex structures like family memberships where multiple individuals (e.g., parents and children) are grouped together under the same membership umbrella.\r\n\r\nThe validity of a membership is tied to time periods, which dictate when the membership is active. Time periods can be manipulated through actions like renewals (adding time after the current period), upgrades (changing the benefits while maintaining the same time frame), and extensions (terminating the current period early and starting a new one from today). These actions ensure that memberships are flexible and can adapt to different needs and life situations.\r\n\r\n## Member ##\r\nA member is an individual associated with one or more memberships. In many cases, a member will have a single membership, but they can hold multiple memberships concurrently, especially in scenarios like family memberships or guardianship relationships. For example, a parent may hold their own individual membership but also be a guardian on their child's membership, where they can manage and oversee the child's membership.\r\n\r\nThe member entity is primarily focused on the person\u2014their personal details, contact information, and their association with one or more memberships. The ability to link members to multiple memberships allows for flexibility in managing groups or families where a person may need to oversee or participate in different memberships simultaneously.\r\n\r\n## Card ##\r\nA card is a physical or virtual representation of a member\u2019s access to their membership. Each member can have zero or more cards, and the cards are tied to specific memberships. Cards are primarily used to authenticate the member's access to services associated with the membership, such as gaining entry to a facility, participating in an event or getting membership benefits such as discounts.\r\n\r\nA card is linked to a specific member and a specific membership, providing a bridge between the person and their ability to interact with the membership benefits. Cards can be added, replaced, or removed as needed, and in cases where a card is lost or damaged, it can be replaced with a new one while blocking the old one. Not all members may have cards (for example, in cases where physical access is not required), but the option to assign cards provides flexibility in how memberships are managed.\r\n\r\n## Time Periods and Membership Lifecycle Actions ##\r\nA membership must have a valid time period that defines when it is active. This period ensures that members are only able to use their membership benefits during specific times. Various actions can manipulate these time periods:\r\n\r\n- **Renewals:** A renewal adds additional time after the current period, ensuring the membership continues without interruption once the current period ends.\r\n\r\n- **Upgrades:** An upgrade does not alter the time period but modifies the membership\u2019s benefits by transitioning it to a higher or lower tier. The current period is terminated, but the overall duration remains the same.\r\n\r\n- **Extensions:** An extension creates a new period starting from today, terminating the current period early and ensuring the new period is longer than the original. This action increases the overall membership duration.\r\n\r\nThese time period adjustments allow memberships to evolve over time, adapting to the changing needs of the member or the organization, while maintaining clarity over when a membership is valid and usable.\r\n\r\n"
       },
       "docs\\pages\\memberships\\catalog-introduction.mdx": {
         "markdown": "---\ntitle: Membership Catalog Services\n---\n\r\nThe catalog endpoints serve as the foundation for a headless setup, offering a centralized way to access essential information about the available types of memberships. \r\n\r\nKey Concepts:\r\n\r\n    * Store Code Parameter:\r\n        The store code acts as a filter, allowing the system to tailor the available ticket information to a specific \r\n        sales channel or store front. Each store or sales channel may have its own unique set of memberships\r\n        and the store code ensures that only the relevant subset of catalog items are returned. \r\n        This is particularly useful in cases where different platforms, regions, or partners require distinct offerings.\r\n\r\n    * Localized Storefront:\r\n        The store front is typically designed to target a specific language or region. \r\n        As a result, the catalog endpoint ensures that ticket information is delivered in the appropriate language for \r\n        the store's target audience. By supporting multiple languages, the system can accommodate global users \r\n        while ensuring that the presentation and messaging are localized.\r\n\r\n    * Formatted Content Fields:\r\n        The catalog also supports two fields that can include HTML styling and formatting. \r\n        These fields provide flexibility for content presentation, allowing rich text formatting such as bold text, \r\n        lists, links, or other HTML elements. \r\n        This ensures that the ticket descriptions or other important information can be presented in an \r\n        engaging and readable way, enhancing the user experience across different devices or platforms. \r\n        It also allows ticket sellers to include more detailed or visually appealing descriptions \r\n        without requiring separate design templates for each store.\r\n"
@@ -16948,10 +17050,10 @@
         "markdown": "---\ntitle: Membership Member Services\nhide-toc: false\n---\n\r\nThe member endpoints are designed to manage the lifecycle and details of individual members within a membership. These endpoints allow for adding new members to a membership, retrieving member information by ID or number, and managing member access and status through actions like blocking or unblocking. Additionally, member details can be updated, images can be retrieved or set, and members can be searched based on various criteria. \n"
       },
       "docs\\pages\\memberships\\card-introduction.mdx": {
-        "markdown": "---\ntitle: Memberships Card Services\n---\n\r\nThe card endpoints are designed to manage the lifecycle and actions related to member cards within a membership. These endpoints enable you to add new cards, replace existing ones, and retrieve card details by ID or number. They also allow for operational actions such as registering a member’s arrival at a facility using their card or printing a physical card for use. \n"
+        "markdown": "---\ntitle: Memberships Card Services\n---\n\r\nThe card endpoints are designed to manage the lifecycle and actions related to member cards within a membership. These endpoints enable you to add new cards, replace existing ones, and retrieve card details by ID or number. They also allow for operational actions such as registering a member\u2019s arrival at a facility using their card or printing a physical card for use. \n"
       },
       "docs\\pages\\memberships\\lifecycle-introduction.mdx": {
-        "markdown": "---\ntitle: Membership Lifecycle Services\nhide-toc: false\n---\n\r\nThe lifecycle endpoints are designed to manage and track the different stages and key events in a membership's existence. These endpoints help organizations and users understand the status, changes, and important transitions in a membership’s lifecycle, providing insight into its history and future.\r\n\r\n### Membership History ### \r\nThis endpoint provides a detailed view of the membership's past, capturing important milestones like creation, renewals, upgrades, downgrades, suspensions, and cancellations. It is useful for auditing and understanding the entire journey of the membership, from initiation to the current state.\r\n\r\n### Renew ### \r\nThe renew endpoint extends the membership beyond its current expiration date, adding additional time after the current period ends. This keeps the membership alive and ensures continuity for the member without any gaps in service.\r\n\r\n### Upgrade ###\r\nThe upgrade endpoint allows for the membership to be transitioned to a higher or lower plan or tier. This changes the benefits or features associated with the membership but does not affect the overall membership duration. The focus here is on enhancing the membership while keeping the time period intact.\r\n\r\n### Extend ###\r\nThe extend endpoint is used to modify the membership's time period by immediately terminating the current period and starting a new period from today. Unlike renewals, this results in an overall membership duration that is greater than before.\n"
+        "markdown": "---\ntitle: Membership Lifecycle Services\nhide-toc: false\n---\n\r\nThe lifecycle endpoints are designed to manage and track the different stages and key events in a membership's existence. These endpoints help organizations and users understand the status, changes, and important transitions in a membership\u2019s lifecycle, providing insight into its history and future.\r\n\r\n### Membership History ### \r\nThis endpoint provides a detailed view of the membership's past, capturing important milestones like creation, renewals, upgrades, downgrades, suspensions, and cancellations. It is useful for auditing and understanding the entire journey of the membership, from initiation to the current state.\r\n\r\n### Renew ### \r\nThe renew endpoint extends the membership beyond its current expiration date, adding additional time after the current period ends. This keeps the membership alive and ensures continuity for the member without any gaps in service.\r\n\r\n### Upgrade ###\r\nThe upgrade endpoint allows for the membership to be transitioned to a higher or lower plan or tier. This changes the benefits or features associated with the membership but does not affect the overall membership duration. The focus here is on enhancing the membership while keeping the time period intact.\r\n\r\n### Extend ###\r\nThe extend endpoint is used to modify the membership's time period by immediately terminating the current period and starting a new period from today. Unlike renewals, this results in an overall membership duration that is greater than before.\n"
       },
       "docs\\pages\\memberships\\misc-introduction.mdx": {
         "markdown": "\r\nIntensionally left blank.\n"

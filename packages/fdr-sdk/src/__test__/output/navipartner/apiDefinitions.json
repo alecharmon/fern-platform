@@ -9844,6 +9844,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_global-api-types:ApiVersionDate": {
         "name": "ApiVersionDate",

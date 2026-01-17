@@ -2023,11 +2023,15 @@
           "variants": [
             {
               "fontFile": "229f260f-d946-4cdd-b56a-5b0a407851f8",
-              "weight": ["400"]
+              "weight": [
+                "400"
+              ]
             },
             {
               "fontFile": "0caedca6-fc1f-48bd-ba2a-1c79e950e3ed",
-              "weight": ["500"]
+              "weight": [
+                "500"
+              ]
             }
           ]
         }
@@ -2089,7 +2093,8 @@
           ],
           "types": [],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_accounts:AccountResponse": {
@@ -2477,7 +2482,9 @@
             "name": "Agent",
             "shape": {
               "type": "object",
-              "extends": ["type_agents:AgentConfig"],
+              "extends": [
+                "type_agents:AgentConfig"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -2525,7 +2532,9 @@
             "name": "AgentVersion",
             "shape": {
               "type": "object",
-              "extends": ["type_agents:AgentConfig"],
+              "extends": [
+                "type_agents:AgentConfig"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -3622,7 +3631,9 @@
             "name": "ConstraintVersionResource",
             "shape": {
               "type": "object",
-              "extends": ["type_apps:ConstraintResource"],
+              "extends": [
+                "type_apps:ConstraintResource"
+              ],
               "properties": [
                 {
                   "key": "version",
@@ -4765,7 +4776,9 @@
             "name": "Action",
             "shape": {
               "type": "object",
-              "extends": ["type_commons:ActionWithoutLabel"],
+              "extends": [
+                "type_commons:ActionWithoutLabel"
+              ],
               "properties": [
                 {
                   "description": "The text on the Button itself",
@@ -4784,7 +4797,9 @@
             "name": "APIAction",
             "shape": {
               "type": "object",
-              "extends": ["type_commons:Action"],
+              "extends": [
+                "type_commons:Action"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -4827,7 +4842,9 @@
             "name": "ActionUpdate",
             "shape": {
               "type": "object",
-              "extends": ["type_commons:ActionWithoutLabel"],
+              "extends": [
+                "type_commons:ActionWithoutLabel"
+              ],
               "properties": [
                 {
                   "key": "label",
@@ -4853,21 +4870,27 @@
                 {
                   "discriminantValue": "hasAllValid",
                   "additionalProperties": {
-                    "extends": ["type_commons:ActionConstraintHasAllValid"],
+                    "extends": [
+                      "type_commons:ActionConstraintHasAllValid"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "hasSelection",
                   "additionalProperties": {
-                    "extends": ["type_commons:ActionConstraintHasSelection"],
+                    "extends": [
+                      "type_commons:ActionConstraintHasSelection"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "hasData",
                   "additionalProperties": {
-                    "extends": ["type_commons:ActionConstraintHasData"],
+                    "extends": [
+                      "type_commons:ActionConstraintHasData"
+                    ],
                     "properties": []
                   }
                 }
@@ -4883,35 +4906,45 @@
                 {
                   "discriminantValue": "sheet",
                   "additionalProperties": {
-                    "extends": ["type_commons:ActionMountSheet"],
+                    "extends": [
+                      "type_commons:ActionMountSheet"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "workbook",
                   "additionalProperties": {
-                    "extends": ["type_commons:ActionMountWorkbook"],
+                    "extends": [
+                      "type_commons:ActionMountWorkbook"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "field",
                   "additionalProperties": {
-                    "extends": ["type_commons:ActionMountField"],
+                    "extends": [
+                      "type_commons:ActionMountField"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "document",
                   "additionalProperties": {
-                    "extends": ["type_commons:ActionMountDocument"],
+                    "extends": [
+                      "type_commons:ActionMountDocument"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "file",
                   "additionalProperties": {
-                    "extends": ["type_commons:ActionMountFile"],
+                    "extends": [
+                      "type_commons:ActionMountFile"
+                    ],
                     "properties": []
                   }
                 }
@@ -5715,7 +5748,9 @@
             "name": "DataRetentionPolicy",
             "shape": {
               "type": "object",
-              "extends": ["type_data-retention-policies:DataRetentionPolicyConfig"],
+              "extends": [
+                "type_data-retention-policies:DataRetentionPolicyConfig"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -5858,7 +5893,9 @@
             "name": "Document",
             "shape": {
               "type": "object",
-              "extends": ["type_documents:DocumentConfig"],
+              "extends": [
+                "type_documents:DocumentConfig"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -6368,7 +6405,9 @@
             "name": "CreateEventConfig",
             "shape": {
               "type": "object",
-              "extends": ["type_events:BaseEvent"],
+              "extends": [
+                "type_events:BaseEvent"
+              ],
               "properties": [
                 {
                   "key": "topic",
@@ -6434,371 +6473,477 @@
                 {
                   "discriminantValue": "agent:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "agent:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "agent:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "space:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "space:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "space:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "space:archived",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "space:expired",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "space:guestAdded",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "space:guestRemoved",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "document:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "document:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "document:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "workbook:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "workbook:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "workbook:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "workbook:expired",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "sheet:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "sheet:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "sheet:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "sheet:counts-updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "snapshot:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "records:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "records:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "records:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "file:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "file:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "file:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "file:expired",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "job:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "job:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "job:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "job:failed",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "job:completed",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "job:ready",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "job:scheduled",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "job:outcome-acknowledged",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "job:parts-completed",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "program:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "program:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "commit:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "commit:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "commit:completed",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "secret:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "secret:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "secret:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "layer:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "environment:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "environment:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "environment:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "action:created",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "action:updated",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "action:deleted",
                   "additionalProperties": {
-                    "extends": ["type_events:GenericEvent"],
+                    "extends": [
+                      "type_events:GenericEvent"
+                    ],
                     "properties": []
                   }
                 }
@@ -6809,7 +6954,9 @@
             "name": "GenericEvent",
             "shape": {
               "type": "object",
-              "extends": ["type_events:BaseEvent"],
+              "extends": [
+                "type_events:BaseEvent"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -7952,7 +8099,9 @@
             "name": "Guest",
             "shape": {
               "type": "object",
-              "extends": ["type_guests:GuestConfig"],
+              "extends": [
+                "type_guests:GuestConfig"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -8302,7 +8451,9 @@
             "name": "Job",
             "shape": {
               "type": "object",
-              "extends": ["type_jobs:JobConfig"],
+              "extends": [
+                "type_jobs:JobConfig"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -9456,14 +9607,18 @@
                 {
                   "discriminantValue": "resource",
                   "additionalProperties": {
-                    "extends": ["type_jobs:ResourceJobSubject"],
+                    "extends": [
+                      "type_jobs:ResourceJobSubject"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "collection",
                   "additionalProperties": {
-                    "extends": ["type_jobs:CollectionJobSubject"],
+                    "extends": [
+                      "type_jobs:CollectionJobSubject"
+                    ],
                     "properties": []
                   }
                 }
@@ -9570,7 +9725,9 @@
             "name": "JobExecutionPlanRequest",
             "shape": {
               "type": "object",
-              "extends": ["type_jobs:JobExecutionPlan"],
+              "extends": [
+                "type_jobs:JobExecutionPlan"
+              ],
               "properties": [
                 {
                   "key": "fileId",
@@ -9593,7 +9750,9 @@
             "name": "JobExecutionPlanConfigRequest",
             "shape": {
               "type": "object",
-              "extends": ["type_jobs:JobExecutionPlanConfig"],
+              "extends": [
+                "type_jobs:JobExecutionPlanConfig"
+              ],
               "properties": [
                 {
                   "key": "fileId",
@@ -9872,56 +10031,72 @@
                 {
                   "discriminantValue": "id",
                   "additionalProperties": {
-                    "extends": ["type_jobs:JobOutcomeNextId"],
+                    "extends": [
+                      "type_jobs:JobOutcomeNextId"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "url",
                   "additionalProperties": {
-                    "extends": ["type_jobs:JobOutcomeNextUrl"],
+                    "extends": [
+                      "type_jobs:JobOutcomeNextUrl"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "download",
                   "additionalProperties": {
-                    "extends": ["type_jobs:JobOutcomeNextDownload"],
+                    "extends": [
+                      "type_jobs:JobOutcomeNextDownload"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "files",
                   "additionalProperties": {
-                    "extends": ["type_jobs:JobOutcomeNextFiles"],
+                    "extends": [
+                      "type_jobs:JobOutcomeNextFiles"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "wait",
                   "additionalProperties": {
-                    "extends": ["type_jobs:JobOutcomeNextWait"],
+                    "extends": [
+                      "type_jobs:JobOutcomeNextWait"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "snapshot",
                   "additionalProperties": {
-                    "extends": ["type_jobs:JobOutcomeNextSnapshot"],
+                    "extends": [
+                      "type_jobs:JobOutcomeNextSnapshot"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "retry",
                   "additionalProperties": {
-                    "extends": ["type_jobs:JobOutcomeNextRetry"],
+                    "extends": [
+                      "type_jobs:JobOutcomeNextRetry"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "view",
                   "additionalProperties": {
-                    "extends": ["type_jobs:JobOutcomeNextView"],
+                    "extends": [
+                      "type_jobs:JobOutcomeNextView"
+                    ],
                     "properties": []
                   }
                 }
@@ -11368,7 +11543,9 @@
             "name": "MappingRule",
             "shape": {
               "type": "object",
-              "extends": ["type_mapping:MappingRuleConfig"],
+              "extends": [
+                "type_mapping:MappingRuleConfig"
+              ],
               "properties": [
                 {
                   "description": "ID of the mapping rule",
@@ -11442,7 +11619,9 @@
             "name": "MappingRuleOrConfig",
             "shape": {
               "type": "object",
-              "extends": ["type_mapping:MappingRuleConfig"],
+              "extends": [
+                "type_mapping:MappingRuleConfig"
+              ],
               "properties": [
                 {
                   "description": "ID of the mapping rule",
@@ -11591,63 +11770,81 @@
                 {
                   "discriminantValue": "string",
                   "additionalProperties": {
-                    "extends": ["type_property:StringProperty"],
+                    "extends": [
+                      "type_property:StringProperty"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "number",
                   "additionalProperties": {
-                    "extends": ["type_property:NumberProperty"],
+                    "extends": [
+                      "type_property:NumberProperty"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "boolean",
                   "additionalProperties": {
-                    "extends": ["type_property:BooleanProperty"],
+                    "extends": [
+                      "type_property:BooleanProperty"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "date",
                   "additionalProperties": {
-                    "extends": ["type_property:DateProperty"],
+                    "extends": [
+                      "type_property:DateProperty"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "enum",
                   "additionalProperties": {
-                    "extends": ["type_property:EnumProperty"],
+                    "extends": [
+                      "type_property:EnumProperty"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "reference",
                   "additionalProperties": {
-                    "extends": ["type_property:ReferenceProperty"],
+                    "extends": [
+                      "type_property:ReferenceProperty"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "reference-list",
                   "additionalProperties": {
-                    "extends": ["type_property:ReferenceListProperty"],
+                    "extends": [
+                      "type_property:ReferenceListProperty"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "string-list",
                   "additionalProperties": {
-                    "extends": ["type_property:StringListProperty"],
+                    "extends": [
+                      "type_property:StringListProperty"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "enum-list",
                   "additionalProperties": {
-                    "extends": ["type_property:EnumListProperty"],
+                    "extends": [
+                      "type_property:EnumListProperty"
+                    ],
                     "properties": []
                   }
                 }
@@ -11815,7 +12012,9 @@
             "name": "StringProperty",
             "shape": {
               "type": "object",
-              "extends": ["type_property:BaseProperty"],
+              "extends": [
+                "type_property:BaseProperty"
+              ],
               "properties": [
                 {
                   "key": "config",
@@ -11835,7 +12034,9 @@
             "name": "StringListProperty",
             "shape": {
               "type": "object",
-              "extends": ["type_property:BaseProperty"],
+              "extends": [
+                "type_property:BaseProperty"
+              ],
               "properties": []
             }
           },
@@ -11844,7 +12045,10 @@
             "name": "NumberProperty",
             "shape": {
               "type": "object",
-              "extends": ["type_property:BaseProperty", "type_property:ArrayableProperty"],
+              "extends": [
+                "type_property:BaseProperty",
+                "type_property:ArrayableProperty"
+              ],
               "properties": [
                 {
                   "key": "config",
@@ -11887,7 +12091,9 @@
             "name": "BooleanProperty",
             "shape": {
               "type": "object",
-              "extends": ["type_property:BaseProperty"],
+              "extends": [
+                "type_property:BaseProperty"
+              ],
               "properties": [
                 {
                   "key": "config",
@@ -11926,7 +12132,9 @@
             "name": "DateProperty",
             "shape": {
               "type": "object",
-              "extends": ["type_property:BaseProperty"],
+              "extends": [
+                "type_property:BaseProperty"
+              ],
               "properties": []
             }
           },
@@ -11935,7 +12143,10 @@
             "name": "EnumProperty",
             "shape": {
               "type": "object",
-              "extends": ["type_property:BaseProperty", "type_property:ArrayableProperty"],
+              "extends": [
+                "type_property:BaseProperty",
+                "type_property:ArrayableProperty"
+              ],
               "properties": [
                 {
                   "description": "Will allow multiple values and store / provide the values in an array if set. Not all field types support arrays.",
@@ -11965,7 +12176,9 @@
             "name": "EnumListProperty",
             "shape": {
               "type": "object",
-              "extends": ["type_property:BaseProperty"],
+              "extends": [
+                "type_property:BaseProperty"
+              ],
               "properties": [
                 {
                   "key": "config",
@@ -12117,7 +12330,10 @@
             "name": "ReferenceProperty",
             "shape": {
               "type": "object",
-              "extends": ["type_property:BaseProperty", "type_property:ArrayableProperty"],
+              "extends": [
+                "type_property:BaseProperty",
+                "type_property:ArrayableProperty"
+              ],
               "properties": [
                 {
                   "key": "config",
@@ -12134,7 +12350,10 @@
             "name": "ReferenceListProperty",
             "shape": {
               "type": "object",
-              "extends": ["type_property:BaseProperty", "type_property:ArrayableProperty"],
+              "extends": [
+                "type_property:BaseProperty",
+                "type_property:ArrayableProperty"
+              ],
               "properties": [
                 {
                   "key": "config",
@@ -12246,7 +12465,9 @@
                 {
                   "discriminantValue": "unique",
                   "additionalProperties": {
-                    "extends": ["type_property:UniqueConstraint"],
+                    "extends": [
+                      "type_property:UniqueConstraint"
+                    ],
                     "properties": []
                   }
                 },
@@ -12260,14 +12481,18 @@
                 {
                   "discriminantValue": "external",
                   "additionalProperties": {
-                    "extends": ["type_property:ExternalConstraint"],
+                    "extends": [
+                      "type_property:ExternalConstraint"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "stored",
                   "additionalProperties": {
-                    "extends": ["type_property:StoredConstraint"],
+                    "extends": [
+                      "type_property:StoredConstraint"
+                    ],
                     "properties": []
                   }
                 }
@@ -12514,7 +12739,9 @@
             "name": "RecordsResponseData",
             "shape": {
               "type": "object",
-              "extends": ["type_commons:SuccessData"],
+              "extends": [
+                "type_commons:SuccessData"
+              ],
               "properties": [
                 {
                   "key": "records",
@@ -12582,7 +12809,9 @@
             "name": "GetRecordsResponseData",
             "shape": {
               "type": "object",
-              "extends": ["type_commons:SuccessData"],
+              "extends": [
+                "type_commons:SuccessData"
+              ],
               "properties": [
                 {
                   "key": "records",
@@ -12865,7 +13094,9 @@
             "name": "CellValueWithLinks",
             "shape": {
               "type": "object",
-              "extends": ["type_records:CellValue"],
+              "extends": [
+                "type_records:CellValue"
+              ],
               "properties": [
                 {
                   "key": "links",
@@ -12993,7 +13224,9 @@
             "name": "Record",
             "shape": {
               "type": "object",
-              "extends": ["type_records:RecordBase"],
+              "extends": [
+                "type_records:RecordBase"
+              ],
               "properties": [
                 {
                   "key": "values",
@@ -13297,7 +13530,9 @@
             "name": "DiffRecord",
             "shape": {
               "type": "object",
-              "extends": ["type_records:RecordBase"],
+              "extends": [
+                "type_records:RecordBase"
+              ],
               "properties": [
                 {
                   "key": "values",
@@ -13345,7 +13580,9 @@
             "name": "DiffValue",
             "shape": {
               "type": "object",
-              "extends": ["type_records:CellValue"],
+              "extends": [
+                "type_records:CellValue"
+              ],
               "properties": [
                 {
                   "key": "snapshotValue",
@@ -13827,7 +14064,9 @@
             "name": "Secret",
             "shape": {
               "type": "object",
-              "extends": ["type_secrets:WriteSecret"],
+              "extends": [
+                "type_secrets:WriteSecret"
+              ],
               "properties": [
                 {
                   "description": "The ID of the secret.",
@@ -14132,7 +14371,7 @@
                   }
                 },
                 {
-                  "description": "Where you define your Sheet’s data schema.",
+                  "description": "Where you define your Sheet\u2019s data schema.",
                   "key": "fields",
                   "valueType": {
                     "type": "list",
@@ -14283,7 +14522,7 @@
                   }
                 },
                 {
-                  "description": "Where you define your Sheet’s data schema.",
+                  "description": "Where you define your Sheet\u2019s data schema.",
                   "key": "fields",
                   "valueType": {
                     "type": "optional",
@@ -14322,14 +14561,18 @@
                 {
                   "discriminantValue": "unique",
                   "additionalProperties": {
-                    "extends": ["type_sheets:CompositeUniqueConstraint"],
+                    "extends": [
+                      "type_sheets:CompositeUniqueConstraint"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "external",
                   "additionalProperties": {
-                    "extends": ["type_sheets:ExternalSheetConstraint"],
+                    "extends": [
+                      "type_sheets:ExternalSheetConstraint"
+                    ],
                     "properties": []
                   }
                 }
@@ -14592,7 +14835,10 @@
             "name": "SheetConfigOrUpdate",
             "shape": {
               "type": "object",
-              "extends": ["type_sheets:SheetConfigUpdate", "type_sheets:SheetUpdate"],
+              "extends": [
+                "type_sheets:SheetConfigUpdate",
+                "type_sheets:SheetUpdate"
+              ],
               "properties": []
             }
           },
@@ -14703,7 +14949,9 @@
             "name": "CellValueWithCounts",
             "shape": {
               "type": "object",
-              "extends": ["type_records:CellValue"],
+              "extends": [
+                "type_records:CellValue"
+              ],
               "properties": [
                 {
                   "key": "counts",
@@ -15095,7 +15343,9 @@
             "name": "Space",
             "shape": {
               "type": "object",
-              "extends": ["type_spaces:InternalSpaceConfigBase"],
+              "extends": [
+                "type_spaces:InternalSpaceConfigBase"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -15359,7 +15609,9 @@
             "name": "SpaceConfig",
             "shape": {
               "type": "object",
-              "extends": ["type_spaces:InternalSpaceConfigBase"],
+              "extends": [
+                "type_spaces:InternalSpaceConfigBase"
+              ],
               "properties": [
                 {
                   "description": "The name of the space",
@@ -15805,7 +16057,9 @@
             "name": "UserWithRoles",
             "shape": {
               "type": "object",
-              "extends": ["type_users:User"],
+              "extends": [
+                "type_users:User"
+              ],
               "properties": [
                 {
                   "key": "actorRoles",
@@ -15825,7 +16079,9 @@
             "name": "User",
             "shape": {
               "type": "object",
-              "extends": ["type_users:UserConfig"],
+              "extends": [
+                "type_users:UserConfig"
+              ],
               "properties": [
                 {
                   "key": "id",
@@ -16977,7 +17233,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-current",
-                "migratedFromUrlSlugs": ["get-the-current-account"],
+                "migratedFromUrlSlugs": [
+                  "get-the-current-account"
+                ],
                 "method": "GET",
                 "id": "getCurrent",
                 "originalEndpointId": "endpoint_accounts.getCurrent",
@@ -17074,7 +17332,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update-current",
-                "migratedFromUrlSlugs": ["update-the-current-account"],
+                "migratedFromUrlSlugs": [
+                  "update-the-current-account"
+                ],
                 "method": "PATCH",
                 "id": "updateCurrent",
                 "originalEndpointId": "endpoint_accounts.updateCurrent",
@@ -17182,11 +17442,16 @@
                 "authed": true
               }
             ],
-            "types": ["type_accounts:AccountResponse", "type_accounts:Account", "type_accounts:AccountPatch"],
+            "types": [
+              "type_accounts:AccountResponse",
+              "type_accounts:Account",
+              "type_accounts:AccountPatch"
+            ],
             "subpackages": [],
             "urlSlug": "accounts",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_actions": {
             "subpackageId": "subpackage_actions",
@@ -17201,7 +17466,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-an-action"],
+                "migratedFromUrlSlugs": [
+                  "create-an-action"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_actions.create",
@@ -17325,7 +17592,9 @@
                         ],
                         "mount": {
                           "type": "sheet",
-                          "slugs": ["string"]
+                          "slugs": [
+                            "string"
+                          ]
                         },
                         "guide": {
                           "content": "string"
@@ -17349,7 +17618,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "bulk-create",
-                "migratedFromUrlSlugs": ["create-several-actions"],
+                "migratedFromUrlSlugs": [
+                  "create-several-actions"
+                ],
                 "method": "POST",
                 "id": "bulkCreate",
                 "originalEndpointId": "endpoint_actions.bulkCreate",
@@ -17476,7 +17747,9 @@
                           ],
                           "mount": {
                             "type": "sheet",
-                            "slugs": ["string"]
+                            "slugs": [
+                              "string"
+                            ]
                           },
                           "guide": {
                             "content": "string"
@@ -17501,7 +17774,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-an-action"],
+                "migratedFromUrlSlugs": [
+                  "get-an-action"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_actions.get",
@@ -17628,7 +17903,9 @@
                         ],
                         "mount": {
                           "type": "sheet",
-                          "slugs": ["string"]
+                          "slugs": [
+                            "string"
+                          ]
                         },
                         "guide": {
                           "content": "string"
@@ -17652,7 +17929,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-an-action"],
+                "migratedFromUrlSlugs": [
+                  "update-an-action"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_actions.update",
@@ -17793,7 +18072,9 @@
                         ],
                         "mount": {
                           "type": "sheet",
-                          "slugs": ["string"]
+                          "slugs": [
+                            "string"
+                          ]
                         },
                         "guide": {
                           "content": "string"
@@ -17817,7 +18098,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-an-action"],
+                "migratedFromUrlSlugs": [
+                  "delete-an-action"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_actions.delete",
@@ -17893,11 +18176,16 @@
                 "authed": true
               }
             ],
-            "types": ["type_actions:Actions", "type_actions:ActionResponse", "type_actions:ActionsResponse"],
+            "types": [
+              "type_actions:Actions",
+              "type_actions:ActionResponse",
+              "type_actions:ActionsResponse"
+            ],
             "subpackages": [],
             "urlSlug": "actions",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_agents": {
             "subpackageId": "subpackage_agents",
@@ -17912,7 +18200,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-agents"],
+                "migratedFromUrlSlugs": [
+                  "list-agents"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_agents.list",
@@ -17967,7 +18257,9 @@
                       "data": [
                         {
                           "id": "us_ag_YOUR_ID",
-                          "topics": ["workbook:updated"],
+                          "topics": [
+                            "workbook:updated"
+                          ],
                           "compiler": "js",
                           "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }",
                           "slug": "default",
@@ -18004,7 +18296,9 @@
                         "data": [
                           {
                             "id": "us_ag_YOUR_ID",
-                            "topics": ["workbook:updated"],
+                            "topics": [
+                              "workbook:updated"
+                            ],
                             "compiler": "js",
                             "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }",
                             "slug": "default",
@@ -18030,7 +18324,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-an-agent"],
+                "migratedFromUrlSlugs": [
+                  "create-an-agent"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_agents.create",
@@ -18103,7 +18399,9 @@
                       "X-Disable-Hooks": "true"
                     },
                     "requestBody": {
-                      "topics": ["workbook:updated"],
+                      "topics": [
+                        "workbook:updated"
+                      ],
                       "compiler": "js",
                       "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }"
                     },
@@ -18111,7 +18409,9 @@
                     "responseBody": {
                       "data": {
                         "id": "us_ag_YOUR_ID",
-                        "topics": ["workbook:updated"],
+                        "topics": [
+                          "workbook:updated"
+                        ],
                         "compiler": "js",
                         "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }",
                         "slug": "default",
@@ -18144,7 +18444,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "topics": ["workbook:updated"],
+                        "topics": [
+                          "workbook:updated"
+                        ],
                         "compiler": "js",
                         "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }"
                       }
@@ -18154,7 +18456,9 @@
                       "value": {
                         "data": {
                           "id": "us_ag_YOUR_ID",
-                          "topics": ["workbook:updated"],
+                          "topics": [
+                            "workbook:updated"
+                          ],
                           "compiler": "js",
                           "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }",
                           "slug": "default",
@@ -18178,7 +18482,9 @@
                       "X-Disable-Hooks": "true"
                     },
                     "requestBody": {
-                      "topics": ["workbook:updated"],
+                      "topics": [
+                        "workbook:updated"
+                      ],
                       "compiler": "js",
                       "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }"
                     },
@@ -18214,7 +18520,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "topics": ["workbook:updated"],
+                        "topics": [
+                          "workbook:updated"
+                        ],
                         "compiler": "js",
                         "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }"
                       }
@@ -18244,7 +18552,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-an-agent"],
+                "migratedFromUrlSlugs": [
+                  "get-an-agent"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_agents.get",
@@ -18342,7 +18652,9 @@
                     "responseBody": {
                       "data": {
                         "id": "us_ag_YOUR_ID",
-                        "topics": ["workbook:updated"],
+                        "topics": [
+                          "workbook:updated"
+                        ],
                         "compiler": "js",
                         "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }",
                         "slug": "default",
@@ -18377,7 +18689,9 @@
                       "value": {
                         "data": {
                           "id": "us_ag_YOUR_ID",
-                          "topics": ["workbook:updated"],
+                          "topics": [
+                            "workbook:updated"
+                          ],
                           "compiler": "js",
                           "source": "module.exports = { routeEvent: async (...args) => { console.log(args) } }",
                           "slug": "default",
@@ -18492,7 +18806,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list-versions",
-                "migratedFromUrlSlugs": ["list-agent-versions-for-an-agent"],
+                "migratedFromUrlSlugs": [
+                  "list-agent-versions-for-an-agent"
+                ],
                 "method": "GET",
                 "id": "listVersions",
                 "originalEndpointId": "endpoint_agents.listVersions",
@@ -18587,7 +18903,9 @@
                             "createdAt": "2023-01-01T00:00:00Z",
                             "updatedAt": "2023-01-01T00:00:00Z",
                             "agent_id": "string",
-                            "topics": ["agent:created"],
+                            "topics": [
+                              "agent:created"
+                            ],
                             "compiler": "js",
                             "source": "string",
                             "sourceMap": "string",
@@ -18662,7 +18980,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "revert",
-                "migratedFromUrlSlugs": ["revert-to-a-specific-agent-version"],
+                "migratedFromUrlSlugs": [
+                  "revert-to-a-specific-agent-version"
+                ],
                 "method": "GET",
                 "id": "revert",
                 "originalEndpointId": "endpoint_agents.revert",
@@ -18772,7 +19092,9 @@
                           "createdAt": "2023-01-01T00:00:00Z",
                           "updatedAt": "2023-01-01T00:00:00Z",
                           "agent_id": "string",
-                          "topics": ["agent:created"],
+                          "topics": [
+                            "agent:created"
+                          ],
                           "compiler": "js",
                           "source": "string",
                           "sourceMap": "string",
@@ -19051,7 +19373,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "assign-agent-role",
-                "migratedFromUrlSlugs": ["assign-role-to-agent"],
+                "migratedFromUrlSlugs": [
+                  "assign-role-to-agent"
+                ],
                 "method": "POST",
                 "id": "assignAgentRole",
                 "originalEndpointId": "endpoint_agents.assignAgentRole",
@@ -19291,7 +19615,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete-agent-role",
-                "migratedFromUrlSlugs": ["remove-role-from-agent"],
+                "migratedFromUrlSlugs": [
+                  "remove-role-from-agent"
+                ],
                 "method": "DELETE",
                 "id": "deleteAgentRole",
                 "originalEndpointId": "endpoint_agents.deleteAgentRole",
@@ -19508,7 +19834,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-agent-logs",
-                "migratedFromUrlSlugs": ["get-logs-for-an-agent"],
+                "migratedFromUrlSlugs": [
+                  "get-logs-for-an-agent"
+                ],
                 "method": "GET",
                 "id": "getAgentLogs",
                 "originalEndpointId": "endpoint_agents.getAgentLogs",
@@ -19759,7 +20087,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-agent-log",
-                "migratedFromUrlSlugs": ["get-an-agent-log"],
+                "migratedFromUrlSlugs": [
+                  "get-an-agent-log"
+                ],
                 "method": "GET",
                 "id": "getAgentLog",
                 "originalEndpointId": "endpoint_agents.getAgentLog",
@@ -20002,7 +20332,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-environment-agent-logs",
-                "migratedFromUrlSlugs": ["get-all-agent-logs-in-your-environment"],
+                "migratedFromUrlSlugs": [
+                  "get-all-agent-logs-in-your-environment"
+                ],
                 "method": "GET",
                 "id": "getEnvironmentAgentLogs",
                 "originalEndpointId": "endpoint_agents.getEnvironmentAgentLogs",
@@ -20285,7 +20617,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-environment-agent-executions",
-                "migratedFromUrlSlugs": ["get-all-executions-in-your-environment"],
+                "migratedFromUrlSlugs": [
+                  "get-all-executions-in-your-environment"
+                ],
                 "method": "GET",
                 "id": "getEnvironmentAgentExecutions",
                 "originalEndpointId": "endpoint_agents.getEnvironmentAgentExecutions",
@@ -20564,7 +20898,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-an-agent"],
+                "migratedFromUrlSlugs": [
+                  "delete-an-agent"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_agents.delete",
@@ -20806,7 +21142,8 @@
             "subpackages": [],
             "urlSlug": "agents",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_apps": {
             "subpackageId": "subpackage_apps",
@@ -20821,7 +21158,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-apps"],
+                "migratedFromUrlSlugs": [
+                  "list-apps"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_apps.list",
@@ -20902,7 +21241,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-an-app"],
+                "migratedFromUrlSlugs": [
+                  "get-an-app"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_apps.get",
@@ -20975,8 +21316,13 @@
                           "foo": "bar"
                         },
                         "environmentFilters": {
-                          "type": ["PROD", "DEV"],
-                          "exclude_ids": ["us_env_123456"]
+                          "type": [
+                            "PROD",
+                            "DEV"
+                          ],
+                          "exclude_ids": [
+                            "us_env_123456"
+                          ]
                         },
                         "createdAt": "2023-10-30T16:59:45.735Z",
                         "updatedAt": "2023-10-30T16:59:45.735Z",
@@ -21019,8 +21365,13 @@
                             "foo": "bar"
                           },
                           "environmentFilters": {
-                            "type": ["PROD", "DEV"],
-                            "exclude_ids": ["us_env_123456"]
+                            "type": [
+                              "PROD",
+                              "DEV"
+                            ],
+                            "exclude_ids": [
+                              "us_env_123456"
+                            ]
                           },
                           "createdAt": "2023-10-30T16:59:45.735Z",
                           "updatedAt": "2023-10-30T16:59:45.735Z",
@@ -21044,7 +21395,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-an-app"],
+                "migratedFromUrlSlugs": [
+                  "update-an-app"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_apps.update",
@@ -21137,8 +21490,13 @@
                           "foo": "bar"
                         },
                         "environmentFilters": {
-                          "type": ["PROD", "DEV"],
-                          "exclude_ids": ["us_env_123456"]
+                          "type": [
+                            "PROD",
+                            "DEV"
+                          ],
+                          "exclude_ids": [
+                            "us_env_123456"
+                          ]
                         },
                         "createdAt": "2023-10-30T16:59:45.735Z",
                         "updatedAt": "2023-10-30T16:59:45.735Z",
@@ -21194,8 +21552,13 @@
                             "foo": "bar"
                           },
                           "environmentFilters": {
-                            "type": ["PROD", "DEV"],
-                            "exclude_ids": ["us_env_123456"]
+                            "type": [
+                              "PROD",
+                              "DEV"
+                            ],
+                            "exclude_ids": [
+                              "us_env_123456"
+                            ]
                           },
                           "createdAt": "2023-10-30T16:59:45.735Z",
                           "updatedAt": "2023-10-30T16:59:45.735Z",
@@ -21219,7 +21582,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-an-app"],
+                "migratedFromUrlSlugs": [
+                  "create-an-app"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_apps.create",
@@ -21294,8 +21659,13 @@
                           "foo": "bar"
                         },
                         "environmentFilters": {
-                          "type": ["PROD", "DEV"],
-                          "exclude_ids": ["us_env_123456"]
+                          "type": [
+                            "PROD",
+                            "DEV"
+                          ],
+                          "exclude_ids": [
+                            "us_env_123456"
+                          ]
                         },
                         "createdAt": "2023-10-30T16:59:45.735Z",
                         "updatedAt": "2023-10-30T16:59:45.735Z",
@@ -21352,8 +21722,13 @@
                             "foo": "bar"
                           },
                           "environmentFilters": {
-                            "type": ["PROD", "DEV"],
-                            "exclude_ids": ["us_env_123456"]
+                            "type": [
+                              "PROD",
+                              "DEV"
+                            ],
+                            "exclude_ids": [
+                              "us_env_123456"
+                            ]
                           },
                           "createdAt": "2023-10-30T16:59:45.735Z",
                           "updatedAt": "2023-10-30T16:59:45.735Z",
@@ -21377,7 +21752,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-an-app"],
+                "migratedFromUrlSlugs": [
+                  "delete-an-app"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_apps.delete",
@@ -22289,7 +22666,8 @@
             "subpackages": [],
             "urlSlug": "apps",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_assistant": {
             "subpackageId": "subpackage_assistant",
@@ -22304,7 +22682,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-prompts"],
+                "migratedFromUrlSlugs": [
+                  "list-prompts"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_assistant.list",
@@ -22444,7 +22824,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-prompt"],
+                "migratedFromUrlSlugs": [
+                  "get-a-prompt"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_assistant.get",
@@ -22551,7 +22933,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-prompt"],
+                "migratedFromUrlSlugs": [
+                  "update-a-prompt"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_assistant.update",
@@ -22677,7 +23061,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-prompt"],
+                "migratedFromUrlSlugs": [
+                  "create-a-prompt"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_assistant.create",
@@ -22788,7 +23174,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-prompts"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-prompts"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_assistant.delete",
@@ -22883,7 +23271,8 @@
             "subpackages": [],
             "urlSlug": "assistant",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_commits": {
             "subpackageId": "subpackage_commits",
@@ -22898,7 +23287,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-commit-version"],
+                "migratedFromUrlSlugs": [
+                  "get-a-commit-version"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_commits.get",
@@ -23121,7 +23512,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "complete",
-                "migratedFromUrlSlugs": ["complete-a-commit-version"],
+                "migratedFromUrlSlugs": [
+                  "complete-a-commit-version"
+                ],
                 "method": "POST",
                 "id": "complete",
                 "originalEndpointId": "endpoint_commits.complete",
@@ -23281,7 +23674,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "replay",
-                "migratedFromUrlSlugs": ["replay-a-commit-version"],
+                "migratedFromUrlSlugs": [
+                  "replay-a-commit-version"
+                ],
                 "method": "POST",
                 "id": "replay",
                 "originalEndpointId": "endpoint_commits.replay",
@@ -23433,11 +23828,16 @@
                 "authed": true
               }
             ],
-            "types": ["type_commits:ListCommitsResponse", "type_commits:CommitResponse", "type_commits:Commit"],
+            "types": [
+              "type_commits:ListCommitsResponse",
+              "type_commits:CommitResponse",
+              "type_commits:Commit"
+            ],
             "subpackages": [],
             "urlSlug": "commits",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_commons": {
             "subpackageId": "subpackage_commons",
@@ -23521,7 +23921,8 @@
             "subpackages": [],
             "urlSlug": "commons",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_data-retention-policies": {
             "subpackageId": "subpackage_data-retention-policies",
@@ -23536,7 +23937,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-data-retention-policies"],
+                "migratedFromUrlSlugs": [
+                  "list-data-retention-policies"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_data-retention-policies.list",
@@ -23762,7 +24165,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-data-retention-policy"],
+                "migratedFromUrlSlugs": [
+                  "create-a-data-retention-policy"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_data-retention-policies.create",
@@ -24005,7 +24410,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-data-retention-policy"],
+                "migratedFromUrlSlugs": [
+                  "get-a-data-retention-policy"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_data-retention-policies.get",
@@ -24232,7 +24639,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-data-retention-policy"],
+                "migratedFromUrlSlugs": [
+                  "update-a-data-retention-policy"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_data-retention-policies.update",
@@ -24498,7 +24907,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-data-retention-policy"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-data-retention-policy"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_data-retention-policies.delete",
@@ -24660,7 +25071,8 @@
             "subpackages": [],
             "urlSlug": "data-retention-policies",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_documents": {
             "subpackageId": "subpackage_documents",
@@ -24675,7 +25087,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-documents"],
+                "migratedFromUrlSlugs": [
+                  "list-documents"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_documents.list",
@@ -24966,7 +25380,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-document"],
+                "migratedFromUrlSlugs": [
+                  "create-a-document"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_documents.create",
@@ -25268,7 +25684,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-document"],
+                "migratedFromUrlSlugs": [
+                  "get-a-document"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_documents.get",
@@ -25536,7 +25954,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-document"],
+                "migratedFromUrlSlugs": [
+                  "update-a-document"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_documents.update",
@@ -25839,7 +26259,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-document"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-document"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_documents.delete",
@@ -26019,7 +26441,8 @@
             "subpackages": [],
             "urlSlug": "documents",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_entitlements": {
             "subpackageId": "subpackage_entitlements",
@@ -26034,7 +26457,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-entitlements"],
+                "migratedFromUrlSlugs": [
+                  "list-entitlements"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_entitlements.list",
@@ -26247,11 +26672,15 @@
                 "authed": true
               }
             ],
-            "types": ["type_entitlements:ListEntitlementsResponse", "type_entitlements:Entitlement"],
+            "types": [
+              "type_entitlements:ListEntitlementsResponse",
+              "type_entitlements:Entitlement"
+            ],
             "subpackages": [],
             "urlSlug": "entitlements",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_environments": {
             "subpackageId": "subpackage_environments",
@@ -26266,7 +26695,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-environments"],
+                "migratedFromUrlSlugs": [
+                  "list-environments"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_environments.list",
@@ -26340,10 +26771,14 @@
                           "accountId": "us_acc_YOUR_ID",
                           "name": "dev",
                           "isProd": false,
-                          "guestAuthentication": ["magic_link"],
+                          "guestAuthentication": [
+                            "magic_link"
+                          ],
                           "features": {},
                           "metadata": {},
-                          "namespaces": ["default"]
+                          "namespaces": [
+                            "default"
+                          ]
                         }
                       ]
                     },
@@ -26376,10 +26811,14 @@
                             "accountId": "us_acc_YOUR_ID",
                             "name": "dev",
                             "isProd": false,
-                            "guestAuthentication": ["magic_link"],
+                            "guestAuthentication": [
+                              "magic_link"
+                            ],
                             "features": {},
                             "metadata": {},
-                            "namespaces": ["default"]
+                            "namespaces": [
+                              "default"
+                            ]
                           }
                         ]
                       }
@@ -26399,7 +26838,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-an-environment"],
+                "migratedFromUrlSlugs": [
+                  "create-an-environment"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_environments.create",
@@ -26451,11 +26892,15 @@
                     "requestBody": {
                       "name": "dev",
                       "isProd": false,
-                      "guestAuthentication": ["magic_link"],
+                      "guestAuthentication": [
+                        "magic_link"
+                      ],
                       "metadata": {
                         "key": "value"
                       },
-                      "namespaces": ["default"]
+                      "namespaces": [
+                        "default"
+                      ]
                     },
                     "responseStatusCode": 200,
                     "responseBody": {
@@ -26464,10 +26909,14 @@
                         "accountId": "us_acc_YOUR_ID",
                         "name": "dev",
                         "isProd": false,
-                        "guestAuthentication": ["magic_link"],
+                        "guestAuthentication": [
+                          "magic_link"
+                        ],
                         "features": {},
                         "metadata": {},
-                        "namespaces": ["default"]
+                        "namespaces": [
+                          "default"
+                        ]
                       }
                     },
                     "codeExamples": {
@@ -26495,11 +26944,15 @@
                       "value": {
                         "name": "dev",
                         "isProd": false,
-                        "guestAuthentication": ["magic_link"],
+                        "guestAuthentication": [
+                          "magic_link"
+                        ],
                         "metadata": {
                           "key": "value"
                         },
-                        "namespaces": ["default"]
+                        "namespaces": [
+                          "default"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -26510,10 +26963,14 @@
                           "accountId": "us_acc_YOUR_ID",
                           "name": "dev",
                           "isProd": false,
-                          "guestAuthentication": ["magic_link"],
+                          "guestAuthentication": [
+                            "magic_link"
+                          ],
                           "features": {},
                           "metadata": {},
-                          "namespaces": ["default"]
+                          "namespaces": [
+                            "default"
+                          ]
                         }
                       }
                     },
@@ -26532,7 +26989,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-environment-event-token",
-                "migratedFromUrlSlugs": ["get-environment-subscription-credentials"],
+                "migratedFromUrlSlugs": [
+                  "get-environment-subscription-credentials"
+                ],
                 "method": "GET",
                 "id": "getEnvironmentEventToken",
                 "originalEndpointId": "endpoint_environments.getEnvironmentEventToken",
@@ -26747,7 +27206,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-an-environment"],
+                "migratedFromUrlSlugs": [
+                  "get-an-environment"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_environments.get",
@@ -26837,10 +27298,14 @@
                         "accountId": "us_acc_YOUR_ID",
                         "name": "dev",
                         "isProd": false,
-                        "guestAuthentication": ["magic_link"],
+                        "guestAuthentication": [
+                          "magic_link"
+                        ],
                         "features": {},
                         "metadata": {},
-                        "namespaces": ["default"]
+                        "namespaces": [
+                          "default"
+                        ]
                       }
                     },
                     "codeExamples": {
@@ -26871,10 +27336,14 @@
                           "accountId": "us_acc_YOUR_ID",
                           "name": "dev",
                           "isProd": false,
-                          "guestAuthentication": ["magic_link"],
+                          "guestAuthentication": [
+                            "magic_link"
+                          ],
                           "features": {},
                           "metadata": {},
-                          "namespaces": ["default"]
+                          "namespaces": [
+                            "default"
+                          ]
                         }
                       }
                     },
@@ -26979,7 +27448,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-an-environment"],
+                "migratedFromUrlSlugs": [
+                  "update-an-environment"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_environments.update",
@@ -27052,11 +27523,15 @@
                     "requestBody": {
                       "name": "dev",
                       "isProd": false,
-                      "guestAuthentication": ["magic_link"],
+                      "guestAuthentication": [
+                        "magic_link"
+                      ],
                       "metadata": {
                         "key": "value"
                       },
-                      "namespaces": ["default"]
+                      "namespaces": [
+                        "default"
+                      ]
                     },
                     "responseStatusCode": 200,
                     "responseBody": {
@@ -27064,10 +27539,14 @@
                       "accountId": "us_acc_YOUR_ID",
                       "name": "dev",
                       "isProd": false,
-                      "guestAuthentication": ["magic_link"],
+                      "guestAuthentication": [
+                        "magic_link"
+                      ],
                       "features": {},
                       "metadata": {},
-                      "namespaces": ["default"]
+                      "namespaces": [
+                        "default"
+                      ]
                     },
                     "codeExamples": {
                       "nodeAxios": "",
@@ -27094,11 +27573,15 @@
                       "value": {
                         "name": "dev",
                         "isProd": false,
-                        "guestAuthentication": ["magic_link"],
+                        "guestAuthentication": [
+                          "magic_link"
+                        ],
                         "metadata": {
                           "key": "value"
                         },
-                        "namespaces": ["default"]
+                        "namespaces": [
+                          "default"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -27108,10 +27591,14 @@
                         "accountId": "us_acc_YOUR_ID",
                         "name": "dev",
                         "isProd": false,
-                        "guestAuthentication": ["magic_link"],
+                        "guestAuthentication": [
+                          "magic_link"
+                        ],
                         "features": {},
                         "metadata": {},
-                        "namespaces": ["default"]
+                        "namespaces": [
+                          "default"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -27129,7 +27616,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-an-environment"],
+                "migratedFromUrlSlugs": [
+                  "delete-an-environment"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_environments.delete",
@@ -27294,7 +27783,8 @@
             "subpackages": [],
             "urlSlug": "environments",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_events": {
             "subpackageId": "subpackage_events",
@@ -27309,7 +27799,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-events"],
+                "migratedFromUrlSlugs": [
+                  "list-events"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_events.list",
@@ -27470,7 +27962,9 @@
                           },
                           "callbackUrl": "",
                           "dataUrl": "",
-                          "namespaces": ["workbook"],
+                          "namespaces": [
+                            "workbook"
+                          ],
                           "origin": {
                             "id": "us_wb_YOUR_ID"
                           }
@@ -27518,7 +28012,9 @@
                             },
                             "callbackUrl": "",
                             "dataUrl": "",
-                            "namespaces": ["workbook"],
+                            "namespaces": [
+                              "workbook"
+                            ],
                             "origin": {
                               "id": "us_wb_YOUR_ID"
                             }
@@ -27541,7 +28037,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-an-event"],
+                "migratedFromUrlSlugs": [
+                  "create-an-event"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_events.create",
@@ -27647,7 +28145,9 @@
                         },
                         "callbackUrl": "",
                         "dataUrl": "",
-                        "namespaces": ["workbook"],
+                        "namespaces": [
+                          "workbook"
+                        ],
                         "origin": {
                           "id": "us_wb_YOUR_ID"
                         }
@@ -27710,7 +28210,9 @@
                           },
                           "callbackUrl": "",
                           "dataUrl": "",
-                          "namespaces": ["workbook"],
+                          "namespaces": [
+                            "workbook"
+                          ],
                           "origin": {
                             "id": "us_wb_YOUR_ID"
                           }
@@ -27841,7 +28343,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-an-event"],
+                "migratedFromUrlSlugs": [
+                  "get-an-event"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_events.get",
@@ -27919,7 +28423,9 @@
                         },
                         "callbackUrl": "",
                         "dataUrl": "",
-                        "namespaces": ["workbook"],
+                        "namespaces": [
+                          "workbook"
+                        ],
                         "origin": {
                           "id": "us_wb_YOUR_ID"
                         }
@@ -27965,7 +28471,9 @@
                           },
                           "callbackUrl": "",
                           "dataUrl": "",
-                          "namespaces": ["workbook"],
+                          "namespaces": [
+                            "workbook"
+                          ],
                           "origin": {
                             "id": "us_wb_YOUR_ID"
                           }
@@ -27986,7 +28494,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "ack",
-                "migratedFromUrlSlugs": ["acknowledge-an-event"],
+                "migratedFromUrlSlugs": [
+                  "acknowledge-an-event"
+                ],
                 "method": "POST",
                 "id": "ack",
                 "originalEndpointId": "endpoint_events.ack",
@@ -28070,7 +28580,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-event-token",
-                "migratedFromUrlSlugs": ["get-subscription-credentials"],
+                "migratedFromUrlSlugs": [
+                  "get-subscription-credentials"
+                ],
                 "method": "GET",
                 "id": "getEventToken",
                 "originalEndpointId": "endpoint_events.getEventToken",
@@ -28314,7 +28826,8 @@
             "subpackages": [],
             "urlSlug": "events",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_files": {
             "subpackageId": "subpackage_files",
@@ -28329,7 +28842,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-files"],
+                "migratedFromUrlSlugs": [
+                  "list-files"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_files.list",
@@ -28503,7 +29018,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "upload",
-                "migratedFromUrlSlugs": ["upload-a-file"],
+                "migratedFromUrlSlugs": [
+                  "upload-a-file"
+                ],
                 "method": "POST",
                 "id": "upload",
                 "originalEndpointId": "endpoint_files.upload",
@@ -28737,7 +29254,9 @@
                               ],
                               "mount": {
                                 "type": "sheet",
-                                "slugs": ["string"]
+                                "slugs": [
+                                  "string"
+                                ]
                               },
                               "guide": {
                                 "content": "string"
@@ -28815,7 +29334,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-file"],
+                "migratedFromUrlSlugs": [
+                  "get-a-file"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_files.get",
@@ -29054,7 +29575,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-file"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-file"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_files.delete",
@@ -29214,7 +29737,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-file"],
+                "migratedFromUrlSlugs": [
+                  "update-a-file"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_files.update",
@@ -29540,7 +30065,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "download",
-                "migratedFromUrlSlugs": ["download-a-file"],
+                "migratedFromUrlSlugs": [
+                  "download-a-file"
+                ],
                 "method": "GET",
                 "id": "download",
                 "originalEndpointId": "endpoint_files.download",
@@ -29693,7 +30220,8 @@
             "subpackages": [],
             "urlSlug": "files",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_guests": {
             "subpackageId": "subpackage_guests",
@@ -29708,7 +30236,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-guests"],
+                "migratedFromUrlSlugs": [
+                  "list-guests"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_guests.list",
@@ -29857,7 +30387,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-guest"],
+                "migratedFromUrlSlugs": [
+                  "create-a-guest"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_guests.create",
@@ -30034,7 +30566,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-guest"],
+                "migratedFromUrlSlugs": [
+                  "get-a-guest"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_guests.get",
@@ -30174,7 +30708,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-guest"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-guest"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_guests.delete",
@@ -30282,7 +30818,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-guest"],
+                "migratedFromUrlSlugs": [
+                  "update-a-guest"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_guests.update",
@@ -30767,7 +31305,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "assign-guest-role",
-                "migratedFromUrlSlugs": ["assign-role-to-guest"],
+                "migratedFromUrlSlugs": [
+                  "assign-role-to-guest"
+                ],
                 "method": "POST",
                 "id": "assignGuestRole",
                 "originalEndpointId": "endpoint_guests.assignGuestRole",
@@ -31007,7 +31547,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete-guest-role",
-                "migratedFromUrlSlugs": ["remove-role-from-guest"],
+                "migratedFromUrlSlugs": [
+                  "remove-role-from-guest"
+                ],
                 "method": "DELETE",
                 "id": "deleteGuestRole",
                 "originalEndpointId": "endpoint_guests.deleteGuestRole",
@@ -31224,7 +31766,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "invite",
-                "migratedFromUrlSlugs": ["invite-guests"],
+                "migratedFromUrlSlugs": [
+                  "invite-guests"
+                ],
                 "method": "POST",
                 "id": "invite",
                 "originalEndpointId": "endpoint_guests.invite",
@@ -31333,7 +31877,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "Guests can be created as a named guest on the Space or there’s a global link that will let anonymous guests into the space.",
+                "description": "Guests can be created as a named guest on the Space or there\u2019s a global link that will let anonymous guests into the space.",
                 "authed": true
               }
             ],
@@ -31353,7 +31897,8 @@
             "subpackages": [],
             "urlSlug": "guests",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_jobs": {
             "subpackageId": "subpackage_jobs",
@@ -31368,7 +31913,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-jobs"],
+                "migratedFromUrlSlugs": [
+                  "list-jobs"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_jobs.list",
@@ -31629,7 +32176,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-job"],
+                "migratedFromUrlSlugs": [
+                  "create-a-job"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_jobs.create",
@@ -31790,7 +32339,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-job"],
+                "migratedFromUrlSlugs": [
+                  "get-a-job"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_jobs.get",
@@ -31947,7 +32498,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-job"],
+                "migratedFromUrlSlugs": [
+                  "update-a-job"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_jobs.update",
@@ -32127,7 +32680,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-job"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-job"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_jobs.delete",
@@ -32234,7 +32789,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "execute",
-                "migratedFromUrlSlugs": ["execute-a-job"],
+                "migratedFromUrlSlugs": [
+                  "execute-a-job"
+                ],
                 "method": "POST",
                 "id": "execute",
                 "originalEndpointId": "endpoint_jobs.execute",
@@ -32344,7 +32901,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-execution-plan",
-                "migratedFromUrlSlugs": ["get-a-job-s-execution-plan"],
+                "migratedFromUrlSlugs": [
+                  "get-a-job-s-execution-plan"
+                ],
                 "method": "GET",
                 "id": "getExecutionPlan",
                 "originalEndpointId": "endpoint_jobs.getExecutionPlan",
@@ -32446,7 +33005,11 @@
                                 "type": "string",
                                 "label": "First Name"
                               },
-                              "preview": ["John", "Suzy", "Joe"],
+                              "preview": [
+                                "John",
+                                "Suzy",
+                                "Joe"
+                              ],
                               "metadata": {
                                 "certainty": "absolute",
                                 "confidence": 1,
@@ -32463,7 +33026,11 @@
                                 "type": "string",
                                 "label": "Last Name"
                               },
-                              "preview": ["Smith", "Que", "Montana"],
+                              "preview": [
+                                "Smith",
+                                "Que",
+                                "Montana"
+                              ],
                               "metadata": {
                                 "certainty": "absolute",
                                 "confidence": 1,
@@ -32540,7 +33107,11 @@
                                   "type": "string",
                                   "label": "First Name"
                                 },
-                                "preview": ["John", "Suzy", "Joe"],
+                                "preview": [
+                                  "John",
+                                  "Suzy",
+                                  "Joe"
+                                ],
                                 "metadata": {
                                   "certainty": "absolute",
                                   "confidence": 1,
@@ -32557,7 +33128,11 @@
                                   "type": "string",
                                   "label": "Last Name"
                                 },
-                                "preview": ["Smith", "Que", "Montana"],
+                                "preview": [
+                                  "Smith",
+                                  "Que",
+                                  "Montana"
+                                ],
                                 "metadata": {
                                   "certainty": "absolute",
                                   "confidence": 1,
@@ -32586,7 +33161,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update-execution-plan",
-                "migratedFromUrlSlugs": ["replace-a-job-s-plan"],
+                "migratedFromUrlSlugs": [
+                  "replace-a-job-s-plan"
+                ],
                 "method": "PUT",
                 "id": "updateExecutionPlan",
                 "originalEndpointId": "endpoint_jobs.updateExecutionPlan",
@@ -32743,7 +33320,11 @@
                                 "type": "string",
                                 "label": "First Name"
                               },
-                              "preview": ["John", "Suzy", "Joe"],
+                              "preview": [
+                                "John",
+                                "Suzy",
+                                "Joe"
+                              ],
                               "metadata": {
                                 "certainty": "absolute",
                                 "confidence": 1,
@@ -32760,7 +33341,11 @@
                                 "type": "string",
                                 "label": "Last Name"
                               },
-                              "preview": ["Smith", "Que", "Montana"],
+                              "preview": [
+                                "Smith",
+                                "Que",
+                                "Montana"
+                              ],
                               "metadata": {
                                 "certainty": "absolute",
                                 "confidence": 1,
@@ -32885,7 +33470,11 @@
                                   "type": "string",
                                   "label": "First Name"
                                 },
-                                "preview": ["John", "Suzy", "Joe"],
+                                "preview": [
+                                  "John",
+                                  "Suzy",
+                                  "Joe"
+                                ],
                                 "metadata": {
                                   "certainty": "absolute",
                                   "confidence": 1,
@@ -32902,7 +33491,11 @@
                                   "type": "string",
                                   "label": "Last Name"
                                 },
-                                "preview": ["Smith", "Que", "Montana"],
+                                "preview": [
+                                  "Smith",
+                                  "Que",
+                                  "Montana"
+                                ],
                                 "metadata": {
                                   "certainty": "absolute",
                                   "confidence": 1,
@@ -32931,7 +33524,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update-execution-plan-fields",
-                "migratedFromUrlSlugs": ["update-a-job-s-plan"],
+                "migratedFromUrlSlugs": [
+                  "update-a-job-s-plan"
+                ],
                 "method": "PATCH",
                 "id": "updateExecutionPlanFields",
                 "originalEndpointId": "endpoint_jobs.updateExecutionPlanFields",
@@ -33034,7 +33629,9 @@
                               "searchField": "string",
                               "q": "string",
                               "sheet": "string",
-                              "exceptions": ["string"],
+                              "exceptions": [
+                                "string"
+                              ],
                               "snapshotLabel": "string"
                             },
                             "trigger": "manual",
@@ -33061,7 +33658,9 @@
                             },
                             "partExecution": "sequential",
                             "parentId": "string",
-                            "predecessorIds": ["string"],
+                            "predecessorIds": [
+                              "string"
+                            ],
                             "metadata": {
                               "string": {}
                             }
@@ -33146,7 +33745,9 @@
                                       ],
                                       "mount": {
                                         "type": "sheet",
-                                        "slugs": ["string"]
+                                        "slugs": [
+                                          "string"
+                                        ]
                                       },
                                       "guide": {
                                         "content": "string"
@@ -33157,8 +33758,12 @@
                                     }
                                   ],
                                   "metadata": {},
-                                  "treatments": ["string"],
-                                  "alternativeNames": ["string"]
+                                  "treatments": [
+                                    "string"
+                                  ],
+                                  "alternativeNames": [
+                                    "string"
+                                  ]
                                 },
                                 "destinationField": {
                                   "type": "string",
@@ -33237,7 +33842,9 @@
                                       ],
                                       "mount": {
                                         "type": "sheet",
-                                        "slugs": ["string"]
+                                        "slugs": [
+                                          "string"
+                                        ]
                                       },
                                       "guide": {
                                         "content": "string"
@@ -33248,10 +33855,16 @@
                                     }
                                   ],
                                   "metadata": {},
-                                  "treatments": ["string"],
-                                  "alternativeNames": ["string"]
+                                  "treatments": [
+                                    "string"
+                                  ],
+                                  "alternativeNames": [
+                                    "string"
+                                  ]
                                 },
-                                "preview": ["string"],
+                                "preview": [
+                                  "string"
+                                ],
                                 "enumDetails": {
                                   "mapping": [
                                     {
@@ -33259,8 +33872,12 @@
                                       "destinationValue": "string"
                                     }
                                   ],
-                                  "unusedSourceValues": ["string"],
-                                  "unusedDestinationValues": ["string"]
+                                  "unusedSourceValues": [
+                                    "string"
+                                  ],
+                                  "unusedDestinationValues": [
+                                    "string"
+                                  ]
                                 },
                                 "metadata": {
                                   "certainty": "absolute",
@@ -33348,7 +33965,9 @@
                                       ],
                                       "mount": {
                                         "type": "sheet",
-                                        "slugs": ["string"]
+                                        "slugs": [
+                                          "string"
+                                        ]
                                       },
                                       "guide": {
                                         "content": "string"
@@ -33359,10 +33978,16 @@
                                     }
                                   ],
                                   "metadata": {},
-                                  "treatments": ["string"],
-                                  "alternativeNames": ["string"]
+                                  "treatments": [
+                                    "string"
+                                  ],
+                                  "alternativeNames": [
+                                    "string"
+                                  ]
                                 },
-                                "preview": ["string"]
+                                "preview": [
+                                  "string"
+                                ]
                               }
                             ],
                             "unmappedDestinationFields": [
@@ -33444,7 +34069,9 @@
                                       ],
                                       "mount": {
                                         "type": "sheet",
-                                        "slugs": ["string"]
+                                        "slugs": [
+                                          "string"
+                                        ]
                                       },
                                       "guide": {
                                         "content": "string"
@@ -33455,10 +34082,16 @@
                                     }
                                   ],
                                   "metadata": {},
-                                  "treatments": ["string"],
-                                  "alternativeNames": ["string"]
+                                  "treatments": [
+                                    "string"
+                                  ],
+                                  "alternativeNames": [
+                                    "string"
+                                  ]
                                 },
-                                "preview": ["string"]
+                                "preview": [
+                                  "string"
+                                ]
                               }
                             ],
                             "programId": "string"
@@ -33481,7 +34114,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "ack",
-                "migratedFromUrlSlugs": ["acknowledge-a-job"],
+                "migratedFromUrlSlugs": [
+                  "acknowledge-a-job"
+                ],
                 "method": "POST",
                 "id": "ack",
                 "originalEndpointId": "endpoint_jobs.ack",
@@ -33665,7 +34300,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "ack-outcome",
-                "migratedFromUrlSlugs": ["acknowledge-a-job-outcome"],
+                "migratedFromUrlSlugs": [
+                  "acknowledge-a-job-outcome"
+                ],
                 "method": "POST",
                 "id": "ackOutcome",
                 "originalEndpointId": "endpoint_jobs.ackOutcome",
@@ -33823,7 +34460,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "complete",
-                "migratedFromUrlSlugs": ["complete-a-job"],
+                "migratedFromUrlSlugs": [
+                  "complete-a-job"
+                ],
                 "method": "POST",
                 "id": "complete",
                 "originalEndpointId": "endpoint_jobs.complete",
@@ -34023,7 +34662,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "fail",
-                "migratedFromUrlSlugs": ["fail-a-job"],
+                "migratedFromUrlSlugs": [
+                  "fail-a-job"
+                ],
                 "method": "POST",
                 "id": "fail",
                 "originalEndpointId": "endpoint_jobs.fail",
@@ -34223,7 +34864,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "cancel",
-                "migratedFromUrlSlugs": ["cancel-a-job"],
+                "migratedFromUrlSlugs": [
+                  "cancel-a-job"
+                ],
                 "method": "POST",
                 "id": "cancel",
                 "originalEndpointId": "endpoint_jobs.cancel",
@@ -34403,7 +35046,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "retry",
-                "migratedFromUrlSlugs": ["retry-a-failed-job"],
+                "migratedFromUrlSlugs": [
+                  "retry-a-failed-job"
+                ],
                 "method": "POST",
                 "id": "retry",
                 "originalEndpointId": "endpoint_jobs.retry",
@@ -34486,7 +35131,9 @@
                             "searchField": "string",
                             "q": "string",
                             "sheet": "string",
-                            "exceptions": ["string"],
+                            "exceptions": [
+                              "string"
+                            ],
                             "snapshotLabel": "string"
                           },
                           "trigger": "manual",
@@ -34513,7 +35160,9 @@
                           },
                           "partExecution": "sequential",
                           "parentId": "string",
-                          "predecessorIds": ["string"],
+                          "predecessorIds": [
+                            "string"
+                          ],
                           "metadata": {
                             "string": {}
                           }
@@ -34535,7 +35184,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "preview-mutation",
-                "migratedFromUrlSlugs": ["preview-a-mutation"],
+                "migratedFromUrlSlugs": [
+                  "preview-a-mutation"
+                ],
                 "method": "POST",
                 "id": "previewMutation",
                 "originalEndpointId": "endpoint_jobs.previewMutation",
@@ -34673,7 +35324,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "split",
-                "migratedFromUrlSlugs": ["split-a-job"],
+                "migratedFromUrlSlugs": [
+                  "split-a-job"
+                ],
                 "method": "POST",
                 "id": "split",
                 "originalEndpointId": "endpoint_jobs.split",
@@ -34743,7 +35396,9 @@
                       "X-Disable-Hooks": "true"
                     },
                     "requestBody": {
-                      "parts": [{}],
+                      "parts": [
+                        {}
+                      ],
                       "runInParallel": true
                     },
                     "responseStatusCode": 200,
@@ -34800,7 +35455,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "parts": [{}],
+                        "parts": [
+                          {}
+                        ],
                         "runInParallel": true
                       }
                     },
@@ -34915,7 +35572,8 @@
             "subpackages": [],
             "urlSlug": "jobs",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_mapping": {
             "subpackageId": "subpackage_mapping",
@@ -34930,7 +35588,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create-mapping-program",
-                "migratedFromUrlSlugs": ["create-a-mapping-between-two-schemas"],
+                "migratedFromUrlSlugs": [
+                  "create-a-mapping-between-two-schemas"
+                ],
                 "method": "POST",
                 "id": "createMappingProgram",
                 "originalEndpointId": "endpoint_mapping.createMappingProgram",
@@ -35054,8 +35714,12 @@
                           "familyId": "string",
                           "createdAt": "2023-01-01T00:00:00Z",
                           "createdBy": "string",
-                          "sourceKeys": ["string"],
-                          "destinationKeys": ["string"],
+                          "sourceKeys": [
+                            "string"
+                          ],
+                          "destinationKeys": [
+                            "string"
+                          ],
                           "summary": {
                             "totalRuleCount": 0,
                             "addedRuleCount": 0,
@@ -35174,7 +35838,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete-all-history-for-user",
-                "migratedFromUrlSlugs": ["delete-all-history-for-the-authenticated-user"],
+                "migratedFromUrlSlugs": [
+                  "delete-all-history-for-the-authenticated-user"
+                ],
                 "method": "DELETE",
                 "id": "deleteAllHistoryForUser",
                 "originalEndpointId": "endpoint_mapping.deleteAllHistoryForUser",
@@ -35550,8 +36216,12 @@
                             "familyId": "string",
                             "createdAt": "2023-01-01T00:00:00Z",
                             "createdBy": "string",
-                            "sourceKeys": ["string"],
-                            "destinationKeys": ["string"],
+                            "sourceKeys": [
+                              "string"
+                            ],
+                            "destinationKeys": [
+                              "string"
+                            ],
                             "summary": {
                               "totalRuleCount": 0,
                               "addedRuleCount": 0,
@@ -35604,7 +36274,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-mapping-program",
-                "migratedFromUrlSlugs": ["get-a-mapping-program"],
+                "migratedFromUrlSlugs": [
+                  "get-a-mapping-program"
+                ],
                 "method": "GET",
                 "id": "getMappingProgram",
                 "originalEndpointId": "endpoint_mapping.getMappingProgram",
@@ -35714,8 +36386,12 @@
                           "familyId": "string",
                           "createdAt": "2023-01-01T00:00:00Z",
                           "createdBy": "string",
-                          "sourceKeys": ["string"],
-                          "destinationKeys": ["string"],
+                          "sourceKeys": [
+                            "string"
+                          ],
+                          "destinationKeys": [
+                            "string"
+                          ],
                           "summary": {
                             "totalRuleCount": 0,
                             "addedRuleCount": 0,
@@ -35792,7 +36468,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update-mapping-program",
-                "migratedFromUrlSlugs": ["update-a-mapping-program"],
+                "migratedFromUrlSlugs": [
+                  "update-a-mapping-program"
+                ],
                 "method": "PATCH",
                 "id": "updateMappingProgram",
                 "originalEndpointId": "endpoint_mapping.updateMappingProgram",
@@ -35935,8 +36613,12 @@
                           "familyId": "string",
                           "createdAt": "2023-01-01T00:00:00Z",
                           "createdBy": "string",
-                          "sourceKeys": ["string"],
-                          "destinationKeys": ["string"],
+                          "sourceKeys": [
+                            "string"
+                          ],
+                          "destinationKeys": [
+                            "string"
+                          ],
                           "summary": {
                             "totalRuleCount": 0,
                             "addedRuleCount": 0,
@@ -36059,7 +36741,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete-mapping-program",
-                "migratedFromUrlSlugs": ["delete-a-mapping-program"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-mapping-program"
+                ],
                 "method": "DELETE",
                 "id": "deleteMappingProgram",
                 "originalEndpointId": "endpoint_mapping.deleteMappingProgram",
@@ -36219,7 +36903,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create-rules",
-                "migratedFromUrlSlugs": ["add-mapping-rules-to-a-program"],
+                "migratedFromUrlSlugs": [
+                  "add-mapping-rules-to-a-program"
+                ],
                 "method": "POST",
                 "id": "createRules",
                 "originalEndpointId": "endpoint_mapping.createRules",
@@ -36429,7 +37115,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete-multiple-rules",
-                "migratedFromUrlSlugs": ["delete-multiple-mapping-rules"],
+                "migratedFromUrlSlugs": [
+                  "delete-multiple-mapping-rules"
+                ],
                 "method": "DELETE",
                 "id": "deleteMultipleRules",
                 "originalEndpointId": "endpoint_mapping.deleteMultipleRules",
@@ -36537,7 +37225,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "ruleIds": ["string"]
+                        "ruleIds": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -36566,7 +37256,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "ruleIds": ["string"]
+                        "ruleIds": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -36598,7 +37290,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "ruleIds": ["string"]
+                        "ruleIds": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -36627,7 +37321,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list-rules",
-                "migratedFromUrlSlugs": ["list-mapping-rules"],
+                "migratedFromUrlSlugs": [
+                  "list-mapping-rules"
+                ],
                 "method": "GET",
                 "id": "listRules",
                 "originalEndpointId": "endpoint_mapping.listRules",
@@ -36864,7 +37560,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-rule",
-                "migratedFromUrlSlugs": ["get-a-mapping-rule"],
+                "migratedFromUrlSlugs": [
+                  "get-a-mapping-rule"
+                ],
                 "method": "GET",
                 "id": "getRule",
                 "originalEndpointId": "endpoint_mapping.getRule",
@@ -37116,7 +37814,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update-rule",
-                "migratedFromUrlSlugs": ["update-a-mapping-rule"],
+                "migratedFromUrlSlugs": [
+                  "update-a-mapping-rule"
+                ],
                 "method": "PATCH",
                 "id": "updateRule",
                 "originalEndpointId": "endpoint_mapping.updateRule",
@@ -37407,7 +38107,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update-rules",
-                "migratedFromUrlSlugs": ["update-a-list-of-mapping-rules"],
+                "migratedFromUrlSlugs": [
+                  "update-a-list-of-mapping-rules"
+                ],
                 "method": "PATCH",
                 "id": "updateRules",
                 "originalEndpointId": "endpoint_mapping.updateRules",
@@ -37626,7 +38328,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete-rule",
-                "migratedFromUrlSlugs": ["delete-a-mapping-rule"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-mapping-rule"
+                ],
                 "method": "DELETE",
                 "id": "deleteRule",
                 "originalEndpointId": "endpoint_mapping.deleteRule",
@@ -37871,7 +38575,8 @@
             "subpackages": [],
             "urlSlug": "mapping",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_records": {
             "subpackageId": "subpackage_records",
@@ -37886,7 +38591,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-records"],
+                "migratedFromUrlSlugs": [
+                  "get-records"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_records.get",
@@ -38412,7 +39119,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-records"],
+                "migratedFromUrlSlugs": [
+                  "update-records"
+                ],
                 "method": "PUT",
                 "id": "update",
                 "originalEndpointId": "endpoint_records.update",
@@ -38718,7 +39427,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "insert",
-                "migratedFromUrlSlugs": ["insert-records"],
+                "migratedFromUrlSlugs": [
+                  "insert-records"
+                ],
                 "method": "POST",
                 "id": "insert",
                 "originalEndpointId": "endpoint_records.insert",
@@ -39075,7 +39786,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-records"],
+                "migratedFromUrlSlugs": [
+                  "delete-records"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_records.delete",
@@ -39307,7 +40020,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "find-and-replace",
-                "migratedFromUrlSlugs": ["finds-and-replaces-field-values-matching-search-criteria"],
+                "migratedFromUrlSlugs": [
+                  "finds-and-replaces-field-values-matching-search-criteria"
+                ],
                 "method": "PUT",
                 "id": "findAndReplace",
                 "originalEndpointId": "endpoint_records.findAndReplace",
@@ -39554,7 +40269,8 @@
             "subpackages": [],
             "urlSlug": "records",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_roles": {
             "subpackageId": "subpackage_roles",
@@ -39569,7 +40285,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-roles"],
+                "migratedFromUrlSlugs": [
+                  "list-roles"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_roles.list",
@@ -39646,7 +40364,8 @@
             "subpackages": [],
             "urlSlug": "roles",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_secrets": {
             "subpackageId": "subpackage_secrets",
@@ -39661,7 +40380,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-secrets"],
+                "migratedFromUrlSlugs": [
+                  "list-secrets"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_secrets.list",
@@ -39911,7 +40632,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "upsert",
-                "migratedFromUrlSlugs": ["upsert-a-secret"],
+                "migratedFromUrlSlugs": [
+                  "upsert-a-secret"
+                ],
                 "method": "POST",
                 "id": "upsert",
                 "originalEndpointId": "endpoint_secrets.upsert",
@@ -40160,7 +40883,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-secret-by-it-s-id"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-secret-by-it-s-id"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_secrets.delete",
@@ -40393,7 +41118,8 @@
             "subpackages": [],
             "urlSlug": "secrets",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_sheets": {
             "subpackageId": "subpackage_sheets",
@@ -40408,7 +41134,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-sheets"],
+                "migratedFromUrlSlugs": [
+                  "list-sheets"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_sheets.list",
@@ -40490,7 +41218,9 @@
                             "mappingConfidenceThreshold": 0.5
                           },
                           "metadata": {
-                            "rowHeaders": [4]
+                            "rowHeaders": [
+                              4
+                            ]
                           },
                           "updatedAt": "2021-08-31T18:00:00Z",
                           "createdAt": "2021-08-31T18:00:00Z"
@@ -40549,7 +41279,9 @@
                               "mappingConfidenceThreshold": 0.5
                             },
                             "metadata": {
-                              "rowHeaders": [4]
+                              "rowHeaders": [
+                                4
+                              ]
                             },
                             "updatedAt": "2021-08-31T18:00:00Z",
                             "createdAt": "2021-08-31T18:00:00Z"
@@ -40572,7 +41304,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-sheet"],
+                "migratedFromUrlSlugs": [
+                  "get-a-sheet"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_sheets.get",
@@ -40661,7 +41395,9 @@
                           "mappingConfidenceThreshold": 0.5
                         },
                         "metadata": {
-                          "rowHeaders": [4]
+                          "rowHeaders": [
+                            4
+                          ]
                         },
                         "updatedAt": "2021-08-31T18:00:00Z",
                         "createdAt": "2021-08-31T18:00:00Z"
@@ -40718,7 +41454,9 @@
                             "mappingConfidenceThreshold": 0.5
                           },
                           "metadata": {
-                            "rowHeaders": [4]
+                            "rowHeaders": [
+                              4
+                            ]
                           },
                           "updatedAt": "2021-08-31T18:00:00Z",
                           "createdAt": "2021-08-31T18:00:00Z"
@@ -40740,7 +41478,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-sheet"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-sheet"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_sheets.delete",
@@ -40957,7 +41697,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "validate",
-                "migratedFromUrlSlugs": ["validate-a-sheet"],
+                "migratedFromUrlSlugs": [
+                  "validate-a-sheet"
+                ],
                 "method": "POST",
                 "id": "validate",
                 "originalEndpointId": "endpoint_sheets.validate",
@@ -41174,7 +41916,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-records-as-csv",
-                "migratedFromUrlSlugs": ["download-records-as-a-csv-file"],
+                "migratedFromUrlSlugs": [
+                  "download-records-as-a-csv-file"
+                ],
                 "method": "GET",
                 "id": "getRecordsAsCsv",
                 "originalEndpointId": "endpoint_sheets.getRecordsAsCsv",
@@ -41617,7 +42361,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-sheet-commits",
-                "migratedFromUrlSlugs": ["get-commit-versions-for-a-sheet"],
+                "migratedFromUrlSlugs": [
+                  "get-commit-versions-for-a-sheet"
+                ],
                 "method": "GET",
                 "id": "getSheetCommits",
                 "originalEndpointId": "endpoint_sheets.getSheetCommits",
@@ -41749,7 +42495,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "lock-sheet",
-                "migratedFromUrlSlugs": ["lock-a-sheet"],
+                "migratedFromUrlSlugs": [
+                  "lock-a-sheet"
+                ],
                 "method": "POST",
                 "id": "lockSheet",
                 "originalEndpointId": "endpoint_sheets.lockSheet",
@@ -41966,7 +42714,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "unlock-sheet",
-                "migratedFromUrlSlugs": ["unlock-a-sheet"],
+                "migratedFromUrlSlugs": [
+                  "unlock-a-sheet"
+                ],
                 "method": "POST",
                 "id": "unlockSheet",
                 "originalEndpointId": "endpoint_sheets.unlockSheet",
@@ -42183,7 +42933,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-cell-values",
-                "migratedFromUrlSlugs": ["get-record-cells-by-field"],
+                "migratedFromUrlSlugs": [
+                  "get-record-cells-by-field"
+                ],
                 "method": "GET",
                 "id": "getCellValues",
                 "originalEndpointId": "endpoint_sheets.getCellValues",
@@ -42438,7 +43190,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update-sheet",
-                "migratedFromUrlSlugs": ["update-a-sheet"],
+                "migratedFromUrlSlugs": [
+                  "update-a-sheet"
+                ],
                 "method": "PATCH",
                 "id": "updateSheet",
                 "originalEndpointId": "endpoint_sheets.updateSheet",
@@ -42533,7 +43287,9 @@
                     "requestBody": {
                       "name": "New Sheet Name",
                       "metadata": {
-                        "rowHeaders": [6]
+                        "rowHeaders": [
+                          6
+                        ]
                       }
                     },
                     "responseStatusCode": 200,
@@ -42566,7 +43322,9 @@
                           "mappingConfidenceThreshold": 0.5
                         },
                         "metadata": {
-                          "rowHeaders": [6]
+                          "rowHeaders": [
+                            6
+                          ]
                         },
                         "updatedAt": "2021-08-31T18:00:00Z",
                         "createdAt": "2021-08-31T18:00:00Z"
@@ -42597,7 +43355,9 @@
                       "value": {
                         "name": "New Sheet Name",
                         "metadata": {
-                          "rowHeaders": [6]
+                          "rowHeaders": [
+                            6
+                          ]
                         }
                       }
                     },
@@ -42632,7 +43392,9 @@
                             "mappingConfidenceThreshold": 0.5
                           },
                           "metadata": {
-                            "rowHeaders": [6]
+                            "rowHeaders": [
+                              6
+                            ]
                           },
                           "updatedAt": "2021-08-31T18:00:00Z",
                           "createdAt": "2021-08-31T18:00:00Z"
@@ -42766,7 +43528,8 @@
             "subpackages": [],
             "urlSlug": "sheets",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_snapshots": {
             "subpackageId": "subpackage_snapshots",
@@ -42781,7 +43544,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create-snapshot",
-                "migratedFromUrlSlugs": ["create-a-snapshot"],
+                "migratedFromUrlSlugs": [
+                  "create-a-snapshot"
+                ],
                 "method": "POST",
                 "id": "createSnapshot",
                 "originalEndpointId": "endpoint_snapshots.createSnapshot",
@@ -43432,7 +44197,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-snapshot",
-                "migratedFromUrlSlugs": ["get-a-snapshot"],
+                "migratedFromUrlSlugs": [
+                  "get-a-snapshot"
+                ],
                 "method": "GET",
                 "id": "getSnapshot",
                 "originalEndpointId": "endpoint_snapshots.getSnapshot",
@@ -43762,7 +44529,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete-snapshot",
-                "migratedFromUrlSlugs": ["delete-a-snapshot"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-snapshot"
+                ],
                 "method": "DELETE",
                 "id": "deleteSnapshot",
                 "originalEndpointId": "endpoint_snapshots.deleteSnapshot",
@@ -43979,7 +44748,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "restore-snapshot",
-                "migratedFromUrlSlugs": ["restore-a-snapshot"],
+                "migratedFromUrlSlugs": [
+                  "restore-a-snapshot"
+                ],
                 "method": "POST",
                 "id": "restoreSnapshot",
                 "originalEndpointId": "endpoint_snapshots.restoreSnapshot",
@@ -44324,7 +45095,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-snapshot-records",
-                "migratedFromUrlSlugs": ["get-records-from-a-snapshot"],
+                "migratedFromUrlSlugs": [
+                  "get-records-from-a-snapshot"
+                ],
                 "method": "GET",
                 "id": "getSnapshotRecords",
                 "originalEndpointId": "endpoint_snapshots.getSnapshotRecords",
@@ -44628,7 +45401,8 @@
             "subpackages": [],
             "urlSlug": "snapshots",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_spaces": {
             "subpackageId": "subpackage_spaces",
@@ -44643,7 +45417,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-spaces"],
+                "migratedFromUrlSlugs": [
+                  "list-spaces"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_spaces.list",
@@ -44829,7 +45605,10 @@
                           "filesCount": 1,
                           "isCollaborative": true,
                           "upgradedAt": "2021-01-01T00:00:00.000Z",
-                          "guestAuthentication": ["magic_link", "shared_link"],
+                          "guestAuthentication": [
+                            "magic_link",
+                            "shared_link"
+                          ],
                           "environmentId": "us_env_YOUR_ID",
                           "primaryWorkbookId": "us_wb_YOUR_ID",
                           "labels": [],
@@ -44878,7 +45657,10 @@
                             "filesCount": 1,
                             "isCollaborative": true,
                             "upgradedAt": "2021-01-01T00:00:00.000Z",
-                            "guestAuthentication": ["magic_link", "shared_link"],
+                            "guestAuthentication": [
+                              "magic_link",
+                              "shared_link"
+                            ],
                             "environmentId": "us_env_YOUR_ID",
                             "primaryWorkbookId": "us_wb_YOUR_ID",
                             "labels": [],
@@ -44946,7 +45728,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-space"],
+                "migratedFromUrlSlugs": [
+                  "create-a-space"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_spaces.create",
@@ -45039,7 +45823,10 @@
                         "filesCount": 1,
                         "isCollaborative": true,
                         "upgradedAt": "2021-01-01T00:00:00.000Z",
-                        "guestAuthentication": ["magic_link", "shared_link"],
+                        "guestAuthentication": [
+                          "magic_link",
+                          "shared_link"
+                        ],
                         "environmentId": "us_env_YOUR_ID",
                         "primaryWorkbookId": "us_wb_YOUR_ID",
                         "labels": [],
@@ -45090,7 +45877,10 @@
                           "filesCount": 1,
                           "isCollaborative": true,
                           "upgradedAt": "2021-01-01T00:00:00.000Z",
-                          "guestAuthentication": ["magic_link", "shared_link"],
+                          "guestAuthentication": [
+                            "magic_link",
+                            "shared_link"
+                          ],
                           "environmentId": "us_env_YOUR_ID",
                           "primaryWorkbookId": "us_wb_YOUR_ID",
                           "labels": [],
@@ -45203,7 +45993,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-space"],
+                "migratedFromUrlSlugs": [
+                  "get-a-space"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_spaces.get",
@@ -45299,7 +46091,10 @@
                         "filesCount": 1,
                         "isCollaborative": true,
                         "upgradedAt": "2021-01-01T00:00:00.000Z",
-                        "guestAuthentication": ["magic_link", "shared_link"],
+                        "guestAuthentication": [
+                          "magic_link",
+                          "shared_link"
+                        ],
                         "environmentId": "us_env_YOUR_ID",
                         "primaryWorkbookId": "us_wb_YOUR_ID",
                         "labels": [],
@@ -45341,7 +46136,10 @@
                           "filesCount": 1,
                           "isCollaborative": true,
                           "upgradedAt": "2021-01-01T00:00:00.000Z",
-                          "guestAuthentication": ["magic_link", "shared_link"],
+                          "guestAuthentication": [
+                            "magic_link",
+                            "shared_link"
+                          ],
                           "environmentId": "us_env_YOUR_ID",
                           "primaryWorkbookId": "us_wb_YOUR_ID",
                           "labels": [],
@@ -45450,7 +46248,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-space"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-space"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_spaces.delete",
@@ -45667,7 +46467,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "bulk-delete",
-                "migratedFromUrlSlugs": ["delete-spaces"],
+                "migratedFromUrlSlugs": [
+                  "delete-spaces"
+                ],
                 "method": "DELETE",
                 "id": "bulkDelete",
                 "originalEndpointId": "endpoint_spaces.bulkDelete",
@@ -45876,7 +46678,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-space"],
+                "migratedFromUrlSlugs": [
+                  "update-a-space"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_spaces.update",
@@ -45985,7 +46789,10 @@
                         "filesCount": 1,
                         "isCollaborative": true,
                         "upgradedAt": "2021-01-01T00:00:00.000Z",
-                        "guestAuthentication": ["magic_link", "shared_link"],
+                        "guestAuthentication": [
+                          "magic_link",
+                          "shared_link"
+                        ],
                         "environmentId": "us_env_YOUR_ID",
                         "primaryWorkbookId": "us_wb_YOUR_ID",
                         "labels": [],
@@ -46033,7 +46840,10 @@
                           "filesCount": 1,
                           "isCollaborative": true,
                           "upgradedAt": "2021-01-01T00:00:00.000Z",
-                          "guestAuthentication": ["magic_link", "shared_link"],
+                          "guestAuthentication": [
+                            "magic_link",
+                            "shared_link"
+                          ],
                           "environmentId": "us_env_YOUR_ID",
                           "primaryWorkbookId": "us_wb_YOUR_ID",
                           "labels": [],
@@ -46150,7 +46960,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "archive-space",
-                "migratedFromUrlSlugs": ["archives-a-space"],
+                "migratedFromUrlSlugs": [
+                  "archives-a-space"
+                ],
                 "method": "POST",
                 "id": "archiveSpace",
                 "originalEndpointId": "endpoint_spaces.archiveSpace",
@@ -46367,7 +47179,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "unarchive-space",
-                "migratedFromUrlSlugs": ["unarchives-a-space"],
+                "migratedFromUrlSlugs": [
+                  "unarchives-a-space"
+                ],
                 "method": "POST",
                 "id": "unarchiveSpace",
                 "originalEndpointId": "endpoint_spaces.unarchiveSpace",
@@ -46566,7 +47380,8 @@
             "subpackages": [],
             "urlSlug": "spaces",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_users": {
             "subpackageId": "subpackage_users",
@@ -46581,7 +47396,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-users"],
+                "migratedFromUrlSlugs": [
+                  "list-users"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_users.list",
@@ -46771,7 +47588,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create-and-invite",
-                "migratedFromUrlSlugs": ["create-and-invite-user"],
+                "migratedFromUrlSlugs": [
+                  "create-and-invite-user"
+                ],
                 "method": "POST",
                 "id": "createAndInvite",
                 "originalEndpointId": "endpoint_users.createAndInvite",
@@ -46957,7 +47776,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "resend-invite",
-                "migratedFromUrlSlugs": ["resend-user-invite"],
+                "migratedFromUrlSlugs": [
+                  "resend-user-invite"
+                ],
                 "method": "POST",
                 "id": "resendInvite",
                 "originalEndpointId": "endpoint_users.resendInvite",
@@ -47042,7 +47863,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-user"],
+                "migratedFromUrlSlugs": [
+                  "update-a-user"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_users.update",
@@ -47176,7 +47999,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-user"],
+                "migratedFromUrlSlugs": [
+                  "get-a-user"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_users.get",
@@ -47304,7 +48129,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-user"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-user"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_users.delete",
@@ -47592,7 +48419,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "assign-user-role",
-                "migratedFromUrlSlugs": ["assign-role-to-user"],
+                "migratedFromUrlSlugs": [
+                  "assign-role-to-user"
+                ],
                 "method": "POST",
                 "id": "assignUserRole",
                 "originalEndpointId": "endpoint_users.assignUserRole",
@@ -47832,7 +48661,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete-user-role",
-                "migratedFromUrlSlugs": ["remove-role-from-user"],
+                "migratedFromUrlSlugs": [
+                  "remove-role-from-user"
+                ],
                 "method": "DELETE",
                 "id": "deleteUserRole",
                 "originalEndpointId": "endpoint_users.deleteUserRole",
@@ -48054,7 +48885,8 @@
             "subpackages": [],
             "urlSlug": "users",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_versions": {
             "subpackageId": "subpackage_versions",
@@ -48191,11 +49023,15 @@
                 "authed": true
               }
             ],
-            "types": ["type_versions:VersionResponse", "type_versions:Version"],
+            "types": [
+              "type_versions:VersionResponse",
+              "type_versions:Version"
+            ],
             "subpackages": [],
             "urlSlug": "versions",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_views": {
             "subpackageId": "subpackage_views",
@@ -48210,7 +49046,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-views-by-sheet"],
+                "migratedFromUrlSlugs": [
+                  "list-views-by-sheet"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_views.list",
@@ -48483,7 +49321,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-view"],
+                "migratedFromUrlSlugs": [
+                  "create-a-view"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_views.create",
@@ -48748,7 +49588,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-view"],
+                "migratedFromUrlSlugs": [
+                  "get-a-view"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_views.get",
@@ -48985,7 +49827,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-view"],
+                "migratedFromUrlSlugs": [
+                  "update-a-view"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_views.update",
@@ -49267,7 +50111,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-view"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-view"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_views.delete",
@@ -49378,7 +50224,8 @@
             "subpackages": [],
             "urlSlug": "views",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_workbooks": {
             "subpackageId": "subpackage_workbooks",
@@ -49393,7 +50240,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-workbooks"],
+                "migratedFromUrlSlugs": [
+                  "list-workbooks"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_workbooks.list",
@@ -49574,13 +50423,17 @@
                                 "mappingConfidenceThreshold": 0.5
                               },
                               "metadata": {
-                                "rowHeaders": [4]
+                                "rowHeaders": [
+                                  4
+                                ]
                               },
                               "updatedAt": "2021-08-31T18:00:00Z",
                               "createdAt": "2021-08-31T18:00:00Z"
                             }
                           ],
-                          "labels": ["simple-demo"],
+                          "labels": [
+                            "simple-demo"
+                          ],
                           "actions": [
                             {
                               "operation": "submitAction",
@@ -49657,13 +50510,17 @@
                                   "mappingConfidenceThreshold": 0.5
                                 },
                                 "metadata": {
-                                  "rowHeaders": [4]
+                                  "rowHeaders": [
+                                    4
+                                  ]
                                 },
                                 "updatedAt": "2021-08-31T18:00:00Z",
                                 "createdAt": "2021-08-31T18:00:00Z"
                               }
                             ],
-                            "labels": ["simple-demo"],
+                            "labels": [
+                              "simple-demo"
+                            ],
                             "actions": [
                               {
                                 "operation": "submitAction",
@@ -49742,7 +50599,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-workbook"],
+                "migratedFromUrlSlugs": [
+                  "create-a-workbook"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_workbooks.create",
@@ -49830,7 +50689,9 @@
                           "mappingConfidenceThreshold": 0.5
                         }
                       ],
-                      "labels": ["simple-demo"],
+                      "labels": [
+                        "simple-demo"
+                      ],
                       "actions": [
                         {
                           "operation": "submitAction",
@@ -49880,13 +50741,17 @@
                               "mappingConfidenceThreshold": 0.5
                             },
                             "metadata": {
-                              "rowHeaders": [4]
+                              "rowHeaders": [
+                                4
+                              ]
                             },
                             "updatedAt": "2021-08-31T18:00:00Z",
                             "createdAt": "2021-08-31T18:00:00Z"
                           }
                         ],
-                        "labels": ["simple-demo"],
+                        "labels": [
+                          "simple-demo"
+                        ],
                         "actions": [
                           {
                             "operation": "submitAction",
@@ -49952,7 +50817,9 @@
                             "mappingConfidenceThreshold": 0.5
                           }
                         ],
-                        "labels": ["simple-demo"],
+                        "labels": [
+                          "simple-demo"
+                        ],
                         "actions": [
                           {
                             "operation": "submitAction",
@@ -50004,13 +50871,17 @@
                                 "mappingConfidenceThreshold": 0.5
                               },
                               "metadata": {
-                                "rowHeaders": [4]
+                                "rowHeaders": [
+                                  4
+                                ]
                               },
                               "updatedAt": "2021-08-31T18:00:00Z",
                               "createdAt": "2021-08-31T18:00:00Z"
                             }
                           ],
-                          "labels": ["simple-demo"],
+                          "labels": [
+                            "simple-demo"
+                          ],
                           "actions": [
                             {
                               "operation": "submitAction",
@@ -50091,7 +50962,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get",
-                "migratedFromUrlSlugs": ["get-a-workbook"],
+                "migratedFromUrlSlugs": [
+                  "get-a-workbook"
+                ],
                 "method": "GET",
                 "id": "get",
                 "originalEndpointId": "endpoint_workbooks.get",
@@ -50209,13 +51082,17 @@
                               "mappingConfidenceThreshold": 0.5
                             },
                             "metadata": {
-                              "rowHeaders": [4]
+                              "rowHeaders": [
+                                4
+                              ]
                             },
                             "updatedAt": "2021-08-31T18:00:00Z",
                             "createdAt": "2021-08-31T18:00:00Z"
                           }
                         ],
-                        "labels": ["simple-demo"],
+                        "labels": [
+                          "simple-demo"
+                        ],
                         "actions": [
                           {
                             "operation": "submitAction",
@@ -50290,13 +51167,17 @@
                                 "mappingConfidenceThreshold": 0.5
                               },
                               "metadata": {
-                                "rowHeaders": [4]
+                                "rowHeaders": [
+                                  4
+                                ]
                               },
                               "updatedAt": "2021-08-31T18:00:00Z",
                               "createdAt": "2021-08-31T18:00:00Z"
                             }
                           ],
-                          "labels": ["simple-demo"],
+                          "labels": [
+                            "simple-demo"
+                          ],
                           "actions": [
                             {
                               "operation": "submitAction",
@@ -50416,7 +51297,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-workbook"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-workbook"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_workbooks.delete",
@@ -50633,7 +51516,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-a-workbook"],
+                "migratedFromUrlSlugs": [
+                  "update-a-workbook"
+                ],
                 "method": "PATCH",
                 "id": "update",
                 "originalEndpointId": "endpoint_workbooks.update",
@@ -50727,7 +51612,9 @@
                     },
                     "requestBody": {
                       "name": "My Updated Workbook",
-                      "labels": ["my-new-label"],
+                      "labels": [
+                        "my-new-label"
+                      ],
                       "actions": [
                         {
                           "operation": "submitAction",
@@ -50774,13 +51661,17 @@
                               "mappingConfidenceThreshold": 0.5
                             },
                             "metadata": {
-                              "rowHeaders": [4]
+                              "rowHeaders": [
+                                4
+                              ]
                             },
                             "updatedAt": "2021-08-31T18:00:00Z",
                             "createdAt": "2021-08-31T18:00:00Z"
                           }
                         ],
-                        "labels": ["simple-demo"],
+                        "labels": [
+                          "simple-demo"
+                        ],
                         "actions": [
                           {
                             "operation": "submitAction",
@@ -50822,7 +51713,9 @@
                       "type": "json",
                       "value": {
                         "name": "My Updated Workbook",
-                        "labels": ["my-new-label"],
+                        "labels": [
+                          "my-new-label"
+                        ],
                         "actions": [
                           {
                             "operation": "submitAction",
@@ -50871,13 +51764,17 @@
                                 "mappingConfidenceThreshold": 0.5
                               },
                               "metadata": {
-                                "rowHeaders": [4]
+                                "rowHeaders": [
+                                  4
+                                ]
                               },
                               "updatedAt": "2021-08-31T18:00:00Z",
                               "createdAt": "2021-08-31T18:00:00Z"
                             }
                           ],
-                          "labels": ["simple-demo"],
+                          "labels": [
+                            "simple-demo"
+                          ],
                           "actions": [
                             {
                               "operation": "submitAction",
@@ -51005,7 +51902,9 @@
                 ],
                 "defaultEnvironment": "Production",
                 "urlSlug": "get-workbook-commits",
-                "migratedFromUrlSlugs": ["get-commits-for-a-workbook"],
+                "migratedFromUrlSlugs": [
+                  "get-commits-for-a-workbook"
+                ],
                 "method": "GET",
                 "id": "getWorkbookCommits",
                 "originalEndpointId": "endpoint_workbooks.getWorkbookCommits",
@@ -51141,7 +52040,8 @@
             "subpackages": [],
             "urlSlug": "workbooks",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -51209,10 +52109,10 @@
         "markdown": "\n<Card \n  href=\"https://app.getpostman.com/run-collection/31067885-897e74ef-e13d-4cdb-8681-65785a63b2a3?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D31067885-897e74ef-e13d-4cdb-8681-65785a63b2a3%26entityType%3Dcollection%26workspaceId%3Da2b6bd5c-0afa-46d3-bb84-e29a36dd97ec\"\n  icon=\"fa-regular fa-play\"\n  title=\"Run in Postman\"\n/>\n\n<br />\n**It's a wild west of data out there, where rules and best practices are shot from the hip. This makes injesting data cleanly a colossal pain in the ass. Flatfile is the missing API for data exchange, import, and migration.**\n\nWith Flatfile, you can:\n\n- Accept, transform, and validate data so that it arrives in your systems in exactly the right shape\n- Embed an easy-to-use, self-service data importer directly into your app\n- Invite your customers to collaborate on a hosted onboarding project, replacing hours of back-and-forth communication\n\nLet's design and build your dream data exchange experience.\n\n### About our API\n\nThe Flatfile API uses [REST](http://www.drdobbs.com/web-development/restful-web-services-a-tutorial/240169069). Our API is designed to have predictable resource-oriented URLs and to use HTTP response codes to indicate API errors. It accepts form-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.\n\nThe Flatfile API doesn't have a test mode; however, [Environments](/api-reference/environments)  allow you to test without affecting your live data.\n\n### Getting started\n\nTo begin working with Flatfile, follow this [link](https://platform.flatfile.com/account/sign-up) to sign up and immediately retrieve your API keys.\n\n### We're Here to Help\nContact Support at [support@flatfile.com](mailto:support@flatfile.com) to get help from our team of in-house experts.\n"
       },
       "mdx/auth.mdx": {
-        "markdown": "**Learn how to use API keys to authenticate API requests.**\n\nFlatfile provides two different kinds of environment-specific API keys you can use to interact with the API. In addition, you can work with a development key or a production environment.\n\nRead on to learn more about how to think about which keys to use and how to test in development mode.\n\n## Testing and development\n\n[Environments](/api-reference/environments) are isolated entities and are intended to be a safe place to create and\ntest different configurations. A `development` and `production` environment are created\nby default.\n\n| isProd  | Name          | Description                                                                                 |\n| ------- | ------------- | ------------------------------------------------------------------------------------------- |\n| _false_ | `development` | Use this default environment, and its associated test API keys, as you build with Flatfile. |\n| _true_  | `production`  | When you're ready to launch, create a new environment and swap out your keys.               |\n\n<Callout intent=\"success\">\n    The development environment does not count towards your paid credits.\n</Callout>\n\n## Secret and publishable keys\n\nAll Accounts have two key types for each environment. Learn when to use each type of key:\n\n| Type            | Id                     | Description                                                                                                             |\n| --------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |\n| Secret key      | `sk_23ghsyuyshs7dcrty` | **On the server-side:** Store this securely in your server-side code. Don’t expose this key in an application.          |\n| Publishable key | `pk_23ghsyuyshs7dcert` | **On the client-side:** Can be publicly-accessible in your application's client-side code. Use when embedding Flatfile. |\n\n<Callout intent=\"info\">\n    The `accessToken` provided from `publishableKey` will remain valid for a\n    duration of 24 hours.\n</Callout>\n"
+        "markdown": "**Learn how to use API keys to authenticate API requests.**\n\nFlatfile provides two different kinds of environment-specific API keys you can use to interact with the API. In addition, you can work with a development key or a production environment.\n\nRead on to learn more about how to think about which keys to use and how to test in development mode.\n\n## Testing and development\n\n[Environments](/api-reference/environments) are isolated entities and are intended to be a safe place to create and\ntest different configurations. A `development` and `production` environment are created\nby default.\n\n| isProd  | Name          | Description                                                                                 |\n| ------- | ------------- | ------------------------------------------------------------------------------------------- |\n| _false_ | `development` | Use this default environment, and its associated test API keys, as you build with Flatfile. |\n| _true_  | `production`  | When you're ready to launch, create a new environment and swap out your keys.               |\n\n<Callout intent=\"success\">\n    The development environment does not count towards your paid credits.\n</Callout>\n\n## Secret and publishable keys\n\nAll Accounts have two key types for each environment. Learn when to use each type of key:\n\n| Type            | Id                     | Description                                                                                                             |\n| --------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |\n| Secret key      | `sk_23ghsyuyshs7dcrty` | **On the server-side:** Store this securely in your server-side code. Don\u2019t expose this key in an application.          |\n| Publishable key | `pk_23ghsyuyshs7dcert` | **On the client-side:** Can be publicly-accessible in your application's client-side code. Use when embedding Flatfile. |\n\n<Callout intent=\"info\">\n    The `accessToken` provided from `publishableKey` will remain valid for a\n    duration of 24 hours.\n</Callout>\n"
       },
       "mdx/using-environments.mdx": {
-        "markdown": "**Learn how to use Environments for testing and authentication.**\n\n[Environments](/api-reference/environments) are isolated entities and are intended to be a safe place to create and\ntest different configurations. Environments serve as self-contained, secure domains\nwhere diverse configurations can be created and tested. By default, a development\nand a production environment are set up.\n\n| isProd  | Name          | Description                                                                                  |\n| ------- | ------------- | -------------------------------------------------------------------------------------------- |\n| _false_ | `development` | Use this default environment, and it’s associated test API keys, as you build with Flatfile. |\n| _true_  | `production`  | When you're ready to launch, create a new environment and swap out your keys.                |\n\n<Callout intent=\"success\">\n    The development environment does not count towards your paid credits.\n</Callout>\n\n## Guest Authentication\n\nEnvironments support two types of guest authentication:\n\n1. `magic_link`: This method dispatches an email to your guests, which includes a magic link to facilitate login.\n2. `shared_link`: This method transforms the Space URL into a public one, typically used in conjunction with embedded Flatfile.\n\n### Additional Info\n\nShould the `guestAuthentication` be left unspecified, both `magic_link` and `shared_link` types are enabled by default.\n\nIt's important to note that `guestAuthentication` settings can be applied at both Environment and Space levels. However, in case of any conflicting settings, the authentication type set at the Space level will take precedence over the Environment level setting. This flexibility enables customization based on specific needs, ensuring the right balance of accessibility and security.\n\n## Secret and publishable keys\n\nAll Accounts have two key types for each environment. Learn when to use each type of key:\n\n| Type            | Id                     | Description                                                                                                             |\n| --------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |\n| Secret key      | `sk_23ghsyuyshs7dcrty` | **On the server-side:** Store this securely in your server-side code. Don’t expose this key in an application.          |\n| Publishable key | `pk_23ghsyuyshs7dcert` | **On the client-side:** Can be publicly-accessible in your application's client-side code. Use when embedding Flatfile. |\n\n<Callout intent=\"warning\">\n    The publishable key only has permissions to create a Space.\n</Callout>\n"
+        "markdown": "**Learn how to use Environments for testing and authentication.**\n\n[Environments](/api-reference/environments) are isolated entities and are intended to be a safe place to create and\ntest different configurations. Environments serve as self-contained, secure domains\nwhere diverse configurations can be created and tested. By default, a development\nand a production environment are set up.\n\n| isProd  | Name          | Description                                                                                  |\n| ------- | ------------- | -------------------------------------------------------------------------------------------- |\n| _false_ | `development` | Use this default environment, and it\u2019s associated test API keys, as you build with Flatfile. |\n| _true_  | `production`  | When you're ready to launch, create a new environment and swap out your keys.                |\n\n<Callout intent=\"success\">\n    The development environment does not count towards your paid credits.\n</Callout>\n\n## Guest Authentication\n\nEnvironments support two types of guest authentication:\n\n1. `magic_link`: This method dispatches an email to your guests, which includes a magic link to facilitate login.\n2. `shared_link`: This method transforms the Space URL into a public one, typically used in conjunction with embedded Flatfile.\n\n### Additional Info\n\nShould the `guestAuthentication` be left unspecified, both `magic_link` and `shared_link` types are enabled by default.\n\nIt's important to note that `guestAuthentication` settings can be applied at both Environment and Space levels. However, in case of any conflicting settings, the authentication type set at the Space level will take precedence over the Environment level setting. This flexibility enables customization based on specific needs, ensuring the right balance of accessibility and security.\n\n## Secret and publishable keys\n\nAll Accounts have two key types for each environment. Learn when to use each type of key:\n\n| Type            | Id                     | Description                                                                                                             |\n| --------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |\n| Secret key      | `sk_23ghsyuyshs7dcrty` | **On the server-side:** Store this securely in your server-side code. Don\u2019t expose this key in an application.          |\n| Publishable key | `pk_23ghsyuyshs7dcert` | **On the client-side:** Can be publicly-accessible in your application's client-side code. Use when embedding Flatfile. |\n\n<Callout intent=\"warning\">\n    The publishable key only has permissions to create a Space.\n</Callout>\n"
       }
     },
     "search": {

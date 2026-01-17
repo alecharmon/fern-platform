@@ -3194,6 +3194,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_:AttributeFilter": {
         "name": "AttributeFilter",
@@ -12301,6 +12302,7 @@
       }
     },
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_batch:Alternative": {
         "name": "Alternative",
@@ -28837,6 +28839,7 @@
       }
     },
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_chat:SubscribeEvent": {
         "name": "SubscribeEvent",

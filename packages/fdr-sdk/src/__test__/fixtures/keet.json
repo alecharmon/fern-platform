@@ -1114,7 +1114,8 @@
           ],
           "types": [],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_common/errors:BaseError": {
@@ -5348,21 +5349,28 @@
             "name": "common",
             "endpoints": [],
             "types": [],
-            "subpackages": ["subpackage_common/errors", "subpackage_common/types"],
+            "subpackages": [
+              "subpackage_common/errors",
+              "subpackage_common/types"
+            ],
             "urlSlug": "common",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_common/errors": {
             "subpackageId": "subpackage_common/errors",
             "parent": "subpackage_common",
             "name": "errors",
             "endpoints": [],
-            "types": ["type_common/errors:BaseError"],
+            "types": [
+              "type_common/errors:BaseError"
+            ],
             "subpackages": [],
             "urlSlug": "errors",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_common/types": {
             "subpackageId": "subpackage_common/types",
@@ -5380,7 +5388,8 @@
             "subpackages": [],
             "urlSlug": "types",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations": {
             "subpackageId": "subpackage_integrations",
@@ -5406,7 +5415,8 @@
             ],
             "urlSlug": "integrations",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/amazon": {
             "subpackageId": "subpackage_integrations/amazon",
@@ -5693,7 +5703,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -6039,7 +6051,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -6472,7 +6486,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -6905,7 +6921,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -7336,7 +7354,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -7400,7 +7420,8 @@
             "subpackages": [],
             "urlSlug": "amazon",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/amazonBusiness": {
             "subpackageId": "subpackage_integrations/amazonBusiness",
@@ -7687,7 +7708,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -7912,7 +7935,9 @@
                               "country": "string"
                             },
                             "orderNumber": "string",
-                            "items": ["string"]
+                            "items": [
+                              "string"
+                            ]
                           }
                         ],
                         "pageInfo": {
@@ -8152,7 +8177,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -8498,7 +8525,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -8931,7 +8960,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -8998,7 +9029,8 @@
             "subpackages": [],
             "urlSlug": "amazon-business",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/amazonSeller": {
             "subpackageId": "subpackage_integrations/amazonSeller",
@@ -9285,7 +9317,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -9343,7 +9377,8 @@
             "subpackages": [],
             "urlSlug": "amazon-seller",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/dispatchMe": {
             "subpackageId": "subpackage_integrations/dispatchMe",
@@ -9630,7 +9665,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -9882,7 +9919,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -9960,7 +9999,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -10037,7 +10078,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -10114,7 +10157,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -10191,7 +10236,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -10268,7 +10315,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -10934,7 +10983,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -11166,7 +11217,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -11242,7 +11295,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -11317,7 +11372,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -11392,7 +11449,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -11467,7 +11526,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -11542,7 +11603,9 @@
                               "number": "string"
                             }
                           ],
-                          "labels": ["string"]
+                          "labels": [
+                            "string"
+                          ]
                         }
                       }
                     },
@@ -12180,7 +12243,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -12511,7 +12576,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -12842,7 +12909,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -13323,7 +13392,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -13739,7 +13810,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -13934,7 +14007,9 @@
                           "duration": 0,
                           "time": "string",
                           "userId": 0,
-                          "secondaryUserIds": [0],
+                          "secondaryUserIds": [
+                            0
+                          ],
                           "type": "string",
                           "organizationId": 0,
                           "jobId": 0
@@ -13975,7 +14050,9 @@
                           "duration": 0,
                           "time": "string",
                           "userId": 0,
-                          "secondaryUserIds": [0],
+                          "secondaryUserIds": [
+                            0
+                          ],
                           "type": "string",
                           "organizationId": 0,
                           "jobId": 0
@@ -14016,7 +14093,9 @@
                           "duration": 0,
                           "time": "string",
                           "userId": 0,
-                          "secondaryUserIds": [0],
+                          "secondaryUserIds": [
+                            0
+                          ],
                           "type": "string",
                           "organizationId": 0,
                           "jobId": 0
@@ -14057,7 +14136,9 @@
                           "duration": 0,
                           "time": "string",
                           "userId": 0,
-                          "secondaryUserIds": [0],
+                          "secondaryUserIds": [
+                            0
+                          ],
                           "type": "string",
                           "organizationId": 0,
                           "jobId": 0
@@ -14098,7 +14179,9 @@
                           "duration": 0,
                           "time": "string",
                           "userId": 0,
-                          "secondaryUserIds": [0],
+                          "secondaryUserIds": [
+                            0
+                          ],
                           "type": "string",
                           "organizationId": 0,
                           "jobId": 0
@@ -14139,7 +14222,9 @@
                           "duration": 0,
                           "time": "string",
                           "userId": 0,
-                          "secondaryUserIds": [0],
+                          "secondaryUserIds": [
+                            0
+                          ],
                           "type": "string",
                           "organizationId": 0,
                           "jobId": 0
@@ -14317,7 +14402,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -14818,7 +14905,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -14891,7 +14980,8 @@
             "subpackages": [],
             "urlSlug": "dispatch-me",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/facebook": {
             "subpackageId": "subpackage_integrations/facebook",
@@ -15178,7 +15268,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -15651,7 +15743,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -16041,7 +16135,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -16433,7 +16529,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -16496,7 +16594,8 @@
             "subpackages": [],
             "urlSlug": "facebook",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/instagram": {
             "subpackageId": "subpackage_integrations/instagram",
@@ -16783,7 +16882,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -16841,7 +16942,8 @@
             "subpackages": [],
             "urlSlug": "instagram",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/linkedin": {
             "subpackageId": "subpackage_integrations/linkedin",
@@ -17128,7 +17230,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -17468,7 +17572,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -17882,7 +17988,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -18296,7 +18404,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -18755,7 +18865,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -19183,7 +19295,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -19629,7 +19743,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -20080,7 +20196,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -20150,7 +20268,8 @@
             "subpackages": [],
             "urlSlug": "linkedin",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/ppp": {
             "subpackageId": "subpackage_integrations/ppp",
@@ -20437,7 +20556,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -21432,7 +21553,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -21864,7 +21987,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -23137,7 +23262,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -23469,7 +23596,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -23801,7 +23930,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -24133,7 +24264,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -24465,7 +24598,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -24797,7 +24932,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -25129,7 +25266,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -25461,7 +25600,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -25793,7 +25934,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -26125,7 +26268,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -26457,7 +26602,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -26871,7 +27018,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -26952,7 +27101,8 @@
             "subpackages": [],
             "urlSlug": "ppp",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/servicebox": {
             "subpackageId": "subpackage_integrations/servicebox",
@@ -27239,7 +27389,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -27627,7 +27779,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -27964,7 +28118,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -28378,7 +28534,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -28823,7 +28981,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -28888,7 +29048,8 @@
             "subpackages": [],
             "urlSlug": "servicebox",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/toast": {
             "subpackageId": "subpackage_integrations/toast",
@@ -29175,7 +29336,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -29506,7 +29669,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -29560,11 +29725,14 @@
                 }
               }
             ],
-            "types": ["type_integrations/toast:GetMenusResponse"],
+            "types": [
+              "type_integrations/toast:GetMenusResponse"
+            ],
             "subpackages": [],
             "urlSlug": "toast",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/uber": {
             "subpackageId": "subpackage_integrations/uber",
@@ -29851,7 +30019,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -30421,7 +30591,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -30483,7 +30655,8 @@
             "subpackages": [],
             "urlSlug": "uber",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/venmo": {
             "subpackageId": "subpackage_integrations/venmo",
@@ -30770,7 +30943,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -30960,7 +31135,9 @@
                                 "content": "string"
                               },
                               "type": "string",
-                              "attachments": [{}],
+                              "attachments": [
+                                {}
+                              ],
                               "title": {
                                 "titleType": "string",
                                 "payload": {
@@ -31152,7 +31329,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -31221,7 +31400,8 @@
             "subpackages": [],
             "urlSlug": "venmo",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/vin": {
             "subpackageId": "subpackage_integrations/vin",
@@ -31508,7 +31688,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -32108,7 +32290,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -32506,7 +32690,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -32838,7 +33024,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -33170,7 +33358,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -33584,7 +33774,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -33967,7 +34159,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -34588,7 +34782,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -34655,7 +34851,8 @@
             "subpackages": [],
             "urlSlug": "vin",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/whatsapp": {
             "subpackageId": "subpackage_integrations/whatsapp",
@@ -34942,7 +35139,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -35388,7 +35587,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -35802,7 +36003,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -36199,7 +36402,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -36262,7 +36467,8 @@
             "subpackages": [],
             "urlSlug": "whatsapp",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_integrations/x": {
             "subpackageId": "subpackage_integrations/x",
@@ -36549,7 +36755,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -36946,7 +37154,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -37336,7 +37546,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -37399,7 +37611,8 @@
             "subpackages": [],
             "urlSlug": "x",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_link": {
             "subpackageId": "subpackage_link",
@@ -37868,7 +38081,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -37922,11 +38137,14 @@
                 }
               }
             ],
-            "types": ["type_link:CreateLinkResponse"],
+            "types": [
+              "type_link:CreateLinkResponse"
+            ],
             "subpackages": [],
             "urlSlug": "link",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_linked-accounts": {
             "subpackageId": "subpackage_linked-accounts",
@@ -38507,7 +38725,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -38896,7 +39116,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -39315,7 +39537,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { KeetClient } from \"@keet-tech/keet-node-client\";"],
+                      "imports": [
+                        "import { KeetClient } from \"@keet-tech/keet-node-client\";"
+                      ],
                       "templateString": "const client = new KeetClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -39378,7 +39602,8 @@
             "subpackages": [],
             "urlSlug": "linked-accounts",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -39431,7 +39656,7 @@
     },
     "pages": {
       "docs/contents/intro.mdx": {
-        "markdown": "### Welcome\n\nKeet provides APIs for any website. You can use us to connect your customers' accounts and perform actions on their behalf.\n\nCall API endpoints to request data from your users accounts on websites that dont normally offer them in code as simple as:\n\n```ts\nkeetClient.integrations.linkedIn.post(\"Hello LinkedIn!\")\n```\n\n## Supported Integrations\n\n<ul>\n  <li>`Instagram`</li>\n  <li>`LinkedIn`</li>\n  <li>`Amazon`</li>\n  <li>`Amazon Business`</li>\n  <li>`Amazon Seller`</li>\n  <li>`X`</li>\n  <li>`Venmo`</li>\n  <li>`Facebook`</li>\n  <li>`WhatsApp`</li>\n  <li>`Uber`</li>\n</ul>\n\n\n## Its quick and easy to get started\n\n<Steps>\n### Users connect their accounts using our link component\n<Frame background=\"subtle\" style=\"width: 100px; height: auto;\">\n  <img src=\"file:52ff1783-66b8-4718-af7b-40cc2b7c5799\" />\n</Frame>\n\n### Access your end users accounts and act on their behalf\n\nWe offer a variety of API abstractions to make it easy to interact with your users accounts. However, we also understand there are some integrations that require more niche interactions. In that case we give you the option to connect via playwright and write your own automations.\n\n<Cards>\n  <Card href=\"/overview/integrations/using-our-abstractions\" title=\"Learn more about our API abstractions\" />\n  <Card href=\"/overview/integrations/custom-automations\" title=\"Learn more about writing your own automations\" />\n</Cards>\n\n</Steps>\n## Why does this exist?\n\nBuilding automations on sites with authenticated sessions is challenging.\n\nImagine if you could easily...\n\n1. Get your users health data from their insurance provider.\n2. Book Ubers based on your users calendar and location\n3. Track activity on properties for future homeowners on Redfin\n\n## How are we different\n\nThere are other solutions out there. What do we do differently...\n\n1. No chrome extension necessary for your users to authenticate\n2. We maintain your users authenticated sessions\n3. Many of our API abstractions don’t rely on playwright or browser automations.\n"
+        "markdown": "### Welcome\n\nKeet provides APIs for any website. You can use us to connect your customers' accounts and perform actions on their behalf.\n\nCall API endpoints to request data from your users accounts on websites that dont normally offer them in code as simple as:\n\n```ts\nkeetClient.integrations.linkedIn.post(\"Hello LinkedIn!\")\n```\n\n## Supported Integrations\n\n<ul>\n  <li>`Instagram`</li>\n  <li>`LinkedIn`</li>\n  <li>`Amazon`</li>\n  <li>`Amazon Business`</li>\n  <li>`Amazon Seller`</li>\n  <li>`X`</li>\n  <li>`Venmo`</li>\n  <li>`Facebook`</li>\n  <li>`WhatsApp`</li>\n  <li>`Uber`</li>\n</ul>\n\n\n## Its quick and easy to get started\n\n<Steps>\n### Users connect their accounts using our link component\n<Frame background=\"subtle\" style=\"width: 100px; height: auto;\">\n  <img src=\"file:52ff1783-66b8-4718-af7b-40cc2b7c5799\" />\n</Frame>\n\n### Access your end users accounts and act on their behalf\n\nWe offer a variety of API abstractions to make it easy to interact with your users accounts. However, we also understand there are some integrations that require more niche interactions. In that case we give you the option to connect via playwright and write your own automations.\n\n<Cards>\n  <Card href=\"/overview/integrations/using-our-abstractions\" title=\"Learn more about our API abstractions\" />\n  <Card href=\"/overview/integrations/custom-automations\" title=\"Learn more about writing your own automations\" />\n</Cards>\n\n</Steps>\n## Why does this exist?\n\nBuilding automations on sites with authenticated sessions is challenging.\n\nImagine if you could easily...\n\n1. Get your users health data from their insurance provider.\n2. Book Ubers based on your users calendar and location\n3. Track activity on properties for future homeowners on Redfin\n\n## How are we different\n\nThere are other solutions out there. What do we do differently...\n\n1. No chrome extension necessary for your users to authenticate\n2. We maintain your users authenticated sessions\n3. Many of our API abstractions don\u2019t rely on playwright or browser automations.\n"
       },
       "docs/contents/quick-start.mdx": {
         "markdown": "## Add Keet Link to Your Product\n\n<Tip>\n  If you get stuck at any point, email for help at zack@trykeet.com. If you don't get a response in 10 minutes, we'll\n  buy you coffee.\n</Tip>\n\nKeet link uses a series of token exchanges to authenticate your users accounts.\n\n{\" \"}\n\n&nbsp;&nbsp;&nbsp;&nbsp;**Step 1**: Get a `linkToken` so that you can initialize a link session for your users\n\n&nbsp;&nbsp;&nbsp;&nbsp;**Step 2**: Make Keet Link appear in your frontend using the `linkToken`\n\n&nbsp;&nbsp;&nbsp;&nbsp;**Step 3**: Swap the `publicToken`, returned by `keetLink` for an `accountToken`\n\n&nbsp;&nbsp;&nbsp;&nbsp;**Step 4**: Use the `accountToken` for future requests to authenticated sessions.\n\n### Step 1: Get a Link Token (Server side)\n\nIn your backend, set up a POST request to initialize a Keet Link session and get a `linkToken` from this URL: `https://api.trykeet.com/v1/link/token`\n\n<Accordion title=\"Supported Integrations\">\n  <ul>\n    <li>`Instagram`</li>\n    <li>`LinkedIn`</li>\n    <li>`Amazon`</li>\n    <li>`Amazon Business`</li>\n    <li>`Amazon Seller`</li>\n    <li>`X`</li>\n    <li>`Venmo`</li>\n    <li>`Facebook`</li>\n    <li>`WhatsApp`</li>\n    <li>`Uber`</li>\n  </ul>\n  \n</Accordion>\n\n<EndpointRequestSnippet endpoint=\"POST v1/link/token\" />\n<EndpointResponseSnippet endpoint=\"POST v1/link/token\" />\n\nYou can now pass this public `linkToken` back to your client to initialize the link component.\n\n### Step 2: Make the Keet Link Appear (Client side)\n\n<Tabs>\n  <Tab title=\"React\">\n    1. Install the link sdk: `npm install @keet-tech/react-keet-link`\n\n    2. Use the `linkToken` from **[Step 1](#step-1-get-a-link-token)** to open Keet link\n    ```tsx\n      import { useKeetLink } from \"@keet-tech/react-keet-link\"\n      import { useEffect, useState } from \"react\"\n\n      export default function App() {\n        const onSuccess = (publicToken: string) => {\n          /* send a request to your backend\n          to exchange this for an account token */\n        }\n\n        const onValidationError = (errors: any) => {\n          console.error(\"An error from Keet Link occured: \", errors)\n        }\n\n        const { open, isReady } = useKeetLink({\n          linkToken: \"ADD YOUR LINK TOKEN -- SEE STEP 1\",\n          onSuccess,\n          onValidationError\n        })\n\n\n\n        return (\n          <button disabled={!isReady} onClick={open}>Open Link</button>\n        )\n      }\n\n      export default App;\n      ```\n\n  </Tab>\n  <Tab title=\"HTML/JS\">\n    ```html\n    <button id=\"open-link-button\">Start linking</button>\n    <script src=\"https://cdn.trykeet.com/initialize.js\"></script>\n    <script type=\"text/javascript\">\n      const button = document.getElementById(\"open-link-button\");\n      button.disabled = true;\n\n    function onSuccess(public_token) {\n    // Send public_token to server (Step 3)\n    }\n\n    KeetLink.initialize({\n      // Replace ADD_GENERATED_LINK_TOKEN with the token retrieved from your backend (Step 1)\n      linkToken: \"ADD_GENERATED_LINK_TOKEN\",\n      onSuccess: (public_token) => onSuccess(public_token),\n      onReady: () => (button.disabled = false),\n      });\n\n      button.addEventListener(\"click\", function () {\n      KeetLink.openLink();\n    });\n    </script>\n      ```\n\n  </Tab>\n  <Tab title=\"React Native (Mobile)\">\n    1. Install the link sdk: <br/> `npm install --save @keet-tech/react-native-keet-link react-native-svg`\n\n    2.  Use the `linkToken` from **[Step 1](#step-1-get-a-link-token)** to open Keet link:\n      ```tsx\n      import KeetLink, { LinkError } from \"@keet-tech/react-native-keet-link\"\n\n      export default function App() {\n        const onSuccess = (publicToken: string) => {\n          /* send a request to your backend\n          to exchange this for an account token */\n        }\n\n        const onError = (errors: LinkError[]) => {\n          console.error(\"An error from Keet Link occured: \", errors)\n        }\n\n        return (\n          <View style={{ flex: 1, justifyContent: \"center\", alignItems: \"center\" }}>\n            <KeetLink linkToken={linkToken} onSuccess={onSuccess} onError={onError}>\n              <Text style={{ color: \"blue\" }}>Open Link</Text>\n            </KeetLink>\n          </View>\n        )\n      }\n        ```\n\n  </Tab>\n\n</Tabs>\n\n### Step 3: Swap `publicToken` for `accountToken` (Server Side)\n\nIn your backend, create a request to exchange the short-lived `publicToken` for a permanent `accountToken`.\n\n<EndpointRequestSnippet endpoint=\"POST v1/linked-accounts/token\" />\n<EndpointResponseSnippet endpoint=\"POST v1/linked-accounts/token\" />\n\n<Note>\n  Store this account token someplace secure. It is used to make all requests to this end users authenticated sessions.\n</Note>\n\n### You're done!\n\nUse the `accountToken` to make all future requests on behalf of the user to every integration they use.\n\n## Check out how to use your integrations\n\n<Cards center>\n  <Card title=\"Integration Overview\" href=\"/overview/quick-start\" />\n</Cards>\n"

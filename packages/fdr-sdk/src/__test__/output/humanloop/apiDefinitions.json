@@ -20291,6 +20291,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_chats:ChatsCreateStreamRequestToolChoice": {
         "name": "ChatsCreateStreamRequestToolChoice",
@@ -78404,6 +78405,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_prompts:PromptLogRequestToolChoice": {
         "name": "PromptLogRequestToolChoice",

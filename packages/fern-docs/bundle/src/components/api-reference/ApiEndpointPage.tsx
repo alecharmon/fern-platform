@@ -6,6 +6,7 @@ import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import {
     type ApiDefinition,
     createEndpointContext,
+    createGraphqlContext,
     createGrpcContext,
     createWebhookContext,
     createWebSocketContext,
@@ -19,6 +20,7 @@ import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import { constructPageOptions } from "../PageActionsOptions";
 import { EndpointContent } from "./endpoints/EndpointContent";
+import { GraphqlContent } from "./graphql/GraphqlContent";
 import { GrpcContent } from "./grpcs/GrpcContent";
 import { WebhookContent } from "./webhooks/WebhookContent";
 import { WebSocketContent } from "./websockets/WebSocket";
@@ -177,6 +179,27 @@ async function ApiEndpointContent({
             }
             return (
                 <GrpcContent
+                    serialize={serialize}
+                    breadcrumb={breadcrumb}
+                    context={context}
+                    action={action}
+                    bottomNavigation={bottomNavigation}
+                    hideFeedback={hideFeedback}
+                    pageActionOptions={pageActionOptions}
+                    markdownPromise={markdownPromise}
+                    lang={lang}
+                    pageActionsStyle={pageActionsStyle}
+                    theme={theme}
+                />
+            );
+        }
+        case "graphql": {
+            const context = createGraphqlContext(node, prune(apiDefinition, node));
+            if (!context) {
+                throw new Error(`Could not create graphql context for ${node.id}`);
+            }
+            return (
+                <GraphqlContent
                     serialize={serialize}
                     breadcrumb={breadcrumb}
                     context={context}

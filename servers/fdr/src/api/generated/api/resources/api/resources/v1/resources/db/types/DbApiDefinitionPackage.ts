@@ -6,6 +6,7 @@ export interface DbApiDefinitionPackage {
     endpoints: FernRegistry.api.v1.db.DbEndpointDefinition[];
     websockets: FernRegistry.api.v1.read.WebSocketChannel[] | undefined;
     webhooks: FernRegistry.api.v1.read.WebhookDefinition[] | undefined;
+    graphqlOperations: FernRegistry.api.latest.GraphQlOperation[] | undefined;
     types: FernRegistry.TypeId[];
     subpackages: FernRegistry.api.v1.SubpackageId[];
     /**

@@ -1,0 +1,99 @@
+import "server-only";
+
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
+import type { GraphqlContext } from "@fern-api/fdr-sdk/api-definition";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { GraphqlContentCodeSnippets } from "@fern-docs/components/api-reference/graphql/GraphqlContentCodeSnippets";
+import { GraphqlContextProvider } from "@fern-docs/components/api-reference/graphql/GraphqlContext";
+import { TypeDefinitionRoot } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
+import { AvailabilityBadge } from "@fern-docs/components/badges";
+import type { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
+import type React from "react";
+import { FooterLayout } from "@/components/layouts/FooterLayout";
+import { PageHeader } from "@/components/PageHeader";
+import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
+import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
+import type { MdxSerializer } from "@/server/mdx-serializer";
+import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
+import { GraphqlContentLeft } from "./GraphqlContentLeft";
+
+export async function GraphqlContent({
+    serialize,
+    context,
+    breadcrumb,
+    action,
+    bottomNavigation,
+    hideFeedback,
+    pageActionOptions,
+    markdownPromise,
+    lang,
+    pageActionsStyle = "default",
+    theme
+}: {
+    serialize: MdxSerializer;
+    context: GraphqlContext;
+    breadcrumb: readonly FernNavigation.BreadcrumbItem[];
+    action?: React.ReactNode;
+    bottomNavigation?: React.ReactNode;
+    hideFeedback: boolean;
+    pageActionOptions?: FernDropdown.PageActionOption[];
+    markdownPromise: Promise<{ content: string; contentType: "markdown" | "mdx" } | undefined>;
+    lang: string;
+    pageActionsStyle?: "default" | "toolbar";
+    theme?: FernThemeConfig;
+}) {
+    const { node, operation, types } = context;
+
+    const graphqlExample = operation.examples?.[0]
+        ? {
+              query: operation.examples[0].query,
+              variables: operation.examples[0].variables,
+              response: operation.examples[0].response
+          }
+        : undefined;
+
+    const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(operation.description);
+
+    return (
+        <GraphqlContextProvider operation={operation} example={graphqlExample}>
+            <ReferenceLayout
+                theme={theme}
+                header={
+                    <PageHeader
+                        serialize={serialize}
+                        breadcrumb={breadcrumb}
+                        title={node.title}
+                        action={action}
+                        tags={
+                            operation.availability != null && (
+                                <AvailabilityBadge availability={operation.availability} rounded />
+                            )
+                        }
+                        slug={node.slug}
+                        pageActionOptions={pageActionOptions}
+                        markdownPromise={markdownPromise}
+                        lang={lang}
+                        pageActionsStyle={pageActionsStyle}
+                    />
+                }
+                aside={<GraphqlContentCodeSnippets node={node} lang={lang} />}
+                reference={
+                    <TypeDefinitionRoot types={types} slug={node.slug}>
+                        <TypeDefinitionSlotsServer types={types} lang={lang}>
+                            <GraphqlContentLeft context={context} lang={lang} />
+                        </TypeDefinitionSlotsServer>
+                    </TypeDefinitionRoot>
+                }
+                descriptionFooter={
+                    footerContent ? (
+                        <MdxServerComponentProseSuspense key="description-footer" mdx={footerContent} />
+                    ) : undefined
+                }
+                footer={<FooterLayout bottomNavigation={bottomNavigation} hideFeedback={hideFeedback} lang={lang} />}
+            >
+                <MdxServerComponentProseSuspense mdx={descriptionWithoutFooter} />
+            </ReferenceLayout>
+        </GraphqlContextProvider>
+    );
+}

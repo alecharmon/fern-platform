@@ -22,6 +22,7 @@ export function followRedirect(
         webSocket: (node) => node.slug,
         webhook: (node) => node.slug,
         grpc: (node) => node.slug,
+        graphql: (node) => node.slug,
         landingPage: (node) => node.slug,
 
         // nodes with overview

@@ -830,7 +830,9 @@
           "variants": [
             {
               "fontFile": "8d79560a-0ba6-43b5-b573-a7e0654b4cfc",
-              "weight": ["600"]
+              "weight": [
+                "600"
+              ]
             }
           ]
         },
@@ -840,11 +842,15 @@
           "variants": [
             {
               "fontFile": "6e41cbfd-6cf7-4fe9-a711-c24fec385a5d",
-              "weight": ["400"]
+              "weight": [
+                "400"
+              ]
             },
             {
               "fontFile": "8ce1eb24-895e-49f1-ad96-dfeeb269a251",
-              "weight": ["500"]
+              "weight": [
+                "500"
+              ]
             }
           ]
         },
@@ -854,7 +860,9 @@
           "variants": [
             {
               "fontFile": "a156f5b5-71f2-4a89-9c8e-3ac2503063f8",
-              "weight": ["400"]
+              "weight": [
+                "400"
+              ]
             }
           ]
         }
@@ -1225,7 +1233,8 @@
             "type_:RequestDirection"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_:CustomFieldType": {
@@ -6176,7 +6185,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["add-subscription-to-an-automation"],
+                "migratedFromUrlSlugs": [
+                  "add-subscription-to-an-automation"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_automationJourneys.create",
@@ -6560,7 +6571,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-automation-journeys"],
+                "migratedFromUrlSlugs": [
+                  "list-automation-journeys"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_automationJourneys.index",
@@ -6864,7 +6877,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-automation-journey"],
+                "migratedFromUrlSlugs": [
+                  "get-automation-journey"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_automationJourneys.show",
@@ -7199,7 +7214,8 @@
             "urlSlug": "automation-journeys",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Automation Journeys"
+            "displayName": "Automation Journeys",
+            "graphqlOperations": []
           },
           "subpackage_automations": {
             "subpackageId": "subpackage_automations",
@@ -7214,7 +7230,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-automations"],
+                "migratedFromUrlSlugs": [
+                  "list-automations"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_automations.index",
@@ -7353,7 +7371,9 @@
                           "id": "aut_00000000-0000-0000-0000-000000000000",
                           "status": "running",
                           "name": "Custom welcome series",
-                          "trigger_events": ["api"],
+                          "trigger_events": [
+                            "api"
+                          ],
                           "description": "Sends 2 days after signing up"
                         }
                       ],
@@ -7381,7 +7401,9 @@
                             "id": "aut_00000000-0000-0000-0000-000000000000",
                             "status": "running",
                             "name": "Custom welcome series",
-                            "trigger_events": ["api"],
+                            "trigger_events": [
+                              "api"
+                            ],
                             "description": "Sends 2 days after signing up"
                           }
                         ],
@@ -7553,7 +7575,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-automation"],
+                "migratedFromUrlSlugs": [
+                  "get-automation"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_automations.show",
@@ -7681,7 +7705,9 @@
                         "id": "aut_00000000-0000-0000-0000-000000000000",
                         "status": "running",
                         "name": "Custom welcome series",
-                        "trigger_events": ["api"],
+                        "trigger_events": [
+                          "api"
+                        ],
                         "description": "Sends 2 days after signing up"
                       }
                     },
@@ -7703,7 +7729,9 @@
                           "id": "aut_00000000-0000-0000-0000-000000000000",
                           "status": "running",
                           "name": "Custom welcome series",
-                          "trigger_events": ["api"],
+                          "trigger_events": [
+                            "api"
+                          ],
                           "description": "Sends 2 days after signing up"
                         }
                       }
@@ -7854,12 +7882,16 @@
                 "authed": true
               }
             ],
-            "types": ["type_automations:AutomationsListResponse", "type_automations:AutomationsGetResponse"],
+            "types": [
+              "type_automations:AutomationsListResponse",
+              "type_automations:AutomationsGetResponse"
+            ],
             "subpackages": [],
             "urlSlug": "automations",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Automations"
+            "displayName": "Automations",
+            "graphqlOperations": []
           },
           "subpackage_bulkSubscriptionUpdates": {
             "subpackageId": "subpackage_bulkSubscriptionUpdates",
@@ -7874,7 +7906,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-subscription-updates"],
+                "migratedFromUrlSlugs": [
+                  "list-subscription-updates"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_bulkSubscriptionUpdates.index",
@@ -7992,7 +8026,9 @@
                           "completed": 1,
                           "created": 1,
                           "updated": 1,
-                          "error_log": ["error_log"]
+                          "error_log": [
+                            "error_log"
+                          ]
                         }
                       ]
                     },
@@ -8021,7 +8057,9 @@
                             "completed": 1,
                             "created": 1,
                             "updated": 1,
-                            "error_log": ["error_log"]
+                            "error_log": [
+                              "error_log"
+                            ]
                           }
                         ]
                       }
@@ -8177,7 +8215,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-subscription-update"],
+                "migratedFromUrlSlugs": [
+                  "get-subscription-update"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_bulkSubscriptionUpdates.show",
@@ -8313,7 +8353,9 @@
                         "completed": 1,
                         "created": 1,
                         "updated": 1,
-                        "error_log": ["error_log"]
+                        "error_log": [
+                          "error_log"
+                        ]
                       }
                     },
                     "codeExamples": {
@@ -8340,7 +8382,9 @@
                           "completed": 1,
                           "created": 1,
                           "updated": 1,
-                          "error_log": ["error_log"]
+                          "error_log": [
+                            "error_log"
+                          ]
                         }
                       }
                     },
@@ -8499,7 +8543,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "put",
-                "migratedFromUrlSlugs": ["update-subscriptions"],
+                "migratedFromUrlSlugs": [
+                  "update-subscriptions"
+                ],
                 "method": "PUT",
                 "id": "put",
                 "originalEndpointId": "endpoint_bulkSubscriptionUpdates.put",
@@ -8894,7 +8940,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "patch",
-                "migratedFromUrlSlugs": ["update-subscriptions"],
+                "migratedFromUrlSlugs": [
+                  "update-subscriptions"
+                ],
                 "method": "PATCH",
                 "id": "patch",
                 "originalEndpointId": "endpoint_bulkSubscriptionUpdates.patch",
@@ -9289,7 +9337,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "put-status",
-                "migratedFromUrlSlugs": ["update-subscriptions-status"],
+                "migratedFromUrlSlugs": [
+                  "update-subscriptions-status"
+                ],
                 "method": "PUT",
                 "id": "put-status",
                 "originalEndpointId": "endpoint_bulkSubscriptionUpdates.put-status",
@@ -9369,7 +9419,10 @@
                     "queryParameters": {},
                     "headers": {},
                     "requestBody": {
-                      "subscription_ids": ["sub_1234-5678-9012-3456-7890", "sub_9876-5432-1098-7654-3210"],
+                      "subscription_ids": [
+                        "sub_1234-5678-9012-3456-7890",
+                        "sub_9876-5432-1098-7654-3210"
+                      ],
                       "new_status": "active"
                     },
                     "responseStatusCode": 204,
@@ -9379,7 +9432,10 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "subscription_ids": ["sub_1234-5678-9012-3456-7890", "sub_9876-5432-1098-7654-3210"],
+                        "subscription_ids": [
+                          "sub_1234-5678-9012-3456-7890",
+                          "sub_9876-5432-1098-7654-3210"
+                        ],
                         "new_status": "active"
                       }
                     },
@@ -9398,7 +9454,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "patch-status",
-                "migratedFromUrlSlugs": ["update-subscriptions-status"],
+                "migratedFromUrlSlugs": [
+                  "update-subscriptions-status"
+                ],
                 "method": "PATCH",
                 "id": "patch-status",
                 "originalEndpointId": "endpoint_bulkSubscriptionUpdates.patch-status",
@@ -9478,7 +9536,10 @@
                     "queryParameters": {},
                     "headers": {},
                     "requestBody": {
-                      "subscription_ids": ["sub_1234-5678-9012-3456-7890", "sub_9876-5432-1098-7654-3210"],
+                      "subscription_ids": [
+                        "sub_1234-5678-9012-3456-7890",
+                        "sub_9876-5432-1098-7654-3210"
+                      ],
                       "new_status": "active"
                     },
                     "responseStatusCode": 204,
@@ -9488,7 +9549,10 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "subscription_ids": ["sub_1234-5678-9012-3456-7890", "sub_9876-5432-1098-7654-3210"],
+                        "subscription_ids": [
+                          "sub_1234-5678-9012-3456-7890",
+                          "sub_9876-5432-1098-7654-3210"
+                        ],
                         "new_status": "active"
                       }
                     },
@@ -9518,7 +9582,8 @@
             "urlSlug": "bulk-subscription-updates",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Bulk Subscription Updates"
+            "displayName": "Bulk Subscription Updates",
+            "graphqlOperations": []
           },
           "subpackage_customFields": {
             "subpackageId": "subpackage_customFields",
@@ -9533,7 +9598,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-custom-field"],
+                "migratedFromUrlSlugs": [
+                  "create-custom-field"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_customFields.create",
@@ -9884,7 +9951,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-custom-field"],
+                "migratedFromUrlSlugs": [
+                  "get-custom-field"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_customFields.show",
@@ -10194,7 +10263,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-custom-fields"],
+                "migratedFromUrlSlugs": [
+                  "list-custom-fields"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_customFields.index",
@@ -10465,7 +10536,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "put",
-                "migratedFromUrlSlugs": ["update-custom-field"],
+                "migratedFromUrlSlugs": [
+                  "update-custom-field"
+                ],
                 "method": "PUT",
                 "id": "put",
                 "originalEndpointId": "endpoint_customFields.put",
@@ -10821,7 +10894,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "patch",
-                "migratedFromUrlSlugs": ["update-custom-field"],
+                "migratedFromUrlSlugs": [
+                  "update-custom-field"
+                ],
                 "method": "PATCH",
                 "id": "patch",
                 "originalEndpointId": "endpoint_customFields.patch",
@@ -11177,7 +11252,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-custom-field"],
+                "migratedFromUrlSlugs": [
+                  "delete-custom-field"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_customFields.delete",
@@ -11477,7 +11554,8 @@
             "urlSlug": "custom-fields",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Custom Fields"
+            "displayName": "Custom Fields",
+            "graphqlOperations": []
           },
           "subpackage_ids": {
             "subpackageId": "subpackage_ids",
@@ -11499,7 +11577,8 @@
             "subpackages": [],
             "urlSlug": "ids",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_posts": {
             "subpackageId": "subpackage_posts",
@@ -11514,7 +11593,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-posts"],
+                "migratedFromUrlSlugs": [
+                  "list-posts"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_posts.index",
@@ -11749,7 +11830,9 @@
                           "id": "post_00000000-0000-0000-0000-000000000000",
                           "subtitle": "New post subtitle",
                           "title": "New Post Title",
-                          "authors": ["Clark Kent"],
+                          "authors": [
+                            "Clark Kent"
+                          ],
                           "created": 1666800076,
                           "status": "draft",
                           "publish_date": 1666800076,
@@ -11762,7 +11845,9 @@
                           "web_url": "web_url",
                           "audience": "free",
                           "platform": "web",
-                          "content_tags": ["content_tags"],
+                          "content_tags": [
+                            "content_tags"
+                          ],
                           "meta_default_description": "A post with great content",
                           "meta_default_title": "My great post",
                           "hidden_from_feed": true
@@ -11792,7 +11877,9 @@
                             "id": "post_00000000-0000-0000-0000-000000000000",
                             "subtitle": "New post subtitle",
                             "title": "New Post Title",
-                            "authors": ["Clark Kent"],
+                            "authors": [
+                              "Clark Kent"
+                            ],
                             "created": 1666800076,
                             "status": "draft",
                             "publish_date": 1666800076,
@@ -11805,7 +11892,9 @@
                             "web_url": "web_url",
                             "audience": "free",
                             "platform": "web",
-                            "content_tags": ["content_tags"],
+                            "content_tags": [
+                              "content_tags"
+                            ],
                             "meta_default_description": "A post with great content",
                             "meta_default_title": "My great post",
                             "hidden_from_feed": true
@@ -11825,7 +11914,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"],
+                      "expand": [
+                        "stats"
+                      ],
                       "audience": "free"
                     },
                     "headers": {},
@@ -11862,7 +11953,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"],
+                      "expand": [
+                        "stats"
+                      ],
                       "audience": "free"
                     },
                     "headers": {},
@@ -11899,7 +11992,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"],
+                      "expand": [
+                        "stats"
+                      ],
                       "audience": "free"
                     },
                     "headers": {},
@@ -11936,7 +12031,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"],
+                      "expand": [
+                        "stats"
+                      ],
                       "audience": "free"
                     },
                     "headers": {},
@@ -11980,7 +12077,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-post"],
+                "migratedFromUrlSlugs": [
+                  "get-post"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_posts.show",
@@ -12123,7 +12222,9 @@
                         "id": "post_00000000-0000-0000-0000-000000000000",
                         "subtitle": "New post subtitle",
                         "title": "New Post Title",
-                        "authors": ["Clark Kent"],
+                        "authors": [
+                          "Clark Kent"
+                        ],
                         "created": 1666800076,
                         "status": "draft",
                         "publish_date": 1666800076,
@@ -12136,7 +12237,9 @@
                         "web_url": "web_url",
                         "audience": "free",
                         "platform": "web",
-                        "content_tags": ["content_tags"],
+                        "content_tags": [
+                          "content_tags"
+                        ],
                         "meta_default_description": "A post with great content",
                         "meta_default_title": "My great post",
                         "content": {
@@ -12193,7 +12296,9 @@
                           "id": "post_00000000-0000-0000-0000-000000000000",
                           "subtitle": "New post subtitle",
                           "title": "New Post Title",
-                          "authors": ["Clark Kent"],
+                          "authors": [
+                            "Clark Kent"
+                          ],
                           "created": 1666800076,
                           "status": "draft",
                           "publish_date": 1666800076,
@@ -12206,7 +12311,9 @@
                           "web_url": "web_url",
                           "audience": "free",
                           "platform": "web",
-                          "content_tags": ["content_tags"],
+                          "content_tags": [
+                            "content_tags"
+                          ],
                           "meta_default_description": "A post with great content",
                           "meta_default_title": "My great post",
                           "content": {
@@ -12255,7 +12362,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"]
+                      "expand": [
+                        "stats"
+                      ]
                     },
                     "headers": {},
                     "responseStatusCode": 400,
@@ -12292,7 +12401,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"]
+                      "expand": [
+                        "stats"
+                      ]
                     },
                     "headers": {},
                     "responseStatusCode": 404,
@@ -12329,7 +12440,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"]
+                      "expand": [
+                        "stats"
+                      ]
                     },
                     "headers": {},
                     "responseStatusCode": 429,
@@ -12366,7 +12479,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"]
+                      "expand": [
+                        "stats"
+                      ]
                     },
                     "headers": {},
                     "responseStatusCode": 500,
@@ -12409,7 +12524,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-post"],
+                "migratedFromUrlSlugs": [
+                  "delete-post"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_posts.delete",
@@ -12711,7 +12828,8 @@
             "urlSlug": "posts",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Posts"
+            "displayName": "Posts",
+            "graphqlOperations": []
           },
           "subpackage_publications": {
             "subpackageId": "subpackage_publications",
@@ -12726,7 +12844,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-publications"],
+                "migratedFromUrlSlugs": [
+                  "list-publications"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_publications.index",
@@ -12946,7 +13066,9 @@
                     "path": "/publications",
                     "pathParameters": {},
                     "queryParameters": {
-                      "expand": ["stats"],
+                      "expand": [
+                        "stats"
+                      ],
                       "limit": 0
                     },
                     "headers": {},
@@ -12981,7 +13103,9 @@
                     "path": "/publications",
                     "pathParameters": {},
                     "queryParameters": {
-                      "expand": ["stats"],
+                      "expand": [
+                        "stats"
+                      ],
                       "limit": 0
                     },
                     "headers": {},
@@ -13016,7 +13140,9 @@
                     "path": "/publications",
                     "pathParameters": {},
                     "queryParameters": {
-                      "expand": ["stats"],
+                      "expand": [
+                        "stats"
+                      ],
                       "limit": 0
                     },
                     "headers": {},
@@ -13051,7 +13177,9 @@
                     "path": "/publications",
                     "pathParameters": {},
                     "queryParameters": {
-                      "expand": ["stats"],
+                      "expand": [
+                        "stats"
+                      ],
                       "limit": 0
                     },
                     "headers": {},
@@ -13095,7 +13223,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-publication"],
+                "migratedFromUrlSlugs": [
+                  "get-publication"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_publications.show",
@@ -13276,7 +13406,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"]
+                      "expand": [
+                        "stats"
+                      ]
                     },
                     "headers": {},
                     "responseStatusCode": 400,
@@ -13312,7 +13444,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"]
+                      "expand": [
+                        "stats"
+                      ]
                     },
                     "headers": {},
                     "responseStatusCode": 404,
@@ -13348,7 +13482,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"]
+                      "expand": [
+                        "stats"
+                      ]
                     },
                     "headers": {},
                     "responseStatusCode": 429,
@@ -13384,7 +13520,9 @@
                       "publicationId": ":publicationId"
                     },
                     "queryParameters": {
-                      "expand": ["stats"]
+                      "expand": [
+                        "stats"
+                      ]
                     },
                     "headers": {},
                     "responseStatusCode": 500,
@@ -13430,7 +13568,8 @@
             "urlSlug": "publications",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Publications"
+            "displayName": "Publications",
+            "graphqlOperations": []
           },
           "subpackage_referralProgram": {
             "subpackageId": "subpackage_referralProgram",
@@ -13445,7 +13584,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-referral-program"],
+                "migratedFromUrlSlugs": [
+                  "get-referral-program"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_referralProgram.show",
@@ -13787,12 +13928,15 @@
                 "authed": true
               }
             ],
-            "types": ["type_referralProgram:ReferralProgramGetResponse"],
+            "types": [
+              "type_referralProgram:ReferralProgramGetResponse"
+            ],
             "subpackages": [],
             "urlSlug": "referral-program",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Referral Program"
+            "displayName": "Referral Program",
+            "graphqlOperations": []
           },
           "subpackage_segments": {
             "subpackageId": "subpackage_segments",
@@ -13807,7 +13951,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-segments"],
+                "migratedFromUrlSlugs": [
+                  "list-segments"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_segments.index",
@@ -14195,7 +14341,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-segment"],
+                "migratedFromUrlSlugs": [
+                  "get-segment"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_segments.show",
@@ -14430,7 +14578,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "expand-results",
-                "migratedFromUrlSlugs": ["list-segment-subscribers"],
+                "migratedFromUrlSlugs": [
+                  "list-segment-subscribers"
+                ],
                 "method": "GET",
                 "id": "expand_results",
                 "originalEndpointId": "endpoint_segments.expand_results",
@@ -14581,7 +14731,10 @@
                     "headers": {},
                     "responseStatusCode": 200,
                     "responseBody": {
-                      "data": ["sub_00000000-0000-0000-0000-000000000000", "sub_00000000-1111-1111-1111-111111111111"],
+                      "data": [
+                        "sub_00000000-0000-0000-0000-000000000000",
+                        "sub_00000000-1111-1111-1111-111111111111"
+                      ],
                       "limit": 1,
                       "page": 1,
                       "total_results": 1,
@@ -14778,7 +14931,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-segment"],
+                "migratedFromUrlSlugs": [
+                  "delete-segment"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_segments.delete",
@@ -15030,7 +15185,8 @@
             "urlSlug": "segments",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Segments"
+            "displayName": "Segments",
+            "graphqlOperations": []
           },
           "subpackage_subscriptions": {
             "subpackageId": "subpackage_subscriptions",
@@ -15045,7 +15201,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-subscription"],
+                "migratedFromUrlSlugs": [
+                  "create-subscription"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_subscriptions.create",
@@ -15384,7 +15542,10 @@
                         "status": "validating",
                         "created": 1666800076,
                         "subscription_tier": "free",
-                        "subscription_premium_tier_names": ["Premium", "Gold"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Gold"
+                        ],
                         "utm_source": "Twitter",
                         "utm_medium": "organic",
                         "utm_channel": "",
@@ -15436,7 +15597,10 @@
                           "status": "validating",
                           "created": 1666800076,
                           "subscription_tier": "free",
-                          "subscription_premium_tier_names": ["Premium", "Gold"],
+                          "subscription_premium_tier_names": [
+                            "Premium",
+                            "Gold"
+                          ],
                           "utm_source": "Twitter",
                           "utm_medium": "organic",
                           "utm_channel": "",
@@ -15621,7 +15785,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-subscriptions"],
+                "migratedFromUrlSlugs": [
+                  "list-subscriptions"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_subscriptions.index",
@@ -15858,7 +16024,10 @@
                           "status": "validating",
                           "created": 1666800076,
                           "subscription_tier": "free",
-                          "subscription_premium_tier_names": ["Premium", "Gold"],
+                          "subscription_premium_tier_names": [
+                            "Premium",
+                            "Gold"
+                          ],
                           "utm_source": "Twitter",
                           "utm_medium": "organic",
                           "utm_channel": "",
@@ -15872,8 +16041,15 @@
                               "status": "active"
                             }
                           ],
-                          "custom_fields": [{}],
-                          "tags": ["Premium", "Basic", "Active", "Engaged"],
+                          "custom_fields": [
+                            {}
+                          ],
+                          "tags": [
+                            "Premium",
+                            "Basic",
+                            "Active",
+                            "Engaged"
+                          ],
                           "stats": {
                             "emails_received": 25,
                             "open_rate": 60.1,
@@ -15907,7 +16083,10 @@
                             "status": "validating",
                             "created": 1666800076,
                             "subscription_tier": "free",
-                            "subscription_premium_tier_names": ["Premium", "Gold"],
+                            "subscription_premium_tier_names": [
+                              "Premium",
+                              "Gold"
+                            ],
                             "utm_source": "Twitter",
                             "utm_medium": "organic",
                             "utm_channel": "",
@@ -15921,8 +16100,15 @@
                                 "status": "active"
                               }
                             ],
-                            "custom_fields": [{}],
-                            "tags": ["Premium", "Basic", "Active", "Engaged"],
+                            "custom_fields": [
+                              {}
+                            ],
+                            "tags": [
+                              "Premium",
+                              "Basic",
+                              "Active",
+                              "Engaged"
+                            ],
                             "stats": {
                               "emails_received": 25,
                               "open_rate": 60.1,
@@ -16099,7 +16285,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-by-email",
-                "migratedFromUrlSlugs": ["get-subscription-by-email"],
+                "migratedFromUrlSlugs": [
+                  "get-subscription-by-email"
+                ],
                 "method": "GET",
                 "id": "get-by-email",
                 "originalEndpointId": "endpoint_subscriptions.get-by-email",
@@ -16243,7 +16431,10 @@
                         "status": "validating",
                         "created": 1666800076,
                         "subscription_tier": "free",
-                        "subscription_premium_tier_names": ["Premium", "Gold"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Gold"
+                        ],
                         "utm_source": "Twitter",
                         "utm_medium": "organic",
                         "utm_channel": "",
@@ -16257,8 +16448,15 @@
                             "status": "active"
                           }
                         ],
-                        "custom_fields": [{}],
-                        "tags": ["Premium", "Basic", "Active", "Engaged"],
+                        "custom_fields": [
+                          {}
+                        ],
+                        "tags": [
+                          "Premium",
+                          "Basic",
+                          "Active",
+                          "Engaged"
+                        ],
                         "stats": {
                           "emails_received": 25,
                           "open_rate": 60.1,
@@ -16286,7 +16484,10 @@
                           "status": "validating",
                           "created": 1666800076,
                           "subscription_tier": "free",
-                          "subscription_premium_tier_names": ["Premium", "Gold"],
+                          "subscription_premium_tier_names": [
+                            "Premium",
+                            "Gold"
+                          ],
                           "utm_source": "Twitter",
                           "utm_medium": "organic",
                           "utm_channel": "",
@@ -16300,8 +16501,15 @@
                               "status": "active"
                             }
                           ],
-                          "custom_fields": [{}],
-                          "tags": ["Premium", "Basic", "Active", "Engaged"],
+                          "custom_fields": [
+                            {}
+                          ],
+                          "tags": [
+                            "Premium",
+                            "Basic",
+                            "Active",
+                            "Engaged"
+                          ],
                           "stats": {
                             "emails_received": 25,
                             "open_rate": 60.1,
@@ -16473,7 +16681,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-by-id",
-                "migratedFromUrlSlugs": ["get-subscription-by-id"],
+                "migratedFromUrlSlugs": [
+                  "get-subscription-by-id"
+                ],
                 "method": "GET",
                 "id": "get-by-id",
                 "originalEndpointId": "endpoint_subscriptions.get-by-id",
@@ -16615,7 +16825,10 @@
                         "status": "validating",
                         "created": 1666800076,
                         "subscription_tier": "free",
-                        "subscription_premium_tier_names": ["Premium", "Gold"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Gold"
+                        ],
                         "utm_source": "Twitter",
                         "utm_medium": "organic",
                         "utm_channel": "",
@@ -16636,7 +16849,10 @@
                           "status": "validating",
                           "created": 1666800076,
                           "subscription_tier": "free",
-                          "subscription_premium_tier_names": ["Premium", "Gold"],
+                          "subscription_premium_tier_names": [
+                            "Premium",
+                            "Gold"
+                          ],
                           "utm_source": "Twitter",
                           "utm_medium": "organic",
                           "utm_channel": "",
@@ -16777,7 +16993,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "put",
-                "migratedFromUrlSlugs": ["update-subscription"],
+                "migratedFromUrlSlugs": [
+                  "update-subscription"
+                ],
                 "method": "PUT",
                 "id": "put",
                 "originalEndpointId": "endpoint_subscriptions.put",
@@ -16981,7 +17199,10 @@
                         "status": "active",
                         "created": 1666800076,
                         "subscription_tier": "premium",
-                        "subscription_premium_tier_names": ["Premium", "Gold"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Gold"
+                        ],
                         "utm_source": "Twitter",
                         "utm_medium": "organic",
                         "utm_channel": "",
@@ -17027,7 +17248,10 @@
                           "status": "active",
                           "created": 1666800076,
                           "subscription_tier": "premium",
-                          "subscription_premium_tier_names": ["Premium", "Gold"],
+                          "subscription_premium_tier_names": [
+                            "Premium",
+                            "Gold"
+                          ],
                           "utm_source": "Twitter",
                           "utm_medium": "organic",
                           "utm_channel": "",
@@ -17208,7 +17432,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "patch",
-                "migratedFromUrlSlugs": ["update-subscription"],
+                "migratedFromUrlSlugs": [
+                  "update-subscription"
+                ],
                 "method": "PATCH",
                 "id": "patch",
                 "originalEndpointId": "endpoint_subscriptions.patch",
@@ -17412,7 +17638,10 @@
                         "status": "active",
                         "created": 1666800076,
                         "subscription_tier": "premium",
-                        "subscription_premium_tier_names": ["Premium", "Gold"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Gold"
+                        ],
                         "utm_source": "Twitter",
                         "utm_medium": "organic",
                         "utm_channel": "",
@@ -17458,7 +17687,10 @@
                           "status": "active",
                           "created": 1666800076,
                           "subscription_tier": "premium",
-                          "subscription_premium_tier_names": ["Premium", "Gold"],
+                          "subscription_premium_tier_names": [
+                            "Premium",
+                            "Gold"
+                          ],
                           "utm_source": "Twitter",
                           "utm_medium": "organic",
                           "utm_channel": "",
@@ -17639,7 +17871,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-subscription"],
+                "migratedFromUrlSlugs": [
+                  "delete-subscription"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_subscriptions.delete",
@@ -17943,7 +18177,8 @@
             "urlSlug": "subscriptions",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Subscriptions"
+            "displayName": "Subscriptions",
+            "graphqlOperations": []
           },
           "subpackage_subscriptionTags": {
             "subpackageId": "subpackage_subscriptionTags",
@@ -17958,7 +18193,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["add-subscription-tag"],
+                "migratedFromUrlSlugs": [
+                  "add-subscription-tag"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_subscriptionTags.create",
@@ -18112,14 +18349,22 @@
                         "status": "validating",
                         "created": 1666800076,
                         "subscription_tier": "free",
-                        "subscription_premium_tier_names": ["Premium", "Gold"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Gold"
+                        ],
                         "utm_source": "Twitter",
                         "utm_medium": "organic",
                         "utm_channel": "",
                         "utm_campaign": "utm_campaign",
                         "referring_site": "https://www.blog.com",
                         "referral_code": "referral_code",
-                        "tags": ["Premium", "Basic", "Active", "Engaged"]
+                        "tags": [
+                          "Premium",
+                          "Basic",
+                          "Active",
+                          "Engaged"
+                        ]
                       }
                     },
                     "codeExamples": {
@@ -18146,14 +18391,22 @@
                           "status": "validating",
                           "created": 1666800076,
                           "subscription_tier": "free",
-                          "subscription_premium_tier_names": ["Premium", "Gold"],
+                          "subscription_premium_tier_names": [
+                            "Premium",
+                            "Gold"
+                          ],
                           "utm_source": "Twitter",
                           "utm_medium": "organic",
                           "utm_channel": "",
                           "utm_campaign": "utm_campaign",
                           "referring_site": "https://www.blog.com",
                           "referral_code": "referral_code",
-                          "tags": ["Premium", "Basic", "Active", "Engaged"]
+                          "tags": [
+                            "Premium",
+                            "Basic",
+                            "Active",
+                            "Engaged"
+                          ]
                         }
                       }
                     },
@@ -18320,12 +18573,15 @@
                 "authed": true
               }
             ],
-            "types": ["type_subscriptionTags:SubscriptionTagsCreateResponse"],
+            "types": [
+              "type_subscriptionTags:SubscriptionTagsCreateResponse"
+            ],
             "subpackages": [],
             "urlSlug": "subscription-tags",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Subscription Tags"
+            "displayName": "Subscription Tags",
+            "graphqlOperations": []
           },
           "subpackage_tiers": {
             "subpackageId": "subpackage_tiers",
@@ -18340,7 +18596,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-tier"],
+                "migratedFromUrlSlugs": [
+                  "create-a-tier"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_tiers.create",
@@ -18499,7 +18757,11 @@
                           "interval": "month",
                           "interval_display": "Monthly",
                           "cta": "Subscribe Now",
-                          "features": ["Exclusive content", "Ad-free experience", "Priority support"]
+                          "features": [
+                            "Exclusive content",
+                            "Ad-free experience",
+                            "Priority support"
+                          ]
                         }
                       ]
                     },
@@ -18545,7 +18807,11 @@
                             "interval": "month",
                             "interval_display": "Monthly",
                             "cta": "Subscribe Now",
-                            "features": ["Exclusive content", "Ad-free experience", "Priority support"]
+                            "features": [
+                              "Exclusive content",
+                              "Ad-free experience",
+                              "Priority support"
+                            ]
                           }
                         ]
                       }
@@ -18745,7 +19011,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-tiers"],
+                "migratedFromUrlSlugs": [
+                  "list-tiers"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_tiers.index",
@@ -19125,7 +19393,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-tier"],
+                "migratedFromUrlSlugs": [
+                  "get-tier"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_tiers.show",
@@ -19473,7 +19743,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "put",
-                "migratedFromUrlSlugs": ["update-a-tier"],
+                "migratedFromUrlSlugs": [
+                  "update-a-tier"
+                ],
                 "method": "PUT",
                 "id": "put",
                 "originalEndpointId": "endpoint_tiers.put",
@@ -19652,7 +19924,9 @@
                           "interval": "month",
                           "interval_display": "Monthly",
                           "cta": "Subscribe Now",
-                          "features": ["Exclusive content"],
+                          "features": [
+                            "Exclusive content"
+                          ],
                           "delete": true
                         }
                       ]
@@ -19699,7 +19973,9 @@
                             "interval": "month",
                             "interval_display": "Monthly",
                             "cta": "Subscribe Now",
-                            "features": ["Exclusive content"],
+                            "features": [
+                              "Exclusive content"
+                            ],
                             "delete": true
                           }
                         ]
@@ -19896,7 +20172,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "patch",
-                "migratedFromUrlSlugs": ["update-a-tier"],
+                "migratedFromUrlSlugs": [
+                  "update-a-tier"
+                ],
                 "method": "PATCH",
                 "id": "patch",
                 "originalEndpointId": "endpoint_tiers.patch",
@@ -20075,7 +20353,9 @@
                           "interval": "month",
                           "interval_display": "Monthly",
                           "cta": "Subscribe Now",
-                          "features": ["Exclusive content"],
+                          "features": [
+                            "Exclusive content"
+                          ],
                           "delete": true
                         }
                       ]
@@ -20122,7 +20402,9 @@
                             "interval": "month",
                             "interval_display": "Monthly",
                             "cta": "Subscribe Now",
-                            "features": ["Exclusive content"],
+                            "features": [
+                              "Exclusive content"
+                            ],
                             "delete": true
                           }
                         ]
@@ -20327,7 +20609,8 @@
             "urlSlug": "tiers",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Tiers"
+            "displayName": "Tiers",
+            "graphqlOperations": []
           },
           "subpackage_webhooks": {
             "subpackageId": "subpackage_webhooks",
@@ -20342,7 +20625,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-webhook"],
+                "migratedFromUrlSlugs": [
+                  "create-a-webhook"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_webhooks.create",
@@ -20492,7 +20777,9 @@
                     "headers": {},
                     "requestBody": {
                       "url": "https://example.com/webhook",
-                      "event_types": ["post.sent"]
+                      "event_types": [
+                        "post.sent"
+                      ]
                     },
                     "responseStatusCode": 200,
                     "responseBody": {
@@ -20501,7 +20788,10 @@
                         "url": "https://example.com/webhook",
                         "created": 1666800076,
                         "updated": 1666800076,
-                        "event_types": ["post.sent", "subscription.confirmed"],
+                        "event_types": [
+                          "post.sent",
+                          "subscription.confirmed"
+                        ],
                         "description": "A webhook to receive new posts data and new subscription confirmations."
                       }
                     },
@@ -20520,7 +20810,9 @@
                       "type": "json",
                       "value": {
                         "url": "https://example.com/webhook",
-                        "event_types": ["post.sent"]
+                        "event_types": [
+                          "post.sent"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -20531,7 +20823,10 @@
                           "url": "https://example.com/webhook",
                           "created": 1666800076,
                           "updated": 1666800076,
-                          "event_types": ["post.sent", "subscription.confirmed"],
+                          "event_types": [
+                            "post.sent",
+                            "subscription.confirmed"
+                          ],
                           "description": "A webhook to receive new posts data and new subscription confirmations."
                         }
                       }
@@ -20561,7 +20856,9 @@
                       "type": "json",
                       "value": {
                         "url": "string",
-                        "event_types": ["post.sent"]
+                        "event_types": [
+                          "post.sent"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -20602,7 +20899,9 @@
                       "type": "json",
                       "value": {
                         "url": "string",
-                        "event_types": ["post.sent"]
+                        "event_types": [
+                          "post.sent"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -20643,7 +20942,9 @@
                       "type": "json",
                       "value": {
                         "url": "string",
-                        "event_types": ["post.sent"]
+                        "event_types": [
+                          "post.sent"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -20684,7 +20985,9 @@
                       "type": "json",
                       "value": {
                         "url": "string",
-                        "event_types": ["post.sent"]
+                        "event_types": [
+                          "post.sent"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -20715,7 +21018,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "index",
-                "migratedFromUrlSlugs": ["list-webhooks"],
+                "migratedFromUrlSlugs": [
+                  "list-webhooks"
+                ],
                 "method": "GET",
                 "id": "index",
                 "originalEndpointId": "endpoint_webhooks.index",
@@ -20842,7 +21147,10 @@
                           "url": "https://example.com/webhook",
                           "created": 1666800076,
                           "updated": 1666800076,
-                          "event_types": ["post.sent", "subscription.confirmed"],
+                          "event_types": [
+                            "post.sent",
+                            "subscription.confirmed"
+                          ],
                           "description": "A webhook to receive new posts data and new subscription confirmations."
                         }
                       ]
@@ -20867,7 +21175,10 @@
                             "url": "https://example.com/webhook",
                             "created": 1666800076,
                             "updated": 1666800076,
-                            "event_types": ["post.sent", "subscription.confirmed"],
+                            "event_types": [
+                              "post.sent",
+                              "subscription.confirmed"
+                            ],
                             "description": "A webhook to receive new posts data and new subscription confirmations."
                           }
                         ]
@@ -21032,7 +21343,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "show",
-                "migratedFromUrlSlugs": ["get-webhook"],
+                "migratedFromUrlSlugs": [
+                  "get-webhook"
+                ],
                 "method": "GET",
                 "id": "show",
                 "originalEndpointId": "endpoint_webhooks.show",
@@ -21173,7 +21486,10 @@
                         "url": "https://example.com/webhook",
                         "created": 1666800076,
                         "updated": 1666800076,
-                        "event_types": ["post.sent", "subscription.confirmed"],
+                        "event_types": [
+                          "post.sent",
+                          "subscription.confirmed"
+                        ],
                         "description": "A webhook to receive new posts data and new subscription confirmations."
                       }
                     },
@@ -21188,7 +21504,10 @@
                           "url": "https://example.com/webhook",
                           "created": 1666800076,
                           "updated": 1666800076,
-                          "event_types": ["post.sent", "subscription.confirmed"],
+                          "event_types": [
+                            "post.sent",
+                            "subscription.confirmed"
+                          ],
                           "description": "A webhook to receive new posts data and new subscription confirmations."
                         }
                       }
@@ -21343,7 +21662,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-webhook"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-webhook"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_webhooks.delete",
@@ -21601,7 +21922,8 @@
             "urlSlug": "webhooks",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Webhooks"
+            "displayName": "Webhooks",
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -21615,10 +21937,17 @@
         "id": "8bc5b8d2-4f22-459a-868c-60517d846e4c",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_post", "subpackage_subscription", "subpackage_survey"],
-          "types": ["type_:CommonWebhookProperties"],
+          "subpackages": [
+            "subpackage_post",
+            "subpackage_subscription",
+            "subpackage_survey"
+          ],
+          "types": [
+            "type_:CommonWebhookProperties"
+          ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_:CommonWebhookProperties": {
@@ -21673,7 +22002,9 @@
             "name": "Post",
             "shape": {
               "type": "object",
-              "extends": ["type_:CommonWebhookProperties"],
+              "extends": [
+                "type_:CommonWebhookProperties"
+              ],
               "properties": [
                 {
                   "key": "data",
@@ -21893,7 +22224,9 @@
             "name": "Subscription",
             "shape": {
               "type": "object",
-              "extends": ["type_:CommonWebhookProperties"],
+              "extends": [
+                "type_:CommonWebhookProperties"
+              ],
               "properties": [
                 {
                   "key": "data",
@@ -22323,7 +22656,9 @@
             "name": "SurveyResponse",
             "shape": {
               "type": "object",
-              "extends": ["type_:CommonWebhookProperties"],
+              "extends": [
+                "type_:CommonWebhookProperties"
+              ],
               "properties": [
                 {
                   "key": "data",
@@ -22344,13 +22679,19 @@
             "subpackageId": "subpackage_post",
             "name": "post",
             "endpoints": [],
-            "types": ["type_post:Post", "type_post:PostData", "type_post:PostStatus"],
+            "types": [
+              "type_post:Post",
+              "type_post:PostData",
+              "type_post:PostStatus"
+            ],
             "subpackages": [],
             "urlSlug": "post",
             "webhooks": [
               {
                 "urlSlug": "sent",
-                "migratedFromUrlSlugs": ["post-sent"],
+                "migratedFromUrlSlugs": [
+                  "post-sent"
+                ],
                 "method": "POST",
                 "id": "sent",
                 "name": "Post Sent",
@@ -22373,8 +22714,12 @@
                       "event_type": "post.sent",
                       "data": {
                         "audience": "free",
-                        "authors": ["Clark Kent"],
-                        "content_tags": ["news"],
+                        "authors": [
+                          "Clark Kent"
+                        ],
+                        "content_tags": [
+                          "news"
+                        ],
                         "created": 1666800076,
                         "displayed_date": 1666800076,
                         "id": "post_00000000-0000-0000-0000-000000000000",
@@ -22393,7 +22738,8 @@
                 ]
               }
             ],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_subscription": {
             "subpackageId": "subpackage_subscription",
@@ -22409,7 +22755,9 @@
             "webhooks": [
               {
                 "urlSlug": "created",
-                "migratedFromUrlSlugs": ["subscription-created"],
+                "migratedFromUrlSlugs": [
+                  "subscription-created"
+                ],
                 "method": "POST",
                 "id": "created",
                 "name": "Subscription Created",
@@ -22438,7 +22786,10 @@
                         "referring_site": "https://www.blog.com",
                         "status": "active",
                         "subscription_tier": "premium",
-                        "subscription_premium_tier_names": ["Premium", "Pro"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Pro"
+                        ],
                         "stripe_customer_id": "cus_00000000000000",
                         "utm_campaign": "Q1 Campaign",
                         "utm_channel": "website",
@@ -22451,7 +22802,9 @@
               },
               {
                 "urlSlug": "confirmed",
-                "migratedFromUrlSlugs": ["subscription-confirmed"],
+                "migratedFromUrlSlugs": [
+                  "subscription-confirmed"
+                ],
                 "method": "POST",
                 "id": "confirmed",
                 "name": "Subscription Confirmed",
@@ -22480,7 +22833,10 @@
                         "referring_site": "https://www.blog.com",
                         "status": "active",
                         "subscription_tier": "premium",
-                        "subscription_premium_tier_names": ["Premium", "Pro"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Pro"
+                        ],
                         "stripe_customer_id": "cus_00000000000000",
                         "utm_campaign": "Q1 Campaign",
                         "utm_channel": "website",
@@ -22493,7 +22849,9 @@
               },
               {
                 "urlSlug": "deleted",
-                "migratedFromUrlSlugs": ["subscription-deleted"],
+                "migratedFromUrlSlugs": [
+                  "subscription-deleted"
+                ],
                 "method": "POST",
                 "id": "deleted",
                 "name": "Subscription Deleted",
@@ -22522,7 +22880,10 @@
                         "referring_site": "https://www.blog.com",
                         "status": "active",
                         "subscription_tier": "premium",
-                        "subscription_premium_tier_names": ["Premium", "Pro"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Pro"
+                        ],
                         "stripe_customer_id": "cus_00000000000000",
                         "utm_campaign": "Q1 Campaign",
                         "utm_channel": "website",
@@ -22535,7 +22896,9 @@
               },
               {
                 "urlSlug": "upgraded",
-                "migratedFromUrlSlugs": ["subscription-upgraded"],
+                "migratedFromUrlSlugs": [
+                  "subscription-upgraded"
+                ],
                 "method": "POST",
                 "id": "upgraded",
                 "name": "Subscription Upgraded",
@@ -22564,7 +22927,10 @@
                         "referring_site": "https://www.blog.com",
                         "status": "active",
                         "subscription_tier": "premium",
-                        "subscription_premium_tier_names": ["Premium", "Pro"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Pro"
+                        ],
                         "stripe_customer_id": "cus_00000000000000",
                         "utm_campaign": "Q1 Campaign",
                         "utm_channel": "website",
@@ -22577,7 +22943,9 @@
               },
               {
                 "urlSlug": "downgraded",
-                "migratedFromUrlSlugs": ["subscription-downgraded"],
+                "migratedFromUrlSlugs": [
+                  "subscription-downgraded"
+                ],
                 "method": "POST",
                 "id": "downgraded",
                 "name": "Subscription Downgraded",
@@ -22606,7 +22974,10 @@
                         "referring_site": "https://www.blog.com",
                         "status": "active",
                         "subscription_tier": "premium",
-                        "subscription_premium_tier_names": ["Premium", "Pro"],
+                        "subscription_premium_tier_names": [
+                          "Premium",
+                          "Pro"
+                        ],
                         "stripe_customer_id": "cus_00000000000000",
                         "utm_campaign": "Q1 Campaign",
                         "utm_channel": "website",
@@ -22619,7 +22990,9 @@
               },
               {
                 "urlSlug": "tier-added",
-                "migratedFromUrlSlugs": ["subscription-tier-added"],
+                "migratedFromUrlSlugs": [
+                  "subscription-tier-added"
+                ],
                 "method": "POST",
                 "id": "tier_added",
                 "name": "Subscription Tier Added",
@@ -22647,7 +23020,9 @@
                         "referral_code": "ABC123",
                         "referring_site": "https://www.blog.com",
                         "status": "active",
-                        "subscription_premium_tier_names": ["Premium"],
+                        "subscription_premium_tier_names": [
+                          "Premium"
+                        ],
                         "subscription_tier": "free",
                         "utm_campaign": "Q1 Campaign",
                         "utm_channel": "website",
@@ -22660,7 +23035,9 @@
               },
               {
                 "urlSlug": "tier-deleted",
-                "migratedFromUrlSlugs": ["subscription-tier-deleted"],
+                "migratedFromUrlSlugs": [
+                  "subscription-tier-deleted"
+                ],
                 "method": "POST",
                 "id": "tier_deleted",
                 "name": "Subscription Tier Deleted",
@@ -22700,7 +23077,8 @@
                 ]
               }
             ],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_survey": {
             "subpackageId": "subpackage_survey",
@@ -22717,7 +23095,9 @@
             "webhooks": [
               {
                 "urlSlug": "submitted",
-                "migratedFromUrlSlugs": ["survey-response-submitted"],
+                "migratedFromUrlSlugs": [
+                  "survey-response-submitted"
+                ],
                 "method": "POST",
                 "id": "submitted",
                 "name": "Survey Response Submitted",
@@ -22764,7 +23144,10 @@
                           "status": "active",
                           "stripe_customer_id": "cus_1234567890",
                           "subscription_tier": "free",
-                          "subscription_premium_tier_names": ["Premium", "Pro"],
+                          "subscription_premium_tier_names": [
+                            "Premium",
+                            "Pro"
+                          ],
                           "utm_campaign": "Q1 Campaign",
                           "utm_channel": "website",
                           "utm_medium": "organic",
@@ -22777,7 +23160,8 @@
                 ]
               }
             ],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "hasMultipleBaseUrls": false,

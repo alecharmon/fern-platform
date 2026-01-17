@@ -126662,6 +126662,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_approvalPolicies:GetApprovalPoliciesRequestStatus": {
         "name": "GetApprovalPoliciesRequestStatus",
@@ -297553,6 +297554,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_approvalPolicies:GetApprovalPoliciesRequestStatus": {
         "name": "GetApprovalPoliciesRequestStatus",

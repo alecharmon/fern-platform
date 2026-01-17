@@ -643,6 +643,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_paymentWebhooks:PaymentStatusWebhookPayloadNotificationConfig": {
         "name": "PaymentStatusWebhookPayloadNotificationConfig",
@@ -5339,6 +5340,7 @@
         ]
       }
     },
+    "graphqlOperations": {},
     "types": {
       "type_:AccountFundingTypeEnum": {
         "name": "AccountFundingTypeEnum",
@@ -17755,6 +17757,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_paymentsApi:PaymentCaptureApiRequestOrder": {
         "name": "PaymentCaptureApiRequestOrder",
@@ -33765,6 +33768,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_:AccountFundingTypeEnum": {
         "name": "AccountFundingTypeEnum",
@@ -41046,6 +41050,7 @@
         ]
       }
     },
+    "graphqlOperations": {},
     "types": {
       "type_:AccountFundingTypeEnum": {
         "name": "AccountFundingTypeEnum",
@@ -53674,6 +53679,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_paymentsApi:PaymentCaptureApiRequestOrder": {
         "name": "PaymentCaptureApiRequestOrder",
@@ -69054,6 +69060,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_:AccountFundingTypeEnum": {
         "name": "AccountFundingTypeEnum",

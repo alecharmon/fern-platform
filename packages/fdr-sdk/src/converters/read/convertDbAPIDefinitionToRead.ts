@@ -22,6 +22,7 @@ export function convertDbAPIDefinitionToRead(dbShape: APIV1Db.DbApiDefinition): 
             types: dbShape.rootPackage.types,
             webhooks: dbShape.rootPackage.webhooks ?? [],
             websockets: dbShape.rootPackage.websockets ?? [],
+            graphqlOperations: dbShape.rootPackage.graphqlOperations ?? [],
             pointsTo: dbShape.rootPackage.pointsTo
         },
         types: dbShape.types,
@@ -30,7 +31,6 @@ export function convertDbAPIDefinitionToRead(dbShape: APIV1Db.DbApiDefinition): 
                 return [id, transformSubpackage({ dbShape: subpackage })];
             })
         ),
-        graphqlOperations: dbShape.graphqlOperations ?? {},
         snippetsConfiguration: dbShape.snippetsConfiguration,
         auth: dbShape.auth,
         authSchemes: dbShape.authSchemes,
@@ -58,6 +58,7 @@ function transformSubpackage({
         // htmlDescription: dbShape.htmlDescription,
         webhooks: dbShape.webhooks ?? [],
         websockets: dbShape.websockets ?? [],
+        graphqlOperations: dbShape.graphqlOperations ?? [],
         displayName: dbShape.displayName
         // descriptionContainsMarkdown: dbShape.descriptionContainsMarkdown,
     };

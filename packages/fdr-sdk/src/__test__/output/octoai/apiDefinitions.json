@@ -2642,6 +2642,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_endpoint:EndpointDeleteEndpointResponse": {
         "name": "EndpointDeleteEndpointResponse",
@@ -5765,6 +5766,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_:ADetailerRequestSeed": {
         "name": "ADetailerRequestSeed",
@@ -27200,6 +27202,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_asset-library:Data": {
         "name": "Data",

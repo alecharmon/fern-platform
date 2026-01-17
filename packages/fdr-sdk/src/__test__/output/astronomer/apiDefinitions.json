@@ -10327,6 +10327,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_organization:ListOrganizationsRequestSupportPlan": {
         "name": "ListOrganizationsRequestSupportPlan",
@@ -29158,6 +29159,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_authorization:ListPermissionGroupsRequestScopeType": {
         "name": "ListPermissionGroupsRequestScopeType",

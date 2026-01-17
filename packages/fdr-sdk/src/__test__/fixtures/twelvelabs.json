@@ -719,7 +719,8 @@
             "type_:VideoVector"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_tasks:TasksListResponsePageInfo": {
@@ -6497,7 +6498,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-video-indexing-tasks"],
+                "migratedFromUrlSlugs": [
+                  "list-video-indexing-tasks"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_tasks.list",
@@ -7120,7 +7123,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -7361,7 +7366,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -7407,7 +7414,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-video-indexing-task"],
+                "migratedFromUrlSlugs": [
+                  "create-a-video-indexing-task"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_tasks.create",
@@ -7876,7 +7885,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -7906,7 +7917,9 @@
                                 "type": "template",
                                 "value": {
                                   "type": "generic",
-                                  "imports": ["import fs from \"fs\";"],
+                                  "imports": [
+                                    "import fs from \"fs\";"
+                                  ],
                                   "templateString": "fs.createReadStream(\"/path/to/your/file\")",
                                   "isOptional": false,
                                   "templateInputs": []
@@ -7916,7 +7929,9 @@
                                 "type": "template",
                                 "value": {
                                   "type": "generic",
-                                  "imports": ["import fs from \"fs\";"],
+                                  "imports": [
+                                    "import fs from \"fs\";"
+                                  ],
                                   "templateString": "fs.createReadStream(\"/path/to/your/file\")",
                                   "isOptional": false,
                                   "templateInputs": []
@@ -8037,7 +8052,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -8083,7 +8100,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "retrieve",
-                "migratedFromUrlSlugs": ["retrieve-a-video-indexing-task"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-a-video-indexing-task"
+                ],
                 "method": "GET",
                 "id": "retrieve",
                 "originalEndpointId": "endpoint_tasks.retrieve",
@@ -8333,7 +8352,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -8382,7 +8403,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -8428,7 +8451,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-a-video-indexing-task"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-video-indexing-task"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_tasks.delete",
@@ -8611,7 +8636,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -8660,7 +8687,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -8706,7 +8735,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "status",
-                "migratedFromUrlSlugs": ["retrieve-tasks-by-status"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-tasks-by-status"
+                ],
                 "method": "GET",
                 "id": "status",
                 "originalEndpointId": "endpoint_tasks.status",
@@ -8910,7 +8941,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -8959,7 +8992,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -9070,7 +9105,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -9100,7 +9137,9 @@
                                 "type": "template",
                                 "value": {
                                   "type": "generic",
-                                  "imports": ["import fs from \"fs\";"],
+                                  "imports": [
+                                    "import fs from \"fs\";"
+                                  ],
                                   "templateString": "fs.createReadStream(\"/path/to/your/file\")",
                                   "isOptional": false,
                                   "templateInputs": []
@@ -9113,7 +9152,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -9164,7 +9205,8 @@
             "subpackages": [],
             "urlSlug": "tasks",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_uploadVideos": {
             "subpackageId": "subpackage_uploadVideos",
@@ -9179,7 +9221,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "cloud-to-cloud-import-videos",
-                "migratedFromUrlSlugs": ["import-videos"],
+                "migratedFromUrlSlugs": [
+                  "import-videos"
+                ],
                 "method": "POST",
                 "id": "cloud-to-cloud-import-videos",
                 "originalEndpointId": "endpoint_uploadVideos.cloud-to-cloud-import-videos",
@@ -9547,7 +9591,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -9566,7 +9612,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "cloud-to-cloud-retrieve-status",
-                "migratedFromUrlSlugs": ["retrieve-import-status"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-import-status"
+                ],
                 "method": "GET",
                 "id": "cloud-to-cloud-retrieve-status",
                 "originalEndpointId": "endpoint_uploadVideos.cloud-to-cloud-retrieve-status",
@@ -9686,7 +9734,10 @@
                     },
                     "responseStatusCode": 200,
                     "responseBody": {
-                      "not_imported": ["NEW_VIDEO_1.mp4", "NEW_VIDEO_2.mp4"],
+                      "not_imported": [
+                        "NEW_VIDEO_1.mp4",
+                        "NEW_VIDEO_2.mp4"
+                      ],
                       "validating": [
                         {
                           "video_id": "66fcee250f9f7bcce21915a2",
@@ -9748,7 +9799,10 @@
                     "responseBodyV3": {
                       "type": "json",
                       "value": {
-                        "not_imported": ["NEW_VIDEO_1.mp4", "NEW_VIDEO_2.mp4"],
+                        "not_imported": [
+                          "NEW_VIDEO_1.mp4",
+                          "NEW_VIDEO_2.mp4"
+                        ],
                         "validating": [
                           {
                             "video_id": "66fcee250f9f7bcce21915a2",
@@ -9843,7 +9897,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "cloud-to-cloud-retrieve-import-logs",
-                "migratedFromUrlSlugs": ["retrieve-import-logs"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-import-logs"
+                ],
                 "method": "GET",
                 "id": "cloud-to-cloud-retrieve-import-logs",
                 "originalEndpointId": "endpoint_uploadVideos.cloud-to-cloud-retrieve-import-logs",
@@ -10075,7 +10131,8 @@
             "urlSlug": "upload-videos",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Upload videos"
+            "displayName": "Upload videos",
+            "graphqlOperations": []
           },
           "subpackage_indexes": {
             "subpackageId": "subpackage_indexes",
@@ -10090,7 +10147,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-indexes"],
+                "migratedFromUrlSlugs": [
+                  "list-indexes"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_indexes.list",
@@ -10333,13 +10392,25 @@
                           "engines": [
                             {
                               "engine_name": "marengo2.7",
-                              "engine_options": ["visual", "text_in_video", "conversation", "logo"],
-                              "addons": ["thumbnail"]
+                              "engine_options": [
+                                "visual",
+                                "text_in_video",
+                                "conversation",
+                                "logo"
+                              ],
+                              "addons": [
+                                "thumbnail"
+                              ]
                             },
                             {
                               "engine_name": "pegasus1.1",
-                              "engine_options": ["visual", "conversation"],
-                              "addons": ["thumbnail"]
+                              "engine_options": [
+                                "visual",
+                                "conversation"
+                              ],
+                              "addons": [
+                                "thumbnail"
+                              ]
                             }
                           ]
                         },
@@ -10354,13 +10425,23 @@
                           "engines": [
                             {
                               "engine_name": "marengo2.7",
-                              "engine_options": ["visual", "logo"],
-                              "addons": ["thumbnail"]
+                              "engine_options": [
+                                "visual",
+                                "logo"
+                              ],
+                              "addons": [
+                                "thumbnail"
+                              ]
                             },
                             {
                               "engine_name": "pegasus1.1",
-                              "engine_options": ["visual", "conversation"],
-                              "addons": ["thumbnail"]
+                              "engine_options": [
+                                "visual",
+                                "conversation"
+                              ],
+                              "addons": [
+                                "thumbnail"
+                              ]
                             }
                           ]
                         }
@@ -10408,13 +10489,25 @@
                             "engines": [
                               {
                                 "engine_name": "marengo2.7",
-                                "engine_options": ["visual", "text_in_video", "conversation", "logo"],
-                                "addons": ["thumbnail"]
+                                "engine_options": [
+                                  "visual",
+                                  "text_in_video",
+                                  "conversation",
+                                  "logo"
+                                ],
+                                "addons": [
+                                  "thumbnail"
+                                ]
                               },
                               {
                                 "engine_name": "pegasus1.1",
-                                "engine_options": ["visual", "conversation"],
-                                "addons": ["thumbnail"]
+                                "engine_options": [
+                                  "visual",
+                                  "conversation"
+                                ],
+                                "addons": [
+                                  "thumbnail"
+                                ]
                               }
                             ]
                           },
@@ -10429,13 +10522,23 @@
                             "engines": [
                               {
                                 "engine_name": "marengo2.7",
-                                "engine_options": ["visual", "logo"],
-                                "addons": ["thumbnail"]
+                                "engine_options": [
+                                  "visual",
+                                  "logo"
+                                ],
+                                "addons": [
+                                  "thumbnail"
+                                ]
                               },
                               {
                                 "engine_name": "pegasus1.1",
-                                "engine_options": ["visual", "conversation"],
-                                "addons": ["thumbnail"]
+                                "engine_options": [
+                                  "visual",
+                                  "conversation"
+                                ],
+                                "addons": [
+                                  "thumbnail"
+                                ]
                               }
                             ]
                           }
@@ -10684,7 +10787,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -10893,7 +10998,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -10939,7 +11046,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-an-index"],
+                "migratedFromUrlSlugs": [
+                  "create-an-index"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_indexes.create",
@@ -11065,14 +11174,24 @@
                       "engines": [
                         {
                           "engine_name": "marengo2.7",
-                          "engine_options": ["visual", "conversation", "text_in_video", "logo"]
+                          "engine_options": [
+                            "visual",
+                            "conversation",
+                            "text_in_video",
+                            "logo"
+                          ]
                         },
                         {
                           "engine_name": "pegasus1.1",
-                          "engine_options": ["visual", "conversation"]
+                          "engine_options": [
+                            "visual",
+                            "conversation"
+                          ]
                         }
                       ],
-                      "addons": ["thumbnail"]
+                      "addons": [
+                        "thumbnail"
+                      ]
                     },
                     "responseStatusCode": 200,
                     "responseBody": {
@@ -11106,14 +11225,24 @@
                         "engines": [
                           {
                             "engine_name": "marengo2.7",
-                            "engine_options": ["visual", "conversation", "text_in_video", "logo"]
+                            "engine_options": [
+                              "visual",
+                              "conversation",
+                              "text_in_video",
+                              "logo"
+                            ]
                           },
                           {
                             "engine_name": "pegasus1.1",
-                            "engine_options": ["visual", "conversation"]
+                            "engine_options": [
+                              "visual",
+                              "conversation"
+                            ]
                           }
                         ],
-                        "addons": ["thumbnail"]
+                        "addons": [
+                          "thumbnail"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -11160,7 +11289,9 @@
                         "engines": [
                           {
                             "engine_name": "string",
-                            "engine_options": ["string"]
+                            "engine_options": [
+                              "string"
+                            ]
                           }
                         ]
                       }
@@ -11210,7 +11341,9 @@
                             "containerTemplateString": "engines=[\n\t\t$FERN_INPUT\n\t]",
                             "delimiter": ",\n\t\t",
                             "innerTemplate": {
-                              "imports": ["from twelvelabs.indexes import IndexesCreateRequestEnginesItem"],
+                              "imports": [
+                                "from twelvelabs.indexes import IndexesCreateRequestEnginesItem"
+                              ],
                               "isOptional": true,
                               "templateString": "IndexesCreateRequestEnginesItem(\n\t\t\t$FERN_INPUT\n\t\t)",
                               "templateInputs": [
@@ -11300,7 +11433,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -11442,7 +11577,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -11488,7 +11625,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "retrieve",
-                "migratedFromUrlSlugs": ["retrieve-an-index"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-an-index"
+                ],
                 "method": "GET",
                 "id": "retrieve",
                 "originalEndpointId": "endpoint_indexes.retrieve",
@@ -11596,13 +11735,25 @@
                       "engines": [
                         {
                           "engine_name": "marengo2.7",
-                          "engine_options": ["visual", "text_in_video", "conversation", "logo"],
-                          "addons": ["thumbnail"]
+                          "engine_options": [
+                            "visual",
+                            "text_in_video",
+                            "conversation",
+                            "logo"
+                          ],
+                          "addons": [
+                            "thumbnail"
+                          ]
                         },
                         {
                           "engine_name": "pegasus1.1",
-                          "engine_options": ["visual", "conversation"],
-                          "addons": ["thumbnail"]
+                          "engine_options": [
+                            "visual",
+                            "conversation"
+                          ],
+                          "addons": [
+                            "thumbnail"
+                          ]
                         }
                       ]
                     },
@@ -11640,13 +11791,25 @@
                         "engines": [
                           {
                             "engine_name": "marengo2.7",
-                            "engine_options": ["visual", "text_in_video", "conversation", "logo"],
-                            "addons": ["thumbnail"]
+                            "engine_options": [
+                              "visual",
+                              "text_in_video",
+                              "conversation",
+                              "logo"
+                            ],
+                            "addons": [
+                              "thumbnail"
+                            ]
                           },
                           {
                             "engine_name": "pegasus1.1",
-                            "engine_options": ["visual", "conversation"],
-                            "addons": ["thumbnail"]
+                            "engine_options": [
+                              "visual",
+                              "conversation"
+                            ],
+                            "addons": [
+                              "thumbnail"
+                            ]
                           }
                         ]
                       }
@@ -11726,7 +11889,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -11775,7 +11940,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -11821,7 +11988,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-an-index"],
+                "migratedFromUrlSlugs": [
+                  "update-an-index"
+                ],
                 "method": "PUT",
                 "id": "update",
                 "originalEndpointId": "endpoint_indexes.update",
@@ -12054,7 +12223,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -12131,7 +12302,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -12177,7 +12350,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-an-index"],
+                "migratedFromUrlSlugs": [
+                  "delete-an-index"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_indexes.delete",
@@ -12360,7 +12535,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -12409,7 +12586,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -12455,10 +12634,13 @@
               "type_indexes:IndexesRetrieveResponseEnginesItem",
               "type_indexes:IndexesRetrieveResponse"
             ],
-            "subpackages": ["subpackage_indexes/videos"],
+            "subpackages": [
+              "subpackage_indexes/videos"
+            ],
             "urlSlug": "indexes",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_summarize": {
             "subpackageId": "subpackage_summarize",
@@ -12473,7 +12655,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["summaries-chapters-or-highlights"],
+                "migratedFromUrlSlugs": [
+                  "summaries-chapters-or-highlights"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_summarize.create",
@@ -12846,7 +13030,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -12943,7 +13129,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -12992,7 +13180,8 @@
             "subpackages": [],
             "urlSlug": "summarize",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_generate": {
             "subpackageId": "subpackage_generate",
@@ -13007,7 +13196,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["open-ended-texts"],
+                "migratedFromUrlSlugs": [
+                  "open-ended-texts"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_generate.create",
@@ -13555,7 +13746,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -13652,7 +13845,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -13703,7 +13898,8 @@
             "subpackages": [],
             "urlSlug": "generate",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_embed": {
             "subpackageId": "subpackage_embed",
@@ -13718,7 +13914,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-embeddings-for-text-image-and-audio"],
+                "migratedFromUrlSlugs": [
+                  "create-embeddings-for-text-image-and-audio"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_embed.create",
@@ -13911,7 +14109,11 @@
                       "audio_embedding": {
                         "segments": [
                           {
-                            "float": [-0.042632885, 0.014312328, 0.029209055],
+                            "float": [
+                              -0.042632885,
+                              0.014312328,
+                              0.029209055
+                            ],
                             "start_offset_sec": 0
                           }
                         ],
@@ -13981,7 +14183,11 @@
                         "audio_embedding": {
                           "segments": [
                             {
-                              "float": [-0.042632885, 0.014312328, 0.029209055],
+                              "float": [
+                                -0.042632885,
+                                0.014312328,
+                                0.029209055
+                              ],
                               "start_offset_sec": 0
                             }
                           ],
@@ -14059,7 +14265,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "This method creates embedings for text, image, and audio content.\n\nBefore you create an embedding, ensure that the following prerequisites are met:\n\n- [Text embeddings](/docs/create-text-embeddings#prerequisites)\n- [Image embeddings](/docs/create-image-embeddings#prerequisites)\n- [Audio embeddings](/docs/create-audio-embeddings#prerequisites)\n\nParameters for embeddings:\n\n- **Common parameters**:\n  - `engine_name`: The video understanding engine you want to use. Example: \"Marengo-retrieval-2.6\".\n- **Text embeddings**:\n  - `text`: Text for which to create an embedding.\n- **Image embeddings**:\n  Provide one of the following:\n  - `image_url`: Publicly accessible URL of your image file.\n  - `image_file`: Local image file.\n- **Audio embeddings**:\n  Provide one of the following:\n  - `audio_url`: Publicly accessible URL of your audio file.\n  - `audio_file`: Local audio file.\n\n**NOTES**:\n\n- The “Marengo-retrieval-2.6” video understanding engine generates embeddings for all modalities in the same latent space. This shared space enables any-to-any searches across different types of content.\n- You can create multiple types of embeddings in a single API call.\n- Audio embeddings combine generic sound and human speech in a single embedding. For videos with transcriptions, you can [retrieve transcriptions](/reference/retrieve-transcription) and then [create text embeddings](/reference/create-text-embedding) from these transcriptions.\n\n> 🚧 Important\n> The response includes breaking changes that might require updates to your application code.\n> **Common changes**:\n>\n> - The `is_success` boolean flag has been removed.\n>   **Media-specific changes**:\n> - **Text**:The response now includes a nested array named `segments`.\n> - **Image**: The response now includes a nested array named `segments`.\n> - **Audio**: No additional changes.",
+                "description": "This method creates embedings for text, image, and audio content.\n\nBefore you create an embedding, ensure that the following prerequisites are met:\n\n- [Text embeddings](/docs/create-text-embeddings#prerequisites)\n- [Image embeddings](/docs/create-image-embeddings#prerequisites)\n- [Audio embeddings](/docs/create-audio-embeddings#prerequisites)\n\nParameters for embeddings:\n\n- **Common parameters**:\n  - `engine_name`: The video understanding engine you want to use. Example: \"Marengo-retrieval-2.6\".\n- **Text embeddings**:\n  - `text`: Text for which to create an embedding.\n- **Image embeddings**:\n  Provide one of the following:\n  - `image_url`: Publicly accessible URL of your image file.\n  - `image_file`: Local image file.\n- **Audio embeddings**:\n  Provide one of the following:\n  - `audio_url`: Publicly accessible URL of your audio file.\n  - `audio_file`: Local audio file.\n\n**NOTES**:\n\n- The \u201cMarengo-retrieval-2.6\u201d video understanding engine generates embeddings for all modalities in the same latent space. This shared space enables any-to-any searches across different types of content.\n- You can create multiple types of embeddings in a single API call.\n- Audio embeddings combine generic sound and human speech in a single embedding. For videos with transcriptions, you can [retrieve transcriptions](/reference/retrieve-transcription) and then [create text embeddings](/reference/create-text-embedding) from these transcriptions.\n\n> \ud83d\udea7 Important\n> The response includes breaking changes that might require updates to your application code.\n> **Common changes**:\n>\n> - The `is_success` boolean flag has been removed.\n>   **Media-specific changes**:\n> - **Text**:The response now includes a nested array named `segments`.\n> - **Image**: The response now includes a nested array named `segments`.\n> - **Audio**: No additional changes.",
                 "authed": false,
                 "snippetTemplates": {
                   "python": {
@@ -14202,7 +14408,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -14283,7 +14491,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -14322,10 +14532,13 @@
               }
             ],
             "types": [],
-            "subpackages": ["subpackage_embed/tasks"],
+            "subpackages": [
+              "subpackage_embed/tasks"
+            ],
             "urlSlug": "embed",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_search": {
             "subpackageId": "subpackage_search",
@@ -14340,7 +14553,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "query",
-                "migratedFromUrlSlugs": ["make-any-to-video-search-requests"],
+                "migratedFromUrlSlugs": [
+                  "make-any-to-video-search-requests"
+                ],
                 "method": "POST",
                 "id": "query",
                 "originalEndpointId": "endpoint_search.query",
@@ -14614,7 +14829,9 @@
                     },
                     "requestBody": {
                       "index_id": "index_id",
-                      "search_options": ["visual"]
+                      "search_options": [
+                        "visual"
+                      ]
                     },
                     "responseStatusCode": 200,
                     "responseBody": {
@@ -14696,7 +14913,9 @@
                         },
                         "search_options": {
                           "type": "json",
-                          "value": ["visual"]
+                          "value": [
+                            "visual"
+                          ]
                         },
                         "adjust_confidence_level": {
                           "type": "json"
@@ -14812,7 +15031,9 @@
                         },
                         "search_options": {
                           "type": "json",
-                          "value": ["visual"]
+                          "value": [
+                            "visual"
+                          ]
                         },
                         "adjust_confidence_level": {
                           "type": "json"
@@ -14897,7 +15118,9 @@
                         },
                         "search_options": {
                           "type": "json",
-                          "value": ["visual"]
+                          "value": [
+                            "visual"
+                          ]
                         },
                         "adjust_confidence_level": {
                           "type": "json"
@@ -15176,7 +15399,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -15533,7 +15758,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -15579,7 +15806,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "retrieve",
-                "migratedFromUrlSlugs": ["retrieve-a-specific-page-of-search-results"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-a-specific-page-of-search-results"
+                ],
                 "method": "GET",
                 "id": "retrieve",
                 "originalEndpointId": "endpoint_search.retrieve",
@@ -15847,7 +16076,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -15896,7 +16127,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -15951,7 +16184,8 @@
             "subpackages": [],
             "urlSlug": "search",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_gist": {
             "subpackageId": "subpackage_gist",
@@ -16031,7 +16265,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -16109,7 +16345,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -16151,7 +16389,8 @@
             "subpackages": [],
             "urlSlug": "gist",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_embedNew": {
             "subpackageId": "subpackage_embedNew",
@@ -16231,7 +16470,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -16261,7 +16502,9 @@
                                 "type": "template",
                                 "value": {
                                   "type": "generic",
-                                  "imports": ["import fs from \"fs\";"],
+                                  "imports": [
+                                    "import fs from \"fs\";"
+                                  ],
                                   "templateString": "fs.createReadStream(\"/path/to/your/file\")",
                                   "isOptional": false,
                                   "templateInputs": []
@@ -16271,7 +16514,9 @@
                                 "type": "template",
                                 "value": {
                                   "type": "generic",
-                                  "imports": ["import fs from \"fs\";"],
+                                  "imports": [
+                                    "import fs from \"fs\";"
+                                  ],
                                   "templateString": "fs.createReadStream(\"/path/to/your/file\")",
                                   "isOptional": false,
                                   "templateInputs": []
@@ -16392,7 +16637,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -16434,7 +16681,8 @@
             "subpackages": [],
             "urlSlug": "embed-new",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_embed/tasks": {
             "subpackageId": "subpackage_embed/tasks",
@@ -16450,7 +16698,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-video-embedding-tasks"],
+                "migratedFromUrlSlugs": [
+                  "list-video-embedding-tasks"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_embed/tasks.list",
@@ -16608,7 +16858,9 @@
                               "input_filename": "01.mp4",
                               "input_url": "https://myvideo.com/myvideo.mp4",
                               "video_clip_length": 6,
-                              "video_embedding_scope": ["clip"],
+                              "video_embedding_scope": [
+                                "clip"
+                              ],
                               "duration": 13.4400001
                             }
                           }
@@ -16623,7 +16875,9 @@
                               "input_filename": "01.mp4",
                               "input_url": "https://myvideo.com/myvideo.mp4",
                               "video_clip_length": 6,
-                              "video_embedding_scope": ["clip"],
+                              "video_embedding_scope": [
+                                "clip"
+                              ],
                               "duration": 13.4400001
                             }
                           }
@@ -16638,7 +16892,9 @@
                               "input_filename": "01.mp4",
                               "input_url": "https://myvideo.com/myvideo.mp4",
                               "video_clip_length": 6,
-                              "video_embedding_scope": ["clip"],
+                              "video_embedding_scope": [
+                                "clip"
+                              ],
                               "duration": 13.4400001
                             }
                           }
@@ -16686,7 +16942,9 @@
                                 "input_filename": "01.mp4",
                                 "input_url": "https://myvideo.com/myvideo.mp4",
                                 "video_clip_length": 6,
-                                "video_embedding_scope": ["clip"],
+                                "video_embedding_scope": [
+                                  "clip"
+                                ],
                                 "duration": 13.4400001
                               }
                             }
@@ -16701,7 +16959,9 @@
                                 "input_filename": "01.mp4",
                                 "input_url": "https://myvideo.com/myvideo.mp4",
                                 "video_clip_length": 6,
-                                "video_embedding_scope": ["clip"],
+                                "video_embedding_scope": [
+                                  "clip"
+                                ],
                                 "duration": 13.4400001
                               }
                             }
@@ -16716,7 +16976,9 @@
                                 "input_filename": "01.mp4",
                                 "input_url": "https://myvideo.com/myvideo.mp4",
                                 "video_clip_length": 6,
-                                "video_embedding_scope": ["clip"],
+                                "video_embedding_scope": [
+                                  "clip"
+                                ],
                                 "duration": 13.4400001
                               }
                             }
@@ -16870,7 +17132,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -16983,7 +17247,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -17029,7 +17295,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create",
-                "migratedFromUrlSlugs": ["create-a-video-embedding-task"],
+                "migratedFromUrlSlugs": [
+                  "create-a-video-embedding-task"
+                ],
                 "method": "POST",
                 "id": "create",
                 "originalEndpointId": "endpoint_embed/tasks.create",
@@ -17343,7 +17611,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "This method creates a new video embedding task that uploads a video to the platform and creates one or multiple video embeddings.\n\nEnsure your video meets the requirements in the [Prerequisites](/docs/create-video-embeddings#prerequisites) section of the **Create video embeddings** page.\n\nUpload options:\n\n- **Local file**: Use the `video_file` parameter\n- **Publicly accessible URL**: Use the `video_url` parameter.\n\nSpecify at least one option. If both are provided, `video_url` takes precedence.\n\n**NOTES**:\n\n- The “Marengo-retrieval-2.6” video understanding engine generates embeddings for all modalities in the same latent space. This shared space enables any-to-any searches across different types of content.\n- Video embeddings are stored for seven days.\n- The platform supports uploading video files that can play without additional user interaction or custom video players. Ensure your URL points to the raw video file, not a web page containing the video. Links to third-party hosting sites, cloud storage services, or videos requiring extra steps to play are not supported.",
+                "description": "This method creates a new video embedding task that uploads a video to the platform and creates one or multiple video embeddings.\n\nEnsure your video meets the requirements in the [Prerequisites](/docs/create-video-embeddings#prerequisites) section of the **Create video embeddings** page.\n\nUpload options:\n\n- **Local file**: Use the `video_file` parameter\n- **Publicly accessible URL**: Use the `video_url` parameter.\n\nSpecify at least one option. If both are provided, `video_url` takes precedence.\n\n**NOTES**:\n\n- The \u201cMarengo-retrieval-2.6\u201d video understanding engine generates embeddings for all modalities in the same latent space. This shared space enables any-to-any searches across different types of content.\n- Video embeddings are stored for seven days.\n- The platform supports uploading video files that can play without additional user interaction or custom video players. Ensure your URL points to the raw video file, not a web page containing the video. Links to third-party hosting sites, cloud storage services, or videos requiring extra steps to play are not supported.",
                 "authed": false,
                 "snippetTemplates": {
                   "python": {
@@ -17470,7 +17738,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -17500,7 +17770,9 @@
                                 "type": "template",
                                 "value": {
                                   "type": "generic",
-                                  "imports": ["import fs from \"fs\";"],
+                                  "imports": [
+                                    "import fs from \"fs\";"
+                                  ],
                                   "templateString": "fs.createReadStream(\"/path/to/your/file\")",
                                   "isOptional": false,
                                   "templateInputs": []
@@ -17621,7 +17893,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -17667,7 +17941,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "retrieve",
-                "migratedFromUrlSlugs": ["retrieve-video-embeddings"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-video-embeddings"
+                ],
                 "method": "GET",
                 "id": "retrieve",
                 "originalEndpointId": "endpoint_embed/tasks.retrieve",
@@ -17774,7 +18050,10 @@
                           "input_filename": "01.mp4",
                           "input_url": "example.com/video.mp4",
                           "video_clip_length": 6,
-                          "video_embedding_scope": ["clip", "video"],
+                          "video_embedding_scope": [
+                            "clip",
+                            "video"
+                          ],
                           "duration": 18
                         },
                         "segments": [
@@ -17782,25 +18061,37 @@
                             "start_offset_sec": 0,
                             "end_offset_sec": 6,
                             "embedding_scope": "clip",
-                            "float": [-0.060086973, 0.016479108]
+                            "float": [
+                              -0.060086973,
+                              0.016479108
+                            ]
                           },
                           {
                             "start_offset_sec": 6,
                             "end_offset_sec": 12,
                             "embedding_scope": "clip",
-                            "float": [-0.056660935, 0.012404642]
+                            "float": [
+                              -0.056660935,
+                              0.012404642
+                            ]
                           },
                           {
                             "start_offset_sec": 12,
                             "end_offset_sec": 18,
                             "embedding_scope": "clip",
-                            "float": [-0.05971131, -0.00859428]
+                            "float": [
+                              -0.05971131,
+                              -0.00859428
+                            ]
                           },
                           {
                             "start_offset_sec": 0,
                             "end_offset_sec": 18,
                             "embedding_scope": "video",
-                            "float": [-0.05971131, -0.00859428]
+                            "float": [
+                              -0.05971131,
+                              -0.00859428
+                            ]
                           }
                         ]
                       }
@@ -17838,7 +18129,10 @@
                             "input_filename": "01.mp4",
                             "input_url": "example.com/video.mp4",
                             "video_clip_length": 6,
-                            "video_embedding_scope": ["clip", "video"],
+                            "video_embedding_scope": [
+                              "clip",
+                              "video"
+                            ],
                             "duration": 18
                           },
                           "segments": [
@@ -17846,25 +18140,37 @@
                               "start_offset_sec": 0,
                               "end_offset_sec": 6,
                               "embedding_scope": "clip",
-                              "float": [-0.060086973, 0.016479108]
+                              "float": [
+                                -0.060086973,
+                                0.016479108
+                              ]
                             },
                             {
                               "start_offset_sec": 6,
                               "end_offset_sec": 12,
                               "embedding_scope": "clip",
-                              "float": [-0.056660935, 0.012404642]
+                              "float": [
+                                -0.056660935,
+                                0.012404642
+                              ]
                             },
                             {
                               "start_offset_sec": 12,
                               "end_offset_sec": 18,
                               "embedding_scope": "clip",
-                              "float": [-0.05971131, -0.00859428]
+                              "float": [
+                                -0.05971131,
+                                -0.00859428
+                              ]
                             },
                             {
                               "start_offset_sec": 0,
                               "end_offset_sec": 18,
                               "embedding_scope": "video",
-                              "float": [-0.05971131, -0.00859428]
+                              "float": [
+                                -0.05971131,
+                                -0.00859428
+                              ]
                             }
                           ]
                         }
@@ -17914,7 +18220,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "This method retrieves embeddings for a specific video embedding task. Ensure the task status is `ready` before invoking this method. Refer to the [Retrieve a video embedding](/reference/retrieve-video-embeding-task) task page for instructions on checking the task status.\n\n> 🚧 Important\n> The response includes breaking changes that might require updates to your application code. Key differences:\n>\n> - The `video_embeddings` field has been renamed to `video_embedding` (plural to singular)\n> - The response now includes a nested array named `segments`.\n\n- The `metadata` field is now nested under `video_embedding`.",
+                "description": "This method retrieves embeddings for a specific video embedding task. Ensure the task status is `ready` before invoking this method. Refer to the [Retrieve a video embedding](/reference/retrieve-video-embeding-task) task page for instructions on checking the task status.\n\n> \ud83d\udea7 Important\n> The response includes breaking changes that might require updates to your application code. Key differences:\n>\n> - The `video_embeddings` field has been renamed to `video_embedding` (plural to singular)\n> - The response now includes a nested array named `segments`.\n\n- The `metadata` field is now nested under `video_embedding`.",
                 "authed": false,
                 "snippetTemplates": {
                   "python": {
@@ -17945,7 +18251,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -17994,7 +18302,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -18041,10 +18351,13 @@
               "type_embed/tasks:TasksRetrieveResponseVideoEmbedding",
               "type_embed/tasks:TasksRetrieveResponse"
             ],
-            "subpackages": ["subpackage_embed/tasks/status"],
+            "subpackages": [
+              "subpackage_embed/tasks/status"
+            ],
             "urlSlug": "tasks",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_embed/tasks/status": {
             "subpackageId": "subpackage_embed/tasks/status",
@@ -18060,7 +18373,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "retrieve",
-                "migratedFromUrlSlugs": ["retrieve-the-status-of-a-video-embedding-task"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-the-status-of-a-video-embedding-task"
+                ],
                 "method": "GET",
                 "id": "retrieve",
                 "originalEndpointId": "endpoint_embed/tasks/status.retrieve",
@@ -18165,7 +18480,10 @@
                         "input_filename": "01.mp4",
                         "input_url": "example.com/video.mp4",
                         "video_clip_length": 6,
-                        "video_embedding_scope": ["clip", "video"],
+                        "video_embedding_scope": [
+                          "clip",
+                          "video"
+                        ],
                         "duration": 18
                       }
                     },
@@ -18200,7 +18518,10 @@
                           "input_filename": "01.mp4",
                           "input_url": "example.com/video.mp4",
                           "video_clip_length": 6,
-                          "video_embedding_scope": ["clip", "video"],
+                          "video_embedding_scope": [
+                            "clip",
+                            "video"
+                          ],
                           "duration": 18
                         }
                       }
@@ -18280,7 +18601,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -18329,7 +18652,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -18374,7 +18699,8 @@
             "subpackages": [],
             "urlSlug": "status",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_indexes/videos": {
             "subpackageId": "subpackage_indexes/videos",
@@ -18390,7 +18716,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list",
-                "migratedFromUrlSlugs": ["list-videos"],
+                "migratedFromUrlSlugs": [
+                  "list-videos"
+                ],
                 "method": "GET",
                 "id": "list",
                 "originalEndpointId": "endpoint_indexes/videos.list",
@@ -19206,7 +19534,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -19532,7 +19862,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -19578,7 +19910,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "retrieve",
-                "migratedFromUrlSlugs": ["retrieve-video-information"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-video-information"
+                ],
                 "method": "GET",
                 "id": "retrieve",
                 "originalEndpointId": "endpoint_indexes/videos.retrieve",
@@ -19722,7 +20056,11 @@
                               "start_offset_sec": 0,
                               "end_offset_sec": 7.5666666,
                               "embedding_scope": "clip",
-                              "float": [-0.04747168, 0.030509098, 0.032282468]
+                              "float": [
+                                -0.04747168,
+                                0.030509098,
+                                0.032282468
+                              ]
                             }
                           ]
                         }
@@ -19779,7 +20117,11 @@
                                 "start_offset_sec": 0,
                                 "end_offset_sec": 7.5666666,
                                 "embedding_scope": "clip",
-                                "float": [-0.04747168, 0.030509098, 0.032282468]
+                                "float": [
+                                  -0.04747168,
+                                  0.030509098,
+                                  0.032282468
+                                ]
                               }
                             ]
                           }
@@ -19831,7 +20173,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "This method retrieves information about the specified video.\n\n> 🚧 Important\n> When retrieving video embeddings, the response includes breaking changes that might require updates to your application code. Key differences:\n>\n> - The `video_embeddings` field has been renamed to `video_embedding` (plural to singular)\n> - The response now includes a nested array named `segments`.",
+                "description": "This method retrieves information about the specified video.\n\n> \ud83d\udea7 Important\n> When retrieving video embeddings, the response includes breaking changes that might require updates to your application code. Key differences:\n>\n> - The `video_embeddings` field has been renamed to `video_embedding` (plural to singular)\n> - The response now includes a nested array named `segments`.",
                 "authed": false,
                 "snippetTemplates": {
                   "python": {
@@ -19894,7 +20236,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -19959,7 +20303,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -20005,7 +20351,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update",
-                "migratedFromUrlSlugs": ["update-video-information"],
+                "migratedFromUrlSlugs": [
+                  "update-video-information"
+                ],
                 "method": "PUT",
                 "id": "update",
                 "originalEndpointId": "endpoint_indexes/videos.update",
@@ -20363,7 +20711,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -20497,7 +20847,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -20543,7 +20895,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete",
-                "migratedFromUrlSlugs": ["delete-video-information"],
+                "migratedFromUrlSlugs": [
+                  "delete-video-information"
+                ],
                 "method": "DELETE",
                 "id": "delete",
                 "originalEndpointId": "endpoint_indexes/videos.delete",
@@ -20762,7 +21116,9 @@
                       "type": "generic"
                     },
                     "clientInstantiation": {
-                      "imports": ["from twelvelabs import TwelveLabs"],
+                      "imports": [
+                        "from twelvelabs import TwelveLabs"
+                      ],
                       "isOptional": true,
                       "templateString": "client = TwelveLabs(api_key=\"YOUR_API_KEY\", )",
                       "templateInputs": [],
@@ -20827,7 +21183,9 @@
                     },
                     "clientInstantiation": {
                       "type": "generic",
-                      "imports": ["import { TwelveLabsClient } from \"twelevelabs-js\";"],
+                      "imports": [
+                        "import { TwelveLabsClient } from \"twelevelabs-js\";"
+                      ],
                       "templateString": "const client = new TwelveLabsClient($FERN_INPUT);",
                       "isOptional": false,
                       "inputDelimiter": ",",
@@ -20879,7 +21237,8 @@
             "subpackages": [],
             "urlSlug": "videos",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "hasMultipleBaseUrls": false,
@@ -20914,7 +21273,7 @@
     },
     "pages": {
       "docs/pages/introduction.mdx": {
-        "markdown": "The Twelve Labs Video Understanding Platform leverages artificial intelligence to extract information from videos. It identifies and interprets movements, actions, objects, individuals, sounds, on-screen text, and spoken words. Built on a state-of-the-art multimodal foundation model optimized for videos, the platform enables you to add rich, contextual video understanding to your applications through developer-friendly APIs.\n\n## Key Capabilities of Twelve Labs for Multimodal Video Understanding\n\nTwelve Labs equips developers with the following key capabilities:\n\n- **Deep Semantic Search**: Find the exact moment you need within your videos using natural language queries instead of tags or metadata.\n- **Zero-shot Classification**: Use natural language to create your custom taxonomy, facilitating accurate and efficient video classification tailored to your unique use case.\n- **Dynamic Video-to-Text Generation**: Capture the essence of your videos into concise summaries or custom reports. The platform offers built-in formats to generate titles, topics, summaries, hashtags, chapters, and highlights. Additionally, you can provide a prompt detailing the content and desired output format, such as a police report, to tailor the results to your needs.\n- **Intuitive Integration**: Embed a state-of-the-art multimodal foundation model for video understanding into your application in just a few API calls.\n- **Rapid Result Retrieval**: Receive your results within seconds.\n- **Scalability**: Our cloud-native distributed infrastructure seamlessly processes thousands of concurrent requests.\n\n## Twelve Labs’ Advantages\n\nThe table below provides a basic comparison between Twelve Labs Video Understanding Platform and other video AI solutions:\n\n- **Simplified API Integration**: Perform a rich set of video understanding tasks with just a few API calls. This allows you to focus on building your application rather than aggregating data from separate image and speech APIs or managing multiple data sources.\n- **Natural Language Use**: Tap into the model's capabilities using everyday language to write queries or prompts. This method is more effective, intuitive, flexible, and accurate than using solely rules, tags, or keywords.\n- **Image-to-Video Search**: Perform searches using images as queries and find videos semantically similar to the provided images. This addresses the challenges you face when the existing reverse image search tools yield inconsistent results or when describing the desired results using text is challenging.\n- **Multimodal Approach**: The platform adopts a video-first, multimodal approach, surpassing traditional unimodal models that depend exclusively on text or images, providing a comprehensive understanding of your videos.\n- **One-time Video Indexing for Multiple Tasks**: Index your videos once and create contextual video embeddings that encapsulate semantics for scaling and repurposing, allowing you to search and classify your videos swiftly.\n- **Flexible Deployment**: The platform can adapt to varied business needs, with deployment options spanning on-premise, hybrid, or cloud-based environments.\n- **Fine-tuning Capabilities**: Though our state-of-the-art foundation model for video understanding already yields highly accurate results, we can provide fine-tuning capabilities to help you get more out of the models and achieve better results with only a few examples.\n\nFor details on fine-tuning the models or different deployment options, please contact us at [email protected].\n\n## Discover Twelve Labs\n\nExperience the key capabilities of the Twelve Labs Video Understanding platform by signing up for a free account.\n",
+        "markdown": "The Twelve Labs Video Understanding Platform leverages artificial intelligence to extract information from videos. It identifies and interprets movements, actions, objects, individuals, sounds, on-screen text, and spoken words. Built on a state-of-the-art multimodal foundation model optimized for videos, the platform enables you to add rich, contextual video understanding to your applications through developer-friendly APIs.\n\n## Key Capabilities of Twelve Labs for Multimodal Video Understanding\n\nTwelve Labs equips developers with the following key capabilities:\n\n- **Deep Semantic Search**: Find the exact moment you need within your videos using natural language queries instead of tags or metadata.\n- **Zero-shot Classification**: Use natural language to create your custom taxonomy, facilitating accurate and efficient video classification tailored to your unique use case.\n- **Dynamic Video-to-Text Generation**: Capture the essence of your videos into concise summaries or custom reports. The platform offers built-in formats to generate titles, topics, summaries, hashtags, chapters, and highlights. Additionally, you can provide a prompt detailing the content and desired output format, such as a police report, to tailor the results to your needs.\n- **Intuitive Integration**: Embed a state-of-the-art multimodal foundation model for video understanding into your application in just a few API calls.\n- **Rapid Result Retrieval**: Receive your results within seconds.\n- **Scalability**: Our cloud-native distributed infrastructure seamlessly processes thousands of concurrent requests.\n\n## Twelve Labs\u2019 Advantages\n\nThe table below provides a basic comparison between Twelve Labs Video Understanding Platform and other video AI solutions:\n\n- **Simplified API Integration**: Perform a rich set of video understanding tasks with just a few API calls. This allows you to focus on building your application rather than aggregating data from separate image and speech APIs or managing multiple data sources.\n- **Natural Language Use**: Tap into the model's capabilities using everyday language to write queries or prompts. This method is more effective, intuitive, flexible, and accurate than using solely rules, tags, or keywords.\n- **Image-to-Video Search**: Perform searches using images as queries and find videos semantically similar to the provided images. This addresses the challenges you face when the existing reverse image search tools yield inconsistent results or when describing the desired results using text is challenging.\n- **Multimodal Approach**: The platform adopts a video-first, multimodal approach, surpassing traditional unimodal models that depend exclusively on text or images, providing a comprehensive understanding of your videos.\n- **One-time Video Indexing for Multiple Tasks**: Index your videos once and create contextual video embeddings that encapsulate semantics for scaling and repurposing, allowing you to search and classify your videos swiftly.\n- **Flexible Deployment**: The platform can adapt to varied business needs, with deployment options spanning on-premise, hybrid, or cloud-based environments.\n- **Fine-tuning Capabilities**: Though our state-of-the-art foundation model for video understanding already yields highly accurate results, we can provide fine-tuning capabilities to help you get more out of the models and achieve better results with only a few examples.\n\nFor details on fine-tuning the models or different deployment options, please contact us at [email protected].\n\n## Discover Twelve Labs\n\nExperience the key capabilities of the Twelve Labs Video Understanding platform by signing up for a free account.\n",
         "editThisPageUrl": "https://github.com/twelve-labs/docs/blob/main/fern/docs/pages/introduction.mdx"
       },
       "docs/pages/platform-overview.mdx": {
@@ -20930,11 +21289,11 @@
         "editThisPageUrl": "https://github.com/twelve-labs/docs/blob/main/fern/docs/pages/authentication.mdx"
       },
       "docs/pages/create-indexes.mdx": {
-        "markdown": "An index is a fundamental unit for organizing and storing video data, consisting of video embeddings and metadata. Indexes facilitate information retrieval and processing.\n\nYou can use indexes to group related videos. For example, if you want to upload multiple videos from a car race, you can create a single index and upload all the videos to it. After uploading, you can search for specific moments across all videos in that index in a single request.\n\n## Prerequisites\n\n- You’re familiar with the concepts described on the Platform overview page.\n- You have an API key. To retrieve your API key, navigate to the API Key page and log in with your credentials. Then, select the **Copy** icon to the right of your API key to copy it to your clipboard.\n\n## Procedure\n\n1. **Import the SDK into your application**:\n   - Python: `from twelvelabs import TwelveLabs`\n   - Node.js: `import { TwelveLabs } from 'twelvelabs-js';`\n\n2. **Instantiate the SDK client with your API key**:\n   - Python: `client = TwelveLabs(api_key=\"<YOUR_API_KEY>\")`\n   - Node.js: `const client = new TwelveLabs({ apiKey: '<YOUR_API_KEY>' });`\n\n3. **Specify the desired engine configuration**:\n   - The example below enables the Marengo video understanding engine and the following engine options - `visual`, `conversation`, `text_in_video`, and `logo`:\n     - Python:\n       ```python\n       engines = [\n           {\n               \"name\": \"marengo2.6\",\n               \"options\": [\"visual\", \"conversation\", \"text_in_video\", \"logo\"]\n           }\n       ]\n       ```\n     - Node.js:\n       ```javascript\n       const engines = [\n           {\n               name: 'marengo2.6',\n               options: ['visual', 'conversation', 'text_in_video', 'logo'],\n           },\n       ];\n       ```\n\n4. **Create a new index**:\n   - Invoke the `create` method of the `client.index` object with the following parameters:\n     - `name`: A string representing the name of your new index. Choose a succinct and descriptive name for your index.\n     - `engines`: An object specifying your engine configuration. You constructed this object in the previous step.\n     - _(Optional)_ `addons`: An array of strings specifying the add-ons you want to enable for your index. This example enables the thumbnail generation feature.\n     - Python:\n       ```python\n       index = client.index.create(\n           name=\"<YOUR_INDEX_NAME>\",\n           engines=engines,\n           addons=[\"thumbnail\"]  # Optional\n       )\n       print(f\"A new index has been created: id={index.id} name={index.name} engines={index.engines}\")\n       ```\n     - Node.js:\n       ```javascript\n       let index = await client.index.create({\n           name: '<YOUR_INDEX_NAME>',\n           engines: engines,\n           addons: ['thumbnail'], // Optional\n       });\n       console.log(`A new index has been created: id=${index.id} name=${index.name} engines=${JSON.stringify(index.engines)}`);\n       ```\n\nThe response should look similar to the following one:\n```\nA new index has been created: id=65d345106efba5e3988d6d4b name=index-01 engines=[Engine(name='marengo2.6', options=['visual', 'conversation', 'text_in_video', 'logo'], addons=None)]\n```\n\nNote that the response contains, among other information, a field named `id`, representing the unique identifier of your new index.\n",
+        "markdown": "An index is a fundamental unit for organizing and storing video data, consisting of video embeddings and metadata. Indexes facilitate information retrieval and processing.\n\nYou can use indexes to group related videos. For example, if you want to upload multiple videos from a car race, you can create a single index and upload all the videos to it. After uploading, you can search for specific moments across all videos in that index in a single request.\n\n## Prerequisites\n\n- You\u2019re familiar with the concepts described on the Platform overview page.\n- You have an API key. To retrieve your API key, navigate to the API Key page and log in with your credentials. Then, select the **Copy** icon to the right of your API key to copy it to your clipboard.\n\n## Procedure\n\n1. **Import the SDK into your application**:\n   - Python: `from twelvelabs import TwelveLabs`\n   - Node.js: `import { TwelveLabs } from 'twelvelabs-js';`\n\n2. **Instantiate the SDK client with your API key**:\n   - Python: `client = TwelveLabs(api_key=\"<YOUR_API_KEY>\")`\n   - Node.js: `const client = new TwelveLabs({ apiKey: '<YOUR_API_KEY>' });`\n\n3. **Specify the desired engine configuration**:\n   - The example below enables the Marengo video understanding engine and the following engine options - `visual`, `conversation`, `text_in_video`, and `logo`:\n     - Python:\n       ```python\n       engines = [\n           {\n               \"name\": \"marengo2.6\",\n               \"options\": [\"visual\", \"conversation\", \"text_in_video\", \"logo\"]\n           }\n       ]\n       ```\n     - Node.js:\n       ```javascript\n       const engines = [\n           {\n               name: 'marengo2.6',\n               options: ['visual', 'conversation', 'text_in_video', 'logo'],\n           },\n       ];\n       ```\n\n4. **Create a new index**:\n   - Invoke the `create` method of the `client.index` object with the following parameters:\n     - `name`: A string representing the name of your new index. Choose a succinct and descriptive name for your index.\n     - `engines`: An object specifying your engine configuration. You constructed this object in the previous step.\n     - _(Optional)_ `addons`: An array of strings specifying the add-ons you want to enable for your index. This example enables the thumbnail generation feature.\n     - Python:\n       ```python\n       index = client.index.create(\n           name=\"<YOUR_INDEX_NAME>\",\n           engines=engines,\n           addons=[\"thumbnail\"]  # Optional\n       )\n       print(f\"A new index has been created: id={index.id} name={index.name} engines={index.engines}\")\n       ```\n     - Node.js:\n       ```javascript\n       let index = await client.index.create({\n           name: '<YOUR_INDEX_NAME>',\n           engines: engines,\n           addons: ['thumbnail'], // Optional\n       });\n       console.log(`A new index has been created: id=${index.id} name=${index.name} engines=${JSON.stringify(index.engines)}`);\n       ```\n\nThe response should look similar to the following one:\n```\nA new index has been created: id=65d345106efba5e3988d6d4b name=index-01 engines=[Engine(name='marengo2.6', options=['visual', 'conversation', 'text_in_video', 'logo'], addons=None)]\n```\n\nNote that the response contains, among other information, a field named `id`, representing the unique identifier of your new index.\n",
         "editThisPageUrl": "https://github.com/twelve-labs/docs/blob/main/fern/docs/pages/create-indexes.mdx"
       },
       "docs/pages/upload-videos.mdx": {
-        "markdown": "This guide shows how you can upload a video file to the Twelve Labs platform. The platform offers the following options for uploading single videos:\n\n- **Upload from the local file system**: Use this option to upload a single video file from your local file system.\n- **Upload from a direct URL**: Use this option to upload a video file from a publicly accessible URL. The platform will retrieve the file directly from the specified URL, so your application doesn't have to store the video locally and upload it.\n\n> **Notes:**\n> - The platform supports uploading video files that can play without additional user interaction or custom video players. Ensure your URL points to the raw video file, not a web page containing the video. Links to third-party hosting sites, cloud storage services, or videos requiring extra steps to play are not supported.\n> - The ability to upload videos from YouTube is no longer supported.\n\n## Prerequisites\n\n- You’re familiar with the concepts described on the Platform overview page.\n- You have an API key. To retrieve your API key, navigate to the API Key page and log in with your credentials. Then, select the **Copy** icon to the right of your API key to copy it to your clipboard.\n- You’ve already created an index.\n- The video you wish to upload must meet the following requirements:\n  - **Video resolution**: Must be greater or equal to 360p and less or equal to 4K.\n  - **Video and audio formats**: The video files you wish to upload must be encoded in the video and audio formats listed on the FFmpeg Formats Documentation page.\n  - **Duration**: For Marengo, it must be between 4 seconds and 2 hours (7,200s). For Pegasus, it must be between 4 seconds and 30 minutes (1,800s).\n  - **File size**: Must not exceed 2 GB.\n  - **Audio track**: If the `conversation` engine option is selected, the video you're uploading must contain an audio track.\n\n## Procedure\n\n1. **Import the required packages into your application**:\n   - Python:\n     ```python\n     from twelvelabs import TwelveLabs\n     from twelvelabs.models.task import Task\n     ```\n   - Node.js:\n     ```javascript\n     import { TwelveLabs, Task } from 'twelvelabs-js';\n     ```\n\n2. **Instantiate the SDK client with your API key**:\n   - Python:\n     ```python\n     client = TwelveLabs(api_key=\"<YOUR_API_KEY>\")\n     ```\n   - Node.js:\n     ```javascript\n     const client = new TwelveLabs({ apiKey: '<YOUR_API_KEY>' });\n     ```\n\n3. **Upload a video**:\n   - **From the local file system**:\n     - Python:\n       ```python\n       task = client.task.create(\n           index_id=\"<YOUR_INDEX_ID>\",\n           file=\"<YOUR_VIDEO_FILE>\",\n           transcription_file=\"<YOUR_TRANSCRIPTION_FILE>\"  # Optional\n       )\n       print(f\"Task id={task.id}\")\n       ```\n     - Node.js:\n       ```javascript\n       const task = await client.task.create({\n           indexId: '<YOUR_INDEX_ID>',\n           file: '<YOUR_VIDEO_FILE>',\n           transcriptionFile: '<YOUR_TRANSCRIPTION_FILE>',  // Optional\n       });\n       console.log(`Task id=${task.id}`);\n       ```\n\n   - **From a direct URL**:\n     - Python:\n       ```python\n       task = client.task.create(\n           index_id=\"<YOUR_INDEX_ID>\",\n           url=\"<YOUR_VIDEO_URL>\",\n           transcription_url=\"<YOUR_TRANSCRIPTION_URL>\"  # Optional\n       )\n       print(f\"Task id={task.id}\")\n       ```\n     - Node.js:\n       ```javascript\n       const task = await client.task.create({\n           indexId: '<YOUR_INDEX_ID>',\n           url: '<YOUR_VIDEO_URL>',\n           transcriptionUrl: '<YOUR_TRANSCRIPTION_URL>',  // Optional\n       });\n       console.log(`Task id=${task.id}`);\n       ```\n\n4. **Monitor the indexing process**:\n   - Python:\n     ```python\n     def on_task_update(task: Task):\n         print(f\"  Status={task.status}\")\n     task.wait_for_done(sleep_interval=5, callback=on_task_update)\n     if task.status != \"ready\":\n         raise RuntimeError(f\"Indexing failed with status {task.status}\")\n     print(f\"The unique identifier of your video is {task.video_id}.\")\n     ```\n   - Node.js:\n     ```javascript\n     await task.waitForDone(500, (task: Task) => {\n         console.log(`  Status=${task.status}`);\n     });\n     if (task.status !== 'ready') {\n         throw new Error(`Indexing failed with status ${task.status}`);\n     }\n     console.log(`The unique identifier of your video is ${task.videoId}`);\n     ```\n\nOnce a video has been successfully uploaded and indexed, the `task` object contains, among other information, a field named `video_id`, representing the unique identifier of your video.\n",
+        "markdown": "This guide shows how you can upload a video file to the Twelve Labs platform. The platform offers the following options for uploading single videos:\n\n- **Upload from the local file system**: Use this option to upload a single video file from your local file system.\n- **Upload from a direct URL**: Use this option to upload a video file from a publicly accessible URL. The platform will retrieve the file directly from the specified URL, so your application doesn't have to store the video locally and upload it.\n\n> **Notes:**\n> - The platform supports uploading video files that can play without additional user interaction or custom video players. Ensure your URL points to the raw video file, not a web page containing the video. Links to third-party hosting sites, cloud storage services, or videos requiring extra steps to play are not supported.\n> - The ability to upload videos from YouTube is no longer supported.\n\n## Prerequisites\n\n- You\u2019re familiar with the concepts described on the Platform overview page.\n- You have an API key. To retrieve your API key, navigate to the API Key page and log in with your credentials. Then, select the **Copy** icon to the right of your API key to copy it to your clipboard.\n- You\u2019ve already created an index.\n- The video you wish to upload must meet the following requirements:\n  - **Video resolution**: Must be greater or equal to 360p and less or equal to 4K.\n  - **Video and audio formats**: The video files you wish to upload must be encoded in the video and audio formats listed on the FFmpeg Formats Documentation page.\n  - **Duration**: For Marengo, it must be between 4 seconds and 2 hours (7,200s). For Pegasus, it must be between 4 seconds and 30 minutes (1,800s).\n  - **File size**: Must not exceed 2 GB.\n  - **Audio track**: If the `conversation` engine option is selected, the video you're uploading must contain an audio track.\n\n## Procedure\n\n1. **Import the required packages into your application**:\n   - Python:\n     ```python\n     from twelvelabs import TwelveLabs\n     from twelvelabs.models.task import Task\n     ```\n   - Node.js:\n     ```javascript\n     import { TwelveLabs, Task } from 'twelvelabs-js';\n     ```\n\n2. **Instantiate the SDK client with your API key**:\n   - Python:\n     ```python\n     client = TwelveLabs(api_key=\"<YOUR_API_KEY>\")\n     ```\n   - Node.js:\n     ```javascript\n     const client = new TwelveLabs({ apiKey: '<YOUR_API_KEY>' });\n     ```\n\n3. **Upload a video**:\n   - **From the local file system**:\n     - Python:\n       ```python\n       task = client.task.create(\n           index_id=\"<YOUR_INDEX_ID>\",\n           file=\"<YOUR_VIDEO_FILE>\",\n           transcription_file=\"<YOUR_TRANSCRIPTION_FILE>\"  # Optional\n       )\n       print(f\"Task id={task.id}\")\n       ```\n     - Node.js:\n       ```javascript\n       const task = await client.task.create({\n           indexId: '<YOUR_INDEX_ID>',\n           file: '<YOUR_VIDEO_FILE>',\n           transcriptionFile: '<YOUR_TRANSCRIPTION_FILE>',  // Optional\n       });\n       console.log(`Task id=${task.id}`);\n       ```\n\n   - **From a direct URL**:\n     - Python:\n       ```python\n       task = client.task.create(\n           index_id=\"<YOUR_INDEX_ID>\",\n           url=\"<YOUR_VIDEO_URL>\",\n           transcription_url=\"<YOUR_TRANSCRIPTION_URL>\"  # Optional\n       )\n       print(f\"Task id={task.id}\")\n       ```\n     - Node.js:\n       ```javascript\n       const task = await client.task.create({\n           indexId: '<YOUR_INDEX_ID>',\n           url: '<YOUR_VIDEO_URL>',\n           transcriptionUrl: '<YOUR_TRANSCRIPTION_URL>',  // Optional\n       });\n       console.log(`Task id=${task.id}`);\n       ```\n\n4. **Monitor the indexing process**:\n   - Python:\n     ```python\n     def on_task_update(task: Task):\n         print(f\"  Status={task.status}\")\n     task.wait_for_done(sleep_interval=5, callback=on_task_update)\n     if task.status != \"ready\":\n         raise RuntimeError(f\"Indexing failed with status {task.status}\")\n     print(f\"The unique identifier of your video is {task.video_id}.\")\n     ```\n   - Node.js:\n     ```javascript\n     await task.waitForDone(500, (task: Task) => {\n         console.log(`  Status=${task.status}`);\n     });\n     if (task.status !== 'ready') {\n         throw new Error(`Indexing failed with status ${task.status}`);\n     }\n     console.log(`The unique identifier of your video is ${task.videoId}`);\n     ```\n\nOnce a video has been successfully uploaded and indexed, the `task` object contains, among other information, a field named `video_id`, representing the unique identifier of your video.\n",
         "editThisPageUrl": "https://github.com/twelve-labs/docs/blob/main/fern/docs/pages/upload-videos.mdx"
       },
       "docs/pages/api-overview.mdx": {

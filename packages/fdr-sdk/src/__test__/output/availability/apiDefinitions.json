@@ -1562,6 +1562,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "UserRole": {
         "name": "UserRole",
@@ -3773,6 +3774,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "UserRole": {
         "name": "UserRole",

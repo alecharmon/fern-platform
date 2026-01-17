@@ -8,6 +8,8 @@ export * from "./ChangelogYearNode";
 export * from "./EndpointNode";
 export * from "./EndpointPairNode";
 export * from "./ExternalProductNode";
+export * from "./GraphQlNode";
+export * from "./GraphQlOperationType";
 export * from "./GrpcNode";
 export * from "./InternalProductNode";
 export * from "./LandingPageNode";

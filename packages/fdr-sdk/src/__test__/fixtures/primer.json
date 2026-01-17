@@ -379,7 +379,10 @@
         "id": "3e1141df-b4bc-4dab-9542-53cf91851645",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_paymentWebhooks", "subpackage_disputeChargebacksWebhooks"],
+          "subpackages": [
+            "subpackage_paymentWebhooks",
+            "subpackage_disputeChargebacksWebhooks"
+          ],
           "types": [
             "type_:AccountFundingTypeEnum",
             "type_:ApayaCustomerTokenApiSchema",
@@ -423,7 +426,8 @@
             "type_:RecurringPaymentTypeSchema"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_paymentWebhooks:PaymentStatusWebhookPayloadNotificationConfig": {
@@ -3940,7 +3944,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "payment-status-webhook-event",
-                "migratedFromUrlSlugs": ["payment-status-update"],
+                "migratedFromUrlSlugs": [
+                  "payment-status-update"
+                ],
                 "method": "POST",
                 "id": "payment_status_webhook_event",
                 "name": "Payment Status Update",
@@ -4177,7 +4183,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "payment-refund-webhook-event",
-                "migratedFromUrlSlugs": ["payment-refund"],
+                "migratedFromUrlSlugs": [
+                  "payment-refund"
+                ],
                 "method": "POST",
                 "id": "payment_refund_webhook_event",
                 "name": "Payment Refund",
@@ -4415,7 +4423,8 @@
             "subpackages": [],
             "urlSlug": "payment-webhooks",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_disputeChargebacksWebhooks": {
             "subpackageId": "subpackage_disputeChargebacksWebhooks",
@@ -4430,7 +4439,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "dispute-open-webhook-event",
-                "migratedFromUrlSlugs": ["dispute-open"],
+                "migratedFromUrlSlugs": [
+                  "dispute-open"
+                ],
                 "method": "POST",
                 "id": "dispute_open_webhook_event",
                 "name": "Dispute Open",
@@ -4577,7 +4588,8 @@
             "subpackages": [],
             "urlSlug": "dispute-chargebacks-webhooks",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -4591,7 +4603,10 @@
         "id": "ca56f687-5be3-4661-aeed-674a0f1f7193",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_paymentWebhooks", "subpackage_disputeChargebacksWebhooks"],
+          "subpackages": [
+            "subpackage_paymentWebhooks",
+            "subpackage_disputeChargebacksWebhooks"
+          ],
           "types": [
             "type_:AccountFundingTypeEnum",
             "type_:ApayaCustomerTokenApiSchema",
@@ -4658,7 +4673,8 @@
             "type_:CheckoutCustomerDetailsApiSchema"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_:AccountFundingTypeEnum": {
@@ -7905,7 +7921,7 @@
                   }
                 },
                 {
-                  "description": "Primer’s unified reason that explains why the dispute was raised. This should not vary across processors for the same dispute `reasonCode`, unlike the `processorReason`.",
+                  "description": "Primer\u2019s unified reason that explains why the dispute was raised. This should not vary across processors for the same dispute `reasonCode`, unlike the `processorReason`.",
                   "key": "reason",
                   "valueType": {
                     "type": "optional",
@@ -7944,7 +7960,7 @@
                   }
                 },
                 {
-                  "description": "The disputed amount. Note: this is not always the same as the payment amount.\n\nThis will be displayed in minor units.\n\ne.g. for $7, use `700`. Some currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.",
+                  "description": "The disputed amount. Note: this is not always the same as the payment amount.\n\nThis will be displayed in minor units.\n\ne.g. for $7, use `700`. Some currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.",
                   "key": "amount",
                   "valueType": {
                     "type": "optional",
@@ -9229,7 +9245,9 @@
             "webhooks": [
               {
                 "urlSlug": "payment-status-webhook-event",
-                "migratedFromUrlSlugs": ["payment-status-update"],
+                "migratedFromUrlSlugs": [
+                  "payment-status-update"
+                ],
                 "description": "Primer notifies you with a `PAYMENT.STATUS` webhook when a payment's status has been updated. This is especially useful for asyncronous processor Connections, which do not respond with an upfront authorization.\nThe webhook events will arrive in the order that the payment status changes, for example you should expect a status of `PENDING`, then `AUTHORIZED`, then `SETTLED` (depending on how your workflow is set up).\nThe webhook body contains the full payment object.\n\nExample payment status notification:\n\n```JSON\n{\n  \"eventType\":\"PAYMENT.STATUS\",\n  \"date\":\"2021-02-21T15:36:16.367687\",\n  \"notificationConfig\":{\n    \"id\":\"cc51f9f0-7e1c-492b-9d37-f83a818f6070\",\n    \"description\":\"Payment webhook\"\n  },\n  \"version\":\"2.3\",\n  \"signedAt\": \"1689221338\",\n  \"payment\":{\n    \"id\":\"DdRZ6YY0\",\n    \"date\":\"2021-02-21T15:34:16.367687\",\n    \"dateUpdated\":\"2021-02-21T15:35:16.133701\",\n    \"amount\":3000,\n    \"currencyCode\":\"GBP\",\n    \"customerId\":\"cust-123\",\n    \"orderId\":\"order-123\",\n    \"status\":\"SETTLED\",\n    \"cardTokenType\":\"CARD_PAN\",\n    \"customer\": {\n      \"emailAddress\": \"test@primer.io\",\n      \"mobileNumber\": \"0123456789\",\n      \"billingAddress\": {\n        \"firstName\": \"John\",\n        \"postalCode\": \"CB94BQ\",\n        \"addressLine1\": \"10001 Alpha St\",\n        \"countryCode\": \"GB\",\n        \"city\": \"Cambridge\",\n        \"state\": \"Cambridgeshire\"\n      }\n    },\n    \"paymentMethod\":{\n      \"paymentType\":\"FIRST_PAYMENT\",\n      \"paymentMethodToken\":\"-lcWjvBAAs2DnIRXwxNjUzNTYzNjIy\",\n      \"isVaulted\": \"false\",\n      \"analyticsId\":\"LUi5pETUaVsdSEamK25L\",\n      \"paymentMethodType\":\"PAYMENT_CARD\",\n      \"paymentMethodData\":{\n        \"last4Digits\":\"1111\",\n        \"first6Digits\": \"411111\",\n        \"expirationMonth\":\"03\",\n        \"expirationYear\":\"2030\",\n        \"cardholderName\":\"ADYEN\",\n        \"network\":\"Visa\",\n        \"isNetworkTokenized\":false,\n        \"binData\":{\n          \"network\":\"VISA\",\n          \"issuerCountryCode\":\"US\",\n          \"issuerName\":\"JPMORGAN CHASE BANK, N.A.\",\n          \"regionalRestriction\":\"UNKNOWN\",\n          \"accountNumberType\":\"UNKNOWN\",\n          \"accountFundingType\":\"UNKNOWN\",\n          \"prepaidReloadableIndicator\":\"NOT_APPLICABLE\",\n          \"productUsageType\":\"UNKNOWN\",\n          \"productCode\":\"UNKNOWN\",\n          \"productName\":\"UNKNOWN\"\n        }\n      },\n      \"authorizationType\": \"FINAL\",\n      \"threeDSecureAuthentication\":{\n        \"responseCode\":\"NOT_PERFORMED\"\n      }\n    },\n    \"processor\":{\n      \"name\":\"STRIPE\",\n      \"processorMerchantId\":\"acct_1GORasdasqNWFwi8c\",\n      \"amountCaptured\":3000,\n      \"amountRefunded\":0\n    },\n    \"transactions\":[\n      {\n        \"date\":\"2021-02-21T15:34:16.367687\",\n        \"amount\":3000,\n        \"currencyCode\":\"GBP\",\n        \"transactionType\":\"SALE\",\n        \"orderId\":\"order-123\",\n        \"processorTransactionId\":\"pi_3L3edsGZasdasdc1iget38p\",\n        \"processorName\":\"STRIPE\",\n        \"processorMerchantId\":\"acct_1GORasvasdNWFwi8c\",\n        \"processorStatus\":\"SETTLED\",\n        \"cardTokenType\":\"CARD_PAN\"\n      }\n    ],\n    \"riskData\":{\n      \"fraudChecks\":{\n        \"source\":\"riskified\",\n        \"preAuthorizationResult\":\"THREE_DS\",\n        \"postAuthorizationResult\":\"ACCEPT\"\n      },\n      \"cvvCheck\": {\n        \"source\": \"processor\",\n        \"result\": \"MATCHED\"\n      },\n      \"avsCheck\": {\n        \"source\": \"processor\",\n        \"result\": {\n          \"streetAddress\": \"NOT_MATCHED\",\n          \"postalCode\": \"NOT_VERIFIED\"\n        }\n      }\n    }\n  }\n}\n```\n\nLearn more about [how Primer handles webhooks](https://primer.io/docs/how-primer-works/webhooks).\n",
                 "method": "POST",
                 "id": "payment_status_webhook_event",
@@ -9376,7 +9394,9 @@
               },
               {
                 "urlSlug": "payment-refund-webhook-event",
-                "migratedFromUrlSlugs": ["payment-refund"],
+                "migratedFromUrlSlugs": [
+                  "payment-refund"
+                ],
                 "description": "Primer notifies you with a `PAYMENT.REFUND` Webhook when a refund request has been fully processed by a payment processor and the refund has reached a final state.\n\nCheck the transaction with the most recent `transactionType: \"REFUND\"` in the `transactions` array:\n- if `processorStatus` is `SETTLED`, the refund was successful and the funds have been returned to the customer\n- if `processorStatus` is `FAILED`, the refund was unsuccessful\n\nLearn more about [how Primer handles webhooks](https://primer.io/docs/how-primer-works/webhooks).\n",
                 "method": "POST",
                 "id": "payment_refund_webhook_event",
@@ -9522,7 +9542,8 @@
                 ]
               }
             ],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_disputeChargebacksWebhooks": {
             "subpackageId": "subpackage_disputeChargebacksWebhooks",
@@ -9534,7 +9555,9 @@
             "webhooks": [
               {
                 "urlSlug": "dispute-open-webhook-event",
-                "migratedFromUrlSlugs": ["dispute-open"],
+                "migratedFromUrlSlugs": [
+                  "dispute-open"
+                ],
                 "description": "Primer notifies you with a `DISPUTE.OPEN` webhook on newly opened disputes or chargebacks. This notification is unified across all processors.\n\nLearn more about [how Primer handles webhooks](https://primer.io/docs/how-primer-works/webhooks).\n",
                 "method": "POST",
                 "id": "dispute_open_webhook_event",
@@ -9587,7 +9610,9 @@
               },
               {
                 "urlSlug": "dispute-status-webhook-event",
-                "migratedFromUrlSlugs": ["dispute-status"],
+                "migratedFromUrlSlugs": [
+                  "dispute-status"
+                ],
                 "description": "Primer notifies you with a `DISPUTE.STATUS` webhook that will provide information on retrievals, disputes (also known as chargebacks), and preabritration filings.\n\nThis notification is supported for processors Adyen, Braintree, Checkout.com & PayPal.\n\nThe `DISPUTE.STATUS` event can be used to proactively communicate with customers, issue refunds, send disputes to risk tools, or to proactively defend disputes.\n\nThe `DISPUTE.STATUS` event is currently in an open beta stage, as we continue to add more processors.\n\nLearn more about [managing disputes at Primer](https://primer.io/docs/accept-payments/manage-disputes).\n",
                 "method": "POST",
                 "id": "dispute_status_webhook_event",
@@ -9656,7 +9681,8 @@
                 ]
               }
             ],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "hasMultipleBaseUrls": false
@@ -9784,7 +9810,8 @@
             "type_:CardTokenTypeEnum"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_paymentsApi:PaymentCaptureApiRequestOrder": {
@@ -12026,7 +12053,7 @@
                   }
                 },
                 {
-                  "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                  "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                   "key": "amount",
                   "valueType": {
                     "type": "optional",
@@ -16081,7 +16108,9 @@
             "name": "VerifiedMerchantPaymentMethodTokenApiResponse",
             "shape": {
               "type": "object",
-              "extends": ["type_:MerchantPaymentMethodTokenApiResponse"],
+              "extends": [
+                "type_:MerchantPaymentMethodTokenApiResponse"
+              ],
               "properties": [
                 {
                   "description": "Whether or not this payment method was verified",
@@ -18641,7 +18670,7 @@
                   }
                 },
                 {
-                  "description": "The amount you would like to charge the customer,\nin minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units.\nIn this case you should use the value as it is, without any formatting.\nFor example for ¥100, use `100`.\nThe minimum amount is 0.",
+                  "description": "The amount you would like to charge the customer,\nin minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units.\nIn this case you should use the value as it is, without any formatting.\nFor example for \u00a5100, use `100`.\nThe minimum amount is 0.",
                   "key": "amount",
                   "valueType": {
                     "type": "primitive",
@@ -19504,7 +19533,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "retrieve-client-side-token",
-                "migratedFromUrlSlugs": ["retrieve-a-client-session"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-a-client-session"
+                ],
                 "method": "GET",
                 "id": "retrieveClientSideToken",
                 "name": "Retrieve a client session",
@@ -19620,7 +19651,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -19715,7 +19748,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -19872,7 +19907,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-client-side-token",
-                "migratedFromUrlSlugs": ["create-a-client-session"],
+                "migratedFromUrlSlugs": [
+                  "create-a-client-session"
+                ],
                 "method": "POST",
                 "id": "createClientSideToken",
                 "name": "Create a client session",
@@ -19922,7 +19959,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -20084,7 +20121,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -20174,7 +20213,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -20273,7 +20314,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -20365,7 +20408,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -20532,7 +20577,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-client-side-token",
-                "migratedFromUrlSlugs": ["update-client-session"],
+                "migratedFromUrlSlugs": [
+                  "update-client-session"
+                ],
                 "method": "PATCH",
                 "id": "updateClientSideToken",
                 "name": "Update client session",
@@ -20610,7 +20657,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -20758,7 +20805,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -20849,7 +20898,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -20943,7 +20994,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -21036,7 +21089,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -21195,7 +21250,8 @@
             "subpackages": [],
             "urlSlug": "client-session-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_paymentsApi": {
             "subpackageId": "subpackage_paymentsApi",
@@ -21210,7 +21266,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list-payments",
-                "migratedFromUrlSlugs": ["search-list-payments"],
+                "migratedFromUrlSlugs": [
+                  "search-list-payments"
+                ],
                 "method": "GET",
                 "id": "listPayments",
                 "name": "Search & list payments",
@@ -21581,7 +21639,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-payment",
-                "migratedFromUrlSlugs": ["create-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "create-a-payment"
+                ],
                 "method": "POST",
                 "id": "createPayment",
                 "name": "Create a payment",
@@ -21645,7 +21705,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`. The minimum amount is 0.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`. The minimum amount is 0.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -22227,7 +22287,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "authorize-payment",
-                "migratedFromUrlSlugs": ["authorize-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "authorize-a-payment"
+                ],
                 "method": "POST",
                 "id": "authorizePayment",
                 "name": "Authorize a payment",
@@ -22890,7 +22952,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "capture-payment",
-                "migratedFromUrlSlugs": ["capture-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "capture-a-payment"
+                ],
                 "method": "POST",
                 "id": "capturePayment",
                 "name": "Capture a payment",
@@ -23441,7 +23505,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "cancel-payment",
-                "migratedFromUrlSlugs": ["cancel-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "cancel-a-payment"
+                ],
                 "method": "POST",
                 "id": "cancelPayment",
                 "name": "Cancel a payment",
@@ -23877,7 +23943,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "refund-payment",
-                "migratedFromUrlSlugs": ["refund-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "refund-a-payment"
+                ],
                 "method": "POST",
                 "id": "refundPayment",
                 "name": "Refund a payment",
@@ -24403,7 +24471,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "resume-payment",
-                "migratedFromUrlSlugs": ["resume-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "resume-a-payment"
+                ],
                 "method": "POST",
                 "id": "resumePayment",
                 "name": "Resume a payment",
@@ -24828,7 +24898,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "adjust-authorization",
-                "migratedFromUrlSlugs": ["adjust-authorized-amount"],
+                "migratedFromUrlSlugs": [
+                  "adjust-authorized-amount"
+                ],
                 "method": "POST",
                 "id": "adjustAuthorization",
                 "name": "Adjust authorized amount",
@@ -24887,7 +24959,7 @@
                     "extends": [],
                     "properties": [
                       {
-                        "description": "The **final** amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                        "description": "The **final** amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                         "key": "amount",
                         "valueType": {
                           "type": "primitive",
@@ -25405,7 +25477,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-payment-by-id",
-                "migratedFromUrlSlugs": ["get-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "get-a-payment"
+                ],
                 "method": "GET",
                 "id": "getPaymentById",
                 "name": "Get a payment",
@@ -25785,11 +25859,14 @@
                 "authed": true
               }
             ],
-            "types": ["type_paymentsApi:PaymentCaptureApiRequestOrder"],
+            "types": [
+              "type_paymentsApi:PaymentCaptureApiRequestOrder"
+            ],
             "subpackages": [],
             "urlSlug": "payments-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_paymentMethodsApi": {
             "subpackageId": "subpackage_paymentMethodsApi",
@@ -25804,7 +25881,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "vault-payment-method-payment-methods-token-vault-post",
-                "migratedFromUrlSlugs": ["save-a-payment-method-token"],
+                "migratedFromUrlSlugs": [
+                  "save-a-payment-method-token"
+                ],
                 "method": "POST",
                 "id": "vault_payment_method_payment_methods__token__vault_post",
                 "name": "Save a payment method token",
@@ -26085,7 +26164,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-payment-methods-payment-methods-get",
-                "migratedFromUrlSlugs": ["list-saved-payment-methods"],
+                "migratedFromUrlSlugs": [
+                  "list-saved-payment-methods"
+                ],
                 "method": "GET",
                 "id": "get_payment_methods_payment_methods_get",
                 "name": "List saved payment methods",
@@ -26204,7 +26285,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-payment-method-payment-methods-token-delete",
-                "migratedFromUrlSlugs": ["delete-a-saved-payment-method"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-saved-payment-method"
+                ],
                 "method": "DELETE",
                 "id": "delete_payment_method_payment_methods__token__delete",
                 "name": "Delete a saved payment method",
@@ -26382,7 +26465,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "set-payment-method-default-payment-methods-token-default-post",
-                "migratedFromUrlSlugs": ["update-the-default-saved-payment-method"],
+                "migratedFromUrlSlugs": [
+                  "update-the-default-saved-payment-method"
+                ],
                 "method": "POST",
                 "id": "set_payment_method_default_payment_methods__token__default_post",
                 "name": "Update the default saved payment method",
@@ -26556,7 +26641,8 @@
             "subpackages": [],
             "urlSlug": "payment-methods-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_observabilityApiBeta": {
             "subpackageId": "subpackage_observabilityApiBeta",
@@ -26571,7 +26657,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "external-payment",
-                "migratedFromUrlSlugs": ["create-an-external-payment"],
+                "migratedFromUrlSlugs": [
+                  "create-an-external-payment"
+                ],
                 "method": "POST",
                 "id": "external_payment",
                 "name": "Create an external payment",
@@ -26758,7 +26846,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Observability API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreating a payment with the Observability API sends external payments data to Primer to populate [Observability Payment Insights dashboards](https://primer.io/observability). Payments created through the [Payments API](/reference/create_payment_payments_post) will be automatically populated and do not need to be sent in the Observability API.\n\nCreate an API key with the `observability-payments:write` scope.\n\nEach record must be created with a unique `paymentId`. To update a payment record with new data use the `PATCH` endpoint.",
+                "description": "The Observability API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreating a payment with the Observability API sends external payments data to Primer to populate [Observability Payment Insights dashboards](https://primer.io/observability). Payments created through the [Payments API](/reference/create_payment_payments_post) will be automatically populated and do not need to be sent in the Observability API.\n\nCreate an API key with the `observability-payments:write` scope.\n\nEach record must be created with a unique `paymentId`. To update a payment record with new data use the `PATCH` endpoint.",
                 "authed": true
               },
               {
@@ -26770,7 +26858,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "external-payment-update",
-                "migratedFromUrlSlugs": ["update-an-external-payment"],
+                "migratedFromUrlSlugs": [
+                  "update-an-external-payment"
+                ],
                 "method": "PATCH",
                 "id": "external_payment_update",
                 "name": "Update an external payment",
@@ -26848,7 +26938,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer,\nin minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units.\nIn this case you should use the value as it is, without any formatting.\nFor example for ¥100, use `100`.\nThe minimum amount is 0.",
+                        "description": "The amount you would like to charge the customer,\nin minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units.\nIn this case you should use the value as it is, without any formatting.\nFor example for \u00a5100, use `100`.\nThe minimum amount is 0.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -27115,7 +27205,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Observability API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nYou can update payments created earlier through the Observability API with this endpoint. The only required field for the request is `paymentId`. Other supported request fields are the same as for the [create an external payment](/reference/external_payment) API call.\n\nIf you wish to update nested fields on the payment, you only need to pass the fields that you wish to update. For example to update the processor name, you would pass in `processor.name` only.\n\nThe response will contain all the fields of the payment including the ones that were changed.",
+                "description": "The Observability API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nYou can update payments created earlier through the Observability API with this endpoint. The only required field for the request is `paymentId`. Other supported request fields are the same as for the [create an external payment](/reference/external_payment) API call.\n\nIf you wish to update nested fields on the payment, you only need to pass the fields that you wish to update. For example to update the processor name, you would pass in `processor.name` only.\n\nThe response will contain all the fields of the payment including the ones that were changed.",
                 "authed": true
               }
             ],
@@ -27127,7 +27217,8 @@
             "subpackages": [],
             "urlSlug": "observability-api-beta",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_loyaltyApi": {
             "subpackageId": "subpackage_loyaltyApi",
@@ -27142,7 +27233,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-loyalty-customer",
-                "migratedFromUrlSlugs": ["get-a-loyalty-customers-points-balance"],
+                "migratedFromUrlSlugs": [
+                  "get-a-loyalty-customers-points-balance"
+                ],
                 "method": "GET",
                 "id": "get_loyalty_customer",
                 "name": "Get a loyalty customer's points balance",
@@ -27285,7 +27378,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:read` scopes.\n\nGet a loyalty customer by ID and connection ID. This includes the customer's points balance.\n\nThe `connectionId` is the unique Primer identifier for your loyalty provider connection. Primer will provide this once the loyalty provider connection is created.\n\nThe `customerId` refers to the customer identifier on the loyalty provider's side.",
+                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:read` scopes.\n\nGet a loyalty customer by ID and connection ID. This includes the customer's points balance.\n\nThe `connectionId` is the unique Primer identifier for your loyalty provider connection. Primer will provide this once the loyalty provider connection is created.\n\nThe `customerId` refers to the customer identifier on the loyalty provider's side.",
                 "authed": true
               },
               {
@@ -27297,7 +27390,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-loyalty-customer-transactions",
-                "migratedFromUrlSlugs": ["list-the-transactions-for-a-customer"],
+                "migratedFromUrlSlugs": [
+                  "list-the-transactions-for-a-customer"
+                ],
                 "method": "GET",
                 "id": "get_loyalty_customer_transactions",
                 "name": "List the transactions for a customer",
@@ -27563,7 +27658,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:read` scopes.\n\nGet all your loyalty transactions. You can filter by `connectionId` (recommended) and by `customerId` and `orderId`.\n\nAdditionally provide a `limit` to restrict the number of transactions in the response, and an `offset` to determine where to start.",
+                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:read` scopes.\n\nGet all your loyalty transactions. You can filter by `connectionId` (recommended) and by `customerId` and `orderId`.\n\nAdditionally provide a `limit` to restrict the number of transactions in the response, and an `offset` to determine where to start.",
                 "authed": true
               },
               {
@@ -27575,7 +27670,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "post-loyalty-transaction",
-                "migratedFromUrlSlugs": ["create-a-loyalty-transaction"],
+                "migratedFromUrlSlugs": [
+                  "create-a-loyalty-transaction"
+                ],
                 "method": "POST",
                 "id": "post_loyalty_transaction",
                 "name": "Create a loyalty transaction",
@@ -27862,7 +27959,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:write` scopes.\n\nCreate a loyalty transaction. This is either a points redemption or a points refund.",
+                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:write` scopes.\n\nCreate a loyalty transaction. This is either a points redemption or a points refund.",
                 "authed": true
               }
             ],
@@ -27870,7 +27967,8 @@
             "subpackages": [],
             "urlSlug": "loyalty-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -27884,7 +27982,11 @@
         "id": "7ed504c0-fc2e-4a52-b3fd-b277869eda14",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_clientSessionApi", "subpackage_paymentsApi", "subpackage_paymentMethodsApi"],
+          "subpackages": [
+            "subpackage_clientSessionApi",
+            "subpackage_paymentsApi",
+            "subpackage_paymentMethodsApi"
+          ],
           "types": [
             "type_:AccountFundingTypeEnum",
             "type_:ApayaCustomerTokenApiSchema",
@@ -27964,7 +28066,8 @@
             "type_:four_hundred_twenty_two_ErrorResponse"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_:AccountFundingTypeEnum": {
@@ -29345,7 +29448,7 @@
                   }
                 },
                 {
-                  "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                  "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                   "key": "amount",
                   "valueType": {
                     "type": "optional",
@@ -33079,7 +33182,9 @@
             "name": "VerifiedMerchantPaymentMethodTokenApiResponse",
             "shape": {
               "type": "object",
-              "extends": ["type_:MerchantPaymentMethodTokenApiResponse"],
+              "extends": [
+                "type_:MerchantPaymentMethodTokenApiResponse"
+              ],
               "properties": [
                 {
                   "description": "Whether or not this payment method was verified",
@@ -33331,7 +33436,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "retrieve-client-side-token",
-                "migratedFromUrlSlugs": ["retrieve-a-client-session"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-a-client-session"
+                ],
                 "method": "GET",
                 "id": "retrieveClientSideToken",
                 "name": "Retrieve a client session",
@@ -33681,7 +33788,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-client-side-token",
-                "migratedFromUrlSlugs": ["create-a-client-session"],
+                "migratedFromUrlSlugs": [
+                  "create-a-client-session"
+                ],
                 "method": "POST",
                 "id": "createClientSideToken",
                 "name": "Create a client session",
@@ -33733,7 +33842,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -34317,7 +34426,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-client-side-token",
-                "migratedFromUrlSlugs": ["update-client-session"],
+                "migratedFromUrlSlugs": [
+                  "update-client-session"
+                ],
                 "method": "PATCH",
                 "id": "updateClientSideToken",
                 "name": "Update client session",
@@ -34395,7 +34506,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -34954,7 +35065,8 @@
             "subpackages": [],
             "urlSlug": "client-session-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_paymentsApi": {
             "subpackageId": "subpackage_paymentsApi",
@@ -34969,7 +35081,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list-payments",
-                "migratedFromUrlSlugs": ["search-list-payments"],
+                "migratedFromUrlSlugs": [
+                  "search-list-payments"
+                ],
                 "method": "GET",
                 "id": "listPayments",
                 "name": "Search & list payments",
@@ -35328,7 +35442,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-payment",
-                "migratedFromUrlSlugs": ["create-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "create-a-payment"
+                ],
                 "method": "POST",
                 "id": "createPayment",
                 "name": "Create a payment",
@@ -35394,7 +35510,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`. The minimum amount is 0.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`. The minimum amount is 0.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -35910,7 +36026,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "capture-payment",
-                "migratedFromUrlSlugs": ["capture-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "capture-a-payment"
+                ],
                 "method": "POST",
                 "id": "capturePayment",
                 "name": "Capture a payment",
@@ -36384,7 +36502,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "cancel-payment",
-                "migratedFromUrlSlugs": ["cancel-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "cancel-a-payment"
+                ],
                 "method": "POST",
                 "id": "cancelPayment",
                 "name": "Cancel a payment",
@@ -36766,7 +36886,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "refund-payment",
-                "migratedFromUrlSlugs": ["refund-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "refund-a-payment"
+                ],
                 "method": "POST",
                 "id": "refundPayment",
                 "name": "Refund a payment",
@@ -37234,7 +37356,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "resume-payment",
-                "migratedFromUrlSlugs": ["resume-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "resume-a-payment"
+                ],
                 "method": "POST",
                 "id": "resumePayment",
                 "name": "Resume a payment",
@@ -37605,7 +37729,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-payment-by-id",
-                "migratedFromUrlSlugs": ["get-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "get-a-payment"
+                ],
                 "method": "GET",
                 "id": "getPaymentById",
                 "name": "Get a payment",
@@ -37935,7 +38061,8 @@
             "subpackages": [],
             "urlSlug": "payments-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_paymentMethodsApi": {
             "subpackageId": "subpackage_paymentMethodsApi",
@@ -37950,7 +38077,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "vault-payment-method-payment-methods-token-vault-post",
-                "migratedFromUrlSlugs": ["save-a-payment-method-token"],
+                "migratedFromUrlSlugs": [
+                  "save-a-payment-method-token"
+                ],
                 "method": "POST",
                 "id": "vault_payment_method_payment_methods__token__vault_post",
                 "name": "Save a payment method token",
@@ -38201,7 +38330,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-payment-methods-payment-methods-get",
-                "migratedFromUrlSlugs": ["list-saved-payment-methods"],
+                "migratedFromUrlSlugs": [
+                  "list-saved-payment-methods"
+                ],
                 "method": "GET",
                 "id": "get_payment_methods_payment_methods_get",
                 "name": "List saved payment methods",
@@ -38298,7 +38429,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-payment-method-payment-methods-token-delete",
-                "migratedFromUrlSlugs": ["delete-a-saved-payment-method"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-saved-payment-method"
+                ],
                 "method": "DELETE",
                 "id": "delete_payment_method_payment_methods__token__delete",
                 "name": "Delete a saved payment method",
@@ -38450,7 +38583,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "set-payment-method-default-payment-methods-token-default-post",
-                "migratedFromUrlSlugs": ["update-the-default-saved-payment-method"],
+                "migratedFromUrlSlugs": [
+                  "update-the-default-saved-payment-method"
+                ],
                 "method": "POST",
                 "id": "set_payment_method_default_payment_methods__token__default_post",
                 "name": "Update the default saved payment method",
@@ -38598,7 +38733,8 @@
             "subpackages": [],
             "urlSlug": "payment-methods-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -38612,7 +38748,10 @@
         "id": "c5629660-3984-4ce0-989e-9c6fb0df36d9",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_paymentWebhooks", "subpackage_disputeChargebacksWebhooks"],
+          "subpackages": [
+            "subpackage_paymentWebhooks",
+            "subpackage_disputeChargebacksWebhooks"
+          ],
           "types": [
             "type_:AccountFundingTypeEnum",
             "type_:ApayaCustomerTokenApiSchema",
@@ -38679,7 +38818,8 @@
             "type_:CheckoutCustomerDetailsApiSchema"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_:AccountFundingTypeEnum": {
@@ -41926,7 +42066,7 @@
                   }
                 },
                 {
-                  "description": "Primer’s unified reason that explains why the dispute was raised. This should not vary across processors for the same dispute `reasonCode`, unlike the `processorReason`.",
+                  "description": "Primer\u2019s unified reason that explains why the dispute was raised. This should not vary across processors for the same dispute `reasonCode`, unlike the `processorReason`.",
                   "key": "reason",
                   "valueType": {
                     "type": "optional",
@@ -41965,7 +42105,7 @@
                   }
                 },
                 {
-                  "description": "The disputed amount. Note: this is not always the same as the payment amount.\n\nThis will be displayed in minor units.\n\ne.g. for $7, use `700`. Some currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.",
+                  "description": "The disputed amount. Note: this is not always the same as the payment amount.\n\nThis will be displayed in minor units.\n\ne.g. for $7, use `700`. Some currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.",
                   "key": "amount",
                   "valueType": {
                     "type": "optional",
@@ -43250,7 +43390,9 @@
             "webhooks": [
               {
                 "urlSlug": "payment-status-webhook-event",
-                "migratedFromUrlSlugs": ["payment-status-update"],
+                "migratedFromUrlSlugs": [
+                  "payment-status-update"
+                ],
                 "description": "Primer notifies you with a `PAYMENT.STATUS` webhook when a payment's status has been updated. This is especially useful for asyncronous processor Connections, which do not respond with an upfront authorization.\nThe webhook events will arrive in the order that the payment status changes, for example you should expect a status of `PENDING`, then `AUTHORIZED`, then `SETTLED` (depending on how your workflow is set up).\nThe webhook body contains the full payment object.\n\nExample payment status notification:\n\n```JSON\n{\n  \"eventType\":\"PAYMENT.STATUS\",\n  \"date\":\"2021-02-21T15:36:16.367687\",\n  \"notificationConfig\":{\n    \"id\":\"cc51f9f0-7e1c-492b-9d37-f83a818f6070\",\n    \"description\":\"Payment webhook\"\n  },\n  \"version\":\"2.2\",\n  \"signedAt\": \"1689221338\",\n  \"payment\":{\n    \"id\":\"DdRZ6YY0\",\n    \"date\":\"2021-02-21T15:34:16.367687\",\n    \"dateUpdated\":\"2021-02-21T15:35:16.133701\",\n    \"amount\":3000,\n    \"currencyCode\":\"GBP\",\n    \"customerId\":\"cust-123\",\n    \"orderId\":\"order-123\",\n    \"status\":\"SETTLED\",\n    \"cardTokenType\":\"CARD_PAN\",\n    \"customer\": {\n      \"emailAddress\": \"test@primer.io\",\n      \"mobileNumber\": \"0123456789\",\n      \"billingAddress\": {\n        \"firstName\": \"John\",\n        \"postalCode\": \"CB94BQ\",\n        \"addressLine1\": \"10001 Alpha St\",\n        \"countryCode\": \"GB\",\n        \"city\": \"Cambridge\",\n        \"state\": \"Cambridgeshire\"\n      }\n    },\n    \"paymentMethod\":{\n      \"paymentType\":\"FIRST_PAYMENT\",\n      \"paymentMethodToken\":\"-lcWjvBAAs2DnIRXwxNjUzNTYzNjIy\",\n      \"isVaulted\": \"false\",\n      \"analyticsId\":\"LUi5pETUaVsdSEamK25L\",\n      \"paymentMethodType\":\"PAYMENT_CARD\",\n      \"paymentMethodData\":{\n        \"last4Digits\":\"1111\",\n        \"first6Digits\": \"411111\",\n        \"expirationMonth\":\"03\",\n        \"expirationYear\":\"2030\",\n        \"cardholderName\":\"ADYEN\",\n        \"network\":\"Visa\",\n        \"isNetworkTokenized\":false,\n        \"binData\":{\n          \"network\":\"VISA\",\n          \"issuerCountryCode\":\"US\",\n          \"issuerName\":\"JPMORGAN CHASE BANK, N.A.\",\n          \"regionalRestriction\":\"UNKNOWN\",\n          \"accountNumberType\":\"UNKNOWN\",\n          \"accountFundingType\":\"UNKNOWN\",\n          \"prepaidReloadableIndicator\":\"NOT_APPLICABLE\",\n          \"productUsageType\":\"UNKNOWN\",\n          \"productCode\":\"UNKNOWN\",\n          \"productName\":\"UNKNOWN\"\n        }\n      },\n      \"authorizationType\": \"FINAL\",\n      \"threeDSecureAuthentication\":{\n        \"responseCode\":\"NOT_PERFORMED\"\n      }\n    },\n    \"processor\":{\n      \"name\":\"STRIPE\",\n      \"processorMerchantId\":\"acct_1GORasdasqNWFwi8c\",\n      \"amountCaptured\":3000,\n      \"amountRefunded\":0\n    },\n    \"transactions\":[\n      {\n        \"date\":\"2021-02-21T15:34:16.367687\",\n        \"amount\":3000,\n        \"currencyCode\":\"GBP\",\n        \"transactionType\":\"SALE\",\n        \"orderId\":\"order-123\",\n        \"processorTransactionId\":\"pi_3L3edsGZasdasdc1iget38p\",\n        \"processorName\":\"STRIPE\",\n        \"processorMerchantId\":\"acct_1GORasvasdNWFwi8c\",\n        \"processorStatus\":\"SETTLED\",\n        \"cardTokenType\":\"CARD_PAN\"\n      }\n    ],\n    \"riskData\":{\n      \"fraudChecks\":{\n        \"source\":\"riskified\",\n        \"preAuthorizationResult\":\"THREE_DS\",\n        \"postAuthorizationResult\":\"ACCEPT\"\n      },\n      \"cvvCheck\": {\n        \"source\": \"processor\",\n        \"result\": \"MATCHED\"\n      },\n      \"avsCheck\": {\n        \"source\": \"processor\",\n        \"result\": {\n          \"streetAddress\": \"NOT_MATCHED\",\n          \"postalCode\": \"NOT_VERIFIED\"\n        }\n      }\n    }\n  }\n}\n```\n\nLearn more about [how Primer handles webhooks](https://primer.io/docs/how-primer-works/webhooks).\n",
                 "method": "POST",
                 "id": "payment_status_webhook_event",
@@ -43397,7 +43539,9 @@
               },
               {
                 "urlSlug": "payment-refund-webhook-event",
-                "migratedFromUrlSlugs": ["payment-refund"],
+                "migratedFromUrlSlugs": [
+                  "payment-refund"
+                ],
                 "description": "Primer notifies you with a `PAYMENT.REFUND` Webhook when a refund request has been fully processed by a payment processor and the refund has reached a final state.\n\nCheck the transaction with the most recent `transactionType: \"REFUND\"` in the `transactions` array:\n- if `processorStatus` is `SETTLED`, the refund was successful and the funds have been returned to the customer\n- if `processorStatus` is `FAILED`, the refund was unsuccessful\n\nLearn more about [how Primer handles webhooks](https://primer.io/docs/how-primer-works/webhooks).\n",
                 "method": "POST",
                 "id": "payment_refund_webhook_event",
@@ -43543,7 +43687,8 @@
                 ]
               }
             ],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_disputeChargebacksWebhooks": {
             "subpackageId": "subpackage_disputeChargebacksWebhooks",
@@ -43555,7 +43700,9 @@
             "webhooks": [
               {
                 "urlSlug": "dispute-open-webhook-event",
-                "migratedFromUrlSlugs": ["dispute-open"],
+                "migratedFromUrlSlugs": [
+                  "dispute-open"
+                ],
                 "description": "Primer notifies you with a `DISPUTE.OPEN` webhook on newly opened disputes or chargebacks. This notification is unified across all processors.\n\nLearn more about [how Primer handles webhooks](https://primer.io/docs/how-primer-works/webhooks).\n",
                 "method": "POST",
                 "id": "dispute_open_webhook_event",
@@ -43608,7 +43755,9 @@
               },
               {
                 "urlSlug": "dispute-status-webhook-event",
-                "migratedFromUrlSlugs": ["dispute-status"],
+                "migratedFromUrlSlugs": [
+                  "dispute-status"
+                ],
                 "description": "Primer notifies you with a `DISPUTE.STATUS` webhook that will provide information on retrievals, disputes (also known as chargebacks), and preabritration filings.\n\nThis notification is supported for processors Adyen, Braintree, Checkout.com & PayPal.\n\nThe `DISPUTE.STATUS` event can be used to proactively communicate with customers, issue refunds, send disputes to risk tools, or to proactively defend disputes.\n\nThe `DISPUTE.STATUS` event is currently in an open beta stage, as we continue to add more processors.\n\nLearn more about [managing disputes at Primer](https://primer.io/docs/accept-payments/manage-disputes).\n",
                 "method": "POST",
                 "id": "dispute_status_webhook_event",
@@ -43677,7 +43826,8 @@
                 ]
               }
             ],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "hasMultipleBaseUrls": false
@@ -43805,7 +43955,8 @@
             "type_:CardTokenTypeEnum"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_paymentsApi:PaymentCaptureApiRequestOrder": {
@@ -46018,7 +46169,7 @@
                   }
                 },
                 {
-                  "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                  "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                   "key": "amount",
                   "valueType": {
                     "type": "optional",
@@ -50328,7 +50479,9 @@
             "name": "VerifiedMerchantPaymentMethodTokenApiResponse",
             "shape": {
               "type": "object",
-              "extends": ["type_:MerchantPaymentMethodTokenApiResponse"],
+              "extends": [
+                "type_:MerchantPaymentMethodTokenApiResponse"
+              ],
               "properties": [
                 {
                   "description": "Whether or not this payment method was verified",
@@ -52888,7 +53041,7 @@
                   }
                 },
                 {
-                  "description": "The amount you would like to charge the customer,\nin minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units.\nIn this case you should use the value as it is, without any formatting.\nFor example for ¥100, use `100`.\nThe minimum amount is 0.",
+                  "description": "The amount you would like to charge the customer,\nin minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units.\nIn this case you should use the value as it is, without any formatting.\nFor example for \u00a5100, use `100`.\nThe minimum amount is 0.",
                   "key": "amount",
                   "valueType": {
                     "type": "primitive",
@@ -53675,7 +53828,9 @@
             "name": "four_hundred_nine_ErrorResponseError",
             "shape": {
               "type": "object",
-              "extends": ["type_:ErrorObject"],
+              "extends": [
+                "type_:ErrorObject"
+              ],
               "properties": [
                 {
                   "description": "Payment ID of the related payment",
@@ -53786,7 +53941,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "retrieve-client-side-token",
-                "migratedFromUrlSlugs": ["retrieve-a-client-session"],
+                "migratedFromUrlSlugs": [
+                  "retrieve-a-client-session"
+                ],
                 "method": "GET",
                 "id": "retrieveClientSideToken",
                 "name": "Retrieve a client session",
@@ -53902,7 +54059,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -53997,7 +54156,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -54154,7 +54315,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-client-side-token",
-                "migratedFromUrlSlugs": ["create-a-client-session"],
+                "migratedFromUrlSlugs": [
+                  "create-a-client-session"
+                ],
                 "method": "POST",
                 "id": "createClientSideToken",
                 "name": "Create a client session",
@@ -54204,7 +54367,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -54366,7 +54529,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -54456,7 +54621,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -54555,7 +54722,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -54647,7 +54816,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -54814,7 +54985,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-client-side-token",
-                "migratedFromUrlSlugs": ["update-client-session"],
+                "migratedFromUrlSlugs": [
+                  "update-client-session"
+                ],
                 "method": "PATCH",
                 "id": "updateClientSideToken",
                 "name": "Update client session",
@@ -54892,7 +55065,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -55040,7 +55213,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -55131,7 +55306,9 @@
                       },
                       "paymentMethod": {
                         "paymentType": "FIRST_PAYMENT",
-                        "orderedAllowedCardNetworks": ["AMEX"],
+                        "orderedAllowedCardNetworks": [
+                          "AMEX"
+                        ],
                         "options": {
                           "<PAYMENT_METHOD_TYPE>": {
                             "surcharge": {}
@@ -55225,7 +55402,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -55318,7 +55497,9 @@
                         },
                         "paymentMethod": {
                           "paymentType": "FIRST_PAYMENT",
-                          "orderedAllowedCardNetworks": ["AMEX"],
+                          "orderedAllowedCardNetworks": [
+                            "AMEX"
+                          ],
                           "options": {
                             "<PAYMENT_METHOD_TYPE>": {
                               "surcharge": {}
@@ -55477,7 +55658,8 @@
             "subpackages": [],
             "urlSlug": "client-session-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_paymentsApi": {
             "subpackageId": "subpackage_paymentsApi",
@@ -55492,7 +55674,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list-payments",
-                "migratedFromUrlSlugs": ["search-list-payments"],
+                "migratedFromUrlSlugs": [
+                  "search-list-payments"
+                ],
                 "method": "GET",
                 "id": "listPayments",
                 "name": "Search & list payments",
@@ -55863,7 +56047,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-payment",
-                "migratedFromUrlSlugs": ["create-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "create-a-payment"
+                ],
                 "method": "POST",
                 "id": "createPayment",
                 "name": "Create a payment",
@@ -55927,7 +56113,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`. The minimum amount is 0.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`. The minimum amount is 0.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -56509,7 +56695,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "authorize-payment",
-                "migratedFromUrlSlugs": ["authorize-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "authorize-a-payment"
+                ],
                 "method": "POST",
                 "id": "authorizePayment",
                 "name": "Authorize a payment",
@@ -57176,7 +57364,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "capture-payment",
-                "migratedFromUrlSlugs": ["capture-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "capture-a-payment"
+                ],
                 "method": "POST",
                 "id": "capturePayment",
                 "name": "Capture a payment",
@@ -57795,7 +57985,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "cancel-payment",
-                "migratedFromUrlSlugs": ["cancel-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "cancel-a-payment"
+                ],
                 "method": "POST",
                 "id": "cancelPayment",
                 "name": "Cancel a payment",
@@ -58299,7 +58491,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "refund-payment",
-                "migratedFromUrlSlugs": ["refund-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "refund-a-payment"
+                ],
                 "method": "POST",
                 "id": "refundPayment",
                 "name": "Refund a payment",
@@ -58893,7 +59087,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "resume-payment",
-                "migratedFromUrlSlugs": ["resume-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "resume-a-payment"
+                ],
                 "method": "POST",
                 "id": "resumePayment",
                 "name": "Resume a payment",
@@ -59318,7 +59514,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "adjust-authorization",
-                "migratedFromUrlSlugs": ["adjust-authorized-amount"],
+                "migratedFromUrlSlugs": [
+                  "adjust-authorized-amount"
+                ],
                 "method": "POST",
                 "id": "adjustAuthorization",
                 "name": "Adjust authorized amount",
@@ -59377,7 +59575,7 @@
                     "extends": [],
                     "properties": [
                       {
-                        "description": "The **final** amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                        "description": "The **final** amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                         "key": "amount",
                         "valueType": {
                           "type": "primitive",
@@ -59967,7 +60165,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-payment-by-id",
-                "migratedFromUrlSlugs": ["get-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "get-a-payment"
+                ],
                 "method": "GET",
                 "id": "getPaymentById",
                 "name": "Get a payment",
@@ -60347,11 +60547,14 @@
                 "authed": true
               }
             ],
-            "types": ["type_paymentsApi:PaymentCaptureApiRequestOrder"],
+            "types": [
+              "type_paymentsApi:PaymentCaptureApiRequestOrder"
+            ],
             "subpackages": [],
             "urlSlug": "payments-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_paymentMethodsApi": {
             "subpackageId": "subpackage_paymentMethodsApi",
@@ -60366,7 +60569,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "vault-payment-method-payment-methods-token-vault-post",
-                "migratedFromUrlSlugs": ["save-a-payment-method-token"],
+                "migratedFromUrlSlugs": [
+                  "save-a-payment-method-token"
+                ],
                 "method": "POST",
                 "id": "vault_payment_method_payment_methods__token__vault_post",
                 "name": "Save a payment method token",
@@ -60647,7 +60852,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-payment-methods-payment-methods-get",
-                "migratedFromUrlSlugs": ["list-saved-payment-methods"],
+                "migratedFromUrlSlugs": [
+                  "list-saved-payment-methods"
+                ],
                 "method": "GET",
                 "id": "get_payment_methods_payment_methods_get",
                 "name": "List saved payment methods",
@@ -60766,7 +60973,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-payment-method-payment-methods-token-delete",
-                "migratedFromUrlSlugs": ["delete-a-saved-payment-method"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-saved-payment-method"
+                ],
                 "method": "DELETE",
                 "id": "delete_payment_method_payment_methods__token__delete",
                 "name": "Delete a saved payment method",
@@ -60944,7 +61153,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "set-payment-method-default-payment-methods-token-default-post",
-                "migratedFromUrlSlugs": ["update-the-default-saved-payment-method"],
+                "migratedFromUrlSlugs": [
+                  "update-the-default-saved-payment-method"
+                ],
                 "method": "POST",
                 "id": "set_payment_method_default_payment_methods__token__default_post",
                 "name": "Update the default saved payment method",
@@ -61118,7 +61329,8 @@
             "subpackages": [],
             "urlSlug": "payment-methods-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_observabilityApiBeta": {
             "subpackageId": "subpackage_observabilityApiBeta",
@@ -61133,7 +61345,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "external-payment",
-                "migratedFromUrlSlugs": ["create-an-external-payment"],
+                "migratedFromUrlSlugs": [
+                  "create-an-external-payment"
+                ],
                 "method": "POST",
                 "id": "external_payment",
                 "name": "Create an external payment",
@@ -61320,7 +61534,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Observability API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreating a payment with the Observability API sends external payments data to Primer to populate [Observability Payment Insights dashboards](https://primer.io/observability). Payments created through the [Payments API](/reference/create_payment_payments_post) will be automatically populated and do not need to be sent in the Observability API.\n\nCreate an API key with the `observability-payments:write` scope.\n\nEach record must be created with a unique `paymentId`. To update a payment record with new data use the `PATCH` endpoint.",
+                "description": "The Observability API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreating a payment with the Observability API sends external payments data to Primer to populate [Observability Payment Insights dashboards](https://primer.io/observability). Payments created through the [Payments API](/reference/create_payment_payments_post) will be automatically populated and do not need to be sent in the Observability API.\n\nCreate an API key with the `observability-payments:write` scope.\n\nEach record must be created with a unique `paymentId`. To update a payment record with new data use the `PATCH` endpoint.",
                 "authed": true
               },
               {
@@ -61332,7 +61546,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "external-payment-update",
-                "migratedFromUrlSlugs": ["update-an-external-payment"],
+                "migratedFromUrlSlugs": [
+                  "update-an-external-payment"
+                ],
                 "method": "PATCH",
                 "id": "external_payment_update",
                 "name": "Update an external payment",
@@ -61410,7 +61626,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer,\nin minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units.\nIn this case you should use the value as it is, without any formatting.\nFor example for ¥100, use `100`.\nThe minimum amount is 0.",
+                        "description": "The amount you would like to charge the customer,\nin minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units.\nIn this case you should use the value as it is, without any formatting.\nFor example for \u00a5100, use `100`.\nThe minimum amount is 0.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -61677,7 +61893,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Observability API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nYou can update payments created earlier through the Observability API with this endpoint. The only required field for the request is `paymentId`. Other supported request fields are the same as for the [create an external payment](/reference/external_payment) API call.\n\nIf you wish to update nested fields on the payment, you only need to pass the fields that you wish to update. For example to update the processor name, you would pass in `processor.name` only.\n\nThe response will contain all the fields of the payment including the ones that were changed.",
+                "description": "The Observability API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nYou can update payments created earlier through the Observability API with this endpoint. The only required field for the request is `paymentId`. Other supported request fields are the same as for the [create an external payment](/reference/external_payment) API call.\n\nIf you wish to update nested fields on the payment, you only need to pass the fields that you wish to update. For example to update the processor name, you would pass in `processor.name` only.\n\nThe response will contain all the fields of the payment including the ones that were changed.",
                 "authed": true
               }
             ],
@@ -61689,7 +61905,8 @@
             "subpackages": [],
             "urlSlug": "observability-api-beta",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_loyaltyApi": {
             "subpackageId": "subpackage_loyaltyApi",
@@ -61704,7 +61921,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-loyalty-customer",
-                "migratedFromUrlSlugs": ["get-a-loyalty-customers-points-balance"],
+                "migratedFromUrlSlugs": [
+                  "get-a-loyalty-customers-points-balance"
+                ],
                 "method": "GET",
                 "id": "get_loyalty_customer",
                 "name": "Get a loyalty customer's points balance",
@@ -61847,7 +62066,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:read` scopes.\n\nGet a loyalty customer by ID and connection ID. This includes the customer's points balance.\n\nThe `connectionId` is the unique Primer identifier for your loyalty provider connection. Primer will provide this once the loyalty provider connection is created.\n\nThe `customerId` refers to the customer identifier on the loyalty provider's side.",
+                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:read` scopes.\n\nGet a loyalty customer by ID and connection ID. This includes the customer's points balance.\n\nThe `connectionId` is the unique Primer identifier for your loyalty provider connection. Primer will provide this once the loyalty provider connection is created.\n\nThe `customerId` refers to the customer identifier on the loyalty provider's side.",
                 "authed": true
               },
               {
@@ -61859,7 +62078,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-loyalty-customer-transactions",
-                "migratedFromUrlSlugs": ["list-the-transactions-for-a-customer"],
+                "migratedFromUrlSlugs": [
+                  "list-the-transactions-for-a-customer"
+                ],
                 "method": "GET",
                 "id": "get_loyalty_customer_transactions",
                 "name": "List the transactions for a customer",
@@ -62125,7 +62346,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:read` scopes.\n\nGet all your loyalty transactions. You can filter by `connectionId` (recommended) and by `customerId` and `orderId`.\n\nAdditionally provide a `limit` to restrict the number of transactions in the response, and an `offset` to determine where to start.",
+                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:read` scopes.\n\nGet all your loyalty transactions. You can filter by `connectionId` (recommended) and by `customerId` and `orderId`.\n\nAdditionally provide a `limit` to restrict the number of transactions in the response, and an `offset` to determine where to start.",
                 "authed": true
               },
               {
@@ -62137,7 +62358,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "post-loyalty-transaction",
-                "migratedFromUrlSlugs": ["create-a-loyalty-transaction"],
+                "migratedFromUrlSlugs": [
+                  "create-a-loyalty-transaction"
+                ],
                 "method": "POST",
                 "id": "post_loyalty_transaction",
                 "name": "Create a loyalty transaction",
@@ -62424,7 +62647,7 @@
                     "codeSamples": []
                   }
                 ],
-                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don’t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:write` scopes.\n\nCreate a loyalty transaction. This is either a points redemption or a points refund.",
+                "description": "The Loyalty API is currently in beta.\n\nPlease contact our Support Team via our [JIRA Service Desk](https://primerapi.atlassian.net/servicedesk/customer/portal/11) for access to the Beta.\nIf you don\u2019t have access, please contact your account administrator for assistance.\n\nNot yet integrated with Primer and interested in learning more? [Contact us](https://primer.io/contact-us/).\n\nCreate an API key with the `loyalty-transactions:write` scopes.\n\nCreate a loyalty transaction. This is either a points redemption or a points refund.",
                 "authed": true
               }
             ],
@@ -62432,7 +62655,8 @@
             "subpackages": [],
             "urlSlug": "loyalty-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -62446,7 +62670,11 @@
         "id": "fe590ab9-f9e7-4719-8ec5-b595affff88d",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_clientSessionApi", "subpackage_paymentsApi", "subpackage_paymentMethodsApi"],
+          "subpackages": [
+            "subpackage_clientSessionApi",
+            "subpackage_paymentsApi",
+            "subpackage_paymentMethodsApi"
+          ],
           "types": [
             "type_:AccountFundingTypeEnum",
             "type_:ApayaCustomerTokenApiSchema",
@@ -62523,7 +62751,8 @@
             "type_:four_hundred_twenty_two_ErrorResponse"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_:AccountFundingTypeEnum": {
@@ -67738,7 +67967,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-client-side-token",
-                "migratedFromUrlSlugs": ["create-a-client-session"],
+                "migratedFromUrlSlugs": [
+                  "create-a-client-session"
+                ],
                 "method": "POST",
                 "id": "createClientSideToken",
                 "name": "Create a client session",
@@ -67790,7 +68021,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`.\n\nIf the amount is provided on this level, it would override any amount calculated from the provided line items, shipping and other amounts.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -68366,7 +68597,8 @@
             "subpackages": [],
             "urlSlug": "client-session-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_paymentsApi": {
             "subpackageId": "subpackage_paymentsApi",
@@ -68381,7 +68613,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list-payments",
-                "migratedFromUrlSlugs": ["search-list-payments"],
+                "migratedFromUrlSlugs": [
+                  "search-list-payments"
+                ],
                 "method": "GET",
                 "id": "listPayments",
                 "name": "Search & list payments",
@@ -68732,7 +68966,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-payment",
-                "migratedFromUrlSlugs": ["create-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "create-a-payment"
+                ],
                 "method": "POST",
                 "id": "createPayment",
                 "name": "Create a payment",
@@ -68798,7 +69034,7 @@
                         }
                       },
                       {
-                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for ¥100, use `100`. The minimum amount is 0.",
+                        "description": "The amount you would like to charge the customer, in minor units. e.g. for $7, use `700`.\n\nSome currencies, such as Japanese Yen, do not have minor units. In this case you should use the value as it is, without any formatting. For example for \u00a5100, use `100`. The minimum amount is 0.",
                         "key": "amount",
                         "valueType": {
                           "type": "optional",
@@ -69306,7 +69542,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "capture-payment",
-                "migratedFromUrlSlugs": ["capture-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "capture-a-payment"
+                ],
                 "method": "POST",
                 "id": "capturePayment",
                 "name": "Capture a payment",
@@ -69745,7 +69983,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "cancel-payment",
-                "migratedFromUrlSlugs": ["cancel-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "cancel-a-payment"
+                ],
                 "method": "POST",
                 "id": "cancelPayment",
                 "name": "Cancel a payment",
@@ -70119,7 +70359,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "refund-payment",
-                "migratedFromUrlSlugs": ["refund-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "refund-a-payment"
+                ],
                 "method": "POST",
                 "id": "refundPayment",
                 "name": "Refund a payment",
@@ -70571,7 +70813,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "resume-payment",
-                "migratedFromUrlSlugs": ["resume-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "resume-a-payment"
+                ],
                 "method": "POST",
                 "id": "resumePayment",
                 "name": "Resume a payment",
@@ -70934,7 +71178,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-payment-by-id",
-                "migratedFromUrlSlugs": ["get-a-payment"],
+                "migratedFromUrlSlugs": [
+                  "get-a-payment"
+                ],
                 "method": "GET",
                 "id": "getPaymentById",
                 "name": "Get a payment",
@@ -71256,7 +71502,8 @@
             "subpackages": [],
             "urlSlug": "payments-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_paymentMethodsApi": {
             "subpackageId": "subpackage_paymentMethodsApi",
@@ -71271,7 +71518,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "vault-payment-method-payment-methods-token-vault-post",
-                "migratedFromUrlSlugs": ["save-a-payment-method-token"],
+                "migratedFromUrlSlugs": [
+                  "save-a-payment-method-token"
+                ],
                 "method": "POST",
                 "id": "vault_payment_method_payment_methods__token__vault_post",
                 "name": "Save a payment method token",
@@ -71452,7 +71701,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-payment-methods-payment-methods-get",
-                "migratedFromUrlSlugs": ["list-saved-payment-methods"],
+                "migratedFromUrlSlugs": [
+                  "list-saved-payment-methods"
+                ],
                 "method": "GET",
                 "id": "get_payment_methods_payment_methods_get",
                 "name": "List saved payment methods",
@@ -71549,7 +71800,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-payment-method-payment-methods-token-delete",
-                "migratedFromUrlSlugs": ["delete-a-saved-payment-method"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-saved-payment-method"
+                ],
                 "method": "DELETE",
                 "id": "delete_payment_method_payment_methods__token__delete",
                 "name": "Delete a saved payment method",
@@ -71693,7 +71946,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "set-payment-method-default-payment-methods-token-default-post",
-                "migratedFromUrlSlugs": ["update-the-default-saved-payment-method"],
+                "migratedFromUrlSlugs": [
+                  "update-the-default-saved-payment-method"
+                ],
                 "method": "POST",
                 "id": "set_payment_method_default_payment_methods__token__default_post",
                 "name": "Update the default saved payment method",
@@ -71833,7 +72088,8 @@
             "subpackages": [],
             "urlSlug": "payment-methods-api",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -71890,7 +72146,7 @@
         "markdown": "Primer's Loyalty API provides an interface to interact with 3rd party loyalty point and service providers.\n\nAll of the endpoints below reference a `connectionId`. This is the unique Primer identifier for your loyalty provider connection. Primer will provide this once the loyalty provider connection is created.\n\nTo identify the customer in the context of the loyalty provider, a `customerId` is also necessary.\n\n## Get the customer balance\n\nCall the [Loyalty Customers](https://apiref.primer.io/reference/get_loyalty_customer) endpoint, which includes the customer's balance. In future this object could contain further details.\n\n## Redeem points\n\nCall the [Loyalty Transactions](https://apiref.primer.io/reference/post_loyalty_transaction) endpoint to create a `REDEMPTION` transaction.\n\nProvide an `orderId` to link multiple transactions together.\n\n## Refund points\n\nCall the [Loyalty Transactions](https://apiref.primer.io/reference/post_loyalty_transaction) endpoint to create a `REFUND` transaction. This transaction is completely independent from a redeem transaction.\n\nProvide an `orderId` to link multiple transactions together.\n\n## Get a list of transactions\n\nCall the [Loyalty Transactions](https://apiref.primer.io/reference/get_loyalty_transaction) endpoint to retrieve a list of all your transactions. In most cases it makes sense to filter by `connectionId`. You can also filter by `customerId` or `orderId`."
       },
       "introduction/changelogs.md": {
-        "markdown": "## API v2.3\n\nThis version includes improvements to the Payments API.\n\nSet `X-Api-Version` header to `2.3` to use v2.3 of the API.\n\n### Payments API\n\n**Improvements**\n\n- The Payments API endpoints were modified to return error code `IdempotencyKeyAlreadyExists`  with status `409` when a payment request is submitted with an `X-Idempotency-Key`that was already sent in a previous request.\n- The payment creation endpoint was improved to return the correct [paymentMethodType](https://primer.io/docs/sdk/web/2.x.x/constants/paymentMethodTypes/)\n- The payment status webhook was improved to return the correct [paymentMethodType](https://primer.io/docs/sdk/web/2.x.x/constants/paymentMethodTypes)\n\n## API v2.2\n\nThis version includes improvements to the Client Session API, Payments API and the Payment Methods API.\nYou must set the `X-Api-Version` header to `2.2` to use v2.2 of the API.\n\n### Client Session API\n\n- Added `order.lineItems.productData` on the request and response\n\n### Payments API\n\n- Added `order.lineItems.productData` on the request and response\n\n## API v2.1\n\nVersion 2.1 includes improvements to the Client Session API, Payments API and the Payment Methods API.\n\nStarting API v2.1, the API Version X-Api-Version is a semantic version without a patch (e.g. 2.1) rather than a date 🎉\nSet the `X-Api-Version` header to `2.1` to use v2.1 of the API.\n\n### Client Session API\n\n- Added `paymentMethod.paymentType` and `paymentMethod.descriptor` on the request and response of the client session\n- Added `order.lineItems[].productType` on the request and response of the client session\n- Added `GET /client-session` to get the content of a client session\n- Added `PATCH /client-session` to update the content of a client session\n- Additional validation has been put in place to ensure that a `currencyCode` is always passed if any `amount` value is passed\n\n### Payments API\n\n- Added `paymentMethod.isVaulted` boolean field to indicate whether the `paymentMethod.paymentMethodToken` in the response is a vaulted token (and can therefore be used for future payments) or not. This replaces `vaultedPaymentMethodToken`.\n- Added `order.lineItems[].productType` on the request and response\n- `amount`, `currencyCode`, `customerId` and `orderId` are now required fields when making a payment with a vaulted token (i.e. a recurring payment).\n- When paying with a vaulted token, additional validation has been put in place to ensure the `customerId` matches the `customerId` associated with the vaulted token.\n\n### Payment Methods API\n\n- Added verify in `POST /payment-instruments/{paymentMethodToken}/vault` to set whether or not the payment method token should be verified before vaulting\n- Added `isVerified` to the payment method response\n\n## API v2\n\nVersion 2 includes improvements to the Client Session API and the Payments API.\n\n### Client Session API\n\n- `X-API-Version` -> `2021-09-27`\n- Creating a payment using _only_ a payment method token is now possible. The `order`, `customer` and `metadata` passed on the Client Session request is then used for the payment.\n- The create Client Session endpoint request was extended to include `order`, `customer`, etc.\n- All references to `paymentInstrument` from the previous Payments API version have been refactored to `paymentMethod` to be more consistent throughout\n- The customer `billingAddress` and `shippingAddress` fields are now all optional\n\n### Payments API\n\n- `X-API-Version` -> `2021-09-27`\n- Creating a payment using _only_ a payment method token is now possible. The `order`, `customer` and `metadata` passed on the Client Session request is then used for the payment.\n- The create payment endpoint request was extended to include `order`, `customer`, etc. It now more closely resembles the `/client-session` endpoint\n- The response of all the Payments API endpoints was refactored to match the create payment request structure\n- All references to `paymentInstrument` from the previous Payments API version have been refactored to `paymentMethod` to be more consistent throughout\n- All the payments API endpoints (create, capture, cancel, refund, etc.) are now versioned\n- `paymentMethodData` in `PaymentMethod` responses (for card payment method types) all now contain a `first6digits` field in addition to the `last4digits` returned. This is an opt-in field, so it is `null` by default.\n- The customer `billingAddress` and `shippingAddress` fields are now all optional\n"
+        "markdown": "## API v2.3\n\nThis version includes improvements to the Payments API.\n\nSet `X-Api-Version` header to `2.3` to use v2.3 of the API.\n\n### Payments API\n\n**Improvements**\n\n- The Payments API endpoints were modified to return error code `IdempotencyKeyAlreadyExists`  with status `409` when a payment request is submitted with an `X-Idempotency-Key`that was already sent in a previous request.\n- The payment creation endpoint was improved to return the correct [paymentMethodType](https://primer.io/docs/sdk/web/2.x.x/constants/paymentMethodTypes/)\n- The payment status webhook was improved to return the correct [paymentMethodType](https://primer.io/docs/sdk/web/2.x.x/constants/paymentMethodTypes)\n\n## API v2.2\n\nThis version includes improvements to the Client Session API, Payments API and the Payment Methods API.\nYou must set the `X-Api-Version` header to `2.2` to use v2.2 of the API.\n\n### Client Session API\n\n- Added `order.lineItems.productData` on the request and response\n\n### Payments API\n\n- Added `order.lineItems.productData` on the request and response\n\n## API v2.1\n\nVersion 2.1 includes improvements to the Client Session API, Payments API and the Payment Methods API.\n\nStarting API v2.1, the API Version X-Api-Version is a semantic version without a patch (e.g. 2.1) rather than a date \ud83c\udf89\nSet the `X-Api-Version` header to `2.1` to use v2.1 of the API.\n\n### Client Session API\n\n- Added `paymentMethod.paymentType` and `paymentMethod.descriptor` on the request and response of the client session\n- Added `order.lineItems[].productType` on the request and response of the client session\n- Added `GET /client-session` to get the content of a client session\n- Added `PATCH /client-session` to update the content of a client session\n- Additional validation has been put in place to ensure that a `currencyCode` is always passed if any `amount` value is passed\n\n### Payments API\n\n- Added `paymentMethod.isVaulted` boolean field to indicate whether the `paymentMethod.paymentMethodToken` in the response is a vaulted token (and can therefore be used for future payments) or not. This replaces `vaultedPaymentMethodToken`.\n- Added `order.lineItems[].productType` on the request and response\n- `amount`, `currencyCode`, `customerId` and `orderId` are now required fields when making a payment with a vaulted token (i.e. a recurring payment).\n- When paying with a vaulted token, additional validation has been put in place to ensure the `customerId` matches the `customerId` associated with the vaulted token.\n\n### Payment Methods API\n\n- Added verify in `POST /payment-instruments/{paymentMethodToken}/vault` to set whether or not the payment method token should be verified before vaulting\n- Added `isVerified` to the payment method response\n\n## API v2\n\nVersion 2 includes improvements to the Client Session API and the Payments API.\n\n### Client Session API\n\n- `X-API-Version` -> `2021-09-27`\n- Creating a payment using _only_ a payment method token is now possible. The `order`, `customer` and `metadata` passed on the Client Session request is then used for the payment.\n- The create Client Session endpoint request was extended to include `order`, `customer`, etc.\n- All references to `paymentInstrument` from the previous Payments API version have been refactored to `paymentMethod` to be more consistent throughout\n- The customer `billingAddress` and `shippingAddress` fields are now all optional\n\n### Payments API\n\n- `X-API-Version` -> `2021-09-27`\n- Creating a payment using _only_ a payment method token is now possible. The `order`, `customer` and `metadata` passed on the Client Session request is then used for the payment.\n- The create payment endpoint request was extended to include `order`, `customer`, etc. It now more closely resembles the `/client-session` endpoint\n- The response of all the Payments API endpoints was refactored to match the create payment request structure\n- All references to `paymentInstrument` from the previous Payments API version have been refactored to `paymentMethod` to be more consistent throughout\n- All the payments API endpoints (create, capture, cancel, refund, etc.) are now versioned\n- `paymentMethodData` in `PaymentMethod` responses (for card payment method types) all now contain a `first6digits` field in addition to the `last4digits` returned. This is an opt-in field, so it is `null` by default.\n- The customer `billingAddress` and `shippingAddress` fields are now all optional\n"
       }
     },
     "search": {

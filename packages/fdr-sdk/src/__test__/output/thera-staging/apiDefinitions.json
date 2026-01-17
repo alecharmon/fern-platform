@@ -13818,6 +13818,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_api/aiprise/aiprise_webhook_api:AiPriseVerificationCallback": {
         "name": "AiPriseVerificationCallback",

@@ -36746,6 +36746,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_common/errors:BaseError": {
         "name": "BaseError",

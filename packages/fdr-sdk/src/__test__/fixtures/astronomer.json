@@ -19,7 +19,9 @@
                 "id": "docs/pages/overview.mdx",
                 "title": "Overview",
                 "urlSlug": "overview",
-                "fullSlug": ["overview"],
+                "fullSlug": [
+                  "overview"
+                ],
                 "hidden": false
               },
               {
@@ -27,7 +29,9 @@
                 "id": "docs/pages/get-started.mdx",
                 "title": "Get started",
                 "urlSlug": "get-started",
-                "fullSlug": ["get-started"],
+                "fullSlug": [
+                  "get-started"
+                ],
                 "hidden": false
               },
               {
@@ -35,7 +39,9 @@
                 "id": "docs/pages/versioning-and-support.mdx",
                 "title": "Versioning and support",
                 "urlSlug": "versioning-and-support",
-                "fullSlug": ["versioning-and-support"],
+                "fullSlug": [
+                  "versioning-and-support"
+                ],
                 "hidden": false
               }
             ],
@@ -274,7 +280,8 @@
             "type_:WorkspacesPaginated"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_organization:ListOrganizationsRequestSupportPlan": {
@@ -5292,14 +5299,18 @@
                 {
                   "discriminantValue": "DEDICATED",
                   "additionalProperties": {
-                    "extends": ["type_:UpdateDedicatedClusterRequest"],
+                    "extends": [
+                      "type_:UpdateDedicatedClusterRequest"
+                    ],
                     "properties": []
                   }
                 },
                 {
                   "discriminantValue": "HYBRID",
                   "additionalProperties": {
-                    "extends": ["type_:UpdateHybridClusterRequest"],
+                    "extends": [
+                      "type_:UpdateHybridClusterRequest"
+                    ],
                     "properties": []
                   }
                 }
@@ -7099,7 +7110,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-organization",
-                "migratedFromUrlSlugs": ["get-an-organization"],
+                "migratedFromUrlSlugs": [
+                  "get-an-organization"
+                ],
                 "method": "GET",
                 "id": "GetOrganization",
                 "name": "Get an Organization",
@@ -7274,7 +7287,9 @@
                       "managedDomains": [
                         {
                           "createdAt": "2024-01-15T09:30:00Z",
-                          "enforcedLogins": ["enforcedLogins"],
+                          "enforcedLogins": [
+                            "enforcedLogins"
+                          ],
                           "id": "cln203mz7000008jv0jyz9m3y",
                           "name": "mycompany.com",
                           "organizationId": "cln204xr2000008mu3hhe3zwe",
@@ -7319,7 +7334,9 @@
                         "managedDomains": [
                           {
                             "createdAt": "2024-01-15T09:30:00Z",
-                            "enforcedLogins": ["enforcedLogins"],
+                            "enforcedLogins": [
+                              "enforcedLogins"
+                            ],
                             "id": "cln203mz7000008jv0jyz9m3y",
                             "name": "mycompany.com",
                             "organizationId": "cln204xr2000008mu3hhe3zwe",
@@ -7474,7 +7491,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-organization",
-                "migratedFromUrlSlugs": ["update-an-organization"],
+                "migratedFromUrlSlugs": [
+                  "update-an-organization"
+                ],
                 "method": "POST",
                 "id": "UpdateOrganization",
                 "name": "Update an Organization",
@@ -7679,7 +7698,9 @@
                       "managedDomains": [
                         {
                           "createdAt": "2024-01-15T09:30:00Z",
-                          "enforcedLogins": ["enforcedLogins"],
+                          "enforcedLogins": [
+                            "enforcedLogins"
+                          ],
                           "id": "cln203mz7000008jv0jyz9m3y",
                           "name": "mycompany.com",
                           "organizationId": "cln204xr2000008mu3hhe3zwe",
@@ -7732,7 +7753,9 @@
                         "managedDomains": [
                           {
                             "createdAt": "2024-01-15T09:30:00Z",
-                            "enforcedLogins": ["enforcedLogins"],
+                            "enforcedLogins": [
+                              "enforcedLogins"
+                            ],
                             "id": "cln203mz7000008jv0jyz9m3y",
                             "name": "mycompany.com",
                             "organizationId": "cln204xr2000008mu3hhe3zwe",
@@ -7919,7 +7942,8 @@
             "description": "The `organization` object contains the metadata and configurations of an Astro Organization. It does not include objects within the Organization, such as users and clusters. Make requests to `organization` endpoints to view and update high level settings for your Organization, including settings related to authentication and billing. To manage resources within an Organization, make requests to the endpoints related to those resources, such as `users`. See [Billing](https://www.astronomer.io/docs/astro/manage-billing), [Set up single sign-on](https://www.astronomer.io/docs/astro/configure-idp), and [Manage domains](https://www.astronomer.io/docs/astro/manage-domains).",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Organization"
+            "displayName": "Organization",
+            "graphqlOperations": []
           },
           "subpackage_options": {
             "subpackageId": "subpackage_options",
@@ -8124,7 +8148,9 @@
                         },
                         "defaultPodSubnetRange": "172.21.0.0/19",
                         "defaultRegion": {
-                          "bannedInstances": ["bannedInstances"],
+                          "bannedInstances": [
+                            "bannedInstances"
+                          ],
                           "limited": true,
                           "name": "us-east-1"
                         },
@@ -8176,7 +8202,9 @@
                           },
                           "defaultPodSubnetRange": "172.21.0.0/19",
                           "defaultRegion": {
-                            "bannedInstances": ["bannedInstances"],
+                            "bannedInstances": [
+                              "bannedInstances"
+                            ],
                             "limited": true,
                             "name": "us-east-1"
                           },
@@ -8513,7 +8541,9 @@
                     "headers": {},
                     "responseStatusCode": 200,
                     "responseBody": {
-                      "executors": ["executors"],
+                      "executors": [
+                        "executors"
+                      ],
                       "resourceQuotas": {
                         "defaultPodSize": {
                           "cpu": {
@@ -8607,7 +8637,9 @@
                     "responseBodyV3": {
                       "type": "json",
                       "value": {
-                        "executors": ["executors"],
+                        "executors": [
+                          "executors"
+                        ],
                         "resourceQuotas": {
                           "defaultPodSize": {
                             "cpu": {
@@ -8811,7 +8843,8 @@
             "description": "The `options` object represents all possible configurations for a given Astro component. Make requests to the `options` object to get the configuration constraints for creating or updating a given Astro component.",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Options"
+            "displayName": "Options",
+            "graphqlOperations": []
           },
           "subpackage_cluster": {
             "subpackageId": "subpackage_cluster",
@@ -9057,7 +9090,9 @@
                           "type": "DEDICATED",
                           "updatedAt": "2022-11-22T04:37:12Z",
                           "vpcSubnetRange": "172.20.0.0/22",
-                          "workspaceIds": ["workspaceIds"]
+                          "workspaceIds": [
+                            "workspaceIds"
+                          ]
                         }
                       ],
                       "limit": 10,
@@ -9111,7 +9146,9 @@
                             "type": "DEDICATED",
                             "updatedAt": "2022-11-22T04:37:12Z",
                             "vpcSubnetRange": "172.20.0.0/22",
-                            "workspaceIds": ["workspaceIds"]
+                            "workspaceIds": [
+                              "workspaceIds"
+                            ]
                           }
                         ],
                         "limit": 10,
@@ -9230,7 +9267,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-cluster",
-                "migratedFromUrlSlugs": ["create-a-cluster"],
+                "migratedFromUrlSlugs": [
+                  "create-a-cluster"
+                ],
                 "method": "POST",
                 "id": "CreateCluster",
                 "name": "Create a cluster",
@@ -9409,7 +9448,9 @@
                       "id": "clm7k8tgw000008jz97i37y81",
                       "isLimited": false,
                       "metadata": {
-                        "externalIPs": ["externalIPs"],
+                        "externalIPs": [
+                          "externalIPs"
+                        ],
                         "oidcIssuerUrl": "https://westus2.oic.prod-aks.azure.com/b84efac8-cfae-467a-b223-23b9aea1486d/3075f79e-abc2-4602-a691-28117197e83d/"
                       },
                       "name": "my cluster",
@@ -9423,7 +9464,9 @@
                           "maxNodeCount": 1,
                           "name": "default",
                           "nodeInstanceType": "t3.medium",
-                          "supportedAstroMachines": ["supportedAstroMachines"],
+                          "supportedAstroMachines": [
+                            "supportedAstroMachines"
+                          ],
                           "updatedAt": "2022-11-22T04:37:12Z"
                         }
                       ],
@@ -9444,7 +9487,9 @@
                       "type": "DEDICATED",
                       "updatedAt": "2022-11-22T04:37:12Z",
                       "vpcSubnetRange": "172.20.0.0/22",
-                      "workspaceIds": ["workspaceIds"]
+                      "workspaceIds": [
+                        "workspaceIds"
+                      ]
                     },
                     "codeExamples": {
                       "nodeAxios": ""
@@ -9478,7 +9523,9 @@
                         "id": "clm7k8tgw000008jz97i37y81",
                         "isLimited": false,
                         "metadata": {
-                          "externalIPs": ["externalIPs"],
+                          "externalIPs": [
+                            "externalIPs"
+                          ],
                           "oidcIssuerUrl": "https://westus2.oic.prod-aks.azure.com/b84efac8-cfae-467a-b223-23b9aea1486d/3075f79e-abc2-4602-a691-28117197e83d/"
                         },
                         "name": "my cluster",
@@ -9492,7 +9539,9 @@
                             "maxNodeCount": 1,
                             "name": "default",
                             "nodeInstanceType": "t3.medium",
-                            "supportedAstroMachines": ["supportedAstroMachines"],
+                            "supportedAstroMachines": [
+                              "supportedAstroMachines"
+                            ],
                             "updatedAt": "2022-11-22T04:37:12Z"
                           }
                         ],
@@ -9513,7 +9562,9 @@
                         "type": "DEDICATED",
                         "updatedAt": "2022-11-22T04:37:12Z",
                         "vpcSubnetRange": "172.20.0.0/22",
-                        "workspaceIds": ["workspaceIds"]
+                        "workspaceIds": [
+                          "workspaceIds"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -9686,7 +9737,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-cluster",
-                "migratedFromUrlSlugs": ["get-a-cluster"],
+                "migratedFromUrlSlugs": [
+                  "get-a-cluster"
+                ],
                 "method": "GET",
                 "id": "GetCluster",
                 "name": "Get a cluster",
@@ -9857,7 +9910,9 @@
                       "id": "clm7k8tgw000008jz97i37y81",
                       "isLimited": false,
                       "metadata": {
-                        "externalIPs": ["externalIPs"],
+                        "externalIPs": [
+                          "externalIPs"
+                        ],
                         "oidcIssuerUrl": "https://westus2.oic.prod-aks.azure.com/b84efac8-cfae-467a-b223-23b9aea1486d/3075f79e-abc2-4602-a691-28117197e83d/"
                       },
                       "name": "my cluster",
@@ -9871,7 +9926,9 @@
                           "maxNodeCount": 1,
                           "name": "default",
                           "nodeInstanceType": "t3.medium",
-                          "supportedAstroMachines": ["supportedAstroMachines"],
+                          "supportedAstroMachines": [
+                            "supportedAstroMachines"
+                          ],
                           "updatedAt": "2022-11-22T04:37:12Z"
                         }
                       ],
@@ -9892,7 +9949,9 @@
                       "type": "DEDICATED",
                       "updatedAt": "2022-11-22T04:37:12Z",
                       "vpcSubnetRange": "172.20.0.0/22",
-                      "workspaceIds": ["workspaceIds"]
+                      "workspaceIds": [
+                        "workspaceIds"
+                      ]
                     },
                     "codeExamples": {
                       "nodeAxios": ""
@@ -9906,7 +9965,9 @@
                         "id": "clm7k8tgw000008jz97i37y81",
                         "isLimited": false,
                         "metadata": {
-                          "externalIPs": ["externalIPs"],
+                          "externalIPs": [
+                            "externalIPs"
+                          ],
                           "oidcIssuerUrl": "https://westus2.oic.prod-aks.azure.com/b84efac8-cfae-467a-b223-23b9aea1486d/3075f79e-abc2-4602-a691-28117197e83d/"
                         },
                         "name": "my cluster",
@@ -9920,7 +9981,9 @@
                             "maxNodeCount": 1,
                             "name": "default",
                             "nodeInstanceType": "t3.medium",
-                            "supportedAstroMachines": ["supportedAstroMachines"],
+                            "supportedAstroMachines": [
+                              "supportedAstroMachines"
+                            ],
                             "updatedAt": "2022-11-22T04:37:12Z"
                           }
                         ],
@@ -9941,7 +10004,9 @@
                         "type": "DEDICATED",
                         "updatedAt": "2022-11-22T04:37:12Z",
                         "vpcSubnetRange": "172.20.0.0/22",
-                        "workspaceIds": ["workspaceIds"]
+                        "workspaceIds": [
+                          "workspaceIds"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -10069,7 +10134,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-cluster",
-                "migratedFromUrlSlugs": ["update-a-cluster"],
+                "migratedFromUrlSlugs": [
+                  "update-a-cluster"
+                ],
                 "method": "POST",
                 "id": "UpdateCluster",
                 "name": "Update a cluster",
@@ -10250,7 +10317,9 @@
                       "type": "json",
                       "value": {
                         "clusterType": "DEDICATED",
-                        "k8sTags": [{}],
+                        "k8sTags": [
+                          {}
+                        ],
                         "name": "string"
                       }
                     },
@@ -10263,7 +10332,9 @@
                         "id": "string",
                         "isLimited": true,
                         "metadata": {
-                          "externalIPs": ["string"],
+                          "externalIPs": [
+                            "string"
+                          ],
                           "oidcIssuerUrl": "string"
                         },
                         "name": "string",
@@ -10277,7 +10348,9 @@
                             "maxNodeCount": 0,
                             "name": "string",
                             "nodeInstanceType": "string",
-                            "supportedAstroMachines": ["string"],
+                            "supportedAstroMachines": [
+                              "string"
+                            ],
                             "updatedAt": "2023-01-01T00:00:00Z"
                           }
                         ],
@@ -10298,7 +10371,9 @@
                         "type": "DEDICATED",
                         "updatedAt": "2023-01-01T00:00:00Z",
                         "vpcSubnetRange": "string",
-                        "workspaceIds": ["string"]
+                        "workspaceIds": [
+                          "string"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -10319,7 +10394,9 @@
                       "type": "json",
                       "value": {
                         "clusterType": "DEDICATED",
-                        "k8sTags": [{}],
+                        "k8sTags": [
+                          {}
+                        ],
                         "name": "string"
                       }
                     },
@@ -10349,7 +10426,9 @@
                       "type": "json",
                       "value": {
                         "clusterType": "DEDICATED",
-                        "k8sTags": [{}],
+                        "k8sTags": [
+                          {}
+                        ],
                         "name": "string"
                       }
                     },
@@ -10379,7 +10458,9 @@
                       "type": "json",
                       "value": {
                         "clusterType": "DEDICATED",
-                        "k8sTags": [{}],
+                        "k8sTags": [
+                          {}
+                        ],
                         "name": "string"
                       }
                     },
@@ -10409,7 +10490,9 @@
                       "type": "json",
                       "value": {
                         "clusterType": "DEDICATED",
-                        "k8sTags": [{}],
+                        "k8sTags": [
+                          {}
+                        ],
                         "name": "string"
                       }
                     },
@@ -10439,7 +10522,9 @@
                       "type": "json",
                       "value": {
                         "clusterType": "DEDICATED",
-                        "k8sTags": [{}],
+                        "k8sTags": [
+                          {}
+                        ],
                         "name": "string"
                       }
                     },
@@ -10466,7 +10551,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-cluster",
-                "migratedFromUrlSlugs": ["delete-a-cluster"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-cluster"
+                ],
                 "method": "DELETE",
                 "id": "DeleteCluster",
                 "name": "Delete a cluster",
@@ -10741,13 +10828,17 @@
                 "authed": true
               }
             ],
-            "types": ["type_cluster:ListClustersRequestProvider", "type_cluster:ListClustersRequestSortsItem"],
+            "types": [
+              "type_cluster:ListClustersRequestProvider",
+              "type_cluster:ListClustersRequestSortsItem"
+            ],
             "subpackages": [],
             "urlSlug": "cluster",
             "description": "A `cluster` object represents an Astro cluster, which is a Kubernetes cluster that hosts the infrastructure required to run Deployments. Make requests to `cluster` endpoints to manage your standard and dedicated clusters. See [Create a dedicated cluster](https://www.astronomer.io/docs/astro/create-dedicated-cluster).",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Cluster"
+            "displayName": "Cluster",
+            "graphqlOperations": []
           },
           "subpackage_deployment": {
             "subpackageId": "subpackage_deployment",
@@ -10974,7 +11065,9 @@
                           "cloudProvider": "AWS",
                           "clusterId": "clmh597sg000208lb2kjhcn8q",
                           "clusterName": "my cluster",
-                          "contactEmails": ["contactEmails"],
+                          "contactEmails": [
+                            "contactEmails"
+                          ],
                           "createdAt": "2022-11-22T04:37:12Z",
                           "createdBy": {
                             "apiTokenName": "my-token",
@@ -10997,7 +11090,9 @@
                             }
                           ],
                           "executor": "CELERY",
-                          "externalIPs": ["externalIPs"],
+                          "externalIPs": [
+                            "externalIPs"
+                          ],
                           "id": "clmh57jtm000008lb58fe2wmv",
                           "imageRepository": "https://my-image-repository",
                           "imageTag": "my-image-tag",
@@ -11073,7 +11168,9 @@
                             "cloudProvider": "AWS",
                             "clusterId": "clmh597sg000208lb2kjhcn8q",
                             "clusterName": "my cluster",
-                            "contactEmails": ["contactEmails"],
+                            "contactEmails": [
+                              "contactEmails"
+                            ],
                             "createdAt": "2022-11-22T04:37:12Z",
                             "createdBy": {
                               "apiTokenName": "my-token",
@@ -11096,7 +11193,9 @@
                               }
                             ],
                             "executor": "CELERY",
-                            "externalIPs": ["externalIPs"],
+                            "externalIPs": [
+                              "externalIPs"
+                            ],
                             "id": "clmh57jtm000008lb58fe2wmv",
                             "imageRepository": "https://my-image-repository",
                             "imageTag": "my-image-tag",
@@ -11271,7 +11370,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-deployment",
-                "migratedFromUrlSlugs": ["create-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "create-a-deployment"
+                ],
                 "method": "POST",
                 "id": "CreateDeployment",
                 "name": "Create a Deployment",
@@ -11451,7 +11552,9 @@
                       "cloudProvider": "AWS",
                       "clusterId": "clmh597sg000208lb2kjhcn8q",
                       "clusterName": "my cluster",
-                      "contactEmails": ["contactEmails"],
+                      "contactEmails": [
+                        "contactEmails"
+                      ],
                       "createdAt": "2022-11-22T04:37:12Z",
                       "createdBy": {
                         "apiTokenName": "my-token",
@@ -11475,7 +11578,9 @@
                         }
                       ],
                       "executor": "CELERY",
-                      "externalIPs": ["externalIPs"],
+                      "externalIPs": [
+                        "externalIPs"
+                      ],
                       "id": "clmh57jtm000008lb58fe2wmv",
                       "imageRepository": "https://my-image-repository",
                       "imageTag": "my-image-tag",
@@ -11603,7 +11708,9 @@
                         "cloudProvider": "AWS",
                         "clusterId": "clmh597sg000208lb2kjhcn8q",
                         "clusterName": "my cluster",
-                        "contactEmails": ["contactEmails"],
+                        "contactEmails": [
+                          "contactEmails"
+                        ],
                         "createdAt": "2022-11-22T04:37:12Z",
                         "createdBy": {
                           "apiTokenName": "my-token",
@@ -11627,7 +11734,9 @@
                           }
                         ],
                         "executor": "CELERY",
-                        "externalIPs": ["externalIPs"],
+                        "externalIPs": [
+                          "externalIPs"
+                        ],
                         "id": "clmh57jtm000008lb58fe2wmv",
                         "imageRepository": "https://my-image-repository",
                         "imageTag": "my-image-tag",
@@ -11881,7 +11990,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-deployment",
-                "migratedFromUrlSlugs": ["get-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "get-a-deployment"
+                ],
                 "method": "GET",
                 "id": "GetDeployment",
                 "name": "Get a Deployment",
@@ -12051,7 +12162,9 @@
                       "cloudProvider": "AWS",
                       "clusterId": "clmh597sg000208lb2kjhcn8q",
                       "clusterName": "my cluster",
-                      "contactEmails": ["contactEmails"],
+                      "contactEmails": [
+                        "contactEmails"
+                      ],
                       "createdAt": "2022-11-22T04:37:12Z",
                       "createdBy": {
                         "apiTokenName": "my-token",
@@ -12075,7 +12188,9 @@
                         }
                       ],
                       "executor": "CELERY",
-                      "externalIPs": ["externalIPs"],
+                      "externalIPs": [
+                        "externalIPs"
+                      ],
                       "id": "clmh57jtm000008lb58fe2wmv",
                       "imageRepository": "https://my-image-repository",
                       "imageTag": "my-image-tag",
@@ -12164,7 +12279,9 @@
                         "cloudProvider": "AWS",
                         "clusterId": "clmh597sg000208lb2kjhcn8q",
                         "clusterName": "my cluster",
-                        "contactEmails": ["contactEmails"],
+                        "contactEmails": [
+                          "contactEmails"
+                        ],
                         "createdAt": "2022-11-22T04:37:12Z",
                         "createdBy": {
                           "apiTokenName": "my-token",
@@ -12188,7 +12305,9 @@
                           }
                         ],
                         "executor": "CELERY",
-                        "externalIPs": ["externalIPs"],
+                        "externalIPs": [
+                          "externalIPs"
+                        ],
                         "id": "clmh57jtm000008lb58fe2wmv",
                         "imageRepository": "https://my-image-repository",
                         "imageTag": "my-image-tag",
@@ -12392,7 +12511,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-deployment",
-                "migratedFromUrlSlugs": ["update-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "update-a-deployment"
+                ],
                 "method": "POST",
                 "id": "UpdateDeployment",
                 "name": "Update a Deployment",
@@ -12606,7 +12727,9 @@
                       "cloudProvider": "AWS",
                       "clusterId": "clmh597sg000208lb2kjhcn8q",
                       "clusterName": "my cluster",
-                      "contactEmails": ["contactEmails"],
+                      "contactEmails": [
+                        "contactEmails"
+                      ],
                       "createdAt": "2022-11-22T04:37:12Z",
                       "createdBy": {
                         "apiTokenName": "my-token",
@@ -12630,7 +12753,9 @@
                         }
                       ],
                       "executor": "CELERY",
-                      "externalIPs": ["externalIPs"],
+                      "externalIPs": [
+                        "externalIPs"
+                      ],
                       "id": "clmh57jtm000008lb58fe2wmv",
                       "imageRepository": "https://my-image-repository",
                       "imageTag": "my-image-tag",
@@ -12756,7 +12881,9 @@
                         "cloudProvider": "AWS",
                         "clusterId": "clmh597sg000208lb2kjhcn8q",
                         "clusterName": "my cluster",
-                        "contactEmails": ["contactEmails"],
+                        "contactEmails": [
+                          "contactEmails"
+                        ],
                         "createdAt": "2022-11-22T04:37:12Z",
                         "createdBy": {
                           "apiTokenName": "my-token",
@@ -12780,7 +12907,9 @@
                           }
                         ],
                         "executor": "CELERY",
-                        "externalIPs": ["externalIPs"],
+                        "externalIPs": [
+                          "externalIPs"
+                        ],
                         "id": "clmh57jtm000008lb58fe2wmv",
                         "imageRepository": "https://my-image-repository",
                         "imageTag": "my-image-tag",
@@ -13099,7 +13228,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-deployment",
-                "migratedFromUrlSlugs": ["delete-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-deployment"
+                ],
                 "method": "DELETE",
                 "id": "DeleteDeployment",
                 "name": "Delete a Deployment",
@@ -13382,7 +13513,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-deployment-hibernation-override",
-                "migratedFromUrlSlugs": ["configure-a-hibernation-override-for-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "configure-a-hibernation-override-for-a-deployment"
+                ],
                 "method": "POST",
                 "id": "UpdateDeploymentHibernationOverride",
                 "name": "Configure a hibernation override for a deployment",
@@ -13530,7 +13663,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-deployment-hibernation-override",
-                "migratedFromUrlSlugs": ["delete-a-hibernation-override-for-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-hibernation-override-for-a-deployment"
+                ],
                 "method": "DELETE",
                 "id": "DeleteDeploymentHibernationOverride",
                 "name": "Delete a hibernation override for a deployment",
@@ -13607,11 +13742,14 @@
                 "authed": true
               }
             ],
-            "types": ["type_deployment:ListDeploymentsRequestSortsItem"],
+            "types": [
+              "type_deployment:ListDeploymentsRequestSortsItem"
+            ],
             "subpackages": [],
             "urlSlug": "deployment",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_deploy": {
             "subpackageId": "subpackage_deploy",
@@ -13626,7 +13764,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list-deploys",
-                "migratedFromUrlSlugs": ["list-deploys-for-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "list-deploys-for-a-deployment"
+                ],
                 "method": "GET",
                 "id": "ListDeploys",
                 "name": "List deploys for a deployment",
@@ -14039,7 +14179,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-deploy",
-                "migratedFromUrlSlugs": ["create-a-deploy"],
+                "migratedFromUrlSlugs": [
+                  "create-a-deploy"
+                ],
                 "method": "POST",
                 "id": "CreateDeploy",
                 "name": "Create a Deploy",
@@ -14471,7 +14613,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-deploy",
-                "migratedFromUrlSlugs": ["get-a-deploy-for-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "get-a-deploy-for-a-deployment"
+                ],
                 "method": "GET",
                 "id": "GetDeploy",
                 "name": "Get a deploy for a deployment",
@@ -14856,7 +15000,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-deploy",
-                "migratedFromUrlSlugs": ["update-a-deploy"],
+                "migratedFromUrlSlugs": [
+                  "update-a-deploy"
+                ],
                 "method": "POST",
                 "id": "UpdateDeploy",
                 "name": "Update a Deploy",
@@ -15292,7 +15438,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "finalize-deploy",
-                "migratedFromUrlSlugs": ["finalize-deploy-of-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "finalize-deploy-of-a-deployment"
+                ],
                 "method": "POST",
                 "id": "FinalizeDeploy",
                 "name": "Finalize deploy of a deployment",
@@ -15680,7 +15828,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "deploy-rollback",
-                "migratedFromUrlSlugs": ["deploy-rollback-of-a-deployment"],
+                "migratedFromUrlSlugs": [
+                  "deploy-rollback-of-a-deployment"
+                ],
                 "method": "POST",
                 "id": "DeployRollback",
                 "name": "Deploy rollback of a deployment",
@@ -16103,11 +16253,14 @@
                 "authed": true
               }
             ],
-            "types": ["type_deploy:CreateDeployRequestType"],
+            "types": [
+              "type_deploy:CreateDeployRequestType"
+            ],
             "subpackages": [],
             "urlSlug": "deploy",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_workspace": {
             "subpackageId": "subpackage_workspace",
@@ -17960,13 +18113,16 @@
                 "authed": true
               }
             ],
-            "types": ["type_workspace:ListWorkspacesRequestSortsItem"],
+            "types": [
+              "type_workspace:ListWorkspacesRequestSortsItem"
+            ],
             "subpackages": [],
             "urlSlug": "workspace",
             "description": "The `workspace` object represents an Astro Workspace, which is a collection of Deployments that can be accessed by a specific group of users. It contains metadata about a Workspace, but does not contain objects within the Workspace such as users and Deployments. Make requests to `workspace` endpoints to manage high level details about your Workspace. To manage resources within a Workspace, make requests to the endpoints related to those resources, such as `users`, and use the `workspaceIds` parameter to filter results by Workspace. See [Configure Workspaces](https://www.astronomer.io/docs/astro/manage-workspaces).",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Workspace"
+            "displayName": "Workspace",
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -18025,7 +18181,8 @@
             "type_:WorkspaceRole"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "type_authorization:ListPermissionGroupsRequestScopeType": {
@@ -20092,7 +20249,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list-permission-groups",
-                "migratedFromUrlSlugs": ["list-authorization-permission-groups"],
+                "migratedFromUrlSlugs": [
+                  "list-authorization-permission-groups"
+                ],
                 "method": "GET",
                 "id": "ListPermissionGroups",
                 "name": "List authorization permission groups",
@@ -20337,11 +20496,14 @@
                 "authed": true
               }
             ],
-            "types": ["type_authorization:ListPermissionGroupsRequestScopeType"],
+            "types": [
+              "type_authorization:ListPermissionGroupsRequestScopeType"
+            ],
             "subpackages": [],
             "urlSlug": "authorization",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_invite": {
             "subpackageId": "subpackage_invite",
@@ -20356,7 +20518,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-user-invite",
-                "migratedFromUrlSlugs": ["create-a-user-invitation"],
+                "migratedFromUrlSlugs": [
+                  "create-a-user-invitation"
+                ],
                 "method": "POST",
                 "id": "CreateUserInvite",
                 "name": "Create a user invitation",
@@ -20746,7 +20910,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-user-invite",
-                "migratedFromUrlSlugs": ["delete-a-user-invite"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-user-invite"
+                ],
                 "method": "DELETE",
                 "id": "DeleteUserInvite",
                 "name": "Delete a user invite",
@@ -21021,13 +21187,16 @@
                 "authed": true
               }
             ],
-            "types": ["type_invite:CreateUserInviteRequestRole"],
+            "types": [
+              "type_invite:CreateUserInviteRequestRole"
+            ],
             "subpackages": [],
             "urlSlug": "invite",
             "description": "The `invite` object represents the record of a user invite generated by Astro. It includes information both about the inviter and the invitee. Invites can be generated both by manual invitations through the Astro UI and automatic invitations through an identity provider. An `invite` record persists until its associated invite expires. Make requests to `invite` endpoints to create, delete, or audit invites for users across your Organization. See [Manage Organization users](https://www.astronomer.io/docs/astro/manage-organization-users) and [Manage Workspace users](https://www.astronomer.io/docs/astro/manage-workspace-users).",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Invite"
+            "displayName": "Invite",
+            "graphqlOperations": []
           },
           "subpackage_role": {
             "subpackageId": "subpackage_role",
@@ -21042,7 +21211,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list-role-templates",
-                "migratedFromUrlSlugs": ["get-role-templates"],
+                "migratedFromUrlSlugs": [
+                  "get-role-templates"
+                ],
                 "method": "GET",
                 "id": "ListRoleTemplates",
                 "name": "Get role templates",
@@ -21206,7 +21377,9 @@
                       {
                         "description": "Subject can only view deployments.",
                         "name": "Deployment_Viewer",
-                        "permissions": ["permissions"],
+                        "permissions": [
+                          "permissions"
+                        ],
                         "scopeType": "DEPLOYMENT"
                       }
                     ],
@@ -21219,7 +21392,9 @@
                         {
                           "description": "Subject can only view deployments.",
                           "name": "Deployment_Viewer",
-                          "permissions": ["permissions"],
+                          "permissions": [
+                            "permissions"
+                          ],
                           "scopeType": "DEPLOYMENT"
                         }
                       ]
@@ -21565,7 +21740,9 @@
                         {
                           "description": "Subject can only view deployments.",
                           "name": "Deployment_Viewer",
-                          "permissions": ["permissions"],
+                          "permissions": [
+                            "permissions"
+                          ],
                           "scopeType": "DEPLOYMENT"
                         }
                       ],
@@ -21584,7 +21761,9 @@
                           "description": "Subject can only view deployments.",
                           "id": "cluc9tapx000901qn2xrgqdmn",
                           "name": "Deployment_Viewer",
-                          "restrictedWorkspaceIds": ["restrictedWorkspaceIds"],
+                          "restrictedWorkspaceIds": [
+                            "restrictedWorkspaceIds"
+                          ],
                           "scopeType": "DEPLOYMENT",
                           "updatedAt": "updatedAt",
                           "updatedBy": {
@@ -21608,7 +21787,9 @@
                           {
                             "description": "Subject can only view deployments.",
                             "name": "Deployment_Viewer",
-                            "permissions": ["permissions"],
+                            "permissions": [
+                              "permissions"
+                            ],
                             "scopeType": "DEPLOYMENT"
                           }
                         ],
@@ -21627,7 +21808,9 @@
                             "description": "Subject can only view deployments.",
                             "id": "cluc9tapx000901qn2xrgqdmn",
                             "name": "Deployment_Viewer",
-                            "restrictedWorkspaceIds": ["restrictedWorkspaceIds"],
+                            "restrictedWorkspaceIds": [
+                              "restrictedWorkspaceIds"
+                            ],
                             "scopeType": "DEPLOYMENT",
                             "updatedAt": "updatedAt",
                             "updatedBy": {
@@ -21777,7 +21960,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-custom-role",
-                "migratedFromUrlSlugs": ["create-a-custom-role"],
+                "migratedFromUrlSlugs": [
+                  "create-a-custom-role"
+                ],
                 "method": "POST",
                 "id": "CreateCustomRole",
                 "name": "Create a custom role",
@@ -21995,7 +22180,9 @@
                     "requestBody": {
                       "description": "Subject can only view deployments.",
                       "name": "Deployment_Viewer",
-                      "permissions": ["permissions"],
+                      "permissions": [
+                        "permissions"
+                      ],
                       "scopeType": "DEPLOYMENT"
                     },
                     "responseStatusCode": 200,
@@ -22012,8 +22199,12 @@
                       "description": "Subject can only view deployments.",
                       "id": "cluc9tapx000901qn2xrgqdmn",
                       "name": "Deployment_Viewer",
-                      "permissions": ["permissions"],
-                      "restrictedWorkspaceIds": ["restrictedWorkspaceIds"],
+                      "permissions": [
+                        "permissions"
+                      ],
+                      "restrictedWorkspaceIds": [
+                        "restrictedWorkspaceIds"
+                      ],
                       "scopeType": "DEPLOYMENT",
                       "updatedAt": "updatedAt",
                       "updatedBy": {
@@ -22033,7 +22224,9 @@
                       "value": {
                         "description": "Subject can only view deployments.",
                         "name": "Deployment_Viewer",
-                        "permissions": ["permissions"],
+                        "permissions": [
+                          "permissions"
+                        ],
                         "scopeType": "DEPLOYMENT"
                       }
                     },
@@ -22052,8 +22245,12 @@
                         "description": "Subject can only view deployments.",
                         "id": "cluc9tapx000901qn2xrgqdmn",
                         "name": "Deployment_Viewer",
-                        "permissions": ["permissions"],
-                        "restrictedWorkspaceIds": ["restrictedWorkspaceIds"],
+                        "permissions": [
+                          "permissions"
+                        ],
+                        "restrictedWorkspaceIds": [
+                          "restrictedWorkspaceIds"
+                        ],
                         "scopeType": "DEPLOYMENT",
                         "updatedAt": "updatedAt",
                         "updatedBy": {
@@ -22083,7 +22280,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"],
+                        "permissions": [
+                          "string"
+                        ],
                         "scopeType": "DEPLOYMENT"
                       }
                     },
@@ -22112,7 +22311,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"],
+                        "permissions": [
+                          "string"
+                        ],
                         "scopeType": "DEPLOYMENT"
                       }
                     },
@@ -22141,7 +22342,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"],
+                        "permissions": [
+                          "string"
+                        ],
                         "scopeType": "DEPLOYMENT"
                       }
                     },
@@ -22170,7 +22373,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"],
+                        "permissions": [
+                          "string"
+                        ],
                         "scopeType": "DEPLOYMENT"
                       }
                     },
@@ -22199,7 +22404,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"],
+                        "permissions": [
+                          "string"
+                        ],
                         "scopeType": "DEPLOYMENT"
                       }
                     },
@@ -22452,7 +22659,9 @@
                     "requestBody": {
                       "description": "Subject can only view deployments.",
                       "name": "Deployment_Viewer",
-                      "permissions": ["permissions"]
+                      "permissions": [
+                        "permissions"
+                      ]
                     },
                     "responseStatusCode": 200,
                     "responseBody": {
@@ -22468,8 +22677,12 @@
                       "description": "Subject can only view deployments.",
                       "id": "cluc9tapx000901qn2xrgqdmn",
                       "name": "Deployment_Viewer",
-                      "permissions": ["permissions"],
-                      "restrictedWorkspaceIds": ["restrictedWorkspaceIds"],
+                      "permissions": [
+                        "permissions"
+                      ],
+                      "restrictedWorkspaceIds": [
+                        "restrictedWorkspaceIds"
+                      ],
                       "scopeType": "DEPLOYMENT",
                       "updatedAt": "updatedAt",
                       "updatedBy": {
@@ -22489,7 +22702,9 @@
                       "value": {
                         "description": "Subject can only view deployments.",
                         "name": "Deployment_Viewer",
-                        "permissions": ["permissions"]
+                        "permissions": [
+                          "permissions"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -22507,8 +22722,12 @@
                         "description": "Subject can only view deployments.",
                         "id": "cluc9tapx000901qn2xrgqdmn",
                         "name": "Deployment_Viewer",
-                        "permissions": ["permissions"],
-                        "restrictedWorkspaceIds": ["restrictedWorkspaceIds"],
+                        "permissions": [
+                          "permissions"
+                        ],
+                        "restrictedWorkspaceIds": [
+                          "restrictedWorkspaceIds"
+                        ],
                         "scopeType": "DEPLOYMENT",
                         "updatedAt": "updatedAt",
                         "updatedBy": {
@@ -22539,7 +22758,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"]
+                        "permissions": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -22568,7 +22789,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"]
+                        "permissions": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -22597,7 +22820,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"]
+                        "permissions": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -22626,7 +22851,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"]
+                        "permissions": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -22655,7 +22882,9 @@
                       "type": "json",
                       "value": {
                         "name": "string",
-                        "permissions": ["string"]
+                        "permissions": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -22681,7 +22910,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-custom-role",
-                "migratedFromUrlSlugs": ["delete-a-custom-role"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-custom-role"
+                ],
                 "method": "DELETE",
                 "id": "DeleteCustomRole",
                 "name": "Delete a custom role",
@@ -22964,7 +23195,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-custom-role",
-                "migratedFromUrlSlugs": ["get-a-custom-role"],
+                "migratedFromUrlSlugs": [
+                  "get-a-custom-role"
+                ],
                 "method": "GET",
                 "id": "GetCustomRole",
                 "name": "Get a custom role",
@@ -23141,8 +23374,12 @@
                       "description": "Subject can only view deployments.",
                       "id": "cluc9tapx000901qn2xrgqdmn",
                       "name": "Deployment_Viewer",
-                      "permissions": ["permissions"],
-                      "restrictedWorkspaceIds": ["restrictedWorkspaceIds"],
+                      "permissions": [
+                        "permissions"
+                      ],
+                      "restrictedWorkspaceIds": [
+                        "restrictedWorkspaceIds"
+                      ],
                       "scopeType": "DEPLOYMENT",
                       "updatedAt": "updatedAt",
                       "updatedBy": {
@@ -23172,8 +23409,12 @@
                         "description": "Subject can only view deployments.",
                         "id": "cluc9tapx000901qn2xrgqdmn",
                         "name": "Deployment_Viewer",
-                        "permissions": ["permissions"],
-                        "restrictedWorkspaceIds": ["restrictedWorkspaceIds"],
+                        "permissions": [
+                          "permissions"
+                        ],
+                        "restrictedWorkspaceIds": [
+                          "restrictedWorkspaceIds"
+                        ],
                         "scopeType": "DEPLOYMENT",
                         "updatedAt": "updatedAt",
                         "updatedBy": {
@@ -23311,7 +23552,8 @@
             "subpackages": [],
             "urlSlug": "role",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           },
           "subpackage_team": {
             "subpackageId": "subpackage_team",
@@ -23750,7 +23992,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-team",
-                "migratedFromUrlSlugs": ["create-a-team"],
+                "migratedFromUrlSlugs": [
+                  "create-a-team"
+                ],
                 "method": "POST",
                 "id": "CreateTeam",
                 "name": "Create a Team",
@@ -24199,7 +24443,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-team",
-                "migratedFromUrlSlugs": ["get-a-team"],
+                "migratedFromUrlSlugs": [
+                  "get-a-team"
+                ],
                 "method": "GET",
                 "id": "GetTeam",
                 "name": "Get a Team",
@@ -24572,7 +24818,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-team",
-                "migratedFromUrlSlugs": ["update-a-team"],
+                "migratedFromUrlSlugs": [
+                  "update-a-team"
+                ],
                 "method": "POST",
                 "id": "UpdateTeam",
                 "name": "Update a Team",
@@ -25018,7 +25266,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-team",
-                "migratedFromUrlSlugs": ["delete-a-team"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-team"
+                ],
                 "method": "DELETE",
                 "id": "DeleteTeam",
                 "name": "Delete a Team",
@@ -25676,7 +25926,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "add-team-members",
-                "migratedFromUrlSlugs": ["add-members-to-a-team"],
+                "migratedFromUrlSlugs": [
+                  "add-members-to-a-team"
+                ],
                 "method": "POST",
                 "id": "AddTeamMembers",
                 "name": "Add members to a team",
@@ -25853,7 +26105,9 @@
                     "queryParameters": {},
                     "headers": {},
                     "requestBody": {
-                      "memberIds": ["memberIds"]
+                      "memberIds": [
+                        "memberIds"
+                      ]
                     },
                     "responseStatusCode": 204,
                     "codeExamples": {
@@ -25862,7 +26116,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "memberIds": ["memberIds"]
+                        "memberIds": [
+                          "memberIds"
+                        ]
                       }
                     },
                     "codeSamples": []
@@ -25882,7 +26138,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "memberIds": ["string"]
+                        "memberIds": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -25910,7 +26168,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "memberIds": ["string"]
+                        "memberIds": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -25938,7 +26198,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "memberIds": ["string"]
+                        "memberIds": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -25966,7 +26228,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "memberIds": ["string"]
+                        "memberIds": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -25994,7 +26258,9 @@
                     "requestBodyV3": {
                       "type": "json",
                       "value": {
-                        "memberIds": ["string"]
+                        "memberIds": [
+                          "string"
+                        ]
                       }
                     },
                     "responseBodyV3": {
@@ -26761,7 +27027,8 @@
             "description": "The `team` object represents an Astro Team, which is a group of users that share the same permissions across your Organization and Workspaces. Make requests to `team` endpoints to create, update, and delete Teams across an Organization. See [Configure Teams on Astro](https://www.astronomer.io/docs/astro/manage-teams).",
             "webhooks": [],
             "websockets": [],
-            "displayName": "Team"
+            "displayName": "Team",
+            "graphqlOperations": []
           },
           "subpackage_apiToken": {
             "subpackageId": "subpackage_apiToken",
@@ -27222,7 +27489,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "create-api-token",
-                "migratedFromUrlSlugs": ["create-an-api-token"],
+                "migratedFromUrlSlugs": [
+                  "create-an-api-token"
+                ],
                 "method": "POST",
                 "id": "CreateApiToken",
                 "name": "Create an API token",
@@ -27702,7 +27971,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-api-token",
-                "migratedFromUrlSlugs": ["get-an-api-token"],
+                "migratedFromUrlSlugs": [
+                  "get-an-api-token"
+                ],
                 "method": "GET",
                 "id": "GetApiToken",
                 "name": "Get an API token",
@@ -28071,7 +28342,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-api-token",
-                "migratedFromUrlSlugs": ["update-an-api-token"],
+                "migratedFromUrlSlugs": [
+                  "update-an-api-token"
+                ],
                 "method": "POST",
                 "id": "UpdateApiToken",
                 "name": "Update an API token",
@@ -28513,7 +28786,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "delete-api-token",
-                "migratedFromUrlSlugs": ["delete-an-api-token"],
+                "migratedFromUrlSlugs": [
+                  "delete-an-api-token"
+                ],
                 "method": "DELETE",
                 "id": "DeleteApiToken",
                 "name": "Delete an API token",
@@ -29581,13 +29856,17 @@
                 "authed": true
               }
             ],
-            "types": ["type_apiToken:ListApiTokensRequestSortsItem", "type_apiToken:CreateApiTokenRequestType"],
+            "types": [
+              "type_apiToken:ListApiTokensRequestSortsItem",
+              "type_apiToken:CreateApiTokenRequestType"
+            ],
             "subpackages": [],
             "urlSlug": "api-token",
             "description": "The `apitoken` object represents a single API token within your Organization. API tokens are used to authenticate automated tools and processes to your Organization. They have varying levels of access to your resources based on their Organization, Workspace, and Deployment roles. See [Workspace API tokens])(workspace-api-tokens.md) and [Organization API tokens](organization-api-tokens.md).",
             "webhooks": [],
             "websockets": [],
-            "displayName": "ApiToken"
+            "displayName": "ApiToken",
+            "graphqlOperations": []
           },
           "subpackage_user": {
             "subpackageId": "subpackage_user",
@@ -29602,7 +29881,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "list-users",
-                "migratedFromUrlSlugs": ["list-users-in-an-organization"],
+                "migratedFromUrlSlugs": [
+                  "list-users-in-an-organization"
+                ],
                 "method": "GET",
                 "id": "ListUsers",
                 "name": "List users in an Organization",
@@ -29969,7 +30250,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "get-user",
-                "migratedFromUrlSlugs": ["get-user-information"],
+                "migratedFromUrlSlugs": [
+                  "get-user-information"
+                ],
                 "method": "GET",
                 "id": "GetUser",
                 "name": "Get user information",
@@ -30308,7 +30591,9 @@
                 ],
                 "defaultEnvironment": "Default",
                 "urlSlug": "update-user-roles",
-                "migratedFromUrlSlugs": ["update-a-users-roles"],
+                "migratedFromUrlSlugs": [
+                  "update-a-users-roles"
+                ],
                 "method": "POST",
                 "id": "UpdateUserRoles",
                 "name": "Update a user's roles",
@@ -30724,13 +31009,17 @@
                 "authed": true
               }
             ],
-            "types": ["type_user:ListUsersRequestSortsItem", "type_user:UpdateUserRolesRequestOrganizationRole"],
+            "types": [
+              "type_user:ListUsersRequestSortsItem",
+              "type_user:UpdateUserRolesRequestOrganizationRole"
+            ],
             "subpackages": [],
             "urlSlug": "user",
             "description": "The `user` object represents a user account in your Astro Organization. Astro creates a new `user` object whenever you invite a user by email or add a user to Astro through an identity provider. The object contains all information about a user, including their personal information, roles, and login attempts. It doesn't include attributes for actions that the user completes after they log in, such as updating a Deployment. Make requests to `user` endpoints to manage permissions for existing users both at the Organization and Workspace level. To create new users, make requests to `invite` endpoints instead.",
             "webhooks": [],
             "websockets": [],
-            "displayName": "User"
+            "displayName": "User",
+            "graphqlOperations": []
           }
         },
         "auth": {

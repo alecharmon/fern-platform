@@ -16248,6 +16248,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_:CustomFieldType": {
         "name": "CustomFieldType",
@@ -23087,6 +23088,7 @@
         ]
       }
     },
+    "graphqlOperations": {},
     "types": {
       "type_:CommonWebhookProperties": {
         "name": "CommonWebhookProperties",

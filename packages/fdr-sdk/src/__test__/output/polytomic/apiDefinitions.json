@@ -31715,6 +31715,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_bulkSync:V2CreateBulkSyncRequestSchemasItem": {
         "name": "V2CreateBulkSyncRequestSchemasItem",
@@ -65427,6 +65428,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_bulkSync:V2CreateBulkSyncRequestSchemasItem": {
         "name": "V2CreateBulkSyncRequestSchemasItem",
@@ -79829,6 +79831,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_:ApiError": {
         "name": "ApiError",
@@ -115600,6 +115603,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_bulkSync:V2CreateBulkSyncRequestSchemasItem": {
         "name": "V2CreateBulkSyncRequestSchemasItem",

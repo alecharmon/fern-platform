@@ -33676,6 +33676,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_accounts:AccountResponse": {
         "name": "AccountResponse",

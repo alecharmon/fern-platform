@@ -31,7 +31,9 @@
         "id": "68959464-61a0-46a4-b0ed-340397f889dd",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_users"],
+          "subpackages": [
+            "subpackage_users"
+          ],
           "types": [
             "User",
             "CreateUserRequest",
@@ -41,7 +43,8 @@
             "Error"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "UserRole": {
@@ -607,7 +610,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "get-users",
-                "migratedFromUrlSlugs": ["get-all-users"],
+                "migratedFromUrlSlugs": [
+                  "get-all-users"
+                ],
                 "method": "GET",
                 "id": "getUsers",
                 "originalEndpointId": "endpoint_users.getUsers",
@@ -872,7 +877,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "create-user",
-                "migratedFromUrlSlugs": ["create-a-new-user"],
+                "migratedFromUrlSlugs": [
+                  "create-a-new-user"
+                ],
                 "method": "POST",
                 "id": "createUser",
                 "originalEndpointId": "endpoint_users.createUser",
@@ -1134,7 +1141,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "get-user",
-                "migratedFromUrlSlugs": ["get-a-specific-user"],
+                "migratedFromUrlSlugs": [
+                  "get-a-specific-user"
+                ],
                 "method": "GET",
                 "id": "getUser",
                 "originalEndpointId": "endpoint_users.getUser",
@@ -1331,7 +1340,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "replace-user",
-                "migratedFromUrlSlugs": ["replace-a-user"],
+                "migratedFromUrlSlugs": [
+                  "replace-a-user"
+                ],
                 "method": "PUT",
                 "id": "replaceUser",
                 "originalEndpointId": "endpoint_users.replaceUser",
@@ -1625,7 +1636,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "delete-user",
-                "migratedFromUrlSlugs": ["delete-a-user"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-user"
+                ],
                 "method": "DELETE",
                 "id": "deleteUser",
                 "originalEndpointId": "endpoint_users.deleteUser",
@@ -1806,7 +1819,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "update-user",
-                "migratedFromUrlSlugs": ["update-a-user"],
+                "migratedFromUrlSlugs": [
+                  "update-a-user"
+                ],
                 "method": "PATCH",
                 "id": "updateUser",
                 "originalEndpointId": "endpoint_users.updateUser",
@@ -2084,7 +2099,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "check-user-exists",
-                "migratedFromUrlSlugs": ["check-user-existence"],
+                "migratedFromUrlSlugs": [
+                  "check-user-existence"
+                ],
                 "method": "HEAD",
                 "id": "checkUserExists",
                 "originalEndpointId": "endpoint_users.checkUserExists",
@@ -2248,7 +2265,8 @@
             "subpackages": [],
             "urlSlug": "users",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -2262,7 +2280,9 @@
         "id": "a8c7404c-e16b-4ecf-97c4-c51193853b15",
         "rootPackage": {
           "endpoints": [],
-          "subpackages": ["subpackage_users"],
+          "subpackages": [
+            "subpackage_users"
+          ],
           "types": [
             "User",
             "CreateUserRequest",
@@ -2272,7 +2292,8 @@
             "Error"
           ],
           "webhooks": [],
-          "websockets": []
+          "websockets": [],
+          "graphqlOperations": []
         },
         "types": {
           "UserRole": {
@@ -2838,7 +2859,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "get-users",
-                "migratedFromUrlSlugs": ["get-all-users"],
+                "migratedFromUrlSlugs": [
+                  "get-all-users"
+                ],
                 "method": "GET",
                 "id": "getUsers",
                 "originalEndpointId": "endpoint_users.getUsers",
@@ -3088,7 +3111,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "create-user",
-                "migratedFromUrlSlugs": ["create-a-new-user"],
+                "migratedFromUrlSlugs": [
+                  "create-a-new-user"
+                ],
                 "method": "POST",
                 "id": "createUser",
                 "originalEndpointId": "endpoint_users.createUser",
@@ -3350,7 +3375,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "get-user",
-                "migratedFromUrlSlugs": ["get-a-specific-user"],
+                "migratedFromUrlSlugs": [
+                  "get-a-specific-user"
+                ],
                 "method": "GET",
                 "id": "getUser",
                 "originalEndpointId": "endpoint_users.getUser",
@@ -3547,7 +3574,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "replace-user",
-                "migratedFromUrlSlugs": ["replace-a-user"],
+                "migratedFromUrlSlugs": [
+                  "replace-a-user"
+                ],
                 "method": "PUT",
                 "id": "replaceUser",
                 "originalEndpointId": "endpoint_users.replaceUser",
@@ -3841,7 +3870,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "delete-user",
-                "migratedFromUrlSlugs": ["delete-a-user"],
+                "migratedFromUrlSlugs": [
+                  "delete-a-user"
+                ],
                 "method": "DELETE",
                 "id": "deleteUser",
                 "originalEndpointId": "endpoint_users.deleteUser",
@@ -4022,7 +4053,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "update-user",
-                "migratedFromUrlSlugs": ["update-a-user"],
+                "migratedFromUrlSlugs": [
+                  "update-a-user"
+                ],
                 "method": "PATCH",
                 "id": "updateUser",
                 "originalEndpointId": "endpoint_users.updateUser",
@@ -4300,7 +4333,9 @@
                 ],
                 "defaultEnvironment": "Production server",
                 "urlSlug": "check-user-exists",
-                "migratedFromUrlSlugs": ["check-user-existence"],
+                "migratedFromUrlSlugs": [
+                  "check-user-existence"
+                ],
                 "method": "HEAD",
                 "id": "checkUserExists",
                 "originalEndpointId": "endpoint_users.checkUserExists",
@@ -4464,7 +4499,8 @@
             "subpackages": [],
             "urlSlug": "users",
             "webhooks": [],
-            "websockets": []
+            "websockets": [],
+            "graphqlOperations": []
           }
         },
         "auth": {
@@ -4859,7 +4895,11 @@
                             "slug": "changelog/2025/8/23",
                             "date": "2025-08-23T00:00:00.000Z",
                             "pageId": "changelog/2025-08-23.mdx",
-                            "tags": ["you", "me", "us"]
+                            "tags": [
+                              "you",
+                              "me",
+                              "us"
+                            ]
                           },
                           {
                             "id": "ca348860c9f5f590974bcac539a53bdb4969cf659a2a29245c275b1df7894bbb",
@@ -4868,7 +4908,10 @@
                             "slug": "changelog/2025/8/22",
                             "date": "2025-08-22T00:00:00.000Z",
                             "pageId": "changelog/2025-08-22.mdx",
-                            "tags": ["tuna", "fish"]
+                            "tags": [
+                              "tuna",
+                              "fish"
+                            ]
                           },
                           {
                             "id": "9a7661407ea49162ebab03102ec1793e2ec1344743e1d89e4d94e69bdfaf9da1",
@@ -4877,7 +4920,10 @@
                             "slug": "changelog/2025/8/21",
                             "date": "2025-08-21T00:00:00.000Z",
                             "pageId": "changelog/2025-08-21.mdx",
-                            "tags": ["hello", "world"]
+                            "tags": [
+                              "hello",
+                              "world"
+                            ]
                           }
                         ]
                       }

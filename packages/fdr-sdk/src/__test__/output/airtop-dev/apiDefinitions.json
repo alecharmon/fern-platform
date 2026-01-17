@@ -6159,6 +6159,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_sessions:SessionsListRequestStatus": {
         "name": "SessionsListRequestStatus",

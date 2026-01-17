@@ -22139,6 +22139,7 @@
     },
     "websockets": {},
     "webhooks": {},
+    "graphqlOperations": {},
     "types": {
       "type_workflows:WorkflowsRunStreamRequestInputsValue": {
         "name": "WorkflowsRunStreamRequestInputsValue",
