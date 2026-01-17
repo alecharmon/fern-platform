@@ -13,6 +13,7 @@ export type ERROR_DIGEST_KEYS =
     | "BASE_BRANCH_NOT_SET"
     | "USER_NOT_IN_ORG"
     | "GITLAB_TOKEN_NOT_CONFIGURED"
+    | "GITLAB_API_ERROR"
     | "MALFORMED_GIT_URL"
     | GithubValidationErrorKeys;
 
@@ -27,6 +28,8 @@ export const ERROR_DIGEST_MESSAGES: Record<ERROR_DIGEST_KEYS, string> = {
     FERN_BOT_NOT_INSTALLED: "Fern App is not installed on this repository. Please contact your repository admin.",
     GHE_APP_NOT_INSTALLED: "Please contact Fern Support to set up this repository.",
     GITLAB_TOKEN_NOT_CONFIGURED: "Please contact Fern Support to set up a GitLab repository.",
+    GITLAB_API_ERROR:
+        "Unable to validate repository due to a GitLab API error. Your access token may be expired or invalid. Please contact Fern Support.",
     MALFORMED_GIT_URL:
         "The provided repository URL is not valid. Please ensure you're using a valid GitHub or GitLab repository URL.",
     DOMAIN_NOT_REGISTERED: "This docs domain is not registered. Please contact support to register your domain.",
@@ -82,6 +85,8 @@ export function getValidationErrorMessage(error: GitRepoValidationError): string
             return `${ERROR_DIGEST_MESSAGES.UNEXPECTED_ERROR} Details: ${error.message}`;
         case "GITLAB_TOKEN_NOT_CONFIGURED":
             return ERROR_DIGEST_MESSAGES.GITLAB_TOKEN_NOT_CONFIGURED;
+        case "GITLAB_API_ERROR":
+            return `${ERROR_DIGEST_MESSAGES.GITLAB_API_ERROR} Details: ${error.message}`;
         case "EDGE_CONFIG_ERROR":
             return ERROR_DIGEST_MESSAGES.EDGE_CONFIG_ERROR;
         default: {

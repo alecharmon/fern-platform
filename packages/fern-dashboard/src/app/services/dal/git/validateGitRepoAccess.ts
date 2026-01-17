@@ -31,6 +31,7 @@ export type GitRepoValidationError =
     | { type: "EDGE_CONFIG_ERROR"; message: string }
     | { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
     | { type: "GITLAB_TOKEN_NOT_CONFIGURED" }
+    | { type: "GITLAB_API_ERROR"; message: string }
     | FernConfigJsonErrors
     | { type: "UNEXPECTED_ERROR"; message: string };
 
@@ -186,32 +187,47 @@ export async function validateGitRepoAccess(
         }
 
         // Validate fern.config.json exists and org matches (same as GitHub)
-        const gitlabLoader = new GitLabLoader({ owner, repo });
-        const fernConfigResult = await gitlabLoader.getFernConfigJson(owner, repo, site);
+        // Wrap in try-catch to handle GitLab API errors (e.g., expired token, network issues)
+        try {
+            const gitlabLoader = new GitLabLoader({ owner, repo });
+            const fernConfigResult = await gitlabLoader.getFernConfigJson(owner, repo, site);
 
-        if (fernConfigResult.type !== "ok") {
+            if (fernConfigResult.type !== "ok") {
+                return {
+                    ok: false,
+                    provider,
+                    error: fernConfigResult.error
+                };
+            }
+
+            if (fernConfigResult.result.organization !== orgName) {
+                return {
+                    ok: false,
+                    provider,
+                    error: { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
+                };
+            }
+
+            return {
+                ok: true,
+                provider,
+                owner,
+                repo,
+                canonicalUrl
+            };
+        } catch (error) {
+            console.error("[validateGitRepoAccess] GitLab API error:", error);
+            const errorMessage =
+                error instanceof Error ? error.message : "An unexpected error occurred while validating the repository";
             return {
                 ok: false,
                 provider,
-                error: fernConfigResult.error
+                error: {
+                    type: "GITLAB_API_ERROR",
+                    message: errorMessage
+                }
             };
         }
-
-        if (fernConfigResult.result.organization !== orgName) {
-            return {
-                ok: false,
-                provider,
-                error: { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
-            };
-        }
-
-        return {
-            ok: true,
-            provider,
-            owner,
-            repo,
-            canonicalUrl
-        };
     }
 
     if (provider === "github" || provider === "github-enterprise") {

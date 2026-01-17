@@ -33,6 +33,7 @@ export function VisualEditorValidationErrorHandler({ error, githubUrl }: Validat
         case "MULTIPLE_PROJECTS_WITH_SITE":
         case "UNEXPECTED_ERROR":
         case "GITLAB_TOKEN_NOT_CONFIGURED":
+        case "GITLAB_API_ERROR":
         case "EDGE_CONFIG_ERROR":
         case "FERN_CONFIG_JSON_MISSING":
         case "FERN_CONFIG_JSON_MALFORMED":
