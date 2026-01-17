@@ -101,6 +101,7 @@ export async function LayoutEvaluator({
             editThisPageLaunch={editThisPageLaunch}
             docsUrl={fullDocsUrl}
             slug={slug}
+            orgName={metadata.org}
             bottomNavigation={bottomNavigation}
             footerLinks={<FooterLinks loader={loader} className="mt-8" />}
             lang={lang}

@@ -30,7 +30,10 @@ export async function middleware(req: NextRequest) {
         }
     }
 
-    return NextResponse.next();
+    // Set current URL as header so server components can access it for redirect preservation
+    const response = NextResponse.next();
+    response.headers.set("x-current-path", req.nextUrl.pathname + req.nextUrl.search);
+    return response;
 }
 
 export const config = {

@@ -10,6 +10,7 @@ export function AbstractFooterLayout({
     editThisPageLaunch,
     docsUrl,
     slug,
+    orgName,
     bottomNavigation,
     className,
     footerLinks,
@@ -23,6 +24,7 @@ export function AbstractFooterLayout({
     editThisPageLaunch?: "github" | "dashboard";
     docsUrl?: string;
     slug?: string;
+    orgName?: string;
     bottomNavigation?: React.ReactNode;
     pathname?: string;
     className?: string;
@@ -39,9 +41,19 @@ export function AbstractFooterLayout({
     );
 
     const renderEditButton = () => {
-        if (editThisPageLaunch === "dashboard" && docsUrl && slug != null) {
-            return <EditInDashboardButton docsUrl={docsUrl} slug={slug} lang={lang} fallbackUrl={editThisPageUrl} />;
+        // Show dashboard button if we have all required data, otherwise fall back to GitHub
+        if (editThisPageLaunch === "dashboard" && docsUrl && slug != null && orgName) {
+            return (
+                <EditInDashboardButton
+                    docsUrl={docsUrl}
+                    slug={slug}
+                    lang={lang}
+                    orgName={orgName}
+                    fallbackUrl={editThisPageUrl}
+                />
+            );
         }
+        // Fallback to GitHub edit URL if dashboard isn't configured or missing orgName
         if (editThisPageUrl) {
             return <EditThisPageButton editThisPageUrl={editThisPageUrl} lang={lang} />;
         }

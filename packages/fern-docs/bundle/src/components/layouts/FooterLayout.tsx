@@ -11,6 +11,7 @@ export function FooterLayout({
     editThisPageLaunch,
     docsUrl,
     slug,
+    orgName,
     bottomNavigation,
     pathname,
     className,
@@ -25,6 +26,7 @@ export function FooterLayout({
     editThisPageLaunch?: "github" | "dashboard";
     docsUrl?: string;
     slug?: string;
+    orgName?: string;
     bottomNavigation?: React.ReactNode;
     pathname?: string;
     className?: string;
@@ -39,6 +41,7 @@ export function FooterLayout({
             editThisPageLaunch={editThisPageLaunch}
             docsUrl={docsUrl}
             slug={slug}
+            orgName={orgName}
             bottomNavigation={bottomNavigation}
             hideNavLinks={hideNavLinks}
             className={className}

@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getAvailableOrgsForUser } from "@/app/services/dal/fdr/getAvailableOrgsForUser";
@@ -16,6 +17,11 @@ export default async function OrgLayout({
     const { orgName } = await params;
     const session = await getCurrentSession();
 
+    // Get the current path to check if this is the edit-page route
+    const headersList = await headers();
+    const currentPath = headersList.get("x-current-path") ?? "";
+    const isEditPage = currentPath.includes("/edit-page");
+
     const permissions: string[] = session?.permissions ?? [];
     // Check if user has access to this org (works even if not authenticated)
     if (session && !permissions.includes("super-user")) {
@@ -27,19 +33,24 @@ export default async function OrgLayout({
         // User doesn't have access to this org
         if (!targetOrg) {
             console.warn("[org] Org Id not found", targetOrg);
-            return NotFound();
+            // For edit-page, let the page handle non-members (redirect to fallback URL)
+            if (!isEditPage) {
+                return NotFound();
+            }
         }
 
         // Session is scoped to a different org (or no org) - re-auth for the correct org
-        if (session.orgId !== targetOrg.id) {
+        if (targetOrg && session.orgId !== targetOrg.id) {
             console.warn("[org] Session Org ID no Equal to Page Route Org", targetOrg.id, session.orgId);
-            redirect(orgRedirect({ id: targetOrg.id, name: orgName }));
+            // Remove the org prefix since orgRedirect adds it back
+            const pathname = currentPath.replace(`/${orgName}`, "");
+            redirect(orgRedirect({ id: targetOrg.id, name: orgName }, pathname));
         }
     }
 
     return (
         <>
-            <TokenRefresher />
+            {session && <TokenRefresher />}
             {children}
         </>
     );

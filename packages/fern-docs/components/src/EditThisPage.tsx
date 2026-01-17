@@ -24,6 +24,7 @@ interface EditInDashboardButtonProps {
     docsUrl: string;
     slug: string;
     lang: string;
+    orgName: string;
     dashboardHost?: string;
     fallbackUrl?: string;
 }
@@ -32,10 +33,11 @@ export function EditInDashboardButton({
     docsUrl,
     slug,
     lang,
+    orgName,
     dashboardHost = "dashboard.buildwithfern.com",
     fallbackUrl
 }: EditInDashboardButtonProps): ReactElement<any> {
-    let editUrl = `https://${dashboardHost}/edit-page?docsUrl=${encodeURIComponent(docsUrl)}&slug=${encodeURIComponent(slug)}`;
+    let editUrl = `https://${dashboardHost}/${orgName}/edit-page?docsUrl=${encodeURIComponent(docsUrl)}&slug=${encodeURIComponent(slug)}`;
     if (fallbackUrl) {
         editUrl += `&fallbackUrl=${encodeURIComponent(fallbackUrl)}`;
     }
