@@ -4,14 +4,15 @@ const VERCEL_API_BASE = "https://api.vercel.com";
 
 function getVercelConfig() {
     const token = process.env.VERCEL_ACCESS_TOKEN;
-    const projectId = process.env.VERCEL_PROJECT_ID;
+    // Use VERCEL_DOCS_PROJECT_ID for the prod.ferndocs.com deployment (not the dashboard project)
+    const projectId = process.env.VERCEL_DOCS_PROJECT_ID;
     const orgId = process.env.VERCEL_TEAM_ID;
 
     if (!token) {
         throw new Error("VERCEL_ACCESS_TOKEN environment variable is required");
     }
     if (!projectId) {
-        throw new Error("VERCEL_PROJECT_ID environment variable is required");
+        throw new Error("VERCEL_DOCS_PROJECT_ID environment variable is required");
     }
     if (!orgId) {
         throw new Error("VERCEL_TEAM_ID environment variable is required");
