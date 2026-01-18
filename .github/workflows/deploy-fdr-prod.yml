@@ -80,7 +80,7 @@ jobs:
         run: |
           cd smoke-test
           npm install -g fern-api
-          fern generate --docs --instance https://fern-platform-test.docs.buildwithfern.com
+          fern generate --docs --instance https://fern-platform-test.docs.buildwithfern.com --log-level debug
           VALUE=$(curl https://fern-platform-test.docs.buildwithfern.com/api-reference/imdb/create-movie)
           length=${#VALUE}
           # Assert that length is over 1000
