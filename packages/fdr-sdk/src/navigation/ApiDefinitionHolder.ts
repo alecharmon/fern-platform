@@ -1,4 +1,4 @@
-import type { APIV1Read, FdrAPI } from "../client/types";
+import type { APIV1Read } from "../client/types";
 import { ROOT_PACKAGE_ID } from "./consts";
 import { isSubpackage } from "./utils/isSubpackage";
 import * as FernNavigation from "./versions/latest";
@@ -11,7 +11,7 @@ export class ApiDefinitionHolder {
     #endpoints = new Map<FernNavigation.EndpointId, APIV1Read.EndpointDefinition>();
     #webSockets = new Map<FernNavigation.WebSocketId, APIV1Read.WebSocketChannel>();
     #webhooks = new Map<FernNavigation.WebhookId, APIV1Read.WebhookDefinition>();
-    #graphqlOperations = new Map<FernNavigation.GraphQlOperationId, FdrAPI.api.latest.GraphQlOperation>();
+    #graphqlOperations = new Map<FernNavigation.GraphQlOperationId, APIV1Read.GraphQlOperation>();
 
     private constructor(public readonly api: APIV1Read.ApiDefinition) {
         [api.rootPackage, ...Object.values(api.subpackages)].forEach((package_) => {
@@ -46,7 +46,7 @@ export class ApiDefinitionHolder {
         return this.#webhooks;
     }
 
-    get graphqlOperations(): ReadonlyMap<FernNavigation.GraphQlOperationId, FdrAPI.api.latest.GraphQlOperation> {
+    get graphqlOperations(): ReadonlyMap<FernNavigation.GraphQlOperationId, APIV1Read.GraphQlOperation> {
         return this.#graphqlOperations;
     }
 
@@ -79,7 +79,7 @@ export class ApiDefinitionHolder {
     }
 
     public static createGraphQlOperationId(
-        graphqlOperation: FdrAPI.api.latest.GraphQlOperation
+        graphqlOperation: APIV1Read.GraphQlOperation
     ): FernNavigation.GraphQlOperationId {
         return graphqlOperation.id;
     }

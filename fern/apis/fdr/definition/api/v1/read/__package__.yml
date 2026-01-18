@@ -7,7 +7,7 @@ imports:
   commons: ../commons.yml
   webhook: webhook.yml
   websocket: websocket.yml
-  graphql: ../../latest/graphql.yml
+  graphql: graphql.yml
   registerRoot: ../register/__package__.yml
   latestEndpoint: ../../latest/endpoint.yml
   latestType: ../../latest/type.yml

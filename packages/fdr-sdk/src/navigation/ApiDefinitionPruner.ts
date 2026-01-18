@@ -1,6 +1,5 @@
 import type { FernNavigation } from "./..";
-import { ApiTypeIdVisitor as LatestApiTypeIdVisitor } from "../api-definition/typeid-visitor";
-import type { APIV1Read, FdrAPI } from "../client/types";
+import type { APIV1Read } from "../client/types";
 import { ApiDefinitionHolder } from "./ApiDefinitionHolder";
 import { ApiTypeIdVisitor } from "./ApiTypeIdVisitor";
 
@@ -114,7 +113,7 @@ export class ApiDefinitionPruner {
             ApiTypeIdVisitor.visitWebhookDefinition(webhook, (typeId) => typeIds.add(typeId));
         });
         graphqlOperations.forEach((graphqlOperation) => {
-            LatestApiTypeIdVisitor.visitGraphQlOperation(graphqlOperation, (typeId) => typeIds.add(typeId));
+            ApiTypeIdVisitor.visitGraphQlOperation(graphqlOperation, (typeId) => typeIds.add(typeId));
         });
         const expandedTypeIds = this.expandTypeIds(typeIds);
         return {
@@ -187,8 +186,8 @@ export class ApiDefinitionPruner {
 
     private pruneGraphqlOperations(
         node: FernNavigation.NavigationNodeApiLeaf | FernNavigation.EndpointPairNode,
-        graphqlOperations: FdrAPI.api.latest.GraphQlOperation[] | undefined
-    ): FdrAPI.api.latest.GraphQlOperation[] {
+        graphqlOperations: APIV1Read.GraphQlOperation[] | undefined
+    ): APIV1Read.GraphQlOperation[] {
         if (node.type !== "graphql" || graphqlOperations == null) {
             return [];
         }

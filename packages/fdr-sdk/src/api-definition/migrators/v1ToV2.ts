@@ -91,10 +91,7 @@ export class ApiDefinitionV1ToLatest {
             });
             pkg.graphqlOperations?.forEach((graphqlOp) => {
                 const id = graphqlOp.id;
-                this.graphqlOperations[id] = {
-                    ...graphqlOp,
-                    namespace: graphqlOp.namespace ?? namespace
-                };
+                this.graphqlOperations[id] = this.migrateGraphQlOperation(graphqlOp, namespace);
             });
         });
 
@@ -799,4 +796,36 @@ export class ApiDefinitionV1ToLatest {
 
         return toRet;
     }
+
+    migrateGraphQlOperation = (v1: APIV1Read.GraphQlOperation, namespace: V2.SubpackageId[]): V2.GraphQlOperation => {
+        return {
+            id: v1.id,
+            operationType: v1.operationType,
+            name: v1.name,
+            displayName: v1.displayName,
+            description: v1.description,
+            availability: v1.availability,
+            namespace,
+            arguments: v1.arguments?.map((arg) => this.migrateGraphQlArgument(arg)),
+            returnType: {
+                type: "alias",
+                value: this.migrateTypeReference(v1.returnType)
+            },
+            examples: v1.examples,
+            snippets: v1.snippets
+        };
+    };
+
+    migrateGraphQlArgument = (v1: APIV1Read.GraphQlArgument): V2.GraphQlArgument => {
+        return {
+            name: v1.name,
+            description: v1.description,
+            availability: v1.availability,
+            type: {
+                type: "alias",
+                value: this.migrateTypeReference(v1.type)
+            },
+            defaultValue: v1.defaultValue
+        };
+    };
 }

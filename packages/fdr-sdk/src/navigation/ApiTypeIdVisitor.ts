@@ -60,6 +60,16 @@ export class ApiTypeIdVisitor {
         ApiTypeIdVisitor.visitWebhookPayloadShape(webhook.payload.type, visit);
     }
 
+    public static visitGraphQlOperation(
+        graphqlOperation: APIV1Read.GraphQlOperation,
+        visit: (typeId: APIV1Read.TypeId) => void
+    ): void {
+        graphqlOperation.arguments?.forEach((arg) => {
+            ApiTypeIdVisitor.visitTypeReference(arg.type, visit);
+        });
+        ApiTypeIdVisitor.visitTypeReference(graphqlOperation.returnType, visit);
+    }
+
     public static visitWebhookPayloadShape(
         payloadShape: APIV1Read.WebhookPayloadShape,
         visit: (typeId: APIV1Read.TypeId) => void

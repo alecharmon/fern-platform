@@ -10,7 +10,7 @@ imports:
   readWebsocket: ../read/websocket.yml
   readEndpoint: ../read/endpoint.yml
   registerRoot: ../register/__package__.yml
-  graphql: ../../latest/graphql.yml
+  graphql: ../read/graphql.yml
 
 types:
   DbApiDefinition:

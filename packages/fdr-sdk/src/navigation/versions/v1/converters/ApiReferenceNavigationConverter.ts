@@ -4,7 +4,7 @@ import { noop } from "ts-essentials";
 import urljoin from "url-join";
 
 import { FernNavigation } from "../../../..";
-import { APIV1Read, type DocsV1Read, type FdrAPI } from "../../../../client/types";
+import { APIV1Read, type DocsV1Read } from "../../../../client/types";
 import { ApiDefinitionHolder } from "../../../ApiDefinitionHolder";
 import { ROOT_PACKAGE_ID } from "../../../consts";
 import { isSubpackage } from "../../../utils/isSubpackage";
@@ -232,7 +232,7 @@ export class ApiReferenceNavigationConverter {
 
     private convertGraphQlNode(
         graphqlOperationId: FernNavigation.V1.GraphQlOperationId,
-        graphqlOperation: FdrAPI.api.latest.GraphQlOperation,
+        graphqlOperation: APIV1Read.GraphQlOperation,
         parentSlug: SlugGenerator
     ): FernNavigation.V1.GraphQlNode {
         return this.#idgen.with(graphqlOperationId, (id) => ({
