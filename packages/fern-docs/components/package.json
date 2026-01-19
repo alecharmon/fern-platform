@@ -81,6 +81,7 @@
     "./api-reference/endpoints/useExampleSelection": "./src/api-reference/endpoints/useExampleSelection.ts",
     "./api-reference/endpoints/utils": "./src/api-reference/endpoints/utils.ts",
     "./api-reference/websockets/*": "./src/api-reference/websockets/*.tsx",
+    "./api-reference/webhooks/*": "./src/api-reference/webhooks/*.tsx",
     "./api-reference/grpcs/*": "./src/api-reference/grpcs/*.tsx",
     "./api-reference/graphql/*": "./src/api-reference/graphql/*.tsx"
   },

@@ -11,7 +11,7 @@ import {
     TypeDefinitionRoot
 } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
-import { WebhookExample } from "@fern-docs/components/api-reference/webhooks/WebhookExample";
+import { WebhookExamplesClient } from "@fern-docs/components/api-reference/webhooks/WebhookExamplesClient";
 import { StatusCodeBadge } from "@fern-docs/components/badges";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
@@ -58,10 +58,11 @@ export async function WebhookContent({
     // Extract footer content from the description
     const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(webhook.description);
 
-    const example = webhook.examples?.[0]; // TODO: Need a way to show all the examples
+    const examples = webhook.examples ?? [];
     const responses = webhook.responses;
 
-    const webhookExample = example ? <WebhookExample example={example} slug={node.slug} lang={lang} /> : null;
+    const webhookExamples =
+        examples.length > 0 ? <WebhookExamplesClient examples={examples} slug={node.slug} lang={lang} /> : null;
 
     return (
         <ReferenceLayout
@@ -79,7 +80,7 @@ export async function WebhookContent({
                     pageActionsStyle={pageActionsStyle}
                 />
             }
-            aside={webhookExample}
+            aside={webhookExamples}
             reference={
                 <TypeDefinitionRoot types={types} slug={node.slug}>
                     <TypeDefinitionSlotsServer types={types} lang={lang}>

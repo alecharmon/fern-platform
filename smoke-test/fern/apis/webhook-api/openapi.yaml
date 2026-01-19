@@ -37,13 +37,34 @@ webhooks:
             schema:
               $ref: "#/components/schemas/OrderCreatedEvent"
             examples:
-              newOrder:
-                summary: New order placed
+              singlePlantOrder:
+                summary: Single plant order
                 value:
                   event: "order.created"
                   timestamp: "2024-01-15T10:30:00Z"
                   data:
                     orderId: "ord_12345"
+                    customerId: "cust_67890"
+                    items:
+                      - plantId: "plant_001"
+                        plantName: "Monstera Deliciosa"
+                        quantity: 1
+                        unitPrice: 45.99
+                    totalAmount: 45.99
+                    currency: "USD"
+                    shippingAddress:
+                      street: "123 Garden Lane"
+                      city: "Portland"
+                      state: "OR"
+                      zipCode: "97201"
+                      country: "US"
+              multiplePlantsOrder:
+                summary: Multiple plants order
+                value:
+                  event: "order.created"
+                  timestamp: "2024-01-15T10:30:00Z"
+                  data:
+                    orderId: "ord_12346"
                     customerId: "cust_67890"
                     items:
                       - plantId: "plant_001"
@@ -62,6 +83,35 @@ webhooks:
                       state: "OR"
                       zipCode: "97201"
                       country: "US"
+              bulkOrder:
+                summary: Bulk order with many plants
+                value:
+                  event: "order.created"
+                  timestamp: "2024-01-15T10:30:00Z"
+                  data:
+                    orderId: "ord_12347"
+                    customerId: "cust_99999"
+                    items:
+                      - plantId: "plant_001"
+                        plantName: "Monstera Deliciosa"
+                        quantity: 10
+                        unitPrice: 45.99
+                      - plantId: "plant_002"
+                        plantName: "Snake Plant"
+                        quantity: 5
+                        unitPrice: 29.99
+                      - plantId: "plant_003"
+                        plantName: "Fiddle Leaf Fig"
+                        quantity: 3
+                        unitPrice: 89.99
+                    totalAmount: 879.82
+                    currency: "USD"
+                    shippingAddress:
+                      street: "456 Greenhouse Ave"
+                      city: "Seattle"
+                      state: "WA"
+                      zipCode: "98101"
+                      country: "US"
       responses:
         "200":
           description: Webhook received successfully
@@ -78,200 +128,43 @@ webhooks:
       security:
         - webhookSignature: []
 
-  orderShipped:
-    post:
-      tags:
-        - orders
-      summary: Order shipped
-      description: |
-        Triggered when an order has been shipped and tracking information is available.
-        
-        **Use Cases**:
-        - Send shipping notification emails
-        - Update order tracking dashboards
-        - Notify customers via SMS
-      operationId: onOrderShipped
-      requestBody:
-        description: Order shipped event payload
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/OrderShippedEvent"
-            examples:
-              shipped:
-                summary: Order shipped with tracking
-                value:
-                  event: "order.shipped"
-                  timestamp: "2024-01-16T14:00:00Z"
-                  data:
-                    orderId: "ord_12345"
-                    trackingNumber: "1Z999AA10123456784"
-                    carrier: "UPS"
-                    estimatedDelivery: "2024-01-19T18:00:00Z"
-                    shippingMethod: "Ground"
-      responses:
-        "200":
-          description: Webhook received successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WebhookAcknowledgement"
-      security:
-        - webhookSignature: []
-
-  orderDelivered:
-    post:
-      tags:
-        - orders
-      summary: Order delivered
-      description: |
-        Triggered when an order has been successfully delivered to the customer.
-      operationId: onOrderDelivered
-      requestBody:
-        description: Order delivered event payload
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/OrderDeliveredEvent"
-            examples:
-              delivered:
-                summary: Order delivered
-                value:
-                  event: "order.delivered"
-                  timestamp: "2024-01-19T15:30:00Z"
-                  data:
-                    orderId: "ord_12345"
-                    deliveredAt: "2024-01-19T15:30:00Z"
-                    signedBy: "J. Smith"
-      responses:
-        "200":
-          description: Webhook received successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WebhookAcknowledgement"
-      security:
-        - webhookSignature: []
-
-  inventoryLow:
-    post:
-      tags:
-        - inventory
-      summary: Low inventory alert
-      description: |
-        Triggered when a plant's inventory falls below the configured threshold.
-        
-        **Use Cases**:
-        - Trigger reorder workflows
-        - Alert inventory managers
-        - Update product availability on storefront
-      operationId: onInventoryLow
-      requestBody:
-        description: Low inventory alert payload
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InventoryLowEvent"
-            examples:
-              lowStock:
-                summary: Plant running low on stock
-                value:
-                  event: "inventory.low"
-                  timestamp: "2024-01-15T09:00:00Z"
-                  data:
-                    plantId: "plant_001"
-                    plantName: "Monstera Deliciosa"
-                    currentQuantity: 5
-                    threshold: 10
-                    reorderSuggested: true
-      responses:
-        "200":
-          description: Webhook received successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WebhookAcknowledgement"
-      security:
-        - webhookSignature: []
-
-  plantPriceChanged:
+  plantImageUploaded:
     post:
       tags:
         - plants
-      summary: Plant price changed
+      summary: Plant image uploaded
       description: |
-        Triggered when a plant's price is updated.
+        Triggered when a new plant image is uploaded via multipart form data.
         
         **Use Cases**:
-        - Update pricing in external systems
-        - Notify customers watching the product
-        - Sync with marketplace listings
-      operationId: onPlantPriceChanged
+        - Process and resize images
+        - Run image classification
+        - Update plant catalog
+      operationId: onPlantImageUploaded
       requestBody:
-        description: Price change event payload
+        description: Plant image upload event with multipart form data
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PriceChangedEvent"
+              $ref: "#/components/schemas/PlantImageUploadEvent"
             examples:
-              priceReduced:
-                summary: Price reduction
+              singleImage:
+                summary: Single image upload
                 value:
-                  event: "plant.price_changed"
-                  timestamp: "2024-01-15T12:00:00Z"
-                  data:
-                    plantId: "plant_001"
-                    plantName: "Monstera Deliciosa"
-                    previousPrice: 49.99
-                    newPrice: 45.99
-                    currency: "USD"
-                    changeReason: "seasonal_sale"
-      responses:
-        "200":
-          description: Webhook received successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WebhookAcknowledgement"
-      security:
-        - webhookSignature: []
-
-  customerCreated:
-    post:
-      tags:
-        - customers
-      summary: New customer registered
-      description: |
-        Triggered when a new customer account is created.
-        
-        **Use Cases**:
-        - Send welcome emails
-        - Add to CRM systems
-        - Trigger onboarding workflows
-      operationId: onCustomerCreated
-      requestBody:
-        description: New customer event payload
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CustomerCreatedEvent"
-            examples:
-              newCustomer:
-                summary: New customer registered
+                  plantId: "plant_001"
+                  plantName: "Monstera Deliciosa"
+                  image: "(binary)"
+                  imageType: "primary"
+                  uploadedBy: "user_12345"
+              multipleImages:
+                summary: Multiple images upload
                 value:
-                  event: "customer.created"
-                  timestamp: "2024-01-15T08:00:00Z"
-                  data:
-                    customerId: "cust_67890"
-                    email: "jane.doe@example.com"
-                    firstName: "Jane"
-                    lastName: "Doe"
-                    marketingOptIn: true
+                  plantId: "plant_002"
+                  plantName: "Snake Plant"
+                  image: "(binary)"
+                  imageType: "gallery"
+                  uploadedBy: "admin_001"
       responses:
         "200":
           description: Webhook received successfully
@@ -367,178 +260,6 @@ components:
         - city
         - country
 
-    OrderShippedEvent:
-      type: object
-      properties:
-        event:
-          type: string
-          enum: ["order.shipped"]
-        timestamp:
-          type: string
-          format: date-time
-        data:
-          $ref: "#/components/schemas/OrderShippedData"
-      required:
-        - event
-        - timestamp
-        - data
-
-    OrderShippedData:
-      type: object
-      properties:
-        orderId:
-          type: string
-        trackingNumber:
-          type: string
-        carrier:
-          type: string
-        estimatedDelivery:
-          type: string
-          format: date-time
-        shippingMethod:
-          type: string
-      required:
-        - orderId
-        - trackingNumber
-        - carrier
-
-    OrderDeliveredEvent:
-      type: object
-      properties:
-        event:
-          type: string
-          enum: ["order.delivered"]
-        timestamp:
-          type: string
-          format: date-time
-        data:
-          $ref: "#/components/schemas/OrderDeliveredData"
-      required:
-        - event
-        - timestamp
-        - data
-
-    OrderDeliveredData:
-      type: object
-      properties:
-        orderId:
-          type: string
-        deliveredAt:
-          type: string
-          format: date-time
-        signedBy:
-          type: string
-      required:
-        - orderId
-        - deliveredAt
-
-    InventoryLowEvent:
-      type: object
-      properties:
-        event:
-          type: string
-          enum: ["inventory.low"]
-        timestamp:
-          type: string
-          format: date-time
-        data:
-          $ref: "#/components/schemas/InventoryLowData"
-      required:
-        - event
-        - timestamp
-        - data
-
-    InventoryLowData:
-      type: object
-      properties:
-        plantId:
-          type: string
-        plantName:
-          type: string
-        currentQuantity:
-          type: integer
-        threshold:
-          type: integer
-        reorderSuggested:
-          type: boolean
-      required:
-        - plantId
-        - currentQuantity
-        - threshold
-
-    PriceChangedEvent:
-      type: object
-      properties:
-        event:
-          type: string
-          enum: ["plant.price_changed"]
-        timestamp:
-          type: string
-          format: date-time
-        data:
-          $ref: "#/components/schemas/PriceChangedData"
-      required:
-        - event
-        - timestamp
-        - data
-
-    PriceChangedData:
-      type: object
-      properties:
-        plantId:
-          type: string
-        plantName:
-          type: string
-        previousPrice:
-          type: number
-          format: double
-        newPrice:
-          type: number
-          format: double
-        currency:
-          type: string
-        changeReason:
-          type: string
-      required:
-        - plantId
-        - previousPrice
-        - newPrice
-        - currency
-
-    CustomerCreatedEvent:
-      type: object
-      properties:
-        event:
-          type: string
-          enum: ["customer.created"]
-        timestamp:
-          type: string
-          format: date-time
-        data:
-          $ref: "#/components/schemas/CustomerCreatedData"
-      required:
-        - event
-        - timestamp
-        - data
-
-    CustomerCreatedData:
-      type: object
-      properties:
-        customerId:
-          type: string
-        email:
-          type: string
-          format: email
-        firstName:
-          type: string
-        lastName:
-          type: string
-        marketingOptIn:
-          type: boolean
-      required:
-        - customerId
-        - email
-
     WebhookAcknowledgement:
       type: object
       properties:
@@ -562,3 +283,29 @@ components:
       required:
         - error
         - code
+
+    PlantImageUploadEvent:
+      type: object
+      properties:
+        plantId:
+          type: string
+          description: The unique identifier of the plant
+        plantName:
+          type: string
+          description: The name of the plant
+        image:
+          type: string
+          format: binary
+          description: The uploaded image file
+        imageType:
+          type: string
+          enum: ["primary", "gallery", "thumbnail"]
+          description: The type of image being uploaded
+        uploadedBy:
+          type: string
+          description: The user who uploaded the image
+      required:
+        - plantId
+        - image
+        - imageType
+        - uploadedBy
