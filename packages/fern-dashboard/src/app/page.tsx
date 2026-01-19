@@ -20,7 +20,8 @@ export default async function Page() {
     const pendingRedirect = cookieStore.get("redirect_on_login")?.value;
 
     if (pendingRedirect) {
-        // Redirect to the invited organization (cookie will be cleared by middleware on next request)
+        // Clear the cookie immediately to prevent redirect loops (e.g., if user isn't a member and gets redirected to GitHub)
+        cookieStore.delete("redirect_on_login");
         redirect(pendingRedirect);
     } else {
         await applyOrgMappings();

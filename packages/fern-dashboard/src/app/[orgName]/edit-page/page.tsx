@@ -1,9 +1,11 @@
 import { constructEditorSlug, generateBranchName, ROOT_SLUG_ALIAS } from "@fern-docs/components/navigation";
+import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { doesUserBelongToOrg } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { GithubLoginButton, GoogleLoginButton } from "@/components/auth/LoginButton";
+import { Button } from "@/components/ui/button";
 import type { EncodedDocsUrl } from "@/utils/types";
 
 interface EditPageProps {
@@ -45,6 +47,21 @@ export default async function EditPage({ params, searchParams }: EditPageProps) 
                         <GoogleLoginButton returnTo={returnTo} />
                         <GithubLoginButton returnTo={returnTo} />
                     </div>
+                    {fallbackUrl && (
+                        <>
+                            <div className="flex w-full items-center gap-3">
+                                <div className="h-px flex-1 bg-gray-900" />
+                                <span className="text-sm text-gray-900">or</span>
+                                <div className="h-px flex-1 bg-gray-900" />
+                            </div>
+                            <Button asChild className="w-full">
+                                <a href={fallbackUrl} target="_blank" rel="noopener noreferrer">
+                                    <MagnifyingGlassIcon className="size-4" />
+                                    View source on GitHub
+                                </a>
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
         );
