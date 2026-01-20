@@ -67,8 +67,10 @@ export function AuthZButton({
                 content={
                     "You don't have permission to perform this action, contact your administrator if you need access"
                 }
+                hideInnerSpan
+                side="top"
             >
-                <span className="inline-flex" aria-disabled>
+                <span className="inline-block w-fit" aria-disabled>
                     {button}
                 </span>
             </DashboardTooltip>

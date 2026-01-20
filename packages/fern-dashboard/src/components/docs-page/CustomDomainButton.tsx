@@ -6,6 +6,8 @@ import { useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
 import type { DocsUrl } from "@/utils/types";
+import { docsPermissionScope } from "../auth/authz";
+import { AuthZButton } from "../auth/authz/AuthZButton";
 import { AddCustomDomainModal } from "../settings/AddCustomDomainModal";
 import { RemoveCustomDomainModal } from "../settings/RemoveCustomDomainModal";
 import { Badge } from "../ui/Badge";
@@ -38,7 +40,9 @@ export function CustomDomainButton({ docsUrl, orgName, domainInfo, allDomains = 
 
         return (
             <>
-                <Button
+                <AuthZButton
+                    permission="manage-settings"
+                    permissionScope={docsPermissionScope(docsUrl)}
                     variant="ghost"
                     size="xs"
                     onClick={() => setShowAddModal(true)}
@@ -46,7 +50,7 @@ export function CustomDomainButton({ docsUrl, orgName, domainInfo, allDomains = 
                 >
                     <CircleDashedIcon className="size-3.5 " />
                     Add custom domain
-                </Button>
+                </AuthZButton>
                 <AddCustomDomainModal
                     open={showAddModal}
                     onOpenChange={setShowAddModal}
