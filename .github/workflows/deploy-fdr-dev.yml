@@ -21,7 +21,7 @@ env:
   PACKAGE_NAME: "@fern-platform/fdr"
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: "buildwithfern"
-  FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+  FERN_TOKEN: ${{ secrets.SMOKE_TEST_FERN_TOKEN }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   FERNIE_SLACK_APP_TOKEN: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}

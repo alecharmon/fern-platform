@@ -1,0 +1,114 @@
+paths:
+  /anyOf/titled:
+    post:
+      x-fern-examples:
+        - request:
+            body:
+              optionA: Enable advanced filtering
+          response:
+            body:
+              success: true
+  /user/username:
+    get:
+      x-fern-examples:
+        - path-parameters:
+            username: username
+          request:
+            body: {}
+          response:
+            body:
+              id: 42
+              username: plantlover99
+              email: plantlover99@example.com
+  /oneOf/titled:
+    post:
+      x-fern-examples:
+        - request:
+            body:
+              titledFieldA: Greenhouse Model X
+          response:
+            body:
+              success: true
+  /plant/error-with-response-headers:
+    get:
+      x-fern-examples:
+        - request:
+            body: {}
+          response:
+            body:
+              id: 42
+              name: Fiddle Leaf Fig
+              status: available
+              tags:
+                - indoor
+                - low-maintenance
+  /plant/search/stream:
+    post:
+      x-fern-examples:
+        - request:
+            body:
+              query: succulent
+              stream: true
+          response:
+            body:
+              results:
+                - id: 101
+                  name: Echeveria Elegans
+                  status: available
+                  tags:
+                    - succulent
+                    - drought-tolerant
+                    - indoor
+                - id: 102
+                  name: Haworthia Fasciata
+                  status: pending
+                  tags:
+                    - succulent
+                    - low-light
+                    - easy-care
+              total: 2
+  /oneOf/no-discriminator:
+    post:
+      x-fern-examples:
+        - request:
+            body:
+              variantAField: Greenhouse Model X
+          response:
+            body:
+              success: true
+  /oneOf/discriminator:
+    post:
+      x-fern-examples:
+        - request:
+            body:
+              type: variantA
+              variantAField: Sample data for variant A
+          response:
+            body:
+              success: true
+  /anyOf/no-titles:
+    post:
+      x-fern-examples:
+        - request:
+            body:
+              optionA: greenhouse
+          response:
+            body:
+              success: true
+  /plant/updates/stream:
+    get:
+      x-fern-examples:
+        - request:
+            body: {}
+          response:
+            body:
+              - event: plant.created
+                timestamp: '2024-04-20T14:45:00Z'
+                plant:
+                  id: 101
+                  name: Fiddle Leaf Fig
+                  status: available
+                  tags:
+                    - indoor
+                    - low-light
+                    - decor
