@@ -224,6 +224,7 @@
     "overrides": {
       "@walletconnect/logger": "3.0.0",
       "ai": "5.0.120",
+      "tar": "^7.5.3",
       "qs": "^6.14.1",
       "vite": "^6.4.1",
       "webpack-bundle-analyzer>ws": "^7.5.10"
