@@ -8,6 +8,7 @@ import { validateWizardForm } from "@/components/onboarding/validation";
 export interface WizardFormData {
     docsSiteName: string;
     docsSiteUrl: string;
+    docsSiteUrlSource: "auto" | "manual";
     docsSiteUrlAvailable: boolean | null;
     // URLs from BrandFetch or final uploaded URLs
     faviconUrl: string | null;
@@ -118,6 +119,7 @@ interface OnboardingContextValue {
 const DEFAULT_FORM_DATA: WizardFormData = {
     docsSiteName: "",
     docsSiteUrl: "",
+    docsSiteUrlSource: "auto",
     docsSiteUrlAvailable: null,
     faviconUrl: null,
     logoUrl: null,
