@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+
 import { buildErrorPageSearchParams } from "./app/error/searchParams";
 import { getAuth0Client } from "./app/services/auth0/auth0";
 import { checkRoutePermissions } from "./route-permissions";
@@ -28,6 +29,16 @@ export async function middleware(req: NextRequest) {
         if (permissionCheck) {
             return permissionCheck;
         }
+    }
+
+    // Handle redirect_on_login cookie consumption on the home page
+    // This must be done in middleware because cookies can only be modified
+    // in Server Actions, Route Handlers, or Middleware in Next.js 15
+    const pendingRedirect = req.cookies.get("redirect_on_login")?.value;
+    if (pendingRedirect) {
+        const response = NextResponse.redirect(new URL(pendingRedirect, req.nextUrl.origin));
+        response.cookies.delete("redirect_on_login");
+        return response;
     }
 
     // Set current URL as header so server components can access it for redirect preservation

@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { RecentOrgRedirect } from "@/components/auth/RecentOrgRedirect";
@@ -15,23 +14,16 @@ export default async function Page() {
         redirect("/login");
     }
 
-    // Check if there's a pending org redirect from invitation flow
-    const cookieStore = await cookies();
-    const pendingRedirect = cookieStore.get("redirect_on_login")?.value;
+    // Note: redirect_on_login cookie is now handled in middleware
+    // (cookies can only be modified in Server Actions, Route Handlers, or Middleware in Next.js 15)
 
-    if (pendingRedirect) {
-        // Clear the cookie immediately to prevent redirect loops (e.g., if user isn't a member and gets redirected to GitHub)
-        cookieStore.delete("redirect_on_login");
-        redirect(pendingRedirect);
+    await applyOrgMappings();
+    const response = await getFirstOrgForUser(session);
+    if (response.empty) {
+        redirect(`/get-started`);
     } else {
-        await applyOrgMappings();
-        const response = await getFirstOrgForUser(session);
-        if (response.empty) {
-            redirect(`/get-started`);
-        } else {
-            // Use client-side component to check for recent org and redirect
-            return <RecentOrgRedirect defaultOrgName={response.orgName} />;
-        }
+        // Use client-side component to check for recent org and redirect
+        return <RecentOrgRedirect defaultOrgName={response.orgName} />;
     }
 }
 
