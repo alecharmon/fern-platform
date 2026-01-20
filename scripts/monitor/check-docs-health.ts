@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
+import { IncidentIOClient, IncidentIOError } from "@fern-api/incidentio";
+
 export {};
 
 /**
@@ -59,6 +61,19 @@ const INCIDENT_SEVERITY_CRITICAL = "01HR85VFNXA1RTYRR744G9FN6J";
 const CORE_CHECKS_PER_SITE = 5;
 
 const INCIDENT_NAME_PREFIX = "Docs health check failing";
+
+// Initialize the Incident.io client with authentication
+function getIncidentClient(): IncidentIOClient | null {
+    const apiKey = process.env.INCIDENT_API_KEY;
+    if (!apiKey) {
+        return null;
+    }
+    return new IncidentIOClient({
+        headers: {
+            Authorization: `Bearer ${apiKey}`
+        }
+    });
+}
 
 function isDryRun(): boolean {
     return process.env.DRY_RUN === "1" || process.env.DRY_RUN === "true";
@@ -459,34 +474,25 @@ async function sendSlackRecoveryAlert(): Promise<void> {
     }
 }
 
-async function findOpenIncident(apiKey: string): Promise<{ id: string; permalink: string } | null> {
+async function findOpenIncident(): Promise<{ id: string; permalink: string } | null> {
+    const client = getIncidentClient();
+    if (!client) {
+        return null;
+    }
+
     try {
         const testMode = isTestMode();
-        const modeFilter = testMode ? "&mode%5Bone_of%5D=test" : "";
+        const modeFilter: Record<string, string[]> | undefined = testMode ? { one_of: ["test"] } : undefined;
 
-        const { response } = await fetchWithRetry(
-            `https://api.incident.io/v2/incidents?page_size=250${modeFilter}`,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${apiKey}`
-                }
-            },
-            2
-        );
-
-        if (!response || !response.ok) {
-            console.error(`Failed to list incidents: ${response?.status} ${response?.statusText}`);
-            return null;
-        }
-
-        const result = await response.json();
+        const result = await client.incidentsV2.list({
+            page_size: 250,
+            mode: modeFilter
+        });
 
         // Find any open incident that starts with our prefix
         for (const incident of result.incidents) {
             const prefix = isTestMode() ? `[TEST] ${INCIDENT_NAME_PREFIX}` : INCIDENT_NAME_PREFIX;
-            if (incident.name.startsWith(prefix)) {
+            if (incident.name?.startsWith(prefix)) {
                 const category = incident.incident_status?.category;
                 if (category && TERMINAL_INCIDENT_STATES.includes(category)) {
                     continue;
@@ -498,7 +504,11 @@ async function findOpenIncident(apiKey: string): Promise<{ id: string; permalink
 
         return null;
     } catch (error) {
-        console.error("Error finding open incident:", error);
+        if (error instanceof IncidentIOError) {
+            console.error(`Failed to list incidents: ${error.statusCode} ${error.message}`);
+        } else {
+            console.error("Error finding open incident:", error);
+        }
         return null;
     }
 }
@@ -554,8 +564,8 @@ function buildIncidentSummary(failuresBySite: Map<string, CheckResult[]>): strin
 }
 
 async function createIncident(failuresBySite: Map<string, CheckResult[]>, totalSites: number): Promise<string | null> {
-    const apiKey = process.env.INCIDENT_API_KEY;
-    if (!apiKey) {
+    const client = getIncidentClient();
+    if (!client) {
         console.error("INCIDENT_API_KEY not configured, skipping incident creation");
         return null;
     }
@@ -576,44 +586,25 @@ async function createIncident(failuresBySite: Map<string, CheckResult[]>, totalS
     const timestamp = new Date().toISOString();
     const idempotencyKey = testMode ? `docs-health:test:${timestamp}` : `docs-health:${timestamp}`;
 
-    const incidentPayload: Record<string, unknown> = {
-        name: getIncidentName(failingSiteNames),
-        idempotency_key: idempotencyKey,
-        incident_status_id: INCIDENT_STATUS_MONITORING,
-        severity_id: severityId,
-        summary,
-        visibility: "public"
-    };
-
-    if (testMode) {
-        incidentPayload.mode = "test";
-    }
-
     try {
-        const { response } = await fetchWithRetry(
-            "https://api.incident.io/v2/incidents",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${apiKey}`
-                },
-                body: JSON.stringify(incidentPayload)
-            },
-            2
-        );
+        const result = await client.incidentsV2.create({
+            idempotency_key: idempotencyKey,
+            name: getIncidentName(failingSiteNames),
+            incident_status_id: INCIDENT_STATUS_MONITORING,
+            severity_id: severityId,
+            summary,
+            visibility: "public",
+            mode: testMode ? "test" : undefined
+        });
 
-        if (!response || !response.ok) {
-            const errorText = response ? await response.text() : "No response";
-            console.error(`Failed to create incident: ${response?.status} ${response?.statusText}`, errorText);
-            return null;
-        }
-
-        const result = await response.json();
         console.log(`Created incident: ${result.incident.permalink}`);
         return result.incident.id;
     } catch (error) {
-        console.error("Error creating incident:", error);
+        if (error instanceof IncidentIOError) {
+            console.error(`Failed to create incident: ${error.statusCode} ${error.message}`, error.body);
+        } else {
+            console.error("Error creating incident:", error);
+        }
         return null;
     }
 }
@@ -623,8 +614,8 @@ async function updateIncident(
     failuresBySite: Map<string, CheckResult[]>,
     totalSites: number
 ): Promise<void> {
-    const apiKey = process.env.INCIDENT_API_KEY;
-    if (!apiKey) {
+    const client = getIncidentClient();
+    if (!client) {
         return;
     }
 
@@ -639,41 +630,29 @@ async function updateIncident(
     const severityId = determineSeverity(failuresBySite, totalSites);
 
     try {
-        const { response } = await fetchWithRetry(
-            `https://api.incident.io/v2/incidents/${incidentId}/actions/edit`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    incident: {
-                        name: getIncidentName(failingSiteNames),
-                        summary,
-                        severity_id: severityId
-                    },
-                    notify_incident_channel: false
-                })
+        await client.incidentsV2.edit({
+            id: incidentId,
+            incident: {
+                name: getIncidentName(failingSiteNames),
+                summary,
+                severity_id: severityId
             },
-            2
-        );
-
-        if (!response || !response.ok) {
-            const errorText = response ? await response.text() : "No response";
-            console.error(`Failed to update incident: ${response?.status} ${response?.statusText}`, errorText);
-            return;
-        }
+            notify_incident_channel: false
+        });
 
         console.log(`Updated incident: ${incidentId}`);
     } catch (error) {
-        console.error("Error updating incident:", error);
+        if (error instanceof IncidentIOError) {
+            console.error(`Failed to update incident: ${error.statusCode} ${error.message}`, error.body);
+        } else {
+            console.error("Error updating incident:", error);
+        }
     }
 }
 
 async function resolveIncident(incidentId: string): Promise<void> {
-    const apiKey = process.env.INCIDENT_API_KEY;
-    if (!apiKey) {
+    const client = getIncidentClient();
+    if (!client) {
         return;
     }
 
@@ -683,37 +662,25 @@ async function resolveIncident(incidentId: string): Promise<void> {
     }
 
     try {
-        const { response } = await fetchWithRetry(
-            `https://api.incident.io/v2/incidents/${incidentId}/actions/edit`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    incident: { incident_status_id: INCIDENT_STATUS_CANCELED },
-                    notify_incident_channel: false
-                })
-            },
-            2
-        );
-
-        if (!response || !response.ok) {
-            const errorText = response ? await response.text() : "No response";
-            console.error(`Failed to resolve incident: ${response?.status} ${response?.statusText}`, errorText);
-            return;
-        }
+        await client.incidentsV2.edit({
+            id: incidentId,
+            incident: { incident_status_id: INCIDENT_STATUS_CANCELED },
+            notify_incident_channel: false
+        });
 
         console.log(`Resolved incident: ${incidentId}`);
     } catch (error) {
-        console.error("Error resolving incident:", error);
+        if (error instanceof IncidentIOError) {
+            console.error(`Failed to resolve incident: ${error.statusCode} ${error.message}`, error.body);
+        } else {
+            console.error("Error resolving incident:", error);
+        }
     }
 }
 
 async function handleIncident(failuresBySite: Map<string, CheckResult[]>, totalSites: number): Promise<void> {
-    const apiKey = process.env.INCIDENT_API_KEY;
-    if (!apiKey) {
+    const client = getIncidentClient();
+    if (!client) {
         return;
     }
 
@@ -721,7 +688,7 @@ async function handleIncident(failuresBySite: Map<string, CheckResult[]>, totalS
 
     if (hasFailures) {
         // We have failures - create or update incident
-        const existingIncident = await findOpenIncident(apiKey);
+        const existingIncident = await findOpenIncident();
         if (existingIncident) {
             await updateIncident(existingIncident.id, failuresBySite, totalSites);
         } else {
@@ -729,7 +696,7 @@ async function handleIncident(failuresBySite: Map<string, CheckResult[]>, totalS
         }
     } else {
         // All healthy - resolve any open incident
-        const existingIncident = await findOpenIncident(apiKey);
+        const existingIncident = await findOpenIncident();
         if (existingIncident) {
             await resolveIncident(existingIncident.id);
             await sendSlackRecoveryAlert();

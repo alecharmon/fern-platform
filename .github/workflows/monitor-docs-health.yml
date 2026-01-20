@@ -22,7 +22,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g tsx
+          npm install -g tsx @fern-api/incidentio
+          echo "NODE_PATH=$(npm root -g)" >> $GITHUB_ENV
 
       - name: Run health check
         env:
