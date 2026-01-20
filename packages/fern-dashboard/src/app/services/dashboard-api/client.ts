@@ -13,7 +13,7 @@ import type { postCreatePr } from "@/app/api/post-git-create-pr/route";
 import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
 import type { getSignedImageUrl } from "@/app/api/signed-image-url/get/route";
 import type { updatePrTitle } from "@/app/api/update-pr-title/route";
-import type { updateUserRoles } from "@/app/api/update-user-roles/route";
+import type { updateUserPermissions } from "@/app/api/update-user-permissions/route";
 import type { ValidateGitRepo } from "@/app/api/validate-git-repo/route";
 
 export const DashboardApiClient = {
@@ -47,8 +47,8 @@ export const DashboardApiClient = {
         typedFetch<generateSignedUploadUrl.Response>("/api/signed-image-url/generate", request),
     getSignedImageUrl: (request: getSignedImageUrl.Request) =>
         typedFetch<getSignedImageUrl.Response>("/api/signed-image-url/get", request),
-    updateUserRoles: (request: updateUserRoles.Request) =>
-        typedFetch<updateUserRoles.Response>("/api/update-user-roles", request)
+    updateUserPermissions: (request: updateUserPermissions.Request) =>
+        typedFetch<updateUserPermissions.Response>("/api/update-user-permissions", request)
 };
 
 export class ApiError extends Error {
