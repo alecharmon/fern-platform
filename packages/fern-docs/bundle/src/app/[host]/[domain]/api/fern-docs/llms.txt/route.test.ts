@@ -68,7 +68,7 @@ describe("llms.txt route - authed root behavior", () => {
         vi.clearAllMocks();
 
         mockGetAuthEdgeConfig.mockResolvedValue(undefined);
-        mockGetEdgeFlags.mockResolvedValue({ ...DEFAULT_EDGE_FLAGS, isLlmsTxtDisabled: false });
+        mockGetEdgeFlags.mockResolvedValue(DEFAULT_EDGE_FLAGS);
         mockCookies.mockResolvedValue({
             get: vi.fn().mockReturnValue(undefined)
         } as any);

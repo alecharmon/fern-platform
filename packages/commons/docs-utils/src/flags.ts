@@ -14,7 +14,6 @@ export interface EdgeFlags {
     isDefaultSearchFilterOn: boolean;
     isChangelogRedirects: boolean;
     isNextMdxRef: boolean;
-    isLlmsTxtDisabled: boolean;
     isCustomReactEnabled: boolean;
 }
 
@@ -34,7 +33,6 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     isDefaultSearchFilterOn: false,
     isChangelogRedirects: false,
     isNextMdxRef: false,
-    isLlmsTxtDisabled: false,
     isCustomReactEnabled: false
 };
 

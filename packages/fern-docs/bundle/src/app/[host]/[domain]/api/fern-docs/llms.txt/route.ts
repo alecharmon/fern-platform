@@ -4,7 +4,7 @@ import { addLeadingSlash, COOKIE_FERN_TOKEN, isLikelyBrowser, slugToHref } from 
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -39,13 +39,7 @@ export async function GET(
 ): Promise<NextResponse> {
     const { host, domain } = await props.params;
 
-    const [_, edgeFlags] = await Promise.all([getAuthEdgeConfig(domain), getEdgeFlags(domain)]);
-
-    if (edgeFlags.isLlmsTxtDisabled) {
-        return NextResponse.json("llms.txt is not enabled for this domain", {
-            status: 404
-        });
-    }
+    await getAuthEdgeConfig(domain);
 
     const fernToken = req.headers.get("FERN_TOKEN") ?? (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
 

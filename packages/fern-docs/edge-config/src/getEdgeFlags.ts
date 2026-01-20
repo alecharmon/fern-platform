@@ -30,7 +30,6 @@ const EDGE_FLAGS = [
     "default-search-filter-on" as const,
     "changelog-redirects" as const,
     "next-mdx-ref" as const,
-    "llms-txt-disabled" as const,
     "dynamic-snippets" as const,
     "custom-react-enabled" as const
 ];
@@ -74,7 +73,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         const isDefaultSearchFilterOn = checkDomainMatchesCustomers(domain, config["default-search-filter-on"]);
         const isChangelogRedirects = checkDomainMatchesCustomers(domain, config["changelog-redirects"]);
         const isNextMdxRef = checkDomainMatchesCustomers(domain, config["next-mdx-ref"]);
-        const isLlmsTxtDisabled = checkDomainMatchesCustomers(domain, config["llms-txt-disabled"]);
         const isCustomReactEnabled = checkDomainMatchesCustomers(domain, config["custom-react-enabled"]);
         return {
             isWhitelabeled,
@@ -92,7 +90,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isDefaultSearchFilterOn,
             isChangelogRedirects,
             isNextMdxRef,
-            isLlmsTxtDisabled,
             isCustomReactEnabled
         };
     } catch (e) {
@@ -113,7 +110,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isDefaultSearchFilterOn: false,
             isChangelogRedirects: false,
             isNextMdxRef: false,
-            isLlmsTxtDisabled: false,
             isCustomReactEnabled: false
         };
     }
