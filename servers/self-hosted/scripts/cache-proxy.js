@@ -391,7 +391,8 @@ function handleCorsProxy(req, res) {
         port: parsedUrl.port || (parsedUrl.protocol === "https:" ? 443 : 80),
         path: parsedUrl.pathname + parsedUrl.search,
         method: req.method,
-        headers: forwardHeaders
+        headers: forwardHeaders,
+        rejectUnauthorized: false
     };
 
     const startTime = Date.now();
@@ -563,7 +564,8 @@ server.on("upgrade", (req, clientSocket, head) => {
               {
                   host: parsedUrl.hostname,
                   port: targetPort,
-                  servername: parsedUrl.hostname
+                  servername: parsedUrl.hostname,
+                  rejectUnauthorized: false
               },
               () => {
                   // Send the upgrade request to the target
