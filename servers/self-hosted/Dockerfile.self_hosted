@@ -101,10 +101,10 @@ EXPOSE 16686
 # ----------- End Jaeger setup -----------
 
 # ----------- Start npm vulnerability patches for app-specific modules -----------
-# Patch glob and brace-expansion in app-specific directories
+# Patch glob, brace-expansion, and tar in app-specific directories
 # The base image already has patches prepared in /tmp/patches/
-# Only patch vulnerable versions: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0, brace-expansion 2.0.x -> 2.0.2
-RUN log "Patching glob/brace-expansion in app-specific node_modules..." && \
+# Only patch vulnerable versions: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0, brace-expansion 2.0.x -> 2.0.2, tar 7.x (<7.5.3) -> 7.5.3
+RUN log "Patching glob/brace-expansion/tar in app-specific node_modules..." && \
     for root in /tmp/npm-global/lib/node_modules /fdr /nextapp; do \
         if [ -d "$root" ]; then \
             find "$root" -path "*/node_modules/glob/package.json" -o -path "*/dist/node_modules/glob/package.json" 2>/dev/null | while read -r pkg; do \
@@ -121,6 +121,13 @@ RUN log "Patching glob/brace-expansion in app-specific node_modules..." && \
                 version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
                 if echo "$version" | grep -q "^2\.0\.[01]$"; then \
                     rm -rf "$dir" && cp -r /tmp/patches/brace-expansion/package "$dir" && log "Patched brace-expansion $version -> 2.0.2 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/tar/package.json" -o -path "*/dist/node_modules/tar/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -qE "^7\.[0-4]\." || echo "$version" | grep -qE "^7\.5\.[0-2]$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/tar/package "$dir" && log "Patched tar $version -> 7.5.3 at $dir"; \
                 fi; \
             done; \
         fi; \
