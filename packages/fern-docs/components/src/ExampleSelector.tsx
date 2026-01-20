@@ -35,10 +35,12 @@ export function ExampleSelector({
         return null;
     }
 
-    const selectedOption = options.find((opt) => opt.key === selectedKey);
+    // If the selectedKey doesn't match any option, default to the first option for display
+    const effectiveSelectedKey = options.some((opt) => opt.key === selectedKey) ? selectedKey : options[0]?.key;
+    const selectedOption = options.find((opt) => opt.key === effectiveSelectedKey);
     const totalLabelLength = totalLabelLengthOverride ?? options.map((opt) => opt.label).join("").length;
     const shouldUseDropdown = forceDropdown === true || options.length >= 8 || totalLabelLength >= 80;
-    const hasSelection = selectedKey !== undefined && selectedOption !== undefined;
+    const hasSelection = effectiveSelectedKey !== undefined && selectedOption !== undefined;
 
     if (shouldUseDropdown) {
         return (
@@ -53,7 +55,7 @@ export function ExampleSelector({
                     onValueChange={(value) => {
                         onSelect(value);
                     }}
-                    value={selectedKey}
+                    value={effectiveSelectedKey}
                     lang={lang}
                 >
                     <FernButton
@@ -72,7 +74,7 @@ export function ExampleSelector({
         <div className={cn("w-full min-w-0", className)}>
             <FernButtonGroup className="w-full min-w-0">
                 {options.map((opt) => {
-                    const isSelected = opt.key === selectedKey;
+                    const isSelected = opt.key === effectiveSelectedKey;
                     return (
                         <FernButton
                             key={opt.key}

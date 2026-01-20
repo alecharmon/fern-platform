@@ -10,6 +10,7 @@ import type { CodeExample } from "../examples/code-example";
 import {
     getAvailableLanguages,
     getAvailableLanguagesByStatusCode,
+    getValidExampleKey,
     groupExamplesByLanguageKeyAndStatusCode,
     selectExampleToRender
 } from "../examples/example-groups";
@@ -132,6 +133,12 @@ export function useExampleSelection(
                     lastRealLanguageRef.current = next.language;
                     if (next.language !== prev.language && prev.language !== PAYLOAD_LANGUAGE) {
                         setGlobalLanguage(next.language);
+                        // When language changes, validate that exampleKey exists in the new language
+                        const langExamples = examplesByLanguageKeyAndStatusCode[next.language] ?? {};
+                        const validKey = getValidExampleKey(langExamples, next.exampleKey);
+                        if (validKey !== next.exampleKey) {
+                            return { ...next, exampleKey: validKey };
+                        }
                     } else if (prev.language === PAYLOAD_LANGUAGE) {
                         // Switching from payload to a real language
                         setGlobalLanguage(next.language);
@@ -141,7 +148,7 @@ export function useExampleSelection(
                 return next;
             });
         },
-        [getInitialExampleKey, setGlobalLanguage]
+        [getInitialExampleKey, setGlobalLanguage, examplesByLanguageKeyAndStatusCode]
     );
 
     React.useEffect(() => {
@@ -152,9 +159,13 @@ export function useExampleSelection(
             internalSelectedExampleKey.language !== PAYLOAD_LANGUAGE
         ) {
             lastRealLanguageRef.current = globalLanguage;
-            setSelectedExampleKeyInner((prev) => ({ ...prev, language: globalLanguage }));
+            setSelectedExampleKeyInner((prev) => {
+                const langExamples = examplesByLanguageKeyAndStatusCode[globalLanguage] ?? {};
+                const validKey = getValidExampleKey(langExamples, prev.exampleKey);
+                return { ...prev, language: globalLanguage, exampleKey: validKey };
+            });
         }
-    }, [globalLanguage, internalSelectedExampleKey.language]);
+    }, [globalLanguage, internalSelectedExampleKey.language, examplesByLanguageKeyAndStatusCode]);
 
     // When computing selectedExample, use the last real language if current is "payload"
     const languageForExample =

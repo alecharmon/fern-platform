@@ -9,12 +9,17 @@ import { EndpointExampleSegmentedControl } from "@fern-docs/components/api-refer
 import { EndpointUrlWithOverflow } from "@fern-docs/components/api-reference/endpoints/EndpointUrlWithOverflow";
 import { ErrorExampleSelect } from "@fern-docs/components/api-reference/endpoints/ErrorExampleSelect";
 import { renderResponseTitle } from "@fern-docs/components/api-reference/endpoints/render-response-title";
+import {
+    getErrorByStatusCode,
+    resolveEnvironmentUrlInCodeSnippet
+} from "@fern-docs/components/api-reference/endpoints/utils";
 import { AudioExample } from "@fern-docs/components/api-reference/examples/AudioExample";
 import {
     CodeSnippetExample,
     JsonCodeSnippetExample
 } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
-import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
+import { type CodeExample, isUserDefinedExample } from "@fern-docs/components/api-reference/examples/code-example";
+import { isVisibleExampleKey } from "@fern-docs/components/api-reference/examples/example-groups";
 import { TitledExample } from "@fern-docs/components/api-reference/examples/TitledExample";
 import { lineNumberOf } from "@fern-docs/components/api-reference/examples/utils";
 import type { StatusCode } from "@fern-docs/components/api-reference/type-definitions/EndpointContent";
@@ -71,13 +76,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
         [setSelectedExampleKey]
     );
 
-    const errorByStatusCode = useMemo(() => {
-        const map: Record<number, ApiDefinition.ErrorResponse> = {};
-        endpoint.errors?.forEach((error) => {
-            map[error.statusCode] = error;
-        });
-        return map;
-    }, [endpoint.errors]);
+    const errorByStatusCode = useMemo(() => getErrorByStatusCode(endpoint.errors), [endpoint.errors]);
 
     const getExampleId = useCallback(
         (example: CodeExample | undefined) => {
@@ -127,98 +126,30 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint, node.apiDefinitionId);
 
     const segmentedControlExamples = useMemo(() => {
-        const hasNonEmptyValue = (value: unknown): boolean => {
-            if (value == null) {
-                return false;
-            }
-            if (typeof value === "object") {
-                if (Array.isArray(value)) {
-                    return value.length > 0;
-                }
-                return Object.keys(value).length > 0;
-            }
-            if (typeof value === "string") {
-                return value.length > 0;
-            }
-            return true;
-        };
-
-        const isMeaningfulParamValue = (key: string, value: unknown): boolean => {
-            if (value == null) {
-                return false;
-            }
-            if (typeof value === "string") {
-                if (value.length === 0) {
-                    return false;
-                }
-                if (value === `:${key}`) {
-                    return false;
-                }
-            }
-            return true;
-        };
-
-        const hasMeaningfulParams = (params: Record<string, unknown> | undefined): boolean => {
-            if (params == null) {
-                return false;
-            }
-            return Object.entries(params).some(([key, value]) => isMeaningfulParamValue(key, value));
-        };
-
-        const hasRequestSideData = (exampleCall: ApiDefinition.ExampleEndpointCall): boolean => {
-            if (exampleCall.requestBody != null && hasNonEmptyValue(exampleCall.requestBody.value)) {
-                return true;
-            }
-            if (hasMeaningfulParams(exampleCall.pathParameters)) {
-                return true;
-            }
-            if (hasMeaningfulParams(exampleCall.queryParameters)) {
-                return true;
-            }
-            return false;
-        };
-
         const allExamples = Object.entries(examplesByKeyAndStatusCode)
-            .map(([exampleKey, examples]) => {
-                const examplesSorted = sortBy(Object.values(examples).flat(), [
+            .filter(([_, examplesByStatusCode]) => isVisibleExampleKey(examplesByStatusCode))
+            .map(([exampleKey, examplesByStatusCode]) => ({
+                exampleKey,
+                examples: sortBy(Object.values(examplesByStatusCode).flat(), [
                     (example) => example.exampleCall.responseStatusCode
-                ]);
-                return { exampleKey, examples: examplesSorted };
-            })
-            .filter(
-                ({ examples }) =>
-                    examples.length > 0 &&
-                    (examples.some((example) => example.exampleCall.responseStatusCode < 400) ||
-                        examples[0]?.name != null) &&
-                    examples.some((example) => hasRequestSideData(example.exampleCall))
-            );
+                ])
+            }));
 
-        const getDisplayName = (example: {
-            name: string | undefined;
-            exampleCall: { name: string | null | undefined };
-        }): string | null | undefined => {
-            return example.name ?? example.exampleCall.name;
-        };
-
-        const isAutoGeneratedName = (name: string | null | undefined): boolean => {
-            return name?.endsWith("_example") ?? false;
-        };
-
-        const isUserDefinedExample = (example: {
-            name: string | undefined;
-            exampleCall: { name: string | null | undefined };
-        }): boolean => {
-            const displayName = getDisplayName(example);
-            return displayName != null && !isAutoGeneratedName(displayName);
-        };
-
-        const hasUserDefinedExample = allExamples.some(({ examples }) => examples.some(isUserDefinedExample));
-
-        if (hasUserDefinedExample) {
-            return allExamples.filter(({ examples }) => examples.some(isUserDefinedExample));
+        // Hide tabs if all code snippets for the current language are identical.
+        // This preserves expected UX when dynamic snippet generators produce the same code
+        // for all examples (e.g., C#/Python/TypeScript generators have a bug where they
+        // ignore example-specific request data). Once generators are fixed, this check
+        // can be removed. See: https://github.com/fern-api/fern-platform/pull/6427
+        const uniqueCodeSnippets = new Set(allExamples.flatMap(({ examples }) => examples.map((e) => e.code)));
+        if (uniqueCodeSnippets.size <= 1) {
+            return [];
         }
 
-        return allExamples;
+        // Filter to user-defined examples if any exist
+        const hasUserDefinedExample = allExamples.some(({ examples }) => examples.some(isUserDefinedExample));
+        return hasUserDefinedExample
+            ? allExamples.filter(({ examples }) => examples.some(isUserDefinedExample))
+            : allExamples;
     }, [examplesByKeyAndStatusCode]);
 
     return (
@@ -383,17 +314,3 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
 };
 
 export const EndpointContentCodeSnippets = memo(UnmemoizedEndpointContentCodeSnippets);
-
-const resolveEnvironmentUrlInCodeSnippet = (
-    endpoint: ApiDefinition.EndpointDefinition,
-    requestCodeSnippet: string,
-    baseUrl: string | undefined
-): string => {
-    const urlToReplace = endpoint.environments?.find((env) => requestCodeSnippet.includes(env.baseUrl))?.baseUrl;
-
-    if (baseUrl?.endsWith("/")) {
-        baseUrl = baseUrl.replace(/\/$/, "");
-    }
-
-    return urlToReplace && baseUrl ? requestCodeSnippet.replace(urlToReplace, baseUrl) : requestCodeSnippet;
-};

@@ -10,6 +10,114 @@ import type {
 } from "../type-definitions/EndpointContent";
 import type { CodeExample } from "./code-example";
 
+function hasNonEmptyValue(value: unknown): boolean {
+    if (value == null) {
+        return false;
+    }
+    if (typeof value === "object") {
+        if (Array.isArray(value)) {
+            return value.length > 0;
+        }
+        return Object.keys(value).length > 0;
+    }
+    if (typeof value === "string") {
+        return value.length > 0;
+    }
+    return true;
+}
+
+function isMeaningfulParamValue(key: string, value: unknown): boolean {
+    if (value == null) {
+        return false;
+    }
+    if (typeof value === "string") {
+        if (value.length === 0) {
+            return false;
+        }
+        if (value === `:${key}`) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function hasMeaningfulParams(params: Record<string, unknown> | undefined): boolean {
+    if (params == null) {
+        return false;
+    }
+    return Object.entries(params).some(([key, value]) => isMeaningfulParamValue(key, value));
+}
+
+/**
+ * Check if an example has meaningful request-side data (body, path params, or query params).
+ */
+export function hasRequestSideData(exampleCall: ApiDefinition.ExampleEndpointCall): boolean {
+    if (exampleCall.requestBody != null && hasNonEmptyValue(exampleCall.requestBody.value)) {
+        return true;
+    }
+    if (hasMeaningfulParams(exampleCall.pathParameters)) {
+        return true;
+    }
+    if (hasMeaningfulParams(exampleCall.queryParameters)) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Check if an exampleKey has valid examples (non-empty, with success response or named).
+ * This is a baseline check shared by both bundle and dashboard.
+ */
+export function hasValidExamples(examplesByStatusCode: ExamplesByStatusCode): boolean {
+    const examples = Object.values(examplesByStatusCode).flat();
+    if (examples.length === 0) {
+        return false;
+    }
+    // Sort by status code to match original behavior for examples[0]?.name check
+    const sortedExamples = sortBy(examples, [(ex) => ex.exampleCall.responseStatusCode]);
+    return sortedExamples.some((ex) => ex.exampleCall.responseStatusCode < 400) || sortedExamples[0]?.name != null;
+}
+
+/**
+ * Check if an exampleKey should be visible in the tabs (bundle version).
+ * An exampleKey is visible if it has valid examples AND meaningful request-side data.
+ */
+export function isVisibleExampleKey(examplesByStatusCode: ExamplesByStatusCode): boolean {
+    if (!hasValidExamples(examplesByStatusCode)) {
+        return false;
+    }
+    const examples = Object.values(examplesByStatusCode).flat();
+    return examples.some((ex) => hasRequestSideData(ex.exampleCall));
+}
+
+/**
+ * Get the first visible exampleKey for a language.
+ * Falls back to the first available exampleKey if none are visible.
+ */
+function getFirstVisibleExampleKey(examplesByKeyAndStatusCode: ExamplesByKeyAndStatusCode): string | undefined {
+    for (const [exampleKey, examplesByStatusCode] of Object.entries(examplesByKeyAndStatusCode)) {
+        if (isVisibleExampleKey(examplesByStatusCode)) {
+            return exampleKey;
+        }
+    }
+    // Fallback to first available if none are visible
+    return Object.keys(examplesByKeyAndStatusCode)[0];
+}
+
+/**
+ * Get a valid exampleKey for a language, preferring the current key if it exists.
+ */
+export function getValidExampleKey(
+    examplesByKeyAndStatusCode: ExamplesByKeyAndStatusCode,
+    currentKey: string | undefined
+): string | undefined {
+    const availableKeys = Object.keys(examplesByKeyAndStatusCode);
+    if (availableKeys.includes(currentKey ?? "")) {
+        return currentKey;
+    }
+    return getFirstVisibleExampleKey(examplesByKeyAndStatusCode);
+}
+
 /**
  * Group examples by language, title, and status code.
  *
@@ -41,7 +149,7 @@ export function groupExamplesByLanguageKeyAndStatusCode(
             snippets.forEach((snippet, j) => {
                 const statusCode = example.responseStatusCode;
 
-                const exampleKey = snippet.code;
+                const exampleKey = example.name || `Example ${i + 1}`;
 
                 const codeExample: CodeExample = {
                     key: `${language}-${i},${j}`,
@@ -193,10 +301,10 @@ export function selectExampleToRender(
         ] ??
         {};
 
-    // prefer the selected exampleId, otherwise pick the first available exampleId
+    // prefer the selected exampleId, otherwise pick the first VISIBLE exampleId
     const examplesByStatusCode =
         examplesByKeyAndStatusCode[exampleKey ?? ""] ??
-        examplesByKeyAndStatusCode[Object.keys(examplesByKeyAndStatusCode)[0] ?? ""] ??
+        examplesByKeyAndStatusCode[getFirstVisibleExampleKey(examplesByKeyAndStatusCode) ?? ""] ??
         {};
 
     // if the status code is defined and there are examples for it, we attempt to use the example at the given index. Otherwise, fall back to the first example in that list.

@@ -18,12 +18,17 @@ import { EndpointExampleSegmentedControl } from "@fern-docs/components/api-refer
 import { EndpointUrlWithOverflow } from "@fern-docs/components/api-reference/endpoints/EndpointUrlWithOverflow";
 import { ErrorExampleSelect } from "@fern-docs/components/api-reference/endpoints/ErrorExampleSelect";
 import { renderResponseTitle } from "@fern-docs/components/api-reference/endpoints/render-response-title";
+import {
+    getErrorByStatusCode,
+    resolveEnvironmentUrlInCodeSnippet
+} from "@fern-docs/components/api-reference/endpoints/utils";
 import { AudioExample } from "@fern-docs/components/api-reference/examples/AudioExample";
 import {
     CodeSnippetExample,
     JsonCodeSnippetExample
 } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
-import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
+import { type CodeExample, isUserDefinedExample } from "@fern-docs/components/api-reference/examples/code-example";
+import { isVisibleExampleKey } from "@fern-docs/components/api-reference/examples/example-groups";
 import { TitledExample } from "@fern-docs/components/api-reference/examples/TitledExample";
 import { lineNumberOf } from "@fern-docs/components/api-reference/examples/utils";
 import type { StatusCode } from "@fern-docs/components/api-reference/type-definitions/EndpointContent";
@@ -78,13 +83,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
         [setSelectedExampleKey]
     );
 
-    const errorByStatusCode = useMemo(() => {
-        const map: Record<number, ApiDefinition.ErrorResponse> = {};
-        endpoint.errors?.forEach((error) => {
-            map[error.statusCode] = error;
-        });
-        return map;
-    }, [endpoint.errors]);
+    const errorByStatusCode = useMemo(() => getErrorByStatusCode(endpoint.errors), [endpoint.errors]);
 
     const getExampleId = useCallback(
         (example: CodeExample | undefined) => {
@@ -135,19 +134,30 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
     const baseUrl = endpoint.environments?.[0]?.baseUrl;
 
     const segmentedControlExamples = useMemo(() => {
-        return Object.entries(examplesByKeyAndStatusCode)
-            .map(([exampleKey, examples]) => {
-                const examplesSorted = sortBy(Object.values(examples).flat(), [
+        const allExamples = Object.entries(examplesByKeyAndStatusCode)
+            .filter(([_, examplesByStatusCode]) => isVisibleExampleKey(examplesByStatusCode))
+            .map(([exampleKey, examplesByStatusCode]) => ({
+                exampleKey,
+                examples: sortBy(Object.values(examplesByStatusCode).flat(), [
                     (example) => example.exampleCall.responseStatusCode
-                ]);
-                return { exampleKey, examples: examplesSorted };
-            })
-            .filter(
-                ({ examples }) =>
-                    examples.length > 0 &&
-                    (examples.some((example) => example.exampleCall.responseStatusCode < 400) ||
-                        examples[0]?.name != null)
-            );
+                ])
+            }));
+
+        // Hide tabs if all code snippets for the current language are identical.
+        // This preserves expected UX when dynamic snippet generators produce the same code
+        // for all examples (e.g., C#/Python/TypeScript generators have a bug where they
+        // ignore example-specific request data). Once generators are fixed, this check
+        // can be removed. See: https://github.com/fern-api/fern-platform/pull/6427
+        const uniqueCodeSnippets = new Set(allExamples.flatMap(({ examples }) => examples.map((e) => e.code)));
+        if (uniqueCodeSnippets.size <= 1) {
+            return [];
+        }
+
+        // Filter to user-defined examples if any exist
+        const hasUserDefinedExample = allExamples.some(({ examples }) => examples.some(isUserDefinedExample));
+        return hasUserDefinedExample
+            ? allExamples.filter(({ examples }) => examples.some(isUserDefinedExample))
+            : allExamples;
     }, [examplesByKeyAndStatusCode]);
 
     return (
@@ -308,20 +318,3 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
 };
 
 export const EndpointContentCodeSnippets = memo(UnmemoizedEndpointContentCodeSnippets);
-
-const resolveEnvironmentUrlInCodeSnippet = (
-    endpoint: ApiDefinition.EndpointDefinition,
-    requestCodeSnippet: string,
-    baseUrl: string | undefined
-): string => {
-    const urlToReplace = endpoint.environments?.find((env) => requestCodeSnippet.includes(env.baseUrl))?.baseUrl;
-
-    let resolvedBaseUrl = baseUrl;
-    if (resolvedBaseUrl?.endsWith("/")) {
-        resolvedBaseUrl = resolvedBaseUrl.replace(/\/$/, "");
-    }
-
-    return urlToReplace && resolvedBaseUrl
-        ? requestCodeSnippet.replace(urlToReplace, resolvedBaseUrl)
-        : requestCodeSnippet;
-};
