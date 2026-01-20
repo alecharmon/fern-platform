@@ -70,22 +70,24 @@ export function PlaygroundBasicAuthForm({
                 </div>
             </li>
 
-            <li className="-mx-4 space-y-2 p-4">
-                <label className="inline-flex flex-wrap items-baseline">
-                    <span className="font-mono text-sm">{basicAuth.passwordName ?? t(lang).auth.password}</span>
-                </label>
+            {!basicAuth.passwordAlwaysEmpty && (
+                <li className="-mx-4 space-y-2 p-4">
+                    <label className="inline-flex flex-wrap items-baseline">
+                        <span className="font-mono text-sm">{basicAuth.passwordName ?? t(lang).auth.password}</span>
+                    </label>
 
-                <div>
-                    <PasswordInputGroup
-                        onValueChange={setPassword}
-                        value={password}
-                        disabled={disabled}
-                        resettable={isPasswordResettable}
-                        onClickReset={() => setPassword(RESET)}
-                        lang={lang}
-                    />
-                </div>
-            </li>
+                    <div>
+                        <PasswordInputGroup
+                            onValueChange={setPassword}
+                            value={password}
+                            disabled={disabled}
+                            resettable={isPasswordResettable}
+                            onClickReset={() => setPassword(RESET)}
+                            lang={lang}
+                        />
+                    </div>
+                </li>
+            )}
         </>
     );
 }

@@ -262,6 +262,9 @@ types:
     properties:
       usernameName: optional<string>
       passwordName: optional<string>
+      passwordAlwaysEmpty:
+        type: optional<boolean>
+        docs: If true, the password field should not be rendered in the API explorer.
 
   BearerAuth:
     extends:

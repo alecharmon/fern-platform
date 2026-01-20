@@ -5,4 +5,6 @@ import type * as FernRegistry from "../../../../../../../index.js";
 export interface BasicAuth extends FernRegistry.api.v1.WithDescription {
     usernameName: string | undefined;
     passwordName: string | undefined;
+    /** If true, the password field should not be rendered in the API explorer. */
+    passwordAlwaysEmpty: boolean | undefined;
 }
