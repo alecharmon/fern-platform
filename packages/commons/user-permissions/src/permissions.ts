@@ -20,9 +20,16 @@ export function isAuthZPermission(value: unknown): value is AuthZPermission {
     return typeof value === "string" && AUTHZ_PERMISSION_SET.has(value as AuthZPermission);
 }
 
+/**
+ * Checks if the user has super-user permission.
+ * Super users have elevated privileges across all organizations and resources.
+ */
+export function isSuperUser(permissions: string[]): boolean {
+    return permissions.includes("super-user");
+}
+
 export function hasPermission(permissions: AuthZPermission[], permissionToCheck: AuthZPermission): boolean {
-    const isSuperUser = permissions.includes("super-user");
-    return isSuperUser || permissions.includes(permissionToCheck);
+    return isSuperUser(permissions) || permissions.includes(permissionToCheck);
 }
 
 /**

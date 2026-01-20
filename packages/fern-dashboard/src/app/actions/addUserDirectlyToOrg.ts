@@ -24,12 +24,12 @@ export async function addUserDirectlyToOrg({
 }): Promise<AddUserDirectlyResult> {
     const session = await getCurrentSessionOrThrow();
 
-    const isFernAdmin = await auth0Management.isFernEmployee(session.user.sub);
+    const isFernAdmin = auth0Management.isFernEmployee(session.permissions ?? []);
     if (!isFernAdmin) {
         return {
             ok: false,
             code: "not_admin",
-            message: "Only Fern employees can add users directly to organizations."
+            message: "Only super users can add users directly to organizations."
         };
     }
 

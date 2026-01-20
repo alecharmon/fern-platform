@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (maybeSessionData.errorResponse != null) {
         return maybeSessionData.errorResponse;
     }
-    const { userId, token } = maybeSessionData.data;
+    const { userId, token, permissions } = maybeSessionData.data;
 
     const parsedBody = await parseNextRequestBody(req, GetOrgMembersRequest);
     if (parsedBody.errorResponse != null) {
@@ -34,5 +34,5 @@ export async function POST(req: NextRequest) {
 
     await assertUserHasOrganizationAccess(token, orgName);
 
-    return NextResponse.json(await handler({ userId, orgName }));
+    return NextResponse.json(await handler({ userId, orgName, permissions }));
 }

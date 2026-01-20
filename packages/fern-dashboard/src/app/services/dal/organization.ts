@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 
@@ -9,6 +10,7 @@ import { getVenusClient } from "../venus/getVenusClient";
 
 /**
  * Asserts that the user has access to a given auth0 organization.
+ * Super users (with super-user permission) have access to all organizations.
  *
  * @throws {DigestibleError} if the user does not have access to the organization
  */
@@ -17,6 +19,15 @@ export const assertUserHasOrganizationAccess = cache(async (token: string, orgNa
     if (!orgExists) {
         throw throwDigestibleError(new Error("Organization not found"), "ORG_NOT_FOUND");
     }
+
+    // Check if user has super-user permission - they have access to all orgs
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const decodedToken = jwt.decode(token) as any;
+    const permissions: string[] = decodedToken?.permissions ?? [];
+    if (auth0Management.isSuperUser(permissions)) {
+        return;
+    }
+
     const venusClient = getVenusClient({ token });
     const result = await venusClient.organization.isMember(orgName);
 

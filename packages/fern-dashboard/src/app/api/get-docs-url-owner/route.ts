@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     if (maybeSessionData.errorResponse != null) {
         return maybeSessionData.errorResponse;
     }
-    const { userId, token } = maybeSessionData.data;
+    const { userId, token, permissions } = maybeSessionData.data;
 
     const parsedBody = await parseNextRequestBody(req, GetDocsUrlOwnerRequest);
     if (parsedBody.errorResponse != null) {
@@ -33,7 +33,9 @@ export async function POST(req: NextRequest) {
 
     let response = await handler({ token, url: parseDocsUrlParam({ docsUrl: url }) });
     if (response.orgName != null) {
-        const doesUserBelongToOrg = await auth0Management.doesUserBelongToOrg(userId, response.orgName);
+        const doesUserBelongToOrg = await auth0Management.doesUserBelongToOrg(userId, response.orgName, {
+            permissions
+        });
         if (!doesUserBelongToOrg) {
             response = { orgName: undefined };
         }

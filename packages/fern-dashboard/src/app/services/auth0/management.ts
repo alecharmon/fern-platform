@@ -1,4 +1,6 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
+
+import { isSuperUser } from "@fern-api/user-permissions";
 import {
     type ApiResponse,
     type GetInvitations200ResponseOneOfInner,
@@ -6,13 +8,15 @@ import {
     type GetUsers200ResponseOneOfInner,
     ManagementClient
 } from "auth0";
-import { cache } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { AsyncRedisCache } from "../redis/AsyncRedisCache";
 import { type InviteToken, RedisCacheKey, RedisCacheKeyType } from "../redis/cacheKey";
 import { redisDel, redisGet, redisSet } from "../redis/redis";
 import { type Auth0Organization, Auth0OrgID, Auth0OrgName, Auth0UserID } from "./types";
 import { convertToAuth0Organization } from "./utils";
+
+// Re-export isSuperUser for convenience
+export { isSuperUser };
 
 export const FERN_ORG_NAME = Auth0OrgName("fern");
 
@@ -428,7 +432,14 @@ async function getAllOrgMembers(orgId: Auth0OrgID) {
     return members;
 }
 
-export async function createIsFernEmployee(): Promise<(userId: Auth0UserID) => boolean> {
+/**
+ * Creates a function to check if a user is a member of the Fern organization.
+ * This is used for filtering Fern employees from member lists.
+ *
+ * Note: For checking if the current user has super-user privileges,
+ * use isSuperUser(permissions) instead.
+ */
+export async function createIsFernOrgMemberChecker(): Promise<(userId: Auth0UserID) => boolean> {
     const fernOrgMembers = await getOrgMembers(FERN_ORG_NAME, {
         includeFernEmployees: true
     });
@@ -437,13 +448,20 @@ export async function createIsFernEmployee(): Promise<(userId: Auth0UserID) => b
 }
 
 /**
- * when checking multiple userIds at once, use createIsFernEmployee
- * to avoid loading the fern org members with every check
+ * @deprecated Use isSuperUser(permissions) instead for checking current user privileges.
+ * This function is kept for backward compatibility but will be removed.
  */
-export const isFernEmployee = cache(async (userId: Auth0UserID): Promise<boolean> => {
-    const isFernEmployeeFunc = await createIsFernEmployee();
-    return isFernEmployeeFunc(userId);
-});
+export async function createIsFernEmployee(): Promise<(userId: Auth0UserID) => boolean> {
+    return createIsFernOrgMemberChecker();
+}
+
+/**
+ * Checks if the current user is a super user based on their session permissions.
+ * This replaces the old isFernEmployee check for determining admin privileges.
+ */
+export function isFernEmployee(permissions: string[]): boolean {
+    return isSuperUser(permissions);
+}
 
 export async function getOrgInvitations(orgName: Auth0OrgName) {
     return await ORGANIZATION_INVITATIONS_CACHE.get(RedisCacheKey.organizationInvitations(orgName), async () => {
@@ -510,9 +528,13 @@ export async function doesOrgExist(orgName: Auth0OrgName) {
     }
 }
 
-export async function doesUserBelongToOrg(userId: Auth0UserID, orgName: Auth0OrgName) {
-    // a fern employee is considered to be in every org, but we need to check if the org exists
-    if (await isFernEmployee(userId)) {
+export async function doesUserBelongToOrg(
+    userId: Auth0UserID,
+    orgName: Auth0OrgName,
+    options?: { permissions?: string[] }
+) {
+    // A super user is considered to be in every org, but we need to check if the org exists
+    if (options?.permissions && isSuperUser(options.permissions)) {
         const orgExists = await doesOrgExist(orgName);
         if (!orgExists) {
             return false;

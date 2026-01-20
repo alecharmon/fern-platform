@@ -22,9 +22,11 @@ export async function redeemInviteToken({
     { success: true; orgName: Auth0OrgName; userId: Auth0UserID } | { success: false; error: RedeemInviteTokenErrors }
 > {
     let userId: Auth0UserID;
+    let permissions: string[] = [];
     try {
         const session = await getCurrentSessionOrThrow();
         userId = Auth0UserID(session.user.sub);
+        permissions = session.permissions ?? [];
     } catch (_) {
         return { success: false, error: { type: "NOT_LOGGED_IN" } };
     }
@@ -50,7 +52,7 @@ export async function redeemInviteToken({
     }
 
     // Check if user is already a member
-    if (await doesUserBelongToOrg(userId, inviteToken.orgName)) {
+    if (await doesUserBelongToOrg(userId, inviteToken.orgName, { permissions })) {
         // Clean up the token since it's been used
         await invalidateCachesAfterRedeemingInviteToken(token);
         return { success: true, orgName: inviteToken.orgName, userId };

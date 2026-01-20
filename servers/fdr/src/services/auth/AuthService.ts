@@ -1,4 +1,9 @@
-import { getManagementClientResult, getRolesResult, hasResourcePermission } from "@fern-api/user-permissions";
+import {
+    getManagementClientResult,
+    getRolesResult,
+    hasResourcePermission,
+    isSuperUser as isSuperUserFromPermissions
+} from "@fern-api/user-permissions";
 import { FernVenusApi, FernVenusApiClient } from "@fern-api/venus-api-sdk";
 import { decodeJwt } from "jose";
 import type winston from "winston";
@@ -103,6 +108,12 @@ export class AuthServiceImpl implements AuthService {
             throw new UnauthorizedError("Authorization header was not specified");
         }
         const token = getTokenFromAuthHeader(authHeader);
+
+        // Check if user has super-user permission - they have access to all orgs
+        if (isSuperUser(token)) {
+            this.logger.debug(`User has super-user permission, granting access to org ${orgId}`);
+            return;
+        }
 
         const venus = getVenusClient({
             config: this.app.config,
@@ -293,6 +304,24 @@ async function getAuth0OrgIdFromName(orgName: string): Promise<string> {
     const client = clientResult.value;
     const { data: organization } = await client.organizations.getByName({ name: orgName });
     return organization.id;
+}
+
+/**
+ * Checks if a token contains the super-user permission.
+ * Super users have access to all organizations.
+ *
+ * @param token - The JWT token string (without Bearer prefix)
+ * @returns true if the token contains super-user permission, false otherwise
+ */
+export function isSuperUser(token: string): boolean {
+    try {
+        const claims = decodeJwt(token);
+        const permissions = (claims.permissions as string[] | undefined) ?? [];
+        return isSuperUserFromPermissions(permissions);
+    } catch {
+        // Failed to decode JWT token - treat as non-super-user
+        return false;
+    }
 }
 
 /**

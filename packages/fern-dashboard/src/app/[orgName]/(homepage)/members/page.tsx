@@ -13,7 +13,7 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
     if (session == null) {
         redirect("/");
     }
-    const isFernAdmin = await isFernEmployee(session.user.sub);
+    const isFernAdmin = isFernEmployee(session.permissions ?? []);
 
     // Check if fine-grained permissions feature flag is enabled
     let isFineGrainedPermissionsEnabled = false;

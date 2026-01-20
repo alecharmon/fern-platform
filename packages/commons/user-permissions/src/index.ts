@@ -27,6 +27,7 @@ export {
     hasResourcePermission,
     hasRoutePermission,
     isAuthZPermission,
+    isSuperUser,
     parseScopedPermission,
     // Resource-scoped permissions
     RESOURCE_TYPES,

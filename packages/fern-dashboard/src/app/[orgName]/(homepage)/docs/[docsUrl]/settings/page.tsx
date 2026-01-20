@@ -20,7 +20,7 @@ export default async function Page({
     const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
 
     const session = await getAuthenticatedSessionOrRedirect(orgName);
-    const isEmployee = await isFernEmployee(session.user.sub);
+    const isEmployee = isFernEmployee(session.permissions ?? []);
 
     return (
         <div className="flex flex-1 flex-col items-center gap-4">

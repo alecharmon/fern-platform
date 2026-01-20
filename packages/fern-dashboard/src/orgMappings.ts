@@ -32,7 +32,7 @@ function parseEmailOrgMappings(): Record<string, string> | null {
         return {};
     }
 }
-async function processUserOrgMapping(userId: Auth0UserID): Promise<void> {
+async function processUserOrgMapping(userId: Auth0UserID, permissions: string[]): Promise<void> {
     // Parse email org mappings from environment variable
     const emailOrgMappings = parseEmailOrgMappings();
 
@@ -57,7 +57,7 @@ async function processUserOrgMapping(userId: Auth0UserID): Promise<void> {
     const auth0OrgName = Auth0OrgName(orgName);
 
     // Check if user is already a member of the org
-    const userBelongsToOrg = await auth0Management.doesUserBelongToOrg(userId, auth0OrgName);
+    const userBelongsToOrg = await auth0Management.doesUserBelongToOrg(userId, auth0OrgName, { permissions });
 
     if (userBelongsToOrg) {
         return;
@@ -76,6 +76,7 @@ export async function applyOrgMappings(): Promise<void> {
         }
 
         const userId = session.user.sub;
+        const permissions = session.permissions ?? [];
 
         // Check if we already have an in-flight promise for this user
         const existingPromise = inFlightPromises[userId];
@@ -84,7 +85,7 @@ export async function applyOrgMappings(): Promise<void> {
         }
 
         // Create and store the promise for this user
-        const promise = processUserOrgMapping(userId);
+        const promise = processUserOrgMapping(userId, permissions);
 
         inFlightPromises[userId] = promise;
 

@@ -21,10 +21,13 @@ export async function removeUserFromOrg({
 
     await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
-    const isFernEmployee = await auth0Management.createIsFernEmployee();
+    // Check if current user is a super user
+    const isCurrentUserSuperUser = auth0Management.isSuperUser(session.permissions ?? []);
+    // For the user being removed, we check Fern org membership since we can't access their permissions
+    const isFernOrgMemberChecker = await auth0Management.createIsFernOrgMemberChecker();
 
-    if (!isFernEmployee(userId) && isFernEmployee(userIdToRemove)) {
-        throw new Error("Non-fern-employee cannot remove fern-employee");
+    if (!isCurrentUserSuperUser && isFernOrgMemberChecker(userIdToRemove)) {
+        throw new Error("Non-super-user cannot remove Fern organization member");
     }
 
     const removedUser = await auth0.users.get({ id: userIdToRemove });

@@ -17,7 +17,7 @@ export default async function DocsSiteNavbar({
         return null;
     }
 
-    const isEmployee = await isFernEmployee(session.user.sub);
+    const isEmployee = isFernEmployee(session.permissions ?? []);
 
     const parsedDocsUrl = parseDocsUrlParam({ docsUrl });
     let askAiStatus = null;
