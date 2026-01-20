@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 
-import { EnableNoiseAnimation } from "@/components/EnableNoiseAnimation";
 import { SplitLayout } from "@/components/layout/SplitLayout";
 import { OnboardingProvider } from "@/providers/OnboardingProvider";
 
@@ -35,7 +34,6 @@ export default function AuthLayout({
 
     return (
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <EnableNoiseAnimation />
             <OnboardingProvider>
                 <SplitLayout
                     cardContent={children}

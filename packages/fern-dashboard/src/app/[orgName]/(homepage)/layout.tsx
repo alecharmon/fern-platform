@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
+import { EnableNoiseAnimation } from "@/components/EnableNoiseAnimation";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SidepanelProvider } from "@/components/layout/SidepanelContext";
 import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
@@ -31,6 +32,7 @@ export default async function AuthedLayout({
     return (
         <>
             <ServerSidePylonSetup />
+            <EnableNoiseAnimation />
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                 <OrgNameProvider orgName={orgName}>
                     <SidepanelProvider>

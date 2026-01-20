@@ -1,3 +1,4 @@
+import { EnableNoiseAnimation } from "@/components/EnableNoiseAnimation";
 import { LoginImage } from "@/components/login-page/LoginImage";
 import { AdobeLogo } from "@/components/login-page/logos/AdobeLogo";
 import { Auth0Logo } from "@/components/login-page/logos/Auth0Logo";
@@ -15,6 +16,7 @@ import { SlideUpTransition } from "@/components/transitions/SlideUpTransition";
 export default function AuthBackgroundSlot() {
     return (
         <div className="mt-16 flex min-h-0 flex-1 flex-col overflow-hidden">
+            <EnableNoiseAnimation />
             <SlideRightTransition>
                 <div className="z-3 relative mx-16 flex flex-col">
                     <ThemedFernLogo className="mb-8 mt-4 w-28" />
