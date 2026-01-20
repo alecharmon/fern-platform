@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { err, errAsync, ok, okAsync, type Result, ResultAsync } from "neverthrow";
+
 import type { Database } from "./database.types";
 import { supabaseError, type UserPermissionsError } from "./errors";
 import type { Roles } from "./roles";
@@ -63,75 +64,37 @@ export interface RolePermissionInsert {
 let supabaseClient: SupabaseClient<Database> | undefined;
 
 /**
- * Parse DATABASE_URL to extract project ID for constructing REST API URL.
- * Format: postgresql://postgres.{PROJECT_ID}:{PASSWORD}@{HOST}:{PORT}/{DB}?pgbouncer=true
- */
-function extractProjectId(databaseUrl: string): string {
-    const url = new URL(databaseUrl);
-    const usernameParts = url.username.split(".");
-    if (usernameParts.length < 2) {
-        throw new Error("DATABASE_URL username must be in format 'postgres.{PROJECT_ID}'");
-    }
-    return usernameParts[1]!;
-}
-
-/**
  * Get a singleton Supabase client instance for resource permission operations.
  * Lazy loads and auto-initializes from environment variables on first use.
  *
- * Required environment variables (one of these combinations):
- * - SUPABASE_URL + (SUPABASE_SERVICE_ROLE_KEY | SUPABASE_API_KEY | SUPABASE_SERVICE_KEY)
- * - DATABASE_URL + (SUPABASE_SERVICE_ROLE_KEY | SUPABASE_API_KEY | SUPABASE_SERVICE_KEY)
+ * Required environment variables:
+ * - SUPABASE_URL
+ * - SUPABASE_SERVICE_ROLE_KEY
  */
 function getClient(): SupabaseClient<Database> {
     if (supabaseClient != null) {
         return supabaseClient;
     }
 
-    // Lazy load from environment variables
-    // Prioritize service role key which bypasses RLS
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    if (!supabaseUrl) {
+        throw new Error("Supabase URL not configured. Set SUPABASE_URL environment variable.");
+    }
 
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!serviceKey) {
         throw new Error(
-            "Supabase service role key not configured. Set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY environment variable."
+            "Supabase service role key not configured. Set SUPABASE_SERVICE_ROLE_KEY environment variable."
         );
     }
 
-    // Try direct URL first
-    const supabaseUrl = process.env.SUPABASE_URL;
-    if (supabaseUrl) {
-        supabaseClient = createClient(supabaseUrl, serviceKey, {
-            auth: {
-                persistSession: false,
-                autoRefreshToken: false
-            },
-            db: {
-                schema: "public"
-            }
-        });
-        return supabaseClient;
-    }
-
-    // Fall back to extracting from DATABASE_URL
-    const databaseUrl = process.env.DATABASE_URL;
-    if (databaseUrl) {
-        const projectId = extractProjectId(databaseUrl);
-        const derivedUrl = `https://${projectId}.supabase.co`;
-
-        supabaseClient = createClient(derivedUrl, serviceKey, {
-            auth: {
-                persistSession: false,
-                autoRefreshToken: false
-            },
-            db: {
-                schema: "public"
-            }
-        });
-        return supabaseClient;
-    }
-
-    throw new Error("Supabase URL not configured. Set either SUPABASE_URL or DATABASE_URL environment variable.");
+    supabaseClient = createClient(supabaseUrl, serviceKey, {
+        auth: {
+            persistSession: false,
+            autoRefreshToken: false
+        }
+    });
+    return supabaseClient;
 }
 
 /**
@@ -141,59 +104,17 @@ export function getClientResult(): Result<SupabaseClient<Database>, UserPermissi
     if (supabaseClient != null) {
         return ok(supabaseClient);
     }
-
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-
-    if (!serviceKey) {
+    try {
+        const client = getClient();
+        return ok(client);
+    } catch (e) {
         return err(
             supabaseError(
                 "NOT_CONFIGURED",
-                "Supabase service role key not configured. Set SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY environment variable."
+                "Could not initialize Supabase client: " + (e instanceof Error ? e.message : String(e))
             )
         );
     }
-
-    const supabaseUrl = process.env.SUPABASE_URL;
-    if (supabaseUrl) {
-        supabaseClient = createClient(supabaseUrl, serviceKey, {
-            auth: {
-                persistSession: false,
-                autoRefreshToken: false
-            },
-            db: {
-                schema: "public"
-            }
-        });
-        return ok(supabaseClient);
-    }
-
-    const databaseUrl = process.env.DATABASE_URL;
-    if (databaseUrl) {
-        try {
-            const projectId = extractProjectId(databaseUrl);
-            const derivedUrl = `https://${projectId}.supabase.co`;
-
-            supabaseClient = createClient(derivedUrl, serviceKey, {
-                auth: {
-                    persistSession: false,
-                    autoRefreshToken: false
-                },
-                db: {
-                    schema: "public"
-                }
-            });
-            return ok(supabaseClient);
-        } catch {
-            return err(supabaseError("NOT_CONFIGURED", "Invalid DATABASE_URL format"));
-        }
-    }
-
-    return err(
-        supabaseError(
-            "NOT_CONFIGURED",
-            "Supabase URL not configured. Set either SUPABASE_URL or DATABASE_URL environment variable."
-        )
-    );
 }
 
 // =============================================================================
@@ -832,7 +753,12 @@ export async function hasUserPermissionForResource({
     resourceId: string;
     permission: string;
 }): Promise<boolean> {
-    const permissions = await getUserPermissionsForResource({ userId, orgId, resourceType, resourceId });
+    const permissions = await getUserPermissionsForResource({
+        userId,
+        orgId,
+        resourceType,
+        resourceId
+    });
     return permissions.includes(permission);
 }
 
@@ -852,9 +778,12 @@ export function hasUserPermissionForResourceResult({
     resourceId: string;
     permission: string;
 }): ResultAsync<boolean, UserPermissionsError> {
-    return getUserPermissionsForResourceResult({ userId, orgId, resourceType, resourceId }).map((permissions) =>
-        permissions.includes(permission)
-    );
+    return getUserPermissionsForResourceResult({
+        userId,
+        orgId,
+        resourceType,
+        resourceId
+    }).map((permissions) => permissions.includes(permission));
 }
 
 /**

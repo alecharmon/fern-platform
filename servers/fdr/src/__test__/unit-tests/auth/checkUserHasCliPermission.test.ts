@@ -56,6 +56,8 @@ describe("checkUserHasCliPermission", () => {
     };
     let auth0Jwt: string;
     const originalAuth0Domain = process.env.AUTH0_DOMAIN;
+    const originalSupabaseUrl = process.env.SUPABASE_URL;
+    const originalSupabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -64,6 +66,10 @@ describe("checkUserHasCliPermission", () => {
         process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
         // Create a valid Auth0 JWT for testing
         auth0Jwt = createMockJwt("https://fern-prod.us.auth0.com/");
+
+        // Set Supabase env vars for tests that need fine-grained permissions
+        process.env.SUPABASE_URL = "https://test.supabase.co";
+        process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
 
         mockLogger = {
             error: vi.fn(),
@@ -95,6 +101,17 @@ describe("checkUserHasCliPermission", () => {
             process.env.AUTH0_DOMAIN = originalAuth0Domain;
         } else {
             delete process.env.AUTH0_DOMAIN;
+        }
+        // Restore original Supabase env vars
+        if (originalSupabaseUrl !== undefined) {
+            process.env.SUPABASE_URL = originalSupabaseUrl;
+        } else {
+            delete process.env.SUPABASE_URL;
+        }
+        if (originalSupabaseServiceRoleKey !== undefined) {
+            process.env.SUPABASE_SERVICE_ROLE_KEY = originalSupabaseServiceRoleKey;
+        } else {
+            delete process.env.SUPABASE_SERVICE_ROLE_KEY;
         }
     });
 
