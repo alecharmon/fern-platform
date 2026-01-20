@@ -33,6 +33,15 @@ export const middleware: NextMiddleware = async (request) => {
     const host = request.nextUrl.host;
     const domain = getDocsDomainEdge(request);
 
+    // Early return for already-rewritten internal routes to prevent re-processing.
+    // This only applies to local development where hot reloading can cause router.refresh()
+    // to re-enter middleware with already-rewritten paths like /${host}/${domain}/dynamic/%2Ffoo.
+    // Re-processing these would cause path corruption due to decodeURIComponent
+    // turning %2F into / and then re-encoding, leading to "path explosion".
+    if (isLocal() && request.nextUrl.pathname.startsWith(`/${host}/${domain}/`)) {
+        return NextResponse.next();
+    }
+
     // note: decoding the uri component here will avoid double-encoding the pathname futher
     // down the middleware chain
 
