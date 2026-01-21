@@ -2,9 +2,17 @@ interface GithubLogoProps {
     width?: number;
     height?: number;
     variant?: "default" | "circle";
+    className?: string;
+    strokeWidth?: number;
 }
 
-export const GithubLogo = ({ width = 18, height = 20, variant = "default" }: GithubLogoProps) => {
+export const GithubLogo = ({
+    width = 18,
+    height = 20,
+    variant = "default",
+    className,
+    strokeWidth = 1.66667
+}: GithubLogoProps) => {
     if (variant === "circle") {
         return (
             <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 25 24" fill="none">
@@ -26,18 +34,25 @@ export const GithubLogo = ({ width = 18, height = 20, variant = "default" }: Git
     }
 
     return (
-        <svg width={width} height={height} viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg
+            width={width}
+            height={height}
+            viewBox="0 0 18 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={className}
+        >
             <path
                 d="M12.3287 18.3332V14.9998C12.4446 13.9559 12.1453 12.9083 11.4953 12.0832C13.9953 12.0832 16.4953 10.4165 16.4953 7.49984C16.562 6.45817 16.2703 5.43317 15.662 4.58317C15.8953 3.62484 15.8953 2.62484 15.662 1.6665C15.662 1.6665 14.8287 1.6665 13.162 2.9165C10.962 2.49984 8.69533 2.49984 6.49533 2.9165C4.82866 1.6665 3.99533 1.6665 3.99533 1.6665C3.74533 2.62484 3.74533 3.62484 3.99533 4.58317C3.38856 5.42974 3.09406 6.46049 3.162 7.49984C3.162 10.4165 5.662 12.0832 8.162 12.0832C7.837 12.4915 7.59533 12.9582 7.45366 13.4582C7.312 13.9582 7.27033 14.4832 7.32866 14.9998V18.3332"
                 stroke="currentColor"
-                strokeWidth="1.66667"
+                strokeWidth={strokeWidth}
                 strokeLinecap="round"
                 strokeLinejoin="round"
             />
             <path
                 d="M7.32869 15.0002C3.57036 16.6668 3.16203 13.3335 1.49536 13.3335"
                 stroke="currentColor"
-                strokeWidth="1.66667"
+                strokeWidth={strokeWidth}
                 strokeLinecap="round"
                 strokeLinejoin="round"
             />
