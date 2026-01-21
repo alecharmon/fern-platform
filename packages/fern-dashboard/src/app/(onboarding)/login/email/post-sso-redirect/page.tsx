@@ -2,6 +2,7 @@ import { addRoles, getRoles } from "@fern-api/user-permissions";
 import { getEmailLoginConfig } from "@fern-docs/edge-config";
 import { redirect } from "next/navigation";
 import z from "zod";
+
 import getMyOrganizations from "@/app/api/get-my-organizations/handler";
 import { getAuth0Client } from "@/app/services/auth0/auth0";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
@@ -9,6 +10,7 @@ import { addUserToOrgById } from "@/app/services/auth0/management";
 import { Auth0OrgID, Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 import orgRedirect from "@/utils/orgRedirect";
+import type { EmailLoginSsoEntry } from "../../../../../../../fern-docs/edge-config/src/getEmailLoginConfig";
 
 const QuerySchema = z.object({
     connection: z.string(),
@@ -28,12 +30,7 @@ function asString(value: string | string[] | undefined): string | undefined {
     return typeof value === "string" ? value : undefined;
 }
 
-type OrgMapping = {
-    org_id: string;
-    org_name: string;
-};
-
-async function getOrgForConnection(connection: string): Promise<OrgMapping | undefined> {
+async function getOrgForConnection(connection: string): Promise<EmailLoginSsoEntry | undefined> {
     const { connectionToOrg, byEmailDomain } = await getEmailLoginConfig();
     const mappedOrg = connectionToOrg[connection];
     if (mappedOrg != null) {
@@ -114,7 +111,7 @@ export default async function PostSsoRedirectPage({
             orgId: orgId,
             // for now these are admin roles but will be downgraded
             // to viewer at some point
-            roleNames: ["admin", "cli"]
+            roleNames: [orgMapping.default_role || "editor"]
         });
         if (addRoleResult.ok === false) {
             // Attempt to continue anyways

@@ -28,7 +28,8 @@ const mocks = vi.hoisted(() => {
         mockGetEmailLoginConfig: vi.fn(),
         mockGetAuth0Client: vi.fn(),
         mockGetRoles: vi.fn(),
-        mockAddRoles: vi.fn()
+        mockAddRoles: vi.fn(),
+        mockOrgRedirect: vi.fn()
     };
 });
 
@@ -69,7 +70,13 @@ vi.mock("@fern-api/user-permissions", () => ({
 
 vi.mock("@/app/services/auth0/types", () => ({
     Auth0OrgID: (id: string) => id,
-    Auth0UserID: (id: string) => id
+    Auth0UserID: (id: string) => id,
+    Auth0OrgName: (name: string) => name
+}));
+
+vi.mock("@/utils/orgRedirect", () => ({
+    __esModule: true,
+    default: mocks.mockOrgRedirect
 }));
 
 describe("post-sso-redirect page", () => {
@@ -80,7 +87,7 @@ describe("post-sso-redirect page", () => {
         });
         mocks.mockGetAuth0Client.mockResolvedValue({
             getSession: vi.fn().mockResolvedValue(null),
-            getAccessToken: vi.fn(),
+            getAccessToken: vi.fn().mockResolvedValue("new_token"),
             updateSession: vi.fn()
         });
         mocks.mockGetEmailLoginConfig.mockResolvedValue({
@@ -95,6 +102,7 @@ describe("post-sso-redirect page", () => {
         });
         mocks.mockGetRoles.mockResolvedValue({ ok: true, data: ["viewer"] });
         mocks.mockAddRoles.mockResolvedValue({ ok: true });
+        mocks.mockOrgRedirect.mockImplementation((org: { id: string; name: string }) => `/auth/login?org=${org.name}`);
     });
 
     it("adds user to org when missing and redirects to provided path", async () => {
@@ -169,5 +177,151 @@ describe("post-sso-redirect page", () => {
 
         await expect(pagePromise).rejects.toMatchObject({ url: "/" });
         expect(mocks.mockGetMyOrganizations).not.toHaveBeenCalled();
+    });
+
+    describe("default_role behavior", () => {
+        it("assigns 'editor' role when default_role is not set", async () => {
+            mocks.mockGetCurrentSession.mockResolvedValue({
+                accessToken: "token",
+                user: { sub: "auth0|user" }
+            });
+            mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
+            mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
+            mocks.mockGetRoles.mockResolvedValue({ ok: true, data: [] });
+            mocks.mockGetEmailLoginConfig.mockResolvedValue({
+                supportedPlatforms: [],
+                connectionToOrg: {
+                    oktahey: {
+                        org_id: "org_123",
+                        org_name: "acme"
+                        // no default_role set
+                    }
+                },
+                byEmailDomain: {}
+            });
+
+            const pagePromise = PostSsoRedirectPage({
+                searchParams: {
+                    connection: "oktahey",
+                    redirect: "/docs",
+                    default_redirect: "/acme"
+                }
+            });
+
+            // When roles are empty and added, redirects via orgRedirect
+            await expect(pagePromise).rejects.toMatchObject({ url: "/auth/login?org=acme" });
+            expect(mocks.mockAddRoles).toHaveBeenCalledWith({
+                userId: "auth0|user",
+                orgId: "org_123",
+                roleNames: ["editor"]
+            });
+        });
+
+        it("assigns configured default_role when set to 'viewer'", async () => {
+            mocks.mockGetCurrentSession.mockResolvedValue({
+                accessToken: "token",
+                user: { sub: "auth0|user" }
+            });
+            mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
+            mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
+            mocks.mockGetRoles.mockResolvedValue({ ok: true, data: [] });
+            mocks.mockGetEmailLoginConfig.mockResolvedValue({
+                supportedPlatforms: [],
+                connectionToOrg: {
+                    oktahey: {
+                        org_id: "org_123",
+                        org_name: "acme",
+                        default_role: "viewer"
+                    }
+                },
+                byEmailDomain: {}
+            });
+
+            const pagePromise = PostSsoRedirectPage({
+                searchParams: {
+                    connection: "oktahey",
+                    redirect: "/docs",
+                    default_redirect: "/acme"
+                }
+            });
+
+            // When roles are empty and added, redirects via orgRedirect
+            await expect(pagePromise).rejects.toMatchObject({ url: "/auth/login?org=acme" });
+            expect(mocks.mockAddRoles).toHaveBeenCalledWith({
+                userId: "auth0|user",
+                orgId: "org_123",
+                roleNames: ["viewer"]
+            });
+        });
+
+        it("assigns configured default_role when set to 'admin'", async () => {
+            mocks.mockGetCurrentSession.mockResolvedValue({
+                accessToken: "token",
+                user: { sub: "auth0|user" }
+            });
+            mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
+            mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
+            mocks.mockGetRoles.mockResolvedValue({ ok: true, data: [] });
+            mocks.mockGetEmailLoginConfig.mockResolvedValue({
+                supportedPlatforms: [],
+                connectionToOrg: {
+                    oktahey: {
+                        org_id: "org_123",
+                        org_name: "acme",
+                        default_role: "admin"
+                    }
+                },
+                byEmailDomain: {}
+            });
+
+            const pagePromise = PostSsoRedirectPage({
+                searchParams: {
+                    connection: "oktahey",
+                    redirect: "/docs",
+                    default_redirect: "/acme"
+                }
+            });
+
+            // When roles are empty and added, redirects via orgRedirect
+            await expect(pagePromise).rejects.toMatchObject({ url: "/auth/login?org=acme" });
+            expect(mocks.mockAddRoles).toHaveBeenCalledWith({
+                userId: "auth0|user",
+                orgId: "org_123",
+                roleNames: ["admin"]
+            });
+        });
+
+        it("does not assign roles when user already has roles", async () => {
+            mocks.mockGetCurrentSession.mockResolvedValue({
+                accessToken: "token",
+                user: { sub: "auth0|user" }
+            });
+            mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
+            mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
+            mocks.mockGetRoles.mockResolvedValue({ ok: true, data: ["viewer"] });
+            mocks.mockGetEmailLoginConfig.mockResolvedValue({
+                supportedPlatforms: [],
+                connectionToOrg: {
+                    oktahey: {
+                        org_id: "org_123",
+                        org_name: "acme",
+                        default_role: "admin"
+                    }
+                },
+                byEmailDomain: {}
+            });
+
+            const pagePromise = PostSsoRedirectPage({
+                searchParams: {
+                    connection: "oktahey",
+                    redirect: "/docs",
+                    default_redirect: "/acme"
+                }
+            });
+
+            // When user already has roles, redirects to destination without adding roles
+            await expect(pagePromise).rejects.toMatchObject({ url: "/docs" });
+            expect(mocks.mockAddRoles).not.toHaveBeenCalled();
+        });
     });
 });
