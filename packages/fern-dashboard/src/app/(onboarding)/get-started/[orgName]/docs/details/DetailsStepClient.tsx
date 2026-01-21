@@ -256,6 +256,7 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
         <OnboardingStepCard
             title="Set up your Docs"
             description="You can always change these settings later."
+            continueText="Publish"
             onContinue={handleSubmit}
             showSkip={false}
             isLoading={isSubmitting}
