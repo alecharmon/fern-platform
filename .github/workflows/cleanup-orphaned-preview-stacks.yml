@@ -1,0 +1,247 @@
+name: Cleanup Orphaned Preview Stacks
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # Run daily at 6 AM UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run mode (only report, don't delete)"
+        required: false
+        default: "false"
+        type: boolean
+
+env:
+  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+
+jobs:
+  cleanup_fdr_lambda_previews:
+    runs-on: ubuntu-latest
+    environment: Fern Dev
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: us-east-1
+
+      - name: Verify AWS Connection
+        run: aws sts get-caller-identity
+
+      - name: Find and cleanup orphaned FDR Lambda preview stacks
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          echo "=== Cleaning up orphaned FDR Lambda preview stacks ==="
+          echo "Dry run mode: $DRY_RUN"
+
+          # Get all FDR Lambda preview stacks
+          echo "Fetching CloudFormation stacks..."
+          STACKS=$(aws cloudformation list-stacks \
+            --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE ROLLBACK_COMPLETE \
+            --query "StackSummaries[?starts_with(StackName, 'fdr-lambda-preview-')].StackName" \
+            --output text)
+
+          if [ -z "$STACKS" ]; then
+            echo "No FDR Lambda preview stacks found."
+            exit 0
+          fi
+
+          echo "Found preview stacks: $STACKS"
+
+          # Get list of open PRs
+          echo "Fetching open PRs..."
+          OPEN_PRS=$(gh pr list --repo fern-api/fern-platform --state open --json number --jq '.[].number')
+          echo "Open PRs: $OPEN_PRS"
+
+          ORPHANED_COUNT=0
+          CLEANED_COUNT=0
+
+          for STACK in $STACKS; do
+            # Extract PR number from stack name (format: fdr-lambda-preview-{PR_NUMBER})
+            PR_NUMBER=$(echo "$STACK" | sed 's/fdr-lambda-preview-//')
+
+            # Check if PR is still open
+            if echo "$OPEN_PRS" | grep -q "^${PR_NUMBER}$"; then
+              echo "Stack $STACK: PR #$PR_NUMBER is still open, skipping."
+              continue
+            fi
+
+            echo "Stack $STACK: PR #$PR_NUMBER is closed/merged, marking for cleanup."
+            ORPHANED_COUNT=$((ORPHANED_COUNT + 1))
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would delete stack: $STACK"
+            else
+              echo "Deleting stack: $STACK"
+              aws cloudformation delete-stack --stack-name "$STACK" || echo "Failed to delete stack $STACK"
+              CLEANED_COUNT=$((CLEANED_COUNT + 1))
+            fi
+          done
+
+          echo ""
+          echo "=== Summary ==="
+          echo "Orphaned stacks found: $ORPHANED_COUNT"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Stacks that would be deleted: $ORPHANED_COUNT"
+          else
+            echo "Stacks deleted: $CLEANED_COUNT"
+          fi
+
+      - name: Cleanup orphaned security group rules
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          RDS_PROXY_SG_ID: sg-0158802587ada8261
+        run: |
+          echo "=== Cleaning up orphaned security group rules ==="
+          echo "RDS Proxy Security Group: $RDS_PROXY_SG_ID"
+          echo "Dry run mode: $DRY_RUN"
+
+          # Get all ingress rules for the RDS Proxy security group
+          echo "Fetching security group rules..."
+          RULES=$(aws ec2 describe-security-group-rules \
+            --filters "Name=group-id,Values=$RDS_PROXY_SG_ID" \
+            --query "SecurityGroupRules[?IsEgress==\`false\`]" \
+            --output json)
+
+          # Get list of existing Lambda security groups (from active preview stacks)
+          echo "Fetching active Lambda security groups..."
+          ACTIVE_SGS=$(aws ec2 describe-security-groups \
+            --filters "Name=group-name,Values=*fdr-lambda-preview*" \
+            --query "SecurityGroups[].GroupId" \
+            --output text)
+
+          echo "Active Lambda security groups: $ACTIVE_SGS"
+
+          ORPHANED_COUNT=0
+          CLEANED_COUNT=0
+
+          # Parse rules and find orphaned ones
+          echo "$RULES" | jq -c '.[]' | while read -r RULE; do
+            RULE_ID=$(echo "$RULE" | jq -r '.SecurityGroupRuleId')
+            REFERENCED_SG=$(echo "$RULE" | jq -r '.ReferencedGroupInfo.GroupId // empty')
+            DESCRIPTION=$(echo "$RULE" | jq -r '.Description // "No description"')
+
+            # Skip rules that don't reference another security group
+            if [ -z "$REFERENCED_SG" ]; then
+              continue
+            fi
+
+            # Check if the referenced security group is from a Lambda preview
+            if ! echo "$DESCRIPTION" | grep -qi "lambda"; then
+              continue
+            fi
+
+            # Check if the referenced security group still exists
+            if echo "$ACTIVE_SGS" | grep -q "$REFERENCED_SG"; then
+              echo "Rule $RULE_ID: References active security group $REFERENCED_SG, skipping."
+              continue
+            fi
+
+            # Check if the security group exists at all
+            SG_EXISTS=$(aws ec2 describe-security-groups --group-ids "$REFERENCED_SG" 2>/dev/null || echo "")
+            if [ -n "$SG_EXISTS" ]; then
+              echo "Rule $RULE_ID: Referenced security group $REFERENCED_SG exists but is not a preview Lambda SG, skipping."
+              continue
+            fi
+
+            echo "Rule $RULE_ID: References non-existent security group $REFERENCED_SG (Description: $DESCRIPTION), marking for cleanup."
+            ORPHANED_COUNT=$((ORPHANED_COUNT + 1))
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would delete rule: $RULE_ID"
+            else
+              echo "Deleting rule: $RULE_ID"
+              aws ec2 revoke-security-group-ingress \
+                --group-id "$RDS_PROXY_SG_ID" \
+                --security-group-rule-ids "$RULE_ID" || echo "Failed to delete rule $RULE_ID"
+              CLEANED_COUNT=$((CLEANED_COUNT + 1))
+            fi
+          done
+
+          echo ""
+          echo "=== Security Group Rules Summary ==="
+          echo "Note: Orphaned rules referencing non-existent security groups have been cleaned up."
+
+  cleanup_fai_chat_previews:
+    runs-on: ubuntu-latest
+    environment: Fern Dev
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: us-east-1
+
+      - name: Verify AWS Connection
+        run: aws sts get-caller-identity
+
+      - name: Find and cleanup orphaned FAI Chat preview stacks
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          echo "=== Cleaning up orphaned FAI Chat preview stacks ==="
+          echo "Dry run mode: $DRY_RUN"
+
+          # Get all FAI Chat preview stacks
+          echo "Fetching CloudFormation stacks..."
+          STACKS=$(aws cloudformation list-stacks \
+            --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE ROLLBACK_COMPLETE \
+            --query "StackSummaries[?starts_with(StackName, 'fai-chat-preview-')].StackName" \
+            --output text)
+
+          if [ -z "$STACKS" ]; then
+            echo "No FAI Chat preview stacks found."
+            exit 0
+          fi
+
+          echo "Found preview stacks: $STACKS"
+
+          # Get list of open PRs with deployFaiChat label
+          echo "Fetching open PRs with deployFaiChat label..."
+          OPEN_PRS=$(gh pr list --repo fern-api/fern-platform --state open --label deployFaiChat --json number --jq '.[].number')
+          echo "Open PRs with deployFaiChat label: $OPEN_PRS"
+
+          ORPHANED_COUNT=0
+          CLEANED_COUNT=0
+
+          for STACK in $STACKS; do
+            # Extract PR number from stack name (format: fai-chat-preview-{PR_NUMBER})
+            PR_NUMBER=$(echo "$STACK" | sed 's/fai-chat-preview-//')
+
+            # Check if PR is still open with the label
+            if echo "$OPEN_PRS" | grep -q "^${PR_NUMBER}$"; then
+              echo "Stack $STACK: PR #$PR_NUMBER is still open with deployFaiChat label, skipping."
+              continue
+            fi
+
+            echo "Stack $STACK: PR #$PR_NUMBER is closed/merged or label removed, marking for cleanup."
+            ORPHANED_COUNT=$((ORPHANED_COUNT + 1))
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would delete stack: $STACK"
+            else
+              echo "Deleting stack: $STACK"
+              aws cloudformation delete-stack --stack-name "$STACK" || echo "Failed to delete stack $STACK"
+              CLEANED_COUNT=$((CLEANED_COUNT + 1))
+            fi
+          done
+
+          echo ""
+          echo "=== Summary ==="
+          echo "Orphaned stacks found: $ORPHANED_COUNT"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Stacks that would be deleted: $ORPHANED_COUNT"
+          else
+            echo "Stacks deleted: $CLEANED_COUNT"
+          fi
