@@ -25,7 +25,7 @@ export default function LoginOverlaySlot() {
             </svg>
 
             {/* Top right buttons */}
-            <div className="absolute right-4 top-4 flex gap-2 items-center">
+            <div className="absolute right-4 top-4 flex gap-2 items-center z-20">
                 <ThemeToggle className="hidden md:flex" />
                 <Button asChild variant="outline">
                     <a href="https://buildwithfern.com/learn" target="_blank" rel="noopener">
