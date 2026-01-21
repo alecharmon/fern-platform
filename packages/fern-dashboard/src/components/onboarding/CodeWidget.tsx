@@ -1,3 +1,5 @@
+"use client";
+
 import {
     ChevronDownIcon,
     ChevronLeftIcon,
@@ -14,6 +16,7 @@ import {
     TriangleAlertIcon,
     UploadIcon
 } from "lucide-react";
+import { type CSSProperties, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { WizardFormData } from "@/providers/OnboardingProvider";
 import { cn } from "@/utils/utils";
@@ -30,9 +33,22 @@ interface CodeWidgetProps {
 }
 
 const DEFAULT_LOGO_URL = "https://raw.githubusercontent.com/fern-api/docs-starter/main/fern/docs/assets/logo.svg";
+const INITIAL_FIELD_REVEAL_DELAY_MS = 1000;
+
+type FieldRevealState = {
+    companyName: boolean;
+    docsUrl: boolean;
+    logo: boolean;
+};
+
+const EMPTY_FIELD_REVEAL_STATE: FieldRevealState = {
+    companyName: false,
+    docsUrl: false,
+    logo: false
+};
 
 /** Helper to create staggered animation delay styles */
-function staggerDelay(index: number, baseDelay = 0, increment = 80): React.CSSProperties {
+function staggerDelay(index: number, baseDelay = 0, increment = 200): CSSProperties {
     return {
         animationDelay: `${baseDelay + index * increment}ms`,
         animationFillMode: "both"
@@ -47,10 +63,83 @@ export function CodeWidget({ wizardFormData, className, focusArea = "none" }: Co
     const logoUrl = wizardFormData.logoUrl ?? DEFAULT_LOGO_URL;
     // const faviconUrl = wizardFormData.faviconUrl;
 
+    const initialFieldStateRef = useRef<FieldRevealState | null>(null);
+    if (initialFieldStateRef.current === null) {
+        initialFieldStateRef.current = {
+            companyName: hasCompanyName,
+            docsUrl: hasDocsUrl,
+            logo: hasLogo
+        };
+    }
+
+    const initialAutofillDetectedRef = useRef(
+        Object.values(initialFieldStateRef.current ?? EMPTY_FIELD_REVEAL_STATE).some(Boolean)
+    );
+
+    const [fieldsPendingInitialReveal, setFieldsPendingInitialReveal] = useState<FieldRevealState>(
+        initialFieldStateRef.current ?? EMPTY_FIELD_REVEAL_STATE
+    );
+    const [isInitialBlurActive, setIsInitialBlurActive] = useState(initialAutofillDetectedRef.current);
+    const revealTimeoutRef = useRef<number | null>(null);
+
+    const scheduleRevealTimeout = useCallback((): void => {
+        if (revealTimeoutRef.current !== null) {
+            window.clearTimeout(revealTimeoutRef.current);
+        }
+        revealTimeoutRef.current = window.setTimeout(() => {
+            setIsInitialBlurActive(false);
+            revealTimeoutRef.current = null;
+        }, INITIAL_FIELD_REVEAL_DELAY_MS);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (revealTimeoutRef.current !== null) {
+                window.clearTimeout(revealTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (initialAutofillDetectedRef.current) {
+            scheduleRevealTimeout();
+        }
+    }, [scheduleRevealTimeout]);
+
+    useLayoutEffect(() => {
+        let didMarkNewField = false;
+
+        setFieldsPendingInitialReveal((current) => {
+            const next = { ...current };
+            const maybeMarkField = (key: keyof FieldRevealState, hasValue: boolean, focusKey: FocusArea) => {
+                if (current[key] || !hasValue || focusArea === focusKey) {
+                    return;
+                }
+                next[key] = true;
+                didMarkNewField = true;
+            };
+
+            maybeMarkField("companyName", hasCompanyName, "title");
+            maybeMarkField("docsUrl", hasDocsUrl, "url");
+            maybeMarkField("logo", hasLogo, "logo");
+
+            return didMarkNewField ? next : current;
+        });
+
+        if (didMarkNewField) {
+            setIsInitialBlurActive(true);
+            scheduleRevealTimeout();
+        }
+    }, [focusArea, hasCompanyName, hasDocsUrl, hasLogo, scheduleRevealTimeout]);
+
+    const shouldShowCompanyName = hasCompanyName && (!isInitialBlurActive || !fieldsPendingInitialReveal.companyName);
+    const shouldShowDocsUrl = hasDocsUrl && (!isInitialBlurActive || !fieldsPendingInitialReveal.docsUrl);
+    const shouldShowLogo = hasLogo && (!isInitialBlurActive || !fieldsPendingInitialReveal.logo);
+
     // Calculate transform based on focus area
     // Use consistent transform origin for smooth transitions
-    const getTransformStyle = (): React.CSSProperties => {
-        const baseStyle: React.CSSProperties = {
+    const getTransformStyle = (): CSSProperties => {
+        const baseStyle: CSSProperties = {
             transition: "transform 400ms ease-in-out"
         };
 
@@ -114,7 +203,7 @@ export function CodeWidget({ wizardFormData, className, focusArea = "none" }: Co
                     </div>
                     <div className="relative w-[200px] h-[12px]">
                         <span className="absolute inset-0 flex items-center text-xs truncate">
-                            {hasDocsUrl ? (
+                            {shouldShowDocsUrl ? (
                                 <>
                                     <AnimatedText text={wizardFormData.docsSiteUrl ?? ""} />
                                     <span>.docs.buildwithfern.com</span>
@@ -122,7 +211,7 @@ export function CodeWidget({ wizardFormData, className, focusArea = "none" }: Co
                             ) : null}
                         </span>
                         <div className="absolute inset-0 flex items-center">
-                            <DotMatrix width={200} height={10} fade={false} visible={!hasDocsUrl} />
+                            <DotMatrix width={200} height={10} fade={false} visible={!shouldShowDocsUrl} />
                         </div>
                     </div>
                     <RotateCwIcon className="size-3" />
@@ -141,7 +230,7 @@ export function CodeWidget({ wizardFormData, className, focusArea = "none" }: Co
                     <div
                         className={cn(
                             "absolute inset-0 flex items-center transition-opacity duration-300",
-                            hasLogo ? "opacity-100" : "opacity-0"
+                            shouldShowLogo ? "opacity-100" : "opacity-0"
                         )}
                     >
                         {/* biome-ignore lint/performance/noImgElement: false positive */}
@@ -152,7 +241,7 @@ export function CodeWidget({ wizardFormData, className, focusArea = "none" }: Co
                         />
                     </div>
                     <div className="absolute inset-0 flex items-center">
-                        <DotMatrix width={120} height={20} visible={!hasLogo} />
+                        <DotMatrix width={120} height={20} visible={!shouldShowLogo} />
                     </div>
                 </div>
                 <div className="mx-auto max-w-md flex-1">
@@ -235,7 +324,7 @@ export function CodeWidget({ wizardFormData, className, focusArea = "none" }: Co
                         <div className="mb-8 flex flex-col gap-2 animate-fade-in" style={staggerDelay(3)}>
                             <div className="relative h-7 w-[300px]">
                                 <h1 className="absolute inset-0 flex items-center text-xl font-medium text-gray-800 dark:text-white whitespace-nowrap">
-                                    {hasCompanyName && (
+                                    {shouldShowCompanyName && (
                                         <>
                                             Welcome to&nbsp;
                                             <AnimatedText text={companyName} />
@@ -244,7 +333,7 @@ export function CodeWidget({ wizardFormData, className, focusArea = "none" }: Co
                                     )}
                                 </h1>
                                 <div className="absolute inset-0 flex items-center">
-                                    <DotMatrix width={300} height={24} fade={false} visible={!hasCompanyName} />
+                                    <DotMatrix width={300} height={24} fade={false} visible={!shouldShowCompanyName} />
                                 </div>
                             </div>
                             <p className="dark:text-gray-800 text-sm text-gray-500">
