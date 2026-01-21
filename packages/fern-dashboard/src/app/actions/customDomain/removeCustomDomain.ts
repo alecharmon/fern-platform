@@ -3,11 +3,17 @@
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
-import { deleteVerification, getVerificationByDocsUrl, removeDomainFromVercelProject } from "@/app/services/domain";
+import {
+    deleteVerification,
+    getVerificationByDocsUrl,
+    getVerificationByDomain,
+    removeDomainFromVercelProject
+} from "@/app/services/domain";
 
 export interface RemoveCustomDomainRequest {
     docsUrl: string;
     orgName: Auth0OrgName;
+    domain?: string;
 }
 
 export interface RemoveCustomDomainResponse {
@@ -17,17 +23,24 @@ export interface RemoveCustomDomainResponse {
 
 export async function removeCustomDomain({
     docsUrl,
-    orgName
+    orgName,
+    domain
 }: RemoveCustomDomainRequest): Promise<RemoveCustomDomainResponse> {
     const session = await getCurrentSessionOrThrow();
     await assertUserHasOrganizationAccess(session.accessToken, orgName);
 
-    // Get existing verification record
-    const verification = await getVerificationByDocsUrl(docsUrl);
+    // Get existing verification record by docsUrl first
+    let verification = await getVerificationByDocsUrl(docsUrl);
+
+    // If not found by docsUrl, try to find by domain name
+    // This handles the case where the docsUrl changed after publishing
+    if (!verification && domain) {
+        verification = await getVerificationByDomain(domain);
+    }
 
     if (!verification) {
         // No custom domain configured, nothing to remove
-        return { success: true };
+        return { success: false, error: "No custom domain verification record found." };
     }
 
     // Check org ownership

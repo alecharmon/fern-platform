@@ -44,7 +44,8 @@ export function RemoveCustomDomainModal({
         try {
             const result = await removeCustomDomain({
                 docsUrl,
-                orgName
+                orgName,
+                domain
             });
 
             if (!result.success) {
