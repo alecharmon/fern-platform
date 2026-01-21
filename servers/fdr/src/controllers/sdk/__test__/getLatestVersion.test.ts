@@ -3,7 +3,7 @@ import { getLatestVersionFromNpm, getLatestVersionFromPypi } from "../getLatestV
 describe("getLatestVersion", () => {
     it("npm", async () => {
         const version = await getLatestVersionFromNpm("lodash");
-        expect(version).toEqual("4.17.21");
+        expect(version).toEqual("4.17.23");
     });
 
     it("pypi", async () => {
