@@ -57,6 +57,7 @@ export function FernAnchor({
 
     const handleClick = () => {
         void copyToClipboard?.();
+        window.history.replaceState(null, "", new URL(href, window.location.href).toString());
     };
 
     if (isDisabled) {
