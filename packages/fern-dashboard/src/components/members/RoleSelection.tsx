@@ -98,6 +98,22 @@ export function RoleSelectionGroup({
     const showRoleControls = !showAccessTypeSelector || accessType === "org";
     const showFineGrainedControls = showAccessTypeSelector && accessType === "fine-grained";
 
+    // Handle org-level role change - clear CLI access when changing away from editor
+    const handleRoleChange = (newRole: UserRole) => {
+        onRoleChange(newRole);
+        if (newRole !== "editor" && cliEnabled) {
+            onCliEnabledChange(false);
+        }
+    };
+
+    // Handle resource role change - clear CLI access when changing away from editor
+    const handleResourceRoleChange = (resourceId: string, newRole: ResourceRole | "none") => {
+        onResourceRoleChange?.(resourceId, newRole);
+        if (newRole !== "editor" && resourceCliAccess?.[resourceId]) {
+            onResourceCliAccessChange?.(resourceId, false);
+        }
+    };
+
     return (
         <div className="space-y-4">
             {/* Access Type Selection */}
@@ -163,7 +179,7 @@ export function RoleSelectionGroup({
             {showRoleControls && (
                 <div>
                     <div className="text-gray-1100 mb-2 text-sm font-medium">{roleLabel}</div>
-                    <Select value={role} onValueChange={(v) => onRoleChange(v as UserRole)} disabled={disabled}>
+                    <Select value={role} onValueChange={(v) => handleRoleChange(v as UserRole)} disabled={disabled}>
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
@@ -240,7 +256,10 @@ export function RoleSelectionGroup({
                                             <Select
                                                 value={currentRole}
                                                 onValueChange={(value) =>
-                                                    onResourceRoleChange?.(resource.id, value as ResourceRole | "none")
+                                                    handleResourceRoleChange(
+                                                        resource.id,
+                                                        value as ResourceRole | "none"
+                                                    )
                                                 }
                                                 disabled={disabled}
                                             >
