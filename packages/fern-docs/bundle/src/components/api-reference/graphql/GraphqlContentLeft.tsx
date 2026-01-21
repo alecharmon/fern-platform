@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { GraphqlContext } from "@fern-api/fdr-sdk/api-definition";
+import type { GraphqlContext, TypeShape } from "@fern-api/fdr-sdk/api-definition";
 import { GraphqlSection } from "@fern-docs/components/api-reference/graphql/GraphqlSection";
 import {
     TypeDefinitionAnchorPart,
@@ -11,6 +11,18 @@ import { MdxServerComponentProseSuspense } from "@/mdx/components/server-compone
 
 import { PropertyWithShape } from "../type-definitions/ObjectProperty";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
+
+function isListType(shape: TypeShape): boolean {
+    if (shape.type === "alias") {
+        if (shape.value.type === "list" || shape.value.type === "set") {
+            return true;
+        }
+        if (shape.value.type === "optional" || shape.value.type === "nullable") {
+            return isListType(shape.value.shape);
+        }
+    }
+    return false;
+}
 
 export interface HoveringProps {
     isHovering: boolean;
@@ -25,7 +37,7 @@ export async function GraphqlContentLeft({
 }) {
     return (
         <>
-            <TypeDefinitionAnchorPart part="request">
+            <TypeDefinitionAnchorPart part="arguments">
                 {operation.arguments != null && operation.arguments.length > 0 && (
                     <GraphqlSection
                         title="Arguments"
@@ -56,15 +68,13 @@ export async function GraphqlContentLeft({
                 )}
             </TypeDefinitionAnchorPart>
             <TypeDefinitionResponse>
-                <TypeDefinitionAnchorPart part="response">
+                <TypeDefinitionAnchorPart part="fields">
                     <GraphqlSection
-                        title="Return Type"
+                        title="Fields"
                         description={
-                            <MdxServerComponentProseSuspense
-                                size="sm"
-                                className="text-(color:--grayscale-a11)"
-                                mdx={undefined}
-                            />
+                            isListType(operation.returnType) ? (
+                                <span className="text-sm text-(color:--grayscale-a11)">Returns a list</span>
+                            ) : undefined
                         }
                     >
                         <TypeDefinitionAnchorPart part="body">

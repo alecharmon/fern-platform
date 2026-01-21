@@ -80,6 +80,7 @@ export function matchesTypeReference(
                 base64: () => typeof value === "string",
                 date: () => value instanceof Date,
                 bigInteger: () => typeof value === "string",
+                scalar: () => value === null,
                 _other: () => value == null
             }),
         literal: (literal) => value === literal.value.value,

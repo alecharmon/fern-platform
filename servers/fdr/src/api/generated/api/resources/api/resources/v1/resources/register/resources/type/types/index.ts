@@ -27,6 +27,7 @@ export * from "./ObjectPropertyAccess";
 export * from "./ObjectType";
 export * from "./OptionalType";
 export * from "./PrimitiveType";
+export * from "./ScalarType";
 export * from "./SetType";
 export * from "./StringType";
 export * from "./TypeDefinition";

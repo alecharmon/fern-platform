@@ -520,6 +520,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                         </span>
                     </WithLabel>
                 ),
+                scalar: () => null,
                 _other: () => null
             }),
         list: (list) => (

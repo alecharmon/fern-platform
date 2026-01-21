@@ -376,6 +376,7 @@ function primitiveToDefault(shape: Latest.PrimitiveType): unknown | undefined {
         uuid: (uuid) => uuid.default,
         base64: (base64) => base64.default,
         date: (value) => value.default,
-        bigInteger: (value) => value.default
+        bigInteger: (value) => value.default,
+        scalar: (value) => value.default
     });
 }

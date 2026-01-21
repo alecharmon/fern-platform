@@ -97,6 +97,8 @@ function toPrimitiveTypeLabels({ primitive, lang }: { primitive: PrimitiveType; 
             return toPrimitiveTypeLabelsNumeric(primitive, primitive.type === "double");
         case "string":
             return toPrimitiveTypeLabelsString({ ...primitive, lang });
+        case "scalar":
+            return primitive.description ? [primitive.description] : [];
         default:
             return [];
     }
@@ -224,6 +226,7 @@ export function renderTypeShorthand(
                     base64: () => (plural ? "Base64 strings" : maybeWithArticle("a", "Base64 string")),
                     date: () => (plural ? "dates" : maybeWithArticle("a", "date")),
                     bigInteger: () => (plural ? "big integers" : maybeWithArticle("a", "big integer")),
+                    scalar: (s) => s.name,
                     _other: () => "<unknown>"
                 }),
 

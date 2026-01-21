@@ -144,6 +144,7 @@ export function getIconInfoForTypeReference(
                 base64: () => ({ content: "abc", size: 6 }),
                 date: () => ({ content: "abc", size: 6 }),
                 bigInteger: () => ({ content: "123", size: 6 }),
+                scalar: () => ({ content: "abc", size: 6 }),
                 _other: () => null
             }),
         literal: () => ({ content: "!", size: 6 }),

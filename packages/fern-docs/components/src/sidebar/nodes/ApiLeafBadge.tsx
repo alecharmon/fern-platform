@@ -15,12 +15,13 @@ export function ApiLeafBadge({ node, className }: { node: FernNavigation.Navigat
             </ApiMethodBadge>
         );
     } else if (node.type === "graphql") {
-        // GraphQL operations display their operation type as a badge
-        const label = node.operationType === "QUERY" ? "Q" : node.operationType === "MUTATION" ? "M" : "S";
         return (
-            <ApiMethodBadge method="GET" size="sm" variant={selected ? "solid" : "subtle"} className={className}>
-                {label}
-            </ApiMethodBadge>
+            <ApiMethodBadge
+                method={node.operationType}
+                size="sm"
+                variant={selected ? "solid" : "subtle"}
+                className={className}
+            />
         );
     } else {
         if (node.type === "endpoint" && node.isResponseStream) {

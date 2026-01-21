@@ -44,19 +44,6 @@ const UnmemoizedGraphqlContentCodeSnippets: React.FC<GraphqlContentCodeSnippets.
                 lang={lang}
             />
 
-            {example?.variables && Object.keys(example.variables).length > 0 && (
-                <JsonCodeSnippetExample
-                    title="Example Variables"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                    }}
-                    json={example.variables}
-                    slug={node?.slug ?? ""}
-                    isResponse={false}
-                    lang={lang}
-                />
-            )}
-
             <JsonCodeSnippetExample
                 title={t(lang).apiReference.exampleResponse}
                 onClick={(e) => {

@@ -144,6 +144,7 @@ export function getEmptyValueForType(shape: TypeShapeOrReference, types: Record<
                 base64: (value) => value.default ?? "",
                 date: (value) => value.default ?? new Date().toISOString(),
                 bigInteger: (value) => value.default ?? "",
+                scalar: (value) => value.default ?? "",
                 _other: () => undefined
             }),
         literal: (literal) => literal.value.value,

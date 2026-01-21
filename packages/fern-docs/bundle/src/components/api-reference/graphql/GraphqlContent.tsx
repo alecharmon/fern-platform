@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
-import type { GraphqlContext } from "@fern-api/fdr-sdk/api-definition";
+import { type GraphqlContext, generateGraphQlSnippet } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { GraphqlContentCodeSnippets } from "@fern-docs/components/api-reference/graphql/GraphqlContentCodeSnippets";
 import { GraphqlContextProvider } from "@fern-docs/components/api-reference/graphql/GraphqlContext";
@@ -45,13 +45,21 @@ export async function GraphqlContent({
 }) {
     const { node, operation, types } = context;
 
+    // Use provided example or generate one from the operation schema
     const graphqlExample = operation.examples?.[0]
         ? {
               query: operation.examples[0].query,
               variables: operation.examples[0].variables,
               response: operation.examples[0].response
           }
-        : undefined;
+        : (() => {
+              const generated = generateGraphQlSnippet({ operation, types });
+              return {
+                  query: generated.query,
+                  variables: Object.keys(generated.variables).length > 0 ? generated.variables : undefined,
+                  response: generated.response
+              };
+          })();
 
     const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(operation.description);
 

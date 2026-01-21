@@ -403,6 +403,8 @@ function generateExamplePrimitive(reference: APIV1Write.PrimitiveType): string |
             return "2023-01-01";
         case "bigInteger":
             return "123456789123456789";
+        case "scalar":
+            return reference.name;
     }
 }
 

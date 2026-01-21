@@ -27,6 +27,7 @@ export * from "./ObjectPropertyAccess.js";
 export * from "./ObjectType.js";
 export * from "./OptionalType.js";
 export * from "./PrimitiveType.js";
+export * from "./ScalarType.js";
 export * from "./SetType.js";
 export * from "./StringType.js";
 export * from "./TypeDefinition.js";

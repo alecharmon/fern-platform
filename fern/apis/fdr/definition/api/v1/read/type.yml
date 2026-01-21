@@ -77,6 +77,13 @@ types:
       bigInteger: BigIntegerType
       uint: UintType
       uint64: Uint64Type
+      scalar: ScalarType
+      
+  ScalarType:
+    properties:
+      name: string
+      description: optional<string>
+      default: optional<unknown>
 
   IntegerType:
     properties:

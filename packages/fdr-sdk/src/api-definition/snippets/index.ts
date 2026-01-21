@@ -3,6 +3,7 @@ export * from "./constants";
 export { convertToCurl } from "./curl";
 export * from "./generators";
 export { getHarRequest } from "./get-har-request";
+export * from "./graphql-snippets";
 export * from "./http-snippets";
 export type {
     SnippetHttpRequest,

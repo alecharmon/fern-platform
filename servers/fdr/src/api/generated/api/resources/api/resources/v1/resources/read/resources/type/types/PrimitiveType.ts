@@ -14,7 +14,8 @@ export type PrimitiveType =
     | FernRegistry.api.v1.read.PrimitiveType.Date_
     | FernRegistry.api.v1.read.PrimitiveType.BigInteger
     | FernRegistry.api.v1.read.PrimitiveType.Uint
-    | FernRegistry.api.v1.read.PrimitiveType.Uint64;
+    | FernRegistry.api.v1.read.PrimitiveType.Uint64
+    | FernRegistry.api.v1.read.PrimitiveType.Scalar;
 
 export namespace PrimitiveType {
     export interface Integer extends FernRegistry.api.v1.read.IntegerType {
@@ -63,5 +64,9 @@ export namespace PrimitiveType {
 
     export interface Uint64 extends FernRegistry.api.v1.read.Uint64Type {
         type: "uint64";
+    }
+
+    export interface Scalar extends FernRegistry.api.v1.read.ScalarType {
+        type: "scalar";
     }
 }

@@ -352,6 +352,17 @@ function convertPrimitiveToSchema(primitive: ApiDefinition.PrimitiveType): OpenA
             return { type: "integer", format: "uint" };
         case "uint64":
             return { type: "integer", format: "uint64" };
+        case "scalar": {
+            const schema: OpenAPIV3_1.SchemaObject = {
+                type: "string",
+                title: primitive.name,
+                description: primitive.description
+            };
+            if (primitive.default !== undefined) {
+                schema.default = primitive.default;
+            }
+            return schema;
+        }
         default:
             assertNever(primitive);
     }

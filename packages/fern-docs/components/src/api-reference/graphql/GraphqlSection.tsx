@@ -22,7 +22,7 @@ export function GraphqlSection({
     const ErrorBoundary = useErrorBoundary();
     return (
         <ErrorBoundary>
-            <SectionContainer className="space-y-3">
+            <SectionContainer className="space-y-3 flex flex-col">
                 <TypeDefinitionAnchor>
                     {titleOverride ? (
                         <div className="mb-0 mt-0 inline-flex items-center gap-2">

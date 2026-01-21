@@ -193,6 +193,8 @@ function getPrimitiveDisplayName(primitive: ApiDefinition.PrimitiveType): string
             return "uint";
         case "uint64":
             return "uint64";
+        case "scalar":
+            return primitive.name;
     }
 }
 
