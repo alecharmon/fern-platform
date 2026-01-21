@@ -37,6 +37,16 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                 orgId: req.body.orgId
             });
 
+            // Check CLI permission if org is in the allowlist (or if "*" is set for all orgs)
+            const shouldCheckCliPermission =
+                app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(req.body.orgId);
+            if (shouldCheckCliPermission) {
+                await app.services.auth.checkUserHasCliPermission({
+                    authHeader: req.headers.authorization,
+                    orgId: req.body.orgId
+                });
+            }
+
             const uploadUrls = await app.services.s3.getPresignedDynamicIrUploadUrlsForSdk({
                 orgId: req.body.orgId,
                 version: req.body.version,
@@ -105,6 +115,17 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                 orgId: req.body.orgId
             });
             logOperationTime("checkUserBelongsToOrg");
+
+            // Check CLI permission if org is in the allowlist (or if "*" is set for all orgs)
+            const shouldCheckCliPermission =
+                app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(req.body.orgId);
+            if (shouldCheckCliPermission) {
+                await app.services.auth.checkUserHasCliPermission({
+                    authHeader: req.headers.authorization,
+                    orgId: req.body.orgId
+                });
+            }
+            logOperationTime("checkUserHasCliPermission");
 
             let apiDefinitionId = FdrAPI.ApiDefinitionId(uuidv4());
             let transformedApiDefinition: APIV1Db.DbApiDefinition | FdrAPI.api.latest.ApiDefinition | undefined;
