@@ -1,12 +1,9 @@
 "use server";
 
+import { addRoles, type Roles } from "@fern-api/user-permissions";
+
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
-import {
-    addUserToOrg,
-    doesUserBelongToOrg,
-    getInviteToken,
-    invalidateCachesAfterRedeemingInviteToken
-} from "../services/auth0/management";
+import * as auth0Management from "../services/auth0/management";
 import { type Auth0OrgName, Auth0UserID } from "../services/auth0/types";
 
 export type RedeemInviteTokenErrors =
@@ -32,7 +29,7 @@ export async function redeemInviteToken({
     }
 
     // Get the invite token from cache
-    const inviteToken = await getInviteToken(token);
+    const inviteToken = await auth0Management.getInviteToken(token);
 
     if (!inviteToken) {
         return {
@@ -44,7 +41,7 @@ export async function redeemInviteToken({
     // Check if token has expired
     if (new Date() > new Date(inviteToken.expiresAt)) {
         // Clean up expired token
-        await invalidateCachesAfterRedeemingInviteToken(token);
+        await auth0Management.invalidateCachesAfterRedeemingInviteToken(token);
         return {
             success: false,
             error: { type: "EXPIRED_INVITE_TOKEN" }
@@ -52,17 +49,23 @@ export async function redeemInviteToken({
     }
 
     // Check if user is already a member
-    if (await doesUserBelongToOrg(userId, inviteToken.orgName, { permissions })) {
+    if (await auth0Management.doesUserBelongToOrg(userId, inviteToken.orgName, { permissions })) {
         // Clean up the token since it's been used
-        await invalidateCachesAfterRedeemingInviteToken(token);
+        await auth0Management.invalidateCachesAfterRedeemingInviteToken(token);
         return { success: true, orgName: inviteToken.orgName, userId };
     }
 
     // Add user to organization
-    await addUserToOrg(userId, inviteToken.orgName);
+    await auth0Management.addUserToOrg(userId, inviteToken.orgName);
+
+    // Assign roles if specified
+    if (inviteToken.roles && inviteToken.roles.length > 0) {
+        const orgId = await auth0Management.getOrgIdFromName(inviteToken.orgName);
+        await addRoles({ userId, orgId, roleNames: inviteToken.roles as Roles[] });
+    }
 
     // Clean up the token since it's been used (one-time use)
-    await invalidateCachesAfterRedeemingInviteToken(token);
+    await auth0Management.invalidateCachesAfterRedeemingInviteToken(token);
 
     // Redirect to organization
     return { success: true, orgName: inviteToken.orgName, userId };

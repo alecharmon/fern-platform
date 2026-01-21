@@ -7,6 +7,7 @@ export interface InviteToken {
     inviterId: string;
     createdAt: string;
     expiresAt: string;
+    roles?: ("admin" | "editor" | "viewer" | "cli")[];
 }
 
 export interface GithubPrInfo {

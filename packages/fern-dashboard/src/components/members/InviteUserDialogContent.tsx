@@ -103,7 +103,7 @@ export function InviteUserDialogContent({
     });
 
     const createLink = useMutation({
-        mutationFn: () => createInviteLink({ orgName }),
+        mutationFn: () => createInviteLink({ orgName, roles: getRoles() }),
         onSuccess: ({ inviteUrl }) => {
             setInviteLink(inviteUrl);
             toast.success("Invite link created successfully");
@@ -155,6 +155,16 @@ export function InviteUserDialogContent({
                             <p className="text-muted-foreground text-sm">
                                 Create a one-time use invite link that can be shared with anyone.
                             </p>
+                            {isEnforcePermissionsEnabled && !inviteLink && (
+                                <RoleSelectionGroup
+                                    role={selectedRole}
+                                    onRoleChange={setSelectedRole}
+                                    cliEnabled={cliEnabled}
+                                    onCliEnabledChange={setCliEnabled}
+                                    disabled={isCreatingLink}
+                                    id="invite-link"
+                                />
+                            )}
                             {!inviteLink ? (
                                 <Button
                                     onClick={() => createLink.mutate()}

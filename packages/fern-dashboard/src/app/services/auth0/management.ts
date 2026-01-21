@@ -271,7 +271,11 @@ export async function getInviteToken(token: string) {
     return await INVITE_TOKEN_CACHE.getDirectly(RedisCacheKey.inviteToken(token));
 }
 
-export async function createInviteToken(orgName: Auth0OrgName, inviterId: string) {
+export async function createInviteToken(
+    orgName: Auth0OrgName,
+    inviterId: string,
+    roles?: ("admin" | "editor" | "viewer" | "cli")[]
+) {
     const token = uuidv4();
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
@@ -279,7 +283,8 @@ export async function createInviteToken(orgName: Auth0OrgName, inviterId: string
         orgName,
         inviterId,
         createdAt: now.toISOString(),
-        expiresAt: expiresAt.toISOString()
+        expiresAt: expiresAt.toISOString(),
+        roles
     };
     await INVITE_TOKEN_CACHE.set(RedisCacheKey.inviteToken(token), inviteToken);
 
