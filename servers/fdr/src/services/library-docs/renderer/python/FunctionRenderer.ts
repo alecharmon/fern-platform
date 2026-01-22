@@ -49,7 +49,7 @@ export function renderFunctionDetailed(func: FdrLambda.libraryDocs.PythonFunctio
     const links = buildCodeBlockLinks(typeInfos, baseSlug, currentModulePath);
 
     // Signature in code block with type links
-    lines.push(renderCodeBlockWithLinks(func.signature, links));
+    lines.push(renderCodeBlockWithLinks(func.signature.replace(/^def /, ""), links));
     lines.push("</Anchor>");
     lines.push("");
 
@@ -109,7 +109,7 @@ export function renderMethodDetailed(
     const links = buildCodeBlockLinks(typeInfos, baseSlug, modulePath);
 
     // Signature in code block with type links
-    lines.push(renderCodeBlockWithLinks(func.signature, links));
+    lines.push(renderCodeBlockWithLinks(func.signature.replace(/^def /, ""), links));
     lines.push("</Anchor>");
     lines.push("");
 

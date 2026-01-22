@@ -15,7 +15,7 @@ import {
     renderSimpleDocstring
 } from "../base/index.js";
 import { renderMethodDetailed, renderProperty } from "./FunctionRenderer.js";
-import { buildCodeBlockLinks, getTypeDisplay, linkTypeInfo, renderCodeBlockWithLinks } from "./TypeLinkResolver.js";
+import { getTypeDisplay, linkTypeInfo } from "./TypeLinkResolver.js";
 
 /**
  * Render a class in detailed form for the API section.
@@ -146,9 +146,8 @@ function renderRegularClassDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, ba
 /**
  * Render a TypedDict class in detailed form.
  */
-function renderTypedDictDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
+function renderTypedDictDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, _baseSlug: string): string {
     const lines: string[] = [];
-    const currentModulePath = getModulePath(cls.path);
 
     const anchorId = generateAnchorId(cls.path);
 
@@ -175,31 +174,16 @@ function renderTypedDictDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, baseS
         }
     }
 
-    // Fields as anchored items with type links
+    // Fields using ParamField
     if (cls.typedDictFields && cls.typedDictFields.length > 0) {
         for (const field of cls.typedDictFields) {
-            const fieldAnchorId = generateAnchorId(`${cls.path}.${field.name}`);
-            // Use resolvedPath for full type path display (enables CodeBlock linking)
-            const typeDisplay = field.typeInfo?.resolvedPath ?? getTypeDisplay(field.typeInfo) ?? "Any";
-            const fieldCode = `${field.name}: ${typeDisplay}`;
-
-            // Build links for the field's type
-            const links = buildCodeBlockLinks([field.typeInfo], baseSlug, currentModulePath);
-
-            lines.push(`<Anchor id="${fieldAnchorId}">`);
-            lines.push("");
-            lines.push(renderCodeBlockWithLinks(fieldCode, links));
-            lines.push("</Anchor>");
-            lines.push("");
-
+            const typeDisplay = getTypeDisplay(field.typeInfo) ?? "Any";
+            lines.push(`<ParamField path="${field.name}" type="${escapeMdx(typeDisplay)}">`);
             if (field.description) {
-                lines.push("<Indent>");
-                lines.push("");
                 lines.push(escapeMdx(field.description));
-                lines.push("");
-                lines.push("</Indent>");
-                lines.push("");
             }
+            lines.push("</ParamField>");
+            lines.push("");
         }
     }
 
@@ -239,17 +223,11 @@ function renderEnumDetailed(cls: FdrLambda.libraryDocs.PythonClassIr): string {
         }
     }
 
-    // Enum members
+    // Enum members using ParamField
     if (cls.enumMembers && cls.enumMembers.length > 0) {
         for (const member of cls.enumMembers) {
-            const memberAnchorId = generateAnchorId(`${cls.path}.${member.name}`);
-
-            lines.push(`<Anchor id="${memberAnchorId}">`);
-            lines.push("");
-            lines.push("```python");
-            lines.push(`${member.name} = ${member.value}`);
-            lines.push("```");
-            lines.push("</Anchor>");
+            lines.push(`<ParamField path="${member.name}" type="= ${escapeMdx(member.value)}">`);
+            lines.push("</ParamField>");
             lines.push("");
         }
     }
@@ -331,43 +309,41 @@ function isVariableReference(value: string): boolean {
 }
 
 /**
- * Render an attribute inline (with anchor and type links, for inside class Indent).
+ * Render an attribute using ParamField component.
  */
 function renderAttributeInline(
     attr: FdrLambda.libraryDocs.AttributeIr,
-    baseSlug: string,
-    currentModulePath: string
+    _baseSlug: string,
+    _currentModulePath: string
 ): string {
     const lines: string[] = [];
 
-    const anchorId = generateAnchorId(attr.path);
+    const typeDisplay = getTypeDisplay(attr.typeInfo);
+    const defaultValue = attr.value && attr.value.length <= 50 ? attr.value : undefined;
 
-    // Use resolvedPath for full type path display (enables CodeBlock linking)
-    const attrTypeDisplay = attr.typeInfo?.resolvedPath ?? getTypeDisplay(attr.typeInfo);
-    const typeStr = attrTypeDisplay ? `: ${attrTypeDisplay}` : "";
-    const valueStr = attr.value && attr.value.length <= 30 ? ` = ${attr.value}` : "";
-    const attrCode = `${attr.name}${typeStr}${valueStr}`;
+    // Build type string with optional default value (e.g., "SomeType = value")
+    let typeStr = typeDisplay || "";
+    if (defaultValue) {
+        typeStr = typeStr ? `${typeStr} = ${defaultValue}` : `= ${defaultValue}`;
+    }
 
-    // Build links for the attribute's type
-    const links = buildCodeBlockLinks([attr.typeInfo], baseSlug, currentModulePath);
+    // Build ParamField props
+    const props: string[] = [`path="${attr.name}"`];
+    if (typeStr) {
+        props.push(`type="${escapeMdx(typeStr)}"`);
+    }
 
-    lines.push(`<Anchor id="${anchorId}">`);
-    lines.push("");
-    lines.push(renderCodeBlockWithLinks(attrCode, links));
-    lines.push("</Anchor>");
+    lines.push(`<ParamField ${props.join(" ")}>`);
 
-    // Docstring if present
+    // Docstring as content
     if (attr.docstring) {
-        lines.push("");
-        lines.push("<Indent>");
-        lines.push("");
         const docstringMdx = renderSimpleDocstring(attr.docstring);
         if (docstringMdx) {
             lines.push(docstringMdx);
         }
-        lines.push("");
-        lines.push("</Indent>");
     }
+
+    lines.push("</ParamField>");
 
     return lines.join("\n");
 }

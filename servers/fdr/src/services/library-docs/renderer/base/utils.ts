@@ -61,7 +61,7 @@ export function joinLines(...lines: (string | undefined | null)[]): string {
  * Create MDX frontmatter.
  */
 export function createFrontmatter(slug: string, title?: string): string {
-    const parts = ["---", `slug: ${slug}`];
+    const parts = ["---", "layout: overview", `slug: ${slug}`];
     if (title) {
         parts.push(`title: ${title}`);
     }

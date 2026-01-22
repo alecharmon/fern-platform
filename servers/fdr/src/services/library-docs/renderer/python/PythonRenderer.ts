@@ -71,16 +71,17 @@ export class PythonRenderer {
         // Generate navigation from module tree
         const navItems = this.generateModuleNav(ir.rootModule, "");
 
-        // Build the wrapper SectionNode
-        const sectionNode = this.buildSectionNode(navItems);
+        // Build the wrapper SectionNode (root module page is the section overview)
+        const sectionNode = this.buildSectionNode(navItems, ir.rootModule.name);
 
         return { pages, sectionNode };
     }
 
     /**
      * Build the wrapper SectionNode containing all navigation items.
+     * The root module page serves as the section's overview/landing page.
      */
-    private buildSectionNode(navItems: NavNode[]): FernRegistry.navigation.v1.SectionNode {
+    private buildSectionNode(navItems: NavNode[], rootModuleName: string): FernRegistry.navigation.v1.SectionNode {
         return {
             type: "section",
             id: generateNodeId(`libdocs:${this.slug}`),
@@ -94,7 +95,7 @@ export class PythonRenderer {
             viewers: undefined,
             orphaned: undefined,
             featureFlags: undefined,
-            overviewPageId: undefined,
+            overviewPageId: `${this.slug}/${rootModuleName}.mdx` as FernRegistry.PageId,
             noindex: undefined,
             pointsTo: undefined,
             collapsed: undefined,
@@ -125,8 +126,8 @@ export class PythonRenderer {
             };
             return pageNode;
         } else {
-            // Generate overview page ID for this section
-            const overviewPageId = `${node.slug}-overview.mdx` as FernRegistry.PageId;
+            // Section overview is now the module's main page (submodules merged in)
+            const overviewPageId = `${node.slug}.mdx` as FernRegistry.PageId;
 
             const sectionNode: FernRegistry.navigation.v1.SectionNode = {
                 type: "section",
@@ -169,7 +170,10 @@ export class PythonRenderer {
             module.docstring != null;
 
         // Add page for this module if it has content
-        if (hasContent) {
+        // Skip if: root module (section overview) or has submodules (becomes section with overview)
+        const isRoot = parentPath === "";
+        const hasSubmodules = module.submodules.length > 0;
+        if (hasContent && !isRoot && !hasSubmodules) {
             items.push({
                 type: "page",
                 title: module.name,

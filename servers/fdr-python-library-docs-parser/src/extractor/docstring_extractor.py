@@ -42,15 +42,15 @@ def extract_docstring(docstring: Optional[Docstring]) -> Optional[DocstringIr]:
         kind = section.kind.name.lower()
 
         if kind == "text":
-            # First text section is summary, subsequent ones are description
             text = str(section.value).strip()
             if summary is None:
-                summary = text
+                # PEP 257: Summary is the first line only (for tables/tooltips)
+                summary = text.split("\n", 1)[0].strip()
+            # Full text always goes to description
+            if description:
+                description += "\n\n" + text
             else:
-                if description:
-                    description += "\n\n" + text
-                else:
-                    description = text
+                description = text
 
         elif kind == "parameters":
             for param in section.value:

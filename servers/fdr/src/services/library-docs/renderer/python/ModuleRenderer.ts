@@ -44,6 +44,11 @@ export function renderModulePage(
         }
     }
 
+    // Submodules section (before Module Contents)
+    if (module.submodules.length > 0) {
+        lines.push(renderSubmodulesSection(module.submodules, config, modulePath));
+    }
+
     // Determine what sections we have
     const hasClasses = module.classes.length > 0;
     const hasFunctions = module.functions.length > 0;
@@ -51,7 +56,8 @@ export function renderModulePage(
     const hasContent = hasClasses || hasFunctions || hasAttributes;
 
     if (hasContent) {
-        lines.push("## Module Contents");
+        const contentsHeader = module.submodules.length > 0 ? "Package Contents" : "Module Contents";
+        lines.push(`## ${contentsHeader}`);
         lines.push("");
 
         // Classes summary table
@@ -119,6 +125,45 @@ export function renderModulePage(
 }
 
 /**
+ * Render a list of submodules, split into Subpackages (have children) and Submodules (leaf nodes).
+ * This matches Python/Sphinx conventions where packages contain other modules.
+ */
+function renderSubmodulesSection(
+    submodules: FdrLambda.libraryDocs.PythonModuleIr[],
+    config: RenderConfig,
+    modulePath: string
+): string {
+    const lines: string[] = [];
+
+    // Split into packages (have submodules) vs modules (leaf nodes)
+    const packages = submodules.filter((sub) => sub.submodules.length > 0);
+    const modules = submodules.filter((sub) => sub.submodules.length === 0);
+
+    const renderItem = (sub: FdrLambda.libraryDocs.PythonModuleIr): string => {
+        const link = `/${config.baseSlug}/${modulePath}/${sub.name}`;
+        return `- **[\`${sub.path}\`](${link})**`;
+    };
+
+    if (packages.length > 0) {
+        lines.push("## Subpackages", "");
+        for (const pkg of packages) {
+            lines.push(renderItem(pkg));
+        }
+        lines.push("");
+    }
+
+    if (modules.length > 0) {
+        lines.push("## Submodules", "");
+        for (const mod of modules) {
+            lines.push(renderItem(mod));
+        }
+        lines.push("");
+    }
+
+    return lines.join("\n");
+}
+
+/**
  * Render a module-level attribute/constant in detail.
  */
 function renderAttributeDetailed(attr: FdrLambda.libraryDocs.AttributeIr): string {
@@ -129,10 +174,13 @@ function renderAttributeDetailed(attr: FdrLambda.libraryDocs.AttributeIr): strin
     lines.push(`<Anchor id="${anchorId}">`);
     lines.push("");
 
-    // Signature
+    // Signature with value (truncated if too long)
     const attrTypeDisplay = getTypeDisplay(attr.typeInfo);
     const typeStr = attrTypeDisplay ? `: ${attrTypeDisplay}` : "";
-    const valueStr = attr.value && attr.value.length <= 50 ? ` = ${attr.value}` : "";
+    const maxValueLength = 80;
+    const valueStr = attr.value
+        ? ` = ${attr.value.length > maxValueLength ? attr.value.slice(0, maxValueLength) + "..." : attr.value}`
+        : "";
 
     lines.push("```python");
     lines.push(`${attr.name}${typeStr}${valueStr}`);
@@ -151,53 +199,6 @@ function renderAttributeDetailed(attr: FdrLambda.libraryDocs.AttributeIr): strin
         lines.push("");
         lines.push("</Indent>");
     }
-
-    return lines.join("\n");
-}
-
-/**
- * Render a section overview page that lists submodules.
- */
-export function renderSectionOverviewPage(
-    module: FdrLambda.libraryDocs.PythonModuleIr,
-    config: RenderConfig,
-    modulePath: string
-): string {
-    const lines: string[] = [];
-
-    const slug = `${config.baseSlug}/${modulePath}`;
-
-    // Frontmatter - use full path for title (e.g., "nemo_rl.algorithms")
-    lines.push(createFrontmatter(slug, module.path));
-    lines.push("");
-
-    // Module docstring if present
-    if (module.docstring) {
-        const docstringMdx = renderSimpleDocstring(module.docstring);
-        if (docstringMdx) {
-            lines.push(docstringMdx);
-            lines.push("");
-        }
-    }
-
-    // Submodules section
-    lines.push("## Submodules");
-    lines.push("");
-
-    for (const submodule of module.submodules) {
-        // Use full absolute path for the link
-        const submodulePath = `${modulePath}/${submodule.name}`;
-        const submoduleLink = `/${config.baseSlug}/${submodulePath}`;
-
-        // Use docstring summary as description if available
-        let description = "";
-        if (submodule.docstring?.summary) {
-            description = ` - ${submodule.docstring.summary}`;
-        }
-
-        lines.push(`- **[\`${submodule.name}\`](${submoduleLink})**${description}`);
-    }
-    lines.push("");
 
     return lines.join("\n");
 }
@@ -224,16 +225,11 @@ export function renderAllModulePages(
         // Check if module has submodules
         const hasSubmodules = module.submodules.length > 0;
 
-        if (hasDirectContent) {
-            // Module has content - render a content page
+        // Generate page if module has any documentable content
+        // Submodules list is now included in renderModulePage, so no separate overview needed
+        if (hasDirectContent || hasSubmodules) {
             const pageKey = `${config.baseSlug}/${modulePath}.mdx`;
             pages[pageKey] = renderModulePage(module, config, parentPath);
-        }
-
-        if (hasSubmodules) {
-            // Module has submodules - render an overview page for the section
-            const pageKey = `${config.baseSlug}/${modulePath}-overview.mdx`;
-            pages[pageKey] = renderSectionOverviewPage(module, config, modulePath);
         }
 
         // Recurse into submodules

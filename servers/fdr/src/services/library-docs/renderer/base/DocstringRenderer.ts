@@ -19,13 +19,7 @@ export function renderDocstring(
 
     const lines: string[] = [];
 
-    // Summary
-    if (docstring.summary) {
-        lines.push(escapeMdx(docstring.summary));
-        lines.push("");
-    }
-
-    // Description
+    // Description (contains full text; summary is only used for tables/tooltips)
     if (docstring.description) {
         lines.push(escapeMdx(docstring.description));
         lines.push("");
@@ -55,19 +49,14 @@ export function renderDocstring(
 
     // Returns
     if (docstring.returns) {
-        lines.push("**Returns:**");
-        lines.push("");
         const type = docstring.returns.type || returnAnnotation || "";
-        lines.push(`<ParamField path="" type="">`);
-        if (type) {
-            lines.push(`\`${formatTypeAnnotation(type)}\``);
-            lines.push("");
-        }
+        const typeStr = type ? `\`${formatTypeAnnotation(type)}\`` : "";
+        lines.push(`**Returns:** ${typeStr}`);
+        lines.push("");
         if (docstring.returns.description) {
             lines.push(escapeMdx(docstring.returns.description));
+            lines.push("");
         }
-        lines.push("</ParamField>");
-        lines.push("");
     }
 
     // Raises
@@ -131,18 +120,6 @@ export function renderSimpleDocstring(docstring: FdrLambda.libraryDocs.Docstring
         return "";
     }
 
-    const lines: string[] = [];
-
-    if (docstring.summary) {
-        lines.push(escapeMdx(docstring.summary));
-    }
-
-    if (docstring.description) {
-        if (lines.length > 0) {
-            lines.push("");
-        }
-        lines.push(escapeMdx(docstring.description));
-    }
-
-    return lines.join("\n");
+    // Description contains full text; summary is only for tables/tooltips
+    return docstring.description ? escapeMdx(docstring.description) : "";
 }
