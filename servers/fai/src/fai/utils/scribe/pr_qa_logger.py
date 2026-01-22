@@ -14,7 +14,7 @@ async def log_install_for_qa(integration: ScribeIntegrationDb) -> None:
     try:
         qa_bot_token = VARIABLES.SCRIBE_SLACK_BOT_TOKEN
 
-        message_text = f"""*SCRIBE APP INSTALLED* 🎉
+        message_text = f"""*FERN WRITER SLACK APP INSTALLED* 🎉
 
 *Org:* {integration.slack_team_name or 'Unknown'}
 *Repository:* `{integration.github_repo}`

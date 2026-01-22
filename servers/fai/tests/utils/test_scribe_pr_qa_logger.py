@@ -55,7 +55,7 @@ class TestLogInstallForQA:
             assert call_args.kwargs["message_key"] == "scribe_install_test-integration-123"
 
             message_text = call_args.kwargs["text"]
-            assert "*SCRIBE APP INSTALLED* 🎉" in message_text
+            assert "*FERN WRITER SLACK APP INSTALLED* 🎉" in message_text
             assert "*Org:* Test Org" in message_text
             assert "*Repository:* `test-org/test-repo`" in message_text
 
