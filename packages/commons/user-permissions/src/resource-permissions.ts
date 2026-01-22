@@ -646,7 +646,6 @@ export async function getUserPermissionsForResource({
     resourceId: string;
     logger?: PermissionLogger;
 }): Promise<string[]> {
-    // biome-ignore lint/suspicious/noConsole: Fallback logging when no logger provided
     const log = logger || console;
     log.warn("[getUserPermissionsForResource] Querying Supabase with:", {
         userId,
@@ -783,7 +782,6 @@ export async function hasUserPermissionForResource({
     permission: string;
     logger?: PermissionLogger;
 }): Promise<boolean> {
-    // biome-ignore lint/suspicious/noConsole: Fallback logging when no logger provided
     const log = logger || console;
     log.warn("[hasUserPermissionForResource] Input:", {
         userId,

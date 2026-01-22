@@ -125,7 +125,7 @@ export function MemberRow({ member, currentUserId, isFineGrainedPermissionsEnabl
                         {!isCurrentUser && (
                             <>
                                 <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
-                                    <PencilIcon /> Edit permissions
+                                    <PencilIcon /> Change role
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                             </>

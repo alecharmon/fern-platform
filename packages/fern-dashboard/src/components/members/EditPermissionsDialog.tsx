@@ -1,6 +1,7 @@
 "use client";
 
 import type { ResourceRole, Roles, UserRolePerResource } from "@fern-api/user-permissions";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -10,16 +11,9 @@ import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { ReactQueryKey } from "@/state/queryKeys";
 import { useOrgMembers } from "@/state/useOrgMembers";
+
 import { Button } from "../ui/button";
-import {
-    Dialog,
-    DialogBody,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from "../ui/dialog";
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import {
     type AccessType,
     RoleSelectionGroup,
@@ -82,7 +76,10 @@ export function EditPermissionsDialog({
     const userResourceRolesQuery = useQuery({
         queryKey: ["user-resource-roles", orgName, userId],
         queryFn: async () => {
-            const response = await DashboardApiClient.getUserResourceRoles({ orgName, userId });
+            const response = await DashboardApiClient.getUserResourceRoles({
+                orgName,
+                userId
+            });
             if (!response.ok) {
                 throw new Error(response.error ?? "Failed to fetch user resource roles");
             }
@@ -172,8 +169,12 @@ export function EditPermissionsDialog({
             toast.success(`Permissions updated for ${userName}`);
             // Invalidate and refetch fresh data
             await refetch();
-            await queryClient.refetchQueries({ queryKey: ReactQueryKey.orgMembers(orgName) });
-            await queryClient.refetchQueries({ queryKey: ["user-resource-roles", orgName, userId] });
+            await queryClient.refetchQueries({
+                queryKey: ReactQueryKey.orgMembers(orgName)
+            });
+            await queryClient.refetchQueries({
+                queryKey: ["user-resource-roles", orgName, userId]
+            });
             onOpenChange(false);
         },
         onError: (error) => {
@@ -233,23 +234,12 @@ export function EditPermissionsDialog({
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Edit permissions for {userName}</DialogTitle>
-                    <DialogDescription>
-                        Update the role and access permissions for this member.{" "}
-                        <a
-                            href="https://buildwithfern.com/learn/dashboard/configuration/permissions"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                        >
-                            Learn more
-                        </a>
-                    </DialogDescription>
+                    <DialogTitle>Change {userName}'s Role</DialogTitle>
                 </DialogHeader>
                 <DialogBody>
                     <div className="space-y-6">
                         <RoleSelectionGroup
-                            roleLabel="Organization Role"
+                            roleLabel="Member Role"
                             role={selectedRole}
                             onRoleChange={setSelectedRole}
                             cliEnabled={cliEnabled}
@@ -259,7 +249,10 @@ export function EditPermissionsDialog({
                             showAccessTypeSelector={isFineGrainedPermissionsEnabled}
                             accessType={accessType}
                             onAccessTypeChange={setAccessType}
-                            resources={docsSitesQuery.data?.map((site) => ({ id: site.url, label: site.url }))}
+                            resources={docsSitesQuery.data?.map((site) => ({
+                                id: site.url,
+                                label: site.url
+                            }))}
                             resourceRoles={resourceRoles as Record<string, RoleSelectionResourceRole | "none">}
                             onResourceRoleChange={(resourceId, role) =>
                                 setResourceRoles((prev) => ({
@@ -280,19 +273,45 @@ export function EditPermissionsDialog({
                     </div>
                 </DialogBody>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isUpdating}>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSave} disabled={isUpdating}>
-                        {isUpdating ? (
-                            <>
-                                Saving...
-                                <Loader2 className="size-4 animate-spin" />
-                            </>
-                        ) : (
-                            "Save changes"
-                        )}
-                    </Button>
+                    <div className="flex w-full items-center justify-between">
+                        <a
+                            href="https://buildwithfern.com/learn/dashboard/configuration/permissions"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-sm text-green-1100 hover:text-green-700  dark:text-green"
+                        >
+                            Learn more
+                            <svg
+                                className="size-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                            </svg>
+                        </a>
+                        <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isUpdating}>
+                                Cancel
+                            </Button>
+                            <Button onClick={handleSave} disabled={isUpdating}>
+                                {isUpdating ? (
+                                    <>
+                                        Saving...
+                                        <Loader2 className="size-4 animate-spin" />
+                                    </>
+                                ) : (
+                                    "Save changes"
+                                )}
+                            </Button>
+                        </div>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

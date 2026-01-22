@@ -149,7 +149,6 @@ export async function hasResourcePermission({
     forceFineGrained?: boolean;
     logger?: PermissionLogger;
 }): Promise<boolean> {
-    // biome-ignore lint/suspicious/noConsole: Fallback logging when no logger provided
     const log = logger || console;
     log.warn("[hasResourcePermission] Input", {
         sessionPermissions,

@@ -16,16 +16,16 @@ export interface Resource {
 }
 
 const ORG_ROLE_OPTIONS: { value: UserRole; label: string; description: string }[] = [
-    { value: "viewer", label: "Viewer", description: "Read-only access to the Dashboard and Analytics." },
+    { value: "viewer", label: "Viewer", description: "Read-only access in the dashboard." },
     {
         value: "editor",
         label: "Editor",
-        description: "Can view, edit, and publish SDKs and Docs. CLI access is configurable separately."
+        description: "Ability to use the Fern Editor."
     },
     {
         value: "admin",
         label: "Admin",
-        description: "Full control including member management and CLI access."
+        description: "Control of the organization including publishing, managing members, and billing."
     }
 ];
 
@@ -205,18 +205,7 @@ export function RoleSelectionGroup({
                         <Label htmlFor={`${id}-cli-access`} className="text-gray-1100 text-sm">
                             CLI Access
                         </Label>
-                        <p className="text-muted-foreground text-xs">
-                            Allow user to publish SDKs and Docs sites to production via the{" "}
-                            <a
-                                href="https://buildwithfern.com/learn/cli-api-reference/cli-reference/overview"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline"
-                            >
-                                Fern CLI
-                            </a>
-                            .
-                        </p>
+                        <p className="text-muted-foreground text-xs">Ability to publish SDKs and Docs.</p>
                     </div>
                     <Switch
                         id={`${id}-cli-access`}

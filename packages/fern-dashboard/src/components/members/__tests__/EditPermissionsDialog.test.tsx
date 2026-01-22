@@ -78,7 +78,7 @@ describe("EditPermissionsDialog", () => {
         it("renders dialog with user name", () => {
             render(<EditPermissionsDialog {...defaultProps} />, { wrapper: createWrapper() });
 
-            expect(screen.getByText("Edit permissions for Test User")).toBeDefined();
+            expect(screen.getByText("Change Test User's Role")).toBeDefined();
         });
 
         it("renders save and cancel buttons", () => {
