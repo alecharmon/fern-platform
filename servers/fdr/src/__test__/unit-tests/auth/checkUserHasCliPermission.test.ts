@@ -319,15 +319,17 @@ describe("checkUserHasCliPermission", () => {
             })
         ).resolves.toBeUndefined();
 
-        expect(mockHasResourcePermission).toHaveBeenCalledWith({
-            sessionPermissions: [],
-            userId: "auth0|user123",
-            orgId: "org_abc123",
-            permissionToCheck: "cli",
-            resourceType: "docs",
-            resourceId: "https://docs.example.com",
-            forceFineGrained: true
-        });
+        expect(mockHasResourcePermission).toHaveBeenCalledWith(
+            expect.objectContaining({
+                sessionPermissions: [],
+                userId: "auth0|user123",
+                orgId: "org_abc123",
+                permissionToCheck: "cli",
+                resourceType: "docs",
+                resourceId: "https://docs.example.com",
+                forceFineGrained: true
+            })
+        );
 
         expect(mockLogger.debug).toHaveBeenCalledWith(
             "User auth0|user123 has fine-grained CLI permission for docs https://docs.example.com"

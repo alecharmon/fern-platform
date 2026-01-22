@@ -637,13 +637,24 @@ export async function getUserPermissionsForResource({
     userId,
     orgId,
     resourceType,
-    resourceId
+    resourceId,
+    logger
 }: {
     userId: string;
     orgId: string;
     resourceType: string;
     resourceId: string;
+    logger?: PermissionLogger;
 }): Promise<string[]> {
+    // biome-ignore lint/suspicious/noConsole: Fallback logging when no logger provided
+    const log = logger || console;
+    log.warn("[getUserPermissionsForResource] Querying Supabase with:", {
+        userId,
+        orgId,
+        resourceType,
+        resourceId
+    });
+
     const client = getClient();
 
     // Get user's roles for this resource
@@ -655,16 +666,24 @@ export async function getUserPermissionsForResource({
         .eq("resource_type", resourceType)
         .eq("resource_id", resourceId);
 
+    log.warn("[getUserPermissionsForResource] UserRolesPerResource query result:", {
+        userRoles,
+        error: rolesError
+    });
+
     if (rolesError) {
         throw new Error(`Failed to get user roles: ${rolesError.message}`);
     }
 
     if (!userRoles || userRoles.length === 0) {
+        log.warn("[getUserPermissionsForResource] No roles found for user, returning empty array");
         return [];
     }
 
     // Get unique roles
     const roles = [...new Set(userRoles.map((r) => r.role as ResourceRole))];
+
+    log.warn("[getUserPermissionsForResource] User roles:", roles);
 
     // Get permissions for only these roles using IN clause (more efficient than fetching all)
     const { data: rolePermissions, error: permError } = await client
@@ -672,12 +691,19 @@ export async function getUserPermissionsForResource({
         .select("permission")
         .in("role", roles);
 
+    log.warn("[getUserPermissionsForResource] RolePermissions query result:", {
+        rolePermissions,
+        error: permError
+    });
+
     if (permError) {
         throw new Error(`Failed to get role permissions: ${permError.message}`);
     }
 
     // Dedupe and return permissions
-    return [...new Set(rolePermissions?.map((p) => p.permission) ?? [])];
+    const permissions = [...new Set(rolePermissions?.map((p) => p.permission) ?? [])];
+    log.warn("[getUserPermissionsForResource] Final permissions:", permissions);
+    return permissions;
 }
 
 /**
@@ -737,6 +763,8 @@ export function getUserPermissionsForResourceResult({
     });
 }
 
+import type { PermissionLogger } from "./permissions";
+
 /**
  * Check if a user has a specific permission for a resource.
  */
@@ -745,21 +773,36 @@ export async function hasUserPermissionForResource({
     orgId,
     resourceType,
     resourceId,
-    permission
+    permission,
+    logger
 }: {
     userId: string;
     orgId: string;
     resourceType: string;
     resourceId: string;
     permission: string;
+    logger?: PermissionLogger;
 }): Promise<boolean> {
+    // biome-ignore lint/suspicious/noConsole: Fallback logging when no logger provided
+    const log = logger || console;
+    log.warn("[hasUserPermissionForResource] Input:", {
+        userId,
+        orgId,
+        resourceType,
+        resourceId,
+        permission
+    });
     const permissions = await getUserPermissionsForResource({
         userId,
         orgId,
         resourceType,
-        resourceId
+        resourceId,
+        logger
     });
-    return permissions.includes(permission);
+    log.warn("[hasUserPermissionForResource] User permissions from Supabase:", permissions);
+    const result = permissions.includes(permission);
+    log.warn("[hasUserPermissionForResource] Result:", result);
+    return result;
 }
 
 /**

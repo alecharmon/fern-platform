@@ -106,6 +106,13 @@ export function getPermissionsFromSession({
 }
 
 /**
+ * Simple logger interface for permission checking
+ */
+export interface PermissionLogger {
+    warn: (message: string, ...args: unknown[]) => void;
+}
+
+/**
  * Checks if a user has a specific permission for a given resource.
  *
  * Permission checking order:
@@ -121,6 +128,7 @@ export function getPermissionsFromSession({
  * @param resourceType - The type of resource being accessed
  * @param resourceId - The specific resource ID being accessed
  * @param forceFineGrained - Optional override to force fine-grained permission check (e.g., from feature flag)
+ * @param logger - Optional logger for debugging permission checks
  */
 export async function hasResourcePermission({
     sessionPermissions,
@@ -129,7 +137,8 @@ export async function hasResourcePermission({
     permissionToCheck,
     resourceType,
     resourceId,
-    forceFineGrained
+    forceFineGrained,
+    logger
 }: {
     sessionPermissions: string[];
     userId: string;
@@ -138,27 +147,48 @@ export async function hasResourcePermission({
     resourceType: ResourceType;
     resourceId: string;
     forceFineGrained?: boolean;
+    logger?: PermissionLogger;
 }): Promise<boolean> {
+    // biome-ignore lint/suspicious/noConsole: Fallback logging when no logger provided
+    const log = logger || console;
+    log.warn("[hasResourcePermission] Input", {
+        sessionPermissions,
+        userId,
+        orgId,
+        permissionToCheck,
+        resourceType,
+        resourceId,
+        forceFineGrained
+    });
     // Extract org-level permissions from session
     const orgPermissions = getPermissionsFromSession({ sessionPermissions });
 
+    log.warn("[hasResourcePermission] orgPermissions:", orgPermissions);
+
     // Check org-level permission first (cascades to all resources)
     if (hasPermission(orgPermissions, permissionToCheck)) {
+        log.warn("[hasResourcePermission] Has org-level permission, returning true");
         return true;
     }
 
     // Check if fine-grained permissions are enabled (via override or session marker)
     const isFineGrainedEnabled = forceFineGrained ?? hasFineGrainPermission(sessionPermissions);
 
+    log.warn("[hasResourcePermission] isFineGrainedEnabled:", isFineGrainedEnabled);
+
     if (isFineGrainedEnabled) {
+        log.warn("[hasResourcePermission] Checking Supabase for resource-level permissions");
         // Check Supabase for resource-level permissions
-        return hasUserPermissionForResource({
+        const result = await hasUserPermissionForResource({
             userId,
             orgId,
             resourceType,
             resourceId,
-            permission: permissionToCheck
+            permission: permissionToCheck,
+            logger
         });
+        log.warn("[hasResourcePermission] hasUserPermissionForResource returned:", result);
+        return result;
     }
 
     // Fall back to checking session for resource-scoped permission string
@@ -258,7 +288,10 @@ export async function getPermittedResourceIds({
     // Check if fine-grained permissions are enabled
     if (hasFineGrainPermission(sessionPermissions)) {
         // Get all resources the user has any role on
-        const accessibleResourceIds = await getUserAccessibleResources({ userId, resourceType });
+        const accessibleResourceIds = await getUserAccessibleResources({
+            userId,
+            resourceType
+        });
 
         // Get role-permission mappings to filter by the specific permission
         const allRolePermissions = await getAllRolePermissions();
@@ -270,7 +303,12 @@ export async function getPermittedResourceIds({
         const permittedResourceIds: string[] = [];
 
         for (const resourceId of accessibleResourceIds) {
-            const userRoles = await getUserRolesForResource({ orgId, userId, resourceType, resourceId });
+            const userRoles = await getUserRolesForResource({
+                orgId,
+                userId,
+                resourceType,
+                resourceId
+            });
             const hasMatchingRole = userRoles.some((ur) => rolesWithPermission.has(ur.role));
             if (hasMatchingRole) {
                 permittedResourceIds.push(resourceId);

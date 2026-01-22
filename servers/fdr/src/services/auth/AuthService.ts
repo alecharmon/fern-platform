@@ -262,8 +262,16 @@ export class AuthServiceImpl implements AuthService {
             return;
         }
 
+        this.logger.warn(
+            `[CLI_PERM_CHECK] Will check fine-grained CLI permission for user=${userId}, orgId=${auth0OrgId}, docsUrl=${docsUrl}`
+        );
+
         // If docsUrl is provided (existing site), check fine-grained permissions
         if (docsUrl != null) {
+            this.logger.warn(
+                `[CLI_PERM_CHECK] Checking fine-grained CLI permission for user=${userId}, orgId=${auth0OrgId}, docsUrl=${docsUrl}`
+            );
+
             const hasFineGrainedCli = await hasResourcePermission({
                 sessionPermissions: [],
                 userId,
@@ -271,8 +279,11 @@ export class AuthServiceImpl implements AuthService {
                 permissionToCheck: "cli",
                 resourceType: "docs",
                 resourceId: docsUrl,
-                forceFineGrained: true
+                forceFineGrained: true,
+                logger: this.logger
             });
+
+            this.logger.warn(`[CLI_PERM_CHECK] Result: ${hasFineGrainedCli}`);
 
             if (hasFineGrainedCli) {
                 this.logger.debug(`User ${userId} has fine-grained CLI permission for docs ${docsUrl}`);
