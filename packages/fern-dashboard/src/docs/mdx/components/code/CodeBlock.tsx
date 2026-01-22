@@ -42,6 +42,11 @@ export function CodeBlock(props: {
      * enables rendering tooltips on handlebars in the code
      */
     tooltips?: Record<string, React.ReactNode>;
+    /**
+     * Whether to show line numbers in the gutter
+     * @default true
+     */
+    showLineNumbers?: boolean;
 }) {
     const {
         className,
@@ -113,6 +118,7 @@ export function toSyntaxHighlighterProps(
         maxLines: props.maxLines ?? 20,
         wordWrap: props.wordWrap,
         template: props.template,
-        tooltips: props.tooltips
+        tooltips: props.tooltips,
+        showLineNumbers: props.showLineNumbers
     };
 }

@@ -27,6 +27,11 @@ export interface FernSyntaxHighlighterProps {
     template?: Record<string, string>;
     tooltips?: Record<string, React.ReactNode>;
     links?: Record<string, string>;
+    /**
+     * Whether to show line numbers in the gutter
+     * @default true
+     */
+    showLineNumbers?: boolean;
 }
 
 export const FernSyntaxHighlighter = forwardRef<HTMLPreElement, FernSyntaxHighlighterProps>((props, ref) => {

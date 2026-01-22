@@ -33,6 +33,11 @@ export interface FernSyntaxHighlighterTokensProps {
     wordWrap?: boolean;
     template?: Record<string, string>;
     links?: Record<string, string>;
+    /**
+     * Whether to show line numbers in the gutter
+     * @default true
+     */
+    showLineNumbers?: boolean;
 }
 
 export function fernSyntaxHighlighterTokenPropsAreEqual(
@@ -47,7 +52,8 @@ export function fernSyntaxHighlighterTokenPropsAreEqual(
         prevProps.className === nextProps.className &&
         prevProps.maxLines === nextProps.maxLines &&
         prevProps.tokens === nextProps.tokens &&
-        prevProps.wordWrap === nextProps.wordWrap
+        prevProps.wordWrap === nextProps.wordWrap &&
+        prevProps.showLineNumbers === nextProps.showLineNumbers
     );
 }
 
@@ -65,7 +71,8 @@ export const FernSyntaxHighlighterTokens = memo(
             wordWrap,
             template,
             links,
-            id
+            id,
+            showLineNumbers = true
         } = props;
         const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -140,6 +147,7 @@ export const FernSyntaxHighlighterTokens = memo(
         const lang = tokens.lang;
         const gutterCli = lang === "cli" || lang === "shell" || lang === "bash";
         const plaintext = tokens.lang === "plaintext" || tokens.lang === "text" || tokens.lang === "txt";
+        const shouldShowGutter = !plaintext && showLineNumbers;
 
         return (
             <pre
@@ -164,7 +172,7 @@ export const FernSyntaxHighlighterTokens = memo(
                                     "word-wrap": wordWrap
                                 })}
                             >
-                                {!plaintext && (
+                                {shouldShowGutter && (
                                     <colgroup>
                                         <col className="w-fit" />
                                         <col />
@@ -178,7 +186,7 @@ export const FernSyntaxHighlighterTokens = memo(
                                             })}
                                             key={lineNumber}
                                         >
-                                            {!plaintext && (
+                                            {shouldShowGutter && (
                                                 <td className="code-block-line-gutter">
                                                     <span>
                                                         {gutterCli ? (lineNumber === 0 ? "$" : ">") : lineNumber + 1}

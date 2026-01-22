@@ -98,6 +98,11 @@ export function CodeBlock(props: {
     links?: Record<string, string>;
     lang?: string;
     disableAnalytics?: boolean;
+    /**
+     * Whether to show line numbers in the gutter
+     * @default true
+     */
+    showLineNumbers?: boolean;
 }) {
     const {
         className,
@@ -212,6 +217,7 @@ export function toSyntaxHighlighterProps(
         template: props.template,
         tooltips: props.tooltips,
         viewportRef: props.viewportRef,
-        links: props.links
+        links: props.links,
+        showLineNumbers: props.showLineNumbers
     };
 }

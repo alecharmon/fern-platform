@@ -20,6 +20,7 @@ interface CodeBlockContext {
     highlightedLines: number[];
     lang: string;
     wordWrap?: boolean;
+    showLineNumbers: boolean;
 }
 
 const CodeBlockTable = forwardRef<HTMLTableElement, FernScrollArea.Props & { context?: CodeBlockContext }>(
@@ -29,6 +30,8 @@ const CodeBlockTable = forwardRef<HTMLTableElement, FernScrollArea.Props & { con
         const highlightedLines = context?.highlightedLines ?? [];
         const lang = context?.lang ?? "plaintext";
         const plaintext = lang === "plaintext" || lang === "text" || lang === "txt";
+        const showLineNumbers = context?.showLineNumbers ?? true;
+        const shouldShowGutter = !plaintext && showLineNumbers;
 
         return (
             <div
@@ -47,7 +50,7 @@ const CodeBlockTable = forwardRef<HTMLTableElement, FernScrollArea.Props & { con
                         {...props}
                         ref={ref}
                     >
-                        {!plaintext && (
+                        {shouldShowGutter && (
                             <colgroup>
                                 <col className="w-fit" />
                                 <col />
@@ -90,7 +93,8 @@ export const FernSyntaxHighlighterTokensVirtualized = memo(
             maxLines,
             wordWrap,
             template,
-            links
+            links,
+            showLineNumbers = true
         } = props;
 
         const virtuosoRef = useRef<TableVirtuosoHandle>(null);
@@ -162,19 +166,21 @@ export const FernSyntaxHighlighterTokensVirtualized = memo(
                 lang: tokens.lang,
                 highlightStyle,
                 highlightedLines: flattenHighlightLines(highlightLines ?? []),
-                wordWrap
+                wordWrap,
+                showLineNumbers
             }),
-            [fontSize, highlightLines, highlightStyle, tokens.lang, wordWrap]
+            [fontSize, highlightLines, highlightStyle, tokens.lang, wordWrap, showLineNumbers]
         );
 
         const lang = tokens.lang;
         const gutterCli = lang === "cli" || lang === "shell" || lang === "bash";
         const plaintext = tokens.lang === "plaintext" || tokens.lang === "text" || tokens.lang === "txt";
+        const shouldShowGutter = !plaintext && showLineNumbers;
 
         const itemContent = useCallback(
             (lineNumber: number, line: Element) => (
                 <>
-                    {!plaintext && (
+                    {shouldShowGutter && (
                         <td className="code-block-line-gutter">
                             <span>{gutterCli ? (lineNumber === 0 ? "$" : ">") : lineNumber + 1}</span>
                         </td>
@@ -184,7 +190,7 @@ export const FernSyntaxHighlighterTokensVirtualized = memo(
                     </td>
                 </>
             ),
-            [gutterCli, plaintext, template, links]
+            [gutterCli, shouldShowGutter, template, links]
         );
 
         return (
