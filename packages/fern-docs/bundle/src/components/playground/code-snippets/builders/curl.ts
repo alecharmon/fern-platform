@@ -24,12 +24,21 @@ export class CurlSnippetBuilder extends PlaygroundCodeSnippetBuilder {
 
         const hasBasicAuthSelected = this.selectedAuthSchemes?.some((auth) => auth.type === "basicAuth") ?? false;
 
+        // When basicAuth is selected, always pass a basicAuth object (even with empty values)
+        // so that convertToCurl uses -u flag instead of Authorization header
+        const basicAuth = hasBasicAuthSelected
+            ? {
+                  username: this.authState.basicAuth?.username ?? "",
+                  password: this.authState.basicAuth?.password ?? ""
+              }
+            : undefined;
+
         return convertToCurl({
             method: this.context.endpoint.method,
             url: this.url,
             searchParams: this.processedQueryParameters,
             headers: this.formState.headers,
-            basicAuth: hasBasicAuthSelected ? this.authState.basicAuth : undefined,
+            basicAuth,
             body: this.#convertFormStateToBody(),
             redacted: this.redacted
         });

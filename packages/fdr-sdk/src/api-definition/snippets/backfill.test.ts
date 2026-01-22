@@ -2267,4 +2267,195 @@ describe("backfillSnippets", () => {
         expect(curlSnippet?.code).toContain("x-custom-api-key:");
         expect(curlSnippet?.code).not.toContain("Authorization:");
     });
+
+    it("should regenerate curl snippet when basic auth uses -H Authorization header instead of -u flag", async () => {
+        const apiDefinition: ApiDefinition = {
+            id: ApiDefinitionId("test-api"),
+            apiName: undefined,
+            endpoints: {
+                [EndpointId("secureEndpoint")]: {
+                    id: EndpointId("secureEndpoint"),
+                    method: "GET",
+                    path: [{ type: "literal", value: "/secure" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: [AuthSchemeId("basicAuth")],
+                    multiAuth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.example.com"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    includeInApiExplorer: undefined,
+                    examples: [
+                        {
+                            name: "Get Secure",
+                            description: "",
+                            path: "/secure",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: undefined,
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: { status: "ok" }
+                            },
+                            snippets: {
+                                curl: [
+                                    {
+                                        name: undefined,
+                                        language: "curl",
+                                        install: undefined,
+                                        code: 'curl https://api.example.com/secure \\\n  -H "Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ="',
+                                        generated: true,
+                                        description: undefined
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            auths: {
+                [AuthSchemeId("basicAuth")]: {
+                    type: "basicAuth",
+                    usernameName: undefined,
+                    passwordName: undefined,
+                    passwordAlwaysEmpty: undefined,
+                    description: undefined
+                }
+            },
+            websockets: {},
+            webhooks: {},
+            graphqlOperations: {},
+            types: {},
+            globalHeaders: [],
+            subpackages: {},
+            snippetsConfiguration: undefined
+        };
+
+        const flags = {
+            httpSnippets: true,
+            alwaysEnableJavaScriptFetch: true
+        };
+
+        const result = await backfillSnippets(apiDefinition, undefined, flags);
+
+        const endpoint = result.endpoints[EndpointId("secureEndpoint")];
+        expect(endpoint).toBeDefined();
+
+        const curlSnippet = endpoint?.examples?.[0]?.snippets?.curl?.[0];
+        expect(curlSnippet?.language).toBe("curl");
+        expect(curlSnippet?.code).toContain("-u ");
+        expect(curlSnippet?.code).not.toContain('-H "Authorization: Basic');
+    });
+
+    it("should not regenerate curl snippet when basic auth already uses -u flag", async () => {
+        const existingCurlCode = 'curl https://api.example.com/secure \\\n     -u "<username>:<password>"';
+        const apiDefinition: ApiDefinition = {
+            id: ApiDefinitionId("test-api"),
+            apiName: undefined,
+            endpoints: {
+                [EndpointId("secureEndpoint")]: {
+                    id: EndpointId("secureEndpoint"),
+                    method: "GET",
+                    path: [{ type: "literal", value: "/secure" }],
+                    displayName: undefined,
+                    operationId: undefined,
+                    auth: [AuthSchemeId("basicAuth")],
+                    multiAuth: undefined,
+                    defaultEnvironment: undefined,
+                    environments: [
+                        {
+                            id: EnvironmentId("default"),
+                            baseUrl: "https://api.example.com"
+                        }
+                    ],
+                    pathParameters: undefined,
+                    queryParameters: undefined,
+                    requestHeaders: undefined,
+                    responseHeaders: undefined,
+                    requests: undefined,
+                    responses: undefined,
+                    errors: undefined,
+                    snippetTemplates: undefined,
+                    protocol: undefined,
+                    description: undefined,
+                    availability: undefined,
+                    namespace: undefined,
+                    includeInApiExplorer: undefined,
+                    examples: [
+                        {
+                            name: "Get Secure",
+                            description: "",
+                            path: "/secure",
+                            pathParameters: {},
+                            queryParameters: {},
+                            headers: {},
+                            requestBody: undefined,
+                            responseStatusCode: 200,
+                            responseBody: {
+                                type: "json",
+                                value: { status: "ok" }
+                            },
+                            snippets: {
+                                curl: [
+                                    {
+                                        name: undefined,
+                                        language: "curl",
+                                        install: undefined,
+                                        code: existingCurlCode,
+                                        generated: true,
+                                        description: undefined
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            auths: {
+                [AuthSchemeId("basicAuth")]: {
+                    type: "basicAuth",
+                    usernameName: undefined,
+                    passwordName: undefined,
+                    passwordAlwaysEmpty: undefined,
+                    description: undefined
+                }
+            },
+            websockets: {},
+            webhooks: {},
+            graphqlOperations: {},
+            types: {},
+            globalHeaders: [],
+            subpackages: {},
+            snippetsConfiguration: undefined
+        };
+
+        const flags = {
+            httpSnippets: true,
+            alwaysEnableJavaScriptFetch: true
+        };
+
+        const result = await backfillSnippets(apiDefinition, undefined, flags);
+
+        const endpoint = result.endpoints[EndpointId("secureEndpoint")];
+        const curlSnippet = endpoint?.examples?.[0]?.snippets?.curl?.[0];
+        expect(curlSnippet?.code).toBe(existingCurlCode);
+    });
 });

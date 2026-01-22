@@ -64,22 +64,42 @@ export function isLikelyGeneratedSnippet(snippet: CodeSnippet): boolean {
  * Determine if a curl snippet should be regenerated because it has the wrong auth header.
  * Only regenerates if:
  * - No existing snippets exist, OR
- * - All existing snippets are likely generated AND none contain the expected header
+ * - All existing snippets are likely generated AND none contain the expected header, OR
+ * - For basic auth: existing snippets use -H "Authorization: Basic" instead of -u flag
  */
 export function shouldRegenerateCurlSnippet(
     existingSnippets: CodeSnippet[] | undefined,
-    expectedHeaderName: string | undefined
+    expectedHeaderName: string | undefined,
+    authScheme?: AuthScheme | ApiAuth
 ): boolean {
     if (existingSnippets == null || existingSnippets.length === 0) {
         return true;
     }
-    if (expectedHeaderName == null) {
-        return false;
-    }
+
     const allLikelyGenerated = existingSnippets.every(isLikelyGeneratedSnippet);
     if (!allLikelyGenerated) {
         return false;
     }
+
+    // For basic auth, check if snippets use -H "Authorization: Basic" instead of -u flag
+    // If so, regenerate to use -u flag
+    if (authScheme?.type === "basicAuth") {
+        const usesBasicAuthHeader = existingSnippets.some(
+            (s) => s.code.includes('-H "Authorization: Basic') || s.code.includes("-H 'Authorization: Basic")
+        );
+        if (usesBasicAuthHeader) {
+            return true;
+        }
+        // If basic auth and no header found, check if -u flag is present
+        const usesUFlag = existingSnippets.some((s) => s.code.includes("-u "));
+        // If -u flag is present, no need to regenerate
+        return !usesUFlag;
+    }
+
+    if (expectedHeaderName == null) {
+        return false;
+    }
+
     const hasCorrectHeader = existingSnippets.some(
         (s) => s.code.includes(`"${expectedHeaderName}:`) || s.code.includes(`'${expectedHeaderName}:`)
     );

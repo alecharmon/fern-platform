@@ -66,9 +66,10 @@ export async function generateHttpSnippets(
 
     // Generate or regenerate curl snippet if needed
     // Regenerate if existing snippet has wrong auth header (targeted repair for pre-stored snippets)
+    // Also regenerate if basic auth uses -H "Authorization: Basic" instead of -u flag
     const authScheme = getFirstAuthScheme(endpoint, apiDefinition.auths);
     const expectedHeaderName = getAuthHeaderName(authScheme);
-    const needsCurlRegeneration = shouldRegenerateCurlSnippet(existingSnippets.curl, expectedHeaderName);
+    const needsCurlRegeneration = shouldRegenerateCurlSnippet(existingSnippets.curl, expectedHeaderName, authScheme);
 
     if (needsCurlRegeneration && shouldIncludeLanguage("curl")) {
         snippets.push(generateCurlSnippet(apiDefinition, endpoint, example));
