@@ -21,11 +21,22 @@ function createMockJwt(issuer: string): string {
     return `${base64UrlEncode(header)}.${base64UrlEncode(payload)}.${signature}`;
 }
 
+// Mock jose library for JWT verification
+vi.mock("jose", async () => {
+    const actual = await vi.importActual<typeof import("jose")>("jose");
+    return {
+        ...actual,
+        jwtVerify: vi.fn()
+    };
+});
+
 // Mock the user-permissions module
 vi.mock("@fern-api/user-permissions", () => ({
     getManagementClientResult: vi.fn(),
     getRolesResult: vi.fn(),
-    hasResourcePermission: vi.fn()
+    hasResourcePermission: vi.fn(),
+    // Provide real implementation for isSuperUser
+    isSuperUser: (permissions: string[]) => permissions.includes("super-user")
 }));
 
 // Mock the venus-api-sdk module
@@ -38,11 +49,13 @@ vi.mock("@fern-api/venus-api-sdk", () => ({
 
 import { getManagementClientResult, getRolesResult, hasResourcePermission } from "@fern-api/user-permissions";
 import { FernVenusApiClient } from "@fern-api/venus-api-sdk";
+import { jwtVerify } from "jose";
 
 const mockGetManagementClientResult = vi.mocked(getManagementClientResult);
 const mockGetRolesResult = vi.mocked(getRolesResult);
 const mockHasResourcePermission = vi.mocked(hasResourcePermission);
 const MockFernVenusApiClient = vi.mocked(FernVenusApiClient);
+const mockJwtVerify = vi.mocked(jwtVerify);
 
 describe("checkUserHasCliPermission", () => {
     let authService: AuthServiceImpl;
@@ -66,6 +79,15 @@ describe("checkUserHasCliPermission", () => {
         process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
         // Create a valid Auth0 JWT for testing
         auth0Jwt = createMockJwt("https://fern-prod.us.auth0.com/");
+
+        // Mock jwtVerify to successfully verify Auth0 tokens by default
+        mockJwtVerify.mockResolvedValue({
+            payload: {
+                iss: "https://fern-prod.us.auth0.com/",
+                sub: "auth0|user123",
+                permissions: []
+            }
+        } as any);
 
         // Set Supabase env vars for tests that need fine-grained permissions
         process.env.SUPABASE_URL = "https://test.supabase.co";
@@ -380,6 +402,9 @@ describe("checkUserHasCliPermission", () => {
         // Legacy fern tokens are not JWTs, so they should skip the permission check
         const legacyFernToken = "fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC";
 
+        // jwtVerify should fail for non-JWT tokens
+        mockJwtVerify.mockRejectedValueOnce(new Error("Invalid JWT"));
+
         await expect(
             authService.checkUserHasCliPermission({
                 authHeader: `Bearer ${legacyFernToken}`,
@@ -399,6 +424,9 @@ describe("checkUserHasCliPermission", () => {
     it("should skip CLI permission check for JWTs from non-Auth0 issuers", async () => {
         // Create a JWT with a different issuer (AUTH0_DOMAIN is already set in beforeEach)
         const nonAuth0Jwt = createMockJwt("https://other-issuer.com/");
+
+        // jwtVerify should fail for JWTs with wrong issuer
+        mockJwtVerify.mockRejectedValueOnce(new Error("Invalid issuer"));
 
         await expect(
             authService.checkUserHasCliPermission({
@@ -456,47 +484,85 @@ describe("isAuth0Token", () => {
         }
     });
 
-    it("should return false when AUTH0_DOMAIN is not set", () => {
+    it("should return false when AUTH0_DOMAIN is not set", async () => {
         delete process.env.AUTH0_DOMAIN;
+        // Clear the mock to ensure no calls from beforeEach
+        mockJwtVerify.mockClear();
+
         const token = createMockJwt("https://fern-prod.us.auth0.com/");
-        expect(isAuth0Token(token)).toBe(false);
+        expect(await isAuth0Token(token)).toBe(false);
+        // jwtVerify should not be called if Auth0 domain is not configured
+        expect(mockJwtVerify).not.toHaveBeenCalled();
     });
 
-    it("should return true for Auth0 JWT with matching issuer", () => {
+    it("should return true for Auth0 JWT with matching issuer", async () => {
         process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
         const token = createMockJwt("https://fern-prod.us.auth0.com/");
-        expect(isAuth0Token(token)).toBe(true);
+
+        // Mock successful verification
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                iss: "https://fern-prod.us.auth0.com/",
+                sub: "auth0|user123"
+            }
+        } as any);
+
+        expect(await isAuth0Token(token)).toBe(true);
     });
 
-    it("should return false for JWT with non-matching issuer", () => {
+    it("should return false for JWT with non-matching issuer", async () => {
         process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
         const token = createMockJwt("https://other-domain.auth0.com/");
-        expect(isAuth0Token(token)).toBe(false);
+
+        // Mock verification failure (wrong issuer)
+        mockJwtVerify.mockRejectedValueOnce(new Error("Invalid issuer"));
+
+        expect(await isAuth0Token(token)).toBe(false);
     });
 
-    it("should return false for non-JWT tokens", () => {
+    it("should return false for non-JWT tokens", async () => {
         process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
-        expect(isAuth0Token("fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC")).toBe(false);
-        expect(isAuth0Token("not-a-jwt")).toBe(false);
-        expect(isAuth0Token("")).toBe(false);
+
+        // Mock verification failures
+        mockJwtVerify.mockRejectedValue(new Error("Invalid JWT"));
+
+        expect(await isAuth0Token("fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC")).toBe(false);
+        expect(await isAuth0Token("not-a-jwt")).toBe(false);
+        expect(await isAuth0Token("")).toBe(false);
     });
 
-    it("should return false for malformed JWTs", () => {
+    it("should return false for malformed JWTs", async () => {
         process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
-        expect(isAuth0Token("part1.part2")).toBe(false); // Only 2 parts
-        expect(isAuth0Token("part1.part2.part3.part4")).toBe(false); // 4 parts
-        expect(isAuth0Token("invalid.!!!.token")).toBe(false); // Invalid base64
+
+        // Mock verification failures
+        mockJwtVerify.mockRejectedValue(new Error("Invalid JWT"));
+
+        expect(await isAuth0Token("part1.part2")).toBe(false); // Only 2 parts
+        expect(await isAuth0Token("part1.part2.part3.part4")).toBe(false); // 4 parts
+        expect(await isAuth0Token("invalid.!!!.token")).toBe(false); // Invalid base64
     });
 
-    it("should handle issuer URL parsing correctly", () => {
+    it("should handle issuer URL parsing correctly", async () => {
         process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
 
         // Auth0 issuers typically have trailing slash
         const tokenWithSlash = createMockJwt("https://fern-prod.us.auth0.com/");
-        expect(isAuth0Token(tokenWithSlash)).toBe(true);
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                iss: "https://fern-prod.us.auth0.com/",
+                sub: "auth0|user123"
+            }
+        } as any);
+        expect(await isAuth0Token(tokenWithSlash)).toBe(true);
 
-        // Should also work without trailing slash (URL parsing extracts hostname)
+        // Should also work without trailing slash (issuer validation handles this)
         const tokenWithoutSlash = createMockJwt("https://fern-prod.us.auth0.com");
-        expect(isAuth0Token(tokenWithoutSlash)).toBe(true);
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                iss: "https://fern-prod.us.auth0.com/",
+                sub: "auth0|user123"
+            }
+        } as any);
+        expect(await isAuth0Token(tokenWithoutSlash)).toBe(true);
     });
 });

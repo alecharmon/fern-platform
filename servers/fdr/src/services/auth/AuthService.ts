@@ -5,7 +5,7 @@ import {
     isSuperUser as isSuperUserFromPermissions
 } from "@fern-api/user-permissions";
 import { FernVenusApi, FernVenusApiClient } from "@fern-api/venus-api-sdk";
-import { decodeJwt } from "jose";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import type winston from "winston";
 
 import type { FernRegistryError } from "../../api/generated";
@@ -110,7 +110,7 @@ export class AuthServiceImpl implements AuthService {
         const token = getTokenFromAuthHeader(authHeader);
 
         // Check if user has super-user permission - they have access to all orgs
-        if (isSuperUser(token)) {
+        if (await isSuperUser(token)) {
             this.logger.debug(`User has super-user permission, granting access to org ${orgId}`);
             return;
         }
@@ -213,8 +213,13 @@ export class AuthServiceImpl implements AuthService {
         // Only check CLI permissions for Auth0 tokens (JWTs with iss matching AUTH0_DOMAIN).
         // Non-Auth0 tokens (e.g., legacy organization tokens like FERN_TOKEN) are exempt
         // from CLI permission checks to maintain backward compatibility.
-        if (!isAuth0Token(token)) {
+        if (!(await isAuth0Token(token))) {
             this.logger.debug(`Skipping CLI permission check for non-Auth0 token for org ${orgId}`);
+            return;
+        }
+
+        if (await isSuperUser(token)) {
+            this.logger.debug(`User has super-user permission, granting access to org ${orgId}`);
             return;
         }
 
@@ -302,67 +307,110 @@ async function getAuth0OrgIdFromName(orgName: string): Promise<string> {
         throw new Error(`Auth0 not configured: ${clientResult.error.message}`);
     }
     const client = clientResult.value;
-    const { data: organization } = await client.organizations.getByName({ name: orgName });
+    const { data: organization } = await client.organizations.getByName({
+        name: orgName
+    });
     return organization.id;
+}
+
+/**
+ * Gets the Auth0 domain from environment variables.
+ * @returns Auth0 domain or undefined if not configured
+ */
+function getAuth0Domain(): string | undefined {
+    return process.env.AUTH0_DOMAIN;
+}
+
+/**
+ * Constructs the expected Auth0 issuer URL.
+ * @param domain - Auth0 domain (e.g., "fern-prod.us.auth0.com")
+ * @returns Expected issuer URL (e.g., "https://fern-prod.us.auth0.com/")
+ */
+function getAuth0Issuer(domain: string): string {
+    return `https://${domain}/`;
+}
+
+/**
+ * Creates a JWKS for verifying Auth0 RS256 tokens.
+ * @param domain - Auth0 domain
+ * @returns JWKS function for jwtVerify
+ */
+function getAuth0JWKS(domain: string) {
+    const jwksUrl = new URL(`https://${domain}/.well-known/jwks.json`);
+    return createRemoteJWKSet(jwksUrl);
+}
+
+/**
+ * Verifies an Auth0 JWT token and returns the decoded payload.
+ *
+ * SECURITY: This function performs cryptographic signature verification
+ * to ensure the token is authentic and hasn't been tampered with.
+ *
+ * @param token - The JWT token string (without Bearer prefix)
+ * @returns Verified JWT payload, or null if verification fails
+ */
+async function verifyAuth0Token(token: string): Promise<import("jose").JWTPayload | null> {
+    const auth0Domain = getAuth0Domain();
+
+    if (!auth0Domain) {
+        return null;
+    }
+
+    try {
+        const expectedIssuer = getAuth0Issuer(auth0Domain);
+        const JWKS = getAuth0JWKS(auth0Domain);
+
+        const { payload } = await jwtVerify(token, JWKS, {
+            issuer: expectedIssuer,
+            algorithms: ["RS256"]
+        });
+
+        return payload;
+    } catch {
+        // Verification failed (signature invalid, expired, wrong issuer, etc.)
+        return null;
+    }
 }
 
 /**
  * Checks if a token contains the super-user permission.
  * Super users have access to all organizations.
  *
+ * SECURITY: This function verifies the JWT signature before checking permissions
+ * to prevent forged tokens from gaining super-user access.
+ * Uses RS256 with JWKS for Auth0 user tokens.
+ *
  * @param token - The JWT token string (without Bearer prefix)
  * @returns true if the token contains super-user permission, false otherwise
  */
-export function isSuperUser(token: string): boolean {
-    try {
-        const claims = decodeJwt(token);
-        const permissions = (claims.permissions as string[] | undefined) ?? [];
-        return isSuperUserFromPermissions(permissions);
-    } catch {
-        // Failed to decode JWT token - treat as non-super-user
+export async function isSuperUser(token: string): Promise<boolean> {
+    // Verify the token and get the payload
+    const payload = await verifyAuth0Token(token);
+
+    if (!payload) {
+        // Token verification failed
         return false;
     }
+
+    // Extract and validate permissions
+    const permissions = (payload.permissions as string[] | undefined) ?? [];
+    return isSuperUserFromPermissions(permissions);
 }
 
 /**
- * Checks if a token is an Auth0 JWT by examining the `iss` claim.
- * Auth0 JWTs have an issuer that matches the AUTH0_DOMAIN environment variable.
- * Only Auth0 tokens should be subject to CLI permission checks.
+ * Checks if a token is a valid Auth0 JWT by verifying its signature.
+ * Auth0 JWTs are verified using the issuer and signature validation.
+ * Only verified Auth0 tokens should be subject to CLI permission checks.
+ *
+ * SECURITY: This function now verifies the JWT signature for better security.
+ * Previously it only decoded without verification, which could allow forged tokens
+ * to bypass permission checks.
  *
  * @param token - The JWT token string (without Bearer prefix)
- * @returns true if the token is an Auth0 JWT, false otherwise
+ * @returns true if the token is a valid Auth0 JWT, false otherwise
  */
-export function isAuth0Token(token: string): boolean {
-    const auth0Domain = process.env.AUTH0_DOMAIN;
-    if (!auth0Domain) {
-        // If AUTH0_DOMAIN is not configured, we can't determine if it's an Auth0 token
-        // Default to false (skip permission check) to avoid breaking existing functionality
-        return false;
-    }
-
-    try {
-        // Use jose library to decode the JWT payload (without verification)
-        const claims = decodeJwt(token);
-
-        // Check if the issuer matches the Auth0 domain
-        // Auth0 issuers are typically in the format: https://{domain}/
-        // We parse the hostname from the iss claim to compare with AUTH0_DOMAIN
-        if (!claims.iss) {
-            return false;
-        }
-
-        try {
-            const issuerUrl = new URL(claims.iss);
-            return issuerUrl.hostname === auth0Domain;
-        } catch {
-            // Failed to parse issuer URL from JWT - iss claim is not a valid URL
-            // This indicates the token is not from Auth0 (Auth0 always uses URL format for iss)
-            return false;
-        }
-    } catch {
-        // Failed to decode JWT token (JWTInvalid error from jose library)
-        // This occurs for non-JWT tokens (e.g., legacy FERN_TOKEN) or malformed JWTs
-        // Treat as non-Auth0 token and skip permission check to maintain backward compatibility
-        return false;
-    }
+export async function isAuth0Token(token: string): Promise<boolean> {
+    // Verify the token - this returns null if it's not a valid Auth0 token
+    const payload = await verifyAuth0Token(token);
+    return payload !== null;
 }

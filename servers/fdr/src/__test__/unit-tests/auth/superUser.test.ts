@@ -2,6 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { UnauthorizedError, UnavailableError, UserNotInOrgError } from "../../../api/generated/api";
 import { AuthServiceImpl, isSuperUser } from "../../../services/auth/AuthService";
 
+// Mock jose library
+vi.mock("jose", async () => {
+    const actual = await vi.importActual<typeof import("jose")>("jose");
+    return {
+        ...actual,
+        jwtVerify: vi.fn()
+    };
+});
+
 /**
  * Creates a mock JWT token with the specified permissions.
  * This is a simplified JWT structure for testing purposes.
@@ -64,53 +73,145 @@ vi.mock("@fern-api/venus-api-sdk", () => ({
 }));
 
 import { FernVenusApiClient } from "@fern-api/venus-api-sdk";
+import { jwtVerify } from "jose";
 
 const MockFernVenusApiClient = vi.mocked(FernVenusApiClient);
+const mockJwtVerify = vi.mocked(jwtVerify);
 
 describe("isSuperUser", () => {
-    it("should return true when token contains super-user permission", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        // Set up environment variables for Auth0
+        process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
+        process.env.AUTH0_CLIENT_SECRET = "test-secret";
+    });
+
+    it("should return true when token contains super-user permission", async () => {
         const token = createMockJwtWithPermissions(["super-user"]);
-        expect(isSuperUser(token)).toBe(true);
+        // Mock jwtVerify to return successful verification with permissions
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["super-user"]
+            }
+        } as any);
+        expect(await isSuperUser(token)).toBe(true);
     });
 
-    it("should return true when super-user is among multiple permissions", () => {
+    it("should return true when super-user is among multiple permissions", async () => {
         const token = createMockJwtWithPermissions(["read:docs", "super-user", "write:docs"]);
-        expect(isSuperUser(token)).toBe(true);
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["read:docs", "super-user", "write:docs"]
+            }
+        } as any);
+        expect(await isSuperUser(token)).toBe(true);
     });
 
-    it("should return false when token does not contain super-user permission", () => {
+    it("should return false when token does not contain super-user permission", async () => {
         const token = createMockJwtWithPermissions(["read:docs", "write:docs"]);
-        expect(isSuperUser(token)).toBe(false);
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["read:docs", "write:docs"]
+            }
+        } as any);
+        expect(await isSuperUser(token)).toBe(false);
     });
 
-    it("should return false when permissions array is empty", () => {
+    it("should return false when permissions array is empty", async () => {
         const token = createMockJwtWithPermissions([]);
-        expect(isSuperUser(token)).toBe(false);
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: []
+            }
+        } as any);
+        expect(await isSuperUser(token)).toBe(false);
     });
 
-    it("should return false when token has no permissions claim", () => {
+    it("should return false when token has no permissions claim", async () => {
         const token = createMockJwtWithoutPermissions();
-        expect(isSuperUser(token)).toBe(false);
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {}
+        } as any);
+        expect(await isSuperUser(token)).toBe(false);
     });
 
-    it("should return false for non-JWT tokens", () => {
-        expect(isSuperUser("fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC")).toBe(false);
-        expect(isSuperUser("not-a-jwt")).toBe(false);
-        expect(isSuperUser("")).toBe(false);
+    it("should return false for non-JWT tokens", async () => {
+        // jwtVerify will reject for invalid tokens
+        mockJwtVerify.mockRejectedValue(new Error("Invalid JWT"));
+        expect(await isSuperUser("fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC")).toBe(false);
+        expect(await isSuperUser("not-a-jwt")).toBe(false);
+        expect(await isSuperUser("")).toBe(false);
     });
 
-    it("should return false for malformed JWTs", () => {
-        expect(isSuperUser("part1.part2")).toBe(false);
-        expect(isSuperUser("part1.part2.part3.part4")).toBe(false);
-        expect(isSuperUser("invalid.!!!.token")).toBe(false);
+    it("should return false for malformed JWTs", async () => {
+        mockJwtVerify.mockRejectedValue(new Error("Invalid JWT"));
+        expect(await isSuperUser("part1.part2")).toBe(false);
+        expect(await isSuperUser("part1.part2.part3.part4")).toBe(false);
+        expect(await isSuperUser("invalid.!!!.token")).toBe(false);
     });
 
-    it("should be case-sensitive for permission name", () => {
+    it("should be case-sensitive for permission name", async () => {
         const tokenUpperCase = createMockJwtWithPermissions(["SUPER-USER"]);
-        expect(isSuperUser(tokenUpperCase)).toBe(false);
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["SUPER-USER"]
+            }
+        } as any);
+        expect(await isSuperUser(tokenUpperCase)).toBe(false);
 
         const tokenMixedCase = createMockJwtWithPermissions(["Super-User"]);
-        expect(isSuperUser(tokenMixedCase)).toBe(false);
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["Super-User"]
+            }
+        } as any);
+        expect(await isSuperUser(tokenMixedCase)).toBe(false);
+    });
+
+    it("should return false when AUTH0_DOMAIN is not configured", async () => {
+        delete process.env.AUTH0_DOMAIN;
+        const token = createMockJwtWithPermissions(["super-user"]);
+        expect(await isSuperUser(token)).toBe(false);
+        // jwtVerify should not be called if Auth0 is not configured
+        expect(mockJwtVerify).not.toHaveBeenCalled();
+    });
+
+    it("should return false when signature verification fails", async () => {
+        const token = createMockJwtWithPermissions(["super-user"]);
+        // Mock jwtVerify to throw error (signature verification failed)
+        mockJwtVerify.mockRejectedValueOnce(new Error("Signature verification failed"));
+        expect(await isSuperUser(token)).toBe(false);
+    });
+
+    it("should return false when token is expired", async () => {
+        const token = createMockJwtWithPermissions(["super-user"]);
+        // Mock jwtVerify to throw error (token expired)
+        mockJwtVerify.mockRejectedValueOnce(new Error("Token expired"));
+        expect(await isSuperUser(token)).toBe(false);
+    });
+
+    it("should return false when issuer does not match", async () => {
+        const token = createMockJwtWithPermissions(["super-user"]);
+        // Mock jwtVerify to throw error (invalid issuer)
+        mockJwtVerify.mockRejectedValueOnce(new Error("Invalid issuer"));
+        expect(await isSuperUser(token)).toBe(false);
+    });
+
+    it("should handle real RS256 token with super-user permission", async () => {
+        // Real RS256 token from Auth0 with super-user permission
+        const realToken =
+            "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjRkbVZ0U1E3eHFOUnhYd0c1SWlMUSJ9.eyJpc3MiOiJodHRwczovL2Zlcm4tcHJvZC51cy5hdXRoMC5jb20vIiwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMDg3NTgyMzMzNDcxOTY3MjQzODYiLCJhdWQiOlsidmVudXMtcHJvZCIsImh0dHBzOi8vZmVybi1wcm9kLnVzLmF1dGgwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE3NjkwMjY0NzAsImV4cCI6MTc3MTYxODQ3MCwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCIsImF6cCI6InN5YVduazZTak5vbzV4QmYxb21mdnppVTNxNzA4NWxoIiwicGVybWlzc2lvbnMiOlsiY2xpIiwiZWRpdCIsIm1hbmFnZS1zZXR0aW5ncyIsIm1hbmFnZS11c2VycyIsInN1cGVyLXVzZXIiLCJ2aWV3Il19.ds6rMrVrrdofvFib_QdMLY3mLZKNCcjFJyPf5etLx4ovUoilWRfnsRRdY34eADHrVGJHfFBdatNGLHI8QYySYDXDM5Mn6q14P9H5vGGKOmzou0PLWZ03ckUYinRmrnEQYDnjKO4G_fj-fXEv0P1dsjNYevFMjsGsGvPA6bleBuGnbMkpr1Tg39eoWqlX25TuerNdMt5kaao3dXWjSb1Oo5JB5trKpce1xfdJ9_QHj8kWes2VUDzKGAjvrfjcAHPLGA3dZ13DgG4RiKsVKKzE5XOw-nWFjGYnoxMIRZDVh4XNPiY3XRbDmLR3aaaQiOMB98Cx06QRakp1xuGxjuXs-A";
+
+        // Mock jwtVerify to return the actual token payload
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                iss: "https://fern-prod.us.auth0.com/",
+                sub: "google-oauth2|108758233347196724386",
+                permissions: ["cli", "edit", "manage-settings", "manage-users", "super-user", "view"]
+            }
+        } as any);
+
+        expect(await isSuperUser(realToken)).toBe(true);
     });
 });
 
@@ -127,6 +228,10 @@ describe("checkUserBelongsToOrg with super-user", () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+
+        // Set up Auth0 environment variables
+        process.env.AUTH0_DOMAIN = "fern-prod.us.auth0.com";
+        process.env.AUTH0_CLIENT_SECRET = "test-secret";
 
         mockLogger = {
             error: vi.fn(),
@@ -162,6 +267,13 @@ describe("checkUserBelongsToOrg with super-user", () => {
     it("should bypass Venus check and succeed for super-user", async () => {
         const superUserToken = createMockJwtWithPermissions(["super-user"]);
 
+        // Mock jwtVerify to return successful verification with super-user permission
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["super-user"]
+            }
+        } as any);
+
         await expect(
             authService.checkUserBelongsToOrg({
                 authHeader: `Bearer ${superUserToken}`,
@@ -180,6 +292,13 @@ describe("checkUserBelongsToOrg with super-user", () => {
     it("should bypass Venus check for super-user even for non-existent orgs", async () => {
         const superUserToken = createMockJwtWithPermissions(["super-user", "other-permission"]);
 
+        // Mock jwtVerify to return successful verification with super-user permission
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["super-user", "other-permission"]
+            }
+        } as any);
+
         await expect(
             authService.checkUserBelongsToOrg({
                 authHeader: `Bearer ${superUserToken}`,
@@ -192,6 +311,13 @@ describe("checkUserBelongsToOrg with super-user", () => {
 
     it("should check Venus membership for non-super-users", async () => {
         const regularUserToken = createMockJwtWithPermissions(["read:docs"]);
+
+        // Mock jwtVerify to return successful verification without super-user permission
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["read:docs"]
+            }
+        } as any);
 
         mockVenusClient.organization.isMember.mockResolvedValue({
             ok: true,
@@ -212,6 +338,13 @@ describe("checkUserBelongsToOrg with super-user", () => {
     it("should throw UserNotInOrgError when non-super-user is not in org", async () => {
         const regularUserToken = createMockJwtWithPermissions(["read:docs"]);
 
+        // Mock jwtVerify to return successful verification without super-user permission
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["read:docs"]
+            }
+        } as any);
+
         mockVenusClient.organization.isMember.mockResolvedValue({
             ok: true,
             body: false
@@ -229,6 +362,13 @@ describe("checkUserBelongsToOrg with super-user", () => {
 
     it("should throw UnavailableError when Venus returns error for non-super-user", async () => {
         const regularUserToken = createMockJwtWithPermissions(["read:docs"]);
+
+        // Mock jwtVerify to return successful verification without super-user permission
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["read:docs"]
+            }
+        } as any);
 
         mockVenusClient.organization.isMember.mockResolvedValue({
             ok: false,
@@ -248,6 +388,11 @@ describe("checkUserBelongsToOrg with super-user", () => {
     it("should check Venus membership for tokens without permissions claim", async () => {
         const tokenWithoutPermissions = createMockJwtWithoutPermissions();
 
+        // Mock jwtVerify to return successful verification without permissions
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {}
+        } as any);
+
         mockVenusClient.organization.isMember.mockResolvedValue({
             ok: true,
             body: true
@@ -265,6 +410,9 @@ describe("checkUserBelongsToOrg with super-user", () => {
 
     it("should check Venus membership for legacy non-JWT tokens", async () => {
         const legacyToken = "fern_Ngp2jvASiBGMG-BAs9XBsy3sqLY8WruC";
+
+        // Mock jwtVerify to reject for non-JWT tokens
+        mockJwtVerify.mockRejectedValueOnce(new Error("Invalid JWT"));
 
         mockVenusClient.organization.isMember.mockResolvedValue({
             ok: true,
@@ -284,6 +432,13 @@ describe("checkUserBelongsToOrg with super-user", () => {
 
     it("should strip Bearer prefix correctly (case insensitive)", async () => {
         const superUserToken = createMockJwtWithPermissions(["super-user"]);
+
+        // Mock jwtVerify to return successful verification with super-user permission
+        mockJwtVerify.mockResolvedValueOnce({
+            payload: {
+                permissions: ["super-user"]
+            }
+        } as any);
 
         // Test with lowercase "bearer"
         await authService.checkUserBelongsToOrg({
