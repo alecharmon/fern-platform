@@ -20,8 +20,8 @@ export function WebhookExamplesClient({ examples, slug, lang }: WebhookExamplesC
     }, [examples, selectedExampleIndex]);
 
     const selectorOptions = useMemo(() => {
-        return examples.map((_, index) => {
-            const label = `Example ${index + 1}`;
+        return examples.map((example, index) => {
+            const label = example.name ?? `Example ${index + 1}`;
             return {
                 key: String(index),
                 label,
