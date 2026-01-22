@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "Error al iniciar sesión con las credenciales proporcionadas",
     "enterCredentials": "Ingresa tus credenciales",
     "enterUsernameAndPassword": "Ingresa tu nombre de usuario y contraseña",
+    "enterYourField": "Ingresa tu {{field}}",
+    "enterYourFieldAndField": "Ingresa tu {{field1}} y {{field2}}",
     "enterBearerToken": "Ingresa tu token de portador",
     "username": "Nombre de usuario",
     "password": "Contraseña",

@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "Anmeldung mit den angegebenen Anmeldedaten fehlgeschlagen",
     "enterCredentials": "Geben Sie Ihre Anmeldedaten ein",
     "enterUsernameAndPassword": "Geben Sie Ihren Benutzernamen und Ihr Passwort ein",
+    "enterYourField": "Geben Sie Ihr {{field}} ein",
+    "enterYourFieldAndField": "Geben Sie Ihr {{field1}} und {{field2}} ein",
     "enterBearerToken": "Geben Sie Ihr Bearer-Token ein",
     "username": "Benutzername",
     "password": "Passwort",

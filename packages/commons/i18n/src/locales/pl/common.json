@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "Logowanie nie powiodło się z podanymi danymi uwierzytelniającymi",
     "enterCredentials": "Wprowadź dane uwierzytelniające",
     "enterUsernameAndPassword": "Wprowadź nazwę użytkownika i hasło",
+    "enterYourField": "Wprowadź {{field}}",
+    "enterYourFieldAndField": "Wprowadź {{field1}} i {{field2}}",
     "enterBearerToken": "Wprowadź token bearer",
     "username": "Nazwa użytkownika",
     "password": "Hasło",

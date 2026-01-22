@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "Αποτυχία σύνδεσης με τα παρεχόμενα διαπιστευτήρια",
     "enterCredentials": "Εισαγάγετε τα διαπιστευτήριά σας",
     "enterUsernameAndPassword": "Εισαγάγετε το όνομα χρήστη και τον κωδικό πρόσβασής σας",
+    "enterYourField": "Εισαγάγετε {{field}}",
+    "enterYourFieldAndField": "Εισαγάγετε {{field1}} και {{field2}}",
     "enterBearerToken": "Εισαγάγετε το bearer token σας",
     "username": "Όνομα χρήστη",
     "password": "Κωδικός πρόσβασης",

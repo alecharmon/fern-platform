@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "Sağlanan kimlik bilgileriyle giriş yapılamadı",
     "enterCredentials": "Kimlik bilgilerinizi girin",
     "enterUsernameAndPassword": "Kullanıcı adınızı ve şifrenizi girin",
+    "enterYourField": "{{field}} girin",
+    "enterYourFieldAndField": "{{field1}} ve {{field2}} girin",
     "enterBearerToken": "Bearer token'ınızı girin",
     "username": "Kullanıcı adı",
     "password": "Şifre",

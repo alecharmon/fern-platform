@@ -101,7 +101,16 @@ export function PlaygroundCardTriggerManual({
                     ? `${t(lang).auth.enterBearerToken} (${bearer.tokenName})`
                     : t(lang).auth.enterBearerToken;
             },
-            basicAuth: () => t(lang).auth.enterUsernameAndPassword,
+            basicAuth: (basicAuth) => {
+                const usernameName = basicAuth.usernameName ?? t(lang).auth.username.toLowerCase();
+                if (basicAuth.passwordAlwaysEmpty) {
+                    return t(lang).auth.enterYourField.replace("{{field}}", usernameName);
+                }
+                const passwordName = basicAuth.passwordName ?? t(lang).auth.password.toLowerCase();
+                return t(lang)
+                    .auth.enterYourFieldAndField.replace("{{field1}}", usernameName)
+                    .replace("{{field2}}", passwordName);
+            },
             header: (header) => {
                 return `${t(lang).auth.enterCredentials} (${header.headerWireValue})`;
             },

@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "제공된 인증 정보로 로그인하지 못했습니다",
     "enterCredentials": "인증 정보를 입력하세요",
     "enterUsernameAndPassword": "사용자 이름과 비밀번호를 입력하세요",
+    "enterYourField": "{{field}}을(를) 입력하세요",
+    "enterYourFieldAndField": "{{field1}}과(와) {{field2}}을(를) 입력하세요",
     "enterBearerToken": "Bearer 토큰을 입력하세요",
     "username": "사용자 이름",
     "password": "비밀번호",

@@ -8,6 +8,8 @@ export type Translations = {
         failedToLoginWithCredentials: string;
         enterCredentials: string;
         enterUsernameAndPassword: string;
+        enterYourField: string;
+        enterYourFieldAndField: string;
         enterBearerToken: string;
         username: string;
         password: string;

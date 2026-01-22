@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "Не удалось войти с указанными учётными данными",
     "enterCredentials": "Введите учётные данные",
     "enterUsernameAndPassword": "Введите имя пользователя и пароль",
+    "enterYourField": "Введите {{field}}",
+    "enterYourFieldAndField": "Введите {{field1}} и {{field2}}",
     "enterBearerToken": "Введите bearer-токен",
     "username": "Имя пользователя",
     "password": "Пароль",

@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "提供された認証情報でログインに失敗しました",
     "enterCredentials": "認証情報を入力してください",
     "enterUsernameAndPassword": "ユーザー名とパスワードを入力してください",
+    "enterYourField": "{{field}}を入力してください",
+    "enterYourFieldAndField": "{{field1}}と{{field2}}を入力してください",
     "enterBearerToken": "Bearerトークンを入力してください",
     "username": "ユーザー名",
     "password": "パスワード",

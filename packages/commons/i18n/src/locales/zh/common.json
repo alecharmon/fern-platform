@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "使用提供的凭据登录失败",
     "enterCredentials": "输入您的凭据",
     "enterUsernameAndPassword": "输入您的用户名和密码",
+    "enterYourField": "输入您的 {{field}}",
+    "enterYourFieldAndField": "输入您的 {{field1}} 和 {{field2}}",
     "enterBearerToken": "输入您的 Bearer 令牌",
     "username": "用户名",
     "password": "密码",

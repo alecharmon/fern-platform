@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "Innlogging mislyktes med de oppgitte legitimasjonene",
     "enterCredentials": "Skriv inn legitimasjon",
     "enterUsernameAndPassword": "Skriv inn brukernavn og passord",
+    "enterYourField": "Skriv inn {{field}}",
+    "enterYourFieldAndField": "Skriv inn {{field1}} og {{field2}}",
     "enterBearerToken": "Skriv inn bearer-token",
     "username": "Brukernavn",
     "password": "Passord",

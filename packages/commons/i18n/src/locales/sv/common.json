@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "Inloggning misslyckades med de angivna inloggningsuppgifterna",
     "enterCredentials": "Ange dina inloggningsuppgifter",
     "enterUsernameAndPassword": "Ange ditt användarnamn och lösenord",
+    "enterYourField": "Ange ditt {{field}}",
+    "enterYourFieldAndField": "Ange ditt {{field1}} och {{field2}}",
     "enterBearerToken": "Ange din bearer-token",
     "username": "Användarnamn",
     "password": "Lösenord",

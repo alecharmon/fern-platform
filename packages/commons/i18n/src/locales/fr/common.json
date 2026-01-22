@@ -8,6 +8,8 @@
     "failedToLoginWithCredentials": "Échec de la connexion avec les identifiants fournis",
     "enterCredentials": "Entrez vos identifiants",
     "enterUsernameAndPassword": "Entrez votre nom d'utilisateur et votre mot de passe",
+    "enterYourField": "Entrez votre {{field}}",
+    "enterYourFieldAndField": "Entrez votre {{field1}} et {{field2}}",
     "enterBearerToken": "Entrez votre jeton bearer",
     "username": "Nom d'utilisateur",
     "password": "Mot de passe",
