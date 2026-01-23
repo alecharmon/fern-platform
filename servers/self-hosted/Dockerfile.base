@@ -172,15 +172,13 @@ RUN log "Installing esbuild..." && \
     npm-real i -g esbuild@0.27.0 --ignore-scripts 2>&1 | add-timestamps
 # ----------- End esbuild setup -----------
 
-# ----------- Start npm vulnerability patches -----------
-# Patch glob and brace-expansion to fix GHSA-5j98-mcp5-4vw2 and GHSA-v6h2-p8h4-qcjw
-# Patch tar to fix CVE-2026-23745 (GHSA-8qq5-rm4j-mr97)
-# Using npm pack + tar approach to replace vulnerable packages without running npm install
-
-# Helper function to patch glob in a node_modules directory
-# glob 10.x -> 10.5.0, glob 11.x -> 11.1.0
-# tar 7.x -> 7.5.4
-RUN log "Patching npm vulnerabilities..." && \
+# ----------- Start npm vulnerability patches preparation -----------
+# Prepare patches for glob, brace-expansion, and tar vulnerabilities
+# These patches will be applied by Dockerfile.self_hosted to all directories
+# glob 10.x -> 10.5.0, glob 11.x -> 11.1.0 (fixes GHSA-5j98-mcp5-4vw2)
+# brace-expansion 2.0.x -> 2.0.2 (fixes GHSA-v6h2-p8h4-qcjw)
+# tar 7.x (<7.5.4) -> 7.5.4 (fixes CVE-2026-23950 / GHSA-r6q2-hw4h-h46w)
+RUN log "Preparing npm vulnerability patches..." && \
     cd /tmp && \
     npm-real pack glob@10.5.0 2>&1 | add-timestamps && \
     npm-real pack glob@11.1.0 2>&1 | add-timestamps && \
@@ -193,40 +191,8 @@ RUN log "Patching npm vulnerabilities..." && \
     tar -xzf tar-7.5.4.tgz -C /tmp/patches/tar && \
     rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz
 
-# Patch glob, brace-expansion, and tar across all node_modules directories
-# This covers: npm, pnpm, turbo, prisma, esbuild
-# Only patch vulnerable versions: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0, brace-expansion 2.0.x -> 2.0.2, tar 7.x (<7.5.4) -> 7.5.4
-RUN log "Patching glob/brace-expansion/tar across all node_modules..." && \
-    for root in /usr/local/lib/node_modules /usr/lib/node_modules /opt/buf-modules; do \
-        if [ -d "$root" ]; then \
-            find "$root" -path "*/node_modules/glob/package.json" -o -path "*/dist/node_modules/glob/package.json" 2>/dev/null | while read -r pkg; do \
-                dir=$(dirname "$pkg"); \
-                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
-                if echo "$version" | grep -q "^10\."; then \
-                    rm -rf "$dir" && cp -r /tmp/patches/glob-10/package "$dir" && log "Patched glob $version -> 10.5.0 at $dir"; \
-                elif echo "$version" | grep -q "^11\."; then \
-                    rm -rf "$dir" && cp -r /tmp/patches/glob-11/package "$dir" && log "Patched glob $version -> 11.1.0 at $dir"; \
-                fi; \
-            done; \
-            find "$root" -path "*/node_modules/brace-expansion/package.json" -o -path "*/dist/node_modules/brace-expansion/package.json" 2>/dev/null | while read -r pkg; do \
-                dir=$(dirname "$pkg"); \
-                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
-                if echo "$version" | grep -q "^2\.0\.[01]$"; then \
-                    rm -rf "$dir" && cp -r /tmp/patches/brace-expansion/package "$dir" && log "Patched brace-expansion $version -> 2.0.2 at $dir"; \
-                fi; \
-            done; \
-            find "$root" -path "*/node_modules/tar/package.json" -o -path "*/dist/node_modules/tar/package.json" 2>/dev/null | while read -r pkg; do \
-                dir=$(dirname "$pkg"); \
-                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
-                if echo "$version" | grep -qE "^7\.[0-4]\." || echo "$version" | grep -qE "^7\.5\.[0-2]$"; then \
-                    rm -rf "$dir" && cp -r /tmp/patches/tar/package "$dir" && log "Patched tar $version -> 7.5.4 at $dir"; \
-                fi; \
-            done; \
-        fi; \
-    done || true
-
-# Keep patches for use by main Dockerfile (will be cleaned up there after patching app-specific modules)
-# ----------- End npm vulnerability patches -----------
+# Patches are kept in /tmp/patches for use by Dockerfile.self_hosted
+# ----------- End npm vulnerability patches preparation -----------
 
 # ----------- Setup for non-root execution -----------
 # Ensure /tmp directory has proper permissions (sticky bit + world writable)

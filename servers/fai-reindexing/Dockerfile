@@ -56,11 +56,17 @@ RUN ls -lh dist-bundle/
 FROM node:22-alpine AS runner
 WORKDIR /app
 
+# Install dependencies and patch tar to fix CVE-2026-23950 (GHSA-r6q2-hw4h-h46w)
 RUN npm install -g pnpm@10.28.1 && \
     pnpm add \
         @aws-sdk/client-ecs@^3.709.0 \
         @aws-sdk/client-sqs@^3.709.0 \
         --prod && \
+    npm pack tar@7.5.4 && \
+    tar -xzf tar-7.5.4.tgz && \
+    rm -rf /usr/local/lib/node_modules/pnpm/dist/node_modules/tar && \
+    mv package /usr/local/lib/node_modules/pnpm/dist/node_modules/tar && \
+    rm tar-7.5.4.tgz && \
     rm -rf ~/.pnpm-store && \
     rm -rf /usr/local/lib/node_modules/npm
 
