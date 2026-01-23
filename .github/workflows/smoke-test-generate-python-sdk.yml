@@ -1,0 +1,29 @@
+name: Generate Python SDK (Smoke Test)
+
+on:
+  push:
+    branches:
+      - app
+    paths:
+      - "smoke-test/fern/**"
+  pull_request:
+    paths:
+      - "smoke-test/fern/**"
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download Fern
+        run: npm install -g fern-api
+
+      - name: Generate Python SDK
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_SMOKE_TEST_API_KEY }}
+        run: |
+          fern generate --group python-sdk --version 1.0.0 --api api --log-level debug
+        working-directory: smoke-test/fern

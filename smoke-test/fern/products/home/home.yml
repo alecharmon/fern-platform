@@ -20,6 +20,9 @@ tabs:
   webhook-api:
     display-name: Webhook API
     icon: webhook
+  api:
+    display-name: Tasks API
+    icon: check-square
   changelog:
     display-name: Changelog
     icon: clock
@@ -61,4 +64,12 @@ navigation:
     layout:
       - api: Webhook API
         api-name: webhook-api
+  - tab: api
+    layout:
+      - section: Overview
+        contents:
+          - page: API Overview
+            path: ../../docs/pages/api-overview.mdx
+      - api: Tasks API
+        api-name: api
   - tab: changelog
