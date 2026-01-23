@@ -44,6 +44,8 @@ import {
     ApiDefinitionV1ToLatest,
     type AuthScheme,
     backfillSnippets,
+    backfillSnippetsForExample,
+    createSnippetGenerators,
     type EnvironmentId,
     type ObjectProperty,
     type PruningNodeType,
@@ -586,58 +588,90 @@ const getEndpointById = async ({
     };
 };
 
-const getEndpointByLocator = async (
-    domainKey: string,
-    method: HttpMethod,
-    path: string,
-    example?: string,
-    apiName?: string
-): Promise<{
-    apiDefinitionId: ApiDefinition.ApiDefinitionId;
-    endpoint: ApiDefinition.EndpointDefinition;
-    slugs: Slug[];
-}> => {
-    const root = await unsafe_getFullRoot(domainKey);
+const getEndpointByLocator =
+    (cacheConfig: Required<CacheConfig>) =>
+    async (
+        domainKey: string,
+        method: HttpMethod,
+        path: string,
+        example?: string,
+        apiName?: string
+    ): Promise<{
+        apiDefinitionId: ApiDefinition.ApiDefinitionId;
+        endpoint: ApiDefinition.EndpointDefinition;
+        slugs: Slug[];
+    }> => {
+        const root = await unsafe_getFullRoot(domainKey);
 
-    const apiIds = new Set<string>();
-    FernNavigation.traverseBF(root, (node) => {
-        if (FernNavigation.hasMetadata(node) && "apiDefinitionId" in node && node.apiDefinitionId) {
-            apiIds.add(node.apiDefinitionId);
-        }
-        return CONTINUE;
-    });
-
-    for (const apiId of apiIds) {
-        const api = await getApi(domainKey, apiId);
-        // If apiName is specified, only search within that API
-        if (apiName != null && api.id !== apiName) {
-            continue;
-        }
-        const endpoint = findEndpoint({
-            apiDefinition: api,
-            method,
-            path,
-            example
+        const apiIds = new Set<string>();
+        FernNavigation.traverseBF(root, (node) => {
+            if (FernNavigation.hasMetadata(node) && "apiDefinitionId" in node && node.apiDefinitionId) {
+                apiIds.add(node.apiDefinitionId);
+            }
+            return CONTINUE;
         });
-        if (endpoint != null) {
-            const slugs = FernNavigation.NodeCollector.collect(root)
-                .getNodesInOrder()
-                .filter(FernNavigation.hasMetadata)
-                .filter(
-                    (node) =>
-                        node.type === "endpoint" && node.apiDefinitionId === api.id && node.endpointId === endpoint.id
-                )
-                .map((node) => node.slug);
-            return {
-                apiDefinitionId: api.id,
-                endpoint,
-                slugs
-            };
+
+        for (const apiId of apiIds) {
+            const api = await getApi(domainKey, apiId);
+            // If apiName is specified, only search within that API
+            if (apiName != null && api.id !== apiName) {
+                continue;
+            }
+            const endpoint = findEndpoint({
+                apiDefinition: api,
+                method,
+                path,
+                example
+            });
+            if (endpoint != null) {
+                const slugs = FernNavigation.NodeCollector.collect(root)
+                    .getNodesInOrder()
+                    .filter(FernNavigation.hasMetadata)
+                    .filter(
+                        (node) =>
+                            node.type === "endpoint" &&
+                            node.apiDefinitionId === api.id &&
+                            node.endpointId === endpoint.id
+                    )
+                    .map((node) => node.slug);
+
+                // Backfill dynamic SDK snippets for the endpoint
+                const metadata = await getMetadata(cacheConfig)(domainKey);
+                const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, apiId);
+                const settings = await getSettings(cacheConfig)(domainKey);
+                const flags = {
+                    httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
+                    alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
+                };
+
+                let dynamicGenerators = {};
+                try {
+                    if (dynamicIr) {
+                        dynamicGenerators = createSnippetGenerators({ endpoint, dynamicIr });
+                    }
+                } catch (error) {
+                    console.log("[getEndpointByLocator] error creating dynamic snippet generators:", error);
+                }
+
+                const endpointWithSnippets = {
+                    ...endpoint,
+                    examples: await Promise.all(
+                        endpoint.examples?.map((ex) =>
+                            backfillSnippetsForExample(api, dynamicGenerators, endpoint, ex, flags)
+                        ) ?? []
+                    )
+                };
+
+                return {
+                    apiDefinitionId: api.id,
+                    endpoint: endpointWithSnippets,
+                    slugs
+                };
+            }
         }
-    }
-    console.error(`Could not find endpoint ${method} ${path}${apiName ? ` in API "${apiName}"` : ""}`);
-    notFound();
-};
+        console.error(`Could not find endpoint ${method} ${path}${apiName ? ` in API "${apiName}"` : ""}`);
+        notFound();
+    };
 
 const getWebhookByLocator = async (
     domainKey: string,
@@ -1485,7 +1519,7 @@ const createCachedDocsLoaderImpl = async (
         getEndpointByLocator: cache(
             unstable_cache(
                 (method: HttpMethod, path: string, example?: string, apiName?: string) =>
-                    getEndpointByLocator(domainKey, method, path, example, apiName),
+                    getEndpointByLocator(config)(domainKey, method, path, example, apiName),
                 [domainKey, config.cacheKeySuffix],
                 { tags: [domainKey, "endpointByLocator"] }
             )
