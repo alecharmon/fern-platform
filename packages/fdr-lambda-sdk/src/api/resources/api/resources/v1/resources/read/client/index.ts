@@ -1,3 +1,4 @@
+export * as getApiDefinitionFull from "./getApiDefinitionFull.js";
 export * as getEndpointById from "./getEndpointById.js";
 export * as getEndpointByLocator from "./getEndpointByLocator.js";
 export * from "./requests/index.js";

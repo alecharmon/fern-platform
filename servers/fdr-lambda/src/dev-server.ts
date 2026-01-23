@@ -132,6 +132,8 @@ app.listen(PORT, () => {
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  POST http://localhost:${PORT}/v2/registry/docs/ensure-docs-in-s3`);
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
+    console.log(`  GET  http://localhost:${PORT}/v2/registry/api/load-full/{apiDefinitionId}`);
+    // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  GET  http://localhost:${PORT}/v2/registry/api/load/{apiDefinitionId}/endpoint/{endpointId}`);
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  GET  http://localhost:${PORT}/v2/registry/api/load/{apiDefinitionId}/endpoint?method=X&path=Y`);

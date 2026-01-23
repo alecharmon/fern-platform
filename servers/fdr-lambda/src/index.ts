@@ -10,6 +10,7 @@ import {
     UserNotInOrgError
 } from "./errors";
 import { ensureDocsInS3 } from "./services/ensureDocsInS3";
+import { getApiDefinition } from "./services/getApiDefinition";
 import { DocsV2Read, getDocsFields } from "./services/getDocsFields";
 import { getDocsForUrl } from "./services/getDocsForUrl";
 import { getEndpointById } from "./services/getEndpointById";
@@ -369,6 +370,37 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                     "Access-Control-Allow-Origin": "*"
                 },
                 body: JSON.stringify(result)
+            };
+        }
+
+        // Route: GET /registry/api/load-full/{apiDefinitionId}
+        if (path.startsWith("/registry/api/load-full/") && method === "GET") {
+            const pathParts = path.split("/");
+            const apiDefinitionId = pathParts[4];
+
+            if (!apiDefinitionId) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        message: "Missing apiDefinitionId",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            const apiDefinition = await getApiDefinition(apiDefinitionId, pool);
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify(apiDefinition)
             };
         }
 

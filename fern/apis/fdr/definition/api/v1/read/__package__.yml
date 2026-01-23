@@ -9,6 +9,7 @@ imports:
   websocket: websocket.yml
   graphql: graphql.yml
   registerRoot: ../register/__package__.yml
+  latestApi: ../../latest/__package__.yml
   latestEndpoint: ../../latest/endpoint.yml
   latestType: ../../latest/type.yml
 
@@ -24,6 +25,21 @@ service:
       path-parameters:
         apiDefinitionId: rootCommons.ApiDefinitionId
       response: ApiDefinition
+      errors:
+        - rootCommons.UnauthorizedError
+        - ApiDoesNotExistError
+
+    getApiDefinitionFull:
+      method: GET
+      path: /load-full/{apiDefinitionId}
+      audiences:
+        - fdr-lambda
+      docs: |
+        Loads the full API definition for a given API definition ID.
+        Returns the API in the latest format.
+      path-parameters:
+        apiDefinitionId: rootCommons.ApiDefinitionId
+      response: latestApi.ApiDefinition
       errors:
         - rootCommons.UnauthorizedError
         - ApiDoesNotExistError
