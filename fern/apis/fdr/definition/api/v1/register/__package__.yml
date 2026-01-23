@@ -28,13 +28,14 @@ service:
             definition: optional<ApiDefinition>
             definitionV2: optional<latest.ApiDefinition>
             sources: optional<map<SourceId, Source>>
-            dynamicIRs: 
+            dynamicIRs:
               type: optional<map<string, DynamicIR>>
               docs: A mapping of languages to dynamic IR.
       response: RegisterApiDefinitionResponse
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
+        - rootCommons.UnauthorizedError
 
     getSdkDynamicIrUploadUrls:
       docs: Get presigned S3 upload URLs for SDK dynamic IR without requiring full API registration. Used for SDK generation.
@@ -215,13 +216,13 @@ types:
     properties:
       package: string
       version: optional<string>
-      
-  SwiftPackage: 
+
+  SwiftPackage:
     properties:
       package: string
       version: optional<string>
 
-  CratesPackage: 
+  CratesPackage:
     properties:
       package: string
       version: optional<string>

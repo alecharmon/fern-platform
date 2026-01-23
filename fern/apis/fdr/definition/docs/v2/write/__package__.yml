@@ -36,6 +36,7 @@ service:
         - rootCommons.UnauthorizedError
         - rootCommons.UnavailableError
         - rootCommons.UserNotInOrgError
+        - rootCommons.UnauthorizedError
         - InvalidDomainError
         - InvalidCustomDomainError
         - rootCommons.DomainBelongsToAnotherOrgError
@@ -82,6 +83,7 @@ service:
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
+        - rootCommons.UnauthorizedError
         - v1DocsWrite.DocsRegistrationIdNotFound
         - LibraryDocsJobInvalidForRegistrationError
 
@@ -98,7 +100,7 @@ service:
       errors:
         - DocsNotFoundError
         - rootCommons.UnauthorizedError
-  
+
     setIsArchived:
       auth: true
       method: POST
@@ -111,8 +113,8 @@ service:
             isArchived: boolean
       errors:
         - DocsNotFoundError
-        - rootCommons.UnauthorizedError 
-    
+        - rootCommons.UnauthorizedError
+
     setDocsUrlMetadata:
       auth: true
       method: POST
@@ -160,7 +162,7 @@ service:
       docs: List all domains in the Algolia preview whitelist
       response: ListAlgoliaPreviewWhitelistResponse
       errors:
-        - rootCommons.UnauthorizedError 
+        - rootCommons.UnauthorizedError
 
     deleteDocsSite:
       auth: true
@@ -227,7 +229,7 @@ types:
   FilePathWithHash:
     properties:
       path: v1DocsWrite.FilePath
-      fileHash: 
+      fileHash:
         type: optional<string>
         docs: SHA-256 hash of the file content in hex format. When provided, enables content-addressed storage and deduplication.
 

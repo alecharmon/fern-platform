@@ -41,6 +41,7 @@ service:
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
+        - rootCommons.UnauthorizedError
         - DocsRegistrationIdNotFound
 
 types:
@@ -75,7 +76,7 @@ types:
       jsFiles:
         type: optional<map<string, string>>
         docs: |
-          A map of file names to their contents. 
+          A map of file names to their contents.
           The key is the absolute path file name and the value is the file contents.
 
   PageContent:
