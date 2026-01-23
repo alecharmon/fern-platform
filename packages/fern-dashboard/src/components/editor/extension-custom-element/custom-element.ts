@@ -157,11 +157,25 @@ export const CustomElement = Node.create<CustomElementOptions>({
                         }
                     }
 
+                    // Helper to safely call nodesBetween with bounds checking
+                    const safeNodesBetween = (from: number, to: number, callback: (node: any, pos: number) => void) => {
+                        const docSize = state.doc.content.size;
+                        const safeFrom = Math.max(0, Math.min(from, docSize));
+                        const safeTo = Math.max(0, Math.min(to, docSize));
+                        if (safeFrom <= safeTo) {
+                            try {
+                                state.doc.nodesBetween(safeFrom, safeTo, callback);
+                            } catch {
+                                // Ignore errors from invalid positions
+                            }
+                        }
+                    };
+
                     // Check if any step involves a custom element
                     let hasCustomElement = false;
                     transaction.steps.forEach((step) => {
                         if (step instanceof ReplaceStep) {
-                            state.doc.nodesBetween(step.from, step.to, (node) => {
+                            safeNodesBetween(step.from, step.to, (node) => {
                                 if (node.type.name === TAG) {
                                     hasCustomElement = true;
                                 }
@@ -204,7 +218,7 @@ export const CustomElement = Node.create<CustomElementOptions>({
                             const isDeletion = step.slice.content.size === 0 && step.from !== step.to;
                             if (isDeletion && !hasInsertion) {
                                 // Check if a custom element is being deleted
-                                state.doc.nodesBetween(step.from, step.to, (node, pos) => {
+                                safeNodesBetween(step.from, step.to, (node, pos) => {
                                     if (node.type.name === TAG) {
                                         // Check if the custom element is currently selected
                                         const { selection } = state;
