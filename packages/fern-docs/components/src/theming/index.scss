@@ -63,7 +63,10 @@
       }
 
       &[data-state="sticky"] {
-        @apply sticky h-fit max-h-[calc(100dvh-var(--header-height))] shrink-0 border-r-0;
+        @apply border-border-concealed bg-(color:--sidebar-background) sticky border-r backdrop-blur-xl;
+        @apply shrink-0 self-start overflow-y-auto;
+
+        height: calc(100dvh - var(--header-height));
       }
     }
 

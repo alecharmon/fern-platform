@@ -4,6 +4,7 @@ import { useTheme } from "next-themes";
 import React, { Fragment } from "react";
 import { cn } from "../cn";
 import { FERN_FOOTER_ID } from "../constants";
+import { useHasCustomFooter } from "../hooks/useHasCustomFooter";
 import { Separator } from "../Separator";
 import { useIsEmbedded } from "../state/embedded";
 import { FernHeader } from "./fern-header";
@@ -47,9 +48,14 @@ export default function AbstractDefaultDocs({
 }) {
     const { resolvedTheme } = useTheme();
     const isEmbedded = useIsEmbedded();
+    const hasCustomFooter = useHasCustomFooter();
     const headerClassName = resolvedTheme === "dark" ? darkHeaderClassName : lightHeaderClassName;
     const sidebarClassName = resolvedTheme === "dark" ? darkSidebarClassName : lightSidebarClassName;
     const mainRef = React.useRef<HTMLDivElement>(null);
+
+    // Use sticky positioning when there's a custom footer to prevent overlap
+    // Fixed positioning is used when there's no custom footer (existing behavior)
+    const shouldUseFixedSidebar = isSidebarFixed && !hasCustomFooter;
 
     React.useEffect(() => {
         if (typeof document !== "undefined") {
@@ -113,7 +119,7 @@ export default function AbstractDefaultDocs({
                             isSidePanelResizing && "!transition-none"
                         )}
                         data-theme="default"
-                        fixed={isSidebarFixed}
+                        fixed={shouldUseFixedSidebar}
                         isSidePanelOpen={isSidePanelOpen}
                     >
                         <div
