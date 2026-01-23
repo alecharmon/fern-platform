@@ -60,7 +60,7 @@ jobs:
     #   run: docker compose -f servers/fdr/docker-compose.ete.yml down -v
 
   mdx-bundler:
-    runs-on: ubuntu-latest
+    runs-on: Seed
     permissions:
       id-token: write
       contents: read
