@@ -4,79 +4,124 @@
 
 import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
 import { generateAnchorId, renderDocstring } from "../base/index.js";
-import { buildCodeBlockLinks, getTypeDisplay, renderCodeBlockWithLinks } from "./TypeLinkResolver.js";
+import {
+    extractLinksFromTypes,
+    formatSignatureMultiline,
+    getModulePath,
+    getTypeDisplay,
+    getTypePathForSignature,
+    type RenderContext,
+    renderCodeBlockWithLinks,
+    type SignatureParam
+} from "./TypeLinkResolver.js";
 
-/**
- * Collect all TypeInfos from a function's parameters and return type.
- */
-function collectTypeInfos(
-    func: FdrLambda.libraryDocs.PythonFunctionIr
-): (FdrLambda.libraryDocs.TypeInfo | undefined)[] {
-    const typeInfos: (FdrLambda.libraryDocs.TypeInfo | undefined)[] = [];
-
-    for (const param of func.parameters) {
-        typeInfos.push(param.typeInfo);
-    }
-
-    typeInfos.push(func.returnTypeInfo);
-
-    return typeInfos;
+interface FunctionSignature {
+    code: string;
+    typeStrings: string[];
 }
 
 /**
- * Extract module path from a fully qualified function/class path.
- * e.g., "nemo_rl.algorithms.dpo._default_dpo_save_state" -> "nemo_rl.algorithms.dpo"
+ * Build signature code and collect type strings for link extraction in one pass.
  */
-function getModulePath(path: string): string {
-    const parts = path.split(".");
-    return parts.slice(0, -1).join(".");
+function buildFunctionSignature(
+    func: FdrLambda.libraryDocs.PythonFunctionIr,
+    omitSelf: boolean = false
+): FunctionSignature {
+    const rawParams = omitSelf ? func.parameters.filter((p) => p.name !== "self" && p.name !== "cls") : func.parameters;
+
+    const params: SignatureParam[] = [];
+    const typeStrings: string[] = [];
+
+    for (const param of rawParams) {
+        const type = getTypePathForSignature(param.typeInfo) || undefined;
+        if (type) {
+            typeStrings.push(type);
+        }
+        params.push({ name: param.name, type, defaultValue: param.default || undefined });
+    }
+
+    const returnType = getTypePathForSignature(func.returnTypeInfo);
+    if (returnType) {
+        typeStrings.push(returnType);
+    }
+
+    const code = formatSignatureMultiline(func.path, params, returnType ? [returnType] : undefined);
+    return { code, typeStrings };
+}
+
+/**
+ * Build param annotations map for docstring rendering.
+ */
+function buildParamAnnotations(func: FdrLambda.libraryDocs.PythonFunctionIr): Record<string, string> {
+    const annotations: Record<string, string> = {};
+    for (const param of func.parameters) {
+        const typeDisplay = getTypeDisplay(param.typeInfo);
+        if (typeDisplay) {
+            annotations[param.name] = typeDisplay;
+        }
+    }
+    return annotations;
+}
+
+/**
+ * Get badges for special method types.
+ */
+function getMethodBadges(func: FdrLambda.libraryDocs.PythonFunctionIr): string[] {
+    const badges: string[] = [];
+    if (func.isAsync) {
+        badges.push("async");
+    }
+    if (func.isClassmethod) {
+        badges.push("classmethod");
+    }
+    if (func.isStaticmethod) {
+        badges.push("staticmethod");
+    }
+    if (func.isProperty) {
+        badges.push("property");
+    }
+    if (func.decorators.some((d) => d.includes("abstractmethod"))) {
+        badges.push("abstract");
+    }
+    return badges;
 }
 
 /**
  * Render a function in detailed form for the API section.
  */
-export function renderFunctionDetailed(func: FdrLambda.libraryDocs.PythonFunctionIr, baseSlug: string): string {
+export function renderFunctionDetailed(func: FdrLambda.libraryDocs.PythonFunctionIr, ctx: RenderContext): string {
     const lines: string[] = [];
+    const currentModulePath = getModulePath(func.path);
 
-    // Anchor for cross-referencing
-    const anchorId = generateAnchorId(func.path);
-    lines.push(`<Anchor id="${anchorId}">`);
+    // Anchor
+    lines.push(`<Anchor id="${generateAnchorId(func.path)}">`);
     lines.push("");
 
-    // Build links for type references in signature
-    const typeInfos = collectTypeInfos(func);
-    const currentModulePath = getModulePath(func.path);
-    const links = buildCodeBlockLinks(typeInfos, baseSlug, currentModulePath);
-
-    // Signature in code block with type links
-    lines.push(renderCodeBlockWithLinks(func.signature.replace(/^def /, ""), links));
+    // Signature with links (extracted from param/return types only)
+    const { code, typeStrings } = buildFunctionSignature(func);
+    const links = extractLinksFromTypes(typeStrings, ctx, currentModulePath);
+    lines.push(renderCodeBlockWithLinks(code, links));
     lines.push("</Anchor>");
     lines.push("");
 
-    // Wrap content in Indent for visual hierarchy
+    // Content
     lines.push("<Indent>");
     lines.push("");
 
-    // Badges for special method types
+    // Badges
     const badges = getMethodBadges(func);
     if (badges.length > 0) {
         lines.push(badges.map((b) => `<Badge>${b}</Badge>`).join(" "));
         lines.push("");
     }
 
-    // Build param annotations map for docstring rendering
-    const paramAnnotations: Record<string, string> = {};
-    for (const param of func.parameters) {
-        const typeDisplay = getTypeDisplay(param.typeInfo);
-        if (typeDisplay) {
-            paramAnnotations[param.name] = typeDisplay;
-        }
-    }
-
-    // Docstring with parameters
-    const returnTypeDisplay = getTypeDisplay(func.returnTypeInfo);
+    // Docstring
     if (func.docstring) {
-        const docstringMdx = renderDocstring(func.docstring, paramAnnotations, returnTypeDisplay || undefined);
+        const docstringMdx = renderDocstring(
+            func.docstring,
+            buildParamAnnotations(func),
+            getTypeDisplay(func.returnTypeInfo) || undefined
+        );
         if (docstringMdx) {
             lines.push(docstringMdx);
         }
@@ -93,50 +138,41 @@ export function renderFunctionDetailed(func: FdrLambda.libraryDocs.PythonFunctio
  */
 export function renderMethodDetailed(
     func: FdrLambda.libraryDocs.PythonFunctionIr,
-    baseSlug: string,
+    ctx: RenderContext,
     currentModulePath?: string
 ): string {
     const lines: string[] = [];
+    const modulePath = currentModulePath ?? getModulePath(func.path);
 
-    const anchorId = generateAnchorId(func.path);
-
-    lines.push(`<Anchor id="${anchorId}">`);
+    // Anchor
+    lines.push(`<Anchor id="${generateAnchorId(func.path)}">`);
     lines.push("");
 
-    // Build links for type references in signature
-    const typeInfos = collectTypeInfos(func);
-    const modulePath = currentModulePath ?? getModulePath(func.path);
-    const links = buildCodeBlockLinks(typeInfos, baseSlug, modulePath);
-
-    // Signature in code block with type links
-    lines.push(renderCodeBlockWithLinks(func.signature.replace(/^def /, ""), links));
+    // Signature with links (omit self/cls for methods)
+    const { code, typeStrings } = buildFunctionSignature(func, true);
+    const links = extractLinksFromTypes(typeStrings, ctx, modulePath);
+    lines.push(renderCodeBlockWithLinks(code, links));
     lines.push("</Anchor>");
     lines.push("");
 
-    // Wrap method content in Indent
+    // Content
     lines.push("<Indent>");
     lines.push("");
 
-    // Badges for special method types
+    // Badges
     const badges = getMethodBadges(func);
     if (badges.length > 0) {
         lines.push(badges.map((b) => `<Badge>${b}</Badge>`).join(" "));
         lines.push("");
     }
 
-    // Build param annotations map
-    const paramAnnotations: Record<string, string> = {};
-    for (const param of func.parameters) {
-        const typeDisplay = getTypeDisplay(param.typeInfo);
-        if (typeDisplay) {
-            paramAnnotations[param.name] = typeDisplay;
-        }
-    }
-
     // Docstring
-    const methodReturnTypeDisplay = getTypeDisplay(func.returnTypeInfo);
     if (func.docstring) {
-        const docstringMdx = renderDocstring(func.docstring, paramAnnotations, methodReturnTypeDisplay || undefined);
+        const docstringMdx = renderDocstring(
+            func.docstring,
+            buildParamAnnotations(func),
+            getTypeDisplay(func.returnTypeInfo) || undefined
+        );
         if (docstringMdx) {
             lines.push(docstringMdx);
         }
@@ -153,28 +189,25 @@ export function renderMethodDetailed(
  */
 export function renderProperty(
     func: FdrLambda.libraryDocs.PythonFunctionIr,
-    baseSlug: string,
+    ctx: RenderContext,
     currentModulePath?: string
 ): string {
     const lines: string[] = [];
-
-    const anchorId = generateAnchorId(func.path);
-
-    // Property signature
-    const propReturnTypeDisplay = getTypeDisplay(func.returnTypeInfo);
-    const returnType = propReturnTypeDisplay ? `: ${propReturnTypeDisplay}` : "";
-
-    // Build links for the property's return type
     const modulePath = currentModulePath ?? getModulePath(func.path);
-    const links = buildCodeBlockLinks([func.returnTypeInfo], baseSlug, modulePath);
 
-    lines.push(`<Anchor id="${anchorId}">`);
+    // Property signature: name: Type
+    const typeDisplay = getTypePathForSignature(func.returnTypeInfo);
+    const signature = typeDisplay ? `${func.name}: ${typeDisplay}` : func.name;
+    const links = typeDisplay ? extractLinksFromTypes([typeDisplay], ctx, modulePath) : {};
+
+    // Anchor
+    lines.push(`<Anchor id="${generateAnchorId(func.path)}">`);
     lines.push("");
-    lines.push(renderCodeBlockWithLinks(`${func.name}${returnType}`, links));
+    lines.push(renderCodeBlockWithLinks(signature, links));
     lines.push("</Anchor>");
     lines.push("");
 
-    // Docstring (simple, no params for property)
+    // Docstring
     if (func.docstring) {
         lines.push("<Indent>");
         lines.push("");
@@ -187,31 +220,4 @@ export function renderProperty(
     }
 
     return lines.join("\n");
-}
-
-/**
- * Get badges for a method based on its properties.
- */
-function getMethodBadges(func: FdrLambda.libraryDocs.PythonFunctionIr): string[] {
-    const badges: string[] = [];
-
-    if (func.isAsync) {
-        badges.push("async");
-    }
-    if (func.isClassmethod) {
-        badges.push("classmethod");
-    }
-    if (func.isStaticmethod) {
-        badges.push("staticmethod");
-    }
-    if (func.isProperty) {
-        badges.push("property");
-    }
-
-    // Check for abstractmethod decorator
-    if (func.decorators.some((d) => d.includes("abstractmethod"))) {
-        badges.push("abstract");
-    }
-
-    return badges;
 }

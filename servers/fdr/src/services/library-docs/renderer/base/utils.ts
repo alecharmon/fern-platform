@@ -3,22 +3,69 @@
  */
 
 /**
+ * Escape only JSX/HTML characters (not code block markers).
+ * Used by both escapeMdx and escapeMdxForDescription.
+ */
+function escapeJsxChars(text: string): string {
+    return text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/{/g, "&#123;").replace(/}/g, "&#125;");
+}
+
+/**
  * Escape special MDX characters in text.
+ *
+ * Use this for short text like identifiers, types, and parameter values
+ * where code blocks are not expected.
  *
  * Handles:
  * - HTML/JSX brackets: < > { }
  * - Code block markers: ``` (prevents unclosed code blocks)
  */
 export function escapeMdx(text: string): string {
-    return (
-        text
-            // Escape triple backticks first (code block markers)
-            .replace(/```/g, "\\`\\`\\`")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/{/g, "&#123;")
-            .replace(/}/g, "&#125;")
-    );
+    // Escape code block markers first, then JSX chars
+    return escapeJsxChars(text.replace(/```/g, "\\`\\`\\`"));
+}
+
+/**
+ * Escape JSX/HTML characters for MDX descriptions that may contain code blocks.
+ *
+ * Only escapes characters OUTSIDE code blocks. Code blocks are preserved as-is
+ * since their content should render literally.
+ * Handles both closed (```...```) and unclosed (```... to end) code blocks.
+ * Wraps code blocks with <CodeBlock showLineNumbers={false}> for consistent styling.
+ */
+export function escapeMdxForDescription(text: string): string {
+    const result: string[] = [];
+    let lastIndex = 0;
+
+    // Match code blocks: ```optional-lang\n...content...\n``` OR unclosed ```...to end
+    const codeBlockRegex = /```[\w{}-]*\n[\s\S]*?(?:\n```|$)/g;
+
+    let match;
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+        // Escape text before this code block
+        if (match.index > lastIndex) {
+            result.push(escapeJsxChars(text.slice(lastIndex, match.index)));
+        }
+        // Preserve code block as-is (normalize language tag to python)
+        let codeBlock = match[0];
+        codeBlock = codeBlock.replace(/^```\{?\w*\}?\n/, "```python\n");
+        // Add closing ``` if missing
+        if (!codeBlock.endsWith("```")) {
+            codeBlock += "\n```";
+        }
+        // Wrap with CodeBlock component for consistent styling (no line numbers)
+        result.push("<CodeBlock showLineNumbers={false}>\n\n");
+        result.push(codeBlock);
+        result.push("\n\n</CodeBlock>");
+        lastIndex = match.index + match[0].length;
+    }
+
+    // Escape remaining text after last code block
+    if (lastIndex < text.length) {
+        result.push(escapeJsxChars(text.slice(lastIndex)));
+    }
+
+    return result.join("");
 }
 
 /**
@@ -37,24 +84,6 @@ export function formatTypeAnnotation(type: string | null | undefined): string {
         return "";
     }
     return escapeMdx(type);
-}
-
-/**
- * Indent a block of text.
- */
-export function indent(text: string, spaces: number = 4): string {
-    const prefix = " ".repeat(spaces);
-    return text
-        .split("\n")
-        .map((line) => (line.trim() ? prefix + line : line))
-        .join("\n");
-}
-
-/**
- * Join lines with proper newlines, filtering out empty items.
- */
-export function joinLines(...lines: (string | undefined | null)[]): string {
-    return lines.filter((line) => line != null && line !== "").join("\n");
 }
 
 /**

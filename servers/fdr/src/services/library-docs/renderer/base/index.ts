@@ -7,9 +7,8 @@ export type { NavNode, NavPageNode, NavSectionNode, RenderedOutput } from "./typ
 export {
     createFrontmatter,
     escapeMdx,
+    escapeMdxForDescription,
     escapeTableCell,
     formatTypeAnnotation,
-    generateAnchorId,
-    indent,
-    joinLines
+    generateAnchorId
 } from "./utils.js";

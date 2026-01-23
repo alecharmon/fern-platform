@@ -9,7 +9,8 @@ import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
 import { createHash } from "crypto";
 import type { FernRegistry } from "../../../../api/generated/index.js";
 import type { NavNode } from "../base/index.js";
-import { type RenderConfig, renderAllModulePages } from "./ModuleRenderer.js";
+import { renderAllModulePages } from "./ModuleRenderer.js";
+import { buildValidPaths, type RenderContext } from "./TypeLinkResolver.js";
 
 /**
  * Configuration for rendering library docs.
@@ -39,12 +40,10 @@ function generateNodeId(input: string): FernRegistry.navigation.v1.NodeId {
 export class PythonRenderer {
     private slug: string;
     private title: string;
-    private renderConfig: RenderConfig;
 
     constructor(config: PythonRendererConfig = {}) {
         this.slug = config.slug ?? "library-docs";
         this.title = config.title ?? "Library Reference";
-        this.renderConfig = { baseSlug: this.slug };
     }
 
     /**
@@ -54,8 +53,12 @@ export class PythonRenderer {
      * into a DocsDefinition.
      */
     render(ir: FdrLambda.libraryDocs.PythonLibraryDocsIr): FernRegistry.docs.v2.write.RenderedLibraryDocs {
+        // Build valid paths for type linking (only internal types will be linked)
+        const validPaths = buildValidPaths(ir);
+        const ctx: RenderContext = { baseSlug: this.slug, validPaths };
+
         // Render all module pages (keyed by pageId)
-        const rawPages = renderAllModulePages(ir.rootModule, this.renderConfig);
+        const rawPages = renderAllModulePages(ir.rootModule, ctx);
 
         // Convert to Fern-generated PageContent type
         const pages: Record<FernRegistry.PageId, FernRegistry.docs.v1.write.PageContent> = {};

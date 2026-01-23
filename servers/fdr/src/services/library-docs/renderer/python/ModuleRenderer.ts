@@ -10,25 +10,26 @@ import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
 import { createFrontmatter, escapeTableCell, generateAnchorId, renderSimpleDocstring } from "../base/index.js";
 import { renderClassDetailed } from "./ClassRenderer.js";
 import { renderFunctionDetailed } from "./FunctionRenderer.js";
-import { getTypeDisplay } from "./TypeLinkResolver.js";
-
-export interface RenderConfig {
-    baseSlug: string;
-}
+import {
+    extractLinksFromTypes,
+    getTypeDisplay,
+    type RenderContext,
+    renderCodeBlockWithLinks
+} from "./TypeLinkResolver.js";
 
 /**
  * Render a module to an MDX page.
  */
 export function renderModulePage(
     module: FdrLambda.libraryDocs.PythonModuleIr,
-    config: RenderConfig,
+    ctx: RenderContext,
     parentPath: string = ""
 ): string {
     const lines: string[] = [];
 
     // Determine slug
     const modulePath = parentPath ? `${parentPath}/${module.name}` : module.name;
-    const slug = `${config.baseSlug}/${modulePath}`;
+    const slug = `${ctx.baseSlug}/${modulePath}`;
 
     // Frontmatter (includes title, so no need for separate H1)
     // Use full path (e.g., "nemo_rl.algorithms.dpo") for title
@@ -46,7 +47,7 @@ export function renderModulePage(
 
     // Submodules section (before Module Contents)
     if (module.submodules.length > 0) {
-        lines.push(renderSubmodulesSection(module.submodules, config, modulePath));
+        lines.push(renderSubmodulesSection(module.submodules, ctx.baseSlug, modulePath));
     }
 
     // Determine what sections we have
@@ -105,19 +106,21 @@ export function renderModulePage(
         lines.push("### API");
         lines.push("");
 
+        const separator = [""];
+
         for (const cls of module.classes) {
-            lines.push(renderClassDetailed(cls, config.baseSlug));
-            lines.push("");
+            lines.push(renderClassDetailed(cls, ctx));
+            lines.push(...separator);
         }
 
         for (const func of module.functions) {
-            lines.push(renderFunctionDetailed(func, config.baseSlug));
-            lines.push("");
+            lines.push(renderFunctionDetailed(func, ctx));
+            lines.push(...separator);
         }
 
         for (const attr of module.attributes) {
-            lines.push(renderAttributeDetailed(attr));
-            lines.push("");
+            lines.push(renderAttributeDetailed(attr, ctx));
+            lines.push(...separator);
         }
     }
 
@@ -130,7 +133,7 @@ export function renderModulePage(
  */
 function renderSubmodulesSection(
     submodules: FdrLambda.libraryDocs.PythonModuleIr[],
-    config: RenderConfig,
+    baseSlug: string,
     modulePath: string
 ): string {
     const lines: string[] = [];
@@ -140,7 +143,7 @@ function renderSubmodulesSection(
     const modules = submodules.filter((sub) => sub.submodules.length === 0);
 
     const renderItem = (sub: FdrLambda.libraryDocs.PythonModuleIr): string => {
-        const link = `/${config.baseSlug}/${modulePath}/${sub.name}`;
+        const link = `/${baseSlug}/${modulePath}/${sub.name}`;
         return `- **[\`${sub.path}\`](${link})**`;
     };
 
@@ -166,15 +169,19 @@ function renderSubmodulesSection(
 /**
  * Render a module-level attribute/constant in detail.
  */
-function renderAttributeDetailed(attr: FdrLambda.libraryDocs.AttributeIr): string {
+function renderAttributeDetailed(attr: FdrLambda.libraryDocs.AttributeIr, ctx: RenderContext): string {
     const lines: string[] = [];
 
     const anchorId = generateAnchorId(attr.path);
 
+    // Get module path for type link resolution
+    const pathParts = attr.path.split(".");
+    const currentModulePath = pathParts.slice(0, -1).join(".");
+
     lines.push(`<Anchor id="${anchorId}">`);
     lines.push("");
 
-    // Signature with value (truncated if too long)
+    // Signature with full path and value (truncated if too long)
     const attrTypeDisplay = getTypeDisplay(attr.typeInfo);
     const typeStr = attrTypeDisplay ? `: ${attrTypeDisplay}` : "";
     const maxValueLength = 80;
@@ -182,9 +189,10 @@ function renderAttributeDetailed(attr: FdrLambda.libraryDocs.AttributeIr): strin
         ? ` = ${attr.value.length > maxValueLength ? attr.value.slice(0, maxValueLength) + "..." : attr.value}`
         : "";
 
-    lines.push("```python");
-    lines.push(`${attr.name}${typeStr}${valueStr}`);
-    lines.push("```");
+    // Build signature and extract links from type only
+    const signature = `${attr.path}${typeStr}${valueStr}`;
+    const links = attrTypeDisplay ? extractLinksFromTypes([attrTypeDisplay], ctx, currentModulePath) : {};
+    lines.push(renderCodeBlockWithLinks(signature, links));
     lines.push("</Anchor>");
     lines.push("");
 
@@ -208,7 +216,7 @@ function renderAttributeDetailed(attr: FdrLambda.libraryDocs.AttributeIr): strin
  */
 export function renderAllModulePages(
     rootModule: FdrLambda.libraryDocs.PythonModuleIr,
-    config: RenderConfig
+    ctx: RenderContext
 ): Record<string, string> {
     const pages: Record<string, string> = {};
 
@@ -228,8 +236,8 @@ export function renderAllModulePages(
         // Generate page if module has any documentable content
         // Submodules list is now included in renderModulePage, so no separate overview needed
         if (hasDirectContent || hasSubmodules) {
-            const pageKey = `${config.baseSlug}/${modulePath}.mdx`;
-            pages[pageKey] = renderModulePage(module, config, parentPath);
+            const pageKey = `${ctx.baseSlug}/${modulePath}.mdx`;
+            pages[pageKey] = renderModulePage(module, ctx, parentPath);
         }
 
         // Recurse into submodules

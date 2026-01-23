@@ -1,6 +1,7 @@
 """Extract DocstringIr from Griffe docstrings."""
 
-from typing import Optional
+import re
+from typing import Any, Optional
 
 from griffe import Docstring
 
@@ -11,6 +12,37 @@ from src.generated.library_docs import (
     DocstringRaisesIr,
     DocstringReturnsIr,
 )
+
+
+def _extract_example_code(example: Any) -> str:
+    """
+    Extract clean code from a griffe example object.
+
+    Griffe returns examples as tuples: (DocstringSectionKind, code_string)
+    This function extracts the code string and cleans up code fence wrappers.
+
+    Args:
+        example: A griffe example object (tuple or has .value attribute)
+
+    Returns:
+        Clean code string suitable for rendering.
+    """
+    # Handle tuple format: (DocstringSectionKind, code_string)
+    if isinstance(example, tuple) and len(example) >= 2:
+        code = str(example[1])
+    # Handle object with .value attribute
+    elif hasattr(example, "value"):
+        code = str(example.value)
+    else:
+        code = str(example)
+
+    # Remove code fence wrappers if present (e.g., ```{doctest}\n...\n```)
+    # Match opening fence with optional language/directive
+    code = re.sub(r"^```\{?\w*\}?\n", "", code)
+    # Match closing fence
+    code = re.sub(r"\n```$", "", code)
+
+    return code.strip()
 
 
 def extract_docstring(docstring: Optional[Docstring]) -> Optional[DocstringIr]:
@@ -82,20 +114,14 @@ def extract_docstring(docstring: Optional[Docstring]) -> Optional[DocstringIr]:
 
         elif kind == "examples":
             for example in section.value:
-                if hasattr(example, "value"):
-                    examples.append(
-                        DocstringExampleIr(
-                            code=str(example.value),
-                            description=example.description if hasattr(example, "description") else None,
-                        )
+                code = _extract_example_code(example)
+                example_desc = example.description if hasattr(example, "description") else None
+                examples.append(
+                    DocstringExampleIr(
+                        code=code,
+                        description=example_desc,
                     )
-                else:
-                    examples.append(
-                        DocstringExampleIr(
-                            code=str(example),
-                            description=None,
-                        )
-                    )
+                )
 
         elif kind == "notes":
             if isinstance(section.value, str):

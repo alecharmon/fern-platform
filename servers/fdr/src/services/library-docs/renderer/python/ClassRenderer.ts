@@ -1,71 +1,78 @@
 /**
  * Render PythonClassIR to MDX.
- *
- * Classes are rendered with:
- * - Anchor with class signature in code block
- * - Indent containing bases, docstring, attributes, and methods
  */
 
 import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
-import {
-    escapeMdx,
-    formatTypeAnnotation,
-    generateAnchorId,
-    renderDocstring,
-    renderSimpleDocstring
-} from "../base/index.js";
+import { escapeMdx, generateAnchorId, renderDocstring, renderSimpleDocstring } from "../base/index.js";
 import { renderMethodDetailed, renderProperty } from "./FunctionRenderer.js";
-import { getTypeDisplay, linkTypeInfo } from "./TypeLinkResolver.js";
+import {
+    extractLinksFromTypes,
+    formatSignatureMultiline,
+    getModulePath,
+    getTypeDisplay,
+    getTypePathForSignature,
+    linkTypeInfo,
+    type RenderContext,
+    renderCodeBlockWithLinks,
+    type SignatureParam
+} from "./TypeLinkResolver.js";
 
 /**
  * Render a class in detailed form for the API section.
  */
-export function renderClassDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
+export function renderClassDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, ctx: RenderContext): string {
     switch (cls.kind) {
         case "TYPEDDICT":
-            return renderTypedDictDetailed(cls, baseSlug);
+            return renderTypedDictDetailed(cls, ctx);
         case "ENUM":
             return renderEnumDetailed(cls);
         default:
-            return renderRegularClassDetailed(cls, baseSlug);
+            return renderRegularClassDetailed(cls, ctx);
     }
 }
 
-/**
- * Extract module path from a fully qualified class path.
- * e.g., "nemo_rl.algorithms.dpo.MasterConfig" -> "nemo_rl.algorithms.dpo"
- */
-function getModulePath(path: string): string {
-    const parts = path.split(".");
-    return parts.slice(0, -1).join(".");
+interface ClassSignature {
+    code: string;
+    typeStrings: string[];
 }
 
 /**
- * Render a regular class, protocol, dataclass, or exception in detailed form.
+ * Build class signature and collect type strings for link extraction in one pass.
  */
-function renderRegularClassDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, baseSlug: string): string {
-    const lines: string[] = [];
-    const currentModulePath = getModulePath(cls.path);
+function buildClassSignature(cls: FdrLambda.libraryDocs.PythonClassIr): ClassSignature {
+    const params: SignatureParam[] = [];
+    const typeStrings: string[] = [];
 
-    // Anchor for the class
-    const anchorId = generateAnchorId(cls.path);
+    for (const param of cls.constructorParams) {
+        const type = getTypePathForSignature(param.typeInfo) || undefined;
+        if (type) {
+            typeStrings.push(type);
+        }
+        params.push({ name: param.name, type, defaultValue: param.default || undefined });
+    }
 
-    lines.push(`<Anchor id="${anchorId}">`);
-    lines.push("");
+    const code = formatSignatureMultiline(`class ${cls.path}`, params);
+    return { code, typeStrings };
+}
 
-    // Class signature in code block
-    const fullSignature = formatClassSignature(cls);
-    lines.push("```python");
-    lines.push(fullSignature);
-    lines.push("```");
-    lines.push("</Anchor>");
-    lines.push("");
+/**
+ * Build param annotations for docstring rendering.
+ */
+function buildParamAnnotations(cls: FdrLambda.libraryDocs.PythonClassIr): Record<string, string> {
+    const annotations: Record<string, string> = {};
+    for (const param of cls.constructorParams) {
+        const typeDisplay = getTypeDisplay(param.typeInfo);
+        if (typeDisplay) {
+            annotations[param.name] = typeDisplay;
+        }
+    }
+    return annotations;
+}
 
-    // Wrap class body content in Indent
-    lines.push("<Indent>");
-    lines.push("");
-
-    // Kind badge for special types
+/**
+ * Get kind badges for a class.
+ */
+function getClassBadges(cls: FdrLambda.libraryDocs.PythonClassIr): string[] {
     const badges: string[] = [];
     if (cls.kind === "PROTOCOL") {
         badges.push("Protocol");
@@ -79,63 +86,144 @@ function renderRegularClassDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, ba
     if (cls.isAbstract) {
         badges.push("Abstract");
     }
+    return badges;
+}
 
+/**
+ * Render base classes as markdown links.
+ */
+function renderBases(
+    cls: FdrLambda.libraryDocs.PythonClassIr,
+    ctx: RenderContext,
+    currentModulePath: string
+): string | null {
+    if (cls.bases.length === 0 || ["TYPEDDICT", "ENUM"].includes(cls.kind)) {
+        return null;
+    }
+
+    const interestingBases = cls.bases.filter((b) => !["object", "ABC", "Protocol", "TypedDict"].includes(b.name));
+    if (interestingBases.length === 0) {
+        return null;
+    }
+
+    const basesStr = interestingBases
+        .map((b) => (b.typeInfo ? linkTypeInfo(b.typeInfo, ctx, currentModulePath) : `\`${b.name}\``))
+        .join(", ");
+
+    return `**Bases:** ${basesStr}`;
+}
+
+/**
+ * Check if an attribute is meaningful (not just a redundant assignment).
+ */
+function isAttributeMeaningful(attr: FdrLambda.libraryDocs.AttributeIr): boolean {
+    if (attr.value && attr.value === attr.name) {
+        return false;
+    }
+    if (attr.docstring) {
+        return true;
+    }
+    const typeDisplay = getTypeDisplay(attr.typeInfo);
+    if (typeDisplay && typeDisplay !== "Any") {
+        return true;
+    }
+    if (attr.value && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(attr.value)) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Render an attribute using ParamField component.
+ */
+function renderAttribute(attr: FdrLambda.libraryDocs.AttributeIr): string {
+    const typeDisplay = getTypeDisplay(attr.typeInfo);
+    const defaultValue = attr.value && attr.value.length <= 50 ? attr.value : undefined;
+
+    let typeStr = typeDisplay || "";
+    if (defaultValue) {
+        typeStr = typeStr ? `${typeStr} = ${defaultValue}` : `= ${defaultValue}`;
+    }
+
+    const props = [`path="${attr.name}"`];
+    if (typeStr) {
+        props.push(`type="${escapeMdx(typeStr)}"`);
+    }
+
+    const lines = [`<ParamField ${props.join(" ")}>`];
+    if (attr.docstring) {
+        const docMdx = renderSimpleDocstring(attr.docstring);
+        if (docMdx) {
+            lines.push(docMdx);
+        }
+    }
+    lines.push("</ParamField>");
+
+    return lines.join("\n");
+}
+
+/**
+ * Render a regular class, protocol, dataclass, or exception.
+ */
+function renderRegularClassDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, ctx: RenderContext): string {
+    const lines: string[] = [];
+    const currentModulePath = getModulePath(cls.path);
+
+    // Anchor
+    lines.push(`<Anchor id="${generateAnchorId(cls.path)}">`);
+    lines.push("");
+
+    // Signature with links (extracted from param types only)
+    const { code, typeStrings } = buildClassSignature(cls);
+    const links = extractLinksFromTypes(typeStrings, ctx, currentModulePath);
+    lines.push(renderCodeBlockWithLinks(code, links));
+    lines.push("</Anchor>");
+    lines.push("");
+
+    // Content
+    lines.push("<Indent>");
+    lines.push("");
+
+    // Badges
+    const badges = getClassBadges(cls);
     if (badges.length > 0) {
         lines.push(badges.map((b) => `<Badge>${b}</Badge>`).join(" "));
         lines.push("");
     }
 
     // Base classes
-    if (cls.bases.length > 0 && !["TYPEDDICT", "ENUM"].includes(cls.kind)) {
-        const interestingBases = cls.bases.filter((b) => !["object", "ABC", "Protocol", "TypedDict"].includes(b.name));
-        if (interestingBases.length > 0) {
-            const basesStr = interestingBases
-                .map((b) => {
-                    if (b.typeInfo) {
-                        return linkTypeInfo(b.typeInfo, baseSlug, currentModulePath);
-                    }
-                    return `\`${b.name}\``;
-                })
-                .join(", ");
-            lines.push(`**Bases:** ${basesStr}`);
-            lines.push("");
-        }
-    }
-
-    // Class docstring
-    if (cls.docstring) {
-        // Build param annotations from constructor params
-        const paramAnnotations: Record<string, string> = {};
-        for (const param of cls.constructorParams) {
-            const typeDisplay = getTypeDisplay(param.typeInfo);
-            if (typeDisplay) {
-                paramAnnotations[param.name] = typeDisplay;
-            }
-        }
-
-        const docstringMdx = renderDocstring(cls.docstring, paramAnnotations);
-        if (docstringMdx) {
-            lines.push(docstringMdx);
-            lines.push("");
-        }
-    }
-
-    // Class attributes (rendered inline with anchors and type links)
-    const meaningfulAttrs = cls.attributes.filter((attr) => isAttributeMeaningful(attr));
-    for (const attr of meaningfulAttrs) {
-        lines.push(renderAttributeInline(attr, baseSlug, currentModulePath));
+    const basesLine = renderBases(cls, ctx, currentModulePath);
+    if (basesLine) {
+        lines.push(basesLine);
         lines.push("");
     }
 
-    // Methods (rendered with anchors and indent)
+    // Docstring
+    if (cls.docstring) {
+        const docMdx = renderDocstring(cls.docstring, buildParamAnnotations(cls));
+        if (docMdx) {
+            lines.push(docMdx);
+            lines.push("");
+        }
+    }
+
+    // Attributes - blank line between attributes but not after last one
+    const attrs = cls.attributes.filter(isAttributeMeaningful);
+    for (let i = 0; i < attrs.length; i++) {
+        lines.push(renderAttribute(attrs[i]!));
+        if (i < attrs.length - 1) {
+            lines.push("");
+        }
+    }
+
+    // Methods - no extra blank lines since </Indent> adds margin
     const methods = cls.methods.filter((m) => m.name !== "__init__");
     for (const method of methods) {
-        if (method.isProperty) {
-            lines.push(renderProperty(method, baseSlug, currentModulePath));
-        } else {
-            lines.push(renderMethodDetailed(method, baseSlug, currentModulePath));
-        }
-        lines.push("");
+        lines.push(
+            method.isProperty
+                ? renderProperty(method, ctx, currentModulePath)
+                : renderMethodDetailed(method, ctx, currentModulePath)
+        );
     }
 
     lines.push("</Indent>");
@@ -144,37 +232,30 @@ function renderRegularClassDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, ba
 }
 
 /**
- * Render a TypedDict class in detailed form.
+ * Render a TypedDict class.
  */
-function renderTypedDictDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, _baseSlug: string): string {
+function renderTypedDictDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, _ctx: RenderContext): string {
     const lines: string[] = [];
 
-    const anchorId = generateAnchorId(cls.path);
-
-    lines.push(`<Anchor id="${anchorId}">`);
+    lines.push(`<Anchor id="${generateAnchorId(cls.path)}">`);
     lines.push("");
-    lines.push("```python");
-    lines.push(`class ${cls.path}`);
-    lines.push("```");
+    lines.push(renderCodeBlockWithLinks(`class ${cls.path}`, {}));
     lines.push("</Anchor>");
     lines.push("");
 
     lines.push("<Indent>");
     lines.push("");
-
     lines.push(`**Bases:** \`typing.TypedDict\``);
     lines.push("");
 
-    // Docstring
     if (cls.docstring) {
-        const docstringMdx = renderSimpleDocstring(cls.docstring);
-        if (docstringMdx) {
-            lines.push(docstringMdx);
+        const docMdx = renderSimpleDocstring(cls.docstring);
+        if (docMdx) {
+            lines.push(docMdx);
             lines.push("");
         }
     }
 
-    // Fields using ParamField
     if (cls.typedDictFields && cls.typedDictFields.length > 0) {
         for (const field of cls.typedDictFields) {
             const typeDisplay = getTypeDisplay(field.typeInfo) ?? "Any";
@@ -193,37 +274,30 @@ function renderTypedDictDetailed(cls: FdrLambda.libraryDocs.PythonClassIr, _base
 }
 
 /**
- * Render an Enum class in detailed form.
+ * Render an Enum class.
  */
 function renderEnumDetailed(cls: FdrLambda.libraryDocs.PythonClassIr): string {
     const lines: string[] = [];
 
-    const anchorId = generateAnchorId(cls.path);
-
-    lines.push(`<Anchor id="${anchorId}">`);
+    lines.push(`<Anchor id="${generateAnchorId(cls.path)}">`);
     lines.push("");
-    lines.push("```python");
-    lines.push(`class ${cls.path}`);
-    lines.push("```");
+    lines.push(renderCodeBlockWithLinks(`class ${cls.path}`, {}));
     lines.push("</Anchor>");
     lines.push("");
 
     lines.push("<Indent>");
     lines.push("");
-
     lines.push(`**Bases:** \`enum.Enum\``);
     lines.push("");
 
-    // Docstring
     if (cls.docstring) {
-        const docstringMdx = renderSimpleDocstring(cls.docstring);
-        if (docstringMdx) {
-            lines.push(docstringMdx);
+        const docMdx = renderSimpleDocstring(cls.docstring);
+        if (docMdx) {
+            lines.push(docMdx);
             lines.push("");
         }
     }
 
-    // Enum members using ParamField
     if (cls.enumMembers && cls.enumMembers.length > 0) {
         for (const member of cls.enumMembers) {
             lines.push(`<ParamField path="${member.name}" type="= ${escapeMdx(member.value)}">`);
@@ -233,117 +307,6 @@ function renderEnumDetailed(cls: FdrLambda.libraryDocs.PythonClassIr): string {
     }
 
     lines.push("</Indent>");
-
-    return lines.join("\n");
-}
-
-/**
- * Format full class signature with constructor parameters.
- */
-function formatClassSignature(cls: FdrLambda.libraryDocs.PythonClassIr): string {
-    if (cls.constructorParams.length === 0) {
-        return `class ${cls.path}`;
-    }
-
-    // Format parameters
-    const paramStrs: string[] = [];
-    for (const param of cls.constructorParams) {
-        let paramStr = param.name;
-        const typeDisplay = getTypeDisplay(param.typeInfo);
-        if (typeDisplay) {
-            paramStr += `: ${formatTypeAnnotation(typeDisplay)}`;
-        }
-        if (param.default) {
-            let defaultStr = param.default;
-            if (defaultStr.length > 30) {
-                defaultStr = defaultStr.slice(0, 27) + "...";
-            }
-            paramStr += ` = ${defaultStr}`;
-        }
-        paramStrs.push(paramStr);
-    }
-
-    // Always use multiline for readability
-    if (paramStrs.length > 2 || paramStrs.join(", ").length > 60) {
-        const paramsFormatted = paramStrs.join(",\n    ");
-        return `class ${cls.path}(\n    ${paramsFormatted}\n)`;
-    } else {
-        return `class ${cls.path}(${paramStrs.join(", ")})`;
-    }
-}
-
-/**
- * Check if an attribute is meaningful (not just a redundant default).
- */
-function isAttributeMeaningful(attr: FdrLambda.libraryDocs.AttributeIr): boolean {
-    // Skip if default value equals the attribute name (e.g., master_config = master_config)
-    if (attr.value && attr.value === attr.name) {
-        return false;
-    }
-
-    // Keep if it has a docstring
-    if (attr.docstring) {
-        return true;
-    }
-
-    // Keep if it has a meaningful type annotation
-    const typeDisplay = getTypeDisplay(attr.typeInfo);
-    if (typeDisplay && typeDisplay !== "Any") {
-        return true;
-    }
-
-    // Keep if it has a constant value (not just a variable reference)
-    if (attr.value && !isVariableReference(attr.value)) {
-        return true;
-    }
-
-    return false;
-}
-
-/**
- * Check if a value looks like a variable reference vs a constant.
- */
-function isVariableReference(value: string): boolean {
-    // Variable references are typically just identifiers
-    return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(value);
-}
-
-/**
- * Render an attribute using ParamField component.
- */
-function renderAttributeInline(
-    attr: FdrLambda.libraryDocs.AttributeIr,
-    _baseSlug: string,
-    _currentModulePath: string
-): string {
-    const lines: string[] = [];
-
-    const typeDisplay = getTypeDisplay(attr.typeInfo);
-    const defaultValue = attr.value && attr.value.length <= 50 ? attr.value : undefined;
-
-    // Build type string with optional default value (e.g., "SomeType = value")
-    let typeStr = typeDisplay || "";
-    if (defaultValue) {
-        typeStr = typeStr ? `${typeStr} = ${defaultValue}` : `= ${defaultValue}`;
-    }
-
-    // Build ParamField props
-    const props: string[] = [`path="${attr.name}"`];
-    if (typeStr) {
-        props.push(`type="${escapeMdx(typeStr)}"`);
-    }
-
-    lines.push(`<ParamField ${props.join(" ")}>`);
-
-    // Docstring as content
-    if (attr.docstring) {
-        const docstringMdx = renderSimpleDocstring(attr.docstring);
-        if (docstringMdx) {
-            lines.push(docstringMdx);
-        }
-    }
-
-    lines.push("</ParamField>");
 
     return lines.join("\n");
 }

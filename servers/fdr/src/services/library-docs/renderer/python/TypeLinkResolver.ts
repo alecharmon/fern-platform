@@ -1,125 +1,137 @@
 /**
- * TypeLinkResolver - Generate links from resolved type paths.
+ * TypeLinkResolver - Generate links and format signatures for Python library docs.
  */
 
 import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
 import { escapeMdx, generateAnchorId } from "../base/index.js";
 
+// ============================================================================
+// Render Context
+// ============================================================================
+
 /**
- * Get the URL for a type's anchor, if linkable.
- *
- * @param typeInfo - TypeInfo with basePath for anchor generation
- * @param baseSlug - Base URL slug (e.g., "api-reference")
- * @param currentModulePath - Current module path for same-page detection (e.g., "nemo_rl.algorithms.dpo")
- * @returns URL string like "base-slug-module-path#anchor", or null if not linkable
+ * Shared context for rendering, passed to all render functions.
  */
-export function getTypeAnchorUrl(
-    typeInfo: FdrLambda.libraryDocs.TypeInfo | undefined,
-    baseSlug: string,
-    currentModulePath?: string
-): string | null {
-    if (!typeInfo?.basePath) {
+export interface RenderContext {
+    baseSlug: string;
+    validPaths: Set<string>;
+}
+
+/**
+ * Build set of all valid type paths from the IR.
+ * Only paths in this set will be linked.
+ */
+export function buildValidPaths(ir: FdrLambda.libraryDocs.PythonLibraryDocsIr): Set<string> {
+    const paths = new Set<string>();
+
+    function processModule(module: FdrLambda.libraryDocs.PythonModuleIr): void {
+        paths.add(module.path);
+
+        for (const cls of module.classes) {
+            paths.add(cls.path);
+            for (const method of cls.methods) {
+                paths.add(method.path);
+            }
+        }
+
+        for (const func of module.functions) {
+            paths.add(func.path);
+        }
+
+        for (const attr of module.attributes) {
+            paths.add(attr.path);
+        }
+
+        for (const sub of module.submodules) {
+            processModule(sub);
+        }
+    }
+
+    processModule(ir.rootModule);
+
+    return paths;
+}
+
+// ============================================================================
+// Path Utilities
+// ============================================================================
+
+/**
+ * Extract module path from a fully qualified path.
+ * e.g., "nemo_rl.algorithms.dpo.SomeClass" -> "nemo_rl.algorithms.dpo"
+ */
+export function getModulePath(path: string): string {
+    const parts = path.split(".");
+    return parts.slice(0, -1).join(".");
+}
+
+/**
+ * Generate anchor URL from a qualified type path.
+ */
+function pathToAnchorUrl(typePath: string, baseSlug: string, currentModulePath?: string): string | null {
+    const parts = typePath.split(".");
+    if (parts.length < 2) {
         return null;
     }
 
-    const parts = typeInfo.basePath.split(".");
-    if (parts.length < 2) {
-        return null; // Skip builtins like 'str', 'int'
-    }
-
-    // Generate anchor from basePath (remove dots)
-    const anchor = generateAnchorId(typeInfo.basePath);
-
-    // Get target module path (all parts except the last one which is the class/function name)
+    const anchor = generateAnchorId(typePath);
     const targetModulePath = parts.slice(0, -1).join(".");
 
-    // If same page, just return anchor
     if (currentModulePath && targetModulePath === currentModulePath) {
         return `#${anchor}`;
     }
 
-    // Build path format: /base-slug/module/path
-    // e.g., "library-docs" + "nemo_rl.models.policy.interfaces" -> "/library-docs/nemo_rl/models/policy/interfaces"
-    const modulePath = parts.slice(0, -1).join("/");
-
-    return `/${baseSlug}/${modulePath}#${anchor}`;
+    return `/${baseSlug}/${parts.slice(0, -1).join("/")}#${anchor}`;
 }
 
-/**
- * Generate a markdown link from TypeInfo.
- *
- * Uses display for text, basePath for anchor generation.
- *
- * @param typeInfo - TypeInfo with display, resolvedPath, and basePath
- * @param baseSlug - Base URL slug (e.g., "api-reference")
- * @param currentModulePath - Current module path for same-page detection
- * @returns Markdown link with display name and URL, or escaped type string if not linkable
- */
-export function linkTypeInfo(
-    typeInfo: FdrLambda.libraryDocs.TypeInfo | undefined,
-    baseSlug: string,
-    currentModulePath?: string
-): string {
-    if (!typeInfo) {
-        return "-";
-    }
+// ============================================================================
+// Link Extraction
+// ============================================================================
 
-    const displayName = typeInfo.display ?? typeInfo.resolvedPath;
-
-    if (!displayName) {
-        return "-";
-    }
-
-    const url = getTypeAnchorUrl(typeInfo, baseSlug, currentModulePath);
-    if (url) {
-        return `[${escapeMdx(displayName)}](${url})`;
-    }
-
-    // Fallback: just display the type without a link
-    return `\`${escapeMdx(displayName)}\``;
-}
+/** Regex to match qualified Python paths (at least 2 segments). */
+const QUALIFIED_PATH_REGEX = /[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)+/g;
 
 /**
- * Build a links map for CodeBlock component from type infos.
- * Maps fully qualified type paths (as they appear in signatures) to anchor URLs.
- *
- * @param typeInfos - Array of TypeInfo objects to process
- * @param baseSlug - Base URL slug (e.g., "api-reference")
- * @param currentModulePath - Current module path for same-page detection
- * @returns Record mapping type paths to anchor URLs
+ * Extract links from type strings (params and return types).
+ * Only scans the provided type strings, not the full signature.
  */
-export function buildCodeBlockLinks(
-    typeInfos: (FdrLambda.libraryDocs.TypeInfo | undefined)[],
-    baseSlug: string,
+export function extractLinksFromTypes(
+    typeStrings: string[],
+    ctx: RenderContext,
     currentModulePath?: string
 ): Record<string, string> {
     const links: Record<string, string> = {};
 
-    for (const typeInfo of typeInfos) {
-        if (!typeInfo) {
+    for (const typeStr of typeStrings) {
+        if (!typeStr) {
             continue;
         }
+        const matches = typeStr.match(QUALIFIED_PATH_REGEX) || [];
 
-        const url = getTypeAnchorUrl(typeInfo, baseSlug, currentModulePath);
-        if (!url) {
-            continue;
-        }
+        for (const path of matches) {
+            if (links[path]) {
+                continue;
+            }
+            if (!ctx.validPaths.has(path)) {
+                continue;
+            }
 
-        // Use resolvedPath as key (how type appears in fully qualified signatures)
-        const key = typeInfo.resolvedPath ?? typeInfo.basePath;
-        if (key) {
-            links[key] = url;
+            const url = pathToAnchorUrl(path, ctx.baseSlug, currentModulePath);
+            if (url) {
+                links[path] = url;
+            }
         }
     }
 
     return links;
 }
 
+// ============================================================================
+// TypeInfo Helpers (for tables, docstrings)
+// ============================================================================
+
 /**
- * Get display string from TypeInfo.
- *
- * @param typeInfo - TypeInfo object
- * @returns Display string or empty string if no type
+ * Get display string from TypeInfo (short name for tables/docstrings).
  */
 export function getTypeDisplay(typeInfo: FdrLambda.libraryDocs.TypeInfo | undefined): string {
     if (!typeInfo) {
@@ -129,30 +141,103 @@ export function getTypeDisplay(typeInfo: FdrLambda.libraryDocs.TypeInfo | undefi
 }
 
 /**
- * Render a code block with optional links for type references.
- * Uses the CodeBlock component when links are present.
- *
- * @param code - The code to render
- * @param links - Map of type paths to URLs
- * @returns MDX string with CodeBlock wrapper if links present
+ * Get fully qualified type path from TypeInfo (for signatures).
+ */
+export function getTypePathForSignature(typeInfo: FdrLambda.libraryDocs.TypeInfo | undefined): string {
+    if (!typeInfo) {
+        return "";
+    }
+    return typeInfo.resolvedPath ?? typeInfo.display ?? "";
+}
+
+/**
+ * Generate a markdown link from TypeInfo (for tables, base classes).
+ */
+export function linkTypeInfo(
+    typeInfo: FdrLambda.libraryDocs.TypeInfo | undefined,
+    ctx: RenderContext,
+    currentModulePath?: string
+): string {
+    if (!typeInfo) {
+        return "-";
+    }
+
+    const displayName = typeInfo.display ?? typeInfo.resolvedPath;
+    if (!displayName) {
+        return "-";
+    }
+
+    // Only link if basePath exists in our docs
+    if (typeInfo.basePath && ctx.validPaths.has(typeInfo.basePath)) {
+        const url = pathToAnchorUrl(typeInfo.basePath, ctx.baseSlug, currentModulePath);
+        if (url) {
+            return `[${escapeMdx(displayName)}](${url})`;
+        }
+    }
+
+    return `\`${escapeMdx(displayName)}\``;
+}
+
+// ============================================================================
+// CodeBlock Rendering
+// ============================================================================
+
+/**
+ * Render code in a CodeBlock component with optional type links.
  */
 export function renderCodeBlockWithLinks(code: string, links: Record<string, string>): string {
-    const lines: string[] = [];
+    const hasLinks = Object.keys(links).length > 0;
+    const linksAttr = hasLinks ? ` links={${JSON.stringify(links)}}` : "";
 
-    if (Object.keys(links).length > 0) {
-        const linksJson = JSON.stringify(links);
-        lines.push(`<CodeBlock links={${linksJson}}>`);
-        lines.push("");
+    return [
+        `<CodeBlock${linksAttr} showLineNumbers={false} wordWrap={true}>`,
+        "",
+        "```python",
+        code,
+        "```",
+        "",
+        "</CodeBlock>"
+    ].join("\n");
+}
+
+// ============================================================================
+// Signature Formatting
+// ============================================================================
+
+export interface SignatureParam {
+    name: string;
+    type?: string;
+    defaultValue?: string;
+}
+
+const MAX_DEFAULT_LENGTH = 30;
+
+/**
+ * Format a signature with parameters on separate lines.
+ */
+export function formatSignatureMultiline(header: string, params: SignatureParam[], returns?: string[]): string {
+    let returnStr = "";
+    if (returns && returns.length > 0) {
+        returnStr = returns.length === 1 ? ` -> ${returns[0]}` : ` -> tuple[${returns.join(", ")}]`;
     }
 
-    lines.push("```python");
-    lines.push(code);
-    lines.push("```");
-
-    if (Object.keys(links).length > 0) {
-        lines.push("");
-        lines.push("</CodeBlock>");
+    if (params.length === 0) {
+        return `${header}()${returnStr}`;
     }
 
-    return lines.join("\n");
+    const paramLines = params.map((param, i) => {
+        const typeStr = param.type ? `: ${param.type}` : "";
+        let defaultStr = "";
+        if (param.defaultValue) {
+            const truncated =
+                param.defaultValue.length > MAX_DEFAULT_LENGTH
+                    ? param.defaultValue.slice(0, MAX_DEFAULT_LENGTH - 3) + "..."
+                    : param.defaultValue;
+            defaultStr = ` = ${truncated}`;
+        }
+        const comma = i < params.length - 1 ? "," : "";
+        return `    ${param.name}${typeStr}${defaultStr}${comma}`;
+    });
+
+    return [`${header}(`, ...paramLines, `)${returnStr}`].join("\n");
 }

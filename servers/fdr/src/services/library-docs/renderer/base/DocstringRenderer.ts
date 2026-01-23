@@ -3,7 +3,7 @@
  */
 
 import type { FdrLambda } from "@fern-api/fdr-lambda-sdk";
-import { escapeMdx, formatTypeAnnotation } from "./utils.js";
+import { escapeMdx, escapeMdxForDescription, formatTypeAnnotation } from "./utils.js";
 
 /**
  * Render a docstring to MDX.
@@ -20,8 +20,9 @@ export function renderDocstring(
     const lines: string[] = [];
 
     // Description (contains full text; summary is only used for tables/tooltips)
+    // Use escapeMdxForDescription to preserve code blocks while escaping JSX chars
     if (docstring.description) {
-        lines.push(escapeMdx(docstring.description));
+        lines.push(escapeMdxForDescription(docstring.description));
         lines.push("");
     }
 
@@ -78,9 +79,13 @@ export function renderDocstring(
                 lines.push(escapeMdx(example.description));
                 lines.push("");
             }
+            lines.push("<CodeBlock showLineNumbers={false}>");
+            lines.push("");
             lines.push("```python");
             lines.push(example.code);
             lines.push("```");
+            lines.push("");
+            lines.push("</CodeBlock>");
             lines.push("");
         }
     }
@@ -121,5 +126,6 @@ export function renderSimpleDocstring(docstring: FdrLambda.libraryDocs.Docstring
     }
 
     // Description contains full text; summary is only for tables/tooltips
-    return docstring.description ? escapeMdx(docstring.description) : "";
+    // Use escapeMdxForDescription to preserve code blocks
+    return docstring.description ? escapeMdxForDescription(docstring.description) : "";
 }
