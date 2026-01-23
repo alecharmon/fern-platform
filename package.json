@@ -119,7 +119,8 @@
     "typescript": "catalog:",
     "unified": "11.0.5",
     "uuid": "catalog:",
-    "webpack": "catalog:"
+    "webpack": "catalog:",
+    "@walletconnect/universal-provider": "^2.20.0"
   },
   "dependencies": {
     "eslint-plugin-i18n": "^2.4.0",
