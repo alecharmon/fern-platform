@@ -617,7 +617,8 @@ const getEndpointByLocator =
         for (const apiId of apiIds) {
             const api = await getApi(domainKey, apiId);
             // If apiName is specified, only search within that API
-            if (apiName != null && api.id !== apiName) {
+            // Use api.apiName (folder name) for consistency with getTypes
+            if (apiName != null && api.apiName !== apiName) {
                 continue;
             }
             const endpoint = findEndpoint({
