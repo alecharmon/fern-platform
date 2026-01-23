@@ -32,6 +32,12 @@ jobs:
           version: 10.27.0
           run_install: false
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
       - name: Free up disk space
         run: |
           echo "Disk space before cleanup:"

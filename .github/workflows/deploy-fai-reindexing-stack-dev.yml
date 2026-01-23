@@ -37,6 +37,12 @@ jobs:
           version: 10.27.0
           run_install: false
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
       - name: Deploy to Dev
         run: |
           git_version="$(git rev-parse --short HEAD)"

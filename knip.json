@@ -130,6 +130,11 @@
       "project": ["src/**/*.ts"],
       "ignore": ["**/dist/**", "**/bin/**"]
     },
+    "servers/fai-reindexing/deploy": {
+      "entry": ["bin/**/*.ts", "src/**/*.ts"],
+      "project": ["bin/**/*.ts", "src/**/*.ts"],
+      "ignore": ["**/cdk.out/**"]
+    },
     "servers/*-deploy": {
       "entry": ["bin/**/*.ts"],
       "project": ["bin/**/*.ts"],

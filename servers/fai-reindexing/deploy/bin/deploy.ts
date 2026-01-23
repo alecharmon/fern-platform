@@ -6,7 +6,11 @@ import { type Environments, EnvironmentType } from "@fern-fern/fern-cloud-sdk/ap
 
 import { FaiReindexingSchedulerStack } from "../src/reindexing-stack.js";
 
-void main();
+main().catch((error) => {
+    // biome-ignore lint/suspicious/noConsole: Need to log deployment errors for debugging
+    console.error("Deployment failed with error:", error);
+    process.exit(1);
+});
 
 async function main() {
     const version = process.env["VERSION"];
@@ -68,6 +72,9 @@ async function getEnvironments(): Promise<Environments> {
             }
         }
     );
+    if (!response.ok) {
+        throw new Error(`Failed to fetch environments: ${response.status} ${response.statusText}`);
+    }
     const environments = (await response.json()) as any as Environments;
     return environments;
 }
