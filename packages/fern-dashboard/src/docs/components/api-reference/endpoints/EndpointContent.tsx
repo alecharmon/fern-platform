@@ -10,6 +10,7 @@
  * @see packages/fern-docs/bundle/src/components/api-reference/endpoints/EndpointContent.tsx
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { EndpointContextProvider } from "@fern-docs/components/api-reference/endpoints/EndpointContext";
@@ -108,14 +109,16 @@ export interface EndpointContentProps {
     showErrors: boolean;
     showAuth: boolean;
     lang: string;
+    theme?: FernThemeConfig;
 }
 
-export function EndpointContent({ context, breadcrumb, showErrors, showAuth, lang }: EndpointContentProps) {
+export function EndpointContent({ context, breadcrumb, showErrors, showAuth, lang, theme }: EndpointContentProps) {
     const { node, endpoint, types } = context;
 
     return (
         <EndpointContextProvider endpoint={endpoint}>
             <ReferenceLayout
+                theme={theme}
                 header={
                     <EndpointPageHeader
                         breadcrumb={breadcrumb}

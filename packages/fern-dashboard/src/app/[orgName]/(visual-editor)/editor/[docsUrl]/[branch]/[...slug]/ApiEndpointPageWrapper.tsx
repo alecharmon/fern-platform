@@ -4,6 +4,7 @@
  * Client-side wrapper for ApiEndpointPage that receives pre-fetched data from the server.
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { ApiDefinition } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useEffect } from "react";
@@ -15,9 +16,10 @@ export interface ApiEndpointPageWrapperProps {
     node: FernNavigation.EndpointNode;
     apiDefinition: ApiDefinition;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
+    theme?: FernThemeConfig;
 }
 
-export function ApiEndpointPageWrapper({ node, apiDefinition, breadcrumb }: ApiEndpointPageWrapperProps) {
+export function ApiEndpointPageWrapper({ node, apiDefinition, breadcrumb, theme }: ApiEndpointPageWrapperProps) {
     const { setCurrentPageType } = useDevMode();
 
     useEffect(() => {
@@ -30,5 +32,7 @@ export function ApiEndpointPageWrapper({ node, apiDefinition, breadcrumb }: ApiE
         };
     }, [setCurrentPageType]);
 
-    return <ApiEndpointPage node={node} apiDefinition={apiDefinition} breadcrumb={breadcrumb} lang="en" />;
+    return (
+        <ApiEndpointPage node={node} apiDefinition={apiDefinition} breadcrumb={breadcrumb} lang="en" theme={theme} />
+    );
 }

@@ -59,7 +59,7 @@ export default async function VisualEditorPreviewLayout({
     // Use cached loader to prevent duplicate creation across parallel routes
     const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);
 
-    const [colors, layout, fonts, config, root, unsafe_fullRoot, files, { basePath }] = await Promise.all([
+    const [colors, layout, fonts, config, root, unsafe_fullRoot, files, { basePath }, theme] = await Promise.all([
         loader.getColors(),
         loader.getLayout(),
         loader.getFonts(),
@@ -67,7 +67,8 @@ export default async function VisualEditorPreviewLayout({
         loader.getRoot(),
         loader.unsafe_getFullRoot(),
         loader.getFiles(),
-        loader.getMetadata()
+        loader.getMetadata(),
+        loader.getTheme()
     ]);
 
     const hasProductsOrVersions = root.child.type === "productgroup" || root.child.type === "versioned";
@@ -99,6 +100,7 @@ export default async function VisualEditorPreviewLayout({
                             scopeSelector="#preview-container"
                             lightSelector=".light #preview-container"
                             darkSelector=".dark #preview-container"
+                            theme={theme}
                         />
                         <RootNodeProvider sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}>
                             <ResizablePanelsWrapper
@@ -115,103 +117,121 @@ export default async function VisualEditorPreviewLayout({
                                         >
                                             <div id="preview-container">
                                                 <EditorLinkInterceptor />
-                                                <AbstractDefaultDocs
-                                                    header={
-                                                        <PreviewHeader
-                                                            navbarLinks={<NavbarLinks loader={loader} />}
-                                                            headertabs={headertabs}
+                                                {/* Wrapper divs mirror document structure (html > body) for CSS scoping */}
+                                                <div data-fern-html="">
+                                                    <div
+                                                        data-fern-body=""
+                                                        data-body-theme={theme?.body}
+                                                        data-product-switcher-theme={theme?.productSwitcher}
+                                                    >
+                                                        <AbstractDefaultDocs
+                                                            header={
+                                                                <PreviewHeader
+                                                                    navbarLinks={<NavbarLinks loader={loader} />}
+                                                                    headertabs={headertabs}
+                                                                    versionSelect={versionSelect}
+                                                                    productSelect={productSelect}
+                                                                    logo={logo}
+                                                                    showSearchBar={
+                                                                        layout.searchbarPlacement === "HEADER"
+                                                                    }
+                                                                />
+                                                            }
+                                                            lightSidebarClassName={
+                                                                colors.light?.sidebarBackgroundTheme === "dark"
+                                                                    ? "dark"
+                                                                    : undefined
+                                                            }
+                                                            darkSidebarClassName={
+                                                                colors.dark?.sidebarBackgroundTheme === "light"
+                                                                    ? "light"
+                                                                    : undefined
+                                                            }
+                                                            lightHeaderClassName={
+                                                                colors.light?.headerBackgroundTheme === "dark"
+                                                                    ? "dark"
+                                                                    : undefined
+                                                            }
+                                                            darkHeaderClassName={
+                                                                colors.dark?.headerBackgroundTheme === "light"
+                                                                    ? "light"
+                                                                    : undefined
+                                                            }
+                                                            isHeaderDisabled={layout.isHeaderDisabled}
                                                             versionSelect={versionSelect}
                                                             productSelect={productSelect}
-                                                            logo={logo}
-                                                            showSearchBar={layout.searchbarPlacement === "HEADER"}
-                                                        />
-                                                    }
-                                                    lightSidebarClassName={
-                                                        colors.light?.sidebarBackgroundTheme === "dark"
-                                                            ? "dark"
-                                                            : undefined
-                                                    }
-                                                    darkSidebarClassName={
-                                                        colors.dark?.sidebarBackgroundTheme === "light"
-                                                            ? "light"
-                                                            : undefined
-                                                    }
-                                                    lightHeaderClassName={
-                                                        colors.light?.headerBackgroundTheme === "dark"
-                                                            ? "dark"
-                                                            : undefined
-                                                    }
-                                                    darkHeaderClassName={
-                                                        colors.dark?.headerBackgroundTheme === "light"
-                                                            ? "light"
-                                                            : undefined
-                                                    }
-                                                    isHeaderDisabled={layout.isHeaderDisabled}
-                                                    versionSelect={versionSelect}
-                                                    productSelect={productSelect}
-                                                    isSidebarFixed={
-                                                        !!colors.dark?.sidebarBackground ||
-                                                        !!colors.light?.sidebarBackground ||
-                                                        layout.isHeaderDisabled
-                                                    }
-                                                    sidebar={
-                                                        <SidebarContainer
-                                                            key="sidebar-container"
-                                                            logo={<Suspense fallback={null}>{logo}</Suspense>}
-                                                            showSearchBar={layout.searchbarPlacement === "SIDEBAR"}
-                                                            showHeaderInSidebar={showHeaderInSidebar}
-                                                            productSelect={
-                                                                <Suspense fallback={null} key="product-select-3">
-                                                                    {productSelect}
-                                                                </Suspense>
+                                                            isSidebarFixed={
+                                                                !!colors.dark?.sidebarBackground ||
+                                                                !!colors.light?.sidebarBackground ||
+                                                                layout.isHeaderDisabled
                                                             }
-                                                            versionSelect={
-                                                                <Suspense fallback={null} key="version-select-3">
-                                                                    {versionSelect}
-                                                                </Suspense>
+                                                            sidebar={
+                                                                <SidebarContainer
+                                                                    key="sidebar-container"
+                                                                    logo={<Suspense fallback={null}>{logo}</Suspense>}
+                                                                    showSearchBar={
+                                                                        layout.searchbarPlacement === "SIDEBAR"
+                                                                    }
+                                                                    showHeaderInSidebar={showHeaderInSidebar}
+                                                                    productSelect={
+                                                                        <Suspense
+                                                                            fallback={null}
+                                                                            key="product-select-3"
+                                                                        >
+                                                                            {productSelect}
+                                                                        </Suspense>
+                                                                    }
+                                                                    versionSelect={
+                                                                        <Suspense
+                                                                            fallback={null}
+                                                                            key="version-select-3"
+                                                                        >
+                                                                            {versionSelect}
+                                                                        </Suspense>
+                                                                    }
+                                                                    navbarLinks={
+                                                                        <Suspense fallback={null}>
+                                                                            <NavbarLinks loader={loader} />
+                                                                        </Suspense>
+                                                                    }
+                                                                    loginButton={
+                                                                        <Suspense fallback={null}>
+                                                                            {/* <LoginButton
+                                                                                loader={loader}
+                                                                                className="my-6 flex w-full justify-between lg:hidden"
+                                                                                showIcon
+                                                                                /> */}
+                                                                        </Suspense>
+                                                                    }
+                                                                    searchBar={<DesktopSearchButton lang="en" />}
+                                                                    lang="en"
+                                                                >
+                                                                    {sidebar}
+                                                                </SidebarContainer>
                                                             }
-                                                            navbarLinks={
-                                                                <Suspense fallback={null}>
-                                                                    <NavbarLinks loader={loader} />
-                                                                </Suspense>
+                                                            headerTabs={
+                                                                <AbstractHeaderTabsRoot
+                                                                    searchBar={
+                                                                        showSearchBarInHeaderTabs && (
+                                                                            <DesktopSearchButton
+                                                                                id={FERN_SEARCH_BUTTON_ID}
+                                                                                className="fern-header-search-bar cursor-not-allowed overflow-hidden"
+                                                                                lang="en"
+                                                                            />
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    {headertabs}
+                                                                </AbstractHeaderTabsRoot>
                                                             }
-                                                            loginButton={
-                                                                <Suspense fallback={null}>
-                                                                    {/* <LoginButton
-                                                                        loader={loader}
-                                                                        className="my-6 flex w-full justify-between lg:hidden"
-                                                                        showIcon
-                                                                        /> */}
-                                                                </Suspense>
-                                                            }
-                                                            searchBar={<DesktopSearchButton lang="en" />}
-                                                            lang="en"
+                                                            hasProductsOrVersions={hasProductsOrVersions}
                                                         >
-                                                            {sidebar}
-                                                        </SidebarContainer>
-                                                    }
-                                                    headerTabs={
-                                                        <AbstractHeaderTabsRoot
-                                                            searchBar={
-                                                                showSearchBarInHeaderTabs && (
-                                                                    <DesktopSearchButton
-                                                                        id={FERN_SEARCH_BUTTON_ID}
-                                                                        className="fern-header-search-bar cursor-not-allowed overflow-hidden"
-                                                                        lang="en"
-                                                                    />
-                                                                )
-                                                            }
-                                                        >
-                                                            {headertabs}
-                                                        </AbstractHeaderTabsRoot>
-                                                    }
-                                                    hasProductsOrVersions={hasProductsOrVersions}
-                                                    // announcement={<div>Announcement</div>}
-                                                >
-                                                    <div className="flex h-[var(--preview-container-height)] flex-1 justify-center overflow-y-scroll items-start">
-                                                        {children}
+                                                            <div className="flex h-[var(--preview-container-height)] flex-1 justify-center overflow-y-scroll items-start">
+                                                                {children}
+                                                            </div>
+                                                        </AbstractDefaultDocs>
                                                     </div>
-                                                </AbstractDefaultDocs>
+                                                </div>
                                             </div>
                                         </EditorRoutingProvider>
                                     </div>

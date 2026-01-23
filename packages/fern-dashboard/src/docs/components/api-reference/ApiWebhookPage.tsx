@@ -9,6 +9,7 @@
  * @see packages/fern-docs/bundle/src/components/api-reference/webhooks/WebhookContent.tsx
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import { type ApiDefinition, createWebhookContext, prune } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useMemo } from "react";
@@ -22,9 +23,10 @@ export interface ApiWebhookPageProps {
     apiDefinition: ApiDefinition;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
+    theme?: FernThemeConfig;
 }
 
-export function ApiWebhookPage({ node, apiDefinition, breadcrumb, lang }: ApiWebhookPageProps) {
+export function ApiWebhookPage({ node, apiDefinition, breadcrumb, lang, theme }: ApiWebhookPageProps) {
     const context = createWebhookContext(node, prune(apiDefinition, node));
 
     // Create edit target for the Webhook
@@ -46,12 +48,12 @@ export function ApiWebhookPage({ node, apiDefinition, breadcrumb, lang }: ApiWeb
     }
 
     if (!editTarget) {
-        return <WebhookContent context={context} breadcrumb={breadcrumb} lang={lang} />;
+        return <WebhookContent context={context} breadcrumb={breadcrumb} lang={lang} theme={theme} />;
     }
 
     return (
         <ApiEditTargetProvider target={editTarget}>
-            <WebhookContent context={context} breadcrumb={breadcrumb} lang={lang} />
+            <WebhookContent context={context} breadcrumb={breadcrumb} lang={lang} theme={theme} />
         </ApiEditTargetProvider>
     );
 }

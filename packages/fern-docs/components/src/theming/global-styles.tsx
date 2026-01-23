@@ -3,6 +3,7 @@ import type { FernFonts } from "@fern-api/docs-server/generateFonts";
 import { type ArrayOf12, FERN_COLOR_ACCENT, type FernColorTheme } from "@fern-api/docs-utils";
 import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
+import { scopeCss } from "./scope-css";
 import { getThemeCss } from "./variants";
 
 const FONT_MONO = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
@@ -252,9 +253,14 @@ export function GlobalStyles({
 
         ${
             inlineCssScopeSelector
-                ? `${inlineCssScopeSelector} {
-        ${inlineCss.join("\n")}
-    }`
+                ? scopeCss(inlineCss.join("\n"), {
+                      scopeSelector: inlineCssScopeSelector.split(",")[0]?.trim() ?? inlineCssScopeSelector,
+                      additionalScopeSelectors: inlineCssScopeSelector
+                          .split(",")
+                          .slice(1)
+                          .map((s) => s.trim())
+                          .filter(Boolean)
+                  })
                 : inlineCss.join("\n")
         } `}
         </style>

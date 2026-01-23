@@ -9,6 +9,7 @@
  * @see packages/fern-docs/bundle/src/components/api-reference/grpcs/GrpcContent.tsx
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { GrpcContext } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { GrpcContentCodeSnippets } from "@fern-docs/components/api-reference/grpcs/GrpcContentCodeSnippets";
@@ -69,9 +70,10 @@ export interface GrpcContentProps {
     context: GrpcContext;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
+    theme?: FernThemeConfig;
 }
 
-export function GrpcContent({ context, breadcrumb, lang }: GrpcContentProps) {
+export function GrpcContent({ context, breadcrumb, lang, theme }: GrpcContentProps) {
     const { node, grpc, types } = context;
 
     const grpcExample = {
@@ -82,6 +84,7 @@ export function GrpcContent({ context, breadcrumb, lang }: GrpcContentProps) {
     return (
         <GrpcContextProvider grpcEndpoint={grpc} example={grpcExample}>
             <ReferenceLayout
+                theme={theme}
                 header={<GrpcPageHeader breadcrumb={breadcrumb} title={node.title} availability={grpc.availability} />}
                 aside={<GrpcContentCodeSnippets node={node} lang={lang} />}
                 reference={

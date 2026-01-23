@@ -9,6 +9,7 @@
  * @see packages/fern-docs/bundle/src/components/api-reference/webhooks/WebhookContent.tsx
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { getMessageForStatus } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
@@ -79,9 +80,10 @@ export interface WebhookContentProps {
     context: ApiDefinition.WebhookContext;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
+    theme?: FernThemeConfig;
 }
 
-export function WebhookContent({ context, breadcrumb, lang }: WebhookContentProps) {
+export function WebhookContent({ context, breadcrumb, lang, theme }: WebhookContentProps) {
     const { node, webhook, types } = context;
 
     const example = webhook.examples?.[0];
@@ -91,6 +93,7 @@ export function WebhookContent({ context, breadcrumb, lang }: WebhookContentProp
 
     return (
         <ReferenceLayout
+            theme={theme}
             header={<WebhookPageHeader breadcrumb={breadcrumb} title={node.title} />}
             aside={webhookExample}
             reference={

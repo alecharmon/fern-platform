@@ -4,6 +4,7 @@
  * Client-side wrapper for ApiWebhookPage that receives pre-fetched data from the server.
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { ApiDefinition } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useEffect } from "react";
@@ -15,9 +16,10 @@ export interface ApiWebhookPageWrapperProps {
     node: FernNavigation.WebhookNode;
     apiDefinition: ApiDefinition;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
+    theme?: FernThemeConfig;
 }
 
-export function ApiWebhookPageWrapper({ node, apiDefinition, breadcrumb }: ApiWebhookPageWrapperProps) {
+export function ApiWebhookPageWrapper({ node, apiDefinition, breadcrumb, theme }: ApiWebhookPageWrapperProps) {
     const { setCurrentPageType } = useDevMode();
 
     useEffect(() => {
@@ -30,5 +32,5 @@ export function ApiWebhookPageWrapper({ node, apiDefinition, breadcrumb }: ApiWe
         };
     }, [setCurrentPageType]);
 
-    return <ApiWebhookPage node={node} apiDefinition={apiDefinition} breadcrumb={breadcrumb} lang="en" />;
+    return <ApiWebhookPage node={node} apiDefinition={apiDefinition} breadcrumb={breadcrumb} lang="en" theme={theme} />;
 }

@@ -9,6 +9,7 @@
  * @see packages/fern-docs/bundle/src/components/api-reference/ApiEndpointPage.tsx
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import { type ApiDefinition, createEndpointContext, prune } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useMemo } from "react";
@@ -22,9 +23,10 @@ export interface ApiEndpointPageProps {
     apiDefinition: ApiDefinition;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
+    theme?: FernThemeConfig;
 }
 
-export function ApiEndpointPage({ node, apiDefinition, breadcrumb, lang }: ApiEndpointPageProps) {
+export function ApiEndpointPage({ node, apiDefinition, breadcrumb, lang, theme }: ApiEndpointPageProps) {
     const context = createEndpointContext(node, prune(apiDefinition, node));
 
     // Create edit target for the endpoint
@@ -45,13 +47,27 @@ export function ApiEndpointPage({ node, apiDefinition, breadcrumb, lang }: ApiEn
 
     if (!editTarget) {
         return (
-            <EndpointContent context={context} breadcrumb={breadcrumb} showErrors={true} showAuth={true} lang={lang} />
+            <EndpointContent
+                context={context}
+                breadcrumb={breadcrumb}
+                showErrors={true}
+                showAuth={true}
+                lang={lang}
+                theme={theme}
+            />
         );
     }
 
     return (
         <ApiEditTargetProvider target={editTarget}>
-            <EndpointContent context={context} breadcrumb={breadcrumb} showErrors={true} showAuth={true} lang={lang} />
+            <EndpointContent
+                context={context}
+                breadcrumb={breadcrumb}
+                showErrors={true}
+                showAuth={true}
+                lang={lang}
+                theme={theme}
+            />
         </ApiEditTargetProvider>
     );
 }

@@ -9,6 +9,7 @@
  * @see packages/fern-docs/bundle/src/components/api-reference/grpcs/GrpcContent.tsx
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import { type ApiDefinition, createGrpcContext, prune } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useMemo } from "react";
@@ -22,9 +23,10 @@ export interface ApiGrpcPageProps {
     apiDefinition: ApiDefinition;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
+    theme?: FernThemeConfig;
 }
 
-export function ApiGrpcPage({ node, apiDefinition, breadcrumb, lang }: ApiGrpcPageProps) {
+export function ApiGrpcPage({ node, apiDefinition, breadcrumb, lang, theme }: ApiGrpcPageProps) {
     const context = createGrpcContext(node, prune(apiDefinition, node));
 
     // Create edit target for the gRPC method
@@ -46,12 +48,12 @@ export function ApiGrpcPage({ node, apiDefinition, breadcrumb, lang }: ApiGrpcPa
     }
 
     if (!editTarget) {
-        return <GrpcContent context={context} breadcrumb={breadcrumb} lang={lang} />;
+        return <GrpcContent context={context} breadcrumb={breadcrumb} lang={lang} theme={theme} />;
     }
 
     return (
         <ApiEditTargetProvider target={editTarget}>
-            <GrpcContent context={context} breadcrumb={breadcrumb} lang={lang} />
+            <GrpcContent context={context} breadcrumb={breadcrumb} lang={lang} theme={theme} />
         </ApiEditTargetProvider>
     );
 }

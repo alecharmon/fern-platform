@@ -51,7 +51,7 @@ export default async function Page({
     // Use cached loader - this will reuse the loader created in layout.tsx
     const loader = await getCachedEditableDocsLoader(host, docsUrl, session.accessToken, branch);
 
-    const root = await loader.getRoot();
+    const [root, theme] = await Promise.all([loader.getRoot(), loader.getTheme()]);
     const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);
     const navigationNode = FernNavigation.utils.findNode(root, navigationSlug);
 
@@ -65,7 +65,7 @@ export default async function Page({
         };
 
         return (
-            <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={{}} lang="en">
+            <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={{}} lang="en" theme={theme}>
                 <div className="flex w-full flex-col gap-2 py-12">
                     <PageNode pageDataDeps={pageDataDeps} fallbackFoundNode={undefined} serializableRootNode={root} />
                 </div>
@@ -103,6 +103,7 @@ export default async function Page({
                 node={endpointNode}
                 apiDefinition={apiDefinition}
                 breadcrumb={navigationNode.breadcrumb}
+                theme={theme}
             />
         );
     }
@@ -116,6 +117,7 @@ export default async function Page({
                 node={webSocketNode}
                 apiDefinition={apiDefinition}
                 breadcrumb={navigationNode.breadcrumb}
+                theme={theme}
             />
         );
     }
@@ -129,6 +131,7 @@ export default async function Page({
                 node={webhookNode}
                 apiDefinition={apiDefinition}
                 breadcrumb={navigationNode.breadcrumb}
+                theme={theme}
             />
         );
     }
@@ -138,7 +141,12 @@ export default async function Page({
         const apiDefinition = await loader.getPrunedApi(grpcNode.apiDefinitionId, createPruneKey(grpcNode));
 
         return (
-            <ApiGrpcPageWrapper node={grpcNode} apiDefinition={apiDefinition} breadcrumb={navigationNode.breadcrumb} />
+            <ApiGrpcPageWrapper
+                node={grpcNode}
+                apiDefinition={apiDefinition}
+                breadcrumb={navigationNode.breadcrumb}
+                theme={theme}
+            />
         );
     }
 
@@ -177,7 +185,7 @@ export default async function Page({
         // TODO: Currently, we are force-hiding the table of contents is within Fern Editor.
         // This is a temporary solution, as I anticipate we will want the TOC to be dynamic based
         // on the tiptap editor's content.
-        <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={frontmatter} lang="en">
+        <AbstractLayoutEvaluatorContent tableOfContents={[]} frontmatter={frontmatter} lang="en" theme={theme}>
             <div className={cn("flex w-full flex-col gap-2 py-12", frontmatter?.layout === "custom" && "py-10")}>
                 <PageNode
                     pageDataDeps={pageDataDeps}

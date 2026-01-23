@@ -11,6 +11,7 @@
  */
 
 import { removeTrailingSlash } from "@fern-api/docs-utils";
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
@@ -87,9 +88,10 @@ export interface WebSocketContentProps {
     context: WebSocketContext;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
+    theme?: FernThemeConfig;
 }
 
-export function WebSocketContent({ context, breadcrumb, lang }: WebSocketContentProps) {
+export function WebSocketContent({ context, breadcrumb, lang, theme }: WebSocketContentProps) {
     const { channel, node, types, globalHeaders } = context;
 
     const publishMessages = channel.messages.filter(
@@ -130,6 +132,7 @@ export function WebSocketContent({ context, breadcrumb, lang }: WebSocketContent
 
     return (
         <ReferenceLayout
+            theme={theme}
             header={
                 <WebSocketPageHeader
                     breadcrumb={breadcrumb}

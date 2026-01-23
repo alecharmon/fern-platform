@@ -4,6 +4,7 @@
  * Client-side wrapper for ApiWebSocketPage that receives pre-fetched data from the server.
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { ApiDefinition } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useEffect } from "react";
@@ -15,9 +16,10 @@ export interface ApiWebSocketPageWrapperProps {
     node: FernNavigation.WebSocketNode;
     apiDefinition: ApiDefinition;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
+    theme?: FernThemeConfig;
 }
 
-export function ApiWebSocketPageWrapper({ node, apiDefinition, breadcrumb }: ApiWebSocketPageWrapperProps) {
+export function ApiWebSocketPageWrapper({ node, apiDefinition, breadcrumb, theme }: ApiWebSocketPageWrapperProps) {
     const { setCurrentPageType } = useDevMode();
 
     useEffect(() => {
@@ -30,5 +32,7 @@ export function ApiWebSocketPageWrapper({ node, apiDefinition, breadcrumb }: Api
         };
     }, [setCurrentPageType]);
 
-    return <ApiWebSocketPage node={node} apiDefinition={apiDefinition} breadcrumb={breadcrumb} lang="en" />;
+    return (
+        <ApiWebSocketPage node={node} apiDefinition={apiDefinition} breadcrumb={breadcrumb} lang="en" theme={theme} />
+    );
 }

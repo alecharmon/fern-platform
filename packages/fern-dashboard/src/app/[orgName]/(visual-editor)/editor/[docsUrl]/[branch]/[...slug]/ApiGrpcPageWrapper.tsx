@@ -4,6 +4,7 @@
  * Client-side wrapper for ApiGrpcPage that receives pre-fetched data from the server.
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { ApiDefinition } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useEffect } from "react";
@@ -15,9 +16,10 @@ export interface ApiGrpcPageWrapperProps {
     node: FernNavigation.GrpcNode;
     apiDefinition: ApiDefinition;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
+    theme?: FernThemeConfig;
 }
 
-export function ApiGrpcPageWrapper({ node, apiDefinition, breadcrumb }: ApiGrpcPageWrapperProps) {
+export function ApiGrpcPageWrapper({ node, apiDefinition, breadcrumb, theme }: ApiGrpcPageWrapperProps) {
     const { setCurrentPageType } = useDevMode();
 
     useEffect(() => {
@@ -30,5 +32,5 @@ export function ApiGrpcPageWrapper({ node, apiDefinition, breadcrumb }: ApiGrpcP
         };
     }, [setCurrentPageType]);
 
-    return <ApiGrpcPage node={node} apiDefinition={apiDefinition} breadcrumb={breadcrumb} lang="en" />;
+    return <ApiGrpcPage node={node} apiDefinition={apiDefinition} breadcrumb={breadcrumb} lang="en" theme={theme} />;
 }

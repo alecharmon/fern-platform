@@ -9,6 +9,7 @@
  * @see packages/fern-docs/bundle/src/components/api-reference/websockets/WebSocket.tsx
  */
 
+import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import { type ApiDefinition, createWebSocketContext, prune } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useMemo } from "react";
@@ -22,9 +23,10 @@ export interface ApiWebSocketPageProps {
     apiDefinition: ApiDefinition;
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
+    theme?: FernThemeConfig;
 }
 
-export function ApiWebSocketPage({ node, apiDefinition, breadcrumb, lang }: ApiWebSocketPageProps) {
+export function ApiWebSocketPage({ node, apiDefinition, breadcrumb, lang, theme }: ApiWebSocketPageProps) {
     const context = createWebSocketContext(node, prune(apiDefinition, node));
 
     // Create edit target for the WebSocket channel
@@ -46,12 +48,12 @@ export function ApiWebSocketPage({ node, apiDefinition, breadcrumb, lang }: ApiW
     }
 
     if (!editTarget) {
-        return <WebSocketContent context={context} breadcrumb={breadcrumb} lang={lang} />;
+        return <WebSocketContent context={context} breadcrumb={breadcrumb} lang={lang} theme={theme} />;
     }
 
     return (
         <ApiEditTargetProvider target={editTarget}>
-            <WebSocketContent context={context} breadcrumb={breadcrumb} lang={lang} />
+            <WebSocketContent context={context} breadcrumb={breadcrumb} lang={lang} theme={theme} />
         </ApiEditTargetProvider>
     );
 }
