@@ -6,6 +6,7 @@ export class DefinitionObjectFactory {
             pages: {},
             apis: {},
             apisV2: {},
+            apiNameToId: undefined,
             files: {},
             filesV2: {},
             config: {

@@ -126,10 +126,29 @@ export async function getDocsDefinition({
 }): Promise<DocsV1Read.DocsDefinition> {
     let apiDefinitions: any[];
     let apiV2Definitions: any[];
+    let apiNameToId: Record<string, FernNavigation.ApiDefinitionId> | undefined;
 
     if (excludeApis) {
         apiDefinitions = [];
         apiV2Definitions = [];
+
+        // When excluding APIs, fetch only the apiName -> apiDefinitionId mapping for lazy loading
+        const apiNameMappings = await app.services.db.prisma.apiDefinitionsV2.findMany({
+            where: {
+                apiDefinitionId: {
+                    in: Array.from(docsDbDefinition.referencedApis)
+                }
+            },
+            select: {
+                apiName: true,
+                apiDefinitionId: true
+            }
+        });
+
+        apiNameToId = {};
+        for (const mapping of apiNameMappings) {
+            apiNameToId[mapping.apiName] = FernNavigation.ApiDefinitionId(mapping.apiDefinitionId);
+        }
     } else {
         [apiDefinitions, apiV2Definitions] = await Promise.all([
             app.services.db.prisma.apiDefinitionsV2.findMany({
@@ -147,6 +166,13 @@ export async function getDocsDefinition({
                 }
             })
         ]);
+
+        // Build apiNameToId mapping from the already-loaded API definitions
+        // Use apiDefinitions (v2 table) as the source since apiV2Definitions (latest table) may not always be populated
+        apiNameToId = {};
+        for (const def of apiDefinitions) {
+            apiNameToId[def.apiName] = FernNavigation.ApiDefinitionId(def.apiDefinitionId);
+        }
     }
 
     const bufferedApiDefinitionsById = keyBy(apiDefinitions, (def) => DocsV1Db.ApiDefinitionId(def.apiDefinitionId));
@@ -167,7 +193,8 @@ export async function getDocsDefinition({
         filesV2,
         apis: apiDefinitionsById,
         apisV2: apiV2DefinitionsById,
-        id: docsV2?.docsConfigInstanceId ?? undefined
+        id: docsV2?.docsConfigInstanceId ?? undefined,
+        apiNameToId
     });
 }
 

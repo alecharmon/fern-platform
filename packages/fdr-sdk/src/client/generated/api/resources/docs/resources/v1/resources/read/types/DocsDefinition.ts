@@ -6,6 +6,12 @@ export interface DocsDefinition {
     pages: Record<FernRegistry.PageId, FernRegistry.docs.v1.read.PageContent>;
     apis: Record<FernRegistry.ApiDefinitionId, FernRegistry.api.v1.read.ApiDefinition>;
     apisV2: Record<FernRegistry.ApiDefinitionId, FernRegistry.api.latest.ApiDefinition>;
+    /**
+     * A mapping from API name to API definition ID.
+     * Used for lazy-loading API definitions when apis/apisV2 are empty (excludeApis: true).
+     * The key is the human-readable API name and the value is the API definition UUID.
+     */
+    apiNameToId: Record<string, FernRegistry.ApiDefinitionId> | undefined;
     files: Record<FernRegistry.FileId, FernRegistry.Url>;
     filesV2: Record<FernRegistry.FileId, FernRegistry.docs.v1.read.File_>;
     /**

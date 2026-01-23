@@ -69,6 +69,12 @@ types:
       pages: map<rootCommons.PageId, PageContent>
       apis: map<rootCommons.ApiDefinitionId, apiReadV1.ApiDefinition>
       apisV2: map<rootCommons.ApiDefinitionId, apiReadLatest.ApiDefinition>
+      apiNameToId:
+        type: optional<map<string, rootCommons.ApiDefinitionId>>
+        docs: |
+          A mapping from API name to API definition ID.
+          Used for lazy-loading API definitions when apis/apisV2 are empty (excludeApis: true).
+          The key is the human-readable API name and the value is the API definition UUID.
       files: map<rootCommons.FileId, rootCommons.Url>
       filesV2: map<rootCommons.FileId, File>
       jsFiles:

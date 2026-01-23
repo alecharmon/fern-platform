@@ -9,18 +9,21 @@ export function convertDocsDefinitionToRead({
     filesV2,
     apis,
     apisV2,
-    id
+    id,
+    apiNameToId
 }: {
     docsDbDefinition: DocsV1Db.DocsDefinitionDb;
     filesV2: Record<DocsV1Read.FileId, DocsV1Read.File_>;
     apis: Record<DocsV1Db.ApiDefinitionId, APIV1Read.ApiDefinition>;
     apisV2: Record<FernRegistry.ApiDefinitionId, FernRegistry.api.latest.ApiDefinition>;
     id: APIV1Db.DocsConfigId | undefined;
+    apiNameToId?: Record<string, FernRegistry.ApiDefinitionId>;
 }): DocsV1Read.DocsDefinition {
     return {
         pages: docsDbDefinition.pages,
         apis,
         apisV2,
+        apiNameToId,
         files: mapValues(filesV2, (fileV2) => fileV2.url),
         filesV2,
         jsFiles: docsDbDefinition.type === "v3" ? docsDbDefinition.jsFiles : undefined,
