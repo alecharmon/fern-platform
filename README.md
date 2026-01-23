@@ -27,3 +27,6 @@ be deployed to our dev stack.
 
 To release FDR on prod, you need to tag a release with the format "fdr@<tag>"
 on this repository.
+
+## Contributing
+See [Contributing Documentation](./CONTRIBUTING.md)
