@@ -79,7 +79,7 @@
     "@eslint/plugin-kit": "^0.3.3",
     "@fern-fern/fern-cloud-sdk": "^0.0.305",
     "@fern-fern/revalidation-sdk": "^0.0.9",
-    "@metamask/sdk": "^0.33.1",
+    "@metamask/sdk": "^0.34.0",
     "@slack/web-api": "^6.12.0",
     "@sparticuz/chromium": "^133.0.0",
     "@tanstack/form-core": "^1.27.7",
