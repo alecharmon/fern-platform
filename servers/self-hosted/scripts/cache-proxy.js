@@ -115,6 +115,22 @@ class LRUCache {
 
 const cache = new LRUCache(MAX_CACHE_SIZE);
 
+// Paths that should never be cached
+// These patterns are checked using includes() for flexibility
+const EXCLUDED_PATHS = [
+    "/_search/", // MeiliSearch requests need fresh results
+    "/_next/static/", // Static assets - browsers cache these with immutable headers
+    "/_next/image" // Image optimization - browsers handle caching
+];
+
+// Paths that should be excluded unless they match an exception
+const EXCLUDED_PATHS_WITH_EXCEPTIONS = [
+    {
+        pattern: "/api/",
+        exceptions: ["/api/fern-docs/favicon"]
+    }
+];
+
 function log(...args) {
     // biome-ignore lint/suspicious/noConsole: This is a server script that needs to log
     console.log(`[${new Date().toISOString()}] [cache-proxy]`, ...args);
@@ -149,15 +165,21 @@ function shouldBypassCache(req) {
         return true;
     }
 
-    // Don't cache API routes (except some specific ones)
-    if (req.url.includes("/api/") && !req.url.includes("/api/fern-docs/favicon")) {
-        return true;
+    // Check excluded paths with exceptions
+    for (const { pattern, exceptions } of EXCLUDED_PATHS_WITH_EXCEPTIONS) {
+        if (req.url.includes(pattern)) {
+            const hasException = exceptions.some((exception) => req.url.includes(exception));
+            if (!hasException) {
+                return true;
+            }
+        }
     }
 
-    // Don't cache static assets - browsers cache these with immutable headers
-    // This saves proxy memory for HTML pages which benefit most from caching
-    if (req.url.startsWith("/_next/static/") || req.url.startsWith("/_next/image")) {
-        return true;
+    // Check excluded paths
+    for (const path of EXCLUDED_PATHS) {
+        if (req.url.includes(path)) {
+            return true;
+        }
     }
 
     // Don't cache if Cache-Control: no-cache
