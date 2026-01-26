@@ -12,5 +12,5 @@ export const baseConfig: SentryBaseConfig = {
     skipOpenTelemetrySetup: true,
     enableLogs: true,
     serverName: process.env.HOSTNAME || "unknown",
-    integrations: [Sentry.consoleLoggingIntegration({ levels: ["debug", "log", "warn", "error"] })]
+    integrations: [Sentry.consoleLoggingIntegration({ levels: ["warn", "error"] })]
 };
