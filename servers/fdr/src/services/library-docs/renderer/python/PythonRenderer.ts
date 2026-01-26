@@ -192,19 +192,16 @@ export class PythonRenderer {
             if (subItems.length === 0) {
                 // No items - skip
                 continue;
-            } else if (subItems.length === 1) {
-                // Single item - add directly (whether page or section)
-                items.push(subItems[0]!);
-            } else {
-                // Multiple items - create a section with stable slug from module path
-                const submodulePath = `${modulePath}/${submodule.name}`;
-                items.push({
-                    type: "section",
-                    title: submodule.name,
-                    slug: `${this.slug}/${submodulePath}`,
-                    children: subItems
-                });
             }
+
+            // Always create a section for submodules with children to preserve hierarchy
+            const submodulePath = `${modulePath}/${submodule.name}`;
+            items.push({
+                type: "section",
+                title: submodule.name,
+                slug: `${this.slug}/${submodulePath}`,
+                children: subItems
+            });
         }
 
         return items;
