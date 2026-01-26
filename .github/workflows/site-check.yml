@@ -6,42 +6,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  get-sites:
-    name: Determine sites to check
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Log location info
-        run: curl ipinfo.io
-      - uses: actions/checkout@v4
-      - name: Update domain list
-        env:
-          VERCEL_TEAM: ${{ secrets.VERCEL_TEAM }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: python scripts/monitor/get_sites.py
-      - name: Upload domain list
-        uses: actions/upload-artifact@v4
-        with:
-          name: Domains
-          path: sites.csv
-
   up:
     name: Check if sites are up (US)
     runs-on: ubuntu-latest
-    needs: get-sites
     timeout-minutes: 10
     steps:
       - name: Log location info
         run: curl ipinfo.io
       - uses: actions/checkout@v4
-      - name: Download domain list
-        uses: actions/download-artifact@v4
-        with:
-          name: Domains
-      - name: PWD & LS
-        run: |
-          pwd
-          ls
+      - name: Copy domain list
+        run: cp scripts/monitor/sites.csv sites.csv
       - name: Install dependencies
         run: pip install git+https://github.com/fern-api/incident-python.git requests
       - name: Check Sites
@@ -61,10 +35,8 @@ jobs:
       - name: Log location info
         run: curl ipinfo.io
       - uses: actions/checkout@v4
-      - name: Download domain list
-        uses: actions/download-artifact@v4
-        with:
-          name: Domains
+      - name: Copy domain list
+        run: cp scripts/monitor/sites.csv sites.csv
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
