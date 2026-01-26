@@ -1,6 +1,11 @@
 import { headers } from "next/headers";
+import { cache } from "react";
 
-export async function getAppUrlServerSide() {
+/**
+ * Gets the application URL from request headers.
+ * Uses React.cache() to deduplicate header reads within a single request tree.
+ */
+export const getAppUrlServerSide = cache(async () => {
     const headersList = await headers();
 
     const host = headersList.get("host");
@@ -11,4 +16,4 @@ export async function getAppUrlServerSide() {
     const protocol = headersList.get("x-forwarded-proto") ?? "https";
 
     return `${protocol}://${host}`;
-}
+});
