@@ -26,6 +26,7 @@ export declare namespace InternalTypeDefinition {
         lang: string;
         exclude?: string[];
         excludeDeprecated?: boolean;
+        isGraphQL?: boolean;
     }
 }
 
@@ -36,7 +37,8 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     additionalProperties,
     lang,
     exclude,
-    excludeDeprecated
+    excludeDeprecated,
+    isGraphQL = false
 }: {
     shape:
         | ApiDefinition.TypeShape.Enum
@@ -50,6 +52,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     lang: string;
     exclude?: string[];
     excludeDeprecated?: boolean;
+    isGraphQL?: boolean;
 }) {
     switch (shape.type) {
         case "enum": {
@@ -130,7 +133,13 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 key={property.key}
                                 part={{ type: "objectProperty", propertyName: property.key }}
                             >
-                                <ObjectProperty property={property} types={types} location={location} lang={lang} />
+                                <ObjectProperty
+                                    property={property}
+                                    types={types}
+                                    location={location}
+                                    lang={lang}
+                                    isGraphQL={isGraphQL}
+                                />
                             </TypeDefinitionPathPart>
                         ))}
                         {filteredProperties.map((property) => (
@@ -138,7 +147,13 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                                 key={property.key}
                                 part={{ type: "objectProperty", propertyName: property.key }}
                             >
-                                <ObjectProperty property={property} types={types} location={location} lang={lang} />
+                                <ObjectProperty
+                                    property={property}
+                                    types={types}
+                                    location={location}
+                                    lang={lang}
+                                    isGraphQL={isGraphQL}
+                                />
                             </TypeDefinitionPathPart>
                         ))}
                     </WithSeparator>

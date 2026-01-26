@@ -20,7 +20,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
     additionalProperties,
     lang,
     exclude,
-    excludeDeprecated
+    excludeDeprecated,
+    isGraphQL = false
 }: {
     shape: ApiDefinition.TypeShapeOrReference;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
@@ -29,6 +30,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
     lang: string;
     exclude?: string[];
     excludeDeprecated?: boolean;
+    isGraphQL?: boolean;
 }) {
     switch (shape.type) {
         case "id":
@@ -47,11 +49,12 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                             lang={lang}
                             exclude={exclude}
                             excludeDeprecated={excludeDeprecated}
+                            isGraphQL={isGraphQL}
                         />
                     );
                 }
             }
-            return <TypeDefinitionSlot id={shape.id} location={location} />;
+            return <TypeDefinitionSlot id={shape.id} location={location} isGraphQL={isGraphQL} />;
         case "object":
         case "enum":
         case "primitive":
@@ -66,6 +69,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     lang={lang}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
+                    isGraphQL={isGraphQL}
                 />
             );
         case "list":
@@ -80,6 +84,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         lang={lang}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
+                        isGraphQL={isGraphQL}
                     />
                 </TypeDefinitionPathPart>
             );
@@ -94,6 +99,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         lang={lang}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
+                        isGraphQL={isGraphQL}
                     />
                     <TypeReferenceDefinitions
                         shape={shape.valueShape}
@@ -103,6 +109,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         lang={lang}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
+                        isGraphQL={isGraphQL}
                     />
                 </TypeDefinitionPathPart>
             );
@@ -119,6 +126,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     lang={lang}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
+                    isGraphQL={isGraphQL}
                 />
             );
         }
@@ -133,6 +141,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     lang={lang}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
+                    isGraphQL={isGraphQL}
                 />
             );
         }

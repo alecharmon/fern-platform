@@ -7,23 +7,25 @@ import { TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 export function TypeDefinitionSlotsServer({
     types,
     children,
-    lang
+    lang,
+    isGraphQL = false
 }: {
     types: Record<string, TypeDefinition>;
     children: React.ReactNode;
     lang: string;
+    isGraphQL?: boolean;
 }) {
     return (
-        <TypeDefinitionSlotsProvider slots={createTypeDefinitionSlots(types, lang)}>
+        <TypeDefinitionSlotsProvider slots={createTypeDefinitionSlots(types, lang, isGraphQL)}>
             {children}
         </TypeDefinitionSlotsProvider>
     );
 }
 
-function createTypeDefinitionSlots(types: Record<string, TypeDefinition>, lang: string) {
+function createTypeDefinitionSlots(types: Record<string, TypeDefinition>, lang: string, isGraphQL: boolean) {
     return Object.fromEntries(
         Object.entries(types).flatMap(([id, type]) => {
-            const variants = createPropertyAccessTypeVariants(id, type, types, lang);
+            const variants = createPropertyAccessTypeVariants(id, type, types, lang, isGraphQL);
             return [
                 [id, variants.default],
                 [getTypeIdWithLocation(id, "request"), variants.request],
@@ -37,11 +39,28 @@ function createPropertyAccessTypeVariants(
     id: string,
     type: TypeDefinition,
     types: Record<string, TypeDefinition>,
-    lang: string
+    lang: string,
+    isGraphQL: boolean
 ) {
     return {
-        default: <TypeReferenceDefinitions shape={type.shape} types={types} lang={lang} />,
-        request: <TypeReferenceDefinitions shape={type.shape} types={types} location="request" lang={lang} />,
-        response: <TypeReferenceDefinitions shape={type.shape} types={types} location="response" lang={lang} />
+        default: <TypeReferenceDefinitions shape={type.shape} types={types} lang={lang} isGraphQL={isGraphQL} />,
+        request: (
+            <TypeReferenceDefinitions
+                shape={type.shape}
+                types={types}
+                location="request"
+                lang={lang}
+                isGraphQL={isGraphQL}
+            />
+        ),
+        response: (
+            <TypeReferenceDefinitions
+                shape={type.shape}
+                types={types}
+                location="response"
+                lang={lang}
+                isGraphQL={isGraphQL}
+            />
+        )
     };
 }

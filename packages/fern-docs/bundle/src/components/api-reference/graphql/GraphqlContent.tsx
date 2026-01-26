@@ -88,7 +88,7 @@ export async function GraphqlContent({
                 aside={<GraphqlContentCodeSnippets node={node} lang={lang} />}
                 reference={
                     <TypeDefinitionRoot types={types} slug={node.slug}>
-                        <TypeDefinitionSlotsServer types={types} lang={lang}>
+                        <TypeDefinitionSlotsServer types={types} lang={lang} isGraphQL>
                             <GraphqlContentLeft context={context} lang={lang} />
                         </TypeDefinitionSlotsServer>
                     </TypeDefinitionRoot>

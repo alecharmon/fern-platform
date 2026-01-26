@@ -32,13 +32,15 @@ export const ObjectProperty = React.memo(function ObjectProperty({
     types,
     location,
     lang,
-    badge
+    badge,
+    isGraphQL = false
 }: {
     property: ApiDefinition.ObjectProperty | ObjectPropertyWithSerializedDescription;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     lang: string;
     badge?: React.ReactNode;
+    isGraphQL?: boolean;
 }) {
     const unwrapped = ApiDefinition.unwrapReference(property.valueShape, types);
     const description = compact([property.description, ...unwrapped.descriptions])[0];
@@ -57,6 +59,7 @@ export const ObjectProperty = React.memo(function ObjectProperty({
             location={location}
             lang={lang}
             badge={badge}
+            isGraphQL={isGraphQL}
         />
     );
 });
@@ -72,7 +75,8 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     location,
     additionalProperties,
     lang,
-    badge
+    badge,
+    isGraphQL = false
 }: {
     icon?: React.ReactNode;
     name?: string;
@@ -86,6 +90,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang: string;
     badge?: React.ReactNode;
+    isGraphQL?: boolean;
 }) {
     return (
         <PropertyRenderer
@@ -93,7 +98,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
             description={description}
             serializedDescription={serializedDescription}
             renderedDescription={renderedDescription}
-            typeShorthand={<TypeShorthand shape={shape} lang={lang} />}
+            typeShorthand={<TypeShorthand shape={shape} lang={lang} isGraphQL={isGraphQL} />}
             availability={availability}
             badge={badge}
         >
@@ -103,6 +108,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
                 location={location}
                 additionalProperties={additionalProperties}
                 lang={lang}
+                isGraphQL={isGraphQL}
             />
         </PropertyRenderer>
     );

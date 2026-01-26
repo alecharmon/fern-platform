@@ -7,7 +7,15 @@ import { renderTypeShorthandRoot } from "../../type-shorthand";
 import { useGrpcContext } from "../grpcs/GrpcContext";
 import { useTypeDefinitionContext } from "./TypeDefinitionContext";
 
-export function TypeShorthand({ shape, lang }: { shape: TypeShapeOrReference; lang: string }) {
+export function TypeShorthand({
+    shape,
+    lang,
+    isGraphQL = false
+}: {
+    shape: TypeShapeOrReference;
+    lang: string;
+    isGraphQL?: boolean;
+}) {
     const { grpcEndpoint } = useGrpcContext() ?? {};
     const context = useTypeDefinitionContext();
     return renderTypeShorthandRoot({
@@ -15,6 +23,7 @@ export function TypeShorthand({ shape, lang }: { shape: TypeShapeOrReference; la
         types: context.types,
         isResponse: context.isResponse,
         hideAllModifiers: grpcEndpoint?.protocol?.type === "grpc",
+        isGraphQL,
         lang
     });
 }

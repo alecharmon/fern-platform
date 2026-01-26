@@ -60,6 +60,7 @@ export async function GraphqlContentLeft({
                                         availability={arg.availability}
                                         types={types}
                                         lang={lang}
+                                        isGraphQL
                                     />
                                 ))}
                             </WithSeparator>
@@ -83,6 +84,7 @@ export async function GraphqlContentLeft({
                                 types={types}
                                 location="response"
                                 lang={lang}
+                                isGraphQL
                             />
                         </TypeDefinitionAnchorPart>
                     </GraphqlSection>

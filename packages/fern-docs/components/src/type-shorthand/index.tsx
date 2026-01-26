@@ -9,6 +9,7 @@ import { t } from "@fern-docs/i18n";
 import { uniq } from "es-toolkit/array";
 import type { ReactNode } from "react";
 import { NullableDropdown } from "./NullableDropdown";
+import { ScalarTooltip } from "./ScalarTooltip";
 
 export interface TypeShorthandRootOptions {
     shape: TypeShapeOrReference;
@@ -20,6 +21,8 @@ export interface TypeShorthandRootOptions {
     isNullable?: boolean;
     onChange?: (value: unknown) => void;
     lang: string;
+    // When true, capitalizes first letter of types to follow GraphQL conventions
+    isGraphQL?: boolean;
 }
 
 export interface TypeShorthandOptions {
@@ -27,6 +30,57 @@ export interface TypeShorthandOptions {
     withArticle?: boolean;
     nullable?: boolean; // determines whether to render "Optional" or "Nullable"
     hideAllModifiers?: boolean;
+    // When true, capitalizes first letter of types to follow GraphQL conventions
+    isGraphQL?: boolean;
+}
+
+/**
+ * Gets scalar info from the shape if it's a scalar primitive, otherwise returns undefined.
+ */
+function getScalarInfo(
+    shape: TypeShapeOrReference,
+    types: Record<string, TypeDefinition>
+): { name: string; description: string | undefined } | undefined {
+    const unwrapped = unwrapReference(shape, types);
+    if (unwrapped.shape.type === "primitive" && unwrapped.shape.value.type === "scalar") {
+        return {
+            name: unwrapped.shape.value.name,
+            description: unwrapped.shape.value.description
+        };
+    }
+    return undefined;
+}
+
+/**
+ * Renders the type shorthand, replacing the scalar name with a tooltip-wrapped version if it has a description.
+ */
+function renderTypeShorthandWithScalarTooltip(
+    typeShorthand: string,
+    scalarInfo: { name: string; description: string | undefined } | undefined
+): ReactNode {
+    if (!scalarInfo?.description) {
+        return typeShorthand;
+    }
+
+    // Split the type shorthand by the scalar name and reconstruct with tooltip
+    const parts = typeShorthand.split(scalarInfo.name);
+    if (parts.length === 1) {
+        // Scalar name not found in shorthand (shouldn't happen, but fallback)
+        return typeShorthand;
+    }
+
+    return (
+        <>
+            {parts.map((part, index) => (
+                <span key={index}>
+                    {part}
+                    {index < parts.length - 1 && (
+                        <ScalarTooltip name={scalarInfo.name} description={scalarInfo.description} />
+                    )}
+                </span>
+            ))}
+        </>
+    );
 }
 
 export function renderTypeShorthandRoot({
@@ -38,14 +92,18 @@ export function renderTypeShorthandRoot({
     isNullable = false,
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     onChange = () => {},
-    lang
+    lang,
+    isGraphQL = false
 }: TypeShorthandRootOptions): ReactNode {
     const unwrapped = unwrapReference(shape, types);
     const typeShorthand = renderTypeShorthand(
         unwrapped.shape,
-        { nullable: unwrapped.isNullable, hideAllModifiers },
+        { nullable: unwrapped.isNullable, hideAllModifiers, isGraphQL },
         types
     );
+
+    const scalarInfo = getScalarInfo(shape, types);
+    const typeDisplay = renderTypeShorthandWithScalarTooltip(typeShorthand, scalarInfo);
 
     const nullableDropdownOptions = isNullable && !hideAllModifiers ? typeShorthand.split(" or ") : [];
 
@@ -57,7 +115,7 @@ export function renderTypeShorthandRoot({
     return (
         <span className="fern-api-property-meta">
             <span className="fern-api-property-type">
-                {!isResponse && nullableDropdown != null ? nullableDropdown : typeShorthand}
+                {!isResponse && nullableDropdown != null ? nullableDropdown : typeDisplay}
                 {isResponse && unwrapped.isOptional && !unwrapped.isNullable && !hideAllModifiers
                     ? " " + t(lang).apiReference.orNull
                     : false}
@@ -97,8 +155,6 @@ function toPrimitiveTypeLabels({ primitive, lang }: { primitive: PrimitiveType; 
             return toPrimitiveTypeLabelsNumeric(primitive, primitive.type === "double");
         case "string":
             return toPrimitiveTypeLabelsString({ ...primitive, lang });
-        case "scalar":
-            return primitive.description ? [primitive.description] : [];
         default:
             return [];
     }
@@ -184,13 +240,27 @@ function toPrimitiveTypeLabelsString({
 //     );
 // }
 
+/**
+ * Capitalizes the first letter of a string.
+ */
+function capitalize(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export function renderTypeShorthand(
     shape: TypeShapeOrReference,
-    { plural = false, withArticle = false, nullable = false, hideAllModifiers = false }: TypeShorthandOptions = {
+    {
+        plural = false,
+        withArticle = false,
+        nullable = false,
+        hideAllModifiers = false,
+        isGraphQL = false
+    }: TypeShorthandOptions = {
         plural: false,
         withArticle: false,
         nullable: false,
-        hideAllModifiers: false
+        hideAllModifiers: false,
+        isGraphQL: false
     },
     types: Record<string, TypeDefinition>
 ): string {
@@ -199,13 +269,16 @@ export function renderTypeShorthand(
     const maybeWithArticle = (article: string, stringWithoutArticle: string) =>
         withArticle ? `${article} ${stringWithoutArticle}` : stringWithoutArticle;
 
+    // Helper to apply GraphQL capitalization convention
+    const formatType = (type: string): string => (isGraphQL ? capitalize(type) : type);
+
     if (!hideAllModifiers) {
         if (unwrapped.isNullable && unwrapped.isOptional) {
-            return `${maybeWithArticle("a", "nullable or optional")} ${renderTypeShorthand(unwrapped.shape, { plural, hideAllModifiers }, types)}`;
+            return `${maybeWithArticle("a", "nullable or optional")} ${renderTypeShorthand(unwrapped.shape, { plural, hideAllModifiers, isGraphQL }, types)}`;
         } else if (unwrapped.isNullable) {
-            return `${maybeWithArticle("a", "nullable")} ${renderTypeShorthand(unwrapped.shape, { plural, hideAllModifiers }, types)}`;
+            return `${maybeWithArticle("a", "nullable")} ${renderTypeShorthand(unwrapped.shape, { plural, hideAllModifiers, isGraphQL }, types)}`;
         } else if (unwrapped.isOptional) {
-            return `${maybeWithArticle("an", "optional")} ${renderTypeShorthand(unwrapped.shape, { plural, hideAllModifiers }, types)}`;
+            return `${maybeWithArticle("an", "optional")} ${renderTypeShorthand(unwrapped.shape, { plural, hideAllModifiers, isGraphQL }, types)}`;
         }
     }
 
@@ -214,24 +287,24 @@ export function renderTypeShorthand(
             // primitives
             primitive: (primitive) =>
                 visitDiscriminatedUnion(primitive.value, "type")._visit({
-                    string: () => (plural ? "strings" : maybeWithArticle("a", "string")),
-                    integer: () => (plural ? "integers" : maybeWithArticle("an", "integer")),
-                    uint: () => (plural ? "uints" : maybeWithArticle("a", "uint")),
-                    uint64: () => (plural ? "uint64s" : maybeWithArticle("a", "uint64")),
-                    double: () => (plural ? "doubles" : maybeWithArticle("a", "double")),
-                    long: () => (plural ? "longs" : maybeWithArticle("a", "long")),
-                    boolean: () => (plural ? "booleans" : maybeWithArticle("a", "boolean")),
-                    datetime: () => (plural ? "datetimes" : maybeWithArticle("a", "datetime")),
+                    string: () => (plural ? formatType("strings") : maybeWithArticle("a", formatType("string"))),
+                    integer: () => (plural ? formatType("integers") : maybeWithArticle("an", formatType("integer"))),
+                    uint: () => (plural ? formatType("uints") : maybeWithArticle("a", formatType("uint"))),
+                    uint64: () => (plural ? formatType("uint64s") : maybeWithArticle("a", formatType("uint64"))),
+                    double: () => (plural ? formatType("doubles") : maybeWithArticle("a", formatType("double"))),
+                    long: () => (plural ? formatType("longs") : maybeWithArticle("a", formatType("long"))),
+                    boolean: () => (plural ? formatType("booleans") : maybeWithArticle("a", formatType("boolean"))),
+                    datetime: () => (plural ? formatType("datetimes") : maybeWithArticle("a", formatType("datetime"))),
                     uuid: () => (plural ? "UUIDs" : maybeWithArticle("a", "UUID")),
                     base64: () => (plural ? "Base64 strings" : maybeWithArticle("a", "Base64 string")),
-                    date: () => (plural ? "dates" : maybeWithArticle("a", "date")),
+                    date: () => (plural ? formatType("dates") : maybeWithArticle("a", formatType("date"))),
                     bigInteger: () => (plural ? "big integers" : maybeWithArticle("a", "big integer")),
                     scalar: (s) => s.name,
                     _other: () => "<unknown>"
                 }),
 
             // referenced shapes
-            object: () => (plural ? "objects" : maybeWithArticle("an", "object")),
+            object: () => (plural ? formatType("objects") : maybeWithArticle("an", formatType("object"))),
             undiscriminatedUnion: (union) => {
                 return uniq(
                     union.variants.map((variant) =>
@@ -240,37 +313,38 @@ export function renderTypeShorthand(
                             {
                                 plural,
                                 withArticle,
-                                hideAllModifiers
+                                hideAllModifiers,
+                                isGraphQL
                             },
                             types
                         )
                     )
                 ).join(" or ");
             },
-            discriminatedUnion: () => (plural ? "objects" : maybeWithArticle("an", "object")),
+            discriminatedUnion: () => (plural ? formatType("objects") : maybeWithArticle("an", formatType("object"))),
             enum: () => {
-                return plural ? "enums" : maybeWithArticle("an", "enum");
+                return plural ? formatType("enums") : maybeWithArticle("an", formatType("enum"));
             },
 
             // containing shapes
             list: (list) =>
                 `${plural ? "lists of" : maybeWithArticle("a", "list of")} ${renderTypeShorthand(
                     list.itemShape,
-                    { plural: true, hideAllModifiers },
+                    { plural: true, hideAllModifiers, isGraphQL },
                     types
                 )}`,
             set: (set) =>
                 `${plural ? "sets of" : maybeWithArticle("a", "set of")} ${renderTypeShorthand(
                     set.itemShape,
-                    { plural: true, hideAllModifiers },
+                    { plural: true, hideAllModifiers, isGraphQL },
                     types
                 )}`,
             map: (map) =>
                 `${plural ? "maps from" : maybeWithArticle("a", "map from")} ${renderTypeShorthand(
                     map.keyShape,
-                    { plural: true, hideAllModifiers },
+                    { plural: true, hideAllModifiers, isGraphQL },
                     types
-                )} to ${renderTypeShorthand(map.valueShape, { plural: true, hideAllModifiers }, types)}`,
+                )} to ${renderTypeShorthand(map.valueShape, { plural: true, hideAllModifiers, isGraphQL }, types)}`,
 
             // literals
             literal: (literal) =>

@@ -22,7 +22,15 @@ export function useTypeDefinitionSlots(id: string) {
     return React.useContext(TypeDefinitionSlots)[id];
 }
 
-export function TypeDefinitionSlot({ id, location }: { id: string; location: PropertyLocation | undefined }) {
+export function TypeDefinitionSlot({
+    id,
+    location,
+    isGraphQL: _isGraphQL
+}: {
+    id: string;
+    location: PropertyLocation | undefined;
+    isGraphQL?: boolean;
+}) {
     const augmentedId = location ? getTypeIdWithLocation(id, location) : id;
     return useTypeDefinitionSlots(augmentedId);
 }
