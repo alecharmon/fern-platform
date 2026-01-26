@@ -1,7 +1,6 @@
 "use client";
 
-import SparklesIcon from "@heroicons/react/24/outline/SparklesIcon";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { checkVersionUpgradeAction } from "@/app/actions/checkVersionUpgrade";
 import { upgradeFernVersionAction } from "@/app/actions/upgradeFernVersion";
@@ -149,7 +148,7 @@ export function UpgradeFernButton({
             ) : hasExistingPr ? (
                 <ExternalLink className="size-4" />
             ) : (
-                <SparklesIcon className="size-4" />
+                <Sparkles className="size-4" />
             )}
             <span className="transition-opacity duration-300 ease-in-out" style={{ opacity: textOpacity }}>
                 {buttonText}

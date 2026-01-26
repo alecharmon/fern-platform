@@ -1,4 +1,4 @@
-import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
+import { Plus } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 
@@ -34,7 +34,7 @@ export function AnalyticsPageHeader({ analyticsBillingEnabled }: { analyticsBill
                         <span className="text-radix-gray-9">Billing Period: {getBillingPeriod()}</span>
                         <div className="group relative inline-block">
                             <Button size="sm" variant="outline">
-                                <PlusIcon className="h-4 w-4" />
+                                <Plus className="h-4 w-4" />
                                 Get More Queries
                             </Button>
                         </div>

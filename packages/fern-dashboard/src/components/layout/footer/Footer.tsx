@@ -1,4 +1,4 @@
-import ChevronDownIcon from "@heroicons/react/24/outline/ChevronDownIcon";
+import { ChevronDown } from "lucide-react";
 
 import {
     DropdownMenu,
@@ -25,7 +25,7 @@ export function Footer() {
                     <FooterText hoverable>
                         <div className="flex cursor-pointer items-center gap-1">
                             <div>Legal</div>
-                            <ChevronDownIcon className="mt-0.5 size-3" />
+                            <ChevronDown className="mt-0.5 size-3" />
                         </div>
                     </FooterText>
                 </DropdownMenuTrigger>

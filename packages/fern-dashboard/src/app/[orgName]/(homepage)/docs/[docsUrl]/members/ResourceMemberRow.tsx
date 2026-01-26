@@ -1,8 +1,7 @@
 "use client";
 
 import type { ResourceRole } from "@fern-api/user-permissions";
-import EllipsisHorizontalIcon from "@heroicons/react/24/outline/EllipsisHorizontalIcon";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -160,7 +159,7 @@ export function ResourceMemberRow({ member, docsUrl, orgName, isCurrentUser }: R
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild disabled={isPending}>
                         <Button size="icon" variant="ghost">
-                            <EllipsisHorizontalIcon className="size-5" />
+                            <MoreHorizontal className="size-5" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">

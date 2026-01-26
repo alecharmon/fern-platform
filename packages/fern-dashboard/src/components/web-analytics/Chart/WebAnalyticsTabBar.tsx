@@ -1,7 +1,6 @@
 "use client";
 
-import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
-import UserIcon from "@heroicons/react/24/outline/UserIcon";
+import { Eye, User } from "lucide-react";
 
 import { AnalyticsHistogramTabItem } from "@/components/analytics/AnalyticsHistogramTabItem";
 
@@ -17,7 +16,7 @@ export function WebAnalyticsTabBar({ selectedMetric, onChangeMetric }: WebAnalyt
         <div className="flex min-w-0">
             <AnalyticsHistogramTabItem
                 title="Page views"
-                icon={<EyeIcon className="h-4 w-4" />}
+                icon={<Eye className="h-4 w-4" />}
                 isSelected={selectedMetric === "pageviews"}
                 onClick={() => {
                     onChangeMetric("pageviews");
@@ -25,7 +24,7 @@ export function WebAnalyticsTabBar({ selectedMetric, onChangeMetric }: WebAnalyt
             />
             <AnalyticsHistogramTabItem
                 title="Visitors"
-                icon={<UserIcon className="h-4 w-4" />}
+                icon={<User className="h-4 w-4" />}
                 isSelected={selectedMetric === "visitors"}
                 onClick={() => {
                     onChangeMetric("visitors");

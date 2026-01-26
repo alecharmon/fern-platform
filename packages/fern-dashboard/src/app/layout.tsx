@@ -1,6 +1,6 @@
-import CheckCircleIcon from "@heroicons/react/24/outline/CheckCircleIcon";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 
 import { NoiseOverlay } from "@/components/NoiseOverlay";
@@ -72,7 +72,7 @@ export default async function RootLayout({
                         }
                     }}
                     icons={{
-                        success: <CheckCircleIcon className="text-primary size-6" />
+                        success: <CheckCircle2 className="text-primary size-6" />
                     }}
                 />
             </body>

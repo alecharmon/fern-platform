@@ -3,7 +3,7 @@
 import { cn } from "@fern-docs/components/cn";
 import { NoZoomContext } from "@fern-docs/components/contexts/NoZoom";
 import { FernImage } from "@fern-docs/components/FernImage";
-import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";
+import { CloudUpload } from "lucide-react";
 import { type ComponentProps, forwardRef, type ReactElement, useContext, useRef } from "react";
 import Zoom from "react-medium-image-zoom";
 import { CheckboxControl, TextInputControl } from "@/components/editor/editor-component/controls";
@@ -72,7 +72,7 @@ export const Image = forwardRef<
                 // Placeholder when no src is provided
                 <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-500 p-3">
                     <div className="tiptap-image-upload-text flex items-center gap-2">
-                        <CloudArrowUpIcon className="size-8" />
+                        <CloudUpload className="size-8" />
                         <p>Add image</p>
                     </div>
                 </div>

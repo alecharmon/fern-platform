@@ -1,6 +1,5 @@
-import ExclamationTriangleIcon from "@heroicons/react/24/solid/ExclamationTriangleIcon";
 import { cva, type VariantProps } from "class-variance-authority";
-import { RocketIcon } from "lucide-react";
+import { AlertTriangle, RocketIcon } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 
@@ -75,7 +74,7 @@ export function Note({
     ) : variant === "bold" ? (
         <RocketIcon className={iconVariants({ variant })} />
     ) : variant === "error" || variant === "warning" ? (
-        <ExclamationTriangleIcon className={iconVariants({ variant })} />
+        <AlertTriangle className={iconVariants({ variant })} />
     ) : null;
 
     return (

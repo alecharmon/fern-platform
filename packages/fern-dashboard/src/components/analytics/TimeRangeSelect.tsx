@@ -1,6 +1,6 @@
 "use client";
 
-import CalendarDaysIcon from "@heroicons/react/24/outline/CalendarDaysIcon";
+import { Calendar } from "lucide-react";
 import { useState } from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,7 +30,7 @@ export const TimeRangeSelect = ({ value, onChange, options }: TimeRangeSelectPro
     return (
         <Select value={selected} onValueChange={handleChange}>
             <SelectTrigger className="border-input flex min-w-[140px] items-center gap-1 px-2">
-                <CalendarDaysIcon className="h-4 w-4" />
+                <Calendar className="h-4 w-4" />
                 <SelectValue placeholder="Select Time Range" />
             </SelectTrigger>
             <SelectContent>

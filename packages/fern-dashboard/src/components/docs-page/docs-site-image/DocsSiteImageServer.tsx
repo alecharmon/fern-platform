@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
-import ExclamationCircleIcon from "@heroicons/react/24/outline/ExclamationCircleIcon";
+import { AlertCircle } from "lucide-react";
 
 import { getHomepageImageUrl } from "@/app/services/dal/homepage-images/getHomepageImageUrl";
 import { convertFdrDocsSiteUrlToDocsUrl } from "@/utils/getDocsSiteUrl";
@@ -51,7 +51,7 @@ export async function DocsSiteImageServer({ docsSite }: DocsSiteImageServer.Prop
         return (
             <DocsSiteImageLayout>
                 <div className="flex flex-1 flex-col items-center justify-center gap-2 bg-white text-gray-900 dark:bg-black">
-                    <ExclamationCircleIcon className="size-10" />
+                    <AlertCircle className="size-10" />
                     <div>Failed to load</div>
                 </div>
             </DocsSiteImageLayout>

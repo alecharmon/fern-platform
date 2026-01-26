@@ -1,5 +1,5 @@
 import type { Roles } from "@fern-api/user-permissions";
-import EllipsisHorizontalIcon from "@heroicons/react/24/outline/EllipsisHorizontalIcon";
+import { MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
 
@@ -116,7 +116,7 @@ export function MemberOrInviteeRow({
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild disabled={dropdownMenuItems == null}>
                             <Button size="icon" variant="ghost">
-                                {shouldShowDropdownMenuTrigger && <EllipsisHorizontalIcon className="size-5" />}
+                                {shouldShowDropdownMenuTrigger && <MoreHorizontal className="size-5" />}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">{dropdownMenuItems}</DropdownMenuContent>

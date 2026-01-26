@@ -1,5 +1,5 @@
-import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import type { Table } from "@tanstack/react-table";
+import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 
@@ -15,7 +15,7 @@ export function QueriesDataTableHeader<TData>({ table, onExport, isExporting }: 
     return (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div className="relative min-w-[200px]">
-                <MagnifyingGlassIcon className="text-radix-gray-9 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+                <Search className="text-radix-gray-9 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                 <Input
                     placeholder="Search..."
                     value={(table.getColumn("conversation")?.getFilterValue() as string) ?? ""}

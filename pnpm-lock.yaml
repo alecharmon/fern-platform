@@ -1244,9 +1244,6 @@ importers:
       '@gitbeaker/rest':
         specifier: ^43.8.0
         version: 43.8.0
-      '@heroicons/react':
-        specifier: ^2.2.0
-        version: 2.2.0(react@19.0.1)
       '@mdx-js/react':
         specifier: ^3.1.0
         version: 3.1.1(@types/react@19.0.10)(react@19.0.1)
@@ -6503,11 +6500,6 @@ packages:
 
   '@hapi/topo@5.1.0':
     resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
-
-  '@heroicons/react@2.2.0':
-    resolution: {integrity: sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==}
-    peerDependencies:
-      react: 19.0.1
 
   '@hono/node-server@1.19.9':
     resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
@@ -26985,10 +26977,6 @@ snapshots:
   '@hapi/topo@5.1.0':
     dependencies:
       '@hapi/hoek': 9.3.0
-
-  '@heroicons/react@2.2.0(react@19.0.1)':
-    dependencies:
-      react: 19.0.1
 
   '@hono/node-server@1.19.9(hono@4.11.4)':
     dependencies:

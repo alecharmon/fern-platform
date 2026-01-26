@@ -1,10 +1,9 @@
 "use client";
 
 import type { Roles } from "@fern-api/user-permissions";
-import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
-import UserMinusIcon from "@heroicons/react/24/outline/UserMinusIcon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { GetMembers200ResponseOneOfInner } from "auth0";
+import { Pencil, UserMinus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -125,7 +124,7 @@ export function MemberRow({ member, currentUserId, isFineGrainedPermissionsEnabl
                         {!isCurrentUser && (
                             <>
                                 <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
-                                    <PencilIcon /> Change role
+                                    <Pencil /> Change role
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                             </>
@@ -136,7 +135,7 @@ export function MemberRow({ member, currentUserId, isFineGrainedPermissionsEnabl
                                 removeMember.mutate();
                             }}
                         >
-                            <UserMinusIcon /> {isCurrentUser ? "Leave organization" : "Remove member"}
+                            <UserMinus /> {isCurrentUser ? "Leave organization" : "Remove member"}
                         </DropdownMenuItem>
                     </>
                 }

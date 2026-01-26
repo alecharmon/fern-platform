@@ -1,8 +1,5 @@
-import LinkIcon from "@heroicons/react/24/outline/LinkIcon";
-import PaperAirplaneIcon from "@heroicons/react/24/outline/PaperAirplaneIcon";
-import UserPlusIcon from "@heroicons/react/24/outline/UserPlusIcon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Link, Loader2, Send, UserPlus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -179,7 +176,7 @@ export function InviteUserDialogContent({
                                     ) : (
                                         <>
                                             Generate Invite Link
-                                            <LinkIcon className="ml-2 h-4 w-4" />
+                                            <Link className="ml-2 h-4 w-4" />
                                         </>
                                     )}
                                 </Button>
@@ -259,7 +256,7 @@ export function InviteUserDialogContent({
                                     </>
                                 ) : (
                                     <>
-                                        <UserPlusIcon className="h-4 w-4" />
+                                        <UserPlus className="h-4 w-4" />
                                         Add directly (admin)
                                     </>
                                 )}
@@ -279,7 +276,7 @@ export function InviteUserDialogContent({
                             className="w-full min-[480px]:w-auto"
                         >
                             Send invitation
-                            <PaperAirplaneIcon />
+                            <Send />
                         </Button>
                     </div>
                 )}

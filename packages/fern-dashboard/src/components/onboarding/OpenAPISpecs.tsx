@@ -1,7 +1,6 @@
 "use client";
 
-import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";
-import { CircleCheckIcon, CodeXmlIcon, XIcon } from "lucide-react";
+import { CircleCheckIcon, CloudUpload, CodeXmlIcon, XIcon } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
@@ -114,7 +113,7 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError 
                 >
                     <div className="flex flex-col items-center gap-1 text-muted-foreground">
                         <div className="flex items-center gap-1">
-                            <CloudArrowUpIcon className="size-6" /> Drop or click to upload
+                            <CloudUpload className="size-6" /> Drop or click to upload
                         </div>
                         <div className="text-xs">yaml, yml, or json</div>
                     </div>

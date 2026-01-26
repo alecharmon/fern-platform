@@ -1,4 +1,4 @@
-import UserIcon from "@heroicons/react/24/outline/UserIcon";
+import { User } from "lucide-react";
 import Image from "next/image";
 
 import { cn } from "@/utils/utils";
@@ -16,7 +16,7 @@ export function ProfileImage({ picture, name, className }: { picture?: string; n
                 />
             ) : (
                 <div className={cn("bg-gray-1200 border-border size-8 rounded-full border p-1", className)}>
-                    <UserIcon className="size-full text-white" />
+                    <User className="size-full text-white" />
                 </div>
             )}
         </>

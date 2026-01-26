@@ -1,11 +1,11 @@
-import LockClosedIcon from "@heroicons/react/24/outline/LockClosedIcon";
+import { Lock } from "lucide-react";
 import React, { type ElementType } from "react";
 
 import { LogoutButton } from "../auth/LogoutButton";
 
 export default function NotFoundContent({
     children,
-    icon = LockClosedIcon,
+    icon = Lock,
     hideFooter = false
 }: {
     children: React.ReactNode;

@@ -1,8 +1,8 @@
 "use client";
 
-import CloudArrowUpIcon from "@heroicons/react/24/outline/CloudArrowUpIcon";
 import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
+import { CloudUpload } from "lucide-react";
 import * as React from "react";
 
 import "@/components/editor/tiptap-node/media-upload-node/media-upload-node.scss";
@@ -294,7 +294,7 @@ const MediaUploadPreview: React.FC<MediaUploadPreviewProps> = ({ fileItem }) => 
             <div className="tiptap-image-upload-preview-content">
                 <div className="tiptap-image-upload-file-info">
                     <div className="tiptap-image-upload-file-icon">
-                        <CloudArrowUpIcon className="size-8" />
+                        <CloudUpload className="size-8" />
                     </div>
                     <div className="tiptap-image-upload-details">
                         <span className="tiptap-image-upload-text">{fileItem.file.name}</span>
@@ -566,7 +566,7 @@ export const MediaUploadNode: React.FC<NodeViewProps> = (props) => {
                         <MediaUploadDragArea onFile={(files) => void handleUpload(files)}>
                             <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-gray-500 p-3">
                                 <div className="tiptap-image-upload-text flex items-center gap-2">
-                                    <CloudArrowUpIcon className="size-8" />
+                                    <CloudUpload className="size-8" />
                                     <p>{addMediaLabel}</p>
                                 </div>
                             </div>

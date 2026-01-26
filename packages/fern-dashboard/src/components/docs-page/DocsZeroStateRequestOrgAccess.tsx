@@ -1,7 +1,7 @@
 "use client";
 
 import type { User } from "@auth0/nextjs-auth0/types";
-import CheckCircleIcon from "@heroicons/react/24/solid/CheckCircleIcon";
+import { CheckCircle2 } from "lucide-react";
 import { motion } from "motion/react";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
@@ -155,7 +155,7 @@ export function DocsZeroStateRequestOrgAccess({ user, hideLabel = false }: DocsZ
                 className="flex flex-col items-center justify-center space-y-4 py-8"
             >
                 <h2 className="flex items-center gap-2 text-xl font-semibold">
-                    <CheckCircleIcon className="size-6 text-green-800" />
+                    <CheckCircle2 className="size-6 text-green-800" />
                     Site access requested
                 </h2>
                 <p className="text-gray-1200 text-center text-sm">

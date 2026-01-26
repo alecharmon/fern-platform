@@ -1,7 +1,6 @@
 "use client";
 
-import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
-import { CornerDownLeft } from "lucide-react";
+import { CornerDownLeft, MessageSquare } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { type FeedbackType, sendEditorFeedback } from "@/app/actions/sendEditorFeedback";
@@ -72,7 +71,7 @@ export function FeedbackButton({ userEmail, orgName, docsUrl }: FeedbackButtonPr
             <DashboardTooltip content="Send feedback">
                 <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="py-2 mx-2 h-7">
-                        <ChatBubbleLeftEllipsisIcon className="size-4" />
+                        <MessageSquare className="size-4" />
                         Feedback
                     </Button>
                 </PopoverTrigger>

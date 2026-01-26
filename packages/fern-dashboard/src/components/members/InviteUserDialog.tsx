@@ -1,4 +1,4 @@
-import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import type { Auth0Organization } from "@/app/services/auth0/types";
@@ -30,7 +30,7 @@ export function InviteUserDialog({
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button variant="default">
-                    <PlusIcon />
+                    <Plus />
                     Add member
                 </Button>
             </DialogTrigger>

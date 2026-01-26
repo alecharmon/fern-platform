@@ -1,6 +1,5 @@
-import ClockIcon from "@heroicons/react/24/outline/ClockIcon";
-import UserMinusIcon from "@heroicons/react/24/outline/UserMinusIcon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Clock, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 
 import { rescindInvitation } from "@/app/actions/rescindInvitation";
@@ -65,7 +64,7 @@ export function InviteeRow({ invitation }: InviteeRow.Props) {
             title={invitation.inviteeEmail}
             rightContent={
                 <div className="text-gray-1100 flex items-center gap-2">
-                    <ClockIcon className="size-5" />
+                    <Clock className="size-5" />
                     Pending
                 </div>
             }
@@ -78,7 +77,7 @@ export function InviteeRow({ invitation }: InviteeRow.Props) {
                         }}
                         disabled={invitation.id == null}
                     >
-                        <UserMinusIcon /> Rescind invitation
+                        <UserMinus /> Rescind invitation
                     </DropdownMenuItem>
                 </>
             }

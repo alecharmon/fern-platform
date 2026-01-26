@@ -1,6 +1,6 @@
 "use client";
 
-import ArrowTopRightOnSquareIcon from "@heroicons/react/24/outline/ArrowTopRightOnSquareIcon";
+import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/utils/utils";
@@ -22,7 +22,7 @@ export function ExternalHoverLink({ href, displayHref }: { href: string; display
                 }}
             >
                 <span className="truncate">{displayHref ?? href}</span>
-                <ArrowTopRightOnSquareIcon className={cn("size-4 shrink-0", !isHovered && "invisible")} />
+                <ExternalLink className={cn("size-4 shrink-0", !isHovered && "invisible")} />
             </a>
         </div>
     );

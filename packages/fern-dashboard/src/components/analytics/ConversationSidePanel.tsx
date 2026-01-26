@@ -2,8 +2,7 @@ import type { FernAI } from "@fern-api/fai-sdk";
 import { FootnoteSup } from "@fern-docs/search-ui/components/chatbot/footnote";
 import { ChatbotTurnContextProvider } from "@fern-docs/search-ui/components/chatbot/turn-context";
 import { MarkdownContent } from "@fern-docs/search-ui/components/md-content";
-import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
-import { Sparkles, X } from "lucide-react";
+import { MessageSquare, Sparkles, X } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
@@ -24,7 +23,7 @@ export function ConversationSidePanel({
             <div className="flex items-center justify-between pb-6">
                 <div className="flex items-start gap-4">
                     <div className="flex h-10 w-10 items-center justify-center">
-                        <ChatBubbleLeftEllipsisIcon className="h-6 w-6" />
+                        <MessageSquare className="h-6 w-6" />
                     </div>
                     <div className="flex flex-col gap-1">
                         {showLoading ? (
