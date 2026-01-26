@@ -13,15 +13,15 @@
       }
 
       .fern-changelog-content {
-        @apply max-w-content-wide-width relative mx-auto grid w-full grid-cols-1 gap-4 lg:grid-cols-[1fr_minmax(0,var(--content-width))_1fr];
+        @apply max-w-content-wide-width relative mx-auto grid w-full grid-cols-1 gap-4 xl:grid-cols-[1fr_minmax(0,var(--content-width))_1fr];
 
         &[data-has-aside="false"] {
-          @apply lg:grid-cols-1;
+          @apply xl:grid-cols-1;
         }
       }
 
       .eyebrow {
-        @apply mb-4 flex lg:hidden;
+        @apply mb-4 flex xl:hidden;
 
         .filter-row {
           @apply flex-nowrap! min-w-0;
@@ -33,7 +33,7 @@
       }
 
       .fern-changelog-content > aside {
-        @apply top-header-height-padded sticky hidden h-fit min-w-0 lg:flex lg:justify-end;
+        @apply top-header-height-padded sticky hidden h-fit min-w-0 xl:flex xl:justify-end;
       }
     }
 
@@ -54,7 +54,7 @@
     }
 
     .fern-changelog-label {
-      @apply flex w-full flex-row gap-2 lg:flex-col;
+      @apply flex w-full flex-row gap-2 xl:flex-col;
 
       .fern-docs-badge {
         @apply w-fit;
