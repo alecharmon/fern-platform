@@ -1,0 +1,167 @@
+.root {
+  /*
+    TODO(kafkas): Zero internal page padding to avoid "double margin" with @page margin.
+    Currently leaves too much margin on the right side. Needs investigation.
+  */
+  /* --page-padding: 0px;
+  --page-margin: 0px;
+  --aside-offset: 0px; */
+
+  /* Disable shadow variables - they render as thick gray borders in PDF */
+  --shadow-card-grayscale: none;
+  --shadow-card-grayscale-elevated: none;
+  --shadow-card-accent: none;
+  --shadow-card-accent-elevated: none;
+
+  /*
+    In print mode we want content to fill the available page width (until @page margins),
+    not the default on-screen "content width" (e.g. 640px) which leaves a big right gap
+    when we increase density.
+  */
+  --content-width: 100%;
+  --spacing-content-width: 100%;
+}
+
+/*
+  Increase content density for print/PDF by reducing the root font-size.
+  All rem-based Tailwind spacing (my-8, space-y-*, gap-*, padding, etc.) scales with this.
+*/
+:global(html):has(.root) {
+  font-size: 14px;
+}
+
+@page {
+  size: A4;
+  margin: 12mm 9mm;
+}
+
+.root :global(*) {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Remove box-shadows from cards and code blocks (preserves inline code ring styling) */
+.root :global(.fern-card),
+.root :global(.fern-code),
+.root :global(.fern-code-block),
+.root :global(.fern-code-group),
+.root :global(.not-prose:has(.code-block-root)),
+.root :global(.fern-endpoint-request-snippet),
+.root :global(.fern-endpoint-response-snippet),
+.root :global(.fern-code)::after,
+.root :global(.fern-code-group)::after {
+  box-shadow: none !important;
+}
+
+/* Override gray backgrounds that appear prominent in PDF */
+.root :global(.fern-card),
+.root :global(.fern-code),
+.root :global(.fern-code-block),
+.root :global(.fern-code-group),
+.root :global(.not-prose:has(.code-block-root)),
+.root :global(.fern-endpoint-request-snippet),
+.root :global(.fern-endpoint-response-snippet) {
+  background: white !important;
+}
+
+.root :global(.fern-code-header) {
+  background: var(--grayscale-a2) !important;
+}
+
+/* Hide navigation/UI chrome */
+.root :global(.fern-layout-footer),
+.root :global(.fern-page-actions),
+.root :global(.toc-mobile) {
+  display: none !important;
+}
+
+/*
+ * Hide interactive buttons that don't make sense in print/PDF:
+ * - Copy to clipboard buttons (.fern-copy-button)
+ * - Code feedback/report buttons (.fern-feedback-button)
+ * - Expand code buttons (.fern-expand-button)
+ * - Try it / Playground buttons ([id^="playground-button"])
+ * - Language picker dropdowns in code headers (.fern-button in headers)
+ */
+.root :global(.fern-copy-button),
+.root :global(.fern-feedback-button),
+.root :global(.fern-expand-button),
+.root :global([id^="playground-button"]),
+.root :global(.fern-code-header .fern-button),
+.root :global(.fern-code-block-header .fern-button),
+.root :global(.fern-code-group-header .fern-button),
+.root :global(.fern-endpoint-request-snippet .fern-button),
+.root :global(.fern-endpoint-response-snippet .fern-button) {
+  display: none !important;
+}
+
+/* Hide the "Try it" button tray (PlaygroundButtonTray) at the bottom of request snippets */
+.root :global(.fern-endpoint-request-snippet) > :global(div:has([id^="playground-button"])) {
+  display: none !important;
+}
+
+/* Hide page feedback section ("Was this page helpful?" with Yes/No buttons) */
+.root :global(.fern-layout-footer-toolbar) {
+  display: none !important;
+}
+
+/* Remove min-height constraints and spacer elements that cause white space in PDF */
+.root :global(.fern-layout-page),
+.root :global(.fern-layout-overview),
+.root :global(.fern-layout-reference),
+.root :global(.fern-layout-guide) {
+  min-height: unset !important;
+}
+
+/* Hide the "grow" spacer divs that fill remaining space */
+.root :global(.fern-layout-page) > :global(.grow),
+.root :global(.fern-layout-overview) > :global(.grow),
+.root :global(.fern-layout-reference) > :global(.grow),
+.root :global(.fern-layout-guide) > :global(.grow) {
+  display: none !important;
+}
+
+/* Flatten API reference layout: single column with aside (request/response) first */
+.root :global(.fern-layout-reference-content) {
+  display: block !important;
+}
+
+.root :global(.fern-layout-reference-aside) {
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin-bottom: 2rem !important;
+  float: none !important;
+}
+
+/* Avoid breaking code blocks across pages when possible. */
+.root :global(.code-block-root),
+.root :global(.fern-code-block),
+.root :global(.fern-code-group) {
+  break-inside: avoid;
+}
+
+@media print {
+  .root :global([data-fern-docs-header]),
+  .root :global([data-fern-docs-sidebar]),
+  .root :global([data-fern-docs-footer]),
+  .root :global(.sidebar),
+  .root :global(.header),
+  .root :global(.footer) {
+    display: none !important;
+  }
+
+  /* Wrap code content to avoid horizontal overflow in PDF */
+  .root :global(.code-block-line-content) {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+  }
+
+  /* Prevent line numbers from wrapping */
+  .root :global(.code-block-line-gutter) {
+    white-space: nowrap !important;
+    min-width: 2.5em !important;
+  }
+}

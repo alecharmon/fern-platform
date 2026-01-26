@@ -1,0 +1,119 @@
+@reference "tailwindcss";
+
+/*
+  Match content pages density by reducing root font-size.
+  This scales all rem-based Tailwind spacing (mb-6, my-2, mt-7, etc.).
+*/
+:global(html):has(.page) {
+  font-size: 14px;
+}
+
+.page {
+  @apply font-sans text-gray-900;
+}
+
+.heading {
+  @apply mb-6 text-[28px] font-semibold tracking-[-0.02em] text-gray-900;
+}
+
+.listRoot {
+  @apply m-0 list-none p-0;
+}
+
+.listNested {
+  @apply m-0 mt-1.5 list-none pl-[18px];
+}
+
+.row {
+  /* Keep layout deterministic (no reliance on generated arbitrary utilities). */
+  /* Leaf rows should be simple and consistent regardless of depth. */
+  @apply my-2 no-underline text-[15px] font-normal text-gray-900;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 10px;
+  align-items: baseline;
+}
+
+.row:hover {
+  @apply underline;
+}
+
+.leader {
+  /*
+    Consistent "leader line":
+    Use a dashed rule (no gradients) so spacing is consistent and less noisy than dots.
+  */
+  @apply text-gray-400;
+  height: 1em;
+  transform: translateY(-1px);
+  border-bottom: 1px dashed currentColor;
+}
+
+.pageNumber {
+  @apply tabular-nums text-gray-500;
+}
+
+.groupRow {
+  @apply my-2;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 12px;
+  align-items: baseline;
+}
+
+.groupTitle {
+  /* Same font size as leaf rows; hierarchy comes from weight/color, not size. */
+  @apply text-[15px] font-semibold text-gray-900;
+}
+
+/* Chapter-style headings (depth 0): "Docs", "API Reference", ... */
+.groupRow[data-fern-toc-depth="0"] {
+  @apply mt-7 pb-1;
+}
+
+.groupRow[data-fern-toc-depth="0"] .groupTitle {
+  @apply text-[18px] font-semibold tracking-[-0.01em] text-gray-900;
+}
+
+/* Section headings (depth 1): "Get started", "Changelog", ... */
+.groupRow[data-fern-toc-depth="1"] {
+  @apply mt-4;
+}
+
+.groupRow[data-fern-toc-depth="1"] .groupTitle {
+  @apply text-xs font-semibold uppercase tracking-[0.14em] text-gray-500;
+}
+
+/* Leaf rows should not be bold (except top-level section titles). */
+.row:not([data-fern-toc-depth="0"]) :global([data-fern-toc-title]) {
+  font-weight: 400 !important;
+}
+
+/* Top-level section titles should stay emphasized even if they are leaf links (e.g. "API Reference"). */
+.row[data-fern-toc-depth="0"] :global([data-fern-toc-title]) {
+  font-weight: 600 !important;
+}
+
+/* Top-level "section title" leaf rows (e.g. API Reference) should not show page numbers or leaders. */
+.row[data-fern-toc-depth="0"] {
+  @apply mt-7 pb-1 text-[18px] font-semibold text-gray-900;
+}
+
+.row[data-fern-toc-depth="0"] .leader {
+  display: none;
+}
+
+.row[data-fern-toc-depth="0"] .pageNumber {
+  display: none;
+}
+
+@page {
+  size: A4;
+  margin: 16mm;
+}
+
+.page :global(*) {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+

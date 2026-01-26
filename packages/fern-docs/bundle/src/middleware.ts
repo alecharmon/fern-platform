@@ -2,6 +2,7 @@ import { rewritePosthog } from "@fern-api/docs-server/analytics/rewritePosthog";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
+import { fernToken_admin } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { JSON_PATTERN, MARKDOWN_PATTERN, RSS_PATTERN } from "@fern-api/docs-server/patterns";
 import { withPathname } from "@fern-api/docs-server/withPathname";
@@ -325,6 +326,22 @@ export const middleware: NextMiddleware = async (request) => {
      */
     if (pathname.endsWith("/~login")) {
         return rewrite(withDomain("/~login"));
+    }
+
+    /**
+     * Print view used by the PDF generator.
+     * Must bypass dynamic/static docs routing so `/_print` doesn't get treated as a docs slug.
+     */
+    if (pathname === "/_print" || pathname.startsWith("/_print/")) {
+        // Skip auth check in local development
+        if (!isLocal()) {
+            const providedToken = request.headers.get("FERN_TOKEN");
+            if (providedToken !== fernToken_admin()) {
+                return new NextResponse("Unauthorized", { status: 401 });
+            }
+        }
+        const suffix = pathname === "/_print" ? "" : pathname.slice("/_print".length);
+        return rewrite(withDomain(`/print${suffix}`));
     }
 
     let newToken: string | undefined;
