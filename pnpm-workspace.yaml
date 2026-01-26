@@ -59,7 +59,7 @@ catalog:
   "jose": "^5.9.6"
   "jotai": "^2.12.1"
   "js-yaml": "^4.1.1"
-  "mermaid": "^11.12.0"
+  "mermaid": "^11.12.2"
   "next": "15.5.9"
   "prettier": "^3.5.2"
   "qs": "^6.14.0"
