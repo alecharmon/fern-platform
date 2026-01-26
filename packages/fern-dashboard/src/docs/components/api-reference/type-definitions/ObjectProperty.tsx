@@ -88,7 +88,7 @@ export interface PropertyWithShapeProps {
     /** Ignored - dashboard renders MDX client-side from `description` */
     renderedDescription?: React.ReactNode;
     availability: ApiDefinition.Availability | null | undefined;
-    shape: ApiDefinition.TypeShape;
+    shape: ApiDefinition.TypeShapeOrReference;
     types: Record<string, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];

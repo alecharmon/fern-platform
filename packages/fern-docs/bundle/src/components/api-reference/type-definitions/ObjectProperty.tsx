@@ -84,7 +84,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     serializedDescription?: SerializedDescription;
     renderedDescription?: React.ReactNode;
     availability: ApiDefinition.Availability | null | undefined;
-    shape: ApiDefinition.TypeShape;
+    shape: ApiDefinition.TypeShapeOrReference;
     types: Record<string, ApiDefinition.TypeDefinition>;
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];

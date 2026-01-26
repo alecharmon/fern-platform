@@ -39,7 +39,8 @@ export async function EndpointContent({
     markdownPromise,
     lang,
     pageActionsStyle = "default",
-    theme
+    theme,
+    showUnionsAsDropdown = false
 }: {
     serialize: MdxSerializer;
     showErrors: boolean;
@@ -54,6 +55,7 @@ export async function EndpointContent({
     lang: string;
     pageActionsStyle?: "default" | "toolbar";
     theme?: FernThemeConfig;
+    showUnionsAsDropdown?: boolean;
 }) {
     const { node, endpoint, types } = context;
 
@@ -98,7 +100,11 @@ export async function EndpointContent({
                 }
                 reference={
                     <TypeDefinitionRoot types={types} slug={node.slug}>
-                        <TypeDefinitionSlotsServer types={types} lang={lang}>
+                        <TypeDefinitionSlotsServer
+                            types={types}
+                            lang={lang}
+                            showUnionsAsDropdown={showUnionsAsDropdown}
+                        >
                             <EndpointContentLeft
                                 context={context}
                                 showAuth={showAuth}

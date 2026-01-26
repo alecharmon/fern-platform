@@ -50,7 +50,8 @@ export async function WebSocketContent({
     markdownPromise,
     lang,
     pageActionsStyle = "default",
-    theme
+    theme,
+    showUnionsAsDropdown = false
 }: {
     serialize: MdxSerializer;
     context: WebSocketContext;
@@ -63,6 +64,7 @@ export async function WebSocketContent({
     lang: string;
     pageActionsStyle?: "default" | "toolbar";
     theme?: FernThemeConfig;
+    showUnionsAsDropdown?: boolean;
 }) {
     const { channel, node, types, globalHeaders } = context;
 
@@ -164,7 +166,7 @@ export async function WebSocketContent({
             }
             reference={
                 <TypeDefinitionRoot types={types} slug={node.slug}>
-                    <TypeDefinitionSlotsServer types={types} lang={lang}>
+                    <TypeDefinitionSlotsServer types={types} lang={lang} showUnionsAsDropdown={showUnionsAsDropdown}>
                         <CardedSection
                             number={1}
                             title={
@@ -261,7 +263,12 @@ export async function WebSocketContent({
                                         </span>
                                     }
                                 >
-                                    <TypeReferenceDefinitions shape={publishMessageShape} types={types} lang={lang} />
+                                    <TypeReferenceDefinitions
+                                        shape={publishMessageShape}
+                                        types={types}
+                                        lang={lang}
+                                        showUnionsAsDropdown={showUnionsAsDropdown}
+                                    />
                                 </EndpointSection>
                             </TypeDefinitionAnchorPart>
                         )}
@@ -277,7 +284,12 @@ export async function WebSocketContent({
                                         </span>
                                     }
                                 >
-                                    <TypeReferenceDefinitions shape={subscribeMessageShape} types={types} lang={lang} />
+                                    <TypeReferenceDefinitions
+                                        shape={subscribeMessageShape}
+                                        types={types}
+                                        lang={lang}
+                                        showUnionsAsDropdown={showUnionsAsDropdown}
+                                    />
                                 </EndpointSection>
                             </TypeDefinitionAnchorPart>
                         )}

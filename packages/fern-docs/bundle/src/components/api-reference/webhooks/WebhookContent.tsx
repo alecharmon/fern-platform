@@ -39,7 +39,8 @@ export async function WebhookContent({
     markdownPromise,
     lang,
     pageActionsStyle = "default",
-    theme
+    theme,
+    showUnionsAsDropdown = false
 }: {
     serialize: MdxSerializer;
     context: ApiDefinition.WebhookContext;
@@ -52,6 +53,7 @@ export async function WebhookContent({
     lang: string;
     pageActionsStyle?: "default" | "toolbar";
     theme?: FernThemeConfig;
+    showUnionsAsDropdown?: boolean;
 }) {
     const { node, webhook, types } = context;
 
@@ -83,7 +85,7 @@ export async function WebhookContent({
             aside={webhookExamples}
             reference={
                 <TypeDefinitionRoot types={types} slug={node.slug}>
-                    <TypeDefinitionSlotsServer types={types} lang={lang}>
+                    <TypeDefinitionSlotsServer types={types} lang={lang} showUnionsAsDropdown={showUnionsAsDropdown}>
                         <TypeDefinitionAnchorPart part="payload">
                             {webhook.headers && webhook.headers.length > 0 && (
                                 <TypeDefinitionAnchorPart part="header">

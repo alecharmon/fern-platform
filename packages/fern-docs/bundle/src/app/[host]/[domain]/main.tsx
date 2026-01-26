@@ -21,7 +21,8 @@ export async function DocsMainContent({
     parents,
     lang,
     neighbors,
-    breadcrumb
+    breadcrumb,
+    showUnionsAsDropdown = false
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -42,6 +43,7 @@ export async function DocsMainContent({
     };
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     lang: string;
+    showUnionsAsDropdown?: boolean;
 }) {
     const config = await loader.getConfig();
     const footerNavStyle = config.theme?.footerNav ?? "default";
@@ -113,6 +115,7 @@ export async function DocsMainContent({
                     ) : undefined
                 }
                 lang={lang}
+                showUnionsAsDropdown={showUnionsAsDropdown}
             />
         );
     }

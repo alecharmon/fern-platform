@@ -383,6 +383,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                         neighbors={neighbors}
                         breadcrumb={foundResult.breadcrumb}
                         lang={lang}
+                        showUnionsAsDropdown={edgeFlags.isDiscriminatedUnionDropdownEnabled}
                     />
                 </FeedbackPopoverProvider>
             );

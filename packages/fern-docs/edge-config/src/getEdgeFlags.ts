@@ -31,7 +31,8 @@ const EDGE_FLAGS = [
     "changelog-redirects" as const,
     "next-mdx-ref" as const,
     "dynamic-snippets" as const,
-    "custom-react-enabled" as const
+    "custom-react-enabled" as const,
+    "discriminated-union-dropdown-enabled" as const
 ];
 
 type EdgeFlag = (typeof EDGE_FLAGS)[number];
@@ -74,6 +75,10 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         const isChangelogRedirects = checkDomainMatchesCustomers(domain, config["changelog-redirects"]);
         const isNextMdxRef = checkDomainMatchesCustomers(domain, config["next-mdx-ref"]);
         const isCustomReactEnabled = checkDomainMatchesCustomers(domain, config["custom-react-enabled"]);
+        const isDiscriminatedUnionDropdownEnabled = checkDomainMatchesCustomers(
+            domain,
+            config["discriminated-union-dropdown-enabled"]
+        );
         return {
             isWhitelabeled,
             isSeoDisabled: (!isCustomDomain(domain) && !isSeoEnabled) || isSeoDisabled,
@@ -90,7 +95,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isDefaultSearchFilterOn,
             isChangelogRedirects,
             isNextMdxRef,
-            isCustomReactEnabled
+            isCustomReactEnabled,
+            isDiscriminatedUnionDropdownEnabled
         };
     } catch (e) {
         console.error(`[get-edge-flags] ${JSON.stringify(e)}`);
@@ -110,7 +116,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isDefaultSearchFilterOn: false,
             isChangelogRedirects: false,
             isNextMdxRef: false,
-            isCustomReactEnabled: false
+            isCustomReactEnabled: false,
+            isDiscriminatedUnionDropdownEnabled: false
         };
     }
 }

@@ -45,6 +45,7 @@ import { WebSocketRefresh } from "@/components/websocket-refresh";
 import { withJsConfig } from "@/components/with-js-config";
 import { runAsyncSpan } from "@/server/tracing";
 import { SetColors } from "@/state/colors";
+import { DiscriminatedUnionDropdownEnabled } from "@/state/discriminated-union-dropdown";
 import { SetLogoText } from "@/state/logo-text";
 import { SetIsAskAiEnabled, SetIsDefaultSearchFilterOn } from "@/state/search";
 import { Whitelabeled } from "@/state/whitelabeled";
@@ -181,6 +182,7 @@ export default async function Layout({
                             {config.defaultLanguage != null && <DefaultLanguage language={config.defaultLanguage} />}
                             <DarkCode value={(edgeFlags.isDarkCodeEnabled || settings.darkModeCode) ?? false} />
                             <Whitelabeled value={edgeFlags.isWhitelabeled} />
+                            <DiscriminatedUnionDropdownEnabled value={edgeFlags.isDiscriminatedUnionDropdownEnabled} />
                             <SetColors colors={colors} />
                             <SetIsAskAiEnabled isAskAiEnabled={isAskAiEnabled} />
                             <SetIsDefaultSearchFilterOn

@@ -21,6 +21,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
     lang,
     exclude,
     excludeDeprecated,
+    showUnionsAsDropdown = false,
     isGraphQL = false
 }: {
     shape: ApiDefinition.TypeShapeOrReference;
@@ -30,6 +31,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
     lang: string;
     exclude?: string[];
     excludeDeprecated?: boolean;
+    showUnionsAsDropdown?: boolean;
     isGraphQL?: boolean;
 }) {
     switch (shape.type) {
@@ -49,6 +51,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                             lang={lang}
                             exclude={exclude}
                             excludeDeprecated={excludeDeprecated}
+                            showUnionsAsDropdown={showUnionsAsDropdown}
                             isGraphQL={isGraphQL}
                         />
                     );
@@ -69,6 +72,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     lang={lang}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
+                    showUnionsAsDropdown={showUnionsAsDropdown}
                     isGraphQL={isGraphQL}
                 />
             );
@@ -84,6 +88,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         lang={lang}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
+                        showUnionsAsDropdown={showUnionsAsDropdown}
                         isGraphQL={isGraphQL}
                     />
                 </TypeDefinitionPathPart>
@@ -99,6 +104,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         lang={lang}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
+                        showUnionsAsDropdown={showUnionsAsDropdown}
                         isGraphQL={isGraphQL}
                     />
                     <TypeReferenceDefinitions
@@ -109,6 +115,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         lang={lang}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
+                        showUnionsAsDropdown={showUnionsAsDropdown}
                         isGraphQL={isGraphQL}
                     />
                 </TypeDefinitionPathPart>
@@ -126,6 +133,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     lang={lang}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
+                    showUnionsAsDropdown={showUnionsAsDropdown}
                     isGraphQL={isGraphQL}
                 />
             );
@@ -141,6 +149,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     lang={lang}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
+                    showUnionsAsDropdown={showUnionsAsDropdown}
                     isGraphQL={isGraphQL}
                 />
             );

@@ -29,7 +29,8 @@ export async function GrpcContent({
     markdownPromise,
     lang,
     pageActionsStyle = "default",
-    theme
+    theme,
+    showUnionsAsDropdown = false
 }: {
     serialize: MdxSerializer;
     context: GrpcContext;
@@ -42,6 +43,7 @@ export async function GrpcContent({
     lang: string;
     pageActionsStyle?: "default" | "toolbar";
     theme?: FernThemeConfig;
+    showUnionsAsDropdown?: boolean;
 }) {
     const { node, grpc, types } = context;
 
@@ -76,7 +78,11 @@ export async function GrpcContent({
                 aside={<GrpcContentCodeSnippets node={node} lang={lang} />}
                 reference={
                     <TypeDefinitionRoot types={types} slug={node.slug}>
-                        <TypeDefinitionSlotsServer types={types} lang={lang}>
+                        <TypeDefinitionSlotsServer
+                            types={types}
+                            lang={lang}
+                            showUnionsAsDropdown={showUnionsAsDropdown}
+                        >
                             <GrpcContentLeft context={context} lang={lang} />
                         </TypeDefinitionSlotsServer>
                     </TypeDefinitionRoot>

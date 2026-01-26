@@ -8,24 +8,31 @@ export function TypeDefinitionSlotsServer({
     types,
     children,
     lang,
+    showUnionsAsDropdown = false,
     isGraphQL = false
 }: {
     types: Record<string, TypeDefinition>;
     children: React.ReactNode;
     lang: string;
+    showUnionsAsDropdown?: boolean;
     isGraphQL?: boolean;
 }) {
     return (
-        <TypeDefinitionSlotsProvider slots={createTypeDefinitionSlots(types, lang, isGraphQL)}>
+        <TypeDefinitionSlotsProvider slots={createTypeDefinitionSlots(types, lang, showUnionsAsDropdown, isGraphQL)}>
             {children}
         </TypeDefinitionSlotsProvider>
     );
 }
 
-function createTypeDefinitionSlots(types: Record<string, TypeDefinition>, lang: string, isGraphQL: boolean) {
+function createTypeDefinitionSlots(
+    types: Record<string, TypeDefinition>,
+    lang: string,
+    showUnionsAsDropdown: boolean,
+    isGraphQL: boolean
+) {
     return Object.fromEntries(
         Object.entries(types).flatMap(([id, type]) => {
-            const variants = createPropertyAccessTypeVariants(id, type, types, lang, isGraphQL);
+            const variants = createPropertyAccessTypeVariants(id, type, types, lang, showUnionsAsDropdown, isGraphQL);
             return [
                 [id, variants.default],
                 [getTypeIdWithLocation(id, "request"), variants.request],
@@ -40,16 +47,26 @@ function createPropertyAccessTypeVariants(
     type: TypeDefinition,
     types: Record<string, TypeDefinition>,
     lang: string,
+    showUnionsAsDropdown: boolean,
     isGraphQL: boolean
 ) {
     return {
-        default: <TypeReferenceDefinitions shape={type.shape} types={types} lang={lang} isGraphQL={isGraphQL} />,
+        default: (
+            <TypeReferenceDefinitions
+                shape={type.shape}
+                types={types}
+                lang={lang}
+                showUnionsAsDropdown={showUnionsAsDropdown}
+                isGraphQL={isGraphQL}
+            />
+        ),
         request: (
             <TypeReferenceDefinitions
                 shape={type.shape}
                 types={types}
                 location="request"
                 lang={lang}
+                showUnionsAsDropdown={showUnionsAsDropdown}
                 isGraphQL={isGraphQL}
             />
         ),
@@ -59,6 +76,7 @@ function createPropertyAccessTypeVariants(
                 types={types}
                 location="response"
                 lang={lang}
+                showUnionsAsDropdown={showUnionsAsDropdown}
                 isGraphQL={isGraphQL}
             />
         )

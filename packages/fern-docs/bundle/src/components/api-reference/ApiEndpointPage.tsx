@@ -32,7 +32,8 @@ export default async function ApiEndpointPage({
     action,
     breadcrumb,
     bottomNavigation,
-    lang
+    lang,
+    showUnionsAsDropdown = false
 }: {
     loader: DocsLoader;
     serialize: MdxSerializer;
@@ -41,6 +42,7 @@ export default async function ApiEndpointPage({
     breadcrumb: readonly FernNavigation.BreadcrumbItem[];
     bottomNavigation?: React.ReactNode;
     lang: string;
+    showUnionsAsDropdown?: boolean;
 }) {
     const apiDefinition = await loader.getPrunedApi(node.apiDefinitionId, createPruneKey(node));
 
@@ -75,6 +77,7 @@ export default async function ApiEndpointPage({
             lang={lang}
             pageActionsStyle={pageActionsStyle}
             theme={theme}
+            showUnionsAsDropdown={showUnionsAsDropdown}
         />
     );
 }
@@ -91,7 +94,8 @@ async function ApiEndpointContent({
     markdownPromise,
     lang,
     pageActionsStyle,
-    theme
+    theme,
+    showUnionsAsDropdown = false
 }: {
     serialize: MdxSerializer;
     node: FernNavigation.NavigationNodeApiLeaf;
@@ -105,6 +109,7 @@ async function ApiEndpointContent({
     lang: string;
     pageActionsStyle: "default" | "toolbar";
     theme?: FernThemeConfig;
+    showUnionsAsDropdown?: boolean;
 }) {
     switch (node.type) {
         case "endpoint": {
@@ -127,6 +132,7 @@ async function ApiEndpointContent({
                     lang={lang}
                     pageActionsStyle={pageActionsStyle}
                     theme={theme}
+                    showUnionsAsDropdown={showUnionsAsDropdown}
                 />
             );
         }
@@ -148,6 +154,7 @@ async function ApiEndpointContent({
                     lang={lang}
                     pageActionsStyle={pageActionsStyle}
                     theme={theme}
+                    showUnionsAsDropdown={showUnionsAsDropdown}
                 />
             );
         }
@@ -169,6 +176,7 @@ async function ApiEndpointContent({
                     lang={lang}
                     pageActionsStyle={pageActionsStyle}
                     theme={theme}
+                    showUnionsAsDropdown={showUnionsAsDropdown}
                 />
             );
         }
@@ -190,6 +198,7 @@ async function ApiEndpointContent({
                     lang={lang}
                     pageActionsStyle={pageActionsStyle}
                     theme={theme}
+                    showUnionsAsDropdown={showUnionsAsDropdown}
                 />
             );
         }
@@ -211,6 +220,7 @@ async function ApiEndpointContent({
                     lang={lang}
                     pageActionsStyle={pageActionsStyle}
                     theme={theme}
+                    showUnionsAsDropdown={showUnionsAsDropdown}
                 />
             );
         }

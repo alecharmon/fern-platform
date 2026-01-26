@@ -29,7 +29,8 @@ export async function GraphqlContent({
     markdownPromise,
     lang,
     pageActionsStyle = "default",
-    theme
+    theme,
+    showUnionsAsDropdown = false
 }: {
     serialize: MdxSerializer;
     context: GraphqlContext;
@@ -42,6 +43,7 @@ export async function GraphqlContent({
     lang: string;
     pageActionsStyle?: "default" | "toolbar";
     theme?: FernThemeConfig;
+    showUnionsAsDropdown?: boolean;
 }) {
     const { node, operation, types } = context;
 
@@ -88,7 +90,12 @@ export async function GraphqlContent({
                 aside={<GraphqlContentCodeSnippets node={node} lang={lang} />}
                 reference={
                     <TypeDefinitionRoot types={types} slug={node.slug}>
-                        <TypeDefinitionSlotsServer types={types} lang={lang} isGraphQL>
+                        <TypeDefinitionSlotsServer
+                            types={types}
+                            lang={lang}
+                            showUnionsAsDropdown={showUnionsAsDropdown}
+                            isGraphQL
+                        >
                             <GraphqlContentLeft context={context} lang={lang} />
                         </TypeDefinitionSlotsServer>
                     </TypeDefinitionRoot>

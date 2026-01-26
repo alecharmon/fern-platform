@@ -13,10 +13,10 @@ import {
 } from "@fern-docs/components/api-reference/type-definitions/utils";
 import { memo } from "react";
 
-import { DiscriminatedUnionVariant } from "./DiscriminatedUnionVariant";
+import { DiscriminatedUnionVariantSelector } from "./DiscriminatedUnionVariantSelector";
 import { EnumValue } from "./EnumValue";
 import { ObjectProperty } from "./ObjectProperty";
-import { UndiscriminatedUnionVariant } from "./UndiscriminatedUnionVariant";
+import { UndiscriminatedUnionVariantSelector } from "./UndiscriminatedUnionVariantSelector";
 
 export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     shape,
@@ -56,44 +56,23 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
         }
         case "undiscriminatedUnion":
             return (
-                <FernCollapseWithButtonUncontrolled
-                    showText={`Show ${shape.variants.length} variants`}
-                    hideText={`Hide ${shape.variants.length} variants`}
-                >
-                    <WithSeparator separatorText="OR">
-                        {shape.variants.map((variant, idx) => (
-                            <UndiscriminatedUnionVariant
-                                key={variant.displayName}
-                                unionVariant={variant}
-                                idx={idx}
-                                types={types}
-                                location={location}
-                                additionalProperties={additionalProperties}
-                                lang={lang}
-                            />
-                        ))}
-                    </WithSeparator>
-                </FernCollapseWithButtonUncontrolled>
+                <UndiscriminatedUnionVariantSelector
+                    variants={shape.variants}
+                    types={types}
+                    location={location}
+                    additionalProperties={additionalProperties}
+                    lang={lang}
+                />
             );
         case "discriminatedUnion":
             return (
-                <FernCollapseWithButtonUncontrolled
-                    showText={`Show ${shape.variants.length} variants`}
-                    hideText={`Hide ${shape.variants.length} variants`}
-                >
-                    <WithSeparator separatorText="OR">
-                        {shape.variants.map((variant) => (
-                            <DiscriminatedUnionVariant
-                                discriminant={shape.discriminant}
-                                key={variant.displayName}
-                                unionVariant={variant}
-                                types={types}
-                                location={location}
-                                lang={lang}
-                            />
-                        ))}
-                    </WithSeparator>
-                </FernCollapseWithButtonUncontrolled>
+                <DiscriminatedUnionVariantSelector
+                    discriminant={shape.discriminant}
+                    variants={shape.variants}
+                    types={types}
+                    location={location}
+                    lang={lang}
+                />
             );
         case "object": {
             const properties = ApiDefinition.unwrapObjectType(shape, types).properties;

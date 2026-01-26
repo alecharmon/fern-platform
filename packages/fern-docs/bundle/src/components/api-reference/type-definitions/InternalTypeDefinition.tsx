@@ -13,9 +13,11 @@ import { memo } from "react";
 import { UnreachableCaseError } from "ts-essentials";
 
 import { DiscriminatedUnionVariant } from "./DiscriminatedUnionVariant";
+import { DiscriminatedUnionVariantSelector } from "./DiscriminatedUnionVariantSelector";
 import { EnumValue } from "./EnumValue";
 import { ObjectProperty } from "./ObjectProperty";
 import { UndiscriminatedUnionVariant } from "./UndiscriminatedUnionVariant";
+import { UndiscriminatedUnionVariantSelector } from "./UndiscriminatedUnionVariantSelector";
 
 export declare namespace InternalTypeDefinition {
     export interface Props {
@@ -26,6 +28,7 @@ export declare namespace InternalTypeDefinition {
         lang: string;
         exclude?: string[];
         excludeDeprecated?: boolean;
+        showUnionsAsDropdown?: boolean;
         isGraphQL?: boolean;
     }
 }
@@ -38,6 +41,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     lang,
     exclude,
     excludeDeprecated,
+    showUnionsAsDropdown = false,
     isGraphQL = false
 }: {
     shape:
@@ -52,6 +56,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     lang: string;
     exclude?: string[];
     excludeDeprecated?: boolean;
+    showUnionsAsDropdown?: boolean;
     isGraphQL?: boolean;
 }) {
     switch (shape.type) {
@@ -67,6 +72,17 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
             );
         }
         case "undiscriminatedUnion":
+            if (showUnionsAsDropdown) {
+                return (
+                    <UndiscriminatedUnionVariantSelector
+                        variants={shape.variants}
+                        types={types}
+                        location={location}
+                        additionalProperties={additionalProperties}
+                        lang={lang}
+                    />
+                );
+            }
             return (
                 <FernCollapseWithButtonUncontrolled
                     showText={`Show ${shape.variants.length} variants`}
@@ -88,6 +104,17 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                 </FernCollapseWithButtonUncontrolled>
             );
         case "discriminatedUnion":
+            if (showUnionsAsDropdown) {
+                return (
+                    <DiscriminatedUnionVariantSelector
+                        discriminant={shape.discriminant}
+                        variants={shape.variants}
+                        types={types}
+                        location={location}
+                        lang={lang}
+                    />
+                );
+            }
             return (
                 <FernCollapseWithButtonUncontrolled
                     showText={`Show ${shape.variants.length} variants`}

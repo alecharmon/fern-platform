@@ -998,6 +998,50 @@ paths:
           response:
             body:
               success: true
+  /oneOf/object-with-union:
+    post:
+      tags:
+        - oneOf Examples
+      summary: Example endpoint with object containing a discriminated union property
+      description: |
+        Demonstrates an object that has a discriminated union as one of its properties.
+        This tests that the dropdown selector works for unions nested inside objects.
+      operationId: objectWithUnionProperty
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ObjectWithUnionProperty"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+      x-fern-examples:
+        - name: WithVariantA
+          request:
+            name: "Test Plant"
+            plantType:
+              type: "flowering"
+              flowerColor: "red"
+          response:
+            body:
+              success: true
+        - name: WithVariantB
+          request:
+            name: "Test Plant"
+            plantType:
+              type: "succulent"
+              waterRetention: 90
+          response:
+            body:
+              success: true
   /anyOf/no-titles:
     post:
       tags:
@@ -1707,6 +1751,50 @@ components:
       properties:
         titledFieldB:
           type: integer
+    ObjectWithUnionProperty:
+      type: object
+      description: An object that contains a discriminated union as one of its properties
+      required:
+        - name
+        - plantType
+      properties:
+        name:
+          type: string
+          description: Name of the plant
+        plantType:
+          description: The type of plant (discriminated union)
+          oneOf:
+            - $ref: "#/components/schemas/FloweringPlant"
+            - $ref: "#/components/schemas/SucculentPlant"
+          discriminator:
+            propertyName: type
+            mapping:
+              flowering: "#/components/schemas/FloweringPlant"
+              succulent: "#/components/schemas/SucculentPlant"
+    FloweringPlant:
+      type: object
+      description: A flowering plant variant
+      required:
+        - type
+        - flowerColor
+      properties:
+        type:
+          type: string
+        flowerColor:
+          type: string
+          description: Color of the flowers
+    SucculentPlant:
+      type: object
+      description: A succulent plant variant
+      required:
+        - type
+        - waterRetention
+      properties:
+        type:
+          type: string
+        waterRetention:
+          type: integer
+          description: Water retention percentage
     AnyOfVariantA:
       type: object
       description: First variant for anyOf without title
