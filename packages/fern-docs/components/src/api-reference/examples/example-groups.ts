@@ -8,7 +8,7 @@ import type {
     ExamplesByStatusCode,
     SelectedExampleKey
 } from "../type-definitions/EndpointContent";
-import type { CodeExample } from "./code-example";
+import { type CodeExample, isUserDefinedExample } from "./code-example";
 
 function hasNonEmptyValue(value: unknown): boolean {
     if (value == null) {
@@ -80,14 +80,16 @@ export function hasValidExamples(examplesByStatusCode: ExamplesByStatusCode): bo
 
 /**
  * Check if an exampleKey should be visible in the tabs (bundle version).
- * An exampleKey is visible if it has valid examples AND meaningful request-side data.
+ * An exampleKey is visible if it has valid examples AND (meaningful request-side data OR is user-defined).
+ * User-defined examples (with explicit names) are always shown, even without request-side data,
+ * to support use cases like "Default - No Filtering" examples.
  */
 export function isVisibleExampleKey(examplesByStatusCode: ExamplesByStatusCode): boolean {
     if (!hasValidExamples(examplesByStatusCode)) {
         return false;
     }
     const examples = Object.values(examplesByStatusCode).flat();
-    return examples.some((ex) => hasRequestSideData(ex.exampleCall));
+    return examples.some((ex) => hasRequestSideData(ex.exampleCall) || isUserDefinedExample(ex));
 }
 
 /**

@@ -79,7 +79,9 @@ function isUserDefinedExample(example: ExampleEndpointCall): boolean {
 }
 
 /**
- * Filter examples for the API explorer to only show examples with request-side data.
+ * Filter examples for the API explorer to show examples with request-side data OR user-defined examples.
+ * User-defined examples (with explicit names) are always shown, even without request-side data,
+ * to support use cases like "Default - No Filtering" examples.
  * When user-defined examples exist, auto-generated and unnamed examples are filtered out.
  *
  * @param examples - The examples to filter
@@ -93,22 +95,22 @@ export function filterExamplesForExplorer(examples: ExampleEndpointCall[] | unde
         return { filteredExamples: [], indexMapping: [] };
     }
 
-    const examplesWithRequestData = examples
+    const relevantExamples = examples
         .map((example, index) => ({ example, originalIndex: index }))
-        .filter(({ example }) => hasRequestSideData(example));
+        .filter(({ example }) => hasRequestSideData(example) || isUserDefinedExample(example));
 
-    if (examplesWithRequestData.length === 0) {
+    if (relevantExamples.length === 0) {
         return { filteredExamples: [], indexMapping: [] };
     }
 
-    const hasUserDefinedExample = examplesWithRequestData.some(({ example }) => isUserDefinedExample(example));
+    const hasUserDefinedExampleInRelevant = relevantExamples.some(({ example }) => isUserDefinedExample(example));
 
     let finalExamples: { example: ExampleEndpointCall; originalIndex: number }[];
 
-    if (hasUserDefinedExample) {
-        finalExamples = examplesWithRequestData.filter(({ example }) => isUserDefinedExample(example));
+    if (hasUserDefinedExampleInRelevant) {
+        finalExamples = relevantExamples.filter(({ example }) => isUserDefinedExample(example));
     } else {
-        finalExamples = examplesWithRequestData;
+        finalExamples = relevantExamples;
     }
 
     return {
