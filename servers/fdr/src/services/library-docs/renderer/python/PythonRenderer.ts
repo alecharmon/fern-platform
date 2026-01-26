@@ -10,7 +10,7 @@ import { createHash } from "crypto";
 import type { FernRegistry } from "../../../../api/generated/index.js";
 import type { NavNode } from "../base/index.js";
 import { renderAllModulePages } from "./ModuleRenderer.js";
-import { buildValidPaths, type RenderContext } from "./TypeLinkResolver.js";
+import { buildTypeLinkData, type RenderContext } from "./TypeLinkResolver.js";
 
 /**
  * Configuration for rendering library docs.
@@ -53,9 +53,9 @@ export class PythonRenderer {
      * into a DocsDefinition.
      */
     render(ir: FdrLambda.libraryDocs.PythonLibraryDocsIr): FernRegistry.docs.v2.write.RenderedLibraryDocs {
-        // Build valid paths for type linking (only internal types will be linked)
-        const validPaths = buildValidPaths(ir);
-        const ctx: RenderContext = { baseSlug: this.slug, validPaths };
+        // Build type linking data (valid paths + aliases for re-exports)
+        const { validPaths, pathAliases } = buildTypeLinkData(ir);
+        const ctx: RenderContext = { baseSlug: this.slug, validPaths, pathAliases };
 
         // Render all module pages (keyed by pageId)
         const rawPages = renderAllModulePages(ir.rootModule, ctx);

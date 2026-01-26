@@ -15,31 +15,66 @@ import { escapeMdx, generateAnchorId } from "../base/index.js";
 export interface RenderContext {
     baseSlug: string;
     validPaths: Set<string>;
+    /** Maps re-exported paths to their actual definition paths */
+    pathAliases: Map<string, string>;
 }
 
 /**
- * Build set of all valid type paths from the IR.
- * Only paths in this set will be linked.
+ * Result of processing the IR for type linking.
  */
-export function buildValidPaths(ir: FdrLambda.libraryDocs.PythonLibraryDocsIr): Set<string> {
-    const paths = new Set<string>();
+export interface TypeLinkData {
+    /** All valid definition paths that can be linked to */
+    validPaths: Set<string>;
+    /** Maps re-exported paths to their actual definition paths */
+    pathAliases: Map<string, string>;
+}
+
+/**
+ * Build valid paths and path aliases from the IR in a single traversal.
+ * - validPaths: all definition paths (modules, classes, functions, attributes)
+ * - pathAliases: maps re-exported paths to actual definitions (e.g., pkg.Foo -> pkg.sub.Foo)
+ */
+export function buildTypeLinkData(ir: FdrLambda.libraryDocs.PythonLibraryDocsIr): TypeLinkData {
+    const validPaths = new Set<string>();
+    const pathAliases = new Map<string, string>();
+
+    function addTypeInfo(typeInfo: FdrLambda.libraryDocs.TypeInfo | undefined): void {
+        if (typeInfo?.resolvedPath && typeInfo.basePath && typeInfo.resolvedPath !== typeInfo.basePath) {
+            pathAliases.set(typeInfo.resolvedPath, typeInfo.basePath);
+        }
+    }
+
+    function processFunction(func: FdrLambda.libraryDocs.PythonFunctionIr): void {
+        validPaths.add(func.path);
+        for (const param of func.parameters) {
+            addTypeInfo(param.typeInfo);
+        }
+        addTypeInfo(func.returnTypeInfo);
+    }
 
     function processModule(module: FdrLambda.libraryDocs.PythonModuleIr): void {
-        paths.add(module.path);
+        validPaths.add(module.path);
 
         for (const cls of module.classes) {
-            paths.add(cls.path);
+            validPaths.add(cls.path);
+            for (const base of cls.bases) {
+                addTypeInfo(base.typeInfo);
+            }
             for (const method of cls.methods) {
-                paths.add(method.path);
+                processFunction(method);
+            }
+            for (const attr of cls.attributes) {
+                addTypeInfo(attr.typeInfo);
             }
         }
 
         for (const func of module.functions) {
-            paths.add(func.path);
+            processFunction(func);
         }
 
         for (const attr of module.attributes) {
-            paths.add(attr.path);
+            validPaths.add(attr.path);
+            addTypeInfo(attr.typeInfo);
         }
 
         for (const sub of module.submodules) {
@@ -49,7 +84,7 @@ export function buildValidPaths(ir: FdrLambda.libraryDocs.PythonLibraryDocsIr): 
 
     processModule(ir.rootModule);
 
-    return paths;
+    return { validPaths, pathAliases };
 }
 
 // ============================================================================
@@ -94,6 +129,7 @@ const QUALIFIED_PATH_REGEX = /[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)
 /**
  * Extract links from type strings (params and return types).
  * Only scans the provided type strings, not the full signature.
+ * Handles re-exported types by resolving aliases to their actual definition paths.
  */
 export function extractLinksFromTypes(
     typeStrings: string[],
@@ -112,12 +148,22 @@ export function extractLinksFromTypes(
             if (links[path]) {
                 continue;
             }
+
+            // Try direct path first, then resolve via alias map for re-exports
+            let actualPath = path;
             if (!ctx.validPaths.has(path)) {
-                continue;
+                const aliasedPath = ctx.pathAliases.get(path);
+                if (aliasedPath && ctx.validPaths.has(aliasedPath)) {
+                    actualPath = aliasedPath;
+                } else {
+                    continue;
+                }
             }
 
-            const url = pathToAnchorUrl(path, ctx.baseSlug, currentModulePath);
+            // Generate URL using the actual definition path
+            const url = pathToAnchorUrl(actualPath, ctx.baseSlug, currentModulePath);
             if (url) {
+                // Key is the original path (for text replacement in the code block)
                 links[path] = url;
             }
         }
