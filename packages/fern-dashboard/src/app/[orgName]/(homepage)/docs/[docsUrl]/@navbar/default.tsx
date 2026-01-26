@@ -1,7 +1,6 @@
 import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
 import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getDocsGitUrl } from "@/app/services/dal/github/getDocsGitUrl";
 import { DocsSiteNavBarWithOverflow, type NavItem } from "@/components/docs-page/DocsSiteNavBarWithOverflow";
@@ -16,8 +15,6 @@ export default async function DocsSiteNavbar({
     if (session == null) {
         return null;
     }
-
-    const isEmployee = isFernEmployee(session.permissions ?? []);
 
     const parsedDocsUrl = parseDocsUrlParam({ docsUrl });
     let askAiStatus = null;
@@ -48,15 +45,12 @@ export default async function DocsSiteNavbar({
         { title: "Web Analytics", href: "web-analytics" },
         { title: "Search", href: "search" },
         { title: "Link Checker", href: "link-checker" },
-        { title: "Feedback", href: "feedback" }
+        { title: "Feedback", href: "feedback" },
+        { title: "Settings", href: "settings", permission: "manage-settings" }
     ];
 
     if (askAiStatus?.ask_ai_enabled || askAiStatus?.job_id) {
-        navItems.splice(4, 0, { title: "Ask Fern", href: "ask-fern" });
-    }
-
-    if (isEmployee) {
-        navItems.push({ title: "Settings", href: "settings" });
+        navItems.splice(5, 0, { title: "Ask Fern", href: "ask-fern" });
     }
 
     return (
