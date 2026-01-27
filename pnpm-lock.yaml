@@ -277,6 +277,9 @@ importers:
       '@types/node':
         specifier: ^22.0.0
         version: 22.19.1
+      '@types/pngjs':
+        specifier: ^6.0.5
+        version: 6.0.5
       '@typescript-eslint/eslint-plugin':
         specifier: 8.25.0
         version: 8.25.0(@typescript-eslint/parser@8.25.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.7.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.7.3)
@@ -373,9 +376,15 @@ importers:
       lint-staged:
         specifier: ^13.0.3
         version: 13.3.0
+      pixelmatch:
+        specifier: ^7.1.0
+        version: 7.1.0
       playwright:
         specifier: ^1.50.1
         version: 1.57.0
+      pngjs:
+        specifier: ^7.0.0
+        version: 7.0.0
       prettier:
         specifier: 'catalog:'
         version: 3.5.2
@@ -12069,6 +12078,9 @@ packages:
   '@types/phoenix@1.6.7':
     resolution: {integrity: sha512-oN9ive//QSBkf19rfDv45M7eZPi0eEXylht2OLEXicu5b4KoQ1OzXIw+xDSGWxSxe1JmepRR/ZH283vsu518/Q==}
 
+  '@types/pngjs@6.0.5':
+    resolution: {integrity: sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ==}
+
   '@types/postcss-modules-local-by-default@4.0.2':
     resolution: {integrity: sha512-CtYCcD+L+trB3reJPny+bKWKMzPfxEyQpKIwit7kErnOexf5/faaGpkFy4I5AwbV4hp1sk7/aTg0tt0B67VkLQ==}
 
@@ -19305,6 +19317,10 @@ packages:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
     engines: {node: '>= 6'}
 
+  pixelmatch@7.1.0:
+    resolution: {integrity: sha512-1wrVzJ2STrpmONHKBy228LM1b84msXDUoAzVEl0R8Mz4Ce6EPr+IVtxm8+yvrqLYMHswREkjYFaMxnyGnaY3Ng==}
+    hasBin: true
+
   pkce-challenge@5.0.1:
     resolution: {integrity: sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ==}
     engines: {node: '>=16.20.0'}
@@ -19339,6 +19355,10 @@ packages:
   pngjs@5.0.0:
     resolution: {integrity: sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw==}
     engines: {node: '>=10.13.0'}
+
+  pngjs@7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
 
   pnp-webpack-plugin@1.7.0:
     resolution: {integrity: sha512-2Rb3vm+EXble/sMXNSu6eoBx8e79gKqhNq9F5ZWW6ERNCTE/Q0wQNne5541tE5vKjfM8hpNCYL+LGc1YTfI0dg==}
@@ -34712,6 +34732,10 @@ snapshots:
 
   '@types/phoenix@1.6.7': {}
 
+  '@types/pngjs@6.0.5':
+    dependencies:
+      '@types/node': 22.19.1
+
   '@types/postcss-modules-local-by-default@4.0.2':
     dependencies:
       postcss: 8.5.6
@@ -44174,6 +44198,10 @@ snapshots:
 
   pirates@4.0.6: {}
 
+  pixelmatch@7.1.0:
+    dependencies:
+      pngjs: 7.0.0
+
   pkce-challenge@5.0.1: {}
 
   pkg-dir@4.2.0:
@@ -44209,6 +44237,8 @@ snapshots:
       semver-compare: 1.0.0
 
   pngjs@5.0.0: {}
+
+  pngjs@7.0.0: {}
 
   pnp-webpack-plugin@1.7.0(typescript@5.7.3):
     dependencies:

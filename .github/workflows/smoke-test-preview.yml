@@ -12,38 +12,44 @@ on:
   workflow_dispatch:
 
 jobs:
-  generate_preview:
+  smoke-test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
       deployments: read
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: "buildwithfern"
     steps:
+      # 1. Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Install Fern CLI
       - name: Install Fern CLI tool
         run: npm install -g fern-api
 
+      # 3. Setup Go and proto toolchain
       - name: Setup Go for protoc-gen-openapi
         uses: actions/setup-go@v4
         with:
-          go-version: '1.22'
+          go-version: "1.22"
 
       - name: Install proto toolchain
         run: |
           # Install protoc
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
-          
+
           # Install buf CLI (1.35.1 supports buf dep update command)
           BUF_VERSION=1.35.1
           curl -sSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-x86_64.tar.gz" | sudo tar -xzC /usr/local --strip-components=1
-          
+
           # Install protoc-gen-openapi v0.1.6 (includes fern.summary support from PR #13)
           go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.6
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          
+
           # Print versions for debugging
           echo "Installed toolchain versions:"
           protoc --version
@@ -51,32 +57,33 @@ jobs:
           go version
           which protoc-gen-openapi
 
+      # 4. Upload to FDR
       - name: Upload smoke test content to FDR
         id: fern-preview
         env:
           FERN_TOKEN: ${{ secrets.FERN_SMOKE_TEST_API_KEY }}
         run: |
           cd smoke-test/fern
-          
+
           # Verify FERN_TOKEN is set
           if [ -z "$FERN_TOKEN" ]; then
             echo "Error: FERN_TOKEN is not set"
             exit 1
           fi
-          
+
           # Upload docs content to FDR and get the preview host
           set +e
           OUTPUT=$(fern generate --docs --preview --log-level debug 2>&1)
           STATUS=$?
           set -e
-          
+
           echo "$OUTPUT"
-          
+
           if [ $STATUS -ne 0 ]; then
             echo "Error: fern generate failed with exit code $STATUS"
             exit 1
           fi
-          
+
           # Extract preview URL with more flexible pattern
           PREVIEW_URL=$(echo "$OUTPUT" | sed -n 's/.*Published docs to \(https[^ ]*\).*/\1/p' | head -n1)
 
@@ -91,6 +98,15 @@ jobs:
           echo "SMOKE_TEST_HOST=$SMOKE_TEST_HOST" >> $GITHUB_OUTPUT
           cd ../..
 
+      # 5. Install dependencies
+      - name: Install dependencies
+        uses: ./.github/actions/install
+
+      # 6. Install Playwright browsers
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium
+
+      # 7. Wait for prod.ferndocs.com deployment
       - name: Wait for prod.ferndocs.com Deployment
         id: vercel-preview
         if: github.event_name == 'pull_request'
@@ -98,7 +114,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const maxAttempts = 60;  // 60 attempts × 15 seconds = 15 minutes
+            const maxAttempts = 60;  // 60 attempts x 15 seconds = 15 minutes
             const delayMs = 15000;  // 15 seconds
 
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -129,7 +145,7 @@ jobs:
                     const match = line.match(/\[Preview\]\((https:\/\/[^)]+)\)/);
                     if (match) {
                       const previewUrl = match[1];
-                      console.log(`✓ Found prod.ferndocs.com preview URL: ${previewUrl}`);
+                      console.log(`Found prod.ferndocs.com preview URL: ${previewUrl}`);
 
                       // Check if deployment is ready (not building)
                       if (line.includes('Ready') || line.includes('![Ready]')) {
@@ -154,8 +170,15 @@ jobs:
 
             throw new Error('Timeout waiting for prod.ferndocs.com deployment after 15 minutes');
 
+      - name: Skip message for workflow_dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Smoke test cannot run via workflow_dispatch because Vercel preview URL is not available."
+          echo "This workflow is designed to run on pull_request events only."
+
+      # 8. Setup preview connection
       - name: Setup preview connection
-        id: generate-docs
+        id: setup-preview
         if: steps.vercel-preview.outputs.url != ''
         env:
           VERCEL_URL: ${{ steps.vercel-preview.outputs.url }}
@@ -171,83 +194,203 @@ jobs:
           curl -c /tmp/preview-cookies.txt -L "$PREVIEW_API_URL" > /dev/null 2>&1
           echo "Cookie saved to /tmp/preview-cookies.txt"
 
-          # The crawler will visit the preview API URL first to set cookies
-          # Then crawl from the base URL
-          echo "🌱 Smoke Test Preview: $PREVIEW_API_URL" > preview_url.txt
           echo "PREVIEW_URL=$PREVIEW_API_URL" >> $GITHUB_OUTPUT
 
-      - name: Skip message for workflow_dispatch
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          echo "⚠️ Smoke test cannot run via workflow_dispatch because Vercel preview URL is not available."
-          echo "This workflow is designed to run on pull_request events only."
-          echo "🌱 Smoke Test Preview: Skipped (workflow_dispatch)" > preview_url.txt
-
-      - name: Setup Node.js
-        if: steps.generate-docs.outputs.PREVIEW_URL != ''
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install Puppeteer
-        if: steps.generate-docs.outputs.PREVIEW_URL != ''
-        working-directory: smoke-test
-        run: npm install
-
-      - name: Crawl preview site
-        if: steps.generate-docs.outputs.PREVIEW_URL != ''
-        working-directory: smoke-test
-        run: |
-          node crawler.js "${{ steps.generate-docs.outputs.PREVIEW_URL }}"
-
-      - name: Test content negotiation with Accept header
-        if: steps.generate-docs.outputs.PREVIEW_URL != ''
+      # 9. Run smoke test
+      - name: Run smoke test (Playwright)
+        id: smoke-test
+        if: steps.setup-preview.outputs.PREVIEW_URL != ''
+        continue-on-error: true
         env:
           VERCEL_URL: ${{ steps.vercel-preview.outputs.url }}
+          SMOKE_TEST_HOST: ${{ steps.fern-preview.outputs.SMOKE_TEST_HOST }}
         run: |
-          echo "Testing Accept: text/plain header for content negotiation..."
-
-          # Reuse preview cookie from previous step
-          echo "Using existing preview cookie from /tmp/preview-cookies.txt"
-
-          # Test base URL with Accept: text/plain header
-          echo "Testing ${VERCEL_URL} with Accept: text/plain"
-          RESPONSE=$(curl -b /tmp/preview-cookies.txt -H "Accept: text/plain" -s -i "${VERCEL_URL}/" 2>&1)
-
-          # Extract content-type header
-          CONTENT_TYPE=$(echo "$RESPONSE" | grep -i "^content-type:" | head -1 | cut -d' ' -f2- | tr -d '\r')
-
-          echo "Response Content-Type: $CONTENT_TYPE"
-
-          # Check if content-type contains text/plain
-          if echo "$CONTENT_TYPE" | grep -q "text/plain"; then
-            echo "✅ Content negotiation working: returned text/plain"
-          else
-            echo "❌ Content negotiation failed: expected text/plain, got $CONTENT_TYPE"
-            exit 1
+          pnpm smoke-test "$VERCEL_URL" "$SMOKE_TEST_HOST" --concurrency auto2x
+          SMOKE_EXIT=$?
+          echo "SMOKE_EXIT=$SMOKE_EXIT" >> $GITHUB_OUTPUT
+          if [ $SMOKE_EXIT -ne 0 ]; then
+            echo "Smoke test completed with exit code $SMOKE_EXIT"
           fi
 
-      - name: Combine results for PR comment
+      # 10. Post smoke test PR comment (before visual diff)
+      - name: Prepare smoke test PR comment
         if: github.event_name == 'pull_request' && always()
         run: |
-          echo "## 🌱 Smoke Test Preview" > final-comment.txt
-          echo "" >> final-comment.txt
-          echo "**Run at:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> final-comment.txt
-          echo "" >> final-comment.txt
-          echo "Testing branch changes with smoke test content:" >> final-comment.txt
-          echo "" >> final-comment.txt
-          echo "- **Smoke Test Content (from FDR):** https://${{ steps.fern-preview.outputs.SMOKE_TEST_HOST }}" >> final-comment.txt
-          echo "- **Branch's Docs Platform (Vercel):** ${{ steps.generate-docs.outputs.PREVIEW_URL }}" >> final-comment.txt
-          echo "" >> final-comment.txt
-          if [ -f smoke-test/crawler-summary.txt ]; then
-            cat smoke-test/crawler-summary.txt >> final-comment.txt
+          echo "## Smoke Test Preview" > smoke-test-comment.txt
+          echo "" >> smoke-test-comment.txt
+          echo "**Run at:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> smoke-test-comment.txt
+          echo "" >> smoke-test-comment.txt
+          echo "Testing branch changes with smoke test content:" >> smoke-test-comment.txt
+          echo "" >> smoke-test-comment.txt
+          echo "- **Smoke Test Content (from FDR):** https://${{ steps.fern-preview.outputs.SMOKE_TEST_HOST }}" >> smoke-test-comment.txt
+          echo "- **Branch's Docs Platform (Vercel):** ${{ steps.setup-preview.outputs.PREVIEW_URL }}" >> smoke-test-comment.txt
+          echo "" >> smoke-test-comment.txt
+          if [ -f ./smoke-test-output/crawler-summary.txt ]; then
+            cat ./smoke-test-output/crawler-summary.txt >> smoke-test-comment.txt
           else
-            echo "⚠️ Crawler did not run or failed to generate results" >> final-comment.txt
+            echo "Crawler did not run or failed to generate results" >> smoke-test-comment.txt
           fi
 
-      - name: Comment URL in PR
+      - name: Post smoke test PR comment
         if: github.event_name == 'pull_request' && always()
         uses: thollander/actions-comment-pull-request@v2.4.3
         with:
-          filePath: final-comment.txt
+          filePath: smoke-test-comment.txt
           comment_tag: smoke-test-preview
+
+      # 11. Run visual diff (after smoke test comment is posted)
+      - name: Run visual diff
+        id: visual-diff
+        if: steps.setup-preview.outputs.PREVIEW_URL != ''
+        continue-on-error: true
+        run: |
+          pnpm visual-diff \
+            --domains "buildwithfern.com/learn,docs.cohere.com,elevenlabs.io/docs,docs.mercoa.com" \
+            --preview "${{ steps.vercel-preview.outputs.url }}" \
+            --max-pages 100 \
+            --max-diffs 3 \
+            --concurrency auto2x \
+            --output ./visual-diff-output \
+            --fail-on-diff || echo "DIFFS_FOUND=true" >> $GITHUB_OUTPUT
+
+      # 12. Upload visual diff reports and post comment
+      - name: Upload visual diff reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-diff-reports
+          path: visual-diff-output/
+          retention-days: 7
+
+      - name: Install CML dependencies
+        if: github.event_name == 'pull_request' && always()
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
+
+      - name: Setup CML
+        if: github.event_name == 'pull_request' && always()
+        uses: iterative/setup-cml@v2
+
+      - name: Generate visual diff PR comment
+        if: github.event_name == 'pull_request' && always()
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OUTPUT_DIR="./visual-diff-output"
+          SUMMARY_PATH="$OUTPUT_DIR/summary.json"
+
+          if [ ! -f "$SUMMARY_PATH" ]; then
+            echo "No summary.json found"
+            exit 0
+          fi
+
+          # Parse summary.json
+          TOTAL_DOMAINS=$(jq '.domains | length' "$SUMMARY_PATH")
+          TOTAL_PAGES=$(jq '.totalPages' "$SUMMARY_PATH")
+          TOTAL_DIFFS=$(jq '.totalDiffs' "$SUMMARY_PATH")
+          TOTAL_ERRORS=$(jq '.totalErrors' "$SUMMARY_PATH")
+
+          # Start building the report
+          echo "## Visual Diff Report" > visual-diff-comment.md
+          echo "" >> visual-diff-comment.md
+          echo "**Total Domains:** $TOTAL_DOMAINS" >> visual-diff-comment.md
+          echo "**Total Pages:** $TOTAL_PAGES" >> visual-diff-comment.md
+          echo "**Total Diffs:** $TOTAL_DIFFS" >> visual-diff-comment.md
+          echo "**Total Errors:** $TOTAL_ERRORS" >> visual-diff-comment.md
+          echo "" >> visual-diff-comment.md
+
+          # Collect all diffs and sort by percentage (top 3)
+          # Create a temp file with all diffs
+          echo "[]" > /tmp/all_diffs.json
+
+          for domain_dir in "$OUTPUT_DIR"/*/; do
+            if [ -d "$domain_dir" ]; then
+              domain=$(basename "$domain_dir")
+              report_path="$domain_dir/report.json"
+
+              if [ -f "$report_path" ]; then
+                # Extract diffs from this domain's report (including all screenshot paths and URLs)
+                jq --arg domain "$domain" '[.results[] | select(.hasDiff == true and .error == null) | {domain: $domain, page: .page, diffPercentage: .diffPercentage, liveUrl: .liveUrl, previewUrl: .previewUrl, liveScreenshot: .liveScreenshot, previewScreenshot: .previewScreenshot, diffScreenshot: .diffScreenshot}]' "$report_path" > /tmp/domain_diffs.json
+
+                # Merge with all diffs
+                jq -s '.[0] + .[1]' /tmp/all_diffs.json /tmp/domain_diffs.json > /tmp/merged_diffs.json
+                mv /tmp/merged_diffs.json /tmp/all_diffs.json
+              fi
+            fi
+          done
+
+          # Sort by diffPercentage and take top 3
+          jq 'sort_by(-.diffPercentage) | .[0:3]' /tmp/all_diffs.json > /tmp/top_diffs.json
+
+          TOP_COUNT=$(jq 'length' /tmp/top_diffs.json)
+
+          if [ "$TOP_COUNT" -gt 0 ]; then
+            echo "### Top $TOP_COUNT Visual Differences" >> visual-diff-comment.md
+            echo "" >> visual-diff-comment.md
+
+            # Process each top diff
+            for i in $(seq 0 $((TOP_COUNT - 1))); do
+              domain=$(jq -r ".[$i].domain" /tmp/top_diffs.json)
+              page=$(jq -r ".[$i].page" /tmp/top_diffs.json)
+              diff_pct=$(jq -r ".[$i].diffPercentage" /tmp/top_diffs.json)
+              live_url=$(jq -r ".[$i].liveUrl" /tmp/top_diffs.json)
+              preview_url=$(jq -r ".[$i].previewUrl" /tmp/top_diffs.json)
+              live_screenshot=$(jq -r ".[$i].liveScreenshot" /tmp/top_diffs.json)
+              preview_screenshot=$(jq -r ".[$i].previewScreenshot" /tmp/top_diffs.json)
+              diff_screenshot=$(jq -r ".[$i].diffScreenshot" /tmp/top_diffs.json)
+
+              echo "#### $domain - $page" >> visual-diff-comment.md
+              echo "**Diff:** ${diff_pct}%" >> visual-diff-comment.md
+              echo "" >> visual-diff-comment.md
+              
+              # Add links to live and preview pages
+              echo "**Links:** [Live]($live_url) | [Preview]($preview_url)" >> visual-diff-comment.md
+              echo "" >> visual-diff-comment.md
+
+              # Display all three images using CML inline syntax (cml comment auto-uploads images)
+              echo "| Live | Preview | Diff |" >> visual-diff-comment.md
+              echo "|:----:|:-------:|:----:|" >> visual-diff-comment.md
+
+              # Build table row with inline images (CML will auto-upload these)
+              row="|"
+              
+              # Live screenshot
+              if [ "$live_screenshot" != "null" ] && [ -f "$live_screenshot" ]; then
+                row="$row ![]($live_screenshot) |"
+              else
+                row="$row Not available |"
+              fi
+
+              # Preview screenshot
+              if [ "$preview_screenshot" != "null" ] && [ -f "$preview_screenshot" ]; then
+                row="$row ![]($preview_screenshot) |"
+              else
+                row="$row Not available |"
+              fi
+
+              # Diff screenshot
+              if [ "$diff_screenshot" != "null" ] && [ -f "$diff_screenshot" ]; then
+                row="$row ![]($diff_screenshot) |"
+              else
+                row="$row Not available |"
+              fi
+
+              echo "$row" >> visual-diff-comment.md
+              echo "" >> visual-diff-comment.md
+            done
+
+            echo "" >> visual-diff-comment.md
+            echo "> Download the full report from the workflow artifacts for all diff images." >> visual-diff-comment.md
+          else
+            echo "No visual differences found!" >> visual-diff-comment.md
+          fi
+
+      - name: Post visual diff PR comment
+        if: github.event_name == 'pull_request' && always()
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f visual-diff-comment.md ]; then
+            cml comment update visual-diff-comment.md
+          fi

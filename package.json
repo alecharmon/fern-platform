@@ -71,7 +71,10 @@
     "test:e2e:headed": "pnpm --filter=@fern-platform/playwright e2e:headed",
     "test:update": "CI=true turbo test -- -u",
     "vercel-scripts": "pnpm --filter=@fern-platform/vercel-scripts vercel-scripts",
-    "vercel:up": "pnpm up -r \"@vercel/*\""
+    "vercel:up": "pnpm up -r \"@vercel/*\"",
+    "smoke-test": "pnpm tsx scripts/smoke-test.ts",
+    "visual-diff": "pnpm tsx scripts/visual-diff.ts",
+    "visual-diff:serve": "pnpm tsx scripts/visual-diff-serve.ts"
   },
   "resolutions": {
     "@aa-sdk/core": "^4.79.0",
@@ -142,6 +145,7 @@
     "@types/http-proxy": "^1.17.16",
     "@types/is-ci": "^3.0.4",
     "@types/node": "catalog:",
+    "@types/pngjs": "^6.0.5",
     "@typescript-eslint/eslint-plugin": "8.25.0",
     "@typescript-eslint/parser": "8.25.0",
     "@typescript-eslint/utils": "8.25.0",
@@ -174,7 +178,9 @@
     "jsonc-parser": "~2.2.1",
     "knip": "^5.79.0",
     "lint-staged": "^13.0.3",
+    "pixelmatch": "^7.1.0",
     "playwright": "^1.50.1",
+    "pngjs": "^7.0.0",
     "prettier": "catalog:",
     "prettier-plugin-packagejson": "^2.5.8",
     "prettier-plugin-tailwindcss": "^0.6.11",

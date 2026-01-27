@@ -97,3 +97,6 @@ test-results
 # Migration Lambda build artifacts
 packages/migration-lambda-docs/dist/
 packages/migration-lambda-docs/migration-lambda.zip
+
+# Visual diff output
+visual-diff-output/

@@ -193,6 +193,8 @@
         "packages/site-to-docs/**/*",
         "packages/workers/proxy/src/websocket.ts",
         "scripts/monitor/**/*.ts",
+        "scripts/visual-diff.ts",
+        "scripts/visual-diff-serve.ts",
         "servers/fern-bot/**/*",
         "servers/fdr-deploy/scripts/fdr-deploy-stack.ts",
         "servers/fdr-lambda/src/index.ts",
