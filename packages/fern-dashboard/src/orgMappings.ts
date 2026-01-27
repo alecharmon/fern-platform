@@ -1,7 +1,6 @@
+import { addRoles } from "@fern-api/user-permissions";
 import { z } from "zod";
-
 import * as auth0Management from "@/app/services/auth0/management";
-
 import { getCurrentSession } from "./app/services/auth0/getCurrentSession";
 import { Auth0OrgName, type Auth0UserID } from "./app/services/auth0/types";
 import { isProduction } from "./utils/environment";
@@ -65,6 +64,13 @@ async function processUserOrgMapping(userId: Auth0UserID, permissions: string[])
 
     // Add user to the organization
     await auth0Management.addUserToOrg(userId, auth0OrgName);
+    const orgId = await auth0Management.getOrgIdFromName(auth0OrgName);
+
+    await addRoles({
+        userId,
+        orgId,
+        roleNames: ["editor"]
+    });
 }
 
 export async function applyOrgMappings(): Promise<void> {
