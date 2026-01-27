@@ -27,6 +27,9 @@ import {
 } from "./callout";
 import { Card, CardGroup } from "./card";
 import { ClientLibraries } from "./client-libraries";
+import { CodeBlock } from "./code/CodeBlock";
+import { CodeBlocks } from "./code/CodeBlocks";
+import { CodeGroup } from "./code/CodeGroup";
 import { Template } from "./code/Template";
 import { Column, ColumnGroup } from "./columns";
 import { Copy } from "./copy";
@@ -40,7 +43,9 @@ import { Icon } from "./icon/Icon";
 import { If } from "./if";
 import { IFrame } from "./iframe/IFrame";
 import { Json } from "./json";
+import { Mermaid } from "./mermaid";
 import { ParamField } from "./parameters/ParamField";
+import { RunnableEndpoint } from "./runnable-endpoint";
 import {
     EndpointRequestSnippet,
     EndpointResponseSnippet,
@@ -54,52 +59,8 @@ import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
 import { Step, StepGroup } from "./steps";
 import { Tab, TabGroup } from "./tabs";
 import { Tooltip } from "./tooltip";
+import { TwoSlash } from "./twoslash/TwoSlash";
 import { Version, Versions } from "./versions";
-
-// Loading fallback for code blocks - preserves layout during loading
-const CodeBlockFallback = () => (
-    <div className="fern-code fern-code-block bg-card-background border-card-border rounded-3 shadow-card-grayscale relative mb-6 mt-4 flex w-full min-w-0 max-w-full flex-col border first:mt-0 min-h-[100px] animate-pulse" />
-);
-
-// Loading fallback for Mermaid diagrams
-const MermaidFallback = () => (
-    <div className="mermaid-container min-h-[200px] animate-pulse bg-card-background rounded-3" />
-);
-
-// Dynamic imports for heavy components to reduce initial bundle size
-
-// CodeBlock uses Shiki for syntax highlighting - heavy dependency (~500KB)
-const CodeBlock = dynamic(() => import("./code/CodeBlock").then((mod) => mod.CodeBlock), {
-    loading: CodeBlockFallback
-});
-
-// CodeBlocks wraps multiple CodeBlock components
-const CodeBlocks = dynamic(() => import("./code/CodeBlocks").then((mod) => mod.CodeBlocks), {
-    loading: CodeBlockFallback
-});
-
-// CodeGroup uses Shiki and adds tab functionality
-const CodeGroup = dynamic(() => import("./code/CodeGroup").then((mod) => mod.CodeGroup), {
-    loading: CodeBlockFallback
-});
-
-// Mermaid uses mermaid.js for diagrams (~1MB)
-const Mermaid = dynamic(() => import("./mermaid").then((mod) => mod.Mermaid), {
-    ssr: false,
-    loading: MermaidFallback
-});
-
-// TwoSlash renders dynamic code blocks with type information
-const TwoSlash = dynamic(() => import("./twoslash/TwoSlash").then((mod) => mod.TwoSlash), {
-    loading: CodeBlockFallback
-});
-
-// RunnableEndpoint is a complex interactive playground component
-const RunnableEndpoint = dynamic(() => import("./runnable-endpoint").then((mod) => mod.RunnableEndpoint), {
-    loading: () => (
-        <div className="fern-runnable-endpoint my-6 min-h-[200px] animate-pulse bg-card-background rounded-3" />
-    )
-});
 
 const ElevenLabsWaveform = dynamic(
     () => import("./waveform/WaveformComplex").then((mod) => mod.default),
