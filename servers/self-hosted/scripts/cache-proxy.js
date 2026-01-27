@@ -28,6 +28,8 @@ const MAX_CACHE_ENTRY_SIZE = parseInt(process.env.CACHE_MAX_ENTRY_SIZE || "52428
 const DEFAULT_TTL = parseInt(process.env.CACHE_DEFAULT_TTL || "2592000", 10); // 30 days default
 const DEBUG = process.env.CACHE_PROXY_DEBUG === "1";
 const CACHE_DISABLED = process.env.CACHE_DISABLED === "1" || process.env.CACHE_DISABLED === "true";
+// CDN TTL for downstream caches (e.g., CloudFront) - 1 hour default
+const CDN_TTL = parseInt(process.env.CACHE_CDN_TTL || "3600", 10);
 
 // LRU Cache implementation
 class LRUCache {
@@ -217,6 +219,22 @@ function getTTLFromHeaders(headers) {
     return DEFAULT_TTL;
 }
 
+// Set CDN-friendly cache headers for downstream caches (e.g., CloudFront)
+// This allows CDNs to cache the response while still allowing the proxy to serve stale content
+function setCdnCacheHeaders(headers, isCacheableResponse) {
+    const newHeaders = { ...headers };
+
+    if (isCacheableResponse && CDN_TTL > 0) {
+        // Set Cache-Control for downstream CDNs
+        // s-maxage is for shared caches (CDNs), max-age is for browser cache
+        // stale-while-revalidate allows CDN to serve stale content while fetching fresh
+        newHeaders["cache-control"] =
+            `public, max-age=${CDN_TTL}, s-maxage=${CDN_TTL}, stale-while-revalidate=${CDN_TTL}`;
+    }
+
+    return newHeaders;
+}
+
 // Check if response is cacheable
 function isCacheable(statusCode, headers, url) {
     // Only cache successful responses
@@ -271,6 +289,9 @@ function proxyRequest(req, res, cacheKey) {
 
         debug(`Backend response: ${statusCode}, cacheable: ${shouldCache}, ttl: ${ttl}s, contentType: ${contentType}`);
 
+        // Set CDN-friendly cache headers for cacheable responses
+        const responseHeaders = setCdnCacheHeaders(headers, shouldCache);
+
         if (shouldCache) {
             // Collect response body for caching
             const chunks = [];
@@ -290,7 +311,7 @@ function proxyRequest(req, res, cacheKey) {
                         cacheKey,
                         {
                             statusCode,
-                            headers: { ...headers },
+                            headers: { ...responseHeaders },
                             body
                         },
                         ttl
@@ -301,8 +322,8 @@ function proxyRequest(req, res, cacheKey) {
                 }
             });
 
-            // Stream response to client
-            res.writeHead(statusCode, headers);
+            // Stream response to client with CDN-friendly headers
+            res.writeHead(statusCode, responseHeaders);
             proxyRes.pipe(res);
         } else {
             // Stream directly without caching
@@ -663,6 +684,7 @@ server.listen(PROXY_PORT, "0.0.0.0", () => {
         log(`Max cache entries: ${MAX_CACHE_SIZE}`);
         log(`Max entry size: ${MAX_CACHE_ENTRY_SIZE} bytes`);
         log(`Default TTL: ${DEFAULT_TTL} seconds`);
+        log(`CDN TTL: ${CDN_TTL} seconds (for downstream caches like CloudFront)`);
     }
     log(`CORS proxy: enabled at /__proxy/`);
     log(`Debug mode: ${DEBUG ? "enabled" : "disabled"}`);
