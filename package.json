@@ -32,6 +32,8 @@
     "docs:local-bundle:setup": "ts-node --compiler-options='{\"module\":\"commonjs\",\"types\":[\"node\"]}' ./packages/cdk/scripts/setupLocalBundle.ts",
     "docs:local-bundle:unzip": "tar -xzf ./docs_bundle.tar.gz -C ~/.fern/app-preview-local/.next",
     "docs:self-hosted-bundle:build": "NODE_ENV=production bash scripts/build-selfhosted-bundle.sh \"${BASE_PATH:-}\"",
+    "docs:self-hosted-docker:build": "cd servers/self-hosted && bash create_self_hosted_docker.sh fern-self-hosted latest",
+    "docs:self-hosted-docker:build:basepath": "cd servers/self-hosted && bash create_self_hosted_docker.sh fern-self-hosted-basepath latest /docs",
     "docs:self-hosted-fdr:compile": "bash scripts/compile-selfhosted-fdr.sh",
     "docs:start": "turbo docs:start",
     "fai:dev": "bash scripts/run-local-fai.sh",

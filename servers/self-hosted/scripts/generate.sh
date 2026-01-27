@@ -45,6 +45,7 @@ BASE_SCHEMA_DUMP="$BASE_SEED_DIR/postgres-schema.dump"
 # Customer seed artifacts (created by this script)
 SEED_DIR="/opt/fern-seed"
 SEED_MINIO_DIR="$SEED_DIR/minio"
+SEED_MEILI_DIR="$SEED_DIR/meilisearch"
 SEED_POSTGRES_DUMP="$SEED_DIR/postgres.dump"
 SEED_MARKER="$SEED_DIR/.seeded"
 
@@ -73,6 +74,13 @@ run_as_postgres() {
 # Cleanup function to ensure services are stopped on exit
 cleanup() {
     log "Cleaning up services..."
+    
+    # Stop Next.js (if started for search indexing)
+    if [ -n "${nextjs_pid:-}" ] && kill -0 "$nextjs_pid" 2>/dev/null; then
+        log "Stopping Next.js (PID: $nextjs_pid)..."
+        kill "$nextjs_pid" 2>/dev/null || true
+        wait "$nextjs_pid" 2>/dev/null || true
+    fi
     
     # Stop FDR
     if [ -n "${fdr_pid:-}" ] && kill -0 "$fdr_pid" 2>/dev/null; then
@@ -604,15 +612,136 @@ mkdir -p "$SEED_MINIO_DIR"
 cp -r /data/* "$SEED_MINIO_DIR/" 2>/dev/null || true
 log "MinIO data saved to $SEED_MINIO_DIR"
 
+# -----------  Index and Export MeiliSearch  -----------
+log "Indexing and exporting MeiliSearch data..."
+
+# We need to start Next.js temporarily to call the reindex endpoint
+log "Starting Next.js temporarily for search indexing..."
+cd /nextapp/packages/fern-docs/bundle
+
+HOSTNAME="127.0.0.1" \
+PORT=3001 \
+NEXT_PUBLIC_FDR_ORIGIN_PORT=8080 \
+NEXT_PUBLIC_FDR_ORIGIN="http://localhost:8080" \
+NEXT_PUBLIC_FDR_LAMBDA_ORIGIN="http://localhost:8080" \
+NEXT_PUBLIC_MINIO_BUCKET_HOST="http://localhost:9000" \
+NEXT_PUBLIC_MINIO_ACCESS_KEY="minioadmin" \
+NEXT_PUBLIC_MINIO_SECRET_KEY="minioadmin" \
+NEXT_PUBLIC_FILES_ORIGIN="http://localhost:9000/${MINIO_BUCKET_NAME}" \
+NEXT_PUBLIC_ASSET_HOSTING="1" \
+NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
+NEXT_PUBLIC_IS_SELF_HOSTED=1 \
+NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}" \
+NEXT_TELEMETRY_DISABLED=1 \
+NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700" \
+NEXT_PUBLIC_MEILISEARCH_API_KEY="fern123!" \
+NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
+NODE_OPTIONS="--max-old-space-size=4096" \
+node server.js 2>&1 &
+nextjs_pid=$!
+log "Next.js PID: $nextjs_pid"
+
+# Wait for Next.js to be ready
+for i in {1..60}; do
+    if curl -s --max-time 5 -o /dev/null "http://127.0.0.1:3001${NEXT_PUBLIC_BASE_PATH:-}/_next/static/" 2>/dev/null; then
+        log "Next.js is ready"
+        break
+    fi
+    log "Waiting for Next.js... ($i/60)"
+    sleep 2
+done
+
+# Call the meilisearch reindex endpoint
+log "Calling meilisearch reindex endpoint..."
+REINDEX_URL="http://127.0.0.1:3001${NEXT_PUBLIC_BASE_PATH:-}/api/fern-docs/search/v2/reindex/meilisearch"
+REINDEX_RESPONSE=$(curl -s --max-time 600 \
+    -H "x-fern-host: ${NEXT_PUBLIC_DOCS_DOMAIN_URL}" \
+    -H "Accept: application/json" \
+    -X GET "$REINDEX_URL" 2>&1)
+REINDEX_EXIT=$?
+
+if [ $REINDEX_EXIT -eq 0 ] && echo "$REINDEX_RESPONSE" | grep -q '"added"'; then
+    log "MeiliSearch reindex completed successfully!"
+    log "Reindex result: $REINDEX_RESPONSE"
+else
+    log "WARNING: MeiliSearch reindex may have failed"
+    log "Response: $REINDEX_RESPONSE"
+    log "Search may not be available at runtime"
+fi
+
+# Stop Next.js
+log "Stopping Next.js..."
+kill "$nextjs_pid" 2>/dev/null || true
+wait "$nextjs_pid" 2>/dev/null || true
+
+# Create MeiliSearch dump for restoration at runtime
+log "Creating MeiliSearch dump..."
+mkdir -p "$SEED_MEILI_DIR"
+
+# Request a dump from MeiliSearch
+DUMP_RESPONSE=$(curl -s -X POST \
+    -H "Authorization: Bearer fern123!" \
+    -H "Content-Type: application/json" \
+    "http://localhost:7700/dumps" 2>&1)
+DUMP_TASK_UID=$(echo "$DUMP_RESPONSE" | jq -r '.taskUid // empty' 2>/dev/null)
+
+if [ -n "$DUMP_TASK_UID" ]; then
+    log "MeiliSearch dump task started (taskUid: $DUMP_TASK_UID)"
+    
+    # Wait for dump to complete
+    for i in {1..60}; do
+        TASK_STATUS=$(curl -s -H "Authorization: Bearer fern123!" \
+            "http://localhost:7700/tasks/$DUMP_TASK_UID" 2>/dev/null)
+        STATUS=$(echo "$TASK_STATUS" | jq -r '.status // "unknown"' 2>/dev/null)
+        
+        if [ "$STATUS" = "succeeded" ]; then
+            log "MeiliSearch dump completed successfully"
+            break
+        elif [ "$STATUS" = "failed" ]; then
+            log "WARNING: MeiliSearch dump failed"
+            echo "$TASK_STATUS" | jq . 2>/dev/null || echo "$TASK_STATUS"
+            break
+        fi
+        
+        log "Waiting for MeiliSearch dump... ($i/60, status: $STATUS)"
+        sleep 1
+    done
+    
+    # Copy dump file from MeiliSearch's dump directory
+    # MeiliSearch creates dumps in its db-path/dumps/ directory
+    if [ -d "$MEILI_DB_PATH/dumps" ]; then
+        DUMP_FILE=$(ls -t "$MEILI_DB_PATH/dumps/"*.dump 2>/dev/null | head -1)
+        if [ -n "$DUMP_FILE" ] && [ -f "$DUMP_FILE" ]; then
+            cp "$DUMP_FILE" "$SEED_MEILI_DIR/search.dump"
+            log "MeiliSearch dump saved to $SEED_MEILI_DIR/search.dump"
+            log "Dump size: $(du -h "$SEED_MEILI_DIR/search.dump" | cut -f1)"
+        else
+            log "WARNING: Could not find MeiliSearch dump file"
+        fi
+    else
+        log "WARNING: MeiliSearch dumps directory not found at $MEILI_DB_PATH/dumps"
+    fi
+else
+    log "WARNING: Failed to start MeiliSearch dump"
+    log "Response: $DUMP_RESPONSE"
+fi
+
+cd /fern
+
 # Create marker file with metadata
 log "Creating seed marker..."
+MEILI_DUMP_SIZE="none"
+if [ -f "$SEED_MEILI_DIR/search.dump" ]; then
+    MEILI_DUMP_SIZE=$(du -h "$SEED_MEILI_DIR/search.dump" | cut -f1)
+fi
 cat > "$SEED_MARKER" << EOF
 {
     "timestamp": "$(date -Iseconds)",
     "org_name": "$ORG_NAME",
     "docs_domain": "$NEXT_PUBLIC_DOCS_DOMAIN_URL",
     "base_path": "${NEXT_PUBLIC_BASE_PATH:-}",
-    "fern_version": "$(fern --version 2>/dev/null || echo 'unknown')"
+    "fern_version": "$(fern --version 2>/dev/null || echo 'unknown')",
+    "meilisearch_dump": "$MEILI_DUMP_SIZE"
 }
 EOF
 
@@ -631,10 +760,20 @@ log "=========================================="
 log "Seeded data location: $SEED_DIR"
 log "  - PostgreSQL dump: $SEED_POSTGRES_DUMP"
 log "  - MinIO data: $SEED_MINIO_DIR"
+if [ -f "$SEED_MEILI_DIR/search.dump" ]; then
+    log "  - MeiliSearch dump: $SEED_MEILI_DIR/search.dump ($MEILI_DUMP_SIZE)"
+else
+    log "  - MeiliSearch dump: (not created - search will be indexed at runtime)"
+fi
 log "  - Marker: $SEED_MARKER"
 log ""
 log "The container will automatically use this seeded data at runtime."
 log "No network access will be required for docs generation."
+if [ -f "$SEED_MEILI_DIR/search.dump" ]; then
+    log "Search will be available immediately (pre-indexed at build time)."
+else
+    log "Search will be indexed at container startup (may take several minutes)."
+fi
 log "=========================================="
 
 # Cleanup is handled by trap

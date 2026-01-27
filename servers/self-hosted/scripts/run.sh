@@ -18,6 +18,7 @@ SEED_DIR="/opt/fern-seed"
 SEED_MARKER="$SEED_DIR/.seeded"
 SEED_MINIO_DIR="$SEED_DIR/minio"
 SEED_POSTGRES_DUMP="$SEED_DIR/postgres.dump"
+SEED_MEILI_DUMP="$SEED_DIR/meilisearch/search.dump"
 USE_SEEDED_DATA=false
 
 if [ -f "$SEED_MARKER" ]; then
@@ -256,8 +257,16 @@ mkdir -p "$MEILI_DB_PATH"
 # so we need to ensure the working directory is writable by the current UID
 cd "$MEILI_DB_PATH"
 
+# Check if we have a seeded MeiliSearch dump to import
+MEILI_IMPORT_FLAG=""
+if [ "$USE_SEEDED_DATA" = "true" ] && [ -f "$SEED_MEILI_DUMP" ]; then
+    log "Found seeded MeiliSearch dump at $SEED_MEILI_DUMP"
+    log "MeiliSearch will import pre-indexed search data at startup"
+    MEILI_IMPORT_FLAG="--import-dump $SEED_MEILI_DUMP"
+fi
+
 log "Starting MeiliSearch with db-path: $MEILI_DB_PATH..."
-/meilisearch --master-key="fern123!" --db-path "$MEILI_DB_PATH" 2>&1 | tee /tmp/meilisearch.log | add_timestamps &
+/meilisearch --master-key="fern123!" --db-path "$MEILI_DB_PATH" $MEILI_IMPORT_FLAG 2>&1 | tee /tmp/meilisearch.log | add_timestamps &
 meili_pid=$!
 log "MeiliSearch PID: $meili_pid"
 
@@ -543,6 +552,12 @@ CACHE_PROXY_PORT=3000
 log "Starting Next.js on internal port ${NEXTJS_INTERNAL_PORT}..."
 
 cd /nextapp/packages/fern-docs/bundle
+
+# Set Node.js memory limit - default to 4GB, can be overridden via NODE_MEMORY_LIMIT env var
+# Large documentation sites (e.g., with many API versions) may need more memory during search indexing
+NODEJS_HEAP_SIZE="${NODE_MEMORY_LIMIT:-4096}"
+log "Starting Next.js with ${NODEJS_HEAP_SIZE}MB heap limit (set NODE_MEMORY_LIMIT to override)"
+
 HOSTNAME="127.0.0.1" \
 PORT=${NEXTJS_INTERNAL_PORT} \
 NEXT_PUBLIC_FDR_ORIGIN_PORT=8080 \
@@ -560,6 +575,7 @@ NEXT_TELEMETRY_DISABLED=1 \
 NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700" \
 NEXT_PUBLIC_MEILISEARCH_API_KEY="fern123!" \
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
+NODE_OPTIONS="--max-old-space-size=${NODEJS_HEAP_SIZE}" \
 node server.js 2>&1 | tee /tmp/nextjs.log | add_timestamps &
 docs_pid=$!
 if [ $? -ne 0 ]; then
@@ -672,25 +688,66 @@ log "  - http://localhost:8081/liveness  - Check if processes are alive"
 log "  - http://localhost:8081/readiness - Check if services are ready"
 log "  - http://localhost:8081/health    - Legacy health endpoint"
 
-log "Calling /api/fern-docs/search/v2/reindex/meilisearch route..."
-# Try to reindex search, but don't block startup if it fails
-# This is non-critical - docs will work without search
-REINDEX_ATTEMPTS=0
-MAX_REINDEX_ATTEMPTS=10
-REINDEX_URL="http://localhost:3000${NEXT_PUBLIC_BASE_PATH:-}/api/fern-docs/search/v2/reindex/meilisearch"
-until curl -f -X GET "$REINDEX_URL" 2>/dev/null; do
-    REINDEX_ATTEMPTS=$((REINDEX_ATTEMPTS + 1))
-    if [ $REINDEX_ATTEMPTS -ge $MAX_REINDEX_ATTEMPTS ]; then
-        log "WARNING: Failed to reindex search after $MAX_REINDEX_ATTEMPTS attempts"
-        log "WARNING: Docs will be available but search functionality may not work"
-        log "WARNING: This is expected in restricted environments where MeiliSearch cannot run"
-        break
-    fi
-    log "Reindex route not ready yet, retrying in 2 seconds... (attempt $REINDEX_ATTEMPTS/$MAX_REINDEX_ATTEMPTS)"
-    sleep 2
-done
-if [ $REINDEX_ATTEMPTS -lt $MAX_REINDEX_ATTEMPTS ]; then
-    log "Successfully called /api/fern-docs/search/v2/reindex/meilisearch"
+# Skip search reindex if using seeded data (search was pre-indexed at build time)
+if [ "$USE_SEEDED_DATA" = "true" ] && [ -f "$SEED_MEILI_DUMP" ]; then
+    log "=========================================="
+    log "Skipping search reindex (using seeded MeiliSearch data)"
+    log "=========================================="
+    log "Search index was pre-built at image build time and imported at startup."
+    log "Search should be available immediately!"
+else
+    log "Calling /api/fern-docs/search/v2/reindex/meilisearch route..."
+    # Try to reindex search, but don't block startup if it fails
+    # This is non-critical - docs will work without search
+    REINDEX_URL="http://localhost:3000${NEXT_PUBLIC_BASE_PATH:-}/api/fern-docs/search/v2/reindex/meilisearch"
+
+    # Run reindex in background so it doesn't block container startup
+    # Search indexing can take several minutes for large documentation sites
+    (
+        log "[reindex] Starting search reindex in background..."
+        log "[reindex] URL: $REINDEX_URL"
+        log "[reindex] Domain: ${NEXT_PUBLIC_DOCS_DOMAIN_URL}"
+        
+        # Wait a moment for everything to settle
+        sleep 3
+        
+        # Use longer timeout for large docs (10 minutes)
+        # Include x-fern-host header to ensure proper domain resolution
+        # Use -w to get HTTP status code, -o to capture body separately
+        REINDEX_BODY_FILE="/tmp/reindex_response.json"
+        HTTP_CODE=$(curl -s -o "$REINDEX_BODY_FILE" -w "%{http_code}" \
+            --max-time 600 \
+            -H "x-fern-host: ${NEXT_PUBLIC_DOCS_DOMAIN_URL}" \
+            -H "Accept: application/json" \
+            -X GET "$REINDEX_URL" 2>&1)
+        REINDEX_EXIT=$?
+        
+        if [ $REINDEX_EXIT -ne 0 ]; then
+            log "[reindex] WARNING: curl failed with exit code $REINDEX_EXIT"
+            log "[reindex] Docs will work but search may not be available"
+        elif [ "$HTTP_CODE" = "200" ]; then
+            REINDEX_RESULT=$(cat "$REINDEX_BODY_FILE" 2>/dev/null | head -c 500)
+            # Check if response is JSON (starts with { or [)
+            if echo "$REINDEX_RESULT" | grep -q "^[{\[]"; then
+                log "[reindex] Search reindex completed successfully (HTTP $HTTP_CODE)"
+                log "[reindex] Result: $REINDEX_RESULT"
+            else
+                log "[reindex] WARNING: Expected JSON but got HTML response (HTTP $HTTP_CODE)"
+                log "[reindex] This usually means the domain is not configured correctly"
+                log "[reindex] Response preview: $(echo "$REINDEX_RESULT" | head -c 200)"
+            fi
+        else
+            REINDEX_RESULT=$(cat "$REINDEX_BODY_FILE" 2>/dev/null | head -c 500)
+            log "[reindex] WARNING: Search reindex failed (HTTP $HTTP_CODE)"
+            log "[reindex] Response: $REINDEX_RESULT"
+            log "[reindex] Docs will work but search may not be available"
+        fi
+        
+        rm -f "$REINDEX_BODY_FILE"
+    ) &
+    REINDEX_PID=$!
+    log "Search reindex started in background (PID: $REINDEX_PID)"
+    log "Search will be available after indexing completes (may take several minutes for large docs)"
 fi
 
 # --------------  Start cache warmup --------------
