@@ -263,6 +263,9 @@ export class S3ServiceImpl implements S3Service {
         images: DocsV2Write.ImageFilePath[];
         isPrivate: boolean;
     }): Promise<S3DocsUploadResult> {
+        this.app.logger.debug(
+            `[S3] getPresignedDocsAssetsUploadUrls: domain=${domain}, filepaths=${filepaths.length}, images=${images.length}, isPrivate=${isPrivate}`
+        );
         const fileInfos: Record<DocsV1Write.FilePath, S3DocsFileInfo> = {};
         const skippedFiles: DocsV1Write.FilePath[] = [];
         const time: string = new Date().toISOString();
@@ -421,10 +424,12 @@ export class S3ServiceImpl implements S3Service {
             input.ContentType = "image/svg+xml";
         }
         const command = new PutObjectCommand(input);
-        return {
-            url: await getSignedUrl(isPrivate ? this.privateDocsS3 : this.publicDocsS3, command, { expiresIn: 3600 }),
-            key
-        };
+        this.app.logger.debug(`[S3] Creating presigned URL for bucket=${bucketName}, key=${key}`);
+        const url = await getSignedUrl(isPrivate ? this.privateDocsS3 : this.publicDocsS3, command, {
+            expiresIn: 3600
+        });
+        this.app.logger.debug(`[S3] Presigned URL created successfully`);
+        return { url, key };
     }
 
     async getPresignedApiDefinitionSourceDownloadUrl({ key }: { key: string }): Promise<string> {

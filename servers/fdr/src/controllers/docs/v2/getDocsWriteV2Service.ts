@@ -102,11 +102,16 @@ function parseCustomDomainUrls({ customUrls }: { customUrls: string[] }): Parsed
 export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
     return new DocsV2WriteService({
         startDocsRegister: async (req, res) => {
+            app.logger.debug(`[startDocsRegister] Starting for org=${req.body.orgId}, domain=${req.body.domain}`);
+
+            app.logger.debug(`[startDocsRegister] Checking user belongs to org...`);
             await app.services.auth.checkUserBelongsToOrg({
                 authHeader: req.headers.authorization,
                 orgId: req.body.orgId
             });
+            app.logger.debug(`[startDocsRegister] Auth check passed`);
 
+            app.logger.debug(`[startDocsRegister] Validating domain URL...`);
             const fernUrl = validateAndParseFernDomainUrl({
                 app,
                 url: req.body.domain
@@ -114,11 +119,13 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
             const customUrls = parseCustomDomainUrls({
                 customUrls: req.body.customDomains
             });
+            app.logger.debug(`[startDocsRegister] Domain validated: ${fernUrl.getFullUrl()}`);
 
             // Check CLI permission if org is in the allowlist (or if "*" is set for all orgs)
             const shouldCheckCliPermission =
                 app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(req.body.orgId);
             if (shouldCheckCliPermission) {
+                app.logger.debug(`[startDocsRegister] Checking CLI permission...`);
                 // Check if this is an existing docs site (for fine-grained permission check)
                 const existingDocsOrgId = await app.dao.docsV2().getOrgIdForDocsUrl(fernUrl.toURL());
                 const isExistingSite = existingDocsOrgId != null;
@@ -129,9 +136,11 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                     orgId: req.body.orgId,
                     docsUrl: isExistingSite ? fernUrl.getFullUrl() : undefined
                 });
+                app.logger.debug(`[startDocsRegister] CLI permission check passed`);
             }
 
             // ensure that the domains are not already registered by another org
+            app.logger.debug(`[startDocsRegister] Checking domain ownership...`);
             const { allDomainsOwned: hasOwnership, unownedDomains } = await app.dao
                 .docsV2()
                 .checkDomainsDontBelongToAnotherOrg(
@@ -143,19 +152,30 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                     `The following domains belong to another organization: ${unownedDomains.join(", ")}`
                 );
             }
+            app.logger.debug(`[startDocsRegister] Domain ownership verified`);
 
             const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());
+            app.logger.debug(
+                `[startDocsRegister] Getting presigned URLs for ${req.body.filepaths.length} files, ${req.body.images?.length ?? 0} images...`
+            );
             const { fileInfos, skippedFiles } = await app.services.s3.getPresignedDocsAssetsUploadUrls({
                 domain: req.body.domain,
                 filepaths: req.body.filepaths,
                 images: req.body.images ?? [],
                 isPrivate: req.body.authConfig?.type === "private"
             });
+            app.logger.debug(
+                `[startDocsRegister] Got ${Object.keys(fileInfos).length} presigned URLs, ${skippedFiles.length} skipped`
+            );
 
+            app.logger.debug(`[startDocsRegister] Sending Slack notification...`);
             await app.services.slack.notifyGeneratedDocs({
                 orgId: req.body.orgId,
                 urls: [fernUrl.toURL().toString(), ...customUrls.map((url) => url.toURL().toString())]
             });
+            app.logger.debug(`[startDocsRegister] Slack notification sent`);
+
+            app.logger.debug(`[startDocsRegister] Storing registration...`);
             await app.dao.docsRegistration().storeDocsRegistrationById(docsRegistrationId, {
                 fernUrl,
                 customUrls,
@@ -164,6 +184,8 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                 isPreview: false,
                 authType: req.body.authConfig?.type === "private" ? AuthType.WORKOS_SSO : AuthType.PUBLIC
             });
+            app.logger.debug(`[startDocsRegister] Registration stored, returning response`);
+
             return res.send({
                 docsRegistrationId,
                 uploadUrls: Object.fromEntries(

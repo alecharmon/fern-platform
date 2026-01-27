@@ -474,12 +474,15 @@ else
         }
     fi
 
-    log "Disk usage before fern generate:"
-    df -h 2>&1 | add_timestamps || true
-    log "Inode usage:"
-    df -i 2>&1 | add_timestamps || true
-    log "MinIO data directory size:"
-    du -sh /data 2>&1 | add_timestamps || true
+    # Only show disk usage info when debug logging is enabled
+    if [ "${FERN_LOG_LEVEL:-debug}" = "debug" ]; then
+        log "Disk usage before fern generate:"
+        df -h 2>&1 | add_timestamps || true
+        log "Inode usage:"
+        df -i 2>&1 | add_timestamps || true
+        log "MinIO data directory size:"
+        du -sh /data 2>&1 | add_timestamps || true
+    fi
 
     # Run fern generate --docs - if this fails, the container will exit
     # FERN_LOG_LEVEL can be set to control verbosity (debug, info, warn, error). Defaults to debug for backwards compatibility.
