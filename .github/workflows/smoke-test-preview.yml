@@ -9,6 +9,7 @@ on:
       - "packages/fdr-sdk/**"
       - ".github/workflows/smoke-test-preview.yml"
       - "pnpm-lock.yaml"
+      - "scripts/visual-diff.ts"
   workflow_dispatch:
 
 jobs:

@@ -96,10 +96,11 @@ interface MultiDomainResults {
     totalErrors: number;
 }
 
-async function fetchSitemap(baseUrl: string, context: BrowserContext): Promise<string[]> {
+async function fetchSitemap(baseUrl: string, subpath: string, context: BrowserContext): Promise<string[]> {
     const page = await context.newPage();
     try {
-        const sitemapUrl = `${baseUrl}/sitemap.xml`;
+        // Include the subpath in the sitemap URL (e.g., /learn/sitemap.xml instead of /sitemap.xml)
+        const sitemapUrl = subpath ? `${baseUrl}${subpath}/sitemap.xml` : `${baseUrl}/sitemap.xml`;
         console.log(`Fetching sitemap from ${sitemapUrl}`);
 
         const response = await page.goto(sitemapUrl, {
@@ -139,6 +140,102 @@ function sanitizeFilename(pagePath: string): string {
     return pagePath.replace(/^\//, "").replace(/\//g, "_") || "index";
 }
 
+// Cookie consent popup selectors - used to remove cookie banners before screenshots
+const COOKIE_CONSENT_SELECTORS = [
+    // Class-based selectors
+    '[class*="cookie-consent"]',
+    '[class*="cookie-banner"]',
+    '[class*="cookie-notice"]',
+    '[class*="cookie-popup"]',
+    '[class*="cookie-modal"]',
+    '[class*="cookieconsent"]',
+    '[class*="CookieConsent"]',
+    '[class*="gdpr"]',
+    '[class*="GDPR"]',
+    '[class*="consent-banner"]',
+    '[class*="consent-modal"]',
+    '[class*="privacy-banner"]',
+    '[class*="privacy-notice"]',
+    ".cky-consent-container",
+    // ID-based selectors
+    '[id*="cookie-consent"]',
+    '[id*="cookie-banner"]',
+    '[id*="cookie-notice"]',
+    '[id*="cookieconsent"]',
+    '[id*="CookieConsent"]',
+    '[id*="gdpr"]',
+    '[id*="consent-banner"]',
+    '[id*="onetrust"]',
+    '[id*="OneTrust"]',
+    // Data attribute selectors
+    "[data-cookieconsent]",
+    "[data-cookie-consent]",
+    "[data-gdpr]",
+    // Common cookie consent library elements
+    "#onetrust-banner-sdk",
+    "#onetrust-consent-sdk",
+    ".onetrust-pc-dark-filter",
+    "#CybotCookiebotDialog",
+    "#CybotCookiebotDialogBodyUnderlay",
+    ".cc-window",
+    ".cc-banner",
+    "#cookiescript_injected",
+    ".osano-cm-window",
+    "#osano-cm-window",
+    ".termly-consent-banner",
+    "#termly-consent-banner",
+    // Generic modal/overlay selectors that might be cookie-related
+    '[aria-label*="cookie"]',
+    '[aria-label*="Cookie"]',
+    '[aria-label*="consent"]',
+    '[aria-label*="Consent"]',
+    '[aria-label*="GDPR"]',
+    '[aria-label*="privacy"]',
+    '[aria-label*="Privacy"]'
+];
+
+// Function to remove cookie consent popups - extracted for reuse
+function getRemoveCookieBannersScript(selectors: string[]): string {
+    return `
+        const cookieSelectors = ${JSON.stringify(selectors)};
+        
+        for (const selector of cookieSelectors) {
+            try {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach((el) => el.remove());
+            } catch {
+                // Ignore invalid selectors
+            }
+        }
+
+        // Also remove any fixed/sticky elements at the bottom that might be cookie banners
+        const allElements = document.querySelectorAll("*");
+        allElements.forEach((el) => {
+            const style = window.getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+            // Check if element is fixed/sticky at the bottom of the viewport
+            if (
+                (style.position === "fixed" || style.position === "sticky") &&
+                rect.bottom >= window.innerHeight - 100 &&
+                rect.height < 300
+            ) {
+                // Check if it contains cookie-related text
+                const text = el.textContent?.toLowerCase() || "";
+                if (
+                    text.includes("cookie") ||
+                    text.includes("consent") ||
+                    text.includes("gdpr") ||
+                    text.includes("privacy") ||
+                    text.includes("accept all") ||
+                    text.includes("reject all")
+                ) {
+                    el.remove();
+                }
+            }
+        });
+    `;
+}
+
 async function takeFullPageScreenshot(
     context: BrowserContext,
     url: string,
@@ -161,97 +258,8 @@ async function takeFullPageScreenshot(
             `
         });
 
-        // Remove cookie consent popups and banners
-        await page.evaluate(() => {
-            // Common selectors for cookie consent popups
-            const cookieSelectors = [
-                // Class-based selectors
-                '[class*="cookie-consent"]',
-                '[class*="cookie-banner"]',
-                '[class*="cookie-notice"]',
-                '[class*="cookie-popup"]',
-                '[class*="cookie-modal"]',
-                '[class*="cookieconsent"]',
-                '[class*="CookieConsent"]',
-                '[class*="gdpr"]',
-                '[class*="GDPR"]',
-                '[class*="consent-banner"]',
-                '[class*="consent-modal"]',
-                '[class*="privacy-banner"]',
-                '[class*="privacy-notice"]',
-                ".cky-consent-container",
-                // ID-based selectors
-                '[id*="cookie-consent"]',
-                '[id*="cookie-banner"]',
-                '[id*="cookie-notice"]',
-                '[id*="cookieconsent"]',
-                '[id*="CookieConsent"]',
-                '[id*="gdpr"]',
-                '[id*="consent-banner"]',
-                '[id*="onetrust"]',
-                '[id*="OneTrust"]',
-                // Data attribute selectors
-                "[data-cookieconsent]",
-                "[data-cookie-consent]",
-                "[data-gdpr]",
-                // Common cookie consent library elements
-                "#onetrust-banner-sdk",
-                "#onetrust-consent-sdk",
-                ".onetrust-pc-dark-filter",
-                "#CybotCookiebotDialog",
-                "#CybotCookiebotDialogBodyUnderlay",
-                ".cc-window",
-                ".cc-banner",
-                "#cookiescript_injected",
-                ".osano-cm-window",
-                "#osano-cm-window",
-                ".termly-consent-banner",
-                "#termly-consent-banner",
-                // Generic modal/overlay selectors that might be cookie-related
-                '[aria-label*="cookie"]',
-                '[aria-label*="Cookie"]',
-                '[aria-label*="consent"]',
-                '[aria-label*="Consent"]',
-                '[aria-label*="GDPR"]',
-                '[aria-label*="privacy"]',
-                '[aria-label*="Privacy"]'
-            ];
-
-            for (const selector of cookieSelectors) {
-                try {
-                    const elements = document.querySelectorAll(selector);
-                    elements.forEach((el) => el.remove());
-                } catch {
-                    // Ignore invalid selectors
-                }
-            }
-
-            // Also remove any fixed/sticky elements at the bottom that might be cookie banners
-            const allElements = document.querySelectorAll("*");
-            allElements.forEach((el) => {
-                const style = window.getComputedStyle(el);
-                const rect = el.getBoundingClientRect();
-                // Check if element is fixed/sticky at the bottom of the viewport
-                if (
-                    (style.position === "fixed" || style.position === "sticky") &&
-                    rect.bottom >= window.innerHeight - 100 &&
-                    rect.height < 300
-                ) {
-                    // Check if it contains cookie-related text
-                    const text = el.textContent?.toLowerCase() || "";
-                    if (
-                        text.includes("cookie") ||
-                        text.includes("consent") ||
-                        text.includes("gdpr") ||
-                        text.includes("privacy") ||
-                        text.includes("accept all") ||
-                        text.includes("reject all")
-                    ) {
-                        el.remove();
-                    }
-                }
-            });
-        });
+        // Remove cookie consent popups and banners (first pass - catches immediately visible banners)
+        await page.evaluate(getRemoveCookieBannersScript(COOKIE_CONSENT_SELECTORS));
 
         // Wait for fonts to load
         await page.evaluate(() => document.fonts.ready);
@@ -279,6 +287,11 @@ async function takeFullPageScreenshot(
 
         // Wait for client-side rendered components (like Mermaid diagrams) to fully render
         await page.waitForTimeout(waitTime);
+
+        // Remove cookie consent popups again - some banners load lazily after the initial page load
+        // (e.g., Cohere's cookie banner appears after a delay and would be missed by the earlier removal)
+        await page.evaluate(getRemoveCookieBannersScript(COOKIE_CONSENT_SELECTORS));
+
         await page.screenshot({ path: outputPath, fullPage: true });
     } finally {
         await page.close();
@@ -434,7 +447,7 @@ async function runVisualDiffForDomain(
 
         await setupPage.close();
 
-        const sitemapUrls = await fetchSitemap(liveBaseUrlString, liveContext);
+        const sitemapUrls = await fetchSitemap(liveBaseUrlString, liveSubpath, liveContext);
 
         if (sitemapUrls.length === 0) {
             console.error("No URLs found in sitemap.");
