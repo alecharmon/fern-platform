@@ -191,8 +191,31 @@ export function findNode(root: FernNavigation.RootNode, slug: FernNavigation.Slu
             return node;
         });
 
-        const currentTab =
+        let currentTab: FernNavigation.TabNode | FernNavigation.ChangelogNode | undefined =
             currentTabNode?.type === "tab" || currentTabNode?.type === "changelog" ? currentTabNode : undefined;
+
+        // If currentTab is undefined and we have tabs, try to find the appropriate tab
+        if (currentTab == null && tabbedNode != null) {
+            // First, check if any tab's pointsTo matches the current page's slug
+            for (const tab of tabbedNode.children) {
+                if (tab.type === "tab" && tab.pointsTo === found.node.slug) {
+                    currentTab = tab;
+                    break;
+                }
+                if (tab.type === "changelog" && tab.slug === found.node.slug) {
+                    currentTab = tab;
+                    break;
+                }
+            }
+
+            // If still no tab found and we're on a landing page, select the first tab
+            if (currentTab == null && found.node.type === "landingPage") {
+                const firstTab = tabbedNode.children.find((tab) => tab.type === "tab" || tab.type === "changelog");
+                if (firstTab != null && (firstTab.type === "tab" || firstTab.type === "changelog")) {
+                    currentTab = firstTab;
+                }
+            }
+        }
         // External product links don't have slugs, so fall back to version or root slug
         const slugPrefix =
             currentVariant?.slug ??
