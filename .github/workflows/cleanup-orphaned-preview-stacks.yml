@@ -29,6 +29,7 @@ jobs:
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1
+          role-duration-seconds: 5400 # 90 minutes - sufficient with parallel deletions
 
       - name: Verify AWS Connection
         run: aws sts get-caller-identity
@@ -59,77 +60,111 @@ jobs:
           OPEN_PRS=$(gh pr list --repo fern-api/fern-platform --state open --json number --jq '.[].number')
           echo "Open PRs: $OPEN_PRS"
 
-          ORPHANED_COUNT=0
-          CLEANED_COUNT=0
-          FAILED_COUNT=0
+          # Phase 1: Identify orphaned stacks and trigger deletions in parallel
+          echo ""
+          echo "=== Phase 1: Triggering deletions ==="
+          ORPHANED_STACKS=""
 
           for STACK in $STACKS; do
-            # Extract PR number from stack name (format: fdr-lambda-preview-{PR_NUMBER})
             PR_NUMBER=$(echo "$STACK" | sed 's/fdr-lambda-preview-//')
 
-            # Check if PR is still open
             if echo "$OPEN_PRS" | grep -q "^${PR_NUMBER}$"; then
               echo "Stack $STACK: PR #$PR_NUMBER is still open, skipping."
               continue
             fi
 
             echo "Stack $STACK: PR #$PR_NUMBER is closed/merged, marking for cleanup."
-            ORPHANED_COUNT=$((ORPHANED_COUNT + 1))
+            ORPHANED_STACKS="$ORPHANED_STACKS $STACK"
 
             if [ "$DRY_RUN" = "true" ]; then
               echo "[DRY RUN] Would delete stack: $STACK"
             else
-              echo "Deleting stack: $STACK"
-              MAX_RETRIES=3
-              RETRY_COUNT=0
-              DELETE_SUCCESS=false
+              echo "Triggering deletion for stack: $STACK"
+              if aws cloudformation delete-stack --stack-name "$STACK"; then
+                echo "  Delete initiated for $STACK"
+              else
+                echo "  WARNING: Failed to initiate deletion for $STACK"
+              fi
+              sleep 5
+            fi
+          done
 
-              while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ] && [ "$DELETE_SUCCESS" = "false" ]; do
-                if [ "$RETRY_COUNT" -gt 0 ]; then
-                  BACKOFF=$((30 * RETRY_COUNT))
-                  echo "Retry $RETRY_COUNT/$MAX_RETRIES: Waiting ${BACKOFF}s before retrying..."
-                  sleep "$BACKOFF"
-                fi
+          ORPHANED_COUNT=$(echo $ORPHANED_STACKS | wc -w)
+          echo ""
+          echo "Orphaned stacks found: $ORPHANED_COUNT"
 
-                if aws cloudformation delete-stack --stack-name "$STACK"; then
-                  echo "Waiting for stack $STACK to be deleted..."
-                  if aws cloudformation wait stack-delete-complete --stack-name "$STACK"; then
-                    echo "Stack $STACK deleted successfully."
-                    CLEANED_COUNT=$((CLEANED_COUNT + 1))
-                    DELETE_SUCCESS=true
-                  else
-                    echo "WARNING: Timed out or failed waiting for stack $STACK deletion."
-                    RETRY_COUNT=$((RETRY_COUNT + 1))
-                  fi
+          if [ "$DRY_RUN" = "true" ] || [ -z "$ORPHANED_STACKS" ]; then
+            echo "=== Summary ==="
+            echo "Stacks that would be deleted: $ORPHANED_COUNT"
+            exit 0
+          fi
+
+          # Phase 2: Poll for completion with retries
+          echo ""
+          echo "=== Phase 2: Waiting for deletions to complete ==="
+          MAX_RETRIES=3
+          CLEANED_COUNT=0
+          FAILED_COUNT=0
+
+          for STACK in $ORPHANED_STACKS; do
+            echo "Checking status of $STACK..."
+            RETRY_COUNT=0
+            DELETE_SUCCESS=false
+
+            while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ] && [ "$DELETE_SUCCESS" = "false" ]; do
+              # Check current stack status
+              STACK_STATUS=$(aws cloudformation describe-stacks --stack-name "$STACK" 2>/dev/null \
+                | jq -r '.Stacks[0].StackStatus // empty' || echo "")
+
+              if [ -z "$STACK_STATUS" ]; then
+                echo "  Stack $STACK has been deleted successfully."
+                CLEANED_COUNT=$((CLEANED_COUNT + 1))
+                DELETE_SUCCESS=true
+              elif [ "$STACK_STATUS" = "DELETE_IN_PROGRESS" ]; then
+                echo "  Stack $STACK is still deleting, waiting (timeout: 30 min)..."
+                if timeout 1800 aws cloudformation wait stack-delete-complete --stack-name "$STACK" 2>/dev/null; then
+                  echo "  Stack $STACK deleted successfully."
+                  CLEANED_COUNT=$((CLEANED_COUNT + 1))
+                  DELETE_SUCCESS=true
                 else
-                  echo "WARNING: Failed to initiate deletion for stack $STACK"
+                  WAIT_EXIT_CODE=$?
+                  if [ "$WAIT_EXIT_CODE" -eq 124 ]; then
+                    echo "  WARNING: Timed out after 30 minutes waiting for $STACK."
+                  else
+                    echo "  WARNING: Wait failed for $STACK (exit code: $WAIT_EXIT_CODE)."
+                  fi
                   RETRY_COUNT=$((RETRY_COUNT + 1))
                 fi
-              done
-
-              if [ "$DELETE_SUCCESS" = "false" ]; then
-                echo "ERROR: Failed to delete stack $STACK after $MAX_RETRIES retries."
-                FAILED_COUNT=$((FAILED_COUNT + 1))
+              elif [ "$STACK_STATUS" = "DELETE_FAILED" ]; then
+                echo "  Stack $STACK deletion failed, retrying..."
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; then
+                  aws cloudformation delete-stack --stack-name "$STACK" || true
+                  sleep 10
+                fi
+              else
+                echo "  Stack $STACK is in unexpected state: $STACK_STATUS, retrying deletion..."
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; then
+                  aws cloudformation delete-stack --stack-name "$STACK" || true
+                  sleep 10
+                fi
               fi
+            done
 
-              # Add delay between stack deletions to avoid API rate limits
-              echo "Waiting 30s before next deletion to avoid rate limits..."
-              sleep 30
+            if [ "$DELETE_SUCCESS" = "false" ]; then
+              echo "  ERROR: Failed to delete stack $STACK after $MAX_RETRIES retries."
+              FAILED_COUNT=$((FAILED_COUNT + 1))
             fi
           done
 
           echo ""
           echo "=== Summary ==="
           echo "Orphaned stacks found: $ORPHANED_COUNT"
-          if [ "$DRY_RUN" = "true" ]; then
-            echo "Stacks that would be deleted: $ORPHANED_COUNT"
-          else
-            echo "Stacks deleted: $CLEANED_COUNT"
-            echo "Stacks failed: $FAILED_COUNT"
-            if [ "$FAILED_COUNT" -gt 0 ]; then
-              echo "ERROR: $FAILED_COUNT stack deletion(s) failed. Failing CI."
-              exit 1
-            fi
+          echo "Stacks deleted: $CLEANED_COUNT"
+          echo "Stacks failed: $FAILED_COUNT"
+          if [ "$FAILED_COUNT" -gt 0 ]; then
+            echo "WARNING: $FAILED_COUNT stack deletion(s) failed. These will be retried on the next scheduled run."
           fi
 
       - name: Cleanup orphaned security group rules
@@ -221,6 +256,7 @@ jobs:
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1
+          role-duration-seconds: 5400 # 90 minutes - sufficient with parallel deletions
 
       - name: Verify AWS Connection
         run: aws sts get-caller-identity
@@ -251,75 +287,109 @@ jobs:
           OPEN_PRS=$(gh pr list --repo fern-api/fern-platform --state open --label deployFaiChat --json number --jq '.[].number')
           echo "Open PRs with deployFaiChat label: $OPEN_PRS"
 
-          ORPHANED_COUNT=0
-          CLEANED_COUNT=0
-          FAILED_COUNT=0
+          # Phase 1: Identify orphaned stacks and trigger deletions in parallel
+          echo ""
+          echo "=== Phase 1: Triggering deletions ==="
+          ORPHANED_STACKS=""
 
           for STACK in $STACKS; do
-            # Extract PR number from stack name (format: fai-chat-preview-{PR_NUMBER})
             PR_NUMBER=$(echo "$STACK" | sed 's/fai-chat-preview-//')
 
-            # Check if PR is still open with the label
             if echo "$OPEN_PRS" | grep -q "^${PR_NUMBER}$"; then
               echo "Stack $STACK: PR #$PR_NUMBER is still open with deployFaiChat label, skipping."
               continue
             fi
 
             echo "Stack $STACK: PR #$PR_NUMBER is closed/merged or label removed, marking for cleanup."
-            ORPHANED_COUNT=$((ORPHANED_COUNT + 1))
+            ORPHANED_STACKS="$ORPHANED_STACKS $STACK"
 
             if [ "$DRY_RUN" = "true" ]; then
               echo "[DRY RUN] Would delete stack: $STACK"
             else
-              echo "Deleting stack: $STACK"
-              MAX_RETRIES=3
-              RETRY_COUNT=0
-              DELETE_SUCCESS=false
+              echo "Triggering deletion for stack: $STACK"
+              if aws cloudformation delete-stack --stack-name "$STACK"; then
+                echo "  Delete initiated for $STACK"
+              else
+                echo "  WARNING: Failed to initiate deletion for $STACK"
+              fi
+              sleep 5
+            fi
+          done
 
-              while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ] && [ "$DELETE_SUCCESS" = "false" ]; do
-                if [ "$RETRY_COUNT" -gt 0 ]; then
-                  BACKOFF=$((30 * RETRY_COUNT))
-                  echo "Retry $RETRY_COUNT/$MAX_RETRIES: Waiting ${BACKOFF}s before retrying..."
-                  sleep "$BACKOFF"
-                fi
+          ORPHANED_COUNT=$(echo $ORPHANED_STACKS | wc -w)
+          echo ""
+          echo "Orphaned stacks found: $ORPHANED_COUNT"
 
-                if aws cloudformation delete-stack --stack-name "$STACK"; then
-                  echo "Waiting for stack $STACK to be deleted..."
-                  if aws cloudformation wait stack-delete-complete --stack-name "$STACK"; then
-                    echo "Stack $STACK deleted successfully."
-                    CLEANED_COUNT=$((CLEANED_COUNT + 1))
-                    DELETE_SUCCESS=true
-                  else
-                    echo "WARNING: Timed out or failed waiting for stack $STACK deletion."
-                    RETRY_COUNT=$((RETRY_COUNT + 1))
-                  fi
+          if [ "$DRY_RUN" = "true" ] || [ -z "$ORPHANED_STACKS" ]; then
+            echo "=== Summary ==="
+            echo "Stacks that would be deleted: $ORPHANED_COUNT"
+            exit 0
+          fi
+
+          # Phase 2: Poll for completion with retries
+          echo ""
+          echo "=== Phase 2: Waiting for deletions to complete ==="
+          MAX_RETRIES=3
+          CLEANED_COUNT=0
+          FAILED_COUNT=0
+
+          for STACK in $ORPHANED_STACKS; do
+            echo "Checking status of $STACK..."
+            RETRY_COUNT=0
+            DELETE_SUCCESS=false
+
+            while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ] && [ "$DELETE_SUCCESS" = "false" ]; do
+              # Check current stack status
+              STACK_STATUS=$(aws cloudformation describe-stacks --stack-name "$STACK" 2>/dev/null \
+                | jq -r '.Stacks[0].StackStatus // empty' || echo "")
+
+              if [ -z "$STACK_STATUS" ]; then
+                echo "  Stack $STACK has been deleted successfully."
+                CLEANED_COUNT=$((CLEANED_COUNT + 1))
+                DELETE_SUCCESS=true
+              elif [ "$STACK_STATUS" = "DELETE_IN_PROGRESS" ]; then
+                echo "  Stack $STACK is still deleting, waiting (timeout: 30 min)..."
+                if timeout 1800 aws cloudformation wait stack-delete-complete --stack-name "$STACK" 2>/dev/null; then
+                  echo "  Stack $STACK deleted successfully."
+                  CLEANED_COUNT=$((CLEANED_COUNT + 1))
+                  DELETE_SUCCESS=true
                 else
-                  echo "WARNING: Failed to initiate deletion for stack $STACK"
+                  WAIT_EXIT_CODE=$?
+                  if [ "$WAIT_EXIT_CODE" -eq 124 ]; then
+                    echo "  WARNING: Timed out after 30 minutes waiting for $STACK."
+                  else
+                    echo "  WARNING: Wait failed for $STACK (exit code: $WAIT_EXIT_CODE)."
+                  fi
                   RETRY_COUNT=$((RETRY_COUNT + 1))
                 fi
-              done
-
-              if [ "$DELETE_SUCCESS" = "false" ]; then
-                echo "ERROR: Failed to delete stack $STACK after $MAX_RETRIES retries."
-                FAILED_COUNT=$((FAILED_COUNT + 1))
+              elif [ "$STACK_STATUS" = "DELETE_FAILED" ]; then
+                echo "  Stack $STACK deletion failed, retrying..."
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; then
+                  aws cloudformation delete-stack --stack-name "$STACK" || true
+                  sleep 10
+                fi
+              else
+                echo "  Stack $STACK is in unexpected state: $STACK_STATUS, retrying deletion..."
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; then
+                  aws cloudformation delete-stack --stack-name "$STACK" || true
+                  sleep 10
+                fi
               fi
+            done
 
-              # Add delay between stack deletions to avoid API rate limits
-              echo "Waiting 30s before next deletion to avoid rate limits..."
-              sleep 30
+            if [ "$DELETE_SUCCESS" = "false" ]; then
+              echo "  ERROR: Failed to delete stack $STACK after $MAX_RETRIES retries."
+              FAILED_COUNT=$((FAILED_COUNT + 1))
             fi
           done
 
           echo ""
           echo "=== Summary ==="
           echo "Orphaned stacks found: $ORPHANED_COUNT"
-          if [ "$DRY_RUN" = "true" ]; then
-            echo "Stacks that would be deleted: $ORPHANED_COUNT"
-          else
-            echo "Stacks deleted: $CLEANED_COUNT"
-            echo "Stacks failed: $FAILED_COUNT"
-            if [ "$FAILED_COUNT" -gt 0 ]; then
-              echo "ERROR: $FAILED_COUNT stack deletion(s) failed. Failing CI."
-              exit 1
-            fi
+          echo "Stacks deleted: $CLEANED_COUNT"
+          echo "Stacks failed: $FAILED_COUNT"
+          if [ "$FAILED_COUNT" -gt 0 ]; then
+            echo "WARNING: $FAILED_COUNT stack deletion(s) failed. These will be retried on the next scheduled run."
           fi
