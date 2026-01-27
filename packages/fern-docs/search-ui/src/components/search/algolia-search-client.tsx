@@ -3,6 +3,7 @@
 import { getDevice, getPlatform } from "@fern-api/ui-core-utils";
 import type { FacetFilter, FacetName, FacetsResponse } from "@fern-docs/search-keyword";
 import { useLazyRef } from "@fern-ui/react-commons";
+import type { LegacySearchMethodProps, SearchMethodParams } from "algoliasearch/lite";
 import { type LiteClient, liteClient } from "algoliasearch/lite";
 import { uniq } from "es-toolkit/array";
 import { createContext, type PropsWithChildren, type ReactNode, useContext, useEffect, useMemo } from "react";
@@ -13,6 +14,59 @@ import useSWRImmutable from "swr/immutable";
 import { toAlgoliaFacetFilters } from "../../utils/facet-filters";
 import { FacetFiltersProvider } from "./FacetFiltersProvider";
 import { FacetFiltersContext, useFacetFilters } from "./useFacetFilters";
+
+/**
+ * Checks if all search requests have empty queries.
+ * Handles both modern SearchMethodParams and legacy array format.
+ */
+function allQueriesEmpty(params: SearchMethodParams | LegacySearchMethodProps): boolean {
+    const requests = Array.isArray(params) ? params : params.requests;
+    return requests.every((req) => {
+        // Handle both { query } and { params: { query } } formats
+        const query = (req as { query?: string }).query ?? (req as { params?: { query?: string } }).params?.query ?? "";
+        return query.trim().length === 0;
+    });
+}
+
+/**
+ * Creates an empty response matching Algolia's expected format.
+ * Used to skip unnecessary network requests for empty queries.
+ */
+function createEmptySearchResponse(params: SearchMethodParams | LegacySearchMethodProps) {
+    const requests = Array.isArray(params) ? params : params.requests;
+    return {
+        results: requests.map(() => ({
+            hits: [],
+            nbHits: 0,
+            nbPages: 0,
+            page: 0,
+            processingTimeMS: 0,
+            hitsPerPage: 0,
+            exhaustiveNbHits: false,
+            query: "",
+            params: ""
+        }))
+    };
+}
+
+/**
+ * Wraps an Algolia client to skip empty query requests.
+ * This prevents unnecessary network calls on initial mount when InstantSearch
+ * sends an empty query to "warm up" the connection.
+ *
+ * @see https://www.algolia.com/doc/guides/building-search-ui/going-further/conditional-requests/react/
+ */
+function createSearchClientProxy(client: LiteClient): LiteClient {
+    return {
+        ...client,
+        search: (searchMethodParams, requestOptions) => {
+            if (allQueriesEmpty(searchMethodParams)) {
+                return Promise.resolve(createEmptySearchResponse(searchMethodParams));
+            }
+            return client.search(searchMethodParams, requestOptions);
+        }
+    };
+}
 
 function AlgoliaSearchClientRoot({
     children,
@@ -81,7 +135,8 @@ const SearchClientContext = createContext<
 >(undefined);
 
 /**
- * Provides the algolia search client, and refreshes the client cache when the api key changes.
+ * Provides the Algolia search client wrapped in a proxy that prevents empty query requests.
+ * Refreshes the client cache when the API key changes.
  */
 function SearchClientProvider({
     children,
@@ -97,6 +152,7 @@ function SearchClientProvider({
     indexName: string;
 }): ReactNode {
     const client = useLazyRef(() => liteClient(appId, apiKey));
+    const proxyClient = useLazyRef(() => createSearchClientProxy(client.current));
 
     useEffect(() => {
         client.current.setClientApiKey({ apiKey });
@@ -104,7 +160,7 @@ function SearchClientProvider({
     }, [apiKey]);
 
     const value = useMemo(
-        () => ({ searchClient: client.current, apiKey, domain, indexName }),
+        () => ({ searchClient: proxyClient.current, apiKey, domain, indexName }),
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [apiKey, domain, indexName]
     );
