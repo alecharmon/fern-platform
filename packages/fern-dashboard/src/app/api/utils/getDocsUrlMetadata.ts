@@ -1,21 +1,16 @@
 import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
-import { cache } from "react";
 
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { getFdrClient } from "@/app/services/fdr/getFdrClient";
 import type { DocsUrl } from "@/utils/types";
 
-/**
- * Fetches docs URL metadata from FDR.
- * Uses React.cache() to deduplicate API calls within a single request tree.
- */
-export const getDocsUrlMetadata = cache(async ({ url, token }: { url: DocsUrl; token: string }) => {
+export async function getDocsUrlMetadata({ url, token }: { url: DocsUrl; token: string }) {
     return await getFdrClient({
         token
     }).docs.v2.read.getDocsUrlMetadata({
         url: FdrAPI.Url(url)
     });
-});
+}
 
 export async function getDocsUrlOwner({
     url,
