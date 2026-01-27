@@ -143,7 +143,7 @@ export default function LinkCheckerResults({
                             {brokenLinks.map((link, index) => {
                                 const rowKey = `broken-${index}`;
                                 return (
-                                    <TableRow key={index}>
+                                    <TableRow key={index} style={{ contentVisibility: "auto" }}>
                                         <TableCell>
                                             <a
                                                 href={link.url}
@@ -235,7 +235,7 @@ export default function LinkCheckerResults({
                             {blockedLinks.map((link, index) => {
                                 const rowKey = `blocked-${index}`;
                                 return (
-                                    <TableRow key={index}>
+                                    <TableRow key={index} style={{ contentVisibility: "auto" }}>
                                         <TableCell>
                                             <a
                                                 href={link.url}
