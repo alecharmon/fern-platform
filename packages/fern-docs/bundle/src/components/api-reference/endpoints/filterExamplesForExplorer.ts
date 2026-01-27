@@ -113,6 +113,19 @@ export function filterExamplesForExplorer(examples: ExampleEndpointCall[] | unde
         finalExamples = relevantExamples;
     }
 
+    // Sort examples so that those with request data come first, and those without come last
+    finalExamples.sort((a, b) => {
+        const aHasRequestData = hasRequestSideData(a.example);
+        const bHasRequestData = hasRequestSideData(b.example);
+        if (aHasRequestData && !bHasRequestData) {
+            return -1;
+        }
+        if (!aHasRequestData && bHasRequestData) {
+            return 1;
+        }
+        return 0;
+    });
+
     return {
         filteredExamples: finalExamples.map(({ example }) => example),
         indexMapping: finalExamples.map(({ originalIndex }) => originalIndex)

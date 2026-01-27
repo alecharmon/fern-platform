@@ -94,16 +94,37 @@ export function isVisibleExampleKey(examplesByStatusCode: ExamplesByStatusCode):
 
 /**
  * Get the first visible exampleKey for a language.
+ * Prioritizes examples with request-side data over those without.
  * Falls back to the first available exampleKey if none are visible.
  */
 function getFirstVisibleExampleKey(examplesByKeyAndStatusCode: ExamplesByKeyAndStatusCode): string | undefined {
+    const visibleKeys: { key: string; hasRequestData: boolean }[] = [];
+
     for (const [exampleKey, examplesByStatusCode] of Object.entries(examplesByKeyAndStatusCode)) {
         if (isVisibleExampleKey(examplesByStatusCode)) {
-            return exampleKey;
+            const examples = Object.values(examplesByStatusCode).flat();
+            const hasRequestData = examples.some((ex) => hasRequestSideData(ex.exampleCall));
+            visibleKeys.push({ key: exampleKey, hasRequestData });
         }
     }
-    // Fallback to first available if none are visible
-    return Object.keys(examplesByKeyAndStatusCode)[0];
+
+    if (visibleKeys.length === 0) {
+        // Fallback to first available if none are visible
+        return Object.keys(examplesByKeyAndStatusCode)[0];
+    }
+
+    // Sort so examples with request data come first
+    visibleKeys.sort((a, b) => {
+        if (a.hasRequestData && !b.hasRequestData) {
+            return -1;
+        }
+        if (!a.hasRequestData && b.hasRequestData) {
+            return 1;
+        }
+        return 0;
+    });
+
+    return visibleKeys[0]?.key;
 }
 
 /**
