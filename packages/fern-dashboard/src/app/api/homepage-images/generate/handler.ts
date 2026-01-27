@@ -18,44 +18,48 @@ import { getS3KeyForHomepageScreenshot } from "../getS3KeyForHomepageScreenshot"
 import type { Theme } from "../types";
 
 export default async function generateHomepageImages({ url }: { url: string }): Promise<MaybeErrorResponse> {
-    let browser: Browser;
+    let browser: Browser | undefined;
 
-    if (isProduction()) {
-        browser = await puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(),
-            headless: true
+    try {
+        if (isProduction()) {
+            browser = await puppeteer.launch({
+                args: chromium.args,
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: true
+            });
+        } else {
+            browser = await puppeteer.launch({
+                headless: true,
+                executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+            });
+        }
+
+        const page = await browser.newPage();
+        await page.setViewport({
+            width: HOMEPAGE_SCREENSHOT_WIDTH,
+            height: HOMEPAGE_SCREENSHOT_HEIGHT,
+            deviceScaleFactor: 2
         });
-    } else {
-        browser = await puppeteer.launch({
-            headless: true,
-            executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+        const urlWithProtocol = url.startsWith("http") ? url : `https://${url}`;
+        await takeScreenshotAndWriteToAws({
+            page,
+            url: urlWithProtocol,
+            theme: "light"
         });
+        await takeScreenshotAndWriteToAws({
+            page,
+            url: urlWithProtocol,
+            theme: "dark"
+        });
+
+        return { data: undefined };
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
     }
-
-    const page = await browser.newPage();
-    await page.setViewport({
-        width: HOMEPAGE_SCREENSHOT_WIDTH,
-        height: HOMEPAGE_SCREENSHOT_HEIGHT,
-        deviceScaleFactor: 2
-    });
-
-    const urlWithProtocol = url.startsWith("http") ? url : `https://${url}`;
-    await takeScreenshotAndWriteToAws({
-        page,
-        url: urlWithProtocol,
-        theme: "light"
-    });
-    await takeScreenshotAndWriteToAws({
-        page,
-        url: urlWithProtocol,
-        theme: "dark"
-    });
-
-    await browser.close();
-
-    return { data: undefined };
 }
 
 async function takeScreenshotAndWriteToAws({ page, url, theme }: { page: Page; url: string; theme: Theme }) {
