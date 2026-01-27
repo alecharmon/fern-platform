@@ -34,9 +34,17 @@ export async function maybeGetCurrentSession(req: NextRequest): Promise<MaybeErr
             }
         };
     } catch (e) {
-        console.error("Failed to get session data", e);
+        console.error("Failed to get session data", e, {
+            requestHeaders: Object.fromEntries(req.headers.entries()),
+            requestUrl: req.url
+        });
         return {
-            errorResponse: NextResponse.json({}, { status: 401 })
+            errorResponse: NextResponse.json(
+                {
+                    message: "Unable to get current session"
+                },
+                { status: 401 }
+            )
         };
     }
 }
