@@ -32,6 +32,7 @@ export async function OrgSwitcher({ currentOrgName }: { currentOrgName?: Auth0Or
             currentOrgName={currentOrgName}
             isFernAdmin={isFernAdmin}
             accessToken={session.accessToken}
+            userId={session.user.sub}
         />
     );
 }

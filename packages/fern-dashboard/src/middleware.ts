@@ -16,6 +16,26 @@ export async function middleware(req: NextRequest) {
         // the authorization flow" vs. here we get actually useful errors
         const error = req.nextUrl.searchParams.get("error");
         if (error != null) {
+            // Handle silent auth failures by retrying with regular login
+            // These errors occur when prompt=none is used but user needs to re-authenticate
+            const silentAuthErrors = ["login_required", "consent_required", "interaction_required"];
+            if (silentAuthErrors.includes(error)) {
+                // Get the original redirect URL and organization from cookies
+                const redirectOnLogin = req.cookies.get("redirect_on_login")?.value;
+                const pendingOrgId = req.cookies.get("pending_org_id")?.value;
+                const loginUrl = new URL("/auth/login", req.nextUrl.origin);
+                if (redirectOnLogin) {
+                    loginUrl.searchParams.set("redirect_on_login", redirectOnLogin);
+                }
+                if (pendingOrgId) {
+                    loginUrl.searchParams.set("organization", pendingOrgId);
+                }
+                // Don't include prompt=none this time - allow full login flow
+                const response = NextResponse.redirect(loginUrl);
+                // Clear the pending_org_id cookie since we're using it now
+                response.cookies.delete("pending_org_id");
+                return response;
+            }
             return NextResponse.redirect(
                 new URL("/error?" + buildErrorPageSearchParams(req.nextUrl.searchParams).toString(), req.nextUrl.origin)
             );
@@ -56,10 +76,11 @@ async function applyAuth0Middleware(req: NextRequest): Promise<NextResponse> {
     const authResponse = await auth0.middleware(req);
 
     // copied from https://github.com/auth0/nextjs-auth0/issues/1983
-    if (req.nextUrl.pathname === "/auth/login") {
-        // This is a workaround for this issue: https://github.com/auth0/nextjs-auth0/issues/1917
-        // The auth0 middleware sets some transaction cookies that are not deleted after the login flow completes.
-        // This causes stale cookies to be used in subsequent requests and eventually causes the request header to be rejected because it is too large.
+    // This is a workaround for this issue: https://github.com/auth0/nextjs-auth0/issues/1917
+    // The auth0 middleware sets some transaction cookies that are not deleted after the login flow completes.
+    // This causes stale cookies to be used in subsequent requests and eventually causes the request header to be rejected because it is too large.
+    // We clean these up on both login (before new flow) and callback (after flow completes) to prevent state mismatches.
+    if (req.nextUrl.pathname === "/auth/login" || req.nextUrl.pathname === "/auth/callback") {
         const reqCookieNames = req.cookies.getAll().map((cookie) => cookie.name);
         reqCookieNames.forEach((cookie) => {
             if (cookie.startsWith("__txn")) {
@@ -70,25 +91,38 @@ async function applyAuth0Middleware(req: NextRequest): Promise<NextResponse> {
 
     // Handle redirects after successful authentication
     const redirectLocation = req.nextUrl.searchParams.get("redirect_on_login");
-    if (req.nextUrl.pathname === "/auth/login" && redirectLocation) {
-        // If the user is logging in and they are attempting to access a specific page, we need to store the page
-        // in a cookie so we can redirect them there after log in
-        authResponse.cookies.set("redirect_on_login", redirectLocation, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "lax",
-            maxAge: 600 // 10 minutes
-        });
+    const organizationId = req.nextUrl.searchParams.get("organization");
+    if (req.nextUrl.pathname === "/auth/login") {
+        if (redirectLocation) {
+            // If the user is logging in and they are attempting to access a specific page, we need to store the page
+            // in a cookie so we can redirect them there after log in
+            authResponse.cookies.set("redirect_on_login", redirectLocation, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "lax",
+                maxAge: 600 // 10 minutes
+            });
+        }
+        if (organizationId) {
+            // Store org ID for silent auth retry fallback
+            authResponse.cookies.set("pending_org_id", organizationId, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "lax",
+                maxAge: 600 // 10 minutes
+            });
+        }
     }
 
     // Let Auth0 handle the callback first, then check for pending redirects on the next request
     // Don't intercept /auth/callback as it prevents Auth0 from establishing the session properly
 
-    // Clear the redirect_on_login cookie when user accesses matching page
-    // This ensures the cookie doesn't persist after the invitation flow is complete
+    // Clear auth cookies when user accesses matching page
+    // This ensures cookies don't persist after the auth flow is complete
     const pendingRedirect = req.cookies.get("redirect_on_login")?.value;
     if (pendingRedirect && req.nextUrl.pathname.includes(pendingRedirect)) {
         authResponse.cookies.delete("redirect_on_login");
+        authResponse.cookies.delete("pending_org_id");
     }
 
     return authResponse;

@@ -19,7 +19,7 @@ export default async function Page() {
     if (response.empty) {
         redirect(`/get-started`);
     } else {
-        return <DeepLinkRedirect defaultOrgName={response.orgName} targetPath="/members" />;
+        return <DeepLinkRedirect defaultOrgName={response.orgName} targetPath="/members" userId={session.user.sub} />;
     }
 }
 

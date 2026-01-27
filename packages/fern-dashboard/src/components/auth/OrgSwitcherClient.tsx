@@ -2,7 +2,7 @@
 
 import { useRouter } from "@bprogress/next/app";
 import { ChevronDown, Clock, Plus } from "lucide-react";
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 import type { Auth0Organization, Auth0OrgID, Auth0OrgName } from "@/app/services/auth0/types";
 import { CreateOrganizationModal } from "@/components/auth/CreateOrganizationModal";
@@ -31,8 +31,9 @@ const OrgSwitcherClientInternal = forwardRef<
         currentOrgName?: Auth0OrgName;
         isFernAdmin: boolean;
         accessToken: string;
+        userId: string;
     }
->(({ organizations, currentOrgName, isFernAdmin, accessToken }, ref) => {
+>(({ organizations, currentOrgName, isFernAdmin, accessToken, userId }, ref) => {
     const dropdownRef = useRef<SearchableDropdownRef>(null);
 
     useImperativeHandle(ref, () => ({
@@ -45,15 +46,18 @@ const OrgSwitcherClientInternal = forwardRef<
     const [searchTerm, setSearchTerm] = useState("");
     const [recentOrgNames, setRecentOrgNames] = useState<Auth0OrgName[]>([]);
     const [showOrgModal, setShowOrgModal] = useState(false);
+    const [isSwitchingOrg, setIsSwitchingOrg] = useState(false);
 
     useEffect(() => {
         setLocalOrgName(orgName);
+        // Reset switching state when org changes (switch completed)
+        setIsSwitchingOrg(false);
     }, [orgName]);
 
     // Load recent orgs from localStorage on mount
     useEffect(() => {
-        setRecentOrgNames(getRecentOrgs());
-    }, []);
+        setRecentOrgNames(getRecentOrgs(userId));
+    }, [userId]);
 
     const pathname = usePathnameWithoutOrgName();
     const router = useRouter();
@@ -117,25 +121,39 @@ const OrgSwitcherClientInternal = forwardRef<
         return filtered;
     }, [organizedOrganizations, normalizedSearch, isFernAdmin]);
 
-    const getRedirectPathForOrg = (newOrgName: Auth0OrgName) => {
-        return `/${newOrgName}${getRedirectPathname(pathname)}`;
-    };
+    const getRedirectPathForOrg = useCallback(
+        (newOrgName: Auth0OrgName) => {
+            return `/${newOrgName}${getRedirectPathname(pathname)}`;
+        },
+        [pathname]
+    );
 
-    const onSelectOrg = (organization: OrgDropdownItem) => {
-        if (organization.name !== orgName) {
-            setLocalOrgName(organization.name);
-        }
-        // Save to recent orgs
-        addRecentOrg(organization.name);
-        setRecentOrgNames(getRecentOrgs());
+    const onSelectOrg = useCallback(
+        (organization: OrgDropdownItem) => {
+            // Prevent rapid org switching which can cause OAuth state conflicts
+            if (isSwitchingOrg) {
+                return;
+            }
 
-        if (organization.__isAdmin) {
-            router.push(getRedirectPathForOrg(organization.name));
-            return;
-        }
+            if (organization.name !== orgName) {
+                setLocalOrgName(organization.name);
+            }
+            // Save to recent orgs
+            addRecentOrg(userId, organization.name);
+            setRecentOrgNames(getRecentOrgs(userId));
 
-        router.push(orgRedirect(organization));
-    };
+            // Mark as switching to prevent duplicate auth flows
+            setIsSwitchingOrg(true);
+
+            if (organization.__isAdmin) {
+                router.push(getRedirectPathForOrg(organization.name));
+                return;
+            }
+
+            router.push(orgRedirect(organization));
+        },
+        [isSwitchingOrg, orgName, userId, router, getRedirectPathForOrg]
+    );
 
     const currentOrg = organizations.find((org) => org.name === localOrgName);
 
@@ -230,7 +248,7 @@ const OrgSwitcherClientInternal = forwardRef<
                 <Button
                     variant="outline"
                     className="shrink-0 justify-between !pl-2 md:min-w-[200px]"
-                    disabled={organizations.length === 0}
+                    disabled={organizations.length === 0 || isSwitchingOrg}
                 >
                     <div className="flex items-center gap-2">
                         {currentOrg && <OrgLogo organization={currentOrg} />}
@@ -250,12 +268,14 @@ export const OrgSwitcherClient = ({
     organizations: initialOrganizations,
     currentOrgName,
     isFernAdmin,
-    accessToken
+    accessToken,
+    userId
 }: {
     organizations: Auth0Organization[];
     currentOrgName?: Auth0OrgName;
     isFernAdmin: boolean;
     accessToken: string;
+    userId: string;
 }) => {
     const orgSwitcherRef = useRef<OrgSwitcherClientRef>(null);
 
@@ -275,6 +295,7 @@ export const OrgSwitcherClient = ({
                 currentOrgName={currentOrgName}
                 isFernAdmin={isFernAdmin}
                 accessToken={accessToken}
+                userId={userId}
             />
         </WrapWithKeyboardShortcut>
     );

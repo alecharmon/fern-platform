@@ -23,7 +23,7 @@ export default async function Page() {
         redirect(`/get-started`);
     } else {
         // Use client-side component to check for recent org and redirect
-        return <RecentOrgRedirect defaultOrgName={response.orgName} />;
+        return <RecentOrgRedirect defaultOrgName={response.orgName} userId={session.user.sub} />;
     }
 }
 

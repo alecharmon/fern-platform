@@ -1,4 +1,5 @@
 import type { WizardFormData } from "@/providers/OnboardingProvider";
+import { getCachedItem, getCachedJson, removeCachedItem, setCachedItem, setCachedJson } from "./storageCache";
 
 const ONBOARDING_SESSION_KEY = "fern-onboarding-session";
 const ONBOARDING_FORM_DATA_KEY = "fern-onboarding-form-data";
@@ -15,36 +16,19 @@ export interface OnboardingSessionData {
  * Save onboarding session data to sessionStorage
  */
 export function saveOnboardingSession(sessionId: string, orgName: string): void {
-    if (typeof window === "undefined") {
-        return;
-    }
-
-    try {
-        const sessionData: OnboardingSessionData = {
-            sessionId,
-            orgName,
-            timestamp: Date.now()
-        };
-
-        sessionStorage.setItem(ONBOARDING_SESSION_KEY, JSON.stringify(sessionData));
-    } catch (error) {
-        console.error("Failed to save onboarding session to sessionStorage", error);
-    }
+    const sessionData: OnboardingSessionData = {
+        sessionId,
+        orgName,
+        timestamp: Date.now()
+    };
+    setCachedJson("sessionStorage", ONBOARDING_SESSION_KEY, sessionData);
 }
 
 /**
  * Save form data to sessionStorage
  */
 export function saveOnboardingFormData(formData: WizardFormData): void {
-    if (typeof window === "undefined") {
-        return;
-    }
-
-    try {
-        sessionStorage.setItem(ONBOARDING_FORM_DATA_KEY, JSON.stringify(formData));
-    } catch (error) {
-        console.error("Failed to save onboarding form data to sessionStorage", error);
-    }
+    setCachedJson("sessionStorage", ONBOARDING_FORM_DATA_KEY, formData);
 }
 
 /**
@@ -52,50 +36,25 @@ export function saveOnboardingFormData(formData: WizardFormData): void {
  * Returns null if expired or not found
  */
 export function getOnboardingSession(): OnboardingSessionData | null {
-    if (typeof window === "undefined") {
+    const sessionData = getCachedJson<OnboardingSessionData>("sessionStorage", ONBOARDING_SESSION_KEY);
+    if (!sessionData) {
         return null;
     }
 
-    try {
-        const stored = sessionStorage.getItem(ONBOARDING_SESSION_KEY);
-        if (!stored) {
-            return null;
-        }
-
-        const sessionData = JSON.parse(stored) as OnboardingSessionData;
-
-        // Check if expired
-        if (Date.now() - sessionData.timestamp > SESSION_EXPIRY_MS) {
-            clearOnboardingSession();
-            return null;
-        }
-
-        return sessionData;
-    } catch (error) {
-        console.error("Failed to parse onboarding session from sessionStorage", error);
+    // Check if expired
+    if (Date.now() - sessionData.timestamp > SESSION_EXPIRY_MS) {
+        clearOnboardingSession();
         return null;
     }
+
+    return sessionData;
 }
 
 /**
  * Get form data from sessionStorage
  */
 export function getOnboardingFormData(): WizardFormData | null {
-    if (typeof window === "undefined") {
-        return null;
-    }
-
-    try {
-        const stored = sessionStorage.getItem(ONBOARDING_FORM_DATA_KEY);
-        if (!stored) {
-            return null;
-        }
-
-        return JSON.parse(stored) as WizardFormData;
-    } catch (error) {
-        console.error("Failed to parse onboarding form data from sessionStorage", error);
-        return null;
-    }
+    return getCachedJson<WizardFormData>("sessionStorage", ONBOARDING_FORM_DATA_KEY);
 }
 
 /**
@@ -103,31 +62,14 @@ export function getOnboardingFormData(): WizardFormData | null {
  * This persists across page refreshes to allow the complete page to be accessed
  */
 export function saveSitePublishUrl(url: string): void {
-    if (typeof window === "undefined") {
-        return;
-    }
-
-    try {
-        sessionStorage.setItem(ONBOARDING_PUBLISH_URL_KEY, url);
-    } catch (error) {
-        console.error("Failed to save site publish URL to sessionStorage", error);
-    }
+    setCachedItem("sessionStorage", ONBOARDING_PUBLISH_URL_KEY, url);
 }
 
 /**
  * Get the published site URL from sessionStorage
  */
 export function getSitePublishUrl(): string | null {
-    if (typeof window === "undefined") {
-        return null;
-    }
-
-    try {
-        return sessionStorage.getItem(ONBOARDING_PUBLISH_URL_KEY);
-    } catch (error) {
-        console.error("Failed to get site publish URL from sessionStorage", error);
-        return null;
-    }
+    return getCachedItem("sessionStorage", ONBOARDING_PUBLISH_URL_KEY);
 }
 
 /**
@@ -136,19 +78,9 @@ export function getSitePublishUrl(): string | null {
  * for the complete page to access after publishing
  */
 export function clearOnboardingSession(): void {
-    if (typeof window === "undefined") {
-        return;
-    }
-
-    try {
-        sessionStorage.removeItem(ONBOARDING_SESSION_KEY);
-        // Don't clear form data - needed for complete page
-        // sessionStorage.removeItem(ONBOARDING_FORM_DATA_KEY);
-        // Don't clear the publish URL - it should persist for the complete page
-        // sessionStorage.removeItem(ONBOARDING_PUBLISH_URL_KEY);
-    } catch (error) {
-        console.error("Failed to clear onboarding session from sessionStorage", error);
-    }
+    removeCachedItem("sessionStorage", ONBOARDING_SESSION_KEY);
+    // Don't clear form data - needed for complete page
+    // Don't clear the publish URL - it should persist for the complete page
 }
 
 /**
@@ -156,17 +88,9 @@ export function clearOnboardingSession(): void {
  * Use this when completely resetting the onboarding flow
  */
 export function clearAllOnboardingData(): void {
-    if (typeof window === "undefined") {
-        return;
-    }
-
-    try {
-        sessionStorage.removeItem(ONBOARDING_SESSION_KEY);
-        sessionStorage.removeItem(ONBOARDING_FORM_DATA_KEY);
-        sessionStorage.removeItem(ONBOARDING_PUBLISH_URL_KEY);
-    } catch (error) {
-        console.error("Failed to clear all onboarding data from sessionStorage", error);
-    }
+    removeCachedItem("sessionStorage", ONBOARDING_SESSION_KEY);
+    removeCachedItem("sessionStorage", ONBOARDING_FORM_DATA_KEY);
+    removeCachedItem("sessionStorage", ONBOARDING_PUBLISH_URL_KEY);
 }
 
 /**
