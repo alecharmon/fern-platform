@@ -566,10 +566,15 @@ else
 fi
 
 # Wait for Next.js to be ready before starting cache proxy
-log "Waiting for Next.js to start on port ${NEXTJS_INTERNAL_PORT}..."
+# Use /_next/ path which bypasses middleware (excluded in middleware matcher)
+# This is more reliable than hitting a page route which goes through complex rewrites
+NEXTJS_HEALTH_URL="http://127.0.0.1:${NEXTJS_INTERNAL_PORT}${NEXT_PUBLIC_BASE_PATH:-}/_next/static/"
+log "Waiting for Next.js to start at ${NEXTJS_HEALTH_URL}..."
 NEXTJS_ATTEMPTS=0
 MAX_NEXTJS_ATTEMPTS=30
-until curl -f -s --max-time 5 "http://127.0.0.1:${NEXTJS_INTERNAL_PORT}/" > /dev/null 2>&1; do
+# Don't use -f flag - we just want to check if Next.js is responding, not if we get 200
+# /_next/static/ will return 404 but that's fine - it means Next.js is up and serving
+until curl -s --max-time 5 -o /dev/null -w "%{http_code}" "$NEXTJS_HEALTH_URL" 2>/dev/null | grep -qE "^[0-9]+$"; do
     NEXTJS_ATTEMPTS=$((NEXTJS_ATTEMPTS + 1))
     if [ $NEXTJS_ATTEMPTS -ge $MAX_NEXTJS_ATTEMPTS ]; then
         log "WARNING: Next.js not ready after $MAX_NEXTJS_ATTEMPTS attempts, starting cache proxy anyway"
@@ -579,7 +584,7 @@ until curl -f -s --max-time 5 "http://127.0.0.1:${NEXTJS_INTERNAL_PORT}/" > /dev
     sleep 2
 done
 if [ $NEXTJS_ATTEMPTS -lt $MAX_NEXTJS_ATTEMPTS ]; then
-    log "Next.js is ready on port ${NEXTJS_INTERNAL_PORT}"
+    log "Next.js is ready (responding on port ${NEXTJS_INTERNAL_PORT})"
 fi
 
 # --------------  Start cache proxy --------------
@@ -689,15 +694,16 @@ fi
 # Warm up the cache by fetching all pages
 # This ensures the first real user request is fast
 # Run in background - container is ready immediately, warmup is a performance optimization
+# Warmup is disabled by default, set WARMUP=true to enable
 
-if [ "${SKIP_WARMUP:-false}" != "true" ]; then
+if [ "${WARMUP:-false}" = "true" ]; then
     log "Starting cache warmup in background (this may take a few minutes)..."
     bash /scripts/warmup.sh 2>&1 | add_timestamps &
     warmup_pid=$!
     log "Warmup PID: $warmup_pid"
     log "Warmup running in background - container is ready for traffic"
 else
-    log "Skipping cache warmup (SKIP_WARMUP=true)"
+    log "Skipping cache warmup (WARMUP not set to true)"
 fi
 # --------------  End cache warmup --------------
 

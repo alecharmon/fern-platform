@@ -16,6 +16,15 @@ api:
         from-openapi: true
         dependencies:
           - buf.build/googleapis/googleapis
+    # gRPC spec WITHOUT buf.yaml file - tests the introspection feature
+    # The generate.sh script should create a temporary buf.yaml from these dependencies
+    # This tests air-gapped deployments where customers don't have a buf.yaml
+    - proto:
+        root: ./protos/grpc-no-buf-yaml/
+        local-generation: true
+        from-openapi: true
+        dependencies:
+          - buf.build/googleapis/googleapis
 
 default-group: local
 groups:

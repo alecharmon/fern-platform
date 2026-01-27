@@ -92,7 +92,7 @@ For Docker Desktop, access via `http://localhost:30080`.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SKIP_WARMUP` | Skip cache warmup on startup | `false` |
+| `WARMUP` | Enable cache warmup on startup | `false` |
 | `FERN_LOG_LEVEL` | Log level (debug, info, warn, error) | `info` |
 | `TMPDIR` | Temporary directory for the container | `/tmp` |
 

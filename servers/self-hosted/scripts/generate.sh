@@ -372,7 +372,9 @@ if [ "$ONLY_DEPS" = "true" ]; then
     export BUF_CACHE_DIR=/opt/buf-cache
     mkdir -p "$BUF_CACHE_DIR"
     
-    # Find all proto directories with buf.yaml that have dependencies and run buf build to cache them
+    # =========================================================================
+    # PHASE 1: Process proto directories that already have buf.yaml files
+    # =========================================================================
     log "Searching for proto directories with buf.yaml..."
     PROTO_DIRS=$(find . -name "buf.yaml" -type f -exec dirname {} \; 2>/dev/null || true)
     
@@ -418,8 +420,128 @@ if [ "$ONLY_DEPS" = "true" ]; then
         log "Buf dependencies cached successfully!"
         log "Buf cache location: $BUF_CACHE_DIR"
     else
-        log "No proto directories with buf.yaml found, skipping buf cache population"
+        log "No proto directories with buf.yaml found"
     fi
+    
+    # =========================================================================
+    # PHASE 2: Introspect generators.yml for proto specs WITHOUT buf.yaml
+    # This replicates the fern CLI behavior of creating a temporary buf.yaml
+    # when one doesn't exist but dependencies are specified in generators.yml
+    # =========================================================================
+    log ""
+    log "=========================================="
+    log "Introspecting generators.yml for proto specs without buf.yaml..."
+    log "=========================================="
+    
+    cd /fern
+    
+    # Find all generators.yml files in the fern directory tree
+    GENERATORS_YML_FILES=$(find . -name "generators.yml" -type f 2>/dev/null || true)
+    
+    if [ -n "$GENERATORS_YML_FILES" ]; then
+        for generators_yml in $GENERATORS_YML_FILES; do
+            # Get the directory containing this generators.yml
+            GENERATORS_DIR=$(dirname "$generators_yml")
+            GENERATORS_DIR_ABS=$(cd "$GENERATORS_DIR" && pwd)
+            
+            log "Processing $generators_yml..."
+            
+            # Extract proto specs from generators.yml using yq
+            PROTO_SPECS_COUNT=$(yq '.api.specs | length' "$generators_yml" 2>/dev/null || echo "0")
+            
+            if [ "$PROTO_SPECS_COUNT" = "0" ] || [ "$PROTO_SPECS_COUNT" = "null" ]; then
+                log "  -> No specs found in $generators_yml"
+                continue
+            fi
+            
+            for i in $(seq 0 $((PROTO_SPECS_COUNT - 1))); do
+                # Check if this spec has a proto section
+                PROTO_ROOT=$(yq ".api.specs[$i].proto.root // \"\"" "$generators_yml" 2>/dev/null | tr -d '"')
+                
+                if [ -z "$PROTO_ROOT" ] || [ "$PROTO_ROOT" = "null" ]; then
+                    continue
+                fi
+                
+                # Resolve the proto root path relative to the generators.yml location
+                # This handles paths like "../../../protos/" correctly
+                PROTO_ROOT_ABS=$(cd "$GENERATORS_DIR_ABS" && cd "$PROTO_ROOT" 2>/dev/null && pwd) || {
+                    log "  -> WARNING: Could not resolve proto root path: $PROTO_ROOT"
+                    continue
+                }
+                
+                # Get a display-friendly relative path from /fern
+                PROTO_ROOT_DISPLAY="${PROTO_ROOT_ABS#/fern/}"
+                
+                log "Found proto spec with root: $PROTO_ROOT_DISPLAY"
+                
+                # Check if buf.yaml already exists in this directory
+                if [ -f "$PROTO_ROOT_ABS/buf.yaml" ]; then
+                    log "  -> buf.yaml already exists, skipping introspection"
+                    continue
+                fi
+                
+                # Extract dependencies from generators.yml
+                DEPS=$(yq ".api.specs[$i].proto.dependencies // []" "$generators_yml" 2>/dev/null)
+                DEPS_COUNT=$(echo "$DEPS" | yq 'length' 2>/dev/null || echo "0")
+                
+                if [ "$DEPS_COUNT" = "0" ] || [ "$DEPS_COUNT" = "null" ]; then
+                    log "  -> No dependencies specified in generators.yml, skipping"
+                    continue
+                fi
+                
+                log "  -> Found $DEPS_COUNT dependencies in generators.yml, creating temporary buf.yaml"
+                
+                # Create a temporary buf.yaml with the dependencies
+                cd "$PROTO_ROOT_ABS"
+                
+                # Build the buf.yaml content
+                cat > buf.yaml << 'BUFYAML_HEADER'
+version: v1
+deps:
+BUFYAML_HEADER
+                
+                # Add each dependency
+                for j in $(seq 0 $((DEPS_COUNT - 1))); do
+                    DEP=$(echo "$DEPS" | yq ".[$j]" 2>/dev/null | tr -d '"')
+                    echo "  - $DEP" >> buf.yaml
+                    log "  -> Added dependency: $DEP"
+                done
+                
+                log "  -> Created temporary buf.yaml in $PROTO_ROOT_DISPLAY"
+                
+                # Run buf dep update to fetch dependencies
+                log "  -> Running buf dep update..."
+                buf dep update 2>&1 || {
+                    log "WARNING: buf dep update failed in $PROTO_ROOT_DISPLAY"
+                    log "This may be due to network issues or invalid dependencies"
+                }
+                
+                # Run buf build to populate the cache
+                log "  -> Running buf build to populate cache..."
+                buf build 2>&1 || {
+                    log "WARNING: buf build failed in $PROTO_ROOT_DISPLAY"
+                    log "This may be due to invalid proto files"
+                }
+                
+                # Fix permissions on generated files
+                if [ -f "buf.lock" ]; then
+                    chmod 644 "buf.lock" 2>/dev/null || true
+                    log "  -> Fixed permissions on buf.lock"
+                fi
+                chmod 644 "buf.yaml" 2>/dev/null || true
+                
+                log "  -> Dependencies cached for $PROTO_ROOT_DISPLAY"
+                
+                # Return to /fern for the next iteration
+                cd /fern
+            done
+        done
+    else
+        log "No generators.yml files found, skipping introspection"
+    fi
+    
+    log ""
+    log "Buf dependency caching complete!"
     
     # Make buf cache readable by all (for arbitrary UID runtime)
     chmod -R 755 "$BUF_CACHE_DIR" 2>/dev/null || true

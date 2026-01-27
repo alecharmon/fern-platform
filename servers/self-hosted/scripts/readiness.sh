@@ -23,6 +23,31 @@ check_http_endpoint() {
     return 1
 }
 
+# Check if an endpoint is responding (any HTTP response, not just 200)
+# Useful for endpoints that return 404 but indicate the server is running
+check_http_responding() {
+    local url=$1
+    local service_name=$2
+    local max_attempts=${3:-1}
+    local timeout=${4:-5}
+    
+    for attempt in $(seq 1 $max_attempts); do
+        local http_code
+        http_code=$(curl -s --max-time "$timeout" -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+        if [[ "$http_code" =~ ^[0-9]+$ ]] && [ "$http_code" != "000" ]; then
+            echo "✓ $service_name is responding (HTTP $http_code)"
+            return 0
+        fi
+        
+        if [ $attempt -lt $max_attempts ]; then
+            sleep 1
+        fi
+    done
+    
+    echo "✗ $service_name is not responding (URL: $url)"
+    return 1
+}
+
 check_postgres() {
     # Read the PostgreSQL socket directory from the file written by run.sh
     # This supports UID-scoped directories used for non-root compatibility
@@ -36,18 +61,6 @@ check_postgres() {
         return 0
     else
         echo "✗ PostgreSQL is not ready"
-        return 1
-    fi
-}
-
-check_warmup_complete() {
-    local warmup_file="/tmp/warmup-complete"
-    
-    if [ -f "$warmup_file" ]; then
-        echo "✓ Cache warmup is complete"
-        return 0
-    else
-        echo "✗ Cache warmup not yet complete (waiting for $warmup_file)"
         return 1
     fi
 }
@@ -112,15 +125,13 @@ if ! check_http_endpoint "http://localhost:3000/__cache/stats" "Cache Proxy"; th
     FAILED=1
 fi
 
-# Check Next.js Docs through Cache Proxy with optional BASE_PATH
-NEXTJS_URL="http://localhost:3000${NEXT_PUBLIC_BASE_PATH:-}"
-if ! check_http_endpoint "$NEXTJS_URL" "Next.js Docs (via Cache Proxy)"; then
+# Check Next.js Docs through Cache Proxy
+# Use /_next/static/ path which bypasses middleware and reliably indicates Next.js is running
+# This endpoint returns 404 but that's fine - we just need to know Next.js is responding
+NEXTJS_URL="http://localhost:3000${NEXT_PUBLIC_BASE_PATH:-}/_next/static/"
+if ! check_http_responding "$NEXTJS_URL" "Next.js Docs (via Cache Proxy)"; then
     FAILED=1
 fi
-
-# Note: Cache warmup runs in background and does not block readiness
-# The container is ready for traffic as soon as core services are up
-# Warmup is a performance optimization, not a requirement for readiness
 
 if [ $FAILED -eq 1 ]; then
     echo "Readiness check FAILED: One or more critical services are not ready"

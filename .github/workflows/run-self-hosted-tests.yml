@@ -311,7 +311,7 @@ jobs:
                         containerPort: 8081
                         protocol: TCP
                     env:
-                      - name: SKIP_WARMUP
+                      - name: WARMUP
                         value: "false"
                       - name: FERN_LOG_LEVEL
                         value: "info"
