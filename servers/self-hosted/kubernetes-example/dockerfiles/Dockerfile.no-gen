@@ -15,8 +15,88 @@ FROM ${BASE_IMAGE}
 # Copy the main fern config (includes gRPC with external buf deps)
 COPY fern/ /fern/
 
-# Ensure /data is completely emptyand writable by any user
+# Ensure /data is completely empty and writable by any user
 # This prevents MinIO permission issues when running as non-root (e.g., UID 65532)
 RUN rm -rf /data && mkdir -p /data && chmod 777 /data
+
+# Remove ALL content that doesn't require network access:
+# - openapi.yaml (OpenAPI spec - no network needed)
+# - protos/test (simple proto without external deps - no network needed)
+# - docs/ (markdown pages - no network needed)
+# - apis/ (Conjure API - no network needed)
+# - conjure/ (Conjure definitions - no network needed)
+# - changelog/ (changelog files - no network needed)
+#
+# This ensures that when the proto specs with googleapis dependency fail due to network issues,
+# there's nothing left to generate, and the overall generation fails.
+# The fern CLI allows partial success when some specs fail, so we need to remove everything
+# that would succeed without network access.
+RUN rm -f /fern/openapi.yaml && \
+    rm -rf /fern/protos/test && \
+    rm -rf /fern/docs && \
+    rm -rf /fern/apis && \
+    rm -rf /fern/conjure && \
+    rm -rf /fern/changelog
+
+# Create a modified generators.yml that only includes specs requiring network access
+# This replaces the original generators.yml with one that only has the googleapis-dependent specs
+RUN printf '%s\n' \
+  '# yaml-language-server: $schema=https://schema.buildwithfern.dev/generators-yml.json' \
+  '# Modified fern configuration for air-gapped failure tests' \
+  '# Only includes specs that require network access to buf.build' \
+  'api:' \
+  '  specs:' \
+  '    # gRPC spec with external buf dependencies - requires network access' \
+  '    - proto:' \
+  '        root: ./protos/grpc-with-deps/' \
+  '        local-generation: true' \
+  '        from-openapi: true' \
+  '        dependencies:' \
+  '          - buf.build/googleapis/googleapis' \
+  '    # gRPC spec WITHOUT buf.yaml file - requires network access' \
+  '    - proto:' \
+  '        root: ./protos/grpc-no-buf-yaml/' \
+  '        local-generation: true' \
+  '        from-openapi: true' \
+  '        dependencies:' \
+  '          - buf.build/googleapis/googleapis' \
+  '' \
+  'default-group: local' \
+  'groups:' \
+  '  local:' \
+  '    generators:' \
+  '      - name: fernapi/fern-typescript-node-sdk' \
+  '        output:' \
+  '          location: local-file-system' \
+  '          path: ../sdks/typescript' \
+  '        version: 1.0.0' \
+  > /fern/generators.yml
+
+# Create a minimal docs directory with a simple root page
+# This is needed so the docs page returns HTTP 200 instead of redirecting
+RUN mkdir -p /fern/docs/pages && \
+    printf '%s\n' \
+      '# Air-gapped Test' \
+      '' \
+      'This is a minimal docs page for testing air-gapped deployments.' \
+      > /fern/docs/pages/index.mdx
+
+# Create a minimal docs.yml that references the root page and the API
+# The API requires network access, so if network is blocked, generation will fail
+RUN printf '%s\n' \
+  'instances:' \
+  '  - url: example-org.docs.buildwithfern.com' \
+  '    custom-domain: plantstore.dev' \
+  '' \
+  'title: Air-gapped Test' \
+  '' \
+  'navigation:' \
+  '  - page: Home' \
+  '    slug: /' \
+  '    path: docs/pages/index.mdx' \
+  '  - api: API Reference' \
+  '    slug: api' \
+  '    flattened: true' \
+  > /fern/docs.yml
 
 # No generate.sh - everything happens at runtime

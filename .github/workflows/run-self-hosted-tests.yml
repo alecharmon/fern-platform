@@ -761,11 +761,11 @@ jobs:
             done
             
             if [ "$BECAME_READY" = "true" ]; then
-              echo "WARNING: $ns - pod became ready when it should have failed"
-              echo "This may indicate NetworkPolicy is not being enforced or docs were pre-cached"
+              echo "FAILURE: $ns - pod became ready when it should have failed"
+              echo "This indicates NetworkPolicy is not being enforced or docs were pre-cached"
               kubectl logs -n $ns -l app=fern-docs --tail=50 || true
               TEST_RESULTS="${TEST_RESULTS}$ns: UNEXPECTED PASS (should have failed)\n"
-              # Don't fail the overall test as this depends on NetworkPolicy enforcement
+              FAILED=true
             elif [ "$FOUND_EXPECTED_ERROR" = "true" ]; then
               echo "SUCCESS: $ns passed - found expected network/buf errors (test correctly failed)"
               TEST_RESULTS="${TEST_RESULTS}$ns: PASS (correctly failed with expected errors)\n"
