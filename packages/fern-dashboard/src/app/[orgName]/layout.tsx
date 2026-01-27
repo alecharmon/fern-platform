@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getAvailableOrgsForUser } from "@/app/services/dal/fdr/getAvailableOrgsForUser";
 import { TokenRefresher } from "@/components/auth/TokenRefresher";
+import { OrgNotFoundLayout } from "@/components/layout/OrgNotFoundLayout";
 import orgRedirect from "@/utils/orgRedirect";
-import NotFound from "../not-found";
 import type { Auth0OrgName } from "../services/auth0/types";
 
 export default async function OrgLayout({
@@ -35,7 +35,7 @@ export default async function OrgLayout({
             console.warn("[org] Org Id not found", targetOrg);
             // For edit-page, let the page handle non-members (redirect to fallback URL)
             if (!isEditPage) {
-                return NotFound();
+                return <OrgNotFoundLayout orgName={orgName} />;
             }
         }
 
