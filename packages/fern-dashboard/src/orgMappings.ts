@@ -39,6 +39,11 @@ async function processUserOrgMapping(userId: Auth0UserID, permissions: string[])
         return; // Early return if no mappings available
     }
 
+    // NOTE: The following Auth0 API calls have strict sequential dependencies and cannot be parallelized:
+    // 1. getUserGoogleOauth2EmailInfo - must complete first to get email for org matching
+    // 2. doesUserBelongToOrg - requires auth0OrgName derived from email result
+    // 3. addUserToOrg - only called conditionally based on doesUserBelongToOrg result
+
     const { email, isEmailVerified } = await auth0Management.getUserGoogleOauth2EmailInfo(userId);
 
     if (!email || !isEmailVerified) {
