@@ -179,6 +179,7 @@ async function takeFullPageScreenshot(
                 '[class*="consent-modal"]',
                 '[class*="privacy-banner"]',
                 '[class*="privacy-notice"]',
+                ".cky-consent-container",
                 // ID-based selectors
                 '[id*="cookie-consent"]',
                 '[id*="cookie-banner"]',
