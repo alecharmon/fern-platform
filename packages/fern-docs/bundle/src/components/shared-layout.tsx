@@ -186,6 +186,7 @@ export default async function SharedLayout({
             }
             searchPlaceholder={settings.searchText ?? t(lang).search.search}
             lang={lang}
+            hideFeedback={layout.hideFeedback}
         >
             {children}
         </ThemedDocs>

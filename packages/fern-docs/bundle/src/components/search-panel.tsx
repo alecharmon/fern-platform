@@ -66,7 +66,15 @@ const getDefaultWidth = () => {
 
 const widthAtom = atom(getDefaultWidth());
 
-export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { domain: string; lang: string }) {
+export const SearchPanel = React.memo(function SearchPanel({
+    domain,
+    lang,
+    hideFeedback = false
+}: {
+    domain: string;
+    lang: string;
+    hideFeedback?: boolean;
+}) {
     const isDarkCodeEnabled = useIsDarkCode();
     const userToken = useAlgoliaUserToken();
     const user = useFernUser();
@@ -254,6 +262,16 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
                             if (!assistant) {
                                 return null;
                             }
+                            const copyButton = (
+                                <CopyToClipboardButton
+                                    content={assistant.content}
+                                    lang={lang}
+                                    className="h-8 w-8 p-0"
+                                />
+                            );
+                            if (hideFeedback) {
+                                return <div className="flex items-center gap-2">{copyButton}</div>;
+                            }
                             return (
                                 <SearchPanelFeedback
                                     metadata={() => ({
@@ -265,13 +283,7 @@ export const SearchPanel = React.memo(function SearchPanel({ domain, lang }: { d
                                         domain
                                     })}
                                     lang={lang}
-                                    copyAction={
-                                        <CopyToClipboardButton
-                                            content={assistant.content}
-                                            lang={lang}
-                                            className="h-8 w-8 p-0"
-                                        />
-                                    }
+                                    copyAction={copyButton}
                                 />
                             );
                         }}

@@ -26,7 +26,8 @@ export default function DefaultDocs({
     lightSidebarClassName,
     darkSidebarClassName,
     searchPlaceholder,
-    lang
+    lang,
+    hideFeedback = false
 }: {
     header: React.ReactNode;
     versionSelect?: React.ReactNode;
@@ -45,6 +46,7 @@ export default function DefaultDocs({
     darkSidebarClassName?: string;
     searchPlaceholder?: string;
     lang: string;
+    hideFeedback?: boolean;
 }) {
     const domain = useDomain();
     const isSidePanelOpen = useIsSearchPanelOpen();
@@ -79,7 +81,7 @@ export default function DefaultDocs({
             >
                 {children}
             </AbstractDefaultDocs>
-            {isAskAiEnabled && <SearchPanel domain={domain} lang={lang} />}
+            {isAskAiEnabled && <SearchPanel domain={domain} lang={lang} hideFeedback={hideFeedback} />}
         </>
     );
 }

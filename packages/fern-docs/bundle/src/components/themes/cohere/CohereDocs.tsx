@@ -57,7 +57,8 @@ export default function CohereDocs({
     darkHeaderClassName,
     lightSidebarClassName,
     darkSidebarClassName,
-    lang
+    lang,
+    hideFeedback = false
 }: {
     header: React.ReactNode;
     sidebar: React.ReactNode;
@@ -72,6 +73,7 @@ export default function CohereDocs({
     lightSidebarClassName?: string;
     darkSidebarClassName?: string;
     lang: string;
+    hideFeedback?: boolean;
 }) {
     const { resolvedTheme } = useTheme();
     const headerClassName = resolvedTheme === "dark" ? darkHeaderClassName : lightHeaderClassName;
@@ -142,7 +144,7 @@ export default function CohereDocs({
                     </main>
                 </MainCtx.Provider>
             </div>
-            {isAskAiEnabled && <SearchPanel domain={domain} lang={lang} />}
+            {isAskAiEnabled && <SearchPanel domain={domain} lang={lang} hideFeedback={hideFeedback} />}
         </div>
     );
 }

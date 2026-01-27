@@ -25,7 +25,8 @@ export function ThemedDocs({
     lightHeaderClassName,
     darkHeaderClassName,
     searchPlaceholder,
-    lang
+    lang,
+    hideFeedback = false
 }: {
     theme?: FernTheme;
     announcement?: React.ReactNode;
@@ -45,6 +46,7 @@ export function ThemedDocs({
     darkHeaderClassName?: string;
     searchPlaceholder?: string;
     lang: string;
+    hideFeedback?: boolean;
 }) {
     const Docs = THEMES[theme];
     return (
@@ -65,6 +67,7 @@ export function ThemedDocs({
             darkHeaderClassName={darkHeaderClassName}
             searchPlaceholder={searchPlaceholder}
             lang={lang}
+            hideFeedback={hideFeedback}
         >
             {children}
         </Docs>
