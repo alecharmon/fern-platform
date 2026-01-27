@@ -112,6 +112,7 @@ async def ask_ai_enabled(domain: str) -> None:
 
 
 def strip_domain(url: str) -> str:
+    url = url.strip()
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
     parsed = urlparse(url)

@@ -1148,7 +1148,10 @@ async def handle_slack_oauth_callback(code: str, state: str | None = None) -> JS
 
 @fai_app.get("/slack/get-install", openapi_extra={"x-fern-audiences": ["customers"], "security": [{"bearerAuth": []}]})
 async def get_slack_install_link(domain: str) -> JSONResponse:
+    from fai.dependencies import strip_domain
+
     try:
+        domain = strip_domain(domain)
         async with async_session_maker() as session:
             new_integration = SlackIntegrationDb(
                 domain=domain,
