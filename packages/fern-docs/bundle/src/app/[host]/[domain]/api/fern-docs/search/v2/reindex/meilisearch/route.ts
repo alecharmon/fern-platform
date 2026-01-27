@@ -23,7 +23,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         domain: withoutStaging(domain)
     });
 
-    const { records: targetRecords, tooLarge } = createAlgoliaRecords({
+    const { records: targetRecords, tooLarge } = await createAlgoliaRecords({
         root,
         domain: withoutStaging(domain),
         org_id,

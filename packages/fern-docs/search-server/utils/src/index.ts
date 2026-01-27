@@ -1,3 +1,4 @@
+export { loadApiById } from "./fdr/lazy-load-api";
 export {
     type LoadDocsWithUrlPayload,
     loadDocsWithUrl

@@ -7,7 +7,7 @@ describe("hume", () => {
     it("should work", async () => {
         const [fixture, snapshotFilepath] = readFixture("hume");
         const { root, apis, pages } = readFixtureToRootNode(fixture);
-        const { records, tooLarge } = createAlgoliaRecords({
+        const { records, tooLarge } = await createAlgoliaRecords({
             root,
             domain: "dev.hume.ai",
             org_id: "hume",

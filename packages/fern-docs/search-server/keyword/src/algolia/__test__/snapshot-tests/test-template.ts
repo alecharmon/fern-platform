@@ -18,7 +18,7 @@ export function runFixtureTest(fixtureName: string): void {
         const apis = FernNavigation.utils.toApis(fixture);
         const pages = FernNavigation.utils.toPages(fixture);
 
-        const { records, tooLarge } = createAlgoliaRecords({
+        const { records, tooLarge } = await createAlgoliaRecords({
             root,
             domain: "test.com",
             org_id: "test",

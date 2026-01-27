@@ -21,7 +21,7 @@ export interface LoadDocsWithUrlPayload {
     isBatchStreamToggleDisabled?: boolean;
 }
 
-interface LoadDocsWithUrlResponse {
+export interface LoadDocsWithUrlResponse {
     org_id: FernNavigation.OrgId;
     root: FernNavigation.RootNode;
     pages: Record<FernNavigation.PageId, string>;

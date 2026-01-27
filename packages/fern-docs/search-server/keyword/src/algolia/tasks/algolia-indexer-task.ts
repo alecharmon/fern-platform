@@ -68,7 +68,8 @@ export async function algoliaIndexerTask(payload: AlgoliaIndexerPayload): Promis
     const { org_id, root, pages, apis, domain } = await loadDocsWithUrl(payload);
 
     // create new records (this is the target state of the index)
-    const { records: targetRecords, tooLarge } = createAlgoliaRecords({
+    // If apis is empty but there are API leaf nodes, they will be lazy-loaded
+    const { records: targetRecords, tooLarge } = await createAlgoliaRecords({
         root,
         domain,
         org_id,

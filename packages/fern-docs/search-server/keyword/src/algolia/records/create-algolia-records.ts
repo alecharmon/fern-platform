@@ -1,27 +1,14 @@
 import { type ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { measureBytes } from "@fern-api/ui-core-utils";
+import { loadApiById } from "@fern-docs/search-utils";
 import { groupBy } from "es-toolkit/array";
 
 import type { AlgoliaRecord } from "../types";
-import { createApiReferenceRecordGraphQl } from "./create-api-reference-record-graphql";
-import { createApiReferenceRecordGrpc } from "./create-api-reference-record-grpc";
-import { createApiReferenceRecordHttp } from "./create-api-reference-record-http";
-import { createApiReferenceRecordWebSocket } from "./create-api-reference-record-web-socket";
-import { createApiReferenceRecordWebhook } from "./create-api-reference-record-webhook";
 import { createBaseRecord } from "./create-base-record";
 import { createChangelogRecord } from "./create-changelog-record";
-import { createEndpointBaseRecordGrpc } from "./create-endpoint-record-gprc";
-import { createEndpointBaseRecordGraphQl } from "./create-endpoint-record-graphql";
-import { createEndpointBaseRecordHttp } from "./create-endpoint-record-http";
-import { createEndpointBaseRecordWebSocket } from "./create-endpoint-record-web-socket";
-import { createEndpointBaseRecordWebhook } from "./create-endpoint-record-webhook";
 import { createMarkdownRecords } from "./create-markdown-records";
-import { createGraphQlParameterRecords } from "./create-parameter-records-graphql";
-import { createGrpcParameterRecords } from "./create-parameter-records-grpc";
-import { createHttpParameterRecords } from "./create-parameter-records-http";
-import { createWebSocketParameterRecords } from "./create-parameter-records-web-socket";
-import { createWebhookParameterRecords } from "./create-parameter-records-webhook";
+import { createRecordsForApiLeafNode } from "./create-records-for-api-leaf-node";
 
 interface CreateAlgoliaRecordsOptions {
     root: FernNavigation.RootNode;
@@ -48,7 +35,14 @@ function isEffectivelyHidden(
     return parents.some((parent) => FernNavigation.hasMetadata(parent) && parent.hidden === true);
 }
 
-export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed }: CreateAlgoliaRecordsOptions): {
+export async function createAlgoliaRecords({
+    root,
+    domain,
+    org_id,
+    pages,
+    apis,
+    authed
+}: CreateAlgoliaRecordsOptions): Promise<{
     records: AlgoliaRecord[];
     /**
      * Records that are >= 100kb
@@ -57,7 +51,7 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
         record: AlgoliaRecord;
         size: number;
     }[];
-} {
+}> {
     const collector = FernNavigation.NodeCollector.collect(root);
 
     const versionNodes = collector.getVersionNodes();
@@ -108,131 +102,81 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
         }
     });
 
-    apiLeafNodes.forEach((node) => {
-        const apiDefinition = apis[node.apiDefinitionId];
+    // Group API leaf nodes by apiDefinitionId for efficient lazy-loading
+    const nodesByApiId = new Map<ApiDefinition.ApiDefinitionId, FernNavigation.NavigationNodeApiLeaf[]>();
+    for (const node of apiLeafNodes) {
+        const existing = nodesByApiId.get(node.apiDefinitionId) ?? [];
+        existing.push(node);
+        nodesByApiId.set(node.apiDefinitionId, existing);
+    }
+
+    // Track how many APIs we've lazy-loaded (limit to avoid memory issues)
+    const MAX_LAZY_LOADED_APIS = 3;
+    let lazyLoadedCount = 0;
+    const apisNeedingLazyLoad = Object.keys(apis).length === 0;
+
+    if (apisNeedingLazyLoad) {
+        console.log(
+            `[algolia] APIs not pre-loaded, will lazy-load up to ${MAX_LAZY_LOADED_APIS} of ${nodesByApiId.size} APIs`
+        );
+    }
+
+    // Process each unique API definition
+    for (const [apiDefinitionId, nodes] of nodesByApiId) {
+        // Try to get from pre-loaded apis first, otherwise lazy-load
+        let apiDefinition = apis[apiDefinitionId];
 
         if (!apiDefinition) {
-            console.error(
-                `API leaf node ${node.slug} has api definition id ${node.apiDefinitionId} but no api definition`
-            );
-            return;
-        }
-
-        const base = createBaseRecord({
-            node,
-            parents: collector.getParents(node.id) ?? [],
-            domain,
-            org_id,
-            authed: authed?.(node) ?? false,
-            versionIndexMap
-        });
-
-        if (node.type === "endpoint") {
-            const endpoint = apiDefinition.endpoints[node.endpointId];
-            if (!endpoint) {
-                console.error(`API leaf node ${node.slug} has endpoint id ${node.endpointId} but no endpoint`);
-                return;
-            }
-
-            const endpointBase = createEndpointBaseRecordHttp({
-                base,
-                node,
-                endpoint,
-                types: apiDefinition.types
-            });
-            records.push(...createApiReferenceRecordHttp({ endpointBase, endpoint }));
-            records.push(...createHttpParameterRecords({ endpointBase, endpoint, types: apiDefinition.types }));
-            return;
-        }
-
-        if (node.type === "webSocket") {
-            const endpoint = apiDefinition.websockets[node.webSocketId];
-            if (!endpoint) {
-                console.error(`API leaf node ${node.slug} has web socket id ${node.webSocketId} but no web socket`);
-                return;
-            }
-
-            const endpointBase = createEndpointBaseRecordWebSocket({
-                base,
-                node,
-                endpoint,
-                types: apiDefinition.types
-            });
-            records.push(createApiReferenceRecordWebSocket({ endpointBase }));
-            records.push(
-                ...createWebSocketParameterRecords({ endpointBase, webSocket: endpoint, types: apiDefinition.types })
-            );
-            return;
-        }
-
-        if (node.type === "webhook") {
-            const endpoint = apiDefinition.webhooks[node.webhookId];
-            if (!endpoint) {
-                console.error(`API leaf node ${node.slug} has web hook id ${node.webhookId} but no web hook`);
-                return;
-            }
-
-            const endpointBase = createEndpointBaseRecordWebhook({
-                base,
-                node,
-                endpoint,
-                types: apiDefinition.types
-            });
-            records.push(...createApiReferenceRecordWebhook({ endpointBase, endpoint }));
-            records.push(
-                ...createWebhookParameterRecords({ endpointBase, webhook: endpoint, types: apiDefinition.types })
-            );
-            return;
-        }
-
-        if (node.type === "grpc") {
-            const grpc = apiDefinition.endpoints[getGrpcIdAsEndpointId(node.grpcId)];
-            if (!grpc) {
-                console.error(`API leaf node ${node.slug} has grpc id ${node.grpcId} but no grpc`);
-                return;
-            }
-
-            const grpcMethodType =
-                grpc.protocol?.type === "grpc" && grpc.protocol.methodType ? grpc.protocol.methodType : "UNARY";
-
-            const grpcBase = createEndpointBaseRecordGrpc({
-                base,
-                node,
-                grpc,
-                grpcMethodType,
-                types: apiDefinition.types
-            });
-            records.push(...createApiReferenceRecordGrpc({ grpcBase, grpc }));
-            records.push(...createGrpcParameterRecords({ endpointBase: grpcBase, grpc, types: apiDefinition.types }));
-            return;
-        }
-
-        if (node.type === "graphql") {
-            const graphqlOperation = apiDefinition.graphqlOperations[node.graphqlOperationId];
-            if (!graphqlOperation) {
-                console.error(
-                    `API leaf node ${node.slug} has graphql operation id ${node.graphqlOperationId} but no graphql operation`
+            // Check if we've hit the lazy-load limit
+            if (lazyLoadedCount >= MAX_LAZY_LOADED_APIS) {
+                console.log(
+                    `[algolia] Reached lazy-load limit (${MAX_LAZY_LOADED_APIS}), skipping API ${apiDefinitionId} with ${nodes.length} nodes`
                 );
-                return;
+                continue;
             }
 
-            const graphqlBase = createEndpointBaseRecordGraphQl({
-                base,
-                node,
-                graphqlOperation,
-                types: apiDefinition.types
-            });
-            records.push(...createApiReferenceRecordGraphQl({ graphqlBase, graphqlOperation }));
-            records.push(
-                ...createGraphQlParameterRecords({
-                    endpointBase: graphqlBase,
-                    graphqlOperation,
-                    types: apiDefinition.types
-                })
+            console.log(
+                `[algolia] Lazy-loading API definition: ${apiDefinitionId} (${lazyLoadedCount + 1}/${MAX_LAZY_LOADED_APIS})`
             );
-            return;
+
+            try {
+                apiDefinition = await loadApiById(apiDefinitionId);
+                lazyLoadedCount++;
+            } catch (error) {
+                console.error(`[algolia] Error lazy-loading API ${apiDefinitionId}:`, error);
+                continue;
+            }
+
+            if (!apiDefinition) {
+                console.error(
+                    `[algolia] Failed to load API definition ${apiDefinitionId}, skipping ${nodes.length} nodes`
+                );
+                continue;
+            }
         }
-    });
+
+        // Process all nodes for this API
+        try {
+            for (const node of nodes) {
+                const base = createBaseRecord({
+                    node,
+                    parents: collector.getParents(node.id) ?? [],
+                    domain,
+                    org_id,
+                    authed: authed?.(node) ?? false,
+                    versionIndexMap
+                });
+
+                records.push(...createRecordsForApiLeafNode({ node, apiDefinition, base }));
+            }
+        } catch (error) {
+            console.error(`[algolia] Error processing nodes for API ${apiDefinitionId}:`, error);
+        }
+
+        // API definition can be garbage collected after processing all its nodes
+    }
+
+    console.log(`[algolia] Created ${records.length} records (${lazyLoadedCount} APIs lazy-loaded)`);
 
     // const distinctSlugs = new Set<string>();
     // collector.getNodesInOrder().forEach((node) => {
@@ -263,8 +207,4 @@ export function createAlgoliaRecords({ root, domain, org_id, pages, apis, authed
                 size: measureBytes(record)
             })) ?? []
     };
-}
-
-function getGrpcIdAsEndpointId(grpcId: ApiDefinition.GrpcId): ApiDefinition.EndpointId {
-    return grpcId as unknown as ApiDefinition.EndpointId;
 }

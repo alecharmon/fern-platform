@@ -29,12 +29,14 @@
   },
   "dependencies": {
     "@fern-api/docs-utils": "workspace:*",
+    "@fern-api/fdr-lambda-sdk": "workspace:*",
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-docs/mdx": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "es-toolkit": "^1.32.0",
     "html-entities": "^2.5.2",
+    "jose": "catalog:",
     "js-yaml": "^4.1.1",
     "openapi-types": "^12.1.3",
     "zod": "catalog:"
