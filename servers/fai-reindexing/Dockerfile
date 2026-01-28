@@ -1,6 +1,6 @@
 FROM node:22-alpine AS base
 
-RUN npm install -g pnpm@10.28.1
+RUN npm install -g pnpm@10.28.2
 
 WORKDIR /app
 
@@ -57,7 +57,7 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 
 # Install dependencies and patch tar to fix CVE-2026-23950 (GHSA-r6q2-hw4h-h46w)
-RUN npm install -g pnpm@10.28.1 && \
+RUN npm install -g pnpm@10.28.2 && \
     pnpm add \
         @aws-sdk/client-ecs@^3.709.0 \
         @aws-sdk/client-sqs@^3.709.0 \
