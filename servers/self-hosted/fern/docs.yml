@@ -6,6 +6,8 @@ title: Ariel's Plant Store
 
 experimental:
   ai-examples: true
+  mdx-components:
+    - ./components
 
 layout:
   searchbar-placement: header
@@ -27,6 +29,9 @@ navigation:
       - page: SDKs
         path: docs/pages/sdks.mdx
         slug: sdks
+      - page: Custom Components
+        path: docs/pages/custom-components.mdx
+        slug: custom-components
   - api: API Reference
     slug: api
     flattened: true

@@ -541,3 +541,77 @@ export async function testCacheStatsEndpoint(
         throw new Error(`Cache stats missing hit/miss counters: ${JSON.stringify(stats)}`);
     }
 }
+
+/**
+ * Test that custom components page is accessible and renders the custom component
+ */
+export async function testCustomComponentsPage(
+    containerId: string,
+    endpoint: string = "http://localhost:3000/custom-components"
+): Promise<void> {
+    const maxRetries = 30;
+    const retryDelay = 1000;
+
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const { stdout: httpCode } = await execa("docker", [
+                "exec",
+                containerId,
+                "curl",
+                "-s",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}",
+                endpoint
+            ]);
+
+            if (httpCode === "200") {
+                // Get the actual content to verify custom components rendered
+                const { stdout: content } = await execa("docker", ["exec", containerId, "curl", "-s", endpoint]);
+
+                // Check for HTML structure
+                if (!content.includes("<!DOCTYPE html>") && !content.includes("<html")) {
+                    throw new Error(`Custom components page returned non-HTML content at ${endpoint}`);
+                }
+
+                // Check that the page title or content related to custom components is present
+                if (!content.includes("Custom Components") && !content.includes("custom-components")) {
+                    throw new Error(`Custom components page does not contain expected content at ${endpoint}`);
+                }
+
+                // Check for evidence that the custom component rendered
+                // The CustomBanner component includes data-testid="custom-banner" and specific styling
+                // When SSR renders the component, we should see evidence of it in the HTML
+                if (
+                    !content.includes("custom-banner") &&
+                    !content.includes("CustomBanner") &&
+                    !content.includes("Information") &&
+                    !content.includes("Success!")
+                ) {
+                    throw new Error(
+                        `Custom components page does not appear to have rendered the custom banner component at ${endpoint}`
+                    );
+                }
+
+                // Success!
+                return;
+            }
+
+            lastError = new Error(`Custom components page not accessible at ${endpoint}. HTTP status: ${httpCode}`);
+        } catch (error) {
+            lastError = error as Error;
+        }
+
+        // Wait before retrying (except on last attempt)
+        if (attempt < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+    }
+
+    throw new Error(
+        `Custom components page failed to become accessible after ${maxRetries} attempts: ${lastError?.message}`
+    );
+}

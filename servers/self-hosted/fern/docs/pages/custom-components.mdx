@@ -1,0 +1,51 @@
+---
+title: Custom Components Demo
+description: Testing custom React components in self-hosted docs
+slug: custom-components
+---
+
+import { CustomBanner } from "../../components/CustomBanner";
+
+This page demonstrates custom React components support in self-hosted Fern docs.
+
+## Custom Banner Component
+
+The following banners are rendered using a custom React component:
+
+### Info Banner
+
+<CustomBanner 
+  title="Information" 
+  message="This is an info banner rendered by a custom component." 
+  type="info" 
+/>
+
+### Success Banner
+
+<CustomBanner 
+  title="Success!" 
+  message="The custom component is working correctly in self-hosted mode." 
+  type="success" 
+/>
+
+### Warning Banner
+
+<CustomBanner 
+  title="Warning" 
+  message="This is a warning message from the custom component." 
+  type="warning" 
+/>
+
+### Error Banner
+
+<CustomBanner 
+  title="Error" 
+  message="This demonstrates an error-styled banner." 
+  type="error" 
+/>
+
+## Verifying Custom Components
+
+If you can see the colored banners above with proper styling, custom components are working correctly in your self-hosted Fern docs deployment.
+
+The custom component (`CustomBanner.tsx`) is defined in the `components/` folder and imported into this MDX page.

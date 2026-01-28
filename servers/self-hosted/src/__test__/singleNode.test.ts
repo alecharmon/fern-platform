@@ -7,6 +7,7 @@ import { SELF_HOSTED_CONTAINER_NAME, setup, teardown } from "./setupSelfHostedDo
 import {
     getContainerId,
     testCacheStatsEndpoint,
+    testCustomComponentsPage,
     testDocsUIAccessible,
     testDocsUIElements,
     testExternalCallsBlocked,
@@ -209,5 +210,14 @@ describe("Frontend cache is working", () => {
         expect(containerId).toBeTruthy();
 
         await testFrontendCacheWorking(containerId);
+    });
+});
+
+describe("Custom components support", () => {
+    it("custom components page is accessible and renders the custom component", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testCustomComponentsPage(containerId);
     });
 });

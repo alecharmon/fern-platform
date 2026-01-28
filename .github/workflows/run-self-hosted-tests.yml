@@ -487,6 +487,56 @@ jobs:
           fi
           echo "Docs UI returned valid HTML"
 
+      - name: Test custom components page
+        run: |
+          echo "Testing custom components page (localhost:30080/custom-components)..."
+          
+          for i in {1..30}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:30080/custom-components 2>/dev/null || echo "000")
+            echo "Attempt $i/30: HTTP status=$HTTP_CODE"
+            
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Custom components page is accessible!"
+              break
+            fi
+            sleep 5
+          done
+          
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:30080/custom-components 2>/dev/null || echo "000")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "ERROR: Custom components page not accessible (HTTP $HTTP_CODE)"
+            kubectl logs -l app=fern-docs --tail=100 || true
+            exit 1
+          fi
+          
+          CONTENT=$(curl -s http://localhost:30080/custom-components 2>/dev/null)
+          
+          # Check for HTML structure
+          if ! echo "$CONTENT" | grep -q "<!DOCTYPE html>\|<html"; then
+            echo "ERROR: Custom components page did not return HTML"
+            exit 1
+          fi
+          
+          # Check for evidence of custom components rendering
+          # The page should contain "Custom Components" in the title or content
+          if ! echo "$CONTENT" | grep -qi "custom.component"; then
+            echo "ERROR: Custom components page does not contain expected content"
+            echo "Content preview:"
+            echo "$CONTENT" | head -50
+            exit 1
+          fi
+          
+          # Check for evidence that the CustomBanner component rendered
+          # It includes data-testid="custom-banner" or specific banner text
+          if echo "$CONTENT" | grep -qiE "custom-banner|Information|Success!"; then
+            echo "Custom banner component appears to have rendered!"
+          else
+            echo "WARNING: Could not find evidence of CustomBanner component in HTML"
+            echo "This may be expected if the component renders client-side"
+          fi
+          
+          echo "Custom components page test passed!"
+
       - name: Test CORS proxy endpoint
         run: |
           echo "Testing CORS proxy endpoint (/__proxy/)..."
