@@ -25,7 +25,7 @@ jobs:
 
   up-eu:
     needs: up
-    if: always()
+    if: false
     name: Check if sites are up (via EU runner)
     runs-on:
       group: International
