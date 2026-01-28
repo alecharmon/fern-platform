@@ -3,7 +3,7 @@ import os
 import sys
 import time
 
-import requests
+import httpx
 from fern import IncidentEditPayloadV2, IncidentIO
 from fern.core.api_error import ApiError
 
@@ -144,23 +144,93 @@ for incident in list_standard_incidents():
 
 # Hit all sites to see if they are up
 sites_down = {"US": [], "EU": []}
-with open("sites.csv", "r") as file:
-    reader = csv.reader(file, delimiter=",")
-    http_headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
+FAST_TIMEOUT = 2  # seconds for first pass
+RETRY_TIMEOUT = 15  # seconds for retry pass
+slow_sites = []  # track sites that take longer than expected
 
-    for row in reader:
-        domain = row[0]
-        try:
-            resp = requests.get(f"https://{domain}", headers=http_headers)
-            if resp.status_code != 200:
-                print(f"Issue getting {domain}")
-                print(resp)
-                sites_down[region].append(domain)
-        except Exception:
-            print(f"Issue getting {domain}")
+# First, load all domains to get total count
+with open("sites.csv", "r") as file:
+    domains = [row[0] for row in csv.reader(file, delimiter=",") if row and row[0]]
+
+total_sites = len(domains)
+script_start_time = time.time()
+print(f"\n=== Starting site checks for {region} region ({total_sites} sites) ===\n", flush=True)
+
+http_headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+
+def check_site_httpx(domain: str, timeout: int) -> tuple[bool, int, float, str]:
+    """Check if a site is up using httpx. Returns (success, status_code, elapsed_time, error_msg)."""
+    start_time = time.time()
+    try:
+        with httpx.Client(follow_redirects=True, timeout=timeout) as client:
+            resp = client.get(f"https://{domain}", headers=http_headers)
+        elapsed = time.time() - start_time
+        if resp.status_code == 200:
+            return (True, resp.status_code, elapsed, "")
+        else:
+            return (False, resp.status_code, elapsed, f"status={resp.status_code}")
+    except httpx.TimeoutException:
+        elapsed = time.time() - start_time
+        return (False, 0, elapsed, f"httpx timeout after {elapsed:.2f}s")
+    except httpx.HTTPError as e:
+        elapsed = time.time() - start_time
+        return (False, 0, elapsed, f"httpx {type(e).__name__}")
+    except Exception as e:
+        elapsed = time.time() - start_time
+        return (False, 0, elapsed, f"httpx unexpected: {type(e).__name__}")
+
+
+# === PASS 1: Fast check with httpx ===
+print(f"=== PASS 1: Fast check with httpx ({FAST_TIMEOUT}s timeout) ===", flush=True)
+failed_domains = []
+
+for i, domain in enumerate(domains, 1):
+    if i % 25 == 0 or i == 1:
+        elapsed_total = time.time() - script_start_time
+        print(f"[{i}/{total_sites}] Pass 1... (elapsed: {elapsed_total:.1f}s)", flush=True)
+    
+    success, status, elapsed, error = check_site_httpx(domain, FAST_TIMEOUT)
+    
+    if success:
+        if elapsed > 1:
+            slow_sites.append((domain, elapsed, status))
+    else:
+        failed_domains.append(domain)
+        print(f"  FAIL (pass 1): {domain} - {error}", flush=True)
+
+pass1_elapsed = time.time() - script_start_time
+print(f"\n=== Pass 1 complete: {len(failed_domains)} failures in {pass1_elapsed:.1f}s ===\n", flush=True)
+
+# === PASS 2: Retry failed sites with httpx (longer timeout) ===
+if failed_domains:
+    print(f"=== PASS 2: Retrying {len(failed_domains)} failed sites with httpx ({RETRY_TIMEOUT}s timeout) ===", flush=True)
+    still_failed = []
+    
+    for i, domain in enumerate(failed_domains, 1):
+        print(f"  [{i}/{len(failed_domains)}] Retrying {domain}...", flush=True)
+        
+        success, status, elapsed, error = check_site_httpx(domain, RETRY_TIMEOUT)
+        
+        if success:
+            print(f"    OK: {domain} succeeded on retry in {elapsed:.2f}s", flush=True)
+            if elapsed > 2:
+                slow_sites.append((domain, elapsed, status))
+        else:
+            print(f"    FAILED: {domain} - {error}", flush=True)
             sites_down[region].append(domain)
+
+# Final summary
+total_elapsed = time.time() - script_start_time
+print(f"\n=== Site check complete: {total_sites} sites in {total_elapsed:.1f}s ===", flush=True)
+print(f"Sites down: {len(sites_down[region])}", flush=True)
+
+if slow_sites:
+    print(f"\n=== SLOW SITES SUMMARY ({len(slow_sites)} sites took >1s) ===")
+    for domain, elapsed, status in sorted(slow_sites, key=lambda x: -x[1]):
+        print(f"  {domain}: {elapsed:.2f}s (status: {status})")
 
 
 # If all sites are good, close any open test incidents

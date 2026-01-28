@@ -17,7 +17,7 @@ jobs:
       - name: Copy domain list
         run: cp scripts/monitor/sites.csv sites.csv
       - name: Install dependencies
-        run: pip install git+https://github.com/fern-api/incident-python.git requests
+        run: pip install git+https://github.com/fern-api/incident-python.git httpx
       - name: Check Sites
         env:
           INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
@@ -25,12 +25,12 @@ jobs:
 
   up-eu:
     needs: up
-    if: false
+    if: always()
     name: Check if sites are up (via EU runner)
     runs-on:
       group: International
       labels: eu
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Log location info
         run: curl ipinfo.io
@@ -41,7 +41,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: pip install git+https://github.com/fern-api/incident-python.git requests
+        run: pip install git+https://github.com/fern-api/incident-python.git httpx
       - name: Check Sites
         env:
           INCIDENT_API_KEY: ${{ secrets.INCIDENT_API_KEY }}
