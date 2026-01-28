@@ -601,6 +601,61 @@ jobs:
           
           echo "All CORS proxy tests passed!"
 
+      - name: Test MeiliSearch search endpoint
+        run: |
+          POD_NAME=$(kubectl get pods -l app=fern-docs -o jsonpath='{.items[0].metadata.name}')
+          
+          echo "Testing MeiliSearch health endpoint directly inside pod..."
+          MEILI_HEALTH=$(kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:7700/health 2>/dev/null || echo "000")
+          echo "MeiliSearch health status: $MEILI_HEALTH"
+          
+          if [ "$MEILI_HEALTH" != "200" ]; then
+            echo "ERROR: MeiliSearch health check failed (HTTP $MEILI_HEALTH)"
+            kubectl exec $POD_NAME -- curl -s http://localhost:7700/health 2>/dev/null || true
+            exit 1
+          fi
+          echo "MeiliSearch health check passed"
+          
+          echo "Testing MeiliSearch indexes endpoint via /_search/ proxy..."
+          INDEXES_CODE=$(kubectl exec $POD_NAME -- curl -s -o /tmp/indexes.json -w "%{http_code}" http://localhost:3000/_search/indexes 2>/dev/null || echo "000")
+          echo "Indexes endpoint status: $INDEXES_CODE"
+          
+          if [ "$INDEXES_CODE" != "200" ]; then
+            echo "ERROR: MeiliSearch indexes endpoint failed (HTTP $INDEXES_CODE)"
+            kubectl exec $POD_NAME -- cat /tmp/indexes.json 2>/dev/null || true
+            exit 1
+          fi
+          
+          INDEXES_RESPONSE=$(kubectl exec $POD_NAME -- cat /tmp/indexes.json 2>/dev/null)
+          echo "Indexes response: $INDEXES_RESPONSE"
+          
+          if ! echo "$INDEXES_RESPONSE" | grep -q "results"; then
+            echo "ERROR: MeiliSearch indexes response does not contain expected 'results' field"
+            exit 1
+          fi
+          echo "MeiliSearch indexes endpoint test passed"
+          
+          echo "Testing MeiliSearch stats endpoint via /_search/ proxy..."
+          STATS_CODE=$(kubectl exec $POD_NAME -- curl -s -o /tmp/stats.json -w "%{http_code}" http://localhost:3000/_search/stats 2>/dev/null || echo "000")
+          echo "Stats endpoint status: $STATS_CODE"
+          
+          if [ "$STATS_CODE" != "200" ]; then
+            echo "ERROR: MeiliSearch stats endpoint failed (HTTP $STATS_CODE)"
+            kubectl exec $POD_NAME -- cat /tmp/stats.json 2>/dev/null || true
+            exit 1
+          fi
+          
+          STATS_RESPONSE=$(kubectl exec $POD_NAME -- cat /tmp/stats.json 2>/dev/null)
+          echo "Stats response: $STATS_RESPONSE"
+          
+          if ! echo "$STATS_RESPONSE" | grep -q "databaseSize"; then
+            echo "ERROR: MeiliSearch stats response does not contain expected 'databaseSize' field"
+            exit 1
+          fi
+          echo "MeiliSearch stats endpoint test passed"
+          
+          echo "All MeiliSearch search endpoint tests passed!"
+
       # Cleanup the main deployment before running buf cache tests
       - name: Cleanup main deployment
         run: |

@@ -265,8 +265,14 @@ if [ "$USE_SEEDED_DATA" = "true" ] && [ -f "$SEED_MEILI_DUMP" ]; then
     MEILI_IMPORT_FLAG="--import-dump $SEED_MEILI_DUMP"
 fi
 
+# Configure search queue size to prevent heap memory exhaustion from search request overload
+# Lower values = less RAM during search spikes, but more 503 errors under heavy load
+# Default: 100 (MeiliSearch default is 1000, but we use a lower value for protection)
+MEILI_SEARCH_QUEUE_SIZE="${MEILI_SEARCH_QUEUE_SIZE:-100}"
+log "MeiliSearch search queue size: $MEILI_SEARCH_QUEUE_SIZE"
+
 log "Starting MeiliSearch with db-path: $MEILI_DB_PATH..."
-/meilisearch --master-key="fern123!" --db-path "$MEILI_DB_PATH" $MEILI_IMPORT_FLAG 2>&1 | tee /tmp/meilisearch.log | add_timestamps &
+/meilisearch --master-key="fern123!" --db-path "$MEILI_DB_PATH" --experimental-search-queue-size "$MEILI_SEARCH_QUEUE_SIZE" $MEILI_IMPORT_FLAG 2>&1 | tee /tmp/meilisearch.log | add_timestamps &
 meili_pid=$!
 log "MeiliSearch PID: $meili_pid"
 
