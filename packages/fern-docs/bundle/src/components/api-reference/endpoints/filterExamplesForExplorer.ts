@@ -1,67 +1,5 @@
 import type { ExampleEndpointCall } from "@fern-api/fdr-sdk/api-definition";
-
-/**
- * Check if a value is non-empty (not null, not undefined, not empty object/array/string)
- */
-function hasNonEmptyValue(value: unknown): boolean {
-    if (value == null) {
-        return false;
-    }
-    if (typeof value === "object") {
-        if (Array.isArray(value)) {
-            return value.length > 0;
-        }
-        return Object.keys(value).length > 0;
-    }
-    if (typeof value === "string") {
-        return value.length > 0;
-    }
-    return true;
-}
-
-/**
- * Check if a parameter value is meaningful (not a placeholder like `:key`)
- */
-function isMeaningfulParamValue(key: string, value: unknown): boolean {
-    if (value == null) {
-        return false;
-    }
-    if (typeof value === "string") {
-        if (value.length === 0) {
-            return false;
-        }
-        if (value === `:${key}`) {
-            return false;
-        }
-    }
-    return true;
-}
-
-/**
- * Check if params object has any meaningful values
- */
-function hasMeaningfulParams(params: Record<string, unknown> | undefined): boolean {
-    if (params == null) {
-        return false;
-    }
-    return Object.entries(params).some(([key, value]) => isMeaningfulParamValue(key, value));
-}
-
-/**
- * Check if an example has request-side data (requestBody, pathParameters, or queryParameters)
- */
-export function hasRequestSideData(example: ExampleEndpointCall): boolean {
-    if (example.requestBody != null && hasNonEmptyValue(example.requestBody.value)) {
-        return true;
-    }
-    if (hasMeaningfulParams(example.pathParameters)) {
-        return true;
-    }
-    if (hasMeaningfulParams(example.queryParameters)) {
-        return true;
-    }
-    return false;
-}
+import { compareByRequestData, hasRequestSideData } from "@fern-docs/components/api-reference/examples/example-groups";
 
 /**
  * Check if an example name indicates it's auto-generated (ends with "_example")
@@ -114,17 +52,15 @@ export function filterExamplesForExplorer(examples: ExampleEndpointCall[] | unde
     }
 
     // Sort examples so that those with request data come first, and those without come last
-    finalExamples.sort((a, b) => {
-        const aHasRequestData = hasRequestSideData(a.example);
-        const bHasRequestData = hasRequestSideData(b.example);
-        if (aHasRequestData && !bHasRequestData) {
-            return -1;
-        }
-        if (!aHasRequestData && bHasRequestData) {
-            return 1;
-        }
-        return 0;
-    });
+    // Exception: if the name starts with "Default" (case-insensitive, trimmed), preserve original order
+    finalExamples.sort((a, b) =>
+        compareByRequestData(
+            hasRequestSideData(a.example),
+            hasRequestSideData(b.example),
+            a.example.name,
+            b.example.name
+        )
+    );
 
     return {
         filteredExamples: finalExamples.map(({ example }) => example),

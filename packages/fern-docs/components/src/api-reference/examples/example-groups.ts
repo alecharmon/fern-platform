@@ -49,6 +49,50 @@ function hasMeaningfulParams(params: Record<string, unknown> | undefined): boole
 }
 
 /**
+ * Check if an example key/name starts with "Default" (case-insensitive, trimmed)
+ */
+export function startsWithDefault(name: string | null | undefined): boolean {
+    if (name == null) {
+        return false;
+    }
+    return name.trim().toLowerCase().startsWith("default");
+}
+
+/**
+ * Compare function for sorting examples by request data.
+ * Examples with request data come first, those without come last.
+ * Exception: if the name starts with "Default" (case-insensitive, trimmed), preserve original order.
+ *
+ * @param aHasRequestData - Whether item A has request data
+ * @param bHasRequestData - Whether item B has request data
+ * @param aName - The name of item A (for the Default check)
+ * @param bName - The name of item B (for the Default check)
+ * @returns -1 if A should come first, 1 if B should come first, 0 if order should be preserved
+ */
+export function compareByRequestData(
+    aHasRequestData: boolean,
+    bHasRequestData: boolean,
+    aName: string | null | undefined,
+    bName: string | null | undefined
+): number {
+    if (aHasRequestData && !bHasRequestData) {
+        // Don't sort to bottom if name starts with "Default"
+        if (startsWithDefault(bName)) {
+            return 0;
+        }
+        return -1;
+    }
+    if (!aHasRequestData && bHasRequestData) {
+        // Don't sort to bottom if name starts with "Default"
+        if (startsWithDefault(aName)) {
+            return 0;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+/**
  * Check if an example has meaningful request-side data (body, path params, or query params).
  */
 export function hasRequestSideData(exampleCall: ApiDefinition.ExampleEndpointCall): boolean {
@@ -114,15 +158,8 @@ function getFirstVisibleExampleKey(examplesByKeyAndStatusCode: ExamplesByKeyAndS
     }
 
     // Sort so examples with request data come first
-    visibleKeys.sort((a, b) => {
-        if (a.hasRequestData && !b.hasRequestData) {
-            return -1;
-        }
-        if (!a.hasRequestData && b.hasRequestData) {
-            return 1;
-        }
-        return 0;
-    });
+    // Exception: if the name starts with "Default" (case-insensitive, trimmed), preserve original order
+    visibleKeys.sort((a, b) => compareByRequestData(a.hasRequestData, b.hasRequestData, a.key, b.key));
 
     return visibleKeys[0]?.key;
 }
