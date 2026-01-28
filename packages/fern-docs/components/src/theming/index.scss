@@ -79,7 +79,7 @@
     }
 
     #fern-toc {
-      @apply top-header-height max-h-[calc(100dvh-var(--spacing-header-height))];
+      @apply top-header-height z-[999] max-h-[calc(100dvh-var(--spacing-header-height))];
     }
 
     #fern-sidebar-scroll-area {
