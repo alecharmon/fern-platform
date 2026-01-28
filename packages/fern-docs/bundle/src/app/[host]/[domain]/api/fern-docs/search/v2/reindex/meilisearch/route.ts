@@ -59,8 +59,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         console.warn("[meilisearch] Failed to clear existing documents:", err);
     }
 
-    // Set filterable attributes
-    await meiliIndex.updateFilterableAttributes([
+    // Set filterable attributes - must wait for task to complete before adding documents
+    // so that facet distribution works correctly
+    const filterableTask = await meiliIndex.updateFilterableAttributes([
         "product.title",
         "version.title",
         "method",
@@ -70,8 +71,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         "api_type",
         "distinct"
     ]);
+    await meiliClient.tasks.waitForTask(filterableTask.taskUid, { timeout: 30000 });
+    console.log("[meilisearch] Filterable attributes configured");
 
-    await meiliIndex.updateDistinctAttribute("distinct");
+    const distinctTask = await meiliIndex.updateDistinctAttribute("distinct");
+    await meiliClient.tasks.waitForTask(distinctTask.taskUid, { timeout: 30000 });
+    console.log("[meilisearch] Distinct attribute configured");
 
     // Track indexing progress
     let totalRecords = 0;
