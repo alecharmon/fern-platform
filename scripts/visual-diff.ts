@@ -191,7 +191,9 @@ const COOKIE_CONSENT_SELECTORS = [
     '[aria-label*="Consent"]',
     '[aria-label*="GDPR"]',
     '[aria-label*="privacy"]',
-    '[aria-label*="Privacy"]'
+    '[aria-label*="Privacy"]',
+    // Chat widgets and other floating elements that can cause diff instability
+    "elevenlabs-convai"
 ];
 
 // Function to remove cookie consent popups - extracted for reuse
@@ -236,7 +238,7 @@ function getRemoveCookieBannersScript(selectors: string[]): string {
     `;
 }
 
-async function takeFullPageScreenshot(
+async function takeScreenshot(
     context: BrowserContext,
     url: string,
     outputPath: string,
@@ -292,7 +294,9 @@ async function takeFullPageScreenshot(
         // (e.g., Cohere's cookie banner appears after a delay and would be missed by the earlier removal)
         await page.evaluate(getRemoveCookieBannersScript(COOKIE_CONSENT_SELECTORS));
 
-        await page.screenshot({ path: outputPath, fullPage: true });
+        // Use viewport-only screenshot (not fullPage) for more stable comparisons
+        // Full-page screenshots can vary in height due to dynamic content, causing false diffs
+        await page.screenshot({ path: outputPath });
     } finally {
         await page.close();
     }
@@ -371,16 +375,36 @@ async function processPage(
         console.log(`  Processing: ${pagePath}`);
 
         await Promise.all([
-            takeFullPageScreenshot(liveContext, liveUrl, liveScreenshotPath, waitTime),
-            takeFullPageScreenshot(previewContext, previewUrl, previewScreenshotPath, waitTime)
+            takeScreenshot(liveContext, liveUrl, liveScreenshotPath, waitTime),
+            takeScreenshot(previewContext, previewUrl, previewScreenshotPath, waitTime)
         ]);
 
-        const { diffPixels, diffPercentage } = await compareImages(
+        let { diffPixels, diffPercentage } = await compareImages(
             liveScreenshotPath,
             previewScreenshotPath,
             diffScreenshotPath,
             threshold
         );
+
+        // If diff detected, retry with longer wait time to allow dynamic content to fully load
+        if (diffPercentage >= diffThreshold) {
+            const retryWaitTime = waitTime * 3;
+            console.log(`    Diff detected, retrying with ${retryWaitTime}ms wait time...`);
+
+            await Promise.all([
+                takeScreenshot(liveContext, liveUrl, liveScreenshotPath, retryWaitTime),
+                takeScreenshot(previewContext, previewUrl, previewScreenshotPath, retryWaitTime)
+            ]);
+
+            const retryResult = await compareImages(
+                liveScreenshotPath,
+                previewScreenshotPath,
+                diffScreenshotPath,
+                threshold
+            );
+            diffPixels = retryResult.diffPixels;
+            diffPercentage = retryResult.diffPercentage;
+        }
 
         result.diffPixels = diffPixels;
         result.diffPercentage = diffPercentage;
@@ -424,8 +448,9 @@ async function runVisualDiffForDomain(
         results: []
     };
 
-    const liveContext = await liveBrowser.newContext();
-    const previewContext = await previewBrowser.newContext();
+    const viewportConfig = { width: 1920, height: 1200 };
+    const liveContext = await liveBrowser.newContext({ viewport: viewportConfig });
+    const previewContext = await previewBrowser.newContext({ viewport: viewportConfig });
 
     try {
         const setupPage = await previewContext.newPage();
