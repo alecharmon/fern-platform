@@ -40,7 +40,7 @@ export const FilterDropdownMenu = ({
     const options = toFilterOptions(useFacets(filters).facets);
     const preloadFacets = usePreloadFacets();
 
-    if (options.length === 0) {
+    if (options.length <= 1) {
         return (
             <Button
                 size="icon"
@@ -108,7 +108,7 @@ export const AddFilterButton = ({
     const options = toFilterOptions(useFacets(filters).facets);
     const preloadFacets = usePreloadFacets();
 
-    if (options.length === 0) {
+    if (options.length <= 1) {
         return null;
     }
 

@@ -43,10 +43,6 @@ export async function fetchFacetValuesFromAlgolia(opts: {
     zip(results, SEARCHABLE_FACET_ATTRIBUTES).forEach(([{ facetHits }, attribute]) => {
         const filteredFacets = facetHits.filter((hit) => hit.count > 0);
 
-        if (filteredFacets.length < 2) {
-            return;
-        }
-
         filteredFacets.forEach((hit) => {
             (response[attribute] ??= []).push({
                 value: hit.value,

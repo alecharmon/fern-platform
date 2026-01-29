@@ -30,7 +30,9 @@ export function MobileFacetMenuBar({
         (facet) => facetsResponse?.[facet]?.length
     );
 
-    if (facets.length === 0) {
+    const totalOptions = facets.reduce((sum, facet) => sum + (facetsResponse?.[facet]?.length ?? 0), 0);
+
+    if (facets.length === 0 || totalOptions <= 1) {
         return false;
     }
 

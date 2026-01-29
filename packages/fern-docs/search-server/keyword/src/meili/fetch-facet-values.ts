@@ -57,7 +57,7 @@ export async function fetchFacetValuesFromMeili(opts: {
                             value,
                             count: Number(count)
                         }));
-                    if (facetHits.length > 1) {
+                    if (facetHits.length > 0) {
                         response[facet as FacetName] = facetHits;
                     }
                 }
