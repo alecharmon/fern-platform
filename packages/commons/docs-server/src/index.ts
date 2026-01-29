@@ -33,6 +33,7 @@ export * from "./isDocsDev";
 export * from "./isLocal";
 export * from "./isSelfHosted";
 export * from "./loadDocsDefinitionFromS3";
+export * from "./loadDynamicIRFromMinIO";
 export * from "./loadDynamicIRFromS3";
 export * from "./loadDynamicIRWithUrl";
 export * from "./loadWithUrl";

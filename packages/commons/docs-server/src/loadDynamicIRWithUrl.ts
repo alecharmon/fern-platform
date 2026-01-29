@@ -3,6 +3,7 @@ import { cache } from "react";
 
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
+import { loadDynamicIRFromMinIO } from "./loadDynamicIRFromMinIO";
 import { type DynamicIRsByLanguage, loadDynamicIRFromS3 } from "./loadDynamicIRFromS3";
 
 export type DynamicIRsByAPI = Record<string, DynamicIRsByLanguage>;
@@ -17,17 +18,24 @@ export const loadDynamicIRWithUrl = cache(
         apiName: string;
         snippetsConfig: APIV1Write.SnippetsConfig | undefined;
     }): Promise<DynamicIRsByLanguage | undefined> => {
-        // todo: support dynamic snippets in local dev
         if (isLocal()) {
             return undefined;
         }
 
-        // todo: support dynamic snippets in self-hosted
-        if (isSelfHosted()) {
+        if (!snippetsConfig) {
             return undefined;
         }
 
-        if (!snippetsConfig) {
+        if (isSelfHosted()) {
+            try {
+                const minioEndpoint = process.env.NEXT_PUBLIC_MINIO_BUCKET_HOST ?? "http://localhost:9000";
+                const response = await loadDynamicIRFromMinIO(orgId, apiName, snippetsConfig, minioEndpoint);
+                if (response != null && Object.keys(response).length > 0) {
+                    return response;
+                }
+            } catch (error) {
+                console.error("Failed to load dynamic IR from MinIO:", error);
+            }
             return undefined;
         }
 
