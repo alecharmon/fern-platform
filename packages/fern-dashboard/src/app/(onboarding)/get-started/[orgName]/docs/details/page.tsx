@@ -4,19 +4,20 @@ import { ensureOnboardingOrgAccess } from "../ensureOnboardingOrgAccess";
 import { DetailsStepClient } from "./DetailsStepClient";
 
 interface DocsOnboardingStep3PageProps {
-    params: {
+    params: Promise<{
         orgName: string;
-    };
+    }>;
 }
 
 export default async function DocsOnboardingStep3Page({ params }: DocsOnboardingStep3PageProps) {
-    await ensureOnboardingOrgAccess(params.orgName, `/get-started/${params.orgName}/docs/details`);
+    const { orgName } = await params;
+    await ensureOnboardingOrgAccess(orgName, `/get-started/${orgName}/docs/details`);
 
     return (
         <>
-            <BackArrow href={`/get-started/${params.orgName}/docs/branding`} />
+            <BackArrow href={`/get-started/${orgName}/docs/branding`} />
             <div className="flex justify-center gap-6">
-                <DetailsStepClient organizationId={params.orgName} />
+                <DetailsStepClient organizationId={orgName} />
                 <div
                     className="max-w-[650px] max-h-[450px] hidden lg:block md:pt-12"
                     style={{

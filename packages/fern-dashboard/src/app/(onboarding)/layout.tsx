@@ -29,8 +29,8 @@ export default function AuthLayout({
 }) {
     const pathname = usePathname();
     const centerCard = !pathname.includes("login");
-    // Hide card background for publishing and complete pages
-    const hideCard = pathname.includes("/publishing") || pathname.includes("/complete");
+    // Hide card background for complete page only (publishing page now shows the card UI)
+    const hideCard = pathname.includes("/complete");
 
     return (
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>

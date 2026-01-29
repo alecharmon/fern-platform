@@ -3,6 +3,11 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import type { FormEvent, MouseEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+    markRepoSetupPending,
+    storeRepoSetupError,
+    storeRepoSetupSuccess
+} from "@/components/onboarding/repoSetupStorage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,6 +78,39 @@ export function CreateOrganizationForm({
                 }
 
                 const data = await response.json();
+
+                // Fire-and-forget: start setting up the GitHub repo in the background
+                // This will be ready by the time the user finishes the branding step
+                const orgId = data.organizationId;
+                markRepoSetupPending(orgId);
+
+                void (async () => {
+                    try {
+                        const repoResponse = await fetch("/api/onboarding-docs/set-up-repo", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                orgName: orgId
+                            })
+                        });
+
+                        if (repoResponse.ok) {
+                            const repoData = await repoResponse.json();
+                            storeRepoSetupSuccess(orgId, repoData.repoName, repoData.githubRepoUrl);
+                            console.log("[CreateOrganizationForm] Repo setup complete:", repoData.repoName);
+                        } else {
+                            const errorData = await repoResponse.json().catch(() => ({}));
+                            storeRepoSetupError(orgId, errorData.error || "Failed to set up repo");
+                            console.warn("[CreateOrganizationForm] Repo setup failed:", errorData.error);
+                        }
+                    } catch (err) {
+                        storeRepoSetupError(orgId, err instanceof Error ? err.message : "Unknown error");
+                        console.warn("[CreateOrganizationForm] Failed to start repo setup:", err);
+                    }
+                })();
+
                 onSuccess(data.organizationId);
             } catch (error) {
                 setSubmitError(error instanceof Error ? error.message : "An error occurred");

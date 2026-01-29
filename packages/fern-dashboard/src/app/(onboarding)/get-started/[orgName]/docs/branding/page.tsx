@@ -3,17 +3,18 @@ import { ensureOnboardingOrgAccess } from "../ensureOnboardingOrgAccess";
 import { BrandingStepClient } from "./BrandingStepClient";
 
 interface DocsOnboardingBrandingStepPageProps {
-    params: {
+    params: Promise<{
         orgName: string;
-    };
+    }>;
 }
 
 export default async function DocsOnboardingBrandingStepPage({ params }: DocsOnboardingBrandingStepPageProps) {
-    await ensureOnboardingOrgAccess(params.orgName, `/get-started/${params.orgName}/docs/branding`);
+    const { orgName } = await params;
+    await ensureOnboardingOrgAccess(orgName, `/get-started/${orgName}/docs/branding`);
 
     return (
         <>
-            <BackArrow href={`/get-started/${params.orgName}/docs`} />
+            <BackArrow href={`/get-started/${orgName}/docs`} />
             <BrandingStepClient />
         </>
     );

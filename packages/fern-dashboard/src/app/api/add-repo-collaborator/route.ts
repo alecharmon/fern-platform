@@ -2,6 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { RedisCacheKey } from "@/app/services/redis/cacheKey";
+import { redisGet } from "@/app/services/redis/redis";
+import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,6 +12,7 @@ export const dynamic = "force-dynamic";
 interface AddCollaboratorRequest {
     repoName: string;
     githubUsername: string;
+    orgName: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -24,8 +28,40 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    if (!data.repoName || !data.githubUsername) {
-        return NextResponse.json({ error: "repoName and githubUsername are required" }, { status: 400 });
+    if (!data.repoName || !data.githubUsername || !data.orgName) {
+        return NextResponse.json({ error: "repoName, githubUsername, and orgName are required" }, { status: 400 });
+    }
+
+    // Security check 1: Verify this repo was created for this org via Redis
+    // This check ensures the repo was created during onboarding for this specific org
+    const cachedData = await redisGet(RedisCacheKey.onboardingPreCreate(data.orgName));
+    console.log("[add-repo-collaborator] Security check:", {
+        orgName: data.orgName,
+        repoName: data.repoName,
+        cachedData: cachedData ? { status: cachedData.status, repoName: cachedData.repoName } : null
+    });
+    if (!cachedData) {
+        return NextResponse.json(
+            {
+                error: "Session expired. Please add collaborators directly via GitHub or contact support."
+            },
+            { status: 403 }
+        );
+    }
+    if (cachedData.repoName !== data.repoName) {
+        return NextResponse.json({ error: "Unauthorized: repo does not belong to this org" }, { status: 403 });
+    }
+
+    // Security check 2: Verify user is a member of the org via Venus API
+    try {
+        const venusClient = getVenusClient({ token: session.accessToken });
+        const isMemberResult = await venusClient.organization.isMember(data.orgName);
+        if (!isMemberResult.ok || !isMemberResult.body) {
+            return NextResponse.json({ error: "Unauthorized: user is not a member of this org" }, { status: 403 });
+        }
+    } catch (venusError) {
+        console.error("Error checking org membership:", venusError);
+        return NextResponse.json({ error: "Failed to verify org membership" }, { status: 500 });
     }
 
     // Validate GitHub username format (alphanumeric and hyphens, 1-39 chars)

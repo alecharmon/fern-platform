@@ -155,16 +155,20 @@ export async function validateGitRepoAccess(
     site: DocsUrl,
     gitUrl: string
 ): Promise<ValidateGitRepoResult> {
+    console.log(`[validateGitRepoAccess] Starting: orgName=${orgName}, site=${site}, gitUrl=${gitUrl}`);
     const normalizedGitUrl = normalizeUrl(gitUrl);
 
     // Detect the provider server-side
     const provider = await detectProvider(normalizedGitUrl);
+    console.log(`[validateGitRepoAccess] Detected provider: ${provider}`);
 
     // Parse the URL to get owner/repo
     const parsed = parseGitUrl(normalizedGitUrl);
     const { owner, repo } = parsed;
+    console.log(`[validateGitRepoAccess] Parsed: owner=${owner}, repo=${repo}`);
 
     if (!owner || !repo) {
+        console.error(`[validateGitRepoAccess] Failed: MALFORMED_GIT_URL`);
         return {
             ok: false,
             provider,
@@ -173,6 +177,7 @@ export async function validateGitRepoAccess(
     }
 
     const canonicalUrl = buildCanonicalUrl(normalizedGitUrl, provider, owner, repo);
+    console.log(`[validateGitRepoAccess] Canonical URL: ${canonicalUrl}`);
 
     // Route to appropriate validation based on provider
     if (provider === "gitlab") {
@@ -232,6 +237,7 @@ export async function validateGitRepoAccess(
 
     if (provider === "github" || provider === "github-enterprise") {
         // GitHub/GHE validation
+        console.log(`[validateGitRepoAccess] Checking GitHub permissions for ${owner}/${repo}`);
         const result = await checkOrgWritePermissionToRepo(
             orgName,
             site,
@@ -240,6 +246,7 @@ export async function validateGitRepoAccess(
         );
 
         if (result.ok) {
+            console.log(`[validateGitRepoAccess] GitHub validation passed`);
             return {
                 ok: true,
                 provider,
@@ -249,6 +256,7 @@ export async function validateGitRepoAccess(
             };
         }
 
+        console.error(`[validateGitRepoAccess] GitHub validation failed:`, JSON.stringify(result.error, null, 2));
         return {
             ok: false,
             provider,

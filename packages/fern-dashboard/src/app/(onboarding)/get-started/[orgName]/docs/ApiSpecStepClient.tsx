@@ -1,7 +1,9 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { uploadOnboardingAsset } from "@/components/onboarding/api";
 import { DEFAULT_SPECS } from "@/components/onboarding/constants";
 import { OnboardingStepCard } from "@/components/onboarding/OnboardingStepCard";
 import { OpenAPISpecs } from "@/components/onboarding/OpenAPISpecs";
@@ -11,6 +13,10 @@ import { useOnboarding } from "@/providers/OnboardingProvider";
 export function ApiSpecStepClient() {
     const { form, formData, goToNextStep } = useOnboarding();
     const posthog = usePostHog();
+    const params = useParams();
+    const orgName = params.orgName as string;
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
 
     useEffect(() => {
         captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_VIEWED, {});
@@ -18,11 +24,45 @@ export function ApiSpecStepClient() {
 
     const handleFilesChange = useCallback(
         async (files: File[]) => {
+            // Store files for display
             form.setFieldValue("openApiSpecFiles", files);
+            setUploadError(null);
+
+            // Upload non-default files to S3 immediately
+            const uploadedUrls: { fileName: string; assetUrl: string }[] = [];
+
+            setIsUploading(true);
+            try {
+                for (const file of files) {
+                    // Check if this is a default spec marker (empty file)
+                    const defaultSpec = DEFAULT_SPECS.find((spec) => spec.fileName === file.name);
+                    if (file.size === 0 && defaultSpec) {
+                        uploadedUrls.push({
+                            fileName: file.name,
+                            assetUrl: defaultSpec.assetUrl
+                        });
+                    } else {
+                        // Upload to S3
+                        const { assetUrl } = await uploadOnboardingAsset(file, orgName);
+                        uploadedUrls.push({
+                            fileName: file.name,
+                            assetUrl
+                        });
+                    }
+                }
+                // Store URLs for later use (survives sessionStorage serialization)
+                form.setFieldValue("openApiSpecUrls", uploadedUrls);
+            } catch (err) {
+                console.error("Failed to upload API spec:", err);
+                setUploadError(err instanceof Error ? err.message : "Failed to upload API spec");
+            } finally {
+                setIsUploading(false);
+            }
+
             // Trigger validation to clear error when files are added
             await form.validateField("openApiSpecFiles", "change");
         },
-        [form]
+        [form, orgName]
     );
 
     const handleAddDefaultSpecs = useCallback(() => {
@@ -31,6 +71,14 @@ export function ApiSpecStepClient() {
             return new File([], spec.fileName, { type: fileType });
         });
         form.setFieldValue("openApiSpecFiles", defaultMarkerFiles);
+        // Also set the URLs for default specs (no upload needed)
+        form.setFieldValue(
+            "openApiSpecUrls",
+            DEFAULT_SPECS.map((spec) => ({
+                fileName: spec.fileName,
+                assetUrl: spec.assetUrl
+            }))
+        );
     }, [form]);
 
     const isUsingDefaultSpecs = useCallback((files: File[]) => {
@@ -82,6 +130,8 @@ export function ApiSpecStepClient() {
             onContinue={handleContinue}
             onSkip={handleSkip}
             showSkip
+            isLoading={isUploading}
+            error={uploadError}
         >
             <form.Field
                 name="openApiSpecFiles"

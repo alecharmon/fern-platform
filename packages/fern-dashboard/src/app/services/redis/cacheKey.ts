@@ -73,6 +73,16 @@ export interface LinkCheckerJob {
     skippedLinks: number;
 }
 
+export interface OnboardingPreCreateStatus {
+    status: "pending" | "in_progress" | "completed" | "failed";
+    repoUrl?: string;
+    repoName?: string;
+    fernTokenSet?: boolean;
+    error?: string;
+    startedAt: number;
+    completedAt?: number;
+}
+
 export type RedisCacheKey<T extends RedisCacheKeyType> = string & {
     __type: T;
 };
@@ -91,7 +101,8 @@ export const RedisCacheKeyType = {
     DOCS_SITE_ACCESS: "DOCS_SITE_ACCESS",
     ALGOLIA_ANALYTICS: "ALGOLIA_ANALYTICS",
     LINK_CHECKER_JOB: "LINK_CHECKER_JOB",
-    USER_SESSION_INVALIDATED: "USER_SESSION_INVALIDATED"
+    USER_SESSION_INVALIDATED: "USER_SESSION_INVALIDATED",
+    ONBOARDING_PRE_CREATE: "ONBOARDING_PRE_CREATE"
 } as const;
 
 export type RedisCacheKeyType = (typeof RedisCacheKeyType)[keyof typeof RedisCacheKeyType];
@@ -111,6 +122,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.ALGOLIA_ANALYTICS]: AlgoliaAnalyticsData;
     [RedisCacheKeyType.LINK_CHECKER_JOB]: LinkCheckerJob;
     [RedisCacheKeyType.USER_SESSION_INVALIDATED]: boolean;
+    [RedisCacheKeyType.ONBOARDING_PRE_CREATE]: OnboardingPreCreateStatus;
 };
 
 export const RedisCacheKey = {
@@ -138,7 +150,9 @@ export const RedisCacheKey = {
         cacheKey(RedisCacheKeyType.ALGOLIA_ANALYTICS)(`algolia-analytics-${endpoint}-${params}`),
     linkCheckerJob: (jobId: string) => cacheKey(RedisCacheKeyType.LINK_CHECKER_JOB)(`link-checker-job-${jobId}`),
     userSessionInvalidated: (userId: string) =>
-        cacheKey(RedisCacheKeyType.USER_SESSION_INVALIDATED)(`user-session-invalidated-${userId}`)
+        cacheKey(RedisCacheKeyType.USER_SESSION_INVALIDATED)(`user-session-invalidated-${userId}`),
+    onboardingPreCreate: (orgName: string) =>
+        cacheKey(RedisCacheKeyType.ONBOARDING_PRE_CREATE)(`onboarding-pre-create-${orgName}`)
 };
 
 function cacheKey<T extends RedisCacheKeyType>(_type: T) {

@@ -3,19 +3,17 @@
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
-import { uploadOnboardingAsset } from "@/components/onboarding/api";
 import { ColorPicker } from "@/components/onboarding/ColorPicker";
 import { DocsUrl } from "@/components/onboarding/DocsUrl";
 import { OnboardingStepCard } from "@/components/onboarding/OnboardingStepCard";
 import { UploadImage } from "@/components/onboarding/UploadImage";
-import { useDocsSubmission } from "@/components/onboarding/useDocsSubmission";
 import { nameToUrl } from "@/components/onboarding/validation";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { SlideDownTransition } from "@/components/transitions/SlideDownTransition";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useOnboarding } from "@/providers/OnboardingProvider";
-import { saveOnboardingFormData, saveOnboardingSession } from "@/utils/onboardingSession";
+import { saveOnboardingFormData, saveOnboardingSession, saveSitePublishUrl } from "@/utils/onboardingSession";
 import { generateRandomHash } from "@/utils/organization";
 
 interface DetailsStepClientProps {
@@ -23,9 +21,7 @@ interface DetailsStepClientProps {
 }
 
 export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
-    const { form, formData, validationErrors, validateForm, goToNextStep, setFocusedField } = useOnboarding();
-    const { submitDocs, isSubmitting, sessionId, error } = useDocsSubmission(organizationId);
-    const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+    const { form, formData, validationErrors, validateForm, setStep, setFocusedField } = useOnboarding();
     const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
     const posthog = usePostHog();
     const hasTrackedView = useRef(false);
@@ -66,19 +62,7 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
         }
     }, [docsUrlSource, formData.docsSiteUrl, formData.docsSiteUrlAvailable]);
 
-    // When sessionId is set (submission started), save to sessionStorage and navigate to publishing
-    useEffect(() => {
-        if (sessionId && isSubmitting) {
-            // Save session data to sessionStorage
-            saveOnboardingSession(sessionId, organizationId);
-            saveOnboardingFormData(formData);
-
-            // Navigate to publishing step
-            goToNextStep();
-        }
-    }, [sessionId, isSubmitting, formData, goToNextStep, organizationId]);
-
-    const handleSubmit = useCallback(async () => {
+    const handleSubmit = useCallback(() => {
         // Validate form with current formData
         if (!validateForm()) {
             console.error("Validation failed:", validationErrors);
@@ -92,39 +76,36 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
             hasPrimaryColor: !!formData.primaryColorHex
         });
 
-        try {
-            // Use shared submission hook
-            await submitDocs(formData);
+        // Save form data to sessionStorage for the publishing page
+        saveOnboardingFormData(formData);
 
-            // After successful submission, save session data and navigate to publishing
-            // Note: sessionId is set by submitDocs when submission starts
-        } catch (err) {
-            // Error is handled by the hook
-            console.error("Submission error:", err);
-        }
-    }, [formData, posthog, submitDocs, validateForm, validationErrors]);
+        // Save expected docs URL
+        const expectedDocsUrl = formData.docsSiteUrl.includes(".docs.buildwithfern.com")
+            ? `https://${formData.docsSiteUrl}`
+            : `https://${formData.docsSiteUrl}.docs.buildwithfern.com`;
+        saveSitePublishUrl(expectedDocsUrl);
+
+        // Save onboarding session for PublishingStepClient
+        const sessionId = `publish-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        saveOnboardingSession(sessionId, organizationId);
+
+        // Navigate immediately - publishing page handles async work
+        setStep("publishing");
+    }, [formData, posthog, validateForm, validationErrors, setStep, organizationId]);
 
     const handleLogoUpload = useCallback(
-        async (file: File) => {
-            setIsUploadingLogo(true);
+        (file: File) => {
             setLogoUploadError(null);
 
-            try {
-                // Upload file to S3
-                const { assetUrl } = await uploadOnboardingAsset(file, organizationId);
+            // Create a blob URL for preview (no S3 upload needed)
+            const blobUrl = URL.createObjectURL(file);
 
-                // Store the S3 URL and filename in form state
-                form.setFieldValue("logoUrl", assetUrl);
-                form.setFieldValue("logoFileName", file.name);
-                form.setFieldValue("logoFile", file); // Keep file for reference
-            } catch (err) {
-                console.error("Failed to upload logo:", err);
-                setLogoUploadError(err instanceof Error ? err.message : "Failed to upload logo");
-            } finally {
-                setIsUploadingLogo(false);
-            }
+            // Store the blob URL for preview and file for later base64 conversion
+            form.setFieldValue("logoUrl", blobUrl);
+            form.setFieldValue("logoFileName", file.name);
+            form.setFieldValue("logoFile", file);
         },
-        [form, organizationId]
+        [form]
     );
 
     const ensureAutoDocsUrlAvailability = useCallback(
@@ -259,8 +240,6 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
             continueText="Publish"
             onContinue={handleSubmit}
             showSkip={false}
-            isLoading={isSubmitting}
-            error={error}
         >
             <div className="space-y-6">
                 {/* Marketing / Docs site from Branding step */}
@@ -394,7 +373,6 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
                     onBlur={() => setFocusedField("none")}
                 />
                 {logoUploadError && <p className="text-xs text-red-600">{logoUploadError}</p>}
-                {isUploadingLogo && <p className="text-xs text-gray-600">Uploading logo...</p>}
             </div>
         </OnboardingStepCard>
     );

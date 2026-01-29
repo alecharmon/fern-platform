@@ -6,7 +6,7 @@ import { useCallback, useEffect } from "react";
 import { LoaderScreen } from "@/components/onboarding/LoaderScreen";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { useOnboarding } from "@/providers/OnboardingProvider";
-import { getOnboardingFormData, getOnboardingSession, saveSitePublishUrl } from "@/utils/onboardingSession";
+import { getOnboardingFormData, getOnboardingSession } from "@/utils/onboardingSession";
 
 /**
  * Publishing step client component
@@ -26,16 +26,31 @@ interface PublishingStepClientProps {
 
 export function PublishingStepClient({ organizationId }: PublishingStepClientProps) {
     const router = useRouter();
-    const { form, goToNextStep } = useOnboarding();
+    const { form, formData: providerFormData } = useOnboarding();
     const posthog = usePostHog();
 
-    // Check for required session data and redirect if missing
+    // Check for required session data
+    // Prefer providerFormData (React context) because it preserves File objects
+    // storedFormData (sessionStorage) loses File objects during JSON serialization
     const sessionData = getOnboardingSession();
-    const formData = getOnboardingFormData();
+    const storedFormData = getOnboardingFormData();
+
+    // Merge: use provider data for File objects, stored data for other fields
+    const formData = providerFormData?.docsSiteName
+        ? {
+              ...storedFormData,
+              ...providerFormData,
+              // Ensure File objects from provider are used (not the empty arrays from storage)
+              openApiSpecFiles: providerFormData.openApiSpecFiles ?? [],
+              logoFile: providerFormData.logoFile,
+              faviconFile: providerFormData.faviconFile
+          }
+        : storedFormData;
 
     useEffect(() => {
-        if (!sessionData || !formData) {
-            console.warn("[PublishingStepClient] No valid session data found, redirecting to details");
+        // Only redirect if we have no form data at all
+        if (!formData?.docsSiteName) {
+            console.warn("[PublishingStepClient] No valid form data found, redirecting to details");
             const targetOrg = sessionData?.orgName ?? organizationId;
             if (targetOrg) {
                 router.replace(`/get-started/${targetOrg}/docs/details`);
@@ -55,36 +70,30 @@ export function PublishingStepClient({ organizationId }: PublishingStepClientPro
                 sitePublishUrl: result.url
             });
 
-            // Store the published URL in form state to enable access to complete page
+            // Store the published URL in form state
             form.setFieldValue("sitePublishUrl", result.url);
 
-            // Save the published URL to sessionStorage so it persists across refreshes
-            saveSitePublishUrl(result.url);
-
-            // Note: We don't clear sessionStorage here because the complete page needs it
-            // The session data will expire after 1 hour automatically
-
-            // Navigate to completion screen
-            setTimeout(() => {
-                goToNextStep();
-            }, 100);
+            // Publishing page is the final landing page - no navigation needed
+            // The LoaderScreen will update its UI to show completion state
         },
-        [goToNextStep, form, posthog]
+        [form, posthog]
     );
 
-    // Get session data
-    // Don't render until we've verified session data exists
-    if (!sessionData || !formData) {
+    // Don't render until we've verified form data exists
+    if (!formData?.docsSiteName) {
         return null;
     }
+
+    // Use orgName from session data or fall back to URL param
+    const orgName = sessionData?.orgName ?? organizationId;
 
     return (
         <div className="flex w-full flex-1 items-center justify-center">
             <LoaderScreen
                 wizardFormData={formData}
-                orgName={sessionData.orgName}
+                orgName={orgName}
                 showLogs={true}
-                sessionId={sessionData.sessionId}
+                sessionId={sessionData?.sessionId}
                 onComplete={handleStreamComplete}
             />
         </div>

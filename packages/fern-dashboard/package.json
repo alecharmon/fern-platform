@@ -10,7 +10,7 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf ./.next",
-    "dashboard:build": "next build",
+    "dashboard:build": "pnpm generate-templates && next build",
     "dashboard:dev": "NODE_OPTIONS=\"--max-old-space-size=16384\" next dev",
     "dashboard:dev:inspect": "node --inspect --max-old-space-size=16384 node_modules/next/dist/bin/next dev",
     "dashboard:dev:turbopack": "next dev --turbopack",
@@ -22,6 +22,7 @@
     "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
+    "generate-templates": "tsx scripts/generate-templates.ts",
     "lint": "pnpm lint:eslint && pnpm lint:style",
     "lint:eslint": "eslint --max-warnings 0 . --ignore-pattern .next --ignore-pattern '**/*.{m,c,}js'",
     "lint:eslint:fix": "pnpm lint:eslint --fix",

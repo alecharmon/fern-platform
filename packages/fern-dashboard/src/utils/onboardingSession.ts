@@ -4,12 +4,20 @@ import { getCachedItem, getCachedJson, removeCachedItem, setCachedItem, setCache
 const ONBOARDING_SESSION_KEY = "fern-onboarding-session";
 const ONBOARDING_FORM_DATA_KEY = "fern-onboarding-form-data";
 const ONBOARDING_PUBLISH_URL_KEY = "fern-onboarding-publish-url";
+const ONBOARDING_GITHUB_REPO_KEY = "fern-onboarding-github-repo";
+const ONBOARDING_DOCS_COMMIT_SHA_KEY = "fern-onboarding-docs-commit-sha";
 const SESSION_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
 export interface OnboardingSessionData {
     sessionId: string;
     orgName: string;
     timestamp: number;
+}
+
+export interface OnboardingGithubRepoData {
+    owner: string;
+    repoName: string;
+    repoUrl: string;
 }
 
 /**
@@ -73,6 +81,36 @@ export function getSitePublishUrl(): string | null {
 }
 
 /**
+ * Save GitHub repo data for workflow status polling
+ */
+export function saveGithubRepoData(owner: string, repoName: string, repoUrl: string): void {
+    const data: OnboardingGithubRepoData = { owner, repoName, repoUrl };
+    setCachedJson("sessionStorage", ONBOARDING_GITHUB_REPO_KEY, data);
+}
+
+/**
+ * Get GitHub repo data for workflow status polling
+ */
+export function getGithubRepoData(): OnboardingGithubRepoData | null {
+    return getCachedJson<OnboardingGithubRepoData>("sessionStorage", ONBOARDING_GITHUB_REPO_KEY);
+}
+
+/**
+ * Save the docs commit SHA for workflow status filtering.
+ * This ensures we track the first workflow (docs without API specs) instead of the most recent.
+ */
+export function saveDocsCommitSha(sha: string): void {
+    setCachedItem("sessionStorage", ONBOARDING_DOCS_COMMIT_SHA_KEY, sha);
+}
+
+/**
+ * Get the docs commit SHA for workflow status filtering
+ */
+export function getDocsCommitSha(): string | null {
+    return getCachedItem("sessionStorage", ONBOARDING_DOCS_COMMIT_SHA_KEY);
+}
+
+/**
  * Clear onboarding session data from sessionStorage
  * This only clears the sessionId and orgName, keeping form data and publish URL
  * for the complete page to access after publishing
@@ -91,6 +129,8 @@ export function clearAllOnboardingData(): void {
     removeCachedItem("sessionStorage", ONBOARDING_SESSION_KEY);
     removeCachedItem("sessionStorage", ONBOARDING_FORM_DATA_KEY);
     removeCachedItem("sessionStorage", ONBOARDING_PUBLISH_URL_KEY);
+    removeCachedItem("sessionStorage", ONBOARDING_GITHUB_REPO_KEY);
+    removeCachedItem("sessionStorage", ONBOARDING_DOCS_COMMIT_SHA_KEY);
 }
 
 /**

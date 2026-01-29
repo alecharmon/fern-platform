@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -7,7 +6,10 @@ import { extract } from "tar";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import postGitRepository from "@/app/services/dal/github/postGitRepository";
+import { setFernTokenSecret } from "@/app/services/dal/github/setFernTokenSecret";
+import { updateRepository } from "@/app/services/dal/github/updateRepository";
 import { OnboardS3Service } from "@/app/services/onboarding-assets";
+import { getPreCreateStatus } from "@/app/services/onboarding-prep/preCreateRepo";
 
 import type { OnboardingDocsRequest } from "../types";
 import { createFernProject } from "../utils";
@@ -199,120 +201,20 @@ export async function GET(req: NextRequest) {
                 await createFernProject(data as OnboardingDocsRequest, tempDir);
 
                 const fernDir = path.join(tempDir, "fern");
-
-                sendEvent({
-                    type: "log",
-                    message: "Running fern generate --docs...",
-                    timestamp: new Date().toISOString()
-                });
-
                 const fernToken = session.accessToken;
-                const env = {
-                    ...process.env,
-                    ...(fernToken && { FERN_TOKEN: fernToken }),
-                    npm_config_cache: "/tmp/.npm",
-                    NPM_CONFIG_CACHE: "/tmp/.npm"
-                };
 
-                // Spawn the process to get streaming output
-                const child = spawn(
-                    "sh",
-                    [
-                        "-c",
-                        'echo "y" | npx fern-api@latest upgrade -y ; npx fern-api@latest generate --docs --no-prompt'
-                    ],
-                    {
-                        cwd: tempDir,
-                        env,
-                        shell: true
-                    }
-                );
+                // The published URL is based on the docs site URL
+                const publishedUrl = `https://${normalizedDocsUrl}`;
 
-                // Stream stdout
-                child.stdout.on("data", (data) => {
-                    const lines = data
-                        .toString()
-                        .split("\n")
-                        .filter((line: string) => line.trim());
-                    for (const line of lines) {
-                        sendEvent({
-                            type: "log",
-                            message: line,
-                            timestamp: new Date().toISOString()
-                        });
-                    }
-                });
-
-                // Stream stderr
-                child.stderr.on("data", (data) => {
-                    const lines = data
-                        .toString()
-                        .split("\n")
-                        .filter((line: string) => line.trim());
-                    for (const line of lines) {
-                        sendEvent({
-                            type: "log",
-                            message: line,
-                            timestamp: new Date().toISOString()
-                        });
-                    }
-                });
-
-                // Wait for process to complete and capture output
-                let cliOutput = "";
-                const cliOutputLines: string[] = [];
-
-                child.stdout.on("data", (data) => {
-                    cliOutput += data.toString();
-                    cliOutputLines.push(data.toString());
-                });
-
-                child.stderr.on("data", (data) => {
-                    cliOutput += data.toString();
-                });
-
-                await new Promise<void>((resolve, reject) => {
-                    child.on("close", (code) => {
-                        if (code === 0) {
-                            resolve();
-                        } else {
-                            reject(new Error(`Process exited with code ${code}`));
-                        }
-                    });
-
-                    child.on("error", (error) => {
-                        reject(error);
-                    });
-
-                    // Timeout after 3 minutes
-                    setTimeout(() => {
-                        child.kill();
-                        reject(new Error("Process timeout"));
-                    }, 180000);
-                });
-
-                // Parse the published URL from CLI output
-                const urlMatch = cliOutput.match(/Published docs to (https:\/\/[^\s]+)/);
-                if (!urlMatch) {
-                    throw new Error("Failed to parse published URL from Fern CLI output");
-                }
-                const publishedUrl = urlMatch[1];
-
+                // Update/create GitHub repo and trigger deployment workflow
                 sendEvent({
                     type: "log",
-                    message: `✓ Published docs to ${publishedUrl}`,
-                    timestamp: new Date().toISOString()
-                });
-
-                // Now do S3 upload and GitHub operations in parallel
-                sendEvent({
-                    type: "log",
-                    message: "Uploading to S3 and creating GitHub repository...",
+                    message: "Setting up GitHub repository...",
                     timestamp: new Date().toISOString()
                 });
 
                 const s3Key = `fern_docs_${normalizedDocsUrl}.zip`;
-                const createGithubRepo = true; // Default to true for streaming
+                const createGithubRepo = true;
 
                 const [s3Result, githubResult] = await Promise.all([
                     // S3 upload
@@ -329,23 +231,138 @@ export async function GET(req: NextRequest) {
                         return { downloadUrl: "" };
                     }),
 
-                    // GitHub repo creation
+                    // GitHub repo update (use pre-created repo)
                     (async () => {
                         if (!createGithubRepo) {
                             return { success: false as const, githubRepoUrl: undefined };
                         }
 
                         try {
-                            // Read all files from the entire project (including README.md at root)
-                            const files = await readAllFilesFromDirectory(tempDir);
-
-                            const repoName = data.docsSiteUrl.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
                             const demoCreationBotOwner = process.env.FERN_DEMO_CREATION_BOT_OWNER;
-
                             if (!demoCreationBotOwner) {
                                 console.error("FERN_DEMO_CREATION_BOT_OWNER not set");
                                 return { success: false as const, githubRepoUrl: undefined };
                             }
+
+                            // Wait for pre-created repo to be ready
+                            let preCreateStatus = await getPreCreateStatus(data.orgName);
+
+                            // If pre-creation is in progress, wait for it (poll every 2s, max 30s)
+                            if (preCreateStatus?.status === "in_progress") {
+                                sendEvent({
+                                    type: "log",
+                                    message: "Waiting for repository setup...",
+                                    timestamp: new Date().toISOString()
+                                });
+
+                                const maxWaitMs = 30000;
+                                const pollIntervalMs = 2000;
+                                const startTime = Date.now();
+
+                                while (
+                                    preCreateStatus?.status === "in_progress" &&
+                                    Date.now() - startTime < maxWaitMs
+                                ) {
+                                    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+                                    preCreateStatus = await getPreCreateStatus(data.orgName);
+                                }
+                            }
+
+                            // Use pre-created repo if available
+                            if (
+                                preCreateStatus?.status === "completed" &&
+                                preCreateStatus.repoUrl &&
+                                preCreateStatus.repoName
+                            ) {
+                                sendEvent({
+                                    type: "log",
+                                    message: "Using pre-created repository...",
+                                    timestamp: new Date().toISOString()
+                                });
+
+                                // Ensure FERN_TOKEN is set BEFORE pushing (push triggers workflow)
+                                if (preCreateStatus.fernTokenSet) {
+                                    sendEvent({
+                                        type: "log",
+                                        message: "✓ FERN_TOKEN already configured",
+                                        timestamp: new Date().toISOString()
+                                    });
+                                } else {
+                                    // Try to set FERN_TOKEN now if it wasn't set during pre-creation
+                                    sendEvent({
+                                        type: "log",
+                                        message: "Setting up FERN_TOKEN...",
+                                        timestamp: new Date().toISOString()
+                                    });
+                                    try {
+                                        const tokenResult = await setFernTokenSecret({
+                                            owner: demoCreationBotOwner,
+                                            repoName: preCreateStatus.repoName,
+                                            workingDir: tempDir,
+                                            fernToken: fernToken
+                                        });
+                                        if (tokenResult.success) {
+                                            sendEvent({
+                                                type: "log",
+                                                message: "✓ FERN_TOKEN generated and set in repository",
+                                                timestamp: new Date().toISOString()
+                                            });
+                                        }
+                                    } catch (tokenError) {
+                                        console.warn("Failed to set FERN_TOKEN:", tokenError);
+                                    }
+                                }
+
+                                // Read all files from the entire project
+                                const files = await readAllFilesFromDirectory(tempDir);
+
+                                // Push changes - this will trigger the workflow
+                                const updateResult = await updateRepository({
+                                    owner: demoCreationBotOwner,
+                                    repoName: preCreateStatus.repoName,
+                                    files,
+                                    message: "Add documentation content"
+                                });
+
+                                if (updateResult.success) {
+                                    sendEvent({
+                                        type: "log",
+                                        message: `✓ Updated GitHub repository: ${preCreateStatus.repoUrl}`,
+                                        timestamp: new Date().toISOString()
+                                    });
+
+                                    // Deployment will auto-trigger via GitHub Actions (push to fern/ triggers workflow)
+                                    sendEvent({
+                                        type: "log",
+                                        message: "✓ Deployment workflow will run automatically",
+                                        timestamp: new Date().toISOString()
+                                    });
+
+                                    return {
+                                        success: true as const,
+                                        githubRepoUrl: preCreateStatus.repoUrl,
+                                        fernToken: preCreateStatus.fernTokenSet ? "pre-created" : undefined
+                                    };
+                                } else {
+                                    console.error("Failed to update pre-created repo:", updateResult.error);
+                                    sendEvent({
+                                        type: "log",
+                                        message: "⚠ Failed to update GitHub repository",
+                                        timestamp: new Date().toISOString()
+                                    });
+                                    return { success: false as const, githubRepoUrl: undefined };
+                                }
+                            }
+
+                            // Fallback: create new repo if pre-creation failed or wasn't started
+                            sendEvent({
+                                type: "log",
+                                message: "Creating GitHub repository...",
+                                timestamp: new Date().toISOString()
+                            });
+
+                            const files = await readAllFilesFromDirectory(tempDir);
+                            const repoName = data.orgName.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
 
                             const result = await postGitRepository({
                                 orgName: data.orgName,
@@ -368,20 +385,20 @@ export async function GET(req: NextRequest) {
                                     timestamp: new Date().toISOString()
                                 });
 
-                                // Check if FERN_TOKEN was successfully generated and set
                                 if (result.fernToken) {
                                     sendEvent({
                                         type: "log",
                                         message: "✓ FERN_TOKEN generated and set in repository",
                                         timestamp: new Date().toISOString()
                                     });
-                                } else {
-                                    sendEvent({
-                                        type: "log",
-                                        message: "⚠ Failed to set FERN_TOKEN secret (non-critical)",
-                                        timestamp: new Date().toISOString()
-                                    });
                                 }
+
+                                // Deployment will auto-trigger via GitHub Actions (push to fern/ triggers workflow)
+                                sendEvent({
+                                    type: "log",
+                                    message: "✓ Deployment workflow will run automatically",
+                                    timestamp: new Date().toISOString()
+                                });
 
                                 return {
                                     success: true as const,
@@ -397,10 +414,10 @@ export async function GET(req: NextRequest) {
                                 return { success: false as const, githubRepoUrl: undefined };
                             }
                         } catch (error) {
-                            console.error("GitHub creation failed:", error);
+                            console.error("GitHub operation failed:", error);
                             sendEvent({
                                 type: "log",
-                                message: "⚠ Failed to create GitHub repository",
+                                message: "⚠ Failed to set up GitHub repository",
                                 timestamp: new Date().toISOString()
                             });
                             return { success: false as const, githubRepoUrl: undefined };
@@ -456,13 +473,14 @@ export async function GET(req: NextRequest) {
                 }
 
                 // Send completion event with all results
+                // Note: The docs are being deployed asynchronously via GitHub Actions
                 sendEvent({
                     type: "complete",
                     message: JSON.stringify({
                         url: publishedUrl,
                         fernDocsDownloadUrl: downloadUrl,
                         githubRepoUrl,
-                        message: "Documentation published successfully"
+                        message: "Deployment started - your docs will be live shortly"
                     }),
                     timestamp: new Date().toISOString()
                 });

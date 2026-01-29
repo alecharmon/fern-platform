@@ -1,0 +1,149 @@
+openapi: 3.1.0
+servers:
+  - url: https://api.example.com/v1
+    description: Your API server
+info:
+  description: |
+    This is a sample endpoint showing how your API reference will look.
+
+    If you've added your OpenAPI spec, your API reference is building now. Check GitHub Actions for the build status and refresh this page when it's complete.
+  version: 1.0.0
+  title: Your API Reference is Building
+  contact:
+    email: support@buildwithfern.com
+tags:
+  - name: plants
+    description: Manage your plant collection
+paths:
+  /plants:
+    get:
+      tags:
+        - plants
+      summary: See your APIs
+      description: This is a sample endpoint. If you've added your OpenAPI spec, your API reference is building now. Check GitHub Actions and refresh when complete.
+      operationId: getPlants
+      responses:
+        "200":
+          description: A list of plants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlantResponse"
+              examples:
+                plants:
+                  summary: Plant collection
+                  value:
+                    - id: "plant_001"
+                      name: "Boston Fern"
+                      species: "Nephrolepis exaltata"
+                      wateringFrequency: "daily"
+                      sunlight: "indirect"
+                      createdAt: "2026-01-01T00:00:00Z"
+                    - id: "plant_002"
+                      name: "Jade Plant"
+                      species: "Crassula ovata"
+                      wateringFrequency: "weekly"
+                      sunlight: "direct"
+                      createdAt: "2026-01-01T00:00:00Z"
+    post:
+      tags:
+        - plants
+      summary: Add an API
+      description: This is a sample endpoint. If you've added your OpenAPI spec, your API reference is building now. Check GitHub Actions and refresh when complete.
+      operationId: addPlant
+      requestBody:
+        description: Plant to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlantRequest"
+            examples:
+              fern:
+                summary: Add a Boston Fern
+                value:
+                  name: "Boston Fern"
+                  species: "Nephrolepis exaltata"
+                  wateringFrequency: "daily"
+                  sunlight: "indirect"
+              succulent:
+                summary: Add a Jade Plant
+                value:
+                  name: "Jade Plant"
+                  species: "Crassula ovata"
+                  wateringFrequency: "weekly"
+                  sunlight: "direct"
+      responses:
+        "201":
+          description: Plant successfully added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantResponse"
+              examples:
+                fern:
+                  summary: Boston Fern created
+                  value:
+                    id: "plant_001"
+                    name: "Boston Fern"
+                    species: "Nephrolepis exaltata"
+                    wateringFrequency: "daily"
+                    sunlight: "indirect"
+                    createdAt: "2026-01-01T00:00:00Z"
+                succulent:
+                  summary: Jade Plant created
+                  value:
+                    id: "plant_002"
+                    name: "Jade Plant"
+                    species: "Crassula ovata"
+                    wateringFrequency: "weekly"
+                    sunlight: "direct"
+                    createdAt: "2026-01-01T00:00:00Z"
+        "400":
+          description: Invalid input
+components:
+  schemas:
+    PlantRequest:
+      type: object
+      required:
+        - name
+        - species
+      properties:
+        name:
+          type: string
+          description: Display name for the plant
+        species:
+          type: string
+          description: Scientific name of the plant
+        wateringFrequency:
+          type: string
+          enum: [daily, weekly, biweekly, monthly]
+          description: How often the plant needs water
+        sunlight:
+          type: string
+          enum: [direct, indirect, shade]
+          description: Sunlight requirements
+    PlantResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the plant
+        name:
+          type: string
+          description: Display name for the plant
+        species:
+          type: string
+          description: Scientific name of the plant
+        wateringFrequency:
+          type: string
+          enum: [daily, weekly, biweekly, monthly]
+        sunlight:
+          type: string
+          enum: [direct, indirect, shade]
+        createdAt:
+          type: string
+          format: date-time
+          description: When the plant was added

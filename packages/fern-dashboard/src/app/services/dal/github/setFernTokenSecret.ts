@@ -75,7 +75,9 @@ export async function setFernTokenSecret(params: {
                 if (code === 0) {
                     resolve();
                 } else {
-                    reject(new Error(`fern token exited with code ${code}`));
+                    // Include output in error for debugging
+                    const cleanOutput = tokenOutput.replace(/\x1b\[[0-9;]*m/g, "").trim();
+                    reject(new Error(`fern token exited with code ${code}. Output: ${cleanOutput.substring(0, 500)}`));
                 }
             });
             tokenProcess.on("error", reject);

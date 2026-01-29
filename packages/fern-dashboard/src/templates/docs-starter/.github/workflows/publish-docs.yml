@@ -1,0 +1,24 @@
+name: publish-docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'fern/**'  # Only trigger on changes to fern/ directory
+  workflow_dispatch: # Allow manual/API trigger
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Fern CLI tool
+        run: npm install -g fern-api
+
+      - name: Publish Docs
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+        run: fern generate --docs

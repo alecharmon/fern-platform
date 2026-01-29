@@ -28,10 +28,10 @@ function sanitizeNextHref(rawNext: string | string[] | undefined): string {
 }
 
 interface CreateOrgPageProps {
-    searchParams?: {
+    searchParams?: Promise<{
         next?: string | string[];
         prefillOrgName?: string | string[];
-    };
+    }>;
 }
 
 export default async function CreateOrganizationStepPage({ searchParams }: CreateOrgPageProps) {
@@ -40,8 +40,9 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
         redirect("/");
     }
 
-    const nextHref = sanitizeNextHref(searchParams?.next);
-    const prefillOrgName = sanitizePrefillOrgName(searchParams?.prefillOrgName);
+    const resolvedSearchParams = await searchParams;
+    const nextHref = sanitizeNextHref(resolvedSearchParams?.next);
+    const prefillOrgName = sanitizePrefillOrgName(resolvedSearchParams?.prefillOrgName);
 
     return (
         <>

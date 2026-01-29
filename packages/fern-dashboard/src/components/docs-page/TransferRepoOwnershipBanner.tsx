@@ -52,7 +52,7 @@ export function TransferRepoOwnershipBanner({ docsUrl, sourceRepoOwner }: Transf
             />
 
             <Note
-                title="We’ve setup a GitHub repo for you. Transfer it to your org to take ownership."
+                title="We've setup a GitHub repo for you. Transfer it to your org to take ownership."
                 iconClassName="w-fit h-fit"
                 icon={<GithubLogo width={24} height={24} variant="circle" />}
                 className="items-center font-bold"

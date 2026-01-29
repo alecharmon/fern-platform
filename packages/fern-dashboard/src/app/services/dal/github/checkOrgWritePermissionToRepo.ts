@@ -36,10 +36,14 @@ export async function checkOrgWritePermissionToRepo(
     githubUrl: string,
     skipCache: boolean = false
 ): Promise<CheckOrgWritePermissionToRepoResult> {
+    console.log(`[checkOrgWritePermissionToRepo] Starting: orgName=${orgName}, site=${site}, githubUrl=${githubUrl}`);
+
     // Use parseGitUrl which handles both github.com and GHE URLs
     const { owner, repo } = parseGitUrl(githubUrl);
+    console.log(`[checkOrgWritePermissionToRepo] Parsed: owner=${owner}, repo=${repo}`);
 
     if (owner == null || repo == null) {
+        console.error(`[checkOrgWritePermissionToRepo] Failed: MALFORMED_GIT_URL`);
         return {
             ok: false,
             error: { type: "MALFORMED_GIT_URL", url: githubUrl }
@@ -48,6 +52,7 @@ export async function checkOrgWritePermissionToRepo(
 
     // Check if this is a GitHub Enterprise URL
     const isGhe = await isGheUrl(githubUrl);
+    console.log(`[checkOrgWritePermissionToRepo] isGhe=${isGhe}`);
 
     // Use appropriate Octokit based on whether this is GHE or github.com
     const octokitResult = isGhe
@@ -55,6 +60,8 @@ export async function checkOrgWritePermissionToRepo(
         : await getFernBotOctokitForRepo(owner, repo);
 
     if (!octokitResult.ok) {
+        console.error(`[checkOrgWritePermissionToRepo] Octokit failed:`, JSON.stringify(octokitResult.error, null, 2));
+
         // github.com: Fern Bot app not installed
         if (octokitResult.error.type === "NOT_INSTALLED") {
             return {
@@ -79,13 +86,20 @@ export async function checkOrgWritePermissionToRepo(
         );
     }
 
+    console.log(`[checkOrgWritePermissionToRepo] Octokit obtained successfully`);
+
     // Use uncached loader if skipCache is true to bypass React cache
     const githubLoader = skipCache ? await getUncachedGitHubLoader(githubUrl) : await getCachedGitHubLoader(githubUrl);
 
     // Fetch fern.config.json from the repo
+    console.log(`[checkOrgWritePermissionToRepo] Fetching fern.config.json from ${owner}/${repo}`);
     const fernConfigResult = await githubLoader.getFernConfigJson(owner, repo, site);
 
     if (fernConfigResult.type !== "ok") {
+        console.error(
+            `[checkOrgWritePermissionToRepo] fern.config.json error:`,
+            JSON.stringify(fernConfigResult.error, null, 2)
+        );
         return {
             ok: false,
             error: fernConfigResult.error
@@ -93,13 +107,18 @@ export async function checkOrgWritePermissionToRepo(
     }
 
     const fernConfigJson = fernConfigResult.result;
+    console.log(
+        `[checkOrgWritePermissionToRepo] fern.config.json org=${fernConfigJson.organization}, expected=${orgName}`
+    );
 
     if (fernConfigJson.organization !== orgName) {
+        console.error(`[checkOrgWritePermissionToRepo] Failed: FERN_CONFIG_JSON_ORG_MISMATCH`);
         return {
             ok: false,
             error: { type: "FERN_CONFIG_JSON_ORG_MISMATCH" }
         };
     }
 
+    console.log(`[checkOrgWritePermissionToRepo] Success!`);
     return { ok: true };
 }
