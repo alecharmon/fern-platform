@@ -49,7 +49,7 @@ export async function DocsSiteImageServer({ docsSite }: DocsSiteImageServer.Prop
 
     if (hasError && !lightImageUrl && !darkImageUrl) {
         return (
-            <DocsSiteImageLayout>
+            <DocsSiteImageLayout docsUrl={docsSite.urls[0]}>
                 <div className="flex flex-1 flex-col items-center justify-center gap-2 bg-white text-gray-900 dark:bg-black">
                     <AlertCircle className="size-10" />
                     <div>Failed to load</div>
@@ -59,7 +59,7 @@ export async function DocsSiteImageServer({ docsSite }: DocsSiteImageServer.Prop
     }
 
     if (!lightImageUrl && !darkImageUrl) {
-        return <SkeletonDocsSiteImage />;
+        return <SkeletonDocsSiteImage docsUrl={docsSite.urls[0]} />;
     }
 
     return (
