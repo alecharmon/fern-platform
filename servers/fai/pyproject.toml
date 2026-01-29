@@ -45,7 +45,7 @@ apscheduler = "^3.11.0"
 fern-fern-venus-sdk = { version = "*", source = "fern" }
 tiktoken = "^0.11.0"
 slack-sdk = "^3.36.0"
-python-multipart = "^0.0.20"
+python-multipart = "^0.0.22"
 upstash-redis = "^1.4.0"
 aioboto3 = "^13.0.0"
 markdownify = "^1.2.0"
