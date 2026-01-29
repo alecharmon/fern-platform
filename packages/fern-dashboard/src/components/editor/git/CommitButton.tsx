@@ -2,6 +2,7 @@
 
 import { useNavigation } from "@fern-docs/components/navigation";
 import * as Sentry from "@sentry/nextjs";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DEFAULT_COMMIT_MESSAGE, handleCreatePr } from "@/app/services/github/github";
@@ -52,10 +53,14 @@ export function CommitButtonWithGitHub({
     onShowCelebrationModal?: CommitButtonProps["onShowCelebrationModal"];
 }) {
     const orgName = useOrgName();
+    const params = useParams();
     const { branch } = useBranch();
     const { owner, repo, baseBranch, gitUrl } = useGitHubRepo();
     const { gitPrUrl, setPrUrl, prTitle, refetchPrData, site } = useGitPrInfo();
     const isEditingDisabled = useEditingDisabled();
+
+    // Get current page slug from URL params for editor link in PR description
+    const currentSlug = params?.slug ? (Array.isArray(params.slug) ? params.slug.join("/") : params.slug) : undefined;
 
     const { files, handleCommitSuccess } = useNavigation();
     const {
@@ -182,7 +187,8 @@ export function CommitButtonWithGitHub({
                     baseBranch,
                     title: prTitle == null ? undefined : prTitle,
                     onAiGenerationComplete: refetchPrData,
-                    gitUrl
+                    gitUrl,
+                    currentSlug
                 });
                 if (newPrUrl) {
                     setPrUrl(newPrUrl);
@@ -215,7 +221,8 @@ export function CommitButtonWithGitHub({
         gitUrl,
         hasOpenApiPendingChanges,
         getOpenApiFiles,
-        clearOpenApiPendingChanges
+        clearOpenApiPendingChanges,
+        currentSlug
     ]);
 
     const commitDisabledReason = useMemo(() => {

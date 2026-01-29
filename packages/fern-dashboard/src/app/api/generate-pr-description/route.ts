@@ -28,14 +28,15 @@ export const GeneratePrDescriptionRequest = GitRepoIdentification.and(
     z.object({
         orgName: orgNameValidator,
         branch: z.string(),
-        baseBranch: z.string().optional()
+        baseBranch: z.string().optional(),
+        slug: z.string().optional()
     })
 );
 
 export const POST = withZodValidation(
     GeneratePrDescriptionRequest,
     async (req: NextRequest, validatedBody: z.infer<typeof GeneratePrDescriptionRequest>) => {
-        const { orgName, branch, baseBranch, ...repoData } = validatedBody;
+        const { orgName, branch, baseBranch, slug, ...repoData } = validatedBody;
 
         // 1. Validate session
         const sessionResult = await maybeGetCurrentSession(req);
@@ -87,8 +88,11 @@ export const POST = withZodValidation(
         // 2. The handler already gracefully skips for non-GitHub repos
         // 3. User already passed validation to create the PR/MR
 
-        // 4. Execute handler
-        const result = await handler({ owner, repo, branch, baseBranch, repoUrl: gitUrl });
+        // 4. Extract site from repoData
+        const site = "site" in repoData ? repoData.site : undefined;
+
+        // 5. Execute handler
+        const result = await handler({ owner, repo, branch, baseBranch, repoUrl: gitUrl, site, orgName, slug });
         return NextResponse.json(result);
     }
 );

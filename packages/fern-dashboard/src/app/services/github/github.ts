@@ -14,7 +14,8 @@ export async function handleCreatePr({
     baseBranch,
     title,
     onAiGenerationComplete,
-    gitUrl
+    gitUrl,
+    currentSlug
 }: {
     orgName: Auth0OrgName;
     branch: string;
@@ -25,6 +26,7 @@ export async function handleCreatePr({
     title?: string;
     onAiGenerationComplete?: () => void;
     gitUrl?: string;
+    currentSlug?: string;
 }): Promise<string | undefined> {
     try {
         console.log("[handleCreatePr] Creating PR/MR with params:", {
@@ -59,7 +61,8 @@ export async function handleCreatePr({
                     repo,
                     branch,
                     baseBranch,
-                    gitUrl
+                    gitUrl,
+                    slug: currentSlug
                 })
                     .then((result) => {
                         if (result.success && onAiGenerationComplete) {

@@ -9,6 +9,9 @@ export default async function generatePrDescription(request: {
     branch: string;
     baseBranch?: string;
     repoUrl?: string;
+    site?: string;
+    orgName?: string;
+    slug?: string;
 }): Promise<{
     success: boolean;
     error?: string;
@@ -45,5 +48,13 @@ export default async function generatePrDescription(request: {
         email: session.user.email
     });
 
-    return await prDescriptionService.generateAndUpdatePrTitleAndDescription(request);
+    return await prDescriptionService.generateAndUpdatePrTitleAndDescription({
+        owner: request.owner,
+        repo: request.repo,
+        branch: request.branch,
+        baseBranch: request.baseBranch,
+        site: request.site,
+        orgName: request.orgName,
+        slug: request.slug
+    });
 }

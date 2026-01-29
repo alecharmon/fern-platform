@@ -19,6 +19,9 @@ export interface PrDescriptionService {
         repo: string;
         branch: string;
         baseBranch?: string;
+        site?: string;
+        orgName?: string;
+        slug?: string;
     }) => Promise<{
         success: boolean;
         error?: string;
@@ -104,12 +107,18 @@ export class PrDescriptionServiceImpl implements PrDescriptionService {
         owner,
         repo,
         branch,
-        baseBranch = "main"
+        baseBranch = "main",
+        site,
+        orgName,
+        slug
     }: {
         owner: string;
         repo: string;
         branch: string;
         baseBranch?: string;
+        site?: string;
+        orgName?: string;
+        slug?: string;
     }): Promise<{
         success: boolean;
         error?: string;
@@ -150,7 +159,12 @@ export class PrDescriptionServiceImpl implements PrDescriptionService {
             }
 
             // Step 4: Update the PR title and description
-            await this.updatePrTitleAndDescription(owner, repo, pr.number, newTitle, newDescription, pr.title);
+            await this.updatePrTitleAndDescription(owner, repo, pr.number, newTitle, newDescription, pr.title, {
+                site,
+                orgName,
+                branch,
+                slug
+            });
 
             return {
                 success: true,
@@ -214,16 +228,36 @@ export class PrDescriptionServiceImpl implements PrDescriptionService {
         }
     }
 
-    private appendFernSigningToDescription(description: string): string {
-        const authorString =
+    private appendFernSigningToDescription(
+        description: string,
+        editorInfo?: { site?: string; orgName?: string; branch?: string; slug?: string }
+    ): string {
+        // Build author string
+        const authorPart =
             this.user.name || this.user.email
                 ? `**Author:** ${this.user.name ?? ""} ${this.user.email ? `(${this.user.email})` : ""}`
                 : "";
-        return `${description} \
-    \n<br>
-    \n${authorString}
-    \n🌿 Title and description generated with [Fern](https://www.buildwithfern.com)
-    `;
+
+        // Build editor link if we have the required info
+        let editorLinkPart = "";
+        if (editorInfo?.site && editorInfo?.orgName && editorInfo?.branch) {
+            const encodedSite = encodeURIComponent(editorInfo.site);
+            // Include slug in the URL if available for direct page navigation
+            const slugPath = editorInfo.slug ? `/${editorInfo.slug}` : "";
+            const editorUrl = `https://dashboard.buildwithfern.com/${editorInfo.orgName}/editor/${encodedSite}/${editorInfo.branch}${slugPath}`;
+            editorLinkPart = `[Continue editing in Fern Editor](${editorUrl}) *(PR author only)*`;
+        }
+
+        // Combine author and editor link on one line with bullet separator
+        const authorLine =
+            authorPart && editorLinkPart ? `${authorPart} • ${editorLinkPart}` : authorPart || editorLinkPart;
+
+        return `${description}
+
+---
+${authorLine}
+
+<sub>🌿 Generated with [Fern](https://www.buildwithfern.com)</sub>`;
     }
 
     private async updatePrTitleAndDescription(
@@ -232,7 +266,8 @@ export class PrDescriptionServiceImpl implements PrDescriptionService {
         prNumber: number,
         newTitle: string,
         newDescription: string,
-        existingPrTitle: string
+        existingPrTitle: string,
+        editorInfo?: { site?: string; orgName?: string; branch?: string; slug?: string }
     ): Promise<void> {
         try {
             const update: Record<string, string> = {};
@@ -245,7 +280,7 @@ export class PrDescriptionServiceImpl implements PrDescriptionService {
                 owner,
                 repo,
                 pull_number: prNumber,
-                body: this.appendFernSigningToDescription(newDescription),
+                body: this.appendFernSigningToDescription(newDescription, editorInfo),
                 ...update
             });
         } catch (error) {
