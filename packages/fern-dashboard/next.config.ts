@@ -12,16 +12,15 @@ const isSentryEnabled = process.env.NODE_ENV === "production";
 
 const CSP_HEADER = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' d3vl36l12sfx26.cloudfront.net cdn.jsdelivr.net va.vercel-scripts.com assets.calendly.com widget.usepylon.com us.i.posthog.com us-assets.i.posthog.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' *.usepylon.com *.posthog.com *.pusher.com d3vl36l12sfx26.cloudfront.net cdn.jsdelivr.net va.vercel-scripts.com assets.calendly.com;
   worker-src 'self' blob:;
-  connect-src 'self' us.i.posthog.com us-assets.i.posthog.com assets.calendly.com widget.usepylon.com api.buildwithfern.com api.dev.buildwithfern.com api.staging.buildwithfern.com wss: ws:;
-  style-src 'self' 'unsafe-inline' assets.calendly.com cdn.jsdelivr.net;
-  font-src 'self' fonts.googleapis.com fonts.gstatic.com;
-  img-src 'self' data: blob: avatars.githubusercontent.com s.gravatar.com files.buildwithfern.com lh3.googleusercontent.com prod-docs-homepage-images.s3.us-east-1.amazonaws.com d3vl36l12sfx26.cloudfront.net;
-  frame-src 'self' assets.calendly.com;
-  object-src 'self';
-  media-src 'self' d3vl36l12sfx26.cloudfront.net;
-  frame-ancestors 'none';
+  connect-src 'self' * ws:;
+  style-src 'self' 'unsafe-inline' *;
+  font-src 'self' *;
+  img-src 'self' * data: blob:;
+  frame-src 'self' *;
+  object-src 'self' *;
+  media-src 'self' *;
 `.replace(/\n/g, "");
 
 let nextConfig: NextConfig = {
@@ -241,10 +240,6 @@ let nextConfig: NextConfig = {
                     {
                         key: "Content-Security-Policy",
                         value: CSP_HEADER
-                    },
-                    {
-                        key: "X-Frame-Options",
-                        value: "DENY"
                     }
                 ]
             }
