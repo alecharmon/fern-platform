@@ -20,6 +20,9 @@ interface FinishEditorSetupModalProps {
     trigger?: React.ReactNode;
     showRefreshButtonOnSuccess?: boolean;
     initialGitUrl?: string;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    autoSubmitInitialUrl?: boolean;
 }
 
 /**
@@ -31,7 +34,10 @@ export function FinishEditorSetupModal({
     docsUrl,
     trigger,
     showRefreshButtonOnSuccess,
-    initialGitUrl
+    initialGitUrl,
+    open,
+    onOpenChange,
+    autoSubmitInitialUrl
 }: FinishEditorSetupModalProps) {
     return (
         <EditorSetupModalImpl
@@ -41,6 +47,9 @@ export function FinishEditorSetupModal({
             isLoadingInitialData={false}
             showRefreshButtonOnSuccess={showRefreshButtonOnSuccess}
             initialGitUrl={initialGitUrl}
+            open={open}
+            onOpenChange={onOpenChange}
+            autoSubmitInitialUrl={autoSubmitInitialUrl}
         />
     );
 }
@@ -51,15 +60,23 @@ function EditorSetupModalImpl({
     trigger,
     isLoadingInitialData,
     showRefreshButtonOnSuccess = false,
-    initialGitUrl
+    initialGitUrl,
+    open: controlledOpen,
+    onOpenChange: controlledOnOpenChange,
+    autoSubmitInitialUrl = false
 }: {
     isLoadingInitialData: boolean;
 } & FinishEditorSetupModalProps) {
     // gitUrl tracks the URL being validated/connected - separate from initialGitUrl which just prepopulates the input
     const [gitUrl, setGitUrl] = useState<string | undefined>();
     const [detectedProvider, setDetectedProvider] = useState<string>();
+    const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
 
-    const [open, setOpen] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isControlled = controlledOpen !== undefined;
+    const open = isControlled ? controlledOpen : internalOpen;
+    const setOpen = isControlled ? (controlledOnOpenChange ?? (() => {})) : setInternalOpen;
+
     const { startConfetti } = useConfetti();
 
     const shouldEnableAccessCheck = open && !!gitUrl;
@@ -84,6 +101,19 @@ function EditorSetupModalImpl({
             setDetectedProvider(validationResult.provider);
         }
     }, [validationResult?.provider]);
+
+    // Auto-submit the initial URL when the modal opens with autoSubmitInitialUrl=true
+    // This skips the first step and goes directly to validation
+    useEffect(() => {
+        if (open && autoSubmitInitialUrl && initialGitUrl && !hasAutoSubmitted) {
+            setGitUrl(initialGitUrl);
+            setHasAutoSubmitted(true);
+        }
+        // Reset hasAutoSubmitted when modal closes
+        if (!open && hasAutoSubmitted) {
+            setHasAutoSubmitted(false);
+        }
+    }, [open, autoSubmitInitialUrl, initialGitUrl, hasAutoSubmitted]);
 
     // Convert the new response format to the format expected by child components
     const accessCheckResult = validationResult
@@ -139,7 +169,7 @@ function EditorSetupModalImpl({
             }, 2000);
         }
         return () => clearTimeout(timeout);
-    }, [startConfetti, showRefreshButtonOnSuccess]);
+    }, [startConfetti, showRefreshButtonOnSuccess, setOpen]);
 
     // Centralized hook for connecting GitHub repo
     // All success paths in the modal use this hook's callbacks
@@ -160,13 +190,15 @@ function EditorSetupModalImpl({
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                {trigger ?? (
-                    <Button variant="default" size="default">
-                        Connect repo
-                    </Button>
-                )}
-            </DialogTrigger>
+            {!isControlled && (
+                <DialogTrigger asChild>
+                    {trigger ?? (
+                        <Button variant="default" size="default">
+                            Connect repo
+                        </Button>
+                    )}
+                </DialogTrigger>
+            )}
             <DialogContent className="md:max-w-md">
                 <FinishEditorSetupModalContent
                     state={state}

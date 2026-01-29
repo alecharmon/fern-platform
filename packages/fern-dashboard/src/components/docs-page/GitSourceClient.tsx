@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { AlertCircle, Pencil } from "lucide-react";
+import { useState } from "react";
 
 import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -9,6 +10,7 @@ import type { ValidateGitRepoResult } from "@/app/services/dal/git/validateGitRe
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { getRepoDisplayNameFromUrl } from "@/app/services/github/github";
 import type { GitSourceRepo } from "@/app/services/github/types";
+import { useValidateGitRepo } from "@/hooks/useValidateGitRepo";
 import { ReactQueryKey } from "@/state/queryKeys";
 import type { DocsUrl } from "@/utils/types";
 import { docsPermissionScope } from "../auth/authz";
@@ -16,6 +18,7 @@ import { AuthZWrapper } from "../auth/authz/AuthZWrapper";
 import { GithubLogo } from "../auth/GithubLogo";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
+import { Tooltip, TooltipProvider } from "../ui/tooltip";
 import { FinishEditorSetupModal } from "./visual-editor-section/FinishEditorSetupModal";
 
 export interface GitAuthState {
@@ -35,6 +38,8 @@ export function GitSourceClient({
     gitUrl?: string;
     isLoading?: boolean;
 }) {
+    const [isValidationModalOpen, setIsValidationModalOpen] = useState(false);
+
     const {
         data: gitUrlResponse,
         isLoading: isGithubUrlLoading,
@@ -51,13 +56,23 @@ export function GitSourceClient({
     const resolvedGitUrl = gitUrlResponse?.success ? gitUrlResponse.gitUrl : undefined;
     const showLoadingState = isLoading || isGithubUrlLoading || isGithubUrlFetching;
 
+    // Validate the git repo to check if setup is complete
+    const { result: validationResult, loading: isLoadingValidation } = useValidateGitRepo({
+        enabled: !!resolvedGitUrl && !showLoadingState,
+        docsUrl,
+        gitUrl: resolvedGitUrl
+    });
+
+    // Show warning icon if repo is connected but validation failed
+    const hasValidationError = !isLoadingValidation && resolvedGitUrl && validationResult && !validationResult.ok;
+
     return (
         <>
             {showLoadingState ? (
                 <Skeleton className="h-4 w-24" />
             ) : (
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <div className="flex min-w-0 items-center gap-2">
+                    <div className="flex min-w-0 items-center gap-1">
                         {resolvedGitUrl ? (
                             <>
                                 <div className="shrink-0">
@@ -71,6 +86,28 @@ export function GitSourceClient({
                                 >
                                     {getRepoDisplayNameFromUrl(resolvedGitUrl)}
                                 </a>
+                                {hasValidationError && (
+                                    <TooltipProvider>
+                                        <Tooltip content="This repo needs additional setup.">
+                                            <Button
+                                                variant="ghost"
+                                                size="iconSm"
+                                                onClick={() => setIsValidationModalOpen(true)}
+                                                className="-mx-0.5"
+                                            >
+                                                <AlertCircle className="size-4 text-yellow-1000" />
+                                            </Button>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                )}
+                                <FinishEditorSetupModal
+                                    docsUrl={docsUrl}
+                                    orgName={orgName}
+                                    initialGitUrl={resolvedGitUrl}
+                                    open={isValidationModalOpen}
+                                    onOpenChange={setIsValidationModalOpen}
+                                    autoSubmitInitialUrl={isValidationModalOpen}
+                                />
                                 <AuthZWrapper
                                     permission="manage-settings"
                                     permissionScope={docsPermissionScope(docsUrl)}
