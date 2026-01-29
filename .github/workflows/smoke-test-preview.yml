@@ -13,7 +13,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  smoke-test:
+  # Setup job: Upload to FDR and wait for Vercel deployment
+  setup:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,16 +23,16 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: "buildwithfern"
+    outputs:
+      smoke_test_host: ${{ steps.fern-preview.outputs.SMOKE_TEST_HOST }}
+      vercel_url: ${{ steps.vercel-preview.outputs.url }}
     steps:
-      # 1. Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Install Fern CLI
       - name: Install Fern CLI tool
         run: npm install -g fern-api
 
-      # 3. Setup Go and proto toolchain
       - name: Setup Go for protoc-gen-openapi
         uses: actions/setup-go@v4
         with:
@@ -58,7 +59,6 @@ jobs:
           go version
           which protoc-gen-openapi
 
-      # 4. Upload to FDR
       - name: Upload smoke test content to FDR
         id: fern-preview
         env:
@@ -99,15 +99,6 @@ jobs:
           echo "SMOKE_TEST_HOST=$SMOKE_TEST_HOST" >> $GITHUB_OUTPUT
           cd ../..
 
-      # 5. Install dependencies
-      - name: Install dependencies
-        uses: ./.github/actions/install
-
-      # 6. Install Playwright browsers
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium
-
-      # 7. Wait for prod.ferndocs.com deployment
       - name: Wait for prod.ferndocs.com Deployment
         id: vercel-preview
         if: github.event_name == 'pull_request'
@@ -177,34 +168,33 @@ jobs:
           echo "Smoke test cannot run via workflow_dispatch because Vercel preview URL is not available."
           echo "This workflow is designed to run on pull_request events only."
 
-      # 8. Setup preview connection
-      - name: Setup preview connection
-        id: setup-preview
-        if: steps.vercel-preview.outputs.url != ''
-        env:
-          VERCEL_URL: ${{ steps.vercel-preview.outputs.url }}
-          SMOKE_TEST_HOST: ${{ steps.fern-preview.outputs.SMOKE_TEST_HOST }}
-        run: |
-          # Build the preview API URL
-          PREVIEW_API_URL="${VERCEL_URL}/api/fern-docs/preview?host=${SMOKE_TEST_HOST}"
-          echo "Preview API URL: $PREVIEW_API_URL"
-          echo "Vercel Base URL: $VERCEL_URL"
+  # Smoke test job: Run smoke tests on the preview
+  smoke-test:
+    needs: setup
+    if: needs.setup.outputs.vercel_url != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: "buildwithfern"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-          # Set up preview cookie and save to file for reuse
-          echo "Setting up preview cookie..."
-          curl -c /tmp/preview-cookies.txt -L "$PREVIEW_API_URL" > /dev/null 2>&1
-          echo "Cookie saved to /tmp/preview-cookies.txt"
+      - name: Install dependencies
+        uses: ./.github/actions/install
 
-          echo "PREVIEW_URL=$PREVIEW_API_URL" >> $GITHUB_OUTPUT
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium
 
-      # 9. Run smoke test
       - name: Run smoke test (Playwright)
         id: smoke-test
-        if: steps.setup-preview.outputs.PREVIEW_URL != ''
         continue-on-error: true
         env:
-          VERCEL_URL: ${{ steps.vercel-preview.outputs.url }}
-          SMOKE_TEST_HOST: ${{ steps.fern-preview.outputs.SMOKE_TEST_HOST }}
+          VERCEL_URL: ${{ needs.setup.outputs.vercel_url }}
+          SMOKE_TEST_HOST: ${{ needs.setup.outputs.smoke_test_host }}
         run: |
           pnpm smoke-test "$VERCEL_URL" "$SMOKE_TEST_HOST" --concurrency auto2x
           SMOKE_EXIT=$?
@@ -213,9 +203,11 @@ jobs:
             echo "Smoke test completed with exit code $SMOKE_EXIT"
           fi
 
-      # 10. Post smoke test PR comment (before visual diff)
       - name: Prepare smoke test PR comment
         if: github.event_name == 'pull_request' && always()
+        env:
+          SMOKE_TEST_HOST: ${{ needs.setup.outputs.smoke_test_host }}
+          VERCEL_URL: ${{ needs.setup.outputs.vercel_url }}
         run: |
           echo "## Smoke Test Preview" > smoke-test-comment.txt
           echo "" >> smoke-test-comment.txt
@@ -223,8 +215,8 @@ jobs:
           echo "" >> smoke-test-comment.txt
           echo "Testing branch changes with smoke test content:" >> smoke-test-comment.txt
           echo "" >> smoke-test-comment.txt
-          echo "- **Smoke Test Content (from FDR):** https://${{ steps.fern-preview.outputs.SMOKE_TEST_HOST }}" >> smoke-test-comment.txt
-          echo "- **Branch's Docs Platform (Vercel):** ${{ steps.setup-preview.outputs.PREVIEW_URL }}" >> smoke-test-comment.txt
+          echo "- **Smoke Test Content (from FDR):** https://${SMOKE_TEST_HOST}" >> smoke-test-comment.txt
+          echo "- **Branch's Docs Platform (Vercel):** ${VERCEL_URL}/api/fern-docs/preview?host=${SMOKE_TEST_HOST}" >> smoke-test-comment.txt
           echo "" >> smoke-test-comment.txt
           if [ -f ./smoke-test-output/crawler-summary.txt ]; then
             cat ./smoke-test-output/crawler-summary.txt >> smoke-test-comment.txt
@@ -239,58 +231,129 @@ jobs:
           filePath: smoke-test-comment.txt
           comment_tag: smoke-test-preview
 
-      # 11. Run visual diff (after smoke test comment is posted)
-      - name: Run visual diff
+  # Visual diff jobs: Run visual diff for each domain in parallel
+  visual-diff:
+    needs: setup
+    if: needs.setup.outputs.vercel_url != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: "buildwithfern"
+    strategy:
+      fail-fast: false
+      matrix:
+        domain:
+          - "buildwithfern.com/learn"
+          - "docs.cohere.com"
+          - "elevenlabs.io/docs"
+          - "docs.mercoa.com"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: ./.github/actions/install
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium
+
+      - name: Run visual diff for ${{ matrix.domain }}
         id: visual-diff
-        if: steps.setup-preview.outputs.PREVIEW_URL != ''
         continue-on-error: true
+        env:
+          VERCEL_URL: ${{ needs.setup.outputs.vercel_url }}
         run: |
           pnpm visual-diff \
-            --domains "buildwithfern.com/learn,docs.cohere.com,elevenlabs.io/docs,docs.mercoa.com" \
-            --preview "${{ steps.vercel-preview.outputs.url }}" \
+            --domains "${{ matrix.domain }}" \
+            --preview "$VERCEL_URL" \
             --max-pages 100 \
             --max-diffs 3 \
             --concurrency auto2x \
             --output ./visual-diff-output \
             --fail-on-diff || echo "DIFFS_FOUND=true" >> $GITHUB_OUTPUT
 
-      # 12. Upload visual diff reports and post comment
-      - name: Upload visual diff reports
+      - name: Upload visual diff report for ${{ matrix.domain }}
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: visual-diff-reports
+          name: visual-diff-${{ strategy.job-index }}
           path: visual-diff-output/
           retention-days: 7
 
+  # Aggregate visual diff results and post PR comment
+  visual-diff-report:
+    needs: [setup, visual-diff]
+    if: always() && needs.setup.outputs.vercel_url != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all visual diff artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: visual-diff-*
+          path: ./visual-diff-output
+          merge-multiple: true
+
       - name: Install CML dependencies
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request'
         run: |
           sudo apt-get update
           sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
 
       - name: Setup CML
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request'
         uses: iterative/setup-cml@v2
 
       - name: Generate visual diff PR comment
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request'
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           OUTPUT_DIR="./visual-diff-output"
-          SUMMARY_PATH="$OUTPUT_DIR/summary.json"
-
-          if [ ! -f "$SUMMARY_PATH" ]; then
-            echo "No summary.json found"
-            exit 0
-          fi
-
-          # Parse summary.json
-          TOTAL_DOMAINS=$(jq '.domains | length' "$SUMMARY_PATH")
-          TOTAL_PAGES=$(jq '.totalPages' "$SUMMARY_PATH")
-          TOTAL_DIFFS=$(jq '.totalDiffs' "$SUMMARY_PATH")
-          TOTAL_ERRORS=$(jq '.totalErrors' "$SUMMARY_PATH")
+          
+          # Initialize counters
+          TOTAL_DOMAINS=0
+          TOTAL_PAGES=0
+          TOTAL_DIFFS=0
+          TOTAL_ERRORS=0
+          
+          # Create a temp file with all diffs
+          echo "[]" > /tmp/all_diffs.json
+          
+          # Process each domain directory
+          for domain_dir in "$OUTPUT_DIR"/*/; do
+            if [ -d "$domain_dir" ]; then
+              domain=$(basename "$domain_dir")
+              report_path="$domain_dir/report.json"
+              
+              if [ -f "$report_path" ]; then
+                TOTAL_DOMAINS=$((TOTAL_DOMAINS + 1))
+                
+                # Get stats from this domain's report
+                DOMAIN_PAGES=$(jq '.totalPages // 0' "$report_path")
+                DOMAIN_DIFFS=$(jq '.pagesWithDiffs // 0' "$report_path")
+                DOMAIN_ERRORS=$(jq '.pagesWithErrors // 0' "$report_path")
+                
+                TOTAL_PAGES=$((TOTAL_PAGES + DOMAIN_PAGES))
+                TOTAL_DIFFS=$((TOTAL_DIFFS + DOMAIN_DIFFS))
+                TOTAL_ERRORS=$((TOTAL_ERRORS + DOMAIN_ERRORS))
+                
+                # Extract diffs from this domain's report
+                jq --arg domain "$domain" '[.results[] | select(.hasDiff == true and .error == null) | {domain: $domain, page: .page, diffPercentage: .diffPercentage, liveUrl: .liveUrl, previewUrl: .previewUrl, liveScreenshot: .liveScreenshot, previewScreenshot: .previewScreenshot, diffScreenshot: .diffScreenshot}]' "$report_path" > /tmp/domain_diffs.json
+                
+                # Merge with all diffs
+                jq -s '.[0] + .[1]' /tmp/all_diffs.json /tmp/domain_diffs.json > /tmp/merged_diffs.json
+                mv /tmp/merged_diffs.json /tmp/all_diffs.json
+              fi
+            fi
+          done
 
           # Start building the report
           echo "## Visual Diff Report" > visual-diff-comment.md
@@ -300,26 +363,6 @@ jobs:
           echo "**Total Diffs:** $TOTAL_DIFFS" >> visual-diff-comment.md
           echo "**Total Errors:** $TOTAL_ERRORS" >> visual-diff-comment.md
           echo "" >> visual-diff-comment.md
-
-          # Collect all diffs and sort by percentage (top 3)
-          # Create a temp file with all diffs
-          echo "[]" > /tmp/all_diffs.json
-
-          for domain_dir in "$OUTPUT_DIR"/*/; do
-            if [ -d "$domain_dir" ]; then
-              domain=$(basename "$domain_dir")
-              report_path="$domain_dir/report.json"
-
-              if [ -f "$report_path" ]; then
-                # Extract diffs from this domain's report (including all screenshot paths and URLs)
-                jq --arg domain "$domain" '[.results[] | select(.hasDiff == true and .error == null) | {domain: $domain, page: .page, diffPercentage: .diffPercentage, liveUrl: .liveUrl, previewUrl: .previewUrl, liveScreenshot: .liveScreenshot, previewScreenshot: .previewScreenshot, diffScreenshot: .diffScreenshot}]' "$report_path" > /tmp/domain_diffs.json
-
-                # Merge with all diffs
-                jq -s '.[0] + .[1]' /tmp/all_diffs.json /tmp/domain_diffs.json > /tmp/merged_diffs.json
-                mv /tmp/merged_diffs.json /tmp/all_diffs.json
-              fi
-            fi
-          done
 
           # Sort by diffPercentage and take top 3
           jq 'sort_by(-.diffPercentage) | .[0:3]' /tmp/all_diffs.json > /tmp/top_diffs.json
@@ -388,7 +431,7 @@ jobs:
           fi
 
       - name: Post visual diff PR comment
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request'
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
