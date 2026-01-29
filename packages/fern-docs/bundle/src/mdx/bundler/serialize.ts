@@ -33,6 +33,7 @@ import { gracefulify } from "graceful-fs";
 import { bundleMDX } from "mdx-bundler";
 import path from "path";
 import rehypeKatex from "rehype-katex";
+import rehypeRemoveComments from "rehype-remove-comments";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGemoji from "remark-gemoji";
 import remarkGfm from "remark-gfm";
@@ -289,6 +290,7 @@ async function serializeMdxImpl(
                         }
                     ],
                     rehypeExtractAsides,
+                    rehypeRemoveComments,
                     rehypeLog
                 ];
 

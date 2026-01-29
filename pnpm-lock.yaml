@@ -1882,6 +1882,9 @@ importers:
       rehype-katex:
         specifier: ^7.0.1
         version: 7.0.1
+      rehype-remove-comments:
+        specifier: ^6.1.1
+        version: 6.1.1
       remark-frontmatter:
         specifier: ^5.0.0
         version: 5.0.0
@@ -12679,6 +12682,7 @@ packages:
 
   '@walletconnect/ethereum-provider@2.20.0':
     resolution: {integrity: sha512-TSu1nr+AzCjM5u7xdnWTGX8ryKuHHb1Za56BD6UU0UPS7ZC2fZ99TVa5Q3Sng9JyksY5p99Iwg7fOtlozc3QYQ==}
+    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/events@1.0.1':
     resolution: {integrity: sha512-NPTqaoi0oPBVNuLv7qPaJazmGHs5JGyO8eEAk5VGKmJzDR7AHzD4k6ilox5kxk1iwiOnFopBOOMLs86Oa76HpQ==}
@@ -12723,6 +12727,7 @@ packages:
 
   '@walletconnect/sign-client@2.20.0':
     resolution: {integrity: sha512-5Ao9RVGsgpMTLjVByFfjMbX7RwJM0HvKV7P9ONJwPPo4OiviNyneeOufr2KKZhuwF+QUu5mTE0Lj/euGWSNaOQ==}
+    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/sign-client@2.23.4':
     resolution: {integrity: sha512-Q3hM8YmO+RHdT3R0MWyRBmekK5SNwpeheQQ+rWbu2dZFm9NyqfxJqwr6ZEhrZltFGTzCHrajTaFPrQnMb/LxuA==}
@@ -16424,6 +16429,9 @@ packages:
 
   hast-util-is-body-ok-link@3.0.1:
     resolution: {integrity: sha512-0qpnzOBLztXHbHQenVB8uNuxTnm/QBFUOmdOSsEn7GnBtyY07+ENTWVFBAnXd/zEgd9/SUG3lRY7hSIBWRgGpQ==}
+
+  hast-util-is-conditional-comment@3.0.1:
+    resolution: {integrity: sha512-RWpXL//CiEWwOh4OeAvr2fFeoBbX/sAnPnaYN9x4Nv6O4VPdFf/3Dq64mIybctblVA498SgVjfNc0/mN9S4IQw==}
 
   hast-util-is-element@3.0.0:
     resolution: {integrity: sha512-Val9mnv2IWpLbNPqc/pUem+a7Ipj2aHacCwgNfTiK0vJKl0LF+4Ba4+v1oPHFpf3bLYmreq0/l3Gud9S5OH42g==}
@@ -20478,6 +20486,9 @@ packages:
 
   rehype-remark@10.0.1:
     resolution: {integrity: sha512-EmDndlb5NVwXGfUa4c9GPK+lXeItTilLhE6ADSaQuHr4JUlKw9MidzGzx4HpqZrNCt6vnHmEifXQiiA+CEnjYQ==}
+
+  rehype-remove-comments@6.1.1:
+    resolution: {integrity: sha512-O3OAvqpV8IUJf6+Q4s5nqaKQqrgeXdU/+0fjUHMO0KAB4SwkMdN34NJQC9hexwvjYE00tX/xB8GvnVJI8Cdf6g==}
 
   relateurl@0.2.7:
     resolution: {integrity: sha512-G08Dxvm4iDN3MLM0EsP62EDV9IuhXPR6blNz6Utcp7zyV3tr4HVNINt6MpaRWbxoOHT3Q7YN2P+jaHX8vUbgog==}
@@ -40585,6 +40596,10 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.4
 
+  hast-util-is-conditional-comment@3.0.1:
+    dependencies:
+      '@types/hast': 3.0.4
+
   hast-util-is-element@3.0.0:
     dependencies:
       '@types/hast': 3.0.4
@@ -45712,6 +45727,12 @@ snapshots:
       hast-util-to-mdast: 10.1.2
       unified: 11.0.5
       vfile: 6.0.3
+
+  rehype-remove-comments@6.1.1:
+    dependencies:
+      '@types/hast': 3.0.4
+      hast-util-is-conditional-comment: 3.0.1
+      unist-util-visit: 5.0.0
 
   relateurl@0.2.7: {}
 
