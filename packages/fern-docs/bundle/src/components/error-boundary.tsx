@@ -9,6 +9,23 @@ import type React from "react";
 import type { PropsWithChildren } from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 
+interface ChunkLoadError extends Error {
+    name: "ChunkLoadError";
+    type?: string;
+    request?: string;
+}
+
+function isChunkLoadError(error: Error): error is ChunkLoadError {
+    return (
+        error.name === "ChunkLoadError" ||
+        (error.message?.includes("Loading chunk") && error.message.includes("failed"))
+    );
+}
+
+function handlePageReload(): void {
+    window.location.reload();
+}
+
 export function ErrorBoundaryFallback({
     className,
     error,
@@ -21,22 +38,25 @@ export function ErrorBoundaryFallback({
     lang: string;
 }) {
     console.error(`[error-boundary-fallback] ${JSON.stringify(error)}`);
+
+    const isChunkError = isChunkLoadError(error);
+
     const errorBadge = (
         <SemanticBadge
             variant="subtle"
             intent="error"
             rounded
-            onClick={resetErrorBoundary}
-            interactive={resetErrorBoundary != null}
+            onClick={isChunkError ? handlePageReload : resetErrorBoundary}
+            interactive={isChunkError || resetErrorBoundary != null}
             className="m-auto flex w-fit"
         >
             {t(lang).errors.somethingWentWrong}
-            {resetErrorBoundary != null && <RefreshCcw />}
+            {(isChunkError || resetErrorBoundary != null) && <RefreshCcw />}
         </SemanticBadge>
     );
     return (
         <div className={cn("size-full py-2", className)}>
-            {resetErrorBoundary != null ? (
+            {isChunkError || resetErrorBoundary != null ? (
                 <FernTooltipProvider>
                     <FernTooltip content={t(lang).buttons.clickToRefresh}>{errorBadge}</FernTooltip>
                 </FernTooltipProvider>
