@@ -49,9 +49,11 @@ export default async function ChangelogPage({
         await Promise.all(
             compact([node.overviewPageId, ...pageIds]).map(async (pageId) => {
                 const markdown = await loader.getPage(pageId);
+                const toc = makeToc(toTree(markdown.markdown).hast);
                 return {
                     pageId,
-                    anchors: getAnchorIds(makeToc(toTree(markdown.markdown).hast))
+                    anchors: getAnchorIds(toc),
+                    toc
                 };
             })
         )
@@ -72,10 +74,17 @@ export default async function ChangelogPage({
         });
     });
 
+    // Build entryTocs mapping pageId to TOC items (headings from markdown)
+    const entryTocs: Record<string, TableOfContentsItem[]> = {};
+    pages.forEach(({ pageId, toc }) => {
+        entryTocs[pageId] = toc;
+    });
+
     return (
         <ChangelogPageClient
             node={node}
             anchorIds={anchorIds}
+            entryTocs={entryTocs}
             overview={
                 <ChangelogPageOverview
                     loader={loader}

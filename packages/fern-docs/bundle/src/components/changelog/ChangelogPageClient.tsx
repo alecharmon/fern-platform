@@ -12,6 +12,7 @@ import { TableOfContentsLayout } from "@fern-docs/components/layouts/TableOfCont
 import { SetLayout } from "@fern-docs/components/state/layout";
 import { SCROLL_BODY_ATOM } from "@fern-docs/components/state/viewport";
 import { t } from "@fern-docs/i18n";
+import type { TableOfContentsItem } from "@fern-docs/mdx";
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
 import { chunk } from "es-toolkit/array";
 import { useAtomValue } from "jotai";
@@ -33,7 +34,11 @@ function flattenChangelogEntries({
     return node.children.flatMap((year) =>
         year.children
             .flatMap((month) => month.children)
-            .filter((entry) => selectedFilters.length === 0 || entry.tags?.some((tag) => selectedFilters.includes(tag)))
+            .filter((entry) => {
+                const matchesFilter =
+                    selectedFilters.length === 0 || entry.tags?.some((tag) => selectedFilters.includes(tag));
+                return matchesFilter;
+            })
     );
 }
 
@@ -42,6 +47,7 @@ const CHANGELOG_PAGE_SIZE = 10;
 export default function ChangelogPageClient({
     node,
     anchorIds,
+    entryTocs,
     overview,
     entries,
     isFullPage,
@@ -50,6 +56,7 @@ export default function ChangelogPageClient({
 }: {
     node: FernNavigation.ChangelogNode;
     anchorIds: Record<string, FernNavigation.PageId>;
+    entryTocs: Record<string, TableOfContentsItem[]>;
     overview: React.ReactNode;
     entries: Record<string, React.ReactNode>;
     isFullPage: boolean;
@@ -62,6 +69,67 @@ export default function ChangelogPageClient({
     const [page, setPage] = React.useState(1);
 
     const currentAnchor = useCurrentAnchor();
+
+    // Build hierarchical TOC: dates as parents, version numbers (from markdown headings) as children
+    const tableOfContents: TableOfContentsItem[] = useMemo(() => {
+        const visibleOnCurrentPage = chunkedEntries[page - 1] ?? [];
+
+        // Group entries by normalized date (YYYY-MM-DD format for consistent grouping)
+        const entriesByDate = new Map<
+            string,
+            { entries: FernNavigation.ChangelogEntryNode[]; firstEntryDate: string }
+        >();
+        visibleOnCurrentPage.forEach((entry) => {
+            // Normalize date to YYYY-MM-DD for grouping (use UTC to avoid timezone issues)
+            const dateObj = new Date(entry.date);
+            const normalizedDate = `${dateObj.getUTCFullYear()}-${String(dateObj.getUTCMonth() + 1).padStart(2, "0")}-${String(dateObj.getUTCDate()).padStart(2, "0")}`;
+
+            const existing = entriesByDate.get(normalizedDate);
+            if (existing) {
+                existing.entries.push(entry);
+            } else {
+                entriesByDate.set(normalizedDate, { entries: [entry], firstEntryDate: entry.date });
+            }
+        });
+
+        // Build TOC items with dates as parents and version numbers as children
+        const tocItems: TableOfContentsItem[] = [];
+        entriesByDate.forEach(({ entries: dateEntries, firstEntryDate }) => {
+            // Format the date for display (e.g., "January 12, 2026") using UTC to avoid timezone issues
+            const formattedDate = new Date(firstEntryDate).toLocaleDateString(lang, {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                timeZone: "UTC"
+            });
+
+            // Get version numbers from markdown headings for each entry
+            const children: TableOfContentsItem[] = dateEntries.flatMap((entry) => {
+                const toc = entryTocs[entry.pageId] ?? [];
+                // Use the first heading from each entry's markdown as the version number
+                // If no headings, fall back to using the entry date as anchor
+                if (toc.length > 0) {
+                    return toc.map((item) => ({
+                        simpleString: item.simpleString,
+                        anchorString: item.anchorString,
+                        children: []
+                    }));
+                }
+                return [];
+            });
+
+            // Only add the date group if there are children (version numbers)
+            if (children.length > 0) {
+                tocItems.push({
+                    simpleString: formattedDate,
+                    anchorString: firstEntryDate,
+                    children
+                });
+            }
+        });
+
+        return tocItems;
+    }, [chunkedEntries, page, lang, entryTocs]);
 
     useIsomorphicLayoutEffect(() => {
         const getPageFromHash = (): number => {
@@ -148,8 +216,7 @@ export default function ChangelogPageClient({
 
     return (
         <>
-            <TableOfContentsLayout tableOfContents={undefined} hideTableOfContents={true} lang={lang} />
-            {/* TODO(cd): treat as a guide for now, update for large-screen changelog */}
+            <TableOfContentsLayout tableOfContents={tableOfContents} hideTableOfContents={false} lang={lang} />
             <AsideAwareDiv className="fern-layout-changelog" isFullPage={isFullPage}>
                 <article className="fern-layout-page max-w-full">
                     <SetLayout value="guide" />
