@@ -387,6 +387,7 @@ function handleCorsProxy(req, res) {
     const targetUrl = req.url.slice("/__proxy/".length);
 
     if (!targetUrl) {
+        log(`CORS proxy error: Missing target URL`);
         res.writeHead(400, { "Content-Type": "text/plain" });
         res.end("Missing target URL");
         return;
@@ -396,6 +397,7 @@ function handleCorsProxy(req, res) {
     try {
         parsedUrl = new URL(targetUrl);
     } catch {
+        log(`CORS proxy error: Invalid target URL - ${targetUrl}`);
         res.writeHead(400, { "Content-Type": "text/plain" });
         res.end("Invalid target URL");
         return;
@@ -403,12 +405,14 @@ function handleCorsProxy(req, res) {
 
     // Only allow http and https protocols
     if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+        log(`CORS proxy error: Unsupported protocol - ${parsedUrl.protocol}`);
         res.writeHead(400, { "Content-Type": "text/plain" });
         res.end("Only HTTP and HTTPS protocols are supported");
         return;
     }
 
-    debug(`CORS proxy request: ${req.method} ${targetUrl}`);
+    // Log the request (excluding sensitive headers/API keys)
+    log(`CORS proxy request: ${req.method} ${parsedUrl.origin}${parsedUrl.pathname}`);
 
     // Get the list of headers to forward from the X-Fern-Proxy-Request-Headers header
     const headersToForward = (req.headers["x-fern-proxy-request-headers"] || "").split(",").filter(Boolean);
@@ -480,14 +484,15 @@ function handleCorsProxy(req, res) {
             responseHeadersList.join(",") +
             ",X-Fern-Proxy-Response-Headers,X-Fern-Proxy-Response-Time,X-Fern-Proxy-Origin-Latency";
 
-        debug(`CORS proxy response: ${proxyRes.statusCode} in ${responseTime}ms`);
+        // Log the response (status code and timing only, no sensitive data)
+        log(`CORS proxy response: ${proxyRes.statusCode} ${parsedUrl.origin}${parsedUrl.pathname} (${responseTime}ms)`);
 
         res.writeHead(proxyRes.statusCode, responseHeaders);
         proxyRes.pipe(res);
     });
 
     proxyReq.on("error", (err) => {
-        log(`CORS proxy error: ${err.message}`);
+        log(`CORS proxy error: ${err.message} - ${parsedUrl.origin}${parsedUrl.pathname}`);
         if (!res.headersSent) {
             res.writeHead(502, {
                 "Content-Type": "text/plain",
@@ -599,7 +604,8 @@ server.on("upgrade", (req, clientSocket, head) => {
     const isSecure = parsedUrl.protocol === "https:" || parsedUrl.protocol === "wss:";
     const targetPort = parsedUrl.port || (isSecure ? 443 : 80);
 
-    debug(`WebSocket proxy upgrade: ${targetUrl}`);
+    // Log WebSocket proxy request (excluding sensitive data)
+    log(`CORS proxy WebSocket upgrade: ${parsedUrl.origin}${parsedUrl.pathname}`);
 
     // Create connection to target server
     const targetSocket = isSecure
@@ -649,7 +655,7 @@ server.on("upgrade", (req, clientSocket, head) => {
           });
 
     targetSocket.on("error", (err) => {
-        log(`WebSocket proxy error: ${err.message}`);
+        log(`CORS proxy WebSocket error: ${err.message} - ${parsedUrl.origin}${parsedUrl.pathname}`);
         clientSocket.end();
     });
 
