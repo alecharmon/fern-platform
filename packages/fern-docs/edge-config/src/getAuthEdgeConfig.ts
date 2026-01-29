@@ -25,13 +25,17 @@ export async function getWorkOSOrganizationDomains(orgName: string): Promise<str
     for (const [domain, authConfig] of Object.entries(domainToAuthConfigMap)) {
         const config = AuthEdgeConfigSchema.safeParse(authConfig);
 
-        if (config.success && config.data.type === "sso" && config.data.partner === "workos") {
+        if (!config.success) {
+            // Only log errors when parsing actually fails, not when the config is a different type
+            console.error(`Could not parse AuthEdgeConfig for ${domain}`, config.error.message);
+            continue;
+        }
+
+        if (config.data.type === "sso" && config.data.partner === "workos") {
             // if the orgName matches the organization field, return the domain
             if (config.data.organization === orgName) {
                 domains.push(domain);
             }
-        } else {
-            console.error(`Could not parse AuthEdgeConfig for ${domain}`, config.error);
         }
     }
 
@@ -78,7 +82,7 @@ export async function getApiKeyInjectionDemoConfig(currentDomain: string): Promi
         // if the config is present, it should be valid.
         // if it's malformed, custom auth for this domain will not work and may leak docs to the public.
         if (!config.success) {
-            console.error(`Could not parse ApiKeySchema for ${currentDomain}`, config.error);
+            console.error(`Could not parse ApiKeySchema for ${currentDomain}`, config.error.message);
             // TODO: sentry
         }
         return config.data;
@@ -94,7 +98,7 @@ async function getRecord(currentDomain: string, key: string): Promise<AuthEdgeCo
         // if the config is present, it should be valid.
         // if it's malformed, custom auth for this domain will not work and may leak docs to the public.
         if (!config.success) {
-            console.error(`Could not parse AuthEdgeConfigSchema for ${currentDomain}`, config.error);
+            console.error(`Could not parse AuthEdgeConfigSchema for ${currentDomain}`, config.error.message);
             // TODO: sentry
         }
         return config.data;

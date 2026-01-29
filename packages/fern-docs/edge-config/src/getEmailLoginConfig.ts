@@ -55,7 +55,7 @@ function getDefaultConnectionToOrg(): EmailLoginSsoMap {
         const parsed = JSON.parse(raw) as unknown;
         const validation = z.record(SsoOrgEntrySchema).safeParse(parsed);
         if (!validation.success) {
-            console.error("[get-email-login-config] Invalid connectionToOrg env default", validation.error);
+            console.error("[get-email-login-config] Invalid connectionToOrg env default", validation.error.message);
             return {};
         }
         return validation.data;
@@ -91,7 +91,7 @@ export async function getEmailLoginConfig(): Promise<EmailLoginConfig> {
         const parsed = EmailLoginConfigSchema.safeParse(edgeConfig);
 
         if (!parsed.success) {
-            console.error("[get-email-login-config] Failed to parse edge config", parsed.error);
+            console.error("[get-email-login-config] Failed to parse edge config", parsed.error.message);
             return DEFAULT_CONFIG;
         }
 
