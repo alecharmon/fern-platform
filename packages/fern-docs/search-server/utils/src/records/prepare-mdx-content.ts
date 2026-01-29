@@ -38,6 +38,12 @@ export function prepareMdxContent(content: string): PreparedMdxContent {
 
         // squeeze MdxJsxElements to include only its children
         if (isMdxJsxElement(node)) {
+            // Remove <llms-only> content entirely (don't index for search)
+            if (node.name === "llms-only") {
+                parent.children.splice(index, 1);
+                return [SKIP, index];
+            }
+            // For all other elements (including <llms-ignore>), unwrap and keep children
             parent.children.splice(index, 1, { type: "break" }, ...node.children);
             return [SKIP, index];
         }
