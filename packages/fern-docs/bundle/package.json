@@ -94,7 +94,6 @@
     "@vitejs/plugin-react": "catalog:",
     "ai": "5.0.86",
     "algoliasearch": "^5.20.3",
-    "crypto-browserify": "^3.12.1",
     "cssnano": "^6.0.3",
     "es-toolkit": "catalog:",
     "esbuild": "0.27.0",

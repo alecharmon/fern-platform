@@ -1,13 +1,15 @@
 import { Button } from "@fern-docs/components/button";
 import { FernInput, type FernInputProps } from "@fern-docs/components/FernInput";
 import { t } from "@fern-docs/i18n";
-import { randomBytes } from "crypto-browserify";
 import { forwardRef } from "react";
 
 export const IdempotentInputGroup = forwardRef<HTMLInputElement, FernInputProps>((props, forwardedRef) => {
     function generateIdempotencyKey() {
-        const bytes = randomBytes(16);
-        const hex = bytes.toString("hex");
+        const bytes = new Uint8Array(16);
+        crypto.getRandomValues(bytes);
+        const hex = Array.from(bytes)
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
         return [hex.slice(0, 8), hex.slice(8, 12), hex.slice(12, 16), hex.slice(16, 20), hex.slice(20, 32)].join("-");
     }
     return (
