@@ -285,3 +285,18 @@ This is a test page with custom styles.
     // The style tag should be removed from the bundled code
     expect(result?.code).not.toContain("<style>");
 });
+
+it("should remove MDX comments from rendered output", async () => {
+    const result = await serializeMdx(readFileSync(join(__dirname, "tests", "comments.mdx"), "utf-8"));
+    await expect(deterministic(result?.code)).toMatchFileSnapshot(join(__dirname, "__snapshots__", "comments.js"));
+
+    expect(result?.code).toBeDefined();
+    expect(result?.code).toContain("visible content before the comment");
+    expect(result?.code).toContain("visible content after the comment");
+    expect(result?.code).toContain("More visible content at the end");
+    expect(result?.code).toContain("Content inside div");
+
+    expect(result?.code).not.toContain("This comment should not appear");
+    expect(result?.code).not.toContain("Multi-line comment");
+    expect(result?.code).not.toContain("Comment inside a div");
+});

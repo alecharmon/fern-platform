@@ -20,6 +20,7 @@ import {
     rehypeCodeBlock,
     rehypeExpressionToMd,
     rehypeMdxClassStyle,
+    rehypeRemoveMdxComments,
     rehypeSlug,
     rehypeSqueezeParagraphs,
     rehypeToc,
@@ -281,6 +282,7 @@ async function serializeMdxImpl(
                         }
                     ],
                     toc ? rehypeToc : noop,
+                    rehypeRemoveMdxComments,
                     rehypeAcornErrorBoundary,
                     [
                         rehypeCollectJsx,

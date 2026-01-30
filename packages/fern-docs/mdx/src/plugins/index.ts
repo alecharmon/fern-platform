@@ -2,6 +2,7 @@ export * from "./rehype-acorn-error-boundary";
 export * from "./rehype-code-block";
 export * from "./rehype-expression-to-md";
 export * from "./rehype-mdx-class-style";
+export * from "./rehype-remove-mdx-comments";
 export * from "./rehype-slug";
 export * from "./rehype-squeeze-paragraphs";
 export * from "./rehype-toc";
