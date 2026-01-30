@@ -45,15 +45,12 @@ export function AbstractHeaderContent({
                 <div className="fern-header-logo-container">
                     <div className="flex items-center gap-2">
                         <div className="flex items-center lg:items-start">{logo}</div>
-                        <div
-                            className={cn("items-baseline lg:flex", {
-                                hidden: !forceHeader && !showSwitcher,
-                                flex: forceHeader || showSwitcher
-                            })}
-                        >
-                            {productSelect}
-                            {versionSelect}
-                        </div>
+                        {forceHeader && showSwitcher && (
+                            <div className="flex items-baseline">
+                                {productSelect}
+                                {versionSelect}
+                            </div>
+                        )}
                     </div>
                 </div>
 

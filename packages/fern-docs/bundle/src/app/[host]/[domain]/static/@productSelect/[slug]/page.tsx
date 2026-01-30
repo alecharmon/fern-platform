@@ -25,7 +25,7 @@ export default async function ProductSelectPage({
         loader.getRoot(),
         loader.getTheme()
     ]);
-    const useDenseLayout = layout.isHeaderDisabled;
+    const useDenseLayout = layout.isHeaderDisabled || layout.switcherPlacement === "SIDEBAR";
 
     const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
 
