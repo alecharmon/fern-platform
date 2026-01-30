@@ -72,7 +72,7 @@ export function GitSourceClient({
                 <Skeleton className="h-4 w-24" />
             ) : (
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <div className="flex min-w-0 items-center gap-1">
+                    <div className="flex min-w-0 items-center gap-2">
                         {resolvedGitUrl ? (
                             <>
                                 <div className="shrink-0">
@@ -93,7 +93,7 @@ export function GitSourceClient({
                                                 variant="ghost"
                                                 size="iconSm"
                                                 onClick={() => setIsValidationModalOpen(true)}
-                                                className="-mx-0.5"
+                                                className="-mx-1.5"
                                             >
                                                 <AlertCircle className="size-4 text-yellow-1000" />
                                             </Button>

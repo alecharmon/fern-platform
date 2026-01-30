@@ -89,13 +89,7 @@ export function PublishingStepClient({ organizationId }: PublishingStepClientPro
 
     return (
         <div className="flex w-full flex-1 items-center justify-center">
-            <LoaderScreen
-                wizardFormData={formData}
-                orgName={orgName}
-                showLogs={true}
-                sessionId={sessionData?.sessionId}
-                onComplete={handleStreamComplete}
-            />
+            <LoaderScreen wizardFormData={formData} orgName={orgName} onComplete={handleStreamComplete} />
         </div>
     );
 }

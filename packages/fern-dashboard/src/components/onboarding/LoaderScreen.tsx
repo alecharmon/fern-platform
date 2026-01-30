@@ -1,8 +1,8 @@
 "use client";
 
 import { AppWindow } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WorkflowStatus } from "@/app/api/onboarding-docs/workflow-status/route";
 import { PublishingStepCard, type PublishingStepState } from "@/components/onboarding/PublishingStepCard";
 import { AddCollaboratorModal } from "@/components/shared/AddCollaboratorModal";
@@ -16,6 +16,7 @@ import {
 } from "@/utils/onboardingSession";
 import { cn } from "@/utils/utils";
 import { GithubLogo } from "../auth/GithubLogo";
+import { Button } from "../ui/button";
 import { clearRepoSetupResult, getRepoSetupResult, waitForRepoSetup } from "./repoSetupStorage";
 
 const POLL_INTERVAL_MS = 2000;
@@ -23,8 +24,6 @@ const POLL_INTERVAL_MS = 2000;
 interface LoaderScreenProps {
     wizardFormData: WizardFormData;
     orgName?: string;
-    showLogs?: boolean;
-    sessionId?: string;
     onComplete?: (result: { url: string; fernDocsDownloadUrl?: string; githubRepoUrl?: string }) => void;
 }
 
@@ -231,7 +230,7 @@ async function performCustomization(
     return await response.json();
 }
 
-export function LoaderScreen({ wizardFormData, orgName, showLogs = false, sessionId, onComplete }: LoaderScreenProps) {
+export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScreenProps) {
     const [isComplete, setIsComplete] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [stepStates, setStepStates] = useState<PublishingStepStateMap>(() => ({
@@ -257,7 +256,7 @@ export function LoaderScreen({ wizardFormData, orgName, showLogs = false, sessio
 
     // Main publishing workflow - runs once on mount
     useEffect(() => {
-        if (!showLogs || hasStartedPublishing.current || !orgName) {
+        if (hasStartedPublishing.current || !orgName) {
             return;
         }
         hasStartedPublishing.current = true;
@@ -304,7 +303,7 @@ export function LoaderScreen({ wizardFormData, orgName, showLogs = false, sessio
         };
 
         runPublishing();
-    }, [showLogs, orgName, wizardFormData]);
+    }, [orgName, wizardFormData]);
 
     // Poll workflow status to update step states
     const pollWorkflowStatus = useCallback(async () => {
@@ -416,7 +415,7 @@ export function LoaderScreen({ wizardFormData, orgName, showLogs = false, sessio
 
     // Only start polling when we're in the polling phase
     useEffect(() => {
-        if (!showLogs || isComplete || publishingPhase !== "polling") {
+        if (isComplete || publishingPhase !== "polling") {
             return;
         }
 
@@ -435,67 +434,82 @@ export function LoaderScreen({ wizardFormData, orgName, showLogs = false, sessio
             console.log("[LoaderScreen] Cleaning up polling interval");
             clearInterval(intervalId);
         };
-    }, [showLogs, isComplete, publishingPhase, pollWorkflowStatus]);
+    }, [isComplete, publishingPhase, pollWorkflowStatus]);
+
+    const dashboardLink = useMemo(() => {
+        if (docsUrl) {
+            const cleanedUrl = new URL(docsUrl);
+            const url = cleanedUrl.host;
+            return `/${orgName}/docs/${url}`;
+        }
+        return undefined;
+    }, [docsUrl, orgName]);
 
     return (
         <div className="flex w-full flex-col gap-8">
-            <h1 className="text-xl font-semibold text-left">Your site is publishing!</h1>
+            <h1 className="text-xl font-semibold text-left">
+                {isComplete ? "Your site is published!" : "Your site is publishing!"}
+            </h1>
 
-            {showLogs && (
-                <div className="w-full max-w-3xl space-y-5">
-                    {PUBLISHING_STEPS.map((step, index) => {
-                        const state = stepStates[step.id];
-                        const previousState = index > 0 ? stepStates[PUBLISHING_STEPS[index - 1]!.id] : null;
-                        const nextState =
-                            index < PUBLISHING_STEPS.length - 1 ? stepStates[PUBLISHING_STEPS[index + 1]!.id] : null;
+            <div className="w-full max-w-3xl space-y-5">
+                {PUBLISHING_STEPS.map((step, index) => {
+                    const state = stepStates[step.id];
+                    const previousState = index > 0 ? stepStates[PUBLISHING_STEPS[index - 1]!.id] : null;
+                    const nextState =
+                        index < PUBLISHING_STEPS.length - 1 ? stepStates[PUBLISHING_STEPS[index + 1]!.id] : null;
 
-                        const currentLineColor =
-                            state === "complete"
-                                ? "bg-green-500"
-                                : state === "in-progress"
-                                  ? "bg-primary"
-                                  : "bg-gray-200 dark:bg-gray-800";
+                    const currentLineColor =
+                        state === "complete"
+                            ? "bg-green-500"
+                            : state === "in-progress"
+                              ? "bg-primary"
+                              : "bg-gray-200 dark:bg-gray-800";
 
-                        const topLineColor =
-                            previousState === "complete" ? "bg-green-500" : "bg-gray-200 dark:bg-gray-800";
+                    const topLineColor = previousState === "complete" ? "bg-green-500" : "bg-gray-200 dark:bg-gray-800";
 
-                        const bottomLineColor =
-                            nextState === "complete" ? "bg-green-500" : "bg-gray-200 dark:bg-gray-800";
+                    const bottomLineColor = nextState === "complete" ? "bg-green-500" : "bg-gray-200 dark:bg-gray-800";
 
-                        const actionUrl = step.id === "docs" ? docsUrl : undefined;
-                        const isActionDisabled = step.id === "docs" && state !== "complete";
-                        const onActionClick = step.id === "github" ? () => setIsCollaboratorModalOpen(true) : undefined;
+                    const actionUrl = step.id === "docs" ? docsUrl : undefined;
+                    const isActionDisabled = step.id === "docs" && state !== "complete";
+                    const onActionClick = step.id === "github" ? () => setIsCollaboratorModalOpen(true) : undefined;
 
-                        return (
-                            <div key={step.id} className="flex items-stretch gap-4">
-                                <div className="flex w-4 flex-col items-center self-stretch">
-                                    {index > 0 && <div className={cn("w-1 flex-1 rounded-full", topLineColor)} />}
-                                    <div
-                                        className={cn("w-1 rounded-full", currentLineColor)}
-                                        style={{ minHeight: "100%" }}
-                                    />
-                                    {index < PUBLISHING_STEPS.length - 1 && (
-                                        <div className={cn("w-1 flex-1 rounded-full", bottomLineColor)} />
-                                    )}
-                                </div>
-                                <div className="flex-1">
-                                    <PublishingStepCard
-                                        title={step.title}
-                                        state={state}
-                                        icon={step.icon}
-                                        completeActionLabel={step.completeActionLabel}
-                                        inProgressActionLabel={
-                                            step.id === "docs" ? docsStepLabel : step.inProgressActionLabel
-                                        }
-                                        completeActionUrl={actionUrl ?? undefined}
-                                        isActionDisabled={isActionDisabled}
-                                        onActionClick={onActionClick}
-                                    />
-                                </div>
+                    return (
+                        <div key={step.id} className="flex items-stretch gap-4">
+                            <div className="flex w-4 flex-col items-center self-stretch">
+                                {index > 0 && <div className={cn("w-1 flex-1 rounded-full", topLineColor)} />}
+                                <div
+                                    className={cn("w-1 rounded-full", currentLineColor)}
+                                    style={{ minHeight: "100%" }}
+                                />
+                                {index < PUBLISHING_STEPS.length - 1 && (
+                                    <div className={cn("w-1 flex-1 rounded-full", bottomLineColor)} />
+                                )}
                             </div>
-                        );
-                    })}
-                </div>
+                            <div className="flex-1">
+                                <PublishingStepCard
+                                    title={step.title}
+                                    state={state}
+                                    icon={step.icon}
+                                    completeActionLabel={step.completeActionLabel}
+                                    inProgressActionLabel={
+                                        step.id === "docs" ? docsStepLabel : step.inProgressActionLabel
+                                    }
+                                    completeActionUrl={actionUrl ?? undefined}
+                                    isActionDisabled={isActionDisabled}
+                                    onActionClick={onActionClick}
+                                />
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {isComplete && dashboardLink && (
+                <Button asChild>
+                    <Link href={dashboardLink} prefetch>
+                        Go to dashboard
+                    </Link>
+                </Button>
             )}
 
             {orgName && repoName && (
