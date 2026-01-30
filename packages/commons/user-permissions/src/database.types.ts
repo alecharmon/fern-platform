@@ -59,6 +59,48 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            OidcGroupMappings: {
+                Row: {
+                    id: string;
+                    org_id: string;
+                    connection_name: string;
+                    group_id: string;
+                    mapping_type: "org_role" | "resource_role";
+                    role: string;
+                    resource_type: string | null;
+                    resource_id: string | null;
+                    created_at: string;
+                    updated_at: string;
+                    created_by: string | null;
+                };
+                Insert: {
+                    id?: string;
+                    org_id: string;
+                    connection_name: string;
+                    group_id: string;
+                    mapping_type: "org_role" | "resource_role";
+                    role: string;
+                    resource_type?: string | null;
+                    resource_id?: string | null;
+                    created_at?: string;
+                    updated_at?: string;
+                    created_by?: string | null;
+                };
+                Update: {
+                    id?: string;
+                    org_id?: string;
+                    connection_name?: string;
+                    group_id?: string;
+                    mapping_type?: "org_role" | "resource_role";
+                    role?: string;
+                    resource_type?: string | null;
+                    resource_id?: string | null;
+                    created_at?: string;
+                    updated_at?: string;
+                    created_by?: string | null;
+                };
+                Relationships: [];
+            };
         };
         Views: {
             [_ in never]: never;

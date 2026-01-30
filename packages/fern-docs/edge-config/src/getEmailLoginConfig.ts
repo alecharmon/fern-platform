@@ -14,7 +14,9 @@ const SsoOrgEntrySchema = z.object({
     // We use this as a fallback when creating new users in the org via email
     default_email_domain: z.string().optional(),
     // default auth0 role to assign to users logging in via this SSO connection
-    default_role: z.enum(["admin", "editor", "viewer"]).optional()
+    default_role: z.enum(["admin", "editor", "viewer"]).optional(),
+    // Should permissions be synced from the identity provider's group mappings
+    use_group_mappings: z.boolean().optional().default(false)
 });
 
 const EmailLoginConfigSchema = z.object({

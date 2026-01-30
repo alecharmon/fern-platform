@@ -1,30 +1,15 @@
-import { addRoles, getRoles } from "@fern-api/user-permissions";
 import { getEmailLoginConfig } from "@fern-docs/edge-config";
 import { redirect } from "next/navigation";
-import z from "zod";
 
 import getMyOrganizations from "@/app/api/get-my-organizations/handler";
-import { getAuth0Client } from "@/app/services/auth0/auth0";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { addUserToOrgById } from "@/app/services/auth0/management";
-import { Auth0OrgID, Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import { Auth0OrgID, type Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 import orgRedirect from "@/utils/orgRedirect";
 import type { EmailLoginSsoEntry } from "../../../../../../../fern-docs/edge-config/src/getEmailLoginConfig";
-
-const QuerySchema = z.object({
-    connection: z.string(),
-    redirect: z.string().optional(),
-    default_redirect: z.string().optional()
-});
-
-function ensureRedirectPath(path: string | undefined, fallback: string): string {
-    if (typeof path === "string" && path.startsWith("/")) {
-        return path;
-    }
-
-    return fallback;
-}
+import { attemptGroupPermSync, attemptOrgLevelRole } from "./permission-sync";
+import SilentReauthLoader from "./SilentReauthLoader";
 
 function asString(value: string | string[] | undefined): string | undefined {
     return typeof value === "string" ? value : undefined;
@@ -45,17 +30,11 @@ export default async function PostSsoRedirectPage({
 }: {
     searchParams: Record<string, string | string[] | undefined>;
 }) {
-    const parsed = QuerySchema.safeParse({
-        connection: asString(searchParams.connection),
-        redirect: asString(searchParams.redirect),
-        default_redirect: asString(searchParams.default_redirect)
-    });
+    const connection = asString(searchParams.connection);
 
-    if (!parsed.success) {
+    if (!connection) {
         redirect("/");
     }
-
-    const { connection, redirect: redirectParam, default_redirect } = parsed.data;
 
     const session = await getCurrentSession();
     if (session == null) {
@@ -63,14 +42,13 @@ export default async function PostSsoRedirectPage({
     }
 
     const orgMapping = await getOrgForConnection(connection);
-    const fallbackRedirect = ensureRedirectPath(default_redirect, "/");
     if (!orgMapping) {
         console.error("Failed to resolve org for connection", { connection });
-        redirect(ensureRedirectPath(redirectParam, fallbackRedirect));
+        redirect("/");
     }
 
-    const orgDefaultRedirect = ensureRedirectPath(default_redirect ?? `/${orgMapping.org_name}`, "/");
-    const destination = ensureRedirectPath(redirectParam, orgDefaultRedirect);
+    // Always redirect to the org's home page based on SSO config
+    const destination = orgRedirect({ id: orgMapping.org_id as Auth0OrgID, name: orgMapping.org_name as Auth0OrgName });
 
     const userId = Auth0UserID(session.user.sub);
     const orgId = Auth0OrgID(orgMapping.org_id);
@@ -97,38 +75,14 @@ export default async function PostSsoRedirectPage({
         });
     }
 
-    const currentRoles = await getRoles({ userId: userId, orgId: orgId });
-    if (currentRoles.ok!) {
-        console.error("Failed to check sso roles", {
-            orgId,
-            userId
-        });
-    }
-    if (currentRoles.data.length === 0) {
-        // Add default roles
-        const addRoleResult = await addRoles({
-            userId: userId,
-            orgId: orgId,
-            // for now these are admin roles but will be downgraded
-            // to viewer at some point
-            roleNames: [orgMapping.default_role || "editor"]
-        });
-        if (addRoleResult.ok === false) {
-            // Attempt to continue anyways
-            console.error("Failed to add roles to user", {
-                orgId,
-                userId
-            });
-        }
-        const auth0 = await getAuth0Client();
-        await auth0.getAccessToken({ refresh: true });
-        redirect(
-            orgRedirect({
-                name: Auth0OrgName(orgMapping.org_name),
-                id: Auth0OrgID(orgMapping.org_id)
-            })
-        );
+    if (orgMapping.use_group_mappings) {
+        await attemptGroupPermSync({ userId, orgId, connection });
+    } else {
+        await attemptOrgLevelRole({ userId, orgId, defaultRole: orgMapping.default_role });
     }
 
-    redirect(destination);
+    // Show loading UI while polling for org-scoped token via silent re-auth
+    // This handles the case where permissions were just synced but the token
+    // doesn't yet reflect the org membership
+    return <SilentReauthLoader orgId={orgId} destination={destination} />;
 }

@@ -13,6 +13,24 @@ export {
     supabaseError,
     type UserPermissionsError
 } from "./errors";
+// OIDC Group Permissions
+export {
+    type CreateOidcGroupMappingInput,
+    createOidcGroupMapping,
+    deleteOidcGroupMapping,
+    getOidcGroupMappings,
+    getOidcGroupMappingsResult,
+    getOidcGroups,
+    getOidcGroupsResult,
+    listOidcGroupMappings,
+    type OidcGroupMapping,
+    type OidcMappingType,
+    type OidcRole,
+    type SyncOidcPermissionsInput,
+    type SyncResult,
+    syncOidcPermissions,
+    syncOidcPermissionsResult
+} from "./oidc-permissions";
 export {
     AUTHZ_PERMISSIONS,
     type AuthZPermission,
@@ -90,5 +108,4 @@ export {
     type UpdateRolesRequest,
     type UserPermissionsResponse
 } from "./roles";
-
 export { addPermission, type PermissionRequest, removePermission } from "./user-permissions";

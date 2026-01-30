@@ -54,7 +54,11 @@ describe("login/email API", () => {
         mockGetEmailLoginConfig.mockResolvedValue({
             supportedPlatforms: ["samlp", "google-oauth2", "github"],
             connectionToOrg: {
-                oktahey: { org_id: "org_UtKyk8aCwTJ8Lqr0", org_name: "oktassotestorg20251204" }
+                oktahey: {
+                    org_id: "org_UtKyk8aCwTJ8Lqr0",
+                    org_name: "oktassotestorg20251204",
+                    use_group_mappings: false
+                }
             },
             byEmailDomain: {}
         });
@@ -186,7 +190,8 @@ describe("login/email API", () => {
                 "example.com": {
                     org_id: "org_default",
                     org_name: "example",
-                    connection: "oktahey"
+                    connection: "oktahey",
+                    use_group_mappings: false
                 }
             }
         });
@@ -215,7 +220,8 @@ describe("login/email API", () => {
                 "example.com": {
                     org_id: "org_default",
                     org_name: "example",
-                    connection: "oktahey"
+                    connection: "oktahey",
+                    use_group_mappings: false
                 }
             }
         });

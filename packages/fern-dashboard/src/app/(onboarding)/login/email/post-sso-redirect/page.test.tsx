@@ -27,9 +27,8 @@ const mocks = vi.hoisted(() => {
         mockAddUserToOrgById: vi.fn(),
         mockGetEmailLoginConfig: vi.fn(),
         mockGetAuth0Client: vi.fn(),
-        mockGetRoles: vi.fn(),
-        mockAddRoles: vi.fn(),
-        mockOrgRedirect: vi.fn()
+        mockAttemptGroupPermSync: vi.fn(),
+        mockAttemptOrgLevelRole: vi.fn()
     };
 });
 
@@ -63,10 +62,6 @@ vi.mock("@fern-docs/edge-config", () => ({
 vi.mock("@/app/services/auth0/auth0", () => ({
     getAuth0Client: mocks.mockGetAuth0Client
 }));
-vi.mock("@fern-api/user-permissions", () => ({
-    getRoles: mocks.mockGetRoles,
-    addRoles: mocks.mockAddRoles
-}));
 
 vi.mock("@/app/services/auth0/types", () => ({
     Auth0OrgID: (id: string) => id,
@@ -74,9 +69,16 @@ vi.mock("@/app/services/auth0/types", () => ({
     Auth0OrgName: (name: string) => name
 }));
 
-vi.mock("@/utils/orgRedirect", () => ({
+vi.mock("./permission-sync", () => ({
+    attemptGroupPermSync: mocks.mockAttemptGroupPermSync,
+    attemptOrgLevelRole: mocks.mockAttemptOrgLevelRole
+}));
+
+vi.mock("./SilentReauthLoader", () => ({
     __esModule: true,
-    default: mocks.mockOrgRedirect
+    default: ({ orgId, destination }: { orgId: string; destination: string }) => (
+        <div data-testid="silent-reauth-loader" data-org-id={orgId} data-destination={destination} />
+    )
 }));
 
 describe("post-sso-redirect page", () => {
@@ -95,17 +97,17 @@ describe("post-sso-redirect page", () => {
             connectionToOrg: {
                 oktahey: {
                     org_id: "org_123",
-                    org_name: "acme"
+                    org_name: "acme",
+                    use_group_mappings: false
                 }
             },
             byEmailDomain: {}
         });
-        mocks.mockGetRoles.mockResolvedValue({ ok: true, data: ["viewer"] });
-        mocks.mockAddRoles.mockResolvedValue({ ok: true });
-        mocks.mockOrgRedirect.mockImplementation((org: { id: string; name: string }) => `/auth/login?org=${org.name}`);
+        mocks.mockAttemptGroupPermSync.mockResolvedValue(undefined);
+        mocks.mockAttemptOrgLevelRole.mockResolvedValue(undefined);
     });
 
-    it("adds user to org when missing and redirects to provided path", async () => {
+    it("adds user to org when missing and renders loading UI", async () => {
         const addUser = vi.fn();
         mocks.mockGetCurrentSession.mockResolvedValue({
             accessToken: "token",
@@ -116,7 +118,7 @@ describe("post-sso-redirect page", () => {
             organization: { addUser }
         });
 
-        const pagePromise = PostSsoRedirectPage({
+        const result = await PostSsoRedirectPage({
             searchParams: {
                 connection: "oktahey",
                 redirect: "/docs",
@@ -124,12 +126,13 @@ describe("post-sso-redirect page", () => {
             }
         });
 
-        await expect(pagePromise).rejects.toMatchObject({ url: "/docs" });
+        // Should render the SilentReauthLoader (not redirect)
+        expect(result).toBeDefined();
         expect(addUser).toHaveBeenCalledWith({ orgId: "org_123", userId: "auth0|user" });
         expect(mocks.mockAddUserToOrgById).toHaveBeenCalledWith("auth0|user", "org_123");
     });
 
-    it("skips adding user when already in org and redirects", async () => {
+    it("skips adding user when already in org and renders loading UI", async () => {
         mocks.mockGetCurrentSession.mockResolvedValue({
             accessToken: "token",
             user: { sub: "auth0|user" }
@@ -137,7 +140,7 @@ describe("post-sso-redirect page", () => {
         mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
         mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
 
-        const pagePromise = PostSsoRedirectPage({
+        const result = await PostSsoRedirectPage({
             searchParams: {
                 connection: "oktahey",
                 redirect: "/welcome",
@@ -145,7 +148,8 @@ describe("post-sso-redirect page", () => {
             }
         });
 
-        await expect(pagePromise).rejects.toMatchObject({ url: "/welcome" });
+        // Should render the SilentReauthLoader (not redirect)
+        expect(result).toBeDefined();
         expect(mocks.mockAddUserToOrgById).not.toHaveBeenCalled();
     });
 
@@ -179,28 +183,27 @@ describe("post-sso-redirect page", () => {
         expect(mocks.mockGetMyOrganizations).not.toHaveBeenCalled();
     });
 
-    describe("default_role behavior", () => {
-        it("assigns 'editor' role when default_role is not set", async () => {
+    describe("permission sync behavior", () => {
+        it("calls attemptGroupPermSync when use_group_mappings is true", async () => {
             mocks.mockGetCurrentSession.mockResolvedValue({
                 accessToken: "token",
                 user: { sub: "auth0|user" }
             });
             mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
             mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
-            mocks.mockGetRoles.mockResolvedValue({ ok: true, data: [] });
             mocks.mockGetEmailLoginConfig.mockResolvedValue({
                 supportedPlatforms: [],
                 connectionToOrg: {
                     oktahey: {
                         org_id: "org_123",
-                        org_name: "acme"
-                        // no default_role set
+                        org_name: "acme",
+                        use_group_mappings: true
                     }
                 },
                 byEmailDomain: {}
             });
 
-            const pagePromise = PostSsoRedirectPage({
+            const result = await PostSsoRedirectPage({
                 searchParams: {
                     connection: "oktahey",
                     redirect: "/docs",
@@ -208,36 +211,36 @@ describe("post-sso-redirect page", () => {
                 }
             });
 
-            // When roles are empty and added, redirects via orgRedirect
-            await expect(pagePromise).rejects.toMatchObject({ url: "/auth/login?org=acme" });
-            expect(mocks.mockAddRoles).toHaveBeenCalledWith({
+            expect(result).toBeDefined();
+            expect(mocks.mockAttemptGroupPermSync).toHaveBeenCalledWith({
                 userId: "auth0|user",
                 orgId: "org_123",
-                roleNames: ["editor"]
+                connection: "oktahey"
             });
+            expect(mocks.mockAttemptOrgLevelRole).not.toHaveBeenCalled();
         });
 
-        it("assigns configured default_role when set to 'viewer'", async () => {
+        it("calls attemptOrgLevelRole when use_group_mappings is false", async () => {
             mocks.mockGetCurrentSession.mockResolvedValue({
                 accessToken: "token",
                 user: { sub: "auth0|user" }
             });
             mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
             mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
-            mocks.mockGetRoles.mockResolvedValue({ ok: true, data: [] });
             mocks.mockGetEmailLoginConfig.mockResolvedValue({
                 supportedPlatforms: [],
                 connectionToOrg: {
                     oktahey: {
                         org_id: "org_123",
                         org_name: "acme",
+                        use_group_mappings: false,
                         default_role: "viewer"
                     }
                 },
                 byEmailDomain: {}
             });
 
-            const pagePromise = PostSsoRedirectPage({
+            const result = await PostSsoRedirectPage({
                 searchParams: {
                     connection: "oktahey",
                     redirect: "/docs",
@@ -245,36 +248,35 @@ describe("post-sso-redirect page", () => {
                 }
             });
 
-            // When roles are empty and added, redirects via orgRedirect
-            await expect(pagePromise).rejects.toMatchObject({ url: "/auth/login?org=acme" });
-            expect(mocks.mockAddRoles).toHaveBeenCalledWith({
+            expect(result).toBeDefined();
+            expect(mocks.mockAttemptOrgLevelRole).toHaveBeenCalledWith({
                 userId: "auth0|user",
                 orgId: "org_123",
-                roleNames: ["viewer"]
+                defaultRole: "viewer"
             });
+            expect(mocks.mockAttemptGroupPermSync).not.toHaveBeenCalled();
         });
 
-        it("assigns configured default_role when set to 'admin'", async () => {
+        it("calls attemptOrgLevelRole when use_group_mappings defaults to false", async () => {
             mocks.mockGetCurrentSession.mockResolvedValue({
                 accessToken: "token",
                 user: { sub: "auth0|user" }
             });
             mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
             mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
-            mocks.mockGetRoles.mockResolvedValue({ ok: true, data: [] });
             mocks.mockGetEmailLoginConfig.mockResolvedValue({
                 supportedPlatforms: [],
                 connectionToOrg: {
                     oktahey: {
                         org_id: "org_123",
                         org_name: "acme",
-                        default_role: "admin"
+                        use_group_mappings: false
                     }
                 },
                 byEmailDomain: {}
             });
 
-            const pagePromise = PostSsoRedirectPage({
+            const result = await PostSsoRedirectPage({
                 searchParams: {
                     connection: "oktahey",
                     redirect: "/docs",
@@ -282,46 +284,9 @@ describe("post-sso-redirect page", () => {
                 }
             });
 
-            // When roles are empty and added, redirects via orgRedirect
-            await expect(pagePromise).rejects.toMatchObject({ url: "/auth/login?org=acme" });
-            expect(mocks.mockAddRoles).toHaveBeenCalledWith({
-                userId: "auth0|user",
-                orgId: "org_123",
-                roleNames: ["admin"]
-            });
-        });
-
-        it("does not assign roles when user already has roles", async () => {
-            mocks.mockGetCurrentSession.mockResolvedValue({
-                accessToken: "token",
-                user: { sub: "auth0|user" }
-            });
-            mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
-            mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
-            mocks.mockGetRoles.mockResolvedValue({ ok: true, data: ["viewer"] });
-            mocks.mockGetEmailLoginConfig.mockResolvedValue({
-                supportedPlatforms: [],
-                connectionToOrg: {
-                    oktahey: {
-                        org_id: "org_123",
-                        org_name: "acme",
-                        default_role: "admin"
-                    }
-                },
-                byEmailDomain: {}
-            });
-
-            const pagePromise = PostSsoRedirectPage({
-                searchParams: {
-                    connection: "oktahey",
-                    redirect: "/docs",
-                    default_redirect: "/acme"
-                }
-            });
-
-            // When user already has roles, redirects to destination without adding roles
-            await expect(pagePromise).rejects.toMatchObject({ url: "/docs" });
-            expect(mocks.mockAddRoles).not.toHaveBeenCalled();
+            expect(result).toBeDefined();
+            expect(mocks.mockAttemptOrgLevelRole).toHaveBeenCalled();
+            expect(mocks.mockAttemptGroupPermSync).not.toHaveBeenCalled();
         });
     });
 });
