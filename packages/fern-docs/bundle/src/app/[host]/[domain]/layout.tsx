@@ -123,18 +123,16 @@ export default async function Layout({
             <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
             <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
 
-            {/* KaTeX CSS for LaTeX math rendering - pinned version with SRI for supply-chain security */}
+            {/* KaTeX CSS for LaTeX math rendering */}
             <link
                 rel="preload"
                 as="style"
                 href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
-                integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn"
                 crossOrigin="anonymous"
             />
             <link
                 rel="stylesheet"
                 href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
-                integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn"
                 crossOrigin="anonymous"
             />
         </head>
