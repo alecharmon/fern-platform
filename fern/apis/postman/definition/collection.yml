@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
+
+service:
+  auth: true
+  base-path: /api/postman
+  endpoints:
+
+    getStatus:
+      docs: Returns the publishing status of the Postman collection as documentation.
+      method: GET
+      path: /publish/collection/{collectionId}/status
+      path-parameters:
+        collectionId: CollectionId
+      response: GetCollectionStatusResponse
+      errors:
+        - CollectionDoesNotExistError
+
+    publish:
+      docs: Initiates a request to publish the Postman collection as a Fern documentation site.
+      method: POST
+      path: /publish/collection/{collectionId}
+      path-parameters:
+        collectionId: CollectionId
+      request:
+        name: PublishCollectionRequest
+        body:
+          properties:
+            userId: UserId
+            teamId: TeamId
+      errors:
+        - CollectionDoesNotExistError
+
+types:
+  CollectionId:
+    type: string
+    docs: The unique identifier for a Collection
+
+  UserId:
+    type: string
+    docs: The unique identifier for a User
+
+  TeamId:
+    type: string
+    docs: The unique identifier for a Team
+
+  GetCollectionStatusResponse:
+    docs: Discriminated union representing the status of publishing the collection as documentation.
+    union:
+      publishing:
+        docs: The collection publication is in progress.
+        type:
+      published:
+        docs: The collection has been successfully published as documentation.
+        type: CollectionStatusPublished
+      failed:
+        docs: The collection publication failed.
+        type: CollectionStatusFailed
+  
+  CollectionStatusPublishing:
+    properties:
+      startedAt: datetime
+  
+  CollectionStatusPublished:
+    properties:
+      url: string
+      publishedAt: datetime
+  
+  CollectionStatusFailed:
+    properties:
+      reason: string
+
+errors:
+
+  CollectionDoesNotExistError:
+    status-code: 404
+    type: CollectionId

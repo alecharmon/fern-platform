@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://schema.buildwithfern.dev/generators-yml.json
+
+autorelease: true
+groups:
+  ts-sdk:
+    generators:
+      - name: fern-typescript-sdk
+        version: 3.46.1
+        output: 
+          location: npm
+          package-name: "@fern-api/postman"
+          token: ${NPM_TOKEN}
+        config:
+          namespaceExport: FernPostman
+        github:
+          repository: fern-api/postman-sdk
