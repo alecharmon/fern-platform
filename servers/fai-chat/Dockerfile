@@ -6,7 +6,11 @@ FROM public.ecr.aws/docker/library/python:3.13-slim
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt/extensions/lambda-adapter
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+# Update OpenSSL packages to fix CVE-2025-15467 (Critical), CVE-2025-69420 (High), CVE-2025-69419 (High)
+RUN apt-get update && \
+    apt-get upgrade -y libssl3t64 openssl && \
+    apt-get install -y git && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
 RUN pip3 install --upgrade pip==25.3

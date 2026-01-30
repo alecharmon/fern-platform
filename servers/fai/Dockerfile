@@ -1,6 +1,10 @@
 FROM python:3.13-slim-trixie
 
-RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
+# Update OpenSSL packages to fix CVE-2025-15467 (Critical), CVE-2025-69420 (High), CVE-2025-69419 (High)
+RUN apt-get update && \
+    apt-get upgrade -y libssl3t64 openssl && \
+    apt-get install -y git curl && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --upgrade pip==25.3
 RUN pip3 install memray
