@@ -1,6 +1,6 @@
 "use client";
 
-import { AppWindow } from "lucide-react";
+import { AlertTriangle, AppWindow, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { WorkflowStatus } from "@/app/api/onboarding-docs/workflow-status/route";
@@ -232,6 +232,8 @@ async function performCustomization(
 
 export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScreenProps) {
     const [isComplete, setIsComplete] = useState(false);
+    const [workflowFailed, setWorkflowFailed] = useState(false);
+    const [isRetrying, setIsRetrying] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [stepStates, setStepStates] = useState<PublishingStepStateMap>(() => ({
         github: "in-progress",
@@ -384,12 +386,12 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                         });
                     }
                 } else {
-                    setError("Build failed. Check GitHub Actions for details.");
+                    setWorkflowFailed(true);
                     setStepStates((prev) => {
-                        if (prev.github === "complete" && prev.docs === "complete") {
+                        if (prev.github === "complete" && prev.docs === "failed") {
                             return prev;
                         }
-                        return { github: "complete", docs: "complete" };
+                        return { github: "complete", docs: "failed" };
                     });
                 }
             } else if (status.status === "in_progress") {
@@ -415,7 +417,7 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
 
     // Only start polling when we're in the polling phase
     useEffect(() => {
-        if (isComplete || publishingPhase !== "polling") {
+        if (isComplete || workflowFailed || publishingPhase !== "polling") {
             return;
         }
 
@@ -434,7 +436,7 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
             console.log("[LoaderScreen] Cleaning up polling interval");
             clearInterval(intervalId);
         };
-    }, [isComplete, publishingPhase, pollWorkflowStatus]);
+    }, [isComplete, workflowFailed, publishingPhase, pollWorkflowStatus]);
 
     const dashboardLink = useMemo(() => {
         if (docsUrl) {
@@ -445,10 +447,60 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
         return undefined;
     }, [docsUrl, orgName]);
 
+    const githubActionsUrl = useMemo(() => {
+        if (githubRepoUrl) {
+            return `${githubRepoUrl}/actions`;
+        }
+        return undefined;
+    }, [githubRepoUrl]);
+
+    const handleRetryWorkflow = useCallback(async () => {
+        const repoData = getGithubRepoData();
+        if (!repoData || !orgName) {
+            return;
+        }
+
+        setIsRetrying(true);
+        setWorkflowFailed(false);
+        setStepStates({ github: "complete", docs: "in-progress" });
+        setDocsStepLabel("Retrying...");
+
+        try {
+            const response = await fetch("/api/onboarding-docs/retry-workflow", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    owner: repoData.owner,
+                    repoName: repoData.repoName,
+                    orgName
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to retry workflow");
+            }
+
+            setDocsStepLabel("Publishing site");
+            setPublishingPhase("polling");
+        } catch (err) {
+            console.error("[LoaderScreen] Retry error:", err);
+            setWorkflowFailed(true);
+            setStepStates({ github: "complete", docs: "failed" });
+            setError(err instanceof Error ? err.message : "Failed to retry workflow");
+        } finally {
+            setIsRetrying(false);
+        }
+    }, [orgName]);
+
     return (
         <div className="flex w-full flex-col gap-8">
             <h1 className="text-xl font-semibold text-left">
-                {isComplete ? "Your site is published!" : "Your site is publishing!"}
+                {isComplete
+                    ? "Your site is published!"
+                    : workflowFailed
+                      ? "Publishing failed"
+                      : "Your site is publishing!"}
             </h1>
 
             <div className="w-full max-w-3xl space-y-5">
@@ -461,9 +513,11 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                     const currentLineColor =
                         state === "complete"
                             ? "bg-green-500"
-                            : state === "in-progress"
-                              ? "bg-primary"
-                              : "bg-gray-200 dark:bg-gray-800";
+                            : state === "failed"
+                              ? "bg-red-500"
+                              : state === "in-progress"
+                                ? "bg-primary"
+                                : "bg-gray-200 dark:bg-gray-800";
 
                     const topLineColor = previousState === "complete" ? "bg-green-500" : "bg-gray-200 dark:bg-gray-800";
 
@@ -504,12 +558,53 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                 })}
             </div>
 
-            {isComplete && dashboardLink && (
+            {(isComplete || workflowFailed) && dashboardLink && (
                 <Button asChild>
                     <Link href={dashboardLink} prefetch>
                         Go to dashboard
                     </Link>
                 </Button>
+            )}
+
+            {workflowFailed && (
+                <div className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30 w-full max-w-3xl rounded-lg border p-4">
+                    <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 space-y-3">
+                            <div className="space-y-1">
+                                <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                                    Docs publishing failed
+                                </p>
+                                <p className="text-sm text-red-700 dark:text-red-300">
+                                    The GitHub Action failed to publish your docs. This may be due to a temporary issue
+                                    with the FERN_TOKEN.
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                                {githubActionsUrl && (
+                                    <Button variant="outline" size="sm" asChild>
+                                        <a href={githubActionsUrl} target="_blank" rel="noopener noreferrer">
+                                            View GitHub Action
+                                        </a>
+                                    </Button>
+                                )}
+                                <Button size="sm" onClick={handleRetryWorkflow} disabled={isRetrying}>
+                                    {isRetrying ? (
+                                        <>
+                                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                            Retrying...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <RefreshCw className="h-4 w-4 mr-2" />
+                                            Reset token and retry
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {orgName && repoName && (

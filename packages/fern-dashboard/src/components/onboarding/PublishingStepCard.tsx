@@ -6,7 +6,7 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { cn } from "@/utils/utils";
 import { Button } from "../ui/button";
 
-export type PublishingStepState = "not-started" | "in-progress" | "complete";
+export type PublishingStepState = "not-started" | "in-progress" | "complete" | "failed";
 
 interface PublishingStepCardProps {
     title: string;
@@ -78,7 +78,8 @@ export function PublishingStepCard({
         "flex size-8 items-center justify-center rounded-lg text-gray-500 transition-colors",
         state === "complete" && "bg-green-300 text-primary dark:bg-green-950",
         state === "in-progress" && "bg-primary/10 text-primary",
-        state === "not-started" && "bg-gray-100 dark:bg-gray-950"
+        state === "not-started" && "bg-gray-100 dark:bg-gray-950",
+        state === "failed" && "bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400"
     );
 
     const handleActionClick = () => {
@@ -99,7 +100,8 @@ export function PublishingStepCard({
         <div
             className={cn(
                 "border-border flex items-center justify-between rounded-xl gap-8 border p-5 min-w-[400px]",
-                state === "in-progress" && "border-primary/40"
+                state === "in-progress" && "border-primary/40",
+                state === "failed" && "border-red-400 dark:border-red-600"
             )}
         >
             <div className="flex flex-col gap-2">
