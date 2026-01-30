@@ -41,6 +41,7 @@ const NEXT_IMAGE_HOSTS = [
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
+    crossOrigin: "anonymous",
     basePath: nextBasePath,
     trailingSlash: isTrailingSlashEnabled,
     ignoreWarnings: [
