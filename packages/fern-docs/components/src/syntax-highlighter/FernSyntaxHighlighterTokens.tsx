@@ -9,7 +9,7 @@ import { cn } from "../cn";
 import { FernScrollArea } from "../FernScrollArea";
 import type { HighlightedTokens } from "./fernShiki";
 import { HastToJSX } from "./HastToJsx";
-import { flattenHighlightLines, getMaxHeight, type HighlightLine } from "./utils";
+import { flattenHighlightLines, getMaxHeight, getTextContent, type HighlightLine } from "./utils";
 
 export interface ScrollToHandle {
     scrollTo: (options: ScrollToOptions) => void;
@@ -38,6 +38,11 @@ export interface FernSyntaxHighlighterTokensProps {
      * @default true
      */
     showLineNumbers?: boolean;
+    /**
+     * Whether to hide all line prefixes (numbers AND $/>)
+     * @default false
+     */
+    hideLinePrefixes?: boolean;
 }
 
 export function fernSyntaxHighlighterTokenPropsAreEqual(
@@ -53,7 +58,8 @@ export function fernSyntaxHighlighterTokenPropsAreEqual(
         prevProps.maxLines === nextProps.maxLines &&
         prevProps.tokens === nextProps.tokens &&
         prevProps.wordWrap === nextProps.wordWrap &&
-        prevProps.showLineNumbers === nextProps.showLineNumbers
+        prevProps.showLineNumbers === nextProps.showLineNumbers &&
+        prevProps.hideLinePrefixes === nextProps.hideLinePrefixes
     );
 }
 
@@ -72,7 +78,8 @@ export const FernSyntaxHighlighterTokens = memo(
             template,
             links,
             id,
-            showLineNumbers = true
+            showLineNumbers = true,
+            hideLinePrefixes = false
         } = props;
         const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -147,7 +154,7 @@ export const FernSyntaxHighlighterTokens = memo(
         const lang = tokens.lang;
         const gutterCli = lang === "cli" || lang === "shell" || lang === "bash";
         const plaintext = tokens.lang === "plaintext" || tokens.lang === "text" || tokens.lang === "txt";
-        const shouldShowGutter = !plaintext && showLineNumbers;
+        const shouldShowGutter = !plaintext && showLineNumbers && !hideLinePrefixes;
 
         return (
             <pre
@@ -179,25 +186,37 @@ export const FernSyntaxHighlighterTokens = memo(
                                     </colgroup>
                                 )}
                                 <tbody>
-                                    {lines.map((line, lineNumber) => (
-                                        <tr
-                                            className={cn("code-block-line", {
-                                                highlight: highlightedLines.includes(lineNumber)
-                                            })}
-                                            key={lineNumber}
-                                        >
-                                            {shouldShowGutter && (
-                                                <td className="code-block-line-gutter">
-                                                    <span>
-                                                        {gutterCli ? (lineNumber === 0 ? "$" : ">") : lineNumber + 1}
-                                                    </span>
+                                    {lines.map((line, lineNumber) => {
+                                        let gutterSymbol: string | number;
+                                        if (gutterCli) {
+                                            if (lineNumber === 0) {
+                                                gutterSymbol = "$";
+                                            } else {
+                                                const prevLine = lines[lineNumber - 1];
+                                                const prevLineText = prevLine != null ? getTextContent(prevLine) : "";
+                                                gutterSymbol = prevLineText.trimEnd().endsWith("\\") ? ">" : "$";
+                                            }
+                                        } else {
+                                            gutterSymbol = lineNumber + 1;
+                                        }
+                                        return (
+                                            <tr
+                                                className={cn("code-block-line", {
+                                                    highlight: highlightedLines.includes(lineNumber)
+                                                })}
+                                                key={lineNumber}
+                                            >
+                                                {shouldShowGutter && (
+                                                    <td className="code-block-line-gutter">
+                                                        <span>{gutterSymbol}</span>
+                                                    </td>
+                                                )}
+                                                <td className="code-block-line-content">
+                                                    <HastToJSX hast={line} template={template} links={links} />
                                                 </td>
-                                            )}
-                                            <td className="code-block-line-content">
-                                                <HastToJSX hast={line} template={template} links={links} />
-                                            </td>
-                                        </tr>
-                                    ))}
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

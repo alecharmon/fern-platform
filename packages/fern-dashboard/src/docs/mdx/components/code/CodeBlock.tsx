@@ -47,6 +47,11 @@ export function CodeBlock(props: {
      * @default true
      */
     showLineNumbers?: boolean;
+    /**
+     * Whether to hide all line prefixes (numbers AND $/>)
+     * @default false
+     */
+    hideLinePrefixes?: boolean;
 }) {
     const {
         className,
@@ -119,6 +124,7 @@ export function toSyntaxHighlighterProps(
         wordWrap: props.wordWrap,
         template: props.template,
         tooltips: props.tooltips,
-        showLineNumbers: props.showLineNumbers
+        showLineNumbers: props.showLineNumbers,
+        hideLinePrefixes: props.hideLinePrefixes
     };
 }

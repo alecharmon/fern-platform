@@ -12,7 +12,7 @@ import {
     type ScrollToHandle
 } from "./FernSyntaxHighlighterTokens";
 import { HastToJSX } from "./HastToJsx";
-import { flattenHighlightLines, getLineHeight, getMaxHeight } from "./utils";
+import { flattenHighlightLines, getLineHeight, getMaxHeight, getTextContent } from "./utils";
 
 interface CodeBlockContext {
     fontSize: "sm" | "base" | "lg";
@@ -21,6 +21,7 @@ interface CodeBlockContext {
     lang: string;
     wordWrap?: boolean;
     showLineNumbers: boolean;
+    hideLinePrefixes: boolean;
 }
 
 const CodeBlockTable = forwardRef<HTMLTableElement, FernScrollArea.Props & { context?: CodeBlockContext }>(
@@ -31,7 +32,8 @@ const CodeBlockTable = forwardRef<HTMLTableElement, FernScrollArea.Props & { con
         const lang = context?.lang ?? "plaintext";
         const plaintext = lang === "plaintext" || lang === "text" || lang === "txt";
         const showLineNumbers = context?.showLineNumbers ?? true;
-        const shouldShowGutter = !plaintext && showLineNumbers;
+        const hideLinePrefixes = context?.hideLinePrefixes ?? false;
+        const shouldShowGutter = !plaintext && showLineNumbers && !hideLinePrefixes;
 
         return (
             <div
@@ -94,7 +96,8 @@ export const FernSyntaxHighlighterTokensVirtualized = memo(
             wordWrap,
             template,
             links,
-            showLineNumbers = true
+            showLineNumbers = true,
+            hideLinePrefixes = false
         } = props;
 
         const virtuosoRef = useRef<TableVirtuosoHandle>(null);
@@ -167,30 +170,45 @@ export const FernSyntaxHighlighterTokensVirtualized = memo(
                 highlightStyle,
                 highlightedLines: flattenHighlightLines(highlightLines ?? []),
                 wordWrap,
-                showLineNumbers
+                showLineNumbers,
+                hideLinePrefixes
             }),
-            [fontSize, highlightLines, highlightStyle, tokens.lang, wordWrap, showLineNumbers]
+            [fontSize, highlightLines, highlightStyle, tokens.lang, wordWrap, showLineNumbers, hideLinePrefixes]
         );
 
         const lang = tokens.lang;
         const gutterCli = lang === "cli" || lang === "shell" || lang === "bash";
         const plaintext = tokens.lang === "plaintext" || tokens.lang === "text" || tokens.lang === "txt";
-        const shouldShowGutter = !plaintext && showLineNumbers;
+        const shouldShowGutter = !plaintext && showLineNumbers && !hideLinePrefixes;
 
         const itemContent = useCallback(
-            (lineNumber: number, line: Element) => (
-                <>
-                    {shouldShowGutter && (
-                        <td className="code-block-line-gutter">
-                            <span>{gutterCli ? (lineNumber === 0 ? "$" : ">") : lineNumber + 1}</span>
+            (lineNumber: number, line: Element) => {
+                let gutterSymbol: string | number;
+                if (gutterCli) {
+                    if (lineNumber === 0) {
+                        gutterSymbol = "$";
+                    } else {
+                        const prevLine = lines[lineNumber - 1];
+                        const prevLineText = prevLine != null ? getTextContent(prevLine) : "";
+                        gutterSymbol = prevLineText.trimEnd().endsWith("\\") ? ">" : "$";
+                    }
+                } else {
+                    gutterSymbol = lineNumber + 1;
+                }
+                return (
+                    <>
+                        {shouldShowGutter && (
+                            <td className="code-block-line-gutter">
+                                <span>{gutterSymbol}</span>
+                            </td>
+                        )}
+                        <td className="code-block-line-content">
+                            <HastToJSX hast={line} template={template} links={links} />
                         </td>
-                    )}
-                    <td className="code-block-line-content">
-                        <HastToJSX hast={line} template={template} links={links} />
-                    </td>
-                </>
-            ),
-            [gutterCli, shouldShowGutter, template, links]
+                    </>
+                );
+            },
+            [gutterCli, shouldShowGutter, template, links, lines]
         );
 
         return (

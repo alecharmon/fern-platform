@@ -75,7 +75,7 @@ console.log(greeting);`;
             expect(gutterElements.length).toBe(0);
         });
 
-        it("should show $ and > for bash/cli when showLineNumbers is true", () => {
+        it("should show $ for each new command in bash/cli when showLineNumbers is true", () => {
             const bashCode = `echo "Hello"
 echo "World"`;
             const tokens = createRawTokens(bashCode, "bash");
@@ -84,7 +84,21 @@ echo "World"`;
             const gutterElements = document.querySelectorAll(".code-block-line-gutter");
             expect(gutterElements.length).toBe(2);
             expect(gutterElements[0]?.textContent).toBe("$");
+            expect(gutterElements[1]?.textContent).toBe("$");
+        });
+
+        it("should show > for continuation lines when previous line ends with backslash", () => {
+            const bashCode = `docker run \\
+  --name container \\
+  image:latest`;
+            const tokens = createRawTokens(bashCode, "bash");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} showLineNumbers={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(3);
+            expect(gutterElements[0]?.textContent).toBe("$");
             expect(gutterElements[1]?.textContent).toBe(">");
+            expect(gutterElements[2]?.textContent).toBe(">");
         });
 
         it("should hide $ and > for bash/cli when showLineNumbers is false", () => {
@@ -103,6 +117,53 @@ echo "World"`;
 
             const contentElements = document.querySelectorAll(".code-block-line-content");
             expect(contentElements.length).toBe(2);
+        });
+    });
+
+    describe("hideLinePrefixes prop", () => {
+        const sampleCode = `const greeting = "Hello";
+console.log(greeting);`;
+
+        it("should show line prefixes by default (hideLinePrefixes=false)", () => {
+            const tokens = createRawTokens(sampleCode, "typescript");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBeGreaterThan(0);
+        });
+
+        it("should hide all line prefixes when hideLinePrefixes is true", () => {
+            const tokens = createRawTokens(sampleCode, "typescript");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} hideLinePrefixes={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(0);
+        });
+
+        it("should hide $ and > for bash/cli when hideLinePrefixes is true", () => {
+            const bashCode = `echo "Hello"
+echo "World"`;
+            const tokens = createRawTokens(bashCode, "bash");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} hideLinePrefixes={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(0);
+        });
+
+        it("should still render code content when hideLinePrefixes is true", () => {
+            const tokens = createRawTokens(sampleCode, "typescript");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} hideLinePrefixes={true} />);
+
+            const contentElements = document.querySelectorAll(".code-block-line-content");
+            expect(contentElements.length).toBe(2);
+        });
+
+        it("should not show colgroup when hideLinePrefixes is true", () => {
+            const tokens = createRawTokens(sampleCode, "typescript");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} hideLinePrefixes={true} />);
+
+            const colgroupElements = document.querySelectorAll("colgroup");
+            expect(colgroupElements.length).toBe(0);
         });
     });
 });

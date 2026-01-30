@@ -1,5 +1,20 @@
+import type { Element, ElementContent } from "hast";
+
 // [number, number] is a range of lines to highlight
 export type HighlightLine = number | [number, number];
+
+/**
+ * Extracts the text content from a HAST element recursively.
+ */
+export function getTextContent(node: Element | ElementContent): string {
+    if (node.type === "text") {
+        return node.value;
+    }
+    if (node.type === "element" && node.children) {
+        return node.children.map(getTextContent).join("");
+    }
+    return "";
+}
 
 export function getLineHeight(fontSize: "sm" | "base" | "lg"): number {
     return 1.625 * (fontSize === "sm" ? 12 : fontSize === "base" ? 14 : 16);

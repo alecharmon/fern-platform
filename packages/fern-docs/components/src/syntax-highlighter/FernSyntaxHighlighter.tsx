@@ -32,6 +32,11 @@ export interface FernSyntaxHighlighterProps {
      * @default true
      */
     showLineNumbers?: boolean;
+    /**
+     * Whether to hide all line prefixes (numbers AND $/>)
+     * @default false
+     */
+    hideLinePrefixes?: boolean;
 }
 
 export const FernSyntaxHighlighter = forwardRef<HTMLPreElement, FernSyntaxHighlighterProps>((props, ref) => {
