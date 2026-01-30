@@ -3,6 +3,7 @@ import "server-only";
 import { notFound, redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { redirectToLogin } from "@/app/services/auth0/redirectToLogin";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { docsPermissionScope } from "@/components/auth/authz";
@@ -22,12 +23,12 @@ export default async function DocsLayout({
     header: React.JSX.Element;
     params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }>;
 }>) {
+    const { orgName, docsUrl: encodedDocsUrl } = await params;
     const session = await getCurrentSession();
     if (session == null) {
-        console.debug(`[DocsLayout] No session found, redirecting to home`);
-        redirect("/");
+        console.debug(`[DocsLayout] No session found, redirecting to login`);
+        return await redirectToLogin();
     }
-    const { orgName, docsUrl: encodedDocsUrl } = await params;
     const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
     console.debug(`[DocsLayout] Validating access for org: ${orgName}, docsUrl: ${docsUrl}`);
 

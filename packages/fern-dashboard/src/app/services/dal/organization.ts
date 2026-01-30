@@ -1,10 +1,11 @@
 import jwt from "jsonwebtoken";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import * as auth0Management from "@/app/services/auth0/management";
 import { throwDigestibleError } from "@/utils/errors";
 import { getCurrentSession } from "../auth0/getCurrentSession";
+import { redirectToLogin } from "../auth0/redirectToLogin";
 import type { Auth0OrgName } from "../auth0/types";
 import { getVenusClient } from "../venus/getVenusClient";
 
@@ -49,7 +50,7 @@ export const assertUserHasOrganizationAccess = cache(async (token: string, orgNa
 export const getAuthenticatedSessionOrRedirect = cache(async (orgName: Auth0OrgName) => {
     const session = await getCurrentSession();
     if (session == null) {
-        redirect("/");
+        return await redirectToLogin();
     }
 
     try {

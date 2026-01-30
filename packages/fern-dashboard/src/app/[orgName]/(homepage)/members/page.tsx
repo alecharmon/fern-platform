@@ -1,7 +1,6 @@
-import { redirect } from "next/navigation";
-
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
+import { redirectToLogin } from "@/app/services/auth0/redirectToLogin";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { MembersPage } from "@/components/members/MembersPage";
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
@@ -11,7 +10,7 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
     const { orgName } = await params;
     const session = await getCurrentSession();
     if (session == null) {
-        redirect("/");
+        return await redirectToLogin();
     }
     const isFernAdmin = isFernEmployee(session.permissions ?? []);
 

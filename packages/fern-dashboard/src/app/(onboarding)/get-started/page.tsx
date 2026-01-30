@@ -1,14 +1,15 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+
 import { SlideLeftTransition } from "@/components/transitions/SlideLeftTransition";
 import { SlideUpTransition } from "@/components/transitions/SlideUpTransition";
 import { getCurrentSession } from "../../services/auth0/getCurrentSession";
+import { redirectToLogin } from "../../services/auth0/redirectToLogin";
 import { ProductCard } from "./ProductCard";
 
 export default async function GetStartedCardSlot() {
     const session = await getCurrentSession();
     if (session == null) {
-        redirect("/");
+        return await redirectToLogin();
     }
 
     return (

@@ -5,13 +5,14 @@ import { applyOrgMappings } from "@/orgMappings";
 
 import { type Auth0SessionData, getCurrentSession } from "../services/auth0/getCurrentSession";
 import { getMyOrganizations } from "../services/auth0/management";
+import { redirectToLogin } from "../services/auth0/redirectToLogin";
 import { Auth0OrgName } from "../services/auth0/types";
 
 export default async function Page() {
     const session = await getCurrentSession();
 
     if (session == null) {
-        redirect("/login?redirect_on_login=/members");
+        return await redirectToLogin();
     }
 
     await applyOrgMappings();

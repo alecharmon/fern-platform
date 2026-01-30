@@ -1,8 +1,8 @@
 import "server-only";
 
-import { redirect } from "next/navigation";
 import { BackArrow } from "@/app/(onboarding)/get-started/BackArrow";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { redirectToLogin } from "@/app/services/auth0/redirectToLogin";
 import { SlideLeftTransition } from "@/components/transitions/SlideLeftTransition";
 import { sanitizePrefillOrgName } from "@/utils/organization";
 import { CreateOrganizationStepClient } from "./CreateOrganizationStepClient";
@@ -37,7 +37,7 @@ interface CreateOrgPageProps {
 export default async function CreateOrganizationStepPage({ searchParams }: CreateOrgPageProps) {
     const session = await getCurrentSession();
     if (session == null || session.accessToken == null) {
-        redirect("/");
+        return await redirectToLogin();
     }
 
     const resolvedSearchParams = await searchParams;

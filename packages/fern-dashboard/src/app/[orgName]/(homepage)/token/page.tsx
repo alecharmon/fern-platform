@@ -1,12 +1,11 @@
-import { redirect } from "next/navigation";
-
-import { getCurrentSessionOrThrow } from "../../../services/auth0/getCurrentSession";
+import { getCurrentSession } from "../../../services/auth0/getCurrentSession";
+import { redirectToLogin } from "../../../services/auth0/redirectToLogin";
 
 export default async function TokenPage() {
-    const session = await getCurrentSessionOrThrow();
+    const session = await getCurrentSession();
 
     if (session == null) {
-        redirect("/");
+        return await redirectToLogin();
     }
 
     return (
