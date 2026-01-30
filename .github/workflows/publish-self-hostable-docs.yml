@@ -155,3 +155,10 @@ jobs:
           echo "Successfully published multi-platform images:"
           echo "  - fernapi/fern-self-hosted:$VERSION"
           echo "  - fernenterprise/fern-self-hosted:$VERSION"
+
+  deploy-eks-smoke-test:
+    needs: [determine-version, create-manifest]
+    uses: ./.github/workflows/deploy-eks-smoke-test.yml
+    with:
+      version: ${{ needs.determine-version.outputs.version }}
+    secrets: inherit

@@ -1,0 +1,203 @@
+name: Deploy EKS Smoke Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Docker image version to deploy (e.g., 1.0.0). If not provided, uses 'latest' tag."
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: "Docker image version to deploy"
+        required: true
+        type: string
+
+env:
+  EKS_CLUSTER_NAME: ${{ vars.EKS_SMOKE_TEST_CLUSTER_NAME || 'self-hosted' }}
+  AWS_REGION: ${{ vars.EKS_SMOKE_TEST_AWS_REGION || 'us-east-1' }}
+  NAMESPACE: ${{ vars.EKS_SMOKE_TEST_NAMESPACE || 'fern-smoke-test' }}
+  DEPLOYMENT_NAME: fern-docs-smoke-test
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine image version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.EKS_SMOKE_TEST_AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ env.EKS_CLUSTER_NAME }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: fernapi
+          password: ${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}
+
+      - name: Build and push smoke test image
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BASE_IMAGE="fernapi/fern-self-hosted:${VERSION}"
+          SMOKE_TEST_IMAGE="fernapi/fern-smoke-test:${VERSION}"
+          
+          echo "Building smoke test image from base: $BASE_IMAGE"
+          
+          docker build \
+            --build-arg BASE_IMAGE=$BASE_IMAGE \
+            -f servers/self-hosted/kubernetes-example/dockerfiles/Dockerfile.full-gen \
+            -t $SMOKE_TEST_IMAGE \
+            smoke-test/
+          
+          echo "Pushing smoke test image: $SMOKE_TEST_IMAGE"
+          docker push $SMOKE_TEST_IMAGE
+          
+          echo "smoke_test_image=$SMOKE_TEST_IMAGE" >> $GITHUB_OUTPUT
+        id: build
+
+      - name: Deploy to EKS
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SMOKE_TEST_IMAGE="fernapi/fern-smoke-test:${VERSION}"
+          
+          # Replace IMAGE_PLACEHOLDER with actual image in deployment manifest
+          sed "s|IMAGE_PLACEHOLDER|${SMOKE_TEST_IMAGE}|g" \
+            servers/self-hosted/kubernetes-example/smoke-test/deployment.yaml | \
+            kubectl apply -n ${{ env.NAMESPACE }} -f -
+          
+          # Apply service manifest
+          kubectl apply -n ${{ env.NAMESPACE }} \
+            -f servers/self-hosted/kubernetes-example/smoke-test/service.yaml
+
+      - name: Wait for deployment to be ready
+        run: |
+          echo "Waiting for deployment to roll out..."
+          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ env.NAMESPACE }} \
+            --timeout=300s
+
+      - name: Get NodePort and node IPs
+        id: nodeport
+        run: |
+          NODE_PORT=$(kubectl get service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} \
+            -o jsonpath='{.spec.ports[0].nodePort}')
+          echo "NodePort: $NODE_PORT"
+          echo "node_port=$NODE_PORT" >> $GITHUB_OUTPUT
+          
+          echo "Getting node external IPs..."
+          NODE_IPS=$(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}')
+          if [ -z "$NODE_IPS" ]; then
+            echo "No external IPs found, trying internal IPs..."
+            NODE_IPS=$(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}')
+          fi
+          echo "Node IPs: $NODE_IPS"
+          FIRST_NODE_IP=$(echo $NODE_IPS | awk '{print $1}')
+          echo "node_ip=$FIRST_NODE_IP" >> $GITHUB_OUTPUT
+
+      - name: Run health checks
+        run: |
+          echo "Running health checks..."
+          
+          POD_NAME=$(kubectl get pods -n ${{ env.NAMESPACE }} \
+            -l app=${{ env.DEPLOYMENT_NAME }} \
+            -o jsonpath='{.items[0].metadata.name}')
+          
+          echo "Pod name: $POD_NAME"
+          
+          echo "Testing liveness endpoint..."
+          kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
+            curl -sf http://localhost:8081/liveness || exit 1
+          echo "Liveness check passed"
+          
+          echo "Testing readiness endpoint..."
+          kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
+            curl -sf http://localhost:8081/readiness || exit 1
+          echo "Readiness check passed"
+          
+          echo "Testing FDR health endpoint..."
+          kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
+            curl -sf http://localhost:8080/health || exit 1
+          echo "FDR health check passed"
+          
+          echo "Testing docs endpoint..."
+          HTTP_CODE=$(kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
+            curl -sf -o /dev/null -w "%{http_code}" http://localhost:3000/ || echo "000")
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
+            echo "Docs endpoint check passed (HTTP $HTTP_CODE)"
+          else
+            echo "Docs endpoint check failed (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+          
+          echo "All health checks passed!"
+
+      - name: Print smoke test URL
+        run: |
+          NODE_IP="${{ steps.nodeport.outputs.node_ip }}"
+          NODE_PORT="${{ steps.nodeport.outputs.node_port }}"
+          if [ -n "$NODE_IP" ] && [ -n "$NODE_PORT" ]; then
+            echo ""
+            echo "=============================================="
+            echo "  SMOKE TEST DOCS SITE IS NOW AVAILABLE AT:"
+            echo "  http://${NODE_IP}:${NODE_PORT}"
+            echo "=============================================="
+            echo ""
+          else
+            echo "WARNING: Could not determine NodePort URL."
+            echo "Check the service status below for more details."
+          fi
+
+      - name: Get deployment info
+        if: always()
+        run: |
+          echo "=== Deployment Status ==="
+          kubectl get deployment ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} -o wide || true
+          
+          echo ""
+          echo "=== Pod Status ==="
+          kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.DEPLOYMENT_NAME }} -o wide || true
+          
+          echo ""
+          echo "=== Service Status ==="
+          kubectl get service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} -o wide || true
+          
+          echo ""
+          echo "=== Recent Pod Logs ==="
+          POD_NAME=$(kubectl get pods -n ${{ env.NAMESPACE }} \
+            -l app=${{ env.DEPLOYMENT_NAME }} \
+            -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          if [ -n "$POD_NAME" ]; then
+            kubectl logs -n ${{ env.NAMESPACE }} $POD_NAME --tail=50 || true
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::EKS smoke test deployment failed. Check the logs above for details."
