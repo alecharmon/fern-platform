@@ -75,6 +75,9 @@ const nextConfig: NextConfig = {
         "@fern-ui/react-commons"
     ],
     experimental: {
+        sri: {
+            algorithm: "sha256"
+        },
         appNavFailHandling: true,
         scrollRestoration: true,
         optimisticClientCache: true,
@@ -230,18 +233,19 @@ const nextConfig: NextConfig = {
                 key: "Content-Security-Policy",
                 value: (() => {
                     const httpScheme = isLocal ? "https: http:" : "https:";
+                    const cdnOrigin = cdnUri?.origin ?? "";
                     return [
                         "default-src 'self'",
-                        `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${httpScheme} blob:`,
-                        `style-src 'self' 'unsafe-inline' ${httpScheme}`,
-                        `img-src 'self' ${httpScheme} data: blob:`,
-                        `font-src 'self' ${httpScheme} data:`,
-                        `connect-src 'self' ${httpScheme} wss: ws: data: blob:`,
-                        `media-src 'self' ${httpScheme} data: blob:`,
-                        `object-src 'self' ${httpScheme} data: blob:`,
-                        `frame-src 'self' ${httpScheme} data: blob:`,
+                        `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${cdnOrigin} ${httpScheme} blob:`,
+                        `style-src 'self' 'unsafe-inline' ${cdnOrigin} ${httpScheme}`,
+                        `img-src 'self' ${cdnOrigin} ${httpScheme} data: blob:`,
+                        `font-src 'self' ${cdnOrigin} ${httpScheme} data:`,
+                        `connect-src 'self' ${cdnOrigin} ${httpScheme} wss: ws: data: blob:`,
+                        `media-src 'self' ${cdnOrigin} ${httpScheme} data: blob:`,
+                        `object-src 'self' ${cdnOrigin} ${httpScheme} data: blob:`,
+                        `frame-src 'self' ${cdnOrigin} ${httpScheme} data: blob:`,
                         "base-uri 'self'",
-                        `form-action 'self' ${httpScheme}`
+                        `form-action 'self' ${cdnOrigin} ${httpScheme}`
                     ].join("; ");
                 })()
             }
