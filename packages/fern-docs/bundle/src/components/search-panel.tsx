@@ -231,6 +231,8 @@ export const SearchPanel = React.memo(function SearchPanel({
                     isResizing && "transition-none" // Disable transition while resizing
                 )}
                 style={{ width: `${width}px` }}
+                // Use inert to prevent browser find (cmd+f) from searching hidden panel content
+                inert={!isOpen ? true : undefined}
             >
                 {/* Resize Handle - Hidden on mobile */}
                 <div
