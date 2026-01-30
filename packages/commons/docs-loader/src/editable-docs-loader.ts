@@ -208,7 +208,8 @@ export type ApiSpecsErrors =
     | GetFernProjectErrors
     | { type: "GENERATORS_YML_MISSING" }
     | { type: "NO_API_SPECS" }
-    | { type: "SPEC_FETCH_FAILED"; path: string };
+    | { type: "SPEC_FETCH_FAILED"; path: string }
+    | { type: "UNEXPECTED_ERROR" };
 
 interface GetApiSpecsSuccess {
     type: "ok";

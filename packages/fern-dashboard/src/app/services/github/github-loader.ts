@@ -574,183 +574,210 @@ export class GitHubLoader implements GitLoader {
         preferDefaultBranch: boolean = false,
         options: GetApiSpecsOptions = {}
     ): Promise<GetApiSpecsResult> {
-        const { fetchTypes = ["openapi"] } = options;
+        try {
+            const { fetchTypes = ["openapi"] } = options;
 
-        // Helper to check if a spec type should be fetched
-        const shouldFetch = (type: FetchableSpecType): boolean => fetchTypes.includes(type);
+            // Helper to check if a spec type should be fetched
+            const shouldFetch = (type: FetchableSpecType): boolean => fetchTypes.includes(type);
 
-        // 1. Get the fern project to find the fern folder path
-        const projectResult = await this.getFernProjectBySite(owner, repo, site);
-        if (projectResult.type === "error") {
-            return { type: "error", error: projectResult.error };
-        }
-
-        const defaultBranch = projectResult.result.defaultBranch;
-        const targetRef = preferDefaultBranch ? defaultBranch : ref;
-
-        // Get the fern folder path from docs.yml location
-        const docsYmlPath = projectResult.result.project.docsYmlPath;
-        const fernFolder = docsYmlPath.substring(0, docsYmlPath.lastIndexOf("/"));
-
-        // 2. Search for generators.yml files - check both the fern folder and apis/ subdirectories
-        const generatorsYmlPaths = await this.findGeneratorsYmlFiles(owner, repo, defaultBranch, fernFolder);
-
-        if (generatorsYmlPaths.length === 0) {
-            return {
-                type: "error",
-                error: { type: "GENERATORS_YML_MISSING" }
-            };
-        }
-
-        // 3. Parse generators.yml files and collect specs
-        const specs = new Map<string, string>();
-        const overrideFilePaths = new Set<string>();
-        let detectedSourceType: ApiSourceType = "unknown";
-        let primaryGeneratorsYmlPath = generatorsYmlPaths[0] ?? "";
-        let primaryGeneratorsYmlContent = "";
-
-        for (const generatorsYmlPath of generatorsYmlPaths) {
-            const content = await this.getFileContent(owner, repo, targetRef, generatorsYmlPath);
-            if (!content) {
-                continue;
+            // 1. Get the fern project to find the fern folder path
+            const projectResult = await this.getFernProjectBySite(owner, repo, site);
+            if (projectResult.type === "error") {
+                return { type: "error", error: projectResult.error };
             }
 
-            // Store the content of the first (primary) generators.yml
-            if (generatorsYmlPath === primaryGeneratorsYmlPath) {
-                primaryGeneratorsYmlContent = content;
+            const defaultBranch = projectResult.result.defaultBranch;
+            const targetRef = preferDefaultBranch ? defaultBranch : ref;
+
+            // Get the fern folder path from docs.yml location
+            const docsYmlPath = projectResult.result.project.docsYmlPath;
+            const fernFolder = docsYmlPath.substring(0, docsYmlPath.lastIndexOf("/"));
+
+            // 2. Search for generators.yml files - check both the fern folder and apis/ subdirectories
+            const generatorsYmlPaths = await this.findGeneratorsYmlFiles(owner, repo, defaultBranch, fernFolder);
+
+            if (generatorsYmlPaths.length === 0) {
+                return {
+                    type: "error",
+                    error: { type: "GENERATORS_YML_MISSING" }
+                };
             }
 
-            let generatorsYml: GeneratorsYmlConfig;
-            try {
-                generatorsYml = yaml.load(content) as GeneratorsYmlConfig;
-            } catch {
-                console.warn(`Failed to parse generators.yml at ${generatorsYmlPath}`);
-                continue;
-            }
+            // 3. Parse generators.yml files and collect specs
+            const specs = new Map<string, string>();
+            const overrideFilePaths = new Set<string>();
+            let detectedSourceType: ApiSourceType = "unknown";
+            let primaryGeneratorsYmlPath = generatorsYmlPaths[0] ?? "";
+            let primaryGeneratorsYmlContent = "";
 
-            // Get the directory containing generators.yml for resolving relative paths
-            const generatorsYmlDir = generatorsYmlPath.substring(0, generatorsYmlPath.lastIndexOf("/"));
+            for (const generatorsYmlPath of generatorsYmlPaths) {
+                const content = await this.getFileContent(owner, repo, targetRef, generatorsYmlPath);
+                if (!content) {
+                    continue;
+                }
 
-            // 4. Detect source type and conditionally fetch specs based on fetchTypes
-            if (generatorsYml?.api?.specs) {
-                for (const spec of generatorsYml.api.specs) {
-                    if (spec.openapi) {
-                        detectedSourceType = "openapi";
-                        if (shouldFetch("openapi")) {
-                            await this.fetchSpecWithRefs(owner, repo, targetRef, spec.openapi, generatorsYmlDir, specs);
-                            // Also fetch the overrides file if specified
-                            if (spec.overrides) {
-                                const overridesPath = this.resolvePath(generatorsYmlDir, spec.overrides);
-                                const overridesContent = await this.getFileContent(
+                // Store the content of the first (primary) generators.yml
+                if (generatorsYmlPath === primaryGeneratorsYmlPath) {
+                    primaryGeneratorsYmlContent = content;
+                }
+
+                let generatorsYml: GeneratorsYmlConfig;
+                try {
+                    generatorsYml = yaml.load(content) as GeneratorsYmlConfig;
+                } catch {
+                    console.warn(`Failed to parse generators.yml at ${generatorsYmlPath}`);
+                    continue;
+                }
+
+                // Get the directory containing generators.yml for resolving relative paths
+                const generatorsYmlDir = generatorsYmlPath.substring(0, generatorsYmlPath.lastIndexOf("/"));
+
+                // 4. Detect source type and conditionally fetch specs based on fetchTypes
+                if (generatorsYml?.api?.specs) {
+                    for (const spec of generatorsYml.api.specs) {
+                        if (spec.openapi) {
+                            detectedSourceType = "openapi";
+                            if (shouldFetch("openapi")) {
+                                await this.fetchSpecWithRefs(
                                     owner,
                                     repo,
                                     targetRef,
-                                    overridesPath
+                                    spec.openapi,
+                                    generatorsYmlDir,
+                                    specs
                                 );
-                                if (overridesContent) {
-                                    specs.set(overridesPath, overridesContent);
-                                    overrideFilePaths.add(overridesPath);
+                                // Also fetch the overrides file if specified
+                                if (spec.overrides) {
+                                    const overridesPath = this.resolvePath(generatorsYmlDir, spec.overrides);
+                                    const overridesContent = await this.getFileContent(
+                                        owner,
+                                        repo,
+                                        targetRef,
+                                        overridesPath
+                                    );
+                                    if (overridesContent) {
+                                        specs.set(overridesPath, overridesContent);
+                                        overrideFilePaths.add(overridesPath);
+                                    }
                                 }
                             }
-                        }
-                    } else if (spec.asyncapi) {
-                        if (detectedSourceType === "unknown") {
-                            detectedSourceType = "asyncapi";
-                        }
-                        if (shouldFetch("asyncapi")) {
-                            // AsyncAPI uses the same $ref format as OpenAPI
-                            await this.fetchSpecWithRefs(
-                                owner,
-                                repo,
-                                targetRef,
-                                spec.asyncapi,
-                                generatorsYmlDir,
-                                specs
-                            );
-                            if (spec.overrides) {
-                                const overridesPath = this.resolvePath(generatorsYmlDir, spec.overrides);
-                                const overridesContent = await this.getFileContent(
+                        } else if (spec.asyncapi) {
+                            if (detectedSourceType === "unknown") {
+                                detectedSourceType = "asyncapi";
+                            }
+                            if (shouldFetch("asyncapi")) {
+                                // AsyncAPI uses the same $ref format as OpenAPI
+                                await this.fetchSpecWithRefs(
                                     owner,
                                     repo,
                                     targetRef,
-                                    overridesPath
+                                    spec.asyncapi,
+                                    generatorsYmlDir,
+                                    specs
                                 );
-                                if (overridesContent) {
-                                    specs.set(overridesPath, overridesContent);
-                                    overrideFilePaths.add(overridesPath);
+                                if (spec.overrides) {
+                                    const overridesPath = this.resolvePath(generatorsYmlDir, spec.overrides);
+                                    const overridesContent = await this.getFileContent(
+                                        owner,
+                                        repo,
+                                        targetRef,
+                                        overridesPath
+                                    );
+                                    if (overridesContent) {
+                                        specs.set(overridesPath, overridesContent);
+                                        overrideFilePaths.add(overridesPath);
+                                    }
                                 }
                             }
-                        }
-                    } else if (spec.openrpc) {
-                        if (detectedSourceType === "unknown") {
-                            detectedSourceType = "openrpc";
-                        }
-                        if (shouldFetch("openrpc")) {
-                            // OpenRPC uses JSON Schema $ref format
-                            await this.fetchSpecWithRefs(owner, repo, targetRef, spec.openrpc, generatorsYmlDir, specs);
-                            if (spec.overrides) {
-                                const overridesPath = this.resolvePath(generatorsYmlDir, spec.overrides);
-                                const overridesContent = await this.getFileContent(
+                        } else if (spec.openrpc) {
+                            if (detectedSourceType === "unknown") {
+                                detectedSourceType = "openrpc";
+                            }
+                            if (shouldFetch("openrpc")) {
+                                // OpenRPC uses JSON Schema $ref format
+                                await this.fetchSpecWithRefs(
                                     owner,
                                     repo,
                                     targetRef,
-                                    overridesPath
+                                    spec.openrpc,
+                                    generatorsYmlDir,
+                                    specs
                                 );
-                                if (overridesContent) {
-                                    specs.set(overridesPath, overridesContent);
-                                    overrideFilePaths.add(overridesPath);
+                                if (spec.overrides) {
+                                    const overridesPath = this.resolvePath(generatorsYmlDir, spec.overrides);
+                                    const overridesContent = await this.getFileContent(
+                                        owner,
+                                        repo,
+                                        targetRef,
+                                        overridesPath
+                                    );
+                                    if (overridesContent) {
+                                        specs.set(overridesPath, overridesContent);
+                                        overrideFilePaths.add(overridesPath);
+                                    }
                                 }
                             }
+                        } else if (spec.proto) {
+                            // TODO: Proto/gRPC support - detection only, file loading not supported
+                            if (detectedSourceType === "unknown") {
+                                detectedSourceType = "proto";
+                            }
                         }
-                    } else if (spec.proto) {
-                        // TODO: Proto/gRPC support - detection only, file loading not supported
-                        if (detectedSourceType === "unknown") {
-                            detectedSourceType = "proto";
-                        }
+                    }
+                }
+
+                // TODO: Fern Definition support - detection only, file loading not supported
+                if (!generatorsYml?.api?.specs && detectedSourceType === "unknown") {
+                    const definitionPath = `${generatorsYmlDir}/definition`;
+                    const definitionExists = await this.getFileContent(
+                        owner,
+                        repo,
+                        targetRef,
+                        `${definitionPath}/api.yml`
+                    );
+                    if (definitionExists) {
+                        detectedSourceType = "fern-definition";
+                    }
+                }
+
+                // 5. Fetch openapi-overrides if present (only when fetching openapi)
+                if (shouldFetch("openapi") && generatorsYml?.["openapi-overrides"]) {
+                    const overridesPath = this.resolvePath(generatorsYmlDir, generatorsYml["openapi-overrides"]);
+                    const overridesContent = await this.getFileContent(owner, repo, targetRef, overridesPath);
+                    if (overridesContent) {
+                        const relativePath = overridesPath.startsWith(fernFolder + "/")
+                            ? overridesPath.substring(fernFolder.length + 1)
+                            : overridesPath;
+                        specs.set(relativePath, overridesContent);
+                        overrideFilePaths.add(relativePath);
                     }
                 }
             }
 
-            // TODO: Fern Definition support - detection only, file loading not supported
-            if (!generatorsYml?.api?.specs && detectedSourceType === "unknown") {
-                const definitionPath = `${generatorsYmlDir}/definition`;
-                const definitionExists = await this.getFileContent(owner, repo, targetRef, `${definitionPath}/api.yml`);
-                if (definitionExists) {
-                    detectedSourceType = "fern-definition";
-                }
+            if (specs.size === 0 && detectedSourceType === "unknown") {
+                return {
+                    type: "error",
+                    error: { type: "NO_API_SPECS" }
+                };
             }
 
-            // 5. Fetch openapi-overrides if present (only when fetching openapi)
-            if (shouldFetch("openapi") && generatorsYml?.["openapi-overrides"]) {
-                const overridesPath = this.resolvePath(generatorsYmlDir, generatorsYml["openapi-overrides"]);
-                const overridesContent = await this.getFileContent(owner, repo, targetRef, overridesPath);
-                if (overridesContent) {
-                    const relativePath = overridesPath.startsWith(fernFolder + "/")
-                        ? overridesPath.substring(fernFolder.length + 1)
-                        : overridesPath;
-                    specs.set(relativePath, overridesContent);
-                    overrideFilePaths.add(relativePath);
+            return {
+                type: "ok",
+                result: {
+                    specs,
+                    sourceType: detectedSourceType,
+                    overrideFilePaths,
+                    generatorsYmlPath: primaryGeneratorsYmlPath,
+                    generatorsYmlContent: primaryGeneratorsYmlContent
                 }
-            }
-        }
-
-        if (specs.size === 0 && detectedSourceType === "unknown") {
+            };
+        } catch (error) {
+            console.error("[getApiSpecs] An unexpected error occurred:", error);
             return {
                 type: "error",
-                error: { type: "NO_API_SPECS" }
+                error: { type: "UNEXPECTED_ERROR" }
             };
         }
-
-        return {
-            type: "ok",
-            result: {
-                specs,
-                sourceType: detectedSourceType,
-                overrideFilePaths,
-                generatorsYmlPath: primaryGeneratorsYmlPath,
-                generatorsYmlContent: primaryGeneratorsYmlContent
-            }
-        };
     }
 
     /**

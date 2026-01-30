@@ -234,7 +234,12 @@ export function OpenApiSpecsProvider({
         if (!specs || sourceType !== "openapi") {
             return null;
         }
-        return createResolver(specs, overrideFilePaths);
+        try {
+            return createResolver(specs, overrideFilePaths);
+        } catch (error) {
+            console.error("Failed to create resolver:", error);
+            return null;
+        }
     }, [specs, sourceType, overrideFilePaths]);
 
     // isEditingAvailable means "we have specs to display" (not "we can edit specs")

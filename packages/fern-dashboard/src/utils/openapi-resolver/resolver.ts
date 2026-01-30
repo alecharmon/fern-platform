@@ -69,7 +69,7 @@ export class OpenApiResolver {
 
             for (const [path, pathItem] of Object.entries(spec.paths)) {
                 for (const method of HTTP_METHODS) {
-                    const operation = pathItem[method];
+                    const operation = pathItem?.[method];
                     if (!operation) {
                         continue;
                     }
