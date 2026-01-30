@@ -64,6 +64,26 @@ logger = logging.getLogger(__name__)
 
 TOP_K = 6
 
+AUTH_REQUIRED_MESSAGE = "Sorry, I cannot help you with that question because it requires authentication. Please log in."
+
+
+def create_auth_error_stream() -> AsyncGenerator[str, None]:
+    async def generate() -> AsyncGenerator[str, None]:
+        query_id = str(uuid4())
+        message_id = str(uuid4())
+        yield f'data: {json.dumps({"type": "data-sources", "data": []})}\n\n'
+        yield f'data: {json.dumps({"type": "data-assistant-query-id", "data": query_id})}\n\n'
+        yield f'data: {json.dumps({"type": "start", "messageId": message_id})}\n\n'
+        yield 'data: {"type":"start-step"}\n\n'
+        yield 'data: {"type": "text-start", "id": "0"}\n\n'
+        yield f'data: {json.dumps({"type": "text-delta", "id": "0", "delta": AUTH_REQUIRED_MESSAGE})}\n\n'
+        yield 'data: {"type": "text-end", "id": "0"}\n\n'
+        yield 'data: {"type":"finish-step"}\n\n'
+        yield 'data: {"type":"finish"}\n\n'
+        yield "data: [DONE]\n\n"
+
+    return generate()
+
 
 @app.post("/chat")
 async def chat(
@@ -201,6 +221,34 @@ async def chat(
             f"Retrieved {len(retrieval_result.documents)} documents in {retrieval_result.retrieval_time_ms:.2f}ms"
             + (f" (query decomposition: {query_decomposition_ms:.2f}ms)" if query_decomposition_ms else "")
         )
+
+        if len(retrieval_result.documents) == 0 and not auth_state.authenticated:
+            logger.info("No documents found for unauthenticated user, checking for authenticated content")
+            auth_check_filters = QueryFilters(
+                facet_filters=[{"field": f.field, "value": f.value} for f in request.filters],
+                document_urls=request.documentUrls if request.documentUrls else None,
+                exploded_roles=exploded_roles,
+                user_is_authed=True,
+            )
+            auth_check_query = RetrievalQuery(
+                query=user_query,
+                domain=domain,
+                top_k=1,
+                strategy=RetrievalStrategy.SEMANTIC,
+                filters=auth_check_filters,
+            )
+            auth_check_result = await retriever.retrieve(auth_check_query)
+
+            if len(auth_check_result.documents) > 0:
+                logger.info("Found authenticated content, returning auth required message")
+                protocol = VercelUIMessageStreamProtocol()
+                return StreamingResponse(
+                    create_auth_error_stream(),
+                    media_type=protocol.get_media_type(),
+                    headers=protocol.get_headers(),
+                )
+            logger.info("No authenticated content found either, proceeding normally")
+
     except Exception as e:
         logger.exception(f"Retrieval failed: {e}")
         track_chat_request_error(domain, ErrorType.RETRIEVAL_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
