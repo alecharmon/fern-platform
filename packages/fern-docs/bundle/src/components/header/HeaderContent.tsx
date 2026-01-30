@@ -16,6 +16,7 @@ export function HeaderContent({
     className,
     style,
     showSearchBar,
+    showSwitcher,
     navbarLinks,
     loginButton,
     forceHeader = false,
@@ -30,6 +31,7 @@ export function HeaderContent({
     className?: string;
     style?: CSSProperties;
     showSearchBar?: boolean;
+    showSwitcher?: boolean;
     navbarLinks: React.ReactNode;
     loginButton?: React.ReactNode;
     forceHeader?: boolean;
@@ -51,6 +53,7 @@ export function HeaderContent({
             loginButton={loginButton}
             forceHeader={forceHeader}
             showSearchBar={showSearchBar}
+            showSwitcher={showSwitcher}
             headerDisabled={headerDisabled}
             searchBar={
                 <div className="flex w-full max-w-[640px] flex-row gap-2">

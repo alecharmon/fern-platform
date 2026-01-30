@@ -73,6 +73,7 @@ export * from "./RgbaColor";
 export * from "./SearchbarPlacement";
 export * from "./SegmentConfig";
 export * from "./SizeConfig";
+export * from "./SwitcherPlacement";
 export * from "./TabsPlacement";
 export * from "./ThemedFileId";
 export * from "./TwitterCardSetting";

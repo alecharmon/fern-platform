@@ -1266,6 +1266,9 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
         const searchbarPlacement = config.layout?.disableHeader
             ? "SIDEBAR"
             : (config.layout?.searchbarPlacement ?? defaultSearchbarPlacement(domainKey));
+        const switcherPlacement = config.layout?.disableHeader
+            ? "SIDEBAR"
+            : (config.layout?.switcherPlacement ?? defaultSwitcherPlacement(domainKey));
 
         return {
             logoHeight,
@@ -1275,6 +1278,7 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
             contentWidth,
             tabsPlacement,
             searchbarPlacement,
+            switcherPlacement,
             isHeaderDisabled: config.layout?.disableHeader ?? false,
             hideNavLinks: config.layout?.hideNavLinks ?? false,
             hideFeedback: config.layout?.hideFeedback ?? false
@@ -1339,6 +1343,10 @@ function defaultSearchbarPlacement(domainKey: string) {
     if (domain.includes("cohere")) {
         return "HEADER_TABS";
     }
+    return "HEADER";
+}
+
+function defaultSwitcherPlacement(_domainKey: string): "HEADER" | "SIDEBAR" {
     return "HEADER";
 }
 

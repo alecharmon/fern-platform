@@ -15,6 +15,7 @@ export function AbstractHeaderContent({
     className,
     style,
     showSearchBar,
+    showSwitcher,
     navbarLinks,
     loginButton,
     forceHeader = false,
@@ -29,6 +30,7 @@ export function AbstractHeaderContent({
     className?: string;
     style?: CSSProperties;
     showSearchBar?: boolean;
+    showSwitcher?: boolean;
     navbarLinks: React.ReactNode;
     loginButton?: React.ReactNode;
     forceHeader?: boolean;
@@ -45,8 +47,8 @@ export function AbstractHeaderContent({
                         <div className="flex items-center lg:items-start">{logo}</div>
                         <div
                             className={cn("items-baseline lg:flex", {
-                                hidden: !forceHeader,
-                                flex: forceHeader
+                                hidden: !forceHeader && !showSwitcher,
+                                flex: forceHeader || showSwitcher
                             })}
                         >
                             {productSelect}

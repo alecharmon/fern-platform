@@ -11,6 +11,7 @@ export function SidebarFixedItemsSection({
     productSelect,
     className,
     showSearchBar,
+    showSwitcher,
     showHeaderInSidebar,
     searchBar
 }: {
@@ -19,6 +20,7 @@ export function SidebarFixedItemsSection({
     productSelect: React.ReactNode;
     showBorder?: boolean;
     showSearchBar?: boolean;
+    showSwitcher?: boolean;
     searchBar?: React.ReactNode;
     showHeaderInSidebar?: boolean;
     className?: string;
@@ -27,18 +29,20 @@ export function SidebarFixedItemsSection({
     if (isMobile) {
         return null;
     }
-    if (!showHeaderInSidebar && !showSearchBar) {
+    if (!showHeaderInSidebar && !showSearchBar && !showSwitcher) {
         return null;
     }
     return (
         <div className={cn("flex flex-col px-4 pt-2 lg:pl-5", className)}>
             {showHeaderInSidebar && (
-                <>
-                    <div className="fern-sidebar-header">
-                        <div className="relative flex h-full min-w-fit flex-1 shrink-0 items-center gap-2 py-1">
-                            <div className="flex items-center gap-2">{logo}</div>
-                        </div>
+                <div className="fern-sidebar-header">
+                    <div className="relative flex h-full min-w-fit flex-1 shrink-0 items-center gap-2 py-1">
+                        <div className="flex items-center gap-2">{logo}</div>
                     </div>
+                </div>
+            )}
+            {(showHeaderInSidebar || showSwitcher) && (
+                <>
                     <Fragment key="product-select">{productSelect}</Fragment>
                     <Fragment key="version-select">{versionSelect}</Fragment>
                 </>

@@ -203,6 +203,7 @@ types:
       headerHeight: optional<SizeConfig>
       searchbarPlacement: optional<SearchbarPlacement>
       tabsPlacement: optional<TabsPlacement>
+      switcherPlacement: optional<SwitcherPlacement>
       contentAlignment: optional<ContentAlignment>
       headerPosition: optional<HeaderPosition>
       disableHeader: optional<boolean>
@@ -294,6 +295,11 @@ types:
       - SIDEBAR
 
   TabsPlacement:
+    enum:
+      - HEADER
+      - SIDEBAR
+
+  SwitcherPlacement:
     enum:
       - HEADER
       - SIDEBAR

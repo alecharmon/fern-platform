@@ -172,6 +172,9 @@ export default async function VisualEditorPreviewLayout({
                                                                     showSearchBar={
                                                                         layout.searchbarPlacement === "SIDEBAR"
                                                                     }
+                                                                    showSwitcher={
+                                                                        layout.switcherPlacement === "SIDEBAR"
+                                                                    }
                                                                     showHeaderInSidebar={showHeaderInSidebar}
                                                                     productSelect={
                                                                         <Suspense

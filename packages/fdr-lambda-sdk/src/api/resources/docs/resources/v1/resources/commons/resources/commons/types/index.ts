@@ -64,6 +64,7 @@ export * from "./RgbaColor.js";
 export * from "./SearchbarPlacement.js";
 export * from "./SegmentConfig.js";
 export * from "./SizeConfig.js";
+export * from "./SwitcherPlacement.js";
 export * from "./TabsPlacement.js";
 export * from "./TwitterCardSetting.js";
 export * from "./WithPermissions.js";

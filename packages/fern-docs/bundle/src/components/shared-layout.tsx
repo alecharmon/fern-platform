@@ -93,6 +93,7 @@ export default async function SharedLayout({
                         </React.Suspense>
                     }
                     showSearchBar={layout.searchbarPlacement === "HEADER"}
+                    showSwitcher={layout.switcherPlacement === "HEADER"}
                     navbarLinks={<NavbarLinks loader={loader} />}
                     loginButton={
                         <React.Suspense fallback={null}>
@@ -122,6 +123,7 @@ export default async function SharedLayout({
                 <SidebarContainer
                     logo={<React.Suspense fallback={null}>{logo}</React.Suspense>}
                     showSearchBar={layout.searchbarPlacement === "SIDEBAR"}
+                    showSwitcher={layout.switcherPlacement === "SIDEBAR"}
                     showHeaderInSidebar={showHeaderInSidebar}
                     productSelect={
                         <React.Suspense fallback={null} key="product-select-3">

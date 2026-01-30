@@ -9,6 +9,7 @@ export interface DocsLayoutConfig {
     headerHeight: FdrLambda.docs.v1.commons.SizeConfig | undefined;
     searchbarPlacement: FdrLambda.docs.v1.commons.SearchbarPlacement | undefined;
     tabsPlacement: FdrLambda.docs.v1.commons.TabsPlacement | undefined;
+    switcherPlacement: FdrLambda.docs.v1.commons.SwitcherPlacement | undefined;
     contentAlignment: FdrLambda.docs.v1.commons.ContentAlignment | undefined;
     headerPosition: FdrLambda.docs.v1.commons.HeaderPosition | undefined;
     disableHeader: boolean | undefined;

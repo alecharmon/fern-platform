@@ -9,6 +9,7 @@ export interface DocsLayoutConfig {
     headerHeight: FernRegistry.docs.v1.commons.SizeConfig | undefined;
     searchbarPlacement: FernRegistry.docs.v1.commons.SearchbarPlacement | undefined;
     tabsPlacement: FernRegistry.docs.v1.commons.TabsPlacement | undefined;
+    switcherPlacement: FernRegistry.docs.v1.commons.SwitcherPlacement | undefined;
     contentAlignment: FernRegistry.docs.v1.commons.ContentAlignment | undefined;
     headerPosition: FernRegistry.docs.v1.commons.HeaderPosition | undefined;
     disableHeader: boolean | undefined;
