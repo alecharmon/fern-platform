@@ -1,0 +1,106 @@
+---
+title: Error Codes
+subtitle: A comprehensive list of error codes returned by the Plant Store API
+slug: error-codes
+description: Reference guide for all error codes and their meanings in the Plant Store API.
+---
+
+This page lists all the error codes that can be returned by the Plant Store API. Use the search bar below to quickly find specific error codes.
+
+<Table searchable>
+
+| Code | Name | Description |
+|------|------|-------------|
+| `account_already_exists` | Account Already Exists | The email address provided is already associated with an existing account. |
+| `account_country_invalid_address` | Account Country Invalid Address | The country of the address does not match the account's country. |
+| `account_invalid` | Account Invalid | The account ID provided is not valid or does not exist. |
+| `account_number_invalid` | Account Number Invalid | The bank account number provided is invalid. |
+| `api_key_expired` | API Key Expired | The API key provided has expired. Please generate a new one. |
+| `authentication_required` | Authentication Required | This endpoint requires authentication. Please provide valid credentials. |
+| `balance_insufficient` | Balance Insufficient | The account does not have sufficient balance for this operation. |
+| `bank_account_declined` | Bank Account Declined | The bank account was declined. Please use a different payment method. |
+| `bank_account_exists` | Bank Account Exists | This bank account is already linked to another account. |
+| `bank_account_unusable` | Bank Account Unusable | The bank account cannot be used for this type of transaction. |
+| `card_declined` | Card Declined | The card was declined. Please try a different card. |
+| `card_declined_rate_limit` | Card Declined Rate Limit | The card was declined due to too many attempts. Please wait before trying again. |
+| `charge_already_captured` | Charge Already Captured | The charge has already been captured. |
+| `charge_already_refunded` | Charge Already Refunded | The charge has already been fully refunded. |
+| `charge_disputed` | Charge Disputed | The charge is currently under dispute. |
+| `charge_exceeds_source_limit` | Charge Exceeds Source Limit | The charge amount exceeds the limit for this payment source. |
+| `charge_expired` | Charge Expired | The charge has expired and can no longer be captured. |
+| `country_unsupported` | Country Unsupported | This operation is not supported in the specified country. |
+| `coupon_expired` | Coupon Expired | The coupon code has expired. |
+| `customer_max_payment_methods` | Customer Max Payment Methods | The customer has reached the maximum number of payment methods. |
+| `email_invalid` | Email Invalid | The email address provided is not valid. |
+| `expired_card` | Expired Card | The card has expired. Please use a different card. |
+| `idempotency_key_in_use` | Idempotency Key In Use | The idempotency key is currently being used in another request. |
+| `incorrect_address` | Incorrect Address | The address provided does not match the card's billing address. |
+| `incorrect_cvc` | Incorrect CVC | The CVC code provided is incorrect. |
+| `incorrect_number` | Incorrect Number | The card number provided is incorrect. |
+| `incorrect_zip` | Incorrect ZIP | The ZIP code provided does not match the card's billing address. |
+| `instant_payouts_unsupported` | Instant Payouts Unsupported | Instant payouts are not supported for this account. |
+| `insufficient_funds` | Insufficient Funds | The card has insufficient funds for this transaction. |
+| `intent_invalid_state` | Intent Invalid State | The payment intent is in an invalid state for this operation. |
+| `invalid_card_type` | Invalid Card Type | The card type is not supported for this transaction. |
+| `invalid_charge_amount` | Invalid Charge Amount | The charge amount is invalid. It must be a positive integer. |
+| `invalid_cvc` | Invalid CVC | The CVC code provided is invalid. |
+| `invalid_expiry_month` | Invalid Expiry Month | The expiry month provided is invalid. |
+| `invalid_expiry_year` | Invalid Expiry Year | The expiry year provided is invalid. |
+| `invalid_number` | Invalid Number | The card number is not a valid credit card number. |
+| `invoice_finalized` | Invoice Finalized | The invoice has already been finalized and cannot be modified. |
+| `invoice_not_editable` | Invoice Not Editable | The invoice is not in an editable state. |
+| `invoice_payment_intent_requires_action` | Invoice Payment Intent Requires Action | The payment for this invoice requires additional action. |
+| `livemode_mismatch` | Livemode Mismatch | The request was made with a test key but references live mode data, or vice versa. |
+| `missing_required_param` | Missing Required Param | A required parameter is missing from the request. |
+| `not_allowed_on_standard_account` | Not Allowed On Standard Account | This operation is not allowed on standard accounts. |
+| `order_creation_failed` | Order Creation Failed | The order could not be created. Please try again. |
+| `order_required_settings` | Order Required Settings | Required settings are missing for order creation. |
+| `out_of_inventory` | Out Of Inventory | The requested item is out of inventory. |
+| `parameter_invalid_empty` | Parameter Invalid Empty | A parameter was provided but is empty. |
+| `parameter_invalid_integer` | Parameter Invalid Integer | A parameter expected an integer but received a different type. |
+| `parameter_invalid_string_blank` | Parameter Invalid String Blank | A string parameter was provided but is blank. |
+| `parameter_invalid_string_empty` | Parameter Invalid String Empty | A string parameter was provided but is empty. |
+| `parameter_missing` | Parameter Missing | A required parameter is missing. |
+| `parameter_unknown` | Parameter Unknown | An unknown parameter was provided. |
+| `payment_intent_action_required` | Payment Intent Action Required | The payment intent requires additional action before it can be confirmed. |
+| `payment_intent_authentication_failure` | Payment Intent Authentication Failure | The payment could not be authenticated. |
+| `payment_intent_incompatible_payment_method` | Payment Intent Incompatible Payment Method | The payment method is not compatible with this payment intent. |
+| `payment_intent_invalid_parameter` | Payment Intent Invalid Parameter | A parameter provided to the payment intent is invalid. |
+| `payment_intent_payment_attempt_failed` | Payment Intent Payment Attempt Failed | The payment attempt failed. Please try again. |
+| `payment_intent_unexpected_state` | Payment Intent Unexpected State | The payment intent is in an unexpected state. |
+| `payment_method_not_available` | Payment Method Not Available | The payment method is not available for this transaction. |
+| `payment_method_provider_decline` | Payment Method Provider Decline | The payment was declined by the payment provider. |
+| `payment_method_provider_timeout` | Payment Method Provider Timeout | The payment provider timed out. Please try again. |
+| `payouts_not_allowed` | Payouts Not Allowed | Payouts are not allowed for this account. |
+| `plant_not_found` | Plant Not Found | The specified plant could not be found. |
+| `plant_unavailable` | Plant Unavailable | The specified plant is currently unavailable. |
+| `postal_code_invalid` | Postal Code Invalid | The postal code provided is invalid. |
+| `processing_error` | Processing Error | An error occurred while processing the request. |
+| `product_inactive` | Product Inactive | The product is inactive and cannot be purchased. |
+| `rate_limit` | Rate Limit | Too many requests. Please slow down and try again later. |
+| `refer_to_customer` | Refer To Customer | The customer should contact their bank for more information. |
+| `refund_disputed_payment` | Refund Disputed Payment | Cannot refund a disputed payment. |
+| `resource_already_exists` | Resource Already Exists | A resource with this identifier already exists. |
+| `resource_missing` | Resource Missing | The requested resource does not exist. |
+| `routing_number_invalid` | Routing Number Invalid | The routing number provided is invalid. |
+| `secret_key_required` | Secret Key Required | This endpoint requires a secret API key. |
+| `sepa_unsupported_account` | SEPA Unsupported Account | SEPA payments are not supported for this account. |
+| `shipping_calculation_failed` | Shipping Calculation Failed | Could not calculate shipping for this order. |
+| `sku_inactive` | SKU Inactive | The SKU is inactive and cannot be ordered. |
+| `state_unsupported` | State Unsupported | This operation is not supported in the specified state. |
+| `store_closed` | Store Closed | The store is currently closed. |
+| `store_not_found` | Store Not Found | The specified store could not be found. |
+| `tax_id_invalid` | Tax ID Invalid | The tax ID provided is invalid. |
+| `taxes_calculation_failed` | Taxes Calculation Failed | Could not calculate taxes for this order. |
+| `testmode_charges_only` | Testmode Charges Only | This account can only create charges in test mode. |
+| `tls_version_unsupported` | TLS Version Unsupported | The TLS version used is not supported. Please upgrade. |
+| `token_already_used` | Token Already Used | The token has already been used. |
+| `token_in_use` | Token In Use | The token is currently being used in another request. |
+| `transfer_source_balance_parameters_mismatch` | Transfer Source Balance Parameters Mismatch | The transfer parameters do not match the source balance. |
+| `transfers_not_allowed` | Transfers Not Allowed | Transfers are not allowed for this account. |
+| `url_invalid` | URL Invalid | The URL provided is invalid. |
+| `user_not_found` | User Not Found | The specified user could not be found. |
+| `user_suspended` | User Suspended | The user account has been suspended. |
+| `webhook_url_invalid` | Webhook URL Invalid | The webhook URL provided is invalid. |
+
+</Table>

@@ -48,6 +48,9 @@ navigation:
           - page: SDKs
             path: ../../docs/pages/sdks.mdx
             slug: sdks
+          - page: Error Codes
+            path: ../../docs/pages/error-codes.mdx
+            slug: error-codes
   - tab: rest-api
     layout:
       - api: Rest API

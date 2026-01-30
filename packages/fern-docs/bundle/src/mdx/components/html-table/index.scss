@@ -74,4 +74,32 @@
       @apply bg-background h-10 p-3;
     }
   }
+
+  .fern-table-search {
+    @apply flex items-center gap-2 px-3 py-2;
+    @apply border-card-border border-b;
+    @apply bg-(color:--grayscale-a2);
+  }
+
+  .fern-table-search-icon {
+    @apply text-(color:--grayscale-a9) size-4 shrink-0;
+  }
+
+  .fern-table-search-input {
+    @apply w-full bg-transparent border-none outline-none;
+    @apply text-sm placeholder:text-(color:--grayscale-a9);
+    @apply caret-(color:--accent);
+  }
+
+  .fern-table-search-clear {
+    @apply flex items-center justify-center;
+    @apply text-(color:--grayscale-a9) hover:text-(color:--grayscale-a11);
+    @apply size-6 shrink-0;
+    @apply transition-colors;
+    @apply cursor-pointer border-none bg-transparent;
+  }
+
+  .fern-table-root.searchable {
+    @apply overflow-visible;
+  }
 }
