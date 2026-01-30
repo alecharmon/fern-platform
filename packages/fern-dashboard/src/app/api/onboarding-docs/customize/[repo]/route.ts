@@ -241,7 +241,12 @@ async function readAllFilesFromDirectory(
  * Customizes the template with basic branding (no API specs).
  * This is for the first commit - gets docs live faster.
  */
-async function customizeBasicTemplate(data: CustomizeRequest, projectDir: string): Promise<void> {
+async function customizeBasicTemplate(
+    data: CustomizeRequest,
+    projectDir: string,
+    githubOwner: string,
+    repoName: string
+): Promise<void> {
     const fernDir = path.join(projectDir, "fern");
     const assetsDir = path.join(fernDir, "assets");
 
@@ -264,7 +269,7 @@ async function customizeBasicTemplate(data: CustomizeRequest, projectDir: string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const docsConfig = parseYamlToJs<Record<string, any>>(docsYmlContent);
 
-    // Set the site URL
+    // Set the site URL and edit-this-page configuration
     if (!docsConfig.instances) {
         docsConfig.instances = [];
     }
@@ -273,6 +278,16 @@ async function customizeBasicTemplate(data: CustomizeRequest, projectDir: string
     } else {
         docsConfig.instances.push({ url: fullUrl });
     }
+
+    // Add edit-this-page configuration with GitHub launch
+    docsConfig.instances[0]["edit-this-page"] = {
+        github: {
+            owner: githubOwner,
+            repo: repoName,
+            branch: "main"
+        },
+        launch: "dashboard"
+    };
 
     // Set title
     docsConfig.title = `${data.docsSiteName} | Documentation`;
@@ -629,7 +644,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ rep
         }
 
         // Step 1: Apply basic customizations (branding, no API specs)
-        await customizeBasicTemplate(data, tempDir);
+        await customizeBasicTemplate(data, tempDir, demoCreationBotOwner, repoName);
 
         // Read all files from temp directory for first commit
         const files = await readAllFilesFromDirectory(tempDir);
