@@ -11,7 +11,8 @@ export function PreviewHeader({
     productSelect,
     navbarLinks,
     logo,
-    showSearchBar
+    showSearchBar,
+    showSwitcher
 }: {
     headertabs?: React.ReactNode;
     versionSelect?: React.ReactNode;
@@ -19,6 +20,7 @@ export function PreviewHeader({
     navbarLinks?: React.ReactNode;
     logo?: React.ReactNode;
     showSearchBar?: boolean;
+    showSwitcher?: boolean;
 }) {
     return (
         <AbstractHeaderContent
@@ -28,6 +30,7 @@ export function PreviewHeader({
             productSelect={productSelect}
             navbarLinks={navbarLinks}
             showSearchBar={showSearchBar}
+            showSwitcher={showSwitcher}
             themeSwitch={
                 <FernTooltipProvider>
                     <FernTooltip content="Theme switch is disabled in editor" side="bottom" variant="dashboard">

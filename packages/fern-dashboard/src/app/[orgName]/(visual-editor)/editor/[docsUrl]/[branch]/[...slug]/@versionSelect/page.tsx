@@ -31,7 +31,7 @@ export default async function VersionSelectPage({
         loader.getEdgeFlags(),
         loader.getRoot()
     ]);
-    const useDenseLayout = layout.isHeaderDisabled;
+    const useDenseLayout = layout.isHeaderDisabled || layout.switcherPlacement === "SIDEBAR";
 
     const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);
     const foundNode = FernNavigation.utils.findNode(root, navigationSlug);

@@ -26,7 +26,7 @@ export default async function ProductSelectPage({
 
     // preload:
     const [layout, root] = await Promise.all([loader.getLayout(), loader.getRoot()]);
-    const useDenseLayout = layout.isHeaderDisabled;
+    const useDenseLayout = layout.isHeaderDisabled || layout.switcherPlacement === "SIDEBAR";
 
     const navigationSlug = getRootAliasAwareNavigationSlug(slugjoin(slug), root);
     const foundNode = FernNavigation.utils.findNode(root, navigationSlug);

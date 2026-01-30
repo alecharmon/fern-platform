@@ -132,6 +132,9 @@ export default async function VisualEditorPreviewLayout({
                                                                     versionSelect={versionSelect}
                                                                     productSelect={productSelect}
                                                                     logo={logo}
+                                                                    showSwitcher={
+                                                                        layout.switcherPlacement !== "SIDEBAR"
+                                                                    }
                                                                     showSearchBar={
                                                                         layout.searchbarPlacement === "HEADER"
                                                                     }
