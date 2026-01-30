@@ -9,4 +9,5 @@ export interface RegisterApiDefinitionRequest {
     definitionV2?: FernRegistry.api.latest.ApiDefinition;
     sources?: Record<FernRegistry.api.v1.register.SourceId, FernRegistry.api.v1.register.Source>;
     dynamicIRs?: Record<string, FernRegistry.api.v1.register.DynamicIr>;
+    docsUrl?: string;
 }

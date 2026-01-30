@@ -36,8 +36,7 @@ service:
         - rootCommons.UnauthorizedError
         - rootCommons.UnavailableError
         - rootCommons.UserNotInOrgError
-        - rootCommons.UnauthorizedError
-        - InvalidDomainError
+        - rootCommons.InvalidDomainError
         - InvalidCustomDomainError
         - rootCommons.DomainBelongsToAnotherOrgError
         - rootCommons.InvalidURLError
@@ -61,7 +60,7 @@ service:
         - rootCommons.UnauthorizedError
         - rootCommons.UnavailableError
         - rootCommons.UserNotInOrgError
-        - InvalidDomainError
+        - rootCommons.InvalidDomainError
 
     finishDocsRegister:
       auth: true
@@ -83,7 +82,6 @@ service:
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
-        - rootCommons.UnauthorizedError
         - v1DocsWrite.DocsRegistrationIdNotFound
         - LibraryDocsJobInvalidForRegistrationError
 
@@ -260,12 +258,6 @@ types:
     properties:
       domains: list<string>
 
-  InvalidDomainErrorBody:
-    properties:
-      requiredDomainSuffix:
-        type: string
-        docs: Value the domain should end with (i.e. docs.buildwithfern.com or dev.docs.buildwithfern.com)
-
   InvliadCustomDomainErrorBody:
     properties:
       overlappingDomains: list<OverlappingCustomDomains>
@@ -383,9 +375,6 @@ types:
         docs: Navigation section node to insert into the navigation tree.
 
 errors:
-  InvalidDomainError:
-    status-code: 400
-    # type: InvalidDomainErrorBody
 
   InvalidCustomDomainError:
     status-code: 400

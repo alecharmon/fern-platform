@@ -17,7 +17,6 @@ export * from "./DocsSection.js";
 export * from "./FilePath.js";
 export * from "./FileS3UploadUrl.js";
 export * from "./Height.js";
-export * from "./InvalidDomainErrorBody.js";
 export * from "./InvliadCustomDomainErrorBody.js";
 export * from "./LinkMetadata.js";
 export * from "./MavenPackage.js";

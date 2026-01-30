@@ -108,6 +108,96 @@ export class ReadClient {
     }
 
     /**
+     * Loads the full API definition for a given API definition ID.
+     * Returns the API in the latest format.
+     *
+     * @param {FernRegistry.ApiDefinitionId} apiDefinitionId
+     * @param {ReadClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @example
+     *     await client.api.v1.read.getApiDefinitionFull(FernRegistry.ApiDefinitionId("d5e9c84f-c2b2-4bf4-b4b0-7ffd7a9ffc32"))
+     */
+    public getApiDefinitionFull(
+        apiDefinitionId: FernRegistry.ApiDefinitionId,
+        requestOptions?: ReadClient.RequestOptions,
+    ): core.HttpResponsePromise<
+        core.APIResponse<FernRegistry.api.latest.ApiDefinition, FernRegistry.api.v1.read.getApiDefinitionFull.Error>
+    > {
+        return core.HttpResponsePromise.fromPromise(this.__getApiDefinitionFull(apiDefinitionId, requestOptions));
+    }
+
+    private async __getApiDefinitionFull(
+        apiDefinitionId: FernRegistry.ApiDefinitionId,
+        requestOptions?: ReadClient.RequestOptions,
+    ): Promise<
+        core.WithRawResponse<
+            core.APIResponse<FernRegistry.api.latest.ApiDefinition, FernRegistry.api.v1.read.getApiDefinitionFull.Error>
+        >
+    > {
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.FernRegistryEnvironment.Prod,
+                `/registry/api/load-full/${core.url.encodePathParam(apiDefinitionId)}`,
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
+            timeoutMs:
+                requestOptions?.timeoutInSeconds != null
+                    ? requestOptions.timeoutInSeconds * 1000
+                    : this._options?.timeoutInSeconds != null
+                      ? this._options?.timeoutInSeconds * 1000
+                      : undefined,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: {
+                    ok: true,
+                    body: _response.body as FernRegistry.api.latest.ApiDefinition,
+                    headers: _response.headers,
+                    rawResponse: _response.rawResponse,
+                },
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch ((_response.error.body as FernRegistry.api.v1.read.getApiDefinitionFull.Error)?.error) {
+                case "UnauthorizedError":
+                case "ApiDoesNotExistError":
+                    return {
+                        data: {
+                            ok: false,
+                            error: _response.error.body as FernRegistry.api.v1.read.getApiDefinitionFull.Error,
+                            rawResponse: _response.rawResponse,
+                        },
+                        rawResponse: _response.rawResponse,
+                    };
+            }
+        }
+
+        return {
+            data: {
+                ok: false,
+                error: FernRegistry.api.v1.read.getApiDefinitionFull.Error._unknown(_response.error),
+                rawResponse: _response.rawResponse,
+            },
+            rawResponse: _response.rawResponse,
+        };
+    }
+
+    /**
      * @param {FernRegistry.ApiDefinitionId} apiDefinitionId
      * @param {FernRegistry.EndpointId} endpointId
      * @param {ReadClient.RequestOptions} requestOptions - Request-specific configuration.

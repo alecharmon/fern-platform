@@ -79,7 +79,7 @@ types:
         type: optional<string>
         docs: |
           The ID for the endpoint as declared within the IR, this is a unique name for the endpoint, whereas path and
-          method are not (specifically for the fern definition, consider chat and chat stream). This is optional to 
+          method are not (specifically for the fern definition, consider chat and chat stream). This is optional to
           remain backcompat with old snippets of yore.
 
   EndpointPathLiteral:
@@ -114,6 +114,11 @@ types:
       - Deprecated
       - Beta
 
+  InvalidDomainErrorBody:
+    properties:
+      requiredDomainSuffix:
+        type: string
+        docs: Value the domain should end with (i.e. docs.buildwithfern.com or dev.docs.buildwithfern.com)
 errors:
   BadRequestError:
     status-code: 400
@@ -146,3 +151,7 @@ errors:
   UserDoesNotHaveCliPermissionError:
     status-code: 403
     type: string
+
+  InvalidDomainError:
+    status-code: 400
+    # type: InvalidDomainErrorBody

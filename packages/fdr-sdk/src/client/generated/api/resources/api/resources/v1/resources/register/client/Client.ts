@@ -98,6 +98,7 @@ export class RegisterClient {
             switch ((_response.error.body as FernRegistry.api.v1.register.registerApiDefinition.Error)?.error) {
                 case "UnauthorizedError":
                 case "UserNotInOrgError":
+                case "UserDoesNotHaveCliPermissionError":
                     return {
                         data: {
                             ok: false,
@@ -202,6 +203,7 @@ export class RegisterClient {
             switch ((_response.error.body as FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error)?.error) {
                 case "UnauthorizedError":
                 case "UserNotInOrgError":
+                case "UserDoesNotHaveCliPermissionError":
                     return {
                         data: {
                             ok: false,

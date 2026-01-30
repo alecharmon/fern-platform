@@ -12,6 +12,7 @@ import type {
     SnippetTemplatesByEndpointIdentifier
 } from "../../db/snippets/SnippetTemplate";
 import { writeBuffer } from "../../util";
+import validateAndParseFernDomainUrl from "../../util/validateAndParseFernDomainUrl";
 
 const REGISTER_API_DEFINITION_META = {
     service: "APIV1WriteService",
@@ -120,9 +121,18 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
             const shouldCheckCliPermission =
                 app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(req.body.orgId);
             if (shouldCheckCliPermission) {
+                let fernUrl = undefined;
+                if (req.body.docsUrl) {
+                    fernUrl = validateAndParseFernDomainUrl({
+                        app,
+                        url: req.body.docsUrl
+                    }).getFullUrl();
+                }
+
                 await app.services.auth.checkUserHasCliPermission({
                     authHeader: req.headers.authorization,
-                    orgId: req.body.orgId
+                    orgId: req.body.orgId,
+                    docsUrl: fernUrl
                 });
             }
             logOperationTime("checkUserHasCliPermission");

@@ -17,4 +17,6 @@ export interface RegisterApiDefinitionRequest {
     sources?: Record<FernRegistry.api.v1.register.SourceId, FernRegistry.api.v1.register.Source>;
     /** A mapping of languages to dynamic IR. */
     dynamicIRs?: Record<string, FernRegistry.api.v1.register.DynamicIr>;
+    /** A url that is tracked to a docs site that fern publishes to for the org */
+    docsUrl?: string;
 }

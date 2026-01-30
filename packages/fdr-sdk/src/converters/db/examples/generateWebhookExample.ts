@@ -17,6 +17,7 @@ export function generateWebhookExample({
             return typeDefinition;
         };
         return {
+            name: webhookDefinition.name,
             payload: generateWebhookPayloadExample(webhookDefinition.payload.type, resolveTypeById)
         };
     } catch (_e) {

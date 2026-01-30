@@ -91,6 +91,7 @@ export class RegisterService {
                     switch (error.errorName) {
                         case "UnauthorizedError":
                         case "UserNotInOrgError":
+                        case "UserDoesNotHaveCliPermissionError":
                             break;
                         default:
                             console.warn(
@@ -125,6 +126,7 @@ export class RegisterService {
                     switch (error.errorName) {
                         case "UnauthorizedError":
                         case "UserNotInOrgError":
+                        case "UserDoesNotHaveCliPermissionError":
                             break;
                         default:
                             console.warn(

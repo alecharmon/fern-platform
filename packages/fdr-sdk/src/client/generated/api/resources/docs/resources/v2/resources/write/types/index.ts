@@ -2,7 +2,6 @@ export * from "./AuthConfig.js";
 export * from "./FilePathInput.js";
 export * from "./FilePathWithHash.js";
 export * from "./ImageFilePath.js";
-export * from "./InvalidDomainErrorBody.js";
 export * from "./InvliadCustomDomainErrorBody.js";
 export * from "./LibraryDocsConfig.js";
 export * from "./LibraryDocsErrorCode.js";

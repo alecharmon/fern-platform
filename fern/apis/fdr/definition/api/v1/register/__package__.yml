@@ -31,11 +31,15 @@ service:
             dynamicIRs:
               type: optional<map<string, DynamicIR>>
               docs: A mapping of languages to dynamic IR.
+            docsUrl:
+              type: optional<string>
+              docs: A url that is tracked to a docs site that fern publishes to for the org
+
       response: RegisterApiDefinitionResponse
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
-        - rootCommons.UnauthorizedError
+        - rootCommons.UserDoesNotHaveCliPermissionError
 
     getSdkDynamicIrUploadUrls:
       docs: Get presigned S3 upload URLs for SDK dynamic IR without requiring full API registration. Used for SDK generation.
@@ -56,6 +60,7 @@ service:
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
+        - rootCommons.UserDoesNotHaveCliPermissionError
 
     checkSdkDynamicIrExists:
       docs: Check if SDK dynamic IR exists in S3 for the given languages/snippets. Returns download URLs for existing dynamic IRs.

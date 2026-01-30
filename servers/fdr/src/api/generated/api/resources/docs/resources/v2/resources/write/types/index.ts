@@ -2,7 +2,6 @@ export * from "./AuthConfig";
 export * from "./FilePathInput";
 export * from "./FilePathWithHash";
 export * from "./ImageFilePath";
-export * from "./InvalidDomainErrorBody";
 export * from "./InvliadCustomDomainErrorBody";
 export * from "./LibraryDocsConfig";
 export * from "./LibraryDocsErrorCode";

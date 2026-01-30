@@ -6,6 +6,7 @@ import type * as FernRegistry from "../../../../../../../index.js";
 export type Error =
     | FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error.UnauthorizedError
     | FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error.UserNotInOrgError
+    | FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error.UserDoesNotHaveCliPermissionError
     | FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error._Unknown;
 
 export namespace Error {
@@ -19,6 +20,11 @@ export namespace Error {
         content: string;
     }
 
+    export interface UserDoesNotHaveCliPermissionError {
+        error: "UserDoesNotHaveCliPermissionError";
+        content: string;
+    }
+
     export interface _Unknown {
         error: void;
         content: core.Fetcher.Error;
@@ -27,6 +33,7 @@ export namespace Error {
     export interface _Visitor<_Result> {
         unauthorizedError: (value: string) => _Result;
         userNotInOrgError: (value: string) => _Result;
+        userDoesNotHaveCliPermissionError: (value: string) => _Result;
         _other: (value: core.Fetcher.Error) => _Result;
     }
 }
@@ -50,6 +57,15 @@ export const Error = {
         };
     },
 
+    userDoesNotHaveCliPermissionError: (
+        value: string,
+    ): FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error.UserDoesNotHaveCliPermissionError => {
+        return {
+            content: value,
+            error: "UserDoesNotHaveCliPermissionError",
+        };
+    },
+
     _unknown: (
         fetcherError: core.Fetcher.Error,
     ): FernRegistry.api.v1.register.getSdkDynamicIrUploadUrls.Error._Unknown => {
@@ -68,6 +84,8 @@ export const Error = {
                 return visitor.unauthorizedError(value.content);
             case "UserNotInOrgError":
                 return visitor.userNotInOrgError(value.content);
+            case "UserDoesNotHaveCliPermissionError":
+                return visitor.userDoesNotHaveCliPermissionError(value.content);
             default:
                 return visitor._other(value.content);
         }

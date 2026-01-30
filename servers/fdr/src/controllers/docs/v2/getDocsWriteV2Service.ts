@@ -16,7 +16,7 @@ import { DocsRegistrationIdNotFound } from "../../../api/generated/api/resources
 import { DomainNotRegisteredError } from "../../../api/generated/api/resources/docs/resources/v2/resources/read";
 import {
     CannotDeleteNonPreviewSiteError,
-    InvalidDomainError,
+    InvalidCustomDomainError,
     LibraryDocsGenerationNotCompleteError,
     LibraryDocsJobInvalidForRegistrationError,
     LibraryDocsJobNotFoundError,
@@ -85,7 +85,7 @@ function validateAndParseFernDomainUrl({ app, url }: { app: FdrApplication; url:
         throw new InvalidUrlError(`Domain URL is malformed: https://${baseUrl.hostname + baseUrl.path}`);
     }
     if (!baseUrl.hostname.endsWith(app.config.domainSuffix)) {
-        throw new InvalidDomainError();
+        throw new InvalidCustomDomainError();
     }
     return baseUrl;
 }

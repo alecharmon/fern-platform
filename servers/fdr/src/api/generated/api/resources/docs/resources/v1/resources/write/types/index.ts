@@ -17,7 +17,6 @@ export * from "./DocsSection";
 export * from "./FilePath";
 export * from "./FileS3UploadUrl";
 export * from "./Height";
-export * from "./InvalidDomainErrorBody";
 export * from "./InvliadCustomDomainErrorBody";
 export * from "./LinkMetadata";
 export * from "./MavenPackage";

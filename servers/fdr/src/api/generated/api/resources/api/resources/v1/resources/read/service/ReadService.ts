@@ -21,6 +21,22 @@ export interface ReadServiceMethods {
         },
         next: express.NextFunction,
     ): void | Promise<void>;
+    getApiDefinitionFull(
+        req: express.Request<
+            {
+                apiDefinitionId: FernRegistry.ApiDefinitionId;
+            },
+            FernRegistry.api.latest.ApiDefinition,
+            never,
+            never
+        >,
+        res: {
+            send: (responseBody: FernRegistry.api.latest.ApiDefinition) => Promise<void>;
+            cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
+            locals: any;
+        },
+        next: express.NextFunction,
+    ): void | Promise<void>;
     getEndpointById(
         req: express.Request<
             {
@@ -105,6 +121,40 @@ export class ReadService {
                         default:
                             console.warn(
                                 `Endpoint 'getApi' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
+                            );
+                    }
+                    await error.send(res);
+                } else {
+                    res.status(500).json("Internal Server Error");
+                }
+                next(error);
+            }
+        });
+        this.router.get("/load-full/:apiDefinitionId", async (req, res, next) => {
+            try {
+                await this.methods.getApiDefinitionFull(
+                    req as any,
+                    {
+                        send: async (responseBody) => {
+                            res.json(responseBody);
+                        },
+                        cookie: res.cookie.bind(res),
+                        locals: res.locals,
+                    },
+                    next,
+                );
+                if (!res.writableEnded) {
+                    next();
+                }
+            } catch (error) {
+                if (error instanceof errors.FernRegistryError) {
+                    switch (error.errorName) {
+                        case "UnauthorizedError":
+                        case "ApiDoesNotExistError":
+                            break;
+                        default:
+                            console.warn(
+                                `Endpoint 'getApiDefinitionFull' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
                             );
                     }
                     await error.send(res);

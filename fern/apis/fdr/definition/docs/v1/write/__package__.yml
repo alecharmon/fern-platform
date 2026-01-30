@@ -41,7 +41,6 @@ service:
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
-        - rootCommons.UnauthorizedError
         - DocsRegistrationIdNotFound
 
 types:
@@ -427,12 +426,6 @@ types:
       packageName: string
       githubRepoName: string
       version: string
-
-  InvalidDomainErrorBody:
-    properties:
-      requiredDomainSuffix:
-        type: string
-        docs: Value the domain should end with (i.e. docs.buildwithfern.com or dev.docs.buildwithfern.com)
 
   InvliadCustomDomainErrorBody:
     properties:

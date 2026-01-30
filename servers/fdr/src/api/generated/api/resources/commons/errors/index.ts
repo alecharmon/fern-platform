@@ -1,6 +1,7 @@
 export * from "./BadRequestError";
 export * from "./DomainBelongsToAnotherOrgError";
 export * from "./InternalError";
+export * from "./InvalidDomainError";
 export * from "./InvalidUrlError";
 export * from "./UnauthorizedError";
 export * from "./UnavailableError";

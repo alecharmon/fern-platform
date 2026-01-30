@@ -12,6 +12,7 @@ export * from "./GraphQlOperationId";
 export * from "./GrpcId";
 export * from "./GrpcMethod";
 export * from "./HttpMethod";
+export * from "./InvalidDomainErrorBody";
 export * from "./JqString";
 export * from "./LinkTarget";
 export * from "./MultipleAuthType";
