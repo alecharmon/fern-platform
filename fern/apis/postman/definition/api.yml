@@ -1,4 +1,8 @@
 name: postman
 auth: bearer
+environments:
+  Production: https://dashboard.buildwithfern.com
+  Dev: https://dashboard-dev.buildwithfern.com
+default-environment: Production
 error-discrimination:
   strategy: status-code

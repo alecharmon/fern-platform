@@ -1,0 +1,8 @@
+service:
+  base-path: /api/postman
+  auth: true
+  endpoints:
+    check: 
+      docs: Check endpoint to verify the API key is valid.
+      method: GET
+      path: /check
