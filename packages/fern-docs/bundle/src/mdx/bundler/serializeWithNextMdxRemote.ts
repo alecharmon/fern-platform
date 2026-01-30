@@ -24,7 +24,6 @@ import remarkGemoji from "remark-gemoji";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkSmartypants from "remark-smartypants";
-import { rehypeAccordionNestedHeaders } from "../plugins/rehype-accordion-nested-headers";
 import { rehypeAccordions } from "../plugins/rehype-accordions";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
@@ -33,6 +32,7 @@ import { rehypeFiles } from "../plugins/rehype-files";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeLlmsFilter } from "../plugins/rehype-llms-filter";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
+import { rehypeAccordionNestedHeaders, rehypeTabNestedHeaders } from "../plugins/rehype-nested-headers";
 import { rehypeParamField } from "../plugins/rehype-param-field";
 import { rehypeSchema } from "../plugins/rehype-schema";
 import { rehypeSteps } from "../plugins/rehype-steps";
@@ -92,6 +92,7 @@ function withDefaultMdxOptions(
               ] as PluggableList)
             : []),
         rehypeAccordionNestedHeaders,
+        rehypeTabNestedHeaders,
         [
             rehypeExpressionToMd,
             {

@@ -150,6 +150,7 @@ var Component = (() => {
             children: (0, import_jsx_runtime.jsx)(Tab, {
               title: "First Tab",
               id: "first-tab",
+              nestedHeaders: [],
               children: (0, import_jsx_runtime.jsx)(_components.p, {
                 children: "\u261D\uFE0F Welcome to the content that you can only see inside the first Tab."
               })
@@ -158,6 +159,7 @@ var Component = (() => {
             children: (0, import_jsx_runtime.jsx)(Tab, {
               title: "Second Tab",
               id: "second-tab",
+              nestedHeaders: [],
               children: (0, import_jsx_runtime.jsx)(_components.p, {
                 children: "\u270C\uFE0F Here\u2019s content that\u2019s only inside the second Tab."
               })
@@ -173,6 +175,7 @@ var Component = (() => {
                 })
               }),
               id: "third-tabhttpsgithubcom",
+              nestedHeaders: [],
               children: (0, import_jsx_runtime.jsx)(_components.p, {
                 children: "\u{1F4AA} Here\u2019s content that\u2019s only inside the third Tab. The title of this tab is\na link."
               })

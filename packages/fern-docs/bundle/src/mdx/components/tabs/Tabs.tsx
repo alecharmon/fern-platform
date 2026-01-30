@@ -4,7 +4,7 @@ import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 import { useProgrammingLanguage } from "@fern-docs/components/state/language";
 import * as RadixTabs from "@radix-ui/react-tabs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { unwrapChildren } from "../../common/unwrap-children";
 
@@ -15,6 +15,7 @@ export interface TabProps {
     children: ReactNode;
     language?: string;
     className?: string;
+    nestedHeaders?: string[];
 }
 
 export interface TabGroupProps {
@@ -61,6 +62,25 @@ export function TabGroup({
     const anchor = useCurrentAnchor();
     const [selectedLanguage, setSelectedLanguage] = useProgrammingLanguage();
 
+    const findParentTab = useCallback(
+        (anchor: string) => {
+            // First check if the anchor matches any tab's ID directly
+            if (items.some((tab) => tab.props.id === anchor)) {
+                return anchor;
+            }
+
+            // Then check if the anchor matches any nested header within a tab
+            const parentTab = items.find((tab) => tab.props.nestedHeaders?.includes(anchor));
+
+            if (parentTab) {
+                return parentTab.props.id;
+            }
+
+            return undefined;
+        },
+        [items]
+    );
+
     // Sync with query parameter when it changes
     useEffect(() => {
         if (tabParam != null) {
@@ -73,11 +93,22 @@ export function TabGroup({
 
     useEffect(() => {
         if (anchor != null) {
-            if (items.some((item) => item.props.id === anchor)) {
-                setActiveTab(anchor);
+            const parentTab = findParentTab(anchor);
+            if (parentTab) {
+                setActiveTab(parentTab);
+
+                // If this is a nested header (not the tab itself), scroll to it after the tab opens
+                if (parentTab !== anchor) {
+                    setTimeout(() => {
+                        const element = document.getElementById(anchor);
+                        if (element) {
+                            element.scrollIntoView({ behavior: "smooth" });
+                        }
+                    }, 100);
+                }
             }
         }
-    }, [anchor, items]);
+    }, [anchor, findParentTab]);
 
     useEffect(() => {
         if (selectedLanguage) {
@@ -174,6 +205,10 @@ export function Tab({
      */
     children?: ReactNode;
     className?: string;
+    /**
+     * the headers nested within the tab
+     */
+    nestedHeaders?: string[];
 }) {
     return (
         <RadixTabs.Content

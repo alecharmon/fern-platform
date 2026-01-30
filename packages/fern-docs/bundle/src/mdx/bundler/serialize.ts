@@ -43,7 +43,6 @@ import remarkSmartypants from "remark-smartypants";
 import remarkSqueezeParagraphs from "remark-squeeze-paragraphs";
 import { noop } from "ts-essentials";
 import { getMDXExport } from "../get-mdx-export";
-import { rehypeAccordionNestedHeaders } from "../plugins/rehype-accordion-nested-headers";
 import { rehypeAccordions } from "../plugins/rehype-accordions";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
@@ -57,6 +56,7 @@ import { rehypeLang } from "../plugins/rehype-lang";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeLlmsFilter } from "../plugins/rehype-llms-filter";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
+import { rehypeAccordionNestedHeaders, rehypeTabNestedHeaders } from "../plugins/rehype-nested-headers";
 import { rehypeParamField } from "../plugins/rehype-param-field";
 import { rehypeRunnableEndpoint } from "../plugins/rehype-runnable-endpoint";
 import { rehypeSchema } from "../plugins/rehype-schema";
@@ -232,6 +232,7 @@ async function serializeMdxImpl(
                         }
                     ],
                     rehypeAccordionNestedHeaders,
+                    rehypeTabNestedHeaders,
                     [
                         rehypeExpressionToMd,
                         {

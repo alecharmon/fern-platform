@@ -105,6 +105,7 @@ var Component = (() => {
             children: (0, import_jsx_runtime.jsxs)(Tab, {
               title: "Next.js (App Router)",
               id: "nextjs-app-router",
+              nestedHeaders: ["prerequisites", "authenticate", "setup-context-provider", "audio-input", "starting-session", "displaying-message-history", "interrupt"],
               children: [(0, import_jsx_runtime.jsxs)(_components.p, {
                 children: ["This tutorial utilizes Hume\u2019s React SDK to interact with EVI. It includes detailed steps for both the\n", (0, import_jsx_runtime.jsx)(_components.strong, {
                   children: "App Router"
@@ -280,6 +281,7 @@ var Component = (() => {
             children: (0, import_jsx_runtime.jsxs)(Tab, {
               title: "Next.js (Pages Router)",
               id: "nextjs-pages-router",
+              nestedHeaders: ["prerequisites-1", "authenticate-and-setup-context-provider", "audio-input-1", "starting-session-1", "displaying-message-history-1", "interrupt-1"],
               children: [(0, import_jsx_runtime.jsxs)(_components.p, {
                 children: ["This tutorial utilizes Hume\u2019s React SDK to interact with EVI. It includes detailed steps for both the\n", (0, import_jsx_runtime.jsx)(_components.strong, {
                   children: "Pages Router"
