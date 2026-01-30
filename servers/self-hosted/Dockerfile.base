@@ -177,18 +177,18 @@ RUN log "Installing esbuild..." && \
 # These patches will be applied by Dockerfile.self_hosted to all directories
 # glob 10.x -> 10.5.0, glob 11.x -> 11.1.0 (fixes GHSA-5j98-mcp5-4vw2)
 # brace-expansion 2.0.x -> 2.0.2 (fixes GHSA-v6h2-p8h4-qcjw)
-# tar 7.x (<7.5.4) -> 7.5.4 (fixes CVE-2026-23950 / GHSA-r6q2-hw4h-h46w)
+# tar 7.x (<7.5.7) -> 7.5.7 (fixes GHSA-34x7-hfp2-rc4v)
 RUN log "Preparing npm vulnerability patches..." && \
     cd /tmp && \
     npm-real pack glob@10.5.0 2>&1 | add-timestamps && \
     npm-real pack glob@11.1.0 2>&1 | add-timestamps && \
     npm-real pack brace-expansion@2.0.2 2>&1 | add-timestamps && \
-    npm-real pack tar@7.5.4 2>&1 | add-timestamps && \
+    npm-real pack tar@7.5.7 2>&1 | add-timestamps && \
     mkdir -p /tmp/patches/glob-10 /tmp/patches/glob-11 /tmp/patches/brace-expansion /tmp/patches/tar && \
     tar -xzf glob-10.5.0.tgz -C /tmp/patches/glob-10 && \
     tar -xzf glob-11.1.0.tgz -C /tmp/patches/glob-11 && \
     tar -xzf brace-expansion-2.0.2.tgz -C /tmp/patches/brace-expansion && \
-    tar -xzf tar-7.5.4.tgz -C /tmp/patches/tar && \
+    tar -xzf tar-7.5.7.tgz -C /tmp/patches/tar && \
     rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz
 
 # Patches are kept in /tmp/patches for use by Dockerfile.self_hosted

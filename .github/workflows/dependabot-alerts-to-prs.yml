@@ -516,9 +516,14 @@ jobs:
           # Risk accepted: Wolfi advisory marks this as "pending upstream fix" - requires changes from linux-pam maintainers
           # Attack requires local access, specific branch predictor training, and breaking ASLR via Spectre techniques
           # Self-hosted container runs in isolated environments with limited local access
+          # CVE-2025-59472 (GHSA-5f7q-jpqc-wp7h): Next.js PPR Resume Endpoint DoS vulnerability
+          # No stable fix available (only in 15.6.0-canary.61)
+          # Risk accepted: Vulnerability requires experimental.ppr=true AND NEXT_PRIVATE_MINIMAL_MODE=1
+          # Self-hosted docs do not enable PPR (checked next.config.ts) - vulnerability is not exploitable
           ignored_cves: |
             CVE-2025-60876
             CVE-2024-10041
+            CVE-2025-59472
 
   create-grype-pr-fai:
     name: Run grype scan - fai
