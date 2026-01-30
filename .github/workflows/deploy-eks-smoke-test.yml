@@ -43,7 +43,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.EKS_SMOKE_TEST_AWS_ROLE_ARN }}
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Update kubeconfig for EKS
