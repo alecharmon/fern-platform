@@ -439,8 +439,12 @@ jobs:
           # CVE-2025-60876: BusyBox wget HTTP request smuggling vulnerability
           # No upstream fix available (busybox 1.37.0-r50)
           # Risk accepted: mdx-bundler uses GNU wget (installed via apk) which shadows busybox wget
+          # GHSA-848j-6mx2-7j84: Elliptic uses a cryptographic primitive with a risky implementation
+          # No upstream fix available (elliptic 6.6.1)
+          # Risk accepted: Low severity, transitive dependency from wallet/crypto packages, no fix available yet
           ignored_cves: |
             CVE-2025-60876
+            GHSA-848j-6mx2-7j84
 
   create-grype-pr-self-hosted:
     name: Run grype scan - self-hosted
