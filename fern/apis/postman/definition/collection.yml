@@ -48,7 +48,7 @@ types:
     union:
       publishing:
         docs: The collection publication is in progress.
-        type:
+        type: CollectionStatusPublishing
       published:
         docs: The collection has been successfully published as documentation.
         type: CollectionStatusPublished
