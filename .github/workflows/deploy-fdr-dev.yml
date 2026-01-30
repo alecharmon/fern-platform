@@ -17,6 +17,10 @@ on:
       - "packages/fern-docs/search-server/**"
       - "pnpm-lock.yaml"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   PACKAGE_NAME: "@fern-platform/fdr"
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
