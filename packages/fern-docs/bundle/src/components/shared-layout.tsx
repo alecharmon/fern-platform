@@ -93,7 +93,7 @@ export default async function SharedLayout({
                         </React.Suspense>
                     }
                     showSearchBar={layout.searchbarPlacement === "HEADER"}
-                    showSwitcher={layout.switcherPlacement === "HEADER"}
+                    showSwitcher={layout.switcherPlacement !== "SIDEBAR"}
                     navbarLinks={<NavbarLinks loader={loader} />}
                     loginButton={
                         <React.Suspense fallback={null}>

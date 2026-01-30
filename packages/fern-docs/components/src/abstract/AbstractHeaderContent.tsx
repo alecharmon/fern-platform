@@ -45,7 +45,7 @@ export function AbstractHeaderContent({
                 <div className="fern-header-logo-container">
                     <div className="flex items-center gap-2">
                         <div className="flex items-center lg:items-start">{logo}</div>
-                        {forceHeader && showSwitcher && (
+                        {showSwitcher && (
                             <div className="flex items-baseline">
                                 {productSelect}
                                 {versionSelect}
