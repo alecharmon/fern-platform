@@ -2,9 +2,10 @@ import { getAllUserScopedPermissions } from "@fern-api/user-permissions";
 import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getOrgIdFromName } from "@/app/services/auth0/management";
-import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import { Auth0OrgName, type Auth0UserID } from "@/app/services/auth0/types";
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
 import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
+import { tryAutoAssignAdminRole } from "./autoAssignAdminRole";
 
 export declare namespace getAuthZPermissions {
     /**
@@ -72,15 +73,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ orgN
             }
         }
 
-        if (permissions.length === 0) {
-            console.error("User does not have any permissions", {
+        if (permissions.length === 0 && orgName) {
+            console.warn("User does not have any permissions, checking if auto-assign admin is needed", {
                 userId: sessionData.user.sub,
-                orgName,
-                permissions,
-                isFineGrainedPermissionsEnabled,
-                isEnforcePermissions
+                orgName
+            });
+
+            await tryAutoAssignAdminRole({
+                userId: sessionData.user.sub,
+                orgName: Auth0OrgName(orgName)
             });
         }
+
         return NextResponse.json({
             userId: sessionData.user.sub,
             orgName,
