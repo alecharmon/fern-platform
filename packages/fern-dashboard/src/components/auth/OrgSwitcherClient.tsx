@@ -5,7 +5,6 @@ import { ChevronDown, Clock, Plus } from "lucide-react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 
 import type { Auth0Organization, Auth0OrgID, Auth0OrgName } from "@/app/services/auth0/types";
-import { CreateOrganizationModal } from "@/components/auth/CreateOrganizationModal";
 import { Button } from "@/components/ui/button";
 import { SearchableDropdown, type SearchableDropdownRef } from "@/components/ui/SearchableDropdown";
 import { WrapWithKeyboardShortcut } from "@/components/ui/WrapWithKeyboardShortcut";
@@ -45,7 +44,6 @@ const OrgSwitcherClientInternal = forwardRef<
     const [localOrgName, setLocalOrgName] = useState(currentOrgName);
     const [searchTerm, setSearchTerm] = useState("");
     const [recentOrgNames, setRecentOrgNames] = useState<Auth0OrgName[]>([]);
-    const [showOrgModal, setShowOrgModal] = useState(false);
     const [isSwitchingOrg, setIsSwitchingOrg] = useState(false);
 
     useEffect(() => {
@@ -176,7 +174,7 @@ const OrgSwitcherClientInternal = forwardRef<
                         size="sm"
                         variant="ghost"
                         className="h-[38px] w-[38px] shrink-0 p-0"
-                        onClick={() => setShowOrgModal(true)}
+                        onClick={() => router.push("/get-started/create-org?next=/get-started/:orgId/docs")}
                     >
                         <Plus className="h-4 w-4" />
                         <span className="sr-only">Create organization</span>
@@ -188,7 +186,7 @@ const OrgSwitcherClientInternal = forwardRef<
                             size="sm"
                             variant="ghost"
                             className="flex w-full items-center justify-start gap-2 px-2"
-                            onClick={() => setShowOrgModal(true)}
+                            onClick={() => router.push("/get-started/create-org?next=/get-started/:orgId/docs")}
                         >
                             <Plus className="h-4 w-4" />
                             <span>Create new org</span>
@@ -257,7 +255,6 @@ const OrgSwitcherClientInternal = forwardRef<
                     <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
             </SearchableDropdown>
-            <CreateOrganizationModal accessToken={accessToken} open={showOrgModal} onOpenChange={setShowOrgModal} />
         </>
     );
 });
