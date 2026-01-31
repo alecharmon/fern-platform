@@ -1,4 +1,4 @@
-name: Deploy EKS Smoke Test
+name: Deploy Kubernetes Smoke Test
 
 on:
   workflow_dispatch:
@@ -103,24 +103,6 @@ jobs:
             -n ${{ env.NAMESPACE }} \
             --timeout=300s
 
-      - name: Get NodePort and node IPs
-        id: nodeport
-        run: |
-          NODE_PORT=$(kubectl get service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} \
-            -o jsonpath='{.spec.ports[0].nodePort}')
-          echo "NodePort: $NODE_PORT"
-          echo "node_port=$NODE_PORT" >> $GITHUB_OUTPUT
-          
-          echo "Getting node external IPs..."
-          NODE_IPS=$(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}')
-          if [ -z "$NODE_IPS" ]; then
-            echo "No external IPs found, trying internal IPs..."
-            NODE_IPS=$(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}')
-          fi
-          echo "Node IPs: $NODE_IPS"
-          FIRST_NODE_IP=$(echo $NODE_IPS | awk '{print $1}')
-          echo "node_ip=$FIRST_NODE_IP" >> $GITHUB_OUTPUT
-
       - name: Run health checks
         run: |
           echo "Running health checks..."
@@ -149,7 +131,7 @@ jobs:
           echo "Testing docs endpoint..."
           HTTP_CODE=$(kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
             curl -sf -o /dev/null -w "%{http_code}" http://localhost:3000/ || echo "000")
-          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ] || [ "$HTTP_CODE" = "307" ]; then
             echo "Docs endpoint check passed (HTTP $HTTP_CODE)"
           else
             echo "Docs endpoint check failed (HTTP $HTTP_CODE)"
@@ -158,21 +140,111 @@ jobs:
           
           echo "All health checks passed!"
 
+      - name: Deploy ngrok tunnel
+        id: ngrok
+        run: |
+          echo "Deploying ngrok tunnel to expose smoke test externally..."
+          
+          # Create ngrok deployment that tunnels to the smoke test service
+          cat <<EOF | kubectl apply -n ${{ env.NAMESPACE }} -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ngrok-tunnel
+            labels:
+              app: ngrok-tunnel
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: ngrok-tunnel
+            template:
+              metadata:
+                labels:
+                  app: ngrok-tunnel
+              spec:
+                containers:
+                  - name: ngrok
+                    image: ngrok/ngrok:latest
+                    command:
+                      - ngrok
+                      - http
+                      - --log=stdout
+                      - ${{ env.DEPLOYMENT_NAME }}:80
+                    ports:
+                      - containerPort: 4040
+                        name: api
+                    resources:
+                      requests:
+                        memory: "64Mi"
+                        cpu: "50m"
+                      limits:
+                        memory: "128Mi"
+                        cpu: "100m"
+          EOF
+          
+          echo "Waiting for ngrok pod to be ready..."
+          kubectl wait --for=condition=ready pod -l app=ngrok-tunnel -n ${{ env.NAMESPACE }} --timeout=120s
+          
+          # Wait a bit for ngrok to establish the tunnel
+          sleep 10
+          
+          # Get the ngrok public URL from the API
+          NGROK_POD=$(kubectl get pods -n ${{ env.NAMESPACE }} -l app=ngrok-tunnel -o jsonpath='{.items[0].metadata.name}')
+          echo "ngrok pod: $NGROK_POD"
+          
+          # Get the public URL from ngrok's API
+          for i in {1..10}; do
+            NGROK_URL=$(kubectl exec -n ${{ env.NAMESPACE }} $NGROK_POD -- curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"[^"]*"' | head -1 | cut -d'"' -f4 || echo "")
+            if [ -n "$NGROK_URL" ]; then
+              echo "ngrok URL: $NGROK_URL"
+              echo "ngrok_url=$NGROK_URL" >> $GITHUB_OUTPUT
+              break
+            fi
+            echo "Waiting for ngrok tunnel to be established... ($i/10)"
+            sleep 5
+          done
+          
+          if [ -z "$NGROK_URL" ]; then
+            echo "WARNING: Could not get ngrok URL. Checking ngrok logs..."
+            kubectl logs -n ${{ env.NAMESPACE }} $NGROK_POD --tail=50 || true
+          fi
+
       - name: Print smoke test URL
         run: |
-          NODE_IP="${{ steps.nodeport.outputs.node_ip }}"
-          NODE_PORT="${{ steps.nodeport.outputs.node_port }}"
-          if [ -n "$NODE_IP" ] && [ -n "$NODE_PORT" ]; then
-            echo ""
-            echo "=============================================="
-            echo "  SMOKE TEST DOCS SITE IS NOW AVAILABLE AT:"
-            echo "  http://${NODE_IP}:${NODE_PORT}"
-            echo "=============================================="
-            echo ""
+          NGROK_URL="${{ steps.ngrok.outputs.ngrok_url }}"
+          
+          echo ""
+          echo "=============================================="
+          if [ -n "$NGROK_URL" ]; then
+            echo "  SMOKE TEST DOCS SITE (PUBLIC URL):"
+            echo "  $NGROK_URL"
           else
-            echo "WARNING: Could not determine NodePort URL."
-            echo "Check the service status below for more details."
+            echo "  WARNING: Could not get ngrok URL"
           fi
+          echo "=============================================="
+          echo ""
+
+      - name: Notify Slack
+        if: success()
+        uses: slackapi/slack-github-action@v2
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "Kubernetes Smoke Test Deployed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Kubernetes Smoke Test Deployed* :rocket:\n\nVersion: `${{ steps.version.outputs.version }}`\nPublic URL: ${{ steps.ngrok.outputs.ngrok_url || 'Not available' }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>"
+                  }
+                }
+              ]
+            }
 
       - name: Get deployment info
         if: always()
@@ -200,4 +272,4 @@ jobs:
       - name: Notify on failure
         if: failure()
         run: |
-          echo "::error::EKS smoke test deployment failed. Check the logs above for details."
+          echo "::error::Kubernetes smoke test deployment failed. Check the logs above for details."
