@@ -155,10 +155,28 @@ export const middleware: NextMiddleware = async (request) => {
 
     /**
      * Rewrite /_search/* to MeiliSearch
+     *
+     * SECURITY: Only allow safe search endpoints. Block access to sensitive
+     * MeiliSearch admin endpoints like /keys, /dumps, /snapshots, /tasks, etc.
+     * that could expose API keys or allow unauthorized administrative actions.
      */
     if (pathname.includes("/_search/")) {
         const searchPath = withoutBasepath("/_search/");
         const cleanedPath = searchPath.replace("_search/", "");
+
+        // Only allow search-related endpoints
+        // - indexes/{indexName}/search - single index search
+        // - multi-search - multi-index search
+        // - indexes/{indexName}/facet-search - facet search
+        const isAllowedEndpoint =
+            /^indexes\/[^/]+\/search\/?$/.test(cleanedPath) ||
+            /^indexes\/[^/]+\/facet-search\/?$/.test(cleanedPath) ||
+            /^multi-search\/?$/.test(cleanedPath);
+
+        if (!isAllowedEndpoint) {
+            return new NextResponse("Forbidden", { status: 403 });
+        }
+
         const meiliUrl = `${process.env.NEXT_PUBLIC_MEILISEARCH_ORIGIN ?? "http://localhost:7700"}/${cleanedPath}`;
         // Clone headers and override Authorization
         const newHeaders = new Headers(headers);
