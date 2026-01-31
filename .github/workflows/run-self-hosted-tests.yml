@@ -616,45 +616,28 @@ jobs:
           fi
           echo "MeiliSearch health check passed"
           
-          echo "Testing MeiliSearch indexes endpoint via /_search/ proxy..."
-          INDEXES_CODE=$(kubectl exec $POD_NAME -- curl -s -o /tmp/indexes.json -w "%{http_code}" http://localhost:3000/_search/indexes 2>/dev/null || echo "000")
-          echo "Indexes endpoint status: $INDEXES_CODE"
+          # Note: The /_search/ proxy only allows safe search endpoints (indexes/*/search, multi-search, indexes/*/facet-search)
+          # Admin endpoints like /indexes, /stats, /keys are blocked for security reasons
+          echo "Testing that admin endpoints are blocked via /_search/ proxy..."
+          INDEXES_CODE=$(kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/_search/indexes 2>/dev/null || echo "000")
+          echo "Indexes endpoint status: $INDEXES_CODE (expected 403)"
           
-          if [ "$INDEXES_CODE" != "200" ]; then
-            echo "ERROR: MeiliSearch indexes endpoint failed (HTTP $INDEXES_CODE)"
-            kubectl exec $POD_NAME -- cat /tmp/indexes.json 2>/dev/null || true
+          if [ "$INDEXES_CODE" != "403" ]; then
+            echo "ERROR: MeiliSearch indexes endpoint should return 403 Forbidden (got HTTP $INDEXES_CODE)"
             exit 1
           fi
+          echo "MeiliSearch indexes endpoint correctly blocked"
           
-          INDEXES_RESPONSE=$(kubectl exec $POD_NAME -- cat /tmp/indexes.json 2>/dev/null)
-          echo "Indexes response: $INDEXES_RESPONSE"
+          KEYS_CODE=$(kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/_search/keys 2>/dev/null || echo "000")
+          echo "Keys endpoint status: $KEYS_CODE (expected 403)"
           
-          if ! echo "$INDEXES_RESPONSE" | grep -q "results"; then
-            echo "ERROR: MeiliSearch indexes response does not contain expected 'results' field"
+          if [ "$KEYS_CODE" != "403" ]; then
+            echo "ERROR: MeiliSearch keys endpoint should return 403 Forbidden (got HTTP $KEYS_CODE)"
             exit 1
           fi
-          echo "MeiliSearch indexes endpoint test passed"
+          echo "MeiliSearch keys endpoint correctly blocked"
           
-          echo "Testing MeiliSearch stats endpoint via /_search/ proxy..."
-          STATS_CODE=$(kubectl exec $POD_NAME -- curl -s -o /tmp/stats.json -w "%{http_code}" http://localhost:3000/_search/stats 2>/dev/null || echo "000")
-          echo "Stats endpoint status: $STATS_CODE"
-          
-          if [ "$STATS_CODE" != "200" ]; then
-            echo "ERROR: MeiliSearch stats endpoint failed (HTTP $STATS_CODE)"
-            kubectl exec $POD_NAME -- cat /tmp/stats.json 2>/dev/null || true
-            exit 1
-          fi
-          
-          STATS_RESPONSE=$(kubectl exec $POD_NAME -- cat /tmp/stats.json 2>/dev/null)
-          echo "Stats response: $STATS_RESPONSE"
-          
-          if ! echo "$STATS_RESPONSE" | grep -q "databaseSize"; then
-            echo "ERROR: MeiliSearch stats response does not contain expected 'databaseSize' field"
-            exit 1
-          fi
-          echo "MeiliSearch stats endpoint test passed"
-          
-          echo "All MeiliSearch search endpoint tests passed!"
+          echo "All MeiliSearch security tests passed!"
 
       # Cleanup the main deployment before running buf cache tests
       - name: Cleanup main deployment
