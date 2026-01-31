@@ -58,15 +58,16 @@ function stripMdxFeatures(markdown: string, format: "mdx" | "md", userRoles: str
             }
 
             // remove <If> tags when user doesn't have required roles
+            // Note: supports both "roles" and "viewer" attributes for backwards compatibility
             if (node.name === "If") {
-                const rolesAttr = node.attributes.find(
-                    (attr) => attr.type === "mdxJsxAttribute" && attr.name === "roles"
-                );
+                const rolesAttr =
+                    node.attributes.find((attr) => attr.type === "mdxJsxAttribute" && attr.name === "roles") ??
+                    node.attributes.find((attr) => attr.type === "mdxJsxAttribute" && attr.name === "viewer");
+
+                let requiredRoles: string[] = [];
 
                 if (rolesAttr && rolesAttr.value != null) {
-                    let requiredRoles: string[] = [];
-
-                    // Handle array format: roles={["admin", "editor"]}
+                    // Handle array format: roles={["admin", "editor"]} or viewer={["everyone"]}
                     if (typeof rolesAttr.value === "object" && "value" in rolesAttr.value) {
                         const expressionValue = (rolesAttr.value as { value: unknown }).value;
                         if (typeof expressionValue === "string") {
@@ -76,24 +77,26 @@ function stripMdxFeatures(markdown: string, format: "mdx" | "md", userRoles: str
                                     requiredRoles = parsed.filter((r: unknown) => typeof r === "string");
                                 }
                             } catch {
-                                // If parsing fails, skip this node
+                                // If parsing fails, log and continue with empty roles (will show content)
                                 console.error(`Failed to parse roles attribute: ${expressionValue}`);
                             }
                         }
                     }
+                }
 
-                    const hasEveryoneRole = requiredRoles.includes("everyone");
-                    const hasRequiredRole = userRoles.some((role) => requiredRoles.includes(role));
+                const hasEveryoneRole = requiredRoles.includes("everyone");
+                const hasRequiredRole = userRoles.some((role) => requiredRoles.includes(role));
+                // If no roles specified or parsing failed, default to showing content
+                const noRolesSpecified = requiredRoles.length === 0;
 
-                    const shouldShowContent = hasEveryoneRole || hasRequiredRole;
+                const shouldShowContent = hasEveryoneRole || hasRequiredRole || noRolesSpecified;
 
-                    if (!shouldShowContent) {
-                        parent.children.splice(idx, 1);
-                        return idx;
-                    } else {
-                        parent.children.splice(idx, 1, ...node.children);
-                        return idx;
-                    }
+                if (!shouldShowContent) {
+                    parent.children.splice(idx, 1);
+                    return idx;
+                } else {
+                    parent.children.splice(idx, 1, ...node.children);
+                    return idx;
                 }
             }
 
