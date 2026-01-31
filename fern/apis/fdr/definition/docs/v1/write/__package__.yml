@@ -41,6 +41,7 @@ service:
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError
+        - rootCommons.UnauthorizedError
         - DocsRegistrationIdNotFound
 
 types:

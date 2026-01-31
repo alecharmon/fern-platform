@@ -1,6 +1,6 @@
-import type { FernUser } from "@fern-api/docs-auth";
-import { useFernUser } from "@fern-docs/components/state/fern-user";
+import { useLoggedIn } from "@fern-docs/components/state/logged-in";
 import { useCurrentProductId, useCurrentVersionId } from "@fern-docs/components/state/navigation";
+import { useRoles } from "@fern-docs/components/state/roles";
 import type { Atom } from "jotai";
 import type { PropsWithChildren, ReactNode } from "react";
 
@@ -9,6 +9,11 @@ export interface IfProps {
      * The role to check against
      */
     roles?: string[];
+
+    /**
+     * Alias for roles (used in some MDX content)
+     */
+    viewer?: string[];
 
     /**
      * Invert the role check
@@ -31,9 +36,14 @@ export interface IfProps {
     versions?: string[];
 
     /**
-     * A fern user atom for testing purposes only
+     * A roles atom for testing purposes only
      */
-    __test_fern_user_atom?: Atom<FernUser | undefined>;
+    __test_roles_atom?: Atom<string[]>;
+
+    /**
+     * A logged-in atom for testing purposes only
+     */
+    __test_logged_in_atom?: Atom<boolean>;
 
     /**
      * Override the current product slug for testing purposes only
@@ -74,26 +84,26 @@ export interface IfProps {
 export function If({
     not,
     roles,
+    viewer,
     loggedIn,
     products,
     versions,
     children,
-    __test_fern_user_atom,
+    __test_roles_atom,
+    __test_logged_in_atom,
     __test_product_id,
     __test_version_id
 }: PropsWithChildren<IfProps>): ReactNode {
-    const user = useFernUser({ __test_fern_user_atom });
+    const currentRoles = useRoles({ __test_roles_atom });
     const currentProductId = useCurrentProductId();
     const currentVersionId = useCurrentVersionId();
+    const isLoggedIn = useLoggedIn({ __test_logged_in_atom });
 
     const productId = __test_product_id ?? currentProductId;
     const versionId = __test_version_id ?? currentVersionId;
 
-    const userRoles = user?.roles ?? [];
-
-    if (not && roles?.length === 0 && userRoles.length > 0) {
-        return children;
-    }
+    // Support both 'roles' and 'viewer' props (viewer is an alias for roles)
+    const effectiveRoles = roles ?? viewer;
 
     const shouldShow = () => {
         // Check products first - if specified and doesn't match, return false
@@ -110,15 +120,15 @@ export function If({
             }
         }
 
-        // Original roles/loggedIn logic preserved below
-        if (roles != null) {
-            if (roles.length === 0) {
-                return user != null;
+        // roles=[] means "show if logged in" (using isLoggedIn from path param)
+        if (effectiveRoles != null) {
+            if (effectiveRoles.length === 0) {
+                return isLoggedIn;
             }
-            return roles.some((role) => userRoles.includes(role) || role === "everyone");
+            return effectiveRoles.some((role) => currentRoles.includes(role));
         }
         if (loggedIn != null) {
-            return loggedIn === (user != null);
+            return loggedIn === isLoggedIn;
         }
         return true;
     };

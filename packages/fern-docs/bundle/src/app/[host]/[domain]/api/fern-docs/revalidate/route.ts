@@ -14,7 +14,15 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
 import { pruneWithAuthState } from "@fern-api/docs-server/withRbac";
-import { HEADER_X_FERN_HOST, slugToHref, withoutStaging } from "@fern-api/docs-utils";
+import {
+    EVERYONE_ROLE,
+    encodeBool,
+    encodeRoles,
+    HEADER_X_FERN_HOST,
+    HEADER_X_FERN_REVALIDATE_AUTH,
+    slugToHref,
+    withoutStaging
+} from "@fern-api/docs-utils";
 import { type ApiDefinition, type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
 import {
     ApiDefinitionV1ToLatest,
@@ -276,107 +284,159 @@ async function performRevalidation(params: {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     if (doRegenerate) {
-        const collector = FernNavigation.NodeCollector.collect(staticRoot);
+        const createRevalidationQueue = (
+            slugs: string[],
+            authParams: { requiresLogin: boolean; isLoggedIn: boolean },
+            label: string
+        ) => {
+            const queue = new ResilientQueue<string>({
+                processItem: async (slug: string, attempt: number) => {
+                    const url = withDefaultProtocol(`${domain}${slugToHref(slug)}`);
 
-        controller.log(`revalidate-queued:urls=${collector.slugs.length}\n`);
-
-        const queue = new ResilientQueue<string>({
-            processItem: async (slug: string, attempt: number) => {
-                const url = withDefaultProtocol(`${domain}${slugToHref(slug)}`);
-
-                revalidatePath(`/${host}/${domain}/static/${encodeURIComponent(slugToHref(slug))}`, "page");
-
-                const startTime = performance.now();
-
-                try {
-                    const res = await fetch(`${origin}${slugToHref(slug)}`, {
-                        method: fetchMethod,
-                        headers: { [HEADER_X_FERN_HOST]: domain },
-                        signal: AbortSignal.timeout(600_000)
-                    });
-
-                    const endTime = performance.now();
-
-                    track("revalidate_page_stats", {
-                        url,
-                        domain,
-                        durationMs: endTime - startTime,
-                        status: res?.status ?? null,
-                        ok: res?.ok ?? false,
-                        attempt
-                    });
-
-                    if (!res?.ok) {
-                        track("revalidate_page_error_res_not_ok", {
-                            url,
-                            domain,
-                            status: res?.status ?? null,
-                            error: `Failed to revalidate ${url}. Status code: ${res?.status}`,
-                            attempt
-                        });
-                        throw new RevalidationError(
-                            `Failed to revalidate ${url}. Status code: ${res?.status}`,
-                            url,
-                            res?.status
-                        );
-                    }
-
-                    controller.log(`revalidated:${url}\n`);
-                } catch (e) {
-                    console.error(
-                        `[revalidate:page-revalidate] error: url=${url}; attempt=${attempt}; error=${JSON.stringify((e as Error)?.message)}`
+                    // Path order: [requiresLogin]/[isLoggedIn]/[roles]
+                    const requiresLoginParam = encodeBool(authParams.requiresLogin);
+                    const isLoggedInParam = encodeBool(authParams.isLoggedIn);
+                    const rolesParam = encodeRoles([EVERYONE_ROLE]);
+                    revalidatePath(
+                        `/${host}/${domain}/${requiresLoginParam}/${isLoggedInParam}/${rolesParam}/${encodeURIComponent(slugToHref(slug))}`,
+                        "page"
                     );
 
-                    if (!(e instanceof RevalidationError)) {
-                        const errorMessage = String(e);
-                        const errorDetails: any = {};
+                    const startTime = performance.now();
 
-                        if (e && typeof e === "object" && "cause" in e && e.cause !== undefined) {
-                            errorDetails.cause = e.cause;
-                        }
+                    try {
+                        const res = await fetch(`${origin}${slugToHref(slug)}`, {
+                            method: fetchMethod,
+                            headers: {
+                                [HEADER_X_FERN_HOST]: domain,
+                                [HEADER_X_FERN_REVALIDATE_AUTH]: `requiresLogin:${authParams.requiresLogin},isLoggedIn:${authParams.isLoggedIn}`
+                            },
+                            signal: AbortSignal.timeout(600_000)
+                        });
 
-                        track("revalidate_page_error_unexpected", {
+                        const endTime = performance.now();
+
+                        track("revalidate_page_stats", {
                             url,
                             domain,
-                            error: errorMessage,
-                            errorDetails,
-                            attempt
+                            durationMs: endTime - startTime,
+                            status: res?.status ?? null,
+                            ok: res?.ok ?? false,
+                            attempt,
+                            authMode: label
                         });
+
+                        if (!res?.ok) {
+                            track("revalidate_page_error_res_not_ok", {
+                                url,
+                                domain,
+                                status: res?.status ?? null,
+                                error: `Failed to revalidate ${url}. Status code: ${res?.status}`,
+                                attempt,
+                                authMode: label
+                            });
+                            throw new RevalidationError(
+                                `Failed to revalidate ${url}. Status code: ${res?.status}`,
+                                url,
+                                res?.status
+                            );
+                        }
+
+                        controller.log(`revalidated[${label}]:${url}\n`);
+                    } catch (e) {
+                        console.error(
+                            `[revalidate:page-revalidate] error: url=${url}; attempt=${attempt}; authMode=${label}; error=${JSON.stringify((e as Error)?.message)}`
+                        );
+
+                        if (!(e instanceof RevalidationError)) {
+                            const errorMessage = String(e);
+                            const errorDetails: any = {};
+
+                            if (e && typeof e === "object" && "cause" in e && e.cause !== undefined) {
+                                errorDetails.cause = e.cause;
+                            }
+
+                            track("revalidate_page_error_unexpected", {
+                                url,
+                                domain,
+                                error: errorMessage,
+                                errorDetails,
+                                attempt,
+                                authMode: label
+                            });
+                        }
+
+                        throw e;
                     }
-
-                    throw e;
+                },
+                maxRetries: 3,
+                initialConcurrency: 50,
+                maxConcurrency: 150,
+                minConcurrency: 5,
+                errorRateThreshold: 0.2,
+                backoffBaseMs: 1000,
+                onProgress: (stats) => {
+                    controller.log(
+                        `revalidate-progress[${label}]:completed=${stats.completed}/${stats.total};` +
+                            `failed=${stats.failed};inFlight=${stats.inFlight};` +
+                            `concurrency=${stats.currentConcurrency};errorRate=${(stats.errorRate * 100).toFixed(1)}%\n`
+                    );
                 }
-            },
-            maxRetries: 3,
-            initialConcurrency: 50,
-            maxConcurrency: 150,
-            minConcurrency: 5,
-            errorRateThreshold: 0.2,
-            backoffBaseMs: 1000,
-            onProgress: (stats) => {
-                controller.log(
-                    `revalidate-progress:completed=${stats.completed}/${stats.total};` +
-                        `failed=${stats.failed};inFlight=${stats.inFlight};` +
-                        `concurrency=${stats.currentConcurrency};errorRate=${(stats.errorRate * 100).toFixed(1)}%\n`
-                );
-            }
-        });
-
-        const result = await queue.process(collector.staticPageSlugs);
-
-        if (result.failed > 0) {
-            console.error(`[revalidate] ${result.failed} pages failed permanently after ${3} retries`);
-            track("revalidate_pages_failed_permanently", {
-                domain,
-                failedCount: result.failed,
-                totalCount: result.total
             });
-        }
+            return queue.process(slugs);
+        };
 
-        controller.log(
-            `revalidate-pages-finished:total=${result.total};` +
-                `completed=${result.completed};failed=${result.failed}\n`
-        );
+        // Sites with auth: only cache authed view (requiresLogin=true, isLoggedIn=true)
+        // Sites without auth: only cache unauthed view (requiresLogin=false, isLoggedIn=false)
+        if (authConfig && root) {
+            const authedCollector = FernNavigation.NodeCollector.collect(root);
+            controller.log(`revalidate-queued[auth]:urls=${authedCollector.slugs.length}\n`);
+
+            const authResult = await createRevalidationQueue(
+                authedCollector.staticPageSlugs,
+                { requiresLogin: true, isLoggedIn: true },
+                "auth"
+            );
+
+            if (authResult.failed > 0) {
+                console.error(`[revalidate] ${authResult.failed} auth pages failed permanently after ${3} retries`);
+                track("revalidate_pages_failed_permanently", {
+                    domain,
+                    failedCount: authResult.failed,
+                    totalCount: authResult.total,
+                    authMode: "auth"
+                });
+            }
+
+            controller.log(
+                `revalidate-pages-finished[auth]:total=${authResult.total};` +
+                    `completed=${authResult.completed};failed=${authResult.failed}\n`
+            );
+        } else {
+            const collector = FernNavigation.NodeCollector.collect(staticRoot);
+            controller.log(`revalidate-queued[unauth]:urls=${collector.slugs.length}\n`);
+
+            const unauthResult = await createRevalidationQueue(
+                collector.staticPageSlugs,
+                { requiresLogin: false, isLoggedIn: false },
+                "unauth"
+            );
+
+            if (unauthResult.failed > 0) {
+                console.error(`[revalidate] ${unauthResult.failed} unauth pages failed permanently after ${3} retries`);
+                track("revalidate_pages_failed_permanently", {
+                    domain,
+                    failedCount: unauthResult.failed,
+                    totalCount: unauthResult.total,
+                    authMode: "unauth"
+                });
+            }
+
+            controller.log(
+                `revalidate-pages-finished[unauth]:total=${unauthResult.total};` +
+                    `completed=${unauthResult.completed};failed=${unauthResult.failed}\n`
+            );
+        }
     }
 
     if (

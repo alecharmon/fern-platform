@@ -56,11 +56,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         return NextResponse.json({
             fern_token: fernToken,
-            user_info: {
-                name: userInfo.name,
-                email: userInfo.email,
-                roles: userInfo.roles
-            }
+            user_info: userInfo
         });
     } catch (error) {
         console.error("Error in whoami endpoint:", error);

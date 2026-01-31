@@ -4,6 +4,7 @@ import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { EVERYONE_ROLE } from "@fern-api/docs-utils";
 import type { DocsV1Read, DocsV2Read } from "@fern-api/fdr-sdk/client/types";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { FERN_DOCS_ID } from "@fern-docs/components/constants";
@@ -59,7 +60,7 @@ export default async function Layout({
 }) {
     const { host, domain } = await params;
     const isLocalEnvironment = isLocal();
-    const loader = await createCachedDocsLoader(host, domain);
+    const loader = await createCachedDocsLoader(host, domain, undefined, { roles: [EVERYONE_ROLE] });
     const [
         { basePath },
         config,
@@ -190,7 +191,7 @@ export default async function Layout({
                                     edgeFlags.isDefaultSearchFilterOn || (settings.defaultSearchFilters ?? false)
                                 }
                             />
-                            <FernUser domain={domain} host={host} />
+                            <FernUser />
                             <GlobalStyles
                                 domain={domain}
                                 layout={layout}

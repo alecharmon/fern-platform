@@ -10,8 +10,12 @@ import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import {
     COOKIE_FERN_TOKEN,
     conformTrailingSlash,
+    EVERYONE_ROLE,
+    encodeBool,
+    encodeRoles,
     HEADER_X_FERN_BASEPATH,
     HEADER_X_FERN_HOST,
+    HEADER_X_FERN_REVALIDATE_AUTH,
     HEADER_X_FORWARDED_HOST,
     isTrailingSlashEnabled,
     removeLeadingSlash,
@@ -376,7 +380,19 @@ export const middleware: NextMiddleware = async (request) => {
             return NextResponse.redirect(absoluteUrl);
         }
 
-        return rewrite(withDomain(`/dynamic/${encodeURIComponent(conformTrailingSlash(pathname))}`));
+        // Local mode: inject a dynamic role to prevent caching
+        // This ensures pages are always fresh during local development
+        const localTestingRole = `fern-local-testing-${Math.random().toString(36).substring(2, 15)}`;
+        const rolesPath = encodeRoles([EVERYONE_ROLE, localTestingRole]);
+        // In local mode, assume logged in and no auth required (for development convenience)
+        const isLoggedInParam = encodeBool(true);
+        const requiresLoginParam = encodeBool(false);
+        // Path order: [requiresLogin]/[isLoggedIn]/[roles]
+        return rewrite(
+            withDomain(
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+            )
+        );
     }
 
     if (isSelfHosted()) {
@@ -392,26 +408,130 @@ export const middleware: NextMiddleware = async (request) => {
             return NextResponse.redirect(absoluteUrl);
         }
 
-        const rewritePath = withDomain(`/static/${encodeURIComponent(conformTrailingSlash(pathname))}`);
+        // Self-hosted mode: use "everyone" role for static rendering
+        // IMPORTANT: Self-hosted deployments currently do not support authentication.
+        // Auth/roles/password protection is bypassed in self-hosted mode.
+        // If auth support is needed for self-hosted deployments in the future,
+        // this section will need to be updated to check for auth configuration
+        // and handle it appropriately (similar to the production code path below).
+        const rolesPath = encodeRoles([EVERYONE_ROLE]);
+        const isLoggedInParam = encodeBool(false);
+        const requiresLoginParam = encodeBool(false);
+        // Path order: [requiresLogin]/[isLoggedIn]/[roles]
+        const rewritePath = withDomain(
+            `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+        );
         console.log("[middleware] Self-hosted routing decision:", {
             originalPathname: pathname,
             rewritePath,
-            reason: "Self-hosted mode - using static route"
+            reason: "Self-hosted mode - using roles-based route with everyone"
         });
         return rewrite(rewritePath);
     }
+
+    // Check for revalidation auth header - allows revalidation to specify exact auth params
+    // Format: "requiresLogin:true,isLoggedIn:true" or "requiresLogin:false,isLoggedIn:false"
+    const revalidateAuthHeader = request.headers.get(HEADER_X_FERN_REVALIDATE_AUTH);
+    if (revalidateAuthHeader) {
+        const params = Object.fromEntries(
+            revalidateAuthHeader.split(",").map((pair) => {
+                const [key, value] = pair.split(":");
+                return [key, value === "true"];
+            })
+        );
+        const requiresLoginParam = encodeBool(params.requiresLogin ?? false);
+        const isLoggedInParam = encodeBool(params.isLoggedIn ?? false);
+        const rolesPath = encodeRoles([EVERYONE_ROLE]);
+
+        console.log("[middleware] revalidation auth override:", {
+            host,
+            domain,
+            pathname,
+            requiresLogin: params.requiresLogin,
+            isLoggedIn: params.isLoggedIn,
+            rolesPath
+        });
+
+        return rewrite(
+            withDomain(
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+            )
+        );
+    }
+
+    // Log cookie/header presence for debugging auth issues
+    const hasFernTokenCookie = !!request.cookies.get(COOKIE_FERN_TOKEN);
+    const hasFernTokenHeader = !!request.headers.get("FERN_TOKEN");
+    console.log("[middleware] auth debug - token presence:", {
+        host,
+        domain,
+        pathname,
+        hasFernTokenCookie,
+        hasFernTokenHeader,
+        cookieValue: hasFernTokenCookie
+            ? `[present, length=${request.cookies.get(COOKIE_FERN_TOKEN)?.value?.length}]`
+            : "[absent]"
+    });
 
     const { getAuthState } = await createGetAuthStateEdge(request, (token) => {
         newToken = token;
     });
     const authState = await getAuthState(pathname);
 
-    const getResponse = () => {
-        if (authState.authed || request.nextUrl.searchParams.has("error")) {
-            return rewrite(withDomain(`/dynamic/${encodeURIComponent(conformTrailingSlash(pathname))}`));
-        }
+    // Log auth state for debugging
+    console.log("[middleware] auth debug - authState:", {
+        host,
+        domain,
+        pathname,
+        authed: authState.authed,
+        ok: authState.ok,
+        partner: authState.partner,
+        roles: authState.authed ? authState.user.roles : undefined,
+        hasAuthorizationUrl: !authState.authed ? !!authState.authorizationUrl : undefined
+    });
 
-        return rewrite(withDomain(`/static/${encodeURIComponent(conformTrailingSlash(pathname))}`));
+    // Determine roles based on auth state
+    // If authenticated: use user's roles + "everyone"
+    // If not authenticated: use only "everyone"
+    const rawRoles = authState.authed ? [EVERYONE_ROLE, ...(authState.user.roles ?? [])] : [EVERYONE_ROLE];
+
+    // Validate roles and filter out invalid ones (containing commas or empty)
+    // This also sends Slack alerts for invalid roles if DOCS_ROLES_ALERT_WEBHOOK_URL is configured
+    const { safeRoles } = await validateAndFilterRoles(rawRoles, { host, domain, pathname });
+
+    // Ensure we always have at least the "everyone" role
+    const roles = safeRoles.length > 0 ? safeRoles : [EVERYONE_ROLE];
+
+    const rolesPath = encodeRoles(roles);
+
+    // Determine isLoggedIn and requiresLogin from auth state
+    // isLoggedIn: true if user is authenticated
+    // requiresLogin: true if the site has auth configured (authorizationUrl exists when not logged in, or user is logged in)
+    const isLoggedIn = authState.authed;
+    const requiresLogin = authState.authed || (!authState.authed && authState.authorizationUrl != null);
+    const isLoggedInParam = encodeBool(isLoggedIn);
+    const requiresLoginParam = encodeBool(requiresLogin);
+
+    // Log final roles decision
+    console.log("[middleware] auth debug - roles decision:", {
+        host,
+        domain,
+        pathname,
+        rawRoles,
+        safeRoles,
+        finalRoles: roles,
+        rolesPath,
+        isLoggedIn,
+        requiresLogin
+    });
+
+    // Path order: [requiresLogin]/[isLoggedIn]/[roles]
+    const getResponse = () => {
+        return rewrite(
+            withDomain(
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+            )
+        );
     };
 
     const response = getResponse();
@@ -424,6 +544,66 @@ export const middleware: NextMiddleware = async (request) => {
     }
     return response;
 };
+
+/**
+ * Validates roles and returns safe roles (without commas or empty strings).
+ * Logs warnings and optionally sends Slack alerts for invalid roles.
+ */
+async function validateAndFilterRoles(
+    roles: string[],
+    context: { host: string; domain: string; pathname: string }
+): Promise<{ safeRoles: string[]; invalidRoles: string[]; weirdRoles: string[] }> {
+    // Invalid roles: contain commas (would break decoding) or are empty
+    const invalidRoles = roles.filter((role) => role.includes(",") || role.length === 0);
+
+    // Weird roles: contain unusual characters but are still safe to encode
+    // These are logged for visibility but not filtered out
+    const weirdRoles = roles.filter((role) => !invalidRoles.includes(role) && !/^[A-Za-z0-9:_-]+$/.test(role));
+
+    // Filter out invalid roles
+    const safeRoles = roles.filter((role) => !invalidRoles.includes(role));
+
+    // Log and alert if there are invalid roles
+    if (invalidRoles.length > 0) {
+        console.error(
+            `[middleware] Invalid roles detected for ${context.host}/${context.domain}${context.pathname}: ` +
+                `invalid=${JSON.stringify(invalidRoles)}, all=${JSON.stringify(roles)}`
+        );
+
+        // Send Slack alert if webhook is configured
+        const webhookUrl = process.env.SLACK_WEBHOOK_URL_DOCS_INCIDENTS;
+        if (webhookUrl) {
+            try {
+                await fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        text:
+                            `*Docs roles guardrail triggered*\n` +
+                            `Host: \`${context.host}\`\n` +
+                            `Domain: \`${context.domain}\`\n` +
+                            `Path: \`${context.pathname}\`\n` +
+                            `All roles: \`${JSON.stringify(roles)}\`\n` +
+                            `Invalid roles (commas/empty): \`${JSON.stringify(invalidRoles)}\`` +
+                            (weirdRoles.length > 0
+                                ? `\nWeird-but-allowed roles: \`${JSON.stringify(weirdRoles)}\``
+                                : "")
+                    })
+                });
+            } catch (e) {
+                console.error("[middleware] Failed to send Slack roles alert", e);
+            }
+        }
+    } else if (weirdRoles.length > 0) {
+        // Just log weird roles without alerting
+        console.warn(
+            `[middleware] Unusual role characters detected for ${context.host}/${context.domain}${context.pathname}: ` +
+                `weird=${JSON.stringify(weirdRoles)}`
+        );
+    }
+
+    return { safeRoles, invalidRoles, weirdRoles };
+}
 
 export const config: MiddlewareConfig = {
     matcher: [

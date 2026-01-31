@@ -1,6 +1,5 @@
 "use client";
 
-import type { FernUser } from "@fern-api/docs-auth";
 import { t } from "@fern-docs/i18n";
 import type { TableOfContentsItem as TableOfContentsItemType } from "@fern-docs/mdx";
 import fastdom from "fastdom";
@@ -9,7 +8,8 @@ import { useCallbackOne } from "use-memo-one";
 import { cn } from "../cn";
 import { WithFeatureFlags } from "../feature-flags/WithFeatureFlags";
 import { useCurrentAnchor } from "../hooks/use-anchor";
-import { useFernUser } from "../state/fern-user";
+import { useLoggedIn } from "../state/logged-in";
+import { useRoles } from "../state/roles";
 import { TableOfContentsItem } from "./TableOfContentsItem";
 import { useTableOfContentsObserver } from "./useTableOfContentsObserver";
 
@@ -37,7 +37,8 @@ export function clearAnchorJustSet(): void {
 }
 
 export function hasRequiredRole(
-    user: FernUser | undefined,
+    currentRoles: string[],
+    isLoggedIn: boolean,
     roleRequirements?:
         | {
               roles?: string[];
@@ -50,10 +51,8 @@ export function hasRequiredRole(
         return true;
     }
 
-    const userRoles = user?.roles ?? [];
-
     return roleRequirements.every((requirement) => {
-        if (requirement.not && requirement.roles?.length === 0 && userRoles.length > 0) {
+        if (requirement.not && requirement.roles?.length === 0 && currentRoles.length > 0) {
             return true;
         }
 
@@ -62,12 +61,12 @@ export function hasRequiredRole(
         const shouldShow = () => {
             if (roles != null) {
                 if (roles.length === 0) {
-                    return user != null;
+                    return isLoggedIn;
                 }
-                return roles.some((role) => userRoles.includes(role) || role === "everyone");
+                return roles.some((role) => currentRoles.includes(role));
             }
             if (loggedIn != null) {
-                return loggedIn === (user != null);
+                return loggedIn === isLoggedIn;
             }
             return true;
         };
@@ -76,14 +75,18 @@ export function hasRequiredRole(
     });
 }
 
-function filterTocByRoles(items: TableOfContentsItemType[], user: FernUser | undefined): TableOfContentsItemType[] {
+function filterTocByRoles(
+    items: TableOfContentsItemType[],
+    currentRoles: string[],
+    isLoggedIn: boolean
+): TableOfContentsItemType[] {
     return items
         .map((item) => {
-            if (!hasRequiredRole(user, item.roleRequirements)) {
+            if (!hasRequiredRole(currentRoles, isLoggedIn, item.roleRequirements)) {
                 return null;
             }
 
-            const filteredChildren = filterTocByRoles(item.children, user);
+            const filteredChildren = filterTocByRoles(item.children, currentRoles, isLoggedIn);
 
             return {
                 ...item,
@@ -101,12 +104,13 @@ export const TableOfContents: React.FC<TableOfContents.Props> = ({
     hideHeading,
     skipInitialScroll = false
 }) => {
-    const user = useFernUser();
+    const currentRoles = useRoles();
+    const isLoggedIn = useLoggedIn();
 
-    // filter toc items based on user roles
+    // filter toc items based on current roles and logged-in state
     const filteredTableOfContents = useMemo(() => {
-        return filterTocByRoles(tableOfContents, user);
-    }, [tableOfContents, user]);
+        return filterTocByRoles(tableOfContents, currentRoles, isLoggedIn);
+    }, [tableOfContents, currentRoles, isLoggedIn]);
 
     const allAnchors = useMemo(() => {
         const flatten = (items: TableOfContentsItemType[]): string[] =>

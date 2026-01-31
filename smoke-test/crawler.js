@@ -126,6 +126,14 @@ async function crawlSite(startUrl) {
         "Minified React error #418"
     ];
 
+    // Auth endpoints that are expected to return 401 for unauthenticated requests
+    // These console errors should be ignored when they appear on any page
+    const expectedAuth401Patterns = [
+        /\/api\/fern-docs\/get-jwt.*status of 401/,
+        /\/api\/fern-docs\/auth\/.*status of 401/,
+        /\/api\/fern-docs\/whoami.*status of 401/
+    ];
+
     function shouldIgnoreError(url, message) {
         const fullText = `${url} ${message}`;
 
@@ -139,12 +147,64 @@ async function crawlSite(startUrl) {
             return true;
         }
 
+        // Check if this is an expected 401 from auth endpoints (these are normal for unauthenticated requests)
+        if (expectedAuth401Patterns.some((pattern) => pattern.test(message))) {
+            return true;
+        }
+
+        // Generic 401 console errors on explorer pages are expected (API explorer makes auth requests)
+        // The console error message is just "Failed to load resource: the server responded with a status of 401 ()"
+        // without the actual URL, so we check if we're on an explorer page
+        if (/status of 401/.test(message) && url.includes("explorer=true")) {
+            return true;
+        }
+
         // Expected error for external-dependency-test page (tests error boundary)
         if (url.includes("external-dependency-test") && message.includes("[error-boundary-fallback]")) {
             return true;
         }
 
         return false;
+    }
+
+    // Helper function to check if an error is retriable (transient network/timeout issues)
+    function isRetriableError(errorMessage) {
+        const retriablePatterns = [
+            /net::/i,
+            /timeout/i,
+            /navigation timeout/i,
+            /ERR_CONNECTION/i,
+            /ECONNRESET/i,
+            /ECONNREFUSED/i,
+            /ETIMEDOUT/i,
+            /socket hang up/i,
+            /failed to fetch/i
+        ];
+        return retriablePatterns.some((pattern) => pattern.test(errorMessage));
+    }
+
+    // Helper function to navigate to a URL with retry logic for transient failures
+    async function gotoWithRetry(page, url, options, maxRetries = 3) {
+        let lastError;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const response = await page.goto(url, options);
+                return response;
+            } catch (error) {
+                lastError = error;
+                const errorMessage = error.message || "";
+
+                // Only retry on transient errors
+                if (!isRetriableError(errorMessage) || attempt === maxRetries) {
+                    throw error;
+                }
+
+                console.warn(`  ⚠️ Retrying ${url} (attempt ${attempt + 1}/${maxRetries}) due to: ${errorMessage}`);
+                // Wait before retrying (exponential backoff: 2s, 4s)
+                await new Promise((resolve) => setTimeout(resolve, 2000 * attempt));
+            }
+        }
+        throw lastError;
     }
 
     console.log(`Starting crawl...`);
@@ -230,7 +290,8 @@ async function crawlSite(startUrl) {
             }
 
             // Use Puppeteer for all requests (including text files) to maintain cookies
-            const response = await page.goto(currentUrl, {
+            // Use gotoWithRetry to handle transient network/timeout failures
+            const response = await gotoWithRetry(page, currentUrl, {
                 waitUntil: "networkidle2",
                 timeout: 30000
             });

@@ -14,6 +14,7 @@ export * from "./leading-slash";
 export * from "./navigation-subtitle";
 export * from "./path-similarity";
 export * from "./prepareRedirect";
+export * from "./roles";
 export * from "./route-suggestions";
 export * from "./slug-to-href";
 export * from "./string";

@@ -42,28 +42,40 @@ export function withBasicTokenAnonymous(auth: PathnameViewerRules, pathname: str
 
 /**
  * @internal visibleForTesting
+ *
+ * When auth is configured, content requires authentication by default.
+ * To make content publicly accessible, you must explicitly set viewers: ["everyone"].
+ *
+ * The check order is:
+ * 1. If the path is in the denylist, deny access
+ * 2. Check RBAC - if viewers includes "everyone", allow anonymous access
+ * 3. If the path is in the allowlist/anonymous list, allow anonymous access (backwards compatibility)
+ * 4. Default: require authentication
  */
 export function withBasicTokenAnonymousCheck(
     auth: PathnameViewerRules
 ): (node: Partial<NavigationNode>, parents?: readonly NavigationNodeParent[]) => Gate {
     return (node, parents = EMPTY_ARRAY) => {
+        // Check denylist first
+        if (hasMetadata(node) && auth.denylist?.find((path) => matchPath(path, slugToHref(node.slug)))) {
+            return Gate.DENY;
+        }
+
+        // Check RBAC - if viewers includes "everyone", allow anonymous access
+        const predicate = rbacViewGate([], false);
+        const rbacResult = predicate(node as unknown as NavigationNode, parents);
+
+        if (rbacResult === Gate.ALLOW) {
+            return Gate.ALLOW;
+        }
+
+        // Check allowlist/anonymous list for backwards compatibility
         if (hasMetadata(node) && withBasicTokenAnonymous(auth, slugToHref(node.slug)) === Gate.ALLOW) {
             return Gate.ALLOW;
         }
 
-        // Note: this was causing random edge nodes to show "authed=true"
-        // TODO: decide if we should keep this or remove it
-        // if (
-        //     hasMetadata(node) &&
-        //     !isPage(node as NavigationNode) &&
-        //     withBasicTokenAnonymous(auth, slugToHref(node.slug)) === Gate.DENY
-        // ) {
-        //     return Gate.DENY;
-        // }
-
-        const predicate = rbacViewGate([], false);
-
-        return predicate(node as unknown as NavigationNode, parents);
+        // Default: require authentication
+        return Gate.DENY;
     };
 }
 

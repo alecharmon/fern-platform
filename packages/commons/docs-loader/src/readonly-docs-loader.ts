@@ -1481,6 +1481,26 @@ export type DocsLoaderOptions = {
     cacheConfig?: CacheConfig;
     skipAuth?: boolean;
     returnRawMarkdown?: boolean;
+    /**
+     * Roles used for authorization. These roles are used directly instead of extracting from the fern token.
+     * This enables static rendering by encoding roles in the URL path.
+     * The roles should always include "everyone" for unauthenticated access.
+     *
+     * For docs page routes, this should always be provided. API routes that need token-based auth
+     * should not pass this option and instead rely on the fern_token parameter.
+     */
+    roles?: string[];
+    /**
+     * Whether the user is logged in. This is determined by the middleware based on auth state.
+     * Used to properly show/hide login button and handle auth-required sites without roles.
+     */
+    isLoggedIn?: boolean;
+    /**
+     * Whether the site requires authentication (login). This is determined by the middleware based on
+     * whether auth config exists for the site. Used to handle the edge case where a site
+     * requires auth but has no roles defined for any pages.
+     */
+    requiresLogin?: boolean;
 };
 
 export type CachedDocsLoader = DocsLoader & {
@@ -1520,6 +1540,11 @@ const createCachedDocsLoaderImpl = async (
     const authConfig = options?.skipAuth ? Promise.resolve(undefined) : getAuthConfig(domainKey);
     const metadata = getMetadata(config)(withoutStaging(domainKey));
 
+    // Extract options to local variables for proper TypeScript narrowing
+    const rolesFromOptions = options?.roles;
+    const isLoggedInFromOptions = options?.isLoggedIn;
+    const requiresLoginFromOptions = options?.requiresLogin;
+
     const getAuthState = options?.skipAuth
         ? async (_pathname?: string) => ({
               authed: true as const,
@@ -1527,17 +1552,52 @@ const createCachedDocsLoaderImpl = async (
               user: {},
               partner: "custom" as const
           })
-        : cache(async (pathname?: string) => {
-              const { getAuthState } = await createGetAuthState(
-                  host,
-                  domainKey,
-                  fern_token,
-                  await authConfig,
-                  await metadata,
-                  undefined
-              );
-              return await getAuthState(pathname);
-          });
+        : rolesFromOptions != null
+          ? async (_pathname?: string) => {
+                const authed = isLoggedInFromOptions ?? false;
+                if (authed) {
+                    return {
+                        authed: true as const,
+                        ok: true as const,
+                        user: { roles: rolesFromOptions },
+                        partner: "custom" as const
+                    } as const;
+                }
+
+                // User is not logged in - check if we need to get authorizationUrl for login button
+                if (requiresLoginFromOptions) {
+                    const resolvedAuthConfig = await authConfig;
+                    if (resolvedAuthConfig != null) {
+                        const { getAuthState: originalGetAuthState } = await createGetAuthState(
+                            host,
+                            domainKey,
+                            fern_token,
+                            resolvedAuthConfig,
+                            await metadata,
+                            undefined
+                        );
+                        return await originalGetAuthState(_pathname);
+                    }
+                }
+
+                return {
+                    authed: false as const,
+                    ok: true as const,
+                    authorizationUrl: undefined,
+                    partner: undefined
+                } as const;
+            }
+          : cache(async (pathname?: string) => {
+                const { getAuthState } = await createGetAuthState(
+                    host,
+                    domainKey,
+                    fern_token,
+                    await authConfig,
+                    await metadata,
+                    undefined
+                );
+                return await getAuthState(pathname);
+            });
 
     return {
         domain: deriveDomainFromDomainKey(domainKey),
