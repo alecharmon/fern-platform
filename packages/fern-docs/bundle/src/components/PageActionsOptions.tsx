@@ -53,6 +53,7 @@ export const ViewAsMarkdownOption = ({
         helperText: t(lang).documentation.viewThisPageAsPlainText,
         icon: <MarkdownIcon />,
         href: `https://${domain}/${slug}.md`,
+        target: "_blank",
         rightElement: <ExternalLink className="size-icon" />,
         default: defaultOption
     } as FernDropdown.ValueOption;
@@ -96,6 +97,7 @@ export const OpenLLMSTxtOption = ({
         helperText: t(lang).buttons.readLlmsTxt,
         icon: <TextIcon key="llms-txt-logo" />,
         href: `/llms.txt`,
+        target: "_blank",
         default: defaultOption
     } as FernDropdown.ValueOption;
 };
@@ -139,6 +141,7 @@ export const OpenWithLLM = ({
         helperText: t(lang).search.askQuestionsAboutThisPage,
         icon: LLM_URLS[llm][1],
         href: `${LLM_URLS[llm][0]}${encodeURIComponent(prompt)}`,
+        target: "_blank",
         rightElement: <ExternalLink className="size-icon" />,
         default: defaultOption
     } as FernDropdown.ValueOption;
@@ -185,6 +188,7 @@ export const OpenWithCursor = async ({
         // Example MCP server config for Cursor install link
         // See: https://modelcontextprotocol.org/docs/context/mcp
         href: `cursor://anysphere.cursor-deeplink/mcp/install?name=${mcpServerConfig.name}&config=${mcpServerConfigBase64}`,
+        target: "_blank",
         rightElement: <ExternalLink className="size-icon" />,
         default: defaultOption
     } as FernDropdown.ValueOption;
@@ -253,6 +257,7 @@ export const CustomPageActionOption = ({
         helperText: customAction.subtitle,
         icon: renderCustomActionIcon(customAction.icon, files),
         href: resolvedUrl,
+        target: "_blank",
         rightElement: <ExternalLink className="size-icon" />,
         default: customAction.default
     } as FernDropdown.ValueOption;
