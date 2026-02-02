@@ -1,3 +1,4 @@
+import { conformExplorerRoute } from "@fern-api/docs-utils";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { EMPTY_OBJECT } from "@fern-api/ui-core-utils";
 import { CodeExampleClientDropdown } from "@fern-docs/components/api-reference/endpoints/CodeExampleClientDropdown";
@@ -8,7 +9,11 @@ import {
 } from "@fern-docs/components/api-reference/endpoints/useExampleSelection";
 import { CodeSnippetExample } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
 import { cn } from "@fern-docs/components/cn";
+import { ButtonLink } from "@fern-docs/components/FernLinkButton";
+import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { useCurrentVersionSlug } from "@fern-docs/components/state/navigation";
+import { t } from "@fern-docs/i18n";
+import { Play } from "lucide-react";
 import { type ReactElement, useMemo } from "react";
 import { ApiReferenceButton } from "@/components/ApiReferenceButton";
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";
@@ -20,6 +25,7 @@ export function EndpointRequestSnippet({
     lang,
     className,
     highlight,
+    hideTryItButton,
     languages
 }: {
     /**
@@ -50,6 +56,10 @@ export function EndpointRequestSnippet({
      */
     highlight?: number | number[];
     /**
+     * Hide the "Try it" button that opens the API Explorer
+     */
+    hideTryItButton?: boolean;
+    /**
      * Specifies which languages to show and in what order.
      * If not provided, all available languages will be shown with "payload" at the end.
      * Use "payload" to include the request payload option.
@@ -68,6 +78,7 @@ export function EndpointRequestSnippet({
             className={className}
             lang={lang ?? "en"}
             highlight={highlight}
+            hideTryItButton={hideTryItButton}
             languages={languages}
         />
     );
@@ -80,6 +91,7 @@ function EndpointRequestSnippetInternal({
     className,
     lang,
     highlight,
+    hideTryItButton,
     languages
 }: {
     endpoint: ApiDefinition.EndpointDefinition;
@@ -88,6 +100,7 @@ function EndpointRequestSnippetInternal({
     lang: string;
     className?: string;
     highlight?: number | number[];
+    hideTryItButton?: boolean;
     languages?: string[];
 }): ReactElement<any> | null {
     const slug = useCurrentSlug(slugs);
@@ -210,6 +223,11 @@ function EndpointRequestSnippetInternal({
                         {slug != null && <ApiReferenceButton slug={slug} lang={lang} />}
                     </>
                 }
+                tryIt={
+                    slug != null && !hideTryItButton && (endpoint.includeInApiExplorer ?? true) ? (
+                        <TryItButtonTray slug={slug} lang={lang} />
+                    ) : undefined
+                }
                 code={displayCode}
                 language={displayLanguage}
                 json={EMPTY_OBJECT}
@@ -238,3 +256,36 @@ function useCurrentSlug(slugs: string[]): string | undefined {
     const slug = slugs.find((slug) => slug.startsWith(currentVersionSlug + "/"));
     return slug ?? slugs[0];
 }
+
+const TryItButtonTray: React.FC<{ slug: string; lang: string }> = ({ slug, lang }) => {
+    return (
+        <div className="bg-(color:--grayscale-a2) border-card-border flex h-10 justify-end border-t p-2">
+            <div className="flex items-center">
+                <FernTooltipProvider>
+                    <FernTooltip
+                        content={
+                            <span>
+                                {t(lang).apiReference.customizeAndRunIn}
+                                <span className="text-(color:--accent-a11) font-semibold">
+                                    {t(lang).apiReference.apiExplorer}
+                                </span>
+                            </span>
+                        }
+                    >
+                        <ButtonLink
+                            href={conformExplorerRoute(slug)}
+                            target="_blank"
+                            variant="default"
+                            size="xs"
+                            className="font-mono no-underline [&_svg]:size-3"
+                            scroll={false}
+                        >
+                            <Play className="fill-current" />
+                            {t(lang).buttons.tryIt}
+                        </ButtonLink>
+                    </FernTooltip>
+                </FernTooltipProvider>
+            </div>
+        </div>
+    );
+};
