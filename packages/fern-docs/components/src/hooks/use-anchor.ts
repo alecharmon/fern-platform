@@ -1,18 +1,29 @@
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
 import { usePathname, useSearchParams } from "next/navigation";
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 
 export function useCurrentAnchor() {
     const [anchor, setAnchor] = React.useState<string>("");
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    // hack: searchParams creates a new record when anchor is added
-    // this could break if nextjs checks for equality upstream
-    useIsomorphicLayoutEffect(() => {
+    const updateAnchor = useCallback(() => {
         const hash = window.location.hash.slice(1);
         setAnchor(hash);
-    }, [pathname, searchParams]);
+    }, []);
+
+    // Update anchor when pathname or searchParams change
+    useIsomorphicLayoutEffect(() => {
+        updateAnchor();
+    }, [pathname, searchParams, updateAnchor]);
+
+    // Listen for hashchange events to detect when only the hash changes
+    useEffect(() => {
+        window.addEventListener("hashchange", updateAnchor);
+        return () => {
+            window.removeEventListener("hashchange", updateAnchor);
+        };
+    }, [updateAnchor]);
 
     return anchor;
 }
