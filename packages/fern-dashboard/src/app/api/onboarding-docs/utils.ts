@@ -83,10 +83,25 @@ async function _copyDirectory(src: string, dest: string): Promise<void> {
     }
 }
 
+// Cache for replacement regex patterns to avoid recompilation
+const replacementRegexCache = new Map<string, RegExp>();
+
+function getReplacementRegex(placeholder: string): RegExp {
+    let regex = replacementRegexCache.get(placeholder);
+    if (!regex) {
+        regex = new RegExp(placeholder, "g");
+        replacementRegexCache.set(placeholder, regex);
+    }
+    return regex;
+}
+
 async function replaceInFile(filePath: string, replacements: Record<string, string>): Promise<void> {
     let content = await fs.readFile(filePath, "utf-8");
     for (const [placeholder, value] of Object.entries(replacements)) {
-        content = content.replace(new RegExp(placeholder, "g"), value);
+        const regex = getReplacementRegex(placeholder);
+        // Reset lastIndex since we're reusing the regex with global flag
+        regex.lastIndex = 0;
+        content = content.replace(regex, value);
     }
     await fs.writeFile(filePath, content);
 }
