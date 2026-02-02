@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import * as React from "react";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/utils/utils";
 
 import { Button } from "./button";
@@ -109,18 +110,7 @@ const Pagination = ({
     totalPages: number;
     className?: string;
 }) => {
-    const [isMobile, setIsMobile] = React.useState(false);
-    React.useEffect(() => {
-        const mql = window.matchMedia("(max-width: 768px)");
-        const onChange = (e: MediaQueryListEvent | MediaQueryList) => {
-            setIsMobile("matches" in e ? e.matches : (e as MediaQueryList).matches);
-        };
-        onChange(mql);
-        mql.addEventListener("change", onChange as (e: Event) => void);
-        return () => {
-            mql.removeEventListener("change", onChange as (e: Event) => void);
-        };
-    }, []);
+    const isMobile = useIsMobile();
 
     const maxVisiblePages = isMobile ? 3 : 7;
     return (

@@ -2,6 +2,7 @@
 
 import React from "react";
 
+import { MEDIA_QUERIES, useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/utils/utils";
 
 import { useSidepanel } from "./SidepanelContext";
@@ -10,8 +11,10 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
     const containerRef = React.useRef<HTMLDivElement>(null);
     const contentRef = React.useRef<HTMLDivElement>(null);
     const [hasContent, setHasContent] = React.useState(false);
-    // Initialize to true to avoid SSR/window access; update on mount
-    const [isMobile, setIsMobile] = React.useState<boolean>(true);
+    // Use shared media query hook for tablet/mobile detection (max-width: 1023px)
+    const isMobileFromQuery = useMediaQuery(MEDIA_QUERIES.tabletAndBelow);
+    // Default to true during SSR to match original behavior
+    const isMobile = isMobileFromQuery ?? true;
     const { clear, content } = useSidepanel();
     const hasContextContent = content != null;
 
@@ -60,31 +63,6 @@ export function AnimatedSidepanelContainer({ children }: { children: React.React
             mutationObserver.disconnect();
         };
     }, [checkHasContent]);
-
-    React.useLayoutEffect(() => {
-        // Align breakpoint with Tailwind's lg (min-width: 1024px) => mobile is < 1024px
-        const mql = window.matchMedia("(max-width: 1023px)");
-        const onChange = (e: MediaQueryListEvent) => {
-            setIsMobile(e.matches);
-        };
-        // set initial
-        setIsMobile(mql.matches);
-        // add listener with fallback for older browsers
-        if (typeof mql.addEventListener === "function") {
-            mql.addEventListener("change", onChange);
-            return () => {
-                mql.removeEventListener("change", onChange);
-            };
-        } else if (typeof (mql as any).addListener === "function") {
-            (mql as any).addListener(onChange);
-            return () => (mql as any).removeListener(onChange);
-        }
-        // Fallback cleanup: no listener APIs available; keep a benign reference
-        return () => {
-            // Access to maintain a non-empty cleanup; no side effects
-            void mql.matches;
-        };
-    }, []);
 
     if (isMobile) {
         const show = hasContextContent || hasContent;

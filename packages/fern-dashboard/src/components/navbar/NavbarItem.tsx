@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React from "react";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsSidebarCollapsed } from "@/state/sidebar-collapse";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
@@ -53,7 +54,7 @@ export const NavbarItem = ({
     const [hoverAnimating, setHoverAnimating] = React.useState(false);
     const hoverTimeoutRef = React.useRef<number | null>(null);
     const [isHovered, setIsHovered] = React.useState(false);
-    const [isMobile, setIsMobile] = React.useState(false);
+    const isMobile = useIsMobile();
 
     const handleMouseEnter = () => {
         if (isMobile || disabled) {
@@ -84,17 +85,12 @@ export const NavbarItem = ({
         }
     };
 
+    // Clean up hover timeout on unmount
     React.useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-        checkMobile();
-        window.addEventListener("resize", checkMobile);
         return () => {
             if (hoverTimeoutRef.current != null) {
                 window.clearTimeout(hoverTimeoutRef.current);
             }
-            window.removeEventListener("resize", checkMobile);
         };
     }, []);
 

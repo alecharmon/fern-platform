@@ -1,41 +1,19 @@
 "use client";
 
 import { MoreHorizontal } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MEDIA_QUERIES, useMediaQuery } from "@/hooks/use-media-query";
 
 export function NavbarWithOverflow({ children }: { children: React.ReactNode }) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [mounted, setMounted] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-    const [_visibleCount, setVisibleCount] = useState(99);
-
-    useEffect(() => {
-        setMounted(true);
-
-        const calculateVisibleItems = () => {
-            const mobile = window.matchMedia("(max-width: 767px)").matches;
-            setIsMobile(mobile);
-
-            if (!containerRef.current || !mobile) {
-                setVisibleCount(99);
-                return;
-            }
-
-            setVisibleCount(3);
-        };
-
-        calculateVisibleItems();
-        window.addEventListener("resize", calculateVisibleItems);
-        return () => {
-            window.removeEventListener("resize", calculateVisibleItems);
-        };
-    }, []);
+    const isMobile = useMediaQuery(MEDIA_QUERIES.mobile);
 
     const childArray = React.Children.toArray(children);
 
-    const effectiveMobile = mounted && isMobile;
+    // isMobile is undefined during SSR, treat as false (not mobile)
+    const effectiveMobile = isMobile === true;
 
     const mobileVisibleChildren = effectiveMobile
         ? childArray.filter((child) => {
