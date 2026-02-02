@@ -4,9 +4,19 @@ export const rehypeTable: Unified.Plugin<[], any> = () => {
     return (tree) => {
         /**
          * convert <StickyTable><table>...</table></StickyTable> to <table sticky>...</table>
+         * convert <SearchableTable><table>...</table></SearchableTable> to <table searchable>...</table>
+         * convert <StickySearchableTable><table>...</table></StickySearchableTable> to <table sticky searchable>...</table>
          */
         visit(tree, (node, index, parent) => {
-            if (!isMdxJsxElementHast(node) || node.name !== "StickyTable") {
+            if (!isMdxJsxElementHast(node)) {
+                return;
+            }
+
+            if (
+                node.name !== "StickyTable" &&
+                node.name !== "SearchableTable" &&
+                node.name !== "StickySearchableTable"
+            ) {
                 return;
             }
 
@@ -14,7 +24,7 @@ export const rehypeTable: Unified.Plugin<[], any> = () => {
                 return;
             }
 
-            // find the table element inside StickyTable
+            // find the table element inside the wrapper
             const tableChild = node.children.find((child) => child.type === "element" && child.tagName === "table");
 
             if (!tableChild) {
@@ -22,10 +32,17 @@ export const rehypeTable: Unified.Plugin<[], any> = () => {
             }
 
             if (tableChild.type === "element") {
-                tableChild.properties.sticky = true;
+                if (node.name === "StickyTable") {
+                    tableChild.properties.sticky = true;
+                } else if (node.name === "SearchableTable") {
+                    tableChild.properties.searchable = true;
+                } else if (node.name === "StickySearchableTable") {
+                    tableChild.properties.sticky = true;
+                    tableChild.properties.searchable = true;
+                }
             }
 
-            // replace StickyTable with the modified table
+            // replace the wrapper with the modified table
             parent.children[index] = tableChild;
 
             return [SKIP, index];
