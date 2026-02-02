@@ -34,14 +34,18 @@ RUN git clone --depth 1 --branch RELEASE.2025-10-15T17-29-55Z https://github.com
 # This commit already uses golang.org/x/crypto v0.45.0
 RUN go install -v github.com/minio/mc@4f6310723f43b117ca2ab746c6533949d777a5bb
 
-# Build Buf CLI v1.61.0 from source with patched Go to fix CVE-2025-61729
-# and updated quic-go to fix CVE-2025-64702 (GHSA-g754-hx8w-x2g6 - HTTP/3 QPACK Header Expansion DoS)
+# Build Buf CLI v1.64.0 from source with patched Go to fix CVE-2025-61729
+# Explicitly upgrade go-chi/chi to v5.2.4 to fix GHSA-mqqf-5wvp-8fh8 (open redirect in RedirectSlashes middleware)
+# Use GOPROXY=direct to bypass module proxy caching and ensure fresh downloads
+# Clear module cache and explicitly download the correct version before building
 # Clone, update dependencies, and build from source
-RUN git clone --depth 1 --branch v1.61.0 https://github.com/bufbuild/buf.git /tmp/buf && \
+RUN git clone --depth 1 --branch v1.64.0 https://github.com/bufbuild/buf.git /tmp/buf && \
     cd /tmp/buf && \
-    go get github.com/quic-go/quic-go@v0.57.0 && \
+    go clean -modcache && \
+    GOPROXY=direct go get github.com/go-chi/chi/v5@v5.2.4 && \
+    GOPROXY=direct go mod download && \
     go mod tidy && \
-    go build -o $GOPATH/bin/buf ./cmd/buf && \
+    go build -mod=mod -o $GOPATH/bin/buf ./cmd/buf && \
     rm -rf /tmp/buf
 
 # Build protoc-gen-openapi for converting protobuf specs to OpenAPI
