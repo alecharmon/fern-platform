@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronUp, Info } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -77,21 +77,28 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
         });
     }, [data, sortField, sortDirection]);
 
-    const handleSort = (field: string) => {
-        let newDirection: SortDirection;
-        if (sortField === field) {
-            newDirection = sortDirection === "asc" ? "desc" : "asc";
-            setSortDirection(newDirection);
-        } else {
-            setSortField(field);
-            newDirection = "desc";
-            setSortDirection(newDirection);
-        }
-        // Notify parent component of sort change
-        if (onSort) {
-            onSort(field, newDirection);
-        }
-    };
+    const handleSort = useCallback(
+        (field: string) => {
+            let newDirection: SortDirection;
+            if (sortField === field) {
+                newDirection = sortDirection === "asc" ? "desc" : "asc";
+                setSortDirection(newDirection);
+            } else {
+                setSortField(field);
+                newDirection = "desc";
+                setSortDirection(newDirection);
+            }
+            // Notify parent component of sort change
+            if (onSort) {
+                onSort(field, newDirection);
+            }
+        },
+        [sortField, sortDirection, onSort]
+    );
+
+    const handleToggleShowAll = useCallback(() => {
+        setShowAll((prev) => !prev);
+    }, []);
 
     const getSortIcon = (field: string) => {
         if (sortField !== field) {
@@ -270,7 +277,7 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
                         <Button
                             variant="ghost"
                             className="text-muted-foreground hover:text-foreground w-full rounded-none rounded-b-lg transition-colors"
-                            onClick={() => setShowAll(!showAll)}
+                            onClick={handleToggleShowAll}
                         >
                             {showAll ? (
                                 <>

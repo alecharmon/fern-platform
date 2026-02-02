@@ -10,7 +10,7 @@ import {
     useReactTable
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import type { FeedbackEntry, getFeedback } from "@/app/actions/getFeedback";
 import type { DateRangeOptions } from "@/app/services/posthog/types";
@@ -53,6 +53,14 @@ export function FeedbackTable({
     getFeedbackAction
 }: FeedbackTableProps) {
     const [isExporting, setIsExporting] = useState(false);
+
+    const handlePreviousPage = useCallback(() => {
+        onPageChange(pagination.page - 1);
+    }, [onPageChange, pagination.page]);
+
+    const handleNextPage = useCallback(() => {
+        onPageChange(pagination.page + 1);
+    }, [onPageChange, pagination.page]);
 
     const table = useReactTable({
         data: feedback,
@@ -315,7 +323,7 @@ export function FeedbackTable({
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onPageChange(pagination.page - 1)}
+                        onClick={handlePreviousPage}
                         disabled={pagination.page === 1 || isLoading}
                     >
                         <ChevronLeft className="h-4 w-4 mr-1" />
@@ -324,7 +332,7 @@ export function FeedbackTable({
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onPageChange(pagination.page + 1)}
+                        onClick={handleNextPage}
                         disabled={!pagination.hasMore || isLoading}
                     >
                         Next

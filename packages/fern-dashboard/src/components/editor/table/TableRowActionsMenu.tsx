@@ -1,6 +1,6 @@
 import type { NodeViewProps } from "@tiptap/core";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -23,6 +23,26 @@ export default function TableRowActionsMenu(props: NodeViewProps) {
         return index === 0;
     }, [editor, getPos]);
 
+    const handleAddRowBefore = useCallback(() => {
+        const pos = getPos();
+        if (pos !== undefined) {
+            const cellPos = pos + 2; // Add 2 so that we are inside the first cell
+            editor.chain().focus().setTextSelection(cellPos).addRowBefore().run();
+        }
+    }, [editor, getPos]);
+
+    const handleAddRowAfter = useCallback(() => {
+        const pos = getPos();
+        if (pos !== undefined) {
+            const cellPos = pos + 2; // Add 2 so that we are inside the first cell
+            editor.chain().focus().setTextSelection(cellPos).addRowAfter().run();
+        }
+    }, [editor, getPos]);
+
+    const handleDeleteRow = useCallback(() => {
+        deleteRow();
+    }, [deleteRow]);
+
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -33,32 +53,12 @@ export default function TableRowActionsMenu(props: NodeViewProps) {
                 <div className="border-border-default border-t" />
                 <div className="flex flex-col gap-px p-1">
                     {!isHeaderRow && (
-                        <Button
-                            variant="ghost"
-                            onClick={() => {
-                                const pos = getPos();
-                                if (pos !== undefined) {
-                                    const cellPos = pos + 2; // Add 2 so that we are inside the first cell
-                                    editor.chain().focus().setTextSelection(cellPos).addRowBefore().run();
-                                }
-                            }}
-                            className="justify-start"
-                        >
+                        <Button variant="ghost" onClick={handleAddRowBefore} className="justify-start">
                             <ArrowUp className="size-4" />
                             Insert Row Above
                         </Button>
                     )}
-                    <Button
-                        variant="ghost"
-                        onClick={() => {
-                            const pos = getPos();
-                            if (pos !== undefined) {
-                                const cellPos = pos + 2; // Add 2 so that we are inside the first cell
-                                editor.chain().focus().setTextSelection(cellPos).addRowAfter().run();
-                            }
-                        }}
-                        className="justify-start"
-                    >
+                    <Button variant="ghost" onClick={handleAddRowAfter} className="justify-start">
                         <ArrowDown className="size-4" />
                         Insert Row Below
                     </Button>
@@ -68,7 +68,7 @@ export default function TableRowActionsMenu(props: NodeViewProps) {
                             <hr className="border-border-default -mx-1 my-1" />
                             <Button
                                 variant="ghost"
-                                onClick={() => deleteRow()}
+                                onClick={handleDeleteRow}
                                 disabled={disabled}
                                 className="justify-start hover:text-red-600"
                             >
