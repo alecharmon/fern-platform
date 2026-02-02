@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm, useStore } from "@tanstack/react-form";
+import { usePostHog } from "posthog-js/react";
 import type { FormEvent, MouseEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -8,6 +9,7 @@ import {
     storeRepoSetupError,
     storeRepoSetupSuccess
 } from "@/components/onboarding/repoSetupStorage";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +49,7 @@ export function CreateOrganizationForm({
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const availabilityRequestId = useRef(0);
+    const posthog = usePostHog();
 
     const sanitizedInitialName = initialOrganizationName?.trim() ?? "";
     const initialOrgId = sanitizedInitialName ? slugifyOrganizationName(sanitizedInitialName) : "";
@@ -78,6 +81,13 @@ export function CreateOrganizationForm({
                 }
 
                 const data = await response.json();
+
+                // Track organization creation event
+                captureEvent(posthog, PosthogEventName.ORGANIZATION_CREATED, {
+                    organizationId: data.organizationId,
+                    organizationName: value.organizationName.trim() || data.organizationId,
+                    prepopulatedOrgName: sanitizedInitialName || undefined
+                });
 
                 // Fire-and-forget: start setting up the GitHub repo in the background
                 // This will be ready by the time the user finishes the branding step

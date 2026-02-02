@@ -14,6 +14,8 @@ export const PosthogEventName = {
     SDK_DEMO_SCHEDULED: "dashboard-sdk-demo-scheduled",
 
     // Onboarding flow events
+    CREATE_ORGANIZATION_STEP_VIEWED: "dashboard-create-organization-step-viewed",
+    ORGANIZATION_CREATED: "dashboard-organization-created",
     ONBOARDING_PRODUCT_SELECTED: "dashboard-onboarding-product-selected",
     ONBOARDING_DOCS_BRANDING_STEP_VIEWED: "dashboard-onboarding-docs-branding-step-viewed",
     ONBOARDING_DOCS_BRANDING_STEP_COMPLETED: "dashboard-onboarding-docs-branding-step-completed",
@@ -67,6 +69,14 @@ export type PosthogEventPayloads = {
     };
 
     // Onboarding flow event payloads
+    [PosthogEventName.CREATE_ORGANIZATION_STEP_VIEWED]: {
+        prepopulatedOrgName?: string;
+    };
+    [PosthogEventName.ORGANIZATION_CREATED]: {
+        organizationId: string;
+        organizationName: string;
+        prepopulatedOrgName?: string;
+    };
     [PosthogEventName.ONBOARDING_PRODUCT_SELECTED]: {
         product: "docs" | "sdk";
     };
@@ -109,7 +119,7 @@ export type PosthogEventPayloads = {
  * @param name - Event name from PosthogEventName
  * @param properties - Event properties matching the event's payload type
  */
-export function captureEvent<Name extends PosthogEventName>(
+export function captureEvent<Name extends keyof PosthogEventPayloads>(
     posthog: PostHog | null,
     name: Name,
     properties: PosthogEventPayloads[Name]
