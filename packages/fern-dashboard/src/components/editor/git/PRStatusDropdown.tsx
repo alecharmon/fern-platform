@@ -3,7 +3,7 @@
 import { ChevronDownIcon } from "lucide-react";
 import type { GithubPrStatus } from "@/app/services/github/types";
 import { useUpdatePrStatus } from "@/hooks/useUpdatePrStatus";
-import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useGitPrStatus } from "@/providers/GitPRContext";
 
 import { StatusBadge } from "../../ui/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../../ui/select";
@@ -17,7 +17,7 @@ interface PRStatusDropdownProps {
 }
 
 export function PRStatusDropdown({ gitPrUrl }: PRStatusDropdownProps) {
-    const { prStatus, loading } = useGitPrInfo();
+    const { prStatus, loading } = useGitPrStatus();
     const { updatePrStatus, loading: updatePrStatusLoading } = useUpdatePrStatus();
 
     // If the PR does not yet exist, we'll pretend it's a draft

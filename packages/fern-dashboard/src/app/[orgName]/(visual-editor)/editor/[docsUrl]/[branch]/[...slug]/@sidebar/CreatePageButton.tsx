@@ -7,7 +7,7 @@ import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 import { Icon } from "@/components/icon/Icon";
 import { Button } from "@/components/ui/button";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
-import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useGitPrStatus } from "@/providers/GitPRContext";
 
 import { CreateClientPage } from "./CreateClientPage";
 
@@ -22,7 +22,7 @@ export interface CreatePageButtonHandle {
 }
 
 export const CreatePageButton = forwardRef<CreatePageButtonHandle, CreatePageButtonProps>(({ baseFoundNode }, ref) => {
-    const { prStatus } = useGitPrInfo();
+    const { prStatus } = useGitPrStatus();
     const isEditingDisabled = useEditingDisabled();
     const [isOpen, setIsOpen] = useState(false);
     const [sectionId, setSectionId] = useState<string | undefined>(undefined);

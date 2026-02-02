@@ -6,6 +6,62 @@ import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { getPrForBranch } from "@/app/services/dal/github/getPrForBranch";
 import type { GithubPrStatus } from "@/app/services/github/types";
 
+/**
+ * GitPRStatusContext contains PR status data that updates frequently.
+ * Components that only need to read status can subscribe to this context
+ * without re-rendering when config or actions change.
+ */
+export const GitPRStatusContext = createContext<{
+    gitPrUrl: string | undefined;
+    prTitle: string | undefined;
+    loading: boolean;
+    prStatus: GithubPrStatus | undefined;
+    prNumber: number | undefined;
+    isReadyForReview: boolean;
+}>({
+    gitPrUrl: undefined,
+    prTitle: undefined,
+    loading: false,
+    prStatus: undefined,
+    prNumber: undefined,
+    isReadyForReview: false
+});
+
+/**
+ * GitPRConfigContext contains stable configuration and action callbacks.
+ * Components that only need config/actions can subscribe to this context
+ * without re-rendering when status changes.
+ */
+export const GitPRConfigContext = createContext<{
+    site: string;
+    owner: string | undefined;
+    repo: string | undefined;
+    setPrUrl: (url: string) => void;
+    setPrTitle: (title: string) => void;
+    setPrStatus: (status: GithubPrStatus) => void;
+    refetchPrData: () => void;
+}>({
+    site: "",
+    owner: undefined,
+    repo: undefined,
+    setPrUrl: (_url: string) => {
+        return;
+    },
+    setPrTitle: (_title: string) => {
+        return;
+    },
+    setPrStatus: (_status: GithubPrStatus) => {
+        return;
+    },
+    refetchPrData: () => {
+        return;
+    }
+});
+
+/**
+ * Combined context type for backwards compatibility with useGitPrInfo().
+ * This is used internally to provide both contexts' values.
+ */
 export const GitPRContext = createContext<{
     gitPrUrl: string | undefined;
     setPrUrl: (url: string) => void;
@@ -130,9 +186,9 @@ export function GitPRProvider({
         void fetchPrFromBranch();
     }, [fetchPrFromBranch]);
 
-    function setPrUrl(url: string) {
+    const setPrUrl = useCallback((url: string) => {
         setGitPrUrl(url);
-    }
+    }, []);
 
     const refetchPrData = useCallback(() => {
         void fetchPrFromBranch();
@@ -142,26 +198,49 @@ export function GitPRProvider({
         return prStatus === "open";
     }, [prStatus]);
 
+    // Memoized status context value - only changes when status-related values change
+    const statusValue = useMemo(
+        () => ({
+            gitPrUrl,
+            prTitle,
+            loading: isLoading,
+            prStatus,
+            prNumber,
+            isReadyForReview
+        }),
+        [gitPrUrl, prTitle, isLoading, prStatus, prNumber, isReadyForReview]
+    );
+
+    // Memoized config context value - only changes when config/actions change
+    // Note: callbacks are stable due to useCallback, so this rarely changes
+    const configValue = useMemo(
+        () => ({
+            site,
+            owner,
+            repo,
+            setPrUrl,
+            setPrTitle,
+            setPrStatus,
+            refetchPrData
+        }),
+        [site, owner, repo, setPrUrl, refetchPrData]
+    );
+
+    // Combined value for backwards compatibility
+    const combinedValue = useMemo(
+        () => ({
+            ...statusValue,
+            ...configValue
+        }),
+        [statusValue, configValue]
+    );
+
     return (
-        <GitPRContext.Provider
-            value={{
-                prNumber,
-                gitPrUrl,
-                setPrUrl,
-                prTitle,
-                setPrTitle,
-                loading: isLoading,
-                refetchPrData,
-                prStatus,
-                setPrStatus,
-                site,
-                owner,
-                repo,
-                isReadyForReview
-            }}
-        >
-            {children}
-        </GitPRContext.Provider>
+        <GitPRConfigContext.Provider value={configValue}>
+            <GitPRStatusContext.Provider value={statusValue}>
+                <GitPRContext.Provider value={combinedValue}>{children}</GitPRContext.Provider>
+            </GitPRStatusContext.Provider>
+        </GitPRConfigContext.Provider>
     );
 }
 
@@ -170,29 +249,68 @@ export function GitPRProvider({
  * Used when displaying docs in preview mode without GitHub integration.
  */
 export function PreviewGitPRProvider({ children, site }: { children: ReactNode; site: string }) {
+    const statusValue = useMemo(
+        () => ({
+            gitPrUrl: undefined,
+            prTitle: undefined,
+            loading: false,
+            prStatus: "preview" as const,
+            prNumber: undefined,
+            isReadyForReview: false
+        }),
+        []
+    );
+
+    const configValue = useMemo(
+        () => ({
+            site,
+            owner: undefined,
+            repo: undefined,
+            setPrUrl: () => undefined,
+            setPrTitle: () => undefined,
+            setPrStatus: () => undefined,
+            refetchPrData: () => undefined
+        }),
+        [site]
+    );
+
+    const combinedValue = useMemo(
+        () => ({
+            ...statusValue,
+            ...configValue
+        }),
+        [statusValue, configValue]
+    );
+
     return (
-        <GitPRContext.Provider
-            value={{
-                gitPrUrl: undefined,
-                setPrUrl: () => undefined,
-                prTitle: undefined,
-                setPrTitle: () => undefined,
-                loading: false,
-                refetchPrData: () => undefined,
-                prStatus: "preview",
-                setPrStatus: () => undefined,
-                prNumber: undefined,
-                site,
-                owner: undefined,
-                repo: undefined,
-                isReadyForReview: false
-            }}
-        >
-            {children}
-        </GitPRContext.Provider>
+        <GitPRConfigContext.Provider value={configValue}>
+            <GitPRStatusContext.Provider value={statusValue}>
+                <GitPRContext.Provider value={combinedValue}>{children}</GitPRContext.Provider>
+            </GitPRStatusContext.Provider>
+        </GitPRConfigContext.Provider>
     );
 }
 
+/**
+ * Hook to access all Git PR info (backwards compatible).
+ * Use useGitPrStatus() or useGitPrConfig() for more granular subscriptions.
+ */
 export function useGitPrInfo() {
     return useContext(GitPRContext);
+}
+
+/**
+ * Hook to access only PR status data.
+ * Components using this hook won't re-render when config/actions change.
+ */
+export function useGitPrStatus() {
+    return useContext(GitPRStatusContext);
+}
+
+/**
+ * Hook to access only PR config and actions.
+ * Components using this hook won't re-render when status changes.
+ */
+export function useGitPrConfig() {
+    return useContext(GitPRConfigContext);
 }

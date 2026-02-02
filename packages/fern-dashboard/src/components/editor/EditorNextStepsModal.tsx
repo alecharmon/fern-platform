@@ -4,7 +4,7 @@ import { ExternalLinkIcon, Rocket } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
-import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useGitPrStatus } from "@/providers/GitPRContext";
 import { Button } from "../ui/button";
 import { CopyableText } from "../ui/CopyableText";
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
@@ -19,7 +19,7 @@ export interface EditorNextStepsModalProps {
 
 export function EditorNextStepsModal({ open, onOpenChange }: EditorNextStepsModalProps) {
     const [showConfetti, setShowConfetti] = useState(true);
-    const { gitPrUrl, isReadyForReview } = useGitPrInfo();
+    const { gitPrUrl, isReadyForReview } = useGitPrStatus();
     const { gitUrl } = useGitHubRepo();
     const { startConfetti } = useConfetti();
 

@@ -4,12 +4,12 @@ import { Lock } from "lucide-react";
 import { useMemo } from "react";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useBranch } from "@/providers/BranchContext";
-import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useGitPrStatus } from "@/providers/GitPRContext";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 export function PreviewOnlyNotification() {
     const isEditingDisabled = useEditingDisabled();
-    const { loading, prStatus } = useGitPrInfo();
+    const { loading, prStatus } = useGitPrStatus();
     const { branchFailed, branchFailureReason } = useBranch();
 
     const notificationText = useMemo(() => {

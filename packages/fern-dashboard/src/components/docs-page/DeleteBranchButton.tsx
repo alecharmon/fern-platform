@@ -1,7 +1,7 @@
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useGitPrStatus } from "@/providers/GitPRContext";
 
 import { Button } from "../ui/button";
 import {
@@ -22,7 +22,7 @@ export function DeleteBranchButton({
     onBranchDelete: (branch: string) => void;
 }) {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const { prStatus } = useGitPrInfo();
+    const { prStatus } = useGitPrStatus();
 
     const handleDeleteClick = () => {
         if (prStatus === "closed" || prStatus === "merged") {

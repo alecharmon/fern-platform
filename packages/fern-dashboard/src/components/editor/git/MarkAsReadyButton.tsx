@@ -1,10 +1,10 @@
 import { CheckIcon } from "lucide-react";
 import { useUpdatePrStatus } from "@/hooks/useUpdatePrStatus";
-import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useGitPrStatus } from "@/providers/GitPRContext";
 import { Button } from "../../ui/button";
 
 export const MarkAsReadyButton = () => {
-    const { isReadyForReview } = useGitPrInfo();
+    const { isReadyForReview } = useGitPrStatus();
     const { updatePrStatus, loading: updatePrStatusLoading } = useUpdatePrStatus();
 
     return (
