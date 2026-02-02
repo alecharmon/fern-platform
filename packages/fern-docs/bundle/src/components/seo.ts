@@ -215,6 +215,7 @@ export async function generateMetadataFromPage({
                         )
                 },
                 twitter: {
+                    card: frontmatter?.["twitter:card"] ?? config.metadata?.["twitter:card"],
                     site: frontmatter?.["twitter:site"] ?? config.metadata?.["twitter:site"],
                     creator: frontmatter?.["twitter:handle"] ?? config.metadata?.["twitter:handle"],
                     title: frontmatter?.["twitter:title"] ?? config.metadata?.["twitter:title"],
@@ -296,6 +297,7 @@ export async function generateMetadataFromConfig(props: {
                     )
                 },
                 twitter: {
+                    card: config.metadata?.["twitter:card"],
                     site: config.metadata?.["twitter:site"],
                     creator: config.metadata?.["twitter:handle"],
                     title: config.metadata?.["twitter:title"],
