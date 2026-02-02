@@ -117,6 +117,7 @@ export function TabGroup({ children }: { toc?: boolean; children?: ReactNode }) 
     const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
     const anchor = useCurrentAnchor();
     const [selectedLanguage, setSelectedLanguage] = useProgrammingLanguage();
+    const lastProcessedAnchorRef = useRef<string | null>(null);
     const { isWithinEditor } = useEditorComponent();
     const { appendChildrenMdx } = useEditorComponentChildren();
 
@@ -157,11 +158,19 @@ export function TabGroup({ children }: { toc?: boolean; children?: ReactNode }) 
     }, [tabs, activeTabIndex]);
 
     useEffect(() => {
-        if (anchor != null) {
+        // Only process if anchor actually changed to avoid re-processing when sortedTabs changes
+        if (anchor === lastProcessedAnchorRef.current) {
+            return;
+        }
+
+        if (anchor != null && anchor !== "") {
             const tabIndex = sortedTabs.findIndex((tab) => tab.id === anchor);
             if (tabIndex >= 0) {
+                lastProcessedAnchorRef.current = anchor;
                 setActiveTabIndex(tabIndex);
             }
+        } else {
+            lastProcessedAnchorRef.current = anchor;
         }
     }, [anchor, sortedTabs]);
 

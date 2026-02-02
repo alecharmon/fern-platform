@@ -4,7 +4,7 @@ import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 import { useProgrammingLanguage } from "@fern-docs/components/state/language";
 import * as RadixTabs from "@radix-ui/react-tabs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { unwrapChildren } from "../../common/unwrap-children";
 
@@ -61,6 +61,7 @@ export function TabGroup({
     });
     const anchor = useCurrentAnchor();
     const [selectedLanguage, setSelectedLanguage] = useProgrammingLanguage();
+    const lastProcessedAnchorRef = useRef<string | null>(null);
 
     const findParentTab = useCallback(
         (anchor: string) => {
@@ -92,9 +93,15 @@ export function TabGroup({
     }, [tabParam, items]);
 
     useEffect(() => {
-        if (anchor != null) {
+        // Only process if anchor actually changed to avoid re-processing when findParentTab changes
+        if (anchor === lastProcessedAnchorRef.current) {
+            return;
+        }
+
+        if (anchor != null && anchor !== "") {
             const parentTab = findParentTab(anchor);
             if (parentTab) {
+                lastProcessedAnchorRef.current = anchor;
                 setActiveTab(parentTab);
 
                 // If this is a nested header (not the tab itself), scroll to it after the tab opens
@@ -107,6 +114,8 @@ export function TabGroup({
                     }, 100);
                 }
             }
+        } else {
+            lastProcessedAnchorRef.current = anchor;
         }
     }, [anchor, findParentTab]);
 
