@@ -32,7 +32,7 @@ export default async function VersionSelectPage({
         loader.getRoot(),
         loader.getLanguage()
     ]);
-    const useDenseLayout = layout.isHeaderDisabled;
+    const useDenseLayout = layout.isHeaderDisabled || layout.switcherPlacement === "SIDEBAR";
 
     const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
     const collector = FernNavigation.NodeCollector.collect(root);

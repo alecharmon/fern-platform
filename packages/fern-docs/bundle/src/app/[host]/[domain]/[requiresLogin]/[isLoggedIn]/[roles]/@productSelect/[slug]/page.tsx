@@ -25,13 +25,14 @@ export default async function ProductSelectPage({
     const { roles, isLoggedIn, requiresLogin } = decodeAuthContextFromParams(authParams);
     const loader = await createCachedDocsLoader(host, domain, undefined, { roles, isLoggedIn, requiresLogin });
 
-    const [layout, _auth, _flags, root] = await Promise.all([
+    const [layout, _auth, _flags, root, theme] = await Promise.all([
         loader.getLayout(),
         loader.getAuthState(),
         loader.getEdgeFlags(),
-        loader.getRoot()
+        loader.getRoot(),
+        loader.getTheme()
     ]);
-    const useDenseLayout = layout.isHeaderDisabled;
+    const useDenseLayout = layout.isHeaderDisabled || layout.switcherPlacement === "SIDEBAR";
 
     const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
 
@@ -40,5 +41,12 @@ export default async function ProductSelectPage({
         return null;
     }
 
-    return <ProductDropdown loader={loader} fallbackProduct={fallbackProduct} useDenseLayout={useDenseLayout} />;
+    return (
+        <ProductDropdown
+            loader={loader}
+            fallbackProduct={fallbackProduct}
+            useDenseLayout={useDenseLayout}
+            productSwitcherTheme={theme?.productSwitcher}
+        />
+    );
 }
