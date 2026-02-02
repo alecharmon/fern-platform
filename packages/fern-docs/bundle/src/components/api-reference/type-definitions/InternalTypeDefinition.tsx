@@ -91,7 +91,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
                     <WithSeparator separatorText="OR">
                         {shape.variants.map((variant, idx) => (
                             <UndiscriminatedUnionVariant
-                                key={variant.displayName}
+                                key={variant.displayName ?? idx}
                                 unionVariant={variant}
                                 idx={idx}
                                 types={types}
