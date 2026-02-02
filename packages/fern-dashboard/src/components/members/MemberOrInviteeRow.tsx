@@ -2,6 +2,7 @@ import type { Roles } from "@fern-api/user-permissions";
 import { MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
+import { memo } from "react";
 
 import { cn } from "@/utils/utils";
 
@@ -43,7 +44,7 @@ const ROLE_CONFIG: Record<Roles, { label: string; className: string }> = {
     }
 };
 
-function RoleBadge({ role }: { role: Roles }) {
+const RoleBadge = memo(function RoleBadge({ role }: { role: Roles }) {
     const config = ROLE_CONFIG[role];
     return (
         <span
@@ -55,9 +56,9 @@ function RoleBadge({ role }: { role: Roles }) {
             {config.label}
         </span>
     );
-}
+});
 
-export function MemberOrInviteeRow({
+export const MemberOrInviteeRow = memo(function MemberOrInviteeRow({
     title,
     subtitle,
     pictureUrl,
@@ -125,4 +126,4 @@ export function MemberOrInviteeRow({
             </div>
         </div>
     );
-}
+});

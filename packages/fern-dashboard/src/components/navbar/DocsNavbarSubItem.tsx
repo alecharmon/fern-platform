@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { memo } from "react";
 import { useIsSidebarCollapsed } from "@/state/sidebar-collapse";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { cn } from "@/utils/utils";
@@ -12,7 +13,7 @@ interface DocsNavbarSubItemProps {
     urlParam: string;
 }
 
-export function DocsNavbarSubItem({ title, href, urlParam }: DocsNavbarSubItemProps) {
+export const DocsNavbarSubItem = memo(function DocsNavbarSubItem({ title, href, urlParam }: DocsNavbarSubItemProps) {
     const orgName = useOrgNameFromPathname();
     const params = useParams();
     const [isCollapsed] = useIsSidebarCollapsed();
@@ -49,4 +50,4 @@ export function DocsNavbarSubItem({ title, href, urlParam }: DocsNavbarSubItemPr
             {children}
         </Link>
     );
-}
+});

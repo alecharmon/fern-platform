@@ -1,7 +1,7 @@
 import { constructEditorSlug, ROOT_SLUG_ALIAS } from "@fern-docs/components/navigation";
 import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import type { GitSourceRepo } from "@/app/services/github/types";
 import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 import { BranchPRInfo } from "./BranchPRInfo";
 import { DeleteBranchButton } from "./DeleteBranchButton";
 
-export function BranchListItem({
+export const BranchListItem = memo(function BranchListItem({
     branch,
     sourceRepo,
     docsUrl,
@@ -69,4 +69,4 @@ export function BranchListItem({
             {showDivider && <hr className="border-gray-400 dark:border-gray-600" />}
         </>
     );
-}
+});
