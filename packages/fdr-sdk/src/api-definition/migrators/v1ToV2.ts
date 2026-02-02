@@ -235,7 +235,7 @@ export class ApiDefinitionV1ToLatest {
             displayName: v1.name,
             operationId: v1.urlSlug.split("/").pop(),
             description: v1.description,
-            availability: undefined,
+            availability: v1.availability,
             method: v1.method,
             path: v1.path,
             headers: this.migrateParameters(v1.headers),

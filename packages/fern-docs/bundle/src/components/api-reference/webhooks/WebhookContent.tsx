@@ -12,7 +12,7 @@ import {
 } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
 import { WebhookExamplesClient } from "@fern-docs/components/api-reference/webhooks/WebhookExamplesClient";
-import { StatusCodeBadge } from "@fern-docs/components/badges";
+import { AvailabilityBadge, StatusCodeBadge } from "@fern-docs/components/badges";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import { Prose } from "@fern-docs/components/mdx/prose";
@@ -27,6 +27,11 @@ import { ObjectProperty, PropertyRenderer, PropertyWithShape } from "../type-def
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 import { WebhookResponseSection } from "./WebhookResponseSection";
+
+function getAvailabilityBadge(webhook: ApiDefinition.WebhookDefinition, node: FernNavigation.WebhookNode) {
+    const availability = webhook.availability ?? node.availability;
+    return availability ? <AvailabilityBadge availability={availability} rounded /> : null;
+}
 
 export async function WebhookContent({
     serialize,
@@ -75,6 +80,7 @@ export async function WebhookContent({
                     breadcrumb={breadcrumb}
                     title={node.title}
                     action={action}
+                    tags={getAvailabilityBadge(webhook, node)}
                     slug={node.slug}
                     pageActionOptions={pageActionOptions}
                     markdownPromise={markdownPromise}

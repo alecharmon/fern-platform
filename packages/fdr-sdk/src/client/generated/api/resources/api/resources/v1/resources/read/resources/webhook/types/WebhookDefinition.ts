@@ -2,7 +2,7 @@
 
 import type * as FernRegistry from "../../../../../../../../../index.js";
 
-export interface WebhookDefinition extends FernRegistry.api.v1.WithDescription {
+export interface WebhookDefinition extends FernRegistry.api.v1.WithDescription, FernRegistry.api.v1.WithAvailability {
     urlSlug: string;
     migratedFromUrlSlugs: string[] | undefined;
     method: FernRegistry.api.v1.WebhookHttpMethod;

@@ -8,7 +8,9 @@ imports:
 
 types:
   WebhookDefinition:
-    extends: commons.WithDescription
+    extends:
+      - commons.WithDescription
+      - commons.WithAvailability
     properties:
       method: commons.WebhookHttpMethod
       id: rootCommons.WebhookId

@@ -167,6 +167,7 @@ function transformWebhook({
         urlSlug,
         migratedFromUrlSlugs: !isEqual(oldUrlSlug, urlSlug) ? [oldUrlSlug] : undefined,
         description: writeShape.description,
+        availability: writeShape.availability,
         // htmlDescription,
         // descriptionContainsMarkdown: true,
         method: writeShape.method,
