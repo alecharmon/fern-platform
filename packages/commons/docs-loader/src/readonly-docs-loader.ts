@@ -1565,19 +1565,21 @@ const createCachedDocsLoaderImpl = async (
                 }
 
                 // User is not logged in - check if we need to get authorizationUrl for login button
+                // Note: We call createGetAuthState even if resolvedAuthConfig is null because
+                // preview domains may have org-based auth via "authed-previews" config, which is
+                // handled separately from domain-based auth config in createGetAuthState
                 if (requiresLoginFromOptions) {
                     const resolvedAuthConfig = await authConfig;
-                    if (resolvedAuthConfig != null) {
-                        const { getAuthState: originalGetAuthState } = await createGetAuthState(
-                            host,
-                            domainKey,
-                            fern_token,
-                            resolvedAuthConfig,
-                            await metadata,
-                            undefined
-                        );
-                        return await originalGetAuthState(_pathname);
-                    }
+                    const resolvedMetadata = await metadata;
+                    const { getAuthState: originalGetAuthState } = await createGetAuthState(
+                        host,
+                        domainKey,
+                        fern_token,
+                        resolvedAuthConfig,
+                        resolvedMetadata.isPreview ? { org: resolvedMetadata.org, isPreview: true } : undefined,
+                        undefined
+                    );
+                    return await originalGetAuthState(_pathname);
                 }
 
                 return {
