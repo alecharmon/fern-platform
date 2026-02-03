@@ -459,7 +459,8 @@ export class NavigationStore {
             isMarkedForDeletion: false,
             lastModified: Date.now(),
             parentSectionId: targetSectionId,
-            initialMdx: deps.initialMdx
+            // Empty baseline so diff shows all content as new (file didn't exist before)
+            initialMdx: ""
         });
 
         // Extract the docs file path from the target section's navigation context
@@ -649,7 +650,8 @@ export class NavigationStore {
             isMarkedForDeletion: false,
             lastModified: Date.now(),
             parentSectionId: newSectionId,
-            initialMdx: deps.initialMdx
+            // Empty baseline so diff shows all content as new (file didn't exist before)
+            initialMdx: ""
         });
 
         const newSectionResult = findSectionById(this._rootNode, newSectionId);

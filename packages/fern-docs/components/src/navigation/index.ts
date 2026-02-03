@@ -3,6 +3,7 @@ export {
     formatCommitFiles,
     type GitCommitFile
 } from "./commitUtils";
+export { isJsonFilePath } from "./jsonUtils";
 export { branchMatchesUser, generateBranchName, isValidBranchNameFormat } from "./localStorageUtils";
 export * from "./NavigationStorage";
 export * from "./NavigationStore";

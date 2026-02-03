@@ -14,9 +14,9 @@ import {
     type YmlTabItem
 } from "./types";
 
-/** Checks if file path points to a yml file */
+/** Checks if file path points to a yml/yaml file */
 export function isYmlFilePath(filePath: string): boolean {
-    return filePath.endsWith(".yml");
+    return filePath.endsWith(".yml") || filePath.endsWith(".yaml");
 }
 
 /**
