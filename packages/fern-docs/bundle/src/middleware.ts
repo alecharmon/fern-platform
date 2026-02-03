@@ -166,13 +166,18 @@ export const middleware: NextMiddleware = async (request) => {
      */
     if (pathname.includes("/_search/")) {
         const searchPath = withoutBasepath("/_search/");
-        const cleanedPath = searchPath.replace("_search/", "");
+        // Remove "_search/" and normalize by stripping leading slash for consistent regex matching
+        const cleanedPath = searchPath.replace("_search/", "").replace(/^\//, "");
 
         // Only allow search-related endpoints
+        // - indexes - list all indexes
+        // - indexes/{indexName} - get index info
         // - indexes/{indexName}/search - single index search
-        // - multi-search - multi-index search
         // - indexes/{indexName}/facet-search - facet search
+        // - multi-search - multi-index search
         const isAllowedEndpoint =
+            /^indexes\/?$/.test(cleanedPath) ||
+            /^indexes\/[^/]+\/?$/.test(cleanedPath) ||
             /^indexes\/[^/]+\/search\/?$/.test(cleanedPath) ||
             /^indexes\/[^/]+\/facet-search\/?$/.test(cleanedPath) ||
             /^multi-search\/?$/.test(cleanedPath);
@@ -182,9 +187,9 @@ export const middleware: NextMiddleware = async (request) => {
         }
 
         const meiliUrl = `${process.env.NEXT_PUBLIC_MEILISEARCH_ORIGIN ?? "http://localhost:7700"}/${cleanedPath}`;
-        // Clone headers and override Authorization
         const newHeaders = new Headers(headers);
-        newHeaders.set("Authorization", `Bearer ${process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY ?? "fern123!"}`);
+        const meiliKey = process.env.MEILISEARCH_MASTER_KEY ?? process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY;
+        newHeaders.set("Authorization", `Bearer ${meiliKey}`);
 
         return NextResponse.rewrite(meiliUrl, {
             request: { headers: newHeaders }

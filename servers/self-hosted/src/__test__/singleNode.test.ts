@@ -12,6 +12,8 @@ import {
     testDocsUIElements,
     testExternalCallsBlocked,
     testFrontendCacheWorking,
+    testSearchEndpoint,
+    testSearchSensitiveEndpointsBlocked,
     testServicesAfterPort3000Check
 } from "./testHelpers";
 
@@ -220,4 +222,20 @@ describe("Custom components support", () => {
 
         await testCustomComponentsPage(containerId);
     });
+});
+
+describe("MeiliSearch search functionality", () => {
+    it("search endpoint returns valid results", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testSearchEndpoint(containerId);
+    }, 60000);
+
+    it("sensitive search endpoints are blocked", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testSearchSensitiveEndpointsBlocked(containerId);
+    }, 60000);
 });

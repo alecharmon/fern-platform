@@ -19,7 +19,19 @@ SEED_MARKER="$SEED_DIR/.seeded"
 SEED_MINIO_DIR="$SEED_DIR/minio"
 SEED_POSTGRES_DUMP="$SEED_DIR/postgres.dump"
 SEED_MEILI_DUMP="$SEED_DIR/meilisearch/search.dump"
+SEED_MEILI_KEY_FILE="$SEED_DIR/meili-master-key"
 USE_SEEDED_DATA=false
+
+# Load MeiliSearch master key from build-time generated file, or generate a new one
+# This ensures each deployment uses a unique key instead of a hardcoded one
+if [ -f "$SEED_MEILI_KEY_FILE" ]; then
+    MEILI_MASTER_KEY=$(cat "$SEED_MEILI_KEY_FILE")
+    log "Loaded MeiliSearch master key from build-time seed"
+else
+    # Generate a random key if no seeded key exists (e.g., running without build-time seeding)
+    MEILI_MASTER_KEY=$(head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 32)
+    log "Generated new random MeiliSearch master key"
+fi
 
 if [ -f "$SEED_MARKER" ]; then
     log "=========================================="
@@ -272,7 +284,7 @@ MEILI_SEARCH_QUEUE_SIZE="${MEILI_SEARCH_QUEUE_SIZE:-100}"
 log "MeiliSearch search queue size: $MEILI_SEARCH_QUEUE_SIZE"
 
 log "Starting MeiliSearch with db-path: $MEILI_DB_PATH..."
-/meilisearch --master-key="fern123!" --db-path "$MEILI_DB_PATH" --experimental-search-queue-size "$MEILI_SEARCH_QUEUE_SIZE" $MEILI_IMPORT_FLAG 2>&1 | tee /tmp/meilisearch.log | add_timestamps &
+/meilisearch --master-key="$MEILI_MASTER_KEY" --db-path "$MEILI_DB_PATH" --experimental-search-queue-size "$MEILI_SEARCH_QUEUE_SIZE" $MEILI_IMPORT_FLAG 2>&1 | tee /tmp/meilisearch.log | add_timestamps &
 meili_pid=$!
 log "MeiliSearch PID: $meili_pid"
 
@@ -280,7 +292,7 @@ log "MeiliSearch PID: $meili_pid"
 log "Waiting for MeiliSearch to start..."
 MEILI_ATTEMPTS=0
 MAX_MEILI_ATTEMPTS=30
-until curl -f -H "Authorization: Bearer fern123!" http://localhost:7700/health 2>/dev/null; do
+until curl -f -H "Authorization: Bearer $MEILI_MASTER_KEY" http://localhost:7700/health 2>/dev/null; do
     MEILI_ATTEMPTS=$((MEILI_ATTEMPTS + 1))
     if [ $MEILI_ATTEMPTS -ge $MAX_MEILI_ATTEMPTS ]; then
         log "WARNING: MeiliSearch failed to start after $MAX_MEILI_ATTEMPTS attempts"
@@ -298,6 +310,27 @@ if [ $MEILI_ATTEMPTS -lt $MAX_MEILI_ATTEMPTS ]; then
 fi
 
 export MEILISEARCH_URL="http://localhost:7700"
+
+# Fetch the Default Search API Key from MeiliSearch
+# This key has only search permissions, unlike the master key which has full admin access
+# Using the search-only key is more secure as it prevents access to admin endpoints
+log "Fetching MeiliSearch Default Search API Key..."
+MEILI_SEARCH_KEY=""
+KEYS_RESPONSE=$(curl -s -H "Authorization: Bearer $MEILI_MASTER_KEY" "http://localhost:7700/keys" 2>/dev/null)
+if [ -n "$KEYS_RESPONSE" ]; then
+    # Extract the Default Search API Key (has "search" action only)
+    MEILI_SEARCH_KEY=$(echo "$KEYS_RESPONSE" | jq -r '.results[] | select(.name == "Default Search API Key") | .key' 2>/dev/null)
+    if [ -n "$MEILI_SEARCH_KEY" ] && [ "$MEILI_SEARCH_KEY" != "null" ]; then
+        log "Successfully retrieved MeiliSearch Default Search API Key"
+    else
+        log "WARNING: Could not find Default Search API Key, falling back to master key"
+        MEILI_SEARCH_KEY="$MEILI_MASTER_KEY"
+    fi
+else
+    log "WARNING: Could not fetch MeiliSearch keys, falling back to master key"
+    MEILI_SEARCH_KEY="$MEILI_MASTER_KEY"
+fi
+export MEILI_SEARCH_KEY
 # -----------  End MeiliSearch setup  -----------
 
 # -----------  Start Jaeger setup (optional, for debugging)  -----------
@@ -579,7 +612,8 @@ NEXT_PUBLIC_IS_SELF_HOSTED=1 \
 NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}" \
 NEXT_TELEMETRY_DISABLED=1 \
 NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700" \
-NEXT_PUBLIC_MEILISEARCH_API_KEY="fern123!" \
+NEXT_PUBLIC_MEILISEARCH_API_KEY="${MEILI_SEARCH_KEY}" \
+MEILISEARCH_MASTER_KEY="${MEILI_MASTER_KEY}" \
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
 NODE_OPTIONS="--max-old-space-size=${NODEJS_HEAP_SIZE}" \
 node server.js 2>&1 | tee /tmp/nextjs.log | add_timestamps &

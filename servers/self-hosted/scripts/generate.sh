@@ -48,6 +48,18 @@ SEED_MINIO_DIR="$SEED_DIR/minio"
 SEED_MEILI_DIR="$SEED_DIR/meilisearch"
 SEED_POSTGRES_DUMP="$SEED_DIR/postgres.dump"
 SEED_MARKER="$SEED_DIR/.seeded"
+SEED_MEILI_KEY_FILE="$SEED_DIR/meili-master-key"
+
+# Generate a random MeiliSearch master key at build time for security
+# This ensures each deployment has a unique key instead of a hardcoded one
+# Uses /dev/urandom which is available in all Linux environments
+generate_random_key() {
+    # Generate 32 random bytes, encode as base64, then take first 32 alphanumeric chars
+    head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 32
+}
+
+MEILI_MASTER_KEY=$(generate_random_key)
+log "Generated random MeiliSearch master key for this build"
 
 # Timestamp logging function
 log() {
@@ -275,19 +287,38 @@ mkdir -p "$MEILI_DB_PATH"
 # MeiliSearch may use relative paths for dumps, snapshots, and other files
 cd "$MEILI_DB_PATH"
 
-/meilisearch --master-key="fern123!" --db-path "$MEILI_DB_PATH" 2>&1 &
+/meilisearch --master-key="$MEILI_MASTER_KEY" --db-path "$MEILI_DB_PATH" 2>&1 &
 meili_pid=$!
 log "MeiliSearch PID: $meili_pid (db-path: $MEILI_DB_PATH)"
 
 # Wait for MeiliSearch
 for i in {1..30}; do
-    if curl -f -s -H "Authorization: Bearer fern123!" http://localhost:7700/health 2>/dev/null; then
+    if curl -f -s -H "Authorization: Bearer $MEILI_MASTER_KEY" http://localhost:7700/health 2>/dev/null; then
         log "MeiliSearch is ready"
         break
     fi
     log "Waiting for MeiliSearch... ($i/30)"
     sleep 1
 done
+
+# Fetch the Default Search API Key from MeiliSearch
+# This key has only search permissions, unlike the master key which has full admin access
+log "Fetching MeiliSearch Default Search API Key..."
+MEILI_SEARCH_KEY=""
+KEYS_RESPONSE=$(curl -s -H "Authorization: Bearer $MEILI_MASTER_KEY" "http://localhost:7700/keys" 2>/dev/null)
+if [ -n "$KEYS_RESPONSE" ]; then
+    MEILI_SEARCH_KEY=$(echo "$KEYS_RESPONSE" | jq -r '.results[] | select(.name == "Default Search API Key") | .key' 2>/dev/null)
+    if [ -n "$MEILI_SEARCH_KEY" ] && [ "$MEILI_SEARCH_KEY" != "null" ]; then
+        log "Successfully retrieved MeiliSearch Default Search API Key"
+    else
+        log "WARNING: Could not find Default Search API Key, falling back to master key"
+        MEILI_SEARCH_KEY="$MEILI_MASTER_KEY"
+    fi
+else
+    log "WARNING: Could not fetch MeiliSearch keys, falling back to master key"
+    MEILI_SEARCH_KEY="$MEILI_MASTER_KEY"
+fi
+export MEILI_SEARCH_KEY
 
 # -----------  Start MinIO  -----------
 log "Starting MinIO for seeding..."
@@ -634,7 +665,7 @@ NEXT_PUBLIC_IS_SELF_HOSTED=1 \
 NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}" \
 NEXT_TELEMETRY_DISABLED=1 \
 NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700" \
-NEXT_PUBLIC_MEILISEARCH_API_KEY="fern123!" \
+NEXT_PUBLIC_MEILISEARCH_API_KEY="${MEILI_SEARCH_KEY}" \
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
 NODE_OPTIONS="--max-old-space-size=4096" \
 node server.js 2>&1 &
@@ -680,7 +711,7 @@ mkdir -p "$SEED_MEILI_DIR"
 
 # Request a dump from MeiliSearch
 DUMP_RESPONSE=$(curl -s -X POST \
-    -H "Authorization: Bearer fern123!" \
+    -H "Authorization: Bearer $MEILI_MASTER_KEY" \
     -H "Content-Type: application/json" \
     "http://localhost:7700/dumps" 2>&1)
 DUMP_TASK_UID=$(echo "$DUMP_RESPONSE" | jq -r '.taskUid // empty' 2>/dev/null)
@@ -690,7 +721,7 @@ if [ -n "$DUMP_TASK_UID" ]; then
     
     # Wait for dump to complete
     for i in {1..60}; do
-        TASK_STATUS=$(curl -s -H "Authorization: Bearer fern123!" \
+        TASK_STATUS=$(curl -s -H "Authorization: Bearer $MEILI_MASTER_KEY" \
             "http://localhost:7700/tasks/$DUMP_TASK_UID" 2>/dev/null)
         STATUS=$(echo "$TASK_STATUS" | jq -r '.status // "unknown"' 2>/dev/null)
         
@@ -727,6 +758,12 @@ else
 fi
 
 cd /fern
+
+# Save the MeiliSearch master key for runtime use
+# This allows run.sh to use the same key that was generated at build time
+log "Saving MeiliSearch master key for runtime..."
+echo "$MEILI_MASTER_KEY" > "$SEED_MEILI_KEY_FILE"
+chmod 600 "$SEED_MEILI_KEY_FILE"
 
 # Create marker file with metadata
 log "Creating seed marker..."

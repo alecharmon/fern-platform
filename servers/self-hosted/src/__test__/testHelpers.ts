@@ -615,3 +615,110 @@ export async function testCustomComponentsPage(
         `Custom components page failed to become accessible after ${maxRetries} attempts: ${lastError?.message}`
     );
 }
+
+/**
+ * Test that the MeiliSearch search endpoint is accessible and returns valid results
+ * This tests the /_search/indexes/{index}/search endpoint which is proxied through the middleware
+ */
+export async function testSearchEndpoint(
+    containerId: string,
+    docsEndpoint: string = "http://localhost:3000"
+): Promise<void> {
+    const maxRetries = 30;
+    const retryDelay = 1000;
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            // Test the search endpoint with a simple query
+            // The middleware proxies /_search/* to MeiliSearch
+            const { stdout: httpCode } = await execa("docker", [
+                "exec",
+                containerId,
+                "curl",
+                "-s",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}",
+                "-X",
+                "POST",
+                "-H",
+                "Content-Type: application/json",
+                "-d",
+                '{"q":"test","limit":1}',
+                `${docsEndpoint}/_search/indexes/docs/search`
+            ]);
+
+            if (httpCode === "200") {
+                // Verify we get a valid JSON response with search results structure
+                const { stdout: response } = await execa("docker", [
+                    "exec",
+                    containerId,
+                    "curl",
+                    "-s",
+                    "-X",
+                    "POST",
+                    "-H",
+                    "Content-Type: application/json",
+                    "-d",
+                    '{"q":"test","limit":1}',
+                    `${docsEndpoint}/_search/indexes/docs/search`
+                ]);
+
+                const json = JSON.parse(response);
+                // MeiliSearch returns an object with 'hits' array
+                if (!("hits" in json)) {
+                    throw new Error(`Search response missing 'hits' field: ${JSON.stringify(json)}`);
+                }
+
+                // Success!
+                return;
+            }
+
+            lastError = new Error(`Search endpoint returned HTTP ${httpCode}, expected 200`);
+        } catch (error) {
+            lastError = error as Error;
+        }
+
+        if (attempt < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+    }
+
+    throw new Error(`Search endpoint failed after ${maxRetries} attempts: ${lastError?.message}`);
+}
+
+/**
+ * Test that sensitive MeiliSearch endpoints are blocked by the middleware
+ * The middleware should return 403 for endpoints like /keys, /dumps, /tasks, etc.
+ */
+export async function testSearchSensitiveEndpointsBlocked(
+    containerId: string,
+    docsEndpoint: string = "http://localhost:3000"
+): Promise<void> {
+    // List of sensitive endpoints that should be blocked
+    // Note: /_search/indexes is NOT blocked as it's needed to list available indexes
+    const sensitiveEndpoints = ["/_search/keys", "/_search/dumps", "/_search/snapshots", "/_search/tasks"];
+
+    for (const endpoint of sensitiveEndpoints) {
+        const { stdout: httpCode } = await execa("docker", [
+            "exec",
+            containerId,
+            "curl",
+            "-s",
+            "-o",
+            "/dev/null",
+            "-w",
+            "%{http_code}",
+            `${docsEndpoint}${endpoint}`
+        ]);
+
+        if (httpCode !== "403") {
+            throw new Error(
+                `Sensitive endpoint ${endpoint} should return 403 but returned ${httpCode}. ` +
+                    `This is a security issue - sensitive MeiliSearch endpoints should be blocked.`
+            );
+        }
+    }
+}

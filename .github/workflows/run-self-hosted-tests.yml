@@ -616,18 +616,36 @@ jobs:
           fi
           echo "MeiliSearch health check passed"
           
-          # Note: The /_search/ proxy only allows safe search endpoints (indexes/*/search, multi-search, indexes/*/facet-search)
-          # Admin endpoints like /indexes, /stats, /keys are blocked for security reasons
-          echo "Testing that admin endpoints are blocked via /_search/ proxy..."
-          INDEXES_CODE=$(kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/_search/indexes 2>/dev/null || echo "000")
-          echo "Indexes endpoint status: $INDEXES_CODE (expected 403)"
+          # Note: The /_search/ proxy allows safe search endpoints:
+          # - indexes (list all indexes)
+          # - indexes/{indexName} (get index info)
+          # - indexes/{indexName}/search (single index search)
+          # - indexes/{indexName}/facet-search (facet search)
+          # - multi-search (multi-index search)
+          # Admin endpoints like /keys, /dumps, /snapshots, /tasks are blocked for security reasons
           
-          if [ "$INDEXES_CODE" != "403" ]; then
-            echo "ERROR: MeiliSearch indexes endpoint should return 403 Forbidden (got HTTP $INDEXES_CODE)"
+          echo "Testing that indexes endpoint is allowed via /_search/ proxy..."
+          
+          # Capture verbose output for debugging
+          echo "Making request to http://localhost:3000/_search/indexes..."
+          INDEXES_RESPONSE=$(kubectl exec $POD_NAME -- curl -s -v http://localhost:3000/_search/indexes 2>&1 || echo "curl failed")
+          echo "Full response:"
+          echo "$INDEXES_RESPONSE"
+          
+          INDEXES_CODE=$(kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/_search/indexes 2>/dev/null || echo "000")
+          echo "Indexes endpoint status: $INDEXES_CODE (expected 200)"
+          
+          if [ "$INDEXES_CODE" != "200" ]; then
+            echo "ERROR: MeiliSearch indexes endpoint should return 200 OK (got HTTP $INDEXES_CODE)"
+            echo ""
+            echo "=== Capturing pod logs for debugging ==="
+            kubectl logs $POD_NAME --tail=100 || true
+            echo "=== End of pod logs ==="
             exit 1
           fi
-          echo "MeiliSearch indexes endpoint correctly blocked"
+          echo "MeiliSearch indexes endpoint allowed"
           
+          echo "Testing that admin endpoints are blocked via /_search/ proxy..."
           KEYS_CODE=$(kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/_search/keys 2>/dev/null || echo "000")
           echo "Keys endpoint status: $KEYS_CODE (expected 403)"
           
