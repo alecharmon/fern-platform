@@ -101,6 +101,112 @@ echo "World"`;
             expect(gutterElements[2]?.textContent).toBe(">");
         });
 
+        it("should show > for lines inside unclosed single quotes", () => {
+            const bashCode = `curl -X POST https://example.com \\
+     -d '{
+  "name": "value"
+}'`;
+            const tokens = createRawTokens(bashCode, "bash");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} showLineNumbers={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(4);
+            expect(gutterElements[0]?.textContent).toBe("$"); // First line
+            expect(gutterElements[1]?.textContent).toBe(">"); // Backslash continuation + unclosed '
+            expect(gutterElements[2]?.textContent).toBe(">"); // Inside unclosed '
+            expect(gutterElements[3]?.textContent).toBe(">"); // Closes ' at end
+        });
+
+        it("should show > for lines inside unclosed double quotes", () => {
+            const bashCode = `echo "This is a
+multi-line
+string"`;
+            const tokens = createRawTokens(bashCode, "bash");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} showLineNumbers={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(3);
+            expect(gutterElements[0]?.textContent).toBe("$");
+            expect(gutterElements[1]?.textContent).toBe(">");
+            expect(gutterElements[2]?.textContent).toBe(">");
+        });
+
+        it("should show > for lines inside unclosed braces", () => {
+            const bashCode = `jq '{
+  name: .name,
+  value: .value
+}'`;
+            const tokens = createRawTokens(bashCode, "bash");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} showLineNumbers={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(4);
+            expect(gutterElements[0]?.textContent).toBe("$");
+            expect(gutterElements[1]?.textContent).toBe(">");
+            expect(gutterElements[2]?.textContent).toBe(">");
+            expect(gutterElements[3]?.textContent).toBe(">");
+        });
+
+        it("should show > for lines inside unclosed brackets", () => {
+            const bashCode = `echo [
+  "item1",
+  "item2"
+]`;
+            const tokens = createRawTokens(bashCode, "bash");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} showLineNumbers={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(4);
+            expect(gutterElements[0]?.textContent).toBe("$");
+            expect(gutterElements[1]?.textContent).toBe(">");
+            expect(gutterElements[2]?.textContent).toBe(">");
+            expect(gutterElements[3]?.textContent).toBe(">");
+        });
+
+        it("should show $ when all delimiters are closed", () => {
+            const bashCode = `echo '{}'
+echo "done"`;
+            const tokens = createRawTokens(bashCode, "bash");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} showLineNumbers={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(2);
+            expect(gutterElements[0]?.textContent).toBe("$");
+            expect(gutterElements[1]?.textContent).toBe("$"); // New command after delimiters closed
+        });
+
+        it("should not track brackets inside quotes", () => {
+            const bashCode = `echo 'some { brackets } here'
+echo "next command"`;
+            const tokens = createRawTokens(bashCode, "bash");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} showLineNumbers={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(2);
+            expect(gutterElements[0]?.textContent).toBe("$");
+            expect(gutterElements[1]?.textContent).toBe("$"); // Brackets were inside quotes
+        });
+
+        it("should handle the complex curl example correctly", () => {
+            const bashCode = `curl -X POST https://example.com \\
+     -H "Content-Type: application/json" \\
+     -u "<project_id>:<api_token>" \\
+     -d '{
+  "name": "Test name"
+}'`;
+            const tokens = createRawTokens(bashCode, "bash");
+            render(<FernSyntaxHighlighterTokens tokens={tokens} showLineNumbers={true} />);
+
+            const gutterElements = document.querySelectorAll(".code-block-line-gutter");
+            expect(gutterElements.length).toBe(6);
+            expect(gutterElements[0]?.textContent).toBe("$"); // curl command starts
+            expect(gutterElements[1]?.textContent).toBe(">"); // Backslash continuation
+            expect(gutterElements[2]?.textContent).toBe(">"); // Backslash continuation
+            expect(gutterElements[3]?.textContent).toBe(">"); // Backslash continuation + opens '
+            expect(gutterElements[4]?.textContent).toBe(">"); // Inside unclosed '
+            expect(gutterElements[5]?.textContent).toBe(">"); // Closes ' at end
+        });
+
         it("should hide $ and > for bash/cli when showLineNumbers is false", () => {
             const bashCode = `echo "Hello"
 echo "World"`;

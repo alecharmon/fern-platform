@@ -11,6 +11,87 @@ import type { HighlightedTokens } from "./fernShiki";
 import { HastToJSX } from "./HastToJsx";
 import { flattenHighlightLines, getMaxHeight, getTextContent, type HighlightLine } from "./utils";
 
+/**
+ * Calculates gutter symbols for CLI/shell code blocks in a single O(n) pass by tracking:
+ * 1. Line continuations (backslash at end of line)
+ * 2. Unclosed delimiters (quotes, brackets, braces, parentheses)
+ *
+ * Returns an array where each element is "$" for a new command or ">" for continuation lines
+ */
+function calculateCliGutterSymbols(lines: Element[]): string[] {
+    const gutterSymbols: string[] = [];
+
+    // Track state across all lines
+    let inSingleQuote = false;
+    let inDoubleQuote = false;
+    let inBacktick = false;
+    const delimiterStack: string[] = []; // Track open brackets/braces/parens
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line) {
+            gutterSymbols.push("$");
+            continue;
+        }
+
+        const lineText = getTextContent(line);
+
+        // Determine gutter symbol for current line BEFORE processing it
+        if (i === 0) {
+            gutterSymbols.push("$");
+        } else {
+            // Check if previous line ended with backslash (explicit continuation)
+            const prevLine = lines[i - 1];
+            const prevLineText = prevLine ? getTextContent(prevLine) : "";
+            const hasContinuation = prevLineText.trimEnd().endsWith("\\");
+
+            // Check if we have unclosed delimiters from previous lines
+            const hasUnclosedDelimiters = delimiterStack.length > 0 || inSingleQuote || inDoubleQuote || inBacktick;
+
+            gutterSymbols.push(hasContinuation || hasUnclosedDelimiters ? ">" : "$");
+        }
+
+        // Process each character to track delimiters for next line
+        for (let j = 0; j < lineText.length; j++) {
+            const char = lineText[j];
+            const prevChar = j > 0 ? lineText[j - 1] : "";
+
+            // Skip escaped characters
+            if (prevChar === "\\") {
+                continue;
+            }
+
+            // Handle quotes (which take precedence over brackets)
+            if (char === "'" && !inDoubleQuote && !inBacktick) {
+                inSingleQuote = !inSingleQuote;
+                continue;
+            }
+            if (char === '"' && !inSingleQuote && !inBacktick) {
+                inDoubleQuote = !inDoubleQuote;
+                continue;
+            }
+            if (char === "`" && !inSingleQuote && !inDoubleQuote) {
+                inBacktick = !inBacktick;
+                continue;
+            }
+
+            // Only track brackets/braces/parens when not inside quotes
+            if (!inSingleQuote && !inDoubleQuote && !inBacktick) {
+                if (char === "{" || char === "[" || char === "(") {
+                    delimiterStack.push(char);
+                } else if (char === "}" || char === "]" || char === ")") {
+                    const expected = char === "}" ? "{" : char === "]" ? "[" : "(";
+                    if (delimiterStack[delimiterStack.length - 1] === expected) {
+                        delimiterStack.pop();
+                    }
+                }
+            }
+        }
+    }
+
+    return gutterSymbols;
+}
+
 export interface ScrollToHandle {
     scrollTo: (options: ScrollToOptions) => void;
     scrollToLast: (options?: ScrollOptions) => void;
@@ -139,6 +220,7 @@ export const FernSyntaxHighlighterTokens = memo(
         const highlightedLines = useMemo(() => flattenHighlightLines(highlightLines ?? []), [highlightLines]);
         const lines = useMemo(() => {
             const lines: Element[] = [];
+
             visit(tokens.hast, "element", (node) => {
                 if (node.tagName === "code") {
                     node.children.forEach((child) => {
@@ -153,6 +235,10 @@ export const FernSyntaxHighlighterTokens = memo(
 
         const lang = tokens.lang;
         const gutterCli = lang === "cli" || lang === "shell" || lang === "bash";
+
+        // Pre-calculate all CLI gutter symbols in a single O(n) pass
+        const cliGutterSymbols = useMemo(() => (gutterCli ? calculateCliGutterSymbols(lines) : []), [gutterCli, lines]);
+
         const plaintext = tokens.lang === "plaintext" || tokens.lang === "text" || tokens.lang === "txt";
         const shouldShowGutter = !plaintext && showLineNumbers && !hideLinePrefixes;
 
@@ -189,13 +275,7 @@ export const FernSyntaxHighlighterTokens = memo(
                                     {lines.map((line, lineNumber) => {
                                         let gutterSymbol: string | number;
                                         if (gutterCli) {
-                                            if (lineNumber === 0) {
-                                                gutterSymbol = "$";
-                                            } else {
-                                                const prevLine = lines[lineNumber - 1];
-                                                const prevLineText = prevLine != null ? getTextContent(prevLine) : "";
-                                                gutterSymbol = prevLineText.trimEnd().endsWith("\\") ? ">" : "$";
-                                            }
+                                            gutterSymbol = cliGutterSymbols[lineNumber] ?? "$";
                                         } else {
                                             gutterSymbol = lineNumber + 1;
                                         }
