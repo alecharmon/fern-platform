@@ -116,7 +116,12 @@ export function MaybeEnvironmentDropdown({
                                 isEditingEnvironment.setFalse();
                             }
                         }}
-                        className={cn("p-0", isValidInput ? "" : "error", "h-auto w-fit", "flex flex-col")}
+                        className={cn(
+                            "p-0 cursor-pointer",
+                            isValidInput ? "" : "error",
+                            "h-auto w-fit",
+                            "flex flex-col"
+                        )}
                         inputClassName={cn(
                             "px-1",
                             "py-0.5",
@@ -128,7 +133,7 @@ export function MaybeEnvironmentDropdown({
                     />
                 </span>
             ) : (
-                <FernTooltip content={<span>{t(lang).playground.doubleClickToEdit}</span>}>
+                <FernTooltip content={t(lang).playground.doubleClickToEdit} delayDuration={0}>
                     <span className="max-sm:hidden" style={{ pointerEvents: "auto" }}>
                         {options && options.length > 1 && !isEnvironmentReadonly ? (
                             <FernDropdown
@@ -171,15 +176,13 @@ export function MaybeEnvironmentDropdown({
                                 />
                             </FernDropdown>
                         ) : (
-                            <span key="url" className="whitespace-nowrap font-mono max-sm:hidden">
+                            <span
+                                key="url"
+                                className="whitespace-nowrap font-mono max-sm:hidden cursor-pointer p-1 -m-1 rounded-3/2 hover:bg-(color:--grayscale-a3)"
+                            >
                                 {editable && !isEnvironmentReadonly ? (
                                     <span
-                                        className={cn(
-                                            urlTextStyle,
-                                            "p-0",
-                                            small ? "text-xs" : "text-sm",
-                                            "hover:shadow-lg"
-                                        )}
+                                        className={cn(urlTextStyle, "p-0", small ? "text-xs" : "text-sm")}
                                         onDoubleClick={
                                             editable
                                                 ? () => {
