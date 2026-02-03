@@ -82,6 +82,8 @@ class EditableDocsLoader implements DocsLoader {
     getDynamicIr = (apiName: string) => this.readOnlyDocsLoader.getDynamicIr(apiName);
 
     getTypes = (apiName?: string) => this.readOnlyDocsLoader.getTypes(apiName);
+
+    isAskAiEnabledForDocs = () => this.readOnlyDocsLoader.isAskAiEnabledForDocs();
 }
 
 interface GetFernProjectSuccess {

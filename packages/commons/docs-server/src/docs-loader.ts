@@ -196,4 +196,9 @@ export interface DocsLoader<IsAsync extends boolean = true> {
      * @param apiName - Optional name of the API to filter types by
      */
     getTypes: (apiName?: string) => MaybePromise<Record<TypeId, TypeDefinition>, IsAsync>;
+
+    /**
+     * @returns whether Ask AI (Ask Fern) is enabled for this documentation site
+     */
+    isAskAiEnabledForDocs: () => MaybePromise<boolean, IsAsync>;
 }

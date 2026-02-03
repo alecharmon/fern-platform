@@ -215,6 +215,10 @@ export class PrefetchedDocsLoader implements DocsLoader<false> {
         return this.notSupported("getTypes");
     }
 
+    isAskAiEnabledForDocs(): boolean {
+        return this.notSupported("isAskAiEnabledForDocs");
+    }
+
     private notAllowed(methodName: string): never {
         throw new Error(`${methodName} not allowed in client-side loader`);
     }

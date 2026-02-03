@@ -61,6 +61,8 @@ export async function LayoutEvaluator({
     const files = await loader.getFiles();
     const metadata = await loader.getMetadata();
 
+    const isAskAiEnabled = await loader.isAskAiEnabledForDocs();
+
     const pageActions = frontmatter?.["hide-page-actions"]
         ? undefined
         : await constructPageOptions({
@@ -69,7 +71,8 @@ export async function LayoutEvaluator({
               slug,
               lang,
               files,
-              basePath: metadata.basePath
+              basePath: metadata.basePath,
+              isAskAiEnabled
           });
 
     const pageHeader = (

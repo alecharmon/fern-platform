@@ -51,13 +51,15 @@ export default async function ApiEndpointPage({
     const files = await loader.getFiles();
     const theme = await loader.getTheme();
     const metadata = await loader.getMetadata();
+    const isAskAiEnabled = await loader.isAskAiEnabledForDocs();
     const pageActionOptions = await constructPageOptions({
         pageActionConfig: config,
         domain: loader.domain,
         slug: node.slug,
         lang,
         files,
-        basePath: metadata.basePath
+        basePath: metadata.basePath,
+        isAskAiEnabled
     });
 
     const markdownPromise = getMarkdownForPath(node, loader, loader.domain);

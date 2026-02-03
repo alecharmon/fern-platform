@@ -270,7 +270,8 @@ export async function constructPageOptions({
     slug,
     lang,
     files,
-    basePath
+    basePath,
+    isAskAiEnabled
 }: {
     pageActionConfig: Omit<DocsV1Read.DocsConfig, "navigation" | "root">;
     domain: ParamValue;
@@ -278,6 +279,7 @@ export async function constructPageOptions({
     lang: string;
     files?: Record<string, FileData>;
     basePath?: string;
+    isAskAiEnabled?: boolean;
 }): Promise<FernDropdown.PageActionOption[] | undefined> {
     const options: FernDropdown.PageActionOption[] = [];
     if (pageActionConfig.pageActions?.options?.copyPage !== false) {
@@ -343,7 +345,7 @@ export async function constructPageOptions({
         );
     }
 
-    if (pageActionConfig.pageActions?.options?.cursor !== false) {
+    if (pageActionConfig.pageActions?.options?.cursor !== false && isAskAiEnabled) {
         options.push(
             await OpenWithCursor({
                 domain,
