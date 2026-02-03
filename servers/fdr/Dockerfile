@@ -1,7 +1,7 @@
-FROM cgr.dev/chainguard/wolfi-base:latest AS base
-RUN apk add --no-cache nodejs-22 npm
+FROM cgr.dev/chainguard/node:latest-dev AS base
 
 FROM base AS builder
+USER root
 
 # Produce a pruned version of the monorepo
 WORKDIR /app
@@ -11,6 +11,7 @@ RUN turbo prune @fern-platform/fdr --docker
 
 # Add lockfile and package.json's
 FROM base AS installer
+USER root
 RUN npm install -g pnpm@10.27.0 fern-api
 WORKDIR /app
 
@@ -33,7 +34,7 @@ RUN pnpm turbo --filter=@fern-platform/fdr codegen
 RUN pnpm turbo --filter=@fern-platform/fdr compile
 
 FROM base AS runner
-RUN apk add --no-cache ca-certificates openssl bash wget
+USER root
 WORKDIR /app
 
 RUN npm install -g prisma@5.13.0
@@ -43,4 +44,7 @@ ENV DATABASE_URL=$DATABASE_URL
 
 COPY --from=installer /app .
 
-ENTRYPOINT ["/bin/bash", "/app/servers/fdr/scripts/run.sh"]
+# Switch back to non-root user for runtime security
+USER 65532
+
+ENTRYPOINT ["/bin/sh", "/app/servers/fdr/scripts/run.sh"]
