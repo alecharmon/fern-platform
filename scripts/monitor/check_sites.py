@@ -2,6 +2,7 @@ import csv
 import os
 import sys
 import time
+from datetime import datetime, timedelta, timezone
 
 import httpx
 from fern import IncidentEditPayloadV2, IncidentIO
@@ -110,12 +111,28 @@ def create_incident(
 test_incident_id = ""
 test_incident_sites_down = {"US": [], "EU": []}
 
+# Track sites from incidents created within the last 24 hours (even if closed)
+recent_incident_sites = {"US": set(), "EU": set()}
+twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(hours=24)
+
 for incident in list_test_incidents():
     if incident.name == incident_name:
         incident_url = incident.permalink
         incident_category = incident.incident_status.category
 
         print(f"Found incident {incident_url} of status {incident_category}")
+
+        # Track sites from recent incidents (within 24 hours) regardless of status
+        if incident.created_at and incident.created_at >= twenty_four_hours_ago:
+            recent_sites = parse_sites_from_summary(incident.summary or "")
+            for site in recent_sites["US"]:
+                recent_incident_sites["US"].add(site)
+            for site in recent_sites["EU"]:
+                recent_incident_sites["EU"].add(site)
+            print(
+                f"Found recent test incident (created {incident.created_at}), tracking its sites"
+            )
+
         if incident_category in ["declined", "merged", "canceled", "learning", "closed"]:
             continue
 
@@ -135,6 +152,18 @@ for incident in list_standard_incidents():
         incident_category = incident.incident_status.category
 
         print(f"Found incident {incident_url} of status {incident_category}")
+
+        # Track sites from recent incidents (within 24 hours) regardless of status
+        if incident.created_at and incident.created_at >= twenty_four_hours_ago:
+            recent_sites = parse_sites_from_summary(incident.summary or "")
+            for site in recent_sites["US"]:
+                recent_incident_sites["US"].add(site)
+            for site in recent_sites["EU"]:
+                recent_incident_sites["EU"].add(site)
+            print(
+                f"Found recent standard incident (created {incident.created_at}), tracking its sites"
+            )
+
         if incident_category in ["declined", "merged", "canceled", "learning", "closed"]:
             continue
 
@@ -255,8 +284,25 @@ if len(sites_down[region]) == 0:
 
 # Check if this incident should be created/updated/escalated
 
-# If no test or standard incident exists, create a new one
+# If no test or standard incident exists, check for recent incidents before creating
 if test_incident_id == "" and incident_id == "":
+    # Check if all currently down sites were in a recent incident (within 24 hours)
+    all_sites_in_recent_incident = True
+    for site in sites_down[region]:
+        if site not in recent_incident_sites[region]:
+            all_sites_in_recent_incident = False
+            break
+
+    if all_sites_in_recent_incident and len(sites_down[region]) > 0:
+        print(
+            f"All currently down sites were in a recent incident (within 24 hours). "
+            f"Skipping incident creation to avoid re-opening for transient issues."
+        )
+        print(f"Sites down: {sites_down[region]}")
+        print(f"Recent incident sites: {recent_incident_sites[region]}")
+        exit()
+
+    # Create new test incident for sites not covered by recent incidents
     incident = create_incident(
         idempotency_key=f"{region}-{time.time()}",
         name=incident_name,
