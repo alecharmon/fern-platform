@@ -243,6 +243,8 @@ export const middleware: NextMiddleware = async (request) => {
      */
     if (pathname.endsWith("/_mcp/server")) {
         console.log("[middleware] rewriting mcp");
+        // Extract basepath so MCP route can construct correct internal URLs
+        withoutBasepath("/_mcp/server");
         return rewrite(withDomain("/api/fern-docs/mcp"));
     }
 

@@ -1,11 +1,12 @@
 import { getMetadata } from "@fern-api/docs-loader";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
+import { HEADER_X_FERN_BASEPATH } from "@fern-api/docs-utils";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-function createMcpServer(domain: string): McpServer {
+function createMcpServer(domain: string, basepath: string): McpServer {
     const server = new McpServer(
         {
             name: "fern-docs-mcp-server",
@@ -26,9 +27,11 @@ function createMcpServer(domain: string): McpServer {
         },
         async ({ query }) => {
             try {
-                const url = `https://${domain}/api/fern-docs/search/v2/chat`;
+                // Construct base URL with basepath for sites hosted at subpaths (e.g., buildwithfern.com/learn)
+                const baseUrl = basepath === "/" ? `https://${domain}` : `https://${domain}${basepath}`;
+                const url = `${baseUrl}/api/fern-docs/search/v2/chat`;
 
-                const algoliaSearchKey = await fetch(`https://${domain}/api/fern-docs/search/v2/key`);
+                const algoliaSearchKey = await fetch(`${baseUrl}/api/fern-docs/search/v2/key`);
                 if (!algoliaSearchKey.ok) {
                     return {
                         content: [
@@ -142,7 +145,10 @@ async function handleMcpRequest(req: NextRequest, domain: string): Promise<Respo
         cacheKeySuffix: ""
     })(domain);
 
-    const server = createMcpServer(domain);
+    // Get basepath from header set by middleware (defaults to "/" if not set)
+    const basepath = req.headers.get(HEADER_X_FERN_BASEPATH) ?? "/";
+
+    const server = createMcpServer(domain, basepath);
     const transport = new WebStandardStreamableHTTPServerTransport();
     await server.connect(transport);
 
