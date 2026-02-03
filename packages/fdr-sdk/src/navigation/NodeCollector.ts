@@ -208,6 +208,37 @@ export class NodeCollector {
     }
 
     /**
+     * Returns all page slugs grouped by auth requirement for revalidation.
+     * Each page is categorized as either requiring auth or not based on the node's authed property.
+     */
+    #getRevalidationPageSlugs = once((): { authedSlugs: string[]; unauthedSlugs: string[] } => {
+        const authedSlugs: string[] = [];
+        const unauthedSlugs: string[] = [];
+        const seenSlugs = new Set<string>();
+
+        for (const { node } of this.slugToNode.values()) {
+            if (!FernNavigation.isPage(node)) {
+                continue;
+            }
+            if (seenSlugs.has(node.slug)) {
+                continue;
+            }
+            seenSlugs.add(node.slug);
+
+            if (node.authed) {
+                authedSlugs.push(node.slug);
+            } else {
+                unauthedSlugs.push(node.slug);
+            }
+        }
+
+        return { authedSlugs, unauthedSlugs };
+    });
+    get revalidationPageSlugs(): { authedSlugs: string[]; unauthedSlugs: string[] } {
+        return this.#getRevalidationPageSlugs();
+    }
+
+    /**
      * Returns a list of slugs for pages that should be indexed by search engines, and by algolia.
      *
      * This excludes hidden pages and noindex pages, and uses the canonical slug if it exists.

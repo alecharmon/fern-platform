@@ -13,7 +13,6 @@ import { flushPosthog, track } from "@fern-api/docs-server";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
-import { pruneWithAuthState } from "@fern-api/docs-server/withRbac";
 import {
     EVERYONE_ROLE,
     encodeBool,
@@ -32,7 +31,7 @@ import {
     type WebSocketId
 } from "@fern-api/fdr-sdk/api-definition";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
+import { getEdgeFlags } from "@fern-docs/edge-config";
 import { getEnv, waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
 import { mapValues } from "es-toolkit/object";
@@ -104,11 +103,10 @@ async function performRevalidation(params: {
 
     const loadWithUrlPromise = loadWithUrl(domain);
 
-    const [docs, edgeFlags, metadata, authConfig] = await Promise.all([
+    const [docs, edgeFlags, metadata] = await Promise.all([
         loadWithUrlPromise,
         getEdgeFlags(domain),
-        getMetadataFromResponse(withoutStaging(domain), loadWithUrlPromise),
-        getAuthEdgeConfig(domain)
+        getMetadataFromResponse(withoutStaging(domain), loadWithUrlPromise)
     ]);
 
     let reindexPromise: Promise<void> | undefined;
@@ -161,20 +159,6 @@ async function performRevalidation(params: {
     }
 
     const root = convertResponseToRootNode(docs, edgeFlags);
-    let staticRoot = root;
-
-    if (staticRoot && authConfig) {
-        staticRoot = pruneWithAuthState(
-            {
-                authed: false,
-                authorizationUrl: undefined,
-                partner: undefined,
-                ok: true
-            },
-            authConfig,
-            staticRoot
-        );
-    }
 
     try {
         const keys: Record<string, unknown> = {};
@@ -386,38 +370,16 @@ async function performRevalidation(params: {
             return queue.process(slugs);
         };
 
-        // Sites with auth: only cache authed view (requiresLogin=true, isLoggedIn=true)
-        // Sites without auth: only cache unauthed view (requiresLogin=false, isLoggedIn=false)
-        if (authConfig && root) {
-            const authedCollector = FernNavigation.NodeCollector.collect(root);
-            controller.log(`revalidate-queued[auth]:urls=${authedCollector.slugs.length}\n`);
+        // Revalidate all pages, grouping by auth requirement
+        const collector = FernNavigation.NodeCollector.collect(root);
+        const { authedSlugs, unauthedSlugs } = collector.revalidationPageSlugs;
 
-            const authResult = await createRevalidationQueue(
-                authedCollector.staticPageSlugs,
-                { requiresLogin: true, isLoggedIn: true },
-                "auth"
-            );
-
-            if (authResult.failed > 0) {
-                console.error(`[revalidate] ${authResult.failed} auth pages failed permanently after ${3} retries`);
-                track("revalidate_pages_failed_permanently", {
-                    domain,
-                    failedCount: authResult.failed,
-                    totalCount: authResult.total,
-                    authMode: "auth"
-                });
-            }
-
-            controller.log(
-                `revalidate-pages-finished[auth]:total=${authResult.total};` +
-                    `completed=${authResult.completed};failed=${authResult.failed}\n`
-            );
-        } else {
-            const collector = FernNavigation.NodeCollector.collect(staticRoot);
-            controller.log(`revalidate-queued[unauth]:urls=${collector.slugs.length}\n`);
+        // Revalidate unauthed pages first
+        if (unauthedSlugs.length > 0) {
+            controller.log(`revalidate-queued[unauth]:urls=${unauthedSlugs.length}\n`);
 
             const unauthResult = await createRevalidationQueue(
-                collector.staticPageSlugs,
+                unauthedSlugs,
                 { requiresLogin: false, isLoggedIn: false },
                 "unauth"
             );
@@ -435,6 +397,32 @@ async function performRevalidation(params: {
             controller.log(
                 `revalidate-pages-finished[unauth]:total=${unauthResult.total};` +
                     `completed=${unauthResult.completed};failed=${unauthResult.failed}\n`
+            );
+        }
+
+        // Revalidate authed pages
+        if (authedSlugs.length > 0) {
+            controller.log(`revalidate-queued[auth]:urls=${authedSlugs.length}\n`);
+
+            const authResult = await createRevalidationQueue(
+                authedSlugs,
+                { requiresLogin: true, isLoggedIn: true },
+                "auth"
+            );
+
+            if (authResult.failed > 0) {
+                console.error(`[revalidate] ${authResult.failed} auth pages failed permanently after ${3} retries`);
+                track("revalidate_pages_failed_permanently", {
+                    domain,
+                    failedCount: authResult.failed,
+                    totalCount: authResult.total,
+                    authMode: "auth"
+                });
+            }
+
+            controller.log(
+                `revalidate-pages-finished[auth]:total=${authResult.total};` +
+                    `completed=${authResult.completed};failed=${authResult.failed}\n`
             );
         }
     }
