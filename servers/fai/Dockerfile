@@ -6,7 +6,7 @@ RUN apt-get update && \
     apt-get install -y git curl && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --upgrade pip==25.3
+RUN pip3 install --upgrade pip==26.0
 RUN pip3 install memray
 RUN pip3 install uvicorn
 RUN pip3 install poetry

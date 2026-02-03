@@ -13,7 +13,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
-RUN pip3 install --upgrade pip==25.3
+RUN pip3 install --upgrade pip==26.0
 RUN pip3 install poetry
 
 # Set working directory (Lambda convention within repo layout)
