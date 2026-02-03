@@ -10,6 +10,7 @@ import {
     getMetadataFromResponse
 } from "@fern-api/docs-loader";
 import { flushPosthog, track } from "@fern-api/docs-server";
+import { fernToken_admin } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
@@ -293,7 +294,7 @@ async function performRevalidation(params: {
                             method: fetchMethod,
                             headers: {
                                 [HEADER_X_FERN_HOST]: domain,
-                                [HEADER_X_FERN_REVALIDATE_AUTH]: `requiresLogin:${authParams.requiresLogin},isLoggedIn:${authParams.isLoggedIn}`
+                                [HEADER_X_FERN_REVALIDATE_AUTH]: `requiresLogin:${authParams.requiresLogin},isLoggedIn:${authParams.isLoggedIn},token:${fernToken_admin()}`
                             },
                             signal: AbortSignal.timeout(600_000)
                         });

@@ -437,25 +437,41 @@ export const middleware: NextMiddleware = async (request) => {
     }
 
     // Check for revalidation auth header - allows revalidation to specify exact auth params
-    // Format: "requiresLogin:true,isLoggedIn:true" or "requiresLogin:false,isLoggedIn:false"
+    // Format: "requiresLogin:true,isLoggedIn:true,token:SECRET" or "requiresLogin:false,isLoggedIn:false,token:SECRET"
+    // SECURITY: The token must match FERN_TOKEN to prevent spoofing attacks
     const revalidateAuthHeader = request.headers.get(HEADER_X_FERN_REVALIDATE_AUTH);
     if (revalidateAuthHeader) {
         const params = Object.fromEntries(
             revalidateAuthHeader.split(",").map((pair) => {
-                const [key, value] = pair.split(":");
-                return [key, value === "true"];
+                const [key, ...valueParts] = pair.split(":");
+                const value = valueParts.join(":");
+                return [key, value];
             })
         );
-        const requiresLoginParam = encodeBool(params.requiresLogin ?? false);
-        const isLoggedInParam = encodeBool(params.isLoggedIn ?? false);
+
+        // Validate the token before trusting the auth params
+        const providedToken = params.token;
+        const expectedToken = fernToken_admin();
+        if (!providedToken || providedToken !== expectedToken) {
+            console.warn("[middleware] revalidation auth header rejected - invalid or missing token", {
+                host,
+                domain,
+                pathname,
+                hasToken: !!providedToken
+            });
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const requiresLoginParam = encodeBool(params.requiresLogin === "true");
+        const isLoggedInParam = encodeBool(params.isLoggedIn === "true");
         const rolesPath = encodeRoles([EVERYONE_ROLE]);
 
         console.log("[middleware] revalidation auth override:", {
             host,
             domain,
             pathname,
-            requiresLogin: params.requiresLogin,
-            isLoggedIn: params.isLoggedIn,
+            requiresLogin: params.requiresLogin === "true",
+            isLoggedIn: params.isLoggedIn === "true",
             rolesPath
         });
 
