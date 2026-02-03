@@ -195,12 +195,7 @@ export function CreateRedirectModal({
                                 >
                                     From
                                 </label>
-                                <Input
-                                    id="source-path"
-                                    value={sourcePath}
-                                    disabled
-                                    className="mt-1 bg-gray-100 dark:bg-gray-800"
-                                />
+                                <Input id="source-path" value={sourcePath} disabled className="mt-1" />
                             </div>
                             <div>
                                 <label
@@ -336,7 +331,7 @@ export function CreateRedirectModal({
                             Dismiss
                         </Button>
                         <Button type="submit" disabled={isLoading || !destinationPath.trim() || prUrl != null}>
-                            {isLoading ? "Creating..." : prUrl ? "Redirect Created" : "Create Redirect"}
+                            {isLoading ? "Creating..." : prUrl ? "Redirect PR Created" : "Create Redirect PR"}
                         </Button>
                     </DialogFooter>
                 </form>
