@@ -26,9 +26,9 @@ function createMcpServer(domain: string): McpServer {
         },
         async ({ query }) => {
             try {
-                const url = `http://${domain}/api/fern-docs/search/v2/chat`;
+                const url = `https://${domain}/api/fern-docs/search/v2/chat`;
 
-                const algoliaSearchKey = await fetch(`http://${domain}/api/fern-docs/search/v2/key`);
+                const algoliaSearchKey = await fetch(`https://${domain}/api/fern-docs/search/v2/key`);
                 if (!algoliaSearchKey.ok) {
                     return {
                         content: [
