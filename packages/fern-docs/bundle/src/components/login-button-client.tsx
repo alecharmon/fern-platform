@@ -12,6 +12,14 @@ export function LoginButtonClient({
     returnToQueryParam,
     showIcon = false,
     lang,
+    href,
+    as: _as,
+    replace: _replace,
+    scroll: _scroll,
+    shallow: _shallow,
+    passHref: _passHref,
+    prefetch: _prefetch,
+    ref: _ref,
     ...props
 }: {
     authed: boolean;
@@ -20,18 +28,12 @@ export function LoginButtonClient({
     lang: string;
 } & ComponentProps<typeof ButtonLink>) {
     if (authed) {
-        return (
-            <LogoutButton
-                showIcon={showIcon}
-                lang={lang}
-                {...props}
-            />
-        );
+        return <LogoutButton showIcon={showIcon} lang={lang} href={href} {...props} />;
     }
 
     return (
         <WithReturnTo queryParam={returnToQueryParam}>
-            <ButtonLink variant="outline" {...props} target="_self">
+            <ButtonLink variant="outline" href={href} {...props} target="_self">
                 {t(lang).auth.login}
                 {showIcon && <LogInIcon />}
             </ButtonLink>
@@ -47,10 +49,10 @@ function LogoutButton({
 }: {
     showIcon?: boolean;
     lang: string;
-    href: string;
+    href: ComponentProps<typeof ButtonLink>["href"];
 } & Omit<ComponentProps<typeof Button>, "onClick">) {
     const handleLogout = () => {
-        window.location.replace(href);
+        window.location.replace(String(href));
     };
 
     return (
