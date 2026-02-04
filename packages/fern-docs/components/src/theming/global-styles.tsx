@@ -203,6 +203,7 @@ export function GlobalStyles({
         }
 
         ${hasTheme ? lightSelector : scopeSelector} {
+          color-scheme: ${light ? "light" : "dark"};
           --accent: ${root?.accent ?? FERN_COLOR_ACCENT};
           --background: ${root?.background ?? (light ? "#fff" : "#000")};
           --border: ${domain.includes("nominal") ? "#000" : (root?.border ?? "initial")};
@@ -215,6 +216,7 @@ export function GlobalStyles({
         ${
             hasTheme && dark
                 ? `${darkSelector} {
+          color-scheme: dark;
           --accent: ${dark?.accent ?? FERN_COLOR_ACCENT};
           --background: ${dark.background ?? "#000"};
           --border: ${domain.includes("nominal") ? "#fff" : (dark.border ?? "initial")};
@@ -225,10 +227,11 @@ export function GlobalStyles({
         }`
                 : !hasTheme && !!light
                   ? `${darkSelector} {
+          color-scheme: light;
           --background: ${fallbackDark.background};
           --accent: ${fallbackDark.accent};
         }`
-                  : `${darkSelector} { --background: ${dark?.background ?? "#000"}; }`
+                  : `${darkSelector} { color-scheme: dark; --background: ${dark?.background ?? "#000"}; }`
         }
 
         ${

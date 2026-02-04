@@ -14,6 +14,7 @@
  * - .dark/.light at start → .dark/.light scopeSelector
  * - :is(.dark)/:is(.light) → .dark/.light scopeSelector
  * - Regular selectors → scopeSelector selector
+ * - color-scheme declarations are stripped (Editor controls theme rendering)
  */
 
 interface ScopeCssOptions {
@@ -81,7 +82,8 @@ export function scopeCss(css: string, options: ScopeCssOptions): string {
             const scopedSelectors = rule.selectors.map((selector) =>
                 scopeSelector_internal(selector.trim(), allScopeSelectors)
             );
-            result.push(`${scopedSelectors.join(",\n")} ${rule.block}`);
+            const filteredBlock = stripColorScheme(rule.block);
+            result.push(`${scopedSelectors.join(",\n")} ${filteredBlock}`);
             i = rule.end;
             continue;
         }
@@ -438,4 +440,16 @@ function scopeSelector_internal(selector: string, scopeSelectors: string[]): str
 
     // Default: prepend scope selector
     return scopeSelectors.map((s) => `${s} ${selector}`).join(",\n");
+}
+
+/**
+ * Strips color-scheme declarations from a CSS block.
+ * This allows the Editor to fully control theme rendering via its own color-scheme settings.
+ * Without this, customer CSS with `color-scheme: light dark` would make light-dark()
+ * respond to system preferences instead of the Editor's theme control.
+ */
+function stripColorScheme(block: string): string {
+    // Match color-scheme property declarations (handles various whitespace patterns)
+    // Matches: color-scheme: light; or color-scheme: dark; or color-scheme: light dark; etc.
+    return block.replace(/\s*color-scheme\s*:\s*[^;]+;\s*/gi, " ");
 }

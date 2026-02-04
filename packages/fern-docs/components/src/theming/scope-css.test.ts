@@ -110,4 +110,42 @@ describe("scopeCss", () => {
             expect(result).toContain(`[data-testid=dropdown] .foo`);
         });
     });
+
+    describe("color-scheme stripping", () => {
+        it("strips color-scheme: light from CSS blocks", () => {
+            const input = `:root { color-scheme: light; --color: red; }`;
+            const result = scopeCss(input, { scopeSelector: SCOPE });
+            expect(result).not.toContain("color-scheme");
+            expect(result).toContain("--color: red");
+        });
+
+        it("strips color-scheme: dark from CSS blocks", () => {
+            const input = `:root { color-scheme: dark; --bg: black; }`;
+            const result = scopeCss(input, { scopeSelector: SCOPE });
+            expect(result).not.toContain("color-scheme");
+            expect(result).toContain("--bg: black");
+        });
+
+        it("strips color-scheme: light dark from CSS blocks", () => {
+            const input = `:root { color-scheme: light dark; --accent: blue; }`;
+            const result = scopeCss(input, { scopeSelector: SCOPE });
+            expect(result).not.toContain("color-scheme");
+            expect(result).toContain("--accent: blue");
+        });
+
+        it("strips color-scheme with extra whitespace", () => {
+            const input = `:root {   color-scheme:   light   ;  --color: red; }`;
+            const result = scopeCss(input, { scopeSelector: SCOPE });
+            expect(result).not.toContain("color-scheme");
+            expect(result).toContain("--color: red");
+        });
+
+        it("preserves other CSS properties when stripping color-scheme", () => {
+            const input = `:root { color-scheme: light dark; --accent-12: light-dark(var(--gray-90), var(--gray-0)); --bg: white; }`;
+            const result = scopeCss(input, { scopeSelector: SCOPE });
+            expect(result).not.toContain("color-scheme:");
+            expect(result).toContain("--accent-12: light-dark(var(--gray-90), var(--gray-0))");
+            expect(result).toContain("--bg: white");
+        });
+    });
 });
