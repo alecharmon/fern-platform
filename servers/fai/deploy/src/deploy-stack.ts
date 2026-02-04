@@ -45,6 +45,7 @@ export interface FernAiEnvVariables {
     KV_REST_API_URL: string;
     VENUS_URL: string;
     FAI_REINDEXING_SQS_URL: string;
+    EDGE_CONFIG: string;
     [key: string]: string;
 }
 
