@@ -11,6 +11,10 @@ env:
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   dev:
     if: github.event_name == 'push'
