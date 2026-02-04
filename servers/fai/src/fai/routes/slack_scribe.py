@@ -76,9 +76,6 @@ async def handle_scribe_slack_events(request: Request, background_tasks: Backgro
                     return JSONResponse(content={"status": "ok"})
 
             if event_type == "app_mention":
-                if event.get("bot_id"):
-                    return JSONResponse(content={"status": "ok"})
-
                 if message_ts:
                     await mark_scribe_message_processed(team_id, message_ts)
 
