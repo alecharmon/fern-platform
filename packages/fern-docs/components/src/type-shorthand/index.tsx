@@ -1,4 +1,5 @@
 import {
+    type ObjectPropertyAccess,
     type PrimitiveType,
     type TypeDefinition,
     type TypeShapeOrReference,
@@ -23,6 +24,8 @@ export interface TypeShorthandRootOptions {
     lang: string;
     // When true, capitalizes first letter of types to follow GraphQL conventions
     isGraphQL?: boolean;
+    // Property access modifier (READ_ONLY or WRITE_ONLY)
+    propertyAccess?: ObjectPropertyAccess;
 }
 
 export interface TypeShorthandOptions {
@@ -93,7 +96,8 @@ export function renderTypeShorthandRoot({
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     onChange = () => {},
     lang,
-    isGraphQL = false
+    isGraphQL = false,
+    propertyAccess
 }: TypeShorthandRootOptions): ReactNode {
     const unwrapped = unwrapReference(shape, types);
     const typeShorthand = renderTypeShorthand(
@@ -130,6 +134,9 @@ export function renderTypeShorthandRoot({
                 false
             ) : (
                 <span className="fern-api-property-optional">{t(lang).apiReference.optional}</span>
+            )}
+            {!hideAllModifiers && propertyAccess === "READ_ONLY" && (
+                <span className="fern-api-property-readonly">{t(lang).apiReference.readonly}</span>
             )}
             {unwrapped.shape.type === "primitive" &&
                 toPrimitiveTypeLabels({ primitive: unwrapped.shape.value, lang }).map((label, index) => (

@@ -146,6 +146,7 @@
     "authType": "認証タイプ",
     "deprecated": "非推奨",
     "required": "必須",
+    "readonly": "読み取り専用",
     "allowedValues": "許可された値",
     "any": "任意",
     "orNull": "または null",

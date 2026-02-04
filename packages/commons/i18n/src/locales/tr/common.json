@@ -146,6 +146,7 @@
     "authType": "Kimlik doğrulama türü",
     "deprecated": "Kullanımdan kaldırıldı",
     "required": "Zorunlu",
+    "readonly": "Salt okunur",
     "allowedValues": "İzin verilen değerler",
     "any": "herhangi bir",
     "orNull": "veya null",

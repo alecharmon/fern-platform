@@ -146,6 +146,7 @@
     "authType": "Auth-Typ",
     "deprecated": "Veraltet",
     "required": "Erforderlich",
+    "readonly": "Schreibgeschützt",
     "allowedValues": "Erlaubte Werte",
     "any": "beliebig",
     "orNull": "oder null",

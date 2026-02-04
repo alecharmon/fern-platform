@@ -146,6 +146,7 @@
     "authType": "Typ uwierzytelniania",
     "deprecated": "Przestarzałe",
     "required": "Wymagany",
+    "readonly": "Tylko do odczytu",
     "allowedValues": "Dozwolone wartości",
     "any": "dowolny",
     "orNull": "lub null",

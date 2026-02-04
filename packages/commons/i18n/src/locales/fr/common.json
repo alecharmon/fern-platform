@@ -146,6 +146,7 @@
     "authType": "Type d'authentification",
     "deprecated": "Obsolète",
     "required": "Requis",
+    "readonly": "Lecture seule",
     "allowedValues": "Valeurs autorisées",
     "any": "n'importe quel",
     "orNull": "ou null",

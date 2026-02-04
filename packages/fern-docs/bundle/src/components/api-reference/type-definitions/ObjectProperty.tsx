@@ -60,6 +60,7 @@ export const ObjectProperty = React.memo(function ObjectProperty({
             lang={lang}
             badge={badge}
             isGraphQL={isGraphQL}
+            propertyAccess={property.propertyAccess}
         />
     );
 });
@@ -76,7 +77,8 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     additionalProperties,
     lang,
     badge,
-    isGraphQL = false
+    isGraphQL = false,
+    propertyAccess
 }: {
     icon?: React.ReactNode;
     name?: string;
@@ -91,6 +93,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     lang: string;
     badge?: React.ReactNode;
     isGraphQL?: boolean;
+    propertyAccess?: ApiDefinition.ObjectPropertyAccess;
 }) {
     return (
         <PropertyRenderer
@@ -98,7 +101,9 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
             description={description}
             serializedDescription={serializedDescription}
             renderedDescription={renderedDescription}
-            typeShorthand={<TypeShorthand shape={shape} lang={lang} isGraphQL={isGraphQL} />}
+            typeShorthand={
+                <TypeShorthand shape={shape} lang={lang} isGraphQL={isGraphQL} propertyAccess={propertyAccess} />
+            }
             availability={availability}
             badge={badge}
         >

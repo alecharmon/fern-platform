@@ -149,6 +149,7 @@ export type Translations = {
         authType: string;
         deprecated: string;
         required: string;
+        readonly: string;
         allowedValues: string;
         any: string;
         orNull: string;

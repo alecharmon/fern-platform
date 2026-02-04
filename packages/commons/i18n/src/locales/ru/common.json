@@ -146,6 +146,7 @@
     "authType": "Тип аутентификации",
     "deprecated": "Устарело",
     "required": "Обязательный",
+    "readonly": "Только для чтения",
     "allowedValues": "Допустимые значения",
     "any": "любой",
     "orNull": "или null",

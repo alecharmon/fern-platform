@@ -146,6 +146,7 @@
     "authType": "Autentiseringstype",
     "deprecated": "Utdatert",
     "required": "Påkrevd",
+    "readonly": "Skrivebeskyttet",
     "allowedValues": "Tillatte verdier",
     "any": "hvilken som helst",
     "orNull": "eller null",

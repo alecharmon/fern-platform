@@ -146,6 +146,7 @@
     "authType": "认证类型",
     "deprecated": "已弃用",
     "required": "必需",
+    "readonly": "只读",
     "allowedValues": "允许的值",
     "any": "任何",
     "orNull": "或 null",

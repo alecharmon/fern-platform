@@ -146,6 +146,7 @@
     "authType": "Auth type",
     "deprecated": "Deprecated",
     "required": "Required",
+    "readonly": "Read-only",
     "allowedValues": "Allowed values",
     "any": "any",
     "orNull": "or null",

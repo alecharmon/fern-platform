@@ -146,6 +146,7 @@
     "authType": "인증 유형",
     "deprecated": "더 이상 사용되지 않음",
     "required": "필수",
+    "readonly": "읽기 전용",
     "allowedValues": "허용된 값",
     "any": "모든",
     "orNull": "또는 null",

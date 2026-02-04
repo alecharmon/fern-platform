@@ -1,6 +1,6 @@
 "use client";
 
-import type { TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
+import type { ObjectPropertyAccess, TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
 
 import { renderTypeShorthandRoot } from "../../type-shorthand";
 
@@ -10,11 +10,13 @@ import { useTypeDefinitionContext } from "./TypeDefinitionContext";
 export function TypeShorthand({
     shape,
     lang,
-    isGraphQL = false
+    isGraphQL = false,
+    propertyAccess
 }: {
     shape: TypeShapeOrReference;
     lang: string;
     isGraphQL?: boolean;
+    propertyAccess?: ObjectPropertyAccess;
 }) {
     const { grpcEndpoint } = useGrpcContext() ?? {};
     const context = useTypeDefinitionContext();
@@ -24,6 +26,7 @@ export function TypeShorthand({
         isResponse: context.isResponse,
         hideAllModifiers: grpcEndpoint?.protocol?.type === "grpc",
         isGraphQL,
-        lang
+        lang,
+        propertyAccess
     });
 }
