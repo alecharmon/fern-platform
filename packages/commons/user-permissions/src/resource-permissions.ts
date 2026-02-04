@@ -1,8 +1,11 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { err, errAsync, ok, okAsync, type Result, ResultAsync } from "neverthrow";
+import { getClient, getClientResult } from "@fern-platform/supabase";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
-import type { Database } from "./database.types";
 import { supabaseError, type UserPermissionsError } from "./errors";
+
+// Re-export getClientResult for backward compatibility
+export { getClientResult };
+
 import type { Roles } from "./roles";
 
 /**
@@ -55,66 +58,6 @@ export interface RolePermission {
 export interface RolePermissionInsert {
     role: ResourceRole;
     permission: string;
-}
-
-// =============================================================================
-// Supabase Client
-// =============================================================================
-
-let supabaseClient: SupabaseClient<Database> | undefined;
-
-/**
- * Get a singleton Supabase client instance for resource permission operations.
- * Lazy loads and auto-initializes from environment variables on first use.
- *
- * Required environment variables:
- * - SUPABASE_URL
- * - SUPABASE_SERVICE_ROLE_KEY
- */
-function getClient(): SupabaseClient<Database> {
-    if (supabaseClient != null) {
-        return supabaseClient;
-    }
-
-    const supabaseUrl = process.env.SUPABASE_URL;
-    if (!supabaseUrl) {
-        throw new Error("Supabase URL not configured. Set SUPABASE_URL environment variable.");
-    }
-
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) {
-        throw new Error(
-            "Supabase service role key not configured. Set SUPABASE_SERVICE_ROLE_KEY environment variable."
-        );
-    }
-
-    supabaseClient = createClient(supabaseUrl, serviceKey, {
-        auth: {
-            persistSession: false,
-            autoRefreshToken: false
-        }
-    });
-    return supabaseClient;
-}
-
-/**
- * Get a Supabase client, returning a Result instead of throwing.
- */
-export function getClientResult(): Result<SupabaseClient<Database>, UserPermissionsError> {
-    if (supabaseClient != null) {
-        return ok(supabaseClient);
-    }
-    try {
-        const client = getClient();
-        return ok(client);
-    } catch (e) {
-        return err(
-            supabaseError(
-                "NOT_CONFIGURED",
-                "Could not initialize Supabase client: " + (e instanceof Error ? e.message : String(e))
-            )
-        );
-    }
 }
 
 // =============================================================================

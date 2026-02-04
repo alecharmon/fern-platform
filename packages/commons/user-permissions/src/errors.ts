@@ -1,13 +1,13 @@
-// Supabase errors
-export const SUPABASE_ERROR_CODES = ["NOT_CONFIGURED", "QUERY_FAILED", "INSERT_FAILED", "DELETE_FAILED"] as const;
+// Import Supabase errors from canonical source
+import {
+    SUPABASE_ERROR_CODES,
+    type SupabaseError,
+    type SupabaseErrorCode,
+    supabaseError
+} from "@fern-platform/supabase";
 
-export type SupabaseErrorCode = (typeof SUPABASE_ERROR_CODES)[number];
-
-export interface SupabaseError {
-    source: "supabase";
-    code: SupabaseErrorCode;
-    message: string;
-}
+// Re-export Supabase errors
+export { SUPABASE_ERROR_CODES, supabaseError, type SupabaseError, type SupabaseErrorCode };
 
 // Auth0 errors
 export const AUTH0_ERROR_CODES = ["NOT_CONFIGURED", "API_FAILED", "ROLE_MAPPING_INVALID"] as const;
@@ -23,11 +23,7 @@ export interface Auth0Error {
 // Union type
 export type UserPermissionsError = SupabaseError | Auth0Error;
 
-// Helper factories
-export function supabaseError(code: SupabaseErrorCode, message: string): SupabaseError {
-    return { source: "supabase", code, message };
-}
-
+// Helper factory
 export function auth0Error(code: Auth0ErrorCode, message: string): Auth0Error {
     return { source: "auth0", code, message };
 }

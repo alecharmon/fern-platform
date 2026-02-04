@@ -1,7 +1,6 @@
+import type { Database } from "@fern-platform/supabase";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
-
 import { getManagementClient, getManagementClientResult } from "./client";
-import type { Database } from "./database.types";
 import { auth0Error, supabaseError, type UserPermissionsError } from "./errors";
 import {
     addUserRoleForResourceResult,
