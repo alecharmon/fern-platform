@@ -1,0 +1,149 @@
+name: Revalidate All Sites
+
+on:
+  workflow_call:
+    inputs:
+      batch_size:
+        description: "Number of sites per batch (default: 24)"
+        required: false
+        default: "24"
+        type: string
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: "Number of sites per batch (default: 24)"
+        required: false
+        default: "24"
+        type: string
+
+jobs:
+  prepare:
+    name: Prepare site batches
+    runs-on: ubuntu-latest
+    outputs:
+      batches: ${{ steps.split.outputs.batches }}
+      total_sites: ${{ steps.split.outputs.total_sites }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Split sites into batches
+        id: split
+        run: |
+          # Read sites from the monitor sites list, clean up trailing commas and empty lines
+          sites=$(cat scripts/monitor/sites.csv | sed 's/,$//' | grep -v '^$')
+          total=$(echo "$sites" | wc -l)
+          echo "total_sites=$total" >> $GITHUB_OUTPUT
+          
+          batch_size=${{ inputs.batch_size || '24' }}
+          
+          # Create JSON array of batches
+          batches="["
+          batch_num=0
+          current_batch=""
+          count=0
+          
+          while IFS= read -r site; do
+            if [ -z "$site" ]; then
+              continue
+            fi
+            
+            if [ $count -ge $batch_size ]; then
+              # Close current batch and start new one
+              if [ -n "$current_batch" ]; then
+                batches="${batches}{\"index\":$batch_num,\"sites\":\"$current_batch\"},"
+                batch_num=$((batch_num + 1))
+              fi
+              current_batch="$site"
+              count=1
+            else
+              if [ -z "$current_batch" ]; then
+                current_batch="$site"
+              else
+                current_batch="${current_batch},$site"
+              fi
+              count=$((count + 1))
+            fi
+          done <<< "$sites"
+          
+          # Add final batch
+          if [ -n "$current_batch" ]; then
+            batches="${batches}{\"index\":$batch_num,\"sites\":\"$current_batch\"}"
+          fi
+          
+          batches="${batches}]"
+          
+          # Remove trailing comma if present before closing bracket
+          batches=$(echo "$batches" | sed 's/,]/]/')
+          
+          echo "batches=$batches" >> $GITHUB_OUTPUT
+          echo "Created $((batch_num + 1)) batches from $total sites"
+
+  revalidate:
+    name: Revalidate batch ${{ matrix.batch.index }}
+    needs: prepare
+    runs-on: Seed
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        batch: ${{ fromJson(needs.prepare.outputs.batches) }}
+    steps:
+      - name: Revalidate sites in batch
+        env:
+          REVALIDATE_AUTH_TOKEN: ${{ secrets.FERN_TOKEN }}
+          SITES: ${{ matrix.batch.sites }}
+        run: |
+          echo "Processing batch ${{ matrix.batch.index }}"
+          
+          # Convert comma-separated sites to newline-separated
+          echo "$SITES" | tr ',' '\n' > sites_batch.txt
+          
+          # Count sites in this batch
+          site_count=$(wc -l < sites_batch.txt)
+          echo "Revalidating $site_count sites with 24 parallel requests (3x 8 cores)"
+          
+          # Function to revalidate a single site with retries
+          revalidate_site() {
+            local domain="$1"
+            local max_attempts=2
+            local attempt=1
+            
+            while [ $attempt -le $max_attempts ]; do
+              if curl -s -f -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
+                     "https://$domain/api/fern-docs/revalidate" \
+                     --max-time 800; then
+                echo "SUCCESS: $domain"
+                return 0
+              else
+                echo "Attempt $attempt failed for $domain"
+                if [ $attempt -eq $max_attempts ]; then
+                  echo "ERROR: Failed to revalidate $domain after $max_attempts attempts"
+                  return 1
+                fi
+                sleep 5
+                attempt=$((attempt + 1))
+              fi
+            done
+          }
+          
+          export -f revalidate_site
+          export REVALIDATE_AUTH_TOKEN
+          
+          # Run revalidation with 24 parallel processes (3x 8 cores)
+          cat sites_batch.txt | xargs -P 24 -I {} bash -c 'revalidate_site "$@"' _ {}
+          
+          echo "Batch ${{ matrix.batch.index }} completed"
+
+  summary:
+    name: Revalidation summary
+    needs: [prepare, revalidate]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report summary
+        run: |
+          echo "## Revalidation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Total sites: ${{ needs.prepare.outputs.total_sites }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Batch size: ${{ inputs.batch_size || '24' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Parallel requests per batch: 24 (3x 8 cores)" >> $GITHUB_STEP_SUMMARY
