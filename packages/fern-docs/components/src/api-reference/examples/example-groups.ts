@@ -137,45 +137,115 @@ export function isVisibleExampleKey(examplesByStatusCode: ExamplesByStatusCode):
 }
 
 /**
+ * Get all visible example keys for a language, with filtering logic.
+ * This encapsulates ALL visibility and filtering rules:
+ * 1. Only includes examples that pass isVisibleExampleKey()
+ * 2. Hides all examples if all code snippets are identical (workaround for buggy generators)
+ * 3. Filters to only user-defined examples if any exist
+ *
+ * This is the single source of truth for which examples should be shown in tabs/dropdowns.
+ */
+export function getVisibleExampleKeys(examplesByKeyAndStatusCode: ExamplesByKeyAndStatusCode): string[] {
+    // Step 1: Filter to visible examples only
+    const allExamples = Object.entries(examplesByKeyAndStatusCode)
+        .filter(([_, examplesByStatusCode]) => isVisibleExampleKey(examplesByStatusCode))
+        .map(([exampleKey, examplesByStatusCode]) => ({
+            exampleKey,
+            examplesByStatusCode,
+            examples: sortBy(Object.values(examplesByStatusCode).flat(), [
+                (example) => example.exampleCall.responseStatusCode
+            ])
+        }));
+
+    if (allExamples.length === 0) {
+        return [];
+    }
+
+    // Step 2: Hide if all code snippets are identical (workaround for buggy generators)
+    const uniqueCodeSnippets = new Set(allExamples.flatMap(({ examples }) => examples.map((e) => e.code)));
+    if (uniqueCodeSnippets.size <= 1) {
+        return [];
+    }
+
+    // Step 3: Filter to user-defined examples if any exist
+    const hasUserDefinedExample = allExamples.some(({ examples }) => examples.some(isUserDefinedExample));
+    const filteredExamples = hasUserDefinedExample
+        ? allExamples.filter(({ examples }) => examples.some(isUserDefinedExample))
+        : allExamples;
+
+    // Step 4: Sort by priority (same logic as getFirstVisibleExampleKey)
+    // This ensures the first key in the array is the one that would be selected by default
+    const sortedExamples = filteredExamples.map(({ exampleKey, examples }) => {
+        const hasRequestData = examples.some((ex) => hasRequestSideData(ex.exampleCall));
+        const hasRequestBodyData = examples.some(
+            (ex) => ex.exampleCall.requestBody != null && hasNonEmptyValue(ex.exampleCall.requestBody.value)
+        );
+        return { exampleKey, hasRequestData, hasRequestBodyData };
+    });
+
+    // Sort with the same priority logic as getFirstVisibleExampleKey
+    sortedExamples.sort((a, b) => {
+        // First, prioritize examples with request body data
+        if (a.hasRequestBodyData && !b.hasRequestBodyData) {
+            if (startsWithDefault(b.exampleKey)) {
+                return 0;
+            }
+            return -1;
+        }
+        if (!a.hasRequestBodyData && b.hasRequestBodyData) {
+            if (startsWithDefault(a.exampleKey)) {
+                return 0;
+            }
+            return 1;
+        }
+        // If both have (or don't have) body data, fall back to the original comparison
+        return compareByRequestData(a.hasRequestData, b.hasRequestData, a.exampleKey, b.exampleKey);
+    });
+
+    return sortedExamples.map(({ exampleKey }) => exampleKey);
+}
+
+/**
  * Get the first visible exampleKey for a language.
  * Prioritizes examples with request-side data over those without.
  * Falls back to the first available exampleKey if none are visible.
+ *
+ * This is now a thin wrapper around getVisibleExampleKeys() to maintain a single source of truth.
+ *
+ * @param examplesByKeyAndStatusCode - All examples for a language
+ * @param visibleKeys - Optional pre-filtered list of visible keys to consider. If provided, just returns the first one.
  */
-function getFirstVisibleExampleKey(examplesByKeyAndStatusCode: ExamplesByKeyAndStatusCode): string | undefined {
-    const visibleKeys: { key: string; hasRequestData: boolean }[] = [];
-
-    for (const [exampleKey, examplesByStatusCode] of Object.entries(examplesByKeyAndStatusCode)) {
-        if (isVisibleExampleKey(examplesByStatusCode)) {
-            const examples = Object.values(examplesByStatusCode).flat();
-            const hasRequestData = examples.some((ex) => hasRequestSideData(ex.exampleCall));
-            visibleKeys.push({ key: exampleKey, hasRequestData });
-        }
+function getFirstVisibleExampleKey(
+    examplesByKeyAndStatusCode: ExamplesByKeyAndStatusCode,
+    visibleKeys?: string[]
+): string | undefined {
+    // If visibleKeys is provided, it's already sorted by priority - just return the first one
+    if (visibleKeys != null) {
+        return visibleKeys[0] ?? Object.keys(examplesByKeyAndStatusCode)[0];
     }
 
-    if (visibleKeys.length === 0) {
-        // Fallback to first available if none are visible
-        return Object.keys(examplesByKeyAndStatusCode)[0];
-    }
-
-    // Sort so examples with request data come first
-    // Exception: if the name starts with "Default" (case-insensitive, trimmed), preserve original order
-    visibleKeys.sort((a, b) => compareByRequestData(a.hasRequestData, b.hasRequestData, a.key, b.key));
-
-    return visibleKeys[0]?.key;
+    // Otherwise, calculate visible keys (which are returned in priority order)
+    const calculatedVisibleKeys = getVisibleExampleKeys(examplesByKeyAndStatusCode);
+    return calculatedVisibleKeys[0] ?? Object.keys(examplesByKeyAndStatusCode)[0];
 }
 
 /**
  * Get a valid exampleKey for a language, preferring the current key if it exists.
+ *
+ * @param examplesByKeyAndStatusCode - All examples for a language
+ * @param currentKey - The currently selected key (if any)
+ * @param visibleKeys - Optional pre-filtered list of visible keys to consider. If provided, only these keys will be evaluated.
  */
 export function getValidExampleKey(
     examplesByKeyAndStatusCode: ExamplesByKeyAndStatusCode,
-    currentKey: string | undefined
+    currentKey: string | undefined,
+    visibleKeys?: string[]
 ): string | undefined {
-    const availableKeys = Object.keys(examplesByKeyAndStatusCode);
+    const availableKeys = visibleKeys ?? Object.keys(examplesByKeyAndStatusCode);
     if (availableKeys.includes(currentKey ?? "")) {
         return currentKey;
     }
-    return getFirstVisibleExampleKey(examplesByKeyAndStatusCode);
+    return getFirstVisibleExampleKey(examplesByKeyAndStatusCode, visibleKeys);
 }
 
 /**

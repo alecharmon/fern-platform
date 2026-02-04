@@ -45,6 +45,7 @@ export const EndpointContext = React.createContext<
     availableLanguages: [],
     availableLanguagesByStatusCode: {},
     setSelectedExampleKey: noop,
+    segmentedControlExamples: [],
     endpointProtocol: undefined
 });
 
@@ -62,7 +63,8 @@ export function EndpointContextProvider({
         selectedExampleKey,
         availableLanguages,
         availableLanguagesByStatusCode,
-        setSelectedExampleKey
+        setSelectedExampleKey,
+        segmentedControlExamples
     } = useExampleSelection(endpoint);
 
     const [selectedResponse, setSelectedResponse] = React.useState<HttpResponse | undefined>(endpoint.responses?.[0]);
@@ -181,6 +183,7 @@ export function EndpointContextProvider({
             availableLanguages,
             availableLanguagesByStatusCode,
             setSelectedExampleKey,
+            segmentedControlExamples,
             endpointProtocol: endpoint.protocol
         }),
         [
@@ -196,6 +199,7 @@ export function EndpointContextProvider({
             availableLanguages,
             availableLanguagesByStatusCode,
             setSelectedExampleKey,
+            segmentedControlExamples,
             endpoint.protocol
         ]
     );

@@ -2,7 +2,7 @@
 
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { EMPTY_OBJECT, visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
+import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { CodeExampleClientDropdown } from "@fern-docs/components/api-reference/endpoints/CodeExampleClientDropdown";
 import { useEndpointContext } from "@fern-docs/components/api-reference/endpoints/EndpointContext";
 import { EndpointExampleSegmentedControl } from "@fern-docs/components/api-reference/endpoints/EndpointExampleSegmentedControl";
@@ -18,8 +18,7 @@ import {
     CodeSnippetExample,
     JsonCodeSnippetExample
 } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
-import { type CodeExample, isUserDefinedExample } from "@fern-docs/components/api-reference/examples/code-example";
-import { isVisibleExampleKey } from "@fern-docs/components/api-reference/examples/example-groups";
+import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
 import { TitledExample } from "@fern-docs/components/api-reference/examples/TitledExample";
 import { lineNumberOf } from "@fern-docs/components/api-reference/examples/utils";
 import type { StatusCode } from "@fern-docs/components/api-reference/type-definitions/EndpointContent";
@@ -28,7 +27,6 @@ import { statusCodeToIntent } from "@fern-docs/components/badges/status-code-bad
 import { cn } from "@fern-docs/components/cn";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { t } from "@fern-docs/i18n";
-import { sortBy } from "es-toolkit/array";
 import { memo, type ReactNode, useCallback, useMemo } from "react";
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { usePlaygroundBaseUrl } from "../../playground/utils/select-environment";
@@ -53,11 +51,11 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
     const {
         selectedExample,
         examplesByStatusCode,
-        examplesByKeyAndStatusCode,
         selectedExampleKey,
         availableLanguages,
         availableLanguagesByStatusCode,
-        setSelectedExampleKey
+        setSelectedExampleKey,
+        segmentedControlExamples
     } = useEndpointContext();
 
     const languages =
@@ -125,32 +123,8 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
 
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint, node.apiDefinitionId);
 
-    const segmentedControlExamples = useMemo(() => {
-        const allExamples = Object.entries(examplesByKeyAndStatusCode)
-            .filter(([_, examplesByStatusCode]) => isVisibleExampleKey(examplesByStatusCode))
-            .map(([exampleKey, examplesByStatusCode]) => ({
-                exampleKey,
-                examples: sortBy(Object.values(examplesByStatusCode).flat(), [
-                    (example) => example.exampleCall.responseStatusCode
-                ])
-            }));
-
-        // Hide tabs if all code snippets for the current language are identical.
-        // This preserves expected UX when dynamic snippet generators produce the same code
-        // for all examples (e.g., C#/Python/TypeScript generators have a bug where they
-        // ignore example-specific request data). Once generators are fixed, this check
-        // can be removed. See: https://github.com/fern-api/fern-platform/pull/6427
-        const uniqueCodeSnippets = new Set(allExamples.flatMap(({ examples }) => examples.map((e) => e.code)));
-        if (uniqueCodeSnippets.size <= 1) {
-            return [];
-        }
-
-        // Filter to user-defined examples if any exist
-        const hasUserDefinedExample = allExamples.some(({ examples }) => examples.some(isUserDefinedExample));
-        return hasUserDefinedExample
-            ? allExamples.filter(({ examples }) => examples.some(isUserDefinedExample))
-            : allExamples;
-    }, [examplesByKeyAndStatusCode]);
+    // segmentedControlExamples is now calculated in useExampleSelection and provided via context
+    // This ensures the tabs and the selected example are always in sync
 
     return (
         <div
@@ -226,13 +200,13 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     }
                     code={resolveEnvironmentUrlInCodeSnippet(endpoint, selectedExample?.code ?? "", baseUrl)}
                     language={selectedExampleKey.language}
-                    json={selectedExample?.code ?? ""}
+                    json={selectedExample?.exampleCall.requestBody?.value}
                     jsonStartLine={
                         selectedExampleKey.language === "curl"
                             ? lineNumberOf(selectedExample?.code ?? "", "-d '{")
                             : undefined
                     }
-                    slug={node?.slug ?? ""}
+                    slug={node?.slug}
                     isResponse={false}
                     lang={lang}
                 />
@@ -243,7 +217,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     onClick={(e) => {
                         e.stopPropagation();
                     }}
-                    json={selectedExample?.exampleCall.responseBody?.value ?? EMPTY_OBJECT}
+                    json={selectedExample?.exampleCall.responseBody?.value}
                     intent={statusCodeToIntent(String(selectedExample.exampleCall.responseStatusCode))}
                     slug={node?.slug ?? ""}
                     isResponse={true}

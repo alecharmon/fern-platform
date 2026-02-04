@@ -2,6 +2,7 @@
 
 import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { useDeepCompareMemoize } from "@fern-ui/react-commons";
+import { sortBy } from "es-toolkit/array";
 import type { SetStateAction } from "jotai";
 import { RESET } from "jotai/utils";
 import React, { useMemo } from "react";
@@ -11,6 +12,7 @@ import {
     getAvailableLanguages,
     getAvailableLanguagesByStatusCode,
     getValidExampleKey,
+    getVisibleExampleKeys,
     groupExamplesByLanguageKeyAndStatusCode,
     selectExampleToRender
 } from "../examples/example-groups";
@@ -35,18 +37,33 @@ export function useExampleSelection(
     availableLanguages: string[];
     availableLanguagesByStatusCode: Record<string, string[]>;
     setSelectedExampleKey: (update: typeof RESET | SetStateAction<SelectedExampleKey>) => void;
+    segmentedControlExamples: { exampleKey: string; examples: CodeExample[] }[];
 } {
     const examplesByLanguageKeyAndStatusCode = React.useMemo(
         () => groupExamplesByLanguageKeyAndStatusCode(endpoint),
         [endpoint]
     );
 
+    // Calculate visible example keys for each language
+    const visibleExampleKeysForLanguage = React.useMemo(() => {
+        const result: Record<string, string[]> = {};
+        for (const [language, examplesByKeyAndStatusCode] of Object.entries(examplesByLanguageKeyAndStatusCode)) {
+            result[language] = getVisibleExampleKeys(examplesByKeyAndStatusCode);
+        }
+        return result;
+    }, [examplesByLanguageKeyAndStatusCode]);
+
     const getInitialExampleKey = React.useCallback(
         (language: string): SelectedExampleKey => {
             if (initialExampleId == null) {
+                // Initialize exampleKey to the first visible example to ensure
+                // the correct example (with request body data) is selected on first render
+                const langExamples = examplesByLanguageKeyAndStatusCode[language] ?? {};
+                const visibleKeys = visibleExampleKeysForLanguage[language];
+                const firstVisibleKey = getValidExampleKey(langExamples, undefined, visibleKeys);
                 return {
                     language,
-                    exampleKey: undefined,
+                    exampleKey: firstVisibleKey,
                     statusCode: undefined,
                     responseIndex: undefined
                 };
@@ -76,8 +93,8 @@ export function useExampleSelection(
                 responseIndex: undefined
             };
         },
-        // biome-ignore lint/correctness/useExhaustiveDependencies: only run when examplesByLanguageKeyAndStatusCode or initialExampleId changes
-        useDeepCompareMemoize([examplesByLanguageKeyAndStatusCode, initialExampleId])
+        // biome-ignore lint/correctness/useExhaustiveDependencies: only run when examplesByLanguageKeyAndStatusCode, initialExampleId, or visibleExampleKeysForLanguage changes
+        useDeepCompareMemoize([examplesByLanguageKeyAndStatusCode, initialExampleId, visibleExampleKeysForLanguage])
     );
 
     // We use a string here with the intention that this can be used in a query param to deeplink to a particular example
@@ -135,7 +152,8 @@ export function useExampleSelection(
                         setGlobalLanguage(next.language);
                         // When language changes, validate that exampleKey exists in the new language
                         const langExamples = examplesByLanguageKeyAndStatusCode[next.language] ?? {};
-                        const validKey = getValidExampleKey(langExamples, next.exampleKey);
+                        const visibleKeys = visibleExampleKeysForLanguage[next.language];
+                        const validKey = getValidExampleKey(langExamples, next.exampleKey, visibleKeys);
                         if (validKey !== next.exampleKey) {
                             return { ...next, exampleKey: validKey };
                         }
@@ -148,7 +166,7 @@ export function useExampleSelection(
                 return next;
             });
         },
-        [getInitialExampleKey, setGlobalLanguage, examplesByLanguageKeyAndStatusCode]
+        [getInitialExampleKey, setGlobalLanguage, examplesByLanguageKeyAndStatusCode, visibleExampleKeysForLanguage]
     );
 
     React.useEffect(() => {
@@ -161,11 +179,17 @@ export function useExampleSelection(
             lastRealLanguageRef.current = globalLanguage;
             setSelectedExampleKeyInner((prev) => {
                 const langExamples = examplesByLanguageKeyAndStatusCode[globalLanguage] ?? {};
-                const validKey = getValidExampleKey(langExamples, prev.exampleKey);
+                const visibleKeys = visibleExampleKeysForLanguage[globalLanguage];
+                const validKey = getValidExampleKey(langExamples, prev.exampleKey, visibleKeys);
                 return { ...prev, language: globalLanguage, exampleKey: validKey };
             });
         }
-    }, [globalLanguage, internalSelectedExampleKey.language, examplesByLanguageKeyAndStatusCode]);
+    }, [
+        globalLanguage,
+        internalSelectedExampleKey.language,
+        examplesByLanguageKeyAndStatusCode,
+        visibleExampleKeysForLanguage
+    ]);
 
     // When computing selectedExample, use the last real language if current is "payload"
     const languageForExample =
@@ -200,6 +224,18 @@ export function useExampleSelection(
         [selectedExampleKey, internalSelectedExampleKey.language]
     );
 
+    // Calculate segmented control examples for the selected language
+    const segmentedControlExamples = useMemo(() => {
+        const visibleKeys = visibleExampleKeysForLanguage[languageForExample] ?? [];
+        return visibleKeys.map((exampleKey) => {
+            const examplesByStatusCode = examplesByKeyAndStatusCode[exampleKey] ?? {};
+            const examples = sortBy(Object.values(examplesByStatusCode).flat(), [
+                (example) => example.exampleCall.responseStatusCode
+            ]);
+            return { exampleKey, examples };
+        });
+    }, [examplesByKeyAndStatusCode, languageForExample, visibleExampleKeysForLanguage]);
+
     return {
         selectedExample,
         examplesByStatusCode,
@@ -208,6 +244,7 @@ export function useExampleSelection(
         defaultLanguage,
         availableLanguages,
         availableLanguagesByStatusCode,
-        setSelectedExampleKey
+        setSelectedExampleKey,
+        segmentedControlExamples
     };
 }
