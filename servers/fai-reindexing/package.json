@@ -17,6 +17,7 @@
     "@aws-sdk/client-ecs": "^3.709.0",
     "@aws-sdk/client-sqs": "^3.709.0",
     "@fern-api/docs-utils": "workspace:*",
+    "@fern-docs/edge-config": "workspace:*",
     "@fern-api/fai-sdk": "workspace:*",
     "@fern-api/fdr-lambda-sdk": "workspace:*",
     "@fern-api/fdr-sdk": "workspace:*",

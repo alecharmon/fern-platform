@@ -14,9 +14,11 @@ COPY packages/fai-sdk/package.json ./packages/fai-sdk/
 COPY packages/commons/docs-server/package.json ./packages/commons/docs-server/
 COPY packages/commons/docs-utils/package.json ./packages/commons/docs-utils/
 COPY packages/commons/docs-loader/package.json ./packages/commons/docs-loader/
+COPY packages/commons/docs-auth/package.json ./packages/commons/docs-auth/
 COPY packages/fern-docs/search-server/utils/package.json ./packages/fern-docs/search-server/utils/
 COPY packages/fern-docs/search-server/ask-fern/package.json ./packages/fern-docs/search-server/ask-fern/
 COPY packages/fern-docs/mdx/package.json ./packages/fern-docs/mdx/
+COPY packages/fern-docs/edge-config/package.json ./packages/fern-docs/edge-config/
 COPY packages/commons/core-utils/package.json ./packages/commons/core-utils/
 COPY packages/configs/package.json ./packages/configs/
 COPY packages/snippets/package.json ./packages/snippets/
@@ -33,8 +35,10 @@ COPY --from=deps /app/servers/fai-reindexing/node_modules ./servers/fai-reindexi
 
 COPY packages/commons/docs-utils ./packages/commons/docs-utils
 COPY packages/commons/core-utils ./packages/commons/core-utils
+COPY packages/commons/docs-auth ./packages/commons/docs-auth
 COPY packages/fern-docs/search-server/utils ./packages/fern-docs/search-server/utils
 COPY packages/fern-docs/mdx ./packages/fern-docs/mdx
+COPY packages/fern-docs/edge-config ./packages/fern-docs/edge-config
 COPY packages/fdr-sdk ./packages/fdr-sdk
 COPY packages/fdr-lambda-sdk ./packages/fdr-lambda-sdk
 COPY packages/fai-sdk ./packages/fai-sdk
@@ -61,6 +65,7 @@ RUN npm install -g pnpm@10.28.2 && \
     pnpm add \
         @aws-sdk/client-ecs@^3.709.0 \
         @aws-sdk/client-sqs@^3.709.0 \
+        @vercel/edge-config@^1.4.0 \
         --prod && \
     npm pack tar@7.5.7 && \
     tar -xzf tar-7.5.7.tgz && \

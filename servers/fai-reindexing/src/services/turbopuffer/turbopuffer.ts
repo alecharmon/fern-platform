@@ -3,6 +3,7 @@ import { withoutStaging } from "@fern-api/docs-utils";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
 import { env } from "../../config/env";
 import { createDomainLogger } from "../../config/logger";
+import { isAuthConfigured } from "../../utils/auth-config";
 import { incrementalUpsertTurbopuffer } from "./turbopuffer-incremental-upsert-task";
 import { upsertTurbopuffer } from "./turbopuffer-upsert-task";
 import { getTurbopufferVectorizer } from "./turbopuffer-vectorizer";
@@ -16,6 +17,8 @@ export async function runTurbopufferUpsertTask(domain: string, deleteExisting: b
 
     logger.info("Starting turbopuffer indexing", { namespace, deleteExisting });
 
+    const authed = await isAuthConfigured(withoutStaging(domain));
+
     const numInserted = await upsertTurbopuffer({
         apiKey: env.turbopufferApiKey,
         namespace,
@@ -24,6 +27,7 @@ export async function runTurbopufferUpsertTask(domain: string, deleteExisting: b
             fernToken: env.fernToken,
             domain: withoutStaging(domain)
         },
+        authed,
         vectorizer: getTurbopufferVectorizer(embeddingModel),
         deleteExisting
     });
@@ -50,6 +54,8 @@ export async function runIncrementalTurbopufferUpsertTask(domain: string): Promi
 
     logger.info("Starting incremental turbopuffer indexing", { namespace });
 
+    const authed = await isAuthConfigured(withoutStaging(domain));
+
     const result = await incrementalUpsertTurbopuffer({
         apiKey: env.turbopufferApiKey,
         namespace,
@@ -58,6 +64,7 @@ export async function runIncrementalTurbopufferUpsertTask(domain: string): Promi
             fernToken: env.fernToken,
             domain: withoutStaging(domain)
         },
+        authed,
         vectorizer: getTurbopufferVectorizer(embeddingModel)
     });
 

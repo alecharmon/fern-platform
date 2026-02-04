@@ -3471,6 +3471,9 @@ importers:
       '@fern-api/ui-core-utils':
         specifier: workspace:*
         version: link:../../packages/commons/core-utils
+      '@fern-docs/edge-config':
+        specifier: workspace:*
+        version: link:../../packages/fern-docs/edge-config
       '@fern-docs/search-utils':
         specifier: workspace:*
         version: link:../../packages/fern-docs/search-server/utils

@@ -15,7 +15,7 @@ export default defineConfig({
     splitting: false,
     dts: false,
     // Only externalize native modules that can't be bundled
-    external: ["@aws-sdk/client-ecs", "@aws-sdk/client-sqs"],
+    external: ["@aws-sdk/client-ecs", "@aws-sdk/client-sqs", "@vercel/edge-config"],
     // Don't mark anything as external automatically
     noExternal: ["winston", "winston-transport", "@fern-api/*", "@fern-docs/*", /.*/],
     // Enable shims for Node.js built-ins

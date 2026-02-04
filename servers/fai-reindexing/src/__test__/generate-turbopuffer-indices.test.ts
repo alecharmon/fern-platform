@@ -29,7 +29,7 @@ test("Check generated turbopuffer indices", { timeout: 60000 }, async () => {
             domain,
             pages,
             apis,
-            authed: () => false,
+            authed: false,
             splitText: (text: string) => Promise.resolve([text])
         });
 

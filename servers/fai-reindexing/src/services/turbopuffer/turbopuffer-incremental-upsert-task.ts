@@ -1,4 +1,3 @@
-import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import { FernTurbopufferAttributeSchema, type LoadDocsWithUrlPayload, loadDocsWithUrl } from "@fern-docs/search-utils";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
 import { faiClient } from "../../config/clients";
@@ -81,7 +80,7 @@ interface IncrementalTurbopufferUpsertTaskOptions {
     apiKey: string;
     namespace: string;
     payload: LoadDocsWithUrlPayload;
-    authed?: (node: NavigationNodePage) => boolean;
+    authed?: boolean;
     vectorizer: (chunk: string[]) => Promise<number[][]>;
     splitText?: (text: string) => Promise<string[]>;
 }

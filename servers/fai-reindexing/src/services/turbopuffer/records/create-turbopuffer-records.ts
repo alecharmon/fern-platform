@@ -1,6 +1,5 @@
 import { slugToHref } from "@fern-api/docs-utils";
 import { type ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
-import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
 import type { TurbopufferRecordWithoutVector } from "@fern-docs/search-utils";
 import { flatten } from "es-toolkit/array";
 import { createEndpointBaseRecordHttp } from "./create-endpoint-record-http";
@@ -13,7 +12,7 @@ interface CreateTurbopufferRecordsOptions {
     domain: string;
     pages: Record<FernNavigation.PageId, string>;
     apis: Record<ApiDefinition.ApiDefinitionId, ApiDefinition.ApiDefinition>;
-    authed?: (node: NavigationNodePage) => boolean;
+    authed?: boolean;
     splitText: (text: string) => Promise<string[]>;
 }
 
@@ -63,7 +62,7 @@ export async function createTurbopufferRecords({
                 return createMarkdownRecords({
                     node,
                     parents: collector.getParents(node.id) ?? [],
-                    authed: authed?.(node) ?? false,
+                    authed: authed ?? false,
                     markdown,
                     url,
                     isChangelog,
@@ -93,7 +92,7 @@ export async function createTurbopufferRecords({
                 createEndpointBaseRecordHttp({
                     node,
                     parents: collector.getParents(node.id) ?? [],
-                    authed: authed?.(node) ?? false,
+                    authed: authed ?? false,
                     endpoint,
                     url,
                     types: apiDefinition.types,
@@ -113,7 +112,7 @@ export async function createTurbopufferRecords({
                 createEndpointBaseRecordWebSocket({
                     node,
                     parents: collector.getParents(node.id) ?? [],
-                    authed: authed?.(node) ?? false,
+                    authed: authed ?? false,
                     endpoint,
                     url,
                     types: apiDefinition.types
@@ -132,7 +131,7 @@ export async function createTurbopufferRecords({
                 createEndpointBaseRecordWebhook({
                     node,
                     parents: collector.getParents(node.id) ?? [],
-                    authed: authed?.(node) ?? false,
+                    authed: authed ?? false,
                     endpoint,
                     url,
                     types: apiDefinition.types
