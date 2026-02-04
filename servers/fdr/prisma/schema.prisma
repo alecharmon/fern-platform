@@ -356,3 +356,18 @@ model Repository {
 
   @@unique([owner, name])
 }
+
+// Global Organization Configs
+// Stores shared configuration that can be referenced by multiple docs instances
+model GlobalOrgConfig {
+  id        String   @id @default(uuid())
+  orgId     String
+  configId  String   @default("default")
+  config    Bytes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orgId, configId])
+  @@index([orgId])
+  @@map("global_org_configs")
+}
