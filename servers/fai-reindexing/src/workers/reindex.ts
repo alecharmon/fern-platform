@@ -139,14 +139,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         await sendReindexCallback(domain, sqsMessageId, "success", log);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        log.error("Reindex job failed during execution", {
-            error: errorMessage,
-            stack: errorStack,
-            sqsMessageId,
-            domain,
-            forceFullReindex
-        });
+        log.error("Reindex job failed during execution", { error: errorMessage, sqsMessageId });
 
         await track("ask_ai_turbopuffer_reindex", {
             success: false,

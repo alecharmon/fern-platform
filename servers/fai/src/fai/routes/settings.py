@@ -395,21 +395,9 @@ async def get_toggle_status(
         ask_ai_enabled = existing_record.last_reindex_time is not None
 
         if not existing_record.job_id:
-            last_reindex_time = (
-                existing_record.last_reindex_time.isoformat() if existing_record.last_reindex_time else None
-            )
-            return ToggleStatusResponse(
-                status="completed",
-                ask_ai_enabled=ask_ai_enabled,
-                last_reindex_time=last_reindex_time,
-                last_job_id=existing_record.last_job_id
-            )
+            return ToggleStatusResponse(status="completed", ask_ai_enabled=ask_ai_enabled)
         else:
-            return ToggleStatusResponse(
-                status="in_progress",
-                ask_ai_enabled=ask_ai_enabled,
-                last_job_id=existing_record.last_job_id
-            )
+            return ToggleStatusResponse(status="in_progress", ask_ai_enabled=ask_ai_enabled)
 
     except Exception:
         LOGGER.exception("Failed to get toggle status")
@@ -471,7 +459,6 @@ async def reindex_callback(
         if request.status == "success":
             LOGGER.info(f"Reindex completed successfully for domain {existing_record.domain}")
             was_first_reindex = existing_record.last_reindex_time is None
-            existing_record.last_job_id = request.sourceMessageId
             existing_record.job_id = None
             existing_record.last_reindex_time = datetime.utcnow()
 
@@ -479,7 +466,6 @@ async def reindex_callback(
                 background_tasks.add_task(revalidate_domain, existing_record.domain)
         else:
             LOGGER.error(f"Reindex failed for domain {existing_record.domain}")
-            existing_record.last_job_id = request.sourceMessageId
             existing_record.job_id = None
 
         await db.commit()

@@ -76,9 +76,5 @@ export const orchestratorEnv = {
 
     get environment() {
         return process.env.ENVIRONMENT || "dev";
-    },
-
-    get edgeConfig() {
-        return process.env.EDGE_CONFIG;
     }
 };

@@ -20,18 +20,6 @@ export const env = workerEnv;
  */
 
 async function main() {
-    // Log all environment variables for debugging (excluding sensitive values)
-    const envVars = Object.keys(process.env).filter(
-        (key) => !key.includes("KEY") && !key.includes("TOKEN") && !key.includes("SECRET")
-    );
-    logger.info("Worker starting with environment variables", {
-        availableEnvVars: envVars,
-        hasEdgeConfig: !!process.env.EDGE_CONFIG,
-        hasTurbopufferKey: !!process.env.TURBOPUFFER_API_KEY,
-        hasOpenAiKey: !!process.env.OPENAI_API_KEY,
-        hasFernToken: !!process.env.FERN_TOKEN
-    });
-
     const domain = process.env.REINDEX_DOMAIN;
     const sourceSqsMessageId = process.env.SOURCE_SQS_MESSAGE_ID || "unknown";
     const forceFullReindex = process.env.FORCE_FULL_REINDEX === "true";

@@ -35,7 +35,6 @@ class ToggleStatusResponse(BaseModel):
     status: str = Field(description="Current job status (running, completed, failed, etc.)")
     ask_ai_enabled: bool = Field(description="Current state of Ask AI")
     last_reindex_time: str | None = Field(None, description="ISO timestamp of last reindex")
-    last_job_id: str | None = Field(None, description="Job ID of the last completed reindex")
 
 
 class EnableAskAiRequest(BaseModel):

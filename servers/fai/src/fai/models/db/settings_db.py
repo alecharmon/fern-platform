@@ -23,7 +23,6 @@ class SettingsDb(Base):
     created_time = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
     last_reindex_time = Column(DateTime, nullable=True)
     job_id = Column(String, nullable=True)
-    last_job_id = Column(String, nullable=True)
 
     docs_enabled = Column(Boolean, nullable=False, default=True)
     slack_enabled = Column(Boolean, nullable=False, default=True)
