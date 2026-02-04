@@ -39,7 +39,7 @@ export function generateGraphQlSnippet(context: GraphQlSnippetContext): GraphQlS
     const { operation, types } = context;
 
     const operationKeyword = getOperationKeyword(operation.operationType);
-    const operationName = capitalizeFirst(operation.name);
+    const operationName = getExampleOperationName(operation.operationType);
 
     const args = operation.arguments ?? [];
     const variables: Record<string, unknown> = {};
@@ -105,13 +105,19 @@ function getOperationKeyword(operationType: GraphQlOperationType): string {
 }
 
 /**
- * Capitalize the first letter of a string
+ * Get the example operation name based on operation type
  */
-function capitalizeFirst(str: string): string {
-    if (!str) {
-        return str;
+function getExampleOperationName(operationType: GraphQlOperationType): string {
+    switch (operationType) {
+        case "QUERY":
+            return "ExampleQuery";
+        case "MUTATION":
+            return "ExampleMutation";
+        case "SUBSCRIPTION":
+            return "ExampleSubscription";
+        default:
+            return "ExampleQuery";
     }
-    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 /**
