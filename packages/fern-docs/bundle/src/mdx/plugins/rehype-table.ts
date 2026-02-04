@@ -1,4 +1,4 @@
-import { isMdxJsxElementHast, SKIP, type Unified, visit } from "@fern-docs/mdx";
+import { isMdxJsxAttribute, isMdxJsxElementHast, SKIP, type Unified, visit } from "@fern-docs/mdx";
 
 export const rehypeTable: Unified.Plugin<[], any> = () => {
     return (tree) => {
@@ -39,6 +39,12 @@ export const rehypeTable: Unified.Plugin<[], any> = () => {
                 } else if (node.name === "StickySearchableTable") {
                     tableChild.properties.sticky = true;
                     tableChild.properties.searchable = true;
+                }
+
+                const attributes = node.attributes.filter(isMdxJsxAttribute);
+                const placeholderAttr = attributes.find((attr) => attr.name === "placeholder")?.value;
+                if (typeof placeholderAttr === "string") {
+                    tableChild.properties.placeholder = placeholderAttr;
                 }
             }
 

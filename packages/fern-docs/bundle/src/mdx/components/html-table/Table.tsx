@@ -11,6 +11,7 @@ import React, { type ComponentProps, useCallback, useEffect, useRef, useState } 
 interface TableProps extends ComponentProps<"table"> {
     sticky?: boolean;
     searchable?: boolean;
+    placeholder?: string;
 }
 
 /**
@@ -58,7 +59,7 @@ function useTableFilter(
     }, [containerRef, searchQuery, searchable]);
 }
 
-export function Table({ className, sticky, searchable, children, ...rest }: TableProps) {
+export function Table({ className, sticky, searchable, placeholder, children, ...rest }: TableProps) {
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -81,7 +82,7 @@ export function Table({ className, sticky, searchable, children, ...rest }: Tabl
             <Search className="fern-table-search-icon" />
             <input
                 type="text"
-                placeholder="Search..."
+                placeholder={placeholder ?? "Search..."}
                 value={searchQuery}
                 onChange={handleSearchChange}
                 className="fern-table-search-input"
