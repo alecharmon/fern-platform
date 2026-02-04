@@ -326,6 +326,8 @@ jobs:
                         value: "info"
                       - name: TMPDIR
                         value: /tmp
+                      - name: CORS_PROXY_ALLOWED_DOMAINS
+                        value: "google.com,cloudflare.com"
                     resources:
                       requests:
                         memory: "2Gi"
@@ -550,8 +552,20 @@ jobs:
         run: |
           echo "Testing CORS proxy endpoint (/__proxy/)..."
           
-          # Test GET request through the proxy using Google (highly reliable)
-          echo "Testing GET request through proxy..."
+          # Test 1: Verify SSRF protection - blocked domain should return 403
+          echo "Testing SSRF protection (blocked domain should return 403)..."
+          BLOCKED_CODE=$(curl -s -o /tmp/proxy-blocked-response.txt -w "%{http_code}" "http://localhost:30080/__proxy/https://example.org" 2>/dev/null || echo "000")
+          echo "Blocked domain status: $BLOCKED_CODE"
+          
+          if [ "$BLOCKED_CODE" != "403" ]; then
+            echo "ERROR: SSRF protection failed - expected 403 for blocked domain, got $BLOCKED_CODE"
+            cat /tmp/proxy-blocked-response.txt 2>/dev/null || true
+            exit 1
+          fi
+          echo "SSRF protection working - blocked domain correctly returned 403"
+          
+          # Test 2: GET request through the proxy using Google (allowed via CORS_PROXY_ALLOWED_DOMAINS)
+          echo "Testing GET request through proxy (allowed domain)..."
           PROXY_GET_CODE=$(curl -s -o /tmp/proxy-get-response.html -w "%{http_code}" "http://localhost:30080/__proxy/https://www.google.com" 2>/dev/null || echo "000")
           echo "GET proxy status: $PROXY_GET_CODE"
           
@@ -569,8 +583,8 @@ jobs:
           fi
           echo "GET request through proxy successful"
           
-          # Test POST request through the proxy using Cloudflare (accepts POST)
-          echo "Testing POST request through proxy..."
+          # Test 3: POST request through the proxy using Cloudflare (allowed via CORS_PROXY_ALLOWED_DOMAINS)
+          echo "Testing POST request through proxy (allowed domain)..."
           PROXY_POST_CODE=$(curl -s -o /tmp/proxy-post-response.txt -w "%{http_code}" \
             -X POST "http://localhost:30080/__proxy/https://cloudflare.com/cdn-cgi/trace" \
             -H "Content-Type: application/json" \
@@ -591,7 +605,7 @@ jobs:
           fi
           echo "POST request through proxy successful"
           
-          # Test OPTIONS preflight request (CORS)
+          # Test 4: OPTIONS preflight request (CORS)
           echo "Testing OPTIONS preflight request..."
           CORS_HEADERS=$(curl -s -I -X OPTIONS "http://localhost:30080/__proxy/https://www.google.com" 2>/dev/null)
           

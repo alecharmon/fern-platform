@@ -30,6 +30,68 @@ const DEBUG = process.env.CACHE_PROXY_DEBUG === "1";
 const CACHE_DISABLED = process.env.CACHE_DISABLED === "1" || process.env.CACHE_DISABLED === "true";
 // CDN TTL for downstream caches (e.g., CloudFront) - 1 hour default
 const CDN_TTL = parseInt(process.env.CACHE_CDN_TTL || "3600", 10);
+// Docs site domain for CORS proxy validation (e.g., "docs.example.com")
+// Uses NEXT_PUBLIC_DOCS_DOMAIN_URL which is already set by run.sh from the docs.yml config
+const DOCS_DOMAIN = process.env.NEXT_PUBLIC_DOCS_DOMAIN_URL || "";
+
+// Additional allowed domains for CORS proxy (comma-separated list of root domains)
+// Example: "api.example.com,partner.example.org" allows *.example.com and *.example.org
+const ADDITIONAL_ALLOWED_DOMAINS = process.env.CORS_PROXY_ALLOWED_DOMAINS
+    ? process.env.CORS_PROXY_ALLOWED_DOMAINS.split(",")
+          .map((d) => d.trim().toLowerCase())
+          .filter(Boolean)
+    : [];
+
+/**
+ * Extract the root domain from a hostname.
+ * For example: "docs.example.com" -> "example.com"
+ * Handles common TLDs like .com, .org, .io, .co.uk, etc.
+ */
+function getRootDomain(hostname) {
+    const parts = hostname.toLowerCase().split(".");
+    if (parts.length <= 2) {
+        return hostname.toLowerCase();
+    }
+    // Handle common two-part TLDs like .co.uk, .com.au, etc.
+    const twoPartTlds = ["co.uk", "com.au", "co.nz", "co.jp", "com.br", "co.in", "org.uk", "net.au"];
+    const lastTwo = parts.slice(-2).join(".");
+    if (twoPartTlds.includes(lastTwo)) {
+        return parts.slice(-3).join(".");
+    }
+    return parts.slice(-2).join(".");
+}
+
+/**
+ * Check if a target hostname matches a given allowed domain.
+ * Returns true if target matches the root domain or is a subdomain of it.
+ */
+function matchesDomain(targetHostname, allowedDomain) {
+    const allowedRoot = getRootDomain(allowedDomain);
+    const targetLower = targetHostname.toLowerCase();
+    return targetLower === allowedRoot || targetLower.endsWith("." + allowedRoot);
+}
+
+/**
+ * Check if a target hostname is allowed based on the docs domain and additional allowed domains.
+ * Returns true if the target domain matches or is a subdomain of any allowed root domain.
+ */
+function isProxyTargetAllowed(targetHostname, docsDomain, additionalDomains) {
+    // If no docs domain is configured, allow all (backward compatibility)
+    if (!docsDomain && additionalDomains.length === 0) {
+        return true;
+    }
+    // Check against docs domain
+    if (docsDomain && matchesDomain(targetHostname, docsDomain)) {
+        return true;
+    }
+    // Check against additional allowed domains
+    for (const domain of additionalDomains) {
+        if (matchesDomain(targetHostname, domain)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 // LRU Cache implementation
 class LRUCache {
@@ -411,6 +473,14 @@ function handleCorsProxy(req, res) {
         return;
     }
 
+    // Validate that the target domain matches the docs site domain (SSRF protection)
+    if (!isProxyTargetAllowed(parsedUrl.hostname, DOCS_DOMAIN, ADDITIONAL_ALLOWED_DOMAINS)) {
+        log(`CORS proxy error: Domain not allowed - ${parsedUrl.hostname} (docs domain: ${DOCS_DOMAIN})`);
+        res.writeHead(403, { "Content-Type": "text/plain", "Access-Control-Allow-Origin": "*" });
+        res.end("Proxy target domain not allowed");
+        return;
+    }
+
     // Log the request (excluding sensitive headers/API keys)
     log(`CORS proxy request: ${req.method} ${parsedUrl.origin}${parsedUrl.pathname}`);
 
@@ -604,6 +674,13 @@ server.on("upgrade", (req, clientSocket, head) => {
     const isSecure = parsedUrl.protocol === "https:" || parsedUrl.protocol === "wss:";
     const targetPort = parsedUrl.port || (isSecure ? 443 : 80);
 
+    // Validate that the target domain matches the docs site domain (SSRF protection)
+    if (!isProxyTargetAllowed(parsedUrl.hostname, DOCS_DOMAIN, ADDITIONAL_ALLOWED_DOMAINS)) {
+        log(`CORS proxy WebSocket error: Domain not allowed - ${parsedUrl.hostname} (docs domain: ${DOCS_DOMAIN})`);
+        clientSocket.end("HTTP/1.1 403 Forbidden\r\n\r\nProxy target domain not allowed");
+        return;
+    }
+
     // Log WebSocket proxy request (excluding sensitive data)
     log(`CORS proxy WebSocket upgrade: ${parsedUrl.origin}${parsedUrl.pathname}`);
 
@@ -693,6 +770,23 @@ server.listen(PROXY_PORT, "0.0.0.0", () => {
         log(`CDN TTL: ${CDN_TTL} seconds (for downstream caches like CloudFront)`);
     }
     log(`CORS proxy: enabled at /__proxy/`);
+    if (DOCS_DOMAIN || ADDITIONAL_ALLOWED_DOMAINS.length > 0) {
+        const allowedDomains = [];
+        if (DOCS_DOMAIN) {
+            allowedDomains.push(`*.${getRootDomain(DOCS_DOMAIN)}`);
+        }
+        for (const domain of ADDITIONAL_ALLOWED_DOMAINS) {
+            allowedDomains.push(`*.${getRootDomain(domain)}`);
+        }
+        log(`CORS proxy domain restriction: ${allowedDomains.join(", ")}`);
+        if (ADDITIONAL_ALLOWED_DOMAINS.length > 0) {
+            log(`  Additional domains from CORS_PROXY_ALLOWED_DOMAINS: ${ADDITIONAL_ALLOWED_DOMAINS.join(", ")}`);
+        }
+    } else {
+        log(
+            `CORS proxy domain restriction: DISABLED (set NEXT_PUBLIC_DOCS_DOMAIN_URL or CORS_PROXY_ALLOWED_DOMAINS to enable)`
+        );
+    }
     log(`Debug mode: ${DEBUG ? "enabled" : "disabled"}`);
 });
 
