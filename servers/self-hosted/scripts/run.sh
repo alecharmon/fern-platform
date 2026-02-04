@@ -310,27 +310,7 @@ if [ $MEILI_ATTEMPTS -lt $MAX_MEILI_ATTEMPTS ]; then
 fi
 
 export MEILISEARCH_URL="http://localhost:7700"
-
-# Fetch the Default Search API Key from MeiliSearch
-# This key has only search permissions, unlike the master key which has full admin access
-# Using the search-only key is more secure as it prevents access to admin endpoints
-log "Fetching MeiliSearch Default Search API Key..."
-MEILI_SEARCH_KEY=""
-KEYS_RESPONSE=$(curl -s -H "Authorization: Bearer $MEILI_MASTER_KEY" "http://localhost:7700/keys" 2>/dev/null)
-if [ -n "$KEYS_RESPONSE" ]; then
-    # Extract the Default Search API Key (has "search" action only)
-    MEILI_SEARCH_KEY=$(echo "$KEYS_RESPONSE" | jq -r '.results[] | select(.name == "Default Search API Key") | .key' 2>/dev/null)
-    if [ -n "$MEILI_SEARCH_KEY" ] && [ "$MEILI_SEARCH_KEY" != "null" ]; then
-        log "Successfully retrieved MeiliSearch Default Search API Key"
-    else
-        log "WARNING: Could not find Default Search API Key, falling back to master key"
-        MEILI_SEARCH_KEY="$MEILI_MASTER_KEY"
-    fi
-else
-    log "WARNING: Could not fetch MeiliSearch keys, falling back to master key"
-    MEILI_SEARCH_KEY="$MEILI_MASTER_KEY"
-fi
-export MEILI_SEARCH_KEY
+log "MeiliSearch master key will be used for all operations (middleware handles auth)"
 # -----------  End MeiliSearch setup  -----------
 
 # -----------  Start Jaeger setup (optional, for debugging)  -----------
@@ -611,8 +591,7 @@ NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
 NEXT_PUBLIC_IS_SELF_HOSTED=1 \
 NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}" \
 NEXT_TELEMETRY_DISABLED=1 \
-NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700" \
-NEXT_PUBLIC_MEILISEARCH_API_KEY="${MEILI_SEARCH_KEY}" \
+MEILISEARCH_ORIGIN="http://localhost:7700" \
 MEILISEARCH_MASTER_KEY="${MEILI_MASTER_KEY}" \
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
 NODE_OPTIONS="--max-old-space-size=${NODEJS_HEAP_SIZE}" \

@@ -301,24 +301,7 @@ for i in {1..30}; do
     sleep 1
 done
 
-# Fetch the Default Search API Key from MeiliSearch
-# This key has only search permissions, unlike the master key which has full admin access
-log "Fetching MeiliSearch Default Search API Key..."
-MEILI_SEARCH_KEY=""
-KEYS_RESPONSE=$(curl -s -H "Authorization: Bearer $MEILI_MASTER_KEY" "http://localhost:7700/keys" 2>/dev/null)
-if [ -n "$KEYS_RESPONSE" ]; then
-    MEILI_SEARCH_KEY=$(echo "$KEYS_RESPONSE" | jq -r '.results[] | select(.name == "Default Search API Key") | .key' 2>/dev/null)
-    if [ -n "$MEILI_SEARCH_KEY" ] && [ "$MEILI_SEARCH_KEY" != "null" ]; then
-        log "Successfully retrieved MeiliSearch Default Search API Key"
-    else
-        log "WARNING: Could not find Default Search API Key, falling back to master key"
-        MEILI_SEARCH_KEY="$MEILI_MASTER_KEY"
-    fi
-else
-    log "WARNING: Could not fetch MeiliSearch keys, falling back to master key"
-    MEILI_SEARCH_KEY="$MEILI_MASTER_KEY"
-fi
-export MEILI_SEARCH_KEY
+log "MeiliSearch is ready"
 
 # -----------  Start MinIO  -----------
 log "Starting MinIO for seeding..."
@@ -664,8 +647,8 @@ NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
 NEXT_PUBLIC_IS_SELF_HOSTED=1 \
 NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}" \
 NEXT_TELEMETRY_DISABLED=1 \
-NEXT_PUBLIC_MEILISEARCH_ORIGIN="http://localhost:7700" \
-NEXT_PUBLIC_MEILISEARCH_API_KEY="${MEILI_SEARCH_KEY}" \
+MEILISEARCH_ORIGIN="http://localhost:7700" \
+MEILISEARCH_MASTER_KEY="${MEILI_MASTER_KEY}" \
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
 NODE_OPTIONS="--max-old-space-size=4096" \
 node server.js 2>&1 &
@@ -691,13 +674,28 @@ REINDEX_RESPONSE=$(curl -s --max-time 600 \
     -X GET "$REINDEX_URL" 2>&1)
 REINDEX_EXIT=$?
 
+REINDEX_SUCCESS=false
 if [ $REINDEX_EXIT -eq 0 ] && echo "$REINDEX_RESPONSE" | grep -q '"added"'; then
-    log "MeiliSearch reindex completed successfully!"
-    log "Reindex result: $REINDEX_RESPONSE"
+    # Extract the number of documents added
+    DOCS_ADDED=$(echo "$REINDEX_RESPONSE" | jq -r '.added // 0' 2>/dev/null || echo "0")
+    if [ "$DOCS_ADDED" -gt 0 ] 2>/dev/null; then
+        log "MeiliSearch reindex completed successfully!"
+        log "Reindex result: $REINDEX_RESPONSE"
+        log "Documents indexed: $DOCS_ADDED"
+        REINDEX_SUCCESS=true
+    else
+        log "WARNING: MeiliSearch reindex returned 0 documents"
+        log "Response: $REINDEX_RESPONSE"
+        log "This may indicate an issue with FDR data or domain resolution"
+    fi
 else
     log "WARNING: MeiliSearch reindex may have failed"
     log "Response: $REINDEX_RESPONSE"
-    log "Search may not be available at runtime"
+    log "curl exit code: $REINDEX_EXIT"
+    # Check if response is HTML (error page) instead of JSON
+    if echo "$REINDEX_RESPONSE" | grep -q "<!DOCTYPE\|<html"; then
+        log "ERROR: Received HTML response instead of JSON - this indicates the API route may not be working"
+    fi
 fi
 
 # Stop Next.js
@@ -705,56 +703,62 @@ log "Stopping Next.js..."
 kill "$nextjs_pid" 2>/dev/null || true
 wait "$nextjs_pid" 2>/dev/null || true
 
-# Create MeiliSearch dump for restoration at runtime
-log "Creating MeiliSearch dump..."
+# Create MeiliSearch dump for restoration at runtime - only if reindex succeeded
 mkdir -p "$SEED_MEILI_DIR"
 
-# Request a dump from MeiliSearch
-DUMP_RESPONSE=$(curl -s -X POST \
-    -H "Authorization: Bearer $MEILI_MASTER_KEY" \
-    -H "Content-Type: application/json" \
-    "http://localhost:7700/dumps" 2>&1)
-DUMP_TASK_UID=$(echo "$DUMP_RESPONSE" | jq -r '.taskUid // empty' 2>/dev/null)
+if [ "$REINDEX_SUCCESS" = "true" ]; then
+    log "Creating MeiliSearch dump (reindex succeeded with $DOCS_ADDED documents)..."
+    
+    # Request a dump from MeiliSearch
+    DUMP_RESPONSE=$(curl -s -X POST \
+        -H "Authorization: Bearer $MEILI_MASTER_KEY" \
+        -H "Content-Type: application/json" \
+        "http://localhost:7700/dumps" 2>&1)
+    DUMP_TASK_UID=$(echo "$DUMP_RESPONSE" | jq -r '.taskUid // empty' 2>/dev/null)
 
-if [ -n "$DUMP_TASK_UID" ]; then
-    log "MeiliSearch dump task started (taskUid: $DUMP_TASK_UID)"
-    
-    # Wait for dump to complete
-    for i in {1..60}; do
-        TASK_STATUS=$(curl -s -H "Authorization: Bearer $MEILI_MASTER_KEY" \
-            "http://localhost:7700/tasks/$DUMP_TASK_UID" 2>/dev/null)
-        STATUS=$(echo "$TASK_STATUS" | jq -r '.status // "unknown"' 2>/dev/null)
+    if [ -n "$DUMP_TASK_UID" ]; then
+        log "MeiliSearch dump task started (taskUid: $DUMP_TASK_UID)"
         
-        if [ "$STATUS" = "succeeded" ]; then
-            log "MeiliSearch dump completed successfully"
-            break
-        elif [ "$STATUS" = "failed" ]; then
-            log "WARNING: MeiliSearch dump failed"
-            echo "$TASK_STATUS" | jq . 2>/dev/null || echo "$TASK_STATUS"
-            break
-        fi
+        # Wait for dump to complete
+        for i in {1..60}; do
+            TASK_STATUS=$(curl -s -H "Authorization: Bearer $MEILI_MASTER_KEY" \
+                "http://localhost:7700/tasks/$DUMP_TASK_UID" 2>/dev/null)
+            STATUS=$(echo "$TASK_STATUS" | jq -r '.status // "unknown"' 2>/dev/null)
+            
+            if [ "$STATUS" = "succeeded" ]; then
+                log "MeiliSearch dump completed successfully"
+                break
+            elif [ "$STATUS" = "failed" ]; then
+                log "WARNING: MeiliSearch dump failed"
+                echo "$TASK_STATUS" | jq . 2>/dev/null || echo "$TASK_STATUS"
+                break
+            fi
+            
+            log "Waiting for MeiliSearch dump... ($i/60, status: $STATUS)"
+            sleep 1
+        done
         
-        log "Waiting for MeiliSearch dump... ($i/60, status: $STATUS)"
-        sleep 1
-    done
-    
-    # Copy dump file from MeiliSearch's dump directory
-    # MeiliSearch creates dumps in its db-path/dumps/ directory
-    if [ -d "$MEILI_DB_PATH/dumps" ]; then
-        DUMP_FILE=$(ls -t "$MEILI_DB_PATH/dumps/"*.dump 2>/dev/null | head -1)
-        if [ -n "$DUMP_FILE" ] && [ -f "$DUMP_FILE" ]; then
-            cp "$DUMP_FILE" "$SEED_MEILI_DIR/search.dump"
-            log "MeiliSearch dump saved to $SEED_MEILI_DIR/search.dump"
-            log "Dump size: $(du -h "$SEED_MEILI_DIR/search.dump" | cut -f1)"
+        # Copy dump file from MeiliSearch's dump directory
+        # MeiliSearch creates dumps in its db-path/dumps/ directory
+        if [ -d "$MEILI_DB_PATH/dumps" ]; then
+            DUMP_FILE=$(ls -t "$MEILI_DB_PATH/dumps/"*.dump 2>/dev/null | head -1)
+            if [ -n "$DUMP_FILE" ] && [ -f "$DUMP_FILE" ]; then
+                cp "$DUMP_FILE" "$SEED_MEILI_DIR/search.dump"
+                log "MeiliSearch dump saved to $SEED_MEILI_DIR/search.dump"
+                log "Dump size: $(du -h "$SEED_MEILI_DIR/search.dump" | cut -f1)"
+            else
+                log "WARNING: Could not find MeiliSearch dump file"
+            fi
         else
-            log "WARNING: Could not find MeiliSearch dump file"
+            log "WARNING: MeiliSearch dumps directory not found at $MEILI_DB_PATH/dumps"
         fi
     else
-        log "WARNING: MeiliSearch dumps directory not found at $MEILI_DB_PATH/dumps"
+        log "WARNING: Failed to start MeiliSearch dump"
+        log "Response: $DUMP_RESPONSE"
     fi
 else
-    log "WARNING: Failed to start MeiliSearch dump"
-    log "Response: $DUMP_RESPONSE"
+    log "Skipping MeiliSearch dump creation (reindex did not succeed)"
+    log "Search will be indexed at container startup instead"
 fi
 
 cd /fern

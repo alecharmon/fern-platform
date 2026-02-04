@@ -2,7 +2,7 @@ import { rewritePosthog } from "@fern-api/docs-server/analytics/rewritePosthog";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
-import { fernToken_admin } from "@fern-api/docs-server/env-variables";
+import { fernToken_admin, meilisearchApiKey, meilisearchOrigin } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { JSON_PATTERN, MARKDOWN_PATTERN, RSS_PATTERN } from "@fern-api/docs-server/patterns";
 import { withPathname } from "@fern-api/docs-server/withPathname";
@@ -164,10 +164,26 @@ export const middleware: NextMiddleware = async (request) => {
      * MeiliSearch admin endpoints like /keys, /dumps, /snapshots, /tasks, etc.
      * that could expose API keys or allow unauthorized administrative actions.
      */
-    if (pathname.includes("/_search/")) {
-        const searchPath = withoutBasepath("/_search/");
-        // Remove "_search/" and normalize by stripping leading slash for consistent regex matching
-        const cleanedPath = searchPath.replace("_search/", "").replace(/^\//, "");
+    // Check for /_search/ or /_search at end of path (for the base endpoint)
+    const searchMatch = pathname.match(/\/_search(\/|$)/);
+    if (searchMatch) {
+        const searchPath = withoutBasepath("/_search");
+        // Remove "/_search" prefix and normalize by stripping leading slash for consistent regex matching
+        const cleanedPath = searchPath.replace(/^\/?_search\/?/, "");
+
+        // If cleanedPath is empty, this is a request to the base /_search endpoint
+        // Allow it through as it may be a health check or info request
+        if (cleanedPath === "") {
+            const meiliUrl = `${meilisearchOrigin()}/`;
+            const newHeaders = new Headers(headers);
+            const meiliKey = meilisearchApiKey();
+            if (meiliKey) {
+                newHeaders.set("Authorization", `Bearer ${meiliKey}`);
+            }
+            return NextResponse.rewrite(meiliUrl, {
+                request: { headers: newHeaders }
+            });
+        }
 
         // Only allow search-related endpoints
         // - indexes - list all indexes
@@ -186,10 +202,12 @@ export const middleware: NextMiddleware = async (request) => {
             return new NextResponse("Forbidden", { status: 403 });
         }
 
-        const meiliUrl = `${process.env.NEXT_PUBLIC_MEILISEARCH_ORIGIN ?? "http://localhost:7700"}/${cleanedPath}`;
+        const meiliUrl = `${meilisearchOrigin()}/${cleanedPath}`;
         const newHeaders = new Headers(headers);
-        const meiliKey = process.env.MEILISEARCH_MASTER_KEY ?? process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY;
-        newHeaders.set("Authorization", `Bearer ${meiliKey}`);
+        const meiliKey = meilisearchApiKey();
+        if (meiliKey) {
+            newHeaders.set("Authorization", `Bearer ${meiliKey}`);
+        }
 
         return NextResponse.rewrite(meiliUrl, {
             request: { headers: newHeaders }

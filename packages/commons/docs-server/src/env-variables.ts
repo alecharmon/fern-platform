@@ -1,11 +1,11 @@
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 
 export function meilisearchApiKey(): string {
-    return process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY ?? "fern123!";
+    return getEnvVariable("MEILISEARCH_MASTER_KEY");
 }
 
 export function meilisearchOrigin(): string {
-    return process.env.NEXT_PUBLIC_MEILISEARCH_ORIGIN ?? "http://localhost:7700";
+    return getEnvVariable("MEILISEARCH_ORIGIN");
 }
 
 export function algoliaAppId(): string {
