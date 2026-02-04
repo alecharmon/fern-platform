@@ -19,6 +19,7 @@ jobs:
       FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
       POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+      EDGE_CONFIG: ${{ secrets.EDGE_CONFIG }}
 
     steps:
       - name: Checkout

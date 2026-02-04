@@ -229,6 +229,9 @@ export class FaiReindexingSchedulerStack extends Stack {
                 ENVIRONMENT: environmentType.toLowerCase(),
                 ...(process.env.POSTHOG_API_KEY && {
                     POSTHOG_API_KEY: process.env.POSTHOG_API_KEY
+                }),
+                ...(process.env.EDGE_CONFIG && {
+                    EDGE_CONFIG: process.env.EDGE_CONFIG
                 })
             }
         });
