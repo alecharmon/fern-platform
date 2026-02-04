@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 const MOBILE_TAB_REQUEST = "0";
 const MOBILE_TAB_RESPONSE = "1";
 
+import { useExampleSelection } from "@fern-docs/components/api-reference/endpoints/useExampleSelection";
 import {
     PLAYGROUND_AUTH_STATE_ATOM,
     PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
@@ -23,7 +24,6 @@ import {
     useResolvedPlaygroundState
 } from "@/state/playground";
 import { track } from "../../analytics";
-import { filterExamplesForExplorer } from "../../api-reference/endpoints/filterExamplesForExplorer";
 import { executeProxyRest } from "../fetch-utils/executeProxyRest";
 import { executeProxyStream } from "../fetch-utils/executeProxyStream";
 import type { ProxyRequest } from "../types";
@@ -92,36 +92,46 @@ export const PlaygroundEndpoint = ({
 
     const [formState, setFormState] = usePlaygroundEndpointFormState(context);
 
-    const { filteredExamples, indexMapping } = useMemo(
-        () => filterExamplesForExplorer(context.endpoint.examples),
-        [context.endpoint.examples]
-    );
+    const { segmentedControlExamples } = useExampleSelection(context.endpoint);
 
-    const hasExamples = filteredExamples.length > 0;
+    const hasExamples = segmentedControlExamples.length > 0;
     const [selectedExampleIndex, setSelectedExampleIndex] = useState<number | undefined>(hasExamples ? 0 : undefined);
     const didAutoSelectRef = useRef(false);
 
     useEffect(() => {
         if (hasExamples && !didAutoSelectRef.current) {
             didAutoSelectRef.current = true;
-            const originalIndex = indexMapping[0];
-            if (originalIndex !== undefined) {
-                const example = context.endpoint.examples?.[originalIndex];
+            const firstExample = segmentedControlExamples[0]?.examples[0];
+            if (firstExample) {
                 setSelectedExampleIndex(0);
-                setFormState(getInitialEndpointRequestFormStateWithExample(context, example, resolvedPlaygroundState));
+                setFormState(
+                    getInitialEndpointRequestFormStateWithExample(
+                        context,
+                        firstExample.exampleCall,
+                        resolvedPlaygroundState
+                    )
+                );
             }
         }
-    }, [hasExamples, indexMapping, context, setFormState, resolvedPlaygroundState]);
+    }, [hasExamples, segmentedControlExamples, context, setFormState, resolvedPlaygroundState]);
 
-    const onSelectExample = useEventCallback((filteredIndex: number) => {
-        const originalIndex = indexMapping[filteredIndex];
-        if (originalIndex === undefined) {
+    const onSelectExample = useEventCallback((index: number) => {
+        const selectedGroup = segmentedControlExamples[index];
+        if (!selectedGroup) {
             resetWithoutExample();
             return;
         }
-        const example = context.endpoint.examples?.[originalIndex];
-        setSelectedExampleIndex(filteredIndex);
-        setFormState(getInitialEndpointRequestFormStateWithExample(context, example, resolvedPlaygroundState));
+        const firstExample = selectedGroup.examples[0];
+        if (firstExample) {
+            setSelectedExampleIndex(index);
+            setFormState(
+                getInitialEndpointRequestFormStateWithExample(
+                    context,
+                    firstExample.exampleCall,
+                    resolvedPlaygroundState
+                )
+            );
+        }
     });
 
     const resetWithoutExample = useEventCallback(() => {
@@ -371,7 +381,7 @@ export const PlaygroundEndpoint = ({
                         context={context}
                         formState={formState}
                         setFormState={setFormState}
-                        filteredExamples={filteredExamples}
+                        segmentedControlExamples={segmentedControlExamples}
                         selectedExampleIndex={selectedExampleIndex}
                         onSelectExample={onSelectExample}
                         resetWithoutExample={resetWithoutExample}

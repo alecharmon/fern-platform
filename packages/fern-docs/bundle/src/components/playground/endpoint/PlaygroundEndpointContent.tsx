@@ -1,5 +1,6 @@
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
-import type { EndpointContext, ExampleEndpointCall } from "@fern-api/fdr-sdk/api-definition";
+import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
+import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
 import type { Loadable } from "@fern-ui/loadable";
 import { type Dispatch, type ReactElement, type SetStateAction, useDeferredValue } from "react";
 
@@ -17,7 +18,7 @@ interface PlaygroundEndpointContentProps {
     context: EndpointContext;
     formState: PlaygroundEndpointRequestFormState;
     setFormState: Dispatch<SetStateAction<PlaygroundEndpointRequestFormState>>;
-    filteredExamples: ExampleEndpointCall[];
+    segmentedControlExamples: { exampleKey: string; examples: CodeExample[] }[];
     selectedExampleIndex: number | undefined;
     onSelectExample: (exampleIndex: number) => void;
     resetWithoutExample: () => void;
@@ -34,7 +35,7 @@ export function PlaygroundEndpointContent({
     context,
     formState,
     setFormState,
-    filteredExamples,
+    segmentedControlExamples,
     selectedExampleIndex,
     onSelectExample,
     resetWithoutExample,
@@ -68,7 +69,7 @@ export function PlaygroundEndpointContent({
             <PlaygroundEndpointFormButtons
                 key="form-buttons"
                 node={context.node}
-                examples={filteredExamples}
+                segmentedControlExamples={segmentedControlExamples}
                 selectedExampleIndex={selectedExampleIndex}
                 onSelectExample={onSelectExample}
                 resetWithoutExample={resetWithoutExample}

@@ -1,5 +1,5 @@
-import type { ExampleEndpointCall } from "@fern-api/fdr-sdk/api-definition";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
 import { ExampleSelector } from "@fern-docs/components/ExampleSelector";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernLink } from "@fern-docs/components/FernLink";
@@ -9,7 +9,7 @@ import { useMemo } from "react";
 
 interface PlaygroundEndpointFormButtonsProps {
     node: FernNavigation.EndpointNode;
-    examples: ExampleEndpointCall[] | undefined;
+    segmentedControlExamples: { exampleKey: string; examples: CodeExample[] }[];
     selectedExampleIndex: number | undefined;
     onSelectExample: (exampleIndex: number) => void;
     resetWithoutExample: () => void;
@@ -18,7 +18,7 @@ interface PlaygroundEndpointFormButtonsProps {
 
 export function PlaygroundEndpointFormButtons({
     node,
-    examples,
+    segmentedControlExamples,
     selectedExampleIndex,
     onSelectExample,
     resetWithoutExample,
@@ -27,15 +27,19 @@ export function PlaygroundEndpointFormButtons({
     const apiReferenceId = FernNavigation.utils.getApiReferenceId(node);
 
     const exampleOptions = useMemo(() => {
-        if (!examples || examples.length === 0) {
+        if (!segmentedControlExamples || segmentedControlExamples.length === 0) {
             return [];
         }
-        return examples.map((example, index) => ({
-            key: String(index),
-            label: example.name ?? `Example ${index + 1}`,
-            title: example.name ?? `Example ${index + 1}`
-        }));
-    }, [examples]);
+        return segmentedControlExamples.map(({ examples }, index) => {
+            const exampleIndex = examples[0]?.exampleIndex ?? 0;
+            const label = examples[0]?.name ?? examples[0]?.exampleCall.name ?? `Example ${exampleIndex + 1}`;
+            return {
+                key: String(index),
+                label,
+                title: label
+            };
+        });
+    }, [segmentedControlExamples]);
 
     const hasExamples = exampleOptions.length > 0;
 
