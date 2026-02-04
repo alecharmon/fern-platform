@@ -247,7 +247,7 @@ jobs:
 
       - name: Build container
         run: |
-          docker build -f ./servers/fai-reindexing/Dockerfile -t fai-reindexing:local .
+          docker build --pull -f ./servers/fai-reindexing/Dockerfile -t fai-reindexing:local .
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

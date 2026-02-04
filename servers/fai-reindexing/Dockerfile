@@ -57,26 +57,15 @@ RUN pnpm tsup --config tsup.bundle.config.ts
 
 RUN ls -lh dist-bundle/
 
-FROM node:22-alpine AS runner
+# Use Chainguard's hardened Node.js image with OpenSSL 3.6.1 (fixes all January 2026 CVEs)
+# CVE-2025-15467 (High), CVE-2025-15468, CVE-2025-15469, CVE-2025-11187,
+# CVE-2025-66199, CVE-2025-68160, CVE-2025-69418, CVE-2025-69419, CVE-2025-69420,
+# CVE-2025-69421, CVE-2026-22795, CVE-2026-22796
+FROM cgr.dev/chainguard/node:latest AS runner
 WORKDIR /app
-
-# Install dependencies and patch tar to fix GHSA-34x7-hfp2-rc4v
-RUN npm install -g pnpm@10.28.2 && \
-    pnpm add \
-        @aws-sdk/client-ecs@^3.709.0 \
-        @aws-sdk/client-sqs@^3.709.0 \
-        @vercel/edge-config@^1.4.0 \
-        --prod && \
-    npm pack tar@7.5.7 && \
-    tar -xzf tar-7.5.7.tgz && \
-    rm -rf /usr/local/lib/node_modules/pnpm/dist/node_modules/tar && \
-    mv package /usr/local/lib/node_modules/pnpm/dist/node_modules/tar && \
-    rm tar-7.5.7.tgz && \
-    rm -rf ~/.pnpm-store && \
-    rm -rf /usr/local/lib/node_modules/npm
 
 COPY --from=builder /app/servers/fai-reindexing/dist-bundle ./dist
 
 ENV NODE_ENV=production
 
-CMD ["node", "dist/index.cjs"]
+CMD ["dist/index.cjs"]
