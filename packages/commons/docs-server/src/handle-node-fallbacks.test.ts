@@ -290,6 +290,67 @@ describe("handle-node-fallbacks", () => {
             const result = getTabs(foundNode, root, "test-product/test-page", false, []);
             expect(result).toEqual([everyoneTab, publicTab]);
         });
+
+        it("should filter out hidden tabs when showHiddenNodes is false", () => {
+            const hiddenTab = createTabNode("hidden-tab", "Hidden Tab");
+            hiddenTab.hidden = true;
+            const visibleTab = createTabNode("visible-tab", "Visible Tab");
+            visibleTab.hidden = false;
+
+            const foundNode: FernNavigation.utils.Node = {
+                ...createFoundNode(
+                    createPageNode("test-page", "Test Page"),
+                    [createProductNode("test-product", "Test Product", false)],
+                    createRootNode([], "productgroup")
+                ),
+                tabs: [hiddenTab, visibleTab]
+            };
+            const root = createRootNode([], "productgroup");
+
+            const result = getTabs(foundNode, root, "test-product/test-page", false, []);
+            expect(result).toEqual([visibleTab]);
+        });
+
+        it("should include hidden tab if it is the current tab", () => {
+            const hiddenTab = createTabNode("hidden-tab", "Hidden Tab");
+            hiddenTab.hidden = true;
+            const visibleTab = createTabNode("visible-tab", "Visible Tab");
+            visibleTab.hidden = false;
+
+            const foundNode: FernNavigation.utils.Node = {
+                ...createFoundNode(
+                    createPageNode("test-page", "Test Page"),
+                    [createProductNode("test-product", "Test Product", false)],
+                    createRootNode([], "productgroup")
+                ),
+                tabs: [hiddenTab, visibleTab],
+                currentTab: hiddenTab
+            };
+            const root = createRootNode([], "productgroup");
+
+            const result = getTabs(foundNode, root, "test-product/test-page", false, []);
+            expect(result).toEqual([hiddenTab, visibleTab]);
+        });
+
+        it("should return all tabs including hidden ones when showHiddenNodes is true", () => {
+            const hiddenTab = createTabNode("hidden-tab", "Hidden Tab");
+            hiddenTab.hidden = true;
+            const visibleTab = createTabNode("visible-tab", "Visible Tab");
+            visibleTab.hidden = false;
+
+            const foundNode: FernNavigation.utils.Node = {
+                ...createFoundNode(
+                    createPageNode("test-page", "Test Page"),
+                    [createProductNode("test-product", "Test Product", false)],
+                    createRootNode([], "productgroup")
+                ),
+                tabs: [hiddenTab, visibleTab]
+            };
+            const root = createRootNode([], "productgroup");
+
+            const result = getTabs(foundNode, root, "test-product/test-page", true, []);
+            expect(result).toEqual([hiddenTab, visibleTab]);
+        });
     });
 
     describe("getProducts", () => {

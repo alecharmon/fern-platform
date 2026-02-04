@@ -3,7 +3,6 @@ import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { hasRedirect, type TabChild } from "@fern-api/fdr-sdk/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Lock } from "lucide-react";
-import { cn } from "./cn";
 import { FernLinkTab } from "./FernLinkTab";
 import { processIcon } from "./processIcon";
 
@@ -21,7 +20,6 @@ export function HeaderTabsList({
             {tabs.map((tab) => (
                 <Tabs.TabsTrigger key={tab.id} value={tab.id} asChild>
                     <FernLinkTab
-                        className={cn({ "opacity-50": tab.type !== "link" && tab.hidden })}
                         href={tab.type === "link" ? tab.url : slugToHref(hasRedirect(tab) ? tab.pointsTo : tab.slug)}
                         scroll={true}
                         id={tab.id}

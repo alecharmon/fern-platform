@@ -139,6 +139,9 @@ export const getTabs = (
         return tabs;
     }
 
+    // Get the current tab ID to preserve it even if hidden
+    const currentTabId = foundNode.type === "found" ? foundNode.currentTab?.id : undefined;
+
     return (
         tabs?.filter((tab) => {
             if (tab.type !== "tab" && tab.type !== "changelog") {
@@ -146,6 +149,11 @@ export const getTabs = (
             }
 
             if (tab.authed) {
+                return false;
+            }
+
+            // Filter out hidden tabs, unless it's the current tab
+            if (tab.hidden && tab.id !== currentTabId) {
                 return false;
             }
 
