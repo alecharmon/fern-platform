@@ -25,6 +25,7 @@ import { cn } from "@/utils/utils";
 import { createCodeBlockComponent } from "./extension-code-block/CodeBlockComponent";
 import CustomElement from "./extension-custom-element";
 import { InlineCustomElement } from "./extension-custom-element/inline-custom-element";
+import { EnterHistoryGroupExtension } from "./extension-enter-history-group";
 import { FVEAttributesExtension } from "./extension-fve-attributes";
 import { MarkdownPasteExtension } from "./extension-markdown-paste";
 import { ConditionalPlaceholder } from "./extension-placeholder";
@@ -74,6 +75,7 @@ const extensions = [
         codeBlock: false,
         link: false
     }),
+    EnterHistoryGroupExtension,
     Link.configure({
         openOnClick: false,
         autolink: true,
