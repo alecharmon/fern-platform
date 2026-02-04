@@ -104,3 +104,101 @@ This page lists all the error codes that can be returned by the Plant Store API.
 | `webhook_url_invalid` | Webhook URL Invalid | The webhook URL provided is invalid. |
 
 </Table>
+
+## Product Comparison Table
+
+This table demonstrates searchable tables with `rowSpan` and `colSpan` attributes. Try searching for "industrial", "iSIM", "commercial", or "GSMA" to test the filtering behavior.
+
+<table searchable className="fern-table">
+  <thead>
+    <tr>
+      <th colSpan={2}></th>
+      <th>Advanced eSIM</th>
+      <th>Consumer eSIM</th>
+      <th>Classic eSIM</th>
+      <th>Standard UICC</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td rowSpan={3}>Available physical form factors and quality grades</td>
+      <td>Commercial grade</td>
+
+      <td>
+        <ul>
+          <li>Dual-cut (2FF/3FF)</li>
+          <li>Triple-cut (2FF/3FF/4FF)</li>
+        </ul>
+      </td>
+
+      <td>—</td>
+
+      <td>
+        <ul>
+          <li>Dual-cut (2FF/3FF)</li>
+          <li>Triple-cut (2FF/3FF/4FF)</li>
+        </ul>
+      </td>
+
+      <td>
+        <ul>
+          <li>Dual-cut (2FF/3FF)</li>
+          <li>Triple-cut (2FF/3FF/4FF)</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Industrial grade</td>
+
+      <td>
+        <ul>
+          <li>Plug-In: 2FF, 3FF, 4FF</li>
+          <li>Embedded: MFF2, MFF4</li>
+        </ul>
+      </td>
+
+      <td>MFF2</td>
+
+      <td>
+        <ul>
+          <li>Plug-In: 2FF, 3FF, 4FF</li>
+          <li>Embedded: MFF2</li>
+        </ul>
+      </td>
+
+      <td>
+        <ul>
+          <li>Plug-In: 2FF, 3FF, 4FF</li>
+          <li>Embedded: MFF2, MFF4</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr>
+      <td>iSIM</td>
+      <td>—</td>
+      <td>—</td>
+
+      <td>
+        <ul>
+          <li>To be installed on supported cellular modules</li>
+          <li>Dedicated project with involved OEM</li>
+        </ul>
+      </td>
+
+      <td>—</td>
+    </tr>
+
+    <tr>
+      <td colSpan={2}>GSMA TS.48 test profile for MFF2/4 certification</td>
+
+      <td colSpan={3}>
+        Available on request with dedicated project initiative
+      </td>
+
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
