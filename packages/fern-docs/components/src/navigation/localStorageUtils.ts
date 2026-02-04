@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-
+import { randomUUID } from "../util/randomUUID";
 import { NAVIGATION_STORAGE_KEY } from "./NavigationStorage";
 
 /**
@@ -8,7 +8,7 @@ import { NAVIGATION_STORAGE_KEY } from "./NavigationStorage";
  * NOTE: If you make changes to this function, ensure you update the isValidBranchNameFormat
  * function below to stay in sync. */
 export function generateBranchName(userId: string, name: string | undefined): string {
-    const randomHexString = crypto.randomUUID().split("-")[0];
+    const randomHexString = randomUUID().split("-")[0];
     return (
         new Date().toISOString().split("T")[0] +
         "-" +

@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { randomUUID } from "@/components/util/randomUUID";
 
 function createMcpServer(domain: string, basepath: string): McpServer {
     const server = new McpServer(
@@ -59,12 +60,12 @@ function createMcpServer(domain: string, basepath: string): McpServer {
                 const body = JSON.stringify({
                     algoliaSearchKey: algoliaSearchKeyJson?.apiKey ?? "",
                     url: "MCP",
-                    conversationId: crypto.randomUUID(),
-                    queryId: crypto.randomUUID(),
+                    conversationId: randomUUID(),
+                    queryId: randomUUID(),
                     filters: [],
                     documentUrls: [],
                     source: "MCP",
-                    id: crypto.randomUUID(),
+                    id: randomUUID(),
                     messages: [
                         {
                             role: "user",

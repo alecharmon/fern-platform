@@ -1,3 +1,4 @@
+import { randomUUID } from "../util/randomUUID";
 import { LOCAL_METRICS_CONFIG } from "./constants";
 import { calculateStats } from "./stats";
 import type { LogLevel, MemoryInfo, MetricEvent, MetricEventType, MetricSummary, MetricsMessage } from "./types";
@@ -24,7 +25,7 @@ export class LocalMetricsCollector {
     private totalReloads = 0;
 
     constructor(ws: WebSocket | null) {
-        this.sessionId = crypto.randomUUID();
+        this.sessionId = randomUUID();
         this.sessionStart = performance.now();
         this.samples = new Map();
         this.ws = ws;

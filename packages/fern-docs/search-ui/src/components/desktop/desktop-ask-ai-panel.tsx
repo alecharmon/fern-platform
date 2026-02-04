@@ -39,6 +39,7 @@ import type { Components } from "react-markdown";
 import { useIsomorphicLayoutEffect } from "swr/_internal";
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "../../constants";
 import { isQueryIdPart } from "../../utils/query-id-part";
+import { randomUUID } from "../../utils/randomUUID";
 import { AskAiContextPill } from "../ask-ai-context-pill";
 import { FootnoteSup, FootnotesSection } from "../chatbot/footnote";
 import { ChatbotTurnContextProvider } from "../chatbot/turn-context";
@@ -281,7 +282,7 @@ const DesktopAskAIChat = ({
 
     useEffect(() => {
         if (!queryId) {
-            setQueryId(crypto.randomUUID());
+            setQueryId(randomUUID());
         }
     }, [queryId, setQueryId]);
 
@@ -374,7 +375,7 @@ const DesktopAskAIChat = ({
                     [lastMessage.id]: queryIdPart.data
                 }));
             } else {
-                const assistantQueryId = crypto.randomUUID();
+                const assistantQueryId = randomUUID();
                 setMessageQueryIds((prev) => ({
                     ...prev,
                     [lastMessage.id]: assistantQueryId
@@ -387,7 +388,7 @@ const DesktopAskAIChat = ({
 
     const askAI = useCallback(
         (message?: string): void => {
-            const newQueryId = crypto.randomUUID();
+            const newQueryId = randomUUID();
             setQueryId(newQueryId);
 
             void chat.sendMessage(
@@ -475,7 +476,7 @@ const DesktopAskAIChat = ({
                             chat.setMessages([]);
                             chat.error = undefined;
                             resetConversationId();
-                            setQueryId(crypto.randomUUID());
+                            setQueryId(randomUUID());
                         }}
                     >
                         <RotateCw size={16} />
@@ -586,7 +587,7 @@ const DesktopAskAIChat = ({
                     chat.setMessages([]);
                     chat.error = undefined;
                     resetConversationId();
-                    setQueryId(crypto.randomUUID());
+                    setQueryId(randomUUID());
                 }}
                 onSend={askAI}
                 filters={filters}

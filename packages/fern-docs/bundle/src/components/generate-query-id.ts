@@ -1,3 +1,5 @@
+import { randomUUID } from "./util/randomUUID";
+
 export const generateQueryId = () => {
-    return crypto.randomUUID();
+    return randomUUID();
 };

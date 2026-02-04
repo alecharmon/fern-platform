@@ -8,6 +8,7 @@ on:
       - "servers/self-hosted/**"
       - ".github/workflows/run-self-hosted-tests.yml"
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     paths:
       - "servers/self-hosted/**"
       - ".github/workflows/run-self-hosted-tests.yml"
@@ -23,12 +24,20 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/app' }}
 
+env:
+  EKS_CLUSTER_NAME: ${{ vars.EKS_SMOKE_TEST_CLUSTER_NAME || 'self-hosted' }}
+  AWS_REGION: ${{ vars.EKS_SMOKE_TEST_AWS_REGION || 'us-east-1' }}
+
 jobs:
   # Combined job: build + self-hosted tests + K8s tests
   # This eliminates Docker image save/upload/download overhead
   test:
     runs-on: Seed
     timeout-minutes: 60
+    if: github.event.action != 'closed'
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -894,8 +903,399 @@ jobs:
           
           echo "All expected-to-pass tests passed!"
 
+      - name: Configure AWS credentials for ECR push
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: us-east-1
+
+      - name: Push PR preview image to ECR
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          AWS_ACCOUNT_ID: "985111089818"
+          AWS_REGION: "us-east-1"
+        run: |
+          # Login to ECR
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+          
+          # Create ECR repository if it doesn't exist
+          aws ecr describe-repositories --repository-names smoke-test --region $AWS_REGION 2>/dev/null || \
+            aws ecr create-repository --repository-name smoke-test --region $AWS_REGION
+          
+          # Tag and push the full-gen image (same as KIND tests use) with a PR-specific tag
+          # The full-gen image has pre-generated docs and proper /data directory permissions
+          PR_IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/smoke-test:pr-${PR_NUMBER}"
+          
+          echo "Tagging full-gen image as PR preview image: $PR_IMAGE"
+          docker tag fern-test-full-gen:latest $PR_IMAGE
+          
+          echo "Pushing PR preview image to ECR..."
+          docker push $PR_IMAGE
+          
+          echo "PR preview image pushed successfully: $PR_IMAGE"
+
       - name: Cleanup
         if: always()
         run: |
           # Fast cleanup - just delete the cluster, no need to gracefully delete namespaces
           kind delete cluster || true
+
+  # ============================================================
+  # PR PREVIEW DEPLOYMENT
+  # Deploy to real EKS cluster for PR testing after tests pass
+  # The image was already built and pushed to DockerHub by the test job
+  # ============================================================
+  deploy-pr-preview:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      NAMESPACE: self-hosted-pr-${{ github.event.pull_request.number }}
+      DEPLOYMENT_NAME: fern-docs-pr-preview
+      PR_IMAGE: 985111089818.dkr.ecr.us-east-1.amazonaws.com/smoke-test:pr-${{ github.event.pull_request.number }}
+      AWS_ACCOUNT_ID: "985111089818"
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ env.EKS_CLUSTER_NAME }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Delete existing deployment if exists
+        run: |
+          # Delete existing deployment to avoid "old replicas pending termination" issue
+          # This happens when the old pod can't terminate because the new pod isn't ready
+          echo "Checking for existing deployment..."
+          if kubectl get deployment ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} 2>/dev/null; then
+            echo "Deleting existing deployment to ensure clean rollout..."
+            kubectl delete deployment ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} --timeout=60s || true
+            # Wait for pods to be deleted
+            kubectl wait --for=delete pod -l app=${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} --timeout=60s || true
+            echo "Existing deployment deleted"
+          else
+            echo "No existing deployment found"
+          fi
+
+      - name: Verify image exists in ECR
+        run: |
+          # Verify the image exists in ECR before deploying
+          echo "Verifying image exists in ECR: ${{ env.PR_IMAGE }}"
+          aws ecr describe-images \
+            --repository-name smoke-test \
+            --image-ids imageTag=pr-${{ env.PR_NUMBER }} \
+            --region us-east-1
+          echo "Image verified in ECR!"
+
+      - name: Deploy to EKS
+        run: |
+          cat <<EOF | kubectl apply -n ${{ env.NAMESPACE }} -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ${{ env.DEPLOYMENT_NAME }}
+            labels:
+              app: ${{ env.DEPLOYMENT_NAME }}
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: ${{ env.DEPLOYMENT_NAME }}
+            template:
+              metadata:
+                labels:
+                  app: ${{ env.DEPLOYMENT_NAME }}
+              spec:
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 65532
+                  runAsGroup: 65532
+                  fsGroup: 65532
+                  fsGroupChangePolicy: OnRootMismatch
+                containers:
+                  - name: fern-docs
+                    image: ${{ env.PR_IMAGE }}
+                    imagePullPolicy: Always
+                    ports:
+                      - name: docs
+                        containerPort: 3000
+                        protocol: TCP
+                      - name: health
+                        containerPort: 8081
+                        protocol: TCP
+                    env:
+                      - name: WARMUP
+                        value: "false"
+                      - name: FERN_LOG_LEVEL
+                        value: "info"
+                      - name: TMPDIR
+                        value: /tmp
+                    resources:
+                      requests:
+                        memory: "2Gi"
+                        cpu: "1000m"
+                      limits:
+                        memory: "4Gi"
+                        cpu: "2000m"
+                    livenessProbe:
+                      httpGet:
+                        path: /liveness
+                        port: 8081
+                      initialDelaySeconds: 120
+                      periodSeconds: 10
+                      timeoutSeconds: 15
+                      failureThreshold: 3
+                    readinessProbe:
+                      httpGet:
+                        path: /readiness
+                        port: 8081
+                      initialDelaySeconds: 60
+                      periodSeconds: 10
+                      timeoutSeconds: 15
+                      failureThreshold: 6
+                    securityContext:
+                      allowPrivilegeEscalation: false
+                      runAsNonRoot: true
+                      runAsUser: 65532
+                      runAsGroup: 65532
+                      privileged: false
+                      readOnlyRootFilesystem: false
+                      capabilities:
+                        drop:
+                          - ALL
+                terminationGracePeriodSeconds: 30
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${{ env.DEPLOYMENT_NAME }}
+            labels:
+              app: ${{ env.DEPLOYMENT_NAME }}
+          spec:
+            type: LoadBalancer
+            ports:
+              - name: http
+                port: 80
+                targetPort: 3000
+                protocol: TCP
+            selector:
+              app: ${{ env.DEPLOYMENT_NAME }}
+          EOF
+
+      - name: Wait for deployment to be ready
+        run: |
+          echo "Waiting for deployment to roll out..."
+          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ env.NAMESPACE }} \
+            --timeout=300s
+
+      - name: Run health checks
+        run: |
+          echo "Running health checks..."
+          
+          POD_NAME=$(kubectl get pods -n ${{ env.NAMESPACE }} \
+            -l app=${{ env.DEPLOYMENT_NAME }} \
+            -o jsonpath='{.items[0].metadata.name}')
+          
+          echo "Pod name: $POD_NAME"
+          
+          echo "Testing liveness endpoint..."
+          kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
+            curl -sf http://localhost:8081/liveness || exit 1
+          echo "Liveness check passed"
+          
+          echo "Testing readiness endpoint..."
+          kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
+            curl -sf http://localhost:8081/readiness || exit 1
+          echo "Readiness check passed"
+          
+          echo "All health checks passed!"
+
+      - name: Wait for LoadBalancer URL
+        id: loadbalancer
+        run: |
+          echo "Waiting for LoadBalancer to be provisioned..."
+          
+          for i in {1..30}; do
+            LB_HOSTNAME=$(kubectl get service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} \
+              -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
+            
+            if [ -n "$LB_HOSTNAME" ]; then
+              PREVIEW_URL="http://${LB_HOSTNAME}"
+              echo "LoadBalancer URL: $PREVIEW_URL"
+              echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+              break
+            fi
+            
+            echo "Waiting for LoadBalancer hostname... ($i/30)"
+            sleep 10
+          done
+          
+          if [ -z "$LB_HOSTNAME" ]; then
+            echo "WARNING: LoadBalancer hostname not available yet. Checking service status..."
+            kubectl describe service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} || true
+          fi
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const previewUrl = '${{ steps.loadbalancer.outputs.preview_url }}';
+            const prNumber = context.issue.number;
+            const namespace = '${{ env.NAMESPACE }}';
+            
+            let body;
+            if (previewUrl) {
+              body = `## Self-Hosted PR Preview Deployed
+            
+            Your self-hosted docs container has been deployed to the EKS cluster for testing!
+            
+            **Preview URL:** ${previewUrl}
+            
+            **Namespace:** \`${namespace}\`
+            
+            **Note:** This preview will be automatically destroyed when the PR is closed or merged.`;
+            } else {
+              body = `## Self-Hosted PR Preview Deployed
+            
+            Your self-hosted docs container has been deployed to the EKS cluster for testing!
+            
+            **Warning:** LoadBalancer URL not available yet. The deployment may still be accessible via kubectl port-forward.
+            
+            **Namespace:** \`${namespace}\`
+            
+            **Note:** This preview will be automatically destroyed when the PR is closed or merged.`;
+            }
+            
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Self-Hosted PR Preview Deployed')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: prNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
+
+      - name: Get deployment info
+        if: always()
+        run: |
+          echo "=== Deployment Status ==="
+          kubectl get deployment ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} -o wide || true
+          
+          echo ""
+          echo "=== Pod Status ==="
+          kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.DEPLOYMENT_NAME }} -o wide || true
+          
+          echo ""
+          echo "=== Pod Events ==="
+          POD_NAME=$(kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.DEPLOYMENT_NAME }} -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          if [ -n "$POD_NAME" ]; then
+            echo "Pod: $POD_NAME"
+            kubectl describe pod $POD_NAME -n ${{ env.NAMESPACE }} | tail -30 || true
+            
+            echo ""
+            echo "=== Container Logs (last 100 lines) ==="
+            kubectl logs $POD_NAME -n ${{ env.NAMESPACE }} --tail=100 || true
+          else
+            echo "No pod found"
+          fi
+          
+          echo ""
+          echo "=== Namespace Events ==="
+          kubectl get events -n ${{ env.NAMESPACE }} --sort-by='.lastTimestamp' | tail -20 || true
+          
+          echo ""
+          echo "=== Service Status ==="
+          kubectl get service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} -o wide || true
+          
+
+  # ============================================================
+  # PR PREVIEW CLEANUP
+  # Delete the PR namespace when PR is closed or merged
+  # ============================================================
+  cleanup-pr-preview:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    timeout-minutes: 10
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      NAMESPACE: self-hosted-pr-${{ github.event.pull_request.number }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ env.EKS_CLUSTER_NAME }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Delete PR namespace
+        run: |
+          echo "Deleting namespace ${{ env.NAMESPACE }}..."
+          if kubectl get namespace ${{ env.NAMESPACE }} 2>/dev/null; then
+            kubectl delete namespace ${{ env.NAMESPACE }} --timeout=120s || echo "Namespace deletion timed out, it will be cleaned up eventually"
+            echo "Namespace ${{ env.NAMESPACE }} deleted"
+          else
+            echo "Namespace ${{ env.NAMESPACE }} does not exist, nothing to clean up"
+          fi
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.issue.number;
+            const namespace = '${{ env.NAMESPACE }}';
+            
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Self-Hosted PR Preview Cleaned Up\n\nThe preview namespace \`${namespace}\` has been deleted.`
+            });

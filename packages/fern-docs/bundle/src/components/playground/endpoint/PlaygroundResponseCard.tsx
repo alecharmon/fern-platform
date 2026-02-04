@@ -11,6 +11,7 @@ import { round } from "es-toolkit/math";
 import { Download } from "lucide-react";
 import type { ReactElement } from "react";
 import { ErrorBoundaryFallback } from "@/components/error-boundary";
+import { randomUUID } from "@/components/util/randomUUID";
 import { PlaygroundResponsePreview } from "../PlaygroundResponsePreview";
 import { PlaygroundSendRequestButton } from "../PlaygroundSendRequestButton";
 import type { PlaygroundResponse } from "../types/playgroundResponse";
@@ -201,5 +202,5 @@ function createFilename(body: ProxyResponse.SerializableFileBody, contentType: s
 
     // TODO: use a more deterministic way to generate filenames
     const extension = contentType.split("/")[1];
-    return `${crypto.randomUUID()}.${extension}`;
+    return `${randomUUID()}.${extension}`;
 }

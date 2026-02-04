@@ -56,19 +56,27 @@ jobs:
         run: |
           kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Login to Docker Hub
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin 985111089818.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+
+      - name: Login to Docker Hub (for pulling base image)
         uses: docker/login-action@v3
         with:
           username: fernapi
           password: ${{ secrets.FERN_API_DOCKERHUB_PASSWORD }}
 
-      - name: Build and push smoke test image
+      - name: Build and push smoke test image to ECR
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           BASE_IMAGE="fernapi/fern-self-hosted:${VERSION}"
-          SMOKE_TEST_IMAGE="fernapi/fern-smoke-test:${VERSION}"
+          SMOKE_TEST_IMAGE="985111089818.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/smoke-test:${VERSION}"
           
           echo "Building smoke test image from base: $BASE_IMAGE"
+          
+          # Create ECR repository if it doesn't exist
+          aws ecr describe-repositories --repository-names smoke-test --region ${{ env.AWS_REGION }} 2>/dev/null || \
+            aws ecr create-repository --repository-name smoke-test --region ${{ env.AWS_REGION }}
           
           docker build \
             --build-arg BASE_IMAGE=$BASE_IMAGE \
@@ -76,7 +84,7 @@ jobs:
             -t $SMOKE_TEST_IMAGE \
             smoke-test/
           
-          echo "Pushing smoke test image: $SMOKE_TEST_IMAGE"
+          echo "Pushing smoke test image to ECR: $SMOKE_TEST_IMAGE"
           docker push $SMOKE_TEST_IMAGE
           
           echo "smoke_test_image=$SMOKE_TEST_IMAGE" >> $GITHUB_OUTPUT
@@ -85,7 +93,7 @@ jobs:
       - name: Deploy to EKS
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          SMOKE_TEST_IMAGE="fernapi/fern-smoke-test:${VERSION}"
+          SMOKE_TEST_IMAGE="985111089818.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/smoke-test:${VERSION}"
           
           # Replace IMAGE_PLACEHOLDER with actual image in deployment manifest
           sed "s|IMAGE_PLACEHOLDER|${SMOKE_TEST_IMAGE}|g" \
@@ -140,87 +148,47 @@ jobs:
           
           echo "All health checks passed!"
 
-      - name: Deploy ngrok tunnel
-        id: ngrok
+      - name: Update service to LoadBalancer type
+        id: loadbalancer
         run: |
-          echo "Deploying ngrok tunnel to expose smoke test externally..."
+          echo "Updating service to LoadBalancer type for external access..."
           
-          # Create ngrok deployment that tunnels to the smoke test service
-          cat <<EOF | kubectl apply -n ${{ env.NAMESPACE }} -f -
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: ngrok-tunnel
-            labels:
-              app: ngrok-tunnel
-          spec:
-            replicas: 1
-            selector:
-              matchLabels:
-                app: ngrok-tunnel
-            template:
-              metadata:
-                labels:
-                  app: ngrok-tunnel
-              spec:
-                containers:
-                  - name: ngrok
-                    image: ngrok/ngrok:latest
-                    command:
-                      - ngrok
-                      - http
-                      - --log=stdout
-                      - ${{ env.DEPLOYMENT_NAME }}:80
-                    ports:
-                      - containerPort: 4040
-                        name: api
-                    resources:
-                      requests:
-                        memory: "64Mi"
-                        cpu: "50m"
-                      limits:
-                        memory: "128Mi"
-                        cpu: "100m"
-          EOF
+          # Patch the service to use LoadBalancer type
+          kubectl patch service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} \
+            -p '{"spec": {"type": "LoadBalancer"}}'
           
-          echo "Waiting for ngrok pod to be ready..."
-          kubectl wait --for=condition=ready pod -l app=ngrok-tunnel -n ${{ env.NAMESPACE }} --timeout=120s
+          echo "Waiting for LoadBalancer to be provisioned..."
           
-          # Wait a bit for ngrok to establish the tunnel
-          sleep 10
-          
-          # Get the ngrok public URL from the API
-          NGROK_POD=$(kubectl get pods -n ${{ env.NAMESPACE }} -l app=ngrok-tunnel -o jsonpath='{.items[0].metadata.name}')
-          echo "ngrok pod: $NGROK_POD"
-          
-          # Get the public URL from ngrok's API
-          for i in {1..10}; do
-            NGROK_URL=$(kubectl exec -n ${{ env.NAMESPACE }} $NGROK_POD -- curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"[^"]*"' | head -1 | cut -d'"' -f4 || echo "")
-            if [ -n "$NGROK_URL" ]; then
-              echo "ngrok URL: $NGROK_URL"
-              echo "ngrok_url=$NGROK_URL" >> $GITHUB_OUTPUT
+          # Wait for the LoadBalancer hostname to be assigned
+          for i in {1..30}; do
+            LB_HOSTNAME=$(kubectl get service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} \
+              -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
+            if [ -n "$LB_HOSTNAME" ]; then
+              LB_URL="http://${LB_HOSTNAME}"
+              echo "LoadBalancer URL: $LB_URL"
+              echo "loadbalancer_url=$LB_URL" >> $GITHUB_OUTPUT
               break
             fi
-            echo "Waiting for ngrok tunnel to be established... ($i/10)"
-            sleep 5
+            echo "Waiting for LoadBalancer hostname... ($i/30)"
+            sleep 10
           done
           
-          if [ -z "$NGROK_URL" ]; then
-            echo "WARNING: Could not get ngrok URL. Checking ngrok logs..."
-            kubectl logs -n ${{ env.NAMESPACE }} $NGROK_POD --tail=50 || true
+          if [ -z "$LB_HOSTNAME" ]; then
+            echo "WARNING: Could not get LoadBalancer hostname after 5 minutes"
+            kubectl get service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} -o yaml || true
           fi
 
       - name: Print smoke test URL
         run: |
-          NGROK_URL="${{ steps.ngrok.outputs.ngrok_url }}"
+          LB_URL="${{ steps.loadbalancer.outputs.loadbalancer_url }}"
           
           echo ""
           echo "=============================================="
-          if [ -n "$NGROK_URL" ]; then
+          if [ -n "$LB_URL" ]; then
             echo "  SMOKE TEST DOCS SITE (PUBLIC URL):"
-            echo "  $NGROK_URL"
+            echo "  $LB_URL"
           else
-            echo "  WARNING: Could not get ngrok URL"
+            echo "  WARNING: Could not get LoadBalancer URL"
           fi
           echo "=============================================="
           echo ""
@@ -240,7 +208,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Kubernetes Smoke Test Deployed* :rocket:\n\nVersion: `${{ steps.version.outputs.version }}`\nPublic URL: ${{ steps.ngrok.outputs.ngrok_url || 'Not available' }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>"
+                    "text": "*Kubernetes Smoke Test Deployed* :rocket:\n\nVersion: `${{ steps.version.outputs.version }}`\nPublic URL: ${{ steps.loadbalancer.outputs.loadbalancer_url || 'Not available' }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>"
                   }
                 }
               ]

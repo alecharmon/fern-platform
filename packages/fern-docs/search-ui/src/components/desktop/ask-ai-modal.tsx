@@ -29,8 +29,8 @@ import {
 } from "react";
 import type { Components } from "react-markdown";
 import { useIsomorphicLayoutEffect } from "swr/_internal";
-
 import { MAX_AI_CHAT_MESSAGE_LENGTH } from "../../constants";
+import { randomUUID } from "../../utils/randomUUID";
 import { FootnoteSup, FootnotesSection } from "../chatbot/footnote";
 import { ChatbotTurnContextProvider } from "../chatbot/turn-context";
 import {
@@ -331,7 +331,7 @@ const DesktopAskAIChat = ({
 
     useEffect(() => {
         if (!queryId) {
-            setQueryId(crypto.randomUUID());
+            setQueryId(randomUUID());
         }
     }, [queryId, setQueryId]);
 
