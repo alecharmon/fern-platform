@@ -20,6 +20,7 @@ import {
     encodeRoles,
     HEADER_X_FERN_HOST,
     HEADER_X_FERN_REVALIDATE_AUTH,
+    HEADER_X_FERN_SITE_AUTH,
     slugToHref,
     withoutStaging
 } from "@fern-api/docs-utils";
@@ -73,9 +74,21 @@ async function performRevalidation(params: {
     authHeader: string | null;
     start: number;
     useGetRequests: boolean;
+    hasSiteAuth: boolean;
 }): Promise<void> {
-    const { host, domain, origin, controller, doReindex, doRegenerate, cdnUri, authHeader, start, useGetRequests } =
-        params;
+    const {
+        host,
+        domain,
+        origin,
+        controller,
+        doReindex,
+        doRegenerate,
+        cdnUri,
+        authHeader,
+        start,
+        useGetRequests,
+        hasSiteAuth
+    } = params;
 
     const fetchMethod = useGetRequests ? "GET" : "HEAD";
     if (useGetRequests) {
@@ -371,60 +384,98 @@ async function performRevalidation(params: {
             return queue.process(slugs);
         };
 
-        // Revalidate all pages, grouping by auth requirement
+        // Collect page slugs for revalidation
         const collector = FernNavigation.NodeCollector.collect(root);
         const { authedSlugs, unauthedSlugs } = collector.revalidationPageSlugs;
 
-        // Revalidate unauthed pages first
-        if (unauthedSlugs.length > 0) {
-            controller.log(`revalidate-queued[unauth]:urls=${unauthedSlugs.length}\n`);
+        // If site has site-level auth (from middleware header), treat ALL pages as requiring auth
+        // This overrides the page-level auth settings from the navigation tree
+        if (hasSiteAuth) {
+            controller.log(`site-level-auth-detected\n`);
 
-            const unauthResult = await createRevalidationQueue(
-                unauthedSlugs,
-                { requiresLogin: false, isLoggedIn: false },
-                "unauth"
-            );
+            // Combine all slugs and revalidate with auth params
+            const allSlugs = [...unauthedSlugs, ...authedSlugs];
+            if (allSlugs.length > 0) {
+                controller.log(`revalidate-queued[site-auth]:urls=${allSlugs.length}\n`);
 
-            if (unauthResult.failed > 0) {
-                console.error(`[revalidate] ${unauthResult.failed} unauth pages failed permanently after ${3} retries`);
-                track("revalidate_pages_failed_permanently", {
-                    domain,
-                    failedCount: unauthResult.failed,
-                    totalCount: unauthResult.total,
-                    authMode: "unauth"
-                });
+                const result = await createRevalidationQueue(
+                    allSlugs,
+                    { requiresLogin: true, isLoggedIn: true },
+                    "site-auth"
+                );
+
+                if (result.failed > 0) {
+                    console.error(
+                        `[revalidate] ${result.failed} site-auth pages failed permanently after ${3} retries`
+                    );
+                    track("revalidate_pages_failed_permanently", {
+                        domain,
+                        failedCount: result.failed,
+                        totalCount: result.total,
+                        authMode: "site-auth"
+                    });
+                }
+
+                controller.log(
+                    `revalidate-pages-finished[site-auth]:total=${result.total};` +
+                        `completed=${result.completed};failed=${result.failed}\n`
+                );
+            }
+        } else {
+            // No site-level auth: use page-level auth settings (original behavior)
+            // Revalidate unauthed pages first
+            if (unauthedSlugs.length > 0) {
+                controller.log(`revalidate-queued[unauth]:urls=${unauthedSlugs.length}\n`);
+
+                const unauthResult = await createRevalidationQueue(
+                    unauthedSlugs,
+                    { requiresLogin: false, isLoggedIn: false },
+                    "unauth"
+                );
+
+                if (unauthResult.failed > 0) {
+                    console.error(
+                        `[revalidate] ${unauthResult.failed} unauth pages failed permanently after ${3} retries`
+                    );
+                    track("revalidate_pages_failed_permanently", {
+                        domain,
+                        failedCount: unauthResult.failed,
+                        totalCount: unauthResult.total,
+                        authMode: "unauth"
+                    });
+                }
+
+                controller.log(
+                    `revalidate-pages-finished[unauth]:total=${unauthResult.total};` +
+                        `completed=${unauthResult.completed};failed=${unauthResult.failed}\n`
+                );
             }
 
-            controller.log(
-                `revalidate-pages-finished[unauth]:total=${unauthResult.total};` +
-                    `completed=${unauthResult.completed};failed=${unauthResult.failed}\n`
-            );
-        }
+            // Revalidate authed pages
+            if (authedSlugs.length > 0) {
+                controller.log(`revalidate-queued[auth]:urls=${authedSlugs.length}\n`);
 
-        // Revalidate authed pages
-        if (authedSlugs.length > 0) {
-            controller.log(`revalidate-queued[auth]:urls=${authedSlugs.length}\n`);
+                const authResult = await createRevalidationQueue(
+                    authedSlugs,
+                    { requiresLogin: true, isLoggedIn: true },
+                    "auth"
+                );
 
-            const authResult = await createRevalidationQueue(
-                authedSlugs,
-                { requiresLogin: true, isLoggedIn: true },
-                "auth"
-            );
+                if (authResult.failed > 0) {
+                    console.error(`[revalidate] ${authResult.failed} auth pages failed permanently after ${3} retries`);
+                    track("revalidate_pages_failed_permanently", {
+                        domain,
+                        failedCount: authResult.failed,
+                        totalCount: authResult.total,
+                        authMode: "auth"
+                    });
+                }
 
-            if (authResult.failed > 0) {
-                console.error(`[revalidate] ${authResult.failed} auth pages failed permanently after ${3} retries`);
-                track("revalidate_pages_failed_permanently", {
-                    domain,
-                    failedCount: authResult.failed,
-                    totalCount: authResult.total,
-                    authMode: "auth"
-                });
+                controller.log(
+                    `revalidate-pages-finished[auth]:total=${authResult.total};` +
+                        `completed=${authResult.completed};failed=${authResult.failed}\n`
+                );
             }
-
-            controller.log(
-                `revalidate-pages-finished[auth]:total=${authResult.total};` +
-                    `completed=${authResult.completed};failed=${authResult.failed}\n`
-            );
         }
     }
 
@@ -478,6 +529,9 @@ export async function GET(
         revalidateTag(`${domain}:mdx`);
     }
 
+    // Read site-level auth from middleware header
+    const hasSiteAuth = req.headers.get(HEADER_X_FERN_SITE_AUTH) === "true";
+
     // delay to ensure invalidation propagates before cache is accessed
     await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -504,7 +558,8 @@ export async function GET(
                 cdnUri,
                 authHeader: req.headers.get("authorization"),
                 start,
-                useGetRequests
+                useGetRequests,
+                hasSiteAuth
             });
 
             return new NextResponse("OK", { status: 200 });
@@ -556,7 +611,8 @@ export async function GET(
                     cdnUri,
                     authHeader: req.headers.get("authorization"),
                     start,
-                    useGetRequests
+                    useGetRequests,
+                    hasSiteAuth
                 });
             } catch (e) {
                 console.error(`[revalidate] ${JSON.stringify(e)}`);

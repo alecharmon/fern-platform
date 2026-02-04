@@ -12,6 +12,7 @@ export const HEADER_X_FORWARDED_HOST = "x-forwarded-host";
 export const HEADER_X_MATCHED_PATH = "x-matched-path";
 export const HEADER_X_VERCEL_PROTECTION_BYPASS = "x-vercel-protection-bypass";
 export const HEADER_X_FERN_REVALIDATE_AUTH = "x-fern-revalidate-auth";
+export const HEADER_X_FERN_SITE_AUTH = "x-fern-site-auth";
 
 /**
  * The role that is used to represent everyone (including unauthenticated users)

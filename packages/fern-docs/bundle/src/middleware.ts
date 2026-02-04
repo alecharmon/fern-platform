@@ -16,12 +16,14 @@ import {
     HEADER_X_FERN_BASEPATH,
     HEADER_X_FERN_HOST,
     HEADER_X_FERN_REVALIDATE_AUTH,
+    HEADER_X_FERN_SITE_AUTH,
     HEADER_X_FORWARDED_HOST,
     isTrailingSlashEnabled,
     removeLeadingSlash,
     removeTrailingSlash
 } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { type MiddlewareConfig, type NextMiddleware, NextResponse } from "next/server";
 
 import { isSelfHosted } from "./server/isSelfHosted";
@@ -215,10 +217,18 @@ export const middleware: NextMiddleware = async (request) => {
     }
 
     /**
-     * Rewrite /api/fern-docs/revalidate-all/v3 to /api/fern-docs/revalidate?regenerate=true
+     * Rewrite revalidation routes with site-level auth header
      */
-    if (pathname.endsWith("/api/fern-docs/revalidate-all/v3")) {
-        return rewrite(withDomain("/api/fern-docs/revalidate"));
+    if (pathname.endsWith("/api/fern-docs/revalidate") || pathname.endsWith("/api/fern-docs/revalidate-path")) {
+        const siteAuthConfig = await getAuthEdgeConfig(domain);
+        const hasSiteAuth = siteAuthConfig != null;
+        const revalidateHeaders = new Headers(headers);
+        revalidateHeaders.set(HEADER_X_FERN_SITE_AUTH, hasSiteAuth ? "true" : "false");
+
+        const targetPath = pathname.endsWith("/api/fern-docs/revalidate-path")
+            ? "/api/fern-docs/revalidate-path"
+            : "/api/fern-docs/revalidate";
+        return rewrite(withDomain(targetPath), undefined, revalidateHeaders);
     }
 
     /**

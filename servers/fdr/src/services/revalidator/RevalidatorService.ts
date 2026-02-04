@@ -47,7 +47,7 @@ export class RevalidatorServiceImpl implements RevalidatorService {
         // let revalidationFailed = false;
         try {
             app?.logger.log("Revalidating paths at", baseUrl.toURL().toString());
-            await fetch(`https://${baseUrl.hostname}${baseUrl.path || ""}/api/fern-docs/revalidate-all/v3`, {
+            await fetch(`https://${baseUrl.hostname}${baseUrl.path || ""}/api/fern-docs/revalidate`, {
                 headers: {
                     authorization: authHeader
                 }
