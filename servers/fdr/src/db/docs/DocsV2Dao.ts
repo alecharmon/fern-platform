@@ -415,7 +415,7 @@ export class DocsV2DaoImpl implements DocsV2Dao {
                 updatedTime: "desc"
             },
             take: limit,
-            skip: Math.min(limit * (page - 1), 0)
+            skip: Math.max(limit * (page - 1), 0)
         });
 
         return {
@@ -461,7 +461,7 @@ export class DocsV2DaoImpl implements DocsV2Dao {
                 updatedTime: "desc"
             },
             take: limit,
-            skip: Math.min(limit * (page - 1), 0)
+            skip: Math.max(limit * (page - 1), 0)
         });
 
         return {
