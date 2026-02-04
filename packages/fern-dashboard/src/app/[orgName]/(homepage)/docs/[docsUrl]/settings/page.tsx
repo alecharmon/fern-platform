@@ -4,7 +4,6 @@ import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { ArchiveSiteButton } from "@/components/settings/ArchiveSiteButton";
-import { DeleteDocsSiteButton } from "@/components/settings/DeleteDocsSiteButton";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { ToggleAskAiButton } from "@/components/settings/ToggleAskAiButton";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,18 +36,11 @@ export default async function Page({
                 }
             />
             {isEmployee && (
-                <>
-                    <SettingsCard
-                        title="Archive site"
-                        description="This will hide the site from the dashboard, but any deployed domains will remain live."
-                        button={<ArchiveSiteButton docsUrl={docsUrl} orgName={orgName} />}
-                    />
-                    <SettingsCard
-                        title="Delete docs site"
-                        description="This is a destructive action and cannot be reversed."
-                        button={<DeleteDocsSiteButton docsUrl={docsUrl} orgName={orgName} />}
-                    />
-                </>
+                <SettingsCard
+                    title="Archive site"
+                    description="This will hide the site from the dashboard, but any deployed domains will remain live."
+                    button={<ArchiveSiteButton docsUrl={docsUrl} orgName={orgName} />}
+                />
             )}
         </div>
     );
