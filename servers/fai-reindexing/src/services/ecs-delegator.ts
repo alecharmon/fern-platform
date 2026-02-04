@@ -85,7 +85,7 @@ function buildSharedEnvVars(
     nodeOptions: string,
     launchType: "EC2" | "Fargate"
 ): Array<{ name: string; value: string }> {
-    return [
+    const envVars = [
         { name: "AWS_REGION", value: env.awsRegion },
         { name: "TURBOPUFFER_API_KEY", value: env.turbopufferApiKey },
         { name: "OPENAI_API_KEY", value: env.openaiApiKey },
@@ -102,6 +102,13 @@ function buildSharedEnvVars(
         { name: "REINDEX_DOMAIN", value: jobMessage.domain },
         { name: "FORCE_FULL_REINDEX", value: String(jobMessage.forceFullReindex ?? false) }
     ];
+
+    // Add EDGE_CONFIG if available (needed for auth configuration)
+    if (env.edgeConfig) {
+        envVars.push({ name: "EDGE_CONFIG", value: env.edgeConfig });
+    }
+
+    return envVars;
 }
 
 function buildSharedTags(
