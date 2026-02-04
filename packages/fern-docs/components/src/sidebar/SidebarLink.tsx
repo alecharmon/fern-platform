@@ -238,7 +238,7 @@ export const SidebarSlugLink = forwardRef<HTMLAnchorElement, PropsWithChildren<O
         const ref = useRef<HTMLAnchorElement>(null);
         useScrollSidebarNodeIntoView(ref, props.nodeId);
         const selected = useIsSelectedSidebarNode(props.nodeId);
-        const href = slug ? slugToHref(slug) : undefined;
+        const href = slug != null ? slugToHref(slug) : undefined;
         return (
             <SidebarLink
                 {...innerProps}
