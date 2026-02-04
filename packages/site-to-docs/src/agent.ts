@@ -317,7 +317,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
             onProgress?.({ stage: "classify", classified: crawlResult.pages.size, total: crawlResult.pages.size });
             // Note: siteStructure is not cached, so ordering won't be applied from cache
         } else {
-            const model = anthropic("claude-sonnet-4-20250514");
+            const model = anthropic("claude-opus-4-5-20251101");
             const classificationResult = await classifyPages(crawlResult, model, {
                 concurrency: 3,
                 maxGroupSize,
@@ -337,7 +337,7 @@ export async function runAgent(options: SiteToDocsOptions): Promise<ConversionRe
             log(`  Cached classified pages for next run`);
         }
     } else {
-        const model = anthropic("claude-sonnet-4-20250514");
+        const model = anthropic("claude-opus-4-5-20251101");
         const classificationResult = await classifyPages(crawlResult, model, {
             concurrency: 3,
             maxGroupSize,
