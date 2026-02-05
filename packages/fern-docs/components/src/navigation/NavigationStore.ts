@@ -964,7 +964,11 @@ export class NavigationStore {
                 // Skip deleted pages - don't add them to newRegistry
                 return;
             } else if (entry.status === "changed") {
-                newRegistry[filename] = { ...entry, status: "committed" };
+                newRegistry[filename] = {
+                    ...entry,
+                    status: "committed",
+                    initialMdx: entry.pageData.mdx
+                };
             } else {
                 newRegistry[filename] = entry;
             }
