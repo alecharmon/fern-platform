@@ -274,7 +274,7 @@ export class ApiReferenceNavigationConverter {
             return children;
         }
 
-        package_.endpoints.forEach((endpoint) => {
+        (package_.endpoints ?? []).forEach((endpoint) => {
             if (endpoint.protocol?.type === "grpc" && endpoint.protocol.methodType != null) {
                 const grpcId = ApiDefinitionHolder.createGrpcId(endpoint, subpackageId);
                 if (this.#visitedGrpcs.has(grpcId)) {
@@ -292,7 +292,7 @@ export class ApiReferenceNavigationConverter {
             }
         });
 
-        package_.websockets.forEach((webSocket) => {
+        (package_.websockets ?? []).forEach((webSocket) => {
             const webSocketId = ApiDefinitionHolder.createWebSocketId(webSocket, subpackageId);
             if (this.#visitedWebSockets.has(webSocketId)) {
                 return;
@@ -301,7 +301,7 @@ export class ApiReferenceNavigationConverter {
             this.#visitedWebSockets.add(webSocketId);
         });
 
-        package_.webhooks.forEach((webhook) => {
+        (package_.webhooks ?? []).forEach((webhook) => {
             const webhookId = ApiDefinitionHolder.createWebhookId(webhook, subpackageId);
             if (this.#visitedWebhooks.has(webhookId)) {
                 return;
@@ -310,7 +310,7 @@ export class ApiReferenceNavigationConverter {
             this.#visitedWebhooks.add(webhookId);
         });
 
-        package_.graphqlOperations.forEach((graphqlOperation) => {
+        (package_.graphqlOperations ?? []).forEach((graphqlOperation) => {
             const graphqlOperationId = ApiDefinitionHolder.createGraphQlOperationId(graphqlOperation);
             if (this.#visitedGraphqlOperations.has(graphqlOperationId)) {
                 return;
@@ -319,7 +319,7 @@ export class ApiReferenceNavigationConverter {
             this.#visitedGraphqlOperations.add(graphqlOperationId);
         });
 
-        package_.subpackages.forEach((subpackageId) => {
+        (package_.subpackages ?? []).forEach((subpackageId) => {
             const subpackage = this.api.subpackages[subpackageId];
             if (subpackage == null) {
                 console.error(`Subpackage ${subpackageId} not found in ${this.apiDefinitionId}`);
@@ -395,16 +395,16 @@ export class ApiReferenceNavigationConverter {
         const webSockets = new Map<string, APIV1Read.WebSocketChannel>();
         const webhooks = new Map<string, APIV1Read.WebhookDefinition>();
         const grpc = new Map<string, APIV1Read.EndpointDefinition>();
-        subpackage.endpoints.forEach((endpoint) => {
+        (subpackage.endpoints ?? []).forEach((endpoint) => {
             endpoints.set(endpoint.id, endpoint);
         });
-        subpackage.websockets.forEach((webSocket) => {
+        (subpackage.websockets ?? []).forEach((webSocket) => {
             webSockets.set(webSocket.id, webSocket);
         });
-        subpackage.webhooks.forEach((webhook) => {
+        (subpackage.webhooks ?? []).forEach((webhook) => {
             webhooks.set(webhook.id, webhook);
         });
-        subpackage.endpoints.forEach((endpoint) => {
+        (subpackage.endpoints ?? []).forEach((endpoint) => {
             if (endpoint.protocol?.type === "grpc") {
                 grpc.set(endpoint.id, endpoint);
             }
