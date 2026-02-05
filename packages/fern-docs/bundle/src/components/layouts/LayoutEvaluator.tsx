@@ -4,7 +4,6 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { type Availability, AvailabilityBadge } from "@fern-docs/components/badges/availability-badge";
-import { FooterLinks } from "@fern-docs/components/footer/FooterLinks";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
 import type React from "react";
 
@@ -13,6 +12,7 @@ import { MdxContent } from "@/mdx/components/MdxContent";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
 import { BuiltWithFern } from "../built-with-fern";
+import { CustomFooterLinks } from "../footer/CustomFooterLinks";
 import { constructPageOptions } from "../PageActionsOptions";
 import { PageHeader } from "../PageHeader";
 import { FooterLayout } from "./FooterLayout";
@@ -106,7 +106,7 @@ export async function LayoutEvaluator({
             slug={slug}
             orgName={metadata.org}
             bottomNavigation={bottomNavigation}
-            footerLinks={<FooterLinks loader={loader} className="mt-8" />}
+            footerLinks={<CustomFooterLinks loader={loader} className="mt-8" />}
             lang={lang}
             hasMultipleLanguages={config.languages != null && config.languages.length > 1}
             lastUpdated={frontmatter?.["last-updated"]}

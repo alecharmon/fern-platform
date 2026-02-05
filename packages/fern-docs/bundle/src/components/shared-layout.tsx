@@ -8,6 +8,8 @@ import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
 import { SidebarContainer } from "@fern-docs/components/sidebar/SidebarContainer";
 import { t } from "@fern-docs/i18n";
 import React from "react";
+import { CustomComponent } from "@/components/custom-component";
+import { compileTsx } from "@/components/custom-component/compile-tsx";
 import { HeaderContent } from "@/components/header/HeaderContent";
 import { ThemedDocs } from "@/components/themes/ThemedDocs";
 import { setMdxSerializer } from "@/context/MdxSerializerContext";
@@ -41,7 +43,7 @@ export default async function SharedLayout({
     announcement?: React.ReactNode;
 }) {
     const isLocalEnvironment = isLocal() || isSelfHosted();
-    const [_config, settings, edgeFlags, colors, layout, root, lang, isAskAiEnabled] = await Promise.all([
+    const [config, settings, edgeFlags, colors, layout, root, lang, isAskAiEnabled, jsFiles] = await Promise.all([
         loader.getConfig(),
         loader.getSettings(),
         loader.getEdgeFlags(),
@@ -49,9 +51,29 @@ export default async function SharedLayout({
         loader.getLayout(),
         loader.getRoot(),
         loader.getLanguage(),
-        loader.isAskAiEnabledForDocs()
+        loader.isAskAiEnabledForDocs(),
+        loader.getMdxBundlerFiles()
     ]);
     const theme = edgeFlags.isCohereTheme ? "cohere" : "default";
+
+    // Look up and compile custom header component from jsFiles
+    // config.header contains the relative file path (e.g., "docs/components/CustomHeader.tsx")
+    // The actual source code is stored in jsFiles keyed by the same path
+    // Note: Custom footer is handled in CustomFooterLinks component
+    let compiledHeaderCode: string | undefined;
+
+    if (config.header != null) {
+        const headerSource = jsFiles[config.header];
+        if (headerSource != null) {
+            try {
+                compiledHeaderCode = await compileTsx(headerSource, config.header);
+            } catch (err) {
+                console.error("[SharedLayout] Failed to compile custom header:", err);
+            }
+        } else {
+            console.warn(`[SharedLayout] Custom header path "${config.header}" not found in jsFiles`);
+        }
+    }
 
     const serialize = createCachedMdxSerializer(loader, {
         useNextMdx: edgeFlags.isNextMdxRef
@@ -189,6 +211,11 @@ export default async function SharedLayout({
             searchPlaceholder={settings.searchText ?? t(lang).search.search}
             lang={lang}
             hideFeedback={layout.hideFeedback}
+            customHeader={
+                compiledHeaderCode != null ? (
+                    <CustomComponent code={compiledHeaderCode} componentType="header" />
+                ) : undefined
+            }
         >
             {children}
         </ThemedDocs>

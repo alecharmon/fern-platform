@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@fern-docs/components/cn";
-import { FERN_COHERE_CONTENT_ID, FERN_FOOTER_ID } from "@fern-docs/components/constants";
+import { FERN_COHERE_CONTENT_ID, FERN_FOOTER_ID, FERN_HEADER_ID } from "@fern-docs/components/constants";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
 import { useDomain } from "@fern-docs/components/state/domain";
@@ -58,7 +58,9 @@ export default function CohereDocs({
     lightSidebarClassName,
     darkSidebarClassName,
     lang,
-    hideFeedback = false
+    hideFeedback = false,
+    customHeader,
+    customFooter
 }: {
     header: React.ReactNode;
     sidebar: React.ReactNode;
@@ -74,6 +76,8 @@ export default function CohereDocs({
     darkSidebarClassName?: string;
     lang: string;
     hideFeedback?: boolean;
+    customHeader?: React.ReactNode;
+    customFooter?: React.ReactNode;
 }) {
     const { resolvedTheme } = useTheme();
     const headerClassName = resolvedTheme === "dark" ? darkHeaderClassName : lightHeaderClassName;
@@ -113,21 +117,25 @@ export default function CohereDocs({
                     marginRight: isSidePanelOpen ? "var(--ask-ai-panel-width, 24rem)" : "0"
                 }}
             >
-                <FernHeader
-                    className={cn("flex flex-col gap-3", { "lg:hidden": isHeaderDisabled }, headerClassName)}
-                    data-theme="cohere"
-                >
-                    <div className="border-border-default rounded-2 bg-header-background h-(--header-height-real) flex items-center overflow-clip border px-4">
-                        {header}
-                    </div>
-                    <HeaderTabsRoot
-                        showSearchBar={showSearchBarInTabs}
-                        className="bg-header-background border-border-default rounded-2 overflow-clip border p-3"
-                        lang={lang}
+                {customHeader != null ? (
+                    <header id={FERN_HEADER_ID}>{customHeader}</header>
+                ) : (
+                    <FernHeader
+                        className={cn("flex flex-col gap-3", { "lg:hidden": isHeaderDisabled }, headerClassName)}
+                        data-theme="cohere"
                     >
-                        {tabs}
-                    </HeaderTabsRoot>
-                </FernHeader>
+                        <div className="border-border-default rounded-2 bg-header-background h-(--header-height-real) flex items-center overflow-clip border px-4">
+                            {header}
+                        </div>
+                        <HeaderTabsRoot
+                            showSearchBar={showSearchBarInTabs}
+                            className="bg-header-background border-border-default rounded-2 overflow-clip border p-3"
+                            lang={lang}
+                        >
+                            {tabs}
+                        </HeaderTabsRoot>
+                    </FernHeader>
+                )}
                 <MainCtx.Provider value={mainRef}>
                     <main ref={mainRef} className="flex min-h-0 flex-1 shrink gap-3" data-theme="cohere">
                         <SidebarNav className={sidebarClassName} data-theme="cohere">
@@ -137,8 +145,8 @@ export default function CohereDocs({
                             <FernScrollArea ref={scrollAreaRef} scrollbars="vertical" className="scroll-pt-4">
                                 <div id={FERN_COHERE_CONTENT_ID}>{children}</div>
 
-                                {/* Enables footer DOM injection */}
-                                <footer id={FERN_FOOTER_ID} />
+                                {/* Render custom footer or placeholder for DOM injection */}
+                                <footer id={FERN_FOOTER_ID}>{customFooter}</footer>
                             </FernScrollArea>
                         </div>
                     </main>

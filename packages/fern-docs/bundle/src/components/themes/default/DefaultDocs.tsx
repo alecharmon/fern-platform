@@ -27,7 +27,8 @@ export default function DefaultDocs({
     darkSidebarClassName,
     searchPlaceholder,
     lang,
-    hideFeedback = false
+    hideFeedback = false,
+    customHeader
 }: {
     header: React.ReactNode;
     versionSelect?: React.ReactNode;
@@ -47,6 +48,7 @@ export default function DefaultDocs({
     searchPlaceholder?: string;
     lang: string;
     hideFeedback?: boolean;
+    customHeader?: React.ReactNode;
 }) {
     const domain = useDomain();
     const isSidePanelOpen = useIsSearchPanelOpen();
@@ -78,6 +80,7 @@ export default function DefaultDocs({
                 darkHeaderClassName={darkHeaderClassName}
                 lightSidebarClassName={lightSidebarClassName}
                 darkSidebarClassName={darkSidebarClassName}
+                customHeader={customHeader}
             >
                 {children}
             </AbstractDefaultDocs>

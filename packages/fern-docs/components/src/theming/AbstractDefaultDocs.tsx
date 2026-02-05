@@ -3,7 +3,7 @@
 import { useTheme } from "next-themes";
 import React, { Fragment } from "react";
 import { cn } from "../cn";
-import { FERN_FOOTER_ID } from "../constants";
+import { FERN_HEADER_ID } from "../constants";
 import { useHasCustomFooter } from "../hooks/useHasCustomFooter";
 import { Separator } from "../Separator";
 import { useIsEmbedded } from "../state/embedded";
@@ -27,7 +27,8 @@ export default function AbstractDefaultDocs({
     lightSidebarClassName,
     darkSidebarClassName,
     isSidePanelOpen = false,
-    isSidePanelResizing = false
+    isSidePanelResizing = false,
+    customHeader
 }: {
     header: React.ReactNode;
     versionSelect?: React.ReactNode;
@@ -45,6 +46,7 @@ export default function AbstractDefaultDocs({
     darkSidebarClassName?: string;
     isSidePanelOpen?: boolean;
     isSidePanelResizing?: boolean;
+    customHeader?: React.ReactNode;
 }) {
     const { resolvedTheme } = useTheme();
     const isEmbedded = useIsEmbedded();
@@ -74,25 +76,31 @@ export default function AbstractDefaultDocs({
             }}
         >
             <div className="fern-background-image pointer-events-none fixed inset-0" />
-            {!isEmbedded && (
-                <FernHeader
-                    className={cn(
-                        "fern-background-image transition-all duration-500 ease-out",
-                        { "lg:hidden": isHeaderDisabled },
-                        isSidePanelResizing && "!transition-none",
-                        headerClassName
-                    )}
-                    style={{
-                        width: isSidePanelOpen ? "calc(100% - var(--ask-ai-panel-width, 24rem))" : "100%"
-                    }}
-                    data-theme="default"
-                >
-                    {announcement}
-                    <div className="width-before-scroll-bar">
-                        <div className="fern-header-content">{header}</div>
-                        <Fragment key="header-tabs">{headerTabs}</Fragment>
-                    </div>
-                </FernHeader>
+            {!isEmbedded && customHeader != null ? (
+                <header id={FERN_HEADER_ID} className="width-before-scroll-bar" data-theme="default">
+                    {customHeader}
+                </header>
+            ) : (
+                !isEmbedded && (
+                    <FernHeader
+                        className={cn(
+                            "fern-background-image transition-all duration-500 ease-out",
+                            { "lg:hidden": isHeaderDisabled },
+                            isSidePanelResizing && "!transition-none",
+                            headerClassName
+                        )}
+                        style={{
+                            width: isSidePanelOpen ? "calc(100% - var(--ask-ai-panel-width, 24rem))" : "100%"
+                        }}
+                        data-theme="default"
+                    >
+                        {announcement}
+                        <div className="width-before-scroll-bar">
+                            <div className="fern-header-content">{header}</div>
+                            <Fragment key="header-tabs">{headerTabs}</Fragment>
+                        </div>
+                    </FernHeader>
+                )
             )}
 
             <MainCtx.Provider value={mainRef}>
@@ -142,9 +150,6 @@ export default function AbstractDefaultDocs({
                     {children}
                 </main>
             </MainCtx.Provider>
-
-            {/* Enables footer DOM injection */}
-            {!isEmbedded && <footer id={FERN_FOOTER_ID} className="width-before-scroll-bar" />}
         </div>
     );
 }
