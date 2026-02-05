@@ -107,6 +107,39 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            billing_product: {
+                Row: {
+                    created_at: string;
+                    display_name: string;
+                    id: string;
+                    is_active: boolean;
+                    kind: string;
+                    sku: string;
+                    tier: string | null;
+                    updated_at: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    display_name: string;
+                    id?: string;
+                    is_active?: boolean;
+                    kind: string;
+                    sku: string;
+                    tier?: string | null;
+                    updated_at?: string;
+                };
+                Update: {
+                    created_at?: string;
+                    display_name?: string;
+                    id?: string;
+                    is_active?: boolean;
+                    kind?: string;
+                    sku?: string;
+                    tier?: string | null;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
             CustomDomainVerification: {
                 Row: {
                     createdAt: string;
@@ -149,6 +182,146 @@ export type Database = {
                     vercelDomainId?: string | null;
                     verificationValue?: string;
                     verifiedAt?: string | null;
+                };
+                Relationships: [];
+            };
+            deprecated_payment_metadata: {
+                Row: {
+                    created_at: string;
+                    id: string;
+                    org_id: string;
+                    stripe_customer_id: string;
+                    subscription_end_date: string | null;
+                    subscription_id: string | null;
+                    subscription_start_date: string | null;
+                    subscription_status: string | null;
+                    updated_at: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    id?: string;
+                    org_id: string;
+                    stripe_customer_id: string;
+                    subscription_end_date?: string | null;
+                    subscription_id?: string | null;
+                    subscription_start_date?: string | null;
+                    subscription_status?: string | null;
+                    updated_at?: string;
+                };
+                Update: {
+                    created_at?: string;
+                    id?: string;
+                    org_id?: string;
+                    stripe_customer_id?: string;
+                    subscription_end_date?: string | null;
+                    subscription_id?: string | null;
+                    subscription_start_date?: string | null;
+                    subscription_status?: string | null;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
+            deprecated_PaymentMetadata: {
+                Row: {
+                    created_at: string;
+                    id: string;
+                    org_id: string;
+                    pricing_tier: string;
+                    product_ids: string[] | null;
+                    stripe_customer_id: string;
+                    subscription_end_date: string | null;
+                    subscription_id: string | null;
+                    subscription_start_date: string | null;
+                    subscription_status: string | null;
+                    updated_at: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    id?: string;
+                    org_id: string;
+                    pricing_tier?: string;
+                    product_ids?: string[] | null;
+                    stripe_customer_id: string;
+                    subscription_end_date?: string | null;
+                    subscription_id?: string | null;
+                    subscription_start_date?: string | null;
+                    subscription_status?: string | null;
+                    updated_at?: string;
+                };
+                Update: {
+                    created_at?: string;
+                    id?: string;
+                    org_id?: string;
+                    pricing_tier?: string;
+                    product_ids?: string[] | null;
+                    stripe_customer_id?: string;
+                    subscription_end_date?: string | null;
+                    subscription_id?: string | null;
+                    subscription_start_date?: string | null;
+                    subscription_status?: string | null;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
+            deprecated_product_ownership: {
+                Row: {
+                    created_at: string;
+                    id: string;
+                    org_id: string;
+                    product_registry_id: string;
+                    status: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    id?: string;
+                    org_id: string;
+                    product_registry_id: string;
+                    status?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    created_at?: string;
+                    id?: string;
+                    org_id?: string;
+                    product_registry_id?: string;
+                    status?: string;
+                    updated_at?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: "product_ownership_product_registry_id_fkey";
+                        columns: ["product_registry_id"];
+                        isOneToOne: false;
+                        referencedRelation: "deprecated_product_registry";
+                        referencedColumns: ["id"];
+                    }
+                ];
+            };
+            deprecated_product_registry: {
+                Row: {
+                    created_at: string;
+                    display_name: string;
+                    id: string;
+                    tier: string | null;
+                    type: string | null;
+                    updated_at: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    display_name: string;
+                    id?: string;
+                    tier?: string | null;
+                    type?: string | null;
+                    updated_at?: string;
+                };
+                Update: {
+                    created_at?: string;
+                    display_name?: string;
+                    id?: string;
+                    tier?: string | null;
+                    type?: string | null;
+                    updated_at?: string;
                 };
                 Relationships: [];
             };
@@ -285,6 +458,127 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            org_billing_account: {
+                Row: {
+                    created_at: string;
+                    org_id: string;
+                    stripe_customer_id: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    org_id: string;
+                    stripe_customer_id: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    created_at?: string;
+                    org_id?: string;
+                    stripe_customer_id?: string;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
+            org_subscription: {
+                Row: {
+                    created_at: string;
+                    current_period_end: string | null;
+                    current_period_start: string | null;
+                    id: string;
+                    org_id: string;
+                    status: string;
+                    stripe_subscription_id: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    current_period_end?: string | null;
+                    current_period_start?: string | null;
+                    id?: string;
+                    org_id: string;
+                    status: string;
+                    stripe_subscription_id: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    created_at?: string;
+                    current_period_end?: string | null;
+                    current_period_start?: string | null;
+                    id?: string;
+                    org_id?: string;
+                    status?: string;
+                    stripe_subscription_id?: string;
+                    updated_at?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: "org_subscription_org_id_fkey";
+                        columns: ["org_id"];
+                        isOneToOne: false;
+                        referencedRelation: "org_billing_account";
+                        referencedColumns: ["org_id"];
+                    }
+                ];
+            };
+            org_subscription_item: {
+                Row: {
+                    created_at: string;
+                    id: string;
+                    org_billing_product: string;
+                    org_subscription_id: string;
+                    quantity: number;
+                    stripe_subscription_item_id: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    id?: string;
+                    org_billing_product: string;
+                    org_subscription_id: string;
+                    quantity?: number;
+                    stripe_subscription_item_id: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    created_at?: string;
+                    id?: string;
+                    org_billing_product?: string;
+                    org_subscription_id?: string;
+                    quantity?: number;
+                    stripe_subscription_item_id?: string;
+                    updated_at?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: "org_subscription_item_org_billing_product_fkey";
+                        columns: ["org_billing_product"];
+                        isOneToOne: false;
+                        referencedRelation: "billing_product";
+                        referencedColumns: ["id"];
+                    },
+                    {
+                        foreignKeyName: "org_subscription_item_org_billing_product_fkey";
+                        columns: ["org_billing_product"];
+                        isOneToOne: false;
+                        referencedRelation: "org_active_products";
+                        referencedColumns: ["billing_product_id"];
+                    },
+                    {
+                        foreignKeyName: "org_subscription_item_org_subscription_id_fkey";
+                        columns: ["org_subscription_id"];
+                        isOneToOne: false;
+                        referencedRelation: "org_active_products";
+                        referencedColumns: ["subscription_id"];
+                    },
+                    {
+                        foreignKeyName: "org_subscription_item_org_subscription_id_fkey";
+                        columns: ["org_subscription_id"];
+                        isOneToOne: false;
+                        referencedRelation: "org_subscription";
+                        referencedColumns: ["id"];
+                    }
+                ];
+            };
             Organization: {
                 Row: {
                     orgId: string;
@@ -294,146 +588,6 @@ export type Database = {
                 };
                 Update: {
                     orgId?: string;
-                };
-                Relationships: [];
-            };
-            payment_metadata: {
-                Row: {
-                    created_at: string;
-                    id: string;
-                    org_id: string;
-                    stripe_customer_id: string;
-                    subscription_end_date: string | null;
-                    subscription_id: string | null;
-                    subscription_start_date: string | null;
-                    subscription_status: string | null;
-                    updated_at: string;
-                };
-                Insert: {
-                    created_at?: string;
-                    id?: string;
-                    org_id: string;
-                    stripe_customer_id: string;
-                    subscription_end_date?: string | null;
-                    subscription_id?: string | null;
-                    subscription_start_date?: string | null;
-                    subscription_status?: string | null;
-                    updated_at?: string;
-                };
-                Update: {
-                    created_at?: string;
-                    id?: string;
-                    org_id?: string;
-                    stripe_customer_id?: string;
-                    subscription_end_date?: string | null;
-                    subscription_id?: string | null;
-                    subscription_start_date?: string | null;
-                    subscription_status?: string | null;
-                    updated_at?: string;
-                };
-                Relationships: [];
-            };
-            PaymentMetadata: {
-                Row: {
-                    created_at: string;
-                    id: string;
-                    org_id: string;
-                    pricing_tier: string;
-                    product_ids: string[] | null;
-                    stripe_customer_id: string;
-                    subscription_end_date: string | null;
-                    subscription_id: string | null;
-                    subscription_start_date: string | null;
-                    subscription_status: string | null;
-                    updated_at: string;
-                };
-                Insert: {
-                    created_at?: string;
-                    id?: string;
-                    org_id: string;
-                    pricing_tier?: string;
-                    product_ids?: string[] | null;
-                    stripe_customer_id: string;
-                    subscription_end_date?: string | null;
-                    subscription_id?: string | null;
-                    subscription_start_date?: string | null;
-                    subscription_status?: string | null;
-                    updated_at?: string;
-                };
-                Update: {
-                    created_at?: string;
-                    id?: string;
-                    org_id?: string;
-                    pricing_tier?: string;
-                    product_ids?: string[] | null;
-                    stripe_customer_id?: string;
-                    subscription_end_date?: string | null;
-                    subscription_id?: string | null;
-                    subscription_start_date?: string | null;
-                    subscription_status?: string | null;
-                    updated_at?: string;
-                };
-                Relationships: [];
-            };
-            product_ownership: {
-                Row: {
-                    created_at: string;
-                    id: string;
-                    org_id: string;
-                    product_registry_id: string;
-                    status: string;
-                    updated_at: string;
-                };
-                Insert: {
-                    created_at?: string;
-                    id?: string;
-                    org_id: string;
-                    product_registry_id: string;
-                    status?: string;
-                    updated_at?: string;
-                };
-                Update: {
-                    created_at?: string;
-                    id?: string;
-                    org_id?: string;
-                    product_registry_id?: string;
-                    status?: string;
-                    updated_at?: string;
-                };
-                Relationships: [
-                    {
-                        foreignKeyName: "product_ownership_product_registry_id_fkey";
-                        columns: ["product_registry_id"];
-                        isOneToOne: false;
-                        referencedRelation: "product_registry";
-                        referencedColumns: ["id"];
-                    }
-                ];
-            };
-            product_registry: {
-                Row: {
-                    created_at: string;
-                    display_name: string;
-                    id: string;
-                    tier: string | null;
-                    type: string | null;
-                    updated_at: string;
-                };
-                Insert: {
-                    created_at?: string;
-                    display_name: string;
-                    id?: string;
-                    tier?: string | null;
-                    type?: string | null;
-                    updated_at?: string;
-                };
-                Update: {
-                    created_at?: string;
-                    display_name?: string;
-                    id?: string;
-                    tier?: string | null;
-                    type?: string | null;
-                    updated_at?: string;
                 };
                 Relationships: [];
             };
@@ -452,6 +606,33 @@ export type Database = {
                     id?: number;
                     permission?: string;
                     role?: string;
+                };
+                Relationships: [];
+            };
+            stripe_event_inbox: {
+                Row: {
+                    created_at: string;
+                    payload: Json;
+                    processed_at: string | null;
+                    processing_error: string | null;
+                    stripe_event_id: string;
+                    type: string;
+                };
+                Insert: {
+                    created_at: string;
+                    payload: Json;
+                    processed_at?: string | null;
+                    processing_error?: string | null;
+                    stripe_event_id: string;
+                    type: string;
+                };
+                Update: {
+                    created_at?: string;
+                    payload?: Json;
+                    processed_at?: string | null;
+                    processing_error?: string | null;
+                    stripe_event_id?: string;
+                    type?: string;
                 };
                 Relationships: [];
             };
@@ -544,7 +725,26 @@ export type Database = {
             };
         };
         Views: {
-            [_ in never]: never;
+            org_active_products: {
+                Row: {
+                    billing_product_id: string | null;
+                    kind: string | null;
+                    org_id: string | null;
+                    sku: string | null;
+                    status: string | null;
+                    subscription_id: string | null;
+                    tier: string | null;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: "org_subscription_org_id_fkey";
+                        columns: ["org_id"];
+                        isOneToOne: false;
+                        referencedRelation: "org_billing_account";
+                        referencedColumns: ["org_id"];
+                    }
+                ];
+            };
         };
         Functions: {
             [_ in never]: never;
