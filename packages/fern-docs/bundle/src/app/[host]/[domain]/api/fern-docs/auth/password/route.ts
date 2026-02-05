@@ -56,15 +56,9 @@ export async function POST(
         // Password is correct - sign a JWT with standard fern structure
         const token = await signPasswordAuthJWT({ secret: jwtSecret });
 
-        // Determine the browser's actual host using standard proxy headers
-        const browserHost =
-            req.headers.get("host") ??
-            (req.headers.get("origin") ? new URL(req.headers.get("origin")!).host : null) ??
-            req.nextUrl.host;
-
-        // Set the cookie on the browser's host so it gets sent back on subsequent requests
+        // Set cookie using req.nextUrl.host
         const cookieJar = await cookies();
-        cookieJar.set(COOKIE_FERN_TOKEN, token, withSecureCookie(withDefaultProtocol(browserHost)));
+        cookieJar.set(COOKIE_FERN_TOKEN, token, withSecureCookie(withDefaultProtocol(req.nextUrl.host)));
 
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {
