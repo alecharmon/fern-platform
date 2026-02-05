@@ -513,6 +513,16 @@ export class NavigationStore {
             insertionIndex = calculateInsertionIndex(deps.baseFoundNode.sidebar, targetSectionId);
         }
 
+        // Extract parent section path titles from targetSectionPath
+        // The targetSectionPath includes the target section itself at the end,
+        // so we need all section ancestors BEFORE the last element to correctly
+        // locate nested sections in the YAML structure
+        const parentSectionPathTitles = (deps.targetSectionPath ?? [])
+            .slice(0, -1) // Remove the target section itself
+            .filter((ancestor) => ancestor.type === "section")
+            .map((ancestor) => ancestor.title)
+            .filter((title): title is string => title != null);
+
         // Create a new Map to trigger React re-renders (useSyncExternalStore uses shallow comparison)
         this._navigationChanges = new Map(this._navigationChanges);
         this._navigationChanges.set(filename, {
@@ -528,6 +538,7 @@ export class NavigationStore {
             insertionMode: "atIndex",
             insertionIndex,
             docsYmlFilePath,
+            parentSectionPathTitles,
             createdAt: Date.now()
         });
 
