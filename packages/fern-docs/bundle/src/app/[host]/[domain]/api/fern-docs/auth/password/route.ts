@@ -1,3 +1,4 @@
+import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { signPasswordAuthJWT } from "@fern-api/docs-server/auth/password-auth";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
@@ -15,7 +16,7 @@ export async function POST(
     req: NextRequest,
     props: { params: Promise<{ host: string; domain: string }> }
 ): Promise<NextResponse> {
-    const { domain } = await props.params;
+    const { host, domain } = await props.params;
 
     const jwtSecret = process.env.JWT_SECRET_KEY;
     if (!jwtSecret) {
@@ -56,9 +57,9 @@ export async function POST(
         // Password is correct - sign a JWT with standard fern structure
         const token = await signPasswordAuthJWT({ secret: jwtSecret });
 
-        // Set cookie using req.nextUrl.host
+        // Set cookie on customer domain using same pattern as middleware
         const cookieJar = await cookies();
-        cookieJar.set(COOKIE_FERN_TOKEN, token, withSecureCookie(withDefaultProtocol(req.nextUrl.host)));
+        cookieJar.set(COOKIE_FERN_TOKEN, token, withSecureCookie(withDefaultProtocol(preferPreview(host, domain))));
 
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {
