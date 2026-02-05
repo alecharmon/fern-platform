@@ -185,10 +185,10 @@ def get_message_action(
         channel_settings = ChannelSettings()
 
     if channel_settings.respond_to == "auto":
-        if message_classification is None:
-            LOGGER.warning("Auto mode enabled but no message classification provided")
-            return "ignore"
-        return message_classification
+        # Always respond as a question in auto mode (skip classification)
+        if message_classification == "index":
+            return "index"
+        return "question"
 
     if channel_settings.respond_to == "mentions_only":
         if not is_app_mention:
