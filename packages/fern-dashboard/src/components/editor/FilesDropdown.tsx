@@ -12,7 +12,7 @@
  * | page-deleted  | files.deleted             | Delete MDX page                    | "Deleted"     | No           | Yes   | No         | No        |
  * | openapi-spec  | openApiPendingChanges     | Edit OpenAPI description           | +X -Y         | Yes          | Yes   | No         | No        |
  * | generators    | openApiPendingChanges     | Edit generators.yml (override ref) | +X -Y         | Yes          | No    | No         | No        |
- * | navigation    | navigationChanges         | Create/delete page, rename section | "X change(s)" | No           | No    | Yes        | No        |
+ * | navigation    | navigationChanges         | Create/delete page, rename section | "X change(s)" | Yes          | No    | Yes        | No        |
  *
  * Note: Creating a page produces BOTH a page-modified entry AND a navigation entry (add_page).
  *       Deleting a page produces BOTH a page-deleted entry AND a navigation entry (remove_page).
@@ -47,7 +47,13 @@ type FileChangeKind =
     | { kind: "page-deleted" }
     | { kind: "openapi-spec"; diffChanges: Change[]; added: number; removed: number }
     | { kind: "generators"; diffChanges: Change[]; added: number; removed: number }
-    | { kind: "navigation"; navigationChanges: NavigationChange[] };
+    | {
+          kind: "navigation";
+          navigationChanges: NavigationChange[];
+          diffChanges: Change[];
+          added: number;
+          removed: number;
+      };
 
 interface FileChangeEntry {
     filename: string;
@@ -61,8 +67,16 @@ function hasDiffChanges(change: FileChangeKind): change is DiffChangeKind {
 }
 
 export function FilesDropdown() {
-    const { branchName, metadata, files, registeredPages, navigationChanges, resetPage, unmarkPageForDeletion } =
-        useNavigation();
+    const {
+        branchName,
+        metadata,
+        files,
+        registeredPages,
+        navigationChanges,
+        resetPage,
+        unmarkPageForDeletion,
+        docsYmlBaseContent
+    } = useNavigation();
     const { pendingChanges: openApiPendingChanges, resetSpecChange } = useOpenApiSpecs();
     const router = useRouter();
     const [resetPopoverOpen, setResetPopoverOpen] = useState<string | null>(null);
@@ -177,14 +191,28 @@ export function FilesDropdown() {
         }
 
         // Process navigation yml files
-        for (const [filename, navigationChanges] of changesByYmlFile) {
+        for (const [filename, navChanges] of changesByYmlFile) {
             if (processedFiles.has(filename)) {
                 continue;
             }
             processedFiles.add(filename);
+
+            const originalContent = docsYmlBaseContent?.get(filename);
+            const updatedContent = files.changed[filename];
+            const diffData =
+                originalContent != null && updatedContent != null
+                    ? calcDiff(originalContent, updatedContent)
+                    : { diff: [], added: 0, removed: 0 };
+
             entries.push({
                 filename,
-                change: { kind: "navigation", navigationChanges }
+                change: {
+                    kind: "navigation",
+                    navigationChanges: navChanges,
+                    diffChanges: diffData.diff,
+                    added: diffData.added,
+                    removed: diffData.removed
+                }
             });
         }
 
@@ -227,7 +255,7 @@ export function FilesDropdown() {
             }
             return a.filename.localeCompare(b.filename);
         });
-    }, [files.deleted, files.changed, openApiPendingChanges, changesByYmlFile, registeredPages]);
+    }, [files.deleted, files.changed, openApiPendingChanges, changesByYmlFile, registeredPages, docsYmlBaseContent]);
 
     const changedFilesCount = fileChanges.length;
 
