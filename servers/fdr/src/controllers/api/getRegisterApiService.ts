@@ -21,6 +21,30 @@ const REGISTER_API_DEFINITION_META = {
 
 const SLOW_OPERATION_THRESHOLD_MS = 30000; // 30 seconds
 
+const MAX_CONCURRENT_REGISTRATIONS = 5;
+
+let activeRegistrations = 0;
+const waitQueue: Array<() => void> = [];
+
+async function acquireRegistrationSlot(): Promise<void> {
+    if (activeRegistrations < MAX_CONCURRENT_REGISTRATIONS) {
+        activeRegistrations++;
+        return;
+    }
+    await new Promise<void>((resolve) => {
+        waitQueue.push(resolve);
+    });
+    activeRegistrations++;
+}
+
+function releaseRegistrationSlot(): void {
+    activeRegistrations--;
+    const next = waitQueue.shift();
+    if (next) {
+        next();
+    }
+}
+
 function logSlowOperation(operation: string, durationMs: number) {
     LOGGER.warn(
         `Operation "${operation}" took ${durationMs}ms (threshold: ${SLOW_OPERATION_THRESHOLD_MS}ms)`,
@@ -98,24 +122,13 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
             });
         },
         registerApiDefinition: async (req, res) => {
-            const startTime = Date.now();
-            let lastOperationTime = startTime;
-
-            const logOperationTime = (operation: string) => {
-                const now = Date.now();
-                const duration = now - lastOperationTime;
-                if (duration > SLOW_OPERATION_THRESHOLD_MS) {
-                    logSlowOperation(operation, duration);
-                }
-                lastOperationTime = now;
-            };
-
+            // Use semaphore to limit concurrent registrations and prevent memory exhaustion.
+            // Auth checks happen outside the semaphore since they're cached and lightweight.
             app.logger.debug(`Checking if user belongs to org ${req.body.orgId}`, REGISTER_API_DEFINITION_META);
             await app.services.auth.checkUserBelongsToOrg({
                 authHeader: req.headers.authorization,
                 orgId: req.body.orgId
             });
-            logOperationTime("checkUserBelongsToOrg");
 
             // Check CLI permission if org is in the allowlist (or if "*" is set for all orgs)
             const shouldCheckCliPermission =
@@ -135,183 +148,210 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                     docsUrl: fernUrl
                 });
             }
-            logOperationTime("checkUserHasCliPermission");
 
-            let apiDefinitionId = FdrAPI.ApiDefinitionId(uuidv4());
-            let transformedApiDefinition: APIV1Db.DbApiDefinition | FdrAPI.api.latest.ApiDefinition | undefined;
-
-            const snippetsConfiguration = req.body.definition?.snippetsConfiguration ?? {
-                typescriptSdk: undefined,
-                pythonSdk: undefined,
-                javaSdk: undefined,
-                goSdk: undefined,
-                rubySdk: undefined,
-                csharpSdk: undefined,
-                phpSdk: undefined,
-                swiftSdk: undefined,
-                rustSdk: undefined
-            };
-
-            const snippetsConfigurationWithSdkIds = await app.dao.sdks().getSdkIdsForPackages(snippetsConfiguration);
-            logOperationTime("getSdkIdsForPackages");
-
-            const sdkIds: string[] = [];
-            if (snippetsConfigurationWithSdkIds.typescriptSdk != null) {
-                sdkIds.push(snippetsConfigurationWithSdkIds.typescriptSdk.sdkId);
-            }
-            if (snippetsConfigurationWithSdkIds.pythonSdk != null) {
-                sdkIds.push(snippetsConfigurationWithSdkIds.pythonSdk.sdkId);
-            }
-            if (snippetsConfigurationWithSdkIds.javaSdk != null) {
-                sdkIds.push(snippetsConfigurationWithSdkIds.javaSdk.sdkId);
-            }
-            if (snippetsConfigurationWithSdkIds.goSdk != null) {
-                sdkIds.push(snippetsConfigurationWithSdkIds.goSdk.sdkId);
-            }
-            if (snippetsConfigurationWithSdkIds.rubySdk != null) {
-                sdkIds.push(snippetsConfigurationWithSdkIds.rubySdk.sdkId);
-            }
-            if (snippetsConfigurationWithSdkIds.csharpSdk != null) {
-                sdkIds.push(snippetsConfigurationWithSdkIds.csharpSdk.sdkId);
-            }
-            if (snippetsConfigurationWithSdkIds.rustSdk != null) {
-                sdkIds.push(snippetsConfigurationWithSdkIds.rustSdk.sdkId);
-            }
-
-            let snippetsBySdkId = {};
-            let snippetsBySdkIdAndEndpointId = {};
-            let snippetTemplatesByEndpoint: SnippetTemplatesByEndpoint = {};
-            let snippetTemplatesByEndpointId: SnippetTemplatesByEndpointIdentifier = {};
-
-            if (!req.body.dynamicIRs) {
-                app.logger.debug("No dynamicIRs detected, creating snippet holder");
-
-                snippetsBySdkId = await app.dao.snippets().loadAllSnippetsForSdkIds(sdkIds);
-                logOperationTime("loadAllSnippetsForSdkIds");
-
-                snippetsBySdkIdAndEndpointId = await app.dao.snippets().loadAllSnippetsForSdkIdsByEndpointId(sdkIds);
-                logOperationTime("loadAllSnippetsForSdkIdsByEndpointId");
-
-                snippetTemplatesByEndpoint = await getSnippetTemplatesIfEnabled({
-                    app,
-                    authorization: req.headers.authorization,
-                    orgId: req.body.orgId,
-                    apiId: req.body.apiId,
-                    definition: req.body.definition ?? req.body.definitionV2,
-                    snippetsConfigurationWithSdkIds
-                });
-                logOperationTime("getSnippetTemplatesIfEnabled");
-
-                snippetTemplatesByEndpointId = await getSnippetTemplatesByEndpointIdIfEnabled({
-                    app,
-                    authorization: req.headers.authorization,
-                    orgId: req.body.orgId,
-                    apiId: req.body.apiId,
-                    definition: req.body.definition ?? req.body.definitionV2,
-                    snippetsConfigurationWithSdkIds
-                });
-                logOperationTime("getSnippetTemplatesByEndpointIdIfEnabled");
-            } else {
-                app.logger.debug("Receieved dynamicIR - using empty snippet holder");
-            }
-
-            const snippetHolder = new SDKSnippetHolder({
-                snippetsBySdkId,
-                snippetsBySdkIdAndEndpointId,
-                snippetsConfigWithSdkId: snippetsConfigurationWithSdkIds,
-                snippetTemplatesByEndpoint,
-                snippetTemplatesByEndpointId
-            });
-
-            if (req.body.definition != null && Object.keys(req.body.definition).length > 0) {
-                transformedApiDefinition = convertAPIDefinitionToDb(
-                    req.body.definition,
-                    apiDefinitionId,
-                    snippetHolder
-                );
-            }
-            logOperationTime("convertAPIDefinitionToDb");
-
-            let sources: Record<string, APIV1Write.SourceUpload> | undefined;
-            if (req.body.sources != null) {
-                app.logger.debug(
-                    `Preparing source upload URLs for {orgId: "${req.body.orgId}", apiId: "${req.body.apiId}"}`,
+            if (activeRegistrations >= MAX_CONCURRENT_REGISTRATIONS) {
+                LOGGER.info(
+                    `API Registration for ${req.body.orgId}:${req.body.apiId} queued (position ${waitQueue.length + 1})`,
                     REGISTER_API_DEFINITION_META
                 );
-                sources = await getSourceUploads({
-                    app,
-                    orgId: req.body.orgId,
-                    apiId: req.body.apiId,
-                    sources: req.body.sources
-                });
-                logOperationTime("getSourceUploads");
-                app.logger.debug("Successfully prepared source upload URLs", REGISTER_API_DEFINITION_META);
             }
 
-            let dynamicIRsUploads: Record<string, DynamicIrUpload> | undefined;
-            if (req.body.dynamicIRs) {
-                app.logger.debug(
-                    `Preparing dynamic IR upload URLs for {orgId: "${req.body.orgId}", apiId: "${req.body.apiId}"}`,
-                    REGISTER_API_DEFINITION_META
-                );
-                dynamicIRsUploads = await getDynamicIrsUploads({
-                    app,
-                    orgId: req.body.orgId,
-                    apiId: apiDefinitionId,
-                    dynamicIRs: req.body.dynamicIRs
-                });
+            await acquireRegistrationSlot();
+            try {
+                const startTime = Date.now();
+                let lastOperationTime = startTime;
 
-                logOperationTime("getDynamicIrsUploads");
-                app.logger.debug("Successfully prepared dynamic IR upload URLs", REGISTER_API_DEFINITION_META);
-            }
+                const logOperationTime = (operation: string) => {
+                    const now = Date.now();
+                    const duration = now - lastOperationTime;
+                    if (duration > SLOW_OPERATION_THRESHOLD_MS) {
+                        logSlowOperation(operation, duration);
+                    }
+                    lastOperationTime = now;
+                };
 
-            app.logger.debug(
-                `Creating API Definition in database with id=${apiDefinitionId}, name=${req.body.apiId} for org ${req.body.orgId}`,
-                REGISTER_API_DEFINITION_META
-            );
-            await app.services.db.prisma.apiDefinitionsV2.create({
-                data: {
-                    apiDefinitionId,
-                    apiName: req.body.apiId,
-                    orgId: req.body.orgId,
-                    definition: writeBuffer(transformedApiDefinition)
+                let apiDefinitionId = FdrAPI.ApiDefinitionId(uuidv4());
+                let transformedApiDefinition: APIV1Db.DbApiDefinition | FdrAPI.api.latest.ApiDefinition | undefined;
+
+                const snippetsConfiguration = req.body.definition?.snippetsConfiguration ?? {
+                    typescriptSdk: undefined,
+                    pythonSdk: undefined,
+                    javaSdk: undefined,
+                    goSdk: undefined,
+                    rubySdk: undefined,
+                    csharpSdk: undefined,
+                    phpSdk: undefined,
+                    swiftSdk: undefined,
+                    rustSdk: undefined
+                };
+
+                const snippetsConfigurationWithSdkIds = await app.dao
+                    .sdks()
+                    .getSdkIdsForPackages(snippetsConfiguration);
+                logOperationTime("getSdkIdsForPackages");
+
+                const sdkIds: string[] = [];
+                if (snippetsConfigurationWithSdkIds.typescriptSdk != null) {
+                    sdkIds.push(snippetsConfigurationWithSdkIds.typescriptSdk.sdkId);
                 }
-            });
-            logOperationTime("createApiDefinition");
+                if (snippetsConfigurationWithSdkIds.pythonSdk != null) {
+                    sdkIds.push(snippetsConfigurationWithSdkIds.pythonSdk.sdkId);
+                }
+                if (snippetsConfigurationWithSdkIds.javaSdk != null) {
+                    sdkIds.push(snippetsConfigurationWithSdkIds.javaSdk.sdkId);
+                }
+                if (snippetsConfigurationWithSdkIds.goSdk != null) {
+                    sdkIds.push(snippetsConfigurationWithSdkIds.goSdk.sdkId);
+                }
+                if (snippetsConfigurationWithSdkIds.rubySdk != null) {
+                    sdkIds.push(snippetsConfigurationWithSdkIds.rubySdk.sdkId);
+                }
+                if (snippetsConfigurationWithSdkIds.csharpSdk != null) {
+                    sdkIds.push(snippetsConfigurationWithSdkIds.csharpSdk.sdkId);
+                }
+                if (snippetsConfigurationWithSdkIds.rustSdk != null) {
+                    sdkIds.push(snippetsConfigurationWithSdkIds.rustSdk.sdkId);
+                }
 
-            if (
-                transformedApiDefinition != null &&
-                "rootPackage" in transformedApiDefinition &&
-                (transformedApiDefinition.rootPackage.endpoints.length > 0 ||
-                    Object.values(transformedApiDefinition.subpackages).some(
-                        (subpackage) => subpackage.endpoints.length > 0
-                    ))
-            ) {
-                app.logger.info(
-                    `Storing individual endpoints for API Definition id=${apiDefinitionId}`,
+                let snippetsBySdkId = {};
+                let snippetsBySdkIdAndEndpointId = {};
+                let snippetTemplatesByEndpoint: SnippetTemplatesByEndpoint = {};
+                let snippetTemplatesByEndpointId: SnippetTemplatesByEndpointIdentifier = {};
+
+                if (!req.body.dynamicIRs) {
+                    app.logger.debug("No dynamicIRs detected, creating snippet holder");
+
+                    snippetsBySdkId = await app.dao.snippets().loadAllSnippetsForSdkIds(sdkIds);
+                    logOperationTime("loadAllSnippetsForSdkIds");
+
+                    snippetsBySdkIdAndEndpointId = await app.dao
+                        .snippets()
+                        .loadAllSnippetsForSdkIdsByEndpointId(sdkIds);
+                    logOperationTime("loadAllSnippetsForSdkIdsByEndpointId");
+
+                    snippetTemplatesByEndpoint = await getSnippetTemplatesIfEnabled({
+                        app,
+                        authorization: req.headers.authorization,
+                        orgId: req.body.orgId,
+                        apiId: req.body.apiId,
+                        definition: req.body.definition ?? req.body.definitionV2,
+                        snippetsConfigurationWithSdkIds
+                    });
+                    logOperationTime("getSnippetTemplatesIfEnabled");
+
+                    snippetTemplatesByEndpointId = await getSnippetTemplatesByEndpointIdIfEnabled({
+                        app,
+                        authorization: req.headers.authorization,
+                        orgId: req.body.orgId,
+                        apiId: req.body.apiId,
+                        definition: req.body.definition ?? req.body.definitionV2,
+                        snippetsConfigurationWithSdkIds
+                    });
+                    logOperationTime("getSnippetTemplatesByEndpointIdIfEnabled");
+                } else {
+                    app.logger.debug("Receieved dynamicIR - using empty snippet holder");
+                }
+
+                const snippetHolder = new SDKSnippetHolder({
+                    snippetsBySdkId,
+                    snippetsBySdkIdAndEndpointId,
+                    snippetsConfigWithSdkId: snippetsConfigurationWithSdkIds,
+                    snippetTemplatesByEndpoint,
+                    snippetTemplatesByEndpointId
+                });
+
+                if (req.body.definition != null && Object.keys(req.body.definition).length > 0) {
+                    transformedApiDefinition = convertAPIDefinitionToDb(
+                        req.body.definition,
+                        apiDefinitionId,
+                        snippetHolder
+                    );
+                }
+                logOperationTime("convertAPIDefinitionToDb");
+
+                let sources: Record<string, APIV1Write.SourceUpload> | undefined;
+                if (req.body.sources != null) {
+                    app.logger.debug(
+                        `Preparing source upload URLs for {orgId: "${req.body.orgId}", apiId: "${req.body.apiId}"}`,
+                        REGISTER_API_DEFINITION_META
+                    );
+                    sources = await getSourceUploads({
+                        app,
+                        orgId: req.body.orgId,
+                        apiId: req.body.apiId,
+                        sources: req.body.sources
+                    });
+                    logOperationTime("getSourceUploads");
+                    app.logger.debug("Successfully prepared source upload URLs", REGISTER_API_DEFINITION_META);
+                }
+
+                let dynamicIRsUploads: Record<string, DynamicIrUpload> | undefined;
+                if (req.body.dynamicIRs) {
+                    app.logger.debug(
+                        `Preparing dynamic IR upload URLs for {orgId: "${req.body.orgId}", apiId: "${req.body.apiId}"}`,
+                        REGISTER_API_DEFINITION_META
+                    );
+                    dynamicIRsUploads = await getDynamicIrsUploads({
+                        app,
+                        orgId: req.body.orgId,
+                        apiId: apiDefinitionId,
+                        dynamicIRs: req.body.dynamicIRs
+                    });
+
+                    logOperationTime("getDynamicIrsUploads");
+                    app.logger.debug("Successfully prepared dynamic IR upload URLs", REGISTER_API_DEFINITION_META);
+                }
+
+                app.logger.debug(
+                    `Creating API Definition in database with id=${apiDefinitionId}, name=${req.body.apiId} for org ${req.body.orgId}`,
+                    REGISTER_API_DEFINITION_META
+                );
+                await app.services.db.prisma.apiDefinitionsV2.create({
+                    data: {
+                        apiDefinitionId,
+                        apiName: req.body.apiId,
+                        orgId: req.body.orgId,
+                        definition: writeBuffer(transformedApiDefinition)
+                    }
+                });
+                logOperationTime("createApiDefinition");
+
+                if (
+                    transformedApiDefinition != null &&
+                    "rootPackage" in transformedApiDefinition &&
+                    (transformedApiDefinition.rootPackage.endpoints.length > 0 ||
+                        Object.values(transformedApiDefinition.subpackages).some(
+                            (subpackage) => subpackage.endpoints.length > 0
+                        ))
+                ) {
+                    app.logger.info(
+                        `Storing individual endpoints for API Definition id=${apiDefinitionId}`,
+                        REGISTER_API_DEFINITION_META
+                    );
+
+                    await storeEndpoints({
+                        app,
+                        apiDefinitionId,
+                        apiDefinition: transformedApiDefinition
+                    });
+                    logOperationTime("storeEndpoints");
+                }
+
+                const totalDuration = Date.now() - startTime;
+                LOGGER.warn(
+                    `API Registration for ${req.body.orgId}:${req.body.apiId} took ${totalDuration}ms`,
                     REGISTER_API_DEFINITION_META
                 );
 
-                await storeEndpoints({
-                    app,
+                app.logger.debug(`Returning API Definition ID id=${apiDefinitionId}`, REGISTER_API_DEFINITION_META);
+                return res.send({
                     apiDefinitionId,
-                    apiDefinition: transformedApiDefinition
+                    sources,
+                    dynamicIRs: dynamicIRsUploads
                 });
-                logOperationTime("storeEndpoints");
+            } finally {
+                releaseRegistrationSlot();
             }
-
-            const totalDuration = Date.now() - startTime;
-            LOGGER.warn(
-                `API Registration for ${req.body.orgId}:${req.body.apiId} took ${totalDuration}ms`,
-                REGISTER_API_DEFINITION_META
-            );
-
-            app.logger.debug(`Returning API Definition ID id=${apiDefinitionId}`, REGISTER_API_DEFINITION_META);
-            return res.send({
-                apiDefinitionId,
-                sources,
-                dynamicIRs: dynamicIRsUploads
-            });
         }
     });
 }

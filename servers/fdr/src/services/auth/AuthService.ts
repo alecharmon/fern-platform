@@ -5,6 +5,7 @@ import {
     isSuperUser as isSuperUserFromPermissions
 } from "@fern-api/user-permissions";
 import { FernVenusApi, FernVenusApiClient } from "@fern-api/venus-api-sdk";
+import crypto from "crypto";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type winston from "winston";
 
@@ -16,6 +17,77 @@ import {
     UserNotInOrgError
 } from "../../api/generated/api";
 import type { FdrApplication, FdrConfig } from "../../app";
+
+/**
+ * Simple in-memory cache with TTL for auth results.
+ * This helps prevent overwhelming the Venus auth service when
+ * many concurrent requests are made for the same user/org combination.
+ */
+interface CacheEntry<T> {
+    value: T;
+    expiresAt: number;
+}
+
+class AuthCache<T> {
+    private cache = new Map<string, CacheEntry<T>>();
+    private readonly ttlMs: number;
+    private readonly maxSize: number;
+
+    constructor(ttlMs: number = 5 * 60 * 1000, maxSize: number = 10000) {
+        // Default: 5 minute TTL, max 10k entries
+        this.ttlMs = ttlMs;
+        this.maxSize = maxSize;
+    }
+
+    get(key: string): T | undefined {
+        const entry = this.cache.get(key);
+        if (entry == null) {
+            return undefined;
+        }
+        if (Date.now() > entry.expiresAt) {
+            this.cache.delete(key);
+            return undefined;
+        }
+        return entry.value;
+    }
+
+    set(key: string, value: T): void {
+        // Simple eviction: if we hit max size, clear oldest entries
+        if (this.cache.size >= this.maxSize) {
+            const keysToDelete: string[] = [];
+            const now = Date.now();
+            // First pass: delete expired entries
+            for (const [k, v] of this.cache) {
+                if (now > v.expiresAt) {
+                    keysToDelete.push(k);
+                }
+            }
+            for (const k of keysToDelete) {
+                this.cache.delete(k);
+            }
+            // If still too big, delete oldest 20%
+            if (this.cache.size >= this.maxSize) {
+                const deleteCount = Math.ceil(this.maxSize * 0.2);
+                const iterator = this.cache.keys();
+                for (let i = 0; i < deleteCount; i++) {
+                    const result = iterator.next();
+                    if (result.done) {
+                        break;
+                    }
+                    this.cache.delete(result.value);
+                }
+            }
+        }
+        this.cache.set(key, {
+            value,
+            expiresAt: Date.now() + this.ttlMs
+        });
+    }
+
+    clear(): void {
+        this.cache.clear();
+    }
+}
 
 export type OrgIdsResponse = SuccessOrgIdsResponse | ErrorOrgIdsResponse;
 
@@ -63,11 +135,113 @@ export interface AuthService {
     }): Promise<void>;
 }
 
+/**
+ * Cached org feature access information.
+ */
+interface OrgFeatureAccess {
+    snippetsApiAccessEnabled: boolean;
+    snippetTemplatesAccessEnabled: boolean;
+}
+
 export class AuthServiceImpl implements AuthService {
     private logger: winston.Logger;
+    // Cache for org membership checks to prevent overwhelming Venus with concurrent requests
+    // Key format: `${tokenHash}:${orgId}`, Value: true (member) or false (not member)
+    private orgMembershipCache = new AuthCache<boolean>(5 * 60 * 1000); // 5 minute TTL
+    // Cache for super user checks
+    private superUserCache = new AuthCache<boolean>(5 * 60 * 1000); // 5 minute TTL
+    // Cache for org feature access (snippets, templates, etc.)
+    private orgFeatureCache = new AuthCache<OrgFeatureAccess>(5 * 60 * 1000); // 5 minute TTL
+    // Track in-flight requests to prevent thundering herd
+    private inFlightOrgChecks = new Map<string, Promise<boolean>>();
+    private inFlightOrgFeatureChecks = new Map<string, Promise<OrgFeatureAccess>>();
 
     constructor(private readonly app: FdrApplication) {
         this.logger = app.logger;
+    }
+
+    /**
+     * Creates a cache key from the auth token and org ID.
+     * Uses a simple hash to avoid storing the full token in memory.
+     */
+    private hashToken(token: string): string {
+        return crypto.createHash("sha256").update(token).digest("hex").slice(0, 32);
+    }
+
+    private getCacheKey(token: string, orgId: string): string {
+        return `${this.hashToken(token)}:${orgId}`;
+    }
+
+    /**
+     * Creates a cache key for super user check.
+     */
+    private getSuperUserCacheKey(token: string): string {
+        return `su_${this.hashToken(token)}`;
+    }
+
+    /**
+     * Creates a cache key for org feature access check.
+     */
+    private getOrgFeatureCacheKey(token: string, orgId: string): string {
+        return `orgfeat_${this.hashToken(token)}:${orgId}`;
+    }
+
+    /**
+     * Gets org feature access from Venus, with caching and thundering herd prevention.
+     */
+    private async getOrgFeatureAccess(token: string, orgId: string): Promise<OrgFeatureAccess> {
+        const cacheKey = this.getOrgFeatureCacheKey(token, orgId);
+
+        // Check cache first
+        const cached = this.orgFeatureCache.get(cacheKey);
+        if (cached !== undefined) {
+            this.logger.debug(`Cache HIT: Org feature access for ${orgId}`);
+            return cached;
+        }
+
+        // Check for in-flight request
+        const inFlightPromise = this.inFlightOrgFeatureChecks.get(cacheKey);
+        if (inFlightPromise) {
+            this.logger.debug(`Waiting for in-flight org feature check for ${orgId}`);
+            return inFlightPromise;
+        }
+
+        // Create new request
+        const fetchPromise = this.fetchOrgFeatureAccess(token, orgId, cacheKey);
+        this.inFlightOrgFeatureChecks.set(cacheKey, fetchPromise);
+
+        try {
+            return await fetchPromise;
+        } finally {
+            this.inFlightOrgFeatureChecks.delete(cacheKey);
+        }
+    }
+
+    /**
+     * Fetches org feature access from Venus.
+     */
+    private async fetchOrgFeatureAccess(token: string, orgId: string, cacheKey: string): Promise<OrgFeatureAccess> {
+        const venus = getVenusClient({
+            config: this.app.config,
+            token
+        });
+
+        const orgResponse = await venus.organization.get(FernVenusApi.OrganizationId(orgId));
+        if (!orgResponse.ok) {
+            this.logger.error("Failed to make request to venus for org feature access", orgResponse.error);
+            throw new UnavailableError("Failed to resolve organization features");
+        }
+
+        const org = orgResponse.body;
+        const featureAccess: OrgFeatureAccess = {
+            snippetsApiAccessEnabled: org.snippetsApiAccessEnabled,
+            snippetTemplatesAccessEnabled: org.snippetTemplatesAccessEnabled
+        };
+
+        // Cache the result
+        this.orgFeatureCache.set(cacheKey, featureAccess);
+
+        return featureAccess;
     }
 
     async getOrgIdsFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<OrgIdsResponse> {
@@ -109,27 +283,88 @@ export class AuthServiceImpl implements AuthService {
         }
         const token = getTokenFromAuthHeader(authHeader);
 
+        // Check super user cache first
+        const superUserCacheKey = this.getSuperUserCacheKey(token);
+        let isSuperUserCached = this.superUserCache.get(superUserCacheKey);
+        if (isSuperUserCached === undefined) {
+            isSuperUserCached = await isSuperUser(token);
+            this.superUserCache.set(superUserCacheKey, isSuperUserCached);
+        }
+
         // Check if user has super-user permission - they have access to all orgs
-        if (await isSuperUser(token)) {
+        if (isSuperUserCached) {
             this.logger.debug(`User has super-user permission, granting access to org ${orgId}`);
             return;
         }
 
+        // Check cache for org membership
+        const cacheKey = this.getCacheKey(token, orgId);
+        const cachedResult = this.orgMembershipCache.get(cacheKey);
+        if (cachedResult !== undefined) {
+            if (cachedResult) {
+                this.logger.debug(`Cache HIT: User belongs to org ${orgId}`);
+                return;
+            } else {
+                this.logger.debug(`Cache HIT: User does not belong to org ${orgId}`);
+                throw new UserNotInOrgError("User does not belong to organization");
+            }
+        }
+
+        // Check if there's an in-flight request for this user/org combination
+        // This prevents the "thundering herd" problem where many concurrent requests
+        // all hit Venus at the same time
+        const inFlightPromise = this.inFlightOrgChecks.get(cacheKey);
+        if (inFlightPromise) {
+            this.logger.debug(`Waiting for in-flight org membership check for org ${orgId}`);
+            const belongsToOrg = await inFlightPromise;
+            if (!belongsToOrg) {
+                throw new UserNotInOrgError("User does not belong to organization");
+            }
+            return;
+        }
+
+        // Create a new request and track it
+        const checkPromise = this.performOrgMembershipCheck(token, orgId, cacheKey);
+        this.inFlightOrgChecks.set(cacheKey, checkPromise);
+
+        try {
+            const belongsToOrg = await checkPromise;
+            if (!belongsToOrg) {
+                throw new UserNotInOrgError("User does not belong to organization");
+            }
+        } finally {
+            this.inFlightOrgChecks.delete(cacheKey);
+        }
+    }
+
+    /**
+     * Performs the actual org membership check against Venus.
+     * Results are cached to prevent repeated calls.
+     */
+    private async performOrgMembershipCheck(token: string, orgId: string, cacheKey: string): Promise<boolean> {
         const venus = getVenusClient({
             config: this.app.config,
             token
         });
+
         const response = await venus.organization.isMember(FernVenusApi.OrganizationId(orgId));
         if (!response.ok) {
             this.logger.error("Failed to make request to venus", response.error);
+            // Don't cache failures from Venus - the service might be temporarily overwhelmed
+            // and we want to retry on subsequent requests
             throw new UnavailableError("Failed to resolve user's organizations");
         }
+
         const belongsToOrg = response.body;
+
+        // Cache the result (both positive and negative)
+        this.orgMembershipCache.set(cacheKey, belongsToOrg);
 
         if (!belongsToOrg) {
             this.logger.warn(`User does not belong to organization: ${orgId}`);
-            throw new UserNotInOrgError("User does not belong to organization");
         }
+
+        return belongsToOrg;
     }
 
     async checkOrgHasSnippetsApiAccess({
@@ -146,21 +381,14 @@ export class AuthServiceImpl implements AuthService {
         }
         await this.checkUserBelongsToOrg({ authHeader, orgId });
         const token = getTokenFromAuthHeader(authHeader);
-        const venus = getVenusClient({
-            config: this.app.config,
-            token
-        });
 
-        const orgResponse = await venus.organization.get(FernVenusApi.OrganizationId(orgId));
-        if (!orgResponse.ok) {
-            this.logger.error("Failed to make request to venus", orgResponse.error);
-            throw new UnavailableError("Failed to resolve user's organizations");
-        }
-        const org = orgResponse.body;
-        if (failHard && !org.snippetsApiAccessEnabled) {
+        // Use cached org feature access
+        const featureAccess = await this.getOrgFeatureAccess(token, orgId);
+
+        if (failHard && !featureAccess.snippetsApiAccessEnabled) {
             throw new UnauthorizedError("Organization does not have snippets API access");
         }
-        return org.snippetsApiAccessEnabled;
+        return featureAccess.snippetsApiAccessEnabled;
     }
 
     async checkOrgHasSnippetTemplateAccess({
@@ -177,22 +405,14 @@ export class AuthServiceImpl implements AuthService {
         }
         await this.checkUserBelongsToOrg({ authHeader, orgId });
         const token = getTokenFromAuthHeader(authHeader);
-        const venus = getVenusClient({
-            config: this.app.config,
-            token
-        });
-        const orgResponse = await venus.organization.get(FernVenusApi.OrganizationId(orgId));
-        if (!orgResponse.ok) {
-            this.logger.error("Failed to make request to venus", orgResponse.error);
-            throw new UnavailableError(
-                `The authorization header does not have access to org=${orgId}. Please reach out to support@buildwithfern.com.`
-            );
-        }
-        const org = orgResponse.body;
-        if (failHard && !org.snippetTemplatesAccessEnabled) {
+
+        // Use cached org feature access
+        const featureAccess = await this.getOrgFeatureAccess(token, orgId);
+
+        if (failHard && !featureAccess.snippetTemplatesAccessEnabled) {
             throw new UnauthorizedError("Organization does not have snippets API access");
         }
-        return org.snippetTemplatesAccessEnabled;
+        return featureAccess.snippetTemplatesAccessEnabled;
     }
 
     async checkUserHasCliPermission({
@@ -218,7 +438,14 @@ export class AuthServiceImpl implements AuthService {
             return;
         }
 
-        if (await isSuperUser(token)) {
+        const superUserCacheKey = this.getSuperUserCacheKey(token);
+        let isSuperUserCached = this.superUserCache.get(superUserCacheKey);
+        if (isSuperUserCached === undefined) {
+            isSuperUserCached = await isSuperUser(token);
+            this.superUserCache.set(superUserCacheKey, isSuperUserCached);
+        }
+
+        if (isSuperUserCached) {
             this.logger.debug(`User has super-user permission, granting access to org ${orgId}`);
             return;
         }
