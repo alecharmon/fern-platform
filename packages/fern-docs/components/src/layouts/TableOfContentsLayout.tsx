@@ -12,6 +12,10 @@ interface TableOfContentsLayoutProps {
 export function TableOfContentsLayout({ tableOfContents, hideTableOfContents, lang }: TableOfContentsLayoutProps) {
     const showTableOfContents = tableOfContents != null && !hideTableOfContents && tableOfContents.length > 0;
 
+    if (hideTableOfContents) {
+        return null;
+    }
+
     return (
         <aside id={FERN_TOC_ID}>
             {showTableOfContents && (
