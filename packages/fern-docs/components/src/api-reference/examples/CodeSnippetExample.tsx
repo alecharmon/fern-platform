@@ -113,6 +113,8 @@ const CodeSnippetExampleInternal: FC<CodeSnippetExample.Props> = ({
             copyToClipboardText={useCallback(() => code, [code])}
             {...props}
             className={cn(className, isResponse ? "fern-endpoint-response-snippet" : "fern-endpoint-request-snippet")}
+            expandable={code.split("\n").length > 25 || code.split("\n").some((line) => line.length > 80)}
+            language={language}
         >
             <FernSyntaxHighlighter
                 id={id}

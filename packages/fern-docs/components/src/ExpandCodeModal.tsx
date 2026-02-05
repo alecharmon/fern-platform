@@ -73,7 +73,7 @@ export const ExpandCodeModal: React.FC<ExpandCodeModal.Props> = ({
         <div className="fixed inset-0 top-[var(--header-height)] z-50 flex items-center justify-center">
             <div className="fixed inset-0 bg-black/50" onClick={handleBackdropClick} />
             <div
-                className="bg-card-solid rounded-3 shadow-card-grayscale relative mx-4 flex max-h-[80vh] w-full max-w-4xl flex-col overflow-hidden"
+                className="bg-card-solid rounded-3 shadow-card-grayscale relative mx-4 flex max-h-[80vh] w-full max-w-7xl flex-col overflow-hidden"
                 onKeyDown={handleKeyDown}
             >
                 <div className="flex-1 overflow-scroll">
@@ -87,7 +87,7 @@ export const ExpandCodeModal: React.FC<ExpandCodeModal.Props> = ({
                                 code={codeContent}
                                 language={language}
                                 className="text-sm"
-                                wordWrap={true}
+                                wordWrap={false}
                             />
                             <CopyToClipboardButton content={codeContent} className="absolute right-3 top-2 h-8 w-8" />
                             <Button

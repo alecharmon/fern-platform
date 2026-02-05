@@ -4,6 +4,7 @@ import { forwardRef, type MouseEventHandler, type PropsWithChildren, type ReactE
 import { CopyToClipboardButton } from "../../CopyToClipboardButton";
 import { cn } from "../../cn";
 import type { SemanticColor } from "../../colors";
+import { ExpandCodeButton } from "../../ExpandCodeButton";
 import { useIsDarkCode } from "../../state/dark-code";
 
 export declare namespace TitledExample {
@@ -17,6 +18,8 @@ export declare namespace TitledExample {
         onClick?: MouseEventHandler<HTMLDivElement>;
         disableClipboard?: boolean;
         lang: string;
+        language?: string;
+        expandable?: boolean;
     }
 }
 
@@ -31,7 +34,9 @@ export const TitledExample = forwardRef<HTMLDivElement, PropsWithChildren<Titled
         copyToClipboardText,
         onClick,
         disableClipboard = false,
-        lang
+        lang,
+        language,
+        expandable = false
     },
     ref
 ) {
@@ -72,6 +77,9 @@ export const TitledExample = forwardRef<HTMLDivElement, PropsWithChildren<Titled
                     )}
                     <div className="flex items-center gap-2">
                         {languageDropdown}
+                        {expandable && (
+                            <ExpandCodeButton content={copyToClipboardText} language={language} lang={lang} />
+                        )}
                         {!disableClipboard && (
                             <CopyToClipboardButton content={copyToClipboardText} className="-m-1" lang={lang} />
                         )}
