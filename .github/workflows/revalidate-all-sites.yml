@@ -82,6 +82,8 @@ jobs:
     name: Revalidate batch ${{ matrix.batch.index }}
     needs: prepare
     runs-on: Seed
+    outputs:
+      failed_sites: ${{ steps.revalidate.outputs.failed_sites }}
     strategy:
       fail-fast: false
       max-parallel: 10
@@ -89,6 +91,7 @@ jobs:
         batch: ${{ fromJson(needs.prepare.outputs.batches) }}
     steps:
       - name: Revalidate sites in batch
+        id: revalidate
         env:
           REVALIDATE_AUTH_TOKEN: ${{ secrets.FERN_TOKEN }}
           SITES: ${{ matrix.batch.sites }}
@@ -102,35 +105,38 @@ jobs:
           site_count=$(wc -l < sites_batch.txt)
           echo "Revalidating $site_count sites with 24 parallel requests (3x 8 cores)"
           
-          # Function to revalidate a single site with retries
+          # Create file to track failed sites
+          touch failed_sites.txt
+          
+          # Function to revalidate a single site (no retries)
           revalidate_site() {
             local domain="$1"
-            local max_attempts=2
-            local attempt=1
             
-            while [ $attempt -le $max_attempts ]; do
-              if curl -s -f -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
-                     "https://$domain/api/fern-docs/revalidate" \
-                     --max-time 800; then
-                echo "SUCCESS: $domain"
-                return 0
-              else
-                echo "Attempt $attempt failed for $domain"
-                if [ $attempt -eq $max_attempts ]; then
-                  echo "ERROR: Failed to revalidate $domain after $max_attempts attempts"
-                  return 1
-                fi
-                sleep 5
-                attempt=$((attempt + 1))
-              fi
-            done
+            if curl -s -f -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
+                   "https://$domain/api/fern-docs/revalidate" \
+                   --max-time 800; then
+              echo "SUCCESS: $domain"
+            else
+              echo "FAILED: $domain"
+              echo "$domain" >> failed_sites.txt
+            fi
           }
           
           export -f revalidate_site
           export REVALIDATE_AUTH_TOKEN
           
           # Run revalidation with 24 parallel processes (3x 8 cores)
-          cat sites_batch.txt | xargs -P 24 -I {} bash -c 'revalidate_site "$@"' _ {}
+          # Use || true to prevent xargs from failing the job
+          cat sites_batch.txt | xargs -P 24 -I {} bash -c 'revalidate_site "$@"' _ {} || true
+          
+          # Output failed sites for this batch
+          if [ -s failed_sites.txt ]; then
+            failed=$(cat failed_sites.txt | tr '\n' ',' | sed 's/,$//')
+            echo "failed_sites=$failed" >> $GITHUB_OUTPUT
+            echo "Failed sites in batch ${{ matrix.batch.index }}: $failed"
+          else
+            echo "failed_sites=" >> $GITHUB_OUTPUT
+          fi
           
           echo "Batch ${{ matrix.batch.index }} completed"
 
@@ -140,10 +146,51 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Report summary
+      - name: Collect failed sites and report summary
+        id: collect
         run: |
           echo "## Revalidation Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- Total sites: ${{ needs.prepare.outputs.total_sites }}" >> $GITHUB_STEP_SUMMARY
           echo "- Batch size: ${{ inputs.batch_size || '24' }}" >> $GITHUB_STEP_SUMMARY
           echo "- Parallel requests per batch: 24 (3x 8 cores)" >> $GITHUB_STEP_SUMMARY
+          
+          # Collect all failed sites from matrix jobs
+          # Note: matrix outputs are JSON objects keyed by matrix values
+          failed_json='${{ toJson(needs.revalidate.outputs) }}'
+          
+          # Extract all failed_sites values and combine them
+          all_failed=$(echo "$failed_json" | jq -r '.failed_sites // empty' | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
+          
+          if [ -n "$all_failed" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Failed Sites" >> $GITHUB_STEP_SUMMARY
+            echo "$all_failed" | tr ',' '\n' | while read site; do
+              [ -n "$site" ] && echo "- $site" >> $GITHUB_STEP_SUMMARY
+            done
+            echo "failed_sites=$all_failed" >> $GITHUB_OUTPUT
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All sites revalidated successfully!" >> $GITHUB_STEP_SUMMARY
+            echo "failed_sites=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Slack notification for failures
+        if: steps.collect.outputs.failed_sites != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_DOCS_INCIDENTS }}
+        run: |
+          failed_sites="${{ steps.collect.outputs.failed_sites }}"
+          
+          # Build the list of failed sites for Slack
+          site_list=$(echo "$failed_sites" | tr ',' '\n' | while read site; do
+            [ -n "$site" ] && echo "• $site"
+          done)
+          
+          # Count failed sites
+          failed_count=$(echo "$failed_sites" | tr ',' '\n' | grep -c .)
+          
+          # Send to Slack
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg text "*Revalidation Failed for $failed_count site(s)*\n\n$site_list" '{text: $text}')"
