@@ -1113,7 +1113,21 @@ const getColors = (cacheConfig: Required<CacheConfig>) =>
                           border: toOklch(light.border),
                           sidebarBackground: toOklch(light.sidebarBackground),
                           headerBackground: toOklch(light.headerBackground),
-                          cardBackground: toOklch(light.cardBackground)
+                          cardBackground: toOklch(light.cardBackground),
+                          accentScaleOverrides: {
+                              accent1: toOklch(light.accent1),
+                              accent2: toOklch(light.accent2),
+                              accent3: toOklch(light.accent3),
+                              accent4: toOklch(light.accent4),
+                              accent5: toOklch(light.accent5),
+                              accent6: toOklch(light.accent6),
+                              accent7: toOklch(light.accent7),
+                              accent8: toOklch(light.accent8),
+                              accent9: toOklch(light.accent9),
+                              accent10: toOklch(light.accent10),
+                              accent11: toOklch(light.accent11),
+                              accent12: toOklch(light.accent12)
+                          }
                       }),
                       backgroundGradient: light.background.type === "gradient"
                   }
@@ -1129,7 +1143,21 @@ const getColors = (cacheConfig: Required<CacheConfig>) =>
                           border: toOklch(dark.border),
                           sidebarBackground: toOklch(dark.sidebarBackground),
                           headerBackground: toOklch(dark.headerBackground),
-                          cardBackground: toOklch(dark.cardBackground)
+                          cardBackground: toOklch(dark.cardBackground),
+                          accentScaleOverrides: {
+                              accent1: toOklch(dark.accent1),
+                              accent2: toOklch(dark.accent2),
+                              accent3: toOklch(dark.accent3),
+                              accent4: toOklch(dark.accent4),
+                              accent5: toOklch(dark.accent5),
+                              accent6: toOklch(dark.accent6),
+                              accent7: toOklch(dark.accent7),
+                              accent8: toOklch(dark.accent8),
+                              accent9: toOklch(dark.accent9),
+                              accent10: toOklch(dark.accent10),
+                              accent11: toOklch(dark.accent11),
+                              accent12: toOklch(dark.accent12)
+                          }
                       }),
                       backgroundGradient: dark.background.type === "gradient"
                   }

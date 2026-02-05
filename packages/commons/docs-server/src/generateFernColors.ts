@@ -1,8 +1,8 @@
-import { type ArrayOf12, type ColorPalette, FERN_COLOR_ACCENT } from "@fern-api/docs-utils";
+import { type ArrayOf12, arrayOf12, type ColorPalette, FERN_COLOR_ACCENT } from "@fern-api/docs-utils";
 import * as RadixColors from "@radix-ui/colors";
 import Color from "colorjs.io";
 
-import { darkGrayColors, generateRadixColors, lightGrayColors } from "./generateRadixColors";
+import { darkGrayColors, generateRadixColors, lightGrayColors, toOklchString } from "./generateRadixColors";
 
 /**
  * the goal is to determine the closest grayscale color for the given background and accent
@@ -89,6 +89,21 @@ function generateColorPalette(opts: {
     };
 }
 
+export interface AccentScaleOverrides {
+    accent1?: string;
+    accent2?: string;
+    accent3?: string;
+    accent4?: string;
+    accent5?: string;
+    accent6?: string;
+    accent7?: string;
+    accent8?: string;
+    accent9?: string;
+    accent10?: string;
+    accent11?: string;
+    accent12?: string;
+}
+
 export interface FernColorPalette extends Omit<ColorPalette, "background"> {
     border?: string;
     accent: string;
@@ -109,7 +124,8 @@ export function generateFernColorPalette({
     border,
     sidebarBackground,
     headerBackground,
-    cardBackground
+    cardBackground,
+    accentScaleOverrides
 }: {
     appearance: "light" | "dark";
     background?: string;
@@ -118,8 +134,44 @@ export function generateFernColorPalette({
     sidebarBackground?: string;
     headerBackground?: string;
     cardBackground?: string;
+    accentScaleOverrides?: AccentScaleOverrides;
 }): FernColorPalette {
     const palette = generateColorPalette({ appearance, background, accent });
+
+    // Apply accent scale overrides if provided
+    if (accentScaleOverrides) {
+        const overrideArray = [
+            accentScaleOverrides.accent1,
+            accentScaleOverrides.accent2,
+            accentScaleOverrides.accent3,
+            accentScaleOverrides.accent4,
+            accentScaleOverrides.accent5,
+            accentScaleOverrides.accent6,
+            accentScaleOverrides.accent7,
+            accentScaleOverrides.accent8,
+            accentScaleOverrides.accent9,
+            accentScaleOverrides.accent10,
+            accentScaleOverrides.accent11,
+            accentScaleOverrides.accent12
+        ];
+
+        // Override individual accent scale colors if provided
+        arrayOf12.forEach((i) => {
+            const override = overrideArray[i];
+            if (override != null) {
+                const hexColor = toHex(override);
+                palette.accentScale[i] = hexColor;
+                // Also update wide gamut version
+                try {
+                    const color = new Color(override).to("oklch");
+                    palette.accentScaleWideGamut[i] = toOklchString(color);
+                } catch {
+                    palette.accentScaleWideGamut[i] = hexColor;
+                }
+            }
+        });
+    }
+
     return {
         ...palette,
         accent,

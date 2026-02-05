@@ -11,4 +11,16 @@ export interface ThemeConfig {
     sidebarBackground: FernRegistry.docs.v1.commons.RgbaColor | undefined;
     headerBackground: FernRegistry.docs.v1.commons.RgbaColor | undefined;
     cardBackground: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent1: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent2: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent3: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent4: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent5: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent6: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent7: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent8: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent9: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent10: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent11: FernRegistry.docs.v1.commons.RgbaColor | undefined;
+    accent12: FernRegistry.docs.v1.commons.RgbaColor | undefined;
 }

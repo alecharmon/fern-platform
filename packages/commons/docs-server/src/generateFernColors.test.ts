@@ -131,4 +131,153 @@ describe("generateFernColorPalette", () => {
             })
         ).toMatchSnapshot();
     });
+
+    describe("accent scale overrides", () => {
+        it("should generate default accent scale colors when no overrides are provided", () => {
+            const palette = generateFernColorPalette({
+                appearance: "light",
+                accent: "#418326",
+                background: "#ffffff"
+            });
+
+            // Verify accent scale has 12 colors
+            expect(palette.accentScale).toHaveLength(12);
+            expect(palette.accentScaleWideGamut).toHaveLength(12);
+
+            // Verify all colors are generated (not undefined)
+            palette.accentScale.forEach((color, index) => {
+                expect(color).toBeDefined();
+                expect(typeof color).toBe("string");
+                expect(color.startsWith("#")).toBe(true);
+            });
+        });
+
+        it("should override specific accent scale colors when overrides are provided", () => {
+            const overrideColor1 = "#f0fdf4";
+            const overrideColor5 = "#86efac";
+            const overrideColor9 = "#16a34a";
+
+            const palette = generateFernColorPalette({
+                appearance: "light",
+                accent: "#418326",
+                background: "#ffffff",
+                accentScaleOverrides: {
+                    accent1: overrideColor1,
+                    accent5: overrideColor5,
+                    accent9: overrideColor9
+                }
+            });
+
+            // Verify overridden colors match exactly (converted to hex)
+            expect(palette.accentScale[0].toLowerCase()).toBe(overrideColor1.toLowerCase());
+            expect(palette.accentScale[4].toLowerCase()).toBe(overrideColor5.toLowerCase());
+            expect(palette.accentScale[8].toLowerCase()).toBe(overrideColor9.toLowerCase());
+
+            // Verify non-overridden colors are still generated (different from overrides)
+            expect(palette.accentScale[1]).toBeDefined();
+            expect(palette.accentScale[2]).toBeDefined();
+            expect(palette.accentScale[3]).toBeDefined();
+        });
+
+        it("should override all 12 accent scale colors when all overrides are provided", () => {
+            const overrides = {
+                accent1: "#fef2f2",
+                accent2: "#fee2e2",
+                accent3: "#fecaca",
+                accent4: "#fca5a5",
+                accent5: "#f87171",
+                accent6: "#ef4444",
+                accent7: "#dc2626",
+                accent8: "#b91c1c",
+                accent9: "#991b1b",
+                accent10: "#7f1d1d",
+                accent11: "#6b1a1a",
+                accent12: "#450a0a"
+            };
+
+            const palette = generateFernColorPalette({
+                appearance: "dark",
+                accent: "#418326",
+                background: "#000000",
+                accentScaleOverrides: overrides
+            });
+
+            // Verify all 12 colors are overridden
+            expect(palette.accentScale[0].toLowerCase()).toBe(overrides.accent1.toLowerCase());
+            expect(palette.accentScale[1].toLowerCase()).toBe(overrides.accent2.toLowerCase());
+            expect(palette.accentScale[2].toLowerCase()).toBe(overrides.accent3.toLowerCase());
+            expect(palette.accentScale[3].toLowerCase()).toBe(overrides.accent4.toLowerCase());
+            expect(palette.accentScale[4].toLowerCase()).toBe(overrides.accent5.toLowerCase());
+            expect(palette.accentScale[5].toLowerCase()).toBe(overrides.accent6.toLowerCase());
+            expect(palette.accentScale[6].toLowerCase()).toBe(overrides.accent7.toLowerCase());
+            expect(palette.accentScale[7].toLowerCase()).toBe(overrides.accent8.toLowerCase());
+            expect(palette.accentScale[8].toLowerCase()).toBe(overrides.accent9.toLowerCase());
+            expect(palette.accentScale[9].toLowerCase()).toBe(overrides.accent10.toLowerCase());
+            expect(palette.accentScale[10].toLowerCase()).toBe(overrides.accent11.toLowerCase());
+            expect(palette.accentScale[11].toLowerCase()).toBe(overrides.accent12.toLowerCase());
+        });
+
+        it("should also update wide gamut colors when overrides are provided", () => {
+            const overrideColor = "#16a34a";
+
+            const palette = generateFernColorPalette({
+                appearance: "light",
+                accent: "#418326",
+                background: "#ffffff",
+                accentScaleOverrides: {
+                    accent9: overrideColor
+                }
+            });
+
+            // Verify wide gamut version is also updated (should be oklch format)
+            expect(palette.accentScaleWideGamut[8]).toBeDefined();
+            expect(palette.accentScaleWideGamut[8]).toContain("oklch");
+        });
+
+        it("should not modify palette when accentScaleOverrides is undefined", () => {
+            const paletteWithoutOverrides = generateFernColorPalette({
+                appearance: "light",
+                accent: "#418326",
+                background: "#ffffff"
+            });
+
+            const paletteWithEmptyOverrides = generateFernColorPalette({
+                appearance: "light",
+                accent: "#418326",
+                background: "#ffffff",
+                accentScaleOverrides: undefined
+            });
+
+            // Both palettes should have identical accent scales
+            expect(paletteWithoutOverrides.accentScale).toEqual(paletteWithEmptyOverrides.accentScale);
+        });
+
+        it("should not modify non-overridden colors in the scale", () => {
+            const paletteWithoutOverrides = generateFernColorPalette({
+                appearance: "light",
+                accent: "#418326",
+                background: "#ffffff"
+            });
+
+            const paletteWithPartialOverrides = generateFernColorPalette({
+                appearance: "light",
+                accent: "#418326",
+                background: "#ffffff",
+                accentScaleOverrides: {
+                    accent5: "#ff0000"
+                }
+            });
+
+            // Non-overridden colors should remain the same
+            expect(paletteWithPartialOverrides.accentScale[0]).toBe(paletteWithoutOverrides.accentScale[0]);
+            expect(paletteWithPartialOverrides.accentScale[1]).toBe(paletteWithoutOverrides.accentScale[1]);
+            expect(paletteWithPartialOverrides.accentScale[2]).toBe(paletteWithoutOverrides.accentScale[2]);
+            expect(paletteWithPartialOverrides.accentScale[3]).toBe(paletteWithoutOverrides.accentScale[3]);
+            // accent5 (index 4) should be different
+            expect(paletteWithPartialOverrides.accentScale[4]).not.toBe(paletteWithoutOverrides.accentScale[4]);
+            // Rest should remain the same
+            expect(paletteWithPartialOverrides.accentScale[5]).toBe(paletteWithoutOverrides.accentScale[5]);
+            expect(paletteWithPartialOverrides.accentScale[6]).toBe(paletteWithoutOverrides.accentScale[6]);
+        });
+    });
 });

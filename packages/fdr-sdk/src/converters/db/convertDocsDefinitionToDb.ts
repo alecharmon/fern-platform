@@ -443,7 +443,19 @@ function transformColorsV3ForDb({
                 border: writeShape.border,
                 cardBackground: writeShape.cardBackground,
                 sidebarBackground: writeShape.sidebarBackground,
-                headerBackground: writeShape.headerBackground
+                headerBackground: writeShape.headerBackground,
+                accent1: writeShape.accent1,
+                accent2: writeShape.accent2,
+                accent3: writeShape.accent3,
+                accent4: writeShape.accent4,
+                accent5: writeShape.accent5,
+                accent6: writeShape.accent6,
+                accent7: writeShape.accent7,
+                accent8: writeShape.accent8,
+                accent9: writeShape.accent9,
+                accent10: writeShape.accent10,
+                accent11: writeShape.accent11,
+                accent12: writeShape.accent12
             };
         case "light":
             return {
@@ -456,7 +468,19 @@ function transformColorsV3ForDb({
                 border: writeShape.border,
                 cardBackground: writeShape.cardBackground,
                 sidebarBackground: writeShape.sidebarBackground,
-                headerBackground: writeShape.headerBackground
+                headerBackground: writeShape.headerBackground,
+                accent1: writeShape.accent1,
+                accent2: writeShape.accent2,
+                accent3: writeShape.accent3,
+                accent4: writeShape.accent4,
+                accent5: writeShape.accent5,
+                accent6: writeShape.accent6,
+                accent7: writeShape.accent7,
+                accent8: writeShape.accent8,
+                accent9: writeShape.accent9,
+                accent10: writeShape.accent10,
+                accent11: writeShape.accent11,
+                accent12: writeShape.accent12
             };
         case "darkAndLight":
             return {
@@ -472,7 +496,19 @@ function transformColorsV3ForDb({
                     border: writeShape.light.border,
                     cardBackground: writeShape.light.cardBackground,
                     sidebarBackground: writeShape.light.sidebarBackground,
-                    headerBackground: writeShape.light.headerBackground
+                    headerBackground: writeShape.light.headerBackground,
+                    accent1: writeShape.light.accent1,
+                    accent2: writeShape.light.accent2,
+                    accent3: writeShape.light.accent3,
+                    accent4: writeShape.light.accent4,
+                    accent5: writeShape.light.accent5,
+                    accent6: writeShape.light.accent6,
+                    accent7: writeShape.light.accent7,
+                    accent8: writeShape.light.accent8,
+                    accent9: writeShape.light.accent9,
+                    accent10: writeShape.light.accent10,
+                    accent11: writeShape.light.accent11,
+                    accent12: writeShape.light.accent12
                 },
                 dark: {
                     accentPrimary: writeShape.dark.accentPrimary ?? DEFAULT_DARK_MODE_ACCENT_PRIMARY,
@@ -485,7 +521,19 @@ function transformColorsV3ForDb({
                     border: writeShape.dark.border,
                     cardBackground: writeShape.dark.cardBackground,
                     sidebarBackground: writeShape.dark.sidebarBackground,
-                    headerBackground: writeShape.dark.headerBackground
+                    headerBackground: writeShape.dark.headerBackground,
+                    accent1: writeShape.dark.accent1,
+                    accent2: writeShape.dark.accent2,
+                    accent3: writeShape.dark.accent3,
+                    accent4: writeShape.dark.accent4,
+                    accent5: writeShape.dark.accent5,
+                    accent6: writeShape.dark.accent6,
+                    accent7: writeShape.dark.accent7,
+                    accent8: writeShape.dark.accent8,
+                    accent9: writeShape.dark.accent9,
+                    accent10: writeShape.dark.accent10,
+                    accent11: writeShape.dark.accent11,
+                    accent12: writeShape.dark.accent12
                 }
             };
         default:

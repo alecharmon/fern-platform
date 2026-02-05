@@ -224,7 +224,19 @@ const EMPTY_DARK_THEME: DocsV1Read.ThemeConfig = {
     border: undefined,
     sidebarBackground: undefined,
     headerBackground: undefined,
-    cardBackground: undefined
+    cardBackground: undefined,
+    accent1: undefined,
+    accent2: undefined,
+    accent3: undefined,
+    accent4: undefined,
+    accent5: undefined,
+    accent6: undefined,
+    accent7: undefined,
+    accent8: undefined,
+    accent9: undefined,
+    accent10: undefined,
+    accent11: undefined,
+    accent12: undefined
 };
 
 const EMPTY_LIGHT_THEME: DocsV1Read.ThemeConfig = {
@@ -237,7 +249,19 @@ const EMPTY_LIGHT_THEME: DocsV1Read.ThemeConfig = {
     border: undefined,
     sidebarBackground: undefined,
     headerBackground: undefined,
-    cardBackground: undefined
+    cardBackground: undefined,
+    accent1: undefined,
+    accent2: undefined,
+    accent3: undefined,
+    accent4: undefined,
+    accent5: undefined,
+    accent6: undefined,
+    accent7: undefined,
+    accent8: undefined,
+    accent9: undefined,
+    accent10: undefined,
+    accent11: undefined,
+    accent12: undefined
 };
 
 export function getColorsV3(docsDbConfig: DocsV1Db.DocsDbConfig): DocsV1Read.ColorsConfigV3 {

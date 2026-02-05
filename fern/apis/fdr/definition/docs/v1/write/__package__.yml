@@ -182,6 +182,18 @@ types:
       sidebarBackground: optional<commons.RgbaColor>
       headerBackground: optional<commons.RgbaColor>
       cardBackground: optional<commons.RgbaColor>
+      accent1: optional<commons.RgbaColor>
+      accent2: optional<commons.RgbaColor>
+      accent3: optional<commons.RgbaColor>
+      accent4: optional<commons.RgbaColor>
+      accent5: optional<commons.RgbaColor>
+      accent6: optional<commons.RgbaColor>
+      accent7: optional<commons.RgbaColor>
+      accent8: optional<commons.RgbaColor>
+      accent9: optional<commons.RgbaColor>
+      accent10: optional<commons.RgbaColor>
+      accent11: optional<commons.RgbaColor>
+      accent12: optional<commons.RgbaColor>
 
   DarkAndLightModeConfig:
     properties:
