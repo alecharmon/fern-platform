@@ -10,7 +10,7 @@ const cdnUri = process.env.NEXT_PUBLIC_CDN_URI != null ? new URL("/", process.en
 const isTrailingSlashEnabled = process.env.NEXT_PUBLIC_TRAILING_SLASH === "1";
 const isAssetPrefixDisabled = process.env.NEXT_PUBLIC_ASSET_PREFIX_DISABLED === "1";
 const isSelfHosted = process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1";
-const isLocal = process.env.NEXT_PUBLIC_IS_LOCAL;
+const isLocal = process.env.NEXT_PUBLIC_IS_LOCAL === "1";
 const isStandalone = process.env.NEXT_PUBLIC_IS_LOCAL === "1" || process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1";
 // Disable cache for local development, or when explicitly requested via NEXT_DISABLE_CACHE=1
 // Self-hosted production should have caching enabled for performance
@@ -41,6 +41,7 @@ const NEXT_IMAGE_HOSTS = [
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
+    crossOrigin: "anonymous",
     basePath: nextBasePath,
     trailingSlash: isTrailingSlashEnabled,
     ignoreWarnings: [
@@ -75,6 +76,9 @@ const nextConfig: NextConfig = {
         "@fern-ui/react-commons"
     ],
     experimental: {
+        sri: {
+            algorithm: "sha256"
+        },
         appNavFailHandling: true,
         scrollRestoration: true,
         optimisticClientCache: true,
@@ -230,18 +234,19 @@ const nextConfig: NextConfig = {
                 key: "Content-Security-Policy",
                 value: (() => {
                     const httpScheme = isLocal ? "https: http:" : "https:";
+                    const cdnOrigin = cdnUri?.origin ?? "";
                     return [
                         "default-src 'self'",
-                        `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${httpScheme} blob:`,
-                        `style-src 'self' 'unsafe-inline' ${httpScheme}`,
-                        `img-src 'self' ${httpScheme} data: blob:`,
-                        `font-src 'self' ${httpScheme} data:`,
-                        `connect-src 'self' ${httpScheme} wss: ws: data: blob:`,
-                        `media-src 'self' ${httpScheme} data: blob:`,
-                        `object-src 'self' ${httpScheme} data: blob:`,
-                        `frame-src 'self' ${httpScheme} data: blob:`,
+                        `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${cdnOrigin} ${httpScheme} blob:`,
+                        `style-src 'self' 'unsafe-inline' ${cdnOrigin} ${httpScheme}`,
+                        `img-src 'self' ${cdnOrigin} ${httpScheme} data: blob:`,
+                        `font-src 'self' ${cdnOrigin} ${httpScheme} data:`,
+                        `connect-src 'self' ${cdnOrigin} ${httpScheme} wss: ws: data: blob:`,
+                        `media-src 'self' ${cdnOrigin} ${httpScheme} data: blob:`,
+                        `object-src 'self' ${cdnOrigin} ${httpScheme} data: blob:`,
+                        `frame-src 'self' ${cdnOrigin} ${httpScheme} data: blob:`,
                         "base-uri 'self'",
-                        `form-action 'self' ${httpScheme}`
+                        `form-action 'self' ${cdnOrigin} ${httpScheme}`
                     ].join("; ");
                 })()
             }
