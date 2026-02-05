@@ -97,6 +97,19 @@ export function withPrunedNavigation<NODE extends FernNavigation.NavigationNode>
         if (parent && FernNavigation.hasMetadata(parent) && parent.hidden && FernNavigation.hasMetadata(node)) {
             node.hidden = true;
         }
+
+        // Inherit API playground settings from the nearest apiReference ancestor when undefined on leaves
+        const apiRefAncestor = parents.find((p): p is FernNavigation.ApiReferenceNode => p.type === "apiReference");
+        if (
+            apiRefAncestor &&
+            ((node as any).type === "endpoint" || (node as any).type === "webSocket") &&
+            (node as any).playground == null &&
+            apiRefAncestor.playground != null
+        ) {
+            // safe mutation: these navigation nodes are mutable server-side
+            (node as any).playground = apiRefAncestor.playground;
+        }
+
         return true;
     });
 

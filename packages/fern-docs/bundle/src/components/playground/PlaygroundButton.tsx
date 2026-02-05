@@ -44,11 +44,11 @@ export const PlaygroundButton: FC<{
     className?: string;
     lang: string;
 }> = ({ state, endpoint, className, lang }) => {
+    const playgroundSettings = state.type === "endpoint" || state.type === "webSocket" ? state.playground : undefined;
+
     if (!shouldShowPlayground(state, endpoint)) {
         return null;
     }
-
-    const playgroundSettings = state.type === "endpoint" || state.type === "webSocket" ? state.playground : undefined;
 
     return (
         <FernTooltipProvider>
