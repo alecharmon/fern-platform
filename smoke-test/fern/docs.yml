@@ -47,6 +47,8 @@ logo:
 
 favicon: docs/assets/favicon.svg
 
+footer: docs/components/CustomFooter.tsx
+
 redirects:
   # Page redirect test
   - source: /old-welcome

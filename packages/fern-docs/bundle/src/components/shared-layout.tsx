@@ -59,8 +59,9 @@ export default async function SharedLayout({
     // Look up and compile custom header component from jsFiles
     // config.header contains the relative file path (e.g., "docs/components/CustomHeader.tsx")
     // The actual source code is stored in jsFiles keyed by the same path
-    // Note: Custom footer is handled in CustomFooterLinks component
+    // Note: Custom footer is also compiled here and passed to ThemedDocs
     let compiledHeaderCode: string | undefined;
+    let compiledFooterCode: string | undefined;
 
     if (config.header != null) {
         const headerSource = jsFiles[config.header];
@@ -72,6 +73,19 @@ export default async function SharedLayout({
             }
         } else {
             console.warn(`[SharedLayout] Custom header path "${config.header}" not found in jsFiles`);
+        }
+    }
+
+    if (config.footer != null) {
+        const footerSource = jsFiles[config.footer];
+        if (footerSource != null) {
+            try {
+                compiledFooterCode = await compileTsx(footerSource, config.footer);
+            } catch (err) {
+                console.error("[SharedLayout] Failed to compile custom footer:", err);
+            }
+        } else {
+            console.warn(`[SharedLayout] Custom footer path "${config.footer}" not found in jsFiles`);
         }
     }
 
@@ -214,6 +228,11 @@ export default async function SharedLayout({
             customHeader={
                 compiledHeaderCode != null ? (
                     <CustomComponent code={compiledHeaderCode} componentType="header" />
+                ) : undefined
+            }
+            customFooter={
+                compiledFooterCode != null ? (
+                    <CustomComponent code={compiledFooterCode} componentType="footer" />
                 ) : undefined
             }
         >

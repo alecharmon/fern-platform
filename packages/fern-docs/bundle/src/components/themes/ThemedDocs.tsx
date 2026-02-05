@@ -27,7 +27,8 @@ export function ThemedDocs({
     searchPlaceholder,
     lang,
     hideFeedback = false,
-    customHeader
+    customHeader,
+    customFooter
 }: {
     theme?: FernTheme;
     announcement?: React.ReactNode;
@@ -49,6 +50,7 @@ export function ThemedDocs({
     lang: string;
     hideFeedback?: boolean;
     customHeader?: React.ReactNode;
+    customFooter?: React.ReactNode;
 }) {
     const Docs = THEMES[theme];
     return (
@@ -71,6 +73,7 @@ export function ThemedDocs({
             lang={lang}
             hideFeedback={hideFeedback}
             customHeader={customHeader}
+            customFooter={customFooter}
         >
             {children}
         </Docs>

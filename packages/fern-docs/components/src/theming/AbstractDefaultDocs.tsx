@@ -3,7 +3,7 @@
 import { useTheme } from "next-themes";
 import React, { Fragment } from "react";
 import { cn } from "../cn";
-import { FERN_HEADER_ID } from "../constants";
+import { FERN_FOOTER_ID, FERN_HEADER_ID } from "../constants";
 import { useHasCustomFooter } from "../hooks/useHasCustomFooter";
 import { Separator } from "../Separator";
 import { useIsEmbedded } from "../state/embedded";
@@ -28,7 +28,8 @@ export default function AbstractDefaultDocs({
     darkSidebarClassName,
     isSidePanelOpen = false,
     isSidePanelResizing = false,
-    customHeader
+    customHeader,
+    customFooter
 }: {
     header: React.ReactNode;
     versionSelect?: React.ReactNode;
@@ -47,6 +48,7 @@ export default function AbstractDefaultDocs({
     isSidePanelOpen?: boolean;
     isSidePanelResizing?: boolean;
     customHeader?: React.ReactNode;
+    customFooter?: React.ReactNode;
 }) {
     const { resolvedTheme } = useTheme();
     const isEmbedded = useIsEmbedded();
@@ -150,6 +152,15 @@ export default function AbstractDefaultDocs({
                     {children}
                 </main>
             </MainCtx.Provider>
+
+            {!isEmbedded && (
+                <footer
+                    id={FERN_FOOTER_ID}
+                    className={cn(customFooter != null && "relative", "width-before-scroll-bar")}
+                >
+                    {customFooter}
+                </footer>
+            )}
         </div>
     );
 }

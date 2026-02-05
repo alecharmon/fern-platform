@@ -12,7 +12,6 @@ import {
     Twitter,
     Youtube
 } from "lucide-react";
-import type React from "react";
 import { cn } from "../cn";
 
 const ICON_SIZE = 16;
@@ -78,26 +77,8 @@ function getFooterLinkLabel(type: string): string {
     }
 }
 
-export async function FooterLinks({
-    loader,
-    className,
-    customFooter
-}: {
-    loader: DocsLoader;
-    className?: string;
-    customFooter?: React.ReactNode;
-}) {
+export async function FooterLinks({ loader, className }: { loader: DocsLoader; className?: string }) {
     const config = await loader.getConfig();
-
-    // If there's a custom footer component, render it instead of default footer links
-    if (customFooter != null) {
-        return (
-            <div className={cn("flex flex-col items-center", className)}>
-                <hr className="w-full border-t border-(color:--grayscale-a6) mb-8" />
-                {customFooter}
-            </div>
-        );
-    }
 
     const footerLinks = config.footerLinks ?? [];
 
