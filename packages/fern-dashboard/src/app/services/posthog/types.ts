@@ -1,3 +1,9 @@
+/**
+ * The PostHog UI host URL for the US region.
+ * Used for constructing clickable session replay URLs in Sentry.
+ */
+export const POSTHOG_UI_HOST = "https://us.posthog.com";
+
 export interface PostHogClientConfig {
     projectId: string;
     apiUrl?: string;

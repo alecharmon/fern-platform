@@ -8,7 +8,7 @@
  */
 import { appendFileSync, existsSync, writeFileSync } from "fs";
 
-import type { HogQLQueryRequest, HogQLQueryResponse, PostHogClientConfig } from "./types";
+import { type HogQLQueryRequest, type HogQLQueryResponse, POSTHOG_UI_HOST, type PostHogClientConfig } from "./types";
 
 export interface QueryProfile {
     timestamp: string;
@@ -93,7 +93,7 @@ export class PostHogClient {
         this.apiKey = apiKey;
         this.config = {
             projectId: config.projectId,
-            apiUrl: config.apiUrl || "https://us.posthog.com"
+            apiUrl: config.apiUrl || POSTHOG_UI_HOST
         };
     }
 

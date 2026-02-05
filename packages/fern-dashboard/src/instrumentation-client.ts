@@ -3,6 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 import * as Sentry from "@sentry/nextjs";
 import posthog from "posthog-js";
+import { POSTHOG_UI_HOST } from "@/app/services/posthog/types";
 import { getBuildTimestamp } from "@/utils/buildTimestamp";
 import { isProduction } from "@/utils/environment";
 
@@ -24,8 +25,11 @@ if (isProduction()) {
             try {
                 const sessionReplayUrl = posthog.get_session_replay_url?.({ withTimestamp: true });
                 if (sessionReplayUrl) {
-                    event.tags = { ...(event.tags ?? {}), posthogSessionReplayUrl: sessionReplayUrl };
-                    event.contexts = { ...(event.contexts ?? {}), posthog: { sessionReplayUrl } };
+                    // Transform the relative proxy URL to a full PostHog URL
+                    // The proxy returns URLs like "/ingest/project/..." but we need "https://us.posthog.com/project/..."
+                    const fullSessionReplayUrl = sessionReplayUrl.replace(/^\/ingest/, POSTHOG_UI_HOST);
+                    event.tags = { ...(event.tags ?? {}), posthogSessionReplayUrl: fullSessionReplayUrl };
+                    event.contexts = { ...(event.contexts ?? {}), posthog: { sessionReplayUrl: fullSessionReplayUrl } };
                 }
             } catch (error) {
                 console.error("Failed to attach PostHog session replay URL to Sentry event:", error);
