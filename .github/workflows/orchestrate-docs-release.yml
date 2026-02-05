@@ -90,12 +90,9 @@ jobs:
             PR_LIST="No PRs found in this release"
           fi
           
-          # Use EOF delimiter for multiline output
-          {
-            echo "pr_list<<EOF"
-            echo "$PR_LIST"
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
+          # Escape the PR list for JSON (replace newlines with \n, escape quotes and backslashes)
+          PR_LIST_ESCAPED=$(echo "$PR_LIST" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "pr_list=$PR_LIST_ESCAPED" >> $GITHUB_OUTPUT
           echo "pr_count=$PR_COUNT" >> $GITHUB_OUTPUT
 
       - name: Send Slack notification
@@ -110,7 +107,6 @@ jobs:
             }
 
   revalidate-all-sites:
-    needs: notify-slack
     if: startsWith(github.event.release.tag_name, 'docs@')
     uses: ./.github/workflows/revalidate-all-sites.yml
     secrets: inherit
