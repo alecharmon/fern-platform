@@ -8,6 +8,7 @@ import {
     TypeDefinitionRoot
 } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
+import { cn } from "@fern-docs/components/cn";
 import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
 
 import {
@@ -106,7 +107,7 @@ export const EndpointSchemaSnippetInternal: React.FC<React.PropsWithChildren<End
     const language = lang ?? "en";
 
     return (
-        <div className={className}>
+        <div className={cn("space-y-12", className)}>
             {shouldShowSection(selector, "request.path") && endpointDefinition.pathParameters?.length && (
                 <TypeDefinitionAnchorPart part="path">
                     <EndpointSection title="Path parameters">
