@@ -9,7 +9,13 @@ import { Kbd } from "../ui/kbd";
 
 const GENERIC_ERROR = "We couldn't start SSO for that email. Please try again, or";
 
-export function EmailLoginForm({ redirectOnLogin }: { redirectOnLogin?: string }) {
+export function EmailLoginForm({
+    redirectOnLogin,
+    submitLabel = "Continue"
+}: {
+    redirectOnLogin?: string;
+    submitLabel?: string;
+}) {
     const [email, setEmail] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,7 +93,7 @@ export function EmailLoginForm({ redirectOnLogin }: { redirectOnLogin?: string }
             <Button type="submit" disabled={isSubmitting}>
                 <div className="w-full grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
                     <div aria-hidden="true" />
-                    <span>{isSubmitting ? "Authenticating..." : "Continue"}</span>
+                    <span>{isSubmitting ? "Authenticating..." : submitLabel}</span>
                     {hasMounted && isLastUsed ? (
                         <Kbd className="justify-self-end -mr-1" useBodyFont>
                             last used

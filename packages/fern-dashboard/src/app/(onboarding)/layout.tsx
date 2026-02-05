@@ -28,7 +28,7 @@ export default function AuthLayout({
     overlay: ReactNode;
 }) {
     const pathname = usePathname();
-    const centerCard = !pathname.includes("login");
+    const centerCard = !pathname.includes("login") && !pathname.includes("sign-up");
     // Hide card background for complete page only (publishing page now shows the card UI)
     const hideCard = pathname.includes("/complete");
 

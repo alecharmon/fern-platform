@@ -55,12 +55,14 @@ export const GoogleLoginButton = ({
     returnTo,
     additionalParams,
     buttonProps,
-    children
+    children,
+    labelPrefix = "Continue with"
 }: {
     returnTo?: string;
     additionalParams?: Record<string, string>;
     buttonProps?: React.ComponentProps<typeof Button>;
     children?: React.ReactNode;
+    labelPrefix?: string;
 }) => {
     const [isLastUsed, setIsLastUsed] = useState(false);
     const [showRecommended, setShowRecommended] = useState(false);
@@ -90,7 +92,7 @@ export const GoogleLoginButton = ({
                     <div aria-hidden="true" />
                     <div className="flex items-center gap-2 justify-self-center">
                         <GoogleLogo />
-                        <span>Continue with Google</span>
+                        <span>{labelPrefix} Google</span>
                     </div>
                     {hasMounted && isLastUsed ? (
                         <Kbd className="justify-self-end -mr-1" useBodyFont>
@@ -114,12 +116,14 @@ export const GithubLoginButton = ({
     returnTo,
     additionalParams,
     buttonProps,
-    children
+    children,
+    labelPrefix = "Continue with"
 }: {
     returnTo?: string;
     additionalParams?: Record<string, string>;
     buttonProps?: React.ComponentProps<typeof Button>;
     children?: React.ReactNode;
+    labelPrefix?: string;
 }) => {
     const [isLastUsed, setIsLastUsed] = useState(false);
     const hasMounted = useHasMounted();
@@ -145,7 +149,7 @@ export const GithubLoginButton = ({
                     <div aria-hidden="true" />
                     <div className="flex items-center gap-2 justify-self-center">
                         <GithubLogo />
-                        <span>Continue with GitHub</span>
+                        <span>{labelPrefix} GitHub</span>
                     </div>
                     {hasMounted && isLastUsed ? (
                         <Kbd className="justify-self-end" useBodyFont>

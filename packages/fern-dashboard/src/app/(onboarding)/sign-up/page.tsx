@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { AuthPageCard } from "@/components/login-page/AuthPageCard";
 
-interface LoginPageProps {
+interface SignUpPageProps {
     searchParams: Promise<{ FERN_CI_AUTOMATED_TESTING?: string; redirect_on_login?: string }>;
 }
 
-export default async function LoginCardSlot({ searchParams }: LoginPageProps) {
+export default async function SignUpCardSlot({ searchParams }: SignUpPageProps) {
     const session = await getCurrentSession();
 
     if (session != null) {
@@ -17,12 +17,12 @@ export default async function LoginCardSlot({ searchParams }: LoginPageProps) {
     return (
         <AuthPageCard
             searchParams={searchParams}
-            headerText="Welcome back to Fern"
-            buttonLabelPrefix="Continue with"
-            emailSubmitLabel="Log in"
-            belowFormText="Don't have an account?"
-            belowFormLinkText="Sign up"
-            belowFormLinkHref="/sign-up"
+            headerText="Create a Fern account"
+            buttonLabelPrefix="Sign up with"
+            emailSubmitLabel="Sign up"
+            belowFormText="Already have an account?"
+            belowFormLinkText="Log in"
+            belowFormLinkHref="/login"
         />
     );
 }
