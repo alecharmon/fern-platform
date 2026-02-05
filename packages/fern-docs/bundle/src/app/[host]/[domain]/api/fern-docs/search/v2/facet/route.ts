@@ -16,12 +16,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     const filters = toArray(req.nextUrl.searchParams.getAll("filters"));
-    const apiKey = selectFirst(req.nextUrl.searchParams.get("apiKey"));
 
-    if (!apiKey) {
-        return NextResponse.json("apiKey is required", { status: 400 });
-    }
-
+    // Self-hosted mode uses internal MeiliSearch key, so apiKey is not required
     if (isSelfHosted()) {
         const facetValues = await fetchFacetValuesFromMeili({
             filters,
@@ -32,6 +28,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         });
 
         return NextResponse.json(facetValues);
+    }
+
+    // For non-self-hosted (Algolia), apiKey is required
+    const apiKey = selectFirst(req.nextUrl.searchParams.get("apiKey"));
+
+    if (!apiKey) {
+        return NextResponse.json("apiKey is required", { status: 400 });
     }
 
     const facetValues = await fetchFacetValuesFromAlgolia({

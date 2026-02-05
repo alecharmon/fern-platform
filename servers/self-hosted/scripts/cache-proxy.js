@@ -184,7 +184,9 @@ const cache = new LRUCache(MAX_CACHE_SIZE);
 const EXCLUDED_PATHS = [
     "/_search/", // MeiliSearch requests need fresh results
     "/_next/static/", // Static assets - browsers cache these with immutable headers
-    "/_next/image" // Image optimization - browsers handle caching
+    "/_next/image", // Image optimization - browsers handle caching
+    "/api/fern-docs/search/v2/facet", // Search facets need fresh results with query params
+    "/api/fern-docs/search/v2/key" // Search API keys should not be cached
 ];
 
 // Paths that should be excluded unless they match an exception
