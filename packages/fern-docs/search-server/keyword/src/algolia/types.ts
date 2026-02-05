@@ -4,6 +4,14 @@ import { z } from "zod";
 // in order of priority:
 export const SEARCHABLE_ATTRIBUTES = [
     "title",
+    // hierarchy (h1 -> h6)
+    "hierarchy.h0",
+    "hierarchy.h1.title",
+    "hierarchy.h2.title",
+    "hierarchy.h3.title",
+    "hierarchy.h4.title",
+    "hierarchy.h5.title",
+    "hierarchy.h6.title",
     "endpoint_path",
     "endpoint_path_alternates",
     "parameter_name",
@@ -23,10 +31,7 @@ export const SEARCHABLE_ATTRIBUTES = [
     "unordered(content)",
 
     // make code snippets searchable
-    "unordered(code_snippets.code)",
-
-    // hierarchy (h1 has highest priority, h6 has lowest)
-    "hierarchy.h1.title,hierarchy.h2.title,hierarchy.h3.title,hierarchy.h4.title,hierarchy.h5.title,hierarchy.h6.title"
+    "unordered(code_snippets.code)"
 ] as const;
 
 export const FILTERABLE_FACET_ATTRIBUTES = [
