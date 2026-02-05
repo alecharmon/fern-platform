@@ -81,6 +81,7 @@ export default function AbstractDefaultDocs({
             {!isEmbedded && customHeader != null ? (
                 <header id={FERN_HEADER_ID} className="width-before-scroll-bar" data-theme="default">
                     {customHeader}
+                    <Fragment key="header-tabs">{headerTabs}</Fragment>
                 </header>
             ) : (
                 !isEmbedded && (

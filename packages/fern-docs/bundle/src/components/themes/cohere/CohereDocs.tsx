@@ -118,7 +118,16 @@ export default function CohereDocs({
                 }}
             >
                 {customHeader != null ? (
-                    <header id={FERN_HEADER_ID}>{customHeader}</header>
+                    <header id={FERN_HEADER_ID} className="flex flex-col gap-3">
+                        {customHeader}
+                        <HeaderTabsRoot
+                            showSearchBar={showSearchBarInTabs}
+                            className="bg-header-background border-border-default rounded-2 overflow-clip border p-3"
+                            lang={lang}
+                        >
+                            {tabs}
+                        </HeaderTabsRoot>
+                    </header>
                 ) : (
                     <FernHeader
                         className={cn("flex flex-col gap-3", { "lg:hidden": isHeaderDisabled }, headerClassName)}
