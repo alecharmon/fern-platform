@@ -1,27 +1,42 @@
 import "server-only";
 
-import type { GraphqlContext, TypeShape } from "@fern-api/fdr-sdk/api-definition";
+import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import type { GraphqlContext, TypeShapeOrReference } from "@fern-api/fdr-sdk/api-definition";
+import { unwrapReference } from "@fern-api/fdr-sdk/api-definition";
 import { GraphqlSection } from "@fern-docs/components/api-reference/graphql/GraphqlSection";
 import {
     TypeDefinitionAnchorPart,
     TypeDefinitionResponse
 } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
+import { renderTypeShorthand } from "@fern-docs/components/type-shorthand";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 
 import { PropertyWithShape } from "../type-definitions/ObjectProperty";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 
-function isListType(shape: TypeShape): boolean {
-    if (shape.type === "alias") {
-        if (shape.value.type === "list" || shape.value.type === "set") {
+/**
+ * Determines if the return type has expandable fields (object, enum, union).
+ * Primitives, literals, and unknown types don't have nested fields to expand.
+ */
+function hasExpandableFields(
+    shape: TypeShapeOrReference,
+    types: Record<string, ApiDefinition.TypeDefinition>
+): boolean {
+    const unwrapped = unwrapReference(shape, types);
+    switch (unwrapped.shape.type) {
+        case "object":
+        case "enum":
+        case "undiscriminatedUnion":
+        case "discriminatedUnion":
             return true;
-        }
-        if (shape.value.type === "optional" || shape.value.type === "nullable") {
-            return isListType(shape.value.shape);
-        }
+        case "primitive":
+        case "literal":
+        case "unknown":
+            return false;
+        default:
+            return false;
     }
-    return false;
 }
 
 export interface HoveringProps {
@@ -71,22 +86,28 @@ export async function GraphqlContentLeft({
             <TypeDefinitionResponse>
                 <TypeDefinitionAnchorPart part="fields">
                     <GraphqlSection
-                        title="Fields"
+                        title="Returns"
                         description={
-                            isListType(operation.returnType) ? (
-                                <span className="text-sm text-(color:--grayscale-a11)">Returns a list</span>
-                            ) : undefined
+                            <span className="text-sm text-(color:--grayscale-a11)">
+                                {renderTypeShorthand(
+                                    operation.returnType,
+                                    { withArticle: true, isGraphQL: true },
+                                    types
+                                )}
+                            </span>
                         }
                     >
-                        <TypeDefinitionAnchorPart part="body">
-                            <TypeReferenceDefinitions
-                                shape={operation.returnType}
-                                types={types}
-                                location="response"
-                                lang={lang}
-                                isGraphQL
-                            />
-                        </TypeDefinitionAnchorPart>
+                        {hasExpandableFields(operation.returnType, types) && (
+                            <TypeDefinitionAnchorPart part="body">
+                                <TypeReferenceDefinitions
+                                    shape={operation.returnType}
+                                    types={types}
+                                    location="response"
+                                    lang={lang}
+                                    isGraphQL
+                                />
+                            </TypeDefinitionAnchorPart>
+                        )}
                     </GraphqlSection>
                 </TypeDefinitionAnchorPart>
             </TypeDefinitionResponse>
