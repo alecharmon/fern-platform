@@ -9,10 +9,8 @@ import { OrgNameProvider } from "@/app/[orgName]/context/OrgNameContext";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { EditorProvidersWrapper } from "@/components/editor/EditorProvidersWrapper";
-import { EditorStatusNotification } from "@/components/editor/EditorStatusNotification";
 import { HeaderToolbar } from "@/components/editor/HeaderToolbar";
 import { NeedsSetupBanner } from "@/components/editor/NeedsSetupBanner";
-import { UnsupportedApiFormatNotification } from "@/components/editor/UnsupportedApiFormatNotification";
 import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
 import { BranchProvider } from "@/providers/BranchContext";
 import { CurrentPageProvider } from "@/providers/CurrentPageContext";
@@ -55,8 +53,6 @@ export default async function EditorLayout({
                                             <EditorProvider>
                                                 <NeedsSetupBanner docsUrl={docsUrl} orgName={orgName} />
                                                 <HeaderToolbar session={session} docsUrl={docsUrl} />
-                                                <EditorStatusNotification />
-                                                <UnsupportedApiFormatNotification />
                                                 {children}
                                             </EditorProvider>
                                         </DevModeProvider>

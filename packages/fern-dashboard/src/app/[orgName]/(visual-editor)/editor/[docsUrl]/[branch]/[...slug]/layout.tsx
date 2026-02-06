@@ -18,7 +18,9 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { PreviewHeader } from "@/components/docs-preview/PreviewHeader";
 import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor";
+import { EditorStatusNotification } from "@/components/editor/EditorStatusNotification";
 import { ResizablePanelsWrapper } from "@/components/editor/ResizablePanelsWrapper";
+import { UnsupportedApiFormatNotification } from "@/components/editor/UnsupportedApiFormatNotification";
 import { EditorRoutingProvider } from "@/providers/EditorRoutingContext";
 import { FileResolverProvider } from "@/providers/FileResolverContext";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
@@ -105,7 +107,9 @@ export default async function VisualEditorPreviewLayout({
                         <RootNodeProvider sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}>
                             <ResizablePanelsWrapper
                                 left={
-                                    <div className="border-1 flex h-full flex-col overflow-hidden rounded-2xl border-gray-500 border-b-0 rounded-b-none shadow-lg">
+                                    <div className="relative border-1 flex h-full flex-col overflow-hidden rounded-2xl border-gray-500 border-b-0 rounded-b-none shadow-lg">
+                                        <EditorStatusNotification />
+                                        <UnsupportedApiFormatNotification />
                                         {/* BOUNDARY NOTE: All items within the #preview-container will be themed with domain-specific styles. */}
                                         <EditorRoutingProvider
                                             value={{

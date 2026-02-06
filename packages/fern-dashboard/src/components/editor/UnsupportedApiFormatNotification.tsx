@@ -61,7 +61,7 @@ export function UnsupportedApiFormatNotification({ className }: UnsupportedApiFo
         <div
             className={cn(
                 "absolute left-1/2 z-50 -translate-x-1/2",
-                "top-[calc(var(--header-toolbar-height)+var(--header-height)+12px)]",
+                "top-[calc(var(--header-height)+12px)]",
                 className
             )}
         >
