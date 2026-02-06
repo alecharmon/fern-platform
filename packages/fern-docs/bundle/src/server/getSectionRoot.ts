@@ -1,6 +1,6 @@
 import { removeLeadingSlash } from "@fern-api/docs-utils";
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { CONTINUE, STOP } from "@fern-api/fdr-sdk/traversers";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { NodeCollector } from "@fern-api/fdr-sdk/navigation";
 
 export function getSectionRoot(
     root: FernNavigation.RootNode | undefined,
@@ -10,22 +10,12 @@ export function getSectionRoot(
         return undefined;
     }
 
-    if (path === "/" || root.slug === removeLeadingSlash(path)) {
+    const slug = removeLeadingSlash(path);
+
+    if (path === "/" || root.slug === slug) {
         return root;
     }
 
-    let foundNode: FernNavigation.NavigationNodeWithMetadata | undefined;
-
-    // traverse the tree in a breadth-first manner because the node we're looking for is likely to be near the root
-    FernNavigation.traverseBF(root, (node) => {
-        if (FernNavigation.hasMetadata(node)) {
-            if (node.slug === removeLeadingSlash(path)) {
-                foundNode = node;
-                return STOP;
-            }
-        }
-        return CONTINUE;
-    });
-
-    return foundNode;
+    const collector = NodeCollector.collect(root);
+    return collector.slugMap.get(slug);
 }
