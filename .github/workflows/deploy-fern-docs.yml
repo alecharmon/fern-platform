@@ -113,3 +113,8 @@ jobs:
           run: |
             url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
             vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}
+
+  revalidate-all-sites:
+    needs: [Deploy-Production, Deploy-Production-Slash, Deploy-Production-Assets, Deploy-Production-Preview]
+    uses: ./.github/workflows/revalidate-all-sites.yml
+    secrets: inherit

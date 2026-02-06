@@ -105,8 +105,3 @@ jobs:
               "channel": "#docs-notifs",
               "text": "*Docs Release: ${{ github.event.release.tag_name }}*\n\n${{ steps.get_prs.outputs.pr_count }} PR(s) included in this release:\n${{ steps.get_prs.outputs.pr_list }}\n\n<${{ github.event.release.html_url }}|View Release>"
             }
-
-  revalidate-all-sites:
-    if: startsWith(github.event.release.tag_name, 'docs@')
-    uses: ./.github/workflows/revalidate-all-sites.yml
-    secrets: inherit
