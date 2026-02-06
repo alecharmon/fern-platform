@@ -12,6 +12,7 @@ import type {
     LinkProgressUpdateData,
     LinksCheckStartedData,
     PageScrapedData,
+    ScrapeBatchCompleteData,
     ScrapeCompleteData,
     SitemapFetchedData
 } from "@/app/api/link-checker/types";
@@ -60,10 +61,17 @@ const initialState: LinkCheckerState = {
     error: null
 };
 
+const MAX_CONNECTION_RETRIES = 3;
+const CONNECTION_RETRY_DELAY_MS = 2000;
+
 export function useLinkChecker() {
     const [state, setState] = useState<LinkCheckerState>(initialState);
     const eventSourceRef = useRef<EventSource | null>(null);
     const domainRef = useRef<string>("");
+    const checkRetryCountRef = useRef<number>(0);
+    const lastJobIdRef = useRef<string>("");
+    const scrapeRetryCountRef = useRef<number>(0);
+    const lastScrapeJobIdRef = useRef<string>("");
 
     const addLog = useCallback((message: string, type: LogEntry["type"]) => {
         setState((prev) => ({
@@ -78,6 +86,8 @@ export function useLinkChecker() {
                 eventSourceRef.current.close();
             }
 
+            lastJobIdRef.current = jobId;
+
             const eventSource = new EventSource(
                 `/api/link-checker?domain=${encodeURIComponent(domain)}&phase=check&jobId=${encodeURIComponent(jobId)}`
             );
@@ -85,6 +95,7 @@ export function useLinkChecker() {
 
             eventSource.onmessage = (event) => {
                 try {
+                    checkRetryCountRef.current = 0;
                     const progress: LinkCheckProgress = JSON.parse(event.data);
 
                     switch (progress.type) {
@@ -194,43 +205,50 @@ export function useLinkChecker() {
             };
 
             eventSource.onerror = () => {
-                setState((prev) => ({
-                    ...prev,
-                    status: "error",
-                    error: "Connection lost to server"
-                }));
-                addLog("Connection lost to server", "error");
                 eventSource.close();
+                if (checkRetryCountRef.current < MAX_CONNECTION_RETRIES && lastJobIdRef.current) {
+                    checkRetryCountRef.current++;
+                    addLog(
+                        `Connection lost, retrying (${checkRetryCountRef.current}/${MAX_CONNECTION_RETRIES})...`,
+                        "warning"
+                    );
+                    setTimeout(() => {
+                        startCheckPhase(domain, lastJobIdRef.current);
+                    }, CONNECTION_RETRY_DELAY_MS * checkRetryCountRef.current);
+                } else {
+                    setState((prev) => ({
+                        ...prev,
+                        status: "error",
+                        error: "Connection lost to server"
+                    }));
+                    addLog("Connection lost to server", "error");
+                }
             };
         },
         [addLog]
     );
 
-    const start = useCallback(
-        (domain: string) => {
+    const startScrapePhase = useCallback(
+        (domain: string, scrapeJobId: string | null) => {
             if (eventSourceRef.current) {
                 eventSourceRef.current.close();
             }
 
-            domainRef.current = domain;
+            if (scrapeJobId) {
+                lastScrapeJobIdRef.current = scrapeJobId;
+            }
 
-            setState({
-                ...initialState,
-                status: "fetching_sitemap",
-                logs: [
-                    {
-                        message: `Starting link check for ${domain}...`,
-                        timestamp: new Date().toISOString(),
-                        type: "info"
-                    }
-                ]
-            });
+            let url = `/api/link-checker?domain=${encodeURIComponent(domain)}&phase=scrape`;
+            if (scrapeJobId) {
+                url += `&scrapeJobId=${encodeURIComponent(scrapeJobId)}`;
+            }
 
-            const eventSource = new EventSource(`/api/link-checker?domain=${encodeURIComponent(domain)}&phase=scrape`);
+            const eventSource = new EventSource(url);
             eventSourceRef.current = eventSource;
 
             eventSource.onmessage = (event) => {
                 try {
+                    scrapeRetryCountRef.current = 0;
                     const progress: LinkCheckProgress = JSON.parse(event.data);
 
                     switch (progress.type) {
@@ -248,9 +266,17 @@ export function useLinkChecker() {
                             const data = progress.data as PageScrapedData;
                             setState((prev) => ({
                                 ...prev,
-                                pagesScraped: data.pageIndex,
-                                totalLinks: prev.totalLinks + data.linksFound
+                                pagesScraped: data.pageIndex
                             }));
+                            break;
+                        }
+                        case "scrape_batch_complete": {
+                            const data = progress.data as ScrapeBatchCompleteData;
+                            if (data.hasMore) {
+                                addLog(`Scraped ${data.pagesScraped} pages, continuing with next batch...`, "info");
+                                eventSource.close();
+                                startScrapePhase(domain, data.scrapeJobId);
+                            }
                             break;
                         }
                         case "scrape_complete": {
@@ -282,16 +308,56 @@ export function useLinkChecker() {
             };
 
             eventSource.onerror = () => {
-                setState((prev) => ({
-                    ...prev,
-                    status: "error",
-                    error: "Connection lost to server"
-                }));
-                addLog("Connection lost to server", "error");
                 eventSource.close();
+                if (scrapeRetryCountRef.current < MAX_CONNECTION_RETRIES && lastScrapeJobIdRef.current) {
+                    scrapeRetryCountRef.current++;
+                    addLog(
+                        `Connection lost during scrape, retrying (${scrapeRetryCountRef.current}/${MAX_CONNECTION_RETRIES})...`,
+                        "warning"
+                    );
+                    setTimeout(() => {
+                        startScrapePhase(domain, lastScrapeJobIdRef.current);
+                    }, CONNECTION_RETRY_DELAY_MS * scrapeRetryCountRef.current);
+                } else {
+                    setState((prev) => ({
+                        ...prev,
+                        status: "error",
+                        error: "Connection lost to server"
+                    }));
+                    addLog("Connection lost to server", "error");
+                }
             };
         },
         [addLog, startCheckPhase]
+    );
+
+    const start = useCallback(
+        (domain: string) => {
+            if (eventSourceRef.current) {
+                eventSourceRef.current.close();
+            }
+
+            domainRef.current = domain;
+            scrapeRetryCountRef.current = 0;
+            checkRetryCountRef.current = 0;
+            lastScrapeJobIdRef.current = "";
+            lastJobIdRef.current = "";
+
+            setState({
+                ...initialState,
+                status: "fetching_sitemap",
+                logs: [
+                    {
+                        message: `Starting link check for ${domain}...`,
+                        timestamp: new Date().toISOString(),
+                        type: "info"
+                    }
+                ]
+            });
+
+            startScrapePhase(domain, null);
+        },
+        [startScrapePhase]
     );
 
     const stop = useCallback(() => {

@@ -2,18 +2,14 @@ import type { NextRequest } from "next/server";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 
-import { checkLinksBatch, runLinkChecker, scrapeAndStoreLinks } from "./handler";
-import type { BatchCompleteData, LinkCheckProgress, ScrapeCompleteData } from "./types";
+import { checkLinksBatch, runLinkChecker, scrapePagesBatch } from "./handler";
+import type { BatchCompleteData, LinkCheckProgress, ScrapeBatchCompleteData } from "./types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 800; // Vercel enterprise max - batched approach keeps each request well under this
 
 const HEARTBEAT_INTERVAL_MS = 15000; // Send heartbeat every 15 seconds to prevent idle timeout
-
-function generateJobId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-}
 
 export async function GET(req: NextRequest) {
     const session = await getCurrentSession();
@@ -25,6 +21,7 @@ export async function GET(req: NextRequest) {
     const domain = searchParams.get("domain");
     const phase = searchParams.get("phase");
     const jobId = searchParams.get("jobId");
+    const scrapeJobId = searchParams.get("scrapeJobId");
 
     if (!domain) {
         return new Response("Domain parameter is required", { status: 400 });
@@ -48,18 +45,20 @@ export async function GET(req: NextRequest) {
 
             try {
                 if (phase === "scrape") {
-                    const newJobId = generateJobId();
-                    const result = await scrapeAndStoreLinks(domain, newJobId, sendEvent);
-                    const scrapeCompleteData: ScrapeCompleteData = {
-                        jobId: newJobId,
-                        totalPages: result.totalPages,
-                        totalLinks: result.totalLinks
-                    };
-                    sendEvent({
-                        type: "scrape_complete",
-                        data: scrapeCompleteData,
-                        timestamp: new Date().toISOString()
-                    });
+                    const result = await scrapePagesBatch(domain, scrapeJobId, sendEvent);
+                    if (result.hasMore) {
+                        const scrapeBatchData: ScrapeBatchCompleteData = {
+                            scrapeJobId: result.scrapeJobId,
+                            pagesScraped: result.totalPages,
+                            totalPages: result.totalPages,
+                            hasMore: true
+                        };
+                        sendEvent({
+                            type: "scrape_batch_complete",
+                            data: scrapeBatchData,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
                 } else if (phase === "check" && jobId) {
                     const result = await checkLinksBatch(jobId, sendEvent);
                     if (result.hasMore) {

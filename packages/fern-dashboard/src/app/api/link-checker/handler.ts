@@ -1,6 +1,6 @@
 import pLimit from "p-limit";
 
-import type { LinkCheckerJob } from "@/app/services/redis/cacheKey";
+import type { LinkCheckerJob, LinkCheckerScrapeJob } from "@/app/services/redis/cacheKey";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisDel, redisGet, redisSet } from "@/app/services/redis/redis";
 
@@ -13,6 +13,7 @@ const MAX_REDIRECTS = 5;
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 const LINKS_PER_BATCH = 500;
+const PAGES_PER_BATCH = 200;
 const JOB_TTL_SECONDS = 3600; // 1 hour
 
 function sleep(ms: number): Promise<void> {
@@ -283,6 +284,12 @@ export async function checkLink(url: string): Promise<{ statusCode: number | nul
             return { statusCode: headResponse.status };
         } catch (error) {
             if (error instanceof Error && error.name === "AbortError") {
+                if (retryCount < MAX_RETRIES) {
+                    const delay = RETRY_DELAY_MS * Math.pow(2, retryCount);
+                    await sleep(delay);
+                    retryCount++;
+                    continue;
+                }
                 return { statusCode: null, error: "timeout" };
             }
 
@@ -317,6 +324,12 @@ export async function checkLink(url: string): Promise<{ statusCode: number | nul
 
                 return { statusCode: response.status };
             } catch (getError) {
+                if (retryCount < MAX_RETRIES) {
+                    const delay = RETRY_DELAY_MS * Math.pow(2, retryCount);
+                    await sleep(delay);
+                    retryCount++;
+                    continue;
+                }
                 if (getError instanceof Error) {
                     if (getError.name === "AbortError") {
                         return { statusCode: null, error: "timeout" };
@@ -427,6 +440,176 @@ export async function scrapeAndStoreLinks(
     await redisSet(RedisCacheKey.linkCheckerJob(jobId), job, { ttlInSeconds: JOB_TTL_SECONDS });
 
     return { totalPages: pages.length, totalLinks: linksArray.length };
+}
+
+export async function scrapePagesBatch(
+    domain: string,
+    scrapeJobId: string | null,
+    sendEvent: SendEventFn
+): Promise<{ scrapeJobId: string; totalPages: number; totalLinks: number; hasMore: boolean }> {
+    let scrapeJob: LinkCheckerScrapeJob;
+
+    if (scrapeJobId) {
+        const existing = await redisGet(RedisCacheKey.linkCheckerScrapeJob(scrapeJobId));
+        if (!existing) {
+            sendEvent({
+                type: "error",
+                data: {
+                    message: "Scrape job not found or expired",
+                    code: "SCRAPE_JOB_NOT_FOUND"
+                },
+                timestamp: new Date().toISOString()
+            });
+            throw new Error("Scrape job not found");
+        }
+        scrapeJob = existing;
+    } else {
+        scrapeJobId = `scrape-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+        let pages: string[];
+        try {
+            pages = await fetchSitemap(domain);
+            sendEvent({
+                type: "sitemap_fetched",
+                data: {
+                    totalPages: pages.length,
+                    sitemapUrl: `https://${domain}/sitemap.xml`
+                },
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            sendEvent({
+                type: "error",
+                data: {
+                    message: error instanceof Error ? error.message : "Failed to fetch sitemap",
+                    code: "SITEMAP_FETCH_ERROR"
+                },
+                timestamp: new Date().toISOString()
+            });
+            throw error;
+        }
+
+        scrapeJob = {
+            domain,
+            pages,
+            links: [],
+            cursor: 0,
+            startTime: Date.now()
+        };
+    }
+
+    const { pages, cursor } = scrapeJob;
+    const endIndex = Math.min(cursor + PAGES_PER_BATCH, pages.length);
+    const batchPages = pages.slice(cursor, endIndex);
+
+    const batchLinks = new Map<string, Set<string>>();
+    const pageLimit = pLimit(PAGE_CONCURRENCY);
+    let pagesScraped = cursor;
+
+    await Promise.all(
+        batchPages.map((pageUrl) =>
+            pageLimit(async () => {
+                try {
+                    const links = await scrapePage(pageUrl);
+                    for (const link of links) {
+                        const existing = batchLinks.get(link);
+                        if (existing) {
+                            existing.add(pageUrl);
+                        } else {
+                            batchLinks.set(link, new Set([pageUrl]));
+                        }
+                    }
+                    pagesScraped++;
+                    sendEvent({
+                        type: "page_scraped",
+                        data: {
+                            pageUrl,
+                            linksFound: links.length,
+                            pageIndex: pagesScraped,
+                            totalPages: pages.length
+                        },
+                        timestamp: new Date().toISOString()
+                    });
+                } catch (error) {
+                    console.error(`[link-checker] error scraping ${pageUrl}: ${error}`);
+                    pagesScraped++;
+                    sendEvent({
+                        type: "page_scraped",
+                        data: {
+                            pageUrl,
+                            linksFound: 0,
+                            pageIndex: pagesScraped,
+                            totalPages: pages.length
+                        },
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            })
+        )
+    );
+
+    const existingLinksMap = new Map<string, Set<string>>();
+    for (const link of scrapeJob.links) {
+        existingLinksMap.set(link.url, new Set(link.sourcePages));
+    }
+    for (const [url, sourcePages] of batchLinks) {
+        const existing = existingLinksMap.get(url);
+        if (existing) {
+            for (const page of sourcePages) {
+                existing.add(page);
+            }
+        } else {
+            existingLinksMap.set(url, sourcePages);
+        }
+    }
+
+    const hasMore = endIndex < pages.length;
+
+    if (hasMore) {
+        const mergedLinks = Array.from(existingLinksMap.entries()).map(([url, sourcePages]) => ({
+            url,
+            sourcePages: Array.from(sourcePages)
+        }));
+        scrapeJob.links = mergedLinks;
+        scrapeJob.cursor = endIndex;
+        await redisSet(RedisCacheKey.linkCheckerScrapeJob(scrapeJobId), scrapeJob, {
+            ttlInSeconds: JOB_TTL_SECONDS
+        });
+    } else {
+        await redisDel(RedisCacheKey.linkCheckerScrapeJob(scrapeJobId));
+    }
+
+    const totalLinks = existingLinksMap.size;
+
+    if (!hasMore) {
+        const checkJobId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        const linksArray = Array.from(existingLinksMap.entries()).map(([url, sourcePages]) => ({
+            url,
+            sourcePages: Array.from(sourcePages)
+        }));
+        const job: LinkCheckerJob = {
+            domain,
+            totalPages: pages.length,
+            links: linksArray,
+            cursor: 0,
+            startTime: scrapeJob.startTime,
+            workingLinks: 0,
+            skippedLinks: 0
+        };
+        await redisSet(RedisCacheKey.linkCheckerJob(checkJobId), job, { ttlInSeconds: JOB_TTL_SECONDS });
+
+        sendEvent({
+            type: "scrape_complete",
+            data: {
+                jobId: checkJobId,
+                totalPages: pages.length,
+                totalLinks
+            },
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    return { scrapeJobId, totalPages: pages.length, totalLinks, hasMore };
 }
 
 export async function checkLinksBatch(

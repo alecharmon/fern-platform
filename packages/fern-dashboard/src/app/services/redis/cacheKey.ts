@@ -73,6 +73,14 @@ export interface LinkCheckerJob {
     skippedLinks: number;
 }
 
+export interface LinkCheckerScrapeJob {
+    domain: string;
+    pages: string[];
+    links: { url: string; sourcePages: string[] }[];
+    cursor: number;
+    startTime: number;
+}
+
 export interface OnboardingPreCreateStatus {
     status: "pending" | "in_progress" | "completed" | "failed";
     repoUrl?: string;
@@ -101,6 +109,7 @@ export const RedisCacheKeyType = {
     DOCS_SITE_ACCESS: "DOCS_SITE_ACCESS",
     ALGOLIA_ANALYTICS: "ALGOLIA_ANALYTICS",
     LINK_CHECKER_JOB: "LINK_CHECKER_JOB",
+    LINK_CHECKER_SCRAPE_JOB: "LINK_CHECKER_SCRAPE_JOB",
     USER_SESSION_INVALIDATED: "USER_SESSION_INVALIDATED",
     ONBOARDING_PRE_CREATE: "ONBOARDING_PRE_CREATE"
 } as const;
@@ -121,6 +130,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.DOCS_SITE_ACCESS]: FdrAPI.dashboard.DocsSite;
     [RedisCacheKeyType.ALGOLIA_ANALYTICS]: AlgoliaAnalyticsData;
     [RedisCacheKeyType.LINK_CHECKER_JOB]: LinkCheckerJob;
+    [RedisCacheKeyType.LINK_CHECKER_SCRAPE_JOB]: LinkCheckerScrapeJob;
     [RedisCacheKeyType.USER_SESSION_INVALIDATED]: boolean;
     [RedisCacheKeyType.ONBOARDING_PRE_CREATE]: OnboardingPreCreateStatus;
 };
@@ -149,6 +159,8 @@ export const RedisCacheKey = {
     algoliaAnalytics: (endpoint: string, params: string) =>
         cacheKey(RedisCacheKeyType.ALGOLIA_ANALYTICS)(`algolia-analytics-${endpoint}-${params}`),
     linkCheckerJob: (jobId: string) => cacheKey(RedisCacheKeyType.LINK_CHECKER_JOB)(`link-checker-job-${jobId}`),
+    linkCheckerScrapeJob: (jobId: string) =>
+        cacheKey(RedisCacheKeyType.LINK_CHECKER_SCRAPE_JOB)(`link-checker-scrape-job-${jobId}`),
     userSessionInvalidated: (userId: string) =>
         cacheKey(RedisCacheKeyType.USER_SESSION_INVALIDATED)(`user-session-invalidated-${userId}`),
     onboardingPreCreate: (orgName: string) =>

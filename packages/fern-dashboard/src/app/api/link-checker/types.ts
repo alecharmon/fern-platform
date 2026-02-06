@@ -2,6 +2,7 @@ export type LinkCheckEventType =
     | "sitemap_fetched"
     | "page_scraped"
     | "scrape_complete"
+    | "scrape_batch_complete"
     | "links_check_started"
     | "link_check_progress"
     | "link_checked"
@@ -74,6 +75,13 @@ export interface BatchCompleteData {
     hasMore: boolean;
 }
 
+export interface ScrapeBatchCompleteData {
+    scrapeJobId: string;
+    pagesScraped: number;
+    totalPages: number;
+    hasMore: boolean;
+}
+
 export type LinkCheckProgressData =
     | SitemapFetchedData
     | PageScrapedData
@@ -82,6 +90,7 @@ export type LinkCheckProgressData =
     | LinkProgressUpdateData
     | LinkCheckedData
     | BatchCompleteData
+    | ScrapeBatchCompleteData
     | CompleteData
     | ErrorData;
 
