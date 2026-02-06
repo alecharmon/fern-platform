@@ -83,7 +83,10 @@
     "./api-reference/websockets/*": "./src/api-reference/websockets/*.tsx",
     "./api-reference/webhooks/*": "./src/api-reference/webhooks/*.tsx",
     "./api-reference/grpcs/*": "./src/api-reference/grpcs/*.tsx",
-    "./api-reference/graphql/*": "./src/api-reference/graphql/*.tsx"
+    "./api-reference/graphql/*": "./src/api-reference/graphql/*.tsx",
+    "./changelog/*": "./src/changelog/*.tsx",
+    "./changelog/flattenChangelogEntries": "./src/changelog/flattenChangelogEntries.ts",
+    "./src/changelog/index.scss": "./src/changelog/index.scss"
   },
   "files": ["src"],
   "scripts": {

@@ -4,7 +4,9 @@ import { slugToHref } from "@fern-api/docs-utils";
 import type { FernLayoutConfig } from "@fern-api/docs-utils/types/layout-config";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { EMPTY_ARRAY } from "@fern-api/ui-core-utils";
-import { Badge } from "@fern-docs/components/badges";
+import { ChangelogContentLayout } from "@fern-docs/components/changelog/ChangelogContentLayout";
+import { ChangelogEntryLabel } from "@fern-docs/components/changelog/ChangelogEntryLabel";
+import { flattenChangelogEntries } from "@fern-docs/components/changelog/flattenChangelogEntries";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { useCurrentAnchor } from "@fern-docs/components/hooks/use-anchor";
 import { AsideAwareDiv } from "@fern-docs/components/layouts/AsideAwareDiv";
@@ -22,25 +24,6 @@ import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { useSelectedFilters } from "@/state/search";
 import { BottomNavigationClient } from "../bottom-nav-client";
 import { PageFilters } from "../PageFilters";
-import { ChangelogContentLayout } from "./ChangelogContentLayout";
-
-function flattenChangelogEntries({
-    node,
-    selectedFilters
-}: {
-    node: FernNavigation.ChangelogNode;
-    selectedFilters: string[];
-}): FernNavigation.ChangelogEntryNode[] {
-    return node.children.flatMap((year) =>
-        year.children
-            .flatMap((month) => month.children)
-            .filter((entry) => {
-                const matchesFilter =
-                    selectedFilters.length === 0 || entry.tags?.some((tag) => selectedFilters.includes(tag));
-                return matchesFilter;
-            })
-    );
-}
 
 const CHANGELOG_PAGE_SIZE = 10;
 
@@ -231,20 +214,21 @@ export default function ChangelogPageClient({
                                         as="article"
                                         id={entry.date}
                                         stickyContent={
-                                            <div className="fern-changelog-label">
-                                                <Badge asChild>
+                                            <ChangelogEntryLabel
+                                                asChild
+                                                title={
                                                     <FernLink href={slugToHref(entry.slug)} scroll={true}>
                                                         {entry.title}
                                                     </FernLink>
-                                                </Badge>
-                                                <div className="filter-row">
+                                                }
+                                                tags={
                                                     <PageFilters
                                                         filters={entry.tags ?? []}
                                                         forcePillDisplay
                                                         lang={lang}
                                                     />
-                                                </div>
-                                            </div>
+                                                }
+                                            />
                                         }
                                     >
                                         {entries[entry.pageId]}

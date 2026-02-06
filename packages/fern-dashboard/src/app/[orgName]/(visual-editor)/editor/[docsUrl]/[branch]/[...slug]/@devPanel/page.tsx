@@ -70,6 +70,10 @@ export default function DevPanel() {
 
     // Build the list of files to display based on page type
     const files = useMemo((): DevPanelFile[] => {
+        if (currentPageType === "changelog") {
+            return [];
+        }
+
         if (currentPageType === "api-reference" && openApiSpecs && openApiSpecs.size > 0) {
             // Show OpenAPI spec files for API reference pages
             const specFiles: DevPanelFile[] = [];

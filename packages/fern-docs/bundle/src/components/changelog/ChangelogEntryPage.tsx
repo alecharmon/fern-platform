@@ -3,7 +3,8 @@ import "server-only";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
-import { Badge } from "@fern-docs/components/badges";
+import { ChangelogContentLayout } from "@fern-docs/components/changelog/ChangelogContentLayout";
+import { ChangelogEntryLabel } from "@fern-docs/components/changelog/ChangelogEntryLabel";
 import { FERN_TOC_ID } from "@fern-docs/components/constants";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { AsideAwareDiv } from "@fern-docs/components/layouts/AsideAwareDiv";
@@ -14,7 +15,6 @@ import { HideBuiltWithFern } from "@/components/built-with-fern";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 import { PageFilters } from "../PageFilters";
-import { ChangelogContentLayout } from "./ChangelogContentLayout";
 
 export default function ChangelogEntryPage({
     loader,
@@ -47,16 +47,15 @@ export default function ChangelogEntryPage({
                             as="article"
                             id={node.date}
                             stickyContent={
-                                <div className="fern-changelog-label">
-                                    <Badge asChild>
+                                <ChangelogEntryLabel
+                                    asChild
+                                    title={
                                         <FernLink href={slugToHref(node.slug)} scroll={true}>
                                             {node.title}
                                         </FernLink>
-                                    </Badge>
-                                    <div className="filter-row">
-                                        <PageFilters filters={node.tags ?? []} forcePillDisplay lang={lang} />
-                                    </div>
-                                </div>
+                                    }
+                                    tags={<PageFilters filters={node.tags ?? []} forcePillDisplay lang={lang} />}
+                                />
                             }
                         >
                             {children}

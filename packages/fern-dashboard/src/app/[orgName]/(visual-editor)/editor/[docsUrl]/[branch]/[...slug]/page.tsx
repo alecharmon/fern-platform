@@ -3,6 +3,7 @@ import "server-only";
 import { createPruneKey } from "@fern-api/docs-loader";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { getPageId, slugjoin } from "@fern-api/fdr-sdk/navigation";
+import { flattenChangelogEntries } from "@fern-docs/components/changelog/flattenChangelogEntries";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
 import {
     constructEditorSlug,
@@ -11,10 +12,10 @@ import {
     getSerializableFoundNode
 } from "@fern-docs/components/navigation";
 import { getFrontmatter } from "@fern-docs/mdx";
+import { compact } from "es-toolkit/compat";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertAuthAndFetchGithubUrl } from "@/app/services/dal/github/assertAuthAndFetchGithubUrl";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
-import ChangelogComingSoon from "@/components/editor/unsupported-pages/ChangelogComingSoon";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
@@ -23,10 +24,10 @@ import { ApiEndpointPageWrapper } from "./ApiEndpointPageWrapper";
 import { ApiGrpcPageWrapper } from "./ApiGrpcPageWrapper";
 import { ApiWebhookPageWrapper } from "./ApiWebhookPageWrapper";
 import { ApiWebSocketPageWrapper } from "./ApiWebSocketPageWrapper";
+import { ChangelogEntryPageWrapper } from "./ChangelogEntryPageWrapper";
+import { type ChangelogEntry, ChangelogPageWrapper } from "./ChangelogPageWrapper";
 import { EditorRedirect } from "./EditorRedirect";
 import PageNode, { type PageNode as PageNodeNamespace } from "./PageNode";
-
-const CHANGELOG_NODE_TYPES = new Set(["changelog", "changelogEntry"]);
 
 export default async function Page({
     params
@@ -153,8 +154,47 @@ export default async function Page({
     // apiPackage nodes with overviewPageId will fall through to the page rendering logic below.
     // apiPackage nodes without overviewPageId should redirect (handled by getEditorRedirectSlug above).
 
-    if (CHANGELOG_NODE_TYPES.has(navigationNode.node.type)) {
-        return <ChangelogComingSoon />;
+    if (navigationNode.node.type === "changelog") {
+        const changelogNode = navigationNode.node as FernNavigation.ChangelogNode;
+        const entries = flattenChangelogEntries({ node: changelogNode });
+
+        const overviewPage = changelogNode.overviewPageId
+            ? await loader.getPage(changelogNode.overviewPageId)
+            : undefined;
+
+        const entryData: ChangelogEntry[] = compact(
+            await Promise.all(
+                entries.map(async (entry) => {
+                    try {
+                        const page = await loader.getPage(entry.pageId);
+                        return {
+                            node: entry,
+                            markdown: page.rawMarkdown ?? page.markdown
+                        };
+                    } catch {
+                        return undefined;
+                    }
+                })
+            )
+        );
+
+        return (
+            <ChangelogPageWrapper
+                title={changelogNode.title}
+                overviewMarkdown={overviewPage ? (overviewPage.rawMarkdown ?? overviewPage.markdown) : undefined}
+                entries={entryData}
+                docsUrl={docsUrl}
+                branch={branch}
+            />
+        );
+    }
+
+    if (navigationNode.node.type === "changelogEntry") {
+        const entryNode = navigationNode.node as FernNavigation.ChangelogEntryNode;
+        const page = await loader.getPage(entryNode.pageId);
+        const rawMarkdown = page.rawMarkdown ?? page.markdown;
+
+        return <ChangelogEntryPageWrapper node={entryNode} markdown={rawMarkdown} docsUrl={docsUrl} branch={branch} />;
     }
 
     // Get a serializable copy of the found node to be passed over the wire to PageNode
