@@ -19,12 +19,15 @@ function buildSnippetAuth(authScheme: AuthScheme | undefined): any {
                 type: "bearer",
                 token: "YOUR_TOKEN_HERE"
             };
-        case "basicAuth":
+        case "basicAuth": {
+            const userLabel = (authScheme.usernameName ?? "username").toUpperCase().replace(/\s+/g, "_");
+            const passLabel = (authScheme.passwordName ?? "password").toUpperCase().replace(/\s+/g, "_");
             return {
                 type: "basic",
-                username: "YOUR_USERNAME_HERE",
-                password: "YOUR_PASSWORD_HERE"
+                username: `YOUR_${userLabel}_HERE`,
+                password: `YOUR_${passLabel}_HERE`
             };
+        }
         case "header":
             return {
                 type: "header",
