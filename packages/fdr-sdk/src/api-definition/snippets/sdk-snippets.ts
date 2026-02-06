@@ -1,8 +1,45 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { ApiDefinition, CodeSnippet, EndpointDefinition, ExampleEndpointCall } from "../latest";
+import type { ApiDefinition, AuthScheme, CodeSnippet, EndpointDefinition, ExampleEndpointCall } from "../latest";
 import { getFirstAuthScheme } from "./auth-scheme";
 import type { SnippetGenerators } from "./types";
+
+/**
+ * Build the auth object for SDK snippet generators based on the auth scheme.
+ * Returns a properly formatted auth object compatible with @fern-api/snippets generators.
+ */
+function buildSnippetAuth(authScheme: AuthScheme | undefined): any {
+    if (!authScheme) {
+        return undefined;
+    }
+
+    switch (authScheme.type) {
+        case "bearerAuth":
+            return {
+                type: "bearer",
+                token: "YOUR_TOKEN_HERE"
+            };
+        case "basicAuth":
+            return {
+                type: "basic",
+                username: "YOUR_USERNAME_HERE",
+                password: "YOUR_PASSWORD_HERE"
+            };
+        case "header":
+            return {
+                type: "header",
+                value: "YOUR_API_KEY_HERE"
+            };
+        case "oAuth":
+            // OAuth uses bearer token format for SDK snippets
+            return {
+                type: "bearer",
+                token: "YOUR_TOKEN_HERE"
+            };
+        default:
+            return undefined;
+    }
+}
 
 /**
  * Build the SDK snippet request from an endpoint example.
@@ -14,18 +51,8 @@ export function buildSdkSnippetRequest(
     example: ExampleEndpointCall
 ): any {
     // Build auth configuration using multiAuth-aware selection
-    let auth: any;
     const authDefinition = getFirstAuthScheme(endpoint, apiDefinition.auths);
-    if (authDefinition) {
-        if (authDefinition.type === "bearerAuth") {
-            auth = {
-                type: "bearer",
-                token: "YOUR_TOKEN_HERE"
-            };
-        } else {
-            auth = authDefinition;
-        }
-    }
+    const auth = buildSnippetAuth(authDefinition);
 
     // Process request body (filter out empty objects)
     let bodyValue: unknown = undefined;

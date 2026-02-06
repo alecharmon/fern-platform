@@ -1,14 +1,15 @@
 "use client";
 
 import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
-import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
+import type { AuthScheme, EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { FernSyntaxHighlighter } from "@fern-docs/components/syntax-highlighter";
 import { t } from "@fern-docs/i18n";
 import { useAtomValue } from "jotai";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
-import { PLAYGROUND_AUTH_STATE_ATOM, PLAYGROUND_SELECTED_AUTH_TYPE_ATOM } from "@/state/playground";
-
-import type { PlaygroundEndpointRequestFormState } from "../types";
+import { PLAYGROUND_AUTH_STATE_ATOM } from "@/state/playground";
+import { getHeaderStorageKey } from "../auth/PlaygroundHeaderAuthForm";
+import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
+import { getAuthKey } from "../utils";
 import { returnSelectedOption } from "../utils/parse-auth-options";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 
@@ -44,6 +45,94 @@ export interface PlaygroundDynamicRequestPreviewRef {
 }
 
 // todo: support php
+
+/**
+ * Extracts a token/value from any non-empty auth state field.
+ * Used as a fallback when the primary auth field for the scheme type is empty,
+ * e.g. when the IR expects header auth but the user entered a bearer token.
+ */
+function getFallbackAuthValue(authState: PlaygroundAuthState): string {
+    if (authState.bearerAuth?.token) {
+        const val = returnSelectedOption(authState.bearerAuth.token).value;
+        if (val) {
+            return val;
+        }
+    }
+    if (authState.header?.headers) {
+        for (const val of Object.values(authState.header.headers)) {
+            if (val) {
+                return val;
+            }
+        }
+    }
+    if (authState.oauth) {
+        const token =
+            authState.oauth.selectedInputMethod === "credentials"
+                ? authState.oauth.accessToken
+                : authState.oauth.userSuppliedAccessToken;
+        if (token) {
+            return token;
+        }
+    }
+    return "";
+}
+
+/**
+ * Builds the auth object for the snippets library based on the first auth scheme
+ * (matching the Dynamic IR). Falls back across auth state fields so that any
+ * user-entered value is reflected in the snippet regardless of which auth option
+ * they selected in the UI.
+ */
+function buildSnippetAuth(
+    firstAuthScheme: AuthScheme | undefined,
+    authState: PlaygroundAuthState,
+    authKey: string | undefined
+): Record<string, unknown> | undefined {
+    if (!firstAuthScheme) {
+        return undefined;
+    }
+
+    switch (firstAuthScheme.type) {
+        case "bearerAuth": {
+            const token =
+                returnSelectedOption(authState.bearerAuth?.token ?? "").value || getFallbackAuthValue(authState);
+            return {
+                type: "bearer",
+                token
+            };
+        }
+        case "basicAuth": {
+            return {
+                type: "basic",
+                username: authState.basicAuth?.username ?? "",
+                password: authState.basicAuth?.password ?? ""
+            };
+        }
+        case "header": {
+            const storageKey = authKey
+                ? getHeaderStorageKey(authKey, firstAuthScheme.headerWireValue)
+                : firstAuthScheme.headerWireValue;
+            const value = authState.header?.headers[storageKey] || getFallbackAuthValue(authState);
+            return {
+                type: "header",
+                value
+            };
+        }
+        case "oAuth": {
+            const token =
+                authState.oauth?.selectedInputMethod === "credentials"
+                    ? authState.oauth?.accessToken
+                    : (authState.oauth?.userSuppliedAccessToken ?? "");
+            return {
+                type: "bearer",
+                token: token || getFallbackAuthValue(authState)
+            };
+        }
+        default:
+            return undefined;
+    }
+}
+
 export const PlaygroundDynamicRequestPreview = forwardRef<
     PlaygroundDynamicRequestPreviewRef,
     PlaygroundDynamicRequestPreviewProps
@@ -51,7 +140,6 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
     const [code, setCode] = useState<string>(t(lang).status.loading);
     const [snippetsLoad, setSnippetsLoad] = useState<SnippetsLoadState>({ status: "loading" });
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
-    const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
     const [baseURL] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
 
     useEffect(() => {
@@ -212,7 +300,6 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         }
     }, [dynamicIRsByLanguage, context.endpoint.method, context.endpoint.path, snippetsLoad]);
 
-    // biome-ignore lint/correctness/useExhaustiveDependencies: also runs when selectedAuthType changes
     useEffect(() => {
         const generateCode = () => {
             try {
@@ -242,18 +329,25 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
                     return;
                 }
 
-                let auth;
-                // hack: just parse the bearer token if oauth enabled
-                if (authState.bearerAuth) {
-                    const token = returnSelectedOption(authState.bearerAuth.token).value;
+                // Always use the first auth scheme to match the Dynamic IR's auth type.
+                // The Dynamic IR picks a single auth type per endpoint (the first one),
+                // so we must send values matching that type regardless of the user's UI selection.
+                const firstEntry =
+                    context.authOptionEntries.length > 0
+                        ? context.authOptionEntries[0]
+                        : context.authsWithKeys[0]
+                          ? {
+                                key: getAuthKey(context.authsWithKeys[0]),
+                                schemeIds: [context.authsWithKeys[0].key],
+                                schemes: [context.authsWithKeys[0].scheme],
+                                label: String(context.authsWithKeys[0].key)
+                            }
+                          : undefined;
 
-                    auth = {
-                        type: "bearer",
-                        token: token
-                    };
-                } else {
-                    auth = authState;
-                }
+                const firstAuthScheme = firstEntry?.schemes[0];
+                const authKey = firstEntry?.schemeIds[0] != null ? String(firstEntry.schemeIds[0]) : undefined;
+
+                const auth = buildSnippetAuth(firstAuthScheme, authState, authKey);
 
                 // todo: support environments
                 const request = {
@@ -276,7 +370,17 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         };
 
         generateCode();
-    }, [requestType, memoizedGenerators, formState, baseURL, authState, lang, selectedAuthType, snippetsLoad]);
+    }, [
+        requestType,
+        memoizedGenerators,
+        formState,
+        baseURL,
+        authState,
+        lang,
+        snippetsLoad,
+        context.authOptionEntries,
+        context.authsWithKeys
+    ]);
 
     return (
         <FernSyntaxHighlighter
