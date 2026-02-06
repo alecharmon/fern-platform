@@ -16,7 +16,6 @@ import { getDocsForUrl } from "./services/getDocsForUrl";
 import { getEndpointById } from "./services/getEndpointById";
 import { getEndpointByLocator } from "./services/getEndpointByLocator";
 import { getMetadataForUrl } from "./services/getMetadataForUrl";
-import { compressResponseIfNeeded } from "./utils/compression";
 import { verifyDocsServiceJWT } from "./utils/jwt";
 import { initializeS3 } from "./utils/s3";
 
@@ -395,14 +394,14 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
 
             const apiDefinition = await getApiDefinition(apiDefinitionId, pool);
 
-            return compressResponseIfNeeded(event, {
+            return {
                 statusCode: 200,
                 headers: {
                     "Content-Type": "application/json",
                     "Access-Control-Allow-Origin": "*"
                 },
                 body: JSON.stringify(apiDefinition)
-            });
+            };
         }
 
         // Route: GET /registry/api/load/{apiDefinitionId}/endpoint/{endpointId}
