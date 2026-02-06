@@ -8,7 +8,7 @@ export {
 export { STOP_PROPAGATION } from "./stopPropagation";
 export { tunnel } from "./tunnel-rat";
 export { useBooleanState } from "./useBooleanState";
-export { useIsDesktop, useIsMobile, useMinWidth } from "./useBreakpoint";
+export { ContainerRefProvider, useContainerRef, useIsDesktop, useIsMobile, useMinWidth } from "./useBreakpoint";
 export { useCopyToClipboard } from "./useCopyToClipboard";
 export { useDebouncedCallback } from "./useDebouncedCallback";
 export {

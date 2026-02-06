@@ -1,6 +1,8 @@
 "use client";
 
+import { ContainerRefProvider } from "@fern-ui/react-commons";
 import type React from "react";
+import { useRef } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useDevMode } from "@/providers/DevModeProvider";
 import { cn } from "@/utils/utils";
@@ -12,11 +14,14 @@ interface ResizablePanelsWrapperProps {
 
 export function ResizablePanelsWrapper({ left, right }: ResizablePanelsWrapperProps) {
     const { panelOpen } = useDevMode();
+    const leftPanelRef = useRef<HTMLDivElement>(null);
 
     return (
         <PanelGroup direction="horizontal" className="h-full">
             <Panel defaultSize={70} minSize={30} maxSize={85}>
-                {left}
+                <div ref={leftPanelRef} className="h-full">
+                    <ContainerRefProvider value={leftPanelRef}>{left}</ContainerRefProvider>
+                </div>
             </Panel>
             <PanelResizeHandle
                 className={cn("group relative w-4 bg-transparent !cursor-col-resize", !panelOpen && "hidden")}
