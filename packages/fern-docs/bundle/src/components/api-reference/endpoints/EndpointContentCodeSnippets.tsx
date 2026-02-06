@@ -123,8 +123,23 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
 
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint, node.apiDefinitionId);
 
-    // segmentedControlExamples is now calculated in useExampleSelection and provided via context
-    // This ensures the tabs and the selected example are always in sync
+    // Filter to only show unique examples based on code content
+    // This handles cases where users define the same snippet for multiple examples
+    const uniqueSegmentedControlExamples = useMemo(() => {
+        const seenCodes = new Set<string>();
+        return segmentedControlExamples.filter(({ examples }) => {
+            const primaryExample = examples[0];
+            if (primaryExample == null) {
+                return true;
+            }
+            const code = primaryExample.code;
+            if (seenCodes.has(code)) {
+                return false;
+            }
+            seenCodes.add(code);
+            return true;
+        });
+    }, [segmentedControlExamples]);
 
     return (
         <div
@@ -139,9 +154,9 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                 className
             )}
         >
-            {segmentedControlExamples.length > 1 && (
+            {uniqueSegmentedControlExamples.length > 1 && (
                 <EndpointExampleSegmentedControl
-                    segmentedControlExamples={segmentedControlExamples}
+                    segmentedControlExamples={uniqueSegmentedControlExamples}
                     selectedExample={selectedExample}
                     onSelectExample={(exampleKey) => {
                         setSelectedExampleKey((prev) => {
