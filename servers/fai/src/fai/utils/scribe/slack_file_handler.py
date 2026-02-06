@@ -14,7 +14,7 @@ class AttachmentResult:
 
 
 async def download_slack_file(file_url: str, bot_token: str) -> bytes:
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get(
             file_url,
             headers={"Authorization": f"Bearer {bot_token}"},
