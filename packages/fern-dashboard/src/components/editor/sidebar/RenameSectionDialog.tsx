@@ -6,20 +6,29 @@ import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTi
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export interface RenameSectionDialogProps {
+export interface RenameDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     currentTitle: string;
     onConfirm: (newTitle: string) => void;
+    entityType?: "section" | "page";
 }
 
-export function RenameSectionDialog({ open, onOpenChange, currentTitle, onConfirm }: RenameSectionDialogProps) {
+/** @deprecated Use RenameDialog instead */
+export type RenameSectionDialogProps = RenameDialogProps;
+
+export function RenameDialog({
+    open,
+    onOpenChange,
+    currentTitle,
+    onConfirm,
+    entityType = "section"
+}: RenameDialogProps) {
     const [newTitle, setNewTitle] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
 
     const handleOpenChange = (newOpen: boolean) => {
         if (newOpen) {
-            // Reset the new title when opening
             setNewTitle("");
         }
         onOpenChange(newOpen);
@@ -48,20 +57,20 @@ export function RenameSectionDialog({ open, onOpenChange, currentTitle, onConfir
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent onOpenAutoFocus={handleOpenAutoFocus}>
                 <DialogHeader>
-                    <DialogTitle>Rename section</DialogTitle>
+                    <DialogTitle>Rename {entityType}</DialogTitle>
                 </DialogHeader>
 
                 <DialogBody className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="current-name" className="text-sm font-normal text-muted-foreground mb-2 block">
-                            Previous section name
+                            Previous {entityType} name
                         </Label>
                         <Input id="current-name" value={currentTitle} disabled className="bg-muted" />
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="new-name" className="text-sm font-normal text-muted-foreground mb-2 block">
-                            New section name
+                            New {entityType} name
                         </Label>
                         <Input
                             ref={inputRef}
@@ -69,7 +78,7 @@ export function RenameSectionDialog({ open, onOpenChange, currentTitle, onConfir
                             value={newTitle}
                             onChange={(e) => setNewTitle(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Section"
+                            placeholder={entityType.charAt(0).toUpperCase() + entityType.slice(1)}
                         />
                     </div>
                 </DialogBody>
@@ -86,3 +95,6 @@ export function RenameSectionDialog({ open, onOpenChange, currentTitle, onConfir
         </Dialog>
     );
 }
+
+/** @deprecated Use RenameDialog instead */
+export const RenameSectionDialog = RenameDialog;

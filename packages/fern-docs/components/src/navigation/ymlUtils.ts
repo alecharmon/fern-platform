@@ -76,6 +76,12 @@ function _buildDocsYmlContentFromChanges(
                     newTitle: change.newTitle,
                     tabSlug: change.tabSlug
                 });
+            } else if (change.type === "rename_page") {
+                _applyRenamePageOperation(config, {
+                    oldTitle: change.oldTitle,
+                    newTitle: change.newTitle,
+                    tabSlug: change.tabSlug
+                });
             }
         }
 
@@ -586,6 +592,60 @@ function _applyRenameSectionOperation(
         const renamed = renameSectionInArray(docsConfig.navigation);
         if (!renamed) {
             console.warn(`[ymlUtils] Section "${oldTitle}" not found in root navigation`);
+        }
+    }
+}
+
+/** Renames a page in the navigation structure */
+function _applyRenamePageOperation(
+    docsConfig: DocsYmlConfig,
+    update: { oldTitle: string; newTitle: string; tabSlug?: string }
+) {
+    const { oldTitle, newTitle, tabSlug } = update;
+
+    if (!docsConfig.navigation) {
+        console.warn("[ymlUtils] Cannot apply rename page operation: no navigation array found");
+        return;
+    }
+
+    const renamePageInArray = (items: YmlNavigationItem[]): boolean => {
+        let renamed = false;
+        for (const item of items) {
+            if (isYmlPageItem(item) && item.page === oldTitle) {
+                item.page = newTitle;
+                renamed = true;
+            }
+            if (item.contents) {
+                renamed = renamePageInArray(item.contents) || renamed;
+            }
+            if (item.layout) {
+                renamed = renamePageInArray(item.layout) || renamed;
+            }
+        }
+        return renamed;
+    };
+
+    if (tabSlug) {
+        const tabIdentifier = tabSlug.includes("/") ? tabSlug.split("/").pop() : tabSlug;
+
+        const tab = docsConfig.navigation.find((item) => item.tab === tabIdentifier);
+        if (tab?.layout) {
+            const renamed = renamePageInArray(tab.layout);
+            if (!renamed) {
+                console.warn(
+                    `[ymlUtils] Page "${oldTitle}" not found in tab "${tabIdentifier}" (from slug: "${tabSlug}")`
+                );
+            }
+        } else {
+            console.warn(
+                `[ymlUtils] Tab "${tabIdentifier}" (from slug: "${tabSlug}") not found in navigation. Available tabs:`,
+                docsConfig.navigation.map((item) => item.tab)
+            );
+        }
+    } else {
+        const renamed = renamePageInArray(docsConfig.navigation);
+        if (!renamed) {
+            console.warn(`[ymlUtils] Page "${oldTitle}" not found in root navigation`);
         }
     }
 }

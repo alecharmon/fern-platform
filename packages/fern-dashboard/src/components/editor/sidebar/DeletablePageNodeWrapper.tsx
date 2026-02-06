@@ -4,13 +4,15 @@ import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { getChildren } from "@fern-api/fdr-sdk/navigation";
 import { Button } from "@fern-docs/components/FernButtonV2";
 import { constructEditorSlug, ROOT_SLUG_ALIAS, useNavigation } from "@fern-docs/components/navigation";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Popover from "@radix-ui/react-popover";
-import { MinusCircleIcon } from "lucide-react";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import type { EncodedDocsUrl } from "@/utils/types";
+import { RenameDialog } from "./RenameSectionDialog";
 
 interface DeletablePageNodeWrapperProps {
     node: FernNavigation.NavigationNodeWithMarkdown;
@@ -23,21 +25,19 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
     const navigation = useNavigation();
     const isEditingDisabled = useEditingDisabled();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showRenameDialog, setShowRenameDialog] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
-    // Get page entry from registry to determine if it's a client page
     const pageEntry = navigation.pageRegistry
         ? Object.values(navigation.pageRegistry).find((entry) => entry.pageData.foundNode.node.id === node.id)
         : undefined;
 
     const isClientPage = pageEntry?.pageData.source === "client";
 
-    // Get filename for this page (used for deletion tracking)
     const filename = pageEntry?.pageData.filename || ("pageId" in node ? node.pageId : null);
 
-    // Check if page is marked for deletion either in registry or in navigationChanges
     const isMarkedForDeletion = pageEntry?.isMarkedForDeletion ?? false;
 
-    // For server pages not in registry, check navigationChanges
     const isMarkedForDeletionInDocsYml =
         filename && navigation.navigationChanges
             ? Array.from(navigation.navigationChanges.entries()).some(
@@ -45,17 +45,17 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
               )
             : false;
 
-    // If page is marked for deletion, don't render it at all
     if (isMarkedForDeletion || isMarkedForDeletionInDocsYml) {
         return null;
     }
 
-    // Check if this page has children - if so, it should not be deletable
     const hasChildren = getChildren(node).length > 0;
 
     const isLandingPage = node.type === "landingPage";
 
     const isSectionOverview = FernNavigation.isSectionOverview(node);
+
+    const showMenu = !hasChildren && !isLandingPage && !isSectionOverview;
 
     const handlePageClick = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
@@ -70,7 +70,6 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
         };
         const fullSlug = node.slug;
 
-        // Navigate to the page - RootNode in NavigationStore will determine if it's client or server
         router.push(`/${orgName}/editor/${docsUrl}/${branch}/${fullSlug}`);
     };
 
@@ -80,15 +79,12 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
             return;
         }
 
-        // For server pages not in registry, pass the title from the node
         const pageTitle = pageEntry?.pageData.foundNode.node.title || node.title;
 
         navigation.markPageForDeletion(filename, pageTitle);
 
-        // Build redirect URL preserving current navigation context
         let redirectTarget = ROOT_SLUG_ALIAS;
 
-        // Try to get current tab from page entry (for client pages / visited server pages)
         if (pageEntry?.pageData.foundNode) {
             const foundNode = pageEntry.pageData.foundNode;
             if (foundNode.currentTab && "slug" in foundNode.currentTab) {
@@ -96,24 +92,21 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
             } else if (foundNode.currentProduct && FernNavigation.isInternalProductNode(foundNode.currentProduct)) {
                 redirectTarget = foundNode.currentProduct.slug;
             } else if (foundNode.parents.length > 0) {
-                // Go to the immediate parent section/group
                 const immediateParent = foundNode.parents[foundNode.parents.length - 1];
                 if (immediateParent && "slug" in immediateParent) {
                     redirectTarget = immediateParent.slug;
                 }
             }
         } else {
-            // For server pages not in registry, try to extract tab from current URL
             const currentSlug = params.slug;
             if (Array.isArray(currentSlug) && currentSlug.length > 0) {
-                // The first segment of the slug is typically the tab
                 redirectTarget = currentSlug[0] ?? ROOT_SLUG_ALIAS;
             }
         }
 
         const redirectUrl = constructEditorSlug({
             orgName: String(params.orgName) as Auth0OrgName,
-            docsUrl: String(params.docsUrl) as EncodedDocsUrl, // NOTE: params.docsUrl should already be encoded
+            docsUrl: String(params.docsUrl) as EncodedDocsUrl,
             branchName: String(params.branch),
             slug: redirectTarget
         });
@@ -121,61 +114,123 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
         setShowDeleteConfirm(false);
     };
 
-    // Render delete confirmation popover
-    const renderDeleteConfirmation = () => {
+    const handleRenameConfirm = (newTitle: string) => {
+        if (!("pageId" in node)) {
+            console.error("[DeletablePageNodeWrapper] Cannot rename: node has no pageId");
+            return;
+        }
+
+        try {
+            navigation.renamePage(node.pageId, newTitle);
+            setShowRenameDialog(false);
+        } catch (error) {
+            console.error("Failed to rename page:", error);
+            alert(error instanceof Error ? error.message : "Failed to rename page");
+        }
+    };
+
+    const renderPageMenu = () => {
         return (
-            <Popover.Root open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-                <Popover.Trigger asChild>
-                    <button
-                        className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-red-600 opacity-0 transition-opacity duration-200 hover:bg-red-50 hover:text-red-700 group-hover/deletable:opacity-100 data-[state=open]:opacity-100 dark:text-red-400 dark:hover:bg-red-950/20 dark:hover:text-red-300 disabled:cursor-default disabled:group-hover/deletable:opacity-50 disabled:hover:bg-transparent"
-                        title="Mark for deletion"
-                        aria-label="Mark for deletion"
-                        disabled={isEditingDisabled}
-                    >
-                        <MinusCircleIcon className="size-4" />
-                    </button>
-                </Popover.Trigger>
+            <>
+                <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                    <DropdownMenu.Trigger asChild>
+                        <button
+                            className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover/deletable:opacity-100 data-[state=open]:opacity-100 disabled:cursor-default disabled:group-hover/deletable:opacity-50 disabled:hover:bg-transparent"
+                            title="Page options"
+                            aria-label="Page options"
+                            disabled={isEditingDisabled}
+                        >
+                            <MoreVertical className="size-4" />
+                        </button>
+                    </DropdownMenu.Trigger>
 
-                <Popover.Portal>
-                    <Popover.Content
-                        className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 w-56 rounded-lg border border-gray-500 bg-white p-3 shadow-lg"
-                        side="right"
-                        align="center"
-                        sideOffset={8}
-                    >
-                        <div className="flex flex-col gap-3">
-                            <div className="flex flex-col text-sm font-semibold">Delete this page?</div>
+                    <DropdownMenu.Portal>
+                        <DropdownMenu.Content
+                            className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 w-48 rounded-lg border border-gray-300 bg-white p-1 shadow-lg"
+                            side="right"
+                            align="start"
+                            sideOffset={8}
+                        >
+                            <DropdownMenu.Item
+                                className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-100 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:hover:bg-transparent"
+                                onSelect={() => {
+                                    setShowRenameDialog(true);
+                                    setDropdownOpen(false);
+                                }}
+                            >
+                                <Pencil className="size-4" />
+                                <span>Rename</span>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 outline-none hover:bg-red-50 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:hover:bg-transparent"
+                                onSelect={(e) => {
+                                    e.preventDefault();
+                                    setDropdownOpen(false);
+                                    setTimeout(() => {
+                                        setShowDeleteConfirm(true);
+                                    }, 0);
+                                }}
+                            >
+                                <Trash2 className="size-4" />
+                                <span>Delete</span>
+                            </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                </DropdownMenu.Root>
 
-                            <div className="flex justify-end gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    className="border-gray-500 p-2 text-xs text-foreground cursor-pointer hover:bg-gray-300"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={handleConfirmedDelete}
-                                    className="p-2 text-xs text-white cursor-pointer"
-                                >
-                                    Delete
-                                </Button>
+                <Popover.Root open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                    <Popover.Anchor className="absolute right-2 top-1/2" />
+                    <Popover.Portal>
+                        <Popover.Content
+                            className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-56 rounded-lg border border-gray-500 bg-white p-3 shadow-lg"
+                            side="right"
+                            align="center"
+                            sideOffset={8}
+                            onFocusOutside={(e) => e.preventDefault()}
+                        >
+                            <div className="flex flex-col gap-3">
+                                <div className="flex flex-col text-sm font-semibold">Delete this page?</div>
+
+                                <div className="flex justify-end gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setShowDeleteConfirm(false)}
+                                        className="border-gray-500 p-2 text-xs text-foreground cursor-pointer hover:bg-gray-300"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={handleConfirmedDelete}
+                                        className="p-2 text-xs text-white cursor-pointer"
+                                    >
+                                        Delete
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                    </Popover.Content>
-                </Popover.Portal>
-            </Popover.Root>
+                        </Popover.Content>
+                    </Popover.Portal>
+                </Popover.Root>
+            </>
         );
     };
 
-    // Wrap the component with deletion functionality
     return (
-        <div className="group/deletable relative" onClick={isClientPage ? handlePageClick : undefined}>
-            {component}
-            {!hasChildren && !isLandingPage && !isSectionOverview && renderDeleteConfirmation()}
-        </div>
+        <>
+            <div className="group/deletable relative" onClick={isClientPage ? handlePageClick : undefined}>
+                {component}
+                {showMenu && renderPageMenu()}
+            </div>
+
+            <RenameDialog
+                open={showRenameDialog}
+                onOpenChange={(open) => !open && setShowRenameDialog(false)}
+                currentTitle={node.title}
+                onConfirm={handleRenameConfirm}
+                entityType="page"
+            />
+        </>
     );
 }

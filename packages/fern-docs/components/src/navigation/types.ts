@@ -402,6 +402,22 @@ export type NavigationChange =
            * Examples: "docs.yml", "versions/v2.yml", "platform/docs.yml"
            */
           docsYmlFilePath: DocsYmlFilePath;
+      }
+    | {
+          type: "rename_page";
+          pageId: FernNavigation.PageId;
+          oldTitle: string;
+          newTitle: string;
+          tabSlug?: string;
+          createdAt: number;
+          /** Whether this change has been committed */
+          committed?: boolean;
+          /**
+           * The docs.yml file path where this change should be applied.
+           * Uses normalized relative paths (see DocsYmlFilePath for convention).
+           * Examples: "docs.yml", "versions/v2.yml", "platform/docs.yml"
+           */
+          docsYmlFilePath: DocsYmlFilePath;
       };
 
 // DOCS.YML > VALIDATION

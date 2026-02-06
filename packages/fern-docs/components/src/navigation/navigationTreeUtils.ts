@@ -499,6 +499,87 @@ export function updateSectionTitle(
     return updateNode(rootNode);
 }
 
+/** Updates a page title in the navigation tree immutably */
+export function updatePageTitle(
+    rootNode: FernNavigation.RootNode,
+    pageId: FernNavigation.PageId,
+    newTitle: string
+): FernNavigation.RootNode {
+    const updateNode = <T extends FernNavigation.NavigationNode>(node: T): T => {
+        if (node.type === "page" && node.pageId === pageId) {
+            return { ...node, title: newTitle } as T;
+        }
+
+        switch (node.type) {
+            case "root":
+                return { ...node, child: updateNode(node.child) } as T;
+            case "unversioned":
+                return { ...node, child: updateNode(node.child) } as T;
+            case "product":
+                return { ...node, child: updateNode((node as any).child) } as T;
+            case "versioned": {
+                const versionedNode = node as any;
+                if (versionedNode.children && Array.isArray(versionedNode.children)) {
+                    return {
+                        ...node,
+                        children: versionedNode.children.map((child: any) => updateNode(child))
+                    } as T;
+                }
+                return node;
+            }
+            case "version":
+                return { ...node, child: updateNode((node as any).child) } as T;
+            case "tabbed": {
+                const tabbedNode = node as any;
+                if (tabbedNode.tabs && Array.isArray(tabbedNode.tabs)) {
+                    return {
+                        ...node,
+                        tabs: tabbedNode.tabs.map((tab: any) => updateNode(tab))
+                    } as T;
+                } else if (tabbedNode.children && Array.isArray(tabbedNode.children)) {
+                    return {
+                        ...node,
+                        children: tabbedNode.children.map((child: any) => updateNode(child))
+                    } as T;
+                } else {
+                    return node;
+                }
+            }
+            case "productgroup":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            case "sidebarRoot":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            case "sidebarGroup":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            case "section":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            case "tab":
+                return { ...node, child: updateNode(node.child) } as T;
+            case "apiPackage":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            default:
+                return node;
+        }
+    };
+
+    return updateNode(rootNode);
+}
+
 /** Injects a page node into a section within the navigation tree immutably */
 export function injectPageIntoSection(
     rootNode: FernNavigation.RootNode,

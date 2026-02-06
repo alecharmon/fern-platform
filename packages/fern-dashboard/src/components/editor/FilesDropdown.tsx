@@ -12,7 +12,7 @@
  * | page-deleted  | files.deleted             | Delete MDX page                    | "Deleted"     | No           | Yes   | No         | No        |
  * | openapi-spec  | openApiPendingChanges     | Edit OpenAPI description           | +X -Y         | Yes          | Yes   | No         | No        |
  * | generators    | openApiPendingChanges     | Edit generators.yml (override ref) | +X -Y         | Yes          | No    | No         | No        |
- * | navigation    | navigationChanges         | Create/delete page, rename section | "X change(s)" | Yes          | No    | Yes        | No        |
+ * | navigation    | navigationChanges         | Create/delete/rename page, rename section | "X change(s)" | Yes          | No    | Yes        | No        |
  *
  * Note: Creating a page produces BOTH a page-modified entry AND a navigation entry (add_page).
  *       Deleting a page produces BOTH a page-deleted entry AND a navigation entry (remove_page).
@@ -341,6 +341,9 @@ export function FilesDropdown() {
         if (change.type === "rename_section" && change.newTitle) {
             return `Section renamed to "${change.newTitle}"`;
         }
+        if (change.type === "rename_page" && change.newTitle) {
+            return `Page renamed to "${change.newTitle}"`;
+        }
         return "";
     };
 
@@ -386,8 +389,10 @@ export function FilesDropdown() {
                             : change.type === "remove_page" && change.pageEntry
                               ? `remove-${change.pageEntry.path}`
                               : change.type === "rename_section"
-                                ? `rename-${change.sectionId}-${idx}`
-                                : `change-${idx}`;
+                                ? `rename-section-${change.sectionId}-${idx}`
+                                : change.type === "rename_page"
+                                  ? `rename-page-${change.pageId}-${idx}`
+                                  : `change-${idx}`;
 
                     return (
                         <div key={changeKey} className="text-muted-foreground rounded px-2 py-1 text-xs">

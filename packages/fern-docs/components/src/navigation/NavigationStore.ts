@@ -17,6 +17,7 @@ import {
     findSectionByTitleInContainer,
     injectPageIntoSection,
     injectSectionIntoContainer,
+    updatePageTitle,
     updateSectionTitle
 } from "./navigationTreeUtils";
 import { extractDocsYmlFilePathFromFoundNode, resolvePageData } from "./pageUtils";
@@ -365,6 +366,55 @@ export class NavigationStore {
         this._navigationChanges.set(changeKey, {
             type: "rename_section",
             sectionId,
+            oldTitle: actualOldTitle,
+            newTitle,
+            tabSlug,
+            docsYmlFilePath,
+            createdAt: Date.now()
+        });
+
+        this._setStorageAndNotify();
+    }
+
+    /** Renames a page and tracks the change in docs.yml */
+    renamePage(pageId: FernNavigation.PageId, newTitle: string): void {
+        if (!this._rootNode) {
+            console.warn("[NavigationStore.renamePage] Cannot rename page: rootNode not available");
+            return;
+        }
+
+        const searchResult = findPageByPageId(this._rootNode, pageId);
+
+        if (!searchResult) {
+            console.warn(`[NavigationStore.renamePage] Cannot rename page: pageId ${pageId} not found`);
+            return;
+        }
+
+        const { page: pageNode, tabSlug, product, version } = searchResult;
+        const oldTitle = pageNode.title;
+
+        const updatedRootNode = updatePageTitle(this._rootNode, pageId, newTitle);
+        this._rootNode = updatedRootNode;
+
+        this._navigationChanges = new Map(this._navigationChanges);
+
+        const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+            {
+                currentVersion: version,
+                currentProduct: product,
+                currentTab: tabSlug ? { slug: tabSlug } : undefined
+            },
+            this._slugToDocsYmlFilePath
+        );
+
+        const changeKey = `page-rename-${pageId}`;
+
+        const existingRename = this._navigationChanges.get(changeKey);
+        const actualOldTitle = existingRename?.type === "rename_page" ? existingRename.oldTitle : oldTitle;
+
+        this._navigationChanges.set(changeKey, {
+            type: "rename_page",
+            pageId,
             oldTitle: actualOldTitle,
             newTitle,
             tabSlug,

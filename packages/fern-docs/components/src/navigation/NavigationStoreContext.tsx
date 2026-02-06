@@ -84,6 +84,7 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     markPageForDeletion: NavigationStore["markPageForDeletion"];
     unmarkPageForDeletion: NavigationStore["unmarkPageForDeletion"];
     renameSection: NavigationStore["renameSection"];
+    renamePage: NavigationStore["renamePage"];
     setDeletionToastCallback: NavigationStore["setDeletionToastCallback"];
     setRootNode: NavigationStore["setRootNode"];
     emitPageSaveEvent: NavigationStore["emitPageSaveEvent"];
@@ -118,6 +119,7 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         markPageForDeletion: store.markPageForDeletion.bind(store),
         unmarkPageForDeletion: store.unmarkPageForDeletion.bind(store),
         renameSection: store.renameSection.bind(store),
+        renamePage: store.renamePage.bind(store),
         setDeletionToastCallback: store.setDeletionToastCallback.bind(store),
         setRootNode: store.setRootNode.bind(store),
         emitPageSaveEvent: store.emitPageSaveEvent.bind(store),
