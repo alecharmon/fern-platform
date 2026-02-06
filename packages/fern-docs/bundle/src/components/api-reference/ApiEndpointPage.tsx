@@ -62,7 +62,9 @@ export default async function ApiEndpointPage({
         isAskAiEnabled
     });
 
-    const markdownPromise = getMarkdownForPath(node, loader, loader.domain);
+    const authState = await loader.getAuthState();
+    const userRoles = authState.authed ? (authState.user.roles ?? []) : [];
+    const markdownPromise = getMarkdownForPath(node, loader, loader.domain, userRoles);
     const pageActionsStyle = config.theme?.["page-actions"] ?? "default";
 
     return (

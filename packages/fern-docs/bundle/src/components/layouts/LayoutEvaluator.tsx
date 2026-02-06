@@ -9,6 +9,7 @@ import type React from "react";
 
 import { MdxAside } from "@/mdx/bundler/component";
 import { MdxContent } from "@/mdx/components/MdxContent";
+import { filterMarkdownContent } from "@/server/getMarkdownForPath";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
 import { BuiltWithFern } from "../built-with-fern";
@@ -75,6 +76,10 @@ export async function LayoutEvaluator({
               isAskAiEnabled
           });
 
+    const authState = await loader.getAuthState();
+    const userRoles = authState.authed ? (authState.user.roles ?? []) : [];
+    const filteredMarkdown = filterMarkdownContent(markdown, pageId, userRoles);
+
     const pageHeader = (
         <PageHeader
             serialize={serialize}
@@ -82,7 +87,7 @@ export async function LayoutEvaluator({
             subtitle={subtitle}
             breadcrumb={breadcrumb}
             slug={slug}
-            markdownPromise={Promise.resolve({ content: markdown, contentType: "markdown" })}
+            markdownPromise={Promise.resolve(filteredMarkdown)}
             pageActionOptions={pageActions}
             tags={availability && <AvailabilityBadge availability={availability} rounded />}
             lang={lang}

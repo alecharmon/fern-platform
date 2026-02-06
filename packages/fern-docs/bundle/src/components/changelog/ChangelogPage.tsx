@@ -12,6 +12,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import { Markdown } from "@/mdx/components/Markdown";
 import { MdxContent } from "@/mdx/components/MdxContent";
+import { filterMarkdownContent } from "@/server/getMarkdownForPath";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 
 import ChangelogPageClient from "./ChangelogPageClient";
@@ -136,11 +137,20 @@ export async function ChangelogPageOverview({
         slug: node.slug
     });
 
+    const authState = await loader.getAuthState();
+    const userRoles = authState.authed ? (authState.user.roles ?? []) : [];
+    const filteredMarkdown =
+        page?.markdown != null && node.overviewPageId != null
+            ? filterMarkdownContent(page.markdown, node.overviewPageId, userRoles)
+            : undefined;
+
+    const title = mdx?.frontmatter?.title ?? node.title;
+
     return (
         <>
             <PageHeader
                 serialize={serialize}
-                title={mdx?.frontmatter?.title ?? node.title}
+                title={title}
                 titleHref={slugToHref(node.slug)}
                 subtitle={mdx?.frontmatter?.subtitle ?? mdx?.frontmatter?.excerpt}
                 breadcrumb={breadcrumb}
@@ -149,11 +159,7 @@ export async function ChangelogPageOverview({
                 filters={tags}
                 showBackIcon={showBackIcon}
                 lang={lang}
-                markdownPromise={
-                    page?.markdown
-                        ? Promise.resolve({ content: page.markdown, contentType: "markdown" as const })
-                        : undefined
-                }
+                markdownPromise={filteredMarkdown != null ? Promise.resolve(filteredMarkdown) : undefined}
                 pageActionsStyle={config.theme?.["page-actions"] ?? "default"}
             />
             <Markdown mdx={mdx} fallback={page?.markdown} engine={mdx?.engine} />

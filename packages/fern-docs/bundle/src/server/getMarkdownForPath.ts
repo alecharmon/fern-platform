@@ -8,7 +8,7 @@ import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { AsyncApiYamlFormatter, OpenApiYamlFormatter } from "@fern-docs/search-utils";
 
-import { convertToLlmTxtMarkdown } from "./llm-txt-md";
+import { filterMarkdownForCopyPage } from "./llm-txt-md";
 import { runAsyncSpan, runSyncSpan } from "./tracing";
 
 export type SdkLanguageFilter = "node" | "python" | "java" | "ruby" | "go" | "csharp" | "swift";
@@ -140,6 +140,25 @@ function generateWebSocketSections(
     return sections;
 }
 
+/**
+ * Filters markdown content for RBAC and returns it in a format suitable for the Copy Page feature.
+ * This is a helper function that centralizes the RBAC filtering logic for already-loaded content.
+ *
+ * Unlike LLM text formatting, this:
+ * - Removes <llms-only> tags entirely (content is for LLMs only, not humans)
+ * - Unwraps <llms-ignore> tags (content is for humans, hidden from LLMs)
+ * - Does NOT add title/description formatting
+ */
+export function filterMarkdownContent(
+    markdown: string,
+    pageId: string,
+    userRoles: string[] = []
+): { content: string; contentType: "markdown" | "mdx" } {
+    const contentType = pageId.endsWith(".mdx") ? "mdx" : "markdown";
+    const content = filterMarkdownForCopyPage(markdown, contentType === "mdx" ? "mdx" : "md", userRoles);
+    return { content, contentType };
+}
+
 export async function getMarkdownForPath(
     node: FernNavigation.NavigationNodePage,
     loader: DocsLoader,
@@ -210,9 +229,8 @@ export async function getMarkdownForPath(
 
             const contentType = pageId.endsWith(".mdx") ? "mdx" : "markdown";
             let content = runSyncSpan(
-                "docs.convertToMarkdown",
-                () =>
-                    convertToLlmTxtMarkdown(page.markdown, node.title, contentType === "mdx" ? "mdx" : "md", userRoles),
+                "docs.filterMarkdownForCopyPage",
+                () => filterMarkdownForCopyPage(page.markdown, contentType === "mdx" ? "mdx" : "md", userRoles),
                 {
                     "fern.docs.pageId": pageId,
                     "fern.docs.contentType": contentType

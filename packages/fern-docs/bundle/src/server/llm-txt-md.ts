@@ -14,22 +14,47 @@ export function convertToLlmTxtMarkdown(
     return [
         `# ${title}`,
         description != null ? `> ${description}` : undefined,
-        stripMdxFeatures(content, format, userRoles)
+        stripMdxFeatures(content, format, userRoles, "llm")
     ]
         .filter(isNonNullish)
         .join("\n\n");
 }
 
 /**
- * This is a living list of mdx features that we don't want to include in the LLM TXT format:
- * - esm imports
- * - <style> and <script> tags
- * - img tags with data: urls
- * - <If> tags when user doesn't have required roles
- * - <llms-ignore> tags (never shown to LLMs)
- * - <llms-only> tags are unwrapped (content always shown to LLMs)
+ * Filters markdown content for the Copy Page feature.
+ * Unlike LLM text, this:
+ * - Removes <llms-only> tags entirely (content is for LLMs only, not humans)
+ * - Unwraps <llms-ignore> tags (content is for humans, hidden from LLMs)
+ * - Applies RBAC filtering based on user roles
+ * - Does NOT add title/description formatting
  */
-function stripMdxFeatures(markdown: string, format: "mdx" | "md", userRoles: string[] = []): string {
+export function filterMarkdownForCopyPage(markdown: string, format: "mdx" | "md", userRoles: string[] = []): string {
+    return stripMdxFeatures(markdown, format, userRoles, "copy-page");
+}
+
+/**
+ * Strips MDX features from markdown content.
+ *
+ * For LLM mode:
+ * - <llms-ignore> tags are removed entirely (never shown to LLMs)
+ * - <llms-only> tags are unwrapped (content always shown to LLMs)
+ *
+ * For Copy Page mode:
+ * - <llms-ignore> tags are unwrapped (content is for humans, hidden from LLMs)
+ * - <llms-only> tags are removed entirely (content is for LLMs only, not humans)
+ *
+ * Both modes:
+ * - esm imports are removed
+ * - <style> and <script> tags are removed
+ * - img tags with data: urls are removed
+ * - <If> tags are filtered based on user roles (RBAC)
+ */
+function stripMdxFeatures(
+    markdown: string,
+    format: "mdx" | "md",
+    userRoles: string[] = [],
+    mode: "llm" | "copy-page" = "llm"
+): string {
     if (format !== "mdx") {
         return markdown;
     }
@@ -45,15 +70,27 @@ function stripMdxFeatures(markdown: string, format: "mdx" | "md", userRoles: str
         }
 
         if (isMdxJsxElementHast(node)) {
-            // remove <llms-ignore> tags and their content (never show to LLMs)
+            // Handle <llms-ignore> tags differently based on mode
             if (node.name === "llms-ignore") {
-                parent.children.splice(idx, 1);
+                if (mode === "llm") {
+                    // LLM mode: remove entirely (never show to LLMs)
+                    parent.children.splice(idx, 1);
+                } else {
+                    // Copy Page mode: unwrap (content is for humans)
+                    parent.children.splice(idx, 1, ...node.children);
+                }
                 return idx;
             }
 
-            // replace <llms-only> with its children (always show to LLMs)
+            // Handle <llms-only> tags differently based on mode
             if (node.name === "llms-only") {
-                parent.children.splice(idx, 1, ...node.children);
+                if (mode === "llm") {
+                    // LLM mode: unwrap (content always shown to LLMs)
+                    parent.children.splice(idx, 1, ...node.children);
+                } else {
+                    // Copy Page mode: remove entirely (content is for LLMs only)
+                    parent.children.splice(idx, 1);
+                }
                 return idx;
             }
 
