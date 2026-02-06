@@ -1,9 +1,16 @@
+from dataclasses import dataclass, field
 from typing import Any
 
 import httpx
 
 from fai.settings import LOGGER
 from fai.utils.scribe.devin_client import DevinClient
+
+
+@dataclass
+class AttachmentResult:
+    urls: list[str] = field(default_factory=list)
+    failed_filenames: list[str] = field(default_factory=list)
 
 
 async def download_slack_file(file_url: str, bot_token: str) -> bytes:
@@ -21,28 +28,25 @@ async def process_slack_attachments(
     files: list[dict[str, Any]],
     bot_token: str,
     devin_client: DevinClient,
-) -> list[str]:
-    attachment_urls = []
+) -> AttachmentResult:
+    result = AttachmentResult()
 
     for file_info in files:
         file_url = file_info.get("url_private")
         filename = file_info.get("name", "attachment")
-        mimetype = file_info.get("mimetype", "")
 
         if not file_url:
             LOGGER.warning(f"[SCRIBE] File {filename} has no url_private, skipping")
-            continue
-
-        if not mimetype.startswith("image/"):
-            LOGGER.warning(f"[SCRIBE] Skipping non-image file: {filename} ({mimetype})")
+            result.failed_filenames.append(filename)
             continue
 
         try:
             file_content = await download_slack_file(file_url, bot_token)
             devin_url = await devin_client.upload_attachment(file_content, filename)
-            attachment_urls.append(devin_url)
+            result.urls.append(devin_url)
             LOGGER.info(f"[SCRIBE] Uploaded {filename} to Devin: {devin_url}")
         except Exception as e:
             LOGGER.error(f"[SCRIBE] Failed to process attachment {filename}: {e}")
+            result.failed_filenames.append(filename)
 
-    return attachment_urls
+    return result

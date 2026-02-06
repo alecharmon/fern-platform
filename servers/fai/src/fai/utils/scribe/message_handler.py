@@ -15,7 +15,7 @@ from fai.utils.scribe.db_helpers import get_scribe_integration_by_team_id, get_s
 from fai.utils.scribe.devin_client import DevinClient, create_or_get_devin_session, send_devin_message
 from fai.utils.scribe.generate_startup_message import PLANT_FACTS, STARTUP_INITIAL_MESSAGE
 from fai.utils.scribe.session_poller import poll_devin_session
-from fai.utils.scribe.slack_file_handler import process_slack_attachments
+from fai.utils.scribe.slack_file_handler import AttachmentResult, process_slack_attachments
 from fai.utils.scribe.slack_thread_unfurler import (
     fetch_thread_messages,
     fetch_user_info,
@@ -24,6 +24,22 @@ from fai.utils.scribe.slack_thread_unfurler import (
 )
 
 ERROR_RESPONSE = "❌ An unknown error has occurred. Please reach out to support@buildwithfern.com."
+
+
+async def _post_slack_warning(bot_token: str, channel: str, thread_ts: str | None, text: str) -> None:
+    try:
+        from slack_sdk.web.async_client import AsyncWebClient
+
+        client = AsyncWebClient(token=bot_token)
+        await client.chat_postMessage(
+            channel=channel,
+            text=text,
+            thread_ts=thread_ts,
+            unfurl_links=False,
+            unfurl_media=False,
+        )
+    except Exception as e:
+        LOGGER.warning(f"[SCRIBE] Failed to post attachment warning to Slack: {e}")
 
 
 @dataclass
@@ -46,7 +62,7 @@ async def get_or_create_session(
     user_message: str,
     files: list[dict[str, Any]],
     bot_token: str,
-) -> tuple[ScribeSessionDb, bool]:
+) -> tuple[ScribeSessionDb, bool, list[str]]:
     async with async_session_maker() as session:
         result = await session.execute(
             select(ScribeSessionDb).where(
@@ -57,16 +73,16 @@ async def get_or_create_session(
 
         if existing_session:
             LOGGER.info(f"[SCRIBE] Found existing session for thread {thread_ts}")
-            return existing_session, False
+            return existing_session, False, []
 
         LOGGER.info(f"[SCRIBE] Creating new Devin session for thread {thread_ts}")
 
-        attachment_urls: list[str] = []
+        attachment_result = AttachmentResult()
         if files:
             devin_client = DevinClient(VARIABLES.SCRIBE_DEVIN_API_KEY)
-            attachment_urls = await process_slack_attachments(files, bot_token, devin_client)
+            attachment_result = await process_slack_attachments(files, bot_token, devin_client)
 
-        devin_response = await create_or_get_devin_session(github_repo, user_message, attachment_urls)
+        devin_response = await create_or_get_devin_session(github_repo, user_message, attachment_result.urls)
 
         new_session = ScribeSessionDb(
             integration_id=integration_id,
@@ -83,7 +99,7 @@ async def get_or_create_session(
         await session.refresh(new_session)
 
         LOGGER.info(f"[SCRIBE] Created session record: {new_session.id}")
-        return new_session, True
+        return new_session, True, attachment_result.failed_filenames
 
 
 async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMessageResponse:
@@ -186,9 +202,18 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
             LOGGER.warning(f"[SCRIBE] Failed to parse channel settings: {e}")
 
     try:
-        session_record, is_new_session = await get_or_create_session(
+        session_record, is_new_session, failed_filenames = await get_or_create_session(
             integration.integration_id, thread_ts, channel, github_repo, text, files, integration.slack_bot_token
         )
+
+        if failed_filenames:
+            failed_list = ", ".join(failed_filenames)
+            await _post_slack_warning(
+                integration.slack_bot_token,
+                channel,
+                thread_ts,
+                f"Sorry, I failed to process these attachments: {failed_list}",
+            )
 
         if is_new_session:
             asyncio.create_task(
@@ -208,7 +233,17 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
                 bot_token=integration.slack_bot_token,
             )
         else:
-            await send_devin_message(session_record.devin_session_id, text, files, integration.slack_bot_token)
+            _, followup_failed = await send_devin_message(
+                session_record.devin_session_id, text, files, integration.slack_bot_token
+            )
+            if followup_failed:
+                failed_list = ", ".join(followup_failed)
+                await _post_slack_warning(
+                    integration.slack_bot_token,
+                    channel,
+                    thread_ts,
+                    f"Sorry, I failed to process these attachments: {failed_list}",
+                )
 
             if session_record.status in ["blocked", "stopped"]:
                 LOGGER.info(

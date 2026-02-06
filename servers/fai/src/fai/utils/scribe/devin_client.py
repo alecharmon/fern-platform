@@ -104,14 +104,17 @@ async def send_devin_message(
     message: str,
     files: list[dict[str, Any]] | None = None,
     bot_token: str | None = None,
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], list[str]]:
     client = DevinClient(VARIABLES.SCRIBE_DEVIN_API_KEY)
 
     attachment_urls: list[str] = []
+    failed_filenames: list[str] = []
     if files and bot_token:
         from fai.utils.scribe.slack_file_handler import process_slack_attachments
 
-        attachment_urls = await process_slack_attachments(files, bot_token, client)
+        attachment_result = await process_slack_attachments(files, bot_token, client)
+        attachment_urls = attachment_result.urls
+        failed_filenames = attachment_result.failed_filenames
 
     formatted_message = format_message_with_attachments(message, attachment_urls)
 
@@ -120,7 +123,8 @@ async def send_devin_message(
         LOGGER.info(f"[SCRIBE] Sent message to Devin session: {session_id}")
         return result
 
-    return await retry_with_exponential_backoff(_send_message, max_retries=3, log_prefix="[SCRIBE]")
+    result = await retry_with_exponential_backoff(_send_message, max_retries=3, log_prefix="[SCRIBE]")
+    return result, failed_filenames
 
 
 async def get_devin_session_status(session_id: str) -> dict[str, Any]:
