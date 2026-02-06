@@ -168,6 +168,7 @@ export class FdrLambdaDeployStack extends Stack {
             description: isPreview
                 ? `FDR Lambda API Preview for PR #${prNumber}`
                 : `FDR Lambda API for ${environmentType}`,
+            binaryMediaTypes: ["*/*"],
             deployOptions: {
                 stageName: isPreview ? `preview-${prNumber}` : environmentType.toLowerCase(),
                 loggingLevel: apigateway.MethodLoggingLevel.INFO,
