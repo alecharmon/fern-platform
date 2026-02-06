@@ -86,8 +86,9 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
                                 >
                                     <Select.Trigger
                                         className={cn(
-                                            "flex h-9 w-full items-center justify-between rounded-lg border border-(color:--grayscale-a6) bg-(color:--grayscale-a1) px-3 py-2 text-sm",
-                                            "hover:bg-(color:--grayscale-a2) focus:outline-none focus:ring-2 focus:ring-(color:--grayscale-a8)"
+                                            "flex h-8 w-full items-center justify-between rounded-2 bg-card-background px-2.5 py-2 text-sm text-(color:--grayscale-a12)",
+                                            "ring-border-default ring-1 ring-inset",
+                                            "hover:bg-(color:--grayscale-a2) focus-within:ring-(color:--accent-a5) focus-within:ring-2 focus:outline-none transition-colors"
                                         )}
                                     >
                                         <Select.Value />
@@ -98,8 +99,8 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
                                     <Select.Portal>
                                         <Select.Content
                                             className={cn(
-                                                "rounded-lg bg-(color:--grayscale-a1) shadow-lg border border-(color:--grayscale-a6)",
-                                                "overflow-hidden z-50"
+                                                "rounded-2 bg-background border-border-default border shadow-xl backdrop-blur",
+                                                "z-50 overflow-hidden"
                                             )}
                                         >
                                             <Select.ScrollUpButton className="flex h-6 cursor-default items-center justify-center">
@@ -111,8 +112,8 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
                                                         key={getAuthSchemeValue(index)}
                                                         value={getAuthSchemeValue(index)}
                                                         className={cn(
-                                                            "relative flex h-8 select-none items-center rounded-md pl-8 pr-2 text-sm outline-none",
-                                                            "cursor-pointer data-[highlighted]:bg-(color:--grayscale-a3)"
+                                                            "relative flex h-8 select-none items-center rounded-1 pl-8 pr-2 text-sm outline-none",
+                                                            "cursor-pointer data-[highlighted]:bg-(color:--grayscale-a3) text-(color:--grayscale-a12)"
                                                         )}
                                                     >
                                                         <Select.ItemText>
