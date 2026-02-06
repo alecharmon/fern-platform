@@ -291,7 +291,7 @@ describe("example-groups", () => {
     });
 
     describe("getVisibleExampleKeys", () => {
-        it("returns empty array when all snippets are identical", () => {
+        it("returns all examples even when snippets are identical", () => {
             const endpoint: EndpointDefinition = {
                 id: EndpointId("test-endpoint"),
                 method: "POST",
@@ -349,7 +349,8 @@ describe("example-groups", () => {
 
             const visibleKeys = getVisibleExampleKeys(examplesByKeyAndStatusCode);
 
-            expect(visibleKeys).toEqual([]);
+            // Both examples should be visible even though code snippets are identical
+            expect(visibleKeys).toEqual(["Example 1", "Example 2"]);
         });
 
         it("filters to user-defined examples when any exist", () => {

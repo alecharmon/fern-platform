@@ -19,8 +19,8 @@ export function EndpointExampleSegmentedControl({
 }): ReactElement<any> {
     const options = useMemo(() => {
         return segmentedControlExamples.map(({ exampleKey, examples }) => {
-            const exampleIndex = examples[0]?.exampleIndex ?? 0;
-            const label = examples[0]?.name ?? examples[0]?.exampleCall.name ?? `Example ${exampleIndex + 1}`;
+            // Use exampleCall.name (the actual example name) instead of snippet.name (the language name)
+            const label = examples[0]?.exampleCall.name ?? exampleKey;
             return {
                 key: exampleKey,
                 label,
@@ -33,7 +33,7 @@ export function EndpointExampleSegmentedControl({
         return segmentedControlExamples
             .flatMap(({ examples }) => examples)
             .filter((ex) => ex.exampleCall.responseStatusCode < 400)
-            .map(({ name }) => name)
+            .map((ex) => ex.exampleCall.name)
             .join("").length;
     }, [segmentedControlExamples]);
 

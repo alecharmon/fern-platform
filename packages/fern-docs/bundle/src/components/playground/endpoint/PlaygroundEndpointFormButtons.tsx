@@ -30,9 +30,9 @@ export function PlaygroundEndpointFormButtons({
         if (!segmentedControlExamples || segmentedControlExamples.length === 0) {
             return [];
         }
-        return segmentedControlExamples.map(({ examples }, index) => {
-            const exampleIndex = examples[0]?.exampleIndex ?? 0;
-            const label = examples[0]?.name ?? examples[0]?.exampleCall.name ?? `Example ${exampleIndex + 1}`;
+        return segmentedControlExamples.map(({ exampleKey, examples }, index) => {
+            // Use exampleCall.name (the actual example name) instead of snippet.name (the language name)
+            const label = examples[0]?.exampleCall.name ?? exampleKey;
             return {
                 key: String(index),
                 label,

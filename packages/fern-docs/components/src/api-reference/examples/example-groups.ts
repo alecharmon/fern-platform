@@ -161,19 +161,13 @@ export function getVisibleExampleKeys(examplesByKeyAndStatusCode: ExamplesByKeyA
         return [];
     }
 
-    // Step 2: Hide if all code snippets are identical (workaround for buggy generators)
-    const uniqueCodeSnippets = new Set(allExamples.flatMap(({ examples }) => examples.map((e) => e.code)));
-    if (uniqueCodeSnippets.size <= 1) {
-        return [];
-    }
-
-    // Step 3: Filter to user-defined examples if any exist
+    // Step 2: Filter to user-defined examples if any exist
     const hasUserDefinedExample = allExamples.some(({ examples }) => examples.some(isUserDefinedExample));
     const filteredExamples = hasUserDefinedExample
         ? allExamples.filter(({ examples }) => examples.some(isUserDefinedExample))
         : allExamples;
 
-    // Step 4: Sort by priority (same logic as getFirstVisibleExampleKey)
+    // Step 3: Sort by priority (same logic as getFirstVisibleExampleKey)
     // This ensures the first key in the array is the one that would be selected by default
     const sortedExamples = filteredExamples.map(({ exampleKey, examples }) => {
         const hasRequestData = examples.some((ex) => hasRequestSideData(ex.exampleCall));
