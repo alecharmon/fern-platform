@@ -26,9 +26,10 @@ interface BranchPRInfoProps {
     branch: string;
     docsUrl: DocsUrl;
     sourceRepo?: GitSourceRepo;
+    storedPrTitle?: string;
 }
 
-export function BranchPRInfo({ branch, sourceRepo, docsUrl }: BranchPRInfoProps) {
+export function BranchPRInfo({ branch, sourceRepo, docsUrl, storedPrTitle }: BranchPRInfoProps) {
     return (
         <GitPRProvider
             owner={sourceRepo?.owner}
@@ -38,14 +39,22 @@ export function BranchPRInfo({ branch, sourceRepo, docsUrl }: BranchPRInfoProps)
             site={docsUrl}
             gitUrl={sourceRepo?.gitUrl}
         >
-            <BranchPRContent branch={branch} />
+            <BranchPRContent branch={branch} baseBranch={sourceRepo?.baseBranch} storedPrTitle={storedPrTitle} />
         </GitPRProvider>
     );
 }
 
-function BranchPRContent({ branch }: { branch: string }) {
+function BranchPRContent({
+    branch,
+    baseBranch,
+    storedPrTitle
+}: {
+    branch: string;
+    baseBranch?: string;
+    storedPrTitle?: string;
+}) {
     const { prTitle, gitPrUrl, prStatus, loading, owner, repo } = useGitPrInfo();
-    const displayName = prTitle || getDisplayNameFromBranch(branch);
+    const displayName = prTitle || storedPrTitle || getDisplayNameFromBranch(branch);
 
     return (
         <div className="flex items-center gap-2">
@@ -60,6 +69,7 @@ function BranchPRContent({ branch }: { branch: string }) {
                                 owner={owner}
                                 repo={repo}
                                 branch={branch}
+                                baseBranch={baseBranch}
                                 gitPrUrl={gitPrUrl}
                                 className="max-w-1/2 -ml-1"
                                 hideIcon

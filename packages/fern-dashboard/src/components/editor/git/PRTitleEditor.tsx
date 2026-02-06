@@ -1,5 +1,6 @@
 "use client";
 
+import { createNavigationBufferedIndexedDBStorage } from "@fern-docs/components/navigation";
 import { GitPullRequest, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -135,6 +136,17 @@ function PRTitleEditorInternal({ className, hideIcon, owner, repo, branch, gitPr
             }
 
             setLocalTitle(trimmedTitle);
+
+            // Persist to NavigationStorage so title survives navigation
+            if (branch) {
+                try {
+                    const storage = createNavigationBufferedIndexedDBStorage();
+                    await storage.init(branch);
+                    storage.updateBranchMetadata(branch, { prTitle: trimmedTitle });
+                } catch (error) {
+                    console.error("[PRTitleEditor] Error persisting title to storage:", error);
+                }
+            }
 
             // If no PR exists yet, just save to parent state
             if (!gitPrUrl || !owner || !repo || !branch) {

@@ -58,6 +58,7 @@ export function BranchList({
                             docsUrl={docsUrl}
                             handleBranchDelete={handleBranchDelete}
                             showDivider={index < visibleBranches.length - 1}
+                            storedPrTitle={branch.metadata.prTitle}
                         />
                     ))}
                     {hasMoreBranches && (

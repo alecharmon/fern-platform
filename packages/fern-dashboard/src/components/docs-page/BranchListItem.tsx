@@ -14,13 +14,15 @@ export const BranchListItem = memo(function BranchListItem({
     sourceRepo,
     docsUrl,
     showDivider = false,
-    handleBranchDelete
+    handleBranchDelete,
+    storedPrTitle
 }: {
     branch: string;
     docsUrl: DocsUrl;
     sourceRepo?: GitSourceRepo;
     showDivider?: boolean;
     handleBranchDelete: (branch: string) => void;
+    storedPrTitle?: string;
 }) {
     const [loading, setLoading] = useState(false);
     const orgName = useOrgName();
@@ -39,7 +41,12 @@ export const BranchListItem = memo(function BranchListItem({
         <>
             <div className="flex items-center justify-between gap-x-4 gap-y-1">
                 <div className="flex-1 overflow-x-hidden">
-                    <BranchPRInfo branch={branch} sourceRepo={sourceRepo} docsUrl={docsUrl} />
+                    <BranchPRInfo
+                        branch={branch}
+                        sourceRepo={sourceRepo}
+                        docsUrl={docsUrl}
+                        storedPrTitle={storedPrTitle}
+                    />
                 </div>
                 <div className="flex items-center justify-end gap-2">
                     <DeleteBranchButton branch={branch} onBranchDelete={handleBranchDelete} />

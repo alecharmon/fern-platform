@@ -27,7 +27,7 @@ import { PRTitleEditor } from "./git/PRTitleEditor";
 
 export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData; docsUrl: DocsUrl }) {
     const { name, picture, email } = session.user;
-    const { gitPrUrl, setPrUrl } = useGitPrInfo();
+    const { gitPrUrl } = useGitPrInfo();
     const { branch } = useBranch();
     const isEditingDisabled = useEditingDisabled();
     const { owner, repo, baseBranch } = useGitHubRepo();
@@ -38,16 +38,7 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
     const [showRocketButton, setShowRocketButton] = useState(false);
     const [showCelebrationModal, setShowCelebrationModal] = useState(false);
 
-    useEffect(() => {
-        if (isPreviewMode) {
-            return;
-        }
-        // NOTE: This is a temporary solution to persist the PR URL across route changes/refreshes.
-        const prUrl = localStorage.getItem(`gitPrUrl-${branch}`);
-        if (prUrl) {
-            setPrUrl(prUrl);
-        }
-    }, [branch, setPrUrl, isPreviewMode]);
+    // prUrl persistence is now handled by GitPRProvider reading from NavigationStorage
 
     // Show rocket button if there's a PR URL (existing PR) or if user has committed
     useEffect(() => {

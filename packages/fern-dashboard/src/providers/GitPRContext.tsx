@@ -1,5 +1,6 @@
 "use client";
 
+import { createNavigationBufferedIndexedDBStorage } from "@fern-docs/components/navigation";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
@@ -185,6 +186,26 @@ export function GitPRProvider({
     useEffect(() => {
         void fetchPrFromBranch();
     }, [fetchPrFromBranch]);
+
+    // Load persisted prTitle/prUrl from NavigationStorage
+    useEffect(() => {
+        const loadFromStorage = async () => {
+            try {
+                const storage = createNavigationBufferedIndexedDBStorage();
+                await storage.init(branch);
+                const snapshot = storage.getStore(branch);
+                if (snapshot?.metadata.prTitle) {
+                    setPrTitle((prev) => prev || snapshot.metadata.prTitle || "");
+                }
+                if (snapshot?.metadata.prUrl) {
+                    setGitPrUrl((prev) => prev || snapshot.metadata.prUrl);
+                }
+            } catch (error) {
+                console.error("[GitPRProvider] Error loading from storage:", error);
+            }
+        };
+        void loadFromStorage();
+    }, [branch]);
 
     const setPrUrl = useCallback((url: string) => {
         setGitPrUrl(url);

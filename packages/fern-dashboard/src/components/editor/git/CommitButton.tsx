@@ -1,9 +1,9 @@
 "use client";
 
-import { useNavigation } from "@fern-docs/components/navigation";
+import { createNavigationBufferedIndexedDBStorage, useNavigation } from "@fern-docs/components/navigation";
 import * as Sentry from "@sentry/nextjs";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import { DEFAULT_COMMIT_MESSAGE, handleCreatePr } from "@/app/services/github/github";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
@@ -74,14 +74,6 @@ export function CommitButtonWithGitHub({
 
     // Track if this is the first commit in this session
     const hasCommittedRef = useRef(false);
-
-    useEffect(() => {
-        // NOTE: This is a temporary solution to persist the PR URL across route changes/refreshes.
-        const prUrl = localStorage.getItem(`gitPrUrl-${branch}`);
-        if (prUrl) {
-            setPrUrl(prUrl);
-        }
-    }, [branch, setPrUrl]);
 
     const handleCommitPress = useCallback(async () => {
         if (!owner || !repo) {
@@ -192,7 +184,13 @@ export function CommitButtonWithGitHub({
                 });
                 if (newPrUrl) {
                     setPrUrl(newPrUrl);
-                    localStorage.setItem(`gitPrUrl-${branch}`, newPrUrl);
+                    try {
+                        const storage = createNavigationBufferedIndexedDBStorage();
+                        await storage.init(branch);
+                        storage.updateBranchMetadata(branch, { prUrl: newPrUrl });
+                    } catch (error) {
+                        console.error("[CommitButton] Error persisting PR URL to storage:", error);
+                    }
                 }
             }
         } catch (error) {

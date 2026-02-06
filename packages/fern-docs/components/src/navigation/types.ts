@@ -504,6 +504,8 @@ export interface NavigationSnapshot {
     metadata: {
         docsUrl: string;
         orgName: string;
+        prTitle?: string;
+        prUrl?: string;
     };
     pageRegistry: PageRegistry;
     docsYmlBaseContent: DocsYmlBaseContent;

@@ -1,6 +1,8 @@
 import type { GitOperationError } from "@fern-api/docs-loader";
 
 import { getGitLoader } from "@/app/services/github/getGitLoader";
+import { RedisCacheKey } from "@/app/services/redis/cacheKey";
+import { redisDel } from "@/app/services/redis/redis";
 
 export type UpdatePrTitleErrors = GitOperationError | { type: "PR_NOT_FOUND"; message: string };
 
@@ -76,6 +78,18 @@ export default async function updatePrTitle(request: {
         }
 
         if (updateResult.type === "ok") {
+            const cacheKey = RedisCacheKey.githubPrForBranch(
+                request.owner,
+                request.repo,
+                request.branch,
+                request.baseBranch
+            );
+            try {
+                await redisDel(cacheKey);
+            } catch (error) {
+                console.warn("Failed to invalidate PR cache after title update", error);
+            }
+
             return {
                 success: true,
                 title: request.title,

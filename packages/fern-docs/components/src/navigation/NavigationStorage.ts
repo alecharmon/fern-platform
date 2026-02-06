@@ -9,6 +9,8 @@ export interface BranchMetadata {
     metadata: {
         orgName: string;
         docsUrl: string;
+        prTitle?: string;
+        prUrl?: string;
     };
 }
 
@@ -162,6 +164,7 @@ export class NavigationStorage {
         const serializable = {
             ...data,
             metadata: {
+                ...data.metadata,
                 orgName,
                 docsUrl
             },
@@ -184,6 +187,33 @@ export class NavigationStorage {
 
         const serialized = JSON.stringify(serializable);
         this._storage.set(branchName, serialized);
+    }
+
+    updateBranchMetadata(branchName: string, updates: { prTitle?: string; prUrl?: string }): void {
+        this.checkBufferedStorageInitialized();
+        const serialized = this._storage.get(branchName);
+        if (!serialized) {
+            return;
+        }
+        const parsed = JSON.parse(serialized);
+        if (!parsed.metadata || typeof parsed.metadata !== "object") {
+            return;
+        }
+        if ("prTitle" in updates) {
+            if (updates.prTitle) {
+                parsed.metadata.prTitle = updates.prTitle;
+            } else {
+                delete parsed.metadata.prTitle;
+            }
+        }
+        if ("prUrl" in updates) {
+            if (updates.prUrl) {
+                parsed.metadata.prUrl = updates.prUrl;
+            } else {
+                delete parsed.metadata.prUrl;
+            }
+        }
+        this._storage.set(branchName, JSON.stringify(parsed));
     }
 
     updateStore(branchName: string, orgName: string, docsUrl: string, update: Partial<NavigationSnapshot>): void {
@@ -364,7 +394,9 @@ export class NavigationStorage {
                         branchName,
                         metadata: {
                             orgName: parsed.metadata?.orgName ?? "",
-                            docsUrl: parsed.metadata?.docsUrl ?? ""
+                            docsUrl: parsed.metadata?.docsUrl ?? "",
+                            prTitle: parsed.metadata?.prTitle,
+                            prUrl: parsed.metadata?.prUrl
                         }
                     };
                 } catch (error) {
@@ -819,7 +851,9 @@ class BufferedIndexedDBStorage implements BufferedStorage {
      * Loads only metadata from IndexedDB without caching the full snapshot.
      * Parses the JSON to extract just orgName and docsUrl fields.
      */
-    async getMetadataOnly(branchName: string): Promise<{ orgName: string; docsUrl: string } | null> {
+    async getMetadataOnly(
+        branchName: string
+    ): Promise<{ orgName: string; docsUrl: string; prTitle?: string; prUrl?: string } | null> {
         const fullKey = this.getFullKey(branchName);
 
         if (!this.availableKeys.has(fullKey) || !this.db) {
@@ -842,7 +876,9 @@ class BufferedIndexedDBStorage implements BufferedStorage {
 
             return {
                 orgName: typeof metadata.orgName === "string" ? metadata.orgName : "",
-                docsUrl: typeof metadata.docsUrl === "string" ? metadata.docsUrl : ""
+                docsUrl: typeof metadata.docsUrl === "string" ? metadata.docsUrl : "",
+                prTitle: typeof metadata.prTitle === "string" ? metadata.prTitle : undefined,
+                prUrl: typeof metadata.prUrl === "string" ? metadata.prUrl : undefined
             };
         } catch (error) {
             console.error(`Failed to load metadata for ${branchName}:`, error);
