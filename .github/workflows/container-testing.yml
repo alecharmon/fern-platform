@@ -86,6 +86,20 @@ jobs:
       - name: Standup test container
         run: docker compose -f servers/mdx-bundler/docker-compose.yml up -d --wait
 
+      - name: Test container health endpoint
+        run: |
+          # Verify the container is healthy and responding
+          set +e
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health)
+          if [ "$RESPONSE" = "200" ]; then
+            echo "SUCCESS: mdx-bundler container health check passed (HTTP 200)"
+            exit 0
+          else
+            echo "FAILED: mdx-bundler container health check failed (HTTP $RESPONSE)"
+            docker logs $(docker ps -q --filter "ancestor=mdx-bundler:local") 2>&1 || true
+            exit 1
+          fi
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -181,6 +195,44 @@ jobs:
           touch servers/fai/.env
           docker build -f servers/fai/Dockerfile -t fai:local servers/
 
+      - name: Test container startup
+        run: |
+          # Run the container in detached mode and check logs for startup errors
+          set +e
+          CONTAINER_ID=$(docker run -d --rm fai:local)
+          echo "Started container: $CONTAINER_ID"
+          
+          # Wait a few seconds for the container to start
+          sleep 5
+          
+          # Get container logs
+          OUTPUT=$(docker logs "$CONTAINER_ID" 2>&1)
+          echo "Container output:"
+          echo "$OUTPUT"
+          
+          # Check if container is still running
+          RUNNING=$(docker inspect -f '{{.State.Running}}' "$CONTAINER_ID" 2>/dev/null || echo "false")
+          echo "Container running: $RUNNING"
+          
+          # Stop the container
+          docker stop "$CONTAINER_ID" 2>/dev/null || true
+          
+          # Check for module/import errors
+          if echo "$OUTPUT" | grep -qE "(ModuleNotFoundError|ImportError|No module named)"; then
+            echo "FAILED: Container has Python import errors"
+            exit 1
+          fi
+          
+          # If container is running or shows startup messages, it's working
+          if [ "$RUNNING" = "true" ] || echo "$OUTPUT" | grep -qiE "(uvicorn|started|running|application startup)"; then
+            echo "SUCCESS: Container started successfully"
+            exit 0
+          fi
+          
+          # If no import errors found, consider it a pass
+          echo "SUCCESS: Container loaded modules successfully"
+          exit 0
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -215,6 +267,45 @@ jobs:
         run: |
           docker build -f ./servers/fai-chat/Dockerfile -t fai-chat:local .
 
+      - name: Test container startup
+        run: |
+          # Run the container in detached mode and check logs for startup errors
+          # The container has Lambda Web Adapter which may hang without Lambda runtime
+          set +e
+          CONTAINER_ID=$(docker run -d --rm -p 8081:8080 fai-chat:local)
+          echo "Started container: $CONTAINER_ID"
+          
+          # Wait a few seconds for the container to start
+          sleep 5
+          
+          # Get container logs
+          OUTPUT=$(docker logs "$CONTAINER_ID" 2>&1)
+          echo "Container output:"
+          echo "$OUTPUT"
+          
+          # Check if container is still running
+          RUNNING=$(docker inspect -f '{{.State.Running}}' "$CONTAINER_ID" 2>/dev/null || echo "false")
+          echo "Container running: $RUNNING"
+          
+          # Stop the container
+          docker stop "$CONTAINER_ID" 2>/dev/null || true
+          
+          # Check for module/import errors
+          if echo "$OUTPUT" | grep -qE "(ModuleNotFoundError|ImportError|No module named)"; then
+            echo "FAILED: Container has Python import errors"
+            exit 1
+          fi
+          
+          # If container is running or shows startup messages, it's working
+          if [ "$RUNNING" = "true" ] || echo "$OUTPUT" | grep -qiE "(uvicorn|started|running|application startup|FAI Chat)"; then
+            echo "SUCCESS: Container started successfully"
+            exit 0
+          fi
+          
+          # If no import errors found, consider it a pass
+          echo "SUCCESS: Container loaded modules successfully"
+          exit 0
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -248,6 +339,125 @@ jobs:
       - name: Build container
         run: |
           docker build -f ./servers/fai-reindexing/Dockerfile -t fai-reindexing:local .
+
+      - name: Test orchestrator startup
+        run: |
+          # Test the orchestrator entrypoint (dist/index.cjs)
+          # Run the container in detached mode with dummy env vars and check logs for startup errors
+          set +e
+          CONTAINER_ID=$(docker run -d \
+            -e SQS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/123456789/test-queue \
+            -e ECS_CLUSTER_NAME=test-cluster \
+            -e ECS_EC2_TASK_DEFINITION=test-ec2-task \
+            -e ECS_FARGATE_TASK_DEFINITION=test-fargate-task \
+            -e ECS_CAPACITY_PROVIDER=test-capacity-provider \
+            -e ECS_SUBNETS=subnet-123,subnet-456 \
+            -e ECS_SECURITY_GROUPS=sg-123 \
+            -e TURBOPUFFER_API_KEY=test-turbopuffer-key \
+            -e OPENAI_API_KEY=test-openai-key \
+            -e FERN_TOKEN=test-fern-token \
+            -e AWS_REGION=us-east-1 \
+            -e AWS_ACCESS_KEY_ID=test-access-key \
+            -e AWS_SECRET_ACCESS_KEY=test-secret-key \
+            fai-reindexing:local)
+          echo "Started orchestrator container: $CONTAINER_ID"
+          
+          # Wait a few seconds for the container to start and potentially fail
+          sleep 5
+          
+          # Get container logs (works even if container has exited)
+          OUTPUT=$(docker logs "$CONTAINER_ID" 2>&1)
+          echo "Orchestrator output:"
+          echo "$OUTPUT"
+          
+          # Check if container is still running
+          RUNNING=$(docker inspect -f '{{.State.Running}}' "$CONTAINER_ID" 2>/dev/null || echo "false")
+          EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' "$CONTAINER_ID" 2>/dev/null || echo "unknown")
+          echo "Container running: $RUNNING"
+          echo "Container exit code: $EXIT_CODE"
+          
+          # Clean up container
+          docker stop "$CONTAINER_ID" 2>/dev/null || true
+          docker rm "$CONTAINER_ID" 2>/dev/null || true
+          
+          # Check for module loading errors (the error from the broken Chainguard image)
+          if echo "$OUTPUT" | grep -qE "(Cannot find module|MODULE_NOT_FOUND)"; then
+            echo "FAILED: Orchestrator has module loading errors"
+            exit 1
+          fi
+          
+          # If container is running or shows startup messages, it's working
+          if [ "$RUNNING" = "true" ] || echo "$OUTPUT" | grep -q "Starting FAI Reindexing"; then
+            echo "SUCCESS: Orchestrator started successfully"
+            exit 0
+          fi
+          
+          # If container exited with non-zero, it failed
+          if [ "$RUNNING" = "false" ] && [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "unknown" ]; then
+            echo "FAILED: Orchestrator exited with code $EXIT_CODE"
+            exit 1
+          fi
+          
+          echo "SUCCESS: Orchestrator loaded modules successfully"
+
+      - name: Test delegated worker startup
+        run: |
+          # Test the delegated worker entrypoint using the same command format as ECS task definition
+          # ECS uses command: ["node", "dist/worker.cjs"] which combines with the image entrypoint
+          # For Alpine images: entrypoint is empty, so this runs "node dist/worker.cjs" correctly
+          # For Chainguard images: entrypoint is ["/usr/bin/node"], so this would run "/usr/bin/node node dist/worker.cjs"
+          # which fails with "Cannot find module '/app/node'" because node tries to run a file called "node"
+          set +e
+          CONTAINER_ID=$(docker run -d \
+            -e REINDEX_DOMAIN=test.docs.buildwithfern.com \
+            -e SOURCE_SQS_MESSAGE_ID=test-message-id \
+            -e FORCE_FULL_REINDEX=false \
+            -e TURBOPUFFER_API_KEY=test-turbopuffer-key \
+            -e OPENAI_API_KEY=test-openai-key \
+            -e FERN_TOKEN=test-fern-token \
+            -e AWS_REGION=us-east-1 \
+            -e AWS_ACCESS_KEY_ID=test-access-key \
+            -e AWS_SECRET_ACCESS_KEY=test-secret-key \
+            fai-reindexing:local node dist/worker.cjs)
+          echo "Started delegated worker container: $CONTAINER_ID"
+          
+          # Wait a few seconds for the container to start and potentially fail
+          sleep 5
+          
+          # Get container logs (works even if container has exited)
+          OUTPUT=$(docker logs "$CONTAINER_ID" 2>&1)
+          echo "Delegated worker output:"
+          echo "$OUTPUT"
+          
+          # Check if container is still running
+          RUNNING=$(docker inspect -f '{{.State.Running}}' "$CONTAINER_ID" 2>/dev/null || echo "false")
+          EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' "$CONTAINER_ID" 2>/dev/null || echo "unknown")
+          echo "Container running: $RUNNING"
+          echo "Container exit code: $EXIT_CODE"
+          
+          # Clean up container
+          docker stop "$CONTAINER_ID" 2>/dev/null || true
+          docker rm "$CONTAINER_ID" 2>/dev/null || true
+          
+          # Check for module loading errors (the error from the broken Chainguard image)
+          if echo "$OUTPUT" | grep -qE "(Cannot find module|MODULE_NOT_FOUND)"; then
+            echo "FAILED: Delegated worker has module loading errors"
+            exit 1
+          fi
+          
+          # If container shows startup messages, it's working (will fail later due to fake credentials)
+          if echo "$OUTPUT" | grep -q "Starting delegated reindex worker"; then
+            echo "SUCCESS: Delegated worker started successfully"
+            exit 0
+          fi
+          
+          # If container exited with non-zero and no startup message, it failed to load
+          if [ "$RUNNING" = "false" ] && [ "$EXIT_CODE" != "0" ] && [ "$EXIT_CODE" != "unknown" ]; then
+            echo "FAILED: Delegated worker exited with code $EXIT_CODE without starting properly"
+            exit 1
+          fi
+          
+          echo "SUCCESS: Delegated worker loaded modules successfully"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
