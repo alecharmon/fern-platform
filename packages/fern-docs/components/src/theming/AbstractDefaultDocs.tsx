@@ -3,7 +3,7 @@
 import { useTheme } from "next-themes";
 import React, { Fragment } from "react";
 import { cn } from "../cn";
-import { FERN_FOOTER_ID, FERN_HEADER_ID } from "../constants";
+import { FERN_FOOTER_ID } from "../constants";
 import { useHasCustomFooter } from "../hooks/useHasCustomFooter";
 import { Separator } from "../Separator";
 import { useIsEmbedded } from "../state/embedded";
@@ -79,10 +79,10 @@ export default function AbstractDefaultDocs({
         >
             <div className="fern-background-image pointer-events-none fixed inset-0" />
             {!isEmbedded && customHeader != null ? (
-                <header id={FERN_HEADER_ID} className="width-before-scroll-bar" data-theme="default">
+                <FernHeader className="width-before-scroll-bar" data-theme="default">
                     {customHeader}
                     <Fragment key="header-tabs">{headerTabs}</Fragment>
-                </header>
+                </FernHeader>
             ) : (
                 !isEmbedded && (
                     <FernHeader
