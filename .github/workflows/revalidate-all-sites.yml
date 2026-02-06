@@ -175,22 +175,28 @@ jobs:
             echo "failed_sites=" >> $GITHUB_OUTPUT
           fi
 
-      - name: Send Slack notification for failures
+      - name: Build Slack message
         if: steps.collect.outputs.failed_sites != ''
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_DOCS_INCIDENTS }}
+        id: slack_message
         run: |
           failed_sites="${{ steps.collect.outputs.failed_sites }}"
-          
-          # Build the list of failed sites for Slack
+
           site_list=$(echo "$failed_sites" | tr ',' '\n' | while read site; do
             [ -n "$site" ] && echo "• $site"
           done)
-          
-          # Count failed sites
+
           failed_count=$(echo "$failed_sites" | tr ',' '\n' | grep -c .)
-          
-          # Send to Slack
-          curl -X POST "$SLACK_WEBHOOK_URL" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n --arg text "*Revalidation Failed for $failed_count site(s)*\n\n$site_list" '{text: $text}')"
+
+          echo "text=*Revalidation Failed for $failed_count site(s)*\n\n$site_list" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification for failures
+        if: steps.collect.outputs.failed_sites != ''
+        uses: slackapi/slack-github-action@v2
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "${{ steps.slack_message.outputs.text }}"
+            }
