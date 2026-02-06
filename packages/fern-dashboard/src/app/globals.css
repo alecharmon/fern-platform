@@ -911,16 +911,16 @@ code:not(.code-block):not(#preview-container *) {
   /* Offset underline */
   &::after {
     content: "";
-    @apply absolute left-0 right-0 bg-primary;
+    @apply absolute left-0 right-0 bg-primary pointer-events-none;
     height: 1px;
     bottom: -2px;
     opacity: 0.7;
-    transition: bottom 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
   }
 
   /* Hover animation: move underline down and change opacity */
   &:hover::after {
-    bottom: -4px;
+    transform: translateY(2px);
     opacity: 1;
   }
 }
