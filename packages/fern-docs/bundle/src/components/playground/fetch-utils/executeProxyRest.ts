@@ -16,13 +16,16 @@ export async function executeProxyRest(
         requestHeaders.set("X-Fern-Proxy-Request-Headers", Object.keys(req.headers).join(","));
     }
 
-    if (req.body?.type === "form-data") {
+    const reqContentType = requestHeaders.get("Content-Type") ?? undefined;
+
+    // Only delete Content-Type for form-data that will be sent as multipart (not form-urlencoded)
+    if (req.body?.type === "form-data" && !reqContentType?.toLowerCase().includes("form-urlencoded")) {
         requestHeaders.delete("Content-Type");
     }
     const fetchOptions: RequestInit = {
         method: req.method,
         headers: requestHeaders,
-        body: await toBodyInit(req.body),
+        body: await toBodyInit(req.body, reqContentType),
         mode: "cors" as RequestMode
     };
 

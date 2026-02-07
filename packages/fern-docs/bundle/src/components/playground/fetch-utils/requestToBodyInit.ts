@@ -2,10 +2,15 @@ import { UnreachableCaseError } from "ts-essentials";
 
 import type { ProxyRequest } from "../types/proxy";
 
-export async function toBodyInit(body: ProxyRequest["body"]): Promise<BodyInit | null> {
+export async function toBodyInit(body: ProxyRequest["body"], contentType?: string): Promise<BodyInit | null> {
     if (body == null) {
         return null;
     }
+
+    if (contentType?.toLowerCase().includes("form-urlencoded")) {
+        return toUrlSearchParams(body);
+    }
+
     switch (body.type) {
         case "json":
             return JSON.stringify(body.value);
@@ -66,6 +71,50 @@ export async function toBodyInit(body: ProxyRequest["body"]): Promise<BodyInit |
         }
         default:
             console.error(new UnreachableCaseError(body));
+            return null;
+    }
+}
+
+function toUrlSearchParams(body: NonNullable<ProxyRequest["body"]>): string | null {
+    const params = new URLSearchParams();
+
+    switch (body.type) {
+        case "json": {
+            if (body.value == null || typeof body.value !== "object") {
+                return null;
+            }
+            for (const [key, value] of Object.entries(body.value as Record<string, unknown>)) {
+                if (value !== undefined) {
+                    params.append(key, String(value));
+                }
+            }
+            return params.toString();
+        }
+        case "form-data": {
+            for (const [key, value] of Object.entries(body.value)) {
+                switch (value.type) {
+                    case "json":
+                        if (value.value !== undefined) {
+                            params.append(
+                                key,
+                                typeof value.value === "string" ? value.value : JSON.stringify(value.value)
+                            );
+                        }
+                        break;
+                    case "exploded":
+                        for (const item of value.value) {
+                            if (item !== undefined) {
+                                params.append(key, typeof item === "string" ? item : JSON.stringify(item));
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return params.toString();
+        }
+        default:
             return null;
     }
 }

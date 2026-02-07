@@ -11,15 +11,17 @@ export async function executeProxyStream(
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set("X-Fern-Proxy-Request-Headers", Object.keys(req.headers).join(","));
 
-    // multipart/form-data will be handled by the fetch API with a boundary, and should not be forwarded
-    if (req.body?.type === "form-data") {
+    const reqContentType = requestHeaders.get("Content-Type") ?? undefined;
+
+    // Only delete Content-Type for form-data that will be sent as multipart (not form-urlencoded)
+    if (req.body?.type === "form-data" && !reqContentType?.toLowerCase().includes("form-urlencoded")) {
         requestHeaders.delete("Content-Type");
     }
 
     const response = await fetch(disableProxy ? req.url : urljoin(getHttpProxyUrl(), req.url), {
         method: req.method,
         headers: requestHeaders,
-        body: await toBodyInit(req.body),
+        body: await toBodyInit(req.body, reqContentType),
         mode: "cors"
     });
 
