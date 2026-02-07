@@ -1,0 +1,36 @@
+{
+  "name": "@fern-platform/docs-pdf-exporter-lambda",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "dev:generate-cover-pdf": "tsx src/scripts/generate-cover-pdf.ts",
+    "dev:generate-docs-pdf": "tsx src/scripts/generate-docs-pdf.ts",
+    "playwright:install": "playwright install chromium",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.744.0",
+    "@fern-api/docs-pdf": "workspace:*",
+    "axios": "1.13.2",
+    "jose": "catalog:",
+    "p-limit": "7.2.0",
+    "pdf-lib": "^1.17.1",
+    "playwright": "1.57.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@fern-platform/configs": "workspace:*",
+    "@playwright/test": "^1.57.0",
+    "@types/aws-lambda": "^8.10.143",
+    "@types/node": "^22.0.0",
+    "tsup": "catalog:",
+    "tsx": "^4.7.1",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

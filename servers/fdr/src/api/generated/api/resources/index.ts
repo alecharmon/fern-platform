@@ -15,6 +15,7 @@ export * from "./git/service/requests";
 export * from "./git/types";
 export * as libraryDocs from "./libraryDocs";
 export * as navigation from "./navigation";
+export * as pdfExport from "./pdfExport";
 export * as sdks from "./sdks";
 export * as snippets from "./snippets";
 export * from "./snippets/errors";

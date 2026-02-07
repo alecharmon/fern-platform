@@ -41,7 +41,7 @@
     "fdr-lambda:dev": "bash scripts/start-local-fdr-lambda.sh",
     "fdr-lambda:generate": "pnpm fern generate --api fdr --group fdr-lambda  && pnpm turbo --filter=@fern-api/fdr-lambda-sdk compile",
     "fdr:dev": "bash scripts/start-local-fdr.sh",
-    "fdr:generate": "pnpm fern generate --api fdr  && pnpm turbo --filter=@fern-api/fdr-sdk compile",
+    "fdr:generate": "pnpm fern generate --api fdr && pnpm turbo --filter=@fern-api/fdr-sdk compile",
     "fdr:link-to-cli": "bash scripts/link-fdr-sdk-to-cli.sh",
     "fdr:reset": "pnpm --filter=@fern-platform/fdr db:reset:local",
     "fdr:stop": "bash scripts/stop-local-fdr.sh",
@@ -68,13 +68,13 @@
     "radix:up": "pnpm up -r \"@radix-ui/*\"",
     "root-package:check": "pnpm tsx packages/scripts/src/cli.ts -- fern-scripts check-root-package",
     "root-package:fix": "pnpm root-package:check --fix",
+    "smoke-test": "pnpm tsx scripts/smoke-test.ts",
     "test": "CI=true turbo test",
     "test:e2e": "pnpm --filter=@fern-platform/playwright e2e",
     "test:e2e:headed": "pnpm --filter=@fern-platform/playwright e2e:headed",
     "test:update": "CI=true turbo test -- -u",
     "vercel-scripts": "pnpm --filter=@fern-platform/vercel-scripts vercel-scripts",
     "vercel:up": "pnpm up -r \"@vercel/*\"",
-    "smoke-test": "pnpm tsx scripts/smoke-test.ts",
     "visual-diff": "pnpm tsx scripts/visual-diff.ts",
     "visual-diff:serve": "pnpm tsx scripts/visual-diff-serve.ts"
   },
@@ -93,6 +93,7 @@
     "@types/node": "^22.0.0",
     "@types/node-fetch": "^2.6.3",
     "@vercel/node": "^2.15.10",
+    "@walletconnect/universal-provider": "^2.23.0",
     "browserify-sign": "^4.2.3",
     "clipboardy": "4.0.0",
     "colorjs.io": "^0.5.2",
@@ -124,8 +125,7 @@
     "typescript": "catalog:",
     "unified": "11.0.5",
     "uuid": "catalog:",
-    "webpack": "catalog:",
-    "@walletconnect/universal-provider": "^2.23.0"
+    "webpack": "catalog:"
   },
   "dependencies": {
     "eslint-plugin-i18n": "^2.4.0",
@@ -237,8 +237,8 @@
       "diff": ">=4.0.4",
       "elliptic": "npm:@soatok/elliptic-to-noble@9999.0.0",
       "fast-xml-parser": "^5.3.4",
-      "tar": "^7.5.7",
       "qs": "^6.14.1",
+      "tar": "^7.5.7",
       "vite": "^6.4.1",
       "webpack-bundle-analyzer>ws": "^7.5.10"
     }

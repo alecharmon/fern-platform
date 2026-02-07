@@ -121,6 +121,33 @@ enum LibraryDocsGenerationStatus {
   FAILED
 }
 
+// PDF Export Tasks
+model PdfExportTask {
+  id           String              @id
+  orgId        String
+  docsUrl      String
+  status       PdfExportTaskStatus @default(PENDING)
+  options      Json? // DocsPdfGenerateOptions from frontend
+  createdAt    DateTime            @default(now())
+  startedAt    DateTime?
+  completedAt  DateTime?
+  s3Key        String? // S3 key where the PDF is stored
+  fileName     String?
+  sizeBytes    Int?
+  errorMessage String?
+
+  @@index([orgId, docsUrl])
+  @@index([status])
+  @@map("pdf_export_tasks")
+}
+
+enum PdfExportTaskStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
 model DocsConfigInstances {
   docsConfigInstanceId       String   @id
   createdAt                  DateTime @default(now())

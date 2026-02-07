@@ -15,6 +15,7 @@ import type { CliService as generators_CliService } from "./api/resources/genera
 import type { VersionsService as generators_VersionsService } from "./api/resources/generators/resources/versions/service/VersionsService";
 import type { GeneratorsService as generators_RootService } from "./api/resources/generators/service/GeneratorsService";
 import type { GitService } from "./api/resources/git/service/GitService";
+import type { PdfExportService as pdfExport_RootService } from "./api/resources/pdfExport/service/PdfExportService";
 import type { VersionsService as sdks_VersionsService } from "./api/resources/sdks/resources/versions/service/VersionsService";
 import type { SnippetsService } from "./api/resources/snippets/service/SnippetsService";
 import type { SnippetsFactoryService } from "./api/resources/snippetsFactory/service/SnippetsFactoryService";
@@ -70,6 +71,9 @@ export function register(
             cli: generators_CliService;
             versions: generators_VersionsService;
         };
+        pdfExport: {
+            _root: pdfExport_RootService;
+        };
         sdks: {
             versions: sdks_VersionsService;
         };
@@ -84,6 +88,7 @@ export function register(
     (expressApp as any).use("/v2/registry/docs", services.docs.v2.read._root.toRouter());
     (expressApp as any).use("/v2/registry/docs", services.docs.v2.write._root.toRouter());
     (expressApp as any).use("/generators", services.generators._root.toRouter());
+    (expressApp as any).use("/pdf-export", services.pdfExport._root.toRouter());
     (expressApp as any).use("/registry", services.diff.toRouter());
     (expressApp as any).use("/docs-cache", services.docsCache.toRouter());
     (expressApp as any).use("/generators/cli", services.generators.cli.toRouter());

@@ -20,6 +20,7 @@ import { getGeneratorsCliController } from "../../controllers/generators/getGene
 import { getGeneratorsRootController } from "../../controllers/generators/getGeneratorsRootController";
 import { getGeneratorsVersionsController } from "../../controllers/generators/getGeneratorsVersionsController";
 import { getGitController } from "../../controllers/git/getGitController";
+import { getPdfExportController } from "../../controllers/pdf-export/getPdfExportController";
 import { getVersionsService } from "../../controllers/sdk/getVersionsService";
 import { getSnippetsFactoryService } from "../../controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "../../controllers/snippets/getSnippetsService";
@@ -133,6 +134,9 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
             _root: getGeneratorsRootController(fdrApplication),
             cli: getGeneratorsCliController(fdrApplication),
             versions: getGeneratorsVersionsController(fdrApplication)
+        },
+        pdfExport: {
+            _root: getPdfExportController(fdrApplication)
         },
         tokens: getTokensService(fdrApplication),
         git: getGitController(fdrApplication),

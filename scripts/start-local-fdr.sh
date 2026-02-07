@@ -35,6 +35,28 @@ docker compose -f docker-compose.local.yml up -d
 echo "⏳ Waiting for services to be ready..."
 sleep 5
 
+# Step 1.5: Ensure local SQS queue exists (LocalStack)
+echo ""
+echo "📨 Ensuring local SQS queue exists (LocalStack)..."
+if docker ps --format '{{.Names}}' | grep -q '^fdr-localstack-1$'; then
+    # LocalStack can take a moment to become ready after container start.
+    for i in {1..10}; do
+        if docker exec fdr-localstack-1 awslocal sqs create-queue \
+            --queue-name pdf-export-queue.fifo \
+            --attributes FifoQueue=true,ContentBasedDeduplication=false >/dev/null 2>&1; then
+            echo "✅ SQS queue ready: pdf-export-queue.fifo"
+            break
+        fi
+        if [ "$i" -eq 10 ]; then
+            echo "⚠️  Failed to create SQS queue in LocalStack after retries. PDF export enqueuing may fail locally."
+        else
+            sleep 1
+        fi
+    done
+else
+    echo "⚠️  LocalStack container not found (fdr-localstack-1). PDF export enqueuing may fail locally."
+fi
+
 # Step 2: Check if migrations are needed
 echo ""
 echo "🔧 Running database migrations..."
@@ -73,6 +95,12 @@ export PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT=http://localhost:9001
 # Dummy AWS credentials for local Lambda invocation (Docker RIE doesn't verify)
 export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test
+
+# PDF export (SQS + internal callbacks)
+export PDF_EXPORT_SQS_REGION=us-east-1
+export PDF_EXPORT_SQS_QUEUE_URL=http://localhost:4566/000000000000/pdf-export-queue.fifo
+# Used to validate service-to-service JWTs on callback endpoints (local/dev only)
+export PDF_EXPORT_JWT_SECRET_KEY=local-dev-pdf-export-jwt-secret
 
 echo "🔍 Log level set to: $LOG_LEVEL"
 echo ""

@@ -26,6 +26,14 @@ const PYTHON_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME_ENV_VAR = "PYTHON_LIBRARY_DOCS_LA
 const PYTHON_LIBRARY_DOCS_LAMBDA_REGION_ENV_VAR = "PYTHON_LIBRARY_DOCS_LAMBDA_REGION";
 const PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT_ENV_VAR = "PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT";
 
+const PDF_EXPORT_S3_BUCKET_NAME_ENV_VAR = "PDF_EXPORT_S3_BUCKET_NAME";
+const PDF_EXPORT_S3_BUCKET_REGION_ENV_VAR = "PDF_EXPORT_S3_BUCKET_REGION";
+const PDF_EXPORT_S3_URL_OVERRIDE_ENV_VAR = "PDF_EXPORT_S3_URL_OVERRIDE";
+
+const PDF_EXPORT_SQS_QUEUE_URL_ENV_VAR = "PDF_EXPORT_SQS_QUEUE_URL";
+const PDF_EXPORT_SQS_REGION_ENV_VAR = "PDF_EXPORT_SQS_REGION";
+const PDF_EXPORT_CALLBACK_BASE_URL_ENV_VAR = "PDF_EXPORT_CALLBACK_BASE_URL";
+
 const DOMAIN_SUFFIX_ENV_VAR = "DOMAIN_SUFFIX";
 const SLACK_TOKEN_ENV_VAR = "SLACK_TOKEN";
 const LOG_LEVEL_ENV_VAR = "LOG_LEVEL";
@@ -57,6 +65,11 @@ export interface LambdaConfig {
     endpoint?: string;
 }
 
+export interface SqsConfig {
+    queueUrl: string;
+    region: string;
+}
+
 export interface FdrConfig {
     localModeOverride: boolean;
     venusUrl: string;
@@ -68,6 +81,9 @@ export interface FdrConfig {
     dbDocsDefinitionS3: S3Config;
     privateApiDefinitionSourceS3: S3Config;
     libraryDocsS3: S3Config;
+    pdfExportS3: S3Config;
+    pdfExportSqs: SqsConfig;
+    pdfExportCallbackBaseUrl: string;
     pythonLibraryDocsLambda?: LambdaConfig;
     domainSuffix: string;
     slackToken: string;
@@ -103,6 +119,9 @@ function getConfigForLocalMode(): FdrConfig {
         dbDocsDefinitionS3: selfHostedS3Config,
         privateApiDefinitionSourceS3: selfHostedS3Config,
         libraryDocsS3: selfHostedS3Config,
+        pdfExportS3: selfHostedS3Config,
+        pdfExportSqs: getPdfExportSqsConfigOrThrow(),
+        pdfExportCallbackBaseUrl: "http://localhost:8080",
         pythonLibraryDocsLambda: getPythonLibraryDocsLambdaConfig(),
         domainSuffix: "docs.buildwithfern.com",
         slackToken: "local",
@@ -154,7 +173,14 @@ export function getConfig(): FdrConfig {
             bucketRegion: getEnvironmentVariableOrThrow(LIBRARY_DOCS_S3_BUCKET_REGION_ENV_VAR),
             urlOverride: process.env[LIBRARY_DOCS_S3_URL_OVERRIDE_ENV_VAR]
         },
+        pdfExportS3: {
+            bucketName: getEnvironmentVariableOrThrow(PDF_EXPORT_S3_BUCKET_NAME_ENV_VAR),
+            bucketRegion: getEnvironmentVariableOrThrow(PDF_EXPORT_S3_BUCKET_REGION_ENV_VAR),
+            urlOverride: process.env[PDF_EXPORT_S3_URL_OVERRIDE_ENV_VAR]
+        },
         pythonLibraryDocsLambda: getPythonLibraryDocsLambdaConfig(),
+        pdfExportSqs: getPdfExportSqsConfigOrThrow(),
+        pdfExportCallbackBaseUrl: getEnvironmentVariableOrThrow(PDF_EXPORT_CALLBACK_BASE_URL_ENV_VAR),
         domainSuffix: getEnvironmentVariableOrThrow(DOMAIN_SUFFIX_ENV_VAR),
         slackToken: getEnvironmentVariableOrThrow(SLACK_TOKEN_ENV_VAR),
         logLevel: process.env[LOG_LEVEL_ENV_VAR] ?? "info",
@@ -177,6 +203,13 @@ function getPythonLibraryDocsLambdaConfig(): LambdaConfig | undefined {
         functionName,
         region: process.env[PYTHON_LIBRARY_DOCS_LAMBDA_REGION_ENV_VAR] ?? "us-east-1",
         endpoint: process.env[PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT_ENV_VAR]
+    };
+}
+
+function getPdfExportSqsConfigOrThrow(): SqsConfig {
+    return {
+        queueUrl: getEnvironmentVariableOrThrow(PDF_EXPORT_SQS_QUEUE_URL_ENV_VAR),
+        region: process.env[PDF_EXPORT_SQS_REGION_ENV_VAR] ?? "us-east-1"
     };
 }
 

@@ -1,5 +1,5 @@
 import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
-import { CfnOutput, Duration, type Environment, RemovalPolicy, Stack, type StackProps, Token } from "aws-cdk-lib";
+import { CfnOutput, Duration, type Environment, RemovalPolicy, Size, Stack, type StackProps, Token } from "aws-cdk-lib";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
@@ -11,6 +11,8 @@ import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patte
 import { CfnReplicationGroup, CfnSubnetGroup } from "aws-cdk-lib/aws-elasticache";
 import { ApplicationProtocol, HttpCodeElb } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { ArnPrincipal, Effect, PolicyStatement, ServicePrincipal, User } from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
@@ -20,7 +22,9 @@ import { BlockPublicAccess, Bucket, HttpMethods } from "aws-cdk-lib/aws-s3";
 import { PrivateDnsNamespace } from "aws-cdk-lib/aws-servicediscovery";
 import * as sns from "aws-cdk-lib/aws-sns";
 import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
+import * as path from "path";
 
 const CONTAINER_NAME = "fern-definition-registry";
 const SERVICE_NAME = "fdr";
@@ -139,6 +143,19 @@ export class FdrDeployStack extends Stack {
             versioned: true
         });
 
+        const pdfExportBucket = new Bucket(this, "fdr-pdf-export-files", {
+            bucketName: `fdr-${environmentType.toLowerCase()}-pdf-export-files`,
+            removalPolicy: RemovalPolicy.RETAIN,
+            cors: [
+                {
+                    allowedMethods: [HttpMethods.GET, HttpMethods.POST, HttpMethods.PUT],
+                    allowedOrigins: ["*"],
+                    allowedHeaders: ["*"]
+                }
+            ],
+            versioned: true
+        });
+
         const publicDocsBucket = new Bucket(this, "fdr-docs-files-public", {
             bucketName: `fdr-${environmentType.toLowerCase()}-docs-files-public`,
             removalPolicy: RemovalPolicy.RETAIN,
@@ -209,6 +226,62 @@ export class FdrDeployStack extends Stack {
             namespaceName: cloudmapNamespaceName
         });
 
+        const pdfExportDlq = new sqs.Queue(this, "pdf-export-dlq", {
+            queueName: `pdf-export-dlq-${environmentType.toLowerCase()}`,
+            retentionPeriod: Duration.days(14)
+        });
+
+        const pdfExportQueue = new sqs.Queue(this, "pdf-export-queue", {
+            queueName: `pdf-export-queue-${environmentType.toLowerCase()}.fifo`,
+            fifo: true,
+            // Producer sets MessageDeduplicationId explicitly; keep content-based dedup off.
+            contentBasedDeduplication: false,
+            // Must be >= Lambda timeout; leave some buffer for retries/cleanup.
+            visibilityTimeout: Duration.minutes(20),
+            retentionPeriod: Duration.days(14),
+            deadLetterQueue: {
+                queue: pdfExportDlq,
+                maxReceiveCount: 3
+            }
+        });
+
+        const pdfExporterLambda = new lambda.DockerImageFunction(this, "docs-pdf-exporter-lambda", {
+            functionName: `docs-pdf-exporter-${environmentType.toLowerCase()}`,
+            // Playwright requires OS-level dependencies; deploy as a container image.
+            // Build context is repo root so we can build the workspace package.
+            code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, "../../.."), {
+                file: "servers/docs-pdf-exporter-lambda/Dockerfile"
+            }),
+            // AWS Lambda max timeout is 15 minutes.
+            timeout: Duration.minutes(15),
+            // Lambda supports up to 10,240 MB memory; PDF generation can be memory-heavy.
+            memorySize: 8192,
+            // Playwright/Chromium can use /tmp; bump ephemeral storage for safety.
+            ephemeralStorageSize: Size.gibibytes(5),
+            logGroup,
+            environment: {
+                NODE_ENV: "production",
+                PDF_EXPORT_FERN_TOKEN: getEnvironmentVariableOrThrow("PDF_EXPORT_FERN_TOKEN"),
+                PDF_EXPORT_JWT_SECRET_KEY: getEnvironmentVariableOrThrow("PDF_EXPORT_JWT_SECRET_KEY")
+            }
+        });
+
+        pdfExportQueue.grantConsumeMessages(pdfExporterLambda);
+        pdfExporterLambda.addEventSource(
+            new SqsEventSource(pdfExportQueue, {
+                // FIFO queue: process one message at a time per invocation
+                batchSize: 1
+            })
+        );
+
+        new CfnOutput(this, "PdfExportQueueUrl", {
+            value: pdfExportQueue.queueUrl
+        });
+
+        new CfnOutput(this, "PdfExporterLambdaName", {
+            value: pdfExporterLambda.functionName
+        });
+
         const fargateService = new ApplicationLoadBalancedFargateService(this, SERVICE_NAME, {
             serviceName: SERVICE_NAME,
             cluster,
@@ -232,6 +305,12 @@ export class FdrDeployStack extends Stack {
                     API_DEFINITION_SOURCE_BUCKET_REGION: privateApiDefinitionSourceBucket.stack.region,
                     LIBRARY_DOCS_S3_BUCKET_NAME: libraryDocsBucket.bucketName,
                     LIBRARY_DOCS_S3_BUCKET_REGION: libraryDocsBucket.stack.region,
+                    PDF_EXPORT_S3_BUCKET_NAME: pdfExportBucket.bucketName,
+                    PDF_EXPORT_S3_BUCKET_REGION: pdfExportBucket.stack.region,
+                    PDF_EXPORT_SQS_QUEUE_URL: pdfExportQueue.queueUrl,
+                    PDF_EXPORT_SQS_REGION: Stack.of(this).region,
+                    PDF_EXPORT_JWT_SECRET_KEY: getEnvironmentVariableOrThrow("PDF_EXPORT_JWT_SECRET_KEY"),
+                    PDF_EXPORT_CALLBACK_BASE_URL: `https://${getServiceDomainName(environmentType, environmentInfo)}`,
                     DOMAIN_SUFFIX: getDomainSuffix(environmentType),
                     SLACK_TOKEN: getEnvironmentVariableOrThrow("FERNIE_SLACK_APP_TOKEN"),
                     LOG_LEVEL: getLogLevel(environmentType),

@@ -19,6 +19,8 @@ services:
       API_DEFINITION_SOURCE_BUCKET_REGION: dummy
       LIBRARY_DOCS_S3_BUCKET_NAME: dummy
       LIBRARY_DOCS_S3_BUCKET_REGION: dummy
+      PDF_EXPORT_SQS_QUEUE_URL: dummy
+      PDF_EXPORT_SQS_REGION: us-east-1
       DOMAIN_SUFFIX: dummy
       SLACK_TOKEN: dummy
       DOCS_CACHE_ENDPOINT: redis-0:6379

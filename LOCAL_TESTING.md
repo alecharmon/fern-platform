@@ -30,6 +30,7 @@ pnpm fdr:dev -- verbose
 This starts everything you need:
 - ✅ FDR server at http://localhost:8080
 - ✅ PostgreSQL, Redis, S3 Mock
+- ✅ Local SQS (LocalStack) for PDF export queue
 
 **Log levels:** `error`, `warn`, `info` (default), `debug`, `verbose`, `silly`
 

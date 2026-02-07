@@ -20,6 +20,14 @@ services:
     ports:
       - 6379:6379
     command: ["redis-server"]
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs
+      - DEFAULT_REGION=us-east-1
+      - AWS_DEFAULT_REGION=us-east-1
   python-library-docs-parser:
     build:
       context: ../fdr-python-library-docs-parser

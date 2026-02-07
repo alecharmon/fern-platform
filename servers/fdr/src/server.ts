@@ -20,6 +20,7 @@ import { getGeneratorsCliController } from "./controllers/generators/getGenerato
 import { getGeneratorsRootController } from "./controllers/generators/getGeneratorsRootController";
 import { getGeneratorsVersionsController } from "./controllers/generators/getGeneratorsVersionsController";
 import { getGitController } from "./controllers/git/getGitController";
+import { getPdfExportController } from "./controllers/pdf-export";
 import { getVersionsService } from "./controllers/sdk/getVersionsService";
 import { getSnippetsFactoryService } from "./controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "./controllers/snippets/getSnippetsService";
@@ -121,6 +122,9 @@ async function startServer(): Promise<void> {
             git: getGitController(app),
             dashboard: {
                 _root: getDashboardController(app)
+            },
+            pdfExport: {
+                _root: getPdfExportController(app)
             }
         });
         app.logger.info(`Listening for requests on port ${PORT}`);

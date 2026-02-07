@@ -169,6 +169,16 @@ export const baseMockFdrConfig: FdrConfig = {
         bucketRegion: "us-east-1",
         urlOverride: "http://s3-mock:9090"
     },
+    pdfExportS3: {
+        bucketName: "fdr",
+        bucketRegion: "us-east-1",
+        urlOverride: "http://s3-mock:9090"
+    },
+    pdfExportSqs: {
+        queueUrl: "http://localhost:4566/000000000000/pdf-export-queue.fifo",
+        region: "us-east-1"
+    },
+    pdfExportCallbackBaseUrl: "http://localhost:9999",
     venusUrl: "",
     domainSuffix: "docs.buildwithfern.com",
     slackToken: "",
