@@ -11,7 +11,7 @@ import { getHeaderStorageKey } from "../auth/PlaygroundHeaderAuthForm";
 import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
 import { getAuthKey } from "../utils";
 import { returnSelectedOption } from "../utils/parse-auth-options";
-import { usePlaygroundBaseUrl } from "../utils/select-environment";
+import { usePlaygroundBaseUrl, useSelectedEnvironment } from "../utils/select-environment";
 
 type SnippetsModule = typeof import("@fern-api/snippets");
 let snippetsModulePromise: Promise<SnippetsModule> | null = null;
@@ -140,7 +140,8 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
     const [code, setCode] = useState<string>(t(lang).status.loading);
     const [snippetsLoad, setSnippetsLoad] = useState<SnippetsLoadState>({ status: "loading" });
     const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
-    const [baseURL] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
+    const [baseURL, environmentId] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
+    const selectedEnvironment = useSelectedEnvironment(context.endpoint);
 
     useEffect(() => {
         let cancelled = false;
@@ -349,9 +350,22 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
 
                 const auth = buildSnippetAuth(firstAuthScheme, authState, authKey);
 
-                // todo: support environments
+                const environments = context.endpoint.environments;
+                const isCustomUrl =
+                    baseURL != null && selectedEnvironment != null && baseURL !== selectedEnvironment.baseUrl;
+
+                let snippetBaseURL: string | undefined;
+                let snippetEnvironment: string | undefined;
+
+                if (isCustomUrl) {
+                    snippetBaseURL = baseURL;
+                } else if (environments != null && environments.length > 1 && environmentId != null) {
+                    snippetEnvironment = environmentId;
+                }
+
                 const request = {
-                    baseURL,
+                    baseURL: snippetBaseURL,
+                    environment: snippetEnvironment,
                     auth,
                     pathParameters: formState.pathParameters,
                     queryParameters: formState.queryParameters,
@@ -375,6 +389,9 @@ export const PlaygroundDynamicRequestPreview = forwardRef<
         memoizedGenerators,
         formState,
         baseURL,
+        environmentId,
+        selectedEnvironment,
+        context.endpoint.environments,
         authState,
         lang,
         snippetsLoad,

@@ -12,11 +12,7 @@ namespace Usage;
 public class Example
 {
     public async Task Do() {
-        var client = new CatcatcatTreeClient(
-            clientOptions: new ClientOptions {
-                BaseUrl = "https://api.example.com/v1"
-            }
-        );
+        var client = new CatcatcatTreeClient();
 
         await client.Users.CreateUserAsync(
             new CreateUserRequest {
@@ -60,17 +56,12 @@ public class Example
 
 import (
     client "github.com/fern-demo/cat-demo-go/v/client"
-    option "github.com/fern-demo/cat-demo-go/v/option"
     catGo "github.com/fern-demo/cat-demo-go/v"
     context "context"
 )
 
 func do() {
-    client := client.NewClient(
-        option.WithBaseURL(
-            "https://api.example.com/v1",
-        ),
-    )
+    client := client.NewClient()
     request := &catGo.CreateUserRequest{
         Name: "John Doe",
         Email: "john.doe@example.com",
@@ -102,7 +93,6 @@ public class Example {
     public static void main(String[] args) {
         Cat client = Cat
             .builder()
-            .url("https://api.example.com/v1")
             .build();
 
         client.users().createUser(
@@ -133,11 +123,7 @@ use Cat\\CatClient;
 use Cat\\Users\\Requests\\CreateUserRequest;
 use Cat\\Users\\Types\\CreateUserRequestRole;
 
-$client = new CatClient(
-    options: [
-        'baseUrl' => 'https://api.example.com/v1',
-    ],
-);
+$client = new CatClient();
 $client->users->createUser(
     new CreateUserRequest([
         'name' => 'John Doe',
@@ -158,9 +144,7 @@ $client->users->createUser(
     {
       "code": "from catcatcat import CatClient
 
-client = CatClient(
-    base_url="https://api.example.com/v1"
-)
+client = CatClient()
 
 client.users.create_user(
     name="John Doe",
@@ -180,7 +164,7 @@ client.users.create_user(
     {
       "code": "require "catcatcat"
 
-client = Catcatcat::Client.new(base_url: 'https://api.example.com/v1');
+client = Catcatcat::Client.new();
 
 client.users.create_user(
   name: 'John Doe',
@@ -240,9 +224,7 @@ dataTask.resume()",
       "code": "import { CatClient } from "@treetreetree/treetreetree-js";
 
 async function main() {
-    const client = new CatClient({
-        environment: "https://api.example.com/v1",
-    });
+    const client = new CatClient();
     await client.users.createUser({
         name: "John Doe",
         email: "john.doe@example.com",
@@ -411,9 +393,7 @@ echo $response->getBody();",
               {
                 "code": "from rcs import Pinnacle
 
-client = Pinnacle(
-    base_url="https://api.pinnacle.us/v1"
-)
+client = Pinnacle()
 
 client.phone_numbers.buy()
 ",
@@ -428,7 +408,7 @@ client.phone_numbers.buy()
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+client = Pinnacle::Client.new();
 
 client.phone_numbers.buy();
 ",
@@ -481,9 +461,7 @@ dataTask.resume()",
                 "code": "import { PinnacleClient } from "rcs-js";
 
 async function main() {
-    const client = new PinnacleClient({
-        environment: "https://api.pinnacle.us/v1",
-    });
+    const client = new PinnacleClient();
     await client.phoneNumbers.buy({});
 }
 main();
@@ -664,9 +642,7 @@ echo $response->getBody();",
               {
                 "code": "from rcs import Pinnacle
 
-client = Pinnacle(
-    base_url="https://api.pinnacle.us/v1"
-)
+client = Pinnacle()
 
 client.contacts.create(
     phone_number="+15551234567",
@@ -684,7 +660,7 @@ client.contacts.create(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+client = Pinnacle::Client.new();
 
 client.contacts.create(
   phone_number: '+15551234567',
@@ -740,9 +716,7 @@ dataTask.resume()",
                 "code": "import { PinnacleClient } from "rcs-js";
 
 async function main() {
-    const client = new PinnacleClient({
-        environment: "https://api.pinnacle.us/v1",
-    });
+    const client = new PinnacleClient();
     await client.contacts.create({
         phoneNumber: "+15551234567",
         description: "Customer contact",
@@ -900,9 +874,7 @@ echo $response->getBody();",
               {
                 "code": "from rcs import Pinnacle
 
-client = Pinnacle(
-    base_url="https://api.pinnacle.us/v1"
-)
+client = Pinnacle()
 
 client.brands.get(
     id=
@@ -919,7 +891,7 @@ client.brands.get(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+client = Pinnacle::Client.new();
 
 client.brands.get();
 ",
@@ -962,9 +934,7 @@ dataTask.resume()",
                 "code": "import { PinnacleClient } from "rcs-js";
 
 async function main() {
-    const client = new PinnacleClient({
-        environment: "https://api.pinnacle.us/v1",
-    });
+    const client = new PinnacleClient();
     await client.brands.get(, {});
 }
 main();
@@ -1125,9 +1095,7 @@ echo $response->getBody();",
               {
                 "code": "from rcs import Pinnacle
 
-client = Pinnacle(
-    base_url="https://api.pinnacle.us/v1"
-)
+client = Pinnacle()
 
 client.contacts.get()
 ",
@@ -1142,7 +1110,7 @@ client.contacts.get()
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+client = Pinnacle::Client.new();
 
 client.contacts.get();
 ",
@@ -1185,9 +1153,7 @@ dataTask.resume()",
                 "code": "import { PinnacleClient } from "rcs-js";
 
 async function main() {
-    const client = new PinnacleClient({
-        environment: "https://api.pinnacle.us/v1",
-    });
+    const client = new PinnacleClient();
     await client.contacts.get({});
 }
 main();
@@ -1367,9 +1333,7 @@ echo $response->getBody();",
               {
                 "code": "from rcs import Pinnacle
 
-client = Pinnacle(
-    base_url="https://api.pinnacle.us/v1"
-)
+client = Pinnacle()
 
 client.conversations.get(
     request={}
@@ -1386,7 +1350,7 @@ client.conversations.get(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+client = Pinnacle::Client.new();
 
 client.conversations.get(request: {});
 ",
@@ -1436,9 +1400,7 @@ dataTask.resume()",
                 "code": "import { PinnacleClient } from "rcs-js";
 
 async function main() {
-    const client = new PinnacleClient({
-        environment: "https://api.pinnacle.us/v1",
-    });
+    const client = new PinnacleClient();
     await client.conversations.get({});
 }
 main();
@@ -1620,9 +1582,7 @@ echo $response->getBody();",
               {
                 "code": "from rcs import Pinnacle
 
-client = Pinnacle(
-    base_url="https://api.pinnacle.us/v1"
-)
+client = Pinnacle()
 
 client.phone_numbers.search()
 ",
@@ -1637,7 +1597,7 @@ client.phone_numbers.search()
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+client = Pinnacle::Client.new();
 
 client.phone_numbers.search();
 ",
@@ -1690,9 +1650,7 @@ dataTask.resume()",
                 "code": "import { PinnacleClient } from "rcs-js";
 
 async function main() {
-    const client = new PinnacleClient({
-        environment: "https://api.pinnacle.us/v1",
-    });
+    const client = new PinnacleClient();
     await client.phoneNumbers.search({});
 }
 main();
@@ -1884,9 +1842,7 @@ echo $response->getBody();",
               {
                 "code": "from rcs import Pinnacle
 
-client = Pinnacle(
-    base_url="https://api.pinnacle.us/v1"
-)
+client = Pinnacle()
 
 client.messages.mms.send(
     to="+15551234567",
@@ -1908,7 +1864,7 @@ client.messages.mms.send(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+client = Pinnacle::Client.new();
 
 client.messages.mms.send_(
   to: '+15551234567',
@@ -1968,9 +1924,7 @@ dataTask.resume()",
                 "code": "import { PinnacleClient } from "rcs-js";
 
 async function main() {
-    const client = new PinnacleClient({
-        environment: "https://api.pinnacle.us/v1",
-    });
+    const client = new PinnacleClient();
     await client.messages.mms.send({
         to: "+15551234567",
         from: "+15559876543",
@@ -2160,9 +2114,7 @@ echo $response->getBody();",
               {
                 "code": "from rcs import Pinnacle
 
-client = Pinnacle(
-    base_url="https://api.pinnacle.us/v1"
-)
+client = Pinnacle()
 
 client.messages.sms.send(
     to="+15551234567",
@@ -2181,7 +2133,7 @@ client.messages.sms.send(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new(base_url: 'https://api.pinnacle.us/v1');
+client = Pinnacle::Client.new();
 
 client.messages.sms.send_(
   to: '+15551234567',
@@ -2239,9 +2191,7 @@ dataTask.resume()",
                 "code": "import { PinnacleClient } from "rcs-js";
 
 async function main() {
-    const client = new PinnacleClient({
-        environment: "https://api.pinnacle.us/v1",
-    });
+    const client = new PinnacleClient();
     await client.messages.sms.send({
         to: "+15551234567",
         from: "+15559876543",
@@ -2493,9 +2443,7 @@ dataTask.resume()",
       "code": "import { CatClient } from "@treetreetree/treetreetree-js";
 
 async function main() {
-    const client = new CatClient({
-        environment: "https://api.example.com/v1",
-    });
+    const client = new CatClient();
     await client.users.createUser({
         name: "John Doe",
         email: "john.doe@example.com",
@@ -2628,9 +2576,7 @@ echo $response->getBody();",
     {
       "code": "from catcatcat import CatClient
 
-client = CatClient(
-    base_url="https://api.example.com/v1"
-)
+client = CatClient()
 
 client.users.create_user(
     name="John Doe",
@@ -2713,9 +2659,7 @@ dataTask.resume()",
       "code": "import { CatClient } from "@treetreetree/treetreetree-js";
 
 async function main() {
-    const client = new CatClient({
-        environment: "https://api.example.com/v1",
-    });
+    const client = new CatClient();
     await client.users.createUser({
         name: "John Doe",
         email: "john.doe@example.com",
@@ -2935,9 +2879,7 @@ dataTask.resume()",
       "code": "import { CatClient } from "@treetreetree/treetreetree-js";
 
 async function main() {
-    const client = new CatClient({
-        environment: "https://api.example.com/v1",
-    });
+    const client = new CatClient();
     await client.users.createUser({
         name: "John Doe",
         email: "john.doe@example.com",
@@ -3157,9 +3099,7 @@ dataTask.resume()",
       "code": "import { CatClient } from "@treetreetree/treetreetree-js";
 
 async function main() {
-    const client = new CatClient({
-        environment: "https://api.example.com/v1",
-    });
+    const client = new CatClient();
     await client.users.createUser({
         name: "John Doe",
         email: "john.doe@example.com",
@@ -3379,9 +3319,7 @@ dataTask.resume()",
       "code": "import { CatClient } from "@treetreetree/treetreetree-js";
 
 async function main() {
-    const client = new CatClient({
-        environment: "https://api.example.com/v1",
-    });
+    const client = new CatClient();
     await client.users.createUser({
         name: "Jane Admin",
         email: "jane.admin@example.com",

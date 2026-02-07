@@ -77,10 +77,14 @@ export function buildSdkSnippetRequest(
         }
     }
 
+    const environments = endpoint?.environments;
+    const hasMultipleEnvironments = environments != null && environments.length > 1;
+    const firstEnv = environments?.[0];
+    const defaultEnvironmentId = endpoint.defaultEnvironment ?? firstEnv?.id;
+
     return {
-        baseURL:
-            endpoint?.environments?.find((env) => env.id === endpoint.defaultEnvironment)?.baseUrl ??
-            endpoint?.environments?.[0]?.baseUrl,
+        baseURL: undefined,
+        environment: hasMultipleEnvironments ? defaultEnvironmentId : undefined,
         auth,
         pathParameters: example.pathParameters,
         queryParameters: example.queryParameters,
