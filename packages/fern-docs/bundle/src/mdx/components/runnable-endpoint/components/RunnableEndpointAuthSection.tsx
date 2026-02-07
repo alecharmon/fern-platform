@@ -98,15 +98,17 @@ export function RunnableEndpointAuthSection({ authSchemes, lang }: RunnableEndpo
                                     </Select.Trigger>
                                     <Select.Portal>
                                         <Select.Content
+                                            position="popper"
                                             className={cn(
                                                 "rounded-2 bg-background border-border-default border shadow-xl backdrop-blur",
-                                                "z-50 overflow-hidden"
+                                                "z-50 overflow-hidden",
+                                                "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1"
                                             )}
                                         >
                                             <Select.ScrollUpButton className="flex h-6 cursor-default items-center justify-center">
                                                 <ChevronUp className="size-4" />
                                             </Select.ScrollUpButton>
-                                            <Select.Viewport className="p-1">
+                                            <Select.Viewport className="p-1 min-w-(--radix-select-trigger-width)">
                                                 {authSchemes.map((auth, index) => (
                                                     <Select.Item
                                                         key={getAuthSchemeValue(index)}
