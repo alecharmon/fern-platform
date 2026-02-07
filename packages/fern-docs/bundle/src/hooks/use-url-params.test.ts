@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { useUrlParams } from "./use-url-params";
 
 const mocks = vi.hoisted(() => {
@@ -23,6 +24,10 @@ describe("useUrlParams", () => {
         Array.from(mocks.mockSearchParams.keys()).forEach((key) => mocks.mockSearchParams.delete(key));
         mocks.mockUsePathname.mockReturnValue("/test-path");
         mocks.mockUseSearchParams.mockReturnValue(mocks.mockSearchParams);
+        Object.defineProperty(window, "location", {
+            value: { pathname: "/test-path", search: "" },
+            writable: true
+        });
     });
 
     describe("addUrlParamToPathname", () => {
@@ -35,6 +40,7 @@ describe("useUrlParams", () => {
 
         it("should update existing URL parameter", () => {
             mocks.mockSearchParams.set("existingKey", "oldValue");
+            window.location = { pathname: "/test-path", search: "?existingKey=oldValue" } as Location;
             const { addUrlParamToPathname } = useUrlParams();
 
             const newPath = addUrlParamToPathname("existingKey", "newValue");
@@ -46,19 +52,31 @@ describe("useUrlParams", () => {
     describe("removeUrlParamFromPathname", () => {
         it("should remove a URL parameter from the pathname", () => {
             mocks.mockSearchParams.set("testKey", "testValue");
+            window.location = { pathname: "/test-path", search: "?testKey=testValue" } as Location;
             const { removeUrlParamFromPathname } = useUrlParams();
 
             const newPath = removeUrlParamFromPathname("testKey");
 
-            expect(newPath).toBe("/test-path?");
+            expect(newPath).toBe("/test-path");
         });
 
-        it("should return pathname with empty query string when no params remain", () => {
+        it("should return pathname without query string when no params remain", () => {
             const { removeUrlParamFromPathname } = useUrlParams();
 
             const newPath = removeUrlParamFromPathname("nonExistentKey");
 
-            expect(newPath).toBe("/test-path?");
+            expect(newPath).toBe("/test-path");
+        });
+
+        it("should preserve other params when removing one", () => {
+            mocks.mockSearchParams.set("keep", "yes");
+            mocks.mockSearchParams.set("remove", "me");
+            window.location = { pathname: "/test-path", search: "?keep=yes&remove=me" } as Location;
+            const { removeUrlParamFromPathname } = useUrlParams();
+
+            const newPath = removeUrlParamFromPathname("remove");
+
+            expect(newPath).toBe("/test-path?keep=yes");
         });
     });
 

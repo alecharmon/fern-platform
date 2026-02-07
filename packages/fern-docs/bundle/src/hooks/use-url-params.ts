@@ -1,8 +1,23 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
+function getCurrentPathname(fallback: string): string {
+    if (typeof window === "undefined") {
+        return fallback;
+    }
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+    const locationPathname = window.location.pathname;
+    if (basePath && locationPathname.startsWith(basePath)) {
+        return locationPathname.slice(basePath.length) || "/";
+    }
+    return locationPathname;
+}
+
 /**
  * This hook is used to add and remove URL params from the current pathname.
+ *
+ * Uses window.location at call time to avoid stale pathname values
+ * that can occur in Next.js parallel route layouts during soft navigation.
  */
 export function useUrlParams() {
     const searchParams = useSearchParams();
@@ -16,9 +31,13 @@ export function useUrlParams() {
      */
     const addUrlParamToPathname = useCallback(
         (key: string, value: string) => {
-            const params = new URLSearchParams(searchParams);
+            const currentPathname = getCurrentPathname(pathname);
+            const params =
+                typeof window !== "undefined"
+                    ? new URLSearchParams(window.location.search)
+                    : new URLSearchParams(searchParams);
             params.set(key, value);
-            return `${pathname}?${params.toString()}`;
+            return `${currentPathname}?${params.toString()}`;
         },
         [searchParams, pathname]
     );
@@ -30,9 +49,14 @@ export function useUrlParams() {
      */
     const removeUrlParamFromPathname = useCallback(
         (key: string) => {
-            const params = new URLSearchParams(searchParams);
+            const currentPathname = getCurrentPathname(pathname);
+            const params =
+                typeof window !== "undefined"
+                    ? new URLSearchParams(window.location.search)
+                    : new URLSearchParams(searchParams);
             params.delete(key);
-            return `${pathname}?${params.toString()}`;
+            const search = params.toString();
+            return search ? `${currentPathname}?${search}` : currentPathname;
         },
         [searchParams, pathname]
     );
