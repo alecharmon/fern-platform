@@ -191,7 +191,6 @@ type Group = {
 };
 
 const GROUP_SELECTOR = "[data-cmdk-group]";
-const GROUP_ITEMS_SELECTOR = "[data-cmdk-group-items]";
 const GROUP_HEADING_SELECTOR = "[data-cmdk-group-heading]";
 const ITEM_SELECTOR = "[data-cmdk-item]";
 const VALID_ITEM_SELECTOR = `${GROUP_SELECTOR}:not([hidden]) ${ITEM_SELECTOR}:not([data-disabled="true"])`;
@@ -410,72 +409,75 @@ const Root = forwardRef<HTMLDivElement, CommandProps>((props, forwardedRef) => {
         return value ? (filter?.(value, state.current.search, keywords) ?? 0) : 0;
     }
 
-    /** Sorts items by score, and groups by highest item score. */
+    /** Sorts items by score, and groups by highest item score.
+     *  Disabled: Algolia's server-side ranking handles result ordering.
+     *  Filtering (hiding non-matching items) is still handled by filterItems(). */
     function sort() {
-        if (
-            !state.current.search ||
-            // Explicitly false, because true | undefined is the default
-            !propsRef.current.shouldFilter
-        ) {
-            return;
-        }
+        return;
+        // if (
+        //     !state.current.search ||
+        //     // Explicitly false, because true | undefined is the default
+        //     !propsRef.current.shouldFilter
+        // ) {
+        //     return;
+        // }
 
-        const scores = state.current.filtered.items;
+        // const scores = state.current.filtered.items;
 
-        // Sort the groups
-        const groups: [string, number][] = [];
-        state.current.filtered.groups.forEach((value) => {
-            const items = allGroups.current.get(value);
+        // // Sort the groups
+        // const groups: [string, number][] = [];
+        // state.current.filtered.groups.forEach((value) => {
+        //     const items = allGroups.current.get(value);
 
-            // Get the maximum score of the group's items
-            let max = 0;
-            items?.forEach((item) => {
-                const score = scores.get(item);
-                max = Math.max(score ?? 0, max);
-            });
+        //     // Get the maximum score of the group's items
+        //     let max = 0;
+        //     items?.forEach((item) => {
+        //         const score = scores.get(item);
+        //         max = Math.max(score ?? 0, max);
+        //     });
 
-            groups.push([value, max]);
-        });
+        //     groups.push([value, max]);
+        // });
 
-        // Sort items within groups to bottom
-        // Sort items outside of groups
-        // Sort groups to bottom (pushes all non-grouped items to the top)
-        const listInsertionElement = listInnerRef.current;
+        // // Sort items within groups to bottom
+        // // Sort items outside of groups
+        // // Sort groups to bottom (pushes all non-grouped items to the top)
+        // const listInsertionElement = listInnerRef.current;
 
-        // Sort the items
-        getValidItems()
-            .sort((a, b) => {
-                const valueA = a.getAttribute("id");
-                const valueB = b.getAttribute("id");
-                return (scores.get(valueB ?? "__unknown") ?? 0) - (scores.get(valueA ?? "__unknown") ?? 0);
-            })
-            .forEach((item) => {
-                const group = item.closest(GROUP_ITEMS_SELECTOR);
+        // // Sort the items
+        // getValidItems()
+        //     .sort((a, b) => {
+        //         const valueA = a.getAttribute("id");
+        //         const valueB = b.getAttribute("id");
+        //         return (scores.get(valueB ?? "__unknown") ?? 0) - (scores.get(valueA ?? "__unknown") ?? 0);
+        //     })
+        //     .forEach((item) => {
+        //         const group = item.closest(GROUP_ITEMS_SELECTOR);
 
-                if (group) {
-                    const child = item.parentElement === group ? item : item.closest(`${GROUP_ITEMS_SELECTOR} > *`);
-                    if (child) {
-                        group.appendChild(child);
-                    }
-                } else {
-                    const child =
-                        item.parentElement === listInsertionElement
-                            ? item
-                            : item.closest(`${GROUP_ITEMS_SELECTOR} > *`);
-                    if (child) {
-                        listInsertionElement?.appendChild(child);
-                    }
-                }
-            });
+        //         if (group) {
+        //             const child = item.parentElement === group ? item : item.closest(`${GROUP_ITEMS_SELECTOR} > *`);
+        //             if (child) {
+        //                 group.appendChild(child);
+        //             }
+        //         } else {
+        //             const child =
+        //                 item.parentElement === listInsertionElement
+        //                     ? item
+        //                     : item.closest(`${GROUP_ITEMS_SELECTOR} > *`);
+        //             if (child) {
+        //                 listInsertionElement?.appendChild(child);
+        //             }
+        //         }
+        //     });
 
-        groups
-            .sort((a, b) => b[1] - a[1])
-            .forEach((group) => {
-                const element = listInnerRef.current?.querySelector(
-                    `${GROUP_SELECTOR}[${VALUE_ATTR}="${encodeURIComponent(group[0])}"]`
-                );
-                element?.parentElement?.appendChild(element);
-            });
+        // groups
+        //     .sort((a, b) => b[1] - a[1])
+        //     .forEach((group) => {
+        //         const element = listInnerRef.current?.querySelector(
+        //             `${GROUP_SELECTOR}[${VALUE_ATTR}="${encodeURIComponent(group[0])}"]`
+        //         );
+        //         element?.parentElement?.appendChild(element);
+        //     });
     }
 
     const pointerInside = useRef(false);
