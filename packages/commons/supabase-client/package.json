@@ -19,16 +19,16 @@
   "scripts": {
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "tsc --build",
+    "db:diff": "pnpm exec supabase db diff",
+    "db:push": "pnpm exec supabase db push",
+    "db:reset": "pnpm exec supabase db reset",
     "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
+    "generate:types": "pnpm exec supabase gen types typescript --project-id mygothwbccfcegfpjtoh > src/database.types.ts",
     "lint:eslint": "eslint --max-warnings 0 .",
     "lint:eslint:fix": "pnpm lint:eslint --fix",
-    "test": "vitest --run --passWithNoTests --globals",
-    "generate:types": "pnpm exec supabase gen types typescript --project-id mygothwbccfcegfpjtoh > src/database.types.ts",
-    "db:diff": "pnpm exec supabase db diff",
-    "db:push": "pnpm exec supabase db push",
-    "db:reset": "pnpm exec supabase db reset"
+    "test": "vitest --run --passWithNoTests --globals"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.87.2",
