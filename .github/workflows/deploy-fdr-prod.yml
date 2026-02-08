@@ -65,6 +65,8 @@ jobs:
           pnpm run --filter=@fern-platform/fdr docker:prod "${git_version}"
           pnpm --filter=@fern-platform/mdx-bundler build:tsup:cjs
           pnpm --filter=@fern-platform/mdx-bundler docker "${git_version}"
+          pnpm --filter=@fern-api/docs-pdf compile
+          pnpm --filter=@fern-platform/docs-pdf-exporter-lambda build
           npm install -g aws-cdk
           cd servers/fdr-deploy
           VERSION="${git_version}" pnpm --filter=@fern-platform/fdr-deploy deploy:prod

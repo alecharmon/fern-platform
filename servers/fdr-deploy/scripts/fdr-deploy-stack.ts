@@ -227,7 +227,8 @@ export class FdrDeployStack extends Stack {
         });
 
         const pdfExportDlq = new sqs.Queue(this, "pdf-export-dlq", {
-            queueName: `pdf-export-dlq-${environmentType.toLowerCase()}`,
+            queueName: `pdf-export-dlq-${environmentType.toLowerCase()}.fifo`,
+            fifo: true,
             retentionPeriod: Duration.days(14)
         });
 
@@ -248,10 +249,8 @@ export class FdrDeployStack extends Stack {
         const pdfExporterLambda = new lambda.DockerImageFunction(this, "docs-pdf-exporter-lambda", {
             functionName: `docs-pdf-exporter-${environmentType.toLowerCase()}`,
             // Playwright requires OS-level dependencies; deploy as a container image.
-            // Build context is repo root so we can build the workspace package.
-            code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, "../../.."), {
-                file: "servers/docs-pdf-exporter-lambda/Dockerfile"
-            }),
+            // The bundle is pre-built by tsup; Dockerfile just copies dist/index.cjs.
+            code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, "../../docs-pdf-exporter-lambda")),
             // AWS Lambda max timeout is 15 minutes.
             timeout: Duration.minutes(15),
             // Lambda supports up to 10,240 MB memory; PDF generation can be memory-heavy.

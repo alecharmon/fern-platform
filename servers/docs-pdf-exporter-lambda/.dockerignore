@@ -1,0 +1,11 @@
+# Only dist/index.cjs is needed for the Docker build
+node_modules/
+src/
+output/
+test-results/
+*.md
+*.json
+!package.json
+tsconfig.json
+tsup.config.ts
+.gitignore
