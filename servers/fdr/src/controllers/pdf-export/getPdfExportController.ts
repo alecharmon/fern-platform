@@ -37,7 +37,14 @@ export function getPdfExportController(app: FdrApplication): PdfExportService {
                 authHeader: req.headers.authorization,
                 orgId: req.query.orgId
             });
-            const tasks = await app.services.pdfExport.listTasks(req.query.orgId, req.query.docsUrl, req.query.limit);
+            let limit: number | undefined;
+            if (req.query.limit != null) {
+                const parsed = Number(req.query.limit);
+                if (Number.isFinite(parsed)) {
+                    limit = Math.max(1, Math.min(50, Math.trunc(parsed)));
+                }
+            }
+            const tasks = await app.services.pdfExport.listTasks(req.query.orgId, req.query.docsUrl, limit);
             return res.send({ tasks });
         },
 
