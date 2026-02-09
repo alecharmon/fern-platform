@@ -333,6 +333,7 @@ export class DocsPdfExporter {
                 const start = Date.now();
                 const page = await browserContext.newPage();
                 await page.emulateMedia({ media: "print", colorScheme: "light" });
+                await this.setupPageAuth(page);
                 try {
                     if (opts.initScript) {
                         await page.addInitScript(opts.initScript.fn, ...(opts.initScript.args ?? []));
@@ -389,7 +390,20 @@ export class DocsPdfExporter {
         this.assertNotStarted();
         this.logger.info({ event: "docs_pdf.browser.start" }, "Starting browser");
         try {
-            (this as DocsPdfExporter).browser = await chromium.launch({ headless: true });
+            (this as DocsPdfExporter).browser = await chromium.launch({
+                headless: true,
+                chromiumSandbox: false,
+                args: [
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    // Lambda's seccomp profile restricts clone() flags used by Chromium's zygote process.
+                    // Without this, the main browser process starts but renderer processes can't be created,
+                    // causing "Target page, context or browser has been closed" on newPage().
+                    "--no-zygote"
+                ]
+            });
             this.logger.info({ event: "docs_pdf.browser.started" }, "Browser started");
         } catch (e) {
             this.logger.error(
@@ -540,18 +554,41 @@ export class DocsPdfExporter {
     }
 
     /**
-     * Build browser context options including auth headers if configured.
+     * Build browser context options (viewport only — no extra HTTP headers).
+     *
+     * Authentication is handled by {@link setupPageAuth} which uses CDP
+     * `Fetch.enable` with a URL pattern to inject the `FERN_TOKEN` header
+     * only on `/_print/` navigation requests, with zero overhead on
+     * sub-resource requests.
      */
-    private getBrowserContextOptions() {
-        const options: BrowserContextOptions = {
-            viewport: A4_VIEWPORT_PX
-        };
-        if (this.config.authToken) {
-            options.extraHTTPHeaders = {
-                FERN_TOKEN: this.config.authToken
-            };
+    private getBrowserContextOptions(): BrowserContextOptions {
+        return { viewport: A4_VIEWPORT_PX };
+    }
+
+    /**
+     * Install per-page CDP `Fetch` interception to inject the `FERN_TOKEN`
+     * header **only** on `/_print/` navigation requests.
+     */
+    private async setupPageAuth(page: Page): Promise<void> {
+        if (!this.config.authToken) {
+            return;
         }
-        return options;
+        const authToken = this.config.authToken;
+        const cdpSession = await page.context().newCDPSession(page);
+        await cdpSession.send("Fetch.enable", {
+            patterns: [{ urlPattern: "*/_print/*", requestStage: "Request" }]
+        });
+        cdpSession.on("Fetch.requestPaused", async (event: Record<string, unknown>) => {
+            const request = event.request as { headers: Record<string, string> };
+            const headers = Object.entries({ ...request.headers, FERN_TOKEN: authToken }).map(([name, value]) => ({
+                name,
+                value
+            }));
+            await cdpSession.send("Fetch.continueRequest", {
+                requestId: event.requestId as string,
+                headers
+            });
+        });
     }
 
     /**

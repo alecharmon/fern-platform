@@ -55,7 +55,6 @@ async function getStartedExporter(): Promise<DocsPdfExporter> {
 
         exporter = instance;
         await instance.start();
-        logger.info({ event: "pdf_export.browser.started" }, "Browser started (warm)");
         return instance;
     })().catch((e) => {
         // Reset so the next invocation/message can retry starting a fresh browser.
@@ -75,7 +74,7 @@ async function getStartedExporter(): Promise<DocsPdfExporter> {
  * Update task status in FDR via HTTP callback.
  */
 async function updateTaskStatus(callbackUrl: string, taskId: string, payload: StatusUpdatePayload): Promise<void> {
-    const url = `${callbackUrl}/pdf-export/${taskId}/status`;
+    const url = `${callbackUrl}/pdf-export/task/${taskId}`;
 
     try {
         const jwt = await getServiceJwt();
@@ -146,8 +145,6 @@ async function processMessage(message: PdfExportSqsMessage): Promise<void> {
 
         const baseUrl =
             docsUrl.startsWith("http://") || docsUrl.startsWith("https://") ? docsUrl : `https://${docsUrl}`;
-        logger.info({ event: "pdf_export.generate.start", taskId, baseUrl }, "Generating PDF");
-
         const result = await exporter.generateDocsPdf(baseUrl, options);
 
         if (result.pageErrors.length > 0) {
@@ -162,10 +159,6 @@ async function processMessage(message: PdfExportSqsMessage): Promise<void> {
             );
         }
 
-        logger.info(
-            { event: "pdf_export.upload.start", taskId, bytes: result.pdfBytes.length },
-            "Uploading PDF to S3 (presigned URL)"
-        );
         await uploadPdfToPresignedUrl(uploadUrl, result.pdfBytes);
 
         const s3Key = extractS3KeyFromUrl(uploadUrl);
@@ -185,17 +178,33 @@ async function processMessage(message: PdfExportSqsMessage): Promise<void> {
             "PDF export completed"
         );
     } catch (error) {
-        const errorMessage = extractErrorMessage(error);
-        logger.error({ event: "pdf_export.process.failed", taskId, error: errorMessage }, "PDF export failed");
-
-        // Notify FDR of failure
-        await updateTaskStatus(callbackUrl, taskId, {
-            status: "FAILED",
-            completedAt: new Date().toISOString(),
-            errorMessage
-        });
-
-        throw error;
+        const userFacingErrorMessage =
+            "PDF generation failed. Please try again or contact support if the issue persists.";
+        try {
+            await updateTaskStatus(callbackUrl, taskId, {
+                status: "FAILED",
+                completedAt: new Date().toISOString(),
+                errorMessage: userFacingErrorMessage
+            });
+            logger.info(
+                {
+                    event: "pdf_export.process.failed_and_reported",
+                    taskId,
+                    error: extractErrorMessage(error)
+                },
+                "Failure reported to FDR; message will be deleted from SQS"
+            );
+        } catch (statusError) {
+            logger.error(
+                {
+                    event: "pdf_export.process.failed_status_update_failed",
+                    taskId,
+                    error: extractErrorMessage(statusError)
+                },
+                "Failed to report failure to FDR; re-throwing so SQS retries"
+            );
+            throw error;
+        }
     }
 }
 
