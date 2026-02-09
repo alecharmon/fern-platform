@@ -73,5 +73,5 @@ catalog:
   "url-join": "^5.0.0"
   "uuid": "^11.1.0"
   "vitest": "^3.2.4"
-  "webpack": "5.98.0"
+  "webpack": "5.104.1"
   "zod": "^3.25.49"
