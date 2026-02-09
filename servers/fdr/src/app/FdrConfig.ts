@@ -120,7 +120,7 @@ function getConfigForLocalMode(): FdrConfig {
         privateApiDefinitionSourceS3: selfHostedS3Config,
         libraryDocsS3: selfHostedS3Config,
         pdfExportS3: selfHostedS3Config,
-        pdfExportSqs: getPdfExportSqsConfigOrThrow(),
+        pdfExportSqs: getPdfExportSqsConfig(),
         pdfExportCallbackBaseUrl: "http://localhost:8080",
         pythonLibraryDocsLambda: getPythonLibraryDocsLambdaConfig(),
         domainSuffix: "docs.buildwithfern.com",
@@ -179,7 +179,7 @@ export function getConfig(): FdrConfig {
             urlOverride: process.env[PDF_EXPORT_S3_URL_OVERRIDE_ENV_VAR]
         },
         pythonLibraryDocsLambda: getPythonLibraryDocsLambdaConfig(),
-        pdfExportSqs: getPdfExportSqsConfigOrThrow(),
+        pdfExportSqs: getPdfExportSqsConfig(),
         pdfExportCallbackBaseUrl: getEnvironmentVariableOrThrow(PDF_EXPORT_CALLBACK_BASE_URL_ENV_VAR),
         domainSuffix: getEnvironmentVariableOrThrow(DOMAIN_SUFFIX_ENV_VAR),
         slackToken: getEnvironmentVariableOrThrow(SLACK_TOKEN_ENV_VAR),
@@ -206,11 +206,15 @@ function getPythonLibraryDocsLambdaConfig(): LambdaConfig | undefined {
     };
 }
 
-function getPdfExportSqsConfigOrThrow(): SqsConfig {
-    return {
-        queueUrl: getEnvironmentVariableOrThrow(PDF_EXPORT_SQS_QUEUE_URL_ENV_VAR),
-        region: process.env[PDF_EXPORT_SQS_REGION_ENV_VAR] ?? "us-east-1"
-    };
+function getPdfExportSqsConfig(): SqsConfig {
+    try {
+        return {
+            queueUrl: getEnvironmentVariableOrThrow(PDF_EXPORT_SQS_QUEUE_URL_ENV_VAR),
+            region: process.env[PDF_EXPORT_SQS_REGION_ENV_VAR] ?? "us-east-1"
+        };
+    } catch {
+        return { queueUrl: "local", region: "us-east-1" };
+    }
 }
 
 function getEnvironmentVariableOrThrow(environmentVariable: string): string {

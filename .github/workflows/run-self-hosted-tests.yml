@@ -5,11 +5,13 @@ on:
     branches:
       - app
     paths:
+      - "servers/fdr/**"
       - "servers/self-hosted/**"
       - ".github/workflows/run-self-hosted-tests.yml"
   pull_request:
     types: [opened, synchronize, reopened, closed]
     paths:
+      - "servers/fdr/**"
       - "servers/self-hosted/**"
       - ".github/workflows/run-self-hosted-tests.yml"
   workflow_call:
