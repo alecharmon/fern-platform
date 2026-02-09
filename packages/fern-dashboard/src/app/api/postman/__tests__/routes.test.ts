@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET as checkEndpoint } from "../check/route";
-import { POST as publishEndpoint } from "../publish/collection/[collectionId]/route";
 import { GET as getStatusEndpoint } from "../publish/collection/[collectionId]/status/route";
+import { POST as publishEndpoint } from "../publish/collection/route";
 
 const MOCK_API_KEY = "test-postman-api-key";
 
@@ -131,16 +131,14 @@ describe("Postman API endpoints", () => {
         });
     });
 
-    describe("POST /api/postman/publish/collection/[collectionId]", () => {
+    describe("POST /api/postman/publish/collection", () => {
         it("returns 401 when no authorization header is provided", async () => {
-            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection/test-collection", {
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
                 method: "POST",
-                body: JSON.stringify({ userId: "user-123", teamId: "team-456" })
+                body: JSON.stringify({ collectionId: "test-collection", userId: "user-123", teamId: "team-456" })
             });
 
-            const response = await publishEndpoint(request, {
-                params: Promise.resolve({ collectionId: "test-collection" })
-            });
+            const response = await publishEndpoint(request);
             const body = await response.json();
 
             expect(response.status).toBe(401);
@@ -148,18 +146,16 @@ describe("Postman API endpoints", () => {
         });
 
         it("returns success response when valid token and body are provided", async () => {
-            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection/test-collection", {
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${MOCK_API_KEY}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ userId: "user-123", teamId: "team-456" })
+                body: JSON.stringify({ collectionId: "test-collection", userId: "user-123", teamId: "team-456" })
             });
 
-            const response = await publishEndpoint(request, {
-                params: Promise.resolve({ collectionId: "test-collection" })
-            });
+            const response = await publishEndpoint(request);
             const body = await response.json();
 
             expect(response.status).toBe(200);
@@ -171,18 +167,16 @@ describe("Postman API endpoints", () => {
         });
 
         it("returns 400 when userId is missing", async () => {
-            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection/test-collection", {
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${MOCK_API_KEY}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ teamId: "team-456" })
+                body: JSON.stringify({ collectionId: "test-collection", teamId: "team-456" })
             });
 
-            const response = await publishEndpoint(request, {
-                params: Promise.resolve({ collectionId: "test-collection" })
-            });
+            const response = await publishEndpoint(request);
             const body = await response.json();
 
             expect(response.status).toBe(400);
@@ -190,18 +184,16 @@ describe("Postman API endpoints", () => {
         });
 
         it("returns 400 when teamId is missing", async () => {
-            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection/test-collection", {
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${MOCK_API_KEY}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ userId: "user-123" })
+                body: JSON.stringify({ collectionId: "test-collection", userId: "user-123" })
             });
 
-            const response = await publishEndpoint(request, {
-                params: Promise.resolve({ collectionId: "test-collection" })
-            });
+            const response = await publishEndpoint(request);
             const body = await response.json();
 
             expect(response.status).toBe(400);
@@ -209,7 +201,7 @@ describe("Postman API endpoints", () => {
         });
 
         it("returns 400 when request body is invalid JSON", async () => {
-            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection/test-collection", {
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${MOCK_API_KEY}`,
@@ -218,9 +210,7 @@ describe("Postman API endpoints", () => {
                 body: "invalid json"
             });
 
-            const response = await publishEndpoint(request, {
-                params: Promise.resolve({ collectionId: "test-collection" })
-            });
+            const response = await publishEndpoint(request);
             const body = await response.json();
 
             expect(response.status).toBe(400);
@@ -228,18 +218,16 @@ describe("Postman API endpoints", () => {
         });
 
         it("returns 400 when collectionId is empty", async () => {
-            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection/", {
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${MOCK_API_KEY}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ userId: "user-123", teamId: "team-456" })
+                body: JSON.stringify({ collectionId: "", userId: "user-123", teamId: "team-456" })
             });
 
-            const response = await publishEndpoint(request, {
-                params: Promise.resolve({ collectionId: "" })
-            });
+            const response = await publishEndpoint(request);
             const body = await response.json();
 
             expect(response.status).toBe(400);

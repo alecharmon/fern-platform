@@ -24,6 +24,7 @@ export type GetCollectionStatusResponse =
     | CollectionStatusFailed;
 
 export interface PublishCollectionRequest {
+    collectionId: CollectionId;
     userId: UserId;
     teamId: TeamId;
 }

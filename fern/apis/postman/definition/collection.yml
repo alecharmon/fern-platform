@@ -18,13 +18,12 @@ service:
     publish:
       docs: Initiates a request to publish the Postman collection as a Fern documentation site.
       method: POST
-      path: /publish/collection/{collectionId}
-      path-parameters:
-        collectionId: CollectionId
+      path: /publish/collection
       request:
         name: PublishCollectionRequest
         body:
           properties:
+            collectionId: CollectionId
             userId: UserId
             teamId: TeamId
       errors:
