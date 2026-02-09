@@ -10,11 +10,12 @@ export const AsideAwareDiv = React.forwardRef<
     HTMLDivElement,
     React.ComponentPropsWithoutRef<"div"> & {
         isFullPage: boolean;
+        preserveToc?: boolean;
     }
->(({ children, isFullPage, ...props }, ref) => {
+>(({ children, isFullPage, preserveToc, ...props }, ref) => {
     return (
         <div ref={ref} {...props} data-aside-state={isFullPage ? "hidden" : "visible"}>
-            {isFullPage && <HiddenSidebar />}
+            {isFullPage && <HiddenSidebar preserveToc={preserveToc} />}
             {children}
         </div>
     );

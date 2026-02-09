@@ -1,9 +1,9 @@
 "use client";
 
-export function HiddenSidebar() {
+export function HiddenSidebar({ preserveToc = false }: { preserveToc?: boolean }) {
     return (
         <style>{`
-        #fern-toc,
+        ${preserveToc ? "" : "#fern-toc,"}
         #fern-sidebar[data-state="sticky"],
         #fern-sidebar[data-state="fixed"],
         #fern-sidebar-spacer {
