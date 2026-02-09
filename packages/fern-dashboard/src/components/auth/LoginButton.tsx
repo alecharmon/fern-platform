@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { Kbd } from "../ui/kbd";
 import { GithubLogo } from "./GithubLogo";
 import { GoogleLogo } from "./GoogleLogo";
+import { PostmanLogo } from "./PostmanLogo";
 
 // Used to prevent hydration errors
 function useHasMounted() {
@@ -17,7 +18,7 @@ function useHasMounted() {
 }
 
 // Connection options for authentication providers
-export type AuthConnection = "google-oauth2" | "github" | "enterprise-sso";
+export type AuthConnection = "google-oauth2" | "github" | "enterprise-sso" | "postman";
 
 export const LAST_USED_LOGIN_KEY = "fern-last-used-login";
 
@@ -150,6 +151,59 @@ export const GithubLoginButton = ({
                     <div className="flex items-center gap-2 justify-self-center">
                         <GithubLogo />
                         <span>{labelPrefix} GitHub</span>
+                    </div>
+                    {hasMounted && isLastUsed ? (
+                        <Kbd className="justify-self-end" useBodyFont>
+                            last used
+                        </Kbd>
+                    ) : (
+                        <div aria-hidden="true" />
+                    )}
+                </div>
+            )}
+        </BaseLoginButton>
+    );
+};
+
+// Postman Login Button
+export const PostmanLoginButton = ({
+    returnTo,
+    additionalParams,
+    buttonProps,
+    children,
+    labelPrefix = "Continue with"
+}: {
+    returnTo?: string;
+    additionalParams?: Record<string, string>;
+    buttonProps?: React.ComponentProps<typeof Button>;
+    children?: React.ReactNode;
+    labelPrefix?: string;
+}) => {
+    const [isLastUsed, setIsLastUsed] = useState(false);
+    const hasMounted = useHasMounted();
+
+    useEffect(() => {
+        try {
+            const lastUsed = localStorage.getItem(LAST_USED_LOGIN_KEY);
+            setIsLastUsed(lastUsed === "postman");
+        } catch {
+            setIsLastUsed(false);
+        }
+    }, []);
+
+    return (
+        <BaseLoginButton
+            connection="postman"
+            returnTo={returnTo}
+            additionalParams={additionalParams}
+            buttonProps={buttonProps}
+        >
+            {children ?? (
+                <div className="w-full grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+                    <div aria-hidden="true" />
+                    <div className="flex items-center gap-2 justify-self-center">
+                        <PostmanLogo width={20} height={20} />
+                        <span>{labelPrefix} Postman</span>
                     </div>
                     {hasMounted && isLastUsed ? (
                         <Kbd className="justify-self-end" useBodyFont>

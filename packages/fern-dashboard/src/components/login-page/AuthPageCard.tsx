@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { GithubLoginButton, GoogleLoginButton } from "@/components/auth/LoginButton";
+import { GithubLoginButton, GoogleLoginButton, PostmanLoginButton } from "@/components/auth/LoginButton";
 import { CITestLoginForm } from "@/components/login-page/CITestLoginForm";
 import { EmailLoginForm } from "@/components/login-page/EmailLoginForm";
 
@@ -41,6 +41,7 @@ export async function AuthPageCard({
                 <div className="flex flex-col gap-2">
                     <GoogleLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
                     <GithubLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
+                    <PostmanLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
                 </div>
                 <div className="flex items-center gap-3 my-6">
                     <div className="h-px flex-1 bg-border" />
