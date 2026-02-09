@@ -19,7 +19,7 @@ import { PlaygroundEndpointPath } from "../endpoint/PlaygroundEndpointPath";
 import { getWebSocketProxyUrl } from "../fetch-utils/proxyUrl";
 import { useWebsocketMessages } from "../hooks/useWebsocketMessages";
 import { buildAuthHeaders, getAuthKey } from "../utils";
-import { usePlaygroundBaseUrl } from "../utils/select-environment";
+import { useFilteredEnvironments, usePlaygroundBaseUrl } from "../utils/select-environment";
 import { PlaygroundWebSocketContent } from "./PlaygroundWebSocketContent";
 
 interface PlaygroundWebSocketProps {
@@ -103,6 +103,10 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
     const settings = context.node.playground;
 
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(context.channel, context.node.apiDefinitionId);
+
+    // Filter environments by both PlaygroundSettings.environments (explicit allow list)
+    // and audience matching (environment.audiences vs user.roles)
+    const filteredEnvironments = useFilteredEnvironments(context.channel.environments, settings?.environments);
 
     const startSession = useCallback(async () => {
         return new Promise<boolean>((resolve) => {
@@ -233,13 +237,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                         }}
                         environmentId={environmentId}
                         baseUrl={baseUrl}
-                        options={
-                            settings?.environments
-                                ? context.channel.environments?.filter(
-                                      (env) => settings.environments?.includes(env.id) ?? true
-                                  )
-                                : context.channel.environments
-                        }
+                        options={filteredEnvironments}
                         path={context.channel.path}
                         queryParameters={context.channel.queryParameters}
                         sendRequestButtonLabel={

@@ -34,7 +34,7 @@ import {
     getInitialEndpointRequestFormStateWithExample,
     serializeFormStateBody
 } from "../utils";
-import { usePlaygroundBaseUrl } from "../utils/select-environment";
+import { useFilteredEnvironments, usePlaygroundBaseUrl } from "../utils/select-environment";
 import { PlaygroundEndpointContent } from "./PlaygroundEndpointContent";
 import { PlaygroundEndpointPath } from "./PlaygroundEndpointPath";
 
@@ -342,6 +342,10 @@ export const PlaygroundEndpoint = ({
 
     const settings = node.playground;
 
+    // Filter environments by both PlaygroundSettings.environments (explicit allow list)
+    // and audience matching (environment.audiences vs user.roles)
+    const filteredEnvironments = useFilteredEnvironments(endpoint.environments, settings?.environments);
+
     return (
         <FernTooltipProvider>
             <div className="flex size-full min-h-0 flex-1 shrink flex-col">
@@ -360,13 +364,7 @@ export const PlaygroundEndpoint = ({
                         }}
                         environmentId={environmentId}
                         baseUrl={baseUrl}
-                        options={
-                            settings?.environments
-                                ? endpoint.environments?.filter(
-                                      (env) => settings.environments?.includes(env.id) ?? true
-                                  )
-                                : endpoint.environments
-                        }
+                        options={filteredEnvironments}
                         path={endpoint.path}
                         queryParameters={endpoint.queryParameters}
                         sendRequestIcon={<SendHorizonal className="transition-transform group-hover:translate-x-0.5" />}
