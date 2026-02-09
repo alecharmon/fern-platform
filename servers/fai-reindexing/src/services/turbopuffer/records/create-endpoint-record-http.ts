@@ -1,10 +1,5 @@
 import { ApiDefinition, FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
-import {
-    createDelimitedRolesetString,
-    createViewersForNodes,
-    endpointToMarkdown,
-    type TurbopufferRecord
-} from "@fern-docs/search-utils";
+import { createViewersForNodes, endpointToMarkdown, type TurbopufferRecord } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
 
 import { buildEndpointSummary } from "./endpoint-summary";
@@ -105,7 +100,7 @@ export function createEndpointBaseRecordHttp({
             product: productNode?.title,
             version: versionNode?.title,
             authed: isNodeAuthed,
-            roles: roles.map((role) => createDelimitedRolesetString(role)),
+            roles: [...new Set(roles.flat())].sort(),
             keywords: keywords.values(),
             content_type: "endpoint",
             breadcrumbs,

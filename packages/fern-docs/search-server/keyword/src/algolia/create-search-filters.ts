@@ -1,13 +1,12 @@
 import { EVERYONE_ROLE } from "@fern-api/docs-utils";
-import { createPermutations, createRoleFacet } from "@fern-docs/search-utils";
+import { createRoleFacet } from "@fern-docs/search-utils";
 
 interface CreateSearchFiltersOpts {
     domain: string;
 
     /**
      * roles are ignored if the user is unauthed
-     * but if they are authed, we automatically include the "everyone" role, and then generate all permutations of the provided roles
-     * "everyone" does not have to be included explicitly in the permutations.
+     * but if they are authed, we automatically include the "everyone" role
      */
     roles: string[];
 
@@ -27,14 +26,11 @@ export function createSearchFilters({ domain, roles, authed }: CreateSearchFilte
     }
 
     // if the user is authed, we can show both content where authed=false AND authed=true
-    // In algolia, you cannot create a OR statements across multiple facets, so we must include the "everyone" role in all the filter combinations
-    // for example, all records that do not require auth must include the visible_by:role/everyone facet.
-    // therefore, all filter combinations must include visible_by:role/everyone as well as any additional role filters.
+    // Each individual role is matched independently against the record's visible_by facets.
+    const uniqueRoles = [...new Set(roles.filter((r) => r !== EVERYONE_ROLE))];
     const roleFilters = [
         `${VISIBLE_BY_FACET}:${createRoleFacet([EVERYONE_ROLE])}`,
-        ...createPermutations(roles.filter((r) => r !== EVERYONE_ROLE)).map(
-            (perms) => `${VISIBLE_BY_FACET}:${createRoleFacet(perms)}`
-        )
+        ...uniqueRoles.map((role) => `${VISIBLE_BY_FACET}:${createRoleFacet([role])}`)
     ];
 
     return `domain:${domain} AND (${roleFilters.join(" OR ")})`;

@@ -20,7 +20,7 @@ describe("create-search-filters", () => {
         ).toBe(`domain:${TEST_DOMAIN} AND authed:false`);
     });
 
-    it("should include the everyone role in all permutations", () => {
+    it("should include the everyone role and individual roles", () => {
         expect(
             createSearchFilters({
                 domain: TEST_DOMAIN,
@@ -28,7 +28,7 @@ describe("create-search-filters", () => {
                 authed: true
             })
         ).toMatchInlineSnapshot(
-            '"domain:buildwithfern.com AND (visible_by:role/everyone OR visible_by:role/a OR visible_by:role/a/b OR visible_by:role/a/b/c OR visible_by:role/a/c OR visible_by:role/b OR visible_by:role/b/c OR visible_by:role/c)"'
+            '"domain:buildwithfern.com AND (visible_by:role/everyone OR visible_by:role/a OR visible_by:role/b OR visible_by:role/c)"'
         );
 
         expect(
@@ -38,7 +38,7 @@ describe("create-search-filters", () => {
                 authed: true
             })
         ).toMatchInlineSnapshot(
-            '"domain:buildwithfern.com AND (visible_by:role/everyone OR visible_by:role/a OR visible_by:role/a/b OR visible_by:role/a/b/c OR visible_by:role/a/c OR visible_by:role/b OR visible_by:role/b/c OR visible_by:role/c)"'
+            '"domain:buildwithfern.com AND (visible_by:role/everyone OR visible_by:role/c OR visible_by:role/b OR visible_by:role/a)"'
         );
 
         expect(

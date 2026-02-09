@@ -3,7 +3,6 @@ from datetime import (
     UTC,
     datetime,
 )
-from itertools import combinations
 from typing import (
     Any,
     Literal,
@@ -85,14 +84,7 @@ def create_save_slack_context_tool(capture: SlackContextCapture) -> Tool:
 
 
 def _create_delimited_role_combinations(roleset: list[str], delimiter: str = "&") -> list[str]:
-    src = list(set(filter(None, roleset)))
-    n = len(src)
-    out: list[str] = []
-    for r in range(1, n + 1):
-        for combo in combinations(src, r):
-            sorted_combo = sorted(combo)
-            out.append(delimiter.join(sorted_combo))
-    return out
+    return sorted(set(filter(None, roleset)))
 
 
 async def classify_message(

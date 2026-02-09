@@ -80,7 +80,7 @@ export function createBaseRecord({
                   pathname: `/${tabNode.canonicalSlug ?? tabNode.slug}`
               }
             : undefined,
-        visible_by: roles.map(createRoleFacet),
+        visible_by: [...new Set(roles.flat())].sort().map((role) => createRoleFacet([role])),
         authed,
         page_position: 0,
         version_index: versionNode && versionIndexMap ? versionIndexMap.get(versionNode.versionId) : undefined

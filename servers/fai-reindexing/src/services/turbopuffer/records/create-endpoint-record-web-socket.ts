@@ -1,6 +1,6 @@
 import { ApiDefinition, FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { createDelimitedRolesetString, createViewersForNodes, type TurbopufferRecord } from "@fern-docs/search-utils";
+import { createViewersForNodes, type TurbopufferRecord } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
 import { flatten } from "es-toolkit/array";
 
@@ -105,7 +105,7 @@ export function createEndpointBaseRecordWebSocket({
             version: versionNode?.title,
             product: productNode?.title,
             authed: isNodeAuthed,
-            roles: roles.map((role) => createDelimitedRolesetString(role)),
+            roles: [...new Set(roles.flat())].sort(),
             keywords: keywords.values(),
             content_type: "websocket",
             breadcrumbs,

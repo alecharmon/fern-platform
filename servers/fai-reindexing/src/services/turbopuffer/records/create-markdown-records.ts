@@ -1,9 +1,5 @@
 import { FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
-import {
-    createDelimitedRolesetString,
-    createViewersForNodes,
-    type TurbopufferRecordWithoutVector
-} from "@fern-docs/search-utils";
+import { createViewersForNodes, type TurbopufferRecordWithoutVector } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
 import { maybeRemoveDuplicateNewlines } from "../post-process/chunks/maybe-remove-duplicate-newlines";
 import { maybeRemoveLongWhitespace } from "../post-process/chunks/maybe-remove-long-whitespace";
@@ -77,7 +73,7 @@ export async function createMarkdownRecords({
                 description: undefined,
                 keywords,
                 authed: isNodeAuthed,
-                roles: roles.map((role) => createDelimitedRolesetString(role)),
+                roles: [...new Set(roles.flat())].sort(),
                 url,
                 content_type: "page",
                 breadcrumbs,
