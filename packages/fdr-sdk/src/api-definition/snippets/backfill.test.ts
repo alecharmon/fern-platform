@@ -40,7 +40,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -141,7 +142,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -241,7 +243,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -343,7 +346,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -480,7 +484,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -605,7 +610,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -787,7 +793,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -982,7 +989,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1110,7 +1118,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1252,7 +1261,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com/v1"
+                            baseUrl: "https://api.example.com/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1372,7 +1382,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.pinnacle.us/v1"
+                            baseUrl: "https://api.pinnacle.us/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1428,7 +1439,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.pinnacle.us/v1"
+                            baseUrl: "https://api.pinnacle.us/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1479,7 +1491,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.pinnacle.us/v1"
+                            baseUrl: "https://api.pinnacle.us/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1535,7 +1548,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.pinnacle.us/v1"
+                            baseUrl: "https://api.pinnacle.us/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1593,7 +1607,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.pinnacle.us/v1"
+                            baseUrl: "https://api.pinnacle.us/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1648,7 +1663,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.pinnacle.us/v1"
+                            baseUrl: "https://api.pinnacle.us/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1707,7 +1723,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.pinnacle.us/v1"
+                            baseUrl: "https://api.pinnacle.us/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1760,7 +1777,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.pinnacle.us/v1"
+                            baseUrl: "https://api.pinnacle.us/v1",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1869,7 +1887,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com"
+                            baseUrl: "https://api.example.com",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -1976,7 +1995,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com"
+                            baseUrl: "https://api.example.com",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -2096,7 +2116,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com"
+                            baseUrl: "https://api.example.com",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -2194,7 +2215,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com"
+                            baseUrl: "https://api.example.com",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -2285,7 +2307,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com"
+                            baseUrl: "https://api.example.com",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,
@@ -2383,7 +2406,8 @@ describe("backfillSnippets", () => {
                     environments: [
                         {
                             id: EnvironmentId("default"),
-                            baseUrl: "https://api.example.com"
+                            baseUrl: "https://api.example.com",
+                            audiences: undefined
                         }
                     ],
                     pathParameters: undefined,

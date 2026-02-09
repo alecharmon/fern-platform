@@ -5,5 +5,5 @@ import type * as FernRegistry from "../../../../../../../index.js";
 export interface Environment {
     id: FernRegistry.EnvironmentId;
     baseUrl: string;
-    audiences?: string[];
+    audiences: string[] | undefined;
 }

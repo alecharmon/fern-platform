@@ -26,7 +26,8 @@ const endpoint1: Latest.EndpointDefinition = {
     environments: [
         {
             id: Latest.EnvironmentId("production"),
-            baseUrl: "https://example.com"
+            baseUrl: "https://example.com",
+            audiences: undefined
         }
     ],
     pathParameters: undefined,
@@ -73,7 +74,8 @@ const endpoint2: Latest.EndpointDefinition = {
     environments: [
         {
             id: Latest.EnvironmentId("production"),
-            baseUrl: "https://example.com"
+            baseUrl: "https://example.com",
+            audiences: undefined
         }
     ],
     pathParameters: undefined,
@@ -141,7 +143,8 @@ const websocket1: Latest.WebSocketChannel = {
     environments: [
         {
             id: Latest.EnvironmentId("production"),
-            baseUrl: "https://example.com"
+            baseUrl: "https://example.com",
+            audiences: undefined
         }
     ],
     pathParameters: undefined,

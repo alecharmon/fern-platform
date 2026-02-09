@@ -18,7 +18,7 @@ describe("getAllMatchablePathsForEndpoint", () => {
     it("should return all permutations for an endpoint", () => {
         const endpoint: Pick<EndpointDefinition, "path" | "environments"> = {
             path: [literal("/api/"), pathParameter("id")],
-            environments: [{ id: EnvironmentId("1"), baseUrl: "https://api.example.com" }]
+            environments: [{ id: EnvironmentId("1"), baseUrl: "https://api.example.com", audiences: undefined }]
         };
         const result = getMatchablePermutationsForEndpoint(endpoint);
         expect(result).toEqual(
@@ -32,7 +32,8 @@ describe("getAllMatchablePathsForEndpoint", () => {
             environments: [
                 {
                     id: EnvironmentId("1"),
-                    baseUrl: "https://api.example.com/v1"
+                    baseUrl: "https://api.example.com/v1",
+                    audiences: undefined
                 }
             ]
         };
@@ -56,7 +57,8 @@ describe("getAllMatchablePathsForEndpoint", () => {
             environments: [
                 {
                     id: EnvironmentId("1"),
-                    baseUrl: "https://api.example.com/v1/"
+                    baseUrl: "https://api.example.com/v1/",
+                    audiences: undefined
                 }
             ]
         };

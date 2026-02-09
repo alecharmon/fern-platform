@@ -257,6 +257,7 @@ exports[`backfillSnippets > should backfill dynamic snippets for all pinnacle en
       "displayName": undefined,
       "environments": [
         {
+          "audiences": undefined,
           "baseUrl": "https://api.pinnacle.us/v1",
           "id": "default",
         },
@@ -505,6 +506,7 @@ main();
       "displayName": undefined,
       "environments": [
         {
+          "audiences": undefined,
           "baseUrl": "https://api.pinnacle.us/v1",
           "id": "default",
         },
@@ -763,6 +765,7 @@ main();
       "displayName": undefined,
       "environments": [
         {
+          "audiences": undefined,
           "baseUrl": "https://api.pinnacle.us/v1",
           "id": "default",
         },
@@ -986,6 +989,7 @@ main();
       "displayName": undefined,
       "environments": [
         {
+          "audiences": undefined,
           "baseUrl": "https://api.pinnacle.us/v1",
           "id": "default",
         },
@@ -1197,6 +1201,7 @@ main();
       "displayName": undefined,
       "environments": [
         {
+          "audiences": undefined,
           "baseUrl": "https://api.pinnacle.us/v1",
           "id": "default",
         },
@@ -1444,6 +1449,7 @@ main();
       "displayName": undefined,
       "environments": [
         {
+          "audiences": undefined,
           "baseUrl": "https://api.pinnacle.us/v1",
           "id": "default",
         },
@@ -1694,6 +1700,7 @@ main();
       "displayName": undefined,
       "environments": [
         {
+          "audiences": undefined,
           "baseUrl": "https://api.pinnacle.us/v1",
           "id": "default",
         },
@@ -1975,6 +1982,7 @@ main();
       "displayName": undefined,
       "environments": [
         {
+          "audiences": undefined,
           "baseUrl": "https://api.pinnacle.us/v1",
           "id": "default",
         },

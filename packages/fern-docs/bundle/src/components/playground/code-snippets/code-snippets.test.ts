@@ -65,7 +65,8 @@ describe("PlaygroundCodeSnippetBuilder", () => {
         environments: [
             {
                 id: EnvironmentId("Prod"),
-                baseUrl: "https://example.com"
+                baseUrl: "https://example.com",
+                audiences: undefined
             }
         ],
         displayName: "endpoint-1",
