@@ -63,4 +63,9 @@ export interface RegisterDocsRequest {
      * If provided with a valid jobId, generated library documentation will be merged.
      */
     libraryDocs?: FernRegistry.docs.v2.write.LibraryDocsRegistrationConfig;
+    /**
+     * When true, writes the docs definition to S3 using a basepath-aware key format
+     * ({domain}/{basepath}/v1/fdr.json) instead of the default domain-only key.
+     */
+    basepathAware?: boolean;
 }

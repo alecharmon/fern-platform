@@ -11,5 +11,7 @@ import type * as FernRegistry from "../../../../../../../../index.js";
  */
 export interface GetDocsFieldsRequest {
     domain: string;
+    /** When provided, loads fields for the specific (domain, basepath) pair. */
+    basepath?: string;
     fields: FernRegistry.docs.v2.read.DocsDefinitionField[];
 }

@@ -22,4 +22,9 @@ export interface StartDocsRegisterRequestV2 {
     /** Relative filepath from docs folder with optional content hash. */
     filepaths: FernRegistry.docs.v2.write.FilePathInput[];
     images?: FernRegistry.docs.v2.write.ImageFilePath[];
+    /**
+     * When true, the S3 key for the docs definition will include the basepath,
+     * enabling multiple doc sites under the same custom domain differentiated by basepath.
+     */
+    basepathAware?: boolean;
 }

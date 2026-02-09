@@ -10,4 +10,5 @@ export interface StartDocsRegisterRequestV2 {
     apiId: FernRegistry.ApiId;
     filepaths: FernRegistry.docs.v2.write.FilePathInput[];
     images?: FernRegistry.docs.v2.write.ImageFilePath[];
+    basepathAware?: boolean;
 }

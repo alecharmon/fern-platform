@@ -31,6 +31,11 @@ service:
               type: list<FilePathInput>
               docs: Relative filepath from docs folder with optional content hash.
             images: optional<list<ImageFilePath>>
+            basepathAware:
+              type: optional<boolean>
+              docs: |
+                When true, the S3 key for the docs definition will include the basepath,
+                enabling multiple doc sites under the same custom domain differentiated by basepath.
       response: v1DocsWrite.StartDocsRegisterResponse
       errors:
         - rootCommons.UnauthorizedError
@@ -79,6 +84,11 @@ service:
               docs: |
                 Configuration for merging library docs into the docs definition.
                 If provided with a valid jobId, generated library documentation will be merged.
+            basepathAware:
+              type: optional<boolean>
+              docs: |
+                When true, writes the docs definition to S3 using a basepath-aware key format
+                ({domain}/{basepath}/v1/fdr.json) instead of the default domain-only key.
       errors:
         - rootCommons.UnauthorizedError
         - rootCommons.UserNotInOrgError

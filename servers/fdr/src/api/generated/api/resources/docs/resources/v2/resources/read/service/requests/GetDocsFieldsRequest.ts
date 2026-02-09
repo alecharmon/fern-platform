@@ -4,5 +4,6 @@ import type * as FernRegistry from "../../../../../../../../index";
 
 export interface GetDocsFieldsRequest {
     domain: string;
+    basepath?: string;
     fields: FernRegistry.docs.v2.read.DocsDefinitionField[];
 }

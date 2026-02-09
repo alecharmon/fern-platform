@@ -5,4 +5,5 @@ import type * as FernRegistry from "../../../../../../../../index";
 export interface LoadDocsForUrlRequest {
     url: FernRegistry.Url;
     excludeApis?: boolean;
+    basepath?: string;
 }

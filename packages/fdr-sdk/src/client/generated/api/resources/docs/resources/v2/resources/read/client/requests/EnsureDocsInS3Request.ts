@@ -10,4 +10,9 @@ import type * as FernRegistry from "../../../../../../../../index.js";
  */
 export interface EnsureDocsInS3Request {
     url: FernRegistry.Url;
+    /**
+     * When provided, uses basepath-aware S3 key format and queries
+     * the database with (domain, basepath) instead of domain-only.
+     */
+    basepath?: string;
 }

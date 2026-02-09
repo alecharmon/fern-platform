@@ -10,4 +10,9 @@ import type * as FernRegistry from "../../../../../../../../index.js";
  */
 export interface GetMetadataForUrlRequest {
     url: FernRegistry.Url;
+    /**
+     * When provided, returns metadata for the specific (domain, basepath) pair.
+     * Used for basepath-aware docs sites.
+     */
+    basepath?: string;
 }

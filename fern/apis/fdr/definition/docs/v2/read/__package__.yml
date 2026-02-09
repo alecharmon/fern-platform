@@ -35,6 +35,11 @@ service:
         body:
           properties:
             url: rootCommons.Url
+            basepath:
+              type: optional<string>
+              docs: |
+                When provided, returns metadata for the specific (domain, basepath) pair.
+                Used for basepath-aware docs sites.
       response: DocsUrlMetadata
       errors:
         - DomainNotRegisteredError
@@ -50,6 +55,12 @@ service:
           properties:
             url: rootCommons.Url
             excludeApis: optional<boolean>
+            basepath:
+              type: optional<string>
+              docs: |
+                When provided, resolves docs for the specific (domain, basepath) pair
+                instead of using domain-only lookup. Used for basepath-aware docs sites
+                where multiple doc sites share a single custom domain.
       response: LoadDocsForUrlResponse
       errors:
         - DomainNotRegisteredError
@@ -69,6 +80,11 @@ service:
         body:
           properties:
             url: rootCommons.Url
+            basepath:
+              type: optional<string>
+              docs: |
+                When provided, uses basepath-aware S3 key format and queries
+                the database with (domain, basepath) instead of domain-only.
       response: EnsureDocsInS3Response
       errors:
         - DomainNotRegisteredError
@@ -141,6 +157,10 @@ service:
         body:
           properties:
             domain: string
+            basepath:
+              type: optional<string>
+              docs: |
+                When provided, loads fields for the specific (domain, basepath) pair.
             fields: list<DocsDefinitionField>
       response: GetDocsFieldsResponse
       errors:

@@ -6,4 +6,5 @@ export interface RegisterDocsRequest {
     docsDefinition: FernRegistry.docs.v1.write.DocsDefinition;
     excludeApis?: boolean;
     libraryDocs?: FernRegistry.docs.v2.write.LibraryDocsRegistrationConfig;
+    basepathAware?: boolean;
 }

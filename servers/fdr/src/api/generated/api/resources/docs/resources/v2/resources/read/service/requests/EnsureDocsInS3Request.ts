@@ -4,4 +4,5 @@ import type * as FernRegistry from "../../../../../../../../index";
 
 export interface EnsureDocsInS3Request {
     url: FernRegistry.Url;
+    basepath?: string;
 }
