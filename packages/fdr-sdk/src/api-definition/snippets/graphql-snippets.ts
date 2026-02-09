@@ -2,6 +2,7 @@ import type { TypeId } from "../../navigation";
 import type {
     GraphQlOperation,
     GraphQlOperationType,
+    ObjectProperty,
     PrimitiveType,
     TypeDefinition,
     TypeReference,
@@ -47,7 +48,7 @@ export function generateGraphQlSnippet(context: GraphQlSnippetContext): GraphQlS
     // Build variable definitions and collect example values
     const variableDefinitions = args.map((arg) => {
         const graphqlType = typeShapeToGraphQlType(arg.type, types);
-        const exampleValue = generateExampleValue(arg.type, types, arg.defaultValue);
+        const exampleValue = generateExampleValue(arg.type, types, 5, new Set(), arg.defaultValue);
         variables[arg.name] = exampleValue;
         return `$${arg.name}: ${graphqlType}`;
     });
@@ -209,19 +210,43 @@ function primitiveToGraphQlType(primitive: PrimitiveType): string {
 }
 
 /**
+ * Collect all properties for an object type, including inherited properties from `extends`.
+ */
+function collectObjectProperties(
+    shape: { extends: TypeId[]; properties: ObjectProperty[] },
+    types: Record<TypeId, TypeDefinition>
+): ObjectProperty[] {
+    const properties: ObjectProperty[] = [];
+    for (const parentId of shape.extends) {
+        const parentDef = types[parentId];
+        if (parentDef?.shape?.type === "object") {
+            properties.push(...collectObjectProperties(parentDef.shape, types));
+        }
+    }
+    properties.push(...shape.properties);
+    return properties;
+}
+
+/**
  * Generate an example value for a type
  */
 function generateExampleValue(
     shape: TypeShape,
     types: Record<TypeId, TypeDefinition>,
+    depth: number,
+    visited: Set<TypeId>,
     defaultValue?: unknown
 ): unknown {
     if (defaultValue !== undefined) {
         return defaultValue;
     }
 
+    if (depth <= 0) {
+        return null;
+    }
+
     if (shape.type === "alias") {
-        return generateExampleValueFromReference(shape.value, types);
+        return generateExampleValueFromReference(shape.value, types, depth, visited);
     }
     if (shape.type === "enum") {
         // Return the first enum value if available
@@ -229,9 +254,35 @@ function generateExampleValue(
         return firstValue?.value ?? "EXAMPLE_VALUE";
     }
     if (shape.type === "object") {
+        const properties = collectObjectProperties(shape, types);
+        if (properties.length === 0) {
+            return {};
+        }
+        const result: Record<string, unknown> = {};
+        for (const prop of properties.slice(0, 10)) {
+            result[prop.key] = generateExampleValue(prop.valueShape, types, depth - 1, visited);
+        }
+        return result;
+    }
+    if (shape.type === "undiscriminatedUnion") {
+        const firstVariant = shape.variants?.[0];
+        if (firstVariant?.shape) {
+            return generateExampleValue(firstVariant.shape, types, depth, visited);
+        }
         return {};
     }
-    if (shape.type === "undiscriminatedUnion" || shape.type === "discriminatedUnion") {
+    if (shape.type === "discriminatedUnion") {
+        const firstVariant = shape.variants?.[0];
+        if (firstVariant) {
+            const result: Record<string, unknown> = {
+                [shape.discriminant]: firstVariant.discriminantValue
+            };
+            const properties = collectObjectProperties(firstVariant, types);
+            for (const prop of properties.slice(0, 10)) {
+                result[prop.key] = generateExampleValue(prop.valueShape, types, depth - 1, visited);
+            }
+            return result;
+        }
         return {};
     }
 
@@ -241,23 +292,34 @@ function generateExampleValue(
 /**
  * Generate an example value from a type reference
  */
-function generateExampleValueFromReference(ref: TypeReference, types: Record<TypeId, TypeDefinition>): unknown {
+function generateExampleValueFromReference(
+    ref: TypeReference,
+    types: Record<TypeId, TypeDefinition>,
+    depth: number,
+    visited: Set<TypeId>
+): unknown {
     switch (ref.type) {
         case "primitive":
             return generateExamplePrimitiveValue(ref.value);
         case "id": {
+            if (visited.has(ref.id)) {
+                return null;
+            }
             const typeDef = types[ref.id];
             if (typeDef?.shape) {
-                return generateExampleValue(typeDef.shape, types);
+                visited.add(ref.id);
+                const result = generateExampleValue(typeDef.shape, types, depth, visited);
+                visited.delete(ref.id);
+                return result;
             }
             return {};
         }
         case "optional":
         case "nullable":
-            return generateExampleValue(ref.shape, types);
+            return generateExampleValue(ref.shape, types, depth, visited);
         case "list":
         case "set":
-            return [generateExampleValue(ref.itemShape, types)];
+            return [generateExampleValue(ref.itemShape, types, depth, visited)];
         case "map":
             return {};
         case "literal":
