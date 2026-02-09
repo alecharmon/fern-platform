@@ -10,9 +10,7 @@ import {
     findWebhook,
     generateFernColorPalette,
     generateFonts,
-    getDocsServiceJWT,
     getDocsUrlMetadata,
-    getFdrLambdaOrigin,
     isDocsDev,
     isLocal,
     isSelfHosted,
@@ -41,7 +39,6 @@ import {
 } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { FernAIClient } from "@fern-api/fai-sdk";
-import { FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
 import { type ApiDefinition, type DocsV1Read, type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
 import {
     ApiDefinitionV1ToLatest,
@@ -1432,7 +1429,6 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
         return result;
     });
 
-// we already cache the API definitions, so no need to cache the types as well
 const getTypes = () =>
     cache(async (domainKey: string, apiName?: string): Promise<Record<TypeId, TypeDefinition>> => {
         "use cache";
@@ -1462,38 +1458,21 @@ const getTypes = () =>
             }
         }
 
-        // If no types found and apiNameToId mapping exists, lazy-load the API using fdr-lambda
         if (Object.keys(allTypes).length === 0 && response.definition.apiNameToId != null) {
             const apiNameToId = response.definition.apiNameToId;
 
-            // Create fdr-lambda client for lazy-loading
-            const token = isSelfHosted() ? "" : await getDocsServiceJWT();
-            const fdrLambdaClient = new FdrLambdaClient({
-                environment: getFdrLambdaOrigin(),
-                token
-            });
-
             if (apiName != null) {
-                // Fetch specific API by name
                 const apiDefinitionId = apiNameToId[apiName];
                 if (apiDefinitionId != null) {
-                    const apiResponse = await fdrLambdaClient.api.v1.read.getApiDefinitionFull(
-                        ApiDefinitionId(apiDefinitionId)
-                    );
-                    if (apiResponse.ok && apiResponse.body.types) {
-                        Object.assign(allTypes, apiResponse.body.types);
+                    const api = await getApi(domainKey, apiDefinitionId);
+                    if (api.types) {
+                        Object.assign(allTypes, api.types);
                     }
                 }
             } else {
-                // Fetch all APIs
                 const fetchPromises = Object.entries(apiNameToId).map(async ([_, apiDefinitionId]) => {
-                    const apiResponse = await fdrLambdaClient.api.v1.read.getApiDefinitionFull(
-                        ApiDefinitionId(apiDefinitionId)
-                    );
-                    if (apiResponse.ok && apiResponse.body.types) {
-                        return apiResponse.body.types;
-                    }
-                    return {};
+                    const api = await getApi(domainKey, apiDefinitionId);
+                    return api.types ?? {};
                 });
                 const results = await Promise.all(fetchPromises);
                 for (const types of results) {

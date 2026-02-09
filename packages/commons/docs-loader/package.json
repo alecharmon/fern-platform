@@ -43,7 +43,6 @@
     "@fern-api/docs-server": "workspace:*",
     "@fern-api/docs-utils": "workspace:*",
     "@fern-api/fai-sdk": "workspace:*",
-    "@fern-api/fdr-lambda-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-api/visual-editor-server": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",

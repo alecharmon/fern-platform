@@ -593,9 +593,6 @@ importers:
       '@fern-api/fai-sdk':
         specifier: workspace:*
         version: link:../../fai-sdk
-      '@fern-api/fdr-lambda-sdk':
-        specifier: workspace:*
-        version: link:../../fdr-lambda-sdk
       '@fern-api/ui-core-utils':
         specifier: workspace:*
         version: link:../core-utils
