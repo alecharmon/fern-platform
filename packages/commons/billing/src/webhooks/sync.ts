@@ -111,14 +111,9 @@ export interface CustomerUpdateResult {
  * Create or link a billing account when a Stripe customer is created.
  */
 export async function syncCustomerFromStripe(
-    stripeCustomer: Stripe.Customer
+    stripeCustomer: Stripe.Customer,
+    orgId: string
 ): Promise<Result<{ orgId: string }, BillingError>> {
-    const orgId = stripeCustomer.metadata?.org_id;
-
-    if (!orgId) {
-        return err(billingError("INVALID_STATE", `Stripe customer ${stripeCustomer.id} has no org_id in metadata`));
-    }
-
     const result = await upsertOrgBillingAccount({
         org_id: orgId,
         stripe_customer_id: stripeCustomer.id
@@ -135,14 +130,10 @@ export async function syncCustomerFromStripe(
  * Handle customer.updated event - updates org_id if it changed in metadata.
  */
 export async function syncCustomerUpdateFromStripe(
-    stripeCustomer: Stripe.Customer
+    stripeCustomer: Stripe.Customer,
+    newOrgId: string
 ): Promise<Result<CustomerUpdateResult, BillingError>> {
     const customerId = stripeCustomer.id;
-    const newOrgId = stripeCustomer.metadata?.org_id;
-
-    if (!newOrgId) {
-        return err(billingError("INVALID_STATE", `Stripe customer ${customerId} has no org_id in metadata`));
-    }
 
     const existingResult = await getOrgBillingAccountByCustomerId(customerId);
     if (existingResult.isErr()) {

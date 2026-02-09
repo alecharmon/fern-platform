@@ -1,8 +1,12 @@
 import { err, ok, type Result } from "neverthrow";
 import type Stripe from "stripe";
 
-import type { BillingError } from "../errors";
+import { type BillingError, billingError } from "../errors";
 import { syncCustomerFromStripe, syncCustomerUpdateFromStripe, syncSubscriptionFromStripe } from "./sync";
+
+function resolveOrgId(customer: Stripe.Customer): string | undefined {
+    return customer.metadata?.org_id ?? customer.metadata?.orgId;
+}
 
 export type WebhookHandlerResult = {
     handled: boolean;
@@ -11,7 +15,12 @@ export type WebhookHandlerResult = {
 };
 
 async function handleCustomerCreated(customer: Stripe.Customer): Promise<Result<WebhookHandlerResult, BillingError>> {
-    const result = await syncCustomerFromStripe(customer);
+    const orgId = resolveOrgId(customer);
+    if (!orgId) {
+        return err(billingError("INVALID_STATE", `Stripe customer ${customer.id} has no org_id in metadata`));
+    }
+
+    const result = await syncCustomerFromStripe(customer, orgId);
     if (result.isErr()) {
         return err(result.error);
     }
@@ -24,7 +33,12 @@ async function handleCustomerCreated(customer: Stripe.Customer): Promise<Result<
 }
 
 async function handleCustomerUpdated(customer: Stripe.Customer): Promise<Result<WebhookHandlerResult, BillingError>> {
-    const result = await syncCustomerUpdateFromStripe(customer);
+    const orgId = resolveOrgId(customer);
+    if (!orgId) {
+        return err(billingError("INVALID_STATE", `Stripe customer ${customer.id} has no org_id in metadata`));
+    }
+
+    const result = await syncCustomerUpdateFromStripe(customer, orgId);
     if (result.isErr()) {
         return err(result.error);
     }

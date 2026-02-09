@@ -230,13 +230,18 @@ describe("syncCustomerFromStripe", () => {
         vi.clearAllMocks();
     });
 
-    it("fails when org_id metadata missing", async () => {
+    it("upserts billing account with provided orgId", async () => {
+        accountMocks.upsertOrgBillingAccount.mockResolvedValue(ok({ org_id: "org_1" } as any));
         const customer = { id: "cus_1", metadata: {} } as any;
 
-        const result = await syncCustomerFromStripe(customer);
+        const result = await syncCustomerFromStripe(customer, "org_1");
 
-        expect(result.isErr()).toBe(true);
-        expect(result._unsafeUnwrapErr().code).toBe("INVALID_STATE");
+        expect(result.isOk()).toBe(true);
+        expect(result._unsafeUnwrap().orgId).toBe("org_1");
+        expect(accountMocks.upsertOrgBillingAccount).toHaveBeenCalledWith({
+            org_id: "org_1",
+            stripe_customer_id: "cus_1"
+        });
     });
 });
 
@@ -275,10 +280,10 @@ describe("syncCustomerUpdateFromStripe", () => {
         subscriptionMocks.upsertSubscriptionByStripeId.mockResolvedValue(ok({ id: "sub_db" } as any));
         subscriptionMocks.deleteSubscriptionItemsNotIn.mockResolvedValue(ok(undefined));
 
-        const result = await syncCustomerUpdateFromStripe({
-            id: "cus_1",
-            metadata: { org_id: "new_org" }
-        } as any);
+        const result = await syncCustomerUpdateFromStripe(
+            { id: "cus_1", metadata: { org_id: "new_org" } } as any,
+            "new_org"
+        );
 
         expect(result.isOk()).toBe(true);
         expect(list).toHaveBeenCalledWith({ customer: "cus_1", status: "all", limit: 100 });
