@@ -82,8 +82,6 @@ jobs:
     name: Revalidate batch ${{ matrix.batch.index }}
     needs: prepare
     runs-on: Seed
-    outputs:
-      failed_sites: ${{ steps.revalidate.outputs.failed_sites }}
     strategy:
       fail-fast: false
       max-parallel: 10
@@ -140,12 +138,27 @@ jobs:
           
           echo "Batch ${{ matrix.batch.index }} completed"
 
+      - name: Upload failed sites
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-sites-batch-${{ matrix.batch.index }}
+          path: failed_sites.txt
+          retention-days: 1
+
   summary:
     name: Revalidation summary
     needs: [prepare, revalidate]
     runs-on: ubuntu-latest
     if: always()
     steps:
+      - name: Download failed site artifacts
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: failed-sites-batch-*
+          path: failed-sites-artifacts
+
       - name: Collect failed sites and report summary
         id: collect
         run: |
@@ -155,12 +168,25 @@ jobs:
           echo "- Batch size: ${{ inputs.batch_size || '24' }}" >> $GITHUB_STEP_SUMMARY
           echo "- Parallel requests per batch: 24 (3x 8 cores)" >> $GITHUB_STEP_SUMMARY
           
-          # Collect all failed sites from matrix jobs
-          # Note: matrix outputs are JSON objects keyed by matrix values
-          failed_json='${{ toJson(needs.revalidate.outputs) }}'
+          # Collect all failed sites from artifact files across all batches
+          all_failed=""
+          for f in failed-sites-artifacts/*/failed_sites.txt; do
+            if [ -f "$f" ] && [ -s "$f" ]; then
+              sites=$(cat "$f" | tr '\n' ',' | sed 's/,$//')
+              if [ -n "$sites" ]; then
+                if [ -n "$all_failed" ]; then
+                  all_failed="$all_failed,$sites"
+                else
+                  all_failed="$sites"
+                fi
+              fi
+            fi
+          done
           
-          # Extract all failed_sites values and combine them
-          all_failed=$(echo "$failed_json" | jq -r '.failed_sites // empty' | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
+          # Deduplicate and sort
+          if [ -n "$all_failed" ]; then
+            all_failed=$(echo "$all_failed" | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
+          fi
           
           if [ -n "$all_failed" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -181,11 +207,9 @@ jobs:
         run: |
           failed_sites="${{ steps.collect.outputs.failed_sites }}"
 
-          site_list=$(echo "$failed_sites" | tr ',' '\n' | while read site; do
-            [ -n "$site" ] && echo "• $site"
-          done)
-
           failed_count=$(echo "$failed_sites" | tr ',' '\n' | grep -c .)
+
+          site_list=$(echo "$failed_sites" | tr ',' '\n' | awk 'NF{printf "%s• %s", (c++>0?"\\n":""), $0}')
 
           echo "text=*Revalidation Failed for $failed_count site(s)*\n\n$site_list" >> $GITHUB_OUTPUT
 
