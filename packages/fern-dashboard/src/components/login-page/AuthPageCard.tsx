@@ -32,6 +32,7 @@ export async function AuthPageCard({
     const { FERN_CI_AUTOMATED_TESTING, redirect_on_login } = resolvedSearchParams;
     const shouldShowCITestLogin =
         !!process.env.FERN_CI_AUTOMATED_TESTING && FERN_CI_AUTOMATED_TESTING === process.env.FERN_CI_AUTOMATED_TESTING;
+    const isNonProductionEnv = process.env.VERCEL_ENV !== "production";
 
     return (
         <>
@@ -41,7 +42,9 @@ export async function AuthPageCard({
                 <div className="flex flex-col gap-2">
                     <GoogleLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
                     <GithubLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
-                    <PostmanLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
+                    {isNonProductionEnv && (
+                        <PostmanLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
+                    )}
                 </div>
                 <div className="flex items-center gap-3 my-6">
                     <div className="h-px flex-1 bg-border" />
