@@ -149,7 +149,7 @@ function typeReferenceToGraphQlType(ref: TypeReference, types: Record<TypeId, Ty
         case "id": {
             const typeDef = types[ref.id];
             if (typeDef) {
-                return typeDef.name ?? "Object";
+                return typeDef.displayName ?? unnamespacedName(typeDef.name) ?? "Object";
             }
             return "Object";
         }
@@ -170,6 +170,15 @@ function typeReferenceToGraphQlType(ref: TypeReference, types: Record<TypeId, Ty
         default:
             return "String";
     }
+}
+
+/**
+ * Extract the un-namespaced type name from a Fern type name.
+ * e.g., "orders_UserInput" -> "UserInput"
+ */
+function unnamespacedName(name: string): string {
+    const lastUnderscoreIndex = name.lastIndexOf("_");
+    return lastUnderscoreIndex !== -1 ? name.slice(lastUnderscoreIndex + 1) : name;
 }
 
 /**
