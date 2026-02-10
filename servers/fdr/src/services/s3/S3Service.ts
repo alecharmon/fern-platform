@@ -186,16 +186,24 @@ export class S3ServiceImpl implements S3Service {
         basepath?: string;
         readDocsDefinition: FernRegistry.docs.v2.read.LoadDocsForUrlResponse;
     }): Promise<PutObjectCommandOutput> {
+        const s3Key = getS3KeyForV1DocsDefinition(domain, basepath);
+        this.app.logger.info(
+            `[S3] writeLoadDocsForUrlResponse: domain=${domain}${basepath != null ? `, basepath=${basepath}` : ""}, key=${s3Key}`
+        );
         const command = new PutObjectCommand({
             Bucket: this.config.dbDocsDefinitionS3.bucketName,
-            Key: getS3KeyForV1DocsDefinition(domain, basepath),
+            Key: s3Key,
             Body: JSON.stringify(readDocsDefinition)
         });
         try {
             const response = await this.dbDocsDefinitionS3.send(command);
+            this.app.logger.info(`[S3] writeLoadDocsForUrlResponse: successfully stored docs at key=${s3Key}`);
             return response;
         } catch (error) {
-            this.app.logger.error(`Failed to write docs definition to S3 for domain ${domain}`, error);
+            this.app.logger.error(
+                `Failed to write docs definition to S3 for domain=${domain}${basepath != null ? `, basepath=${basepath}` : ""}, key=${s3Key}`,
+                error
+            );
             // Send a slack notification about the failure
             await this.app.services.slack.notify(`Fail to store docs for ${domain} in s3!`, error);
 

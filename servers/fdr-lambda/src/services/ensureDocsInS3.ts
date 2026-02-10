@@ -32,8 +32,15 @@ export async function ensureDocsInS3(
     const dbDocs = await loadDocsForURLFromDatabase(url, pool, basepath);
 
     if (dbDocs == null) {
+        console.warn(
+            `[ensureDocsInS3] No docs found in DB for hostname=${url.hostname}${basepath != null ? `, basepath=${basepath}` : ""}`
+        );
         throw new DomainNotRegisteredError();
     }
+
+    console.log(
+        `[ensureDocsInS3] Found docs in DB for hostname=${url.hostname}${basepath != null ? `, basepath=${basepath}` : ""}, orgId=${dbDocs.orgId}`
+    );
 
     // Verify the service JWT from docs-server
     await verifyDocsServiceJWT(authHeader);

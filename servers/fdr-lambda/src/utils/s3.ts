@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/suspicious/noConsole: lambda logging */
+
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { DocsV2Read } from "@fern-api/fdr-sdk";
@@ -94,6 +96,9 @@ export async function getDocsDefinitionFromS3(
 
     try {
         const key = getS3KeyForV1DocsDefinition(domain, basepath);
+        console.log(
+            `[S3] getDocsDefinitionFromS3: domain=${domain}${basepath != null ? `, basepath=${basepath}` : ""}, key=${key}`
+        );
 
         const command = new GetObjectCommand({
             Bucket: s3Config.dbDocsDefinitionS3BucketName,
@@ -102,15 +107,19 @@ export async function getDocsDefinitionFromS3(
         const response = await dbDocsDefinitionS3Client.send(command);
 
         if (!response.Body) {
+            console.warn(`[S3] getDocsDefinitionFromS3: empty body for key=${key}`);
             return null;
         }
-        // Convert stream to string
         const bodyString = await response.Body.transformToString();
 
         const docsDefinition = JSON.parse(bodyString) as DocsV2Read.LoadDocsForUrlResponse;
 
+        console.log(`[S3] getDocsDefinitionFromS3: successfully loaded docs from key=${key}`);
         return docsDefinition;
     } catch (_error) {
+        console.warn(
+            `[S3] getDocsDefinitionFromS3: no docs found at key for domain=${domain}${basepath != null ? `, basepath=${basepath}` : ""}`
+        );
         return null;
     }
 }
@@ -133,6 +142,9 @@ export async function storeDocsDefinitionInS3(
     }
 
     const key = getS3KeyForV1DocsDefinition(domain, basepath);
+    console.log(
+        `[S3] storeDocsDefinitionInS3: domain=${domain}${basepath != null ? `, basepath=${basepath}` : ""}, key=${key}`
+    );
 
     const command = new PutObjectCommand({
         Bucket: s3Config.dbDocsDefinitionS3BucketName,
@@ -141,4 +153,5 @@ export async function storeDocsDefinitionInS3(
         ContentType: "application/json"
     });
     await dbDocsDefinitionS3Client.send(command);
+    console.log(`[S3] storeDocsDefinitionInS3: successfully stored docs at key=${key}`);
 }

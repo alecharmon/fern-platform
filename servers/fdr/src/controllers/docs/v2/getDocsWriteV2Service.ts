@@ -361,6 +361,11 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
 
                 for (const url of urls) {
                     try {
+                        const basepath = req.body.basepathAware === true ? (url.path ?? undefined) : undefined;
+                        app.logger.info(
+                            `[finishDocsRegister] Writing S3 docs for domain=${url.hostname}${basepath != null ? `, basepath=${basepath} (basepathAware=true)` : ", no basepath"}`
+                        );
+
                         const response = await app.docsDefinitionCache.getDocsForUrl({
                             url: url.toURL(),
                             excludeApis: req.body.excludeApis ?? false
@@ -368,9 +373,13 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
 
                         await app.services.s3.writeLoadDocsForUrlResponse({
                             domain: url.hostname,
-                            basepath: req.body.basepathAware === true ? (url.path ?? undefined) : undefined,
+                            basepath,
                             readDocsDefinition: response
                         });
+
+                        app.logger.info(
+                            `[finishDocsRegister] Successfully wrote S3 docs for domain=${url.hostname}${basepath != null ? `, basepath=${basepath}` : ""}`
+                        );
                     } catch (e) {
                         app.logger.error(`Error while trying to write DB docs definition for ${url.getFullUrl()}`, e);
                     }

@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/suspicious/noConsole: lambda logging */
+
 import type { Pool } from "pg";
 import { InvalidUrlError } from "../errors";
 
@@ -38,11 +40,22 @@ export async function getMetadataForUrl(url: string, pool: Pool, basepath?: stri
                LIMIT 1`,
                   values: [hostname]
               };
+    console.log(
+        `[getMetadataForUrl] Querying metadata for hostname=${hostname}${basepath != null ? `, basepath=${basepath}` : ", no basepath"}`
+    );
+
     const result = await pool.query(query.text, query.values);
 
     if (result.rows.length === 0) {
+        console.warn(
+            `[getMetadataForUrl] No metadata found for hostname=${hostname}${basepath != null ? `, basepath=${basepath}` : ""}`
+        );
         return null;
     }
+
+    console.log(
+        `[getMetadataForUrl] Found metadata for hostname=${hostname}${basepath != null ? `, basepath=${basepath}` : ""}, org=${result.rows[0].orgID}`
+    );
 
     const whitelistResult = await pool.query(
         `SELECT "domain" FROM "algolia_preview_domain_whitelist" WHERE "domain" = $1 LIMIT 1`,

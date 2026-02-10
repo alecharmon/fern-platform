@@ -23,15 +23,23 @@ export async function getDocsForUrl(
     authHeader: string | undefined,
     basepath?: string
 ): Promise<DocsV2Read.LoadDocsForUrlResponse> {
+    console.log(
+        `[getDocsForUrl] Looking up docs for hostname=${url.hostname}${basepath != null ? `, basepath=${basepath}` : ", no basepath"}`
+    );
+
     const s3Docs = await getDocsDefinitionFromS3(url.hostname, basepath);
 
     if (s3Docs != null) {
-        // Verify the service JWT from docs-server
+        console.log(
+            `[getDocsForUrl] Found docs in S3 for hostname=${url.hostname}${basepath != null ? `, basepath=${basepath}` : ""}`
+        );
         await verifyDocsServiceJWT(authHeader);
         return s3Docs;
-    } else {
-        console.log(`[getDocsForUrl] No docs found in S3, falling back to db for hostname: ${url.hostname}`);
     }
+
+    console.log(
+        `[getDocsForUrl] No docs found in S3 for hostname=${url.hostname}${basepath != null ? `, basepath=${basepath}` : ""}, falling back to DB`
+    );
 
     const dbDocs = await loadDocsForURLFromDatabase(url, pool, basepath);
 
@@ -51,6 +59,9 @@ export async function getDocsForUrl(
             apisV2: apiDefinitions.apiV2Definitions,
             id: dbDocs.docsConfigInstanceId != null ? DocsV1Read.DocsConfigId(dbDocs.docsConfigInstanceId) : undefined
         });
+        console.log(
+            `[getDocsForUrl] Found docs in DB for hostname=${url.hostname}${basepath != null ? `, basepath=${basepath}` : ""}, orgId=${dbDocs.orgId}`
+        );
         return {
             orgId: dbDocs.orgId,
             baseUrl: {
@@ -61,6 +72,10 @@ export async function getDocsForUrl(
             lightModeEnabled: definition.config.colorsV3?.type !== "dark"
         };
     }
+
+    console.warn(
+        `[getDocsForUrl] No docs found in S3 or DB for hostname=${url.hostname}${basepath != null ? `, basepath=${basepath}` : ""}`
+    );
     throw new DomainNotRegisteredError();
 }
 

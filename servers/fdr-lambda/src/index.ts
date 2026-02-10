@@ -132,9 +132,16 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                 };
             }
 
+            console.log(
+                `[Handler] metadata-for-url: url=${body.url}${body.basepath != null ? `, basepath=${body.basepath}` : ", no basepath"}`
+            );
+
             const metadata = await getMetadataForUrl(body.url, pool, body.basepath);
 
             if (metadata === null) {
+                console.warn(
+                    `[Handler] metadata-for-url returned null for url=${body.url}${body.basepath != null ? `, basepath=${body.basepath}` : ""}`
+                );
                 throw new DomainNotRegisteredError();
             }
 
@@ -191,7 +198,9 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                 event.headers?.["X-Fern-Token"];
             console.log(`[Handler] Authorization header present: ${!!authHeader}`);
 
-            console.log(`[Handler] Calling getDocsForUrl for domain: ${parsedUrl.hostname}`);
+            console.log(
+                `[Handler] Calling getDocsForUrl for domain=${parsedUrl.hostname}${body.basepath != null ? `, basepath=${body.basepath}` : ", no basepath"}`
+            );
             const docsResponse = await getDocsForUrl(parsedUrl, pool, authHeader, body.basepath);
             console.log(`[Handler] getDocsForUrl completed successfully, preparing response`);
 
@@ -287,7 +296,9 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                 event.headers?.["X-Fern-Token"];
             console.log(`[Handler] Authorization header present: ${!!authHeader}`);
 
-            console.log(`[Handler] Calling ensureDocsInS3 for domain: ${parsedUrl.hostname}`);
+            console.log(
+                `[Handler] Calling ensureDocsInS3 for domain=${parsedUrl.hostname}${body.basepath != null ? `, basepath=${body.basepath}` : ", no basepath"}`
+            );
             const s3Response = await ensureDocsInS3(parsedUrl, pool, authHeader, body.basepath);
             console.log(`[Handler] ensureDocsInS3 completed successfully, S3 URL: ${s3Response.s3Url}`);
 
