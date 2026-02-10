@@ -132,20 +132,30 @@ jobs:
                 // Look for the markdown table row with prod.ferndocs.com
                 const lines = vercelComment.body.split('\n');
                 for (const line of lines) {
-                  if (line.includes('prod.ferndocs.com') && line.includes('Preview')) {
-                    // Extract URL from markdown link format [Preview](url)
-                    const match = line.match(/\[Preview\]\((https:\/\/[^)]+)\)/);
-                    if (match) {
-                      const previewUrl = match[1];
-                      console.log(`Found prod.ferndocs.com preview URL: ${previewUrl}`);
+                  if (line.includes('prod.ferndocs.com')) {
+                    // Check if deployment was skipped or ignored by Vercel
+                    if (line.includes('Skipped') || line.includes('Ignored')) {
+                      console.log('prod.ferndocs.com deployment was skipped/ignored by Vercel');
+                      console.log('Downstream smoke-test and visual-diff jobs will be skipped');
+                      core.setOutput('url', '');
+                      return;
+                    }
 
-                      // Check if deployment is ready (not building)
-                      if (line.includes('Ready') || line.includes('![Ready]')) {
-                        console.log('Deployment is ready!');
-                        core.setOutput('url', previewUrl);
-                        return;
-                      } else {
-                        console.log('Deployment exists but not ready yet, waiting...');
+                    if (line.includes('Preview')) {
+                      // Extract URL from markdown link format [Preview](url)
+                      const match = line.match(/\[Preview\]\((https:\/\/[^)]+)\)/);
+                      if (match) {
+                        const previewUrl = match[1];
+                        console.log(`Found prod.ferndocs.com preview URL: ${previewUrl}`);
+
+                        // Check if deployment is ready (not building)
+                        if (line.includes('Ready') || line.includes('![Ready]')) {
+                          console.log('Deployment is ready!');
+                          core.setOutput('url', previewUrl);
+                          return;
+                        } else {
+                          console.log('Deployment exists but not ready yet, waiting...');
+                        }
                       }
                     }
                   }

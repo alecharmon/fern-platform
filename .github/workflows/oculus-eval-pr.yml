@@ -109,9 +109,33 @@ jobs:
           script: |
             const maxAttempts = 60;
             const delayMs = 10000;
+            const prNumber = parseInt('${{ steps.eval_gate.outputs.number }}');
 
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
               console.log(`Attempt ${attempt}/${maxAttempts}: Checking for prod.ferndocs.com deployment...`);
+
+              // Check the Vercel bot comment to detect skipped/ignored deployments
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+              });
+
+              const vercelComment = comments.find(comment =>
+                comment.user.login === 'vercel[bot]' &&
+                comment.body.includes('prod.ferndocs.com')
+              );
+
+              if (vercelComment) {
+                const lines = vercelComment.body.split('\n');
+                for (const line of lines) {
+                  if (line.includes('prod.ferndocs.com') && (line.includes('Skipped') || line.includes('Ignored'))) {
+                    console.log('prod.ferndocs.com deployment was skipped/ignored by Vercel');
+                    core.setOutput('url', '');
+                    return;
+                  }
+                }
+              }
 
               // Check GitHub Deployments API
               const { data: deployments } = await github.rest.repos.listDeployments({
@@ -179,31 +203,31 @@ jobs:
             throw new Error('Timeout waiting for prod.ferndocs.com deployment after 10 minutes');
 
       - name: Setup Python
-        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' && steps.vercel-preview.outputs.url != '' }}
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install Poetry
-        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' && steps.vercel-preview.outputs.url != '' }}
         run: |
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Oculus dependencies
-        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' && steps.vercel-preview.outputs.url != '' }}
         working-directory: servers/oculus
         run: poetry install
 
       - name: Setup FAI dependencies
-        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' && steps.vercel-preview.outputs.url != '' }}
         working-directory: servers/fai
         run: |
           poetry install
           echo "PYTHONPATH=$PWD/src:$PYTHONPATH" >> $GITHUB_ENV
 
       - name: Run Oculus evaluation
-        if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
+        if: ${{ steps.eval_gate.outputs.should_run == 'true' && steps.vercel-preview.outputs.url != '' }}
         working-directory: servers/oculus
         env:
           VERCEL_URL: ${{ steps.vercel-preview.outputs.url }}
@@ -219,7 +243,7 @@ jobs:
             --github-output
 
       - name: Upload results artifact
-        if: ${{ always() && steps.eval_gate.outputs.should_run == 'true' }}
+        if: ${{ always() && steps.eval_gate.outputs.should_run == 'true' && steps.vercel-preview.outputs.url != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: oculus-results-pr-${{ steps.eval_gate.outputs.number }}
@@ -227,7 +251,7 @@ jobs:
           retention-days: 90
 
       - name: Comment PR with results
-        if: ${{ always() && steps.eval_gate.outputs.should_run == 'true' }}
+        if: ${{ always() && steps.eval_gate.outputs.should_run == 'true' && steps.vercel-preview.outputs.url != '' }}
         uses: actions/github-script@v7
         with:
           script: |
