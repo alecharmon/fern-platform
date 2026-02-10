@@ -1,126 +1,64 @@
 import "server-only";
 
 import * as esbuild from "esbuild";
-import * as path from "path";
-import { replaceReactImports } from "./react-imports";
 
-function getLoaderForFile(filename: string): esbuild.Loader {
-    if (filename.endsWith(".jsx")) {
-        return "jsx";
-    } else if (filename.endsWith(".ts") && !filename.endsWith(".tsx")) {
-        return "ts";
-    } else if (filename.endsWith(".js")) {
-        return "js";
+/**
+ * Strips React/ReactDOM imports from source code.
+ * These are provided as globals by getMDXExport, so importing them would cause
+ * require() calls that don't work in the browser context.
+ */
+function stripReactImports(source: string): string {
+    // Remove various forms of React imports:
+    // - import React from 'react'
+    // - import * as React from 'react'
+    // - import { useState, useEffect } from 'react'
+    // - import React, { useState } from 'react'
+    // - import ReactDOM from 'react-dom'
+    const importPatterns = [
+        // Default imports: import React from 'react'
+        /^\s*import\s+React\s+from\s+['"]react['"];?\s*$/gm,
+        // Namespace imports: import * as React from 'react'
+        /^\s*import\s+\*\s+as\s+React\s+from\s+['"]react['"];?\s*$/gm,
+        // Named imports: import { useState } from 'react'
+        /^\s*import\s+\{[^}]*\}\s+from\s+['"]react['"];?\s*$/gm,
+        // Default + named: import React, { useState } from 'react'
+        /^\s*import\s+React\s*,\s*\{[^}]*\}\s+from\s+['"]react['"];?\s*$/gm,
+        // ReactDOM imports
+        /^\s*import\s+ReactDOM\s+from\s+['"]react-dom['"];?\s*$/gm,
+        /^\s*import\s+\*\s+as\s+ReactDOM\s+from\s+['"]react-dom['"];?\s*$/gm,
+        /^\s*import\s+\{[^}]*\}\s+from\s+['"]react-dom['"];?\s*$/gm,
+        // React types (TypeScript)
+        /^\s*import\s+type\s+.*\s+from\s+['"]react['"];?\s*$/gm
+    ];
+
+    let result = source;
+    for (const pattern of importPatterns) {
+        result = result.replace(pattern, "// [stripped react import]");
     }
-    return "tsx";
-}
-
-function createVirtualFsPlugin(entryPath: string, files: Record<string, string>): esbuild.Plugin {
-    return {
-        name: "virtual-fs",
-        setup(build) {
-            build.onResolve({ filter: /^\./ }, (args) => {
-                const dir = path.dirname(args.importer === "<stdin>" ? entryPath : args.importer);
-                const resolved = path.join(dir, args.path);
-
-                const candidates = [resolved, `${resolved}.ts`, `${resolved}.tsx`, `${resolved}.js`, `${resolved}.jsx`];
-                for (const candidate of candidates) {
-                    if (files[candidate] != null) {
-                        return { path: candidate, namespace: "virtual" };
-                    }
-                }
-
-                const indexCandidates = [
-                    path.join(resolved, "index.ts"),
-                    path.join(resolved, "index.tsx"),
-                    path.join(resolved, "index.js"),
-                    path.join(resolved, "index.jsx")
-                ];
-                for (const candidate of indexCandidates) {
-                    if (files[candidate] != null) {
-                        return { path: candidate, namespace: "virtual" };
-                    }
-                }
-
-                return undefined;
-            });
-
-            build.onResolve({ filter: /^react(-dom)?$/ }, (args) => {
-                return { path: args.path, namespace: "react-shim" };
-            });
-
-            build.onLoad({ filter: /.*/, namespace: "react-shim" }, (args) => {
-                if (args.path === "react-dom") {
-                    return { contents: "export default ReactDOM;", loader: "js" };
-                }
-                return { contents: "export default React;", loader: "js" };
-            });
-
-            build.onLoad({ filter: /.*/, namespace: "virtual" }, (args) => {
-                const source = files[args.path];
-                if (source == null) {
-                    return undefined;
-                }
-                return {
-                    contents: replaceReactImports(source),
-                    loader: getLoaderForFile(args.path)
-                };
-            });
-        }
-    };
-}
-
-async function compileTsxWithBundle(source: string, filename: string, files: Record<string, string>): Promise<string> {
-    const processedSource = replaceReactImports(source);
-
-    const absFilename = path.resolve(filename);
-    const absFiles: Record<string, string> = {};
-    for (const [key, value] of Object.entries(files)) {
-        absFiles[path.resolve(key)] = value;
-    }
-    absFiles[absFilename] = processedSource;
-
-    const result = await esbuild.build({
-        stdin: {
-            contents: processedSource,
-            loader: getLoaderForFile(filename),
-            resolveDir: path.dirname(absFilename),
-            sourcefile: path.basename(absFilename)
-        },
-        bundle: true,
-        write: false,
-        format: "iife",
-        globalName: "__exports__",
-        target: "es2020",
-        jsx: "transform",
-        jsxFactory: "React.createElement",
-        jsxFragment: "React.Fragment",
-        minify: false,
-        plugins: [createVirtualFsPlugin(absFilename, absFiles)]
-    });
-
-    const output = result.outputFiles?.[0]?.text ?? "";
-    return output + "\nreturn __exports__;";
+    return result;
 }
 
 /**
  * Compiles TSX/JSX source code to JavaScript on the server side.
- * Supports direct React hook imports and relative file imports.
+ * This enables server-side rendering of custom React components.
  *
  * @param source - The TSX/JSX source code to compile
  * @param filename - The filename (used to determine loader type)
- * @param files - Optional map of all available files for resolving imports
  * @returns The compiled JavaScript code as a string
  */
-export async function compileTsx(source: string, filename: string, files?: Record<string, string>): Promise<string> {
-    const hasRelativeImports = /^\s*import\s+.*from\s+['"]\./m.test(source);
+export async function compileTsx(source: string, filename: string): Promise<string> {
+    // Strip React imports since React is provided as a global
+    const processedSource = stripReactImports(source);
 
-    if (hasRelativeImports && files != null) {
-        return compileTsxWithBundle(source, filename, files);
+    // Determine the loader based on file extension
+    let loader: esbuild.Loader = "tsx";
+    if (filename.endsWith(".jsx")) {
+        loader = "jsx";
+    } else if (filename.endsWith(".ts") && !filename.endsWith(".tsx")) {
+        loader = "ts";
+    } else if (filename.endsWith(".js")) {
+        loader = "js";
     }
-
-    const processedSource = replaceReactImports(source);
-    const loader = getLoaderForFile(filename);
 
     const result = await esbuild.transform(processedSource, {
         loader,
