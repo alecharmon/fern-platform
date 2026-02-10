@@ -4,11 +4,11 @@
 export const DEFAULT_SPECS = [
     {
         fileName: "example-openapi.json",
-        assetUrl: "https://petstore3.swagger.io/api/v3/openapi.json"
+        assetUrl: "https://raw.githubusercontent.com/fern-api/docs-starter/refs/heads/main/fern/openapi.yaml"
     },
     {
         fileName: "example-asyncapi.yaml",
-        assetUrl: "https://raw.githubusercontent.com/asyncapi/spec/master/examples/streetlights-mqtt-asyncapi.yml"
+        assetUrl: "https://raw.githubusercontent.com/fern-api/docs-starter/refs/heads/main/fern/asyncapi.yaml"
     }
 ] as const;
 
