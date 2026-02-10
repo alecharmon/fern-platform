@@ -1,0 +1,43 @@
+@page {
+  size: a4;
+  margin: 0;
+}
+
+@layer components {
+  .fern-pdf-cover-root {
+    /* Print fidelity */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
+
+  .fern-pdf-cover-title {
+    @apply text-body;
+  }
+
+  .fern-pdf-cover-subtitle {
+    @apply text-(color:--grayscale-a11);
+  }
+
+  .fern-pdf-cover-date {
+    @apply text-(color:--grayscale-a11);
+  }
+
+  .fern-pdf-cover-footer {
+    @apply text-(color:--grayscale-a10);
+  }
+
+  .fern-pdf-cover-footer-brand {
+    /* FernLogo uses currentColor */
+    @apply text-(color:--grayscale-a11);
+  }
+}
+
+@layer utilities {
+  /* Override Tailwind fill utility so the logo uses currentColor */
+  .fern-pdf-cover-root .fill-fern-ground {
+    fill: currentcolor !important;
+  }
+}
+

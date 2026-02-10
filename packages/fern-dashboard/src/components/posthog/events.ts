@@ -26,7 +26,10 @@ export const PosthogEventName = {
     ONBOARDING_DOCS_SITE_CREATED: "dashboard-onboarding-docs-site-created",
     ONBOARDING_DOCS_COMPLETE_ACTION: "dashboard-onboarding-docs-complete-action",
     ONBOARDING_SDK_PAGE_VIEWED: "dashboard-onboarding-sdk-page-viewed",
-    ONBOARDING_SDK_QUICKSTART_CLICKED: "dashboard-onboarding-sdk-quickstart-clicked"
+    ONBOARDING_SDK_QUICKSTART_CLICKED: "dashboard-onboarding-sdk-quickstart-clicked",
+
+    // PDF export events
+    PDF_EXPORT_CLICKED: "dashboard-pdf-export-clicked"
 } as const;
 
 export type PosthogEventName = (typeof PosthogEventName)[keyof typeof PosthogEventName];
@@ -109,6 +112,12 @@ export type PosthogEventPayloads = {
     };
     [PosthogEventName.ONBOARDING_SDK_PAGE_VIEWED]: Record<string, never>;
     [PosthogEventName.ONBOARDING_SDK_QUICKSTART_CLICKED]: Record<string, never>;
+
+    // PDF export event payloads
+    [PosthogEventName.PDF_EXPORT_CLICKED]: {
+        orgName: string;
+        docsUrl: string;
+    };
 };
 
 /**

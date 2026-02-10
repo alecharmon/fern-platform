@@ -40,6 +40,7 @@
     "@bprogress/next": "^3.2.11",
     "@fern-api/docs-auth": "workspace:*",
     "@fern-api/docs-loader": "workspace:*",
+    "@fern-api/docs-pdf": "workspace:*",
     "@fern-api/docs-server": "workspace:*",
     "@fern-api/docs-utils": "workspace:*",
     "@fern-api/fai-sdk": "workspace:*",

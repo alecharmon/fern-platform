@@ -46,6 +46,8 @@
     "./navigation/types": "./src/navigation/types.ts",
     "./navigation/pageUtils": "./src/navigation/pageUtils.ts",
     "./navigation/mdxUtils": "./src/navigation/mdxUtils.ts",
+    "./pdf/PdfCoverPage": "./src/pdf/PdfCoverPage.tsx",
+    "./src/pdf/PdfCoverPage.scss": "./src/pdf/PdfCoverPage.scss",
     "./*": "./src/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
     "./state/*": "./src/state/*.tsx",

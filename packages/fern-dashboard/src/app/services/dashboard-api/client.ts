@@ -8,6 +8,9 @@ import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
 import type { getOrgMembers } from "@/app/api/get-org-members/route";
 import type { getUserResourceRoles } from "@/app/api/get-user-resource-roles/route";
 import type { validateGithubBranch } from "@/app/api/get-validate-github-branch/route";
+import type { createPdfExportTask } from "@/app/api/pdf-export/create-task/route";
+import type { getPdfExportDownloadUrl } from "@/app/api/pdf-export/get-download-url/route";
+import type { listPdfExportTasks } from "@/app/api/pdf-export/list-tasks/route";
 import type { postDocsGithubSource } from "@/app/api/post-docs-github-source/route";
 import type { postCreatePr } from "@/app/api/post-git-create-pr/route";
 import type { generateSignedUploadUrl } from "@/app/api/signed-image-url/generate/route";
@@ -48,7 +51,13 @@ export const DashboardApiClient = {
     getSignedImageUrl: (request: getSignedImageUrl.Request) =>
         typedFetch<getSignedImageUrl.Response>("/api/signed-image-url/get", request),
     updateUserPermissions: (request: updateUserPermissions.Request) =>
-        typedFetch<updateUserPermissions.Response>("/api/update-user-permissions", request)
+        typedFetch<updateUserPermissions.Response>("/api/update-user-permissions", request),
+    createPdfExportTask: (request: createPdfExportTask.Request) =>
+        typedFetch<createPdfExportTask.Response>("/api/pdf-export/create-task", request),
+    listPdfExportTasks: (request: listPdfExportTasks.Request) =>
+        typedFetch<listPdfExportTasks.Response>("/api/pdf-export/list-tasks", request),
+    getPdfExportDownloadUrl: (request: getPdfExportDownloadUrl.Request) =>
+        typedFetch<getPdfExportDownloadUrl.Response>("/api/pdf-export/get-download-url", request)
 };
 
 export class ApiError extends Error {

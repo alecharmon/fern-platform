@@ -4,6 +4,7 @@ import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { ArchiveSiteButton } from "@/components/settings/ArchiveSiteButton";
+import { PdfExporterSettingsCard } from "@/components/settings/PdfExporterSettingsCard";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { ToggleAskAiButton } from "@/components/settings/ToggleAskAiButton";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,6 +24,7 @@ export default async function Page({
 
     return (
         <div className="flex flex-1 flex-col items-center gap-4">
+            <PdfExporterSettingsCard docsUrl={docsUrl} orgName={orgName} />
             <SettingsCard
                 title="Ask AI"
                 description="This will turn on or turn off AI search for this documentation site."

@@ -13,6 +13,7 @@
 @import "./badges/index.scss";
 @import "./kbd.css";
 @import "./accordion.scss";
+@import "./pdf/PdfCoverPage.scss";
 @import "./utilities.scss";
 @import "./syntax-highlighter/index.css";
 @import "./header/index.scss";

@@ -1,0 +1,145 @@
+import type { DocsMetadata } from "@fern-api/docs-server/docs-loader";
+import type { DocsV1Read } from "@fern-api/fdr-sdk";
+import { cn } from "../cn";
+import { FernLogo, FernLogoFill } from "../FernLogo";
+
+const LOGO_HEIGHT_MIN_PX = 64;
+const LOGO_HEIGHT_MAX_PX = 96;
+const LOGO_HEIGHT_DEFAULT_PX = 32;
+const LOGO_HEIGHT_SCALE = 2;
+const SUBTITLE_DEFAULT_TEXT = "Complete documentation for developers, technical teams, and partners.";
+
+interface PdfCoverPageProps {
+    domain: string;
+    docsMetadata: DocsMetadata;
+    docsConfig: Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">;
+    docsLanguage: string;
+    printCoverPageDataAttribute: string;
+    className?: string;
+    logoSrc?: string;
+    logoHeight?: number;
+    coverTitleOverride?: string;
+    coverSubtitleOverride?: string;
+    hideFooter?: boolean;
+}
+
+export function PdfCoverPage({
+    domain,
+    docsMetadata,
+    docsConfig,
+    docsLanguage,
+    printCoverPageDataAttribute,
+    className,
+    logoSrc,
+    logoHeight,
+    coverTitleOverride,
+    coverSubtitleOverride,
+    hideFooter
+}: PdfCoverPageProps) {
+    logoHeight = Math.max(
+        LOGO_HEIGHT_MIN_PX,
+        Math.min(LOGO_HEIGHT_MAX_PX, (logoHeight ?? LOGO_HEIGHT_DEFAULT_PX) * LOGO_HEIGHT_SCALE)
+    );
+
+    const exportDate = new Date().toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+
+    const coverTitleOverrideTrimmed = coverTitleOverride?.trim();
+    const coverTitle = coverTitleOverride == null ? docsConfig.title || domain : coverTitleOverrideTrimmed;
+    const coverSubtitleOverrideTrimmed = coverSubtitleOverride?.trim();
+    const coverSubtitle = coverSubtitleOverride == null ? SUBTITLE_DEFAULT_TEXT : coverSubtitleOverrideTrimmed;
+
+    const shouldRenderTitle = coverTitleOverride == null || coverTitleOverrideTrimmed !== "";
+    const shouldRenderSubtitle = coverSubtitleOverride == null || coverSubtitleOverrideTrimmed !== "";
+
+    return (
+        <div
+            {...{ [printCoverPageDataAttribute]: true }}
+            data-fern-domain={domain}
+            data-fern-base-path={docsMetadata.basePath}
+            lang={docsLanguage}
+            className={cn(
+                "fern-pdf-cover-root relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-white px-16 py-12 font-sans",
+                className
+            )}
+        >
+            {/* Subtle top gradient wash */}
+            <div
+                data-fern-cover-accent
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+                style={{
+                    backgroundImage: "linear-gradient(180deg, rgba(0, 135, 0, 0.03) 0%, transparent 50%)"
+                }}
+            />
+
+            <div data-fern-cover-content className="relative z-10 flex max-w-[600px] flex-col items-center text-center">
+                <div
+                    data-fern-cover-badge
+                    className="mb-[46px] inline-flex items-center gap-2 rounded-full border px-[14px] py-[7px] text-[10px] font-[650] uppercase tracking-[0.14em] leading-none"
+                    style={{ color: "#065f46", background: "#ecfdf5", borderColor: "#6ee7b7" }}
+                >
+                    Documentation
+                </div>
+
+                {logoSrc ? (
+                    <div data-fern-cover-logo className="mb-14 flex items-center justify-center">
+                        <img
+                            src={logoSrc}
+                            alt={`${docsConfig.title ?? domain} logo`}
+                            style={{ height: `${logoHeight}px` }}
+                            className="block max-w-[400px] object-contain"
+                        />
+                    </div>
+                ) : null}
+
+                {shouldRenderTitle ? (
+                    <h1
+                        data-fern-cover-title
+                        className="fern-pdf-cover-title mb-6 text-[58px] font-extrabold leading-[1.05] tracking-[-0.03em]"
+                    >
+                        {coverTitle}
+                    </h1>
+                ) : null}
+
+                {shouldRenderSubtitle ? (
+                    <div
+                        data-fern-cover-subtitle
+                        className="fern-pdf-cover-subtitle mb-20 max-w-[500px] text-[18px] leading-[1.6]"
+                    >
+                        {coverSubtitle}
+                    </div>
+                ) : null}
+
+                <div data-fern-cover-meta className="mt-2">
+                    <div data-fern-cover-date className="fern-pdf-cover-date text-[15px] font-normal tracking-[0.01em]">
+                        {exportDate}
+                    </div>
+                </div>
+            </div>
+
+            {hideFooter ? null : (
+                <div
+                    data-fern-cover-footer
+                    className="fern-pdf-cover-footer absolute bottom-[44px] right-[44px] z-10 flex justify-center text-[12px]"
+                >
+                    <div data-fern-cover-footer-inner className="inline-flex items-center gap-1.5">
+                        <span>Generated by</span>
+                        <span
+                            data-fern-cover-footer-brand
+                            className="fern-pdf-cover-footer-brand inline-flex items-center gap-1.5 font-semibold tracking-[-0.005em]"
+                        >
+                            <FernLogo
+                                fill={FernLogoFill.Ground}
+                                style={{ height: 12, width: "auto", marginTop: -3.5 }}
+                            />
+                        </span>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

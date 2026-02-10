@@ -1252,6 +1252,9 @@ importers:
       '@fern-api/docs-loader':
         specifier: workspace:*
         version: link:../commons/docs-loader
+      '@fern-api/docs-pdf':
+        specifier: workspace:*
+        version: link:../commons/docs-pdf
       '@fern-api/docs-server':
         specifier: workspace:*
         version: link:../commons/docs-server

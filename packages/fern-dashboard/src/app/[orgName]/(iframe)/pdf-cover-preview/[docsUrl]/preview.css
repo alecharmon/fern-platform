@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
+
+/* Pull in the exact docs-component styles for the cover. */
+@import "@fern-docs/components/styles";
+
+/* Ensure Tailwind scans the workspace package sources for classes. */
+@source "../../../../../../../fern-docs/components/src";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: white;
+}
+
+/* Keep this page isolated and predictable */
+#pdf-cover-iframe {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
