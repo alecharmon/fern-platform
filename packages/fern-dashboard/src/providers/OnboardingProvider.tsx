@@ -127,7 +127,7 @@ const DEFAULT_FORM_DATA: WizardFormData = {
     logoFile: null,
     faviconFileName: null,
     logoFileName: null,
-    primaryColorHex: null,
+    primaryColorHex: "#008700",
     existingDocsSite: "",
     openApiSpecFiles: [],
     openApiSpecUrls: [],

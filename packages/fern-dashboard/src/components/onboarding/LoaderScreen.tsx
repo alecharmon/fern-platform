@@ -244,6 +244,8 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
     const [publishingPhase, setPublishingPhase] = useState<PublishingPhase>("repo");
     const [docsStepLabel, setDocsStepLabel] = useState<string>("Applying branding");
     const [isCollaboratorModalOpen, setIsCollaboratorModalOpen] = useState(false);
+    const [showSlowPublishingWarning, setShowSlowPublishingWarning] = useState(false);
+    const pollingStartTime = useRef<number | null>(null);
 
     const onCompleteRef = useRef(onComplete);
     const hasStartedPublishing = useRef(false);
@@ -296,7 +298,28 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
 
                 // Step 3: Start polling for workflow completion
                 console.log("[LoaderScreen] Step 3: Polling workflow status...");
-                setDocsStepLabel("Publishing site");
+                pollingStartTime.current = Date.now();
+                // Cycle through fun labels before "Publishing site"
+                const funLabels = [
+                    "Tending the garden",
+                    "Planting a Fern",
+                    "Adding your colors",
+                    "Thanking our robots",
+                    "Publishing site"
+                ];
+                let labelIndex = 0;
+                setDocsStepLabel(funLabels[0] || "Publishing site");
+
+                // Cycle through labels every 2 seconds
+                const labelInterval = setInterval(() => {
+                    labelIndex++;
+                    if (labelIndex < funLabels.length) {
+                        setDocsStepLabel(funLabels[labelIndex] || "Publishing site");
+                    } else {
+                        clearInterval(labelInterval);
+                    }
+                }, 2000);
+
                 setPublishingPhase("polling");
             } catch (err) {
                 console.error("[LoaderScreen] Publishing error:", err);
@@ -437,6 +460,21 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
             clearInterval(intervalId);
         };
     }, [isComplete, workflowFailed, publishingPhase, pollWorkflowStatus]);
+
+    // Show warning after 15 seconds of polling
+    useEffect(() => {
+        if (publishingPhase !== "polling" || isComplete || workflowFailed) {
+            return;
+        }
+
+        const timeoutId = setTimeout(() => {
+            setShowSlowPublishingWarning(true);
+        }, 15000);
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
+    }, [publishingPhase, isComplete, workflowFailed]);
 
     const dashboardLink = useMemo(() => {
         if (docsUrl) {
@@ -621,6 +659,10 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                 <div className="border-border w-full max-w-3xl rounded-lg border bg-white p-4 text-sm text-red-800 dark:border-red-800 dark:bg-black dark:text-red-400">
                     {error}
                 </div>
+            )}
+
+            {showSlowPublishingWarning && !isComplete && !workflowFailed && (
+                <p className="text-sm text-muted-foreground">This is taking longer than usual. Check back in a few!</p>
             )}
         </div>
     );
