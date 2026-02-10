@@ -23,7 +23,8 @@
     "test": "vitest --run --passWithNoTests --globals"
   },
   "dependencies": {
-    "@fern-platform/supabase": "workspace:*"
+    "@fern-platform/supabase": "workspace:*",
+    "auth0": "^4.20.0"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
