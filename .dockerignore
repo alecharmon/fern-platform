@@ -24,7 +24,6 @@ tsconfig.tsbuildinfo
 
 # Large directories not needed for Docker builds
 .git
-fern/
 .github/
 
 # Test files

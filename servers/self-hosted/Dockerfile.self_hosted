@@ -11,8 +11,10 @@ ARG BASE_IMAGE=fernapi/fern-self-hosted-base:latest
 FROM ${BASE_IMAGE}
 
 # Copy source code and run turbo prune
-# Note: .git, fern/, .github/, and test files are excluded via .dockerignore
+# Note: .git, .github/, and test files are excluded via .dockerignore
 COPY . .
+RUN log "Cleaning up fern directory..." && \
+    rm -rf fern/
 
 RUN log "Running turbo prune..." && \
     turbo prune @fern-docs/bundle --docker 2>&1 | add-timestamps
