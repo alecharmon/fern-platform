@@ -67,7 +67,7 @@ export default async function SharedLayout({
         const headerSource = jsFiles[config.header];
         if (headerSource != null) {
             try {
-                compiledHeaderCode = await compileTsx(headerSource, config.header);
+                compiledHeaderCode = await compileTsx(headerSource, config.header, jsFiles);
             } catch (err) {
                 console.error("[SharedLayout] Failed to compile custom header:", err);
             }
@@ -80,7 +80,7 @@ export default async function SharedLayout({
         const footerSource = jsFiles[config.footer];
         if (footerSource != null) {
             try {
-                compiledFooterCode = await compileTsx(footerSource, config.footer);
+                compiledFooterCode = await compileTsx(footerSource, config.footer, jsFiles);
             } catch (err) {
                 console.error("[SharedLayout] Failed to compile custom footer:", err);
             }
