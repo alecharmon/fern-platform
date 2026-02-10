@@ -107,36 +107,6 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
     await fs.writeFile(outputPath, Buffer.from(buffer));
 }
 
-const LLMS_FULL_TXT_URL = "https://buildwithfern.com/learn/docs/llms-full.txt";
-
-/**
- * Fetches the CLAUDE.md content from the Fern docs LLM page and writes it to the fern directory.
- * Silently skips if the fetch fails.
- */
-async function fetchAndWriteClaudeMd(fernDir: string): Promise<void> {
-    try {
-        const response = await fetch(LLMS_FULL_TXT_URL);
-        if (!response.ok) {
-            console.warn(`[customize] Failed to fetch llms-full.txt: ${response.status}`);
-            return;
-        }
-        const content = await response.text();
-        const currentDate = new Date().toISOString().split("T")[0];
-        const header = `###########
-About this page.
-This is a fetch of <${LLMS_FULL_TXT_URL}> - dated on ${currentDate}
-We've automatically included this file to aid any LLM assistants with making efficient edits to your documentation repo.
-Happy documenting!
-###########
-
-`;
-        await fs.writeFile(path.join(fernDir, "CLAUDE.md"), header + content);
-        console.log("[customize] CLAUDE.md written successfully");
-    } catch (error) {
-        console.warn("[customize] Error fetching llms-full.txt:", error);
-    }
-}
-
 /**
  * Parses a spec and extracts type and title
  */
@@ -406,9 +376,6 @@ async function customizeBasicTemplate(
 
     // Remove generators.yml for first commit (will be added with API specs)
     await fs.unlink(path.join(fernDir, "generators.yml")).catch(() => {});
-
-    // Fetch and write CLAUDE.md for LLM assistance (silently skips if fetch fails)
-    await fetchAndWriteClaudeMd(fernDir);
 
     // Write updated docs.yml
     await fs.writeFile(docsYmlPath, stringifyYaml(docsConfig, { schemaUrl: YAML_SCHEMAS.DOCS_YML }));
