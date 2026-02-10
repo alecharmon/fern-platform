@@ -1,14 +1,17 @@
 "use client";
 
-import { conformExplorerRoute } from "@fern-api/docs-utils";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { cn } from "@fern-docs/components/cn";
+import { Button } from "@fern-docs/components/FernButtonV2";
 import { ButtonLink } from "@fern-docs/components/FernLinkButton";
 import { FernTooltip, FernTooltipProvider } from "@fern-docs/components/FernTooltip";
 import { t } from "@fern-docs/i18n";
+import { useSetAtom } from "jotai";
 import { Play } from "lucide-react";
-import type { FC } from "react";
+import { type FC, useCallback } from "react";
+import { useUrlParams } from "@/hooks/use-url-params";
+import { PLAYGROUND_EXPLORER_OPEN_ATOM } from "@/state/playground";
 
 function isEndpointDefinition(
     endpoint: ApiDefinition.EndpointDefinition | ApiDefinition.WebSocketChannel | undefined
@@ -45,10 +48,20 @@ export const PlaygroundButton: FC<{
     lang: string;
 }> = ({ state, endpoint, className, lang }) => {
     const playgroundSettings = state.type === "endpoint" || state.type === "webSocket" ? state.playground : undefined;
+    const { addUrlParamToPathname } = useUrlParams();
+    const setExplorerOpen = useSetAtom(PLAYGROUND_EXPLORER_OPEN_ATOM);
+
+    const handleOpen = useCallback(() => {
+        setExplorerOpen(true);
+        const url = addUrlParamToPathname("explorer", "true");
+        window.history.pushState(window.history.state, "", url);
+    }, [setExplorerOpen, addUrlParamToPathname]);
 
     if (!shouldShowPlayground(state, endpoint)) {
         return null;
     }
+
+    const hasCustomHref = playgroundSettings?.button?.href != null;
 
     return (
         <FernTooltipProvider>
@@ -62,23 +75,33 @@ export const PlaygroundButton: FC<{
                     </span>
                 }
             >
-                <ButtonLink
-                    id={`playground-button:${state.slug}`}
-                    aria-description={
-                        playgroundSettings?.button?.href
-                            ? t(lang).apiReference.opensApiExplorerNewTab
-                            : t(lang).apiReference.opensApiExplorer
-                    }
-                    href={playgroundSettings?.button?.href ?? conformExplorerRoute(state.slug)}
-                    target={playgroundSettings?.button?.href ? "_blank" : undefined}
-                    variant="default"
-                    size="xs"
-                    className={cn("font-mono [&_svg]:size-3", className)}
-                    scroll={false}
-                >
-                    <Play className="fill-current" />
-                    {t(lang).buttons.tryIt}
-                </ButtonLink>
+                {hasCustomHref ? (
+                    <ButtonLink
+                        id={`playground-button:${state.slug}`}
+                        aria-description={t(lang).apiReference.opensApiExplorerNewTab}
+                        href={playgroundSettings.button!.href!}
+                        target="_blank"
+                        variant="default"
+                        size="xs"
+                        className={cn("font-mono [&_svg]:size-3", className)}
+                        scroll={false}
+                    >
+                        <Play className="fill-current" />
+                        {t(lang).buttons.tryIt}
+                    </ButtonLink>
+                ) : (
+                    <Button
+                        id={`playground-button:${state.slug}`}
+                        aria-description={t(lang).apiReference.opensApiExplorer}
+                        onClick={handleOpen}
+                        variant="default"
+                        size="xs"
+                        className={cn("font-mono [&_svg]:size-3", className)}
+                    >
+                        <Play className="fill-current" />
+                        {t(lang).buttons.tryIt}
+                    </Button>
+                )}
             </FernTooltip>
         </FernTooltipProvider>
     );

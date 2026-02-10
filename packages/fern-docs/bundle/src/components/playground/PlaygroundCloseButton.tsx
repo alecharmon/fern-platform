@@ -1,58 +1,57 @@
 "use client";
 
 import { FernButton } from "@fern-docs/components/FernButton";
-import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
 import { tunnel } from "@fern-ui/react-commons";
+import { useSetAtom } from "jotai";
 import { X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useCallback } from "react";
 
 import { useUrlParams } from "@/hooks/use-url-params";
+import { PLAYGROUND_EXPLORER_OPEN_ATOM } from "@/state/playground";
 
 export const closeButton = tunnel();
 
 export function PlaygroundCloseButton() {
     const { removeUrlParamFromPathname } = useUrlParams();
+    const setExplorerOpen = useSetAtom(PLAYGROUND_EXPLORER_OPEN_ATOM);
+
+    const handleClose = useCallback(() => {
+        setExplorerOpen(false);
+        const url = removeUrlParamFromPathname("explorer");
+        window.history.replaceState(window.history.state, "", url);
+    }, [setExplorerOpen, removeUrlParamFromPathname]);
+
     return (
         <closeButton.In>
-            <FernLinkButton
-                icon={<X />}
-                size="large"
-                rounded
-                variant="outlined"
-                href={removeUrlParamFromPathname("explorer")}
-                replace
-                scroll={false}
-            />
+            <FernButton icon={<X />} size="large" rounded variant="outlined" onClick={handleClose} />
         </closeButton.In>
     );
 }
 
 export function InterceptedPlaygroundCloseButton() {
-    const router = useRouter();
     const { removeUrlParamFromPathname } = useUrlParams();
+    const setExplorerOpen = useSetAtom(PLAYGROUND_EXPLORER_OPEN_ATOM);
+
+    const handleClose = useCallback(() => {
+        setExplorerOpen(false);
+        const url = removeUrlParamFromPathname("explorer");
+        window.history.replaceState(window.history.state, "", url);
+    }, [setExplorerOpen, removeUrlParamFromPathname]);
+
     React.useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
-                router.replace(removeUrlParamFromPathname("explorer"));
+                handleClose();
             }
         };
         window.addEventListener("keydown", handleEscape);
         return () => {
             window.removeEventListener("keydown", handleEscape);
         };
-    }, [router, removeUrlParamFromPathname]);
+    }, [handleClose]);
     return (
         <closeButton.In>
-            <FernButton
-                icon={<X />}
-                size="large"
-                rounded
-                variant="outlined"
-                onClick={() => {
-                    router.replace(removeUrlParamFromPathname("explorer"));
-                }}
-            />
+            <FernButton icon={<X />} size="large" rounded variant="outlined" onClick={handleClose} />
         </closeButton.In>
     );
 }

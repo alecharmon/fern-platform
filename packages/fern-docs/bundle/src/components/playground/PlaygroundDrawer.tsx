@@ -3,18 +3,25 @@
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useRouter } from "next/navigation";
-import React, { useCallback } from "react";
+import { useAtom } from "jotai";
+import React, { useCallback, useEffect } from "react";
 import { Drawer } from "vaul";
 import { useUrlParams } from "@/hooks/use-url-params";
+import { PLAYGROUND_EXPLORER_OPEN_ATOM } from "@/state/playground";
 
 import { useHeaderHeight, useViewportSize } from "../hooks/useViewportSize";
 
 export function PlaygroundDrawer({ children }: { children: React.ReactNode }) {
     const [snap, setSnap] = React.useState<number | string | null>(null);
-    const { removeUrlParamFromPathname, urlHasParam, addUrlParamToPathname } = useUrlParams();
-    const open = urlHasParam("explorer");
-    const router = useRouter();
+    const { removeUrlParamFromPathname, addUrlParamToPathname } = useUrlParams();
+    const [open, setOpen] = useAtom(PLAYGROUND_EXPLORER_OPEN_ATOM);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("explorer")) {
+            setOpen(true);
+        }
+    }, [setOpen]);
     const viewport = useViewportSize();
     const headerHeight = useHeaderHeight();
 
@@ -38,14 +45,12 @@ export function PlaygroundDrawer({ children }: { children: React.ReactNode }) {
      * the URL param is always in sync with the drawer's open state.
      */
     const handleOpenChange = useCallback(
-        (open: boolean) => {
-            if (!open) {
-                router.replace(removeUrlParamFromPathname("explorer"));
-            } else {
-                router.replace(addUrlParamToPathname("explorer", "true"));
-            }
+        (nextOpen: boolean) => {
+            setOpen(nextOpen);
+            const url = nextOpen ? addUrlParamToPathname("explorer", "true") : removeUrlParamFromPathname("explorer");
+            window.history.replaceState(window.history.state, "", url);
         },
-        [router, removeUrlParamFromPathname, addUrlParamToPathname]
+        [setOpen, removeUrlParamFromPathname, addUrlParamToPathname]
     );
 
     return (

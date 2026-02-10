@@ -224,6 +224,8 @@ export const PLAYGROUND_AUTH_STATE_OAUTH_ATOM = atom(
 
 export const PLAYGROUND_AUTH_FORM_OPEN_ATOM = atom<boolean>(false);
 
+export const PLAYGROUND_EXPLORER_OPEN_ATOM = atom<boolean>(false);
+
 const playgroundFormStateFamily = atomFamily((nodeId: FernNavigation.NodeId) => {
     const formStateAtom = atomWithStorage<PlaygroundRequestFormState | undefined>(nodeId, undefined, undefined, {
         getOnInit: true
