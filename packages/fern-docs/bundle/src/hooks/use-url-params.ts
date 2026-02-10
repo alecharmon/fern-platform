@@ -1,6 +1,14 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
+/**
+ * This function computes a more accurate pathname than the one provided by the usePathname hook,
+ * as the usePathname hook can return stale values when used in a parallel route layout. To account
+ * for this, we use the pathname from window.location when available, otherwise we use the fallback
+ * from usePathname.
+ * @param fallback - The fallback pathname to use if window.location is not available.
+ * @returns The current pathname.
+ */
 function getCurrentPathname(fallback: string): string {
     if (typeof window === "undefined") {
         return fallback;
@@ -11,6 +19,18 @@ function getCurrentPathname(fallback: string): string {
         return locationPathname.slice(basePath.length) || "/";
     }
     return locationPathname;
+}
+
+/**
+ * Same as above comment, but for search params.
+ * @param fallback - The fallback search params to use if window.location is not available.
+ * @returns The current search params.
+ */
+function getCurrentSearchParams(fallback: URLSearchParams): URLSearchParams {
+    if (typeof window === "undefined") {
+        return new URLSearchParams(fallback);
+    }
+    return new URLSearchParams(window.location.search);
 }
 
 /**
@@ -32,12 +52,9 @@ export function useUrlParams() {
     const addUrlParamToPathname = useCallback(
         (key: string, value: string) => {
             const currentPathname = getCurrentPathname(pathname);
-            const params =
-                typeof window !== "undefined"
-                    ? new URLSearchParams(window.location.search)
-                    : new URLSearchParams(searchParams);
-            params.set(key, value);
-            return `${currentPathname}?${params.toString()}`;
+            const currentSearchParams = getCurrentSearchParams(searchParams);
+            currentSearchParams.set(key, value);
+            return `${currentPathname}?${currentSearchParams.toString()}`;
         },
         [searchParams, pathname]
     );
@@ -50,12 +67,9 @@ export function useUrlParams() {
     const removeUrlParamFromPathname = useCallback(
         (key: string) => {
             const currentPathname = getCurrentPathname(pathname);
-            const params =
-                typeof window !== "undefined"
-                    ? new URLSearchParams(window.location.search)
-                    : new URLSearchParams(searchParams);
-            params.delete(key);
-            const search = params.toString();
+            const currentSearchParams = getCurrentSearchParams(searchParams);
+            currentSearchParams.delete(key);
+            const search = currentSearchParams.toString();
             return search ? `${currentPathname}?${search}` : currentPathname;
         },
         [searchParams, pathname]
