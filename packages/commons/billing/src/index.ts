@@ -42,6 +42,7 @@ export {
     getActiveSubscription,
     getSubscriptionByStripeId,
     getSubscriptionItems,
+    hasAnySubscription,
     updateSubscription,
     upsertSubscriptionByStripeId,
     upsertSubscriptionItem

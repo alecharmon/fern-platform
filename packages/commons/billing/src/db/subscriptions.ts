@@ -11,6 +11,28 @@ import type {
 } from "./types";
 
 /**
+ * Check if an org has any subscription rows, regardless of status.
+ */
+export async function hasAnySubscription(orgId: string): Promise<Result<boolean, BillingError>> {
+    try {
+        const client = getClient();
+        const { count, error } = await client
+            .from("org_subscription")
+            .select("*", { count: "exact", head: true })
+            .eq("org_id", orgId)
+            .limit(1);
+
+        if (error) {
+            return err(billingError("QUERY_FAILED", `Failed to check subscriptions: ${error.message}`, error));
+        }
+
+        return ok((count ?? 0) > 0);
+    } catch (e) {
+        return err(billingError("QUERY_FAILED", "Failed to check subscriptions", e));
+    }
+}
+
+/**
  * Get active subscription for an org (status in active, trialing, past_due).
  */
 export async function getActiveSubscription(orgId: string): Promise<Result<OrgSubscription | null, BillingError>> {

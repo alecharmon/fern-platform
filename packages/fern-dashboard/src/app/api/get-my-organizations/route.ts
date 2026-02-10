@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { ResolvedReturnType } from "@/utils/types";
 
 import { maybeGetCurrentSession } from "../utils/maybeGetCurrentSession";
@@ -14,7 +15,9 @@ export async function GET(req: NextRequest) {
     if (maybeSessionData.errorResponse != null) {
         return maybeSessionData.errorResponse;
     }
-    const { userId } = maybeSessionData.data;
+    const { userId, permissions } = maybeSessionData.data;
 
-    return NextResponse.json(await handler(userId));
+    const orgName = req.nextUrl.searchParams.get("orgName") as Auth0OrgName | null;
+
+    return NextResponse.json(await handler(userId, { orgName: orgName ?? undefined, permissions }));
 }

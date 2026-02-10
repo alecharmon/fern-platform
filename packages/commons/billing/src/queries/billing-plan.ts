@@ -1,8 +1,8 @@
 import { err, ok, type Result } from "neverthrow";
 import { getOrgActiveProducts } from "../db/products";
-import { getActiveSubscription } from "../db/subscriptions";
+import { hasAnySubscription } from "../db/subscriptions";
 import type { ProductTier } from "../db/types";
-import { type BillingError, billingError } from "../errors";
+import type { BillingError } from "../errors";
 
 /**
  * Billing plan information for an organization.
@@ -10,17 +10,20 @@ import { type BillingError, billingError } from "../errors";
 export interface BillingPlan {
     orgId: string;
     tier: ProductTier;
-    status: "active" | "trialing" | "past_due";
+    status: string;
+    /** SKU of the first product with kind "plan", if one exists */
+    planSku: string | null;
     products: Array<{
         sku: string;
         kind: "plan" | "addon";
         tier: ProductTier;
+        status: string;
     }>;
     subscription: {
         id: string;
-        stripeSubscriptionId: string;
-        currentPeriodEnd: Date;
-    };
+    } | null;
+    /** Whether the org has ever had any subscription (regardless of status). */
+    hasSubscriptionHistory: boolean;
 }
 
 /**
@@ -38,56 +41,46 @@ function deriveHighestTier(tiers: (string | null)[]): ProductTier {
 
 /**
  * Get billing plan for an organization.
- * Returns null if the org has no active subscription.
+ * Returns null if the org has no active products.
  */
 export async function getBillingPlan(orgId: string): Promise<Result<BillingPlan | null, BillingError>> {
-    // Get active subscription
-    const subscriptionResult = await getActiveSubscription(orgId);
-    if (subscriptionResult.isErr()) {
-        return err(subscriptionResult.error);
-    }
-
-    const subscription = subscriptionResult.value;
-    if (!subscription) {
-        return ok(null);
-    }
-
-    // Get active products from view
     const productsResult = await getOrgActiveProducts(orgId);
     if (productsResult.isErr()) {
         return err(productsResult.error);
     }
 
     const products = productsResult.value;
+
+    const hasSubResult = await hasAnySubscription(orgId);
+    if (hasSubResult.isErr()) {
+        return err(hasSubResult.error);
+    }
+    const hasSubscriptionHistory = hasSubResult.value;
+
     if (products.length === 0) {
         return ok(null);
     }
 
-    // Validate subscription has required fields
-    if (!subscription.current_period_end) {
-        return err(billingError("INVALID_STATE", `Subscription ${subscription.id} missing current_period_end`));
-    }
+    const validProducts = products.filter(
+        (p): p is typeof p & { sku: string; kind: string; tier: string; status: string } =>
+            p.sku != null && p.kind != null && p.tier != null && p.status != null
+    );
 
-    // Build plan response
+    const planProduct = validProducts.find((p) => p.kind === "plan");
+
     const plan: BillingPlan = {
         orgId,
         tier: deriveHighestTier(products.map((p) => p.tier)),
-        status: subscription.status as "active" | "trialing" | "past_due",
-        products: products
-            .filter(
-                (p): p is typeof p & { sku: string; kind: string; tier: string } =>
-                    p.sku != null && p.kind != null && p.tier != null
-            )
-            .map((p) => ({
-                sku: p.sku,
-                kind: p.kind as "plan" | "addon",
-                tier: p.tier as ProductTier
-            })),
-        subscription: {
-            id: subscription.id,
-            stripeSubscriptionId: subscription.stripe_subscription_id,
-            currentPeriodEnd: new Date(subscription.current_period_end)
-        }
+        status: planProduct?.status ?? "unknown",
+        planSku: planProduct?.sku ?? null,
+        products: validProducts.map((p) => ({
+            sku: p.sku,
+            kind: p.kind as "plan" | "addon",
+            tier: p.tier as ProductTier,
+            status: p.status
+        })),
+        subscription: products[0]?.subscription_id ? { id: products[0].subscription_id } : null,
+        hasSubscriptionHistory
     };
 
     return ok(plan);

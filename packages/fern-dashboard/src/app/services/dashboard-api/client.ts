@@ -25,7 +25,10 @@ export const DashboardApiClient = {
     getDocsSites: (request: getDocsSites.Request) => typedFetch<getDocsSites.Response>("/api/get-docs-sites", request),
     getUserResourceRoles: (request: getUserResourceRoles.Request) =>
         typedFetch<getUserResourceRoles.Response>("/api/get-user-resource-roles", request),
-    getMyOrganizations: () => typedFetch<getMyOrganizations.Response>("/api/get-my-organizations"),
+    getMyOrganizations: (orgName?: string) =>
+        typedFetch<getMyOrganizations.Response>(
+            orgName ? `/api/get-my-organizations?orgName=${encodeURIComponent(orgName)}` : "/api/get-my-organizations"
+        ),
     getOrgInvitations: (request: getOrgInvitations.Request) =>
         typedFetch<getOrgInvitations.Response>("/api/get-org-invitations", request),
     getOrgMembers: (request: getOrgMembers.Request): Promise<getOrgMembers.Response> =>

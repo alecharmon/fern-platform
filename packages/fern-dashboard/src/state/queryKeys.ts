@@ -12,7 +12,10 @@ export type ReactQueryKey<T> = string[] & { __queryData: Awaited<T> };
 export const ReactQueryKey = {
     orgInvitations: (orgName: Auth0OrgName) => queryKey<OrgInvitation[]>("org-invitations", orgName),
     orgMembers: (orgName: Auth0OrgName) => queryKey<getOrgMembers.Response>("org-members", orgName),
-    myOrganizations: () => queryKey<getMyOrganizations.Response>("my-orgs"),
+    myOrganizations: (orgName?: string) =>
+        orgName
+            ? queryKey<getMyOrganizations.Response>("my-orgs", orgName)
+            : queryKey<getMyOrganizations.Response>("my-orgs"),
     docsUrlOwner: (docsUrl: DocsUrl) => queryKey<getDocsUrlOwner.Response>("docs-url-owner", docsUrl),
     orgSvgLogo: (svgUrl: string) => queryKey<string>("org-svg", svgUrl),
     docsGithubUrl: (docsUrl: DocsUrl) => queryKey<getDocsGitUrl.Response>("github-source-repo", docsUrl)

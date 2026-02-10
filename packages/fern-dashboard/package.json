@@ -126,6 +126,7 @@
     "clsx": "^2.1.1",
     "countup.js": "^2.9.0",
     "dayjs": "^1.11.18",
+    "devicon": "^2.17.0",
     "diff": "^8.0.3",
     "es-toolkit": "^1.39.7",
     "framer-motion": "^12.23.26",

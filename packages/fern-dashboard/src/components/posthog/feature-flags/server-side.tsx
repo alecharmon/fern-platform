@@ -9,6 +9,7 @@ export declare namespace FeatureFlaggedServerSide {
     export interface Props {
         flag: PosthogFeatureFlag;
         redirectWhenDisabled?: boolean;
+        redirectTo?: string;
         orgName: Auth0OrgName;
         children: React.JSX.Element;
     }
@@ -17,6 +18,7 @@ export declare namespace FeatureFlaggedServerSide {
 export async function FeatureFlaggedServerSide({
     flag,
     redirectWhenDisabled = false,
+    redirectTo,
     orgName,
     children
 }: FeatureFlaggedServerSide.Props) {
@@ -28,7 +30,8 @@ export async function FeatureFlaggedServerSide({
     }
 
     if (redirectWhenDisabled) {
-        redirect(`/${orgName}/members`);
+        const redirectUrl = redirectTo || `/${orgName}/members`;
+        redirect(redirectUrl);
     }
 
     return null;
