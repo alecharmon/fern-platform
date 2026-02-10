@@ -1,0 +1,35 @@
+{
+  "name": "@fern-platform/entitlements",
+  "version": "0.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fern-api/fern-platform.git",
+    "directory": "packages/commons/entitlements"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "clean": "rm -rf ./dist && tsc --build --clean",
+    "compile": "tsc --build",
+    "depcheck": "depcheck",
+    "test": "vitest --run --passWithNoTests --globals"
+  },
+  "dependencies": {
+    "@fern-platform/supabase": "workspace:*"
+  },
+  "devDependencies": {
+    "@fern-platform/configs": "workspace:*",
+    "@types/node": "catalog:",
+    "depcheck": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

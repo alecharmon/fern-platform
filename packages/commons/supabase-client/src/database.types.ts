@@ -479,6 +479,27 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            org_entitlement_usage: {
+                Row: {
+                    key: string;
+                    org_id: string;
+                    updated_at: string;
+                    usage_count: number;
+                };
+                Insert: {
+                    key: string;
+                    org_id: string;
+                    updated_at?: string;
+                    usage_count?: number;
+                };
+                Update: {
+                    key?: string;
+                    org_id?: string;
+                    updated_at?: string;
+                    usage_count?: number;
+                };
+                Relationships: [];
+            };
             org_subscription: {
                 Row: {
                     created_at: string;
@@ -591,6 +612,30 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            postman_app_installations: {
+                Row: {
+                    app_installation_id: string;
+                    created_at: string;
+                    shared_secret: string;
+                    team_id: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    app_installation_id: string;
+                    created_at?: string;
+                    shared_secret: string;
+                    team_id: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    app_installation_id?: string;
+                    created_at?: string;
+                    shared_secret?: string;
+                    team_id?: string;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
             RolePermissions: {
                 Row: {
                     id: number;
@@ -689,30 +734,6 @@ export type Database = {
                         referencedColumns: ["userId"];
                     }
                 ];
-            };
-            postman_app_installations: {
-                Row: {
-                    app_installation_id: string;
-                    created_at: string;
-                    shared_secret: string;
-                    team_id: string;
-                    updated_at: string;
-                };
-                Insert: {
-                    app_installation_id: string;
-                    created_at?: string;
-                    shared_secret: string;
-                    team_id: string;
-                    updated_at?: string;
-                };
-                Update: {
-                    app_installation_id?: string;
-                    created_at?: string;
-                    shared_secret?: string;
-                    team_id?: string;
-                    updated_at?: string;
-                };
-                Relationships: [];
             };
             UserRolesPerResource: {
                 Row: {
