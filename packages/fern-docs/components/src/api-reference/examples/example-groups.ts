@@ -289,9 +289,38 @@ export function groupExamplesByLanguageKeyAndStatusCode(
                 addCodeExample({ language, exampleKey, statusCode }, codeExample);
 
                 endpoint.errors?.forEach((error, k) => {
-                    error.examples?.forEach((errorExample, l) => {
+                    if (error.examples != null && error.examples.length > 0) {
+                        error.examples.forEach((errorExample, l) => {
+                            const codeExample: CodeExample = {
+                                key: `${language}-${i},${j},${k},${l}`,
+                                exampleIndex: i,
+                                snippetIndex: j,
+                                exampleKey,
+                                language,
+                                name: snippet.name ?? example.name,
+                                code: snippet.code,
+                                install: snippet.install,
+                                // HACK: this is a bit of a hack to append the global error to every example
+                                exampleCall: {
+                                    ...example,
+                                    responseStatusCode: error.statusCode,
+                                    responseBody: errorExample.responseBody,
+                                    name: errorExample.name ?? error.name
+                                },
+                                globalError: true
+                            };
+                            addCodeExample(
+                                {
+                                    language,
+                                    exampleKey,
+                                    statusCode: error.statusCode
+                                },
+                                codeExample
+                            );
+                        });
+                    } else {
                         const codeExample: CodeExample = {
-                            key: `${language}-${i},${j},${k},${l}`,
+                            key: `${language}-${i},${j},${k},-1`,
                             exampleIndex: i,
                             snippetIndex: j,
                             exampleKey,
@@ -299,12 +328,11 @@ export function groupExamplesByLanguageKeyAndStatusCode(
                             name: snippet.name ?? example.name,
                             code: snippet.code,
                             install: snippet.install,
-                            // HACK: this is a bit of a hack to append the global error to every example
                             exampleCall: {
                                 ...example,
                                 responseStatusCode: error.statusCode,
-                                responseBody: errorExample.responseBody,
-                                name: errorExample.name ?? error.name
+                                responseBody: undefined,
+                                name: error.name
                             },
                             globalError: true
                         };
@@ -316,7 +344,7 @@ export function groupExamplesByLanguageKeyAndStatusCode(
                             },
                             codeExample
                         );
-                    });
+                    }
                 });
             });
         });

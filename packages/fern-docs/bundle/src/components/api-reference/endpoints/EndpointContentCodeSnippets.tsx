@@ -28,6 +28,7 @@ import { cn } from "@fern-docs/components/cn";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { t } from "@fern-docs/i18n";
 import { memo, type ReactNode, useCallback, useMemo } from "react";
+import { generateExampleFromTypeShape } from "../../../mdx/components/snippets/generate-example-from-type";
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { usePlaygroundBaseUrl } from "../../playground/utils/select-environment";
 
@@ -36,6 +37,7 @@ export declare namespace EndpointContentCodeSnippets {
         node: FernNavigation.EndpointNode;
         endpoint: ApiDefinition.EndpointDefinition;
         showErrors: boolean;
+        types?: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
         className?: string;
         lang: string;
     }
@@ -45,6 +47,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
     node,
     endpoint,
     showErrors,
+    types,
     className,
     lang
 }) => {
@@ -100,8 +103,25 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     return t(lang).playground.streamedResponse;
                 case "sse":
                     return t(lang).playground.serverSentEvents;
-                default:
+                default: {
+                    if (example != null && example.exampleCall.responseStatusCode >= 400) {
+                        const title =
+                            example.exampleCall.name ??
+                            ApiDefinition.getMessageForStatus(
+                                example.exampleCall.responseStatusCode,
+                                endpoint.method
+                            ) ??
+                            t(lang).apiReference.response;
+                        const error = errorByStatusCode[example.exampleCall.responseStatusCode];
+                        return renderResponseTitle(
+                            title,
+                            example.exampleCall.responseStatusCode,
+                            undefined,
+                            error?.isWildcard
+                        );
+                    }
                     return t(lang).apiReference.response;
+                }
             }
         },
         [endpoint.method, endpoint.protocol?.type, lang, errorByStatusCode]
@@ -226,19 +246,45 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     lang={lang}
                 />
             )}
-            {selectedExample != null && selectedExample.exampleCall.responseStatusCode >= 400 && (
-                <JsonCodeSnippetExample
-                    title={errorSelector}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                    }}
-                    json={selectedExample?.exampleCall.responseBody?.value}
-                    intent={statusCodeToIntent(String(selectedExample.exampleCall.responseStatusCode))}
-                    slug={node?.slug ?? ""}
-                    isResponse={true}
-                    lang={lang}
-                />
-            )}
+            {selectedExample != null &&
+                selectedExample.exampleCall.responseStatusCode >= 400 &&
+                (() => {
+                    const responseJson =
+                        selectedExample.exampleCall.responseBody?.value ??
+                        (() => {
+                            const error = errorByStatusCode[selectedExample.exampleCall.responseStatusCode];
+                            if (error?.shape != null) {
+                                return generateExampleFromTypeShape(
+                                    error.shape,
+                                    (id) => types?.[id],
+                                    false,
+                                    new Set(),
+                                    0
+                                );
+                            }
+                            return undefined;
+                        })();
+                    return responseJson != null ? (
+                        <JsonCodeSnippetExample
+                            title={errorSelector}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                            }}
+                            json={responseJson}
+                            intent={statusCodeToIntent(String(selectedExample.exampleCall.responseStatusCode))}
+                            slug={node?.slug ?? ""}
+                            isResponse={true}
+                            lang={lang}
+                        />
+                    ) : (
+                        <TitledExample
+                            title={errorSelector}
+                            intent={statusCodeToIntent(String(selectedExample.exampleCall.responseStatusCode))}
+                            disableClipboard={true}
+                            lang={lang}
+                        />
+                    );
+                })()}
             {selectedExample?.exampleCall.responseBody != null &&
                 selectedExample.exampleCall.responseStatusCode >= 200 &&
                 selectedExample.exampleCall.responseStatusCode < 300 &&

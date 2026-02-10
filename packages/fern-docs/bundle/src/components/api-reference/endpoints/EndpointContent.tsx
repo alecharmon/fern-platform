@@ -93,6 +93,7 @@ export async function EndpointContent({
                         <EndpointContentCodeSnippets
                             endpoint={endpoint}
                             showErrors={showErrors}
+                            types={types}
                             node={node}
                             lang={lang}
                         />
