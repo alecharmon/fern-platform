@@ -22,6 +22,14 @@ class PostChatCompletionRequest(BaseModel):
     rewrite_query: bool | None = Field(
         default=False, description="Whether to rewrite the query using query decomposition"
     )
+    user_is_authed: bool = Field(
+        default=False,
+        description="Whether the requesting user is authenticated. When true, authed chunks are included in results.",
+    )
+    allowed_roles: list[str] | None = Field(
+        default=None,
+        description="Roles the authenticated user has. Used to filter chunks by role-based access control.",
+    )
 
 
 class PostChatCompletionResponse(BaseModel):

@@ -1,8 +1,12 @@
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { getFaiChatUrl } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
+import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
+import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 60;
@@ -30,13 +34,17 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
         const model = config.aiChatConfig?.model;
         const customerSystemPrompt = config.aiChatConfig?.systemPrompt;
 
-        if (model != null || customerSystemPrompt != null) {
-            forwardedBody = JSON.stringify({
-                ...parsedBody,
-                model: model,
-                customerSystemPrompt: customerSystemPrompt
-            });
-        }
+        const cookieJar = await cookies();
+        const fernToken = req.headers.get("FERN_TOKEN") ?? cookieJar.get(COOKIE_FERN_TOKEN)?.value;
+        const user = await safeVerifyFernJWTConfig(fernToken, await getAuthEdgeConfig(domain));
+
+        forwardedBody = JSON.stringify({
+            ...parsedBody,
+            model: model ?? parsedBody.model,
+            customerSystemPrompt: customerSystemPrompt ?? parsedBody.customerSystemPrompt,
+            user_is_authed: user != null,
+            allowed_roles: user?.roles ?? null
+        });
     } catch (error) {
         console.error("FAI chat proxy: failed to augment request with aiChatConfig", error);
     }

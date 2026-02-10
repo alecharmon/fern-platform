@@ -45,6 +45,16 @@ DEFAULT_MODEL: ModelId = "claude-4-sonnet"
 TOP_K = 6
 
 
+def _build_chat_filters(user_is_authed: bool, allowed_roles: list[str] | None) -> QueryFilters:
+    if not allowed_roles:
+        return QueryFilters(user_is_authed=user_is_authed)
+    roles_with_everyone = allowed_roles.copy()
+    if "everyone" not in roles_with_everyone:
+        roles_with_everyone.append("everyone")
+    exploded_roles = sorted(set(filter(None, roles_with_everyone)))
+    return QueryFilters(user_is_authed=user_is_authed, exploded_roles=exploded_roles)
+
+
 @fai_app.post(
     "/chat/{domain}",
     response_model=PostChatCompletionResponse,
@@ -58,6 +68,9 @@ async def post_chat_completion(
 ) -> JSONResponse:
     LOGGER.info(f"Chatting for domain {domain}")
     try:
+        filters = _build_chat_filters(request.user_is_authed, request.allowed_roles)
+        LOGGER.info(f"Chat filters: user_is_authed={request.user_is_authed}, allowed_roles={request.allowed_roles}")
+
         user_messages = [CoreChatMessage(role=msg.role, content=msg.content) for msg in request.messages]
         last_user_message = user_messages[-1] if user_messages else None
 
@@ -80,6 +93,7 @@ async def post_chat_completion(
                         domain=domain,
                         strategy=RetrievalStrategy.HYBRID,
                         top_k=TOP_K,
+                        filters=filters,
                     )
                     for sq in sub_queries
                 ]
@@ -92,6 +106,7 @@ async def post_chat_completion(
                     domain=domain,
                     strategy=RetrievalStrategy.HYBRID,
                     top_k=TOP_K,
+                    filters=filters,
                 )
                 result = await retriever.retrieve(retrieval_query)
                 retrieved_documents = result.documents
@@ -126,7 +141,7 @@ async def post_chat_completion(
         search_tool = create_documentation_search_tool(
             retriever=retriever,
             domain=domain,
-            filters=QueryFilters(),
+            filters=filters,
             top_k=5,
             max_calls=2,
             already_retrieved_urls=initial_urls,
