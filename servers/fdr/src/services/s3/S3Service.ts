@@ -46,9 +46,11 @@ export interface S3ApiDefinitionSourceFileInfo {
 export interface S3Service {
     writeLoadDocsForUrlResponse({
         domain,
+        basepath,
         readDocsDefinition
     }: {
         domain: string;
+        basepath?: string;
         readDocsDefinition: FernRegistry.docs.v2.read.LoadDocsForUrlResponse;
     }): Promise<PutObjectCommandOutput>;
     getPresignedDocsAssetsUploadUrls({
@@ -177,14 +179,16 @@ export class S3ServiceImpl implements S3Service {
 
     async writeLoadDocsForUrlResponse({
         domain,
+        basepath,
         readDocsDefinition
     }: {
         domain: string;
+        basepath?: string;
         readDocsDefinition: FernRegistry.docs.v2.read.LoadDocsForUrlResponse;
     }): Promise<PutObjectCommandOutput> {
         const command = new PutObjectCommand({
             Bucket: this.config.dbDocsDefinitionS3.bucketName,
-            Key: getS3KeyForV1DocsDefinition(domain),
+            Key: getS3KeyForV1DocsDefinition(domain, basepath),
             Body: JSON.stringify(readDocsDefinition)
         });
         try {

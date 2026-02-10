@@ -46,14 +46,17 @@ const s3Client = new S3Client({
 
 interface GetMetadataForUrlRequest {
     url: string;
+    basepath?: string;
 }
 
 interface LoadDocsForUrlRequest {
     url: string;
+    basepath?: string;
 }
 
 interface EnsureDocsInS3Request {
     url: string;
+    basepath?: string;
 }
 
 async function deleteDocsSite(url: string, authHeader: string | undefined): Promise<void> {
@@ -129,7 +132,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                 };
             }
 
-            const metadata = await getMetadataForUrl(body.url, pool);
+            const metadata = await getMetadataForUrl(body.url, pool, body.basepath);
 
             if (metadata === null) {
                 throw new DomainNotRegisteredError();
@@ -189,7 +192,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
             console.log(`[Handler] Authorization header present: ${!!authHeader}`);
 
             console.log(`[Handler] Calling getDocsForUrl for domain: ${parsedUrl.hostname}`);
-            const docsResponse = await getDocsForUrl(parsedUrl, pool, authHeader);
+            const docsResponse = await getDocsForUrl(parsedUrl, pool, authHeader, body.basepath);
             console.log(`[Handler] getDocsForUrl completed successfully, preparing response`);
 
             return {
@@ -285,7 +288,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
             console.log(`[Handler] Authorization header present: ${!!authHeader}`);
 
             console.log(`[Handler] Calling ensureDocsInS3 for domain: ${parsedUrl.hostname}`);
-            const s3Response = await ensureDocsInS3(parsedUrl, pool, authHeader);
+            const s3Response = await ensureDocsInS3(parsedUrl, pool, authHeader, body.basepath);
             console.log(`[Handler] ensureDocsInS3 completed successfully, S3 URL: ${s3Response.s3Url}`);
 
             return {

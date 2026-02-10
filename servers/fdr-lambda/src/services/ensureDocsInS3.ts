@@ -22,11 +22,14 @@ import { readBuffer } from "../utils/serde";
 export async function ensureDocsInS3(
     url: URL,
     pool: Pool,
-    authHeader: string | undefined
+    authHeader: string | undefined,
+    basepath?: string
 ): Promise<FdrLambda.docs.v2.read.EnsureDocsInS3Response> {
-    console.log(`[ensureDocsInS3] Loading docs from database for hostname: ${url.hostname}`);
+    console.log(
+        `[ensureDocsInS3] Loading docs from database for hostname: ${url.hostname}${basepath != null ? `, basepath: ${basepath}` : ""}`
+    );
 
-    const dbDocs = await loadDocsForURLFromDatabase(url, pool);
+    const dbDocs = await loadDocsForURLFromDatabase(url, pool, basepath);
 
     if (dbDocs == null) {
         throw new DomainNotRegisteredError();
@@ -64,11 +67,13 @@ export async function ensureDocsInS3(
     console.log(`[ensureDocsInS3] Storing docs definition in S3 for domain: ${url.hostname}`);
 
     // Store the docs definition in S3 idempotently
-    await storeDocsDefinitionInS3(url.hostname, docsResponse);
+    await storeDocsDefinitionInS3(url.hostname, docsResponse, basepath);
 
     // Construct the S3 URL (non-presigned)
     const bucketName = process.env.DB_DOCS_DEFINITION_BUCKET_NAME || "";
-    const s3Key = `${url.hostname}/v1/fdr.json`;
+    const cleanBasepath = basepath != null ? basepath.replace(/^\//, "") : undefined;
+    const s3Key =
+        cleanBasepath != null ? `${url.hostname}/${cleanBasepath}/v1/fdr.json` : `${url.hostname}/v1/fdr.json`;
     const s3Url = `https://${bucketName}.s3.amazonaws.com/${s3Key}`;
 
     console.log(`[ensureDocsInS3] Successfully stored docs in S3, returning URL: ${s3Url}`);
@@ -89,16 +94,30 @@ interface LoadDocsDefinitionByUrlResponse {
     hasPublicS3Assets: boolean;
 }
 
-async function loadDocsForURLFromDatabase(url: URL, pool: Pool): Promise<LoadDocsDefinitionByUrlResponse | undefined> {
-    const result = await pool.query(
-        `SELECT "orgID", "domain", "path", "docsDefinition", "docsConfigInstanceId",
-                "authType", "hasPublicS3Assets"
-         FROM "DocsV2"
-         WHERE "domain" = $1
-         ORDER BY "updatedTime" DESC
-         LIMIT 1`,
-        [url.hostname]
-    );
+async function loadDocsForURLFromDatabase(
+    url: URL,
+    pool: Pool,
+    basepath?: string
+): Promise<LoadDocsDefinitionByUrlResponse | undefined> {
+    const query =
+        basepath != null
+            ? {
+                  text: `SELECT "orgID", "domain", "path", "docsDefinition", "docsConfigInstanceId",
+                      "authType", "hasPublicS3Assets"
+               FROM "DocsV2"
+               WHERE "domain" = $1 AND "path" = $2`,
+                  values: [url.hostname, basepath]
+              }
+            : {
+                  text: `SELECT "orgID", "domain", "path", "docsDefinition", "docsConfigInstanceId",
+                      "authType", "hasPublicS3Assets"
+               FROM "DocsV2"
+               WHERE "domain" = $1
+               ORDER BY "updatedTime" DESC
+               LIMIT 1`,
+                  values: [url.hostname]
+              };
+    const result = await pool.query(query.text, query.values);
 
     if (result.rows.length === 0) {
         return undefined;

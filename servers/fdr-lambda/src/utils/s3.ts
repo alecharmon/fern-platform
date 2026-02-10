@@ -75,7 +75,10 @@ export async function getPresignedDocsAssetsDownloadUrl({
     return `${s3Config.publicDocsCDNUrl}/${key}`;
 }
 
-export async function getDocsDefinitionFromS3(domain: string): Promise<DocsV2Read.LoadDocsForUrlResponse | null> {
+export async function getDocsDefinitionFromS3(
+    domain: string,
+    basepath?: string
+): Promise<DocsV2Read.LoadDocsForUrlResponse | null> {
     if (!s3Config) {
         throw new Error("S3 not initialized. Call initializeS3() first.");
     }
@@ -90,7 +93,7 @@ export async function getDocsDefinitionFromS3(domain: string): Promise<DocsV2Rea
     }
 
     try {
-        const key = getS3KeyForV1DocsDefinition(domain);
+        const key = getS3KeyForV1DocsDefinition(domain, basepath);
 
         const command = new GetObjectCommand({
             Bucket: s3Config.dbDocsDefinitionS3BucketName,
@@ -114,7 +117,8 @@ export async function getDocsDefinitionFromS3(domain: string): Promise<DocsV2Rea
 
 export async function storeDocsDefinitionInS3(
     domain: string,
-    docsDefinition: DocsV2Read.LoadDocsForUrlResponse
+    docsDefinition: DocsV2Read.LoadDocsForUrlResponse,
+    basepath?: string
 ): Promise<void> {
     if (!s3Config) {
         throw new Error("S3 not initialized. Call initializeS3() first.");
@@ -128,7 +132,7 @@ export async function storeDocsDefinitionInS3(
         throw new Error("DB Docs Definition S3 bucket not configured");
     }
 
-    const key = getS3KeyForV1DocsDefinition(domain);
+    const key = getS3KeyForV1DocsDefinition(domain, basepath);
 
     const command = new PutObjectCommand({
         Bucket: s3Config.dbDocsDefinitionS3BucketName,

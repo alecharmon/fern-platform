@@ -9,9 +9,7 @@ export interface DocsUrlMetadata {
     enableAlgoliaOnPreview: boolean;
 }
 
-export async function getMetadataForUrl(url: string, pool: Pool): Promise<DocsUrlMetadata | null> {
-    // Parse the URL to get the hostname
-    // Coerce URL by adding https:// prefix if missing (similar to ParsedBaseUrl in FDR)
+export async function getMetadataForUrl(url: string, pool: Pool, basepath?: string): Promise<DocsUrlMetadata | null> {
     let parsedUrl: URL;
     try {
         let urlWithProtocol = url;
@@ -24,15 +22,23 @@ export async function getMetadataForUrl(url: string, pool: Pool): Promise<DocsUr
     }
     const hostname = parsedUrl.hostname;
 
-    // Query the database for the docs metadata
-    const result = await pool.query(
-        `SELECT "orgID", "isPreview", "domain", "path", "githubUrl"
-     FROM "DocsV2"
-     WHERE "domain" = $1
-     ORDER BY "updatedTime" DESC
-     LIMIT 1`,
-        [hostname]
-    );
+    const query =
+        basepath != null
+            ? {
+                  text: `SELECT "orgID", "isPreview", "domain", "path", "githubUrl"
+               FROM "DocsV2"
+               WHERE "domain" = $1 AND "path" = $2`,
+                  values: [hostname, basepath]
+              }
+            : {
+                  text: `SELECT "orgID", "isPreview", "domain", "path", "githubUrl"
+               FROM "DocsV2"
+               WHERE "domain" = $1
+               ORDER BY "updatedTime" DESC
+               LIMIT 1`,
+                  values: [hostname]
+              };
+    const result = await pool.query(query.text, query.values);
 
     if (result.rows.length === 0) {
         return null;

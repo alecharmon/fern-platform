@@ -368,6 +368,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
 
                         await app.services.s3.writeLoadDocsForUrlResponse({
                             domain: url.hostname,
+                            basepath: req.body.basepathAware === true ? (url.path ?? undefined) : undefined,
                             readDocsDefinition: response
                         });
                     } catch (e) {

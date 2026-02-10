@@ -20,9 +20,10 @@ import { readBuffer } from "../utils/serde";
 export async function getDocsForUrl(
     url: URL,
     pool: Pool,
-    authHeader: string | undefined
+    authHeader: string | undefined,
+    basepath?: string
 ): Promise<DocsV2Read.LoadDocsForUrlResponse> {
-    const s3Docs = await getDocsDefinitionFromS3(url.hostname);
+    const s3Docs = await getDocsDefinitionFromS3(url.hostname, basepath);
 
     if (s3Docs != null) {
         // Verify the service JWT from docs-server
@@ -32,7 +33,7 @@ export async function getDocsForUrl(
         console.log(`[getDocsForUrl] No docs found in S3, falling back to db for hostname: ${url.hostname}`);
     }
 
-    const dbDocs = await loadDocsForURLFromDatabase(url, pool);
+    const dbDocs = await loadDocsForURLFromDatabase(url, pool, basepath);
 
     if (dbDocs != null) {
         // Verify the service JWT from docs-server
@@ -73,16 +74,30 @@ interface LoadDocsDefinitionByUrlResponse {
     hasPublicS3Assets: boolean;
 }
 
-async function loadDocsForURLFromDatabase(url: URL, pool: Pool): Promise<LoadDocsDefinitionByUrlResponse | undefined> {
-    const result = await pool.query(
-        `SELECT "orgID", "domain", "path", "docsDefinition", "docsConfigInstanceId",
-                "authType", "hasPublicS3Assets"
-         FROM "DocsV2"
-         WHERE "domain" = $1
-         ORDER BY "updatedTime" DESC
-         LIMIT 1`,
-        [url.hostname]
-    );
+async function loadDocsForURLFromDatabase(
+    url: URL,
+    pool: Pool,
+    basepath?: string
+): Promise<LoadDocsDefinitionByUrlResponse | undefined> {
+    const query =
+        basepath != null
+            ? {
+                  text: `SELECT "orgID", "domain", "path", "docsDefinition", "docsConfigInstanceId",
+                      "authType", "hasPublicS3Assets"
+               FROM "DocsV2"
+               WHERE "domain" = $1 AND "path" = $2`,
+                  values: [url.hostname, basepath]
+              }
+            : {
+                  text: `SELECT "orgID", "domain", "path", "docsDefinition", "docsConfigInstanceId",
+                      "authType", "hasPublicS3Assets"
+               FROM "DocsV2"
+               WHERE "domain" = $1
+               ORDER BY "updatedTime" DESC
+               LIMIT 1`,
+                  values: [url.hostname]
+              };
+    const result = await pool.query(query.text, query.values);
 
     if (result.rows.length === 0) {
         return undefined;
