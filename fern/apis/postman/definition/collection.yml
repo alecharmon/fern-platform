@@ -23,9 +23,7 @@ service:
         name: PublishCollectionRequest
         body:
           properties:
-            collectionId: CollectionId
-            userId: UserId
-            teamId: TeamId
+            payload: PublishCollectionPayload
       errors:
         - CollectionDoesNotExistError
 
@@ -41,6 +39,12 @@ types:
   TeamId:
     type: string
     docs: The unique identifier for a Team
+
+  PublishCollectionPayload:
+    properties:
+      collectionId: CollectionId
+      userId: UserId
+      teamId: TeamId
 
   GetCollectionStatusResponse:
     docs: Discriminated union representing the status of publishing the collection as documentation.

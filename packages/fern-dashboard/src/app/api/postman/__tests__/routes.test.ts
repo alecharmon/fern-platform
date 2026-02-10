@@ -135,7 +135,9 @@ describe("Postman API endpoints", () => {
         it("returns 401 when no authorization header is provided", async () => {
             const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
                 method: "POST",
-                body: JSON.stringify({ collectionId: "test-collection", userId: "user-123", teamId: "team-456" })
+                body: JSON.stringify({
+                    payload: { collectionId: "test-collection", userId: "user-123", teamId: "team-456" }
+                })
             });
 
             const response = await publishEndpoint(request);
@@ -152,7 +154,9 @@ describe("Postman API endpoints", () => {
                     Authorization: `Bearer ${MOCK_API_KEY}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ collectionId: "test-collection", userId: "user-123", teamId: "team-456" })
+                body: JSON.stringify({
+                    payload: { collectionId: "test-collection", userId: "user-123", teamId: "team-456" }
+                })
             });
 
             const response = await publishEndpoint(request);
@@ -173,7 +177,7 @@ describe("Postman API endpoints", () => {
                     Authorization: `Bearer ${MOCK_API_KEY}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ collectionId: "test-collection", teamId: "team-456" })
+                body: JSON.stringify({ payload: { collectionId: "test-collection", teamId: "team-456" } })
             });
 
             const response = await publishEndpoint(request);
@@ -190,7 +194,7 @@ describe("Postman API endpoints", () => {
                     Authorization: `Bearer ${MOCK_API_KEY}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ collectionId: "test-collection", userId: "user-123" })
+                body: JSON.stringify({ payload: { collectionId: "test-collection", userId: "user-123" } })
             });
 
             const response = await publishEndpoint(request);
@@ -224,7 +228,7 @@ describe("Postman API endpoints", () => {
                     Authorization: `Bearer ${MOCK_API_KEY}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ collectionId: "", userId: "user-123", teamId: "team-456" })
+                body: JSON.stringify({ payload: { collectionId: "", userId: "user-123", teamId: "team-456" } })
             });
 
             const response = await publishEndpoint(request);

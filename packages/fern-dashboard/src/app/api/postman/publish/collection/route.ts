@@ -16,19 +16,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    if (!body.collectionId) {
+    if (!body.payload) {
+        return NextResponse.json({ error: "payload is required" }, { status: 400 });
+    }
+
+    const { payload } = body;
+
+    if (!payload.collectionId) {
         return NextResponse.json({ error: "collectionId is required" }, { status: 400 });
     }
 
-    if (!body.userId || !body.teamId) {
+    if (!payload.userId || !payload.teamId) {
         return NextResponse.json({ error: "userId and teamId are required" }, { status: 400 });
     }
 
     const response: PublishCollectionResponse = {
         success: true,
-        collectionId: body.collectionId,
-        userId: body.userId,
-        teamId: body.teamId,
+        collectionId: payload.collectionId,
+        userId: payload.userId,
+        teamId: payload.teamId,
         message: "Collection publish initiated"
     };
 

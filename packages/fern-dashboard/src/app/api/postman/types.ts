@@ -23,10 +23,14 @@ export type GetCollectionStatusResponse =
     | CollectionStatusPublished
     | CollectionStatusFailed;
 
-export interface PublishCollectionRequest {
+export interface PublishCollectionPayload {
     collectionId: CollectionId;
     userId: UserId;
     teamId: TeamId;
+}
+
+export interface PublishCollectionRequest {
+    payload: PublishCollectionPayload;
 }
 
 export interface PublishCollectionResponse {
