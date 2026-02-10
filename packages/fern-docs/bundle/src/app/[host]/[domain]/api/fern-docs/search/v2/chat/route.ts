@@ -1,11 +1,9 @@
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { getFaiChatUrl } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
-import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -27,6 +25,9 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
     const originalBodyText = await req.text();
     let forwardedBody = originalBodyText;
 
+    const cookieJar = await cookies();
+    const fernToken = req.headers.get("FERN_TOKEN") ?? cookieJar.get(COOKIE_FERN_TOKEN)?.value;
+
     try {
         const parsedBody = JSON.parse(originalBodyText || "{}");
         const loader = await createCachedDocsLoader(host, domain);
@@ -34,16 +35,10 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
         const model = config.aiChatConfig?.model;
         const customerSystemPrompt = config.aiChatConfig?.systemPrompt;
 
-        const cookieJar = await cookies();
-        const fernToken = req.headers.get("FERN_TOKEN") ?? cookieJar.get(COOKIE_FERN_TOKEN)?.value;
-        const user = await safeVerifyFernJWTConfig(fernToken, await getAuthEdgeConfig(domain));
-
         forwardedBody = JSON.stringify({
             ...parsedBody,
             model: model ?? parsedBody.model,
-            customerSystemPrompt: customerSystemPrompt ?? parsedBody.customerSystemPrompt,
-            user_is_authed: user != null,
-            allowed_roles: user?.roles ?? null
+            customerSystemPrompt: customerSystemPrompt ?? parsedBody.customerSystemPrompt
         });
     } catch (error) {
         console.error("FAI chat proxy: failed to augment request with aiChatConfig", error);
@@ -54,7 +49,8 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
             method: "POST",
             headers: {
                 "Content-Type": req.headers.get("content-type") ?? "application/json",
-                "x-fern-host": domain
+                "x-fern-host": domain,
+                ...(fernToken ? { FERN_TOKEN: fernToken } : {})
             },
             body: forwardedBody,
             cache: "no-store",
