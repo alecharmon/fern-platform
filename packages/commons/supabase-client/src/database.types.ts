@@ -690,6 +690,30 @@ export type Database = {
                     }
                 ];
             };
+            postman_app_installations: {
+                Row: {
+                    app_installation_id: string;
+                    created_at: string;
+                    shared_secret: string;
+                    team_id: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    app_installation_id: string;
+                    created_at?: string;
+                    shared_secret: string;
+                    team_id: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    app_installation_id?: string;
+                    created_at?: string;
+                    shared_secret?: string;
+                    team_id?: string;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
             UserRolesPerResource: {
                 Row: {
                     created_at: string;
