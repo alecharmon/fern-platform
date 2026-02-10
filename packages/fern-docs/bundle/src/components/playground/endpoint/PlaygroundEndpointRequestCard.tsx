@@ -3,6 +3,7 @@ import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import { CodeExampleClientDropdown } from "@fern-docs/components/api-reference/endpoints/CodeExampleClientDropdown";
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
+import { ExpandCodeButton } from "@fern-docs/components/ExpandCodeButton";
 import { FernButton, FernButtonGroup } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
 import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
@@ -187,6 +188,27 @@ export function PlaygroundEndpointRequestCard({
                             lang={lang}
                         />
                     )}
+                    <ExpandCodeButton
+                        content={() => {
+                            if (shouldUseDynamicSnippets && dynamicPreviewRef.current) {
+                                return dynamicPreviewRef.current.getCurrentCode();
+                            }
+
+                            const resolver = new PlaygroundCodeSnippetResolverBuilder(context, true).create(
+                                authStateRef.current,
+                                formState,
+                                baseUrl,
+                                setOAuthValue,
+                                selectedAuth,
+                                authKey,
+                                selectedAuthSchemes,
+                                selectedAuthKeys
+                            );
+                            return resolver.resolve(getFallbackRequestType());
+                        }}
+                        language={requestType === "curl" ? "bash" : requestType}
+                        lang={lang}
+                    />
                     <CopyToClipboardButton
                         content={() => {
                             // if using dynamic snippets, get the code from the dynamic preview

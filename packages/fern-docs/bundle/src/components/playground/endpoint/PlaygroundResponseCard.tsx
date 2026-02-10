@@ -1,5 +1,6 @@
 import { CopyToClipboardButton } from "@fern-docs/components/CopyToClipboardButton";
 import { cn } from "@fern-docs/components/cn";
+import { ExpandCodeButton } from "@fern-docs/components/ExpandCodeButton";
 import { FernAudioPlayer } from "@fern-docs/components/FernAudioPlayer";
 import { FernButton } from "@fern-docs/components/FernButton";
 import { FernCard } from "@fern-docs/components/FernCard";
@@ -94,17 +95,30 @@ export function PlaygroundResponseCard({
                                 </FernTooltip>
                             </FernTooltipProvider>
                         ) : (
-                            <CopyToClipboardButton
-                                content={() =>
-                                    response.type === "json"
-                                        ? JSON.stringify(response.response.body, null, 2)
-                                        : response.type === "stream"
-                                          ? response.response.body
-                                          : ""
-                                }
-                                className="-mr-2"
-                                lang={lang}
-                            />
+                            <div className="flex items-center gap-2">
+                                <ExpandCodeButton
+                                    content={() =>
+                                        response.type === "json"
+                                            ? JSON.stringify(response.response.body, null, 2)
+                                            : response.type === "stream"
+                                              ? response.response.body
+                                              : ""
+                                    }
+                                    language="json"
+                                    lang={lang}
+                                />
+                                <CopyToClipboardButton
+                                    content={() =>
+                                        response.type === "json"
+                                            ? JSON.stringify(response.response.body, null, 2)
+                                            : response.type === "stream"
+                                              ? response.response.body
+                                              : ""
+                                    }
+                                    className="-mr-2"
+                                    lang={lang}
+                                />
+                            </div>
                         ),
                     failed: () => (
                         <span className="bg-(color:--red-a3) text-(color:--red-a11) rounded-1 flex items-center p-1 font-mono text-xs uppercase leading-none">
