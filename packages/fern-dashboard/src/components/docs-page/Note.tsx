@@ -79,7 +79,11 @@ export function Note({
 
     return (
         <div
-            className={cn(noteVariants({ variant }), subtitle || children ? "items-start" : "items-center", className)}
+            className={cn(
+                noteVariants({ variant }),
+                subtitle || children ? "items-start" : "items-start md:items-center",
+                className
+            )}
         >
             {iconWithStyles}
             <div

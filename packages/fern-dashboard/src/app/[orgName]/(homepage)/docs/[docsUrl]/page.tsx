@@ -9,9 +9,9 @@ import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organizati
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { docsPermissionScope } from "@/components/auth/authz";
 import { AuthZWrapperServer } from "@/components/auth/authz/AuthZWrapperServer";
+import { AddCollaboratorBanner } from "@/components/docs-page/AddCollaboratorBanner";
 import { DocsPageTracker } from "@/components/docs-page/DocsPageTracker";
 import { DocsSiteOverviewCard } from "@/components/docs-page/DocsSiteOverviewCard";
-import { TransferRepoOwnershipBanner } from "@/components/docs-page/TransferRepoOwnershipBanner";
 import { CriticalUpdateWarning } from "@/components/docs-page/visual-editor-section/CriticalUpdateWarning";
 import { FinishDocsSetupBanner } from "@/components/docs-page/visual-editor-section/FinishDocsSetupBanner";
 import { VisualEditorLoadingCard } from "@/components/docs-page/visual-editor-section/VisualEditorLoadingCard";
@@ -40,15 +40,17 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
         notFound();
     }
 
-    // Get git URL to determine source repo owner
+    // Get git URL to determine source repo owner and name
     const githubUrlResult = await getDocsGitUrl(docsUrl, session.accessToken);
 
-    // Extract owner from git URL
+    // Extract owner and repo from git URL
     let sourceRepoOwner: string | undefined;
+    let sourceRepoName: string | undefined;
 
     if (githubUrlResult.success && githubUrlResult.gitUrl) {
         const parsed = parseGitUrl(githubUrlResult.gitUrl);
         sourceRepoOwner = parsed.owner ?? undefined;
+        sourceRepoName = parsed.repo ?? undefined;
     }
 
     const gitUrl = githubUrlResult.success ? githubUrlResult.gitUrl : undefined;
@@ -61,7 +63,11 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
                 permissionScope={docsPermissionScope(docsUrl)}
                 orgName={orgName}
             >
-                <TransferRepoOwnershipBanner docsUrl={docsUrl} sourceRepoOwner={sourceRepoOwner} />
+                <AddCollaboratorBanner
+                    docsUrl={docsUrl}
+                    sourceRepoOwner={sourceRepoOwner}
+                    sourceRepoName={sourceRepoName}
+                />
                 <FinishDocsSetupBanner docsUrl={docsUrl} orgName={orgName} gitUrl={gitUrl} />
                 <CriticalUpdateWarning orgName={orgName} docsUrl={docsUrl} gitUrl={gitUrl} />
             </AuthZWrapperServer>

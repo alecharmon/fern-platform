@@ -2,9 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { RedisCacheKey } from "@/app/services/redis/cacheKey";
-import { redisGet } from "@/app/services/redis/redis";
+import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
+import type { DocsUrl } from "@/utils/types";
+import { getDocsUrlMetadata } from "../utils/getDocsUrlMetadata";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ interface AddCollaboratorRequest {
     repoName: string;
     githubUsername: string;
     orgName: string;
+    docsUrl: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -28,28 +30,55 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    if (!data.repoName || !data.githubUsername || !data.orgName) {
-        return NextResponse.json({ error: "repoName, githubUsername, and orgName are required" }, { status: 400 });
-    }
-
-    // Security check 1: Verify this repo was created for this org via Redis
-    // This check ensures the repo was created during onboarding for this specific org
-    const cachedData = await redisGet(RedisCacheKey.onboardingPreCreate(data.orgName));
-    console.log("[add-repo-collaborator] Security check:", {
-        orgName: data.orgName,
-        repoName: data.repoName,
-        cachedData: cachedData ? { status: cachedData.status, repoName: cachedData.repoName } : null
-    });
-    if (!cachedData) {
+    if (!data.repoName || !data.githubUsername || !data.orgName || !data.docsUrl) {
         return NextResponse.json(
-            {
-                error: "Session expired. Please add collaborators directly via GitHub or contact support."
-            },
-            { status: 403 }
+            { error: "repoName, githubUsername, orgName, and docsUrl are required" },
+            { status: 400 }
         );
     }
-    if (cachedData.repoName !== data.repoName) {
-        return NextResponse.json({ error: "Unauthorized: repo does not belong to this org" }, { status: 403 });
+
+    // Security check 1: Verify the docs URL is owned by this org and get the linked repo
+    const docsUrlMetadata = await getDocsUrlMetadata({
+        url: data.docsUrl as DocsUrl,
+        token: session.accessToken
+    });
+
+    if (!docsUrlMetadata.ok) {
+        console.error("[add-repo-collaborator] Failed to load docs URL metadata:", docsUrlMetadata.error);
+        return NextResponse.json({ error: "Docs URL not found or not registered" }, { status: 404 });
+    }
+
+    // Verify the org owns this docs URL
+    if (docsUrlMetadata.body.org !== data.orgName) {
+        return NextResponse.json({ error: "Unauthorized: docs URL does not belong to this org" }, { status: 403 });
+    }
+
+    // Verify the docs URL has a linked git repo
+    if (!docsUrlMetadata.body.gitUrl) {
+        return NextResponse.json({ error: "No repository is linked to this docs site" }, { status: 400 });
+    }
+
+    // Verify the linked repo matches the requested repo name
+    const parsedGitUrl = parseGitUrl(docsUrlMetadata.body.gitUrl);
+    if (parsedGitUrl.repo !== data.repoName) {
+        console.error("[add-repo-collaborator] Repo mismatch:", {
+            requested: data.repoName,
+            actual: parsedGitUrl.repo
+        });
+        return NextResponse.json({ error: "Repo name does not match the linked repository" }, { status: 403 });
+    }
+
+    // Verify the repo owner is in the allowlist (fern-support or fern)
+    const allowedOwners = ["fern-support", "fern", "fern-demo"];
+    if (!parsedGitUrl.owner || !allowedOwners.includes(parsedGitUrl.owner)) {
+        console.error("[add-repo-collaborator] Owner not in allowlist:", {
+            owner: parsedGitUrl.owner,
+            allowedOwners
+        });
+        return NextResponse.json(
+            { error: "Repository owner is not authorized for collaborator additions" },
+            { status: 403 }
+        );
     }
 
     // Security check 2: Verify user is a member of the org via Venus API

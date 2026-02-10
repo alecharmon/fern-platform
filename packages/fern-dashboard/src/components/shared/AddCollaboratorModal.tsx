@@ -18,10 +18,18 @@ interface AddCollaboratorModalProps {
     onOpenChange: (open: boolean) => void;
     orgName: string;
     repoName: string;
+    docsUrl: string;
     onSuccess?: () => void;
 }
 
-export function AddCollaboratorModal({ open, onOpenChange, orgName, repoName, onSuccess }: AddCollaboratorModalProps) {
+export function AddCollaboratorModal({
+    open,
+    onOpenChange,
+    orgName,
+    repoName,
+    docsUrl,
+    onSuccess
+}: AddCollaboratorModalProps) {
     const [githubUsername, setGithubUsername] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccessState, setShowSuccessState] = useState(false);
@@ -45,6 +53,7 @@ export function AddCollaboratorModal({ open, onOpenChange, orgName, repoName, on
                 body: JSON.stringify({
                     orgName,
                     repoName,
+                    docsUrl,
                     githubUsername: githubUsername.trim()
                 })
             });

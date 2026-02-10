@@ -607,12 +607,13 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                 </div>
             )}
 
-            {orgName && repoName && (
+            {orgName && repoName && docsUrl && (
                 <AddCollaboratorModal
                     open={isCollaboratorModalOpen}
                     onOpenChange={setIsCollaboratorModalOpen}
                     orgName={orgName}
                     repoName={repoName}
+                    docsUrl={docsUrl.replace("https://", "")}
                 />
             )}
 
