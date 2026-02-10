@@ -5,10 +5,24 @@ import { GET as checkEndpoint } from "../check/route";
 import { GET as getStatusEndpoint } from "../publish/collection/[collectionId]/status/route";
 import { POST as publishEndpoint } from "../publish/collection/route";
 
+vi.mock("@/app/services/postman/repository", () => ({
+    getAppInstallationByTeamId: vi.fn()
+}));
+
+vi.mock("@/app/services/postman/jwt", () => ({
+    getPostmanAccessToken: vi.fn(),
+    getPostmanBaseUrl: vi.fn(() => "https://api.getpostman.com")
+}));
+
+vi.mock("@/app/services/postman/api", () => ({
+    fetchPostmanCollection: vi.fn()
+}));
+
 const MOCK_API_KEY = "test-postman-api-key";
 
 describe("Postman API endpoints", () => {
     beforeEach(() => {
+        vi.clearAllMocks();
         vi.stubEnv("POSTMAN_FERN_API_KEY", MOCK_API_KEY);
     });
 
@@ -147,7 +161,24 @@ describe("Postman API endpoints", () => {
             expect(body.error).toBe("Unauthorized");
         });
 
-        it("returns success response when valid token and body are provided", async () => {
+        it("returns success response when installation exists and collection is fetched", async () => {
+            const { getAppInstallationByTeamId } = await import("@/app/services/postman/repository");
+            const { getPostmanAccessToken } = await import("@/app/services/postman/jwt");
+            const { fetchPostmanCollection } = await import("@/app/services/postman/api");
+
+            const mockInstallation = {
+                team_id: "team-456",
+                shared_secret: "secret-abc",
+                app_installation_id: "install-789",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            const mockCollection = { info: { name: "Test Collection" }, item: [] };
+
+            vi.mocked(getAppInstallationByTeamId).mockResolvedValue(mockInstallation);
+            vi.mocked(getPostmanAccessToken).mockResolvedValue("mock-access-token");
+            vi.mocked(fetchPostmanCollection).mockResolvedValue(mockCollection);
+
             const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
                 method: "POST",
                 headers: {
@@ -168,6 +199,129 @@ describe("Postman API endpoints", () => {
             expect(body.userId).toBe("user-123");
             expect(body.teamId).toBe("team-456");
             expect(body.message).toBe("Collection publish initiated");
+            expect(body.collection).toEqual(mockCollection);
+        });
+
+        it("polls for installation and succeeds on second attempt", async () => {
+            const { getAppInstallationByTeamId } = await import("@/app/services/postman/repository");
+            const { getPostmanAccessToken } = await import("@/app/services/postman/jwt");
+            const { fetchPostmanCollection } = await import("@/app/services/postman/api");
+
+            const mockInstallation = {
+                team_id: "team-456",
+                shared_secret: "secret-abc",
+                app_installation_id: "install-789",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+
+            vi.mocked(getAppInstallationByTeamId).mockResolvedValueOnce(null).mockResolvedValueOnce(mockInstallation);
+            vi.mocked(getPostmanAccessToken).mockResolvedValue("mock-access-token");
+            vi.mocked(fetchPostmanCollection).mockResolvedValue({ info: { name: "Test" } });
+
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${MOCK_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    payload: { collectionId: "test-collection", userId: "user-123", teamId: "team-456" }
+                })
+            });
+
+            const response = await publishEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(200);
+            expect(body.success).toBe(true);
+            expect(getAppInstallationByTeamId).toHaveBeenCalledTimes(2);
+        });
+
+        it("returns 404 when installation is not found after all poll attempts", async () => {
+            const { getAppInstallationByTeamId } = await import("@/app/services/postman/repository");
+            vi.mocked(getAppInstallationByTeamId).mockResolvedValue(null);
+
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${MOCK_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    payload: { collectionId: "test-collection", userId: "user-123", teamId: "team-456" }
+                })
+            });
+
+            const response = await publishEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(404);
+            expect(body.error).toContain("No app installation found");
+        }, 30000);
+
+        it("returns 500 when access token generation fails", async () => {
+            const { getAppInstallationByTeamId } = await import("@/app/services/postman/repository");
+            const { getPostmanAccessToken } = await import("@/app/services/postman/jwt");
+
+            vi.mocked(getAppInstallationByTeamId).mockResolvedValue({
+                team_id: "team-456",
+                shared_secret: "secret",
+                app_installation_id: "install-789",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            });
+            vi.mocked(getPostmanAccessToken).mockRejectedValue(new Error("Token error"));
+
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${MOCK_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    payload: { collectionId: "test-collection", userId: "user-123", teamId: "team-456" }
+                })
+            });
+
+            const response = await publishEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(500);
+            expect(body.error).toBe("Failed to generate access token");
+        });
+
+        it("returns 502 when collection fetch fails", async () => {
+            const { getAppInstallationByTeamId } = await import("@/app/services/postman/repository");
+            const { getPostmanAccessToken } = await import("@/app/services/postman/jwt");
+            const { fetchPostmanCollection } = await import("@/app/services/postman/api");
+
+            vi.mocked(getAppInstallationByTeamId).mockResolvedValue({
+                team_id: "team-456",
+                shared_secret: "secret",
+                app_installation_id: "install-789",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            });
+            vi.mocked(getPostmanAccessToken).mockResolvedValue("mock-token");
+            vi.mocked(fetchPostmanCollection).mockRejectedValue(new Error("Fetch error"));
+
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${MOCK_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    payload: { collectionId: "test-collection", userId: "user-123", teamId: "team-456" }
+                })
+            });
+
+            const response = await publishEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(502);
+            expect(body.error).toBe("Failed to fetch collection from Postman");
         });
 
         it("returns 400 when userId is missing", async () => {

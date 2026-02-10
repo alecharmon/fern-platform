@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
-function getPostmanBaseUrl(): string {
+export function getPostmanBaseUrl(): string {
     // eslint-disable-next-line turbo/no-undeclared-env-vars
     const baseUrl = process.env.POSTMAN_API_BASE_URL;
     if (!baseUrl) {
@@ -45,7 +45,7 @@ export async function getPostmanAccessToken(request: GetPostmanAccessTokenReques
     const token = jwt.sign(
         {
             iss: clientId,
-            aud: tokenUrl,
+            aud: "https://api.getpostman.com/oauth/token",
             jti: uuidv4(),
             iat: now,
             exp: expire
@@ -71,6 +71,7 @@ export async function getPostmanAccessToken(request: GetPostmanAccessTokenReques
 
     if (!response.ok) {
         const body = await response.text();
+        console.error(`[postman-api] Token request failed. tokenUrl=${tokenUrl} jwt=${token}`);
         throw new Error(`Failed to get access token: ${body}`);
     }
 

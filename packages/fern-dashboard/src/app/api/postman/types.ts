@@ -40,6 +40,7 @@ export interface PublishCollectionResponse {
     userId: UserId;
     teamId: TeamId;
     message: string;
+    collection: Record<string, unknown>;
 }
 
 export interface CustomerAuthPayload {
