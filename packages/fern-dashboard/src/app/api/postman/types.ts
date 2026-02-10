@@ -1,6 +1,7 @@
 export type CollectionId = string;
 export type UserId = string;
 export type TeamId = string;
+export type InstallationAuthId = string;
 
 export interface CollectionStatusPublishing {
     type: "publishing";
@@ -39,6 +40,19 @@ export interface PublishCollectionResponse {
     userId: UserId;
     teamId: TeamId;
     message: string;
+}
+
+export interface CustomerAuthPayload {
+    sharedSecret: string;
+    installationAuthId: InstallationAuthId;
+    teamId: TeamId;
+}
+
+export interface CustomerAuthRequest {
+    eventId: string;
+    eventKey: string;
+    eventStatusCallbackUrl?: string;
+    payload: CustomerAuthPayload;
 }
 
 export interface CheckResponse {

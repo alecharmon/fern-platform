@@ -27,6 +27,19 @@ service:
       errors:
         - CollectionDoesNotExistError
 
+    customerAuth:
+      docs: Webhook endpoint invoked by Postman when a customer auth event occurs.
+      method: POST
+      path: /customer/auth
+      request:
+        name: CustomerAuthRequest
+        body:
+          properties:
+            eventId: string
+            eventKey: string
+            eventStatusCallbackUrl: optional<string>
+            payload: CustomerAuthPayload
+
 types:
   CollectionId:
     type: string
@@ -39,6 +52,16 @@ types:
   TeamId:
     type: string
     docs: The unique identifier for a Team
+
+  InstallationAuthId:
+    type: string
+    docs: The unique identifier for an installation auth
+
+  CustomerAuthPayload:
+    properties:
+      sharedSecret: string
+      installationAuthId: InstallationAuthId
+      teamId: TeamId
 
   PublishCollectionPayload:
     properties:
