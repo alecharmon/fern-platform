@@ -6,11 +6,13 @@ import { useFernCollapseOverflow } from "../FernCollapse";
 export function CollapsibleSidebarGroup({
     open,
     trigger,
-    children
+    children,
+    depth
 }: {
     open: boolean;
     trigger: React.ReactNode;
     children: React.ReactNode;
+    depth?: number;
 }) {
     return (
         <Collapsible.Root open={open}>
@@ -18,7 +20,8 @@ export function CollapsibleSidebarGroup({
             <Collapsible.Content asChild {...useFernCollapseOverflow()}>
                 <ul
                     className={cn(
-                        "fern-sidebar-group fern-collapsible border-border-concealed ml-4 border-l lg:ml-2 lg:py-1 lg:pl-1"
+                        "fern-sidebar-group fern-collapsible border-border-concealed ml-4 border-l lg:ml-2 lg:py-1 lg:pl-1",
+                        depth != null && `fern-sidebar-group-level-${depth + 1}`
                     )}
                 >
                     {React.Children.map(children, (child, index) => (

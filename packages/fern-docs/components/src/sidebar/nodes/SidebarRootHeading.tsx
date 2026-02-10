@@ -41,7 +41,7 @@ export function SidebarRootHeading({
     }
 
     const headingComponent = (
-        <div className={cn("fern-sidebar-heading", className)}>
+        <div className={cn("fern-sidebar-heading fern-sidebar-level-0", className)}>
             {icon}
             <span className="fern-sidebar-heading-content">{node.title}</span>
         </div>

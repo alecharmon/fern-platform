@@ -35,6 +35,7 @@ export function SidebarCollapseGroup({
         <WithFeatureFlags featureFlags={node.featureFlags}>
             <CollapsibleSidebarGroup
                 open={expanded}
+                depth={depth}
                 trigger={
                     <SidebarSlugLink
                         nodeId={node.id}

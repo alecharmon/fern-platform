@@ -51,7 +51,7 @@ export function SidebarRootApiPackageNode({
                 renderOptions={renderOptions}
             />
 
-            <ul className="fern-sidebar-group">
+            <ul className="fern-sidebar-group fern-sidebar-group-level-1">
                 {node.children.map((child) => (
                     <li key={child.id}>
                         <SidebarApiPackageChild

@@ -13,7 +13,7 @@ interface SidebarGroupNodeProps {
 
 export function SidebarGroupNode({ node, renderOptions, lang }: SidebarGroupNodeProps): ReactNode {
     return (
-        <ul className="fern-sidebar-group">
+        <ul className="fern-sidebar-group fern-sidebar-group-level-1">
             {node.children.map((child) => (
                 <li key={child.id}>
                     <SidebarNavigationChild node={child} depth={1} root renderOptions={renderOptions} lang={lang} />

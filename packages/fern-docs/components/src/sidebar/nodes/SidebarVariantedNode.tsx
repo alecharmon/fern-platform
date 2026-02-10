@@ -157,7 +157,7 @@ export function SidebarVariantedNode({ node, depth, renderOptions, lang }: Sideb
             </DropdownMenu.Root>
 
             {/* Render the selected variant's children */}
-            <ul className="fern-sidebar-group mt-2">
+            <ul className={`fern-sidebar-group fern-sidebar-group-level-${depth + 1} mt-2`}>
                 {currentVariant.children.map((child) => {
                     if (child.type === "sidebarGroup") {
                         return (

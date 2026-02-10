@@ -155,7 +155,13 @@ const SidebarLinkInternal = React.forwardRef<HTMLAnchorElement, SidebarLinkProps
         );
     };
 
-    const sharedClassName = cn("fern-sidebar-link", { "opacity-50": hidden }, depth > 0 && "nested", className);
+    const sharedClassName = cn(
+        "fern-sidebar-link",
+        `fern-sidebar-level-${depth + 1}`,
+        { "opacity-50": hidden },
+        depth > 0 && "nested",
+        className
+    );
 
     return withTooltip(
         href ? (
