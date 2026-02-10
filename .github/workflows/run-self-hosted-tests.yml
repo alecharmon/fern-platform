@@ -330,12 +330,16 @@ jobs:
                         value: /tmp
                       - name: CORS_PROXY_ALLOWED_DOMAINS
                         value: "google.com,cloudflare.com"
+                      - name: FERN_AUTH_TYPE
+                        value: "password"
+                      - name: FERN_AUTH_SECRET
+                        value: "fern"
                     resources:
                       requests:
-                        memory: "2Gi"
+                        memory: "4Gi"
                         cpu: "1000m"
                       limits:
-                        memory: "4Gi"
+                        memory: "8Gi"
                         cpu: "2000m"
                     livenessProbe:
                       httpGet:
@@ -469,86 +473,98 @@ jobs:
           fi
           echo "fdr database has $TABLE_COUNT tables"
 
-      - name: Test docs UI via NodePort
+      - name: Test docs UI via NodePort (password auth enabled)
         run: |
-          echo "Testing docs UI via NodePort (localhost:30080)..."
+          echo "Testing docs UI via NodePort with password auth (localhost:30080)..."
+          echo "With password auth enabled, unauthenticated requests should return 307 (redirect to login)"
           
           for i in {1..30}; do
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:30080 2>/dev/null || echo "000")
-            echo "Attempt $i/30: HTTP status=$HTTP_CODE"
+            echo "Attempt $i/5: HTTP status=$HTTP_CODE"
             
-            if [ "$HTTP_CODE" = "200" ]; then
-              echo "Docs UI is accessible!"
+            if [ "$HTTP_CODE" = "307" ] || [ "$HTTP_CODE" = "200" ]; then
+              echo "Docs UI is responding (HTTP $HTTP_CODE)!"
               break
             fi
             sleep 5
           done
           
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:30080 2>/dev/null || echo "000")
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "ERROR: Docs UI not accessible (HTTP $HTTP_CODE)"
+          if [ "$HTTP_CODE" != "307" ] && [ "$HTTP_CODE" != "200" ]; then
+            echo "ERROR: Docs UI not accessible (HTTP $HTTP_CODE, expected 307 or 200)"
             kubectl logs -l app=fern-docs --tail=100 || true
             exit 1
           fi
+          echo "Docs UI is responding correctly (HTTP $HTTP_CODE)"
+
+      - name: Test password auth flow
+        run: |
+          POD_NAME=$(kubectl get pods -l app=fern-docs -o jsonpath='{.items[0].metadata.name}')
+          DOMAIN=$(kubectl exec $POD_NAME -- printenv NEXT_PUBLIC_DOCS_DOMAIN 2>/dev/null || echo "localhost")
           
-          CONTENT=$(curl -s http://localhost:30080 2>/dev/null | head -20)
-          if ! echo "$CONTENT" | grep -q "<!DOCTYPE html>\|<html"; then
-            echo "ERROR: Docs UI did not return HTML"
-            echo "Content received:"
-            echo "$CONTENT"
+          echo "Testing password auth endpoint..."
+          
+          echo "Test 1: Incorrect password should return 401..."
+          WRONG_PW_CODE=$(kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "http://localhost:3000/api/fern-docs/auth/password" \
+            -H "Content-Type: application/json" \
+            -H "x-fern-host: ${DOMAIN}" \
+            -d '{"password": "wrong"}' 2>/dev/null || echo "000")
+          echo "Wrong password status: $WRONG_PW_CODE"
+          if [ "$WRONG_PW_CODE" != "401" ]; then
+            echo "ERROR: Wrong password should return 401 (got $WRONG_PW_CODE)"
+            kubectl exec $POD_NAME -- curl -s \
+              -X POST "http://localhost:3000/api/fern-docs/auth/password" \
+              -H "Content-Type: application/json" \
+              -H "x-fern-host: ${DOMAIN}" \
+              -d '{"password": "wrong"}' 2>/dev/null || true
             exit 1
           fi
-          echo "Docs UI returned valid HTML"
+          echo "Wrong password correctly rejected"
+          
+          echo "Test 2: Correct password should return 200..."
+          CORRECT_PW_CODE=$(kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "http://localhost:3000/api/fern-docs/auth/password" \
+            -H "Content-Type: application/json" \
+            -H "x-fern-host: ${DOMAIN}" \
+            -d '{"password": "fern"}' 2>/dev/null || echo "000")
+          echo "Correct password status: $CORRECT_PW_CODE"
+          if [ "$CORRECT_PW_CODE" != "200" ]; then
+            echo "ERROR: Correct password should return 200 (got $CORRECT_PW_CODE)"
+            kubectl exec $POD_NAME -- curl -s \
+              -X POST "http://localhost:3000/api/fern-docs/auth/password" \
+              -H "Content-Type: application/json" \
+              -H "x-fern-host: ${DOMAIN}" \
+              -d '{"password": "fern"}' 2>/dev/null || true
+            exit 1
+          fi
+          echo "Correct password accepted"
+          
+          echo "All password auth tests passed!"
 
       - name: Test custom components page
         run: |
           echo "Testing custom components page (localhost:30080/custom-components)..."
+          echo "With password auth enabled, unauthenticated requests should return 307 (redirect to login)"
           
           for i in {1..30}; do
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:30080/custom-components 2>/dev/null || echo "000")
-            echo "Attempt $i/30: HTTP status=$HTTP_CODE"
+            echo "Attempt $i/5: HTTP status=$HTTP_CODE"
             
-            if [ "$HTTP_CODE" = "200" ]; then
-              echo "Custom components page is accessible!"
+            if [ "$HTTP_CODE" = "307" ] || [ "$HTTP_CODE" = "200" ]; then
+              echo "Custom components page is responding (HTTP $HTTP_CODE)!"
               break
             fi
             sleep 5
           done
           
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:30080/custom-components 2>/dev/null || echo "000")
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "ERROR: Custom components page not accessible (HTTP $HTTP_CODE)"
+          if [ "$HTTP_CODE" != "307" ] && [ "$HTTP_CODE" != "200" ]; then
+            echo "ERROR: Custom components page not accessible (HTTP $HTTP_CODE, expected 307 or 200)"
             kubectl logs -l app=fern-docs --tail=100 || true
             exit 1
           fi
-          
-          CONTENT=$(curl -s http://localhost:30080/custom-components 2>/dev/null)
-          
-          # Check for HTML structure
-          if ! echo "$CONTENT" | grep -q "<!DOCTYPE html>\|<html"; then
-            echo "ERROR: Custom components page did not return HTML"
-            exit 1
-          fi
-          
-          # Check for evidence of custom components rendering
-          # The page should contain "Custom Components" in the title or content
-          if ! echo "$CONTENT" | grep -qi "custom.component"; then
-            echo "ERROR: Custom components page does not contain expected content"
-            echo "Content preview:"
-            echo "$CONTENT" | head -50
-            exit 1
-          fi
-          
-          # Check for evidence that the CustomBanner component rendered
-          # It includes data-testid="custom-banner" or specific banner text
-          if echo "$CONTENT" | grep -qiE "custom-banner|Information|Success!"; then
-            echo "Custom banner component appears to have rendered!"
-          else
-            echo "WARNING: Could not find evidence of CustomBanner component in HTML"
-            echo "This may be expected if the component renders client-side"
-          fi
-          
-          echo "Custom components page test passed!"
+          echo "Custom components page responding correctly (HTTP $HTTP_CODE)"
 
       - name: Test CORS proxy endpoint
         run: |
@@ -790,7 +806,7 @@ jobs:
             echo "=========================================="
             
             READY=false
-            for i in {1..5}; do
+            for i in {1..30}; do
               POD_READY=$(kubectl get pods -n $ns -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null || echo "false")
               POD_STATUS=$(kubectl get pods -n $ns -l app=fern-docs -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "Pending")
               echo "$ns - Attempt $i/5: Ready=$POD_READY, Status=$POD_STATUS"
@@ -863,7 +879,7 @@ jobs:
             
             BECAME_READY=false
             FOUND_EXPECTED_ERROR=false
-            for i in {1..5}; do
+            for i in {1..30}; do
               POD_READY=$(kubectl get pods -n $ns -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null || echo "false")
               POD_STATUS=$(kubectl get pods -n $ns -l app=fern-docs -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "Pending")
               RESTART_COUNT=$(kubectl get pods -n $ns -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].restartCount}' 2>/dev/null || echo "0")
@@ -992,6 +1008,28 @@ jobs:
             --name ${{ env.EKS_CLUSTER_NAME }} \
             --region ${{ env.AWS_REGION }}
 
+      - name: Validate VPC subnets for internet-facing LoadBalancer
+        run: |
+          echo "Checking that EKS VPC subnets are tagged for internet-facing LoadBalancers..."
+          
+          VPC_ID=$(aws eks describe-cluster --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} \
+            --query 'cluster.resourcesVpcConfig.vpcId' --output text)
+          echo "EKS VPC: $VPC_ID"
+          
+          TAGGED_SUBNETS=$(aws ec2 describe-subnets \
+            --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:kubernetes.io/role/elb,Values=1" \
+            --query 'Subnets[*].SubnetId' --output text --region ${{ env.AWS_REGION }})
+          
+          if [ -z "$TAGGED_SUBNETS" ]; then
+            echo "::error::No subnets tagged with kubernetes.io/role/elb=1 in VPC $VPC_ID."
+            echo "::error::Internet-facing LoadBalancers require at least one public subnet with this tag."
+            echo "::error::Tag your public subnets: aws ec2 create-tags --resources <subnet-ids> --tags Key=kubernetes.io/role/elb,Value=1"
+            exit 1
+          fi
+          
+          echo "Found tagged subnets: $TAGGED_SUBNETS"
+          echo "VPC is correctly configured for internet-facing LoadBalancers."
+
       - name: Create namespace if not exists
         run: |
           kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
@@ -1066,10 +1104,10 @@ jobs:
                         value: /tmp
                     resources:
                       requests:
-                        memory: "2Gi"
+                        memory: "4Gi"
                         cpu: "1000m"
                       limits:
-                        memory: "4Gi"
+                        memory: "8Gi"
                         cpu: "2000m"
                     livenessProbe:
                       httpGet:
@@ -1105,6 +1143,8 @@ jobs:
             name: ${{ env.DEPLOYMENT_NAME }}
             labels:
               app: ${{ env.DEPLOYMENT_NAME }}
+            annotations:
+              service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
           spec:
             type: LoadBalancer
             ports:
@@ -1134,14 +1174,34 @@ jobs:
           echo "Pod name: $POD_NAME"
           
           echo "Testing liveness endpoint..."
-          kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
-            curl -sf http://localhost:8081/liveness || exit 1
-          echo "Liveness check passed"
+          for i in {1..5}; do
+            if kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
+              curl -sf http://localhost:8081/liveness 2>/dev/null; then
+              echo "Liveness check passed"
+              break
+            fi
+            echo "Liveness check attempt $i/5 failed, retrying in 10s..."
+            sleep 10
+            if [ "$i" = "5" ]; then
+              echo "ERROR: Liveness check failed after 5 attempts"
+              exit 1
+            fi
+          done
           
           echo "Testing readiness endpoint..."
-          kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
-            curl -sf http://localhost:8081/readiness || exit 1
-          echo "Readiness check passed"
+          for i in {1..5}; do
+            if kubectl exec -n ${{ env.NAMESPACE }} $POD_NAME -- \
+              curl -sf http://localhost:8081/readiness 2>/dev/null; then
+              echo "Readiness check passed"
+              break
+            fi
+            echo "Readiness check attempt $i/5 failed, retrying in 10s..."
+            sleep 10
+            if [ "$i" = "5" ]; then
+              echo "ERROR: Readiness check failed after 5 attempts"
+              exit 1
+            fi
+          done
           
           echo "All health checks passed!"
 

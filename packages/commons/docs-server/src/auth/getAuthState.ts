@@ -218,7 +218,19 @@ export async function createGetAuthState(
         getAuthState: (pathname?: string) => AsyncOrSync<AuthState>;
     }
 > {
-    if (isLocal() || isSelfHosted()) {
+    console.log("[createGetAuthState] entry", {
+        domain,
+        host,
+        isLocal: isLocal(),
+        isSelfHosted: isSelfHosted(),
+        hasAuthConfigParam: authConfig != null,
+        NEXT_PUBLIC_IS_SELF_HOSTED: process.env.NEXT_PUBLIC_IS_SELF_HOSTED ?? "[absent]",
+        NEXT_PUBLIC_IS_LOCAL: process.env.NEXT_PUBLIC_IS_LOCAL ?? "[absent]",
+        FERN_AUTH_TYPE: process.env.FERN_AUTH_TYPE ?? "[absent]"
+    });
+
+    if (isLocal()) {
+        console.log("[createGetAuthState] isLocal=true, returning authed:true");
         return {
             domain: domain,
             allowedDestinations: [],
@@ -232,6 +244,25 @@ export async function createGetAuthState(
     }
 
     authConfig ??= await getAuthEdgeConfig(domain);
+    console.log("[createGetAuthState] after getAuthEdgeConfig", {
+        authConfigType: authConfig?.type ?? "[undefined]",
+        authConfigExists: authConfig != null
+    });
+
+    if (isSelfHosted() && !authConfig) {
+        console.log("[createGetAuthState] self-hosted + no authConfig fallback → authed:true partner:custom");
+        return {
+            domain: domain,
+            allowedDestinations: [],
+            getAuthState: (_pathname?: string) => ({
+                authed: true,
+                ok: true,
+                user: {},
+                partner: "custom"
+            })
+        };
+    }
+
     const previewAuthConfig = orgMetadata != null ? await getPreviewUrlAuthConfig(orgMetadata) : undefined;
 
     const getAuthState = await getAuthStateInternal({

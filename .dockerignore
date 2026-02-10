@@ -21,3 +21,16 @@ Dockerfile
 **/tsconfig.tsbuildinfo
 **/Dockerfile
 tsconfig.tsbuildinfo
+
+# Large directories not needed for Docker builds
+.git
+fern/
+.github/
+
+# Test files
+**/__test__
+**/__tests__
+**/*.test.ts
+**/*.spec.ts
+**/*.test.tsx
+**/*.test.js

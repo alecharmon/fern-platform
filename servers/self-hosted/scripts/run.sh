@@ -562,6 +562,47 @@ fi
 
 # --------------  Finish generate docs --------------
 
+# --------------  Auth env var passthrough  --------------
+if [ -n "${FERN_AUTH_TYPE:-}" ]; then
+    log "Auth configured: FERN_AUTH_TYPE=$FERN_AUTH_TYPE"
+    export FERN_AUTH_TYPE
+    [ -n "${FERN_AUTH_SECRET:-}" ] && export FERN_AUTH_SECRET
+    [ -n "${FERN_AUTH_REDIRECT:-}" ] && export FERN_AUTH_REDIRECT
+    [ -n "${FERN_AUTH_LOGOUT:-}" ] && export FERN_AUTH_LOGOUT
+    [ -n "${FERN_AUTH_ISSUER:-}" ] && export FERN_AUTH_ISSUER
+    [ -n "${FERN_AUTH_RETURN_TO_QUERY_PARAM:-}" ] && export FERN_AUTH_RETURN_TO_QUERY_PARAM
+    [ -n "${FERN_AUTH_CLIENT_ID:-}" ] && export FERN_AUTH_CLIENT_ID
+    [ -n "${FERN_AUTH_CLIENT_SECRET:-}" ] && export FERN_AUTH_CLIENT_SECRET
+    [ -n "${FERN_AUTH_PARTNER:-}" ] && export FERN_AUTH_PARTNER
+    [ -n "${FERN_AUTH_ENDPOINT:-}" ] && export FERN_AUTH_ENDPOINT
+    [ -n "${FERN_AUTH_TOKEN_ENDPOINT:-}" ] && export FERN_AUTH_TOKEN_ENDPOINT
+    [ -n "${FERN_AUTH_SCOPE:-}" ] && export FERN_AUTH_SCOPE
+    [ -n "${FERN_AUTH_ROLES_CLAIM:-}" ] && export FERN_AUTH_ROLES_CLAIM
+    [ -n "${FERN_AUTH_ORGANIZATION:-}" ] && export FERN_AUTH_ORGANIZATION
+    [ -n "${FERN_AUTH_CONNECTION:-}" ] && export FERN_AUTH_CONNECTION
+    [ -n "${FERN_AUTH_PROVIDER:-}" ] && export FERN_AUTH_PROVIDER
+    [ -n "${FERN_AUTH_ALLOWLIST:-}" ] && export FERN_AUTH_ALLOWLIST
+    [ -n "${FERN_AUTH_DENYLIST:-}" ] && export FERN_AUTH_DENYLIST
+    [ -n "${FERN_AUTH_TEST_LOGIN:-}" ] && export FERN_AUTH_TEST_LOGIN
+fi
+
+if [ -n "${FERN_AUTH_SECRET:-}" ]; then
+    export JWT_SECRET_KEY="$FERN_AUTH_SECRET"
+    log "JWT signing secret configured from FERN_AUTH_SECRET"
+fi
+
+if [ "${FERN_AUTH_TEST_LOGIN:-}" = "true" ] || [ "${FERN_AUTH_TEST_LOGIN:-}" = "1" ]; then
+    log "============================================"
+    log "TEST LOGIN ENABLED"
+    log "============================================"
+    log "A test login page is available at /__test-login"
+    log "Set FERN_AUTH_REDIRECT to point to it, e.g.:"
+    log "  FERN_AUTH_REDIRECT=http://localhost:3000/__test-login"
+    log "This is for testing only - do NOT use in production!"
+    log "============================================"
+fi
+# --------------  End auth env var passthrough  --------------
+
 # --------------  Start nextapp --------------
 
 # Next.js runs on internal port 3001, cache proxy runs on external port 3000
@@ -625,24 +666,39 @@ if [ $NEXTJS_ATTEMPTS -lt $MAX_NEXTJS_ATTEMPTS ]; then
     log "Next.js is ready (responding on port ${NEXTJS_INTERNAL_PORT})"
 fi
 
-# --------------  Start cache proxy --------------
-log "Starting cache proxy on port ${CACHE_PROXY_PORT}..."
+# --------------  Start cache proxy (disabled when auth is configured) --------------
+if [ -n "${FERN_AUTH_TYPE:-}" ]; then
+    log "Auth is configured (FERN_AUTH_TYPE=${FERN_AUTH_TYPE}), disabling cache proxy"
+    log "Cache proxy does not respect middleware auth redirects, so it must be bypassed when auth is enabled"
+    # Run Next.js directly on the external port by using a simple TCP proxy
+    # This ensures all requests go through Next.js middleware (including auth)
+    CACHE_DISABLED=1 \
+    CACHE_PROXY_PORT=${CACHE_PROXY_PORT} \
+    NEXTJS_PORT=${NEXTJS_INTERNAL_PORT} \
+    NEXTJS_HOST="127.0.0.1" \
+    CACHE_PROXY_DEBUG="${CACHE_PROXY_DEBUG:-0}" \
+    node /scripts/cache-proxy.js 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
+    cache_proxy_pid=$!
+    log "Cache proxy PID (caching disabled, pass-through mode): $cache_proxy_pid"
+else
+    log "Starting cache proxy on port ${CACHE_PROXY_PORT}..."
 
-# Cache proxy configuration
-# CACHE_MAX_ENTRIES: Maximum number of pages to cache (default: 1000)
-# CACHE_MAX_ENTRY_SIZE: Maximum size per cached entry in bytes (default: 5MB)
-# CACHE_DEFAULT_TTL: Default cache TTL in seconds (default: 3600 = 1 hour)
-# CACHE_PROXY_DEBUG: Set to "1" for verbose logging
-CACHE_PROXY_PORT=${CACHE_PROXY_PORT} \
-NEXTJS_PORT=${NEXTJS_INTERNAL_PORT} \
-NEXTJS_HOST="127.0.0.1" \
-CACHE_MAX_ENTRIES="${CACHE_MAX_ENTRIES:-1000}" \
-CACHE_MAX_ENTRY_SIZE="${CACHE_MAX_ENTRY_SIZE:-5242880}" \
-CACHE_DEFAULT_TTL="${CACHE_DEFAULT_TTL:-3600}" \
-CACHE_PROXY_DEBUG="${CACHE_PROXY_DEBUG:-0}" \
-node /scripts/cache-proxy.js 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
-cache_proxy_pid=$!
-log "Cache proxy PID: $cache_proxy_pid"
+    # Cache proxy configuration
+    # CACHE_MAX_ENTRIES: Maximum number of pages to cache (default: 1000)
+    # CACHE_MAX_ENTRY_SIZE: Maximum size per cached entry in bytes (default: 5MB)
+    # CACHE_DEFAULT_TTL: Default cache TTL in seconds (default: 3600 = 1 hour)
+    # CACHE_PROXY_DEBUG: Set to "1" for verbose logging
+    CACHE_PROXY_PORT=${CACHE_PROXY_PORT} \
+    NEXTJS_PORT=${NEXTJS_INTERNAL_PORT} \
+    NEXTJS_HOST="127.0.0.1" \
+    CACHE_MAX_ENTRIES="${CACHE_MAX_ENTRIES:-1000}" \
+    CACHE_MAX_ENTRY_SIZE="${CACHE_MAX_ENTRY_SIZE:-5242880}" \
+    CACHE_DEFAULT_TTL="${CACHE_DEFAULT_TTL:-3600}" \
+    CACHE_PROXY_DEBUG="${CACHE_PROXY_DEBUG:-0}" \
+    node /scripts/cache-proxy.js 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
+    cache_proxy_pid=$!
+    log "Cache proxy PID: $cache_proxy_pid"
+fi
 
 # Wait for cache proxy to be ready
 log "Waiting for cache proxy to start on port ${CACHE_PROXY_PORT}..."
@@ -661,8 +717,12 @@ if [ $PROXY_ATTEMPTS -lt $MAX_PROXY_ATTEMPTS ]; then
     log "Cache proxy is ready on port ${CACHE_PROXY_PORT}"
 fi
 
-log "Docs available at http://localhost:${CACHE_PROXY_PORT} (with caching)"
-log "Cache stats available at http://localhost:${CACHE_PROXY_PORT}/__cache/stats"
+if [ -n "${FERN_AUTH_TYPE:-}" ]; then
+    log "Docs available at http://localhost:${CACHE_PROXY_PORT} (caching disabled, auth mode)"
+else
+    log "Docs available at http://localhost:${CACHE_PROXY_PORT} (with caching)"
+    log "Cache stats available at http://localhost:${CACHE_PROXY_PORT}/__cache/stats"
+fi
 
 # --------------  Finish nextapp --------------
 

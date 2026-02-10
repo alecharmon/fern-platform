@@ -2,7 +2,7 @@ import "server-only";
 
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+
 import { cn } from "@fern-docs/components/cn";
 import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
 import { SidebarContainer } from "@fern-docs/components/sidebar/SidebarContainer";
@@ -42,7 +42,7 @@ export default async function SharedLayout({
     logo: React.ReactNode;
     announcement?: React.ReactNode;
 }) {
-    const isLocalEnvironment = isLocal() || isSelfHosted();
+    const isLocalEnvironment = isLocal();
     const [config, settings, edgeFlags, colors, layout, root, lang, isAskAiEnabled, jsFiles] = await Promise.all([
         loader.getConfig(),
         loader.getSettings(),

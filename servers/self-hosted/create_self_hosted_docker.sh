@@ -47,8 +47,8 @@ if [ -n "$GITHUB_ACTIONS" ]; then
     -f "$DOCKER_DIR/Dockerfile.self_hosted" \
     -t "$DOCKER_NAME" "$REPO_ROOT"
 else
-  docker buildx build \
-    --load \
+  # Use plain docker build locally (faster than buildx --load which exports via tarball)
+  docker build \
     -f "$DOCKER_DIR/Dockerfile.self_hosted" \
     -t "$DOCKER_NAME" "$REPO_ROOT"
 fi

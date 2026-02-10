@@ -18,9 +18,11 @@ export class FernNextResponse {
             return NextResponse.next();
         }
 
+        const forwardedHost = req.headers.get("x-forwarded-host");
         const allowedDomains = [
             req.nextUrl.host,
             getDocsDomainEdge(req),
+            ...(forwardedHost ? [decodeURIComponent(forwardedHost)] : []),
             ...(allowedDestinations ?? []).map((url) => new URL(url).host)
         ];
         const redirectLocation = new URL(destination);

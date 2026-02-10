@@ -1,4 +1,6 @@
+import type { AuthEdgeConfig } from "@fern-api/docs-auth";
 import { rewritePosthog } from "@fern-api/docs-server/analytics/rewritePosthog";
+import { createGetAuthState } from "@fern-api/docs-server/auth/getAuthState";
 import { createGetAuthStateEdge } from "@fern-api/docs-server/auth/getAuthStateEdge";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
@@ -28,6 +30,71 @@ import { type MiddlewareConfig, type NextMiddleware, NextResponse } from "next/s
 
 import { isSelfHosted } from "./server/isSelfHosted";
 
+/**
+ * Build AuthEdgeConfig from FERN_AUTH_* env vars at runtime.
+ * This is needed because getAuthEdgeConfig from @fern-docs/edge-config
+ * may not work correctly in the Edge middleware bundle (build-time bundling issue).
+ * The middleware has confirmed access to these env vars at runtime.
+ */
+function getSelfHostedAuthConfigRuntime(): AuthEdgeConfig | undefined {
+    const authType = process.env.FERN_AUTH_TYPE;
+    if (!authType) {
+        return undefined;
+    }
+
+    const allowlist = process.env.FERN_AUTH_ALLOWLIST?.split(",").filter(Boolean);
+    const denylist = process.env.FERN_AUTH_DENYLIST?.split(",").filter(Boolean);
+
+    switch (authType) {
+        case "basic_token_verification":
+            return {
+                type: "basic_token_verification" as const,
+                secret: process.env.FERN_AUTH_SECRET ?? "",
+                issuer: process.env.FERN_AUTH_ISSUER ?? "",
+                redirect: process.env.FERN_AUTH_REDIRECT ?? "",
+                logout: process.env.FERN_AUTH_LOGOUT,
+                returnToQueryParam: process.env.FERN_AUTH_RETURN_TO_QUERY_PARAM,
+                allowlist,
+                denylist
+            };
+        case "password":
+            return {
+                type: "password" as const,
+                password: process.env.FERN_AUTH_SECRET ?? "",
+                allowlist,
+                denylist
+            };
+        case "oauth2":
+            return {
+                type: "oauth2" as const,
+                partner: process.env.FERN_AUTH_PARTNER ?? "",
+                clientId: process.env.FERN_AUTH_CLIENT_ID ?? "",
+                clientSecret: process.env.FERN_AUTH_CLIENT_SECRET ?? "",
+                auth_endpoint: process.env.FERN_AUTH_ENDPOINT ?? "",
+                token_endpoint: process.env.FERN_AUTH_TOKEN_ENDPOINT ?? "",
+                redirectUri: process.env.FERN_AUTH_REDIRECT,
+                scope: process.env.FERN_AUTH_SCOPE,
+                issuer: process.env.FERN_AUTH_ISSUER,
+                roles_claim: process.env.FERN_AUTH_ROLES_CLAIM,
+                allowlist,
+                denylist
+            } as AuthEdgeConfig;
+        case "sso":
+            return {
+                type: "sso" as const,
+                partner: "workos" as const,
+                organization: process.env.FERN_AUTH_ORGANIZATION ?? "",
+                connection: process.env.FERN_AUTH_CONNECTION,
+                provider: process.env.FERN_AUTH_PROVIDER,
+                allowlist,
+                denylist
+            };
+        default:
+            console.error(`[middleware] Unknown FERN_AUTH_TYPE: ${authType}`);
+            return undefined;
+    }
+}
+
 function splitPathname(pathname: string, splitter: string | RegExp): [basepath: string, pathname: string] {
     const index = typeof splitter === "string" ? pathname.indexOf(splitter) : pathname.search(splitter);
     if (index <= 0) {
@@ -37,7 +104,17 @@ function splitPathname(pathname: string, splitter: string | RegExp): [basepath: 
 }
 
 export const middleware: NextMiddleware = async (request) => {
-    const host = request.nextUrl.host;
+    // For self-hosted behind the cache proxy, use the original external-facing host
+    // (from X-Forwarded-Host) so that all downstream URLs (rewrites, auth redirects)
+    // use the correct external port (e.g. 3000) instead of the internal Next.js port (3001).
+    // Decode URI components because request.nextUrl.host can URL-encode the colon in
+    // the port (e.g. "localhost%3A3000") which breaks withDefaultProtocol's localhost
+    // detection and causes https:// to be used instead of http://.
+    const rawHost =
+        isSelfHosted() && request.headers.get("x-forwarded-host")
+            ? request.headers.get("x-forwarded-host")!
+            : request.nextUrl.host;
+    const host = decodeURIComponent(rawHost);
     const domain = getDocsDomainEdge(request);
 
     // Early return for already-rewritten internal routes to prevent re-processing.
@@ -432,7 +509,6 @@ export const middleware: NextMiddleware = async (request) => {
 
     if (isSelfHosted()) {
         console.log("[middleware] Self-hosted mode detected");
-        // serve local files directly
         if (pathname.startsWith("/_local/")) {
             const origin = process.env.NEXT_PUBLIC_FDR_ORIGIN;
             if (!origin) {
@@ -443,25 +519,63 @@ export const middleware: NextMiddleware = async (request) => {
             return NextResponse.redirect(absoluteUrl);
         }
 
-        // Self-hosted mode: use "everyone" role for static rendering
-        // IMPORTANT: Self-hosted deployments currently do not support authentication.
-        // Auth/roles/password protection is bypassed in self-hosted mode.
-        // If auth support is needed for self-hosted deployments in the future,
-        // this section will need to be updated to check for auth configuration
-        // and handle it appropriately (similar to the production code path below).
-        const rolesPath = encodeRoles([EVERYONE_ROLE]);
-        const isLoggedInParam = encodeBool(false);
-        const requiresLoginParam = encodeBool(false);
-        // Path order: [requiresLogin]/[isLoggedIn]/[roles]
-        const rewritePath = withDomain(
-            `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+        if (!process.env.FERN_AUTH_TYPE) {
+            const rolesPath = encodeRoles([EVERYONE_ROLE]);
+            const isLoggedInParam = encodeBool(false);
+            const requiresLoginParam = encodeBool(false);
+            const rewritePath = withDomain(
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+            );
+            console.log("[middleware] Self-hosted routing decision:", {
+                originalPathname: pathname,
+                rewritePath,
+                reason: "Self-hosted mode - no auth configured, using everyone role"
+            });
+            return rewrite(rewritePath);
+        }
+
+        console.log("[middleware] Self-hosted mode with auth configured, using production auth flow");
+
+        // Debug: log which FERN_* auth env vars are available (values of secrets are redacted)
+        const authEnvVars = [
+            "FERN_AUTH_TYPE",
+            "FERN_AUTH_SECRET",
+            "FERN_AUTH_ALLOWLIST",
+            "FERN_AUTH_DENYLIST",
+            "FERN_AUTH_ISSUER",
+            "FERN_AUTH_REDIRECT",
+            "FERN_AUTH_LOGOUT",
+            "FERN_AUTH_PARTNER",
+            "FERN_AUTH_CLIENT_ID",
+            "FERN_AUTH_CLIENT_SECRET",
+            "FERN_AUTH_ENDPOINT",
+            "FERN_AUTH_TOKEN_ENDPOINT",
+            "FERN_AUTH_SCOPE",
+            "FERN_AUTH_ROLES_CLAIM",
+            "FERN_AUTH_ORGANIZATION",
+            "FERN_AUTH_CONNECTION",
+            "FERN_AUTH_PROVIDER",
+            "JWT_SECRET_KEY"
+        ] as const;
+        const authEnvDebug = Object.fromEntries(
+            authEnvVars.map((key) => {
+                const val = process.env[key];
+                const isSecret = key.includes("SECRET") || key === "JWT_SECRET_KEY";
+                return [key, val == null ? "[absent]" : isSecret ? `[set, len=${val.length}]` : val];
+            })
         );
-        console.log("[middleware] Self-hosted routing decision:", {
-            originalPathname: pathname,
-            rewritePath,
-            reason: "Self-hosted mode - using roles-based route with everyone"
-        });
-        return rewrite(rewritePath);
+        console.log("[middleware] auth debug - FERN_* env vars:", authEnvDebug);
+
+        // Debug: test getAuthEdgeConfig directly from middleware to see what it returns
+        try {
+            const testAuthConfig = await getAuthEdgeConfig(domain);
+            console.log("[middleware] auth debug - getAuthEdgeConfig result:", {
+                domain,
+                returned: testAuthConfig != null ? { type: testAuthConfig.type } : "[undefined]"
+            });
+        } catch (err) {
+            console.error("[middleware] auth debug - getAuthEdgeConfig threw:", String(err));
+        }
     }
 
     // Check for revalidation auth header - allows revalidation to specify exact auth params
@@ -524,9 +638,34 @@ export const middleware: NextMiddleware = async (request) => {
             : "[absent]"
     });
 
-    const { getAuthState } = await createGetAuthStateEdge(request, (token) => {
-        newToken = token;
-    });
+    // For self-hosted with auth, build the auth config from env vars at runtime
+    // and pass it directly to createGetAuthState. This avoids relying on getAuthEdgeConfig
+    // from the edge-config package, which doesn't work in the Edge middleware bundle.
+    let getAuthState: Awaited<ReturnType<typeof createGetAuthState>>["getAuthState"];
+    if (isSelfHosted() && process.env.FERN_AUTH_TYPE) {
+        const runtimeAuthConfig = getSelfHostedAuthConfigRuntime();
+        console.log("[middleware] self-hosted runtime auth config:", {
+            type: runtimeAuthConfig?.type ?? "[undefined]",
+            built: runtimeAuthConfig != null
+        });
+        const fernToken = request.headers.get("FERN_TOKEN") ?? request.cookies.get(COOKIE_FERN_TOKEN)?.value;
+        const result = await createGetAuthState(
+            host,
+            domain,
+            fernToken,
+            runtimeAuthConfig,
+            undefined, // no org metadata for self-hosted
+            (token) => {
+                newToken = token;
+            }
+        );
+        getAuthState = result.getAuthState;
+    } else {
+        const result = await createGetAuthStateEdge(request, (token) => {
+            newToken = token;
+        });
+        getAuthState = result.getAuthState;
+    }
     const authState = await getAuthState(pathname);
 
     // Log auth state for debugging

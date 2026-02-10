@@ -54,11 +54,115 @@ export async function getWorkOSOrganizationDomains(orgName: string): Promise<str
 }
 
 export async function getAuthEdgeConfig(currentDomain: string): Promise<AuthEdgeConfig | undefined> {
-    if (isLocal() || isSelfHosted()) {
+    const selfHosted = isSelfHosted();
+    const local = isLocal();
+    console.log("[self-hosted-auth] getAuthEdgeConfig called", {
+        currentDomain,
+        isLocal: local,
+        isSelfHosted: selfHosted
+    });
+
+    if (local) {
         return undefined;
     }
 
+    if (selfHosted) {
+        return getSelfHostedAuthConfig();
+    }
+
     return getRecord(currentDomain, "authentication");
+}
+
+function getSelfHostedAuthConfig(): AuthEdgeConfig | undefined {
+    const authType = process.env.FERN_AUTH_TYPE;
+    console.log("[self-hosted-auth] getSelfHostedAuthConfig called", {
+        FERN_AUTH_TYPE: authType ?? "[absent]",
+        FERN_AUTH_SECRET: process.env.FERN_AUTH_SECRET
+            ? `[set, len=${process.env.FERN_AUTH_SECRET.length}]`
+            : "[absent]",
+        JWT_SECRET_KEY: process.env.JWT_SECRET_KEY ? `[set, len=${process.env.JWT_SECRET_KEY.length}]` : "[absent]",
+        NEXT_PUBLIC_IS_SELF_HOSTED: process.env.NEXT_PUBLIC_IS_SELF_HOSTED ?? "[absent]"
+    });
+    if (!authType) {
+        console.log("[self-hosted-auth] No FERN_AUTH_TYPE set, returning undefined");
+        return undefined;
+    }
+
+    const allowlist = process.env.FERN_AUTH_ALLOWLIST?.split(",").filter(Boolean);
+    const denylist = process.env.FERN_AUTH_DENYLIST?.split(",").filter(Boolean);
+
+    let raw: Record<string, unknown>;
+
+    switch (authType) {
+        case "basic_token_verification":
+            raw = {
+                type: "basic_token_verification" as const,
+                secret: process.env.FERN_AUTH_SECRET ?? "",
+                issuer: process.env.FERN_AUTH_ISSUER ?? "",
+                redirect: process.env.FERN_AUTH_REDIRECT ?? "",
+                logout: process.env.FERN_AUTH_LOGOUT,
+                returnToQueryParam: process.env.FERN_AUTH_RETURN_TO_QUERY_PARAM,
+                allowlist,
+                denylist
+            };
+            break;
+        case "password":
+            raw = {
+                type: "password" as const,
+                password: process.env.FERN_AUTH_SECRET ?? "",
+                allowlist,
+                denylist
+            };
+            break;
+        case "oauth2":
+            raw = {
+                type: "oauth2" as const,
+                partner: process.env.FERN_AUTH_PARTNER ?? "",
+                clientId: process.env.FERN_AUTH_CLIENT_ID ?? "",
+                clientSecret: process.env.FERN_AUTH_CLIENT_SECRET ?? "",
+                auth_endpoint: process.env.FERN_AUTH_ENDPOINT ?? "",
+                token_endpoint: process.env.FERN_AUTH_TOKEN_ENDPOINT ?? "",
+                redirectUri: process.env.FERN_AUTH_REDIRECT,
+                scope: process.env.FERN_AUTH_SCOPE,
+                issuer: process.env.FERN_AUTH_ISSUER,
+                roles_claim: process.env.FERN_AUTH_ROLES_CLAIM,
+                allowlist,
+                denylist
+            };
+            break;
+        case "sso":
+            raw = {
+                type: "sso" as const,
+                partner: "workos" as const,
+                organization: process.env.FERN_AUTH_ORGANIZATION ?? "",
+                connection: process.env.FERN_AUTH_CONNECTION,
+                provider: process.env.FERN_AUTH_PROVIDER,
+                allowlist,
+                denylist
+            };
+            break;
+        default:
+            console.error(`[self-hosted] Unknown FERN_AUTH_TYPE: ${authType}`);
+            return undefined;
+    }
+
+    console.log("[self-hosted-auth] Built raw config:", {
+        type: raw.type,
+        hasPassword:
+            "password" in raw && typeof raw.password === "string"
+                ? `[set, len=${(raw.password as string).length}]`
+                : "[absent]",
+        keys: Object.keys(raw)
+    });
+
+    const result = AuthEdgeConfigSchema.safeParse(raw);
+    if (result.success) {
+        console.log("[self-hosted-auth] Config parsed successfully, type:", result.data.type);
+        return result.data;
+    }
+    console.error("[self-hosted-auth] Schema validation FAILED:", result.error.message);
+    console.error("[self-hosted-auth] Schema validation issues:", JSON.stringify(result.error.issues, null, 2));
+    return undefined;
 }
 
 export async function getApiKeyInjectionEdgeConfig(currentDomain: string): Promise<AuthEdgeConfig | undefined> {

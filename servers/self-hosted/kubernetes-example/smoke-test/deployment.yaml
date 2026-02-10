@@ -38,6 +38,10 @@ spec:
               value: "info"
             - name: TMPDIR
               value: /tmp
+            - name: FERN_AUTH_TYPE
+              value: "password"
+            - name: FERN_AUTH_SECRET
+              value: "fern"
           resources:
             requests:
               memory: "2Gi"

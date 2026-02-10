@@ -17,14 +17,22 @@ import { type NextRequest, NextResponse } from "next/server";
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-    if (isLocal() || isSelfHosted()) {
+    if (isLocal()) {
         return new NextResponse("jwt is not accessible in local preview mode", {
             status: 400
         });
     }
 
     const domain = getDocsDomainEdge(req);
-    const host = req.nextUrl.host;
+    // For self-hosted behind the cache proxy, req.nextUrl.host is the internal
+    // Next.js host (e.g. 127.0.0.1:3001). Use x-forwarded-host to get the
+    // external-facing host (e.g. localhost:3000) so that redirects and cookies
+    // use the correct origin (http:// for localhost, not https://).
+    // Decode URI components because the host can contain encoded colons (%3A).
+    const rawHost =
+        isSelfHosted() && req.headers.get("x-forwarded-host") ? req.headers.get("x-forwarded-host")! : req.nextUrl.host;
+    const host = decodeURIComponent(rawHost);
+    // For self-hosted, getAuthEdgeConfig reads from FERN_AUTH_* env vars
     const edgeConfig = await getAuthEdgeConfig(domain);
 
     // since we expect the callback to be redirected to, the token will be in the query params

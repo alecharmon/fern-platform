@@ -9,10 +9,6 @@ vi.mock("@fern-api/docs-server/isLocal", () => ({
     isLocal: vi.fn()
 }));
 
-vi.mock("@fern-api/docs-server/isSelfHosted", () => ({
-    isSelfHosted: vi.fn()
-}));
-
 vi.mock("@fern-api/docs-server/xfernhost/edge", () => ({
     getDocsDomainEdge: vi.fn()
 }));
@@ -27,7 +23,6 @@ vi.mock("next/headers", () => ({
 
 import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 
@@ -35,7 +30,6 @@ import { POST } from "./route";
 
 const mockSafeVerifyFernJWTConfig = vi.mocked(safeVerifyFernJWTConfig);
 const mockIsLocal = vi.mocked(isLocal);
-const mockIsSelfHosted = vi.mocked(isSelfHosted);
 const mockGetDocsDomainEdge = vi.mocked(getDocsDomainEdge);
 const mockGetAuthEdgeConfig = vi.mocked(getAuthEdgeConfig);
 
@@ -43,7 +37,6 @@ describe("auth/verify route", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockIsLocal.mockReturnValue(false);
-        mockIsSelfHosted.mockReturnValue(false);
         mockGetDocsDomainEdge.mockReturnValue("buildwithfern.com");
     });
 
@@ -60,24 +53,7 @@ describe("auth/verify route", () => {
         expect(response.status).toBe(400);
         expect(data).toEqual({
             authenticated: false,
-            error: "Authentication verification is not available in local preview mode or self-hosted mode"
-        });
-    });
-
-    it("should return error in self-hosted mode", async () => {
-        mockIsSelfHosted.mockReturnValue(true);
-
-        const request = new NextRequest("https://example.com/api/fern-docs/auth/verify", {
-            method: "POST"
-        });
-
-        const response = await POST(request);
-        const data = await response.json();
-
-        expect(response.status).toBe(400);
-        expect(data).toEqual({
-            authenticated: false,
-            error: "Authentication verification is not available in local preview mode or self-hosted mode"
+            error: "Authentication verification is not available in local preview mode"
         });
     });
 

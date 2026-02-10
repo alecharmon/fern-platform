@@ -5,7 +5,6 @@ import { normalizeDomainForCookie } from "@fern-api/docs-server/auth/with-secure
 import { revokeSessionForToken } from "@fern-api/docs-server/auth/workos-session";
 import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { safeUrl } from "@fern-api/docs-server/safeUrl";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_ACCESS_TOKEN, COOKIE_FERN_TOKEN, COOKIE_REFRESH_TOKEN } from "@fern-api/docs-utils";
@@ -15,13 +14,14 @@ import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-    if (isLocal() || isSelfHosted()) {
+    if (isLocal()) {
         return new NextResponse("auth logout is not accessible in local preview mode", {
             status: 400
         });
     }
 
-    const host = req.nextUrl.host;
+    const rawHost = req.headers.get("x-forwarded-host") ?? req.nextUrl.host;
+    const host = decodeURIComponent(rawHost);
     const domain = getDocsDomainEdge(req);
     const cookieJar = await cookies();
 
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     // Delete cookies by setting them with Max-Age=0 and Expires in the past
     // We need to match the domain that was used when the cookie was set
-    const requestHost = req.nextUrl.host.split(":")[0] ?? req.nextUrl.host;
+    const requestHost = host.split(":")[0] ?? host;
     const isSecure = req.nextUrl.protocol === "https:";
 
     for (const cookieName of cookiesToDelete) {

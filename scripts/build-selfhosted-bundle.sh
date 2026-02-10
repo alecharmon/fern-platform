@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Accept BASE_PATH as an optional argument (e.g., ./build-selfhosted-bundle.sh /docs)
 BASE_PATH="${1:-}"
@@ -24,6 +25,16 @@ if [ -f "$ENV_LOCAL_PATH" ]; then
     echo "temporarily moving .env.local to backup..."
     mv "$ENV_LOCAL_PATH" "$ENV_LOCAL_BACKUP"
 fi
+
+# clean turbo cache before building (same as docs:clean:local)
+rm -rf packages/fern-docs/bundle/.next packages/fern-docs/bundle/next-env.d.ts packages/fern-docs/bundle/dist packages/fern-docs/bundle/.turbo
+
+# Compile all workspace dependencies first so their dist/ directories are up to date.
+# This is critical because packages like @fern-api/docs-server and @fern-docs/edge-config
+# have "exports" maps pointing to ./dist/*.js, and Next.js resolves those at build time.
+# Without this step, stale dist/ files cause the Edge middleware to use outdated code.
+echo "Compiling workspace dependencies..."
+pnpm compile
 
 # run the build process
 NODE_OPTIONS="--max-old-space-size=8192" NODE_ENV=production pnpm --filter=@fern-docs/bundle docs:build:selfhosted

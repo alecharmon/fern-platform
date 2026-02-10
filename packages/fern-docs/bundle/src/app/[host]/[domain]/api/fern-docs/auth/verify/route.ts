@@ -1,6 +1,5 @@
 import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
@@ -24,11 +23,11 @@ interface VerifyAuthError {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse<VerifyAuthResponse | VerifyAuthError>> {
-    if (isLocal() || isSelfHosted()) {
+    if (isLocal()) {
         return NextResponse.json(
             {
                 authenticated: false,
-                error: "Authentication verification is not available in local preview mode or self-hosted mode"
+                error: "Authentication verification is not available in local preview mode"
             },
             { status: 400 }
         );

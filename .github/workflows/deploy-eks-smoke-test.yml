@@ -52,6 +52,28 @@ jobs:
             --name ${{ env.EKS_CLUSTER_NAME }} \
             --region ${{ env.AWS_REGION }}
 
+      - name: Validate VPC subnets for internet-facing LoadBalancer
+        run: |
+          echo "Checking that EKS VPC subnets are tagged for internet-facing LoadBalancers..."
+          
+          VPC_ID=$(aws eks describe-cluster --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} \
+            --query 'cluster.resourcesVpcConfig.vpcId' --output text)
+          echo "EKS VPC: $VPC_ID"
+          
+          TAGGED_SUBNETS=$(aws ec2 describe-subnets \
+            --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:kubernetes.io/role/elb,Values=1" \
+            --query 'Subnets[*].SubnetId' --output text --region ${{ env.AWS_REGION }})
+          
+          if [ -z "$TAGGED_SUBNETS" ]; then
+            echo "::error::No subnets tagged with kubernetes.io/role/elb=1 in VPC $VPC_ID."
+            echo "::error::Internet-facing LoadBalancers require at least one public subnet with this tag."
+            echo "::error::Tag your public subnets: aws ec2 create-tags --resources <subnet-ids> --tags Key=kubernetes.io/role/elb,Value=1"
+            exit 1
+          fi
+          
+          echo "Found tagged subnets: $TAGGED_SUBNETS"
+          echo "VPC is correctly configured for internet-facing LoadBalancers."
+
       - name: Create namespace if not exists
         run: |
           kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
@@ -153,9 +175,9 @@ jobs:
         run: |
           echo "Updating service to LoadBalancer type for external access..."
           
-          # Patch the service to use LoadBalancer type
+          # Patch the service to use LoadBalancer type with internet-facing scheme
           kubectl patch service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} \
-            -p '{"spec": {"type": "LoadBalancer"}}'
+            -p '{"metadata": {"annotations": {"service.beta.kubernetes.io/aws-load-balancer-scheme": "internet-facing"}}, "spec": {"type": "LoadBalancer"}}'
           
           echo "Waiting for LoadBalancer to be provisioned..."
           
