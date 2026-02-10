@@ -99,7 +99,7 @@ export function PublishingStepCard({
     return (
         <div
             className={cn(
-                "border-border flex items-center justify-between rounded-xl gap-8 border p-5 min-w-[400px]",
+                "border-border flex items-start md:items-center md:justify-between rounded-xl gap-x-8 gap-y-4 border min-w-full p-5 md:min-w-[400px] flex-col md:flex-row",
                 state === "in-progress" && "border-primary/40",
                 state === "failed" && "border-red-400 dark:border-red-600"
             )}

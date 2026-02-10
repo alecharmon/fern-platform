@@ -63,11 +63,10 @@ export function validatePrimaryColor(value: string | null): string | undefined {
 
 /**
  * Validates OpenAPI spec files
+ * Note: Empty array is valid - defaults will be used by the backend
  */
 export function validateOpenApiSpecFiles(files: File[]): string | undefined {
-    if (!files || files.length === 0) {
-        return "Add at least one API spec. Use the default if you don't have one yet.";
-    }
+    // Empty is allowed - defaults will be used automatically
     return undefined;
 }
 

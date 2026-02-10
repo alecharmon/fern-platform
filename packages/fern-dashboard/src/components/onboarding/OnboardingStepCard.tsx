@@ -72,9 +72,9 @@ export function OnboardingStepCard({
     const handleContinue = createDebouncedHandler(onContinue);
     const handleSkip = createDebouncedHandler(onSkip);
     return (
-        <div className="flex w-full flex-col max-w-[550px] overflow-y-auto h-full md:px-12 justify-center">
+        <div className="flex w-full flex-col max-w-[550px] overflow-y-hidden h-full md:px-12 justify-center">
             {/* Main content area */}
-            <div className="mx-auto flex max-h-[calc(100vh-150px)] w-full flex-col overflow-y-auto py-6 md:rounded-t-2xl">
+            <div className="flex max-h-[calc(100vh-150px)] w-full flex-col overflow-y-auto p-7 lg:px-8 md:rounded-t-2xl">
                 <div className="w-full">
                     <SlideLeftTransition>
                         <div className="space-y-8">
@@ -92,7 +92,7 @@ export function OnboardingStepCard({
 
             {/* Footer with action buttons */}
             <SlideUpTransition>
-                <div className="w-full space-y-2">
+                <div className="w-full space-y-2 px-7 lg:px-8">
                     {error && (
                         <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-200">
                             {error}

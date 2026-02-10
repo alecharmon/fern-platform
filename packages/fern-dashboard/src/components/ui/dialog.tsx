@@ -54,10 +54,13 @@ function DialogContent({
                 className={cn(
                     // color + border
                     "bg-background dark:bg-background border-border border",
-                    // state animations
-                    "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95",
+                    // state animations - mobile: slide up from bottom, desktop: zoom in
+                    "data-[state=open]:animate-in data-[state=closed]:animate-out",
+                    "[animation-duration:200ms] [animation-timing-function:ease-out]",
+                    "data-[state=open]:[animation-name:slideUpFromBottom] data-[state=closed]:[animation-name:slideDownToBottom]",
+                    "md:data-[state=open]:[animation-name:zoom] md:data-[state=closed]:fade-out-0 md:data-[state=closed]:zoom-out-95",
                     // base layout + size
-                    "md:min-h-auto fixed bottom-0 z-50 flex min-h-[65%] w-full flex-col overflow-hidden rounded-t-lg pt-6 shadow-lg duration-200",
+                    "md:min-h-auto fixed bottom-0 z-50 flex min-h-[65%] w-full flex-col overflow-hidden rounded-t-lg pt-6 shadow-lg",
                     // responsive positioning
                     "md:bottom-auto md:left-[50%] md:top-[50%] md:max-w-lg md:translate-x-[-50%] md:translate-y-[-50%] md:rounded-lg",
                     className

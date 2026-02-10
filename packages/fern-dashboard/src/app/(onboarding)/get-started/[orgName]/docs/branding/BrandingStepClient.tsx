@@ -72,7 +72,7 @@ export function BrandingStepClient() {
             {(formData.logoUrl || formData.primaryColorHex) && (
                 <div className="mt-6 space-y-4">
                     <h3 className="text-gray-1200 text-sm font-medium">Populated assets:</h3>
-                    <div className="flex gap-12">
+                    <div className="flex flex-wrap gap-x-12 gap-y-3">
                         {formData.logoUrl && (
                             <div className="flex items-center gap-3">
                                 <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-gray-500 bg-white p-1">

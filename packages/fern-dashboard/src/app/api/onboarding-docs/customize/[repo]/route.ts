@@ -7,6 +7,7 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { setFernTokenSecret } from "@/app/services/dal/github/setFernTokenSecret";
 import { updateRepository } from "@/app/services/dal/github/updateRepository";
 import { getGitLoader } from "@/app/services/github/getGitLoader";
+import { DEFAULT_SPECS } from "@/components/onboarding/constants";
 import { getDocsStarterTemplateFiles } from "@/templates/docs-starter";
 import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
@@ -384,16 +385,12 @@ async function customizeBasicTemplate(
 /**
  * Prepares API spec files for a second commit.
  * Creates separate apis/{api-name}/ folders for each spec.
- * Returns the files to be committed, or null if no specs.
+ * Returns the files to be committed, or null if processing failed.
  */
 async function prepareApiSpecFiles(
     data: CustomizeRequest,
     tempDir: string
 ): Promise<Array<{ path: string; content: string }> | null> {
-    if (data.openApiSpecUrls.length === 0) {
-        return null;
-    }
-
     const files: Array<{ path: string; content: string }> = [];
     const fernDir = path.join(tempDir, "fern");
 
@@ -664,23 +661,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ rep
         // Track the first commit SHA (this is what triggers the docs workflow)
         const docsCommitSha = updateResult.commitSha;
 
-        // Step 2: If there are API specs, add them in a second commit
-        if (data.openApiSpecUrls.length > 0) {
-            const apiSpecFiles = await prepareApiSpecFiles(data, tempDir);
-            if (apiSpecFiles) {
-                const apiUpdateResult = await updateRepository({
-                    owner: demoCreationBotOwner,
-                    repoName,
-                    files: apiSpecFiles,
-                    message: "Add API reference documentation"
-                });
+        // Step 2: Add API specs in a second commit
+        // If no specs provided, use defaults to ensure API reference is always available
+        const specsToUse = data.openApiSpecUrls.length > 0 ? data.openApiSpecUrls : [...DEFAULT_SPECS];
+        const apiSpecFiles = await prepareApiSpecFiles({ ...data, openApiSpecUrls: specsToUse }, tempDir);
 
-                if (!apiUpdateResult.success) {
-                    console.warn(`[customize] Failed to add API specs: ${apiUpdateResult.error}`);
-                    // Non-critical - the basic docs are already committed
-                } else {
-                    console.log(`[customize] API specs added successfully for ${repoName}`);
-                }
+        if (apiSpecFiles) {
+            const apiUpdateResult = await updateRepository({
+                owner: demoCreationBotOwner,
+                repoName,
+                files: apiSpecFiles,
+                message: "Add API reference documentation"
+            });
+
+            if (!apiUpdateResult.success) {
+                console.warn(`[customize] Failed to add API specs: ${apiUpdateResult.error}`);
+                // Non-critical - the basic docs are already committed
+            } else {
+                console.log(`[customize] API specs added successfully for ${repoName}`);
             }
         }
 

@@ -48,7 +48,7 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
         <>
             <BackArrow href="/get-started" />
             <SlideLeftTransition>
-                <div className="flex h-full flex-col gap-3 max-w-[420px]">
+                <div className="flex h-full flex-col gap-3 max-w-[420px] px-7 lg:px-8">
                     <h1 className="text-2xl font-semibold">What is your organization name?</h1>
                     <p className="text-sm text-muted-foreground">Organizations are used to group your projects.</p>
                     <div className="mt-4">

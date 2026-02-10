@@ -77,6 +77,7 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
         });
 
         // Save form data to sessionStorage for the publishing page
+        // Note: Backend will add default API specs if openApiSpecUrls is empty
         saveOnboardingFormData(formData);
 
         // Save expected docs URL

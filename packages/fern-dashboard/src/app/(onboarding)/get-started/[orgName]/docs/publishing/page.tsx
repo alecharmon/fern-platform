@@ -15,7 +15,7 @@ export default async function DocsOnboardingPublishingPage({ params }: DocsOnboa
     // Note: Additional client-side guards in PublishingStepClient
     // will check for valid sessionStorage data and redirect if missing
     return (
-        <div className="flex justify-center gap-12">
+        <div className="flex justify-center gap-12 px-7 lg:px-8 w-full md:w-fit">
             <PublishingStepClient organizationId={orgName} />
             <div
                 className="max-w-[650px] max-h-[450px] hidden lg:block md:pt-12"

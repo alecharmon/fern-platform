@@ -81,7 +81,7 @@ export const SplitLayout = ({
             {/* Left card section */}
             <div
                 className={cn(
-                    "relative z-10 flex flex-col overflow-y-auto",
+                    "relative z-10 flex flex-col overflow-hidden",
                     // Mobile: full width, no border/shadow
                     "flex-1",
                     // Desktop: card styling with border and shadow (only when card is visible)
@@ -101,9 +101,7 @@ export const SplitLayout = ({
                     ...(centerCard && !hideCard ? { width: "calc(100% - 300px - 0.5rem)" } : {})
                 }}
             >
-                <div className="flex flex-col items-center justify-center flex-1 w-full h-full py-8 px-7 lg:px-8">
-                    {cardContent}
-                </div>
+                <div className="flex flex-col items-center justify-center flex-1 w-full h-full py-8">{cardContent}</div>
             </div>
 
             {/* Layout placeholder keeps the left -> center animation smooth */}

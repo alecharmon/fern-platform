@@ -108,7 +108,7 @@ export function AddCollaboratorModal({ open, onOpenChange, orgName, repoName, on
                         <GithubLogo width={28} height={28} variant="circle" />
                     </LogoTile>
                 </div>
-                <div className="flex items-center justify-center h-full w-full bg-background z-1 border-border border-t py-6 px-10">
+                <div className="flex items-center justify-center h-full w-full bg-background z-1 border-border border-t py-6 px-4 md:px-10">
                     <AnimatePresence mode="wait">
                         {showSuccessState ? (
                             <SlideUpTransition>

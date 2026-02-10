@@ -36,7 +36,7 @@ export async function AuthPageCard({
 
     return (
         <>
-            <div className="mx-4 flex w-full max-w-[400px] flex-col items-stretch md:mx-auto">
+            <div className="px-4 flex w-full max-w-[400px] flex-col items-stretch md:mx-auto">
                 <div className="mb-8 text-center text-xl font-bold">{headerText}</div>
                 {shouldShowCITestLogin && <CITestLoginForm redirectOnLogin={redirect_on_login} />}
                 <div className="flex flex-col gap-2">
@@ -54,7 +54,7 @@ export async function AuthPageCard({
                 <EmailLoginForm redirectOnLogin={redirect_on_login} submitLabel={emailSubmitLabel} />
                 <div className="mt-4 text-center text-sm text-gray-900">
                     {belowFormText}{" "}
-                    <Link href={belowFormLinkHref} className="fern-link">
+                    <Link href={belowFormLinkHref} className="fern-link" prefetch>
                         {belowFormLinkText}
                     </Link>
                 </div>

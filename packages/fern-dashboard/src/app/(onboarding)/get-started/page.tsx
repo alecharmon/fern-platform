@@ -15,7 +15,7 @@ export default async function GetStartedCardSlot() {
     return (
         <>
             <SlideLeftTransition>
-                <div className="flex w-full flex-col max-w-[500px]">
+                <div className="flex w-full flex-col max-w-[500px] px-5 lg:px-8">
                     <h1 className="text-2xl font-bold">Where do you want to start?</h1>
                     <div className="flex gap-4 mt-8">
                         <ProductCard variant="docs" />
