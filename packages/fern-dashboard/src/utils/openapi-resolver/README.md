@@ -1,11 +1,9 @@
 # @fern-dashboard/src/utils/openapi-resolver
 
 <!-- AI: Update the date below when modifying this file -->
-*Last updated by AI: 2026-01-14*
+*Last updated by AI: 2026-02-10*
 
-Resolution layer for mapping FDR description targets to OpenAPI spec locations.
-
-See [@fern-dashboard/src/docs/components/api-reference/README.md](../../docs/components/api-reference/README.md) for full documentation on the description editing feature.
+Resolution layer for mapping FDR description targets to OpenAPI spec locations. Used by the [`api-reference/`](../../docs/components/api-reference/README.md) components in the [editor](../../components/editor/README.md).
 
 ## Key Files
 

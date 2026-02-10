@@ -1,156 +1,61 @@
-# CLAUDE.md
+# fern-platform
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This monorepo contains Fern's documentation platform and related services. It uses pnpm workspaces and Turbo for monorepo orchestration.
 
-## Repository Overview
-
-This is the Fern Platform monorepo containing Fern's documentation platform and related services. It uses pnpm workspaces and Turbo for monorepo orchestration.
-
-**Main directories:**
+**Key directories:**
 - `packages/` - Shared libraries and UI components
-  - `fern-docs/bundle` - Next.js docs UI application
-  - `fern-dashboard/` - Next.js dashboard UI application
+  - [`fern-docs/bundle/`](packages/fern-docs/bundle/README.md) - Next.js docs UI application for rendering documentation sites
+  - [`fern-docs/components/`](packages/fern-docs/components/README.md) - Shared code used by docs and dashboard
+  - [`fern-dashboard/`](packages/fern-dashboard/README.md) - Next.js dashboard UI application including org management, docs site configuration, [WYSIWYG editor](packages/fern-dashboard/src/components/editor/README.md), and more
   - `commons/` - Shared utilities (docs-auth, docs-loader, docs-server, etc.)
   - `fdr-sdk/`, `fai-sdk/` - Generated SDK packages
 - `servers/` - Backend services
-  - `fdr/` - Fern Definition Registry (Node.js/Express with Prisma)
-  - `fai/` - Fern AI service (Python/FastAPI with Poetry)
+  - [`fdr/`](servers/fdr/README.md) - Fern Definition Registry (Node.js/Express with Prisma)
+  - [`fai/`](servers/fai/README.md) - Fern AI service (Python/FastAPI with Poetry)
   - `fai-discord/` - Discord bot for FAI (Python)
-  - `fern-bot/` - GitHub bot service
-  - `self-hosted/` - Self-hosted deployment utilities
-- `fern/` - Fern API definitions and documentation
+  - [`fern-bot/`](servers/fern-bot/README.md) - GitHub bot service
+  - [`self-hosted/`](servers/self-hosted/README.md) - Self-hosted deployment utilities
+- `fern/` - Fern API definitions and (internal) documentation
 - `scripts/` - Build and deployment scripts
 
 ## Development Commands
 
-### Installation
 ```bash
 pnpm install
-```
 
-### Building and Compiling
-```bash
-pnpm compile           # Compile TypeScript packages
-pnpm build             # Build all packages (runs compile + codegen)
-pnpm turbo compile     # Use turbo to compile with caching
-pnpm codegen           # Run codegen (Prisma, etc.)
-```
+pnpm compile          # Compile TypeScript packages
+pnpm codegen          # Run codegen (Prisma, etc.)
 
-### Linting and Formatting
-```bash
-pnpm lint              # Run all linters (biome + style)
-pnpm lint:biome        # Run Biome linter
-pnpm lint:style        # Run stylelint for SCSS
-pnpm lint:fix          # Auto-fix linting issues
+pnpm lint             # Run all linters (biome + eslint + style + format check)
+pnpm format           # Format code with Biome
 
-pnpm format            # Format code with Biome
-pnpm format:check      # Check formatting
-pnpm format:yaml:fix   # Format YAML files with Prettier
-```
-
-### Testing
-```bash
-pnpm test              # Run all tests (Vitest)
-pnpm test:update       # Run tests and update snapshots
+pnpm test             # Run all tests (Vitest)
+pnpm test:update      # Run tests and update snapshots
 
 # Run tests for specific service
 pnpm --filter=@fern-platform/fdr test
 pnpm --filter=@fern-platform/fdr test:local  # FDR tests against local DB
 ```
 
-To run a single test file:
-```bash
-# Navigate to the package directory or use --filter
-pnpm --filter=<package-name> vitest <path-to-test-file>
-```
-
-### Fern API Definitions
-```bash
-pnpm fern check                    # Validate Fern API definitions
-pnpm fern generate --api fdr       # Generate FDR SDK
-pnpm fern generate --api fai       # Generate FAI SDK
-```
-
-Note: Fern commands are prefixed with `pnpm` since Fern is a workspace dependency.
-
-## Service-Specific Commands
+See [README.md](README.md) for complete monorepo setup and commands.
 
 ### Docs UI (Next.js)
-```bash
-# Development
-pnpm docs:dev                      # Run docs dev server (localhost:3000)
-pnpm turbo docs:dev                # Run with turbo
 
-# Building
-pnpm docs:build                    # Production build
-pnpm docs:local-bundle:build       # Build local bundle
-pnpm docs:local-bundle:deploy      # Deploy bundle to ~/.fern/app-preview-local/
-
-# Using local bundle with Fern CLI
-fern docs dev --bundle-path ~/.fern/app-preview-local/.next
-
-# Self-hosted builds
-pnpm docs:self-hosted-bundle:build
-pnpm docs:self-served-bundle:build
-```
-
-**Setup:** First-time setup requires linking with Vercel:
-```bash
-npm install -g vercel
-vercel link --project prod.ferndocs.com
-vercel pull
-cp .vercel/.env.development.local packages/fern-docs/bundle/.env.local
-```
-
-Set `NEXT_PUBLIC_DOCS_DOMAIN` in `.env.local` to test with a specific domain.
+See [packages/fern-docs/bundle/README.md](packages/fern-docs/bundle/README.md) for setup and commands.
 
 ### Dashboard UI (Next.js)
-```bash
-# Development
-pnpm turbo --filter=@fern-dashboard/ui dashboard:dev
 
-# Setup
-cd packages/fern-dashboard
-vercel pull
-cp .vercel/.env.development.local .env.local
-```
+See [packages/fern-dashboard/README.md](packages/fern-dashboard/README.md) for setup and commands.
 
 ### FDR Server (Node.js/Express)
-```bash
-# Development
-cd servers/fdr
-pnpm dev                           # Run with tsx watch mode
 
-# Database migrations
-pnpm db:migrate:local              # Run migrations locally
-pnpm db:migrate:dev                # Run migrations on dev
-pnpm db:migrate:prod               # Run migrations on prod
-
-# Testing
-pnpm test                          # Unit tests
-pnpm test:local                    # Integration tests with local DB
-```
+See [servers/fdr/README.md](servers/fdr/README.md) for setup and commands.
 
 ### FAI Server (Python/FastAPI)
-```bash
-cd servers/fai
 
-# Install dependencies
-curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
-poetry install
+See [servers/fai/README.md](servers/fai/README.md) for setup and commands.
 
-# Development
-pnpm fai:dev                       # Run local FAI server (from root)
-
-# Linting and formatting
-make code-cleanup                  # Run ruff formatter/linter
-poetry run mypy .                  # Type checking
-
-# Testing
-poetry run pytest -sv
-```
-
-## Architecture
+## Key Services
 
 ### FDR (Fern Definition Registry)
 - **Purpose**: Backend API for storing and retrieving API definitions and documentation
@@ -167,20 +72,6 @@ FDR is deployed to ECS. PRs merged to main with FDR changes auto-deploy to dev. 
 - **Location**: `servers/fai/`
 - **API**: Defined in `fern/apis/fai/`
 - **SDK**: Generated at `packages/fai-sdk/`
-
-### Docs Platform
-- **Purpose**: Next.js application for rendering documentation sites
-- **Stack**: Next.js 15, React 19, TypeScript
-- **Location**: `packages/fern-docs/bundle/`
-- **Components**: `packages/fern-docs/components/`
-- **Search**: `packages/fern-docs/search-server/` (Algolia, Ask Fern)
-
-The docs platform communicates with FDR to fetch documentation definitions and renders them dynamically.
-
-### Dashboard
-- **Purpose**: Internal dashboard for managing Fern projects
-- **Stack**: Next.js 15, React 19, TypeScript, Prisma
-- **Location**: `packages/fern-dashboard/`
 
 ## Deployment and Releases
 
@@ -337,12 +228,12 @@ describe('My New Endpoint', () => {
 ```typescript
 // packages/fern-docs/bundle/src/__test__/my-feature.test.ts
 import { describe, it, expect } from 'vitest';
-import { renderMdx } from '../mdx/bundler/serialize';
+import { serializeMdx } from '../mdx/bundler/serialize';
 
 describe('My Docs Feature', () => {
   it('should render custom component correctly', async () => {
     const mdx = '# Test\n<CustomComponent prop="value" />';
-    const result = await renderMdx(mdx);
+    const result = await serializeMdx(mdx);
     expect(result).toContain('expected-output');
   });
 });
@@ -392,6 +283,13 @@ Before committing, always:
 4. Test locally with a docs site or use local bundle
 5. Run tests: `pnpm --filter=@fern-docs/bundle test`
 
+### Making changes to dashboard/editor
+1. Work in `packages/fern-dashboard/src/` (see [Dashboard README](packages/fern-dashboard/README.md))
+2. For editor changes, see [Editor README](packages/fern-dashboard/src/components/editor/README.md) for architecture and RSC serialization details
+3. Run dev server: `pnpm dashboard:dev`
+4. **Add test fixtures** for new components or rendering logic
+5. Run tests: `pnpm --filter=@fern-dashboard/ui test`
+
 ### Adding a new dependency
 ```bash
 # To workspace root
@@ -411,6 +309,7 @@ This monorepo uses Turborepo for build caching. Key tasks defined in `turbo.json
 - `compile` - Compiles TypeScript
 - `test` - Depends on `compile`
 - `docs:dev`, `docs:build` - Special tasks for docs platform
+- `dashboard:dev` - Dashboard platform
 
 ## Branch Strategy
 

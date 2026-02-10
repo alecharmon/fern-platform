@@ -1,57 +1,29 @@
-# Set up
+# @fern-dashboard/ui
+
+<!-- AI: Update the date below when modifying this file -->
+*Last updated by AI: 2026-02-10*
+
+Next.js application for Fern's Dashboard – org management, docs site configuration, [WYSIWYG editor](src/components/editor/README.md), and more.
+
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for setup instructions.
+
+## Development Commands
 
 ```bash
-pnpm install
-npm install -g vercel
-
-cd packages/fern-dashboard
-
-# to dev against dev environment
-vercel link # link to fern-dashboard-dev
-vercel env pull .env.local
-pnpm turbo --filter=@fern-dashboard/ui dashboard:dev
-
-# to dev against prodenvironment
-vercel link # link to fern-dashboard
-vercel env pull .env.local
-pnpm turbo --filter=@fern-dashboard/ui dashboard:dev
+pnpm dashboard:dev
 ```
 
-## Debugging
+<details>
+<summary>Debugging</summary>
 
-To debug the dashboard with Node.js inspector:
+Run `pnpm dashboard:dev:inspect` to start with the Node.js inspector on port 9229. Attach to it from any Node.js debugger (e.g. VS Code's "Attach to Node Process" command).
 
-```bash
-# From repo root
-pnpm dashboard:dev:inspect
+**Note:** VS Code breakpoints (clicking in the gutter) may appear as unbound (grey/hollow) due to source map limitations with rspack. Instead, use `debugger` statements instead.
 
-# Or from this directory
-pnpm dashboard:dev:inspect
-```
+</details>
 
-This starts the dev server with the Node.js debugger listening on port 9229.
-
-### Attaching VS Code
-
-1. Start the dashboard with `pnpm dashboard:dev:inspect`
-2. Wait for the server to be ready (you should see "Debugger listening on ws://127.0.0.1:9229/...")
-3. In VS Code, open the Debug panel and select "Next.js: attach to server"
-4. Press F5 to attach
-
-### Setting Breakpoints
-
-**Note:** VS Code breakpoints (clicking in the gutter) may appear as unbound (grey/hollow) due to source map limitations with rspack. Instead, use `debugger` statements directly in your code:
-
-```typescript
-function myFunction() {
-  debugger; // Execution will pause here when debugger is attached
-  // ... rest of your code
-}
-```
-
-The `debugger` statement will pause execution when the Node.js inspector is attached.
-
-## Local Tracing with Jaeger
+<details>
+<summary>Local Tracing with Jaeger</summary>
 
 To view OpenTelemetry traces locally:
 
@@ -70,12 +42,19 @@ pnpm turbo --filter=@fern-dashboard/ui dashboard:dev
 
 The dashboard uses `traceExporter: "auto"` which automatically detects and uses the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable when set. In production (on Vercel), traces go to Vercel's OTEL collector.
 
-## Components library
+</details>
 
-We're using [shadcn](https://ui.shadcn.com/) for our components. To add a
-component, go to the shadcn component page and run the `Installation` command:
+## Code Sharing with Docs Bundle
 
-````
-pnpm dlx shadcn@latest add <component>
-```
-````
+The dashboard and the docs site (`@fern-docs/bundle`) are separate Next.js apps that share code at several levels:
+
+| Code | Dashboard | Docs Bundle | Notes |
+|---|---|---|---|
+| [`@fern-docs/components`](../fern-docs/components/README.md) | ✓ | ✓ | Shared UI primitives and utilities |
+| `@fern-docs/mdx` | ✓ | ✓ | MDX processing |
+| `@fern-docs/search-ui` | ✓ | ✓ | Search UI |
+| `@fern-docs/edge-config` | ✓ | ✓ | Edge config |
+| `@fern-api/fdr-sdk` | ✓ | ✓ | FDR SDK |
+| [`components/navigation`](../fern-docs/components/README.md#navigation-module) | ✓ | — | Editor-only state management (`NavigationStore`) – defined in `@fern-docs/components` but only the dashboard imports it |
+| [Docs rendering](src/docs/README.md) | fork | source | Dashboard forks a subset of bundle rendering code for usage as Client Components |
+| [API ref type definitions](../fern-docs/components/README.md#parallel-implementation-pattern) | parallel impl | parallel impl | Both apps implement their own versions |

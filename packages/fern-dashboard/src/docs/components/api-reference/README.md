@@ -1,7 +1,7 @@
 # @fern-dashboard/src/docs/components/api-reference
 
 <!-- AI: Update the date below when modifying this file -->
-*Last updated by AI: 2026-01-14*
+*Last updated by AI: 2026-02-06*
 
 Editor components for rendering OpenAPI specs, editing descriptions, and writing changes to an OpenAPI spec overrides file.
 
@@ -113,17 +113,17 @@ Both YAML and JSON formats are fully supported:
 |------|---------|
 | `src/providers/OpenApiSpecsContext.tsx` | Specs data, pending changes, resolver, edit state, save flow |
 | [`src/utils/openapi-resolver/`](../../../utils/openapi-resolver/README.md) | Resolution layer (resolver, types, ref-utils, yaml-utils) |
-| `src/components/editor/EditorProvidersWrapper.tsx` | Server component that fetches specs via GitHubLoader |
-| `src/components/editor/DescriptionEditButton.tsx` | Edit button that appears on hover |
-| `src/components/editor/MouseFollowingTooltip.tsx` | Tooltip that follows cursor for non-editable descriptions |
-| `src/components/editor/DescriptionEditModal.tsx` | Modal for editing descriptions |
-| `src/components/editor/CommitButton.tsx` | Commits pending changes to GitHub |
+| [`src/components/editor/`](../../../components/editor/README.md) `EditorProvidersWrapper.tsx` | Server component that fetches specs via GitHubLoader |
+| [`src/components/editor/`](../../../components/editor/README.md) `DescriptionEditButton.tsx` | Edit button that appears on hover |
+| [`src/components/editor/`](../../../components/editor/README.md) `MouseFollowingTooltip.tsx` | Tooltip that follows cursor for non-editable descriptions |
+| [`src/components/editor/`](../../../components/editor/README.md) `DescriptionEditModal.tsx` | Modal for editing descriptions |
+| [`src/components/editor/git/`](../../../components/editor/README.md) `CommitButton.tsx` | Commits pending changes to GitHub |
 | `src/app/services/github/github-loader.ts` | `getApiSpecs()` fetches specs from GitHub |
-| `@fern-docs/components` `NavigationStore.ts` | Stores `openApiPendingChanges` map, persisted to IndexedDB |
+| [`@fern-docs/components`](../../../../../fern-docs/components/README.md) `NavigationStore.ts` | Stores `openApiPendingChanges` map, persisted to IndexedDB |
 
 ## Editable Description Types
 
-The `DescriptionTarget` discriminated union in `types.ts` defines all editable locations:
+The `DescriptionTarget` discriminated union in `types.ts` defines all description target locations. The union also includes non-editable types (`websocket`, `webhook`, `grpc`) used for rendering read-only descriptions. The editable targets are:
 
 - **endpoint** - Operation description
 - **schema** - Component schema description

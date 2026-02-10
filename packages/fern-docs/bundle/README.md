@@ -1,21 +1,11 @@
-# CLAUDE.md - Fern Docs Bundle Package
+# @fern-docs/bundle
 
-## Overview
-The main Next.js application that powers Fern's documentation platform. This is the core docs rendering engine that serves customer documentation sites.
+Next.js application that renders Fern Docs sites.
 
-## Purpose
-Renders beautiful, interactive API documentation websites from Fern definitions, supporting multiple documentation formats, search, and AI-powered features.
+## Setup
 
-## Tech Stack
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS, CSS Modules
-- **Search**: Algolia, Ask Fern AI
-- **MDX**: For markdown content with React components
+First-time setup requires linking with Vercel:
 
-## Development
-
-### Setup
 ```bash
 npm install -g vercel
 vercel link --project prod.ferndocs.com
@@ -23,26 +13,39 @@ vercel pull
 cp .vercel/.env.development.local packages/fern-docs/bundle/.env.local
 ```
 
-### Commands
+Set `NEXT_PUBLIC_DOCS_DOMAIN` in `.env.local` to test with a specific domain.
+
+See [CONTRIBUTING.md](../../../CONTRIBUTING.md) for more details.
+
+## Development Commands
+
+### Development Server
+
 ```bash
-# Development
-pnpm docs:dev                      # Run dev server (localhost:3000)
-pnpm turbo docs:dev                # Run with turbo
-
-# Building
-pnpm docs:build                    # Production build
-pnpm docs:local-bundle:build       # Build local bundle
-pnpm docs:local-bundle:deploy      # Deploy to ~/.fern/app-preview-local/
-
-# Self-hosted
-pnpm docs:self-hosted-bundle:build
-pnpm docs:self-served-bundle:build
+pnpm docs:dev          # Run docs dev server (localhost:3000)
+pnpm turbo docs:dev    # Run with turbo
 ```
 
-### Testing with Fern CLI
+### Building
+
 ```bash
-# Use local bundle with Fern CLI
+pnpm docs:build                    # Production build
+pnpm docs:local-bundle:build       # Build local bundle
+pnpm docs:local-bundle:deploy      # Deploy bundle to ~/.fern/app-preview-local/
+```
+
+### Local Bundle
+
+To use the Fern CLI with a local bundle:
+
+```bash
 fern docs dev --bundle-path ~/.fern/app-preview-local/.next
+```
+
+### Self-Hosted Builds
+
+```bash
+pnpm docs:self-hosted-bundle:build
 ```
 
 ## Key Features
@@ -70,14 +73,12 @@ packages/fern-docs/bundle/
 └── next.config.js      # Next.js configuration
 ```
 
-## Architecture Notes
-- Server-side rendering for SEO
-- Edge functions for auth and routing
-- Fetches docs from FDR at build/runtime
-- Supports multiple deployment targets (Vercel, self-hosted)
-- Uses ISR (Incremental Static Regeneration)
+## Related Packages
+
+This app shares UI primitives and utilities with the [dashboard](../../fern-dashboard/README.md) via [`@fern-docs/components`](../components/README.md).
 
 ## Environment Variables
+
 Key variables in `.env.local`:
 - `NEXT_PUBLIC_DOCS_DOMAIN`: Domain for testing
 - `NEXT_PUBLIC_FDR_ORIGIN`: FDR API endpoint
@@ -90,10 +91,3 @@ Key variables in `.env.local`:
 - **Preview**: Automatic preview deployments for PRs
 - **Staging**: Available at `*.docs.staging.buildwithfern.com`
 - **Self-hosted**: Can be deployed as Docker container
-
-## Related Packages
-- `@fern-docs/components`: Shared UI components
-- `@fern-docs/mdx`: MDX processing
-- `@fern-platform/fdr-sdk`: API registry client
-- `@fern-platform/fai-sdk`: AI features
-- `@fern-platform/snippets`: Code examples

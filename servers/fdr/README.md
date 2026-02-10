@@ -2,9 +2,7 @@
 
 This repo contains the backend code for the Fern Definition Registry (FDR) as well as the packages/SDKs associated with it. This project is a TypeScript monorepo that uses [pnpm](https://pnpm.io/) workspaces with [Turbo](https://turbo.build) as the build system. The interface of the FDR API is defined in Fern. The application that serves the API is `fdr`, which runs on AWS ([ECS](https://aws.amazon.com/ecs/)) in a Dockerized format.
 
-## Getting Started
-
-### Pre-requisites
+## Setup
 
 - Make sure Node.js 18+ and pnpm are installed on your machine
 - Make sure you have fern-api installed: `npm install -g fern-api`
@@ -19,55 +17,20 @@ fern generate
 This will install the dependencies for all workspaces, and generate the SDKs required by
 the FDR app.
 
-### Directory Structure
-
-The primary directories that you should be familiar with when working on this project are:
-
-- `/apps`: Contains applications (deployables) where each application is a workspace.
-- `/fern`: Contains the Fern Definition (API spec) and SDK generators for FDR.
-- `/packages`: Contains packages that are used by apps and possibly other packages.
-
-### Scripts
-
-The root-level scripts run with Turbo are cached to speed up subsequent executions. By default, Turbo executes a given script
-in each workspace wherein it has been defined. The `--filter` flag can be used to run a script in a specific workspace.
-
-#### `build`
-
-Builds all apps and packages.
+## Development Commands
 
 ```bash
-pnpm build
-```
+# Development
+pnpm dev                           # Run with tsx watch mode
 
-To build specifically the `fdr` app run.
+# Database migrations
+pnpm db:migrate:local              # Run migrations locally
+pnpm db:migrate:dev                # Run migrations on dev
+pnpm db:migrate:prod               # Run migrations on prod
 
-```bash
-pnpm build:fdr
-```
-
-#### `lint`
-
-Lints all workspaces.
-
-```bash
-pnpm lint
-```
-
-#### `format`
-
-Runs format check in each workspace.
-
-```bash
-pnpm format
-```
-
-#### `test`
-
-Runs test in each workspace.
-
-```bash
-pnpm test
+# Testing
+pnpm test                          # Unit tests
+pnpm test:local                    # Integration tests with local DB
 ```
 
 ### Environment Variables
