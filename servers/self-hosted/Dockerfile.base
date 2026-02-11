@@ -168,7 +168,7 @@ RUN log "Verifying Buf CLI installation..." && \
 # ----------- End Buf CLI setup -----------
 
 RUN log "Installing jq and yq..." && \
-    apk add --no-cache jq yq 2>&1 | add-timestamps
+    apk add --no-cache jq 'yq>=4.52.2-r1' 2>&1 | add-timestamps
 
 # ----------- Start esbuild setup -----------
 # Install esbuild globally with --ignore-scripts to avoid ETXTBSY race condition
