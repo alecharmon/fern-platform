@@ -1295,6 +1295,9 @@ importers:
       '@fern-api/fdr-sdk':
         specifier: workspace:*
         version: link:../fdr-sdk
+      '@fern-api/postman-fern-integration-service-client':
+        specifier: 0.0.6
+        version: 0.0.6
       '@fern-api/site-to-docs':
         specifier: workspace:*
         version: link:../site-to-docs
@@ -6477,6 +6480,10 @@ packages:
 
   '@fern-api/php-dynamic-snippets@0.0.6':
     resolution: {integrity: sha512-3GH72Aej6lc6AvUms0eSyXUcde/VIi3jJMnjRukEB35HD63p8uAhv5B7oR0wjZn6fc0Zjr59JSxMsCnBYZFXxg==}
+
+  '@fern-api/postman-fern-integration-service-client@0.0.6':
+    resolution: {integrity: sha512-uA+Mjp0f6KBdgPHUAB6hvKpNYvw2EgjZQyDEvzh/ONE+gmE+XXYWWtS02EBsJGEa1eLJZVe0t78uIhrDcNuZRg==}
+    engines: {node: '>=18.0.0'}
 
   '@fern-api/python-dynamic-snippets@0.0.6':
     resolution: {integrity: sha512-CIO/WYd9++EcIH3qckXdG6f9RDhFAOJLDRCtOOczqVNl+zwD4Ef1iR2KZbCD5Ayl5lgyey7Vgqnpe87QuQdrhQ==}
@@ -26968,6 +26975,8 @@ snapshots:
       - supports-color
 
   '@fern-api/php-dynamic-snippets@0.0.6': {}
+
+  '@fern-api/postman-fern-integration-service-client@0.0.6': {}
 
   '@fern-api/python-dynamic-snippets@0.0.6': {}
 

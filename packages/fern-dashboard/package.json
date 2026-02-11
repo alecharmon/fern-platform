@@ -46,6 +46,7 @@
     "@fern-api/fai-sdk": "workspace:*",
     "@fern-api/fdr-lambda-sdk": "workspace:*",
     "@fern-api/fdr-sdk": "workspace:*",
+    "@fern-api/postman-fern-integration-service-client": "0.0.6",
     "@fern-api/site-to-docs": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-api/user-permissions": "workspace:*",
