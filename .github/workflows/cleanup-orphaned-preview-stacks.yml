@@ -1,4 +1,4 @@
-name: Cleanup Orphaned Preview Stacks
+name: Cleanup Orphaned Preview Resources
 
 on:
   schedule:
@@ -392,4 +392,101 @@ jobs:
           echo "Stacks failed: $FAILED_COUNT"
           if [ "$FAILED_COUNT" -gt 0 ]; then
             echo "WARNING: $FAILED_COUNT stack deletion(s) failed. These will be retried on the next scheduled run."
+          fi
+
+  cleanup_k8s_pr_previews:
+    runs-on: ubuntu-latest
+    environment: Fern Dev
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      EKS_CLUSTER_NAME: ${{ vars.EKS_SMOKE_TEST_CLUSTER_NAME || 'self-hosted' }}
+      AWS_REGION: ${{ vars.EKS_SMOKE_TEST_AWS_REGION || 'us-east-1' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: us-east-1
+          role-duration-seconds: 5400
+
+      - name: Verify AWS Connection
+        run: aws sts get-caller-identity
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ env.EKS_CLUSTER_NAME }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Find and cleanup orphaned k8s PR preview namespaces
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          echo "=== Cleaning up orphaned k8s PR preview namespaces ==="
+          echo "Dry run mode: $DRY_RUN"
+
+          # Get all self-hosted-pr-* namespaces
+          echo "Fetching k8s namespaces..."
+          NAMESPACES=$(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep '^self-hosted-pr-' || true)
+
+          if [ -z "$NAMESPACES" ]; then
+            echo "No self-hosted PR preview namespaces found."
+            exit 0
+          fi
+
+          echo "Found preview namespaces:"
+          echo "$NAMESPACES"
+
+          # Get list of open PRs
+          echo ""
+          echo "Fetching open PRs..."
+          OPEN_PRS=$(gh pr list --repo fern-api/fern-platform --state open --json number --jq '.[].number')
+          echo "Open PRs: $OPEN_PRS"
+
+          ORPHANED_NAMESPACES=""
+          ORPHANED_COUNT=0
+          CLEANED_COUNT=0
+          FAILED_COUNT=0
+
+          for NS in $NAMESPACES; do
+            PR_NUMBER=$(echo "$NS" | sed 's/self-hosted-pr-//')
+
+            if echo "$OPEN_PRS" | grep -q "^${PR_NUMBER}$"; then
+              echo "Namespace $NS: PR #$PR_NUMBER is still open, skipping."
+              continue
+            fi
+
+            echo "Namespace $NS: PR #$PR_NUMBER is closed/merged, marking for cleanup."
+            ORPHANED_NAMESPACES="$ORPHANED_NAMESPACES $NS"
+            ORPHANED_COUNT=$((ORPHANED_COUNT + 1))
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would delete namespace: $NS"
+            else
+              echo "Deleting namespace: $NS"
+              if kubectl delete namespace "$NS" --timeout=120s 2>/dev/null; then
+                echo "  Namespace $NS deleted successfully."
+                CLEANED_COUNT=$((CLEANED_COUNT + 1))
+              else
+                echo "  WARNING: Failed to delete namespace $NS, it may be cleaned up eventually."
+                FAILED_COUNT=$((FAILED_COUNT + 1))
+              fi
+            fi
+          done
+
+          echo ""
+          echo "=== k8s Namespace Cleanup Summary ==="
+          echo "Orphaned namespaces found: $ORPHANED_COUNT"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Namespaces that would be deleted: $ORPHANED_COUNT"
+          else
+            echo "Namespaces deleted: $CLEANED_COUNT"
+            echo "Namespaces failed: $FAILED_COUNT"
+            if [ "$FAILED_COUNT" -gt 0 ]; then
+              echo "WARNING: $FAILED_COUNT namespace deletion(s) failed. These will be retried on the next scheduled run."
+            fi
           fi
