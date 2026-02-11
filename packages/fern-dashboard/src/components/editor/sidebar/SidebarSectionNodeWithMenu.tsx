@@ -5,7 +5,7 @@ import { useNavigation } from "@fern-docs/components/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { File, GripVertical, MoreVertical, Pencil } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { CreatePageButtonHandle } from "@/app/[orgName]/(visual-editor)/editor/[docsUrl]/[branch]/[...slug]/@sidebar/CreatePageButton";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { RenameDialog } from "./RenameDialog";
@@ -27,22 +27,6 @@ export function SidebarSectionNodeWithMenu({
     const [showRenameDialog, setShowRenameDialog] = useState(false);
     const [_showDeleteDialog, _setShowDeleteDialog] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [buttonTop, setButtonTop] = useState<number | null>(null);
-    const [isHovered, setIsHovered] = useState(false);
-
-    // biome-ignore lint/correctness/useExhaustiveDependencies: only run when title or isHovered changes
-    useLayoutEffect(() => {
-        if (containerRef.current) {
-            const expandIndicator = containerRef.current.querySelector(".expand-indicator");
-            if (expandIndicator) {
-                const containerRect = containerRef.current.getBoundingClientRect();
-                const indicatorRect = expandIndicator.getBoundingClientRect();
-                const relativeTop = indicatorRect.top - containerRect.top + indicatorRect.height / 2;
-                setButtonTop(relativeTop);
-            }
-        }
-    }, [node.title, isHovered]);
 
     const handleRenameConfirm = (newTitle: string) => {
         try {
@@ -57,31 +41,28 @@ export function SidebarSectionNodeWithMenu({
 
     return (
         <>
-            <div
-                ref={containerRef}
-                className="group sidebar-section-node-with-menu relative"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-            >
+            <div className="group sidebar-section-node-with-menu relative">
                 {children}
 
                 {/* Drag handle — positioned to the left of the heading.
-                    Uses group-hover so it stays visible when the cursor moves from
-                    the heading to the handle (both are inside the same group). */}
+                    Uses inset-y-0 + flex items-center so it vertically centers regardless of
+                    customer CSS on the sidebar link. group-hover keeps it visible when the
+                    cursor moves from the heading to the handle. */}
                 {!isEditingDisabled && (
                     <div
-                        className="absolute left-0 top-1/2 z-10 -translate-x-full -translate-y-1/2 cursor-grab rounded-md px-0.5 py-1 opacity-0 transition-opacity duration-150 hover:bg-gray-500/40 group-hover:opacity-100 active:cursor-grabbing"
+                        className="absolute inset-y-0 -left-1 z-10 flex -translate-x-full items-center opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                         aria-label="Drag to reorder"
                     >
-                        <GripVertical className="size-3.5 text-muted-foreground" />
+                        <div className="cursor-grab rounded-md px-0.5 py-1 hover:bg-gray-500/40 active:cursor-grabbing">
+                            <GripVertical className="size-3.5 text-muted-foreground" />
+                        </div>
                     </div>
                 )}
 
                 <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenu.Trigger asChild>
                         <button
-                            className="absolute right-[5px] -translate-y-1/2 cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover:opacity-100 data-[state=open]:opacity-100 disabled:cursor-default disabled:group-hover:opacity-50 disabled:hover:bg-transparent"
-                            style={{ top: buttonTop != null ? `${buttonTop}px` : "50%" }}
+                            className="absolute inset-y-0 right-[5px] flex cursor-pointer items-center text-gray-1000 opacity-0 transition-opacity duration-200 group-hover:opacity-100 data-[state=open]:opacity-100 disabled:cursor-default disabled:group-hover:opacity-50"
                             title="Section options"
                             aria-label="Section options"
                             disabled={isEditingDisabled}
@@ -90,7 +71,9 @@ export function SidebarSectionNodeWithMenu({
                             // component when used inside SidebarCollapseGroup).
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <MoreVertical className="size-4" />
+                            <div className="rounded-md p-1 hover:bg-gray-300">
+                                <MoreVertical className="size-4" />
+                            </div>
                         </button>
                     </DropdownMenu.Trigger>
 

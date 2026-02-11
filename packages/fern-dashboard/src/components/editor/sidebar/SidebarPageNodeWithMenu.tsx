@@ -135,12 +135,14 @@ export function SidebarPageNodeWithMenu({ node, children }: SidebarPageNodeWithM
                 <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenu.Trigger asChild>
                         <button
-                            className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover/page-menu:opacity-100 data-[state=open]:opacity-100 disabled:cursor-default disabled:group-hover/page-menu:opacity-50 disabled:hover:bg-transparent"
+                            className="absolute inset-y-0 right-2 flex cursor-pointer items-center text-gray-1000 opacity-0 transition-opacity duration-200 group-hover/page-menu:opacity-100 data-[state=open]:opacity-100 disabled:cursor-default disabled:group-hover/page-menu:opacity-50"
                             title="Page options"
                             aria-label="Page options"
                             disabled={isEditingDisabled}
                         >
-                            <MoreVertical className="size-4" />
+                            <div className="rounded-md p-1 hover:bg-gray-300">
+                                <MoreVertical className="size-4" />
+                            </div>
                         </button>
                     </DropdownMenu.Trigger>
 
@@ -179,7 +181,7 @@ export function SidebarPageNodeWithMenu({ node, children }: SidebarPageNodeWithM
                 </DropdownMenu.Root>
 
                 <Popover.Root open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-                    <Popover.Anchor className="absolute right-2 top-1/2" />
+                    <Popover.Anchor className="absolute inset-y-0 right-2 flex items-center" />
                     <Popover.Portal>
                         <Popover.Content
                             className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-56 rounded-lg border border-gray-500 bg-white p-3 shadow-lg"

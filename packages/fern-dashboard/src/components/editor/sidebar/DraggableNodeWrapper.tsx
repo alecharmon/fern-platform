@@ -63,8 +63,8 @@ export function DraggableNodeWrapper({ node, nodeType, children }: DraggableNode
         isDescendantOf(rootNode, draggedNode.nodeId, node.id);
 
     // Check if the drop indicator should show relative to this node
-    const showDropBefore = dropTarget?.nodeId === node.id && dropTarget.position === "before";
-    const showDropAfter = dropTarget?.nodeId === node.id && dropTarget.position === "after";
+    const showDropBefore = dropTarget != null && dropTarget.nodeId === node.id && dropTarget.position === "before";
+    const showDropAfter = dropTarget != null && dropTarget.nodeId === node.id && dropTarget.position === "after";
 
     const handleDragStart = useCallback(
         (e: React.DragEvent<HTMLDivElement>) => {
@@ -196,10 +196,12 @@ export function DraggableNodeWrapper({ node, nodeType, children }: DraggableNode
             {/* Drag handle */}
             {isDraggable && (
                 <div
-                    className="absolute left-0 top-1/2 z-10 -translate-x-full -translate-y-1/2 cursor-grab rounded-md px-0.5 py-1 opacity-0 transition-opacity duration-150 hover:bg-gray-500/40 group-hover/draggable:opacity-100 active:cursor-grabbing"
+                    className="absolute inset-y-0 -left-1 z-10 flex -translate-x-full items-center opacity-0 transition-opacity duration-150 group-hover/draggable:opacity-100"
                     aria-label="Drag to reorder"
                 >
-                    <GripVertical className="size-3.5 text-muted-foreground" />
+                    <div className="cursor-grab rounded-md px-0.5 py-1 hover:bg-gray-500/40 active:cursor-grabbing">
+                        <GripVertical className="size-3.5 text-muted-foreground" />
+                    </div>
                 </div>
             )}
 
@@ -265,8 +267,8 @@ export function SectionDropZone({ node, children }: SectionDropZoneProps): React
     const isBeingDragged = draggedNode?.nodeId === node.id;
 
     // ---- Drop indicator state ----
-    const showDropBefore = dropTarget?.nodeId === node.id && dropTarget.position === "before";
-    const showDropAfter = dropTarget?.nodeId === node.id && dropTarget.position === "after";
+    const showDropBefore = dropTarget != null && dropTarget.nodeId === node.id && dropTarget.position === "before";
+    const showDropAfter = dropTarget != null && dropTarget.nodeId === node.id && dropTarget.position === "after";
     const showDropInside = dropTarget?.nodeId === node.id && dropTarget.position === "inside";
 
     // ---- Drag source handlers (section heading) ----
