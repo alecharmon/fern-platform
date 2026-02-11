@@ -11,4 +11,10 @@ import type * as FdrLambda from "../../../../../../../../index.js";
 export interface LoadDocsForUrlRequest {
     url: FdrLambda.Url;
     excludeApis?: boolean;
+    /**
+     * When provided, resolves docs for the specific (domain, basepath) pair
+     * instead of using domain-only lookup. Used for basepath-aware docs sites
+     * where multiple doc sites share a single custom domain.
+     */
+    basepath?: string;
 }

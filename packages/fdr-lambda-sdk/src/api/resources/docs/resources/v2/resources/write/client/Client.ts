@@ -21,7 +21,7 @@ export class WriteClient {
     }
 
     /**
-     * Delete a docs site and all associated data including S3 assets
+     * Delete a preview docs site. Only preview sites can be deleted through this endpoint.
      *
      * @param {FdrLambda.docs.v2.write.DeleteDocsSiteRequest} request
      * @param {WriteClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -87,6 +87,7 @@ export class WriteClient {
             switch ((_response.error.body as FdrLambda.docs.v2.write.deleteDocsSite.Error)?.error) {
                 case "DocsNotFoundError":
                 case "UnauthorizedError":
+                case "CannotDeleteNonPreviewSiteError":
                     return {
                         data: {
                             ok: false,

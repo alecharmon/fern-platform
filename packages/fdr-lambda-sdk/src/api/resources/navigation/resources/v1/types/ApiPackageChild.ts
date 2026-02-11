@@ -9,5 +9,6 @@ export type ApiPackageChild =
     | FdrLambda.navigation.v1.WebSocketNode
     | FdrLambda.navigation.v1.WebhookNode
     | FdrLambda.navigation.v1.GrpcNode
+    | FdrLambda.navigation.v1.GraphQlNode
     | FdrLambda.navigation.v1.PageNode
     | FdrLambda.navigation.v1.LinkNode;

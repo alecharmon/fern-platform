@@ -5,4 +5,6 @@ import type * as FdrLambda from "../../../../../../../index.js";
 export interface MapType {
     keyShape: FdrLambda.api.latest.TypeShape;
     valueShape: FdrLambda.api.latest.TypeShape;
+    minProperties: number | undefined;
+    maxProperties: number | undefined;
 }

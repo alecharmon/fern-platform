@@ -14,7 +14,8 @@ export type PrimitiveType =
     | FdrLambda.api.v1.read.PrimitiveType.Date_
     | FdrLambda.api.v1.read.PrimitiveType.BigInteger
     | FdrLambda.api.v1.read.PrimitiveType.Uint
-    | FdrLambda.api.v1.read.PrimitiveType.Uint64;
+    | FdrLambda.api.v1.read.PrimitiveType.Uint64
+    | FdrLambda.api.v1.read.PrimitiveType.Scalar;
 
 export namespace PrimitiveType {
     export interface Integer extends FdrLambda.api.v1.read.IntegerType {
@@ -57,11 +58,15 @@ export namespace PrimitiveType {
         type: "bigInteger";
     }
 
-    export interface Uint {
+    export interface Uint extends FdrLambda.api.v1.read.UintType {
         type: "uint";
     }
 
-    export interface Uint64 {
+    export interface Uint64 extends FdrLambda.api.v1.read.Uint64Type {
         type: "uint64";
+    }
+
+    export interface Scalar extends FdrLambda.api.v1.read.ScalarType {
+        type: "scalar";
     }
 }

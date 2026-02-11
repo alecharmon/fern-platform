@@ -9,4 +9,5 @@ export interface DocsThemeConfig {
     footerNav: FdrLambda.docs.v1.commons.FooterNavConfig | undefined;
     "page-actions": FdrLambda.docs.v1.commons.DocsPageActionsConfig | undefined;
     "language-switcher": FdrLambda.docs.v1.commons.LanguageSwitcherConfig | undefined;
+    "product-switcher": FdrLambda.docs.v1.commons.ProductSwitcherConfig | undefined;
 }

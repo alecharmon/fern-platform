@@ -4,7 +4,8 @@ import type * as FdrLambda from "../../../../../../../../../index.js";
 
 export type WebhookPayloadShape =
     | FdrLambda.api.v1.read.WebhookPayloadShape.Object_
-    | FdrLambda.api.v1.read.WebhookPayloadShape.Reference;
+    | FdrLambda.api.v1.read.WebhookPayloadShape.Reference
+    | FdrLambda.api.v1.read.WebhookPayloadShape.FormData;
 
 export namespace WebhookPayloadShape {
     export interface Object_ extends FdrLambda.api.v1.read.ObjectType {
@@ -14,5 +15,9 @@ export namespace WebhookPayloadShape {
     export interface Reference {
         type: "reference";
         value: FdrLambda.api.v1.read.TypeReference;
+    }
+
+    export interface FormData extends FdrLambda.api.v1.read.FormDataRequest {
+        type: "formData";
     }
 }

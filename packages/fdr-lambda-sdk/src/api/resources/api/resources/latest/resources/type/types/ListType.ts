@@ -4,4 +4,6 @@ import type * as FdrLambda from "../../../../../../../index.js";
 
 export interface ListType {
     itemShape: FdrLambda.api.latest.TypeShape;
+    minItems: number | undefined;
+    maxItems: number | undefined;
 }

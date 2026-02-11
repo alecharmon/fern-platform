@@ -2,7 +2,7 @@
 
 import type * as FdrLambda from "../../../../../../../../../index.js";
 
-export interface WebhookDefinition extends FdrLambda.api.v1.WithDescription {
+export interface WebhookDefinition extends FdrLambda.api.v1.WithDescription, FdrLambda.api.v1.WithAvailability {
     urlSlug: string;
     migratedFromUrlSlugs: string[] | undefined;
     method: FdrLambda.api.v1.WebhookHttpMethod;

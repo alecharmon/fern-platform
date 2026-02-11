@@ -4,6 +4,8 @@ export * as commons from "./commons/index.js";
 export * from "./commons/types/index.js";
 export * as endpoint from "./endpoint/index.js";
 export * from "./endpoint/types/index.js";
+export * as graphql from "./graphql/index.js";
+export * from "./graphql/types/index.js";
 export * as type_ from "./type/index.js";
 export * from "./type/types/index.js";
 export * as webhook from "./webhook/index.js";

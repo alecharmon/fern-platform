@@ -8,6 +8,7 @@ export interface ApiDefinition {
     endpoints: Record<FdrLambda.EndpointId, FdrLambda.api.latest.EndpointDefinition>;
     websockets: Record<FdrLambda.WebSocketId, FdrLambda.api.latest.WebSocketChannel>;
     webhooks: Record<FdrLambda.WebhookId, FdrLambda.api.latest.WebhookDefinition>;
+    graphqlOperations: Record<FdrLambda.GraphQlOperationId, FdrLambda.api.latest.GraphQlOperation>;
     types: Record<FdrLambda.TypeId, FdrLambda.api.latest.TypeDefinition>;
     subpackages: Record<FdrLambda.api.latest.SubpackageId, FdrLambda.api.latest.SubpackageMetadata>;
     auths: Record<FdrLambda.AuthSchemeId, FdrLambda.api.latest.AuthScheme>;

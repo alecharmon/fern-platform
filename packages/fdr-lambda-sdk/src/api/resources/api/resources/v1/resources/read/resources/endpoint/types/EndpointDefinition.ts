@@ -18,6 +18,7 @@ export interface EndpointDefinition extends FdrLambda.api.v1.WithDescription, Fd
     path: FdrLambda.api.v1.read.EndpointPath;
     queryParameters: FdrLambda.api.v1.read.QueryParameter[];
     headers: FdrLambda.api.v1.read.Header[];
+    responseHeaders: FdrLambda.api.v1.read.Header[] | undefined;
     request: FdrLambda.api.v1.read.HttpRequest | undefined;
     requestsV2: FdrLambda.api.v1.read.HttpRequestsV2 | undefined;
     response: FdrLambda.api.v1.read.HttpResponse | undefined;

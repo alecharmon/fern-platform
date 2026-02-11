@@ -36,9 +36,7 @@ export class ReadClient {
     ): core.HttpResponsePromise<
         core.APIResponse<FdrLambda.api.latest.ApiDefinition, FdrLambda.api.v1.read.getApiDefinitionFull.Error>
     > {
-        return core.HttpResponsePromise.fromPromise(
-            this.__getApiDefinitionFull(apiDefinitionId, requestOptions),
-        );
+        return core.HttpResponsePromise.fromPromise(this.__getApiDefinitionFull(apiDefinitionId, requestOptions));
     }
 
     private async __getApiDefinitionFull(

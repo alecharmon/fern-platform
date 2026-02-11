@@ -5,4 +5,5 @@ import type * as FdrLambda from "../../../../../../../index.js";
 export interface Environment {
     id: FdrLambda.EnvironmentId;
     baseUrl: string;
+    audiences: string[] | undefined;
 }

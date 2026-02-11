@@ -11,4 +11,16 @@ export interface ThemeConfig {
     sidebarBackground: FdrLambda.docs.v1.commons.RgbaColor | undefined;
     headerBackground: FdrLambda.docs.v1.commons.RgbaColor | undefined;
     cardBackground: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent1: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent2: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent3: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent4: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent5: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent6: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent7: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent8: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent9: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent10: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent11: FdrLambda.docs.v1.commons.RgbaColor | undefined;
+    accent12: FdrLambda.docs.v1.commons.RgbaColor | undefined;
 }

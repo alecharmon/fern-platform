@@ -6,6 +6,12 @@ export interface DocsDefinition {
     pages: Record<FdrLambda.PageId, FdrLambda.docs.v1.read.PageContent>;
     apis: Record<FdrLambda.ApiDefinitionId, FdrLambda.api.v1.read.ApiDefinition>;
     apisV2: Record<FdrLambda.ApiDefinitionId, FdrLambda.api.latest.ApiDefinition>;
+    /**
+     * A mapping from API name to API definition ID.
+     * Used for lazy-loading API definitions when apis/apisV2 are empty (excludeApis: true).
+     * The key is the human-readable API name and the value is the API definition UUID.
+     */
+    apiNameToId: Record<string, FdrLambda.ApiDefinitionId> | undefined;
     files: Record<FdrLambda.FileId, FdrLambda.Url>;
     filesV2: Record<FdrLambda.FileId, FdrLambda.docs.v1.read.File_>;
     /**

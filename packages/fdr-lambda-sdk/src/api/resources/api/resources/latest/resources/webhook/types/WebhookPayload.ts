@@ -3,5 +3,5 @@
 import type * as FdrLambda from "../../../../../../../index.js";
 
 export interface WebhookPayload extends FdrLambda.api.latest.WithDescription {
-    shape: FdrLambda.api.latest.TypeShape;
+    shape: FdrLambda.api.latest.WebhookPayloadShape;
 }

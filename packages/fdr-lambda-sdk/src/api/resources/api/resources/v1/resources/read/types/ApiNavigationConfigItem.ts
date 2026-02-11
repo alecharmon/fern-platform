@@ -6,7 +6,8 @@ export type ApiNavigationConfigItem =
     | FdrLambda.api.v1.read.ApiNavigationConfigItem.Subpackage
     | FdrLambda.api.v1.read.ApiNavigationConfigItem.EndpointId
     | FdrLambda.api.v1.read.ApiNavigationConfigItem.WebsocketId
-    | FdrLambda.api.v1.read.ApiNavigationConfigItem.WebhookId;
+    | FdrLambda.api.v1.read.ApiNavigationConfigItem.WebhookId
+    | FdrLambda.api.v1.read.ApiNavigationConfigItem.GraphqlOperationId;
 
 export namespace ApiNavigationConfigItem {
     export interface Subpackage extends FdrLambda.api.v1.read.ApiNavigationConfigSubpackage {
@@ -26,5 +27,10 @@ export namespace ApiNavigationConfigItem {
     export interface WebhookId {
         type: "webhookId";
         value: FdrLambda.WebhookId;
+    }
+
+    export interface GraphqlOperationId {
+        type: "graphqlOperationId";
+        value: FdrLambda.GraphQlOperationId;
     }
 }

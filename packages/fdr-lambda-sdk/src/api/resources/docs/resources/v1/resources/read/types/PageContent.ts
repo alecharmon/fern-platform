@@ -5,5 +5,6 @@ import type * as FdrLambda from "../../../../../../../index.js";
 export interface PageContent {
     markdown: string;
     editThisPageUrl: FdrLambda.Url | undefined;
+    editThisPageLaunch: FdrLambda.docs.v1.commons.EditThisPageLaunch | undefined;
     rawMarkdown: string | undefined;
 }

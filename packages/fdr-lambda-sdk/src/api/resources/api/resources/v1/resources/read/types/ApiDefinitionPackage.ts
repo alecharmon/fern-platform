@@ -6,6 +6,7 @@ export interface ApiDefinitionPackage {
     endpoints: FdrLambda.api.v1.read.EndpointDefinition[];
     websockets: FdrLambda.api.v1.read.WebSocketChannel[];
     webhooks: FdrLambda.api.v1.read.WebhookDefinition[];
+    graphqlOperations: FdrLambda.api.v1.read.GraphQlOperation[];
     types: FdrLambda.TypeId[];
     subpackages: FdrLambda.api.v1.SubpackageId[];
     /**
