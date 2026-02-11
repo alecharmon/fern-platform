@@ -24,6 +24,7 @@ export type OpenApiResolverFailureReason =
     | "unsupported-ref" // Circular ref or complex ref pattern
     | "composition-type" // allOf/oneOf/anyOf (complex merge semantics)
     | "unsupported-protocol" // WebSocket channels, Webhooks (not standard OpenAPI operations)
+    | "security-scheme-not-supported" // Security scheme (auth) descriptions not yet editable
     | "editing-not-available"; // No target provided or editing context unavailable
 
 /** Result of resolving where to write a description edit, with override handling. */
@@ -50,7 +51,8 @@ export type DescriptionTarget =
     | ResponseDescriptionTarget
     | ResponsePropertyDescriptionTarget
     | EnumValueDescriptionTarget
-    | FormDataFieldDescriptionTarget;
+    | FormDataFieldDescriptionTarget
+    | SecuritySchemeDescriptionTarget;
 
 export interface EndpointDescriptionTarget {
     type: "endpoint";
@@ -154,6 +156,16 @@ export interface FormDataFieldDescriptionTarget {
     path: string;
     fieldKey: string;
     fieldType: "file" | "files" | "property";
+}
+
+/**
+ * Target for security scheme (auth) descriptions.
+ * Note: Security scheme editing is not yet supported; returns "security-scheme-not-supported" reason.
+ */
+export interface SecuritySchemeDescriptionTarget {
+    type: "securityScheme";
+    /** Name of the security scheme (e.g., "bearerAuth", "apiKeyAuth") */
+    schemeName?: string;
 }
 
 /** Parsed OpenAPI spec structure (subset of fields we need). */

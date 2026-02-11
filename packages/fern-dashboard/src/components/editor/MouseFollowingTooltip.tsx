@@ -79,7 +79,7 @@ export function MouseFollowingTooltip({ reason, children, delay = 150, offset = 
             {isVisible &&
                 createPortal(
                     <div
-                        className="pointer-events-none fixed z-50 max-w-xs rounded-md border-none bg-[#252529] p-2 text-center text-sm leading-normal text-white shadow-lg"
+                        className="pointer-events-none fixed z-50 rounded-md border-none bg-[#252529] p-2 text-center text-sm leading-normal text-white shadow-lg"
                         style={{
                             left: position.x,
                             top: position.y

@@ -70,11 +70,11 @@ export function EnumValue({ enumValue, lang = "en" }: { enumValue: ApiDefinition
     const descriptionContent = liveDescription ? (
         // Has description: editable gets edit button, non-editable gets mouse-following tooltip
         isEditable ? (
-            <div className="group/desc relative inline pr-5">
+            <div className="group/desc inline-flex items-start gap-1">
                 <MdxContent mdx={liveDescription} size="xs" />
-                <span className="absolute -right-1 top-1/2 -translate-y-1/2 inline-flex opacity-0 transition-opacity group-hover/desc:opacity-100">
+                <div className="inline-flex shrink-0 opacity-0 transition-opacity group-hover/desc:opacity-100">
                     <DescriptionEditButton target={enumTarget} currentValue={liveDescription ?? ""} />
-                </span>
+                </div>
             </div>
         ) : (
             <MouseFollowingTooltip reason={reason}>

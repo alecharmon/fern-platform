@@ -458,6 +458,10 @@ export function OpenApiSpecsProvider({
             if (target.type === "grpc") {
                 return { location: null, reason: "non-openapi-format" };
             }
+            // Security scheme (auth) targets are not yet editable
+            if (target.type === "securityScheme") {
+                return { location: null, reason: "security-scheme-not-supported" };
+            }
             return resolver
                 ? resolver.resolve(target)
                 : {

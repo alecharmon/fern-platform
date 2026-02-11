@@ -87,9 +87,9 @@ function EditableEndpointDescription({ endpoint }: { endpoint: EndpointContext["
     // Has description: editable gets edit button, non-editable gets mouse-following tooltip
     if (isEditable) {
         return (
-            <div className="group/desc relative pr-8">
-                <MdxContent mdx={liveDescription} />
-                <div className="absolute -right-1 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/desc:opacity-100">
+            <div className="group/desc flex items-start gap-1">
+                <MdxContent mdx={liveDescription} className="min-w-0 flex-1" />
+                <div className="shrink-0 opacity-0 transition-opacity group-hover/desc:opacity-100">
                     <DescriptionEditButton target={target} currentValue={liveDescription ?? ""} />
                 </div>
             </div>

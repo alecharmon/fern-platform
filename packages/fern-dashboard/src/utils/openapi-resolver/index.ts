@@ -15,6 +15,7 @@ export type {
     PropertyDescriptionTarget,
     RequestBodyDescriptionTarget,
     ResponseDescriptionTarget,
-    SchemaDescriptionTarget
+    SchemaDescriptionTarget,
+    SecuritySchemeDescriptionTarget
 } from "./types";
 export { createParameterOverrideContent, updateYamlValue, type YamlUpdateResult } from "./yaml-utils";

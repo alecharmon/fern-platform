@@ -11,6 +11,8 @@ export function getEditDisabledMessage(reason?: OpenApiResolverFailureReason): s
             return "This field uses a complex reference pattern that cannot be resolved";
         case "unsupported-protocol":
             return "WebSocket and Webhook descriptions are not yet editable";
+        case "security-scheme-not-supported":
+            return "Authentication descriptions are not yet editable";
         case "not-found":
             return "This field could not be found in the OpenAPI specification";
         case "editing-not-available":

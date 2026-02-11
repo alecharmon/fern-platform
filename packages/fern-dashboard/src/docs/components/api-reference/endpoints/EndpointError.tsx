@@ -83,14 +83,14 @@ export function EndpointError({
             // Has content: editable gets edit button, non-editable gets mouse-following tooltip
             if (isEditable && errorTarget) {
                 return (
-                    <div className="group/desc relative pr-6">
+                    <div className="group/desc flex items-start gap-1">
                         <MdxContent
                             mdx={liveDescription}
                             fallback={fallbackDescription}
                             size="sm"
-                            className="text-(color:--grayscale-a11)"
+                            className="min-w-0 flex-1 text-(color:--grayscale-a11)"
                         />
-                        <div className="absolute -right-1 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/desc:opacity-100">
+                        <div className="shrink-0 opacity-0 transition-opacity group-hover/desc:opacity-100">
                             <DescriptionEditButton target={errorTarget} currentValue={liveDescription ?? ""} />
                         </div>
                     </div>

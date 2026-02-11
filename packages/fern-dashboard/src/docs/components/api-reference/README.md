@@ -37,6 +37,7 @@ Non-editable descriptions show a mouse-following tooltip on hover explaining why
 |-------------|-------|-----------------|
 | `unsupported-protocol` | WebSocket channels or Webhooks | Hover on description in WebSocket/Webhook page |
 | `non-openapi-format` | AsyncAPI, OpenRPC, gRPC, or Fern Definition | Hover on description in gRPC page |
+| `security-scheme-not-supported` | Authentication/security scheme descriptions | Hover on description in Auth section |
 | `composition-type` | allOf/oneOf/anyOf composition | Hover on property using allOf/oneOf/anyOf |
 | `unsupported-ref` | Circular refs or complex patterns | Hover on property with unresolvable `$ref` |
 | `not-found` | Element doesn't exist in any spec | Hover on description not found in specs |

@@ -36,10 +36,67 @@ import { MouseFollowingTooltip } from "@/components/editor/MouseFollowingTooltip
 import { MdxContent } from "@/docs/mdx/components/MdxContent";
 import { useApiEditTarget } from "@/providers/ApiEditTargetContext";
 import { type DescriptionTarget, useDescriptionEditability, useLiveDescription } from "@/providers/OpenApiSpecsContext";
-import { ObjectProperty, PropertyRenderer, PropertyWithShape } from "../type-definitions/ObjectProperty";
+import {
+    ObjectProperty,
+    PropertyRenderer,
+    type PropertyRendererProps,
+    PropertyWithShape
+} from "../type-definitions/ObjectProperty";
 import { TypeDefinitionRequest } from "../type-definitions/TypeDefinitionContext";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 import { EndpointErrorGroup } from "./EndpointErrorGroup";
+
+/**
+ * PropertyRenderer wrapper for auth/security scheme sections.
+ * Auth descriptions are not yet editable, so this shows a tooltip explaining that.
+ *
+ * Follows the same pattern as EditableWebSocketDescription and EditableWebhookDescription.
+ */
+function AuthPropertyRenderer({ name, description, availability, typeShorthand }: PropertyRendererProps) {
+    const apiEditTarget = useApiEditTarget();
+
+    // Build security scheme description target (only if we're in an endpoint context)
+    const target = useMemo((): DescriptionTarget | null => {
+        // Auth sections appear within endpoints, so verify we have an endpoint target
+        if (!apiEditTarget || apiEditTarget.type !== "endpoint") {
+            return null;
+        }
+        return {
+            type: "securityScheme",
+            schemeName: name
+        };
+    }, [apiEditTarget, name]);
+
+    const { reason } = useDescriptionEditability(target);
+
+    // If no edit target context, just render without tooltip
+    if (!target) {
+        return (
+            <PropertyRenderer
+                name={name}
+                description={description}
+                availability={availability}
+                typeShorthand={typeShorthand}
+            />
+        );
+    }
+
+    // With target, wrap description in mouse-following tooltip to show edit-disabled message
+    return (
+        <PropertyRenderer
+            name={name}
+            description={undefined} // We'll handle description separately with tooltip
+            availability={availability}
+            typeShorthand={typeShorthand}
+        >
+            {description && (
+                <MouseFollowingTooltip reason={reason}>
+                    <MdxContent mdx={description} size="sm" className="text-(color:--grayscale-a11)" />
+                </MouseFollowingTooltip>
+            )}
+        </PropertyRenderer>
+    );
+}
 
 /** Shared endpoint info for description targets */
 type EndpointInfo = { operationId?: string; method: string; path: string };
@@ -117,9 +174,9 @@ function EditableFormDataFieldDescription({
     // Has description: editable gets edit button, non-editable gets mouse-following tooltip
     if (isEditable) {
         return (
-            <div className="group/desc relative pr-6">
-                <MdxContent mdx={liveDescription} size="sm" className="text-(color:--grayscale-a11)" />
-                <div className="absolute -right-1 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/desc:opacity-100">
+            <div className="group/desc flex items-start gap-1">
+                <MdxContent mdx={liveDescription} size="sm" className="min-w-0 flex-1 text-(color:--grayscale-a11)" />
+                <div className="shrink-0 opacity-0 transition-opacity group-hover/desc:opacity-100">
                     <DescriptionEditButton target={target} currentValue={liveDescription} />
                 </div>
             </div>
@@ -252,14 +309,14 @@ function EditableDescription({
     // Has description: editable gets edit button, non-editable gets mouse-following tooltip
     if (isEditable) {
         return (
-            <div className="group/desc relative overflow-visible pr-6">
+            <div className="group/desc flex items-start gap-1">
                 <MdxContent
                     mdx={liveDescription}
                     fallback={fallback}
                     size={size}
-                    className="text-(color:--grayscale-a11)"
+                    className="min-w-0 flex-1 text-(color:--grayscale-a11)"
                 />
-                <div className="absolute -right-1 top-1/2 z-10 -translate-y-1/2 opacity-0 transition-opacity group-hover/desc:opacity-100">
+                <div className="z-10 shrink-0 opacity-0 transition-opacity group-hover/desc:opacity-100">
                     <DescriptionEditButton target={target} currentValue={liveDescription ?? ""} />
                 </div>
             </div>
@@ -332,7 +389,7 @@ export function EndpointContentLeft({
                                 auths={auths}
                                 lang={lang}
                                 className="fern-endpoint-section-auth"
-                                PropertyRenderer={PropertyRenderer}
+                                PropertyRenderer={AuthPropertyRenderer}
                             />
                         </TypeDefinitionAnchorPart>
                     )}
