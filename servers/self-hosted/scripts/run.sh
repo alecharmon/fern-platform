@@ -686,14 +686,14 @@ else
     # Cache proxy configuration
     # CACHE_MAX_ENTRIES: Maximum number of pages to cache (default: 1000)
     # CACHE_MAX_ENTRY_SIZE: Maximum size per cached entry in bytes (default: 5MB)
-    # CACHE_DEFAULT_TTL: Default cache TTL in seconds (default: 3600 = 1 hour)
+    # CACHE_DEFAULT_TTL: Default cache TTL in seconds (default: 2592000 = 30 days)
     # CACHE_PROXY_DEBUG: Set to "1" for verbose logging
     CACHE_PROXY_PORT=${CACHE_PROXY_PORT} \
     NEXTJS_PORT=${NEXTJS_INTERNAL_PORT} \
     NEXTJS_HOST="127.0.0.1" \
     CACHE_MAX_ENTRIES="${CACHE_MAX_ENTRIES:-1000}" \
     CACHE_MAX_ENTRY_SIZE="${CACHE_MAX_ENTRY_SIZE:-5242880}" \
-    CACHE_DEFAULT_TTL="${CACHE_DEFAULT_TTL:-3600}" \
+    CACHE_DEFAULT_TTL="${CACHE_DEFAULT_TTL:-2592000}" \
     CACHE_PROXY_DEBUG="${CACHE_PROXY_DEBUG:-0}" \
     node /scripts/cache-proxy.js 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
     cache_proxy_pid=$!
