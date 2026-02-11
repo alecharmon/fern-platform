@@ -9,8 +9,8 @@ test.describe("Authentication", () => {
         // 1. Navigate to login page
         await page.goto(`${env.dashboardUrl}/login`);
 
-        // 2. Verify 'Log in to Fern' heading is visible
-        await expect(page.locator("text=Log in to Fern")).toBeVisible();
+        // 2. Verify 'Welcome back to Fern' heading is visible
+        await expect(page.locator("text=Welcome back to Fern")).toBeVisible();
 
         // 3. Verify Google login button is present
         await expect(page.getByRole("link", { name: /Continue with Google/i })).toBeVisible();
@@ -20,7 +20,7 @@ test.describe("Authentication", () => {
 
         // 5. Verify Email login form is visible
         await expect(page.getByPlaceholder("Enter email address")).toBeVisible();
-        await expect(page.getByRole("button", { name: /Continue/i, exact: false })).toBeVisible();
+        await expect(page.getByRole("button", { name: /Log in/i, exact: false })).toBeVisible();
 
         // 6. Verify 'Documentation' link in top-right corner is present
         await expect(page.getByRole("link", { name: /Documentation/i })).toBeVisible();

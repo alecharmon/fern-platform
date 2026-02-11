@@ -5,7 +5,12 @@ import { expect, test } from "../../../fixtures/auth.fixture";
 import { env } from "../../../utils/env";
 
 test.describe("Authentication", () => {
-    test("Redirect to Dashboard When Already Authenticated", async ({ homePage: adminPage }) => {
+    test("Redirect to Dashboard When Already Authenticated", async ({ homePage: adminPage, browserName }) => {
+        test.skip(
+            browserName === "firefox",
+            "Firefox aborts navigation with NS_BINDING_ABORTED during fast auth redirect"
+        );
+
         // 1. Login as admin user using CI credentials (already done via adminPage fixture)
         // 2. Verify dashboard is displayed
         await expect(adminPage).toHaveURL(/.*\//);

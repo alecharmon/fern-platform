@@ -2,6 +2,11 @@ name: Playwright E2E Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      dashboard_url:
+        description: "Vercel preview URL for fern-dashboard (e.g. https://fern-dashboard-xxx-buildwithfern.vercel.app)"
+        required: true
+        type: string
   deployment_status:
 
 jobs:
@@ -35,13 +40,13 @@ jobs:
 
       - name: Print Preview URL
         run: |
-          echo "Preview URL: ${{ github.event.deployment_status.target_url || 'Not available (workflow_dispatch)' }}"
-          echo "Environment: ${{ github.event.deployment.environment || 'N/A' }}"
+          echo "Preview URL: ${{ inputs.dashboard_url || github.event.deployment_status.target_url || 'Not available' }}"
+          echo "Environment: ${{ github.event.deployment.environment || 'workflow_dispatch' }}"
 
       - name: Run E2E Tests
         run: pnpm test:e2e
         env:
-          DASHBOARD_URL: ${{ github.event.deployment_status.target_url || '' }}
+          DASHBOARD_URL: ${{ inputs.dashboard_url || github.event.deployment_status.target_url || '' }}
           FERN_CI_AUTOMATED_TESTING: ${{ secrets.FERN_CI_AUTOMATED_TESTING }}
 
       - name: Upload Playwright Report

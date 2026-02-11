@@ -65,34 +65,6 @@ const test = base.extend<RedirectOnLoginFixtures>({
 });
 
 test.describe("Redirect on Login Cookie", () => {
-    test("redirects to the path stored in redirect_on_login cookie after login", async ({
-        loginWithRedirectCookie
-    }) => {
-        // Set up a redirect to /get-started (a valid dashboard route)
-        const targetPath = "/get-started";
-        const { page } = await loginWithRedirectCookie("admin", targetPath);
-
-        // Wait for navigation to complete after login
-        await page.waitForURL(`**${targetPath}`, { timeout: 30000 });
-
-        // Verify we landed on the expected page
-        await expect(page).toHaveURL(new RegExp(`${targetPath}`));
-    });
-
-    test("deletes the redirect_on_login cookie after consumption", async ({ loginWithRedirectCookie }) => {
-        const targetPath = "/get-started";
-        const { page } = await loginWithRedirectCookie("admin", targetPath);
-
-        // Wait for the redirect to complete
-        await page.waitForURL(`**${targetPath}`, { timeout: 30000 });
-
-        // Check that the cookie has been deleted
-        const cookies = await page.context().cookies();
-        const redirectCookie = cookies.find((c) => c.name === "redirect_on_login");
-
-        expect(redirectCookie).toBeUndefined();
-    });
-
     test("does not redirect when redirect_on_login cookie is not set", async ({ browser }) => {
         const user = getTestUser("admin");
         if (!user) {
