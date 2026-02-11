@@ -16,6 +16,7 @@ import { RemoveScroll } from "react-remove-scroll";
 
 import { cn } from "../cn";
 import { FERN_HEADER_ID, FERN_SIDEBAR_ID, FERN_SIDEBAR_OVERLAY_ID } from "../constants";
+import { usePortalContainer } from "../contexts/portal-container";
 import { useCurrentPathname } from "../hooks/use-current-pathname";
 import { useIsDismissableSidebarOpen } from "../state/mobile";
 
@@ -40,6 +41,7 @@ export function MobileMenu({
     isSidePanelOpen?: boolean;
 }) {
     const [open, setOpen] = useIsDismissableSidebarOpen();
+    const portalContainer = usePortalContainer();
 
     // Close the sidebar when the path changes
     const currentPath = useCurrentPathname();
@@ -215,7 +217,7 @@ export function MobileMenu({
                       ])
             }
         >
-            <Portal className="pointer-events-none fixed inset-0" {...props}>
+            <Portal className="pointer-events-none fixed inset-0" container={portalContainer} {...props}>
                 <AnimatePresence
                     mode="popLayout"
                     onExitComplete={() => {

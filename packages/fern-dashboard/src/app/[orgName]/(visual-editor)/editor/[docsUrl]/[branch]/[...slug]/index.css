@@ -38,10 +38,13 @@
     @apply text-(color:--grayscale-a12);
   }
 
-  .fern-background-image {
-    overflow: hidden;
-    position: absolute;
-    background-attachment: scroll;
+  #fern-header.fern-background-image {
+    background-size: 100% calc(var(--preview-container-height) + var(--header-height, var(--header-height-real)));
+    background-position: top;
+  }
+
+  #fern-toc {
+    @apply hidden;
   }
 
   .solid-hover-handle {

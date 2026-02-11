@@ -19,6 +19,7 @@ import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEd
 import { PreviewHeader } from "@/components/docs-preview/PreviewHeader";
 import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor";
 import { EditorStatusNotification } from "@/components/editor/EditorStatusNotification";
+import { PreviewContainerProvider } from "@/components/editor/PreviewContainerProvider";
 import { ResizablePanelsWrapper } from "@/components/editor/ResizablePanelsWrapper";
 import { UnsupportedApiFormatNotification } from "@/components/editor/UnsupportedApiFormatNotification";
 import { EditorRoutingProvider } from "@/providers/EditorRoutingContext";
@@ -119,7 +120,7 @@ export default async function VisualEditorPreviewLayout({
                                                 basePath
                                             }}
                                         >
-                                            <div id="preview-container">
+                                            <PreviewContainerProvider>
                                                 <EditorLinkInterceptor />
                                                 {/* Wrapper divs mirror document structure (html > body) for CSS scoping */}
                                                 <div data-fern-html="">
@@ -242,7 +243,7 @@ export default async function VisualEditorPreviewLayout({
                                                         </AbstractDefaultDocs>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </PreviewContainerProvider>
                                         </EditorRoutingProvider>
                                     </div>
                                 }
