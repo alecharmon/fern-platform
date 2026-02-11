@@ -4,7 +4,7 @@ import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DocsUrl } from "@/utils/types";
-
+import { AuthZWrapperServer } from "../auth/authz/AuthZWrapperServer";
 import { CustomDomainSection } from "./CustomDomainSection";
 import { DocsSiteAttribute } from "./DocsSiteAttribute";
 import { DocsSiteLink } from "./DocsSiteLink";
@@ -44,7 +44,7 @@ export async function DocsSiteOverviewCardContent({ docsUrl, orgName, urls }: Do
                         <DocsSiteLink key={`${url.domain}${url.path}`} docsSiteUrl={url} />
                     ))}
                 </div>
-                {customDomainContent}
+                <AuthZWrapperServer permission="super-user">{customDomainContent}</AuthZWrapperServer>
             </div>
             <div className="flex flex-wrap gap-x-10 gap-y-4">
                 <DocsSiteAttribute name="Source">{gitSourceContent}</DocsSiteAttribute>
