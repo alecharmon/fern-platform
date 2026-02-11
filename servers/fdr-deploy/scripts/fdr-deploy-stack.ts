@@ -254,8 +254,8 @@ export class FdrDeployStack extends Stack {
             // AWS Lambda max timeout is 15 minutes.
             timeout: Duration.minutes(15),
             // Lambda supports up to 10,240 MB memory; PDF generation can be memory-heavy.
-            memorySize: 8192,
-            // Playwright/Chromium can use /tmp; bump ephemeral storage for safety.
+            memorySize: 10_240,
+            // Playwright/Chromium/Ghostscript can use /tmp; bump ephemeral storage for safety.
             ephemeralStorageSize: Size.gibibytes(5),
             logGroup,
             environment: {

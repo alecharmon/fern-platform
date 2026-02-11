@@ -8,7 +8,9 @@ const EnvSchema = z.object({
 
     DOCS_PDF_MAX_RENDER_CONCURRENCY: z.coerce.number().int().positive().optional(),
     DOCS_PDF_RENDER_TIMEOUT_SECONDS: z.coerce.number().int().positive().optional(),
-    DOCS_PDF_MAX_RENDER_RETRIES: z.coerce.number().int().nonnegative().optional()
+    DOCS_PDF_MAX_RENDER_RETRIES: z.coerce.number().int().nonnegative().optional(),
+    DOCS_PDF_MAX_COMPRESSION_CONCURRENCY: z.coerce.number().int().positive().optional(),
+    DOCS_PDF_COMPRESSION_TIMEOUT_SECONDS: z.coerce.number().int().positive().optional()
 });
 
 export type ExporterLambdaEnv = z.infer<typeof EnvSchema>;

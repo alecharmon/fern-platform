@@ -5,7 +5,7 @@ export interface DocsPdfExporterConfig {
      * Maximum number of content pages to render concurrently during generation.
      * This bounds browser page creation and prevents thrashing on large sites.
      *
-     * @defaultValue 5
+     * @defaultValue 10
      */
     maxRenderConcurrency: number;
 
@@ -15,7 +15,7 @@ export interface DocsPdfExporterConfig {
      * Retries are useful for transient failures (timeouts, navigation flakiness,
      * Chromium hiccups). Total attempts = 1 + maxRenderRetries.
      *
-     * @defaultValue 2
+     * @defaultValue 4
      */
     maxRenderRetries: number;
 
@@ -38,6 +38,26 @@ export interface DocsPdfExporterConfig {
      * @defaultValue false
      */
     continueOnPageError: boolean;
+
+    /**
+     * Ghostscript-based PDF compression settings.
+     *
+     * When provided, each individual page PDF (cover, TOC, content) is post-processed
+     * through Ghostscript *before* merging.  This recompresses embedded images,
+     * consolidates fonts, and removes unused objects — targeting the biggest sources
+     * of PDF file-size bloat.
+     *
+     * Because compression runs on each page independently (before merge, TOC link
+     * rewriting, and header/footer stamping), annotations and cross-references
+     * added in later pipeline stages are never affected.
+     *
+     * Requires `gs` (Ghostscript) to be available on `$PATH`.
+     *
+     * Set to `undefined` to disable compression.
+     *
+     * @defaultValue undefined
+     */
+    compression: PdfCompressionConfig | undefined;
 
     /**
      * Logging verbosity.
@@ -66,6 +86,48 @@ export interface DocsPdfExporterConfig {
      * This should be the Fern admin token.
      */
     authToken?: string;
+}
+
+/**
+ * Configuration for Ghostscript-based PDF compression.
+ *
+ * All fields are optional and fall back to sensible defaults.
+ */
+export interface PdfCompressionConfig {
+    /**
+     * Quality presets for Ghostscript PDF compression, controlling image
+     * downsampling resolution and overall compression aggressiveness.
+     *
+     * - `"screen"`:   72 dpi images — smallest files, suitable for screen viewing only
+     * - `"ebook"`:    150 dpi images — good balance of quality and size
+     * - `"printer"`:  300 dpi images — high quality, suitable for printing
+     * - `"prepress"`: 300 dpi images — highest quality with full color
+     *
+     * @defaultValue "ebook"
+     */
+    quality: "screen" | "ebook" | "printer" | "prepress";
+
+    /**
+     * Maximum time in seconds to wait for Ghostscript to compress a single
+     * page PDF.  If exceeded, the uncompressed page PDF is used instead and
+     * a warning is logged.
+     *
+     * @defaultValue 30
+     */
+    timeoutSeconds: number;
+
+    /**
+     * Maximum number of Ghostscript processes that may run concurrently.
+     *
+     * Page rendering uses `maxRenderConcurrency` (e.g. 50) for fast Chromium
+     * rendering, but each Ghostscript subprocess consumes significant memory.
+     * This limit decouples compression concurrency from render concurrency so
+     * that render slots release their Chromium pages quickly while compression
+     * is rate-limited.
+     *
+     * @defaultValue 5
+     */
+    maxConcurrency: number;
 }
 
 export interface DocsPdfGenerateOptions {

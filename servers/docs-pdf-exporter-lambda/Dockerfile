@@ -16,8 +16,12 @@ ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV NODE_ENV=production
 
 # aws-lambda-ric builds a native binary and requires build tooling.
+# ghostscript: used for optional PDF compression (image recompression, font
+# consolidation) on individual page PDFs before merging.
+# Version pinned to Jammy's 9.55.0 series. Update the patch suffix when
+# Ubuntu publishes security updates (check: packages.ubuntu.com/jammy/ghostscript).
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends cmake build-essential autoconf automake libtool pkg-config \
+  && apt-get install -y --no-install-recommends cmake build-essential autoconf automake libtool pkg-config ghostscript=9.55.0~dfsg1-0ubuntu5.13 \
   && rm -rf /var/lib/apt/lists/*
 
 # Install runtime deps:

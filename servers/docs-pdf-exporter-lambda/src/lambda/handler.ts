@@ -44,12 +44,17 @@ async function getStartedExporter(): Promise<DocsPdfExporter> {
         const instance =
             exporter ??
             new DocsPdfExporter({
-                logLevel: "info",
+                logLevel: "debug",
                 logFormat: "json",
-                maxRenderConcurrency: env.DOCS_PDF_MAX_RENDER_CONCURRENCY ?? 50,
-                renderTimeoutSeconds: env.DOCS_PDF_RENDER_TIMEOUT_SECONDS ?? 120,
-                maxRenderRetries: env.DOCS_PDF_MAX_RENDER_RETRIES ?? 4,
+                maxRenderConcurrency: env.DOCS_PDF_MAX_RENDER_CONCURRENCY,
+                renderTimeoutSeconds: env.DOCS_PDF_RENDER_TIMEOUT_SECONDS,
+                maxRenderRetries: env.DOCS_PDF_MAX_RENDER_RETRIES,
                 continueOnPageError: true,
+                compression: {
+                    quality: "ebook",
+                    timeoutSeconds: env.DOCS_PDF_COMPRESSION_TIMEOUT_SECONDS,
+                    maxConcurrency: env.DOCS_PDF_MAX_COMPRESSION_CONCURRENCY
+                },
                 authToken: env.PDF_EXPORT_FERN_TOKEN
             });
 

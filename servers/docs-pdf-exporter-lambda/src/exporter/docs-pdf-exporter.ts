@@ -1,4 +1,9 @@
+import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { promisify } from "node:util";
 import {
     PRINT_CONTENT_PAGE_SELECTOR,
     PRINT_COVER_PAGE_SELECTOR,
@@ -36,8 +41,11 @@ import type {
     DocsPdfExporterConfig,
     DocsPdfGenerateOptions,
     DocsPdfGenerateResult,
-    PageRenderError
+    PageRenderError,
+    PdfCompressionConfig
 } from "./types";
+
+const execFileAsync = promisify(execFile);
 
 async function sleep(ms: number) {
     await new Promise((resolve) => setTimeout(resolve, ms));
@@ -80,13 +88,26 @@ interface ContentValidationOptions {
  * Default configuration for the generator.
  */
 const DEFAULT_DOCS_PDF_GENERATOR_CONFIG: DocsPdfExporterConfig = {
-    maxRenderConcurrency: 5,
+    maxRenderConcurrency: 10,
     renderTimeoutSeconds: 60,
-    maxRenderRetries: 2,
+    maxRenderRetries: 4,
     logLevel: "info",
     logFormat: "pretty",
-    continueOnPageError: false
+    continueOnPageError: false,
+    compression: undefined
 };
+
+const DEFAULT_COMPRESSION_CONFIG: PdfCompressionConfig = {
+    quality: "ebook",
+    timeoutSeconds: 30,
+    maxConcurrency: 5
+};
+
+type DeepPartial<T> = T extends object
+    ? {
+          [P in keyof T]?: DeepPartial<T[P]>;
+      }
+    : T;
 
 /**
  * In-memory representation of a rendered content page PDF plus its slug.
@@ -125,14 +146,33 @@ export class DocsPdfExporter {
     private readonly config: DocsPdfExporterConfig;
     private readonly logger: Logger;
     protected browser: Browser | null = null;
+    private readonly gsLimiter: ReturnType<typeof pLimit>;
 
     /**
      * Create a generator instance.
      * Call `start()` before using any generation methods.
      */
-    public constructor(config: Partial<DocsPdfExporterConfig> = {}) {
-        this.config = { ...DEFAULT_DOCS_PDF_GENERATOR_CONFIG, ...config };
+    public constructor(config: DeepPartial<DocsPdfExporterConfig> = {}) {
+        this.config = {
+            maxRenderConcurrency: config.maxRenderConcurrency ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.maxRenderConcurrency,
+            maxRenderRetries: config.maxRenderRetries ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.maxRenderRetries,
+            renderTimeoutSeconds: config.renderTimeoutSeconds ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.renderTimeoutSeconds,
+            continueOnPageError: config.continueOnPageError ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.continueOnPageError,
+            compression:
+                config.compression != null
+                    ? {
+                          quality: config.compression.quality ?? DEFAULT_COMPRESSION_CONFIG.quality,
+                          timeoutSeconds:
+                              config.compression.timeoutSeconds ?? DEFAULT_COMPRESSION_CONFIG.timeoutSeconds,
+                          maxConcurrency: config.compression.maxConcurrency ?? DEFAULT_COMPRESSION_CONFIG.maxConcurrency
+                      }
+                    : undefined,
+            logLevel: config.logLevel ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.logLevel,
+            logFormat: config.logFormat ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.logFormat,
+            authToken: config.authToken
+        };
         this.logger = withLogLevel(this.createLogger(), this.config.logLevel);
+        this.gsLimiter = pLimit(this.config.compression?.maxConcurrency ?? DEFAULT_COMPRESSION_CONFIG.maxConcurrency);
     }
 
     private createLogger() {
@@ -239,6 +279,106 @@ export class DocsPdfExporter {
         return null;
     }
 
+    /**
+     * Compress a single-page PDF via Ghostscript.
+     *
+     * This writes the PDF bytes to a temp file, invokes `gs` with the configured
+     * quality preset, reads the compressed output, and cleans up.  It is designed
+     * to run on *individual* page PDFs (cover, TOC, content) **before** they are
+     * merged, so that all post-merge operations (TOC link rewriting, header/footer
+     * stamping) are unaffected by Ghostscript's PDF re-creation.
+     *
+     * On any failure (gs not installed, timeout, unexpected error) the method
+     * logs a warning and returns the original bytes unchanged.  If Ghostscript's
+     * output is larger than the input (can happen for already-compact PDFs),
+     * the original is kept.
+     */
+    private async compressPdfWithGhostscript(pdfBytes: Buffer, runLogger: Logger): Promise<Buffer> {
+        const { compression } = this.config;
+        if (!compression) {
+            return pdfBytes;
+        }
+        return await this.gsLimiter(() => this.runGhostscript(pdfBytes, runLogger, compression));
+    }
+
+    private async runGhostscript(
+        pdfBytes: Buffer,
+        runLogger: Logger,
+        compression: PdfCompressionConfig
+    ): Promise<Buffer> {
+        const quality = compression.quality;
+        const timeoutMs = compression.timeoutSeconds * 1000;
+
+        const id = randomUUID();
+        const workDir = path.join(tmpdir(), "fern-pdf-gs");
+        const inputPath = path.join(workDir, `${id}.pdf`);
+        const outputPath = path.join(workDir, `${id}-out.pdf`);
+
+        try {
+            await mkdir(workDir, { recursive: true });
+            await writeFile(inputPath, pdfBytes);
+
+            await execFileAsync(
+                "gs",
+                [
+                    "-sDEVICE=pdfwrite",
+                    "-dCompatibilityLevel=1.5",
+                    `-dPDFSETTINGS=/${quality}`,
+                    "-dNOPAUSE",
+                    "-dBATCH",
+                    "-dQUIET",
+                    `-sOutputFile=${outputPath}`,
+                    inputPath
+                ],
+                { timeout: timeoutMs }
+            );
+
+            const compressedBytes = await readFile(outputPath);
+
+            const originalSize = pdfBytes.length;
+            const compressedSize = compressedBytes.length;
+            const reductionPercent = originalSize > 0 ? ((1 - compressedSize / originalSize) * 100).toFixed(1) : "0.0";
+
+            // Ghostscript can occasionally produce *larger* output for small or
+            // already-compact PDFs.  Only use the compressed version if it's smaller.
+            if (compressedSize < originalSize) {
+                runLogger.debug(
+                    {
+                        event: "docs_pdf.gs_compress.ok",
+                        originalBytes: originalSize,
+                        compressedBytes: compressedSize,
+                        reductionPercent
+                    },
+                    `Ghostscript: ${originalSize} → ${compressedSize} bytes (${reductionPercent}% reduction)`
+                );
+                return compressedBytes;
+            }
+
+            runLogger.debug(
+                {
+                    event: "docs_pdf.gs_compress.skip_larger",
+                    originalBytes: originalSize,
+                    compressedBytes: compressedSize
+                },
+                "Ghostscript output was not smaller; keeping original"
+            );
+            return pdfBytes;
+        } catch (e) {
+            runLogger.warn(
+                {
+                    event: "docs_pdf.gs_compress.failed",
+                    error: extractErrorMessage(e)
+                },
+                "Ghostscript compression failed; using uncompressed PDF"
+            );
+            return pdfBytes;
+        } finally {
+            // Clean up temp files
+            await rm(inputPath, { force: true }).catch(() => {});
+            await rm(outputPath, { force: true }).catch(() => {});
+        }
+    }
+
     private async withRetries<T>(
         runLogger: Logger,
         opts: {
@@ -324,6 +464,10 @@ export class DocsPdfExporter {
              * errors that don't cause HTTP failures but produce error UI.
              */
             contentValidation?: ContentValidationOptions;
+            /**
+             * Whether to post-process this page PDF through Ghostscript compression.
+             */
+            compress?: boolean;
         }
     ) {
         return await this.withRetries(
@@ -334,6 +478,8 @@ export class DocsPdfExporter {
                 const page = await browserContext.newPage();
                 await page.emulateMedia({ media: "print", colorScheme: "light" });
                 await this.setupPageAuth(page);
+
+                let rawBytes: Buffer;
                 try {
                     if (opts.initScript) {
                         await page.addInitScript(opts.initScript.fn, ...(opts.initScript.args ?? []));
@@ -367,15 +513,17 @@ export class DocsPdfExporter {
                         await this.validatePageContent(page, opts.contentValidation);
                     }
 
-                    const bytes = await page.pdf({
+                    rawBytes = await page.pdf({
                         printBackground: true,
                         preferCSSPageSize: true
                     });
-                    const pdf = await PDFDocument.load(bytes);
-                    return { pdf, bytesLength: bytes.length, durationMs: Date.now() - start };
                 } finally {
                     await page.close();
                 }
+
+                const bytes = opts.compress ? await this.compressPdfWithGhostscript(rawBytes, runLogger) : rawBytes;
+                const pdf = await PDFDocument.load(bytes);
+                return { pdf, bytesLength: bytes.length, durationMs: Date.now() - start };
             }
         );
     }
@@ -648,7 +796,7 @@ export class DocsPdfExporter {
         const start = Date.now();
         const pages = await this.fetchContentPageList(runLogger, baseUrl);
 
-        const limitFn = pLimit(this.config.maxRenderConcurrency);
+        const pageLimiter = pLimit(this.config.maxRenderConcurrency);
 
         runLogger.info(
             {
@@ -661,7 +809,7 @@ export class DocsPdfExporter {
 
         const rendered = await Promise.all(
             pages.map((pageInfo, orderIndex) =>
-                limitFn(async () => {
+                pageLimiter(async () => {
                     try {
                         const pageUrl = `${baseUrl}/${PRINT_PAGE_PATH_PREFIX}/${pageInfo.slug}`;
                         const { pdf, bytesLength, durationMs } = await this.renderUrlToPdfWithRetries(
@@ -679,7 +827,8 @@ export class DocsPdfExporter {
                                 contentValidation: {
                                     successSelector: PRINT_CONTENT_PAGE_SELECTOR,
                                     checkErrorPatterns: true
-                                }
+                                },
+                                compress: true
                             }
                         );
                         runLogger.debug(
