@@ -118,7 +118,9 @@ jobs:
             --push \
             -f Dockerfile.self_hosted \
             -t fernapi/fern-self-hosted-with-docs-basepath:$VERSION-amd64 \
+            -t fernapi/fern-self-hosted-with-docs-basepath:latest-amd64 \
             -t fernenterprise/fern-self-hosted-with-docs-basepath:$VERSION-amd64 \
+            -t fernenterprise/fern-self-hosted-with-docs-basepath:latest-amd64 \
             ../..
 
   build-docker-arm64:
@@ -158,7 +160,9 @@ jobs:
             --push \
             -f Dockerfile.self_hosted \
             -t fernapi/fern-self-hosted-with-docs-basepath:$VERSION-arm64 \
+            -t fernapi/fern-self-hosted-with-docs-basepath:latest-arm64 \
             -t fernenterprise/fern-self-hosted-with-docs-basepath:$VERSION-arm64 \
+            -t fernenterprise/fern-self-hosted-with-docs-basepath:latest-arm64 \
             ../..
 
   create-manifest:
@@ -183,11 +187,23 @@ jobs:
             fernapi/fern-self-hosted-with-docs-basepath:$VERSION-arm64
           docker manifest push fernapi/fern-self-hosted-with-docs-basepath:$VERSION
           
+          docker manifest create fernapi/fern-self-hosted-with-docs-basepath:latest \
+            fernapi/fern-self-hosted-with-docs-basepath:latest-amd64 \
+            fernapi/fern-self-hosted-with-docs-basepath:latest-arm64
+          docker manifest push fernapi/fern-self-hosted-with-docs-basepath:latest
+          
           docker manifest create fernenterprise/fern-self-hosted-with-docs-basepath:$VERSION \
             fernenterprise/fern-self-hosted-with-docs-basepath:$VERSION-amd64 \
             fernenterprise/fern-self-hosted-with-docs-basepath:$VERSION-arm64
           docker manifest push fernenterprise/fern-self-hosted-with-docs-basepath:$VERSION
           
+          docker manifest create fernenterprise/fern-self-hosted-with-docs-basepath:latest \
+            fernenterprise/fern-self-hosted-with-docs-basepath:latest-amd64 \
+            fernenterprise/fern-self-hosted-with-docs-basepath:latest-arm64
+          docker manifest push fernenterprise/fern-self-hosted-with-docs-basepath:latest
+          
           echo "Successfully published multi-platform images:"
           echo "  - fernapi/fern-self-hosted-with-docs-basepath:$VERSION"
+          echo "  - fernapi/fern-self-hosted-with-docs-basepath:latest"
           echo "  - fernenterprise/fern-self-hosted-with-docs-basepath:$VERSION"
+          echo "  - fernenterprise/fern-self-hosted-with-docs-basepath:latest"

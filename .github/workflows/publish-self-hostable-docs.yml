@@ -84,7 +84,9 @@ jobs:
             --push \
             -f Dockerfile.self_hosted \
             -t fernapi/fern-self-hosted:$VERSION-amd64 \
+            -t fernapi/fern-self-hosted:latest-amd64 \
             -t fernenterprise/fern-self-hosted:$VERSION-amd64 \
+            -t fernenterprise/fern-self-hosted:latest-amd64 \
             ../..
 
   build-docker-arm64:
@@ -123,7 +125,9 @@ jobs:
             --push \
             -f Dockerfile.self_hosted \
             -t fernapi/fern-self-hosted:$VERSION-arm64 \
+            -t fernapi/fern-self-hosted:latest-arm64 \
             -t fernenterprise/fern-self-hosted:$VERSION-arm64 \
+            -t fernenterprise/fern-self-hosted:latest-arm64 \
             ../..
 
   create-manifest:
@@ -147,14 +151,26 @@ jobs:
             fernapi/fern-self-hosted:$VERSION-arm64
           docker manifest push fernapi/fern-self-hosted:$VERSION
           
+          docker manifest create fernapi/fern-self-hosted:latest \
+            fernapi/fern-self-hosted:latest-amd64 \
+            fernapi/fern-self-hosted:latest-arm64
+          docker manifest push fernapi/fern-self-hosted:latest
+          
           docker manifest create fernenterprise/fern-self-hosted:$VERSION \
             fernenterprise/fern-self-hosted:$VERSION-amd64 \
             fernenterprise/fern-self-hosted:$VERSION-arm64
           docker manifest push fernenterprise/fern-self-hosted:$VERSION
           
+          docker manifest create fernenterprise/fern-self-hosted:latest \
+            fernenterprise/fern-self-hosted:latest-amd64 \
+            fernenterprise/fern-self-hosted:latest-arm64
+          docker manifest push fernenterprise/fern-self-hosted:latest
+          
           echo "Successfully published multi-platform images:"
           echo "  - fernapi/fern-self-hosted:$VERSION"
+          echo "  - fernapi/fern-self-hosted:latest"
           echo "  - fernenterprise/fern-self-hosted:$VERSION"
+          echo "  - fernenterprise/fern-self-hosted:latest"
 
   deploy-eks-smoke-test:
     needs: [determine-version, create-manifest]
