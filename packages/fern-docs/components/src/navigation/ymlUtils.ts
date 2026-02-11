@@ -85,6 +85,13 @@ function _buildDocsYmlContentFromChanges(
             }
         }
 
+        // Apply move operations (after renames, before add/remove)
+        for (const change of fileChanges.values()) {
+            if (change.type === "move_node") {
+                _applyMoveOperation(config, change, filePath);
+            }
+        }
+
         // Apply add/remove operations
         for (const change of fileChanges.values()) {
             if (change.type === "add_page" && change.pageEntry) {
@@ -648,6 +655,235 @@ function _applyRenamePageOperation(
             console.warn(`[ymlUtils] Page "${oldTitle}" not found in root navigation`);
         }
     }
+}
+
+/**
+ * Applies a move_node change to the docs.yml config.
+ * Removes the item from its old location and inserts it at the new location.
+ */
+function _applyMoveOperation(
+    docsConfig: DocsYmlConfig,
+    change: Extract<import("./types").NavigationChange, { type: "move_node" }>,
+    ymlFilePath: DocsYmlFilePath
+) {
+    if (!docsConfig.navigation) {
+        console.warn("[ymlUtils] Cannot apply move operation: no navigation array found");
+        return;
+    }
+
+    const {
+        nodeType,
+        toSectionTitle,
+        toSectionPathTitles,
+        fromSectionPathTitles,
+        toInsertionIndex,
+        pageEntry,
+        sectionTitle,
+        tabSlug
+    } = change;
+
+    // Determine the tab identifier if applicable
+    const tabIdentifier = tabSlug?.includes("/") ? (tabSlug.split("/").pop() ?? tabSlug) : tabSlug;
+
+    // Resolve the target container using the section path (handles nested sections).
+    // This mirrors the _findOrCreateSectionPath pattern used by the add_page flow.
+    const targetContainer = _resolveMoveSectionTarget(
+        docsConfig.navigation,
+        toSectionTitle ?? null,
+        toSectionPathTitles,
+        tabIdentifier
+    );
+    if (!targetContainer) {
+        return;
+    }
+
+    if (nodeType === "page" && pageEntry) {
+        // --- Move a page ---
+        // Capture the page's current index in the target container BEFORE removal.
+        // If the page is in this container (same-container move), currentIndex >= 0
+        // and is used to adjust toInsertionIndex after _removeItemFromNavigation
+        // mutates the array. When currentIndex is -1 (cross-container move), no
+        // adjustment is needed since removal doesn't affect the target array.
+        const currentIndex = targetContainer.findIndex((item) =>
+            _isMatchingPage(item, pageEntry.page, pageEntry.path, ymlFilePath)
+        );
+
+        // 1. Remove the page from its old location, capturing the original item to preserve metadata (icon, slug, etc.)
+        let removedPage: YmlNavigationItem | undefined;
+        _removeItemFromNavigation(docsConfig.navigation, (item) => {
+            if (_isMatchingPage(item, pageEntry.page, pageEntry.path, ymlFilePath)) {
+                removedPage = item;
+                return true;
+            }
+            return false;
+        });
+
+        if (!removedPage) {
+            console.warn(`[ymlUtils] Page "${pageEntry.page}" not found for move operation`);
+            return;
+        }
+
+        // 2. Re-insert the original item with its path updated to be relative to the yml file.
+        //    This preserves all extra metadata (icon, slug, hidden, etc.).
+        const pathToWrite = _makePathRelativeToYmlFile(pageEntry.path, ymlFilePath);
+        removedPage.path = pathToWrite;
+
+        let adjustedIndex = toInsertionIndex;
+        if (currentIndex >= 0 && currentIndex < toInsertionIndex) {
+            adjustedIndex = toInsertionIndex - 1;
+        }
+
+        const position = Math.min(Math.max(adjustedIndex, 0), targetContainer.length);
+        targetContainer.splice(position, 0, removedPage);
+    } else if (nodeType === "section" && sectionTitle) {
+        // --- Move a section ---
+        // Same pattern as page moves: capture index before removal for
+        // same-container adjustment. -1 means cross-container (no adjustment needed).
+        const currentIndex = targetContainer.findIndex(
+            (item) => isYmlSectionItem(item) && item.section === sectionTitle
+        );
+
+        // 1. Remove the section from its old location.
+        //    When fromSectionPathTitles is available, scope removal to the source
+        //    container so that sections with duplicate titles in other containers
+        //    are not accidentally removed. Falls back to full-tree search otherwise.
+        let removedSection: YmlSectionItem | undefined;
+
+        if (fromSectionPathTitles) {
+            // Resolve the source container using the from-path, then remove directly.
+            const fromSectionTitle = change.fromSectionTitle ?? null;
+            const sourceContainer = _resolveMoveSectionTarget(
+                docsConfig.navigation,
+                fromSectionTitle,
+                fromSectionPathTitles,
+                tabIdentifier
+            );
+            if (sourceContainer) {
+                const idx = sourceContainer.findIndex(
+                    (item) => isYmlSectionItem(item) && item.section === sectionTitle
+                );
+                if (idx >= 0) {
+                    removedSection = sourceContainer.splice(idx, 1)[0] as YmlSectionItem;
+                }
+            }
+        }
+
+        // Fallback: full-tree search if scoped removal didn't find it
+        if (!removedSection) {
+            _removeItemFromNavigation(docsConfig.navigation, (item) => {
+                if (isYmlSectionItem(item) && item.section === sectionTitle) {
+                    removedSection = item;
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        if (!removedSection) {
+            console.warn(`[ymlUtils] Section "${sectionTitle}" not found for move operation`);
+            return;
+        }
+
+        // 2. Insert at the new location (adjust index for same-container moves)
+        let adjustedIndex = toInsertionIndex;
+        if (currentIndex >= 0 && currentIndex < toInsertionIndex) {
+            adjustedIndex = toInsertionIndex - 1;
+        }
+
+        const position = Math.min(Math.max(adjustedIndex, 0), targetContainer.length);
+        targetContainer.splice(position, 0, removedSection);
+    }
+}
+
+/**
+ * Resolves the target container for a move operation by walking the YAML section path.
+ * Uses the same level-by-level navigation as _findOrCreateSectionPath, but read-only
+ * (does not create missing sections — returns undefined on miss).
+ *
+ * @param navigation - The root navigation array
+ * @param toSectionTitle - The title of the direct target section (null = root level)
+ * @param toSectionPathTitles - Ordered ancestor section titles leading to the target
+ * @param tabIdentifier - Tab identifier to navigate into first
+ */
+function _resolveMoveSectionTarget(
+    navigation: YmlNavigationItem[],
+    toSectionTitle: string | null,
+    toSectionPathTitles?: string[],
+    tabIdentifier?: string
+): YmlNavigationItem[] | undefined {
+    let container = navigation;
+
+    // Navigate into tab if needed
+    if (tabIdentifier) {
+        const tab = container.find((item): item is YmlTabItem => isYmlTabItem(item) && item.tab === tabIdentifier);
+        if (tab?.layout) {
+            container = tab.layout;
+        } else {
+            console.warn(`[ymlUtils] Tab "${tabIdentifier}" not found for move target`);
+            return undefined;
+        }
+    }
+
+    // Walk through the ancestor section path (if any) to reach the parent container
+    if (toSectionPathTitles && toSectionPathTitles.length > 0) {
+        for (const ancestorTitle of toSectionPathTitles) {
+            const ancestorSection = container.find(
+                (item): item is YmlSectionItem => isYmlSectionItem(item) && item.section === ancestorTitle
+            );
+            if (ancestorSection?.contents) {
+                container = ancestorSection.contents;
+            } else {
+                console.warn(`[ymlUtils] Ancestor section "${ancestorTitle}" not found while walking section path`);
+                return undefined;
+            }
+        }
+    }
+
+    // Navigate into the final target section if needed
+    if (toSectionTitle) {
+        const section = container.find(
+            (item): item is YmlSectionItem => isYmlSectionItem(item) && item.section === toSectionTitle
+        );
+        if (section?.contents) {
+            return section.contents;
+        } else {
+            console.warn(`[ymlUtils] Target section "${toSectionTitle}" not found for move target`);
+            return undefined;
+        }
+    }
+
+    return container;
+}
+
+/**
+ * Recursively removes an item from the navigation structure.
+ * The predicate is called for each item; if it returns true, the item is removed.
+ * Returns true if an item was removed.
+ */
+function _removeItemFromNavigation(
+    items: YmlNavigationItem[],
+    predicate: (item: YmlNavigationItem) => boolean
+): boolean {
+    for (let i = items.length - 1; i >= 0; i--) {
+        const item = items[i]!;
+        if (predicate(item)) {
+            items.splice(i, 1);
+            return true;
+        }
+        // Recurse into section contents
+        if (item.contents) {
+            if (_removeItemFromNavigation(item.contents, predicate)) {
+                return true;
+            }
+        }
+        // Recurse into tab layouts
+        if (item.layout) {
+            if (_removeItemFromNavigation(item.layout, predicate)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /** Checks if item matches target page by path or title */

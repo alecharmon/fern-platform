@@ -27,6 +27,7 @@ export function SidebarRootNodeImpl({
 }) {
     const forceClientRender = renderOptions?.forceClientRender ?? false;
     const wrapSectionNode = renderOptions?.wrapSectionNode;
+    const wrapSectionContainer = renderOptions?.wrapSectionContainer;
     const wrapPageNode = renderOptions?.wrapPageNode;
     const currentVariantId = renderOptions?.currentVariantId;
 
@@ -87,6 +88,7 @@ export function SidebarRootNodeImpl({
                                 renderOptions={{
                                     forceClientRender,
                                     wrapSectionNode,
+                                    wrapSectionContainer,
                                     wrapPageNode,
                                     currentVariantId,
                                     preResolvedIcons: renderOptions?.preResolvedIcons,

@@ -177,6 +177,20 @@ export function CreateClientPage({
                 return "Section title cannot have leading or trailing spaces";
             }
 
+            // Check for duplicate sibling section names in the selected parent container
+            // Look up the live version from allContainers to reflect any renames (state may be stale)
+            if (isCreatingNewSection && newSectionTitle && parentContainerForNewSection) {
+                const liveParent =
+                    allContainers.find((c) => c.id === parentContainerForNewSection.id) ?? parentContainerForNewSection;
+                const children = "children" in liveParent ? liveParent.children : [];
+                const hasDuplicateSibling = children?.some(
+                    (child) => child.type === "section" && child.title === newSectionTitle
+                );
+                if (hasDuplicateSibling) {
+                    return "A section with this name already exists";
+                }
+            }
+
             return null;
         };
 
@@ -223,11 +237,15 @@ export function CreateClientPage({
             );
 
             // Check for duplicates in the selected container
+            // Look up the live version from allContainers to reflect any renames (state may be stale)
+            const liveSelectedContainer = selectedContainer
+                ? (allContainers.find((c) => c.id === selectedContainer.id) ?? selectedContainer)
+                : null;
             const duplicateInContainer =
-                selectedContainer && "children" in selectedContainer
-                    ? selectedContainer.children
+                liveSelectedContainer && "children" in liveSelectedContainer
+                    ? liveSelectedContainer.children
                           ?.filter((child) => child.type === "page")
-                          .some((page) => page.slug === finalSlug)
+                          .some((page) => "slug" in page && page.slug === finalSlug)
                     : false;
 
             if (duplicateInRegistry || duplicateInContainer) {
@@ -250,7 +268,8 @@ export function CreateClientPage({
         parentContainerForNewSection,
         finalSlug,
         registeredPages,
-        isCreatingNewSection
+        isCreatingNewSection,
+        allContainers
     ]);
 
     // Block user submission if mandatory fields are not filled

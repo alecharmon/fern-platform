@@ -188,7 +188,7 @@ export default function NodeHoverHandle() {
                                 handleClick(e);
                                 cancelScheduledClose();
                             }}
-                            className="fern-hover-handle flex items-center justify-center rounded-md py-1 px-0.5 hover:bg-gray-500/40 cursor-grab leading-none"
+                            className="fern-hover-handle flex items-center justify-center rounded-md py-1 px-0.5 hover:bg-gray-500/40 cursor-grab active:cursor-grabbing leading-none"
                         >
                             <GripVertical className="text-muted-foreground" size={16} />
                         </div>

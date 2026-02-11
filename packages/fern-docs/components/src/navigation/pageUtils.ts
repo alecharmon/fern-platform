@@ -291,44 +291,35 @@ export function getAllPageContainersFromSidebarRootNode(
     const sections = getAllSectionsFromSidebarRootNode(sidebarRootNode);
     result.push(...sections);
 
-    // Add exactly one root-level container representing "No section"
-    // This ensures the dropdown always shows exactly one "No section" option
-    const rootSectionPath: SectionAncestorMetadata[] = [
-        {
-            id: sidebarRootNode.id,
-            type: sidebarRootNode.type,
-            title: null
+    // Add exactly one root-level container representing "No section".
+    // Always target the sidebarRoot — insertNodeIntoParent auto-wraps pages in
+    // a SidebarGroupNode when they can't be direct sidebarRoot children.
+    //
+    // Flatten sidebarGroup children so that duplicate slug validation can find
+    // page nodes that live inside sidebarGroups (sidebarGroups are invisible wrappers).
+    const flatChildren: FernNavigation.NavigationNode[] = [];
+    for (const child of sidebarRootNode.children) {
+        if (child.type === "sidebarGroup") {
+            flatChildren.push(...child.children);
+        } else {
+            flatChildren.push(child);
         }
-    ];
-
-    // Find all sidebarGroups at the root level
-    const sidebarGroups = sidebarRootNode.children.filter((child) => child.type === "sidebarGroup");
-
-    // Use the last sidebarGroup if any exist (pages should append to the end)
-    // Otherwise, use the sidebarRoot itself as the target
-    const lastSidebarGroup = sidebarGroups[sidebarGroups.length - 1];
-    const targetId = lastSidebarGroup?.id ?? sidebarRootNode.id;
-    const targetType = lastSidebarGroup ? "sidebarGroup" : "sidebarRoot";
-    const targetChildren = lastSidebarGroup?.children ?? sidebarRootNode.children;
+    }
 
     const rootContainer: RootLevelContainerWithTraversalContext = {
-        type: targetType,
-        id: targetId,
+        type: "sidebarRoot",
+        id: sidebarRootNode.id,
         title: null,
-        slug: currentTabSlug || "", // Use the current tab slug as the base
-        sectionPath:
-            targetType === "sidebarGroup"
-                ? [
-                      ...rootSectionPath,
-                      {
-                          id: targetId,
-                          type: "sidebarGroup",
-                          title: null
-                      }
-                  ]
-                : rootSectionPath,
+        slug: currentTabSlug || "",
+        sectionPath: [
+            {
+                id: sidebarRootNode.id,
+                type: sidebarRootNode.type,
+                title: null
+            }
+        ],
         isRootLevel: true,
-        children: targetChildren
+        children: flatChildren
     };
     result.push(rootContainer);
 

@@ -12,14 +12,14 @@ import { type ReactNode, useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import type { EncodedDocsUrl } from "@/utils/types";
-import { RenameDialog } from "./RenameSectionDialog";
+import { RenameDialog } from "./RenameDialog";
 
-interface DeletablePageNodeWrapperProps {
+interface SidebarPageNodeWithMenuProps {
     node: FernNavigation.NavigationNodeWithMarkdown;
-    component: ReactNode;
+    children: ReactNode;
 }
 
-export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeWrapperProps): ReactNode {
+export function SidebarPageNodeWithMenu({ node, children }: SidebarPageNodeWithMenuProps): ReactNode {
     const params = useParams();
     const router = useRouter();
     const navigation = useNavigation();
@@ -49,13 +49,13 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
         return null;
     }
 
-    const hasChildren = getChildren(node).length > 0;
+    const hasNodeChildren = getChildren(node).length > 0;
 
     const isLandingPage = node.type === "landingPage";
 
     const isSectionOverview = FernNavigation.isSectionOverview(node);
 
-    const showMenu = !hasChildren && !isLandingPage && !isSectionOverview;
+    const showMenu = !hasNodeChildren && !isLandingPage && !isSectionOverview;
 
     const handlePageClick = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
@@ -75,7 +75,7 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
 
     const handleConfirmedDelete = () => {
         if (!params || !filename) {
-            console.error("[DeletablePageNodeWrapper] Cannot delete page: no filename available");
+            console.error("[SidebarPageNodeWithMenu] Cannot delete page: no filename available");
             return;
         }
 
@@ -116,7 +116,7 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
 
     const handleRenameConfirm = (newTitle: string) => {
         if (!("pageId" in node)) {
-            console.error("[DeletablePageNodeWrapper] Cannot rename: node has no pageId");
+            console.error("[SidebarPageNodeWithMenu] Cannot rename: node has no pageId");
             return;
         }
 
@@ -135,7 +135,7 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
                 <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenu.Trigger asChild>
                         <button
-                            className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover/deletable:opacity-100 data-[state=open]:opacity-100 disabled:cursor-default disabled:group-hover/deletable:opacity-50 disabled:hover:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-gray-1000 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover/page-menu:opacity-100 data-[state=open]:opacity-100 disabled:cursor-default disabled:group-hover/page-menu:opacity-50 disabled:hover:bg-transparent"
                             title="Page options"
                             aria-label="Page options"
                             disabled={isEditingDisabled}
@@ -219,8 +219,8 @@ export function DeletablePageNodeWrapper({ node, component }: DeletablePageNodeW
 
     return (
         <>
-            <div className="group/deletable relative" onClick={isClientPage ? handlePageClick : undefined}>
-                {component}
+            <div className="group/page-menu relative" onClick={isClientPage ? handlePageClick : undefined}>
+                {children}
                 {showMenu && renderPageMenu()}
             </div>
 

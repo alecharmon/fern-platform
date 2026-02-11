@@ -333,16 +333,29 @@ export function FilesDropdown() {
 
     const getNavigationChangeLabel = (change: NavigationChange) => {
         if (change.type === "add_page" && change.pageEntry) {
-            return `Page created: "${change.pageEntry.page}"`;
+            return `Page added: "${change.pageEntry.page}"`;
         }
         if (change.type === "remove_page" && change.pageEntry) {
-            return `Page deleted: "${change.pageEntry.page}"`;
+            return `Page removed: "${change.pageEntry.page}"`;
         }
         if (change.type === "rename_section" && change.newTitle) {
-            return `Section renamed to "${change.newTitle}"`;
+            return `Section renamed: "${change.oldTitle}" → "${change.newTitle}"`;
         }
         if (change.type === "rename_page" && change.newTitle) {
-            return `Page renamed to "${change.newTitle}"`;
+            return `Page renamed: "${change.oldTitle}" → "${change.newTitle}"`;
+        }
+        if (change.type === "move_node") {
+            const name =
+                change.nodeType === "page" ? (change.pageEntry?.page ?? "page") : (change.sectionTitle ?? "section");
+            const isSameParent = change.fromSectionId === change.toSectionId;
+
+            if (isSameParent) {
+                return `Reordered ${change.nodeType}: "${name}"`;
+            }
+
+            const from = change.fromSectionTitle ?? "top level";
+            const to = change.toSectionTitle ?? "top level";
+            return `Moved ${change.nodeType}: "${name}" (${from} → ${to})`;
         }
         return "";
     };
@@ -392,7 +405,9 @@ export function FilesDropdown() {
                                 ? `rename-section-${change.sectionId}-${idx}`
                                 : change.type === "rename_page"
                                   ? `rename-page-${change.pageId}-${idx}`
-                                  : `change-${idx}`;
+                                  : change.type === "move_node"
+                                    ? `move-${change.nodeId}-${idx}`
+                                    : `change-${idx}`;
 
                     return (
                         <div key={changeKey} className="text-muted-foreground rounded px-2 py-1 text-xs">

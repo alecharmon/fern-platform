@@ -9,6 +9,14 @@ export * from "./NavigationStorage";
 export * from "./NavigationStore";
 export * from "./NavigationStoreContext";
 export {
+    computeSidebarRootFlatIndex,
+    findNodeById,
+    findNodeTabSlug,
+    findParentNodeId,
+    getChildrenOfNode,
+    isDescendantOf
+} from "./navigationTreeUtils";
+export {
     createMdxFrontmatter,
     extractDocsYmlFilePathFromFoundNode,
     extractLiveSidebarFromRootNode,

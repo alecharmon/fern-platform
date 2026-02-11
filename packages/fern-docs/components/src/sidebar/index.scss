@@ -143,8 +143,8 @@
   }
 
   /* Shift trailing icons (expand/collapse) when menu in fern-dashboard is shown on hover or when menu is open */
-  .sidebar-section-with-menu:hover .expand-indicator,
-  .sidebar-section-with-menu:has(button[data-state="open"]) .expand-indicator {
+  .sidebar-section-node-with-menu:hover .expand-indicator,
+  .sidebar-section-node-with-menu:has(button[data-state="open"]) .expand-indicator {
     @apply mr-6;
   }
 }

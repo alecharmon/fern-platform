@@ -21,6 +21,7 @@ export function SidebarClientRootNode({
 }) {
     const forceClientRender = renderOptions?.forceClientRender ?? true;
     const wrapSectionNode = renderOptions?.wrapSectionNode;
+    const wrapSectionContainer = renderOptions?.wrapSectionContainer;
     const wrapPageNode = renderOptions?.wrapPageNode;
 
     const loader = PrefetchedDocsLoader.fromSerializable(loaderData);
@@ -34,7 +35,7 @@ export function SidebarClientRootNode({
             visibleNodeIds={visibleNodeIds}
             authState={authState}
             edgeFlags={edgeFlags}
-            renderOptions={{ forceClientRender, wrapSectionNode, wrapPageNode, files }}
+            renderOptions={{ forceClientRender, wrapSectionNode, wrapSectionContainer, wrapPageNode, files }}
             lang={lang}
         />
     );

@@ -18,8 +18,10 @@ import { SidebarTabsList } from "@fern-docs/components/sidebar/SidebarTabsList";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
 import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 import { useRef } from "react";
-import { DeletablePageNodeWrapper } from "@/components/editor/sidebar/DeletablePageNodeWrapper";
-import { SidebarSectionWithMenu } from "@/components/editor/sidebar/SidebarSectionWithMenu";
+import { DraggableNodeWrapper, SectionDropZone } from "@/components/editor/sidebar/DraggableNodeWrapper";
+import { SidebarDndProvider } from "@/components/editor/sidebar/SidebarDndContext";
+import { SidebarPageNodeWithMenu } from "@/components/editor/sidebar/SidebarPageNodeWithMenu";
+import { SidebarSectionNodeWithMenu } from "@/components/editor/sidebar/SidebarSectionNodeWithMenu";
 import { CreatePageButton, type CreatePageButtonHandle } from "./CreatePageButton";
 
 interface PageSidebarProps {
@@ -44,7 +46,7 @@ export default function PageSidebar({
     // Store initial page data in a ref so we don't re-resolve it on every render
     const initialPageDataRef = useRef<ResolvedPageData | null>(null);
 
-    // Create a ref to the CreatePageButton so SidebarSectionWithMenu can trigger it
+    // Create a ref to the CreatePageButton so SidebarSectionNodeWithMenu can trigger it
     const createPageButtonRef = useRef<CreatePageButtonHandle>(null);
 
     // Extract files from the loader data for custom icon support
@@ -126,25 +128,30 @@ export default function PageSidebar({
                 <>
                     {/* Always use the current found node as the base when creating a new page */}
                     <CreatePageButton ref={createPageButtonRef} baseFoundNode={found} />
-                    <SidebarClientRootNode
-                        root={found.sidebar}
-                        visibleNodeIds={visibleNodeIds}
-                        loaderData={prefetchedLoaderData}
-                        renderOptions={{
-                            forceClientRender: true,
-                            wrapPageNode: (node, component) => (
-                                <DeletablePageNodeWrapper node={node} component={component} />
-                            ),
-                            wrapSectionNode: (node, trigger) => (
-                                <SidebarSectionWithMenu
-                                    node={node}
-                                    trigger={trigger}
-                                    createPageButtonRef={createPageButtonRef}
-                                />
-                            ),
-                            files
-                        }}
-                    />
+                    <SidebarDndProvider>
+                        <SidebarClientRootNode
+                            root={found.sidebar}
+                            visibleNodeIds={visibleNodeIds}
+                            loaderData={prefetchedLoaderData}
+                            renderOptions={{
+                                forceClientRender: true,
+                                wrapPageNode: (node, component) => (
+                                    <DraggableNodeWrapper node={node} nodeType="page">
+                                        <SidebarPageNodeWithMenu node={node}>{component}</SidebarPageNodeWithMenu>
+                                    </DraggableNodeWrapper>
+                                ),
+                                wrapSectionNode: (node, component) => (
+                                    <SidebarSectionNodeWithMenu node={node} createPageButtonRef={createPageButtonRef}>
+                                        {component}
+                                    </SidebarSectionNodeWithMenu>
+                                ),
+                                wrapSectionContainer: (node, component) => (
+                                    <SectionDropZone node={node}>{component}</SectionDropZone>
+                                ),
+                                files
+                            }}
+                        />
+                    </SidebarDndProvider>
                 </>
             )}
         </>

@@ -24,6 +24,8 @@ export function SidebarRootSectionNode({
     files,
     lang
 }: SidebarRootSectionNodeProps): ReactNode {
+    const wrapSectionContainer = renderOptions.wrapSectionContainer;
+
     // If the node has no children, it is a page node.
     if (node.children.length === 0 && FernNavigation.hasMarkdown(node)) {
         return (
@@ -35,7 +37,10 @@ export function SidebarRootSectionNode({
         return null;
     }
 
-    return (
+    // wrapSectionNode is applied inside SidebarRootHeading (wraps the heading).
+    // wrapSectionContainer wraps the entire section (heading + children) with
+    // a drop zone for drag-and-drop.
+    const sectionContent = (
         <WithFeatureFlags featureFlags={node.featureFlags}>
             <SidebarRootHeading node={node} className={className} icon={icon} renderOptions={renderOptions} />
 
@@ -54,4 +59,6 @@ export function SidebarRootSectionNode({
             </ul>
         </WithFeatureFlags>
     );
+
+    return wrapSectionContainer ? wrapSectionContainer(node, sectionContent) : sectionContent;
 }

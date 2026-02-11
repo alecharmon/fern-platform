@@ -11,12 +11,18 @@ import {
 import { createNavigationBufferedIndexedDBStorage, type NavigationStorage } from "./NavigationStorage";
 import {
     calculateInsertionIndex,
+    computeSidebarRootFlatIndex,
     extractParentSectionId,
+    findNodeById,
+    findPageByNodeId,
     findPageByPageId,
+    findParentNodeId,
     findSectionById,
     findSectionByTitleInContainer,
-    injectPageIntoSection,
-    injectSectionIntoContainer,
+    findSectionTitleById,
+    getSectionAncestorTitles,
+    insertNodeIntoParent,
+    moveNodeInTree,
     updatePageTitle,
     updateSectionTitle
 } from "./navigationTreeUtils";
@@ -425,6 +431,142 @@ export class NavigationStore {
         this._setStorageAndNotify();
     }
 
+    /**
+     * Moves a node (page or section) to a new position in the navigation tree.
+     * Updates both the in-memory RootNode and tracks the change for docs.yml generation.
+     *
+     * @param nodeId - The ID of the node to move
+     * @param targetParentId - The ID of the parent container to move into
+     * @param insertionIndex - The index at which to insert in the target container
+     */
+    moveNode(nodeId: FernNavigation.NodeId, targetParentId: FernNavigation.NodeId, insertionIndex: number): void {
+        if (!this._rootNode) {
+            console.warn("[NavigationStore.moveNode] Cannot move node: rootNode not available");
+            return;
+        }
+
+        // Find the node to determine its type and context
+        const fromParentId = findParentNodeId(this._rootNode, nodeId);
+        if (!fromParentId) {
+            console.warn(`[NavigationStore.moveNode] Cannot move node: parent of ${String(nodeId)} not found`);
+            return;
+        }
+
+        // Determine node type and get context for the change tracking
+        let nodeType: "page" | "section" = "page";
+        let pageEntry: { page: string; path: string } | undefined;
+        let sectionTitle: string | undefined;
+        let tabSlug: string | undefined;
+        let product: FernNavigation.ProductNode | undefined;
+        let version: FernNavigation.VersionNode | undefined;
+
+        // Try to find the node as a page first (by node.id, not pageId)
+        const pageResult = findPageByNodeId(this._rootNode, nodeId);
+        if (pageResult) {
+            nodeType = "page";
+            tabSlug = pageResult.tabSlug;
+            product = pageResult.product;
+            version = pageResult.version;
+
+            const pageNode = pageResult.page;
+
+            // Use pageId as the canonical path (e.g. "pages/get-started.mdx").
+            // Fall back to the registry filename if the page has been visited and registered.
+            const registryEntry = Object.values(this._pageRegistry).find(
+                (entry) => entry.pageData.foundNode.node.id === nodeId
+            );
+            pageEntry = {
+                page: pageNode.title,
+                path: registryEntry?.pageData.filename ?? pageNode.pageId
+            };
+        } else {
+            // Try as a section
+            const sectionResult = findSectionById(this._rootNode, nodeId);
+            if (sectionResult) {
+                nodeType = "section";
+                sectionTitle = sectionResult.section.title;
+                tabSlug = sectionResult.tabSlug;
+                product = sectionResult.product;
+                version = sectionResult.version;
+            } else {
+                console.warn(
+                    `[NavigationStore.moveNode] Cannot move node: ${String(nodeId)} not found as page or section`
+                );
+                return;
+            }
+        }
+
+        // Compute the YAML-level insertion index BEFORE mutating the tree.
+        // When the target parent is a sidebarRoot, the tree-level children index
+        // doesn't match the flat YAML layout index because sidebarGroups are invisible
+        // wrappers that get expanded in YAML. computeSidebarRootFlatIndex converts
+        // the tree index to the correct flat position.
+        let ymlInsertionIndex = insertionIndex;
+        const targetNode = findNodeById(this._rootNode, targetParentId);
+        if (targetNode?.type === "sidebarRoot") {
+            ymlInsertionIndex = computeSidebarRootFlatIndex(
+                targetNode as FernNavigation.SidebarRootNode,
+                insertionIndex
+            );
+        }
+
+        // Perform the move in the tree
+        const moveResult = moveNodeInTree(this._rootNode, nodeId, targetParentId, insertionIndex);
+        if (!moveResult) {
+            console.warn(`[NavigationStore.moveNode] moveNodeInTree failed for ${String(nodeId)}`);
+            return;
+        }
+
+        this._rootNode = moveResult.updatedRoot;
+
+        // Determine the docs.yml file path
+        const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+            {
+                currentVersion: version,
+                currentProduct: product,
+                currentTab: tabSlug ? { slug: tabSlug } : undefined
+            },
+            this._slugToDocsYmlFilePath
+        );
+
+        // Resolve section titles from rootNode for YAML generation
+        const fromSectionTitle = findSectionTitleById(this._rootNode, fromParentId);
+        const toSectionTitle = findSectionTitleById(this._rootNode, targetParentId);
+
+        // Compute the ancestor section path for the target container.
+        // This lets _applyMoveOperation walk the YAML tree level-by-level to find nested sections.
+        const toSectionPathTitles = getSectionAncestorTitles(this._rootNode, targetParentId);
+
+        // Compute the ancestor section path for the source container.
+        // This scopes section removal to the correct container, avoiding false
+        // matches when sections share the same title across different parents.
+        const fromSectionPathTitles = getSectionAncestorTitles(this._rootNode, fromParentId);
+
+        // Track the change
+        this._navigationChanges = new Map(this._navigationChanges);
+        const changeKey = `move-node-${String(nodeId)}-${Math.random().toString(36).substring(2, 15)}`;
+
+        this._navigationChanges.set(changeKey, {
+            type: "move_node",
+            nodeId,
+            nodeType,
+            fromSectionId: fromParentId,
+            fromSectionTitle,
+            toSectionId: targetParentId,
+            toSectionTitle,
+            toSectionPathTitles,
+            fromSectionPathTitles,
+            toInsertionIndex: ymlInsertionIndex,
+            pageEntry,
+            sectionTitle,
+            tabSlug,
+            docsYmlFilePath,
+            createdAt: Date.now()
+        });
+
+        this._setStorageAndNotify();
+    }
+
     /** Resolves initial page data from dependencies */
     resolveInitialPageData(deps: PageDataDependencies): ResolvedPageData | null {
         try {
@@ -554,13 +696,31 @@ export class NavigationStore {
         // Calculate insertion index from RootNode order before injecting
         // Try stored rootNode first, fall back to live sidebar from baseFoundNode if rootNode is stale/unavailable
         let insertionIndex: number | undefined = undefined;
-        if (this._rootNode && targetSectionId) {
-            insertionIndex = calculateInsertionIndex(this._rootNode, targetSectionId);
+        let ymlInsertionIndex: number | undefined = undefined;
+
+        // Check if the target container is a sidebarRoot — if so, use computeSidebarRootFlatIndex
+        // for YAML and "append" mode for the tree insertion
+        if (targetSectionId && this._rootNode) {
+            const targetNode = findNodeById(this._rootNode, targetSectionId);
+            if (targetNode?.type === "sidebarRoot") {
+                // Tree-level index: append to end of sidebarRoot.children
+                insertionIndex = targetNode.children.length;
+                // Flat YAML index: expand sidebarGroups
+                ymlInsertionIndex = computeSidebarRootFlatIndex(targetNode, insertionIndex);
+            } else {
+                insertionIndex = calculateInsertionIndex(this._rootNode, targetSectionId);
+            }
         }
 
         // If we couldn't find the container in rootNode (stale), fall back to live sidebar
         if (insertionIndex === undefined && deps.baseFoundNode.sidebar && targetSectionId) {
-            insertionIndex = calculateInsertionIndex(deps.baseFoundNode.sidebar, targetSectionId);
+            if (deps.baseFoundNode.sidebar.id === targetSectionId) {
+                // Target is sidebarRoot — compute flat YAML index
+                insertionIndex = deps.baseFoundNode.sidebar.children.length;
+                ymlInsertionIndex = computeSidebarRootFlatIndex(deps.baseFoundNode.sidebar, insertionIndex);
+            } else {
+                insertionIndex = calculateInsertionIndex(deps.baseFoundNode.sidebar, targetSectionId);
+            }
         }
 
         // Extract parent section path titles from targetSectionPath
@@ -586,7 +746,7 @@ export class NavigationStore {
             tabSlug: this._extractTabSlug(deps.baseFoundNode),
             pageEntry: { page: title, path: filename },
             insertionMode: "atIndex",
-            insertionIndex,
+            insertionIndex: ymlInsertionIndex ?? insertionIndex,
             docsYmlFilePath,
             parentSectionPathTitles,
             createdAt: Date.now()
@@ -594,12 +754,12 @@ export class NavigationStore {
 
         // Inject the new page into the RootNode at the correct location
         if (this._rootNode && targetSectionId) {
-            this._rootNode = injectPageIntoSection(
+            this._rootNode = insertNodeIntoParent(
                 this._rootNode,
                 newPageNode,
                 targetSectionId,
-                "atIndex",
-                insertionIndex
+                insertionIndex ?? 0,
+                "atIndex"
             );
         }
 
@@ -665,10 +825,11 @@ export class NavigationStore {
                 };
 
                 // Inject the new section into the parent container in rootNode
-                this._rootNode = injectSectionIntoContainer(
+                this._rootNode = insertNodeIntoParent(
                     this._rootNode,
                     newSectionNode,
                     deps.parentContainerId,
+                    0,
                     "append"
                 );
             }
@@ -771,12 +932,12 @@ export class NavigationStore {
 
         // Inject the new page into the new section in rootNode
         if (this._rootNode) {
-            this._rootNode = injectPageIntoSection(
+            this._rootNode = insertNodeIntoParent(
                 this._rootNode,
                 newPageNode,
                 newSectionId,
-                "atIndex",
-                insertionIndex
+                insertionIndex ?? 0,
+                "atIndex"
             );
         }
 
@@ -962,10 +1123,16 @@ export class NavigationStore {
                 // Calculate insertion index from RootNode order
                 // Exclude this page from the count since it's still in the rootNode (deletion doesn't remove it)
                 const pageId = (entry.pageData.foundNode.node as FernNavigation.PageNode).pageId;
-                const insertionIndex =
-                    this._rootNode && entry.parentSectionId
-                        ? calculateInsertionIndex(this._rootNode, entry.parentSectionId, pageId)
-                        : undefined;
+                let insertionIndex: number | undefined = undefined;
+                if (this._rootNode && entry.parentSectionId) {
+                    const parentNode = findNodeById(this._rootNode, entry.parentSectionId);
+                    if (parentNode?.type === "sidebarRoot") {
+                        // sidebarRoot targets use flat YAML index
+                        insertionIndex = computeSidebarRootFlatIndex(parentNode, parentNode.children.length);
+                    } else {
+                        insertionIndex = calculateInsertionIndex(this._rootNode, entry.parentSectionId, pageId);
+                    }
+                }
 
                 // Create a new Map to trigger React re-renders
                 this._navigationChanges = new Map(this._navigationChanges);

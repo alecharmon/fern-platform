@@ -43,6 +43,7 @@
     "./colors": "./src/colors.ts",
     "./navigation/NavigationStore": "./src/navigation/NavigationStore.ts",
     "./navigation/NavigationStorage": "./src/navigation/NavigationStorage.ts",
+    "./navigation/navigationTreeUtils": "./src/navigation/navigationTreeUtils.ts",
     "./navigation/types": "./src/navigation/types.ts",
     "./navigation/pageUtils": "./src/navigation/pageUtils.ts",
     "./navigation/mdxUtils": "./src/navigation/mdxUtils.ts",

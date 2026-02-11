@@ -1,7 +1,7 @@
 # @fern-dashboard/src/components/editor
 
 <!-- AI: Update the date below when modifying this file -->
-*Last updated by AI: 2026-02-10*
+*Last updated by AI: 2026-02-11*
 
 WYSIWYG editor for Fern documentation pages. Supports editing page content (MDX, including `FERN_COMPONENTS`), managing site navigation (docs.yml), and editing API reference descriptions (OpenAPI overrides) — all committed back to Git.
 
@@ -190,7 +190,13 @@ flowchart LR
 | `useDerivedFoundNode.ts` | Stores server-provided root node via `setRootNode()`; re-derives the current page's `foundNode` from `rootNode` so client-side nav mutations are reflected |
 | `migrations.ts` | Schema migrations for `NavigationSnapshot` persisted in IndexedDB |
 
-**`_rootNode` vs soft state:** Page creation, section creation, and section renames mutate `_rootNode` directly (via `injectPageIntoSection`, `injectSectionIntoContainer`, `updateSectionTitle`) so new/renamed nodes appear in navigation immediately. Page deletion is a **soft delete** — it flags `isMarkedForDeletion` in `_pageRegistry` and records `remove_page` in `_navigationChanges`, keeping the node in `_rootNode` so the undo toast can trivially restore it.
+**`_pageRegistry` only contains visited pages:** `_pageRegistry` is populated lazily when a user navigates to a page (via `registerPage()`). Any code that needs page metadata (title, path) for *unvisited* pages should fall back to the navigation tree node directly (e.g. `pageNode.title`, `pageNode.pageId`).
+
+**`_rootNode` vs soft state:** Page creation, section creation, and section renames mutate `_rootNode` directly (via `insertNodeIntoParent`, `updateSectionTitle`) so new/renamed nodes appear in navigation immediately. Page deletion is a **soft delete** — it flags `isMarkedForDeletion` in `_pageRegistry` and records `remove_page` in `_navigationChanges`, keeping the node in `_rootNode` so the undo toast can trivially restore it.
+
+**Title-based YAML resolution is inherently fragile:** due to the design of `docs.yml`, YAML operations locate sections by title string, not by a stable ID. Duplicate section titles at the same nesting level will match the first occurrence. The `parentSectionPathTitles` / `toSectionPathTitles` / `fromSectionPathTitles` pattern reduces ambiguity by providing a unique path from root, but truly identical titles at the same level remain an edge case.
+
+**Adding new operations:** When introducing a new `NavigationChange` type, you must also update `getNavigationChangeLabel` in `FilesDropdown.tsx` so the change appears with a human-readable label in the pending-changes list, and `applyNavigationChange` in `ymlUtils.ts` so it is applied to docs.yml at commit time. Existing types include `add_page`, `remove_page`, `rename_section`, `rename_page`, and `move_node`.
 
 **`.files` getter → `CommitButton`:** Collects changed/deleted pages from the registry, calls `buildDocsYmlContentFromChanges()` to apply navigation changes to docs.yml, then `formatCommitFiles()` to produce `GitCommitFile[]`.
 
@@ -232,13 +238,16 @@ The editor reuses most of the docs UI from `@fern-docs/components` — the same 
 
 `layout.tsx` directly renders some shared components (`AbstractDefaultDocs`, `SidebarContainer`, `NavbarLinks`). Others are rendered by **Next.js parallel routes** — `@sidebar/`, `@headertabs/`, `@versionSelect/`, `@productSelect/`, `@logo/` — which fetch data server-side and pass shared components (`SidebarClientRootNode`, `HeaderTabsList`, `VersionDropdown`, `ProductDropdown`, `AbstractLogo`) as slots into the layout.
 
-### Sidebar: Render Options Injection
+### Sidebar: Render Options Injection (`wrap*` pattern)
 
-The sidebar tree nodes (`SidebarPageNode`, `SidebarSectionNode`, `SidebarCollapseGroup`, etc.) live in `@fern-docs/components/sidebar/nodes/` and are shared by both apps. The editor customizes their behavior via [`SidebarRenderOptions`](../../../../fern-docs/components/src/sidebar/SidebarRenderOptions.ts):
+The sidebar nodes live in `@fern-docs/components/sidebar/nodes/` and are shared by both apps. The editor customizes them via [`SidebarRenderOptions`](../../../../fern-docs/components/src/sidebar/SidebarRenderOptions.ts) — dependency-inversion callbacks that wrap each node with additional behavior:
 
-- **`forceClientRender`** — The bundle renders sidebar nodes as Server Components (via async `SidebarRootNode`). The dashboard sets `forceClientRender: true` and uses the client-side `SidebarClientRootNode` instead. Both delegate to the same `SidebarRootNodeImpl`.
-- **`wrapPageNode`** — Wraps page nodes with editor-specific UI (e.g. deletion controls).
-- **`wrapSectionNode`** — Wraps section nodes with editor-specific UI (e.g. context menu for adding pages, renaming).
+- **`forceClientRender`** — Uses client-side `SidebarClientRootNode` instead of the bundle's Server Component `SidebarRootNode`. Both delegate to `SidebarRootNodeImpl`.
+- **`wrapPageNode`** — Wraps page nodes (deletion controls, drag-and-drop via `DraggableNodeWrapper`).
+- **`wrapSectionNode`** — Wraps section **headings only** (context menu, drag handle via `SidebarSectionNodeWithMenu`).
+- **`wrapSectionContainer`** — Wraps the **entire section** (heading + children) with a DnD drop zone (`SectionDropZone`).
+
+**Drag-and-drop** (`DraggableNodeWrapper.tsx`) uses native HTML5 drag events inside a `SidebarDndProvider`. Pages use 50/50 before/after zones; sections use 6px edge zones for before/after at the parent level and the remainder for insert-inside-at-index-0. All drag handlers call `stopPropagation()` so nested wrappers don't conflict. Drops call `NavigationStore.moveNode()` → `moveNodeInTree()` + a `move_node` change for docs.yml.
 
 ### Forked Rendering Code (`src/docs/`)
 

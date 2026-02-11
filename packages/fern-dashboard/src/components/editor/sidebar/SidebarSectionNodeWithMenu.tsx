@@ -3,21 +3,25 @@
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useNavigation } from "@fern-docs/components/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { File, MoreVertical, Pencil } from "lucide-react";
+import { File, GripVertical, MoreVertical, Pencil } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CreatePageButtonHandle } from "@/app/[orgName]/(visual-editor)/editor/[docsUrl]/[branch]/[...slug]/@sidebar/CreatePageButton";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
-import { RenameSectionDialog } from "./RenameSectionDialog";
+import { RenameDialog } from "./RenameDialog";
 
-export interface SidebarSectionWithMenuProps {
+export interface SidebarSectionNodeWithMenuProps {
     node: FernNavigation.SectionNode;
-    trigger: ReactNode;
+    children: ReactNode;
     /** Ref to the CreatePageButton to trigger its popover */
     createPageButtonRef: RefObject<CreatePageButtonHandle | null>;
 }
 
-export function SidebarSectionWithMenu({ node, trigger, createPageButtonRef }: SidebarSectionWithMenuProps): ReactNode {
+export function SidebarSectionNodeWithMenu({
+    node,
+    children,
+    createPageButtonRef
+}: SidebarSectionNodeWithMenuProps): ReactNode {
     const navigation = useNavigation();
     const isEditingDisabled = useEditingDisabled();
     const [showRenameDialog, setShowRenameDialog] = useState(false);
@@ -55,11 +59,24 @@ export function SidebarSectionWithMenu({ node, trigger, createPageButtonRef }: S
         <>
             <div
                 ref={containerRef}
-                className="group sidebar-section-with-menu relative"
+                className="group sidebar-section-node-with-menu relative"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
-                {trigger}
+                {children}
+
+                {/* Drag handle — positioned to the left of the heading.
+                    Uses group-hover so it stays visible when the cursor moves from
+                    the heading to the handle (both are inside the same group). */}
+                {!isEditingDisabled && (
+                    <div
+                        className="absolute left-0 top-1/2 z-10 -translate-x-full -translate-y-1/2 cursor-grab rounded-md px-0.5 py-1 opacity-0 transition-opacity duration-150 hover:bg-gray-500/40 group-hover:opacity-100 active:cursor-grabbing"
+                        aria-label="Drag to reorder"
+                    >
+                        <GripVertical className="size-3.5 text-muted-foreground" />
+                    </div>
+                )}
+
                 <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenu.Trigger asChild>
                         <button
@@ -68,6 +85,10 @@ export function SidebarSectionWithMenu({ node, trigger, createPageButtonRef }: S
                             title="Section options"
                             aria-label="Section options"
                             disabled={isEditingDisabled}
+                            // Stop propagation so that clicking the "..." button doesn't
+                            // also toggle the Collapsible.Trigger (which wraps this
+                            // component when used inside SidebarCollapseGroup).
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <MoreVertical className="size-4" />
                         </button>
@@ -112,7 +133,7 @@ export function SidebarSectionWithMenu({ node, trigger, createPageButtonRef }: S
             </div>
 
             {/* Render dialogs */}
-            <RenameSectionDialog
+            <RenameDialog
                 open={showRenameDialog}
                 onOpenChange={(open) => !open && setShowRenameDialog(false)}
                 currentTitle={node.title}

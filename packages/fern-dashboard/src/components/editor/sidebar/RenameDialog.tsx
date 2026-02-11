@@ -14,9 +14,6 @@ export interface RenameDialogProps {
     entityType?: "section" | "page";
 }
 
-/** @deprecated Use RenameDialog instead */
-export type RenameSectionDialogProps = RenameDialogProps;
-
 export function RenameDialog({
     open,
     onOpenChange,
@@ -95,6 +92,3 @@ export function RenameDialog({
         </Dialog>
     );
 }
-
-/** @deprecated Use RenameDialog instead */
-export const RenameSectionDialog = RenameDialog;
