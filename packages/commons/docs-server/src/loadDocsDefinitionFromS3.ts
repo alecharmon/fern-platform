@@ -103,34 +103,55 @@ const cachedLoadDocsDefinitionFromS3 = cache(
     }
 );
 
+const MAX_S3_FETCH_RETRIES = 2;
+const S3_RETRY_DELAY_MS = 500;
+
 const uncachedLoadDocsDefinitionFromS3 = async (
     domain: string,
     docsBucketName: string
 ): Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse | undefined> => {
-    try {
-        const cleanDomain = domain.replace(/^https?:\/\//, "");
-        const s3Key = getS3KeyForV1DocsDefinition(cleanDomain);
+    const cleanDomain = domain.replace(/^https?:\/\//, "");
+    const s3Key = getS3KeyForV1DocsDefinition(cleanDomain);
 
-        const signedUrl = await getSignedUrl({
-            Bucket: docsBucketName,
-            Key: s3Key,
-            expiresIn: 60 * 60 // 1 hour
-        });
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= MAX_S3_FETCH_RETRIES + 1; attempt++) {
+        try {
+            const signedUrl = await getSignedUrl({
+                Bucket: docsBucketName,
+                Key: s3Key,
+                expiresIn: 60 * 60 // 1 hour
+            });
 
-        const response = await fetch(signedUrl, {
-            next: { tags: [domain, "loadDocsDefinitionFromS3"] }
-        });
+            const response = await fetch(signedUrl, {
+                next: { tags: [domain, "loadDocsDefinitionFromS3"] }
+            });
 
-        if (response.ok) {
-            console.debug("Successfully loaded docs definition from S3: ", signedUrl);
-            const json = await response.json();
-            return json as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
+            if (response.ok) {
+                if (attempt > 1) {
+                    console.warn(
+                        `[S3 Retry] Successfully loaded docs definition from S3 on attempt ${attempt}/${MAX_S3_FETCH_RETRIES + 1} for domain: ${cleanDomain}`
+                    );
+                } else {
+                    console.debug("Successfully loaded docs definition from S3: ", signedUrl);
+                }
+                const json = await response.json();
+                return json as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
+            }
+            throw new Error(
+                `Failed to load docs definition from S3. Status: ${response.status}. Error: ${await response.text()}`
+            );
+        } catch (error) {
+            lastError = error;
+            if (attempt <= MAX_S3_FETCH_RETRIES) {
+                console.warn(
+                    `[S3 Retry] Attempt ${attempt}/${MAX_S3_FETCH_RETRIES + 1} failed for domain: ${cleanDomain}, retrying in ${S3_RETRY_DELAY_MS}ms`,
+                    error
+                );
+                await new Promise((resolve) => setTimeout(resolve, S3_RETRY_DELAY_MS));
+            }
         }
-        throw new Error(
-            `Failed to load docs definition from S3. Status: ${response.status}. Error: ${await response.text()}`
-        );
-    } catch (error) {
-        console.error("Error loading docs definition from S3:", error);
-        return undefined;
     }
+
+    console.error(`[S3 Retry] All ${MAX_S3_FETCH_RETRIES + 1} attempts failed for domain: ${cleanDomain}`, lastError);
+    return undefined;
 };
