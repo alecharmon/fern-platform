@@ -38,10 +38,18 @@ export async function syncSubscriptionFromStripe(
 
     const orgId = account.org_id;
 
+    // In Stripe v20+, current_period_start/end live on SubscriptionItem, not Subscription.
+    // Derive the subscription-level period from the first item.
+    const firstItem = stripeSubscription.items.data[0];
+    const currentPeriodStart = firstItem ? new Date(firstItem.current_period_start * 1000).toISOString() : undefined;
+    const currentPeriodEnd = firstItem ? new Date(firstItem.current_period_end * 1000).toISOString() : undefined;
+
     const subscriptionResult = await upsertSubscriptionByStripeId({
         org_id: orgId,
         stripe_subscription_id: stripeSubscription.id,
-        status: stripeSubscription.status
+        status: stripeSubscription.status,
+        current_period_start: currentPeriodStart,
+        current_period_end: currentPeriodEnd
     });
 
     if (subscriptionResult.isErr()) {

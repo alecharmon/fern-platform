@@ -182,14 +182,14 @@ describe("syncSubscriptionFromStripe", () => {
         const subscription = {
             id: "sub_stripe_1",
             status: "active",
-            current_period_start: 100,
-            current_period_end: 200,
             customer: "cus_1",
             items: {
                 data: [
                     {
                         id: "si_1",
                         quantity: 2,
+                        current_period_start: 100,
+                        current_period_end: 200,
                         price: { product: "prod_stripe_1" }
                     }
                 ]
@@ -203,6 +203,19 @@ describe("syncSubscriptionFromStripe", () => {
         expect(value.orgId).toBe("org_1");
         expect(value.subscriptionId).toBe("sub_db_1");
         expect(value.itemCount).toBe(1);
+        expect(subscriptionMocks.upsertSubscriptionByStripeId).toHaveBeenCalledWith({
+            org_id: "org_1",
+            stripe_subscription_id: "sub_stripe_1",
+            status: "active",
+            current_period_start: new Date(100 * 1000).toISOString(),
+            current_period_end: new Date(200 * 1000).toISOString()
+        });
+        expect(subscriptionMocks.upsertSubscriptionItem).toHaveBeenCalledWith({
+            org_subscription_id: "sub_db_1",
+            org_billing_product: "prod_db_1",
+            stripe_subscription_item_id: "si_1",
+            quantity: 2
+        });
         expect(subscriptionMocks.deleteSubscriptionItemsNotIn).toHaveBeenCalledWith("sub_db_1", ["si_1"]);
     });
 
@@ -212,8 +225,6 @@ describe("syncSubscriptionFromStripe", () => {
         const subscription = {
             id: "sub_stripe_1",
             status: "active",
-            current_period_start: 100,
-            current_period_end: 200,
             customer: "cus_missing",
             items: { data: [] }
         } as any;
@@ -264,8 +275,6 @@ describe("syncCustomerUpdateFromStripe", () => {
         const mockSubscription = {
             id: "sub_1",
             status: "active",
-            current_period_start: 1,
-            current_period_end: 2,
             customer: "cus_1",
             items: { data: [] }
         } as any;
