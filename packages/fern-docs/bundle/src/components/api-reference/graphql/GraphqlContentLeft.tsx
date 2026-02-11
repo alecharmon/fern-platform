@@ -30,6 +30,14 @@ function hasExpandableFields(
         case "undiscriminatedUnion":
         case "discriminatedUnion":
             return true;
+        case "list":
+        case "set":
+            return hasExpandableFields(unwrapped.shape.itemShape, types);
+        case "map":
+            return (
+                hasExpandableFields(unwrapped.shape.keyShape, types) ||
+                hasExpandableFields(unwrapped.shape.valueShape, types)
+            );
         case "primitive":
         case "literal":
         case "unknown":

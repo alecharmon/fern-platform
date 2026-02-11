@@ -19,6 +19,7 @@ interface TypeDefinitionContextValue {
     collapsible: boolean;
     isWidthConstrained: boolean;
     setIsWidthConstrained?: (value: boolean) => void;
+    isGraphQL: boolean;
 }
 
 export const TypeDefinitionContext = createContext<() => TypeDefinitionContextValue>(() => {
@@ -41,11 +42,13 @@ export function useOptionalTypeDefinitionContext(): TypeDefinitionContextValue |
 export function TypeDefinitionRoot({
     children,
     types,
-    slug
+    slug,
+    isGraphQL = false
 }: {
     children: React.ReactNode;
     types: Record<string, TypeDefinition>;
     slug: string;
+    isGraphQL?: boolean;
 }) {
     const [isWidthConstrained, setIsWidthConstrained] = React.useState(false);
     const ErrorBoundary = useErrorBoundary();
@@ -60,9 +63,10 @@ export function TypeDefinitionRoot({
             anchorIdParts: [],
             collapsible: false,
             isWidthConstrained,
-            setIsWidthConstrained
+            setIsWidthConstrained,
+            isGraphQL
         }),
-        [types, slug, isWidthConstrained]
+        [types, slug, isWidthConstrained, isGraphQL]
     );
 
     return (

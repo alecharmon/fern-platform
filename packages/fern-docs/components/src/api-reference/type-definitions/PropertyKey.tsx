@@ -10,7 +10,7 @@ import { jsonPropertyPathToString } from "../examples/JsonPropertyPath";
 import { useTypeDefinitionContext } from "./TypeDefinitionContext";
 
 export function PropertyKey({ children, ...props }: React.ComponentPropsWithoutRef<"span">) {
-    const { jsonPropertyPath, slug, isResponse } = useTypeDefinitionContext();
+    const { jsonPropertyPath, slug, isResponse, isGraphQL } = useTypeDefinitionContext();
 
     const base = jsonPropertyPathToString(jsonPropertyPath);
     const name = typeof children === "string" ? children : undefined;
@@ -18,7 +18,7 @@ export function PropertyKey({ children, ...props }: React.ComponentPropsWithoutR
     const includesCurrent =
         lastPart?.type === "objectProperty" && "propertyName" in lastPart && lastPart.propertyName === name;
     const fullPath = includesCurrent ? base : name ? (base ? `${base}.${name}` : name) : base;
-    const showTooltip = includesCurrent ? jsonPropertyPath.length > 1 : jsonPropertyPath.length > 0;
+    const showTooltip = !isGraphQL && (includesCurrent ? jsonPropertyPath.length > 1 : jsonPropertyPath.length > 0);
 
     const { copyToClipboard, wasJustCopied } = useCopyToClipboard(fullPath);
 
