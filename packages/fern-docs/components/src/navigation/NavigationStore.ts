@@ -1,5 +1,6 @@
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { type ChangedNodes, type Frontmatter, htmlToMdx, mdxToHtml } from "@fern-docs/mdx";
+import { kebabCase } from "es-toolkit/string";
 import * as yaml from "js-yaml";
 import {
     computeStateHash,
@@ -655,9 +656,10 @@ export class NavigationStore {
             initialMdx: ""
         });
 
-        // Extract the docs file path from the target section's navigation context
+        // Extract the docs file path and tab slug from the target section's navigation context
         // We need to look up the target section in the rootNode to get its version/product context
         let docsYmlFilePath = "docs.yml"; // default fallback
+        let resolvedTabSlug: string | undefined;
         if (this._rootNode && targetSectionId) {
             const targetSectionResult = findSectionById(this._rootNode, targetSectionId);
             if (targetSectionResult) {
@@ -670,6 +672,11 @@ export class NavigationStore {
                     },
                     this._slugToDocsYmlFilePath
                 );
+                resolvedTabSlug = targetSectionResult.tabSlug
+                    ? this._resolveNavSlugToYamlTabKey(
+                          targetSectionResult.tabSlug.split("/").pop() ?? targetSectionResult.tabSlug
+                      )
+                    : undefined;
             } else {
                 // Fallback to baseFoundNode context if we can't find the target section
                 docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
@@ -680,6 +687,7 @@ export class NavigationStore {
                     },
                     this._slugToDocsYmlFilePath
                 );
+                resolvedTabSlug = this._extractTabSlug(deps.baseFoundNode);
             }
         } else {
             // Fallback to baseFoundNode context if rootNode is unavailable
@@ -691,6 +699,7 @@ export class NavigationStore {
                 },
                 this._slugToDocsYmlFilePath
             );
+            resolvedTabSlug = this._extractTabSlug(deps.baseFoundNode);
         }
 
         // Calculate insertion index from RootNode order before injecting
@@ -743,7 +752,7 @@ export class NavigationStore {
             // No longer set sectionTitle for new changes - sectionId is the source of truth
             // Keep field as null for backwards compatibility with old snapshots
             sectionTitle: null,
-            tabSlug: this._extractTabSlug(deps.baseFoundNode),
+            tabSlug: resolvedTabSlug,
             pageEntry: { page: title, path: filename },
             insertionMode: "atIndex",
             insertionIndex: ymlInsertionIndex ?? insertionIndex,
@@ -891,7 +900,11 @@ export class NavigationStore {
                 },
                 this._slugToDocsYmlFilePath
             );
-            tabSlug = newSectionResult.tabSlug;
+            tabSlug = newSectionResult.tabSlug
+                ? this._resolveNavSlugToYamlTabKey(
+                      newSectionResult.tabSlug.split("/").pop() ?? newSectionResult.tabSlug
+                  )
+                : undefined;
         } else {
             // Fallback to parentContainerContext if we can't find the new section
             docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
@@ -1521,40 +1534,60 @@ export class NavigationStore {
             return undefined;
         }
 
-        // The tab identifier must match the KEY from the tabs section in docs.yml.
-        // We need to look this up because the key can be either:
-        // - lowercase (e.g., "guides" for a tab with title "Guides")
-        // - match the title exactly (e.g., "API Reference" for a tab with title "API Reference")
+        const tabSlugSegment = currentTab.slug.split("/").pop() ?? currentTab.slug;
+        return this._resolveNavSlugToYamlTabKey(tabSlugSegment);
+    }
 
-        // Try to find the tab identifier by looking at existing navigation items in docs.yml
-        if (this._docsYmlBaseContent) {
-            for (const [_, ymlContent] of this._docsYmlBaseContent) {
-                try {
-                    const parsed = yaml.load(ymlContent) as any;
-                    if (parsed?.navigation && Array.isArray(parsed.navigation)) {
-                        // Look for navigation items with matching tab slugs or titles
-                        for (const navItem of parsed.navigation) {
-                            if (navItem?.tab) {
-                                // Check if this tab's slug matches (for versioned paths like "platform/v-2/guides")
-                                // Extract the last segment from the current tab's slug
-                                const tabSlugSegment = currentTab.slug.split("/").pop();
-                                const navTabSegment = navItem.tab.split("/").pop();
+    /**
+     * Maps a navigation tree tab slug to the corresponding yaml tab key.
+     * The nav tree uses slugs derived from display-name (e.g., "docs" for display-name "Docs"),
+     * but the yaml tab key can differ (e.g., "home"). This method checks the `tabs` definition
+     * section in docs.yml to find the correct key.
+     */
+    private _resolveNavSlugToYamlTabKey(navTabSlug: string): string {
+        if (!this._docsYmlBaseContent) {
+            return navTabSlug;
+        }
 
-                                // If the slug segments match, this is our tab identifier
-                                if (tabSlugSegment === navTabSegment || navItem.tab === currentTab.title) {
-                                    return navItem.tab;
+        for (const [_, ymlContent] of this._docsYmlBaseContent) {
+            try {
+                const parsed = yaml.load(ymlContent) as Record<string, unknown>;
+                if (!parsed) {
+                    continue;
+                }
+
+                const navigation = parsed.navigation;
+                if (Array.isArray(navigation)) {
+                    for (const navItem of navigation) {
+                        if (navItem?.tab) {
+                            const navTabSegment = String(navItem.tab).split("/").pop();
+                            if (navTabSegment === navTabSlug) {
+                                return navItem.tab;
+                            }
+                        }
+                    }
+                }
+
+                const tabs = parsed.tabs;
+                if (tabs && typeof tabs === "object" && !Array.isArray(tabs)) {
+                    const tabEntries = tabs as Record<string, unknown>;
+                    for (const [tabKey, tabConfig] of Object.entries(tabEntries)) {
+                        if (tabConfig && typeof tabConfig === "object") {
+                            const displayName = (tabConfig as Record<string, unknown>)["display-name"];
+                            if (typeof displayName === "string") {
+                                const derivedSlug = kebabCase(displayName);
+                                if (derivedSlug === navTabSlug) {
+                                    return tabKey;
                                 }
                             }
                         }
                     }
-                } catch {
-                    // Ignore parse errors and continue
                 }
+            } catch {
+                // Ignore parse errors and continue
             }
         }
 
-        // Fallback: If we can't find it in the YAML, use the slug's last segment
-        // This handles the case where the docs.yml hasn't been written yet
-        return currentTab.slug.split("/").pop() || currentTab.slug;
+        return navTabSlug;
     }
 }

@@ -640,6 +640,462 @@ slug: page-b
         expect(ymlContent).toContain("PAGE B");
     });
 
+    it("should use target section tab slug instead of baseFoundNode tab slug", async () => {
+        const docsYmlContent = `
+navigation:
+  - tab: guides
+    layout:
+      - section: Getting Started
+        contents:
+          - page: Introduction
+            path: docs/pages/introduction.mdx
+  - tab: reference
+    layout:
+      - section: API Docs
+        contents:
+          - page: Endpoints
+            path: docs/pages/endpoints.mdx
+`;
+
+        const docsYmlBaseContent = new Map([["docs.yml", docsYmlContent]]);
+
+        await store.hydrate({ latestDocsYmlAndReferences: docsYmlBaseContent });
+
+        const rootNode: FernNavigation.RootNode = {
+            type: "root",
+            id: "root" as FernNavigation.NodeId,
+            version: "v2",
+            title: "Root",
+            slug: "root" as FernNavigation.Slug,
+            canonicalSlug: undefined,
+            icon: undefined,
+            hidden: undefined,
+            authed: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            pointsTo: undefined,
+            roles: undefined,
+            child: {
+                type: "unversioned",
+                id: "unversioned" as FernNavigation.NodeId,
+                landingPage: undefined,
+                child: {
+                    type: "tabbed",
+                    id: "tabbed" as FernNavigation.NodeId,
+                    children: [
+                        {
+                            type: "tab",
+                            id: "tab-guides" as FernNavigation.NodeId,
+                            slug: "guides" as FernNavigation.Slug,
+                            title: "Guides",
+                            canonicalSlug: undefined,
+                            icon: undefined,
+                            hidden: undefined,
+                            authed: undefined,
+                            viewers: undefined,
+                            orphaned: undefined,
+                            featureFlags: undefined,
+                            pointsTo: undefined,
+                            child: {
+                                type: "sidebarRoot",
+                                id: "sidebar-root-guides" as FernNavigation.NodeId,
+                                children: [
+                                    {
+                                        type: "section",
+                                        id: "section-getting-started" as FernNavigation.NodeId,
+                                        title: "Getting Started",
+                                        slug: "getting-started" as FernNavigation.Slug,
+                                        collapsed: false,
+                                        overviewPageId: undefined,
+                                        canonicalSlug: undefined,
+                                        icon: undefined,
+                                        hidden: undefined,
+                                        authed: undefined,
+                                        viewers: undefined,
+                                        orphaned: undefined,
+                                        featureFlags: undefined,
+                                        noindex: undefined,
+                                        availability: undefined,
+                                        pointsTo: undefined,
+                                        children: [
+                                            {
+                                                type: "page",
+                                                id: "page-intro" as FernNavigation.NodeId,
+                                                pageId: "docs/pages/introduction.mdx" as FernNavigation.PageId,
+                                                title: "Introduction",
+                                                slug: "introduction" as FernNavigation.Slug,
+                                                canonicalSlug: undefined,
+                                                icon: undefined,
+                                                hidden: undefined,
+                                                authed: undefined,
+                                                viewers: undefined,
+                                                orphaned: undefined,
+                                                featureFlags: undefined,
+                                                noindex: undefined,
+                                                availability: undefined
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            type: "tab",
+                            id: "tab-reference" as FernNavigation.NodeId,
+                            slug: "reference" as FernNavigation.Slug,
+                            title: "Reference",
+                            canonicalSlug: undefined,
+                            icon: undefined,
+                            hidden: undefined,
+                            authed: undefined,
+                            viewers: undefined,
+                            orphaned: undefined,
+                            featureFlags: undefined,
+                            pointsTo: undefined,
+                            child: {
+                                type: "sidebarRoot",
+                                id: "sidebar-root-reference" as FernNavigation.NodeId,
+                                children: [
+                                    {
+                                        type: "section",
+                                        id: "section-api-docs" as FernNavigation.NodeId,
+                                        title: "API Docs",
+                                        slug: "api-docs" as FernNavigation.Slug,
+                                        collapsed: false,
+                                        overviewPageId: undefined,
+                                        canonicalSlug: undefined,
+                                        icon: undefined,
+                                        hidden: undefined,
+                                        authed: undefined,
+                                        viewers: undefined,
+                                        orphaned: undefined,
+                                        featureFlags: undefined,
+                                        noindex: undefined,
+                                        availability: undefined,
+                                        pointsTo: undefined,
+                                        children: [
+                                            {
+                                                type: "page",
+                                                id: "page-endpoints" as FernNavigation.NodeId,
+                                                pageId: "docs/pages/endpoints.mdx" as FernNavigation.PageId,
+                                                title: "Endpoints",
+                                                slug: "endpoints" as FernNavigation.Slug,
+                                                canonicalSlug: undefined,
+                                                icon: undefined,
+                                                hidden: undefined,
+                                                authed: undefined,
+                                                viewers: undefined,
+                                                orphaned: undefined,
+                                                featureFlags: undefined,
+                                                noindex: undefined,
+                                                availability: undefined
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+
+        store.setRootNode(rootNode);
+
+        const baseFoundNode = {
+            type: "found" as const,
+            node: {} as any,
+            parents: [],
+            sidebar: undefined,
+            tabs: [],
+            currentTab: { slug: "guides" } as any,
+            currentVersion: undefined,
+            currentProduct: undefined,
+            currentVariant: undefined,
+            isCurrentVersionDefault: true,
+            isCurrentProductDefault: true
+        };
+
+        const newPageMdx = `---
+title: New API Page
+slug: new-api-page
+---
+
+# New API Page
+`;
+
+        store.createClientPage("docs/pages/new-api-page.mdx", {
+            source: "client",
+            filename: "docs/pages/new-api-page.mdx",
+            initialMdx: newPageMdx,
+            baseFoundNode,
+            targetSectionPath: [
+                {
+                    id: "sidebar-root-reference" as FernNavigation.NodeId,
+                    type: "sidebarRoot",
+                    title: null
+                },
+                {
+                    id: "section-api-docs" as FernNavigation.NodeId,
+                    type: "section",
+                    title: "API Docs"
+                }
+            ]
+        });
+
+        const files = store.files;
+
+        expect(files.changed["docs.yml"]).toBeDefined();
+        const ymlContent = files.changed["docs.yml"]!;
+
+        expect(ymlContent).toContain("New API Page");
+
+        const lines = ymlContent.split("\n");
+        const referenceTabIndex = lines.findIndex((line) => line.includes("tab: reference"));
+        const guidesTabIndex = lines.findIndex((line) => line.includes("tab: guides"));
+        const newPageIndex = lines.findIndex((line) => line.includes("New API Page"));
+
+        expect(referenceTabIndex).toBeGreaterThan(-1);
+        expect(guidesTabIndex).toBeGreaterThan(-1);
+        expect(newPageIndex).toBeGreaterThan(-1);
+        expect(newPageIndex).toBeGreaterThan(referenceTabIndex);
+    });
+
+    it("should resolve tab yaml key when it differs from display-name derived slug", async () => {
+        const docsYmlContent = `
+tabs:
+  home:
+    display-name: Docs
+    icon: home
+  guides:
+    display-name: Guides
+    icon: book
+
+navigation:
+  - tab: home
+    layout:
+      - section: Getting Started
+        contents:
+          - page: Welcome
+            path: docs/pages/welcome.mdx
+  - tab: guides
+    layout:
+      - section: Tutorials
+        contents:
+          - page: Quick Start
+            path: docs/pages/quick-start.mdx
+`;
+
+        const docsYmlBaseContent = new Map([["docs.yml", docsYmlContent]]);
+
+        await store.hydrate({ latestDocsYmlAndReferences: docsYmlBaseContent });
+
+        const rootNode: FernNavigation.RootNode = {
+            type: "root",
+            id: "root" as FernNavigation.NodeId,
+            version: "v2",
+            title: "Root",
+            slug: "root" as FernNavigation.Slug,
+            canonicalSlug: undefined,
+            icon: undefined,
+            hidden: undefined,
+            authed: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            pointsTo: undefined,
+            roles: undefined,
+            child: {
+                type: "unversioned",
+                id: "unversioned" as FernNavigation.NodeId,
+                landingPage: undefined,
+                child: {
+                    type: "tabbed",
+                    id: "tabbed" as FernNavigation.NodeId,
+                    children: [
+                        {
+                            type: "tab",
+                            id: "tab-home" as FernNavigation.NodeId,
+                            slug: "docs" as FernNavigation.Slug,
+                            title: "Docs",
+                            canonicalSlug: undefined,
+                            icon: undefined,
+                            hidden: undefined,
+                            authed: undefined,
+                            viewers: undefined,
+                            orphaned: undefined,
+                            featureFlags: undefined,
+                            pointsTo: undefined,
+                            child: {
+                                type: "sidebarRoot",
+                                id: "sidebar-root-home" as FernNavigation.NodeId,
+                                children: [
+                                    {
+                                        type: "section",
+                                        id: "section-getting-started" as FernNavigation.NodeId,
+                                        title: "Getting Started",
+                                        slug: "getting-started" as FernNavigation.Slug,
+                                        collapsed: false,
+                                        overviewPageId: undefined,
+                                        canonicalSlug: undefined,
+                                        icon: undefined,
+                                        hidden: undefined,
+                                        authed: undefined,
+                                        viewers: undefined,
+                                        orphaned: undefined,
+                                        featureFlags: undefined,
+                                        noindex: undefined,
+                                        availability: undefined,
+                                        pointsTo: undefined,
+                                        children: [
+                                            {
+                                                type: "page",
+                                                id: "page-welcome" as FernNavigation.NodeId,
+                                                pageId: "docs/pages/welcome.mdx" as FernNavigation.PageId,
+                                                title: "Welcome",
+                                                slug: "welcome" as FernNavigation.Slug,
+                                                canonicalSlug: undefined,
+                                                icon: undefined,
+                                                hidden: undefined,
+                                                authed: undefined,
+                                                viewers: undefined,
+                                                orphaned: undefined,
+                                                featureFlags: undefined,
+                                                noindex: undefined,
+                                                availability: undefined
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            type: "tab",
+                            id: "tab-guides" as FernNavigation.NodeId,
+                            slug: "guides" as FernNavigation.Slug,
+                            title: "Guides",
+                            canonicalSlug: undefined,
+                            icon: undefined,
+                            hidden: undefined,
+                            authed: undefined,
+                            viewers: undefined,
+                            orphaned: undefined,
+                            featureFlags: undefined,
+                            pointsTo: undefined,
+                            child: {
+                                type: "sidebarRoot",
+                                id: "sidebar-root-guides" as FernNavigation.NodeId,
+                                children: [
+                                    {
+                                        type: "section",
+                                        id: "section-tutorials" as FernNavigation.NodeId,
+                                        title: "Tutorials",
+                                        slug: "tutorials" as FernNavigation.Slug,
+                                        collapsed: false,
+                                        overviewPageId: undefined,
+                                        canonicalSlug: undefined,
+                                        icon: undefined,
+                                        hidden: undefined,
+                                        authed: undefined,
+                                        viewers: undefined,
+                                        orphaned: undefined,
+                                        featureFlags: undefined,
+                                        noindex: undefined,
+                                        availability: undefined,
+                                        pointsTo: undefined,
+                                        children: [
+                                            {
+                                                type: "page",
+                                                id: "page-quick-start" as FernNavigation.NodeId,
+                                                pageId: "docs/pages/quick-start.mdx" as FernNavigation.PageId,
+                                                title: "Quick Start",
+                                                slug: "quick-start" as FernNavigation.Slug,
+                                                canonicalSlug: undefined,
+                                                icon: undefined,
+                                                hidden: undefined,
+                                                authed: undefined,
+                                                viewers: undefined,
+                                                orphaned: undefined,
+                                                featureFlags: undefined,
+                                                noindex: undefined,
+                                                availability: undefined
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+
+        store.setRootNode(rootNode);
+
+        const baseFoundNode = {
+            type: "found" as const,
+            node: {} as any,
+            parents: [],
+            sidebar: undefined,
+            tabs: [],
+            currentTab: { slug: "docs" } as any,
+            currentVersion: undefined,
+            currentProduct: undefined,
+            currentVariant: undefined,
+            isCurrentVersionDefault: true,
+            isCurrentProductDefault: true
+        };
+
+        const newPageMdx = `---
+title: New Docs Page
+slug: new-docs-page
+---
+
+# New Docs Page
+`;
+
+        store.createClientPage("docs/pages/new-docs-page.mdx", {
+            source: "client",
+            filename: "docs/pages/new-docs-page.mdx",
+            initialMdx: newPageMdx,
+            baseFoundNode,
+            targetSectionPath: [
+                {
+                    id: "sidebar-root-home" as FernNavigation.NodeId,
+                    type: "sidebarRoot",
+                    title: null
+                },
+                {
+                    id: "section-getting-started" as FernNavigation.NodeId,
+                    type: "section",
+                    title: "Getting Started"
+                }
+            ]
+        });
+
+        const files = store.files;
+
+        expect(files.changed["docs.yml"]).toBeDefined();
+        const ymlContent = files.changed["docs.yml"]!;
+
+        expect(ymlContent).toContain("New Docs Page");
+
+        // The critical assertion: the page should be written under `- tab: home` (the yaml key),
+        // NOT `- tab: docs` (the display-name derived slug from the nav tree)
+        expect(ymlContent).toContain("- tab: home");
+        expect(ymlContent).not.toMatch(/- tab: docs\b/);
+
+        // Verify the page appears under the home tab section
+        const lines = ymlContent.split("\n");
+        const homeTabIndex = lines.findIndex((line) => line.includes("tab: home"));
+        const newPageIndex = lines.findIndex((line) => line.includes("New Docs Page"));
+
+        expect(homeTabIndex).toBeGreaterThan(-1);
+        expect(newPageIndex).toBeGreaterThan(-1);
+        expect(newPageIndex).toBeGreaterThan(homeTabIndex);
+    });
+
     it("should NOT update pages in different yml files when renaming section", async () => {
         // This test replicates a potential bug where renaming a section in one yml file
         // incorrectly updates add_page changes in a DIFFERENT yml file with the same section name
