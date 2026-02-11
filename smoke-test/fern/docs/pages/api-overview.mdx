@@ -17,3 +17,21 @@ Use the following endpoint to create a new task:
 Here's the schema for a Task object:
 
 <Schema api="api" type="Task" />
+
+## Task Schema (with description)
+
+Here's the same schema, but with the type description included:
+
+<Schema api="api" type="Task" description />
+
+## gRPC Comment Schema (with description)
+
+Here's a Protobuf message schema with description rendered from proto comments:
+
+<Schema api="grpc-api" type="Comment" description />
+
+## gRPC Comment Schema (without description)
+
+Same schema, without the description:
+
+<Schema api="grpc-api" type="Comment" />

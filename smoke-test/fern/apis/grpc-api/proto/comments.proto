@@ -20,16 +20,21 @@ service CommentsService {
   }
 }
 
+// Request message for creating a new comment on a resource.
+// The caller must provide the resource ID, comment text, and author name.
 message CreateCommentRequest {
   string resource_id = 1;
   string text = 2;
   string author = 3;
 }
 
+// Response message containing the newly created comment.
 message CreateCommentResponse {
   Comment comment = 1;
 }
 
+// Represents a comment left on a resource.
+// Each comment has a unique ID, is associated with a resource, and tracks the author and creation time.
 message Comment {
   string id = 1;
   string resource_id = 2;

@@ -5,8 +5,11 @@ import {
     TypeDefinitionRoot
 } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
+import type React from "react";
+import { SerializedMdxRenderer } from "@/components/api-reference/type-definitions/SerializedMdxRenderer";
 import { TypeDefinitionSlotsServer } from "@/components/api-reference/type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "@/components/api-reference/type-definitions/TypeReferenceDefinitions";
+import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { TypeDefinitionWithSerializedDescriptions } from "@/mdx/plugins/serialize-type-definition-descriptions";
 
 type SchemaProps = {
@@ -21,9 +24,21 @@ type SchemaProps = {
     className?: string;
     exclude?: string[];
     excludeDeprecated?: boolean;
+    /**
+     * If true, includes the type definition's description (e.g. Protobuf message comments).
+     */
+    description?: boolean;
 };
 
-export function Schema({ typeDefinition, types, lang, className, exclude, excludeDeprecated }: SchemaProps) {
+export function Schema({
+    typeDefinition,
+    types,
+    lang,
+    className,
+    exclude,
+    excludeDeprecated,
+    description
+}: SchemaProps) {
     const currentSlug = useCurrentSlug();
 
     if (typeDefinition == null || types == null) {
@@ -32,12 +47,38 @@ export function Schema({ typeDefinition, types, lang, className, exclude, exclud
 
     const schemaName = typeDefinition.displayName || typeDefinition.name || "schema";
 
+    const serializedDescription = (typeDefinition as TypeDefinitionWithSerializedDescriptions).serializedDescription;
+    const rawDescription = typeDefinition.description;
+
+    let descriptionContent: React.ReactNode = null;
+    if (description) {
+        if (serializedDescription) {
+            descriptionContent = (
+                <SerializedMdxRenderer
+                    serializedDescription={serializedDescription}
+                    fallback={rawDescription}
+                    size="sm"
+                    className="text-(color:--grayscale-a11) mb-4"
+                />
+            );
+        } else if (rawDescription) {
+            descriptionContent = (
+                <MdxServerComponentProseSuspense
+                    mdx={rawDescription}
+                    size="sm"
+                    className="text-(color:--grayscale-a11) mb-4"
+                />
+            );
+        }
+    }
+
     return (
         <TypeDefinitionRoot types={types} slug={currentSlug}>
             <TypeDefinitionSlotsServer types={types} lang={lang ?? "en"}>
                 <TypeDefinitionAnchorPart part={schemaName}>
                     <SectionContainer>
                         <div className={className}>
+                            {descriptionContent}
                             <TypeReferenceDefinitions
                                 shape={typeDefinition.shape}
                                 types={types}
