@@ -102,6 +102,9 @@ function getSelfHostedAuthConfig(): AuthEdgeConfig | undefined {
                 redirect: process.env.FERN_AUTH_REDIRECT ?? "",
                 logout: process.env.FERN_AUTH_LOGOUT,
                 returnToQueryParam: process.env.FERN_AUTH_RETURN_TO_QUERY_PARAM,
+                "api-key-injection-enabled":
+                    process.env.FERN_API_KEY_INJECTION_ENABLED === "true" ||
+                    process.env.FERN_API_KEY_INJECTION_ENABLED === "1",
                 allowlist,
                 denylist
             };
@@ -126,6 +129,9 @@ function getSelfHostedAuthConfig(): AuthEdgeConfig | undefined {
                 scope: process.env.FERN_AUTH_SCOPE,
                 issuer: process.env.FERN_AUTH_ISSUER,
                 roles_claim: process.env.FERN_AUTH_ROLES_CLAIM,
+                "api-key-injection-enabled":
+                    process.env.FERN_API_KEY_INJECTION_ENABLED === "true" ||
+                    process.env.FERN_API_KEY_INJECTION_ENABLED === "1",
                 allowlist,
                 denylist
             };
@@ -166,11 +172,68 @@ function getSelfHostedAuthConfig(): AuthEdgeConfig | undefined {
 }
 
 export async function getApiKeyInjectionEdgeConfig(currentDomain: string): Promise<AuthEdgeConfig | undefined> {
-    if (isLocal() || isSelfHosted()) {
+    if (isLocal()) {
         return undefined;
     }
 
+    if (isSelfHosted()) {
+        return getSelfHostedApiKeyInjectionConfig();
+    }
+
     return getRecord(currentDomain, "api-key-injection");
+}
+
+function getSelfHostedApiKeyInjectionConfig(): AuthEdgeConfig | undefined {
+    const enabled =
+        process.env.FERN_API_KEY_INJECTION_ENABLED === "true" || process.env.FERN_API_KEY_INJECTION_ENABLED === "1";
+    if (!enabled) {
+        return undefined;
+    }
+
+    const injectionType = process.env.FERN_API_KEY_INJECTION_TYPE;
+    if (!injectionType) {
+        return undefined;
+    }
+
+    let raw: Record<string, unknown>;
+
+    switch (injectionType) {
+        case "basic_token_verification":
+            raw = {
+                type: "basic_token_verification" as const,
+                secret: process.env.FERN_API_KEY_INJECTION_SECRET ?? "",
+                issuer: process.env.FERN_API_KEY_INJECTION_ISSUER ?? "",
+                redirect: process.env.FERN_API_KEY_INJECTION_REDIRECT ?? "",
+                logout: process.env.FERN_API_KEY_INJECTION_LOGOUT,
+                returnToQueryParam: process.env.FERN_API_KEY_INJECTION_RETURN_TO_QUERY_PARAM,
+                "api-key-injection-enabled": true
+            };
+            break;
+        case "oauth2":
+            raw = {
+                type: "oauth2" as const,
+                partner: process.env.FERN_API_KEY_INJECTION_PARTNER ?? "",
+                clientId: process.env.FERN_API_KEY_INJECTION_CLIENT_ID ?? "",
+                clientSecret: process.env.FERN_API_KEY_INJECTION_CLIENT_SECRET ?? "",
+                auth_endpoint: process.env.FERN_API_KEY_INJECTION_ENDPOINT ?? "",
+                token_endpoint: process.env.FERN_API_KEY_INJECTION_TOKEN_ENDPOINT ?? "",
+                redirectUri: process.env.FERN_API_KEY_INJECTION_REDIRECT,
+                scope: process.env.FERN_API_KEY_INJECTION_SCOPE,
+                issuer: process.env.FERN_API_KEY_INJECTION_ISSUER,
+                "api-key-injection-enabled": true
+            };
+            break;
+        default:
+            console.error(`[self-hosted] Unknown FERN_API_KEY_INJECTION_TYPE: ${injectionType}`);
+            return undefined;
+    }
+
+    const result = AuthEdgeConfigSchema.safeParse(raw);
+    if (result.success) {
+        return result.data;
+    }
+    console.error("[self-hosted] API key injection config validation FAILED:", result.error.message);
+    return undefined;
 }
 
 // hard-coded api key for demo purposes

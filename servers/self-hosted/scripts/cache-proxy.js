@@ -46,6 +46,8 @@ const ADDITIONAL_ALLOWED_DOMAINS = process.env.CORS_PROXY_ALLOWED_DOMAINS
 const TEST_LOGIN_ENABLED = process.env.FERN_AUTH_TEST_LOGIN === "1" || process.env.FERN_AUTH_TEST_LOGIN === "true";
 const FERN_AUTH_SECRET = process.env.FERN_AUTH_SECRET || "";
 const FERN_AUTH_ISSUER = process.env.FERN_AUTH_ISSUER || "https://buildwithfern.com";
+const API_KEY_INJECTION_ENABLED =
+    process.env.FERN_API_KEY_INJECTION_ENABLED === "true" || process.env.FERN_API_KEY_INJECTION_ENABLED === "1";
 
 /**
  * Extract the root domain from a hostname.
@@ -630,8 +632,42 @@ function base64url(input) {
 function mintTestFernJWT(secret, issuer) {
     const header = { alg: "HS256", typ: "JWT" };
     const now = Math.floor(Date.now() / 1000);
+
+    const rand = () => Math.random().toString(36).slice(2, 10);
+    let fernPayload = {};
+    if (API_KEY_INJECTION_ENABLED) {
+        fernPayload = {
+            playground: {
+                initial_state: {
+                    auth: {
+                        bearer_token: "test-bearer-" + rand()
+                    }
+                },
+                env_state: {
+                    prod: {
+                        auth: {
+                            bearer_token: JSON.stringify([
+                                { "application 1": "key-" + rand() },
+                                { "application 2": "key-" + rand() }
+                            ])
+                        }
+                    },
+                    dev: {
+                        auth: {
+                            bearer_token: JSON.stringify([
+                                { foo: "bar-" + rand() },
+                                { biz: "bazz-" + rand() },
+                                { buzz: "bee-" + rand() }
+                            ])
+                        }
+                    }
+                }
+            }
+        };
+    }
+
     const payload = {
-        fern: {},
+        fern: fernPayload,
         iat: now,
         exp: now + 30 * 24 * 60 * 60, // 30 days
         iss: issuer || "https://buildwithfern.com"

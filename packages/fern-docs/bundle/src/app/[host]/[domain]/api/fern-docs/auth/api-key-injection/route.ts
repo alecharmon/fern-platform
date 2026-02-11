@@ -6,11 +6,10 @@ import { getOryAuthorizationUrl, OryOAuth2Client } from "@fern-api/docs-server/a
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
 import { getJwtSecretKey } from "@fern-api/docs-server/auth/workos";
-import { fernToken_admin } from "@fern-api/docs-server/env-variables";
+
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
-import { removeTrailingSlash } from "@fern-api/docs-utils";
+import { COOKIE_FERN_TOKEN, removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getApiKeyInjectionEdgeConfig, getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { decodeJwt, SignJWT } from "jose";
@@ -21,7 +20,7 @@ import { WebflowClient } from "webflow-api";
 import type { OauthScope } from "webflow-api/api/types/OAuthScope";
 
 export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectionConfig>> {
-    if (isLocal() || isSelfHosted()) {
+    if (isLocal()) {
         return NextResponse.json({
             enabled: false,
             returnToQueryParam: ""
@@ -38,12 +37,12 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
 
     const returnToQueryParam = getReturnToQueryParam(edgeConfig);
 
-    // fern_token should be set for JWT auto-populate api key
-    const fern_token_cookie = cookieJar.get("fern_token")?.value;
-    const fern_token = fernToken_admin();
+    // User JWT: check request header first (for server-to-server calls), then cookie (for browser calls).
+    // This follows the same pattern as other routes (search/key, auth/verify, llms.txt, etc.)
+    const fern_token = req.headers.get("FERN_TOKEN") ?? cookieJar.get(COOKIE_FERN_TOKEN)?.value;
     const access_token = cookieJar.get("access_token")?.value;
     const refresh_token = cookieJar.get("refresh_token")?.value;
-    const fernUser = await safeVerifyFernJWTConfig(fern_token_cookie ?? fern_token, edgeConfig);
+    const fernUser = await safeVerifyFernJWTConfig(fern_token, edgeConfig);
 
     // if the JWT is valid, and the user has an API key, return it
     if (fernUser?.api_key != null) {
@@ -136,9 +135,9 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
     }
 
     if (edgeConfig.type === "oauth2" && "auth_endpoint" in edgeConfig) {
-        if (fern_token_cookie && edgeConfig["api-key-injection-enabled"]) {
+        if (fern_token && edgeConfig["api-key-injection-enabled"]) {
             try {
-                const decodedToken = decodeJwt(fern_token_cookie);
+                const decodedToken = decodeJwt(fern_token);
                 const refresh_token = decodedToken.refresh_token as string | undefined;
 
                 if (refresh_token && edgeConfig.token_endpoint) {
