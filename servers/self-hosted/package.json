@@ -18,16 +18,19 @@
     "k8s:start": "sh kubernetes-example/k8s-start.sh",
     "k8s:stop": "sh kubernetes-example/k8s-delete.sh",
     "k8s:logs": "kubectl logs -f -l app=fern-docs",
+    "build:cache-proxy": "npx tsc -p scripts/cache-proxy/tsconfig.json",
     "perf": "tsx scripts/perf-test.ts",
     "test:self-hosted": "vitest src/__test__ --globals --config src/__test__/vitest.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.1",
+    "@types/node": "^22.0.0",
     "chalk": "4",
     "commander": "^14.0.1",
     "dotenv": "^16.4.5",
     "execa": "^8.0.1",
     "tsx": "^4.20.6",
+    "typescript": "catalog:",
     "vitest": "catalog:"
   }
 }

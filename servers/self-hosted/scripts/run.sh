@@ -666,39 +666,25 @@ if [ $NEXTJS_ATTEMPTS -lt $MAX_NEXTJS_ATTEMPTS ]; then
     log "Next.js is ready (responding on port ${NEXTJS_INTERNAL_PORT})"
 fi
 
-# --------------  Start cache proxy (disabled when auth is configured) --------------
-if [ -n "${FERN_AUTH_TYPE:-}" ]; then
-    log "Auth is configured (FERN_AUTH_TYPE=${FERN_AUTH_TYPE}), disabling cache proxy"
-    log "Cache proxy does not respect middleware auth redirects, so it must be bypassed when auth is enabled"
-    # Run Next.js directly on the external port by using a simple TCP proxy
-    # This ensures all requests go through Next.js middleware (including auth)
-    CACHE_DISABLED=1 \
-    CACHE_PROXY_PORT=${CACHE_PROXY_PORT} \
-    NEXTJS_PORT=${NEXTJS_INTERNAL_PORT} \
-    NEXTJS_HOST="127.0.0.1" \
-    CACHE_PROXY_DEBUG="${CACHE_PROXY_DEBUG:-0}" \
-    node /scripts/cache-proxy.js 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
-    cache_proxy_pid=$!
-    log "Cache proxy PID (caching disabled, pass-through mode): $cache_proxy_pid"
-else
-    log "Starting cache proxy on port ${CACHE_PROXY_PORT}..."
-
-    # Cache proxy configuration
-    # CACHE_MAX_ENTRIES: Maximum number of pages to cache (default: 1000)
-    # CACHE_MAX_ENTRY_SIZE: Maximum size per cached entry in bytes (default: 5MB)
-    # CACHE_DEFAULT_TTL: Default cache TTL in seconds (default: 2592000 = 30 days)
-    # CACHE_PROXY_DEBUG: Set to "1" for verbose logging
-    CACHE_PROXY_PORT=${CACHE_PROXY_PORT} \
-    NEXTJS_PORT=${NEXTJS_INTERNAL_PORT} \
-    NEXTJS_HOST="127.0.0.1" \
-    CACHE_MAX_ENTRIES="${CACHE_MAX_ENTRIES:-1000}" \
-    CACHE_MAX_ENTRY_SIZE="${CACHE_MAX_ENTRY_SIZE:-5242880}" \
-    CACHE_DEFAULT_TTL="${CACHE_DEFAULT_TTL:-2592000}" \
-    CACHE_PROXY_DEBUG="${CACHE_PROXY_DEBUG:-0}" \
-    node /scripts/cache-proxy.js 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
-    cache_proxy_pid=$!
-    log "Cache proxy PID: $cache_proxy_pid"
-fi
+# --------------  Start cache proxy --------------
+# Cache proxy supports auth-aware caching: cache keys include isLoggedIn + roles from fern_token.
+# When FERN_AUTH_TYPE is set, the proxy uses auth state in cache keys so different users get correct cached responses.
+log "Starting cache proxy on port ${CACHE_PROXY_PORT}..."
+# Cache proxy configuration
+# CACHE_MAX_ENTRIES: Maximum number of pages to cache (default: 1000)
+# CACHE_MAX_ENTRY_SIZE: Maximum size per cached entry in bytes (default: 5MB)
+# CACHE_DEFAULT_TTL: Default cache TTL in seconds (default: 2592000 = 30 days)
+# CACHE_PROXY_DEBUG: Set to "1" for verbose logging
+CACHE_PROXY_PORT=${CACHE_PROXY_PORT} \
+NEXTJS_PORT=${NEXTJS_INTERNAL_PORT} \
+NEXTJS_HOST="127.0.0.1" \
+CACHE_MAX_ENTRIES="${CACHE_MAX_ENTRIES:-1000}" \
+CACHE_MAX_ENTRY_SIZE="${CACHE_MAX_ENTRY_SIZE:-5242880}" \
+CACHE_DEFAULT_TTL="${CACHE_DEFAULT_TTL:-2592000}" \
+CACHE_PROXY_DEBUG="${CACHE_PROXY_DEBUG:-0}" \
+node /scripts/cache-proxy/compiled/index.js 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
+cache_proxy_pid=$!
+log "Cache proxy PID: $cache_proxy_pid"
 
 # Wait for cache proxy to be ready
 log "Waiting for cache proxy to start on port ${CACHE_PROXY_PORT}..."
@@ -717,12 +703,8 @@ if [ $PROXY_ATTEMPTS -lt $MAX_PROXY_ATTEMPTS ]; then
     log "Cache proxy is ready on port ${CACHE_PROXY_PORT}"
 fi
 
-if [ -n "${FERN_AUTH_TYPE:-}" ]; then
-    log "Docs available at http://localhost:${CACHE_PROXY_PORT} (caching disabled, auth mode)"
-else
-    log "Docs available at http://localhost:${CACHE_PROXY_PORT} (with caching)"
-    log "Cache stats available at http://localhost:${CACHE_PROXY_PORT}/__cache/stats"
-fi
+log "Docs available at http://localhost:${CACHE_PROXY_PORT}"
+log "Cache stats available at http://localhost:${CACHE_PROXY_PORT}/__cache/stats"
 
 # --------------  Finish nextapp --------------
 
