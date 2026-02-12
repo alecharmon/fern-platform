@@ -16,6 +16,7 @@ import { useCurrentVariantId } from "../../state/navigation";
 import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarNavigationChild } from "./SidebarNavigationChild";
 import { SidebarRootChild } from "./SidebarRootChild";
+import { SidebarRootSectionNode } from "./SidebarRootSectionNode";
 
 interface SidebarVariantedNodeProps {
     node: FernNavigation.VariantedNode;
@@ -167,8 +168,25 @@ export function SidebarVariantedNode({ node, depth, renderOptions, lang }: Sideb
                         );
                     }
 
-                    // All other types (sections, pages, links, etc.) go through SidebarNavigationChild
-                    // This ensures sections get collapse functionality via SidebarSectionNode
+                    if (child.type === "section" && child.collapsed === false) {
+                        const sectionIcon = processIcon({
+                            node: child,
+                            forceClientRender,
+                            files: renderOptions.files,
+                            preResolvedIcons: renderOptions.preResolvedIcons
+                        });
+                        return (
+                            <li key={child.id}>
+                                <SidebarRootSectionNode
+                                    node={child}
+                                    icon={sectionIcon}
+                                    renderOptions={renderOptions}
+                                    lang={lang}
+                                />
+                            </li>
+                        );
+                    }
+
                     return (
                         <li key={child.id}>
                             <SidebarNavigationChild

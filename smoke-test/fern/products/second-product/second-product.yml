@@ -2,6 +2,9 @@ tabs:
   overview:
     display-name: Overview
     icon: book
+  tab-variants:
+    display-name: Tab Variants
+    icon: book
 
 navigation:
   - tab: overview
@@ -10,3 +13,60 @@ navigation:
         contents:
           - page: Introduction
             path: ../../docs/pages/second-product-intro.mdx
+  - tab: tab-variants
+    variants:
+      - title: Overview
+        default: true
+        layout:
+          - page: Introduction
+            path: ../../docs/pages/second-product-tab-var-1.mdx
+          - section: Resources (Collapsed by default)
+            contents:
+              - link: Fern Overview
+                href: https://buildwithfern.com/learn/docs/getting-started/overview
+                icon: fa-duotone fa-newspaper
+              - link: Fern How it works
+                href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+                icon: fa-duotone fa-users
+          - section: Get Started (Open by default)
+            collapsed: false
+            contents:
+              - link: Fern Overview
+                href: https://buildwithfern.com/learn/docs/getting-started/overview
+                icon: fa-duotone fa-newspaper
+              - link: Fern How it works
+                href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+                icon: fa-duotone fa-users
+              - link: Fern Quickstart
+                href: https://buildwithfern.com/learn/docs/getting-started/overview
+                icon: fa-duotone fa-newspaper
+              - link: Fern Project Structure
+                href: https://buildwithfern.com/learn/docs/getting-started/project-structure
+                icon: fa-duotone fa-users
+      - title: Other Links
+        layout:
+          - page: Introduction
+            path: ../../docs/pages/second-product-tab-var-2.mdx
+          - section: Resources (Collapsed by default)
+            contents:
+              - link: Fern Overview
+                href: https://buildwithfern.com/learn/docs/getting-started/overview
+                icon: fa-duotone fa-newspaper
+              - link: Fern How it works
+                href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+                icon: fa-duotone fa-users
+          - section: Get Started (Open by default)
+            collapsed: false
+            contents:
+              - link: Fern Overview
+                href: https://buildwithfern.com/learn/docs/getting-started/overview
+                icon: fa-duotone fa-newspaper
+              - link: Fern How it works
+                href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+                icon: fa-duotone fa-users
+              - link: Fern Quickstart
+                href: https://buildwithfern.com/learn/docs/getting-started/overview
+                icon: fa-duotone fa-newspaper
+              - link: Fern Project Structure
+                href: https://buildwithfern.com/learn/docs/getting-started/project-structure
+                icon: fa-duotone fa-users
