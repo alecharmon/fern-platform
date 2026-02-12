@@ -72,7 +72,6 @@
     "@types/url-join": "^4.0.1",
     "@types/uuid": "^9.0.1",
     "@ungap/url-search-params": "0.2.2",
-    "@upstash/redis": "^1.35.6",
     "@yarnpkg/pnpify": "^4.0.1",
     "algoliasearch": "^4.24.0",
     "compression": "^1.8.1",

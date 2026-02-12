@@ -4,11 +4,6 @@ import winston from "winston";
 import { FdrDao } from "../db";
 import { type AuthService, AuthServiceImpl } from "../services/auth";
 import { LocalAuthServiceImpl } from "../services/auth/LocalAuthService";
-import {
-    type BasepathRoutesService,
-    NoOpBasepathRoutesService,
-    UpstashBasepathRoutesService
-} from "../services/basepath-routes";
 import { type DatabaseService, DatabaseServiceImpl } from "../services/db";
 import { type DocsDefinitionCache, DocsDefinitionCacheImpl } from "../services/docs-cache/DocsDefinitionCache";
 import RedisDocsDefinitionStore from "../services/docs-cache/RedisDocsDefinitionStore";
@@ -29,7 +24,6 @@ export interface FdrServices {
     readonly revalidator: RevalidatorService;
     readonly libraryDocs: LibraryDocsService;
     readonly pdfExport: PdfExportService;
-    readonly basepathRoutes: BasepathRoutesService;
 }
 
 export const LOGGER = winston.createLogger({
@@ -77,8 +71,7 @@ export class FdrApplication {
             slack: services?.slack ?? new SlackServiceImpl(this),
             revalidator: services?.revalidator ?? new RevalidatorServiceImpl(),
             libraryDocs: services?.libraryDocs ?? new LibraryDocsServiceImpl(this),
-            pdfExport: services?.pdfExport ?? new PdfExportServiceImpl(this),
-            basepathRoutes: services?.basepathRoutes ?? this.createBasepathRoutesService()
+            pdfExport: services?.pdfExport ?? new PdfExportServiceImpl(this)
         };
 
         this.dao = new FdrDao(prisma);
@@ -103,18 +96,6 @@ export class FdrApplication {
                         line: frame.getLineNumber()
                     }))
                 });
-        }
-    }
-
-    private createBasepathRoutesService(): BasepathRoutesService {
-        if (this.config.localModeOverride) {
-            return new NoOpBasepathRoutesService();
-        }
-        try {
-            return new UpstashBasepathRoutesService({ logger: this.logger });
-        } catch {
-            this.logger.warn("[FdrApplication] Failed to create UpstashBasepathRoutesService, using no-op");
-            return new NoOpBasepathRoutesService();
         }
     }
 
