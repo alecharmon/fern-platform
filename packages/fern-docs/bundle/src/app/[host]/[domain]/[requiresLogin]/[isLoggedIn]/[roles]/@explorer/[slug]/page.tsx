@@ -13,8 +13,9 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import { permanentRedirect, RedirectType, redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { ExplorerContent, NoEndpointSelected } from "@/components/playground/ExplorerContent";
+import { ExplorerContent } from "@/components/playground/ExplorerContent";
 import { PlaygroundEndpointSkeleton } from "@/components/playground/endpoint";
+import { NoEndpointSelected } from "@/components/playground/NoEndpointSelected";
 
 export const revalidate = false;
 

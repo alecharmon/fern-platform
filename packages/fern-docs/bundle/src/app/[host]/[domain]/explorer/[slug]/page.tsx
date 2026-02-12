@@ -8,8 +8,9 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { getFernToken } from "@/app/fern-token";
-import { ExplorerContent, NoEndpointSelected } from "@/components/playground/ExplorerContent";
+import { ExplorerContent } from "@/components/playground/ExplorerContent";
 import { PlaygroundEndpointSkeleton } from "@/components/playground/endpoint";
+import { NoEndpointSelected } from "@/components/playground/NoEndpointSelected";
 import { runAsyncSpan } from "@/server/tracing";
 
 export default async function Page(props: { params: Promise<{ host: string; domain: string; slug: string }> }) {

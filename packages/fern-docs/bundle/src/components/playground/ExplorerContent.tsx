@@ -4,12 +4,10 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { type ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import { createEndpointContext, createWebSocketContext, type EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type { NavigationNodePage } from "@fern-api/fdr-sdk/navigation";
-import { t } from "@fern-docs/i18n";
-import { ArrowLeft } from "lucide-react";
 import { ApiDefinitionIdProvider } from "@/contexts/ApiDefinitionIdContext";
-
 import { PlaygroundAuthorizationFormCard } from "./auth";
 import { PlaygroundEndpoint } from "./endpoint";
+import { NoEndpointSelected } from "./NoEndpointSelected";
 import { PlaygroundWebSocket } from "./websocket";
 
 export async function ExplorerContent({
@@ -125,13 +123,4 @@ export async function ExplorerContent({
         );
     }
     return <NoEndpointSelected lang={lang} />;
-}
-
-export function NoEndpointSelected({ lang }: { lang: string }) {
-    return (
-        <div className="flex size-full flex-col items-center justify-center">
-            <ArrowLeft className="t-muted mb-2 size-8" />
-            <h6 className="t-muted">{t(lang).playground.selectAnEndpointToGetStarted}</h6>
-        </div>
-    );
 }
