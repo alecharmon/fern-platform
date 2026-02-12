@@ -7,9 +7,14 @@ COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt
 
 # Install system dependencies
 # Update OpenSSL packages to fix CVE-2025-15467 (Critical), CVE-2025-69420 (High), CVE-2025-69419 (High)
-RUN apt-get update && \
+# Update GnuTLS to fix CVE-2025-14831 (Medium) - pinned from sid until trixie backport lands
+RUN echo 'deb http://deb.debian.org/debian sid main' > /etc/apt/sources.list.d/sid.list && \
+    printf 'Package: *\nPin: release a=unstable\nPin-Priority: 100\n' > /etc/apt/preferences.d/sid && \
+    apt-get update && \
     apt-get upgrade -y libssl3t64 openssl && \
+    apt-get install -y -t sid libgnutls30t64 && \
     apt-get install -y git && \
+    rm -f /etc/apt/sources.list.d/sid.list /etc/apt/preferences.d/sid && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
