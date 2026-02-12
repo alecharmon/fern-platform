@@ -289,7 +289,9 @@ exports[`backfillSnippets > should backfill dynamic snippets for all pinnacle en
           "snippets": {
             "csharp": [
               {
-                "code": "var client = new RestClient("https://api.pinnacle.us/v1/phone-numbers/buy");
+                "code": "using RestSharp;
+
+var client = new RestClient("https://api.pinnacle.us/v1/phone-numbers/buy");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"areaCode\\": \\"415\\",\\n  \\"type\\": \\"local\\"\\n}", ParameterType.RequestBody);
@@ -355,7 +357,10 @@ func main() {
             ],
             "java": [
               {
-                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/phone-numbers/buy")
+                "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/phone-numbers/buy")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"areaCode\\": \\"415\\",\\n  \\"type\\": \\"local\\"\\n}")
   .asString();",
@@ -369,6 +374,7 @@ func main() {
             "php": [
               {
                 "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -539,7 +545,9 @@ main();
           "snippets": {
             "csharp": [
               {
-                "code": "var client = new RestClient("https://api.pinnacle.us/v1/contacts");
+                "code": "using RestSharp;
+
+var client = new RestClient("https://api.pinnacle.us/v1/contacts");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"phoneNumber\\": \\"+15551234567\\",\\n  \\"description\\": \\"Customer contact\\"\\n}", ParameterType.RequestBody);
@@ -605,7 +613,10 @@ func main() {
             ],
             "java": [
               {
-                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/contacts")
+                "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/contacts")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"phoneNumber\\": \\"+15551234567\\",\\n  \\"description\\": \\"Customer contact\\"\\n}")
   .asString();",
@@ -619,6 +630,7 @@ func main() {
             "php": [
               {
                 "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -794,7 +806,9 @@ main();
           "snippets": {
             "csharp": [
               {
-                "code": "var client = new RestClient("https://api.pinnacle.us/v1/brands/brand_123");
+                "code": "using RestSharp;
+
+var client = new RestClient("https://api.pinnacle.us/v1/brands/brand_123");
 var request = new RestRequest(Method.GET);
 IRestResponse response = client.Execute(request);",
                 "description": undefined,
@@ -848,7 +862,10 @@ func main() {
             ],
             "java": [
               {
-                "code": "HttpResponse<String> response = Unirest.get("https://api.pinnacle.us/v1/brands/brand_123")
+                "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.get("https://api.pinnacle.us/v1/brands/brand_123")
   .asString();",
                 "description": undefined,
                 "generated": true,
@@ -860,6 +877,7 @@ func main() {
             "php": [
               {
                 "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -1016,7 +1034,9 @@ main();
           "snippets": {
             "csharp": [
               {
-                "code": "var client = new RestClient("https://api.pinnacle.us/v1/contacts");
+                "code": "using RestSharp;
+
+var client = new RestClient("https://api.pinnacle.us/v1/contacts");
 var request = new RestRequest(Method.GET);
 IRestResponse response = client.Execute(request);",
                 "description": undefined,
@@ -1070,7 +1090,10 @@ func main() {
             ],
             "java": [
               {
-                "code": "HttpResponse<String> response = Unirest.get("https://api.pinnacle.us/v1/contacts")
+                "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.get("https://api.pinnacle.us/v1/contacts")
   .asString();",
                 "description": undefined,
                 "generated": true,
@@ -1082,6 +1105,7 @@ func main() {
             "php": [
               {
                 "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -1235,7 +1259,9 @@ main();
           "snippets": {
             "csharp": [
               {
-                "code": "var client = new RestClient("https://api.pinnacle.us/v1/conversations/get");
+                "code": "using RestSharp;
+
+var client = new RestClient("https://api.pinnacle.us/v1/conversations/get");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"conversationId\\": \\"conv_123\\"\\n}", ParameterType.RequestBody);
@@ -1300,7 +1326,10 @@ func main() {
             ],
             "java": [
               {
-                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/conversations/get")
+                "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/conversations/get")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"conversationId\\": \\"conv_123\\"\\n}")
   .asString();",
@@ -1314,6 +1343,7 @@ func main() {
             "php": [
               {
                 "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -1483,7 +1513,9 @@ main();
           "snippets": {
             "csharp": [
               {
-                "code": "var client = new RestClient("https://api.pinnacle.us/v1/phone-numbers/search");
+                "code": "using RestSharp;
+
+var client = new RestClient("https://api.pinnacle.us/v1/phone-numbers/search");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"areaCode\\": \\"415\\",\\n  \\"limit\\": 10\\n}", ParameterType.RequestBody);
@@ -1549,7 +1581,10 @@ func main() {
             ],
             "java": [
               {
-                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/phone-numbers/search")
+                "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/phone-numbers/search")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"areaCode\\": \\"415\\",\\n  \\"limit\\": 10\\n}")
   .asString();",
@@ -1563,6 +1598,7 @@ func main() {
             "php": [
               {
                 "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -1736,7 +1772,9 @@ main();
           "snippets": {
             "csharp": [
               {
-                "code": "var client = new RestClient("https://api.pinnacle.us/v1/messages/send/mms");
+                "code": "using RestSharp;
+
+var client = new RestClient("https://api.pinnacle.us/v1/messages/send/mms");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Check out this image!\\",\\n  \\"mediaUrls\\": [\\n    \\"https://example.com/image.jpg\\"\\n  ]\\n}", ParameterType.RequestBody);
@@ -1806,7 +1844,10 @@ func main() {
             ],
             "java": [
               {
-                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/messages/send/mms")
+                "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/messages/send/mms")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Check out this image!\\",\\n  \\"mediaUrls\\": [\\n    \\"https://example.com/image.jpg\\"\\n  ]\\n}")
   .asString();",
@@ -1820,6 +1861,7 @@ func main() {
             "php": [
               {
                 "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -2015,7 +2057,9 @@ main();
           "snippets": {
             "csharp": [
               {
-                "code": "var client = new RestClient("https://api.pinnacle.us/v1/messages/send/sms");
+                "code": "using RestSharp;
+
+var client = new RestClient("https://api.pinnacle.us/v1/messages/send/sms");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Hello from Pinnacle!\\"\\n}", ParameterType.RequestBody);
@@ -2082,7 +2126,10 @@ func main() {
             ],
             "java": [
               {
-                "code": "HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/messages/send/sms")
+                "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.pinnacle.us/v1/messages/send/sms")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"to\\": \\"+15551234567\\",\\n  \\"from\\": \\"+15559876543\\",\\n  \\"text\\": \\"Hello from Pinnacle!\\"\\n}")
   .asString();",
@@ -2096,6 +2143,7 @@ func main() {
             "php": [
               {
                 "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -2255,7 +2303,9 @@ exports[`backfillSnippets > should backfill dynamic snippets for typescript 1`] 
 {
   "csharp": [
     {
-      "code": "var client = new RestClient("https://api.example.com/v1/users");
+      "code": "using RestSharp;
+
+var client = new RestClient("https://api.example.com/v1/users");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}", ParameterType.RequestBody);
@@ -2323,7 +2373,10 @@ func main() {
   ],
   "java": [
     {
-      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+      "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
   .asString();",
@@ -2337,6 +2390,7 @@ func main() {
   "php": [
     {
       "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -2475,7 +2529,9 @@ exports[`backfillSnippets > should backfill dynamic snippets for typescript and 
 {
   "csharp": [
     {
-      "code": "var client = new RestClient("https://api.example.com/v1/users");
+      "code": "using RestSharp;
+
+var client = new RestClient("https://api.example.com/v1/users");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}", ParameterType.RequestBody);
@@ -2543,7 +2599,10 @@ func main() {
   ],
   "java": [
     {
-      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+      "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
   .asString();",
@@ -2557,6 +2616,7 @@ func main() {
   "php": [
     {
       "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -2691,7 +2751,9 @@ exports[`backfillSnippets > should backfill dynamic snippets with multiple examp
 {
   "csharp": [
     {
-      "code": "var client = new RestClient("https://api.example.com/v1/users");
+      "code": "using RestSharp;
+
+var client = new RestClient("https://api.example.com/v1/users");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}", ParameterType.RequestBody);
@@ -2759,7 +2821,10 @@ func main() {
   ],
   "java": [
     {
-      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+      "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
   .asString();",
@@ -2773,6 +2838,7 @@ func main() {
   "php": [
     {
       "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -2911,7 +2977,9 @@ exports[`backfillSnippets > should backfill dynamic snippets with multiple examp
 {
   "csharp": [
     {
-      "code": "var client = new RestClient("https://api.example.com/v1/users");
+      "code": "using RestSharp;
+
+var client = new RestClient("https://api.example.com/v1/users");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}", ParameterType.RequestBody);
@@ -2979,7 +3047,10 @@ func main() {
   ],
   "java": [
     {
-      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+      "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"name\\": \\"John Doe\\",\\n  \\"email\\": \\"john.doe@example.com\\",\\n  \\"password\\": \\"securePassword123\\",\\n  \\"role\\": \\"user\\"\\n}")
   .asString();",
@@ -2993,6 +3064,7 @@ func main() {
   "php": [
     {
       "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -3131,7 +3203,9 @@ exports[`backfillSnippets > should backfill dynamic snippets with multiple examp
 {
   "csharp": [
     {
-      "code": "var client = new RestClient("https://api.example.com/v1/users");
+      "code": "using RestSharp;
+
+var client = new RestClient("https://api.example.com/v1/users");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"name\\": \\"Jane Admin\\",\\n  \\"email\\": \\"jane.admin@example.com\\",\\n  \\"password\\": \\"adminPass456\\",\\n  \\"role\\": \\"admin\\"\\n}", ParameterType.RequestBody);
@@ -3199,7 +3273,10 @@ func main() {
   ],
   "java": [
     {
-      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
+      "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.example.com/v1/users")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"name\\": \\"Jane Admin\\",\\n  \\"email\\": \\"jane.admin@example.com\\",\\n  \\"password\\": \\"adminPass456\\",\\n  \\"role\\": \\"admin\\"\\n}")
   .asString();",
@@ -3213,6 +3290,7 @@ func main() {
   "php": [
     {
       "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -3351,7 +3429,9 @@ exports[`backfillSnippets > should backfill snippets for a search endpoint examp
 {
   "csharp": [
     {
-      "code": "var client = new RestClient("https://api.example.com/v1/");
+      "code": "using RestSharp;
+
+var client = new RestClient("https://api.example.com/v1/");
 var request = new RestRequest(Method.POST);
 request.AddHeader("Content-Type", "application/json");
 request.AddParameter("application/json", "{\\n  \\"RecordCount\\": 50,\\n  \\"DocumentSearchParams\\": {\\n    \\"SearchTerms\\": {\\n      \\"All\\": [\\n        \\"data security\\"\\n      ],\\n      \\"Any\\": [\\n        \\"cyberattack\\",\\n        \\"breach\\"\\n      ],\\n      \\"None\\": [\\n        \\"ransomware\\"\\n      ]\\n    },\\n    \\"DocumentDateRangeStart\\": \\"2023-01-01T00:00:00Z\\",\\n    \\"DocumentDateRangeEnd\\": \\"2023-12-31T23:59:59Z\\"\\n  }\\n}", ParameterType.RequestBody);
@@ -3432,7 +3512,10 @@ func main() {
   ],
   "java": [
     {
-      "code": "HttpResponse<String> response = Unirest.post("https://api.example.com/v1/")
+      "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.post("https://api.example.com/v1/")
   .header("Content-Type", "application/json")
   .body("{\\n  \\"RecordCount\\": 50,\\n  \\"DocumentSearchParams\\": {\\n    \\"SearchTerms\\": {\\n      \\"All\\": [\\n        \\"data security\\"\\n      ],\\n      \\"Any\\": [\\n        \\"cyberattack\\",\\n        \\"breach\\"\\n      ],\\n      \\"None\\": [\\n        \\"ransomware\\"\\n      ]\\n    },\\n    \\"DocumentDateRangeStart\\": \\"2023-01-01T00:00:00Z\\",\\n    \\"DocumentDateRangeEnd\\": \\"2023-12-31T23:59:59Z\\"\\n  }\\n}")
   .asString();",
@@ -3469,6 +3552,7 @@ try {
   "php": [
     {
       "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 
@@ -3610,7 +3694,9 @@ exports[`backfillSnippets > should skip head method for dynamic snippets 1`] = `
 {
   "csharp": [
     {
-      "code": "var client = new RestClient("https://api.example.com/v1/users/123");
+      "code": "using RestSharp;
+
+var client = new RestClient("https://api.example.com/v1/users/123");
 var request = new RestRequest(Method.HEAD);
 IRestResponse response = client.Execute(request);",
       "description": undefined,
@@ -3664,7 +3750,10 @@ func main() {
   ],
   "java": [
     {
-      "code": "HttpResponse<String> response = Unirest.head("https://api.example.com/v1/users/123")
+      "code": "import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+
+HttpResponse<String> response = Unirest.head("https://api.example.com/v1/users/123")
   .asString();",
       "description": undefined,
       "generated": true,
@@ -3695,6 +3784,7 @@ try {
   "php": [
     {
       "code": "<?php
+require_once('vendor/autoload.php');
 
 $client = new \\GuzzleHttp\\Client();
 

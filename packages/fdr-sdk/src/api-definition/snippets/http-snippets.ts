@@ -1,10 +1,9 @@
-import { HTTPSnippet } from "httpsnippet-lite";
-
 import type { ApiDefinition, CodeSnippet, EndpointDefinition, ExampleEndpointCall } from "../latest";
 import { getAuthHeaderName, getFirstAuthScheme, shouldRegenerateCurlSnippet } from "./auth-scheme";
 import { HTTP_SNIPPET_CLIENTS } from "./constants";
 import { convertToCurl } from "./curl";
 import { getHarRequest } from "./get-har-request";
+import { HttpSnippetConverter } from "./HttpSnippetConverter";
 import { toSnippetHttpRequest } from "./SnippetHttpRequest";
 import type { HttpSnippetLanguage, SnippetGenerationFlags, SnippetGenerators } from "./types";
 
@@ -78,7 +77,7 @@ export async function generateHttpSnippets(
     // Generate HTTP snippets for other languages
     if (isHttpSnippetsEnabled) {
         const harRequest = getHarRequest(endpoint, example, apiDefinition.auths, example.requestBody);
-        const httpSnippet = new HTTPSnippet(harRequest);
+        const converter = new HttpSnippetConverter(harRequest);
 
         for (const { clientId, targetId } of HTTP_SNIPPET_CLIENTS) {
             // Skip if snippet already exists
@@ -105,13 +104,7 @@ export async function generateHttpSnippets(
                 continue;
             }
 
-            const convertedCode = await httpSnippet.convert(targetId, clientId);
-            const code =
-                typeof convertedCode === "string"
-                    ? convertedCode
-                    : convertedCode != null
-                      ? convertedCode[0]
-                      : undefined;
+            const code = await converter.convert(targetId, clientId);
 
             if (code != null) {
                 snippets.push({
