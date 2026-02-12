@@ -91,6 +91,12 @@ let nextConfig: NextConfig = {
                 hostname: "prod-docs-homepage-images.s3.us-east-1.amazonaws.com",
                 port: "",
                 pathname: "/**"
+            },
+            {
+                protocol: "https",
+                hostname: "res.cloudinary.com",
+                port: "",
+                pathname: "/postman/**"
             }
         ],
         qualities: [75, 100]
