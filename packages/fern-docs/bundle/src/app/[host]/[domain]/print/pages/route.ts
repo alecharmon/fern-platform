@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { fernToken_admin } from "@fern-api/docs-server";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { NodeCollector, slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { NextResponse } from "next/server";
@@ -22,8 +23,11 @@ export async function GET(
     const loader = await createCachedDocsLoader(host, domain, await getFernToken());
     const root = await loader.getRoot();
 
+    const includeAuthed = request.headers.get("FERN_TOKEN") === fernToken_admin();
     const collector = NodeCollector.collect(root);
-    const slugs = collector.indexablePageSlugs;
+    const slugs = includeAuthed
+        ? collector.indexablePageNodesWithAuth.map((node) => node.canonicalSlug ?? node.slug)
+        : collector.indexablePageSlugs;
 
     const printablePages = slugs
         .map((slug) => {
