@@ -16,13 +16,11 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
-    if (isLocal()) {
-        return new NextResponse("jwt is not accessible in local preview mode", {
-            status: 400
-        });
-    }
-
+async function handleJwtCallback(
+    req: NextRequest,
+    token: string | null,
+    returnToParam: string | null
+): Promise<NextResponse> {
     const domain = getDocsDomainEdge(req);
     // For self-hosted behind the cache proxy, req.nextUrl.host is the internal
     // Next.js host (e.g. 127.0.0.1:3001). Use x-forwarded-host to get the
@@ -35,9 +33,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // For self-hosted, getAuthEdgeConfig reads from FERN_AUTH_* env vars
     const edgeConfig = await getAuthEdgeConfig(domain);
 
-    // since we expect the callback to be redirected to, the token will be in the query params
-    const token = req.nextUrl.searchParams.get(COOKIE_FERN_TOKEN);
-    const returnTo = req.nextUrl.searchParams.get(getReturnToQueryParam(edgeConfig));
+    const returnTo = returnToParam ?? req.nextUrl.searchParams.get(getReturnToQueryParam(edgeConfig));
     const redirectLocation = safeUrl(returnTo) ?? safeUrl(withDefaultProtocol(preferPreview(host, domain)));
     console.log("Redirecting", host, domain, redirectLocation);
 
@@ -63,4 +59,28 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     cookieJar.set(COOKIE_FERN_TOKEN, token, withSecureCookie(withDefaultProtocol(host)));
 
     return res;
+}
+
+export async function GET(req: NextRequest): Promise<NextResponse> {
+    if (isLocal()) {
+        return new NextResponse("jwt is not accessible in local preview mode", {
+            status: 400
+        });
+    }
+
+    const token = req.nextUrl.searchParams.get(COOKIE_FERN_TOKEN);
+    return handleJwtCallback(req, token, null);
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+    if (isLocal()) {
+        return new NextResponse("jwt is not accessible in local preview mode", {
+            status: 400
+        });
+    }
+
+    const formData = await req.formData();
+    const token = formData.get(COOKIE_FERN_TOKEN)?.toString() ?? null;
+    const state = formData.get("state")?.toString() ?? null;
+    return handleJwtCallback(req, token, state);
 }

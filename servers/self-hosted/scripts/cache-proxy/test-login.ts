@@ -184,7 +184,8 @@ function serveTestLoginPage(req: http.IncomingMessage, res: http.ServerResponse)
             margin-bottom: 24px;
             letter-spacing: 0.5px;
         }
-        form { width: 100%; }
+        .button-group { display: flex; gap: 16px; width: 100%; }
+        .button-group form { flex: 1; }
         button {
             width: 100%;
             padding: 14px 24px;
@@ -197,12 +198,24 @@ function serveTestLoginPage(req: http.IncomingMessage, res: http.ServerResponse)
             cursor: pointer;
             transition: all 0.2s;
         }
+        button.btn-secondary {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        }
         button:hover {
             transform: translateY(-1px);
             box-shadow: 0 8px 25px -5px rgba(99, 102, 241, 0.4);
         }
+        button.btn-secondary:hover {
+            box-shadow: 0 8px 25px -5px rgba(5, 150, 105, 0.4);
+        }
         button:active {
             transform: translateY(0);
+        }
+        .method-label {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #64748b;
+            text-align: center;
         }
         .return-to {
             margin-top: 16px;
@@ -220,14 +233,25 @@ function serveTestLoginPage(req: http.IncomingMessage, res: http.ServerResponse)
         <div class="info">
             This is a <strong style="color: #e2e8f0;">test login page</strong> for validating
             <code>basic_token_verification</code> auth in the self-hosted container.
-            Clicking the button below will mint a valid JWT and redirect through
-            the standard <code>/api/fern-docs/auth/jwt/callback</code> route.
+            Choose a login method below to mint a valid JWT and redirect through
+            the <code>/api/fern-docs/auth/jwt/callback</code> route.
         </div>
-        <form method="POST" action="/__test-login">
-            <input type="hidden" name="redirect_uri" value="${redirectUri.replace(/"/g, "&quot;")}" />
-            <input type="hidden" name="state" value="${state.replace(/"/g, "&quot;")}" />
-            <button type="submit">Login with Test</button>
-        </form>
+        <div class="button-group">
+            <form method="POST" action="/__test-login">
+                <input type="hidden" name="redirect_uri" value="${redirectUri.replace(/"/g, "&quot;")}" />
+                <input type="hidden" name="state" value="${state.replace(/"/g, "&quot;")}" />
+                <input type="hidden" name="action" value="get" />
+                <button type="submit">Login via GET</button>
+                <div class="method-label">Token in URL query params</div>
+            </form>
+            <form method="POST" action="/__test-login">
+                <input type="hidden" name="redirect_uri" value="${redirectUri.replace(/"/g, "&quot;")}" />
+                <input type="hidden" name="state" value="${state.replace(/"/g, "&quot;")}" />
+                <input type="hidden" name="action" value="post" />
+                <button type="submit" class="btn-secondary">Login via POST</button>
+                <div class="method-label">Token in form body</div>
+            </form>
+        </div>
         <div class="return-to">Redirecting to: ${state.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
     </div>
 </body>
@@ -241,24 +265,22 @@ function serveTestLoginPage(req: http.IncomingMessage, res: http.ServerResponse)
 }
 
 /**
- * Handle POST to /__test-login: mint JWT, set cookie directly, redirect back.
+ * Handle POST to /__test-login: mint JWT and redirect through the real callback.
  *
- * Sets the fern_token cookie at the proxy layer and redirects the user back
- * to the docs. This bypasses /api/fern-docs/auth/jwt/callback because that
- * route's cookie-setting logic uses req.nextUrl.host which resolves to the
- * internal Next.js port (127.0.0.1:3001) in self-hosted mode, producing
- * cookies with wrong domain/secure flags that browsers reject.
+ * Supports two actions via the "action" form field:
+ *   - "get": redirects to the callback with fern_token and state as query params
+ *   - "post": returns an auto-submitting form that POSTs fern_token and state
+ *             to the callback as application/x-www-form-urlencoded
  */
 function handleTestLoginPost(req: http.IncomingMessage, res: http.ServerResponse): void {
-    // Collect the POST body to read the form fields
     let body = "";
     req.on("data", (chunk: Buffer) => {
         body += chunk.toString();
     });
     req.on("end", () => {
         const params = new URLSearchParams(body);
-        // Decode values -- the middleware may URL-encode the colon in localhost:3000
-        // as %3A, which propagates through the form fields.
+        const action = params.get("action") || "get";
+        const redirectUri = fixLocalhostProtocol(decodeURIComponent(params.get("redirect_uri") || ""));
         const state = fixLocalhostProtocol(decodeURIComponent(params.get("state") || "/"));
 
         if (!FERN_AUTH_SECRET) {
@@ -268,16 +290,37 @@ function handleTestLoginPost(req: http.IncomingMessage, res: http.ServerResponse
             return;
         }
 
-        // Mint the JWT
         const token = mintTestFernJWT(FERN_AUTH_SECRET, FERN_AUTH_ISSUER);
-        log(`Test login: minted JWT (issuer=${FERN_AUTH_ISSUER}), redirecting to ${state}`);
+        log(`Test login: minted JWT (issuer=${FERN_AUTH_ISSUER}), action=${action}, redirecting to ${state}`);
 
-        // Set the fern_token cookie directly and redirect to the return URL.
-        // Use permissive cookie settings since this is for testing on localhost/self-hosted.
-        const cookieValue = `fern_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`;
+        if (action === "post") {
+            const callbackUrl = redirectUri || "/api/fern-docs/auth/jwt/callback";
+            const html = `<!DOCTYPE html>
+<html><head><title>Redirecting...</title></head>
+<body>
+    <form id="cb" method="POST" action="${callbackUrl.replace(/"/g, "&quot;")}">
+        <input type="hidden" name="fern_token" value="${token.replace(/"/g, "&quot;")}" />
+        <input type="hidden" name="state" value="${state.replace(/"/g, "&quot;")}" />
+    </form>
+    <script>document.getElementById("cb").submit();</script>
+</body></html>`;
+            res.writeHead(200, {
+                "Content-Type": "text/html; charset=utf-8",
+                "Cache-Control": "no-store"
+            });
+            res.end(html);
+            return;
+        }
+
+        // Default: GET flow — redirect to callback with query params
+        const callbackUrl = new URL(
+            redirectUri || "/api/fern-docs/auth/jwt/callback",
+            `http://localhost:${PROXY_PORT}`
+        );
+        callbackUrl.searchParams.set("fern_token", token);
+        callbackUrl.searchParams.set("state", state);
         res.writeHead(302, {
-            Location: state,
-            "Set-Cookie": cookieValue,
+            Location: callbackUrl.toString(),
             "Cache-Control": "no-store"
         });
         res.end();
