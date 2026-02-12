@@ -10,9 +10,6 @@ export type MergeStrategy = "sum" | "max";
 /** What happens when a metered allowance is exceeded. */
 export type OveragePolicy = "hard_cap" | "soft_cap";
 
-/** When a metered allowance resets. */
-export type ResetPeriod = "monthly" | "annual";
-
 // ---------------------------------------------------------------------------
 // Entitlement definitions — the registry of all known entitlements
 // ---------------------------------------------------------------------------
@@ -20,7 +17,7 @@ export type ResetPeriod = "monthly" | "annual";
 export type EntitlementDefinition =
     | { type: "boolean"; key: string }
     | { type: "quantity"; key: string; merge: MergeStrategy }
-    | { type: "metered"; key: string; merge: MergeStrategy; resetPeriod: ResetPeriod; overagePolicy: OveragePolicy };
+    | { type: "metered"; key: string; merge: MergeStrategy; overagePolicy: OveragePolicy };
 
 /**
  * All entitlement definitions. Adding a new key here automatically extends
@@ -28,7 +25,9 @@ export type EntitlementDefinition =
  */
 export const ENTITLEMENT_DEFINITIONS = {
     seats: { type: "quantity", key: "seats", merge: "sum" },
-    docs_sites: { type: "quantity", key: "docs_sites", merge: "max" }
+    docs_sites: { type: "quantity", key: "docs_sites", merge: "sum" }
+    // TODO: implement ai_credits
+    // ai_credits: { type: "metered", key: "ai_credits", merge: "max", overagePolicy: "hard_cap" }
 } as const satisfies Record<string, EntitlementDefinition>;
 
 /** Union of all valid entitlement keys, derived from definitions. */

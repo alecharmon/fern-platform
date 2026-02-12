@@ -4,6 +4,7 @@ import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
 import type { getDocsSites } from "@/app/api/get-docs-sites/route";
 import type { getDocsUrlOwner } from "@/app/api/get-docs-url-owner/route";
 import type { getMyOrganizations } from "@/app/api/get-my-organizations/route";
+import type { getOrgEntitlements } from "@/app/api/get-org-entitlements/route";
 import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
 import type { getOrgMembers } from "@/app/api/get-org-members/route";
 import type { getUserResourceRoles } from "@/app/api/get-user-resource-roles/route";
@@ -60,7 +61,9 @@ export const DashboardApiClient = {
     listPdfExportTasks: (request: listPdfExportTasks.Request) =>
         typedFetch<listPdfExportTasks.Response>("/api/pdf-export/list-tasks", request),
     getPdfExportDownloadUrl: (request: getPdfExportDownloadUrl.Request) =>
-        typedFetch<getPdfExportDownloadUrl.Response>("/api/pdf-export/get-download-url", request)
+        typedFetch<getPdfExportDownloadUrl.Response>("/api/pdf-export/get-download-url", request),
+    getOrgEntitlements: (request: getOrgEntitlements.Request) =>
+        typedFetch<getOrgEntitlements.Response>("/api/get-org-entitlements", request)
 };
 
 export class ApiError extends Error {

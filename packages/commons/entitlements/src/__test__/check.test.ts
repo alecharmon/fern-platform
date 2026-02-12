@@ -29,6 +29,13 @@ function mockUsageCache(cachedCounts: Partial<Record<EntitlementKey, number | nu
         decrement: vi.fn(async (_orgId: string, key: EntitlementKey, delta = 1) => {
             store[key] = Math.max(0, (store[key] ?? 0) - delta);
             return store[key]!;
+        }),
+        reset: vi.fn(async () => {
+            const count = Object.keys(store).length;
+            for (const k of Object.keys(store)) {
+                delete store[k as EntitlementKey];
+            }
+            return count;
         })
     };
 }
@@ -36,7 +43,7 @@ function mockUsageCache(cachedCounts: Partial<Record<EntitlementKey, number | nu
 describe("EntitlementsChecker", () => {
     it("returns entitled with usage details for quantity entitlement", async () => {
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
             usageProvider: mockUsageProvider({ seats: 3 }),
             usageCache: mockUsageCache()
         });
@@ -45,9 +52,9 @@ describe("EntitlementsChecker", () => {
         expect(result).toEqual({
             entitled: true,
             type: "quantity",
-            limit: 10,
+            limit: 5,
             used: 3,
-            remaining: 7
+            remaining: 2
         });
     });
 
@@ -65,26 +72,26 @@ describe("EntitlementsChecker", () => {
         });
     });
 
-    it("returns not entitled when no SKU grants the feature", async () => {
+    it("returns not entitled when at plan_free fallback limit", async () => {
         const checker = createEntitlementsChecker({
             getActiveSkus: async () => [],
-            usageProvider: mockUsageProvider({}),
+            usageProvider: mockUsageProvider({ seats: 2 }),
             usageCache: mockUsageCache()
         });
 
         const result = await checker.check("org-1", "seats");
         expect(result).toEqual({
             entitled: false,
-            reason: "No active entitlement for seats"
+            reason: "seats limit reached (2/2)"
         });
     });
 
     it("uses cached usage when fresh", async () => {
         const provider = mockUsageProvider({ seats: 99 });
-        const cache = mockUsageCache({ seats: 5 });
+        const cache = mockUsageCache({ seats: 3 });
 
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
             usageProvider: provider,
             usageCache: cache
         });
@@ -92,7 +99,7 @@ describe("EntitlementsChecker", () => {
         const result = await checker.check("org-1", "seats");
         expect(result.entitled).toBe(true);
         if (result.entitled && result.type === "quantity") {
-            expect(result.used).toBe(5); // from cache, not provider
+            expect(result.used).toBe(3); // from cache, not provider
         }
         expect(provider.getCurrentUsage).not.toHaveBeenCalled();
     });
@@ -102,7 +109,7 @@ describe("EntitlementsChecker", () => {
         const cache = mockUsageCache(); // empty cache
 
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
             usageProvider: provider,
             usageCache: cache
         });
@@ -116,8 +123,8 @@ describe("EntitlementsChecker", () => {
 describe("EntitlementChecker (.for())", () => {
     it("canCreate returns true when under limit", async () => {
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
-            usageProvider: mockUsageProvider({ docs_sites: 2 }),
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({ docs_sites: 0 }),
             usageCache: mockUsageCache()
         });
 
@@ -138,32 +145,32 @@ describe("EntitlementChecker (.for())", () => {
 
     it("canCreate(n) checks if N more can be created", async () => {
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
-            usageProvider: mockUsageProvider({ docs_sites: 4 }),
-            usageCache: mockUsageCache()
-        });
-
-        const docSites = checker.for("org-1", "docs_sites");
-        expect(await docSites.canCreate(1)).toBe(true);
-        expect(await docSites.canCreate(2)).toBe(false); // 4 + 2 > 5
-    });
-
-    it("remaining returns correct count", async () => {
-        const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
-            usageProvider: mockUsageProvider({ seats: 7 }),
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({ seats: 4 }),
             usageCache: mockUsageCache()
         });
 
         const seats = checker.for("org-1", "seats");
-        expect(await seats.remaining()).toBe(3);
+        expect(await seats.canCreate(1)).toBe(true); // 4 + 1 <= 5
+        expect(await seats.canCreate(2)).toBe(false); // 4 + 2 > 5
+    });
+
+    it("remaining returns correct count", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({ seats: 2 }),
+            usageCache: mockUsageCache()
+        });
+
+        const seats = checker.for("org-1", "seats");
+        expect(await seats.remaining()).toBe(3); // 5 - 2
     });
 
     it("recordCreate increments cache", async () => {
         const cache = mockUsageCache();
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
-            usageProvider: mockUsageProvider({ docs_sites: 2 }),
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({ docs_sites: 0 }),
             usageCache: cache
         });
 
@@ -175,8 +182,8 @@ describe("EntitlementChecker (.for())", () => {
     it("recordDelete decrements cache", async () => {
         const cache = mockUsageCache();
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
-            usageProvider: mockUsageProvider({ docs_sites: 3 }),
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({ docs_sites: 0 }),
             usageCache: cache
         });
 
@@ -187,7 +194,7 @@ describe("EntitlementChecker (.for())", () => {
 
     it("used returns current usage", async () => {
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
             usageProvider: mockUsageProvider({ seats: 4 }),
             usageCache: mockUsageCache()
         });
@@ -198,12 +205,12 @@ describe("EntitlementChecker (.for())", () => {
 
     it("limit returns resolved limit", async () => {
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro", "addon_extra_seats"],
+            getActiveSkus: async () => ["2025-02-05:docs-team", "addon_extra_seats"],
             usageProvider: mockUsageProvider({}),
             usageCache: mockUsageCache()
         });
 
         const seats = checker.for("org-1", "seats");
-        expect(await seats.limit()).toBe(35); // 10 + 25
+        expect(await seats.limit()).toBe(6); // 5 + 1
     });
 });

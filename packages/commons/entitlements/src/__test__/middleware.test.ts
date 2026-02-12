@@ -14,15 +14,16 @@ function mockUsageCache(): UsageCache {
         get: vi.fn(async () => null),
         set: vi.fn(async () => {}),
         increment: vi.fn(async (_o: string, _k: EntitlementKey, d = 1) => d),
-        decrement: vi.fn(async (_o: string, _k: EntitlementKey, d = 1) => d)
+        decrement: vi.fn(async (_o: string, _k: EntitlementKey, d = 1) => d),
+        reset: vi.fn(async () => 0)
     };
 }
 
 describe("withEntitlement", () => {
     it("executes fn when entitled", async () => {
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["plan_pro"],
-            usageProvider: mockUsageProvider({ docs_sites: 2 }),
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({ docs_sites: 0 }),
             usageCache: mockUsageCache()
         });
 
@@ -57,15 +58,15 @@ describe("withEntitlement", () => {
         );
     });
 
-    it("throws when no entitlement exists", async () => {
+    it("throws when at plan_free fallback limit", async () => {
         const checker = createEntitlementsChecker({
             getActiveSkus: async () => [],
-            usageProvider: mockUsageProvider({}),
+            usageProvider: mockUsageProvider({ seats: 2 }),
             usageCache: mockUsageCache()
         });
 
         await expect(withEntitlement(checker, "org-1", "seats", async () => "created")).rejects.toThrow(
-            "No active entitlement for seats"
+            "seats limit reached (2/2)"
         );
     });
 

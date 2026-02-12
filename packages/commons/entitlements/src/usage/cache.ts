@@ -24,6 +24,9 @@ export interface UsageCache {
 
     /** Decrement count by delta (default 1). Returns new count. */
     decrement(orgId: string, key: EntitlementKey, delta?: number): Promise<number>;
+
+    /** Delete all cached usage entries for an org. Returns the number of entries cleared. */
+    reset(orgId: string): Promise<number>;
 }
 
 const TABLE = "org_entitlement_usage" as const;
@@ -103,6 +106,17 @@ export function createUsageCache(): UsageCache {
                 );
 
             return next;
+        },
+
+        async reset(orgId) {
+            const client = getClient();
+            const { data, error } = await client.from(TABLE).delete().eq("org_id", orgId).select("key");
+
+            if (error) {
+                return 0;
+            }
+
+            return data?.length ?? 0;
         }
     };
 }

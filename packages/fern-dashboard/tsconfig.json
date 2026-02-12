@@ -39,6 +39,9 @@
     },
     {
       "path": "../fern-docs/mdx"
+    },
+    {
+      "path": "../commons/entitlements"
     }
   ]
 }

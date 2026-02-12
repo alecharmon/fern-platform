@@ -1328,6 +1328,9 @@ importers:
       '@fern-platform/billing':
         specifier: workspace:*
         version: link:../commons/billing
+      '@fern-platform/entitlements':
+        specifier: workspace:*
+        version: link:../commons/entitlements
       '@fern-platform/supabase':
         specifier: workspace:*
         version: link:../commons/supabase-client

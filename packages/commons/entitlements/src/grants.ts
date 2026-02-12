@@ -9,15 +9,15 @@ export const SKU_GRANTS: Record<string, EntitlementGrant[]> = {
         { key: "seats", type: "quantity", limit: 2 },
         { key: "docs_sites", type: "quantity", limit: 1 }
     ],
-    plan_pro: [
-        { key: "seats", type: "quantity", limit: 10 },
-        { key: "docs_sites", type: "quantity", limit: 5 }
+    "2025-02-05:docs-team": [
+        { key: "seats", type: "quantity", limit: 5 },
+        { key: "docs_sites", type: "quantity", limit: 1 }
     ],
-    plan_enterprise: [
-        { key: "seats", type: "quantity", limit: 50 },
-        { key: "docs_sites", type: "quantity", limit: 25 }
+    "legacy:custom-enterprise": [
+        { key: "seats", type: "quantity", limit: Infinity },
+        { key: "docs_sites", type: "quantity", limit: Infinity }
     ],
-    addon_extra_seats: [{ key: "seats", type: "quantity", limit: 25 }]
+    addon_extra_seats: [{ key: "seats", type: "quantity", limit: 1 }]
 };
 
 /**
@@ -25,5 +25,12 @@ export const SKU_GRANTS: Record<string, EntitlementGrant[]> = {
  * Unknown SKUs are silently ignored (future: log warning).
  */
 export function getGrantsForSkus(skus: string[]): EntitlementGrant[] {
-    return skus.flatMap((sku) => SKU_GRANTS[sku] ?? []);
+    const grants = skus.flatMap((sku) => SKU_GRANTS[sku] ?? []);
+
+    // If they dont have any grants just assume free
+    if (grants.length === 0) {
+        grants.push(...SKU_GRANTS.plan_free!);
+    }
+
+    return grants;
 }

@@ -160,6 +160,10 @@ class EntitlementsCheckerImpl {
         return new EntitlementChecker(this, this.usageCache, orgId, key);
     }
 
+    async resetCache(orgId: string): Promise<number> {
+        return this.usageCache.reset(orgId);
+    }
+
     private async getUsage(orgId: string, key: EntitlementKey): Promise<number> {
         const cached = await this.usageCache.get(orgId, key, this.staleTtlMs);
         if (cached !== null) {
@@ -179,6 +183,8 @@ class EntitlementsCheckerImpl {
 export interface EntitlementsChecker {
     check(orgId: string, key: EntitlementKey): Promise<EntitlementCheckResult>;
     for(orgId: string, key: EntitlementKey): EntitlementChecker;
+    /** Clear all cached usage counts for an org. Returns number of entries cleared. */
+    resetCache(orgId: string): Promise<number>;
 }
 
 export function createEntitlementsChecker(opts: EntitlementsCheckerOptions): EntitlementsChecker {

@@ -24,13 +24,18 @@ describe("SKU grants", () => {
         expect(grants).toHaveLength(2);
     });
 
-    it("getGrantsForSkus returns empty for unknown SKU", () => {
+    it("getGrantsForSkus falls back to plan_free for unknown SKU", () => {
         const grants = getGrantsForSkus(["unknown_sku"]);
-        expect(grants).toHaveLength(0);
+        expect(grants).toHaveLength(2);
+        expect(grants.find((g: EntitlementGrant) => g.key === "seats")).toEqual({
+            key: "seats",
+            type: "quantity",
+            limit: 2
+        });
     });
 
     it("getGrantsForSkus combines grants from plan + addon", () => {
-        const grants = getGrantsForSkus(["plan_pro", "addon_extra_seats"]);
+        const grants = getGrantsForSkus(["2025-02-05:docs-team", "addon_extra_seats"]);
         const seatGrants = grants.filter((g: EntitlementGrant) => g.key === "seats");
         expect(seatGrants).toHaveLength(2);
     });

@@ -16,8 +16,7 @@ export type {
     EntitlementKey,
     EntitlementType,
     MergeStrategy,
-    OveragePolicy,
-    ResetPeriod
+    OveragePolicy
 } from "./types";
 export { ENTITLEMENT_DEFINITIONS } from "./types";
 export { createUsageCache, type UsageCache } from "./usage/cache";
