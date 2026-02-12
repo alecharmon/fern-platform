@@ -1,5 +1,6 @@
 "use client";
 
+import { assertNever } from "@fern-api/ui-core-utils";
 import { FileIcon, Loader2Icon, RotateCcwIcon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -90,25 +91,38 @@ function renderTemplate(
 
 const TASK_LIMIT = 5;
 
-const DEFAULT_OPTIONS: ExportOptions = {
-    coverTitle: undefined,
-    coverSubtitle: undefined,
-    hideCoverFooter: undefined,
-    headerLeftTemplate: undefined,
-    headerRightTemplate: undefined,
-    footerLeftTemplate: undefined,
-    footerRightTemplate: undefined
-};
-
 interface PdfExporterPageProps {
     docsUrl: DocsUrl;
     orgName: Auth0OrgName;
+    defaultCoverTitle: string;
     highlightExports?: boolean;
 }
 
-export default function PdfExporterPage({ docsUrl, orgName, highlightExports }: PdfExporterPageProps) {
+type OverrideState = Partial<Record<ExportOptionKey, true>>;
+
+export default function PdfExporterPage({
+    docsUrl,
+    orgName,
+    defaultCoverTitle,
+    highlightExports
+}: PdfExporterPageProps) {
     const posthog = usePostHog();
-    const [overrides, setOverrides] = useState(DEFAULT_OPTIONS);
+
+    const defaultOptions: ExportOptions = useMemo(
+        () => ({
+            coverTitle: defaultCoverTitle,
+            coverSubtitle: "Complete documentation for developers, technical teams, and partners.",
+            hideCoverFooter: undefined,
+            headerLeftTemplate: undefined,
+            headerRightTemplate: undefined,
+            footerLeftTemplate: undefined,
+            footerRightTemplate: undefined
+        }),
+        [defaultCoverTitle]
+    );
+
+    const [options, setOptions] = useState(defaultOptions);
+    const [overrides, setOverrides] = useState<OverrideState>({});
     const [isExporting, setIsExporting] = useState(false);
     const [openingTaskId, setOpeningTaskId] = useState<string | null>(null);
     const [nowMs, setNowMs] = useState(() => Date.now());
@@ -160,43 +174,61 @@ export default function PdfExporterPage({ docsUrl, orgName, highlightExports }: 
         return () => window.clearInterval(id);
     }, [recentTasks]);
 
-    const setOverrideValue = useCallback(<K extends ExportOptionKey>(key: K, value: ExportOptions[K]) => {
-        setOverrides((prev) => ({ ...prev, [key]: value }));
+    const setOption = useCallback(<K extends ExportOptionKey>(key: K, value: ExportOptions[K]) => {
+        setOptions((prev) => ({ ...prev, [key]: value }));
     }, []);
 
     const removeOverride = useCallback(
         (key: ExportOptionKey) => {
-            setOverrideValue(key, undefined);
+            setOverrides((prev) => {
+                const next = { ...prev };
+                delete next[key];
+                return next;
+            });
+            switch (key) {
+                case "coverTitle":
+                case "coverSubtitle":
+                    setOption(key, defaultOptions[key]);
+                    return;
+                case "hideCoverFooter":
+                case "headerLeftTemplate":
+                case "headerRightTemplate":
+                case "footerLeftTemplate":
+                case "footerRightTemplate":
+                    setOption(key, undefined);
+                    return;
+                default:
+                    assertNever(key);
+            }
         },
-        [setOverrideValue]
+        [setOption, defaultOptions]
     );
 
     const addOverride = useCallback(
         (key: ExportOptionKey) => {
+            setOverrides((prev) => ({ ...prev, [key]: true }));
             const kind = OPTION_META[key].kind;
             if (kind === "boolean") {
-                setOverrideValue(key, false);
-                return;
+                setOption(key, false);
+            } else if (kind === "template") {
+                setOption(key, "");
+            } else if (kind === "coverText") {
+                // Initialize with the site's current default so the user
+                // sees the real value and can edit or hide it from there.
+                setOption(key, defaultOptions[key] ?? "");
+            } else {
+                assertNever(kind);
             }
-            if (kind === "template") {
-                setOverrideValue(key, "");
-                return;
-            }
-            setOverrideValue(key, null);
         },
-        [setOverrideValue]
+        [setOption, defaultOptions]
     );
 
-    const hasAnyOverrides = useMemo(() => {
-        return (Object.keys(OPTION_META) as ExportOptionKey[]).some((key) => overrides[key] !== undefined);
-    }, [overrides]);
+    const hasAnyOverrides = useMemo(() => Object.keys(overrides).length > 0, [overrides]);
 
     const availableOverridesBySection = useMemo(() => {
         const present = new Set<ExportOptionKey>();
         for (const key of Object.keys(OPTION_META) as ExportOptionKey[]) {
-            // Only treat "present" as an override when it has an explicit value.
-            // This prevents showing UI for keys that exist but are `undefined`.
-            if (overrides[key] !== undefined) {
+            if (overrides[key]) {
                 present.add(key);
             }
         }
@@ -226,13 +258,13 @@ export default function PdfExporterPage({ docsUrl, orgName, highlightExports }: 
             const { task } = await DashboardApiClient.createPdfExportTask({
                 orgName,
                 docsUrl,
-                options: overrides
+                options
             });
             upsertTask(task);
         } finally {
             setIsExporting(false);
         }
-    }, [posthog, docsUrl, orgName, overrides, upsertTask]);
+    }, [posthog, docsUrl, orgName, options, upsertTask]);
 
     const handleOpen = useCallback(
         async (taskId: string) => {
@@ -276,7 +308,10 @@ export default function PdfExporterPage({ docsUrl, orgName, highlightExports }: 
                                     variant="outline"
                                     size="sm"
                                     className="gap-2"
-                                    onClick={() => setOverrides(DEFAULT_OPTIONS)}
+                                    onClick={() => {
+                                        setOverrides({});
+                                        setOptions(defaultOptions);
+                                    }}
                                 >
                                     <RotateCcwIcon className="size-4" />
                                     Reset to defaults
@@ -294,33 +329,33 @@ export default function PdfExporterPage({ docsUrl, orgName, highlightExports }: 
                                 />
 
                                 <div className="flex flex-col gap-3">
-                                    {overrides.coverTitle !== undefined && (
+                                    {overrides.coverTitle && (
                                         <OverrideRow
                                             label={OPTION_META.coverTitle.label}
                                             description={OPTION_META.coverTitle.description}
                                             onRemove={() => removeOverride("coverTitle")}
                                         >
                                             <CoverTextOverride
-                                                value={overrides.coverTitle}
-                                                onChange={(next) => setOverrideValue("coverTitle", next)}
+                                                value={options.coverTitle ?? ""}
+                                                onChange={(next) => setOption("coverTitle", next)}
                                             />
                                         </OverrideRow>
                                     )}
 
-                                    {overrides.coverSubtitle !== undefined && (
+                                    {overrides.coverSubtitle && (
                                         <OverrideRow
                                             label={OPTION_META.coverSubtitle.label}
                                             description={OPTION_META.coverSubtitle.description}
                                             onRemove={() => removeOverride("coverSubtitle")}
                                         >
                                             <CoverTextOverride
-                                                value={overrides.coverSubtitle}
-                                                onChange={(next) => setOverrideValue("coverSubtitle", next)}
+                                                value={options.coverSubtitle ?? ""}
+                                                onChange={(next) => setOption("coverSubtitle", next)}
                                             />
                                         </OverrideRow>
                                     )}
 
-                                    {overrides.hideCoverFooter !== undefined && (
+                                    {overrides.hideCoverFooter && (
                                         <OverrideRow
                                             label={OPTION_META.hideCoverFooter.label}
                                             description={OPTION_META.hideCoverFooter.description}
@@ -329,18 +364,16 @@ export default function PdfExporterPage({ docsUrl, orgName, highlightExports }: 
                                             <div className="flex items-center justify-between gap-4">
                                                 <div className="text-sm text-gray-1100">Hide "Generated by Fern"</div>
                                                 <Switch
-                                                    checked={Boolean(overrides.hideCoverFooter)}
-                                                    onCheckedChange={(checked) =>
-                                                        setOverrideValue("hideCoverFooter", checked)
-                                                    }
+                                                    checked={Boolean(options.hideCoverFooter)}
+                                                    onCheckedChange={(checked) => setOption("hideCoverFooter", checked)}
                                                 />
                                             </div>
                                         </OverrideRow>
                                     )}
 
-                                    {overrides.coverTitle === undefined &&
-                                        overrides.coverSubtitle === undefined &&
-                                        overrides.hideCoverFooter === undefined && <EmptyOverridesHint />}
+                                    {overrides.coverTitle !== true &&
+                                        overrides.coverSubtitle !== true &&
+                                        overrides.hideCoverFooter !== true && <EmptyOverridesHint />}
                                 </div>
                             </div>
 
@@ -365,66 +398,66 @@ export default function PdfExporterPage({ docsUrl, orgName, highlightExports }: 
                                 />
 
                                 <div className="flex flex-col gap-3">
-                                    {overrides.headerLeftTemplate !== undefined && (
+                                    {overrides.headerLeftTemplate && (
                                         <OverrideRow
                                             label={OPTION_META.headerLeftTemplate.label}
                                             description={OPTION_META.headerLeftTemplate.description}
                                             onRemove={() => removeOverride("headerLeftTemplate")}
                                         >
                                             <TemplateOverride
-                                                value={overrides.headerLeftTemplate}
-                                                onChange={(next) => setOverrideValue("headerLeftTemplate", next)}
-                                                sampleRendered={renderTemplate(overrides.headerLeftTemplate, sample)}
+                                                value={options.headerLeftTemplate}
+                                                onChange={(next) => setOption("headerLeftTemplate", next)}
+                                                sampleRendered={renderTemplate(options.headerLeftTemplate, sample)}
                                             />
                                         </OverrideRow>
                                     )}
 
-                                    {overrides.headerRightTemplate !== undefined && (
+                                    {overrides.headerRightTemplate && (
                                         <OverrideRow
                                             label={OPTION_META.headerRightTemplate.label}
                                             description={OPTION_META.headerRightTemplate.description}
                                             onRemove={() => removeOverride("headerRightTemplate")}
                                         >
                                             <TemplateOverride
-                                                value={overrides.headerRightTemplate}
-                                                onChange={(next) => setOverrideValue("headerRightTemplate", next)}
-                                                sampleRendered={renderTemplate(overrides.headerRightTemplate, sample)}
+                                                value={options.headerRightTemplate}
+                                                onChange={(next) => setOption("headerRightTemplate", next)}
+                                                sampleRendered={renderTemplate(options.headerRightTemplate, sample)}
                                             />
                                         </OverrideRow>
                                     )}
 
-                                    {overrides.footerLeftTemplate !== undefined && (
+                                    {overrides.footerLeftTemplate && (
                                         <OverrideRow
                                             label={OPTION_META.footerLeftTemplate.label}
                                             description={OPTION_META.footerLeftTemplate.description}
                                             onRemove={() => removeOverride("footerLeftTemplate")}
                                         >
                                             <TemplateOverride
-                                                value={overrides.footerLeftTemplate}
-                                                onChange={(next) => setOverrideValue("footerLeftTemplate", next)}
-                                                sampleRendered={renderTemplate(overrides.footerLeftTemplate, sample)}
+                                                value={options.footerLeftTemplate}
+                                                onChange={(next) => setOption("footerLeftTemplate", next)}
+                                                sampleRendered={renderTemplate(options.footerLeftTemplate, sample)}
                                             />
                                         </OverrideRow>
                                     )}
 
-                                    {overrides.footerRightTemplate !== undefined && (
+                                    {overrides.footerRightTemplate && (
                                         <OverrideRow
                                             label={OPTION_META.footerRightTemplate.label}
                                             description={OPTION_META.footerRightTemplate.description}
                                             onRemove={() => removeOverride("footerRightTemplate")}
                                         >
                                             <TemplateOverride
-                                                value={overrides.footerRightTemplate}
-                                                onChange={(next) => setOverrideValue("footerRightTemplate", next)}
-                                                sampleRendered={renderTemplate(overrides.footerRightTemplate, sample)}
+                                                value={options.footerRightTemplate}
+                                                onChange={(next) => setOption("footerRightTemplate", next)}
+                                                sampleRendered={renderTemplate(options.footerRightTemplate, sample)}
                                             />
                                         </OverrideRow>
                                     )}
 
-                                    {overrides.headerLeftTemplate === undefined &&
-                                        overrides.headerRightTemplate === undefined &&
-                                        overrides.footerLeftTemplate === undefined &&
-                                        overrides.footerRightTemplate === undefined && <EmptyOverridesHint />}
+                                    {overrides.headerLeftTemplate !== true &&
+                                        overrides.headerRightTemplate !== true &&
+                                        overrides.footerLeftTemplate !== true &&
+                                        overrides.footerRightTemplate !== true && <EmptyOverridesHint />}
                                 </div>
                             </div>
                         </div>
@@ -503,7 +536,7 @@ export default function PdfExporterPage({ docsUrl, orgName, highlightExports }: 
                 </div>
 
                 <div className="shrink-0">
-                    <PdfCoverPreviewCard docsUrl={docsUrl} orgName={orgName} options={overrides} />
+                    <PdfCoverPreviewCard docsUrl={docsUrl} orgName={orgName} options={options} />
                 </div>
             </div>
         </div>

@@ -11,8 +11,8 @@ const CreatePdfExportTaskRequestSchema = z.object({
     docsUrl: docsUrlValidator,
     options: z
         .object({
-            coverTitle: z.string().nullable(),
-            coverSubtitle: z.string().nullable(),
+            coverTitle: z.string(),
+            coverSubtitle: z.string(),
             hideCoverFooter: z.boolean(),
             headerLeftTemplate: z.string(),
             headerRightTemplate: z.string(),
@@ -39,14 +39,8 @@ export const POST = withZodValidation(
             docsUrl: body.docsUrl,
             options: {
                 version: "v1",
-                coverTitle:
-                    body.options?.coverTitle === null || body.options?.coverTitle === ""
-                        ? ""
-                        : body.options?.coverTitle,
-                coverSubtitle:
-                    body.options?.coverSubtitle === null || body.options?.coverSubtitle === ""
-                        ? ""
-                        : body.options?.coverSubtitle,
+                coverTitle: body.options?.coverTitle,
+                coverSubtitle: body.options?.coverSubtitle,
                 hideCoverFooter: body.options?.hideCoverFooter,
                 headerLeftTemplate: body.options?.headerLeftTemplate,
                 headerRightTemplate: body.options?.headerRightTemplate,

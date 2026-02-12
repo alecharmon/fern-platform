@@ -12,18 +12,19 @@ import type { DocsUrl } from "@/utils/types";
 interface PdfExporterSettingsCardProps {
     docsUrl: DocsUrl;
     orgName: Auth0OrgName;
+    defaultCoverTitle: string;
 }
 
 export function PdfExporterSettingsCard(props: PdfExporterSettingsCardProps) {
-    const { docsUrl, orgName } = props;
+    const { docsUrl, orgName, defaultCoverTitle } = props;
     return (
         <PdfExportTasksProvider docsUrl={docsUrl} orgName={orgName}>
-            <PdfExporterSettingsCardInner docsUrl={docsUrl} orgName={orgName} />
+            <PdfExporterSettingsCardInner docsUrl={docsUrl} orgName={orgName} defaultCoverTitle={defaultCoverTitle} />
         </PdfExportTasksProvider>
     );
 }
 
-function PdfExporterSettingsCardInner({ docsUrl, orgName }: { docsUrl: DocsUrl; orgName: Auth0OrgName }) {
+function PdfExporterSettingsCardInner({ docsUrl, orgName, defaultCoverTitle }: PdfExporterSettingsCardProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [highlightExports, setHighlightExports] = useState(false);
 
@@ -81,7 +82,12 @@ function PdfExporterSettingsCardInner({ docsUrl, orgName }: { docsUrl: DocsUrl; 
 
             <Dialog open={isOpen} onOpenChange={handleClose}>
                 <DialogContent className="bottom-auto! left-1/2! top-1/2! h-[90vh] w-[95vw] max-w-[1200px]! translate-x-[-50%]! translate-y-[-50%]! overflow-y-auto rounded-xl p-8">
-                    <PdfExporterPage docsUrl={docsUrl} orgName={orgName} highlightExports={highlightExports} />
+                    <PdfExporterPage
+                        docsUrl={docsUrl}
+                        orgName={orgName}
+                        defaultCoverTitle={defaultCoverTitle}
+                        highlightExports={highlightExports}
+                    />
                 </DialogContent>
             </Dialog>
         </>

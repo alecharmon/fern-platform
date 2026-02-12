@@ -35,26 +35,24 @@ export default async function PdfCoverPreviewIframePage(props: {
         loader.getFiles(),
         loader.getLanguage()
     ]);
-
     const resolveFileSrc = createFileResolver(files);
-    const logo = withLogo(config, resolveFileSrc, metadata.basePath, undefined);
 
-    const title = typeof sp.title === "string" ? sp.title : undefined;
-    const subtitle = typeof sp.subtitle === "string" ? sp.subtitle : undefined;
+    const logo = withLogo(config, resolveFileSrc, metadata.basePath, undefined);
+    const coverTitle = typeof sp.title === "string" ? sp.title : undefined;
+    const coverSubtitle = typeof sp.subtitle === "string" ? sp.subtitle : undefined;
     const hideFooter = sp.hideFooter === "1" || sp.hideFooter === "true";
 
     return (
         <div id="pdf-cover-iframe">
             <PdfCoverPage
                 domain={docsUrl}
-                docsMetadata={metadata}
-                docsConfig={config}
+                basePath={metadata.basePath}
                 docsLanguage={lang}
                 printCoverPageDataAttribute={PRINT_COVER_PAGE_DATA_ATTR}
                 logoSrc={logo.light?.src ?? logo.dark?.src}
                 logoHeight={logo.height}
-                coverTitleOverride={title}
-                coverSubtitleOverride={subtitle}
+                coverTitle={coverTitle}
+                coverSubtitle={coverSubtitle}
                 hideFooter={hideFooter}
             />
         </div>

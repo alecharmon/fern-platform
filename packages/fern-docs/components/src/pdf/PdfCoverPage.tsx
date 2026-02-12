@@ -1,5 +1,3 @@
-import type { DocsMetadata } from "@fern-api/docs-server/docs-loader";
-import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import { cn } from "../cn";
 import { FernLogo, FernLogoFill } from "../FernLogo";
 
@@ -7,33 +5,30 @@ const LOGO_HEIGHT_MIN_PX = 64;
 const LOGO_HEIGHT_MAX_PX = 96;
 const LOGO_HEIGHT_DEFAULT_PX = 32;
 const LOGO_HEIGHT_SCALE = 2;
-const SUBTITLE_DEFAULT_TEXT = "Complete documentation for developers, technical teams, and partners.";
 
 interface PdfCoverPageProps {
     domain: string;
-    docsMetadata: DocsMetadata;
-    docsConfig: Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">;
+    basePath: string;
     docsLanguage: string;
     printCoverPageDataAttribute: string;
+    coverTitle?: string;
+    coverSubtitle?: string;
     className?: string;
     logoSrc?: string;
     logoHeight?: number;
-    coverTitleOverride?: string;
-    coverSubtitleOverride?: string;
     hideFooter?: boolean;
 }
 
 export function PdfCoverPage({
     domain,
-    docsMetadata,
-    docsConfig,
+    basePath,
     docsLanguage,
     printCoverPageDataAttribute,
+    coverTitle,
+    coverSubtitle,
     className,
     logoSrc,
     logoHeight,
-    coverTitleOverride,
-    coverSubtitleOverride,
     hideFooter
 }: PdfCoverPageProps) {
     logoHeight = Math.max(
@@ -47,19 +42,14 @@ export function PdfCoverPage({
         day: "numeric"
     });
 
-    const coverTitleOverrideTrimmed = coverTitleOverride?.trim();
-    const coverTitle = coverTitleOverride == null ? docsConfig.title || domain : coverTitleOverrideTrimmed;
-    const coverSubtitleOverrideTrimmed = coverSubtitleOverride?.trim();
-    const coverSubtitle = coverSubtitleOverride == null ? SUBTITLE_DEFAULT_TEXT : coverSubtitleOverrideTrimmed;
-
-    const shouldRenderTitle = coverTitleOverride == null || coverTitleOverrideTrimmed !== "";
-    const shouldRenderSubtitle = coverSubtitleOverride == null || coverSubtitleOverrideTrimmed !== "";
+    const coverTitleTrimmed = coverTitle?.trim() ?? "";
+    const coverSubtitleTrimmed = coverSubtitle?.trim() ?? "";
 
     return (
         <div
             {...{ [printCoverPageDataAttribute]: true }}
             data-fern-domain={domain}
-            data-fern-base-path={docsMetadata.basePath}
+            data-fern-base-path={basePath}
             lang={docsLanguage}
             className={cn(
                 "fern-pdf-cover-root relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-white px-16 py-12 font-sans",
@@ -89,28 +79,28 @@ export function PdfCoverPage({
                     <div data-fern-cover-logo className="mb-14 flex items-center justify-center">
                         <img
                             src={logoSrc}
-                            alt={`${docsConfig.title ?? domain} logo`}
+                            alt={`${coverTitle ?? domain} logo`}
                             style={{ height: `${logoHeight}px` }}
                             className="block max-w-[400px] object-contain"
                         />
                     </div>
                 ) : null}
 
-                {shouldRenderTitle ? (
+                {coverTitleTrimmed !== "" ? (
                     <h1
                         data-fern-cover-title
                         className="fern-pdf-cover-title mb-6 text-[58px] font-extrabold leading-[1.05] tracking-[-0.03em]"
                     >
-                        {coverTitle}
+                        {coverTitleTrimmed}
                     </h1>
                 ) : null}
 
-                {shouldRenderSubtitle ? (
+                {coverSubtitleTrimmed !== "" ? (
                     <div
                         data-fern-cover-subtitle
                         className="fern-pdf-cover-subtitle mb-20 max-w-[500px] text-[18px] leading-[1.6]"
                     >
-                        {coverSubtitle}
+                        {coverSubtitleTrimmed}
                     </div>
                 ) : null}
 

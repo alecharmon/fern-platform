@@ -24,6 +24,7 @@ async function main(): Promise<void> {
 
     await generator.start();
     const result = await generator.generateDocsPdf(baseUrl, {
+        coverSubtitle: "Complete documentation for developers, technical teams, and partners.",
         footerRightTemplate: "Page {pageIndex} of {totalPages}"
     });
     await generator.stop();

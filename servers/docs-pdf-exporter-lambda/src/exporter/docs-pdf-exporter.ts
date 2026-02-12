@@ -749,21 +749,17 @@ export class DocsPdfExporter {
         options: Pick<DocsPdfGenerateOptions, "coverTitle" | "coverSubtitle" | "hideCoverFooter"> = {}
     ) {
         const url = new URL(`${baseUrl}/${PRINT_COVER_PATH}`);
-        // Presence of an empty string means "hide" on the frontend.
-        if (options.coverTitle === null) {
-            url.searchParams.set("title", "");
-        } else if (typeof options.coverTitle === "string") {
-            url.searchParams.set("title", options.coverTitle.trim());
+        const coverTitleTrimmed = typeof options.coverTitle === "string" ? options.coverTitle.trim() : "";
+        if (coverTitleTrimmed !== "") {
+            url.searchParams.set("title", coverTitleTrimmed);
         }
-        if (options.coverSubtitle === null) {
-            url.searchParams.set("subtitle", "");
-        } else if (typeof options.coverSubtitle === "string") {
-            url.searchParams.set("subtitle", options.coverSubtitle.trim());
+        const coverSubtitleTrimmed = typeof options.coverSubtitle === "string" ? options.coverSubtitle.trim() : "";
+        if (coverSubtitleTrimmed !== "") {
+            url.searchParams.set("subtitle", coverSubtitleTrimmed);
         }
         if (options.hideCoverFooter === true) {
             url.searchParams.set("hideFooter", "1");
         }
-
         const { pdf, bytesLength, durationMs } = await this.renderUrlToPdfWithRetries(runLogger, browserContext, {
             operation: "render_cover",
             url: url.toString(),

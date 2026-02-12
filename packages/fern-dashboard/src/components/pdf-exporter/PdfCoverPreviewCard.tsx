@@ -36,24 +36,22 @@ export function PdfCoverPreviewCard({ docsUrl, orgName, options }: PdfCoverPrevi
         };
     }, [scaledSize]);
 
-    const coverTitleOverride = options.coverTitle;
-    const coverSubtitleOverride = options.coverSubtitle;
-    const hideFooter = options.hideCoverFooter === true;
+    const { coverTitle, coverSubtitle, hideCoverFooter } = options;
 
     const iframeSrc = useMemo(() => {
         const params = new URLSearchParams();
-        if (typeof coverTitleOverride === "string") {
-            params.set("title", coverTitleOverride);
+        if (typeof coverTitle === "string") {
+            params.set("title", coverTitle);
         }
-        if (typeof coverSubtitleOverride === "string") {
-            params.set("subtitle", coverSubtitleOverride);
+        if (typeof coverSubtitle === "string") {
+            params.set("subtitle", coverSubtitle);
         }
-        if (hideFooter) {
+        if (hideCoverFooter) {
             params.set("hideFooter", "1");
         }
         const q = params.toString();
         return `/${orgName}/pdf-cover-preview/${encodeURIComponent(docsUrl)}${q ? `?${q}` : ""}`;
-    }, [coverSubtitleOverride, coverTitleOverride, docsUrl, hideFooter, orgName]);
+    }, [coverSubtitle, coverTitle, docsUrl, hideCoverFooter, orgName]);
 
     return (
         <Card className="flex-col gap-4">

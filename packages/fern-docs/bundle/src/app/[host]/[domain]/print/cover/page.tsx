@@ -28,20 +28,23 @@ export default async function PrintCoverPage(props: {
     ]);
 
     const resolveFileSrc = createFileResolver(files);
+
     const logo = withLogo(config, resolveFileSrc, metadata.basePath, undefined, logoUrls);
+    const coverTitle = typeof searchParams.title === "string" ? searchParams.title : undefined;
+    const coverSubtitle = typeof searchParams.subtitle === "string" ? searchParams.subtitle : undefined;
+    const hideFooter = searchParams.hideFooter === "1" || searchParams.hideFooter === "true";
 
     return (
         <PdfCoverPage
             domain={domain}
-            docsMetadata={metadata}
-            docsConfig={config}
+            basePath={metadata.basePath}
             docsLanguage={lang}
             printCoverPageDataAttribute={PRINT_COVER_PAGE_DATA_ATTR}
             logoSrc={logo.light?.src ?? logo.dark?.src}
             logoHeight={logo.height}
-            coverTitleOverride={typeof searchParams.title === "string" ? searchParams.title : undefined}
-            coverSubtitleOverride={typeof searchParams.subtitle === "string" ? searchParams.subtitle : undefined}
-            hideFooter={searchParams.hideFooter === "1" || searchParams.hideFooter === "true"}
+            coverTitle={coverTitle}
+            coverSubtitle={coverSubtitle}
+            hideFooter={hideFooter}
         />
     );
 }
