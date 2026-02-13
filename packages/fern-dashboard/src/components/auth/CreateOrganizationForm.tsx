@@ -30,6 +30,7 @@ interface CreateOrganizationFormProps {
     submitButtonClassName?: string;
     hideLabel?: boolean;
     initialOrganizationName?: string;
+    postmanTeamId?: string;
 }
 
 type OrgIdStatus = "idle" | "checking" | "available" | "unavailable" | "error" | "invalid";
@@ -40,7 +41,8 @@ export function CreateOrganizationForm({
     submitButtonText = "Create Organization",
     hideLabel = false,
     submitButtonClassName = "w-full",
-    initialOrganizationName
+    initialOrganizationName,
+    postmanTeamId
 }: CreateOrganizationFormProps) {
     const [orgIdStatus, setOrgIdStatus] = useState<OrgIdStatus>("idle");
     const [orgIdError, setOrgIdError] = useState<string | null>(null);
@@ -71,7 +73,8 @@ export function CreateOrganizationForm({
                     },
                     body: JSON.stringify({
                         organizationId: value.organizationId,
-                        displayName: value.organizationName.trim() || undefined
+                        displayName: value.organizationName.trim() || undefined,
+                        postmanTeamId: postmanTeamId || undefined
                     })
                 });
 

@@ -7,11 +7,13 @@ interface DocsOnboardingStep3PageProps {
     params: Promise<{
         orgName: string;
     }>;
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function DocsOnboardingStep3Page({ params }: DocsOnboardingStep3PageProps) {
+export default async function DocsOnboardingStep3Page({ params, searchParams }: DocsOnboardingStep3PageProps) {
     const { orgName } = await params;
-    await ensureOnboardingOrgAccess(orgName, `/get-started/${orgName}/docs/details`);
+    const resolvedSearchParams = searchParams ? await searchParams : undefined;
+    await ensureOnboardingOrgAccess(orgName, `/get-started/${orgName}/docs/details`, resolvedSearchParams);
 
     return (
         <>

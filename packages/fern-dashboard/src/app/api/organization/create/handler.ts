@@ -6,6 +6,7 @@ import { getVenusClient } from "@/app/services/venus/getVenusClient";
 interface CreateOrganizationRequestBody {
     organizationId: string;
     displayName?: string;
+    postmanTeamId?: string;
 }
 
 function getErrorMessage(error: unknown, organizationId: string): string {
@@ -33,7 +34,8 @@ export default async function createOrganization(
         organizationId: body.organizationId,
         displayName: body.displayName,
         enableGithubConnection: true,
-        artifactReadRequiresToken: false
+        artifactReadRequiresToken: false,
+        postmanTeamId: body.postmanTeamId
     });
 
     if (!result.ok) {

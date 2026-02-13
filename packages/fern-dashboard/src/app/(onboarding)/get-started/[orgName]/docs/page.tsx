@@ -5,11 +5,13 @@ interface DocsOnboardingStep1PageProps {
     params: Promise<{
         orgName: string;
     }>;
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function DocsOnboardingStep1Page({ params }: DocsOnboardingStep1PageProps) {
+export default async function DocsOnboardingStep1Page({ params, searchParams }: DocsOnboardingStep1PageProps) {
     const { orgName } = await params;
-    await ensureOnboardingOrgAccess(orgName, `/get-started/${orgName}/docs`);
+    const resolvedSearchParams = searchParams ? await searchParams : undefined;
+    await ensureOnboardingOrgAccess(orgName, `/get-started/${orgName}/docs`, resolvedSearchParams);
 
     return <ApiSpecStepClient />;
 }

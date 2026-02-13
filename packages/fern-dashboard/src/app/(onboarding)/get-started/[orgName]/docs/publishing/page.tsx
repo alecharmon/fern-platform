@@ -6,11 +6,16 @@ interface DocsOnboardingPublishingPageProps {
     params: Promise<{
         orgName: string;
     }>;
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function DocsOnboardingPublishingPage({ params }: DocsOnboardingPublishingPageProps) {
+export default async function DocsOnboardingPublishingPage({
+    params,
+    searchParams
+}: DocsOnboardingPublishingPageProps) {
     const { orgName } = await params;
-    await ensureOnboardingOrgAccess(orgName, `/get-started/${orgName}/docs/publishing`);
+    const resolvedSearchParams = searchParams ? await searchParams : undefined;
+    await ensureOnboardingOrgAccess(orgName, `/get-started/${orgName}/docs/publishing`, resolvedSearchParams);
 
     // Note: Additional client-side guards in PublishingStepClient
     // will check for valid sessionStorage data and redirect if missing

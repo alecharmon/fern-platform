@@ -10,12 +10,14 @@ interface CreateOrganizationStepClientProps {
     accessToken: string;
     nextHref: string;
     initialOrgName?: string;
+    postmanTeamId?: string;
 }
 
 export function CreateOrganizationStepClient({
     accessToken,
     nextHref,
-    initialOrgName
+    initialOrgName,
+    postmanTeamId
 }: CreateOrganizationStepClientProps) {
     const router = useRouter();
     const posthog = usePostHog();
@@ -46,6 +48,7 @@ export function CreateOrganizationStepClient({
             hideLabel
             submitButtonText="Continue"
             initialOrganizationName={initialOrgName}
+            postmanTeamId={postmanTeamId}
         />
     );
 }

@@ -31,6 +31,7 @@ interface CreateOrgPageProps {
     searchParams?: Promise<{
         next?: string | string[];
         prefillOrgName?: string | string[];
+        "postman-team-id"?: string | string[];
     }>;
 }
 
@@ -43,6 +44,8 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
     const resolvedSearchParams = await searchParams;
     const nextHref = sanitizeNextHref(resolvedSearchParams?.next);
     const prefillOrgName = sanitizePrefillOrgName(resolvedSearchParams?.prefillOrgName);
+    const postmanTeamId = resolvedSearchParams?.["postman-team-id"];
+    const postmanTeamIdValue = Array.isArray(postmanTeamId) ? postmanTeamId[0] : postmanTeamId;
 
     return (
         <>
@@ -56,6 +59,7 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
                             accessToken={session.accessToken}
                             nextHref={nextHref}
                             initialOrgName={prefillOrgName}
+                            postmanTeamId={postmanTeamIdValue}
                         />
                     </div>
                 </div>

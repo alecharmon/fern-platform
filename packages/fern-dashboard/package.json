@@ -50,7 +50,7 @@
     "@fern-api/site-to-docs": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-api/user-permissions": "workspace:*",
-    "@fern-api/venus-api-sdk": "0.20.0",
+    "@fern-api/venus-api-sdk": "0.22.34",
     "@fern-docs/components": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",
     "@fern-docs/i18n": "workspace:*",

@@ -1308,8 +1308,8 @@ importers:
         specifier: workspace:*
         version: link:../commons/user-permissions
       '@fern-api/venus-api-sdk':
-        specifier: 0.20.0
-        version: 0.20.0
+        specifier: 0.22.34
+        version: 0.22.34
       '@fern-docs/components':
         specifier: workspace:*
         version: link:../fern-docs/components
@@ -6528,8 +6528,8 @@ packages:
     resolution: {integrity: sha512-JSaql5pywCbEK7nAJJ1NLnEc4RNiurLzqZ8DQKcgXxdudBEv/n7NDpjrDhZ8STUY68MUR1hekYq3JXGbxRvs5A==}
     engines: {node: '>=18.0.0'}
 
-  '@fern-api/venus-api-sdk@0.20.0':
-    resolution: {integrity: sha512-lV6QaYD/kH809S09g1qV/dpNgyHWd4zKwltVX2IKoqpEgIoEG6ZGpTlBfRMpkes6mDEWPcbwtvqgl3Ogdxs/Yg==}
+  '@fern-api/venus-api-sdk@0.22.34':
+    resolution: {integrity: sha512-21J/+zvL/v2LlCsVcBu7uM6k0Ej7Tz+2Tg6qZkUNH5TS0wmU6CyQ3lURE9jwiDRnw/bpNNkVXGuu9R7Vmvyi6Q==}
     engines: {node: '>=18.0.0'}
 
   '@fern-fern/fern-cloud-sdk@0.0.305':
@@ -27044,7 +27044,7 @@ snapshots:
 
   '@fern-api/venus-api-sdk@0.19.10': {}
 
-  '@fern-api/venus-api-sdk@0.20.0': {}
+  '@fern-api/venus-api-sdk@0.22.34': {}
 
   '@fern-fern/fern-cloud-sdk@0.0.305':
     dependencies:
