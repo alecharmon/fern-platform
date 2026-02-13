@@ -60,22 +60,58 @@ export function handleCorsProxy(req: http.IncomingMessage, res: http.ServerRespo
     // Log the request (excluding sensitive headers/API keys)
     log(`CORS proxy request: ${req.method} ${parsedUrl.origin}${parsedUrl.pathname}`);
 
-    // Get the list of headers to forward from the X-Fern-Proxy-Request-Headers header
-    const headersToForward = ((req.headers["x-fern-proxy-request-headers"] as string) || "").split(",").filter(Boolean);
+    const headersToForwardRaw = (req.headers["x-fern-proxy-request-headers"] as string) || "";
+    const headersToForward = headersToForwardRaw.split(",").filter(Boolean);
 
-    // Build headers to forward to the target
+    // Headers that should never be forwarded to the target API.
+    // These are either security-sensitive (cookies from the docs site), internal to the proxy,
+    // or hop-by-hop headers that don't belong in the proxied request.
+    const BLOCKED_HEADERS = new Set([
+        "cookie",
+        "host",
+        "origin",
+        "referer",
+        "connection",
+        "keep-alive",
+        "transfer-encoding",
+        "te",
+        "trailer",
+        "upgrade",
+        "proxy-authorization",
+        "proxy-connection",
+        "x-fern-proxy-request-headers"
+    ]);
+
     const forwardHeaders: Record<string, string | string[] | undefined> = {};
-    for (const header of headersToForward) {
-        const lowerHeader = header.toLowerCase();
-        if (req.headers[lowerHeader] != null) {
-            forwardHeaders[header] = req.headers[lowerHeader];
+
+    if (headersToForward.length > 0) {
+        for (const header of headersToForward) {
+            const lowerHeader = header.toLowerCase();
+            if (req.headers[lowerHeader] != null) {
+                forwardHeaders[header] = req.headers[lowerHeader];
+            }
+        }
+    } else {
+        // Fallback: if X-Fern-Proxy-Request-Headers is missing (e.g. stripped by a reverse proxy
+        // or ingress controller), forward all non-sensitive headers to avoid silently dropping
+        // auth and other API headers. This matches the Cloudflare Worker proxy behavior.
+        debug("CORS proxy: X-Fern-Proxy-Request-Headers missing, forwarding all non-sensitive headers");
+        for (const [key, value] of Object.entries(req.headers)) {
+            if (!BLOCKED_HEADERS.has(key) && value != null) {
+                forwardHeaders[key] = value;
+            }
         }
     }
 
-    // Also forward content-type if present (for POST/PUT requests)
-    if (req.headers["content-type"]) {
+    if (req.headers["content-type"] && !forwardHeaders["Content-Type"] && !forwardHeaders["content-type"]) {
         forwardHeaders["Content-Type"] = req.headers["content-type"];
     }
+
+    if (req.headers["authorization"] && !forwardHeaders["Authorization"] && !forwardHeaders["authorization"]) {
+        forwardHeaders["Authorization"] = req.headers["authorization"];
+    }
+
+    debug(`CORS proxy forwarding headers: ${Object.keys(forwardHeaders).join(", ") || "(none)"}`);
 
     const requestModule = parsedUrl.protocol === "https:" ? https : http;
 
@@ -159,7 +195,7 @@ export function handleCorsPreflightProxy(_req: http.IncomingMessage, res: http.S
     res.writeHead(204, {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Fern-Proxy-Request-Headers, *",
         "Access-Control-Max-Age": "86400"
     });
     res.end();
