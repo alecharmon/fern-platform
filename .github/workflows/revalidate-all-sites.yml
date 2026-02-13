@@ -17,6 +17,21 @@ on:
         type: string
 
 jobs:
+  notify-start:
+    name: Notify revalidation starting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v2
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "`${{ github.ref_name }}` live, revalidation starting..."
+            }
+
   prepare:
     name: Prepare site batches
     runs-on: ubuntu-latest
