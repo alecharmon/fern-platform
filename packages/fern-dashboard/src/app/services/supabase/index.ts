@@ -13,7 +13,6 @@ export type {
     ChartDataPoint,
     CustomDomainVerificationInsert,
     CustomDomainVerificationRow,
-    DomainSetupStep,
     DomainVerificationStatus,
     TopAPIExplorerEntry,
     TopChannelsEntry,

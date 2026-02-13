@@ -1,4 +1,4 @@
-type BadgeVariant = "info" | "success";
+type BadgeVariant = "info" | "success" | "warning";
 
 interface BadgeProps {
     children: React.ReactNode;
@@ -7,7 +7,8 @@ interface BadgeProps {
 
 const variantStyles: Record<BadgeVariant, string> = {
     info: "bg-blue-400 text-blue-1100",
-    success: "bg-green-300 text-green-1100"
+    success: "bg-green-300 text-green-1100",
+    warning: "bg-amber-200 text-amber-900 dark:bg-amber-900/40 dark:text-amber-300"
 };
 
 export function Badge({ children, variant }: BadgeProps) {

@@ -1,6 +1,12 @@
 import type { CustomDomainVerificationInsert } from "../supabase";
 import { getSupabaseClient } from "../supabase";
 import type { CustomDomainVerification, DomainVerificationStatus } from "./types";
+
+export interface ChecklistStepUpdates {
+    ownershipVerified?: boolean;
+    dnsConfigured?: boolean;
+}
+
 import {
     generateVerificationValue,
     getVerificationHost,
@@ -28,8 +34,7 @@ export async function createVerification(data: {
     const supabase = getSupabaseClient();
     const normalizedDomain = normalizeDomainWithSubpath(data.domain);
     const verificationValue = generateVerificationValue();
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + VERIFICATION_EXPIRY_HOURS);
+    const expiresAt = new Date(Date.now() + VERIFICATION_EXPIRY_HOURS * 60 * 60 * 1000);
 
     // Delete any existing verification for this docsUrl first
     // This allows users to restart the verification process
@@ -43,9 +48,11 @@ export async function createVerification(data: {
         verificationValue,
         status: "PENDING",
         vercelDomainId: null,
+        ownershipVerified: false,
+        dnsConfigured: false,
+        prUrl: null,
         verifiedAt: null,
-        expiresAt: expiresAt.toISOString(),
-        setupStep: "update-config"
+        expiresAt: expiresAt.toISOString()
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -204,9 +211,9 @@ export async function isDomainAvailable(domain: string, excludeDocsUrl?: string)
         return true;
     }
 
-    // If the existing verification is expired and not verified, it's available
+    // If the existing verification is expired and ownership not yet verified, it's available
     // Delete the expired record and verify it was actually deleted to prevent race conditions
-    if (existing.status === "PENDING" && new Date(existing.expiresAt) < new Date()) {
+    if (existing.status === "PENDING" && !existing.ownershipVerified && new Date(existing.expiresAt) < new Date()) {
         const { error: deleteError, count } = await supabase
             .from("CustomDomainVerification")
             .delete()
@@ -252,37 +259,60 @@ export function formatVerificationInfo(verification: CustomDomainVerification) {
         id: verification.id,
         domain: verification.domain,
         status: verification.status,
-        setupStep: verification.setupStep,
+        ownershipVerified: verification.ownershipVerified,
+        dnsConfigured: verification.dnsConfigured,
+        prUrl: verification.prUrl ?? null,
         verificationRecord: {
             type: "TXT" as const,
             host: getVerificationHost(verification.domain),
             value: verification.verificationValue
         },
-        createdAt: new Date(verification.createdAt),
-        expiresAt: new Date(verification.expiresAt),
-        verifiedAt: verification.verifiedAt ? new Date(verification.verifiedAt) : null
+        createdAt: new Date(verification.createdAt).toISOString(),
+        expiresAt: new Date(verification.expiresAt).toISOString(),
+        verifiedAt: verification.verifiedAt ? new Date(verification.verifiedAt).toISOString() : null
     };
 }
 
 /**
- * Updates the setup step for a domain
+ * Updates the PR URL for a domain verification record
  */
-export async function updateSetupStep(
+export async function updatePrUrl(id: string, prUrl: string): Promise<CustomDomainVerification> {
+    const supabase = getSupabaseClient();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+        .from("CustomDomainVerification")
+        .update({ prUrl })
+        .eq("id", id)
+        .select()
+        .single();
+
+    if (error) {
+        throw new Error(`Failed to update PR URL: ${error.message}`);
+    }
+
+    return data as unknown as CustomDomainVerification;
+}
+
+/**
+ * Updates checklist step booleans for a domain
+ */
+export async function updateChecklistStep(
     id: string,
-    setupStep: CustomDomainVerification["setupStep"]
+    updates: ChecklistStepUpdates
 ): Promise<CustomDomainVerification> {
     const supabase = getSupabaseClient();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
         .from("CustomDomainVerification")
-        .update({ setupStep })
+        .update(updates)
         .eq("id", id)
         .select()
         .single();
 
     if (error) {
-        throw new Error(`Failed to update setup step: ${error.message}`);
+        throw new Error(`Failed to update checklist step: ${error.message}`);
     }
 
     return data as unknown as CustomDomainVerification;

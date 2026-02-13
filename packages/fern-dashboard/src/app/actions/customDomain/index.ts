@@ -1,4 +1,9 @@
 export {
+    type CheckSiteLivenessRequest,
+    type CheckSiteLivenessResponse,
+    checkSiteLiveness
+} from "./checkSiteLiveness";
+export {
     type CreateCustomDomainPrRequest,
     type CreateCustomDomainPrResponse,
     createCustomDomainPr,
@@ -27,10 +32,10 @@ export {
     removeCustomDomain
 } from "./removeCustomDomain";
 export {
-    type UpdateSetupStepRequest,
-    type UpdateSetupStepResponse,
-    updateDomainSetupStep
-} from "./updateSetupStep";
+    type UpdateChecklistStepRequest,
+    type UpdateChecklistStepResponse,
+    updateDomainChecklistStep
+} from "./updateChecklistStep";
 export {
     type VerifyCustomDomainRequest,
     type VerifyCustomDomainResponse,

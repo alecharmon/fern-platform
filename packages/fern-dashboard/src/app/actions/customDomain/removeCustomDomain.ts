@@ -53,7 +53,7 @@ export async function removeCustomDomain({
 
     try {
         // If domain was added to Vercel, remove it
-        if (verification.status === "VERIFIED" && verification.domain) {
+        if (verification.vercelDomainId && verification.domain) {
             const vercelResult = await removeDomainFromVercelProject(verification.domain);
             if (!vercelResult.success) {
                 console.error("Failed to remove domain from Vercel:", vercelResult.error);

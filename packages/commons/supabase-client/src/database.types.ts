@@ -143,12 +143,14 @@ export type Database = {
             CustomDomainVerification: {
                 Row: {
                     createdAt: string;
+                    dnsConfigured: boolean;
                     docsUrl: string;
                     domain: string;
                     expiresAt: string;
                     id: string;
                     orgId: string;
-                    setupStep: string | null;
+                    ownershipVerified: boolean;
+                    prUrl: string | null;
                     status: string;
                     updatedAt: string;
                     vercelDomainId: string | null;
@@ -157,12 +159,14 @@ export type Database = {
                 };
                 Insert: {
                     createdAt?: string;
+                    dnsConfigured?: boolean;
                     docsUrl: string;
                     domain: string;
                     expiresAt: string;
                     id?: string;
                     orgId: string;
-                    setupStep?: string | null;
+                    ownershipVerified?: boolean;
+                    prUrl?: string | null;
                     status?: string;
                     updatedAt?: string;
                     vercelDomainId?: string | null;
@@ -171,12 +175,14 @@ export type Database = {
                 };
                 Update: {
                     createdAt?: string;
+                    dnsConfigured?: boolean;
                     docsUrl?: string;
                     domain?: string;
                     expiresAt?: string;
                     id?: string;
                     orgId?: string;
-                    setupStep?: string | null;
+                    ownershipVerified?: boolean;
+                    prUrl?: string | null;
                     status?: string;
                     updatedAt?: string;
                     vercelDomainId?: string | null;

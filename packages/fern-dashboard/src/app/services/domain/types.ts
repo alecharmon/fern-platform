@@ -1,6 +1,6 @@
-import type { CustomDomainVerificationRow, DomainSetupStep, DomainVerificationStatus } from "../supabase";
+import type { CustomDomainVerificationRow, DomainVerificationStatus } from "../supabase";
 
-export type { CustomDomainVerificationRow, DomainSetupStep, DomainVerificationStatus };
+export type { CustomDomainVerificationRow, DomainVerificationStatus };
 
 // Alias for easier usage
 export type CustomDomainVerification = CustomDomainVerificationRow;
@@ -45,14 +45,16 @@ export interface CustomDomainInfo {
     id: string;
     domain: string;
     status: DomainVerificationStatus;
-    setupStep: DomainSetupStep | null;
+    ownershipVerified: boolean;
+    dnsConfigured: boolean;
+    prUrl: string | null;
     verificationRecord: {
         type: "TXT";
         host: string;
         value: string;
     };
     dnsRecords?: VercelDnsRecord[];
-    createdAt: Date;
-    expiresAt: Date;
-    verifiedAt: Date | null;
+    createdAt: string;
+    expiresAt: string;
+    verifiedAt: string | null;
 }

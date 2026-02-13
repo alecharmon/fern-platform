@@ -90,14 +90,6 @@ export type AnalyticsRecordInsert = Omit<AnalyticsRecord, "id" | "created_at">;
 
 export type DomainVerificationStatus = "PENDING" | "VERIFIED" | "FAILED" | "EXPIRED";
 
-export type DomainSetupStep =
-    | "enter-domain"
-    | "update-config"
-    | "verify-ownership"
-    | "verify-dns"
-    | "configure-proxy"
-    | "complete";
-
 export interface CustomDomainVerificationRow {
     id: string;
     domain: string;
@@ -106,11 +98,13 @@ export interface CustomDomainVerificationRow {
     verificationValue: string;
     status: DomainVerificationStatus;
     vercelDomainId: string | null;
+    ownershipVerified: boolean;
+    dnsConfigured: boolean;
+    prUrl: string | null;
     createdAt: string;
     updatedAt: string;
     verifiedAt: string | null;
     expiresAt: string;
-    setupStep: DomainSetupStep | null;
 }
 
 export type CustomDomainVerificationInsert = Omit<CustomDomainVerificationRow, "createdAt" | "updatedAt">;

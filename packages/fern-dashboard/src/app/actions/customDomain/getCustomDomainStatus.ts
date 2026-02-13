@@ -4,12 +4,7 @@ import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import type { CustomDomainInfo } from "@/app/services/domain";
-import {
-    formatVerificationInfo,
-    getVerificationByDocsUrl,
-    getVerificationByDomain,
-    updateVerificationStatus
-} from "@/app/services/domain";
+import { formatVerificationInfo, getVerificationByDocsUrl, getVerificationByDomain } from "@/app/services/domain";
 
 export interface GetCustomDomainStatusRequest {
     docsUrl: string;
@@ -52,24 +47,6 @@ export async function getCustomDomainStatus({
     }
 
     if (!verification) {
-        return {
-            success: true,
-            hasCustomDomain: false
-        };
-    }
-
-    // Check if the verification has expired
-    if (verification.status === "PENDING" && new Date(verification.expiresAt) < new Date()) {
-        // Mark as expired
-        await updateVerificationStatus(verification.id, "EXPIRED");
-        return {
-            success: true,
-            hasCustomDomain: false
-        };
-    }
-
-    // Don't show expired verifications
-    if (verification.status === "EXPIRED") {
         return {
             success: true,
             hasCustomDomain: false

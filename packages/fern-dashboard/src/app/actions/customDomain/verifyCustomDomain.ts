@@ -8,6 +8,7 @@ import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization
 import type { CustomDomainInfo } from "@/app/services/domain";
 import {
     addDomainToVercelProject,
+    createVerification,
     formatVerificationInfo,
     getVerificationByDocsUrl,
     getVerificationByDomain,
@@ -76,8 +77,8 @@ export async function verifyCustomDomain({
         };
     }
 
-    // Check if already verified
-    if (verification.status === "VERIFIED") {
+    // Check if ownership was already verified (TXT check passed previously)
+    if (verification.ownershipVerified) {
         return {
             success: true,
             verified: true,
@@ -85,13 +86,18 @@ export async function verifyCustomDomain({
         };
     }
 
-    // Check if expired
+    // If the TXT token has expired, re-issue a new verification with a fresh token
     if (new Date(verification.expiresAt) < new Date()) {
-        await updateVerificationStatus(verification.id, "EXPIRED");
+        const reissued = await createVerification({
+            domain: verification.domain,
+            docsUrl,
+            orgId: orgName
+        });
         return {
-            success: false,
+            success: true,
             verified: false,
-            error: "Verification token has expired. Please start the verification process again."
+            domainInfo: formatVerificationInfo(reissued),
+            error: "Your verification token expired. A new one has been issued — please update your TXT record."
         };
     }
 
@@ -124,11 +130,7 @@ export async function verifyCustomDomain({
     const isSubpathDomain = hasSubpath(verification.domain);
 
     if (isSubpathDomain) {
-        // For subpath domains, we skip Vercel and just mark as verified
-        // User will configure their own proxy
-        const updatedVerification = await updateVerificationStatus(verification.id, "VERIFIED");
-
-        // Send Slack notification for subpath domain verification (proxy setup step)
+        // For subpath domains, we skip Vercel — user will configure their own proxy
         postToSlack(
             "#dashboard-custom-domain-notifs",
             `*[${orgName}]* Custom domain added (subpath/proxy): *${verification.domain}*\nUser: *<mailto:${session.user.email}|${session.user.email ?? "unknown"}>*`,
@@ -138,7 +140,7 @@ export async function verifyCustomDomain({
         return {
             success: true,
             verified: true,
-            domainInfo: formatVerificationInfo(updatedVerification)
+            domainInfo: formatVerificationInfo(verification)
         };
     }
 
@@ -146,7 +148,6 @@ export async function verifyCustomDomain({
     const vercelResult = await addDomainToVercelProject(verification.domain);
 
     if (!vercelResult.success) {
-        await updateVerificationStatus(verification.id, "FAILED");
         return {
             success: false,
             verified: true,
@@ -155,8 +156,12 @@ export async function verifyCustomDomain({
         };
     }
 
-    // Update verification status to VERIFIED
-    const updatedVerification = await updateVerificationStatus(verification.id, "VERIFIED", vercelResult.domainId);
+    // Store the Vercel domain ID — status stays PENDING until all checklist steps complete
+    const updatedVerification = await updateVerificationStatus(
+        verification.id,
+        verification.status,
+        vercelResult.domainId
+    );
 
     // Send Slack notification for subdomain verification (DNS records verified)
     postToSlack(
