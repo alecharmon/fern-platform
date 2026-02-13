@@ -3851,6 +3851,9 @@ importers:
       '@ungap/url-search-params':
         specifier: 0.2.2
         version: 0.2.2
+      '@upstash/redis':
+        specifier: ^1.35.6
+        version: 1.35.6
       '@yarnpkg/pnpify':
         specifier: ^4.0.1
         version: 4.1.6(typanion@3.14.0)

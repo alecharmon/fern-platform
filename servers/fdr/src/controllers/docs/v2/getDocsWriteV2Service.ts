@@ -337,6 +337,20 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                         app.logger.info(
                             `[finishDocsRegister] Successfully wrote S3 docs for domain=${url.hostname}${basepath != null ? `, basepath=${basepath}` : ""}`
                         );
+
+                        if (basepath != null) {
+                            try {
+                                await app.services.basepathRoutes.addBasepathRoute({
+                                    hostname: url.hostname,
+                                    basepath
+                                });
+                            } catch (e) {
+                                app.logger.error(
+                                    `[finishDocsRegister] Failed to add basepath route to KV for domain=${url.hostname}, basepath=${basepath}`,
+                                    e
+                                );
+                            }
+                        }
                     } catch (e) {
                         app.logger.error(`Error while trying to write DB docs definition for ${url.getFullUrl()}`, e);
                     }
