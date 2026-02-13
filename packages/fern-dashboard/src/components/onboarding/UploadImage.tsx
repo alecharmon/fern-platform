@@ -1,6 +1,6 @@
 "use client";
 
-import { UploadCloudIcon } from "lucide-react";
+import { Trash2, UploadCloudIcon } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ interface UploadImageProps {
     description: string;
     imageUrl: string | null;
     onFileSelect: (file: File) => void;
+    onRemove?: () => void;
     size?: ImageSize;
     accept?: string;
     defaultImageUrl?: string | null;
@@ -26,6 +27,7 @@ export function UploadImage({
     description,
     imageUrl,
     onFileSelect,
+    onRemove,
     defaultImageUrl = "https://raw.githubusercontent.com/fern-api/docs-starter/main/fern/docs/assets/logo.svg",
     size = "large",
     accept = "image/*",
@@ -75,23 +77,42 @@ export function UploadImage({
 
             <div className="flex items-center gap-4">
                 {/* Image preview */}
-                <div
-                    className={cn(
-                        containerClasses,
-                        "flex cursor-pointer items-center justify-center overflow-hidden border border-dashed border-gray-500 bg-transparent p-3 transition-all duration-300 hover:border-gray-700 hover:bg-opacity-100"
-                    )}
-                    onClick={() => {
-                        onFocus?.();
-                        fileInputRef.current?.click();
-                    }}
-                >
-                    {effectivePreview ? (
-                        // biome-ignore lint/performance/noImgElement: false positive
-                        <img src={effectivePreview} alt={label} className="h-full w-full rounded-lg object-contain" />
-                    ) : (
-                        <div className="text-gray-900">
-                            <UploadCloudIcon className={iconSize} />
-                        </div>
+                <div className="relative">
+                    <div
+                        className={cn(
+                            containerClasses,
+                            "flex cursor-pointer items-center justify-center overflow-hidden border border-dashed border-gray-500 bg-transparent p-3 transition-all duration-300 hover:border-gray-700 hover:bg-opacity-100"
+                        )}
+                        onClick={() => {
+                            onFocus?.();
+                            fileInputRef.current?.click();
+                        }}
+                    >
+                        {effectivePreview ? (
+                            // biome-ignore lint/performance/noImgElement: false positive
+                            <img
+                                src={effectivePreview}
+                                alt={label}
+                                className="h-full w-full rounded-lg object-contain"
+                            />
+                        ) : (
+                            <div className="text-gray-900">
+                                <UploadCloudIcon className={iconSize} />
+                            </div>
+                        )}
+                    </div>
+                    {imageUrl && onRemove && (
+                        <Button
+                            variant="outline"
+                            size="iconSm"
+                            className="absolute -right-2 -top-2"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onRemove();
+                            }}
+                        >
+                            <Trash2 className="size-4" />
+                        </Button>
                     )}
                 </div>
 

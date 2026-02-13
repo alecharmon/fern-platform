@@ -109,6 +109,12 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
         [form]
     );
 
+    const handleLogoRemove = useCallback(() => {
+        form.setFieldValue("logoUrl", null);
+        form.setFieldValue("logoFileName", null);
+        form.setFieldValue("logoFile", null);
+    }, [form]);
+
     const ensureAutoDocsUrlAvailability = useCallback(
         async (baseSlug: string, requestId: number) => {
             if (!baseSlug) {
@@ -368,6 +374,7 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
                     description="Recommended height of 60 pixels. This will be used as the main logo on the top-left corner of the Docs site."
                     imageUrl={formData.logoUrl}
                     onFileSelect={handleLogoUpload}
+                    onRemove={handleLogoRemove}
                     size="large"
                     accept="image/png,image/gif,image/svg+xml"
                     onFocus={() => setFocusedField("logo")}
