@@ -44,8 +44,10 @@ const MONITORED_SITES: MonitoredSite[] = [
     { domain: "docs.cohere.com", name: "Cohere" }
 ];
 
-const TIMEOUT_MS = 60000;
-const MAX_RETRIES = 5;
+const TIMEOUT_MS = 30000;
+const MAX_RETRIES = 2;
+const STREAMING_TIMEOUT_MS = 15000;
+const GLOBAL_TIMEOUT_MS = 8 * 60 * 1000;
 
 // incident.io status IDs
 const INCIDENT_STATUS_MONITORING = "01HR85VFNXWH1H6976YCEJ5XJB";
@@ -256,6 +258,125 @@ async function checkEndpoint(
     };
 }
 
+async function checkStreamingEndpoint(
+    site: MonitoredSite,
+    path: string,
+    options: {
+        expectedContentType?: string;
+        minContentLength?: number;
+    } = {}
+): Promise<CheckResult> {
+    const baseUrl = getBaseUrl(site);
+    const url = `${baseUrl}${path}`;
+    const { expectedContentType, minContentLength = 1 } = options;
+    const startTime = Date.now();
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), STREAMING_TIMEOUT_MS);
+
+            const response = await fetch(url, {
+                signal: controller.signal,
+                headers: BROWSER_HEADERS
+            });
+
+            if (response.status !== 200) {
+                clearTimeout(timeoutId);
+                return {
+                    site,
+                    endpoint: path,
+                    success: false,
+                    error: `HTTP ${response.status} ${response.statusText}`,
+                    statusCode: response.status,
+                    responseTime: Date.now() - startTime
+                };
+            }
+
+            const contentType = response.headers.get("content-type") || "";
+            if (expectedContentType && !contentType.includes(expectedContentType)) {
+                clearTimeout(timeoutId);
+                return {
+                    site,
+                    endpoint: path,
+                    success: false,
+                    error: `Invalid content-type: ${contentType}, expected: ${expectedContentType}`,
+                    statusCode: response.status,
+                    responseTime: Date.now() - startTime
+                };
+            }
+
+            const reader = response.body?.getReader();
+            if (!reader) {
+                clearTimeout(timeoutId);
+                return {
+                    site,
+                    endpoint: path,
+                    success: false,
+                    error: "No response body",
+                    statusCode: response.status,
+                    responseTime: Date.now() - startTime
+                };
+            }
+
+            let receivedBytes = 0;
+            let streamEndedTooShort = false;
+            try {
+                const { value, done } = await reader.read();
+                if (value) {
+                    receivedBytes += value.length;
+                }
+                if (done && receivedBytes < minContentLength) {
+                    streamEndedTooShort = true;
+                }
+            } finally {
+                reader.releaseLock();
+                controller.abort();
+                clearTimeout(timeoutId);
+            }
+
+            if (streamEndedTooShort) {
+                return {
+                    site,
+                    endpoint: path,
+                    success: false,
+                    error: `Stream ended with only ${receivedBytes} bytes (expected >= ${minContentLength})`,
+                    statusCode: response.status,
+                    responseTime: Date.now() - startTime
+                };
+            }
+
+            return {
+                site,
+                endpoint: path,
+                success: true,
+                statusCode: response.status,
+                responseTime: Date.now() - startTime
+            };
+        } catch (error) {
+            if (attempt < MAX_RETRIES) {
+                await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+                continue;
+            }
+            return {
+                site,
+                endpoint: path,
+                success: false,
+                error: error instanceof Error ? error.message : String(error),
+                responseTime: Date.now() - startTime
+            };
+        }
+    }
+
+    return {
+        site,
+        endpoint: path,
+        success: false,
+        error: "Max retries exceeded",
+        responseTime: Date.now() - startTime
+    };
+}
+
 async function checkSitemapXml(site: MonitoredSite): Promise<CheckResult> {
     return checkEndpoint(site, "/sitemap.xml", {
         expectedContentType: "xml",
@@ -302,16 +423,16 @@ async function checkHomePage(site: MonitoredSite): Promise<CheckResult> {
 }
 
 async function checkLlmsTxt(site: MonitoredSite): Promise<CheckResult> {
-    return checkEndpoint(site, "/llms.txt", {
+    return checkStreamingEndpoint(site, "/llms.txt", {
         expectedContentType: "text/plain",
-        minContentLength: 50
+        minContentLength: 10
     });
 }
 
 async function checkLlmsFullTxt(site: MonitoredSite): Promise<CheckResult> {
-    return checkEndpoint(site, "/llms-full.txt", {
+    return checkStreamingEndpoint(site, "/llms-full.txt", {
         expectedContentType: "text/plain",
-        minContentLength: 100
+        minContentLength: 10
     });
 }
 
@@ -320,18 +441,49 @@ async function checkMdLinkFromLlmsTxt(site: MonitoredSite): Promise<CheckResult 
     const llmsTxtUrl = `${baseUrl}/llms.txt`;
 
     try {
-        const { response } = await fetchWithRetry(llmsTxtUrl);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), STREAMING_TIMEOUT_MS);
+
+        const response = await fetch(llmsTxtUrl, {
+            signal: controller.signal,
+            headers: BROWSER_HEADERS
+        });
+
         if (!response || !response.ok) {
+            clearTimeout(timeoutId);
             return null;
         }
 
-        const text = await response.text();
-        const mdLinkMatch = text.match(/\[.*?\]\((.*?\.mdx?)\)/);
+        const reader = response.body?.getReader();
+        if (!reader) {
+            clearTimeout(timeoutId);
+            return null;
+        }
 
-        if (mdLinkMatch) {
-            let mdLink = mdLinkMatch[1];
+        let accumulated = "";
+        let mdLink: string | null = null;
+        try {
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) {
+                    break;
+                }
+                if (value) {
+                    accumulated += new TextDecoder().decode(value);
+                }
+                const match = accumulated.match(/\[.*?\]\((.*?\.mdx?)\)/);
+                if (match) {
+                    mdLink = match[1];
+                    break;
+                }
+            }
+        } finally {
+            reader.releaseLock();
+            controller.abort();
+            clearTimeout(timeoutId);
+        }
 
-            // Handle full URLs - extract path relative to site
+        if (mdLink) {
             if (mdLink.startsWith("http://") || mdLink.startsWith("https://")) {
                 try {
                     const url = new URL(mdLink);
@@ -341,13 +493,10 @@ async function checkMdLinkFromLlmsTxt(site: MonitoredSite): Promise<CheckResult 
                 }
             }
 
-            // Ensure path starts with /
             if (!mdLink.startsWith("/")) {
                 mdLink = `/${mdLink}`;
             }
 
-            // If site has a basePath and the extracted link already includes it, strip it
-            // This prevents doubling (e.g., /docs/docs/overview/intro.mdx)
             if (site.basePath && mdLink.startsWith(site.basePath)) {
                 mdLink = mdLink.slice(site.basePath.length);
                 if (!mdLink.startsWith("/")) {
@@ -705,6 +854,11 @@ async function handleIncident(failuresBySite: Map<string, CheckResult[]>, totalS
 }
 
 async function main() {
+    const globalTimeout = setTimeout(() => {
+        console.error(`[Health Monitor] Global timeout reached (${GLOBAL_TIMEOUT_MS / 1000}s), exiting`);
+        process.exit(1);
+    }, GLOBAL_TIMEOUT_MS);
+
     console.log(`[Health Monitor] Starting check at ${new Date().toISOString()}`);
     console.log(`[Health Monitor] Checking ${MONITORED_SITES.length} sites`);
 
@@ -773,6 +927,8 @@ async function main() {
     const totalFailures = allFailures.length;
 
     console.log(`\n[Health Monitor] Completed: ${totalChecks} checks, ${totalFailures} failures`);
+
+    clearTimeout(globalTimeout);
 
     if (totalFailures > 0) {
         process.exit(1);
