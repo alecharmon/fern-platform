@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 import { getDocsGitUrl } from "@/app/services/dal/github/getDocsGitUrl";
+import { getRepoCollaboratorCount } from "@/app/services/dal/github/getRepoCollaboratorCount";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { docsPermissionScope } from "@/components/auth/authz";
@@ -40,10 +41,8 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
         notFound();
     }
 
-    // Get git URL to determine source repo owner and name
     const githubUrlResult = await getDocsGitUrl(docsUrl, session.accessToken);
 
-    // Extract owner and repo from git URL
     let sourceRepoOwner: string | undefined;
     let sourceRepoName: string | undefined;
 
@@ -54,6 +53,14 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
     }
 
     const gitUrl = githubUrlResult.success ? githubUrlResult.gitUrl : undefined;
+
+    let collaboratorCount: number | undefined;
+    if (sourceRepoOwner != null && sourceRepoName != null) {
+        const result = await getRepoCollaboratorCount(sourceRepoOwner, sourceRepoName);
+        if (result.success) {
+            collaboratorCount = result.count;
+        }
+    }
 
     return (
         <div className="flex w-full flex-col gap-4">
@@ -67,11 +74,19 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
                     docsUrl={docsUrl}
                     sourceRepoOwner={sourceRepoOwner}
                     sourceRepoName={sourceRepoName}
+                    collaboratorCount={collaboratorCount}
                 />
                 <FinishDocsSetupBanner docsUrl={docsUrl} orgName={orgName} gitUrl={gitUrl} />
                 <CriticalUpdateWarning orgName={orgName} docsUrl={docsUrl} gitUrl={gitUrl} />
             </AuthZWrapperServer>
-            <DocsSiteOverviewCard docsUrl={docsUrl} docsSite={currentDocsSite} orgName={orgName} />
+            <DocsSiteOverviewCard
+                docsUrl={docsUrl}
+                docsSite={currentDocsSite}
+                orgName={orgName}
+                sourceRepoOwner={sourceRepoOwner}
+                sourceRepoName={sourceRepoName}
+                collaboratorCount={collaboratorCount}
+            />
             <Suspense fallback={<VisualEditorLoadingCard />}>
                 <VisualEditorSection docsUrl={docsUrl} session={session} orgName={orgName} />
             </Suspense>

@@ -13,11 +13,17 @@ import { SkeletonDocsSiteOverviewCardContent } from "./SkeletonDocsSiteOverviewC
 export async function DocsSiteOverviewCard({
     docsSite,
     docsUrl,
-    orgName
+    orgName,
+    sourceRepoOwner,
+    sourceRepoName,
+    collaboratorCount
 }: {
     docsUrl: DocsUrl;
     docsSite: FdrAPI.dashboard.DocsSite;
     orgName: Auth0OrgName;
+    sourceRepoOwner?: string;
+    sourceRepoName?: string;
+    collaboratorCount?: number;
 }) {
     return (
         <div className="flex w-full flex-col gap-4">
@@ -27,7 +33,14 @@ export async function DocsSiteOverviewCard({
                     <DocsSiteImageServer docsSite={docsSite} />
                 </Suspense>
                 <Suspense fallback={<SkeletonDocsSiteOverviewCardContent />}>
-                    <DocsSiteOverviewCardContent docsUrl={docsUrl} orgName={orgName} urls={docsSite.urls} />
+                    <DocsSiteOverviewCardContent
+                        docsUrl={docsUrl}
+                        orgName={orgName}
+                        urls={docsSite.urls}
+                        sourceRepoOwner={sourceRepoOwner}
+                        sourceRepoName={sourceRepoName}
+                        collaboratorCount={collaboratorCount}
+                    />
                 </Suspense>
             </Card>
         </div>
