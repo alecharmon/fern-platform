@@ -636,6 +636,33 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            postman_collection_openapi_specs: {
+                Row: {
+                    id: string;
+                    team_id: string;
+                    user_id: string;
+                    collection_id: string;
+                    openapi_spec: Json;
+                    created_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    team_id: string;
+                    user_id: string;
+                    collection_id: string;
+                    openapi_spec: Json;
+                    created_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    team_id?: string;
+                    user_id?: string;
+                    collection_id?: string;
+                    openapi_spec?: Json;
+                    created_at?: string;
+                };
+                Relationships: [];
+            };
             RolePermissions: {
                 Row: {
                     id: number;
