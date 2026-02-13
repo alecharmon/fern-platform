@@ -31,6 +31,13 @@ export async function getBasepathRoutes(domain: string): Promise<string[] | unde
         return undefined;
     }
 
+    if (!process.env.MWARE_KV_REST_API_URL || !process.env.MWARE_KV_REST_API_TOKEN) {
+        console.log(
+            "[getBasepathRoutes] skipping redis lookup: MWARE_KV_REST_API_URL or MWARE_KV_REST_API_TOKEN is not set"
+        );
+        return undefined;
+    }
+
     const cached = basepathCache.get(domain);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
         return cached.value.length > 0 ? cached.value : undefined;
