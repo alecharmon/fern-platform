@@ -324,7 +324,7 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
                                         className="fern-link fern-link--gray px-0 mb-1 text-xs font-semibold cursor-pointer"
                                         onClick={handleUseSuggestedDocsUrl}
                                     >
-                                        Use suggested URL
+                                        Use suggested domain
                                     </button>
                                 )}
                             </div>

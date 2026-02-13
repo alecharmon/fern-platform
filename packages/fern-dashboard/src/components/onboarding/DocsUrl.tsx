@@ -88,7 +88,7 @@ export function DocsUrl({ value, onChange, onFocus, onBlur }: DocsUrlProps) {
     return (
         <div className="flex flex-col gap-2">
             <Label htmlFor="docs-url" className="text-gray-1200 dark:text-gray-1100 text-sm font-normal">
-                URL
+                Domain
             </Label>
             <div className="flex items-center gap-2">
                 <Input
