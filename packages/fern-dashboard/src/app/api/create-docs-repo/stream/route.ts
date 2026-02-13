@@ -38,6 +38,8 @@ interface CreateDocsRepoRequest {
     faviconBase64?: string;
     siteToDocsFiles?: Array<{ path: string; content: string; encoding?: "utf-8" | "base64" }>;
     sourceUrl?: string;
+    postmanCollectionId?: string;
+    postmanTeamId?: string;
 }
 
 // Helper functions imported from main route
@@ -483,7 +485,9 @@ jobs:
                         githubRepoUrl: result.htmlUrl,
                         repoName,
                         collaboratorAdded,
-                        fernTokenSet: !!result.fernToken
+                        fernTokenSet: !!result.fernToken,
+                        postmanCollectionId: data.postmanCollectionId,
+                        postmanTeamId: data.postmanTeamId
                     }
                 });
             } catch (error) {

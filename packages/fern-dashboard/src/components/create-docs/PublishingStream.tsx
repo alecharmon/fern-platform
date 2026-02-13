@@ -10,6 +10,8 @@ interface PublishingStreamProps {
     repoUrl: string;
     onComplete: (result: { url: string; githubRepoUrl: string }) => void;
     onError: (actionsUrl: string) => void;
+    postmanCollectionId?: string;
+    postmanTeamId?: string;
 }
 
 interface LogEntry {
@@ -18,7 +20,15 @@ interface LogEntry {
     timestamp: string;
 }
 
-export function PublishingStream({ repoName, siteUrl, repoUrl, onComplete, onError }: PublishingStreamProps) {
+export function PublishingStream({
+    repoName,
+    siteUrl,
+    repoUrl,
+    onComplete,
+    onError,
+    postmanCollectionId,
+    postmanTeamId
+}: PublishingStreamProps) {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [isConnecting, setIsConnecting] = useState(true);
     const logsEndRef = useRef<HTMLDivElement>(null);
@@ -41,9 +51,14 @@ export function PublishingStream({ repoName, siteUrl, repoUrl, onComplete, onErr
         }
         hasConnectedRef.current = true;
 
-        const eventSource = new EventSource(
-            `/api/create-docs-publish/stream?repoName=${encodeURIComponent(repoName)}&siteUrl=${encodeURIComponent(siteUrl)}`
-        );
+        let streamUrl = `/api/create-docs-publish/stream?repoName=${encodeURIComponent(repoName)}&siteUrl=${encodeURIComponent(siteUrl)}`;
+        if (postmanCollectionId) {
+            streamUrl += `&collection-id=${encodeURIComponent(postmanCollectionId)}`;
+        }
+        if (postmanTeamId) {
+            streamUrl += `&postman-team-id=${encodeURIComponent(postmanTeamId)}`;
+        }
+        const eventSource = new EventSource(streamUrl);
 
         eventSource.onopen = () => {
             setIsConnecting(false);
@@ -83,7 +98,7 @@ export function PublishingStream({ repoName, siteUrl, repoUrl, onComplete, onErr
             eventSource.close();
             hasConnectedRef.current = false;
         };
-    }, [repoName, siteUrl, repoUrl]);
+    }, [repoName, siteUrl, repoUrl, postmanCollectionId, postmanTeamId]);
 
     // Auto-scroll to bottom when new logs arrive
     // biome-ignore lint/correctness/useExhaustiveDependencies: We want to scroll on every log change

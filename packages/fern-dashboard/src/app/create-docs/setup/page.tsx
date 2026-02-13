@@ -181,6 +181,9 @@ export default function SetupPage() {
         setProgress(null);
 
         try {
+            const postmanCollectionId = searchParams.get("collection-id");
+            const postmanTeamId = searchParams.get("postman-team-id");
+
             // Build request body based on flow type
             const body =
                 flowType === "site-to-docs"
@@ -189,7 +192,9 @@ export default function SetupPage() {
                           urlPrefix,
                           sourceType: "site-to-docs",
                           siteToDocsFiles: siteToDocsOutput!.files,
-                          sourceUrl: siteToDocsOutput!.sourceUrl
+                          sourceUrl: siteToDocsOutput!.sourceUrl,
+                          postmanCollectionId: postmanCollectionId ?? undefined,
+                          postmanTeamId: postmanTeamId ?? undefined
                       }
                     : {
                           orgName: selectedOrgName,
@@ -204,7 +209,9 @@ export default function SetupPage() {
                               code: customization!.codeFont
                           },
                           logoBase64: customization!.logoBase64,
-                          faviconBase64: customization!.faviconBase64
+                          faviconBase64: customization!.faviconBase64,
+                          postmanCollectionId: postmanCollectionId ?? undefined,
+                          postmanTeamId: postmanTeamId ?? undefined
                       };
 
             // Use SSE endpoint for progress updates
@@ -267,6 +274,12 @@ export default function SetupPage() {
                                     fernTokenSet: String(result.fernTokenSet ?? false),
                                     orgName: selectedOrgName
                                 });
+                                if (result.postmanCollectionId) {
+                                    params.set("collection-id", result.postmanCollectionId);
+                                }
+                                if (result.postmanTeamId) {
+                                    params.set("postman-team-id", result.postmanTeamId);
+                                }
                                 router.push(`/create-docs/success?${params.toString()}`);
                                 return;
                             } else if (event.type === "error") {

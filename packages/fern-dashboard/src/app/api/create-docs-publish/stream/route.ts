@@ -2,6 +2,9 @@ import type { NextRequest } from "next/server";
 
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { getPostmanFernIntegrationServiceClient } from "@/app/services/postman/getPostmanFernIntegrationServiceClient";
+import { getPostmanAccessToken } from "@/app/services/postman/jwt";
+import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,11 +16,56 @@ interface LogEntry {
     timestamp: string;
 }
 
+async function notifyPostman({
+    teamId,
+    collectionId,
+    siteUrl,
+    success,
+    error
+}: {
+    teamId: string;
+    collectionId: string;
+    siteUrl: string;
+    success: boolean;
+    error?: string;
+}): Promise<void> {
+    const installation = await getAppInstallationByTeamId(teamId);
+    if (!installation) {
+        throw new Error(`No app installation found for team ${teamId}`);
+    }
+
+    const accessToken = await getPostmanAccessToken({
+        teamId,
+        installationAuthId: installation.app_installation_id,
+        sharedSecret: installation.shared_secret
+    });
+
+    const client = getPostmanFernIntegrationServiceClient({ token: accessToken });
+
+    if (success) {
+        await client.putFernDocs({
+            teamId,
+            collectionId,
+            success: true,
+            publishedDocUrl: `https://${siteUrl}`
+        });
+    } else {
+        await client.putFernDocs({
+            teamId,
+            collectionId,
+            success: false,
+            error: error ?? "Docs generation failed"
+        });
+    }
+}
+
 /**
  * SSE endpoint that triggers GitHub Actions workflow and streams logs.
  * Query params:
  * - repoName: The repository name (required)
  * - siteUrl: The docs site URL (required)
+ * - collection-id: The Postman collection ID (optional)
+ * - postman-team-id: The Postman team ID (optional)
  */
 export async function GET(req: NextRequest) {
     const session = await getCurrentSession();
@@ -28,6 +76,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const repoName = searchParams.get("repoName");
     const siteUrl = searchParams.get("siteUrl");
+    const postmanCollectionId = searchParams.get("collection-id");
+    const postmanTeamId = searchParams.get("postman-team-id");
 
     if (!repoName || !siteUrl) {
         return new Response("repoName and siteUrl are required", { status: 400 });
@@ -260,6 +310,34 @@ export async function GET(req: NextRequest) {
                         }
                     }
 
+                    if (postmanCollectionId && postmanTeamId) {
+                        try {
+                            sendEvent({
+                                type: "log",
+                                message: "Notifying Postman of successful publish...",
+                                timestamp: new Date().toISOString()
+                            });
+                            await notifyPostman({
+                                teamId: postmanTeamId,
+                                collectionId: postmanCollectionId,
+                                siteUrl,
+                                success: true
+                            });
+                            sendEvent({
+                                type: "log",
+                                message: "✓ Postman notified successfully",
+                                timestamp: new Date().toISOString()
+                            });
+                        } catch (postmanError) {
+                            console.error("Failed to notify Postman:", postmanError);
+                            sendEvent({
+                                type: "log",
+                                message: "⚠ Failed to notify Postman (non-critical)",
+                                timestamp: new Date().toISOString()
+                            });
+                        }
+                    }
+
                     // Send completion event
                     sendEvent({
                         type: "complete",
@@ -271,6 +349,20 @@ export async function GET(req: NextRequest) {
                         timestamp: new Date().toISOString()
                     });
                 } else {
+                    if (postmanCollectionId && postmanTeamId) {
+                        try {
+                            await notifyPostman({
+                                teamId: postmanTeamId,
+                                collectionId: postmanCollectionId,
+                                siteUrl,
+                                success: false,
+                                error: "GitHub Actions workflow failed"
+                            });
+                        } catch (postmanError) {
+                            console.error("Failed to notify Postman of failure:", postmanError);
+                        }
+                    }
+
                     sendEvent({
                         type: "error",
                         message: `Workflow failed. Check the Actions tab for details: https://github.com/${owner}/${repoName}/actions`,

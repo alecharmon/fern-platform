@@ -130,6 +130,8 @@ function SuccessPageContent() {
     const siteUrl = searchParams.get("siteUrl");
     const fernTokenSet = searchParams.get("fernTokenSet") === "true";
     const orgName = searchParams.get("orgName");
+    const postmanCollectionId = searchParams.get("collection-id");
+    const postmanTeamId = searchParams.get("postman-team-id");
 
     // Publishing state
     const [publishStatus, setPublishStatus] = useState<PublishStatus>(fernTokenSet ? "publishing" : "completed");
@@ -315,6 +317,8 @@ function SuccessPageContent() {
                                     repoUrl={repoUrl}
                                     onComplete={handlePublishComplete}
                                     onError={handlePublishError}
+                                    postmanCollectionId={postmanCollectionId ?? undefined}
+                                    postmanTeamId={postmanTeamId ?? undefined}
                                 />
                             </>
                         ) : publishStatus === "failed" ? (
