@@ -32,6 +32,22 @@ export async function getOpenApiSpecByCollectionId(collectionId: string): Promis
     return data as PostmanCollectionOpenApiSpec;
 }
 
+export async function isUserInTeam(userId: string, teamId: string): Promise<boolean> {
+    const supabase = getSupabaseClient();
+
+    const { count, error } = await supabase
+        .from("postman_collection_openapi_specs")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("team_id", teamId);
+
+    if (error) {
+        throw new Error(`Failed to check if user ${userId} is in team ${teamId}: ${error.message}`);
+    }
+
+    return (count ?? 0) > 0;
+}
+
 export async function upsertOpenApiSpec(data: {
     teamId: string;
     userId: string;
