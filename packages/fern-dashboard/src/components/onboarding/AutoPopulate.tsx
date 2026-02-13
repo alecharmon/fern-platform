@@ -67,17 +67,7 @@ export function AutoPopulate({ onApplyUpdates }: AutoPopulateProps) {
     );
 
     return (
-        <form.Field
-            name="existingDocsSite"
-            validators={{
-                onChange: ({ value }: { value: string }) => {
-                    if (!value || !value.trim()) {
-                        return "Please enter a marketing or docs site URL";
-                    }
-                    return undefined;
-                }
-            }}
-        >
+        <form.Field name="existingDocsSite">
             {(field: {
                 state: { value: string; meta: { errors: (string | undefined)[] } };
                 handleChange: (value: string) => void;

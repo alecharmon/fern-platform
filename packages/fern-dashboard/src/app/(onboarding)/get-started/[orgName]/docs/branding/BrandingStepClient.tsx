@@ -25,16 +25,9 @@ export function BrandingStepClient() {
         [form]
     );
 
+    const hasExistingDocsSite = formData.existingDocsSite.trim().length > 0;
+
     const handleContinue = useCallback(async () => {
-        // Validate the existingDocsSite field (this is where the domain is stored)
-        await form.validateField("existingDocsSite", "change");
-
-        const fieldMeta = form.getFieldMeta("existingDocsSite");
-        if (fieldMeta?.errors && fieldMeta?.errors?.length > 0) {
-            // Validation failed, don't proceed
-            return;
-        }
-
         captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_BRANDING_STEP_COMPLETED, {
             action: "continue",
             hasExistingDocsSite: !!formData.existingDocsSite,
@@ -44,7 +37,7 @@ export function BrandingStepClient() {
 
         // Proceed to next step
         goToNextStep();
-    }, [form, formData.existingDocsSite, formData.logoUrl, formData.primaryColorHex, goToNextStep, posthog]);
+    }, [formData.existingDocsSite, formData.logoUrl, formData.primaryColorHex, goToNextStep, posthog]);
 
     const handleSkip = useCallback(() => {
         captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_BRANDING_STEP_COMPLETED, {
@@ -65,6 +58,7 @@ export function BrandingStepClient() {
             onContinue={handleContinue}
             onSkip={handleSkip}
             showSkip
+            hasData={hasExistingDocsSite}
         >
             <AutoPopulate onApplyUpdates={handleApplyUpdates} />
 

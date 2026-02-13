@@ -58,9 +58,6 @@ export function ApiSpecStepClient() {
             } finally {
                 setIsUploading(false);
             }
-
-            // Trigger validation to clear error when files are added
-            await form.validateField("openApiSpecFiles", "change");
         },
         [form, orgName]
     );
@@ -88,16 +85,9 @@ export function ApiSpecStepClient() {
         return files.every((file) => DEFAULT_SPECS.some((spec) => spec.fileName === file.name));
     }, []);
 
+    const hasUploadedFiles = formData.openApiSpecFiles.length > 0;
+
     const handleContinue = useCallback(async () => {
-        // Validate that at least one spec file is selected
-        await form.validateField("openApiSpecFiles", "change");
-
-        const fieldMeta = form.getFieldMeta("openApiSpecFiles");
-        if (fieldMeta?.errors && fieldMeta.errors.length > 0) {
-            // Validation failed, don't proceed
-            return;
-        }
-
         captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED, {
             action: "continue",
             specCount: formData.openApiSpecFiles.length,
@@ -105,7 +95,7 @@ export function ApiSpecStepClient() {
         });
 
         goToNextStep();
-    }, [form, formData.openApiSpecFiles, goToNextStep, isUsingDefaultSpecs, posthog]);
+    }, [formData.openApiSpecFiles, goToNextStep, isUsingDefaultSpecs, posthog]);
 
     const handleSkip = useCallback(() => {
         // When skipping, add default specs and proceed
@@ -130,20 +120,11 @@ export function ApiSpecStepClient() {
             onContinue={handleContinue}
             onSkip={handleSkip}
             showSkip
+            hasData={hasUploadedFiles}
             isLoading={isUploading}
             error={uploadError}
         >
-            <form.Field
-                name="openApiSpecFiles"
-                validators={{
-                    onChange: ({ value }: { value: File[] }) => {
-                        if (!value || value.length === 0) {
-                            return "Please upload at least one API spec";
-                        }
-                        return undefined;
-                    }
-                }}
-            >
+            <form.Field name="openApiSpecFiles">
                 {(field: {
                     state: { value: File[]; meta: { errors: (string | undefined)[] } };
                     handleChange: (value: File[]) => void;

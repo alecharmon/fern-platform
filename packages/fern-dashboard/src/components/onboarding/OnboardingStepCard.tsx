@@ -13,6 +13,7 @@ interface OnboardingStepCardProps {
     onContinue?: () => void | Promise<void>;
     onSkip?: () => void | Promise<void>;
     showSkip?: boolean;
+    hasData?: boolean;
     continueDisabled?: boolean;
     continueText?: string;
     skipText?: string;
@@ -27,6 +28,7 @@ export function OnboardingStepCard({
     onContinue,
     onSkip,
     showSkip = true,
+    hasData,
     continueDisabled = false,
     continueText = "Continue",
     skipText = "Skip this step",
@@ -99,19 +101,21 @@ export function OnboardingStepCard({
                         </div>
                     )}
 
-                    {/* Continue button */}
-                    <Button
-                        onClick={handleContinue}
-                        variant="default"
-                        className="w-full"
-                        size="lg"
-                        disabled={continueDisabled || isLoading || isProcessing}
-                    >
-                        {continueText}
-                    </Button>
+                    {/* Continue button - hidden when showSkip is enabled and user has no data */}
+                    {(!showSkip || hasData !== false) && (
+                        <Button
+                            onClick={handleContinue}
+                            variant="default"
+                            className="w-full"
+                            size="lg"
+                            disabled={continueDisabled || isLoading || isProcessing}
+                        >
+                            {continueText}
+                        </Button>
+                    )}
 
-                    {/* Skip button */}
-                    {showSkip && (
+                    {/* Skip button - only shown when showSkip is enabled and user has no data */}
+                    {showSkip && !hasData && (
                         <Button
                             onClick={handleSkip}
                             variant="outline"
