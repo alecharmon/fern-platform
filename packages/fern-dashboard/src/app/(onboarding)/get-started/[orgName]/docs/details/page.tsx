@@ -15,7 +15,7 @@ export default async function DocsOnboardingStep3Page({ params }: DocsOnboarding
 
     return (
         <>
-            <BackArrow href={`/get-started/${orgName}/docs/branding`} />
+            <BackArrow href={`/get-started/${orgName}/docs`} />
             <div className="flex justify-center gap-6">
                 <DetailsStepClient organizationId={orgName} />
                 <div

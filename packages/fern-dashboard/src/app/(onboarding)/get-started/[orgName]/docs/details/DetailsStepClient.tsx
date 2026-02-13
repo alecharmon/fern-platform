@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2Icon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
@@ -12,7 +13,7 @@ import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { SlideDownTransition } from "@/components/transitions/SlideDownTransition";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useOnboarding } from "@/providers/OnboardingProvider";
+import { useOnboarding, type WizardFormData } from "@/providers/OnboardingProvider";
 import { saveOnboardingFormData, saveOnboardingSession, saveSitePublishUrl } from "@/utils/onboardingSession";
 import { generateRandomHash } from "@/utils/organization";
 
@@ -23,6 +24,7 @@ interface DetailsStepClientProps {
 export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
     const { form, formData, validationErrors, validateForm, setStep, setFocusedField } = useOnboarding();
     const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
+    const [isAutoPopulating, setIsAutoPopulating] = useState(false);
     const posthog = usePostHog();
     const hasTrackedView = useRef(false);
     const autoDocsUrlRequestId = useRef(0);
@@ -238,7 +240,40 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
         hasSiteTitle
     ]);
 
-    const hasExistingDocsSite = formData.existingDocsSite?.trim().length > 0;
+    const handleAutoPopulate = useCallback(
+        async (domain: string) => {
+            if (!domain.trim()) {
+                return;
+            }
+
+            setIsAutoPopulating(true);
+
+            try {
+                const response = await fetch("/api/brand-assets/auto-populate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ identifier: domain })
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const result = (await response.json()) as { updates: Partial<WizardFormData> };
+
+                if (result.updates && Object.keys(result.updates).length > 0) {
+                    Object.entries(result.updates).forEach(([key, value]) => {
+                        form.setFieldValue(key as keyof WizardFormData, value as WizardFormData[keyof WizardFormData]);
+                    });
+                }
+            } catch (err) {
+                console.error("Error auto-populating from BrandFetch:", err);
+            } finally {
+                setIsAutoPopulating(false);
+            }
+        },
+        [form]
+    );
 
     return (
         <OnboardingStepCard
@@ -249,26 +284,6 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
             showSkip={false}
         >
             <div className="space-y-6">
-                {/* Marketing / Docs site from Branding step */}
-                {hasExistingDocsSite && (
-                    <div className="flex flex-col gap-2">
-                        <Label
-                            htmlFor="marketing-site"
-                            className="text-gray-1200 dark:text-gray-1100 text-sm font-normal"
-                        >
-                            Marketing or docs site
-                        </Label>
-                        <Input
-                            id="marketing-site"
-                            type="text"
-                            value={formData.existingDocsSite}
-                            placeholder="Add this in the branding step"
-                            disabled
-                            className="w-full"
-                        />
-                    </div>
-                )}
-
                 {/* Site Name & Docs URL */}
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="company-site" className="text-gray-1200 dark:text-gray-1100 text-sm font-normal">
@@ -341,20 +356,63 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
                     )}
                 </div>
 
-                {/* Primary Color */}
-                <div className="flex flex-col gap-1">
-                    <ColorPicker
-                        label="Primary color"
-                        color={formData.primaryColorHex}
-                        onColorChange={(color) => form.setFieldValue("primaryColorHex", color)}
-                    />
-                    {validationErrors.primaryColorHex && (
-                        <p className="text-xs text-red-600">{validationErrors.primaryColorHex}</p>
-                    )}
-                </div>
+                <div className="flex flex-col gap-2 rounded-lg border border-border p-4 pt-3">
+                    {/* Auto-populate from existing site */}
+                    <div className="flex flex-col gap-2">
+                        <Label
+                            htmlFor="auto-populate-site"
+                            className="text-gray-1200 dark:text-gray-1100 text-sm font-normal"
+                        >
+                            Find assets from your current site
+                        </Label>
+                        <div className="relative">
+                            <Input
+                                id="auto-populate-site"
+                                type="text"
+                                value={formData.existingDocsSite}
+                                placeholder="your-company.com"
+                                onChange={(e) => form.setFieldValue("existingDocsSite", e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        if (formData.existingDocsSite.trim()) {
+                                            void handleAutoPopulate(formData.existingDocsSite);
+                                        }
+                                    }
+                                }}
+                                disabled={isAutoPopulating}
+                                className="w-full"
+                            />
+                            {isAutoPopulating ? (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <Loader2Icon className="h-4 w-4 animate-spin text-gray-800" />
+                                </div>
+                            ) : (
+                                <>
+                                    {formData.existingDocsSite.trim().length > 0 && (
+                                        <p className="text-xs text-muted-foreground text-right absolute right-3 top-1/2 -translate-y-1/2">
+                                            Enter to search
+                                        </p>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
 
-                {/* TODO: Favicon to an advanced configuration step */}
-                {/* <UploadImage
+                    {/* Primary Color */}
+                    <div className="flex flex-col gap-1">
+                        <ColorPicker
+                            label="Primary color"
+                            color={formData.primaryColorHex}
+                            onColorChange={(color) => form.setFieldValue("primaryColorHex", color)}
+                        />
+                        {validationErrors.primaryColorHex && (
+                            <p className="text-xs text-red-600">{validationErrors.primaryColorHex}</p>
+                        )}
+                    </div>
+
+                    {/* TODO: Favicon to an advanced configuration step */}
+                    {/* <UploadImage
                     label="Favicon"
                     description="Upload a 32 x 32 pixel ICO, PNG, GIF, or JPG to display in browser tabs."
                     imageUrl={formData.faviconUrl}
@@ -368,19 +426,20 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
                     accept="image/x-icon,image/png,image/gif"
                 /> */}
 
-                {/* Logo */}
-                <UploadImage
-                    label="Logo"
-                    description="Recommended height of 60 pixels. This will be used as the main logo on the top-left corner of the Docs site."
-                    imageUrl={formData.logoUrl}
-                    onFileSelect={handleLogoUpload}
-                    onRemove={handleLogoRemove}
-                    size="large"
-                    accept="image/png,image/gif,image/svg+xml"
-                    onFocus={() => setFocusedField("logo")}
-                    onBlur={() => setFocusedField("none")}
-                />
-                {logoUploadError && <p className="text-xs text-red-600">{logoUploadError}</p>}
+                    {/* Logo */}
+                    <UploadImage
+                        label="Logo"
+                        description="Recommended height of 60 pixels, used as the main logo on the top-left corner."
+                        imageUrl={formData.logoUrl}
+                        onFileSelect={handleLogoUpload}
+                        onRemove={handleLogoRemove}
+                        size="large"
+                        accept="image/png,image/gif,image/svg+xml"
+                        onFocus={() => setFocusedField("logo")}
+                        onBlur={() => setFocusedField("none")}
+                    />
+                    {logoUploadError && <p className="text-xs text-red-600">{logoUploadError}</p>}
+                </div>
             </div>
         </OnboardingStepCard>
     );

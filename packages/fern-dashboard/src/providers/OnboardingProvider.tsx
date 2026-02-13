@@ -29,7 +29,7 @@ export interface WizardFormData {
     sitePublishUrl: string | null;
 }
 
-export type OnboardingStep = "branding" | "api-spec" | "details" | "publishing" | "complete";
+export type OnboardingStep = "api-spec" | "details" | "publishing" | "complete";
 
 export type FocusedField = "none" | "title" | "url" | "logo";
 
@@ -136,11 +136,10 @@ const DEFAULT_FORM_DATA: WizardFormData = {
 
 const OnboardingContext = createContext<OnboardingContextValue | undefined>(undefined);
 
-const STEP_ORDER: OnboardingStep[] = ["api-spec", "branding", "details", "publishing", "complete"];
+const STEP_ORDER: OnboardingStep[] = ["api-spec", "details", "publishing", "complete"];
 
 const DEFAULT_STEP_ROUTES: Record<OnboardingStep, string> = {
     "api-spec": "/get-started/docs",
-    branding: "/get-started/docs/branding",
     details: "/get-started/docs/details",
     publishing: "/get-started/docs/publishing",
     complete: "/get-started/docs/complete"
@@ -154,7 +153,6 @@ function buildStepRoutes(orgName?: string | null): Record<OnboardingStep, string
     const base = `/get-started/${orgName}/docs`;
     return {
         "api-spec": base,
-        branding: `${base}/branding`,
         details: `${base}/details`,
         publishing: `${base}/publishing`,
         complete: `${base}/complete`
@@ -172,7 +170,7 @@ function extractOrgNameFromPath(pathname: string | null): string | undefined {
 export function OnboardingProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const [currentStep, setCurrentStep] = useState<OnboardingStep>("branding");
+    const [currentStep, setCurrentStep] = useState<OnboardingStep>("api-spec");
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
     const [isNavigating, setIsNavigating] = useState(false);
     const [focusedField, setFocusedField] = useState<FocusedField>("none");

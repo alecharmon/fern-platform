@@ -93,7 +93,7 @@ export function UploadImage({
                             <img
                                 src={effectivePreview}
                                 alt={label}
-                                className="h-full w-full rounded-lg object-contain"
+                                className="size-[120px] rounded-lg object-contain"
                             />
                         ) : (
                             <div className="text-gray-900">
