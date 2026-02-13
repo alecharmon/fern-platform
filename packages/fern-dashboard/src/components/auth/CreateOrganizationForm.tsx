@@ -157,16 +157,22 @@ export function CreateOrganizationForm({
     }, []);
 
     useEffect(() => {
-        if (organizationIdSource !== "auto") {
-            return;
-        }
-
         const trimmedName = organizationName.trim();
         if (!trimmedName) {
+            // Cancel any in-flight availability checks so they don't overwrite the cleared orgId
+            ++availabilityRequestId.current;
             void form.setFieldValue("organizationId", "");
+            if (organizationIdSource === "manual") {
+                void form.setFieldValue("organizationIdSource", "auto");
+                setIsOrgIdEditing(false);
+            }
             setOrgIdStatus("idle");
             setOrgIdError(null);
             setOrgIdAutoMessage(null);
+            return;
+        }
+
+        if (organizationIdSource !== "auto") {
             return;
         }
 
