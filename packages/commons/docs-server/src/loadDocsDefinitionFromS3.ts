@@ -110,8 +110,16 @@ const uncachedLoadDocsDefinitionFromS3 = async (
     domain: string,
     docsBucketName: string
 ): Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse | undefined> => {
-    const cleanDomain = domain.replace(/^https?:\/\//, "");
-    const s3Key = getS3KeyForV1DocsDefinition(cleanDomain);
+    const cleanDomain = decodeURIComponent(domain.replace(/^https?:\/\//, ""));
+    const { pureDomain, basepath } = splitDomainAndBasepath(cleanDomain);
+    const s3Key = getS3KeyForV1DocsDefinition(pureDomain, basepath);
+    console.log("[S3] loading docs definition:", {
+        domain: cleanDomain,
+        pureDomain,
+        basepath,
+        s3Key,
+        bucket: docsBucketName
+    });
 
     let lastError: unknown;
     for (let attempt = 1; attempt <= MAX_S3_FETCH_RETRIES + 1; attempt++) {
@@ -155,3 +163,14 @@ const uncachedLoadDocsDefinitionFromS3 = async (
     console.error(`[S3 Retry] All ${MAX_S3_FETCH_RETRIES + 1} attempts failed for domain: ${cleanDomain}`, lastError);
     return undefined;
 };
+
+function splitDomainAndBasepath(domainKey: string): { pureDomain: string; basepath: string | undefined } {
+    const slashIndex = domainKey.indexOf("/");
+    if (slashIndex === -1) {
+        return { pureDomain: domainKey, basepath: undefined };
+    }
+    return {
+        pureDomain: domainKey.slice(0, slashIndex),
+        basepath: domainKey.slice(slashIndex)
+    };
+}

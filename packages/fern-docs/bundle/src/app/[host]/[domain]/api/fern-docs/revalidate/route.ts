@@ -63,6 +63,12 @@ interface RevalidationController {
 }
 export const maxDuration = 800; // 13 minutes timeout
 
+function extractPureDomain(domainKey: string): string {
+    const decoded = decodeURIComponent(domainKey);
+    const slashIndex = decoded.indexOf("/");
+    return slashIndex === -1 ? decoded : decoded.slice(0, slashIndex);
+}
+
 async function performRevalidation(params: {
     host: string;
     domain: string;
@@ -89,6 +95,9 @@ async function performRevalidation(params: {
         useGetRequests,
         hasSiteAuth
     } = params;
+
+    const pureDomain = extractPureDomain(domain);
+    console.log("[revalidate] starting revalidation:", { domain, pureDomain });
 
     const fetchMethod = useGetRequests ? "GET" : "HEAD";
     if (useGetRequests) {
@@ -119,13 +128,13 @@ async function performRevalidation(params: {
 
     const [docs, edgeFlags, metadata] = await Promise.all([
         loadWithUrlPromise,
-        getEdgeFlags(domain),
+        getEdgeFlags(pureDomain),
         getMetadataFromResponse(withoutStaging(domain), loadWithUrlPromise)
     ]);
 
     let reindexPromise: Promise<void> | undefined;
     if (doReindex) {
-        reindexPromise = reindex(docs, host, domain, maxDuration)
+        reindexPromise = reindex(docs, host, pureDomain, maxDuration)
             .then((services) => {
                 controller.log(`reindex-queued:services=${services.join(",")}\n`);
             })
@@ -144,7 +153,7 @@ async function performRevalidation(params: {
     const cachePromises = cacheEndpoints.map(({ path, name }) =>
         fetch(`${origin}${path}`, {
             method: fetchMethod,
-            headers: { [HEADER_X_FERN_HOST]: domain },
+            headers: { [HEADER_X_FERN_HOST]: pureDomain },
             signal: AbortSignal.timeout(600_000)
         })
             .then(() => {
@@ -289,14 +298,14 @@ async function performRevalidation(params: {
         ) => {
             const queue = new ResilientQueue<string>({
                 processItem: async (slug: string, attempt: number) => {
-                    const url = withDefaultProtocol(`${domain}${slugToHref(slug)}`);
+                    const url = withDefaultProtocol(`${pureDomain}${slugToHref(slug)}`);
 
                     // Path order: [requiresLogin]/[isLoggedIn]/[roles]
                     const requiresLoginParam = encodeBool(authParams.requiresLogin);
                     const isLoggedInParam = encodeBool(authParams.isLoggedIn);
                     const rolesParam = encodeRoles([EVERYONE_ROLE]);
                     revalidatePath(
-                        `/${host}/${domain}/${requiresLoginParam}/${isLoggedInParam}/${rolesParam}/${encodeURIComponent(slugToHref(slug))}`,
+                        `/${host}/${encodeURIComponent(domain)}/${requiresLoginParam}/${isLoggedInParam}/${rolesParam}/${encodeURIComponent(slugToHref(slug))}`,
                         "page"
                     );
 
@@ -306,7 +315,7 @@ async function performRevalidation(params: {
                         const res = await fetch(`${origin}${slugToHref(slug)}`, {
                             method: fetchMethod,
                             headers: {
-                                [HEADER_X_FERN_HOST]: domain,
+                                [HEADER_X_FERN_HOST]: pureDomain,
                                 [HEADER_X_FERN_REVALIDATE_AUTH]: `requiresLogin:${authParams.requiresLogin},isLoggedIn:${authParams.isLoggedIn},token:${fernToken_admin()}`
                             },
                             signal: AbortSignal.timeout(600_000)
@@ -521,7 +530,10 @@ export async function GET(
     const cdnUri = process.env.NEXT_PUBLIC_CDN_URI;
     const start = performance.now();
 
-    const { host, domain } = await props.params;
+    const { host, domain: rawDomain } = await props.params;
+    // Normalize: middleware encodes basepath domains as "domain.com%2Frepo1" in the URL.
+    // Decoding ensures KV/cache keys match what the loader uses during page serving.
+    const domain = decodeURIComponent(rawDomain);
     revalidateTag(domain);
 
     const shouldRegenerateParam = req.nextUrl.searchParams.get("regenerate");

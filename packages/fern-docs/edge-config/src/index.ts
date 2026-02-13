@@ -6,6 +6,7 @@ export {
 } from "./getAuthEdgeConfig";
 export { getCanonicalUrl } from "./getCanonicalUrl";
 export { getCustomerAnalytics } from "./getCustomerAnalytics";
+export { getDomainsWithBasepathCheck } from "./getDomainsWithBasepathCheck";
 export { getEdgeFlags } from "./getEdgeFlags";
 export { getEdgeFlagsForOrg } from "./getEdgeFlagsForOrg";
 export {

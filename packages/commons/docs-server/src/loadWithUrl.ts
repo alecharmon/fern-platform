@@ -110,8 +110,6 @@ const cachedLoadWithUrl = cache(async (domain: string): Promise<FdrAPI.docs.v2.r
  * Note: this function cannot be stored in the data cache because the response can be > 2MB,
  */
 export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse> => {
-    const domainWithoutStaging = withoutStaging(domain);
-
     // address FDR error: Failed to parse URL: %5Bdomain%5D
     // todo: figure out where these calls originate
     if (domain.includes("[") || domain.includes("%5B")) {
@@ -152,8 +150,14 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
         notFound();
     }
 
+    const decodedDomain = decodeURIComponent(domain);
+    const decodedDomainWithoutStaging = withoutStaging(decodedDomain);
+    console.log("[loadWithUrl] loading from S3:", {
+        domain: decodedDomain,
+        domainWithoutStaging: decodedDomainWithoutStaging
+    });
     try {
-        const response = await loadDocsDefinitionFromS3(domainWithoutStaging, getDocsDefinitionBucketName());
+        const response = await loadDocsDefinitionFromS3(decodedDomainWithoutStaging, getDocsDefinitionBucketName());
         if (response != null) {
             return response;
         }

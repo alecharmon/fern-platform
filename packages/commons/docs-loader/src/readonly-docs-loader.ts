@@ -114,20 +114,29 @@ const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrl
 const loadDynamicIRWithUrl = uncachedLoadDynamicIRWithUrl;
 
 /*
- * Domain key decoder/encoder functions
+ * The domainKey originates from middleware.ts, which encodes the matched basepath
+ * into the domain (e.g. "example.com/repo1" or "example.com/nemo/nemo-rl").
+ * The path portion can be arbitrary depth.
+ *
+ * Examples:
+ *   "example.com"                → domain="example.com"
+ *   "example.com/repo1"          → domain="example.com", s3path="/repo1"
+ *   "example.com/nemo/nemo-rl"   → domain="example.com", s3path="/nemo/nemo-rl"
  */
 export function encodeDocsLoaderDomain(domain: string, branchName?: string) {
     return branchName ? `${domain}::${branchName}` : domain;
 }
 
 function decodeDocsLoaderDomainKey(domainKey: string) {
-    const [domain = domainKey, branchName] = domainKey.split("::");
-    return { domain, branchName };
+    const [domainWithBasepath = domainKey, branchName] = domainKey.split("::");
+    return { domain: domainWithBasepath, branchName };
 }
 
-function deriveDomainFromDomainKey(domainKey: string) {
+function deriveDomainFromS3Path(domainKey: string) {
     const { domain } = decodeDocsLoaderDomainKey(domainKey);
-    return domain;
+    const decoded = decodeURIComponent(domain);
+    const slashIndex = decoded.indexOf("/");
+    return slashIndex === -1 ? decoded : decoded.slice(0, slashIndex);
 }
 
 // Add cache configuration interface
@@ -147,7 +156,7 @@ const DEFAULT_CACHE_CONFIG: Required<CacheConfig> = {
 };
 
 function assertDocsDomain(domainKey: string) {
-    const domain = deriveDomainFromDomainKey(domainKey);
+    const domain = deriveDomainFromS3Path(domainKey);
     const isPreview = process.env.VERCEL_ENV === "preview";
 
     if (FERN_DOCS_ORIGINS.includes(domain)) {
@@ -283,7 +292,7 @@ const cachedGetEdgeFlags = cache(async (domainKey: string) => {
     } else if (isSelfHosted()) {
         return DEFAULT_SELF_HOSTED_EDGE_FLAGS;
     }
-    return await getEdgeFlags(domainKey);
+    return await getEdgeFlags(deriveDomainFromS3Path(domainKey));
 });
 
 export const getMetadataFromResponse = async (
@@ -293,7 +302,7 @@ export const getMetadataFromResponse = async (
     assertDocsDomain(domainKey);
     const [response, docsUrlMetadata] = await Promise.all([
         responsePromise,
-        getDocsUrlMetadata(deriveDomainFromDomainKey(domainKey))
+        getDocsUrlMetadata(deriveDomainFromS3Path(domainKey))
     ]);
 
     const isSelfHostedMode = isSelfHosted();
@@ -1357,7 +1366,7 @@ const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
     });
 
 function defaultTabsPlacement(domainKey: string) {
-    const domain = deriveDomainFromDomainKey(domainKey);
+    const domain = deriveDomainFromS3Path(domainKey);
     if (domain.includes("cohere")) {
         return "HEADER";
     }
@@ -1365,7 +1374,7 @@ function defaultTabsPlacement(domainKey: string) {
 }
 
 function defaultSearchbarPlacement(domainKey: string) {
-    const domain = deriveDomainFromDomainKey(domainKey);
+    const domain = deriveDomainFromS3Path(domainKey);
     if (domain.includes("cohere")) {
         return "HEADER_TABS";
     }
@@ -1530,10 +1539,14 @@ export type CachedDocsLoader = DocsLoader & {
  */
 const createCachedDocsLoaderImpl = async (
     host: string,
-    domainKey: string,
+    rawDomainKey: string,
     fern_token?: string,
     options?: DocsLoaderOptions
 ): Promise<CachedDocsLoader> => {
+    // Normalize: middleware encodes basepath domains as "domain.com%2Frepo1" in the URL,
+    // and Next.js may or may not decode %2F in route params depending on context.
+    // Decoding here ensures KV cache keys are always consistent (e.g. "domain.com/repo1").
+    const domainKey = decodeURIComponent(rawDomainKey);
     assertDocsDomain(domainKey);
 
     const config = { ...DEFAULT_CACHE_CONFIG, ...options?.cacheConfig };
@@ -1545,7 +1558,8 @@ const createCachedDocsLoaderImpl = async (
 
     const prefetchPromise = batchGetCommonMetadata(domainKey, config);
 
-    const authConfig = options?.skipAuth ? Promise.resolve(undefined) : getAuthConfig(domainKey);
+    const pureDomain = deriveDomainFromS3Path(domainKey);
+    const authConfig = options?.skipAuth ? Promise.resolve(undefined) : getAuthConfig(pureDomain);
     const metadata = getMetadata(config)(withoutStaging(domainKey));
 
     // Extract options to local variables for proper TypeScript narrowing
@@ -1610,7 +1624,7 @@ const createCachedDocsLoaderImpl = async (
             });
 
     return {
-        domain: deriveDomainFromDomainKey(domainKey),
+        domain: deriveDomainFromS3Path(domainKey),
         fern_token,
         getAuthConfig: () => authConfig,
         getMetadata: async () => {
@@ -1712,9 +1726,10 @@ const createCachedDocsLoaderImpl = async (
         getFilesUncached: async () => {
             // Fetch files directly from FDR, bypassing KV cache entirely.
             // This is used as a fallback when cached files are missing IDs referenced in page markdown.
-            const domain = deriveDomainFromDomainKey(domainKey);
+            // Use domain with basepath (if any) so S3 loads from the correct folder.
+            const { domain: domainForS3 } = decodeDocsLoaderDomainKey(domainKey);
             try {
-                const response = await uncachedLoadWithUrl(domain);
+                const response = await uncachedLoadWithUrl(domainForS3);
                 return mapValues(response.definition.filesV2, (file) => {
                     if (file.type === "url") {
                         return {
@@ -1738,10 +1753,10 @@ const createCachedDocsLoaderImpl = async (
                     throw new UnreachableCaseError(file);
                 });
             } catch (error) {
-                console.error(`[getFilesUncached] Failed to load files for ${domain}`, error);
+                console.error(`[getFilesUncached] Failed to load files for ${domainForS3}`, error);
                 track("asset_error", {
                     type: "get_files_uncached_error",
-                    domain,
+                    domain: domainForS3,
                     error: String(error)
                 });
                 return {};

@@ -25,8 +25,9 @@ import {
     removeTrailingSlash
 } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig, getDomainsWithBasepathCheck } from "@fern-docs/edge-config";
 import { type MiddlewareConfig, type NextMiddleware, NextResponse } from "next/server";
+import { getBasepathRoutes } from "./server/getBasepathRoutes";
 
 import { isSelfHosted } from "./server/isSelfHosted";
 
@@ -153,6 +154,33 @@ export const middleware: NextMiddleware = async (request) => {
             : "No basePath configured"
     });
 
+    let matchedBasepath: string | undefined;
+    let domainWithBasepath = domain;
+    if (!isSelfHostedMode && !isLocal()) {
+        const allowedDomains = await getDomainsWithBasepathCheck().catch(() => undefined);
+        const shouldCheck = allowedDomains != null && (allowedDomains.includes("*") || allowedDomains.includes(domain));
+        if (shouldCheck) {
+            const basepaths = await getBasepathRoutes(domain).catch(() => undefined);
+            if (basepaths) {
+                const sorted = [...basepaths].sort((a, b) => b.length - a.length);
+                for (const bp of sorted) {
+                    const normalized = bp.startsWith("/") ? bp : `/${bp}`;
+                    if (pathname === normalized || pathname.startsWith(`${normalized}/`)) {
+                        matchedBasepath = normalized;
+                        break;
+                    }
+                }
+                domainWithBasepath = matchedBasepath ? `${domain}${matchedBasepath}` : domain;
+                console.log("[middleware] basepath-routes matched:", {
+                    domain,
+                    matchedBasepath,
+                    domainWithBasepath,
+                    pathname
+                });
+            }
+        }
+    }
+
     const headers = new Headers(request.headers);
     headers.set(HEADER_X_FERN_HOST, domain);
     headers.set("x-fern-requested-path", pathname);
@@ -180,9 +208,12 @@ export const middleware: NextMiddleware = async (request) => {
     };
 
     // this mutation is reversed in `useCurrentPathname` hook. if this changes, please update that hook.
-    // When basePath is configured, internal routes also need the basePath prefix
+    // When basePath is configured, internal routes also need the basePath prefix.
+    // When a basepath-route was matched, encodeURIComponent ensures domain+basepath
+    // (e.g. "example.com/repo1") stays as a single [domain] route param by encoding "/" as "%2F".
     const withDomain = (pathname: string) => {
-        const internalPath = `/${host}/${domain}${conformTrailingSlash(pathname)}`;
+        const domainSegment = matchedBasepath ? encodeURIComponent(domainWithBasepath) : domain;
+        const internalPath = `/${host}/${domainSegment}${conformTrailingSlash(pathname)}`;
         return nextBasePath ? `${nextBasePath}${internalPath}` : internalPath;
     };
 
