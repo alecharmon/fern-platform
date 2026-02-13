@@ -1,4 +1,4 @@
-import { getAllUserScopedPermissions } from "@fern-api/user-permissions";
+import { getAllUserScopedPermissions, getDefaultPermissionsForOrgUser } from "@fern-api/user-permissions";
 import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getOrgIdFromName } from "@/app/services/auth0/management";
@@ -73,6 +73,31 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ orgN
             }
         }
 
+        // Fallback: if the token has no permissions (e.g., token not yet invalidated
+        // after role assignment), resolve default permissions from the user's roles
+        if (permissions.length === 0 && orgName) {
+            try {
+                const orgId = await getOrgIdFromName(orgName);
+                const rolesResult = await getDefaultPermissionsForOrgUser({
+                    userId: sessionData.user.sub,
+                    orgId
+                });
+                if (rolesResult.isOk()) {
+                    permissions = rolesResult.value.data;
+                }
+                if (permissions.length > 0) {
+                    console.warn(
+                        "Active user required permissions backfill from management api",
+                        sessionData.user.sub,
+                        orgId
+                    );
+                }
+            } catch (error) {
+                console.error("Failed to resolve default permissions from roles", error);
+            }
+        }
+
+        // If still no permissions, try auto-assigning admin role for sole org members
         if (permissions.length === 0 && orgName) {
             console.warn("User does not have any permissions, checking if auto-assign admin is needed", {
                 userId: sessionData.user.sub,

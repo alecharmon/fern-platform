@@ -95,8 +95,10 @@ export {
 export {
     addRoles,
     addRolesResult,
+    DEFAULT_ROLE_PERMISSIONS,
     type GetRolesRequest,
     type GetUserRolesResponse,
+    getDefaultPermissionsForOrgUser,
     getRoleMapping,
     getRoleMappingResult,
     getRoles,

@@ -3,6 +3,7 @@ import { err, errAsync, ok, type Result, ResultAsync } from "neverthrow";
 
 import { getManagementClient, getManagementClientResult } from "./client";
 import { auth0Error, type UserPermissionsError } from "./errors";
+import { AUTHZ_PERMISSIONS, type AuthZPermission } from "./permissions";
 
 export type Roles = "admin" | "editor" | "viewer" | "cli" | "fine_grain";
 
@@ -12,6 +13,19 @@ type RoleMap = {
     viewer: string;
     cli: string;
     fine_grain: string;
+};
+
+/**
+ * Default permissions granted to each role.
+ * Used as a fallback when the token doesn't yet have permissions
+ * (e.g., the token hasn't been invalidated after a role assignment).
+ */
+export const DEFAULT_ROLE_PERMISSIONS: Record<Roles, AuthZPermission[]> = {
+    admin: [...AUTHZ_PERMISSIONS],
+    editor: ["edit", "view"],
+    viewer: ["view"],
+    cli: ["cli"],
+    fine_grain: []
 };
 
 /**
@@ -344,4 +358,27 @@ export function getRolesResult({
         (error) =>
             auth0Error("API_FAILED", `Failed to get roles: ${error instanceof Error ? error.message : "Unknown error"}`)
     );
+}
+
+/**
+ * Get default permissions for a user based on their org roles.
+ * Used as a fallback when the token doesn't yet contain permissions
+ * (e.g., the token hasn't been invalidated after a role assignment).
+ */
+export function getDefaultPermissionsForOrgUser({ orgId, userId }: Omit<GetRolesRequest, "client">): ResultAsync<
+    {
+        ok: boolean;
+        data: AuthZPermission[];
+    },
+    UserPermissionsError
+> {
+    const roles = getRolesResult({ orgId, userId });
+
+    return roles.map((r) => {
+        const defaultPermissions = r.data.flatMap((role) => DEFAULT_ROLE_PERMISSIONS[role]);
+        return {
+            ...r,
+            data: [...new Set(defaultPermissions)]
+        };
+    });
 }
