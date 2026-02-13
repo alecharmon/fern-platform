@@ -1,6 +1,5 @@
 "use client";
 
-import { useIsDesktop } from "@fern-ui/react-commons";
 import type React from "react";
 import type { CSSProperties } from "react";
 import { cn } from "../cn";
@@ -38,15 +37,14 @@ export function AbstractHeaderContent({
     themeSwitch: React.ReactNode;
     headerDisabled?: boolean;
 }) {
-    const isDesktop = useIsDesktop();
     return (
         <div className={cn("flex w-full flex-col items-center justify-stretch gap-4", className)}>
             <div className={cn("flex w-full items-center justify-stretch gap-4", className)} style={style}>
                 <div className="fern-header-logo-container">
                     <div className="flex items-center gap-2">
                         <div className="flex items-center lg:items-start">{logo}</div>
-                        {showSwitcher && isDesktop && (
-                            <div className="flex items-baseline">
+                        {showSwitcher && (
+                            <div className="hidden lg:flex items-baseline">
                                 {productSelect}
                                 {versionSelect}
                             </div>
@@ -54,24 +52,22 @@ export function AbstractHeaderContent({
                     </div>
                 </div>
 
-                {(showSearchBar || !isDesktop) && !headerDisabled && searchBar}
-
-                {isDesktop && (
-                    <FernButtonGroup asChild>
-                        <nav className="fern-header-navbar-links" aria-label="Navbar links">
-                            {navbarLinks}
-                            {loginButton}
-                            {languageSelect}
-                            {themeSwitch}
-                        </nav>
-                    </FernButtonGroup>
+                {!headerDisabled && (
+                    <div className={cn(showSearchBar ? "contents" : "contents lg:hidden")}>{searchBar}</div>
                 )}
 
-                {!isDesktop && (
-                    <div className="fern-header-mobile-menu-button">
-                        <MobileMenuButton />
-                    </div>
-                )}
+                <FernButtonGroup asChild>
+                    <nav className="fern-header-navbar-links hidden lg:flex" aria-label="Navbar links">
+                        {navbarLinks}
+                        {loginButton}
+                        {languageSelect}
+                        {themeSwitch}
+                    </nav>
+                </FernButtonGroup>
+
+                <div className="fern-header-mobile-menu-button lg:hidden">
+                    <MobileMenuButton />
+                </div>
             </div>
         </div>
     );
