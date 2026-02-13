@@ -466,7 +466,7 @@ export const middleware: NextMiddleware = async (request) => {
      * Print view used by the PDF generator.
      * Must bypass dynamic/static docs routing so `/_print` doesn't get treated as a docs slug.
      */
-    if (pathname === "/_print" || pathname.startsWith("/_print/")) {
+    if (pathname.match(/\/_print(\/|$)/)) {
         // Skip auth check in local development
         if (!isLocal()) {
             const providedToken = request.headers.get("FERN_TOKEN");
@@ -474,7 +474,8 @@ export const middleware: NextMiddleware = async (request) => {
                 return new NextResponse("Unauthorized", { status: 401 });
             }
         }
-        const suffix = pathname === "/_print" ? "" : pathname.slice("/_print".length);
+        const printPath = withoutBasepath("/_print");
+        const suffix = printPath === "/_print" ? "" : printPath.slice("/_print".length);
         return rewrite(withDomain(`/print${suffix}`));
     }
 
