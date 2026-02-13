@@ -1,7 +1,10 @@
+import type { Json } from "@fern-platform/supabase";
+import { convert } from "@scalar/postman-to-openapi";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchPostmanCollection } from "@/app/services/postman/api";
 import { getPostmanAccessToken } from "@/app/services/postman/jwt";
+import { upsertOpenApiSpec } from "@/app/services/postman/openapi-repository";
 import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
 
 import { validatePostmanAuth } from "../../auth";
@@ -81,6 +84,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     } catch (e) {
         console.error("[postman-api] Failed to fetch collection:", e);
         return NextResponse.json({ error: "Failed to fetch collection from Postman" }, { status: 502 });
+    }
+
+    try {
+        const openApiSpec = convert(collection as Parameters<typeof convert>[0]);
+        await upsertOpenApiSpec({
+            teamId: payload.teamId,
+            userId: payload.userId,
+            collectionId: payload.collectionId,
+            openApiSpec: openApiSpec as unknown as Json
+        });
+    } catch (e) {
+        console.error("[postman-api] Failed to convert/store OpenAPI spec:", e);
     }
 
     const response: PublishCollectionResponse = {
