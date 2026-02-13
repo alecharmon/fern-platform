@@ -30,6 +30,10 @@ const THEMES: Record<"light" | "dark", Record<string | typeof DEFAULT, BundledTh
     }
 };
 
+const DARK_THEME_COLOR_REPLACEMENTS: Record<string, string> = {
+    "#545454": "#8a8a8a"
+};
+
 const getHighlighterInstanceImpl = async (language: string): Promise<Highlighter> => {
     const lang = parseLang(language);
 
@@ -111,6 +115,7 @@ export function highlightTokens(
             light: THEMES.light[lang] ?? THEMES.light[DEFAULT],
             dark: THEMES.dark[lang] ?? THEMES.dark[DEFAULT]
         },
+        colorReplacements: DARK_THEME_COLOR_REPLACEMENTS,
         transformers: [templateTransformer(templateVariables)]
     });
     return { code, lang, hast };

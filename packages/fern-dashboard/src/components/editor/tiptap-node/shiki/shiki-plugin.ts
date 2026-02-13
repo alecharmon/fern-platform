@@ -26,6 +26,10 @@ const THEMES: Record<"light" | "dark", Record<string | typeof DEFAULT, BundledTh
     }
 };
 
+const DARK_THEME_COLOR_REPLACEMENTS: Record<string, string> = {
+    "#545454": "#8a8a8a"
+};
+
 let highlighter: Highlighter;
 
 function parseLang(lang: string): string {
@@ -81,7 +85,8 @@ function highlightTokens(highlighter: Highlighter, code: string, lang: string): 
         themes: {
             light: THEMES.light[lang] ?? THEMES.light[DEFAULT],
             dark: THEMES.dark[lang] ?? THEMES.dark[DEFAULT]
-        }
+        },
+        colorReplacements: DARK_THEME_COLOR_REPLACEMENTS
     });
     return { code, lang, hast };
 }

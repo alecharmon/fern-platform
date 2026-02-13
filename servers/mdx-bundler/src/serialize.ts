@@ -47,6 +47,9 @@ export async function serializeTwoslash(content: string): Promise<SerializeMdxRe
                             light: "min-light",
                             dark: "material-theme-darker"
                         },
+                        colorReplacements: {
+                            "#545454": "#8a8a8a"
+                        },
                         transformers: [
                             transformerNotationDiff(),
                             transformerNotationFocus(),
