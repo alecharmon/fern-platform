@@ -13,7 +13,8 @@ export const loadDynamicIRFromS3 = cache(
         orgName: string,
         apiName: string,
         snippetsConfig: APIV1Write.SnippetsConfig,
-        docsBucketName: string
+        docsBucketName: string,
+        domain?: string
     ): Promise<DynamicIRsByLanguage | undefined> => {
         const dynamicIRsByLanguage: DynamicIRsByLanguage = {};
         try {
@@ -38,9 +39,12 @@ export const loadDynamicIRFromS3 = cache(
                     expiresIn: 60 * 60 // 1 hour
                 });
 
-                // cache with org name, not domain (?)
+                const tags = [orgName, apiName, language, "loadDynamicIRFromS3"];
+                if (domain) {
+                    tags.push(domain);
+                }
                 const response = await fetch(signedUrl, {
-                    next: { tags: [orgName, apiName, language, "loadDynamicIRFromS3"] }
+                    next: { tags }
                 });
 
                 if (response.ok) {

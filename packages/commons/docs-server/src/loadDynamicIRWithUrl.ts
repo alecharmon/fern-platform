@@ -12,11 +12,13 @@ export const loadDynamicIRWithUrl = cache(
     async ({
         orgId,
         apiName,
-        snippetsConfig
+        snippetsConfig,
+        domain
     }: {
         orgId: string;
         apiName: string;
         snippetsConfig: APIV1Write.SnippetsConfig | undefined;
+        domain?: string;
     }): Promise<DynamicIRsByLanguage | undefined> => {
         if (isLocal()) {
             return undefined;
@@ -40,7 +42,13 @@ export const loadDynamicIRWithUrl = cache(
         }
 
         try {
-            const response = await loadDynamicIRFromS3(orgId, apiName, snippetsConfig, getDynamicIRBucketName());
+            const response = await loadDynamicIRFromS3(
+                orgId,
+                apiName,
+                snippetsConfig,
+                getDynamicIRBucketName(),
+                domain
+            );
             if (response != null && Object.keys(response).length > 0) {
                 return response;
             }

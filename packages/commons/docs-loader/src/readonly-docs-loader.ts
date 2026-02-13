@@ -44,8 +44,6 @@ import {
     ApiDefinitionV1ToLatest,
     type AuthScheme,
     backfillSnippets,
-    backfillSnippetsForExample,
-    createSnippetGenerators,
     type EnvironmentId,
     type ObjectProperty,
     type PruningNodeType,
@@ -474,16 +472,9 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                     );
                     if (cached != null) {
                         console.debug(
-                            `[DocsLoader] createGetPrunedApiCached cache hit, backfilling snippets - domain: ${domainKey}, key: ${key}`
+                            `[DocsLoader] createGetPrunedApiCached cache hit - domain: ${domainKey}, key: ${key}`
                         );
-                        const metadata = await getMetadata(cacheConfig)(domainKey);
-                        const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
-                        const settings = await getSettings(cacheConfig)(domainKey);
-                        const flags = {
-                            httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
-                            alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
-                        };
-                        return await backfillSnippets(cached, dynamicIr, flags);
+                        return cached;
                     }
                     console.debug(
                         `[DocsLoader] createGetPrunedApiCached cache miss, falling back to uncached - domain: ${domainKey}, key: ${key}`
@@ -521,14 +512,7 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                 const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
                 kvSet(domainKey, key, pruned, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
             }
-            const metadata = await getMetadata(cacheConfig)(domainKey);
-            const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
-            const settings = await getSettings(cacheConfig)(domainKey);
-            const flags = {
-                httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
-                alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
-            };
-            return backfillSnippets(pruned, dynamicIr, flags);
+            return pruned;
         },
         [domainKey, cacheConfig.cacheKeySuffix],
         { tags: [domainKey, "api"] }
@@ -608,7 +592,7 @@ const getEndpointByLocator =
         apiName?: string
     ): Promise<{
         apiDefinitionId: ApiDefinition.ApiDefinitionId;
-        endpoint: ApiDefinition.EndpointDefinition;
+        endpointId: EndpointId;
         slugs: Slug[];
     }> => {
         const root = await unsafe_getFullRoot(domainKey);
@@ -646,36 +630,9 @@ const getEndpointByLocator =
                     )
                     .map((node) => node.slug);
 
-                // Backfill dynamic SDK snippets for the endpoint
-                const metadata = await getMetadata(cacheConfig)(domainKey);
-                const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, apiId);
-                const settings = await getSettings(cacheConfig)(domainKey);
-                const flags = {
-                    httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
-                    alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
-                };
-
-                let dynamicGenerators = {};
-                try {
-                    if (dynamicIr) {
-                        dynamicGenerators = createSnippetGenerators({ endpoint, dynamicIr });
-                    }
-                } catch (error) {
-                    console.log("[getEndpointByLocator] error creating dynamic snippet generators:", error);
-                }
-
-                const endpointWithSnippets = {
-                    ...endpoint,
-                    examples: await Promise.all(
-                        endpoint.examples?.map((ex) =>
-                            backfillSnippetsForExample(api, dynamicGenerators, endpoint, ex, flags)
-                        ) ?? []
-                    )
-                };
-
                 return {
                     apiDefinitionId: api.id,
-                    endpoint: endpointWithSnippets,
+                    endpointId: endpoint.id,
                     slugs
                 };
             }
@@ -1346,7 +1303,8 @@ const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
         const response = await loadDynamicIRWithUrl({
             orgId,
             apiName,
-            snippetsConfig: api.snippetsConfiguration
+            snippetsConfig: api.snippetsConfiguration,
+            domain
         });
 
         if (response) {
@@ -1623,6 +1581,18 @@ const createCachedDocsLoaderImpl = async (
                 return await getAuthState(pathname);
             });
 
+    const getPrunedApiWithSnippets = async (id: string, ...nodes: PruningNodeType[]) => {
+        const pruned = await createGetPrunedApiCached(domainKey, config)(id, ...nodes);
+        const m = await metadata;
+        const dynamicIr = await getDynamicIr(config)(m.org, m.domain, id);
+        const settings = await getSettings(config)(domainKey);
+        const flags = {
+            httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
+            alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
+        };
+        return backfillSnippets(pruned, dynamicIr, flags);
+    };
+
     return {
         domain: deriveDomainFromS3Path(domainKey),
         fern_token,
@@ -1643,7 +1613,7 @@ const createCachedDocsLoaderImpl = async (
             const prefetched = await prefetchPromise;
             return prefetched.mdxBundlerFiles ?? (await getMdxBundlerFiles(config)(domainKey));
         },
-        getPrunedApi: cache(createGetPrunedApiCached(domainKey, config)),
+        getPrunedApi: cache((id: string, ...nodes: PruningNodeType[]) => getPrunedApiWithSnippets(id, ...nodes)),
         getEndpointById: cache((apiDefinitionId: string, endpointId: EndpointId) =>
             getEndpointById({
                 domainKey,
@@ -1652,14 +1622,22 @@ const createCachedDocsLoaderImpl = async (
                 cacheConfig: config
             })
         ),
-        getEndpointByLocator: cache(
-            unstable_cache(
+        getEndpointByLocator: cache(async (method: HttpMethod, path: string, example?: string, apiName?: string) => {
+            const cachedGetEndpoint = unstable_cache(
                 (method: HttpMethod, path: string, example?: string, apiName?: string) =>
                     getEndpointByLocator(config)(domainKey, method, path, example, apiName),
                 [domainKey, config.cacheKeySuffix],
                 { tags: [domainKey, "endpointByLocator"] }
-            )
-        ),
+            );
+            const { apiDefinitionId, endpointId, slugs } = await cachedGetEndpoint(method, path, example, apiName);
+            const api = await getPrunedApiWithSnippets(apiDefinitionId, { type: "endpoint", endpointId });
+            const endpoint = api.endpoints[endpointId];
+            if (endpoint == null) {
+                console.error(`Could not find endpoint ${method} ${path} after backfilling snippets`);
+                notFound();
+            }
+            return { apiDefinitionId, endpoint, slugs };
+        }),
         getWebhookByLocator: cache(
             unstable_cache(
                 (webhookId: string) => getWebhookByLocator(domainKey, webhookId),
