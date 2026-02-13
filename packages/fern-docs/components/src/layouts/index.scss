@@ -13,10 +13,10 @@
       }
 
       .fern-changelog-content {
-        @apply max-w-content-wide-width relative mx-auto grid w-full grid-cols-1 gap-4 xl:grid-cols-[1fr_minmax(0,var(--content-width))_1fr];
+        @apply max-w-content-wide-width relative mx-auto flex w-full flex-col gap-4;
 
-        &[data-has-aside="false"] {
-          @apply xl:grid-cols-1;
+        &[data-has-aside="true"] {
+          @apply xl:flex-row;
         }
       }
 
@@ -33,7 +33,7 @@
       }
 
       .fern-changelog-content > aside {
-        @apply top-header-height-padded sticky hidden h-fit min-w-0 xl:flex xl:justify-end;
+        @apply top-header-height-padded sticky hidden h-fit shrink-0 whitespace-nowrap xl:flex xl:justify-end;
       }
     }
 
