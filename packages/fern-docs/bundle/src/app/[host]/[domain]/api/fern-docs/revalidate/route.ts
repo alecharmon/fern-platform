@@ -5,6 +5,8 @@ import {
     CACHE_KEY_METADATA,
     CACHE_KEY_ROOT,
     convertResponseToRootNode,
+    createEndpointCacheKey,
+    createPageCacheKey,
     getMetadataFromResponse
 } from "@fern-api/docs-loader";
 import { flushPosthog, track } from "@fern-api/docs-server";
@@ -22,7 +24,14 @@ import {
     slugToHref,
     withoutStaging
 } from "@fern-api/docs-utils";
-import { type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
+import { type ApiDefinition, type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
+import {
+    ApiDefinitionV1ToLatest,
+    type EndpointId,
+    prune,
+    type WebhookId,
+    type WebSocketId
+} from "@fern-api/fdr-sdk/api-definition";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getEdgeFlags } from "@fern-docs/edge-config";
 import { getEnv, waitUntil } from "@vercel/functions";
@@ -176,6 +185,24 @@ async function performRevalidation(params: {
 
         const { navigation, root: _, ...config } = docs.definition.config;
         keys[CACHE_KEY_CONFIG] = config;
+
+        Object.entries(docs.definition.pages).forEach(([id, page]) => {
+            keys[createPageCacheKey({ pageId: id })] = page;
+        });
+
+        Object.values(docs.definition.apisV2).forEach((api) => {
+            const prunedApi = createPrunedApi(api);
+            prunedApi.forEach((value, key) => {
+                keys[`api:${key}`] = value;
+            });
+        });
+
+        Object.values(docs.definition.apis).forEach((api) => {
+            const prunedApi = createPrunedApi(ApiDefinitionV1ToLatest.from(api).migrate());
+            prunedApi.forEach((value, key) => {
+                keys[`api:${key}`] = value;
+            });
+        });
 
         keys[CACHE_KEY_FILES] = mapValues(docs.definition.filesV2, (file) => {
             if (file.type === "url") {
@@ -634,6 +661,32 @@ async function reindex(docs: DocsV2Read.LoadDocsForUrlResponse, host: string, do
         return ["algolia", "turbopuffer"];
     }
     return ["algolia"];
+}
+
+function createPrunedApi(api: ApiDefinition.ApiDefinition) {
+    const apis = new Map<string, ApiDefinition.ApiDefinition>();
+    Object.keys(api.endpoints).forEach((endpointId) => {
+        const pruneKey = {
+            type: "endpoint",
+            endpointId: endpointId as EndpointId
+        } as const;
+        apis.set(`${api.id}:${createEndpointCacheKey(pruneKey)}`, prune(api, pruneKey));
+    });
+    Object.keys(api.websockets).forEach((webSocketId) => {
+        const pruneKey = {
+            type: "webSocket",
+            webSocketId: webSocketId as WebSocketId
+        } as const;
+        apis.set(`${api.id}:${createEndpointCacheKey(pruneKey)}`, prune(api, pruneKey));
+    });
+    Object.keys(api.webhooks).forEach((webhookId) => {
+        const pruneKey = {
+            type: "webhook",
+            webhookId: webhookId as WebhookId
+        } as const;
+        apis.set(`${api.id}:${createEndpointCacheKey(pruneKey)}`, prune(api, pruneKey));
+    });
+    return apis;
 }
 
 function getFileCDN() {

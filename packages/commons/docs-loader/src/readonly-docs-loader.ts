@@ -74,7 +74,8 @@ import {
     CACHE_KEY_MDX_BUNDLER_FILES,
     CACHE_KEY_METADATA,
     CACHE_KEY_ROOT,
-    createDynamicIrCacheKey
+    createDynamicIrCacheKey,
+    createPageCacheKey
 } from "./cache-keys";
 import { createKvCache, type KvCache } from "./kv-cache";
 
@@ -449,6 +450,44 @@ const getApi = async (domainKey: string, id: string) => {
 const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<CacheConfig>) =>
     unstable_cache(
         async (id: string, ...nodes: PruningNodeType[]): Promise<ApiDefinition.ApiDefinition> => {
+            // if there is only one node, and it's an endpoint, try to load from cache
+            const kvGetStart = Date.now();
+            try {
+                if (nodes.length === 1 && nodes[0]) {
+                    const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
+                    console.debug(
+                        `[DocsLoader] createGetPrunedApiCached kvGet start - domain: ${domainKey}, key: ${key}, apiId: ${id}`
+                    );
+                    const cached = await kvGet<ApiDefinition.ApiDefinition>(domainKey, key, cacheConfig.cacheKeySuffix);
+                    const kvGetDuration = Date.now() - kvGetStart;
+                    console.debug(
+                        `[DocsLoader] createGetPrunedApiCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, key: ${key}`
+                    );
+                    if (cached != null) {
+                        console.debug(
+                            `[DocsLoader] createGetPrunedApiCached cache hit, backfilling snippets - domain: ${domainKey}, key: ${key}`
+                        );
+                        const metadata = await getMetadata(cacheConfig)(domainKey);
+                        const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
+                        const settings = await getSettings(cacheConfig)(domainKey);
+                        const flags = {
+                            httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,
+                            alwaysEnableJavaScriptFetch: settings.useJavascriptAsTypescript
+                        };
+                        return await backfillSnippets(cached, dynamicIr, flags);
+                    }
+                    console.debug(
+                        `[DocsLoader] createGetPrunedApiCached cache miss, falling back to uncached - domain: ${domainKey}, key: ${key}`
+                    );
+                }
+            } catch (error) {
+                const kvGetDuration = Date.now() - kvGetStart;
+                console.warn(
+                    `Failed to get pruned api for ${domainKey}:${id} in ${kvGetDuration}ms, fallback to uncached`,
+                    error
+                );
+            }
+
             const getApiStart = Date.now();
             console.debug(`[DocsLoader] createGetPrunedApiCached getApi start - domain: ${domainKey}, apiId: ${id}`);
             const api = await getApi(domainKey, id);
@@ -467,6 +506,11 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                         audiences: undefined
                     });
                 }
+            }
+            // if there is only one node, and it's an endpoint, try to cache the result
+            if (nodes.length === 1 && nodes[0]) {
+                const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
+                kvSet(domainKey, key, pruned, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
             }
             const metadata = await getMetadata(cacheConfig)(domainKey);
             const dynamicIr = await getDynamicIr(cacheConfig)(metadata.org, metadata.domain, id);
@@ -931,8 +975,38 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
         return result;
     });
 
-const getPage = (_cacheConfig: Required<CacheConfig>) =>
+const getPage = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string, pageId: string, returnRawMarkdown: boolean = false) => {
+        const pageCacheKey = createPageCacheKey({ pageId });
+        const kvGetStart = Date.now();
+        console.debug(
+            `[DocsLoader] getPage kvGet start - domain: ${domainKey}, key: ${pageCacheKey}, pageId: ${pageId}`
+        );
+        try {
+            const page = await kvGet<DocsV1Read.PageContent>(domainKey, pageCacheKey, cacheConfig.cacheKeySuffix);
+            const kvGetDuration = Date.now() - kvGetStart;
+            console.debug(
+                `[DocsLoader] getPage kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, pageId: ${pageId}`
+            );
+            if (page != null && isPlainObject(page) && "markdown" in page) {
+                const config = await getConfig(cacheConfig)(domainKey);
+                return {
+                    filename: pageId,
+                    markdown: page.markdown,
+                    editThisPageUrl: page.editThisPageUrl,
+                    editThisPageLaunch: page.editThisPageLaunch,
+                    css: config.css,
+                    rawMarkdown: returnRawMarkdown ? page.rawMarkdown : undefined
+                };
+            }
+        } catch (error) {
+            const kvGetDuration = Date.now() - kvGetStart;
+            console.warn(
+                `Failed to get page for ${domainKey}:${pageId} in ${kvGetDuration}ms, fallback to uncached`,
+                error
+            );
+        }
+
         const loadStart = Date.now();
         console.debug(`[DocsLoader] getPage loadWithUrl start - domain: ${domainKey}, pageId: ${pageId}`);
         const response = await loadWithUrl(domainKey);
@@ -946,6 +1020,7 @@ const getPage = (_cacheConfig: Required<CacheConfig>) =>
             notFound();
         }
 
+        kvSet(domainKey, pageCacheKey, page, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         return {
             filename: pageId,
             markdown: page.markdown,
