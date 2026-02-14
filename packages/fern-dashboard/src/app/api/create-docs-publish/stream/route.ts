@@ -85,11 +85,13 @@ export async function GET(req: NextRequest) {
 
     const demoCreationBotOwner = process.env.FERN_DEMO_CREATION_BOT_OWNER;
     if (!demoCreationBotOwner) {
+        console.error("[create-docs-publish] FERN_DEMO_CREATION_BOT_OWNER environment variable is not set");
         return new Response("Server configuration error", { status: 500 });
     }
 
     const octokitResult = getDemoCreationBotOctokit();
     if (!octokitResult.ok) {
+        console.error("[create-docs-publish] Failed to initialize GitHub client:", octokitResult.error);
         return new Response("Failed to initialize GitHub client", { status: 500 });
     }
 

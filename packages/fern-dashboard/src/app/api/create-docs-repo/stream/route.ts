@@ -424,6 +424,7 @@ jobs:
                 const repoName = `${data.urlPrefix}-docs`.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
                 const demoCreationBotOwner = process.env.FERN_DEMO_CREATION_BOT_OWNER;
                 if (!demoCreationBotOwner) {
+                    console.error("[create-docs-repo] FERN_DEMO_CREATION_BOT_OWNER environment variable is not set");
                     throw new Error("Server configuration error");
                 }
 

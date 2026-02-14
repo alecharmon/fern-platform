@@ -610,6 +610,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ rep
 
     const demoCreationBotOwner = process.env.FERN_DEMO_CREATION_BOT_OWNER;
     if (!demoCreationBotOwner) {
+        console.error("[customize] FERN_DEMO_CREATION_BOT_OWNER environment variable is not set");
         return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 

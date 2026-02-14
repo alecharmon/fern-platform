@@ -101,12 +101,14 @@ export async function POST(req: NextRequest) {
 
     const demoCreationBotOwner = process.env.FERN_DEMO_CREATION_BOT_OWNER;
     if (!demoCreationBotOwner) {
+        console.error("[add-repo-collaborator] FERN_DEMO_CREATION_BOT_OWNER environment variable is not set");
         return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
     try {
         const octokitResult = getDemoCreationBotOctokit();
         if (!octokitResult.ok) {
+            console.error("[add-repo-collaborator] Failed to get GitHub client:", octokitResult.error);
             throw new Error("Failed to get GitHub client");
         }
 
