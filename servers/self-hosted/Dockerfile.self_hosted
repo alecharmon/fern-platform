@@ -22,14 +22,6 @@ RUN log "Running turbo prune..." && \
 ARG CACHEBUST=1
 COPY servers/self-hosted/scripts /scripts
 
-# Compile cache proxy TypeScript to JavaScript
-RUN log "Compiling cache proxy TypeScript..." && \
-    cd /scripts/cache-proxy && \
-    npm init -y > /dev/null 2>&1 && \
-    npm install --save-dev typescript @types/node > /dev/null 2>&1 && \
-    npx tsc -p tsconfig.json 2>&1 | add-timestamps && \
-    rm -rf node_modules package.json package-lock.json
-
 # -----------  Start Postgres schema setup  -----------
 COPY servers/fdr/prisma /prisma
 

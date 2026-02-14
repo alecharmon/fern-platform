@@ -3,7 +3,6 @@
  * CDN header management, and cacheability checks.
  */
 
-import type http from "http";
 import { getAuthInfoFromRequest } from "./auth";
 import { CACHE_DISABLED, CDN_TTL, DEFAULT_TTL, EXCLUDED_PATHS, EXCLUDED_PATHS_WITH_EXCEPTIONS } from "./config";
 
@@ -37,8 +36,8 @@ function normalizeUrlForCacheKey(url: string): string {
  * navigation) requests are cached separately — Next.js returns completely different content
  * (text/html vs text/x-component) depending on these headers (see the Vary response header).
  */
-export function getCacheKey(req: http.IncomingMessage): string {
-    const authInfo = getAuthInfoFromRequest(req);
+export async function getCacheKey(req: Request): Promise<string> {
+    const authInfo = await getAuthInfoFromRequest(req);
     const rolesKey = authInfo.roles.sort().join(",");
 
     // Include the RSC header in the cache key so that HTML page requests and RSC (client-side
@@ -46,10 +45,11 @@ export function getCacheKey(req: http.IncomingMessage): string {
     // (text/html vs text/x-component) depending on this header (see the Vary response header).
     // Note: prefetch headers (next-router-prefetch, next-router-segment-prefetch) are stripped
     // by the proxy before forwarding, so the backend always returns the full response.
-    const rsc = req.headers["rsc"] || "";
+    const rsc = req.headers.get("rsc") || "";
 
     // Normalize URL to strip _rsc query param (Next.js cache-buster that changes per navigation)
-    const normalizedUrl = normalizeUrlForCacheKey(req.url || "");
+    const url = new URL(req.url);
+    const normalizedUrl = normalizeUrlForCacheKey(url.pathname + url.search);
 
     return `${req.method}:${authInfo.isLoggedIn}:${rolesKey}:${rsc}:${normalizedUrl}`;
 }
@@ -58,7 +58,7 @@ export function getCacheKey(req: http.IncomingMessage): string {
  * Check if request should bypass cache.
  * Returns null if caching is allowed, or a reason string if bypassed.
  */
-export function shouldBypassCache(req: http.IncomingMessage): string | null {
+export function shouldBypassCache(req: Request): string | null {
     // Skip all caching if disabled
     if (CACHE_DISABLED) {
         return "cache_disabled";
@@ -69,7 +69,8 @@ export function shouldBypassCache(req: http.IncomingMessage): string | null {
         return `method_${req.method}`;
     }
 
-    const url = req.url || "";
+    const parsedUrl = new URL(req.url);
+    const url = parsedUrl.pathname + parsedUrl.search;
 
     // Check excluded paths with exceptions
     for (const { pattern, exceptions } of EXCLUDED_PATHS_WITH_EXCEPTIONS) {
@@ -99,8 +100,8 @@ export function shouldBypassCache(req: http.IncomingMessage): string | null {
 /**
  * Parse TTL from response headers.
  */
-export function getTTLFromHeaders(headers: http.IncomingHttpHeaders): number {
-    const cacheControl = headers["cache-control"];
+export function getTTLFromHeaders(headers: Headers): number {
+    const cacheControl = headers.get("cache-control");
     if (!cacheControl) {
         return DEFAULT_TTL;
     }
@@ -129,17 +130,16 @@ export function getTTLFromHeaders(headers: http.IncomingHttpHeaders): number {
  * Set CDN-friendly cache headers for downstream caches (e.g., CloudFront).
  * This allows CDNs to cache the response while still allowing the proxy to serve stale content.
  */
-export function setCdnCacheHeaders(
-    headers: http.IncomingHttpHeaders,
-    isCacheableResponse: boolean
-): Record<string, string | string[] | number | undefined> {
-    const newHeaders: Record<string, string | string[] | number | undefined> = { ...headers };
+export function setCdnCacheHeaders(headers: Headers, isCacheableResponse: boolean): Headers {
+    const newHeaders = new Headers(headers);
 
     if (isCacheableResponse && CDN_TTL > 0) {
         // s-maxage is for shared caches (CDNs), max-age is for browser cache
         // stale-while-revalidate allows CDN to serve stale content while fetching fresh
-        newHeaders["cache-control"] =
-            `public, max-age=${CDN_TTL}, s-maxage=${CDN_TTL}, stale-while-revalidate=${CDN_TTL}`;
+        newHeaders.set(
+            "cache-control",
+            `public, max-age=${CDN_TTL}, s-maxage=${CDN_TTL}, stale-while-revalidate=${CDN_TTL}`
+        );
     }
 
     return newHeaders;
@@ -148,14 +148,14 @@ export function setCdnCacheHeaders(
 /**
  * Check if response is cacheable.
  */
-export function isCacheable(statusCode: number, headers: http.IncomingHttpHeaders, _url: string): boolean {
+export function isCacheable(statusCode: number, headers: Headers): boolean {
     // Only cache successful responses
     if (statusCode !== 200) {
         return false;
     }
 
     // Check content type
-    const contentType = (headers["content-type"] as string) || "";
+    const contentType = headers.get("content-type") || "";
     const isHtmlPage = contentType.includes("text/html");
     const isRscResponse = contentType.includes("text/x-component");
 
@@ -167,7 +167,7 @@ export function isCacheable(statusCode: number, headers: http.IncomingHttpHeader
     }
 
     // For non-HTML responses, respect Cache-Control headers
-    const cacheControl = (headers["cache-control"] as string) || "";
+    const cacheControl = headers.get("cache-control") || "";
     if (cacheControl.includes("no-store") || cacheControl.includes("private")) {
         return false;
     }

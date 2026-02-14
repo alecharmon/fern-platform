@@ -6,8 +6,8 @@ import { MAX_CACHE_SIZE } from "./config";
 
 export interface CacheEntry {
     statusCode: number;
-    headers: Record<string, string | string[] | number | undefined>;
-    body: Buffer;
+    headers: Headers;
+    body: Uint8Array;
     cachedAt: number;
     expiresAt: number | null;
 }

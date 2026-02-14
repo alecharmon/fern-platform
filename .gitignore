@@ -98,8 +98,6 @@ test-results
 packages/migration-lambda-docs/dist/
 packages/migration-lambda-docs/migration-lambda.zip
 
-# Self-hosted cache proxy compiled output
-servers/self-hosted/scripts/cache-proxy/compiled/
 
 # Visual diff output
 visual-diff-output/

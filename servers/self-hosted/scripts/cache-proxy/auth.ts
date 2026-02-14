@@ -5,8 +5,6 @@
  * so the cache proxy can include auth state in cache keys.
  */
 
-import crypto from "crypto";
-import type http from "http";
 import {
     EVERYONE_ROLE,
     FERN_AUTH_ISSUER,
@@ -49,12 +47,12 @@ export function getJwtIssuer(): string {
 /**
  * Decode a base64url-encoded string to a Buffer.
  */
-export function base64urlDecode(str: string): Buffer {
+export function base64urlDecode(str: string): Uint8Array {
     let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
     while (base64.length % 4 !== 0) {
         base64 += "=";
     }
-    return Buffer.from(base64, "base64");
+    return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 }
 
 /**
@@ -62,7 +60,7 @@ export function base64urlDecode(str: string): Buffer {
  * Uses HMAC-SHA256 verification matching the jose library's behavior.
  * Returns the decoded payload if valid, null if invalid.
  */
-export function verifyFernJWT(token: string | null | undefined): Record<string, unknown> | null {
+export async function verifyFernJWT(token: string | null | undefined): Promise<Record<string, unknown> | null> {
     if (!token || typeof token !== "string") {
         return null;
     }
@@ -82,18 +80,27 @@ export function verifyFernJWT(token: string | null | undefined): Record<string, 
     const [headerB64, payloadB64, signatureB64] = parts;
 
     try {
-        const expectedSignature = crypto.createHmac("sha256", secret).update(`${headerB64}.${payloadB64}`).digest();
+        const key = await crypto.subtle.importKey(
+            "raw",
+            new TextEncoder().encode(secret),
+            { name: "HMAC", hash: "SHA-256" },
+            false,
+            ["sign"]
+        );
+        const expectedSignature = new Uint8Array(
+            await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${headerB64}.${payloadB64}`))
+        );
         const actualSignature = base64urlDecode(signatureB64);
 
         if (
             expectedSignature.length !== actualSignature.length ||
-            !crypto.timingSafeEqual(expectedSignature, actualSignature)
+            !constantTimeEqual(expectedSignature, actualSignature)
         ) {
             debug("JWT signature verification failed");
             return null;
         }
 
-        const payload = JSON.parse(base64urlDecode(payloadB64).toString("utf8"));
+        const payload = JSON.parse(new TextDecoder().decode(base64urlDecode(payloadB64)));
 
         if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
             debug("JWT token expired");
@@ -114,20 +121,29 @@ export function verifyFernJWT(token: string | null | undefined): Record<string, 
     }
 }
 
+function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
+    if (a.length !== b.length) {
+        return false;
+    }
+    let result = 0;
+    for (let i = 0; i < a.length; i++) {
+        result |= a[i] ^ b[i];
+    }
+    return result === 0;
+}
+
 /**
  * Extract the fern_token from request headers or cookies.
  * Checks the FERN_TOKEN header first, then falls back to the fern_token cookie,
  * matching the behavior of middleware.ts.
  */
-export function extractFernToken(req: http.IncomingMessage): string | null {
-    // Check FERN_TOKEN header first (matches middleware.ts behavior)
-    const headerToken = req.headers["fern_token"] as string | undefined;
+export function extractFernToken(req: Request): string | null {
+    const headerToken = req.headers.get("fern_token");
     if (headerToken) {
         return headerToken;
     }
 
-    // Fall back to fern_token cookie
-    const cookieHeader = req.headers["cookie"];
+    const cookieHeader = req.headers.get("cookie");
     if (!cookieHeader) {
         return null;
     }
@@ -147,7 +163,7 @@ export function extractFernToken(req: http.IncomingMessage): string | null {
  * Extract auth info (isLoggedIn, roles) from the request.
  * Replicates the auth logic from middleware.ts for cache key generation.
  */
-export function getAuthInfoFromRequest(req: http.IncomingMessage): AuthInfo {
+export async function getAuthInfoFromRequest(req: Request): Promise<AuthInfo> {
     if (!FERN_AUTH_TYPE) {
         return { isLoggedIn: false, roles: [EVERYONE_ROLE] };
     }
@@ -157,7 +173,7 @@ export function getAuthInfoFromRequest(req: http.IncomingMessage): AuthInfo {
         return { isLoggedIn: false, roles: [EVERYONE_ROLE] };
     }
 
-    const payload = verifyFernJWT(token);
+    const payload = await verifyFernJWT(token);
     if (!payload) {
         return { isLoggedIn: false, roles: [EVERYONE_ROLE] };
     }

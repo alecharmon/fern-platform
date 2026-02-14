@@ -126,7 +126,7 @@
     }
   },
   "javascript": {
-    "globals": ["expect", "describe", "it", "beforeEach", "test", "beforeAll"],
+    "globals": ["Bun", "expect", "describe", "it", "beforeEach", "test", "beforeAll"],
     "formatter": {
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",

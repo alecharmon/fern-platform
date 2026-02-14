@@ -45,6 +45,9 @@ export const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "";
 export const OAUTH_JWT_SECRET = process.env.OAUTH_JWT_SECRET || "";
 export const EVERYONE_ROLE = "everyone";
 
+// Backend origin URL for proxying requests
+export const BACKEND_ORIGIN = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
+
 // Paths that should never be cached
 // These patterns are checked using includes() for flexibility
 export const EXCLUDED_PATHS = ["/_search/", "/_next/static/", "/_next/image", "/api/fern-docs/", "/_files/"];

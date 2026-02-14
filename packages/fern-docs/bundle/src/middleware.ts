@@ -184,7 +184,12 @@ export const middleware: NextMiddleware = async (request) => {
     const headers = new Headers(request.headers);
     headers.set(HEADER_X_FERN_HOST, domain);
     headers.set("x-fern-requested-path", pathname);
-    if (domain !== host) {
+    // In self-hosted mode, the cache proxy already sets x-forwarded-host to the
+    // real external host (e.g. localhost:3000). Preserve it so that downstream
+    // route handlers (JWT callback, etc.) can set cookies and redirects using
+    // the correct origin. Only overwrite for non-self-hosted deployments where
+    // the domain differs from the host (e.g. custom domains on Vercel).
+    if (domain !== host && !isSelfHostedMode) {
         headers.set(HEADER_X_FORWARDED_HOST, domain);
     }
 

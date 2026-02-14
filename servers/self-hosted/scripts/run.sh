@@ -682,7 +682,7 @@ CACHE_MAX_ENTRIES="${CACHE_MAX_ENTRIES:-1000}" \
 CACHE_MAX_ENTRY_SIZE="${CACHE_MAX_ENTRY_SIZE:-5242880}" \
 CACHE_DEFAULT_TTL="${CACHE_DEFAULT_TTL:-2592000}" \
 CACHE_PROXY_DEBUG="${CACHE_PROXY_DEBUG:-0}" \
-node /scripts/cache-proxy/compiled/index.js 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
+bun /scripts/cache-proxy/index.ts 2>&1 | tee /tmp/cache-proxy.log | add_timestamps &
 cache_proxy_pid=$!
 log "Cache proxy PID: $cache_proxy_pid"
 
