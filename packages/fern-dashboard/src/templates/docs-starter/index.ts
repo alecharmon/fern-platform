@@ -1,6 +1,32 @@
+import { fernCliConfig } from "@/utils/fernCliConfig";
+
 import { TEMPLATE_FILES, type TemplateFile } from "./generated-templates";
 
 export type { TemplateFile };
+
+const WORKFLOW_PATHS = new Set([
+    ".github/workflows/check.yml",
+    ".github/workflows/preview-docs.yml",
+    ".github/workflows/publish-docs.yml"
+]);
+
+function applyCliSubstitutions(files: TemplateFile[]): TemplateFile[] {
+    if (fernCliConfig.npmPackage === "fern-api") {
+        return files;
+    }
+    return files.map((file) => {
+        if (!WORKFLOW_PATHS.has(file.path)) {
+            return file;
+        }
+        return {
+            ...file,
+            content: file.content
+                .replace(/npm install -g fern-api/g, `npm install -g ${fernCliConfig.npmPackage}`)
+                .replace(/run: fern /g, `run: ${fernCliConfig.cliCommand} `)
+                .replace(/\$\(fern /g, `$(${fernCliConfig.cliCommand} `)
+        };
+    });
+}
 
 /**
  * Gets all docs-starter template files.
@@ -9,7 +35,7 @@ export type { TemplateFile };
  * Binary files are base64 encoded.
  */
 export async function getDocsStarterTemplateFiles(): Promise<TemplateFile[]> {
-    return TEMPLATE_FILES;
+    return applyCliSubstitutions(TEMPLATE_FILES);
 }
 
 /**
@@ -33,5 +59,5 @@ export async function getEssentialTemplateFiles(): Promise<TemplateFile[]> {
         "fern/docs/assets/logo.svg"
     ];
 
-    return TEMPLATE_FILES.filter((file) => essentialPaths.includes(file.path));
+    return applyCliSubstitutions(TEMPLATE_FILES.filter((file) => essentialPaths.includes(file.path)));
 }

@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import _sodium from "libsodium-wrappers";
 
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 
 export type SetFernTokenSecretResult =
     | { success: true; token: string }
@@ -114,7 +115,7 @@ async function attemptSetFernTokenSecret(params: {
             NPM_CONFIG_CACHE: "/tmp/.npm"
         };
 
-        const tokenProcess = spawn("npx", ["fern-api", "token"], {
+        const tokenProcess = spawn("npx", [fernCliConfig.npmPackage, "token"], {
             cwd: workingDir,
             env
         });
