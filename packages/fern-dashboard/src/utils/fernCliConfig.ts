@@ -16,7 +16,7 @@ function getFernCliConfig(): FernCliConfig {
         return {
             npmPackage: "@fern-api/fern-api-dev",
             cliCommand: "fern-dev",
-            docsDomain: "dev.docs.buildwithfern.com"
+            docsDomain: "docs.dev.buildwithfern.com"
         };
     }
     return {
