@@ -10,6 +10,7 @@ import { setFernTokenSecret } from "@/app/services/dal/github/setFernTokenSecret
 import { updateRepository } from "@/app/services/dal/github/updateRepository";
 import { OnboardS3Service } from "@/app/services/onboarding-assets";
 import { getPreCreateStatus } from "@/app/services/onboarding-prep/preCreateRepo";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 
 import type { OnboardingDocsRequest } from "../types";
 import { createFernProject } from "../utils";
@@ -145,9 +146,9 @@ export async function GET(req: NextRequest) {
                 tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "fern-stream-"));
 
                 // Normalize the docs URL
-                const normalizedDocsUrl = data.docsSiteUrl.includes(".docs.buildwithfern.com")
+                const normalizedDocsUrl = data.docsSiteUrl.includes(`.${fernCliConfig.docsDomain}`)
                     ? data.docsSiteUrl
-                    : `${data.docsSiteUrl}.docs.buildwithfern.com`;
+                    : `${data.docsSiteUrl}.${fernCliConfig.docsDomain}`;
 
                 // Download docs-starter repo as tarball
                 sendEvent({

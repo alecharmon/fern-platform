@@ -1,6 +1,7 @@
 "use server";
 
 import { fernToken_admin } from "@fern-api/docs-server";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
@@ -13,7 +14,7 @@ export async function checkDocsUrlAvailability(domainPrefix: string): Promise<{
         const session = await getCurrentSessionOrThrow();
         const decodedUrl = decodeURIComponent(domainPrefix);
 
-        const url = `${decodedUrl}.docs.buildwithfern.com`;
+        const url = `${decodedUrl}.${fernCliConfig.docsDomain}`;
         const docsMetadata = await getDocsUrlMetadata({
             url: parseDocsUrlParam({ docsUrl: url }),
             token: fernToken_admin() ?? session.accessToken

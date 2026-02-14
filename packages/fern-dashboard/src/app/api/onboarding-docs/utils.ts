@@ -1,6 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
 import type { OnboardingDocsRequest } from "./types";
@@ -115,10 +116,9 @@ export async function createFernProject(
     // This function assumes the docs-starter repo has been cloned to tempDir
     const fernDir = path.join(tempDir, "fern");
 
-    // Ensure URL has .docs.buildwithfern.com suffix
-    const fullUrl = data.docsSiteUrl.includes(".docs.buildwithfern.com")
+    const fullUrl = data.docsSiteUrl.includes(`.${fernCliConfig.docsDomain}`)
         ? data.docsSiteUrl
-        : `${data.docsSiteUrl}.docs.buildwithfern.com`;
+        : `${data.docsSiteUrl}.${fernCliConfig.docsDomain}`;
 
     // Replace placeholders in fern.config.json (from docs-starter default: "plantstore")
     await replaceInFile(path.join(fernDir, "fern.config.json"), {
@@ -127,7 +127,7 @@ export async function createFernProject(
 
     // Replace placeholders in docs.yml
     const docsYmlReplacements: Record<string, string> = {
-        "plantstore.docs.buildwithfern.com": fullUrl,
+        [`plantstore.${fernCliConfig.docsDomain}`]: fullUrl,
         "Plant Store": data.docsSiteName
     };
     await replaceInFile(path.join(fernDir, "docs.yml"), docsYmlReplacements);

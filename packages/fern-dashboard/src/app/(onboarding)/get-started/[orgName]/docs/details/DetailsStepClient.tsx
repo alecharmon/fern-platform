@@ -14,6 +14,7 @@ import { SlideDownTransition } from "@/components/transitions/SlideDownTransitio
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useOnboarding, type WizardFormData } from "@/providers/OnboardingProvider";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { saveOnboardingFormData, saveOnboardingSession, saveSitePublishUrl } from "@/utils/onboardingSession";
 import { generateRandomHash } from "@/utils/organization";
 
@@ -34,7 +35,7 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
     const hasSiteTitle = formData.docsSiteName.trim().length > 0;
     const generatedDocsUrl = hasSiteTitle ? nameToUrl(formData.docsSiteName) : "";
     const displayDocsUrl = hasSiteTitle ? formData.docsSiteUrl || generatedDocsUrl : "";
-    const docsDomainSuffix = ".docs.buildwithfern.com";
+    const docsDomainSuffix = `.${fernCliConfig.docsDomain}`;
     const formattedDocsUrl =
         displayDocsUrl.length > 0
             ? `${displayDocsUrl.includes(docsDomainSuffix) ? displayDocsUrl : `${displayDocsUrl}${docsDomainSuffix}`}`
@@ -83,9 +84,9 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
         saveOnboardingFormData(formData);
 
         // Save expected docs URL
-        const expectedDocsUrl = formData.docsSiteUrl.includes(".docs.buildwithfern.com")
+        const expectedDocsUrl = formData.docsSiteUrl.includes(docsDomainSuffix)
             ? `https://${formData.docsSiteUrl}`
-            : `https://${formData.docsSiteUrl}.docs.buildwithfern.com`;
+            : `https://${formData.docsSiteUrl}${docsDomainSuffix}`;
         saveSitePublishUrl(expectedDocsUrl);
 
         // Save onboarding session for PublishingStepClient
@@ -94,7 +95,7 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
 
         // Navigate immediately - publishing page handles async work
         setStep("publishing");
-    }, [formData, posthog, validateForm, validationErrors, setStep, organizationId]);
+    }, [formData, posthog, validateForm, validationErrors, setStep, organizationId, docsDomainSuffix]);
 
     const handleLogoUpload = useCallback(
         (file: File) => {

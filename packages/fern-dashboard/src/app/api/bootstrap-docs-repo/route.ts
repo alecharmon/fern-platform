@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { stringifyYaml } from "@/utils/yaml";
 
 const BootstrapDocsRepoRequest = z.object({
@@ -48,7 +49,7 @@ function createDocsYmlContent(organizationName: string, marketingSite?: string):
     const config: Record<string, unknown> = {
         instances: [
             {
-                url: `https://${organizationName}.docs.buildwithfern.com`
+                url: `https://${organizationName}.${fernCliConfig.docsDomain}`
             }
         ],
         title: `${organizationName.charAt(0).toUpperCase() + organizationName.slice(1)} | Documentation`,

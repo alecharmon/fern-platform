@@ -10,6 +10,7 @@ import { finished } from "stream/promises";
 import unzipper from "unzipper";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import postGitRepository from "@/app/services/dal/github/postGitRepository";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 
 export interface PublishToGithubRequest {
     orgName: Auth0OrgName;
@@ -124,7 +125,7 @@ export default async function handler(data: PublishToGithubRequest): Promise<
             description: `Fern documentation for ${data.docsSiteName}`,
             isPrivate: true,
             files,
-            site: `${data.docsSiteUrl}.docs.buildwithfern.com`
+            site: `${data.docsSiteUrl}.${fernCliConfig.docsDomain}`
         });
 
         if (!githubResult.success) {

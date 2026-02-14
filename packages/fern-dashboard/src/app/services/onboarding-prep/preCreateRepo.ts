@@ -6,6 +6,7 @@ import * as path from "node:path";
 
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisGet, redisSet } from "@/app/services/redis/redis";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { getDemoCreationBotOctokit } from "../auth0/fernBotOctokit";
 import { setFernTokenSecret } from "../dal/github/setFernTokenSecret";
 import { triggerWorkflow } from "../dal/github/triggerWorkflow";
@@ -104,7 +105,7 @@ export async function preCreateRepo(params: PreCreateRepoParams): Promise<PreCre
         const baseRepoName = orgName.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
 
         // Generate docs URL from org name
-        const docsUrl = `${baseRepoName}.docs.buildwithfern.com`;
+        const docsUrl = `${baseRepoName}.${fernCliConfig.docsDomain}`;
 
         // Create temp dir with full fern structure for token generation
         // (fern token requires docs.yml to exist)

@@ -9,6 +9,7 @@ import { updateRepository } from "@/app/services/dal/github/updateRepository";
 import { getGitLoader } from "@/app/services/github/getGitLoader";
 import { DEFAULT_SPECS } from "@/components/onboarding/constants";
 import { getDocsStarterTemplateFiles } from "@/templates/docs-starter";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
 export const runtime = "nodejs";
@@ -259,10 +260,9 @@ async function customizeBasicTemplate(
     fernConfig.organization = data.orgName;
     await fs.writeFile(fernConfigPath, JSON.stringify(fernConfig, null, 2));
 
-    // Ensure URL has .docs.buildwithfern.com suffix
-    const fullUrl = data.docsSiteUrl.includes(".docs.buildwithfern.com")
+    const fullUrl = data.docsSiteUrl.includes(`.${fernCliConfig.docsDomain}`)
         ? data.docsSiteUrl
-        : `${data.docsSiteUrl}.docs.buildwithfern.com`;
+        : `${data.docsSiteUrl}.${fernCliConfig.docsDomain}`;
 
     // Load and update docs.yml
     const docsYmlPath = path.join(fernDir, "docs.yml");
@@ -561,7 +561,7 @@ async function ensureRepoExists(
             JSON.stringify({ organization: orgName, version: "*" }, null, 2)
         );
 
-        const docsUrl = `${repoName}.docs.buildwithfern.com`;
+        const docsUrl = `${repoName}.${fernCliConfig.docsDomain}`;
         await fs.writeFile(path.join(fernDir, "docs.yml"), `instances:\n  - url: ${docsUrl}\n\ntitle: Documentation\n`);
 
         await setFernTokenSecret({
@@ -683,9 +683,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ rep
             }
         }
 
-        const normalizedDocsUrl = data.docsSiteUrl.includes(".docs.buildwithfern.com")
+        const normalizedDocsUrl = data.docsSiteUrl.includes(`.${fernCliConfig.docsDomain}`)
             ? data.docsSiteUrl
-            : `${data.docsSiteUrl}.docs.buildwithfern.com`;
+            : `${data.docsSiteUrl}.${fernCliConfig.docsDomain}`;
 
         return NextResponse.json({
             success: true,

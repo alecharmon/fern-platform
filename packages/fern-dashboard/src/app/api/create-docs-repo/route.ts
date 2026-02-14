@@ -8,6 +8,7 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getUserGithubUsername } from "@/app/services/auth0/management";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import postGitRepository from "@/app/services/dal/github/postGitRepository";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
 export const runtime = "nodejs";
@@ -235,9 +236,9 @@ async function customizeTemplate(data: CreateDocsRepoRequest, projectDir: string
     }
     // Replace or add the first instance with the correct URL
     if (docsConfigAny.instances.length > 0) {
-        docsConfigAny.instances[0].url = `${data.urlPrefix}.docs.buildwithfern.com`;
+        docsConfigAny.instances[0].url = `${data.urlPrefix}.${fernCliConfig.docsDomain}`;
     } else {
-        docsConfigAny.instances.push({ url: `${data.urlPrefix}.docs.buildwithfern.com` });
+        docsConfigAny.instances.push({ url: `${data.urlPrefix}.${fernCliConfig.docsDomain}` });
     }
 
     // Set title if company name is provided
@@ -424,9 +425,9 @@ async function writeSiteToDocsFiles(
             docsConfig.instances = [];
         }
         if (docsConfig.instances.length > 0) {
-            docsConfig.instances[0].url = `${urlPrefix}.docs.buildwithfern.com`;
+            docsConfig.instances[0].url = `${urlPrefix}.${fernCliConfig.docsDomain}`;
         } else {
-            docsConfig.instances.push({ url: `${urlPrefix}.docs.buildwithfern.com` });
+            docsConfig.instances.push({ url: `${urlPrefix}.${fernCliConfig.docsDomain}` });
         }
 
         await fs.writeFile(docsYmlPath, stringifyYaml(docsConfig, { schemaUrl: YAML_SCHEMAS.DOCS_YML }));

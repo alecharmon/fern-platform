@@ -5,6 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { setFernTokenSecret } from "@/app/services/dal/github/setFernTokenSecret";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
         );
 
         const baseRepoName = orgName.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
-        const docsUrl = `${baseRepoName}.docs.buildwithfern.com`;
+        const docsUrl = `${baseRepoName}.${fernCliConfig.docsDomain}`;
         await fs.writeFile(path.join(fernDir, "docs.yml"), `instances:\n  - url: ${docsUrl}\n\ntitle: Documentation\n`);
 
         console.log(`[retry-workflow] Resetting FERN_TOKEN for ${owner}/${repoName}`);

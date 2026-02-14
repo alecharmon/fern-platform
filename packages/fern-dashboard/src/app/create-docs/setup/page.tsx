@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useInvalidateOrganizations, useOrganizations } from "@/state/useOrganizations";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { CreateOrganizationModalInline } from "./CreateOrganizationModalInline";
 
 interface DocsCustomization {
@@ -270,7 +271,7 @@ export default function SetupPage() {
                                     repo: result.githubRepoUrl,
                                     repoName: result.repoName,
                                     collaboratorAdded: String(result.collaboratorAdded),
-                                    siteUrl: `${urlPrefix}.docs.buildwithfern.com`,
+                                    siteUrl: `${urlPrefix}.${fernCliConfig.docsDomain}`,
                                     fernTokenSet: String(result.fernTokenSet ?? false),
                                     orgName: selectedOrgName
                                 });
@@ -400,7 +401,7 @@ export default function SetupPage() {
                                         className="flex-1"
                                     />
                                     <span className="flex items-center gap-2 whitespace-nowrap text-sm text-text-description">
-                                        .docs.buildwithfern.com
+                                        {`.${fernCliConfig.docsDomain}`}
                                         {isCheckingUrl && <Loader2 className="h-4 w-4 animate-spin text-gray-500" />}
                                         {!isCheckingUrl && isUrlAvailable === false && (
                                             <X className="h-4 w-4 text-red-500" />

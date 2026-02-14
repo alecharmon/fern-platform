@@ -9,6 +9,7 @@ import { getGitLoader } from "@/app/services/github/getGitLoader";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisSet } from "@/app/services/redis/redis";
 import { getDocsStarterTemplateFiles, type TemplateFile } from "@/templates/docs-starter";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -134,7 +135,7 @@ export async function POST(req: NextRequest) {
 
         // Generate a temporary docs.yml for token generation
         const baseRepoName = data.orgName.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
-        const docsUrl = `${baseRepoName}.docs.buildwithfern.com`;
+        const docsUrl = `${baseRepoName}.${fernCliConfig.docsDomain}`;
         await fs.writeFile(path.join(fernDir, "docs.yml"), `instances:\n  - url: ${docsUrl}\n\ntitle: Documentation\n`);
 
         // Find an available repo name

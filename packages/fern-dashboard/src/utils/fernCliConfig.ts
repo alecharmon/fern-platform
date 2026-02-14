@@ -8,18 +8,21 @@
 interface FernCliConfig {
     npmPackage: string;
     cliCommand: string;
+    docsDomain: string;
 }
 
 function getFernCliConfig(): FernCliConfig {
     if (process.env.FERN_CLI_ENV === "dev") {
         return {
             npmPackage: "@fern-api/fern-api-dev",
-            cliCommand: "fern-dev"
+            cliCommand: "fern-dev",
+            docsDomain: "dev.docs.buildwithfern.com"
         };
     }
     return {
         npmPackage: "fern-api",
-        cliCommand: "fern"
+        cliCommand: "fern",
+        docsDomain: "docs.buildwithfern.com"
     };
 }
 

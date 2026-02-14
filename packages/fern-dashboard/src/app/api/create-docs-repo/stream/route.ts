@@ -8,6 +8,7 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getUserGithubUsername } from "@/app/services/auth0/management";
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import postGitRepository from "@/app/services/dal/github/postGitRepository";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
 export const runtime = "nodejs";
@@ -234,9 +235,9 @@ export async function POST(req: NextRequest) {
                             docsConfig.instances = [];
                         }
                         if (docsConfig.instances.length > 0) {
-                            docsConfig.instances[0]!.url = `${data.urlPrefix}.docs.buildwithfern.com`;
+                            docsConfig.instances[0]!.url = `${data.urlPrefix}.${fernCliConfig.docsDomain}`;
                         } else {
-                            docsConfig.instances.push({ url: `${data.urlPrefix}.docs.buildwithfern.com` });
+                            docsConfig.instances.push({ url: `${data.urlPrefix}.${fernCliConfig.docsDomain}` });
                         }
                         await fs.writeFile(
                             docsYmlPath,
@@ -297,9 +298,9 @@ export async function POST(req: NextRequest) {
                         docsConfig.instances = [];
                     }
                     if (docsConfig.instances.length > 0) {
-                        docsConfig.instances[0].url = `${data.urlPrefix}.docs.buildwithfern.com`;
+                        docsConfig.instances[0].url = `${data.urlPrefix}.${fernCliConfig.docsDomain}`;
                     } else {
-                        docsConfig.instances.push({ url: `${data.urlPrefix}.docs.buildwithfern.com` });
+                        docsConfig.instances.push({ url: `${data.urlPrefix}.${fernCliConfig.docsDomain}` });
                     }
 
                     if (data.companyName) {
@@ -434,7 +435,7 @@ jobs:
                 const description =
                     sourceType === "site-to-docs" && data.sourceUrl
                         ? `Fern documentation imported from ${data.sourceUrl}`
-                        : `Fern documentation for ${data.urlPrefix}.docs.buildwithfern.com`;
+                        : `Fern documentation for ${data.urlPrefix}.${fernCliConfig.docsDomain}`;
 
                 const result = await postGitRepository({
                     orgName: Auth0OrgName(data.orgName),
@@ -443,7 +444,7 @@ jobs:
                     description,
                     isPrivate: true,
                     files,
-                    site: `${data.urlPrefix}.docs.buildwithfern.com`,
+                    site: `${data.urlPrefix}.${fernCliConfig.docsDomain}`,
                     setFernToken: { workingDir: projectDir, fernToken: session.accessToken }
                 });
 
