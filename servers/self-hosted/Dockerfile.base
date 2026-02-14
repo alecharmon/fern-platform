@@ -176,6 +176,15 @@ RUN log "Installing esbuild..." && \
     npm-real i -g esbuild@0.27.0 --ignore-scripts 2>&1 | add-timestamps
 # ----------- End esbuild setup -----------
 
+# ----------- Start Bun setup -----------
+# Install Bun for running TypeScript directly (used by cache proxy to skip TS compilation)
+RUN log "Installing Bun..." && \
+    apk add --no-cache unzip 2>&1 | add-timestamps && \
+    export BUN_INSTALL=/usr/local && curl -fsSL https://bun.sh/install | bash 2>&1 | add-timestamps && \
+    chmod 755 /usr/local/bin/bun && \
+    bun --version 2>&1 | add-timestamps
+# ----------- End Bun setup -----------
+
 # ----------- Start npm vulnerability patches preparation -----------
 # Prepare patches for glob, brace-expansion, and tar vulnerabilities
 # These patches will be applied by Dockerfile.self_hosted to all directories
