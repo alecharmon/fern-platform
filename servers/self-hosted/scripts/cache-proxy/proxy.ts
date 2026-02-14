@@ -8,7 +8,7 @@ import { URL } from "url";
 import { getTTLFromHeaders, isCacheable, setCdnCacheHeaders } from "./cache-utils";
 import { BACKEND_HOST, BACKEND_PORT, DEFAULT_TTL, MAX_CACHE_ENTRY_SIZE, PROXY_PORT } from "./config";
 import { debug, log } from "./logger";
-import { cache } from "./lru-cache";
+import { cache, getCacheStatsHeaders } from "./lru-cache";
 
 /**
  * Proxy request to the backend Next.js server.
@@ -55,8 +55,9 @@ export function proxyRequest(req: http.IncomingMessage, res: http.ServerResponse
         // Set CDN-friendly cache headers for cacheable responses
         const responseHeaders = setCdnCacheHeaders(headers, !!shouldCache);
 
+        const statsHeaders = getCacheStatsHeaders();
+
         if (shouldCache) {
-            // Collect response body for caching
             const chunks: Buffer[] = [];
             let totalSize = 0;
 
@@ -79,12 +80,14 @@ export function proxyRequest(req: http.IncomingMessage, res: http.ServerResponse
                 }
             });
 
-            // Stream response to client with CDN-friendly headers
-            res.writeHead(statusCode, responseHeaders);
+            res.writeHead(statusCode, { ...responseHeaders, "x-cache": "MISS", ...statsHeaders });
             proxyRes.pipe(res);
         } else {
-            // Stream directly without caching
-            res.writeHead(statusCode, headers);
+            const bypassHeaders = { ...headers, "x-cache": "BYPASS", ...statsHeaders };
+            if (statusCode === 200 && (req.url?.includes("/_files/") || req.url?.endsWith("/favicon.ico"))) {
+                bypassHeaders["cache-control"] = "public, max-age=31536000, immutable";
+            }
+            res.writeHead(statusCode, bypassHeaders);
             proxyRes.pipe(res);
         }
     });

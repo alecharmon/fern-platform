@@ -106,4 +106,13 @@ export class LRUCache {
     }
 }
 
+export function getCacheStatsHeaders(): Record<string, string> {
+    const stats = cache.stats();
+    return {
+        "x-cache-size": stats.size.toString(),
+        "x-cache-max-size": stats.maxSize.toString(),
+        "x-cache-hit-rate": stats.hitRate
+    };
+}
+
 export const cache = new LRUCache(MAX_CACHE_SIZE);

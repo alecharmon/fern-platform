@@ -817,11 +817,16 @@ fi
 # Run in background - container is ready immediately, warmup is a performance optimization
 # Warmup is disabled by default, set WARMUP=true to enable
 
-if [ "${WARMUP:-false}" = "true" ]; then
-    log "Starting cache warmup in background (this may take a few minutes)..."
-    bash /scripts/warmup.sh 2>&1 | add_timestamps &
+WARMUP_DEFAULT="false"
+if [ "$USE_SEEDED_DATA" = "true" ]; then
+    WARMUP_DEFAULT="true"
+fi
+
+if [ "${WARMUP:-$WARMUP_DEFAULT}" = "true" ]; then
+    log "Starting cache warmup in background (gentle pacing, minimal CPU usage)..."
+    nice -n 19 bash /scripts/warmup.sh 2>&1 | add_timestamps &
     warmup_pid=$!
-    log "Warmup PID: $warmup_pid"
+    log "Warmup PID: $warmup_pid (nice 19 = lowest CPU priority)"
     log "Warmup running in background - container is ready for traffic"
 else
     log "Skipping cache warmup (WARMUP not set to true)"

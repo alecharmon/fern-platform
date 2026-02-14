@@ -36,7 +36,7 @@ import {
 import { handleCorsPreflightProxy, handleCorsProxy, handleWebSocketUpgrade } from "./cors-proxy";
 import { getRootDomain } from "./domain-utils";
 import { debug, log } from "./logger";
-import { cache } from "./lru-cache";
+import { cache, getCacheStatsHeaders } from "./lru-cache";
 import { handleCacheControl, proxyRequest } from "./proxy";
 import { handleTestLogin } from "./test-login";
 
@@ -80,11 +80,11 @@ function handleRequest(req: http.IncomingMessage, res: http.ServerResponse): voi
             const age = Math.floor((Date.now() - cached.cachedAt) / 1000);
             debug(`[${reqType}] HIT  ${url} (age: ${age}s, key: ${cacheKey})`);
 
-            // Add cache headers
             const headers = {
                 ...cached.headers,
                 "x-cache": "HIT",
-                "x-cache-age": age.toString()
+                "x-cache-age": age.toString(),
+                ...getCacheStatsHeaders()
             };
 
             res.writeHead(cached.statusCode, headers);

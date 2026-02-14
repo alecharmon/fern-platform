@@ -15,6 +15,9 @@ WARMUP_ROUTES_FILE="/tmp/warmup-routes.txt"
 BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}"
 DOCS_URL="http://localhost:3000${BASE_PATH}"
 TIMEOUT=${WARMUP_TIMEOUT:-5}
+WARMUP_DELAY=${WARMUP_DELAY:-0.5}
+WARMUP_BATCH_SIZE=${WARMUP_BATCH_SIZE:-5}
+WARMUP_BATCH_PAUSE=${WARMUP_BATCH_PAUSE:-2}
 
 # Remove any existing warmup complete flag
 rm -f "$WARMUP_FILE"
@@ -81,7 +84,32 @@ else
     fi
 fi
 
-# Count routes
+# Count routes before filtering
+ALL_ROUTE_COUNT=$(wc -l < "$WARMUP_ROUTES_FILE" 2>/dev/null | tr -d ' ')
+log "Found $ALL_ROUTE_COUNT total routes from sitemap"
+
+# Filter out non-default version routes (only warm the latest version)
+VERSION_PREFIXES_FILE="/tmp/warmup-version-prefixes.txt"
+log "Detecting API version prefixes..."
+node /scripts/get-version-prefixes.js > "$VERSION_PREFIXES_FILE" 2>/dev/null || true
+
+if [ -s "$VERSION_PREFIXES_FILE" ]; then
+    FILTERED_FILE="/tmp/warmup-routes-filtered.txt"
+    cp "$WARMUP_ROUTES_FILE" "$FILTERED_FILE"
+    while IFS= read -r prefix; do
+        [ -z "$prefix" ] && continue
+        FULL_PREFIX="${BASE_PATH}/${prefix}"
+        log "  Excluding version prefix: $FULL_PREFIX"
+        grep -v "^${FULL_PREFIX}/" "$FILTERED_FILE" | grep -v "^${FULL_PREFIX}$" > "$FILTERED_FILE.tmp" || true
+        mv "$FILTERED_FILE.tmp" "$FILTERED_FILE"
+    done < "$VERSION_PREFIXES_FILE"
+    mv "$FILTERED_FILE" "$WARMUP_ROUTES_FILE"
+    FILTERED_COUNT=$(wc -l < "$WARMUP_ROUTES_FILE" 2>/dev/null | tr -d ' ')
+    log "Filtered to $FILTERED_COUNT routes (skipped $((ALL_ROUTE_COUNT - FILTERED_COUNT)) non-default version routes)"
+else
+    log "No version prefixes found (unversioned site or single version)"
+fi
+
 ROUTE_COUNT=$(wc -l < "$WARMUP_ROUTES_FILE" 2>/dev/null | tr -d ' ')
 
 if [ "$ROUTE_COUNT" -eq 0 ]; then
@@ -90,9 +118,9 @@ if [ "$ROUTE_COUNT" -eq 0 ]; then
     ROUTE_COUNT=1
 fi
 
-log "Found $ROUTE_COUNT routes to warm up"
+log "Warming $ROUTE_COUNT routes"
+log "Warmup settings: delay=${WARMUP_DELAY}s, batch_size=${WARMUP_BATCH_SIZE}, batch_pause=${WARMUP_BATCH_PAUSE}s"
 
-# Display first few routes for debugging
 log "Sample routes:"
 head -5 "$WARMUP_ROUTES_FILE" | while read -r path; do
     log "  - $path"
@@ -101,7 +129,6 @@ if [ "$ROUTE_COUNT" -gt 5 ]; then
     log "  ... and $((ROUTE_COUNT - 5)) more"
 fi
 
-# Warm up each route (both HTML and RSC payloads)
 # The cache proxy caches HTML and RSC responses separately (cache key includes "rsc" header).
 # RSC (React Server Component) payloads are what Next.js returns for client-side navigations,
 # so warming them ensures instant page transitions for the first user.
@@ -110,17 +137,14 @@ FAILED=0
 RSC_WARMED=0
 RSC_FAILED=0
 START_TIME=$(date +%s)
+BATCH_COUNT=0
 
-# Process routes sequentially
-log "Warming up cache (HTML + RSC)..."
+log "Warming up cache (HTML + RSC) with gentle pacing..."
 
 while IFS= read -r path; do
     [ -z "$path" ] && continue
     
-    # Build full URL (same as revalidate: origin + path)
     FULL_URL="http://localhost:3000${path}"
-    
-    log "Warming: $FULL_URL"
     
     # --- HTML warmup ---
     ANY_SUCCESS=false
@@ -133,10 +157,8 @@ while IFS= read -r path; do
             "$FULL_URL" 2>/dev/null || echo "000")
         
         if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 400 ]; then
-            log "  [HTML] OK ($HTTP_STATUS) with x-fern-host: $try_domain"
             ANY_SUCCESS=true
-        else
-            log "  [HTML] FAILED ($HTTP_STATUS) with x-fern-host: $try_domain"
+            break
         fi
     done
     
@@ -145,6 +167,9 @@ while IFS= read -r path; do
     else
         FAILED=$((FAILED + 1))
     fi
+
+    # Delay between HTML and RSC request
+    sleep "$WARMUP_DELAY"
 
     # --- RSC warmup ---
     # Send "RSC: 1" header to trigger an RSC response (text/x-component) from Next.js.
@@ -161,10 +186,8 @@ while IFS= read -r path; do
             "$FULL_URL" 2>/dev/null || echo "000")
         
         if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 400 ]; then
-            log "  [RSC]  OK ($HTTP_STATUS) with x-fern-host: $try_domain"
             ANY_RSC_SUCCESS=true
-        else
-            log "  [RSC]  FAILED ($HTTP_STATUS) with x-fern-host: $try_domain"
+            break
         fi
     done
     
@@ -174,10 +197,16 @@ while IFS= read -r path; do
         RSC_FAILED=$((RSC_FAILED + 1))
     fi
     
-    # Progress update every 10 routes
+    BATCH_COUNT=$((BATCH_COUNT + 1))
     TOTAL=$((WARMED + FAILED))
-    if [ $((TOTAL % 10)) -eq 0 ] && [ $TOTAL -gt 0 ]; then
+
+    # Delay between each route
+    sleep "$WARMUP_DELAY"
+
+    # Longer pause after each batch to let the container breathe
+    if [ $((BATCH_COUNT % WARMUP_BATCH_SIZE)) -eq 0 ]; then
         log "Progress: $TOTAL/$ROUTE_COUNT (HTML: $WARMED ok/$FAILED fail, RSC: $RSC_WARMED ok/$RSC_FAILED fail)"
+        sleep "$WARMUP_BATCH_PAUSE"
     fi
 done < "$WARMUP_ROUTES_FILE"
 

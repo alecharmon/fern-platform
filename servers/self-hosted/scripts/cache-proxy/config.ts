@@ -8,7 +8,7 @@ export const BACKEND_PORT = parseInt(process.env.NEXTJS_PORT || "3001", 10);
 export const BACKEND_HOST = process.env.NEXTJS_HOST || "127.0.0.1";
 
 // Cache sizing
-export const MAX_CACHE_SIZE = parseInt(process.env.CACHE_MAX_ENTRIES || "1000", 10);
+export const MAX_CACHE_SIZE = parseInt(process.env.CACHE_MAX_ENTRIES || "3000", 10);
 export const MAX_CACHE_ENTRY_SIZE = parseInt(process.env.CACHE_MAX_ENTRY_SIZE || "5242880", 10); // 5MB default
 export const DEFAULT_TTL = parseInt(process.env.CACHE_DEFAULT_TTL || "2592000", 10); // 30 days default
 export const CACHE_DISABLED = process.env.CACHE_DISABLED === "1" || process.env.CACHE_DISABLED === "true";
@@ -47,18 +47,7 @@ export const EVERYONE_ROLE = "everyone";
 
 // Paths that should never be cached
 // These patterns are checked using includes() for flexibility
-export const EXCLUDED_PATHS = [
-    "/_search/", // MeiliSearch requests need fresh results
-    "/_next/static/", // Static assets - browsers cache these with immutable headers
-    "/_next/image", // Image optimization - browsers handle caching
-    "/api/fern-docs/search/v2/facet", // Search facets need fresh results with query params
-    "/api/fern-docs/search/v2/key" // Search API keys should not be cached
-];
+export const EXCLUDED_PATHS = ["/_search/", "/_next/static/", "/_next/image", "/api/fern-docs/", "/_files/"];
 
 // Paths that should be excluded unless they match an exception
-export const EXCLUDED_PATHS_WITH_EXCEPTIONS = [
-    {
-        pattern: "/api/",
-        exceptions: ["/api/fern-docs/favicon"]
-    }
-];
+export const EXCLUDED_PATHS_WITH_EXCEPTIONS: { pattern: string; exceptions: string[] }[] = [];
