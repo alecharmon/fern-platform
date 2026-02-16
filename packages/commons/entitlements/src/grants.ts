@@ -11,11 +11,13 @@ export const SKU_GRANTS: Record<string, EntitlementGrant[]> = {
     ],
     "2025-02-05:docs-team": [
         { key: "seats", type: "quantity", limit: 5 },
-        { key: "docs_sites", type: "quantity", limit: 1 }
+        { key: "docs_sites", type: "quantity", limit: 1 },
+        { key: "custom_domain_subpath", type: "boolean", enabled: true }
     ],
     "legacy:custom-enterprise": [
         { key: "seats", type: "quantity", limit: Infinity },
-        { key: "docs_sites", type: "quantity", limit: Infinity }
+        { key: "docs_sites", type: "quantity", limit: Infinity },
+        { key: "custom_domain_subpath", type: "boolean", enabled: true }
     ],
     addon_extra_seats: [{ key: "seats", type: "quantity", limit: 1 }]
 };

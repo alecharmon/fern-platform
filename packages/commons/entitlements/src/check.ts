@@ -3,7 +3,9 @@ import {
     ENTITLEMENT_DEFINITIONS,
     type EntitlementCheckResult,
     type EntitlementDefinition,
-    type EntitlementKey
+    type EntitlementKey,
+    isNumericEntitlementKey,
+    type NumericEntitlementKey
 } from "./types";
 import type { UsageCache } from "./usage/cache";
 import type { UsageProvider } from "./usage/provider";
@@ -123,6 +125,11 @@ class EntitlementsCheckerImpl {
             return { entitled: true, type: "boolean" };
         }
 
+        // Use type guard to narrow key to NumericEntitlementKey
+        if (!isNumericEntitlementKey(key)) {
+            return { entitled: false, reason: `Unexpected entitlement type for ${key}` };
+        }
+
         const usage = await this.getUsage(orgId, key);
         // Widen to the full union so TypeScript doesn't narrow out future types
         // (current definitions are all "quantity", but "metered" may be added later).
@@ -164,7 +171,7 @@ class EntitlementsCheckerImpl {
         return this.usageCache.reset(orgId);
     }
 
-    private async getUsage(orgId: string, key: EntitlementKey): Promise<number> {
+    private async getUsage(orgId: string, key: NumericEntitlementKey): Promise<number> {
         const cached = await this.usageCache.get(orgId, key, this.staleTtlMs);
         if (cached !== null) {
             return cached;

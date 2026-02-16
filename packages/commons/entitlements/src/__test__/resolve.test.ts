@@ -41,4 +41,24 @@ describe("resolveEntitlements", () => {
         const resolved = resolveEntitlements(["plan_free", "legacy:custom-enterprise"]);
         expect(resolved.docs_sites).toEqual({ type: "quantity", limit: Infinity });
     });
+
+    it("resolves custom_domain_subpath for docs-team (Pro)", () => {
+        const resolved = resolveEntitlements(["2025-02-05:docs-team"]);
+        expect(resolved.custom_domain_subpath).toEqual({ type: "boolean", enabled: true });
+    });
+
+    it("resolves custom_domain_subpath for legacy:custom-enterprise", () => {
+        const resolved = resolveEntitlements(["legacy:custom-enterprise"]);
+        expect(resolved.custom_domain_subpath).toEqual({ type: "boolean", enabled: true });
+    });
+
+    it("does not resolve custom_domain_subpath for plan_free", () => {
+        const resolved = resolveEntitlements(["plan_free"]);
+        expect(resolved.custom_domain_subpath).toBeUndefined();
+    });
+
+    it("does not resolve custom_domain_subpath for empty/unknown SKUs (free fallback)", () => {
+        const resolved = resolveEntitlements([]);
+        expect(resolved.custom_domain_subpath).toBeUndefined();
+    });
 });

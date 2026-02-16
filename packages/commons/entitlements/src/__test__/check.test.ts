@@ -104,6 +104,48 @@ describe("EntitlementsChecker", () => {
         expect(provider.getCurrentUsage).not.toHaveBeenCalled();
     });
 
+    it("returns entitled for boolean entitlement (Pro plan, subpath)", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({}),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "custom_domain_subpath");
+        expect(result).toEqual({
+            entitled: true,
+            type: "boolean"
+        });
+    });
+
+    it("returns not entitled for boolean entitlement (free plan, subpath)", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["plan_free"],
+            usageProvider: mockUsageProvider({}),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "custom_domain_subpath");
+        expect(result).toEqual({
+            entitled: false,
+            reason: "No active entitlement for custom_domain_subpath"
+        });
+    });
+
+    it("returns not entitled for boolean entitlement (no SKUs / free fallback, subpath)", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => [],
+            usageProvider: mockUsageProvider({}),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "custom_domain_subpath");
+        expect(result).toEqual({
+            entitled: false,
+            reason: "No active entitlement for custom_domain_subpath"
+        });
+    });
+
     it("falls back to provider when cache misses and writes through", async () => {
         const provider = mockUsageProvider({ seats: 3 });
         const cache = mockUsageCache(); // empty cache
@@ -201,6 +243,28 @@ describe("EntitlementChecker (.for())", () => {
 
         const seats = checker.for("org-1", "seats");
         expect(await seats.used()).toBe(4);
+    });
+
+    it("isEntitled returns true for boolean entitlement on Pro plan", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({}),
+            usageCache: mockUsageCache()
+        });
+
+        const subpath = checker.for("org-1", "custom_domain_subpath");
+        expect(await subpath.isEntitled()).toBe(true);
+    });
+
+    it("isEntitled returns false for boolean entitlement on free plan", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["plan_free"],
+            usageProvider: mockUsageProvider({}),
+            usageCache: mockUsageCache()
+        });
+
+        const subpath = checker.for("org-1", "custom_domain_subpath");
+        expect(await subpath.isEntitled()).toBe(false);
     });
 
     it("limit returns resolved limit", async () => {

@@ -1,4 +1,4 @@
-import type { EntitlementKey } from "../types";
+import type { NumericEntitlementKey } from "../types";
 import { getDocsSitesUsage } from "./docs-sites";
 import { getSeatsUsage } from "./seats";
 
@@ -8,10 +8,10 @@ import { getSeatsUsage } from "./seats";
  * it just knows the contract.
  */
 export interface UsageProvider {
-    getCurrentUsage(orgId: string, key: EntitlementKey): Promise<number>;
+    getCurrentUsage(orgId: string, key: NumericEntitlementKey): Promise<number>;
 }
 
-const usageHandlers: Record<EntitlementKey, (orgId: string) => Promise<number>> = {
+const usageHandlers: Record<NumericEntitlementKey, (orgId: string) => Promise<number>> = {
     seats: getSeatsUsage,
     docs_sites: getDocsSitesUsage
 };

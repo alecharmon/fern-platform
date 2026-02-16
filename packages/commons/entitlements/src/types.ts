@@ -25,13 +25,25 @@ export type EntitlementDefinition =
  */
 export const ENTITLEMENT_DEFINITIONS = {
     seats: { type: "quantity", key: "seats", merge: "sum" },
-    docs_sites: { type: "quantity", key: "docs_sites", merge: "sum" }
+    docs_sites: { type: "quantity", key: "docs_sites", merge: "sum" },
+    custom_domain_subpath: { type: "boolean", key: "custom_domain_subpath" }
     // TODO: implement ai_credits
     // ai_credits: { type: "metered", key: "ai_credits", merge: "max", overagePolicy: "hard_cap" }
 } as const satisfies Record<string, EntitlementDefinition>;
 
 /** Union of all valid entitlement keys, derived from definitions. */
 export type EntitlementKey = keyof typeof ENTITLEMENT_DEFINITIONS;
+
+/** All numeric entitlement keys */
+export type NumericEntitlementKey = {
+    [K in keyof typeof ENTITLEMENT_DEFINITIONS]: (typeof ENTITLEMENT_DEFINITIONS)[K] extends { type: "boolean" }
+        ? never
+        : K;
+}[keyof typeof ENTITLEMENT_DEFINITIONS];
+
+export function isNumericEntitlementKey(key: EntitlementKey): key is NumericEntitlementKey {
+    return ENTITLEMENT_DEFINITIONS[key].type !== "boolean";
+}
 
 // ---------------------------------------------------------------------------
 // Grants — what a SKU provides for a specific entitlement
