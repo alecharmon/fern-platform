@@ -1,5 +1,7 @@
 "use server";
 
+import { postToSlack } from "@fern-api/docs-server/slack";
+
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
@@ -10,6 +12,7 @@ import {
     getVerificationByDomain,
     updateVerificationStatus
 } from "@/app/services/domain";
+import { hasSubpath } from "@/app/services/domain/validation";
 
 export interface CheckSiteLivenessRequest {
     domain: string;
@@ -49,8 +52,18 @@ export async function checkSiteLiveness({
         });
 
         if (response.ok) {
-            // Site is live — mark as VERIFIED
+            const wasAlreadyVerified = verification.status === "VERIFIED";
             const updated = await updateVerificationStatus(verification.id, "VERIFIED");
+
+            if (!wasAlreadyVerified) {
+                const domainType = hasSubpath(domain) ? "subpath/proxy" : "subdomain";
+                postToSlack(
+                    "#dashboard-custom-domain-notifs",
+                    `*[${orgName}]* Custom domain added (${domainType}): *${domain}*\nUser: *<mailto:${session.user.email}|${session.user.email ?? "unknown"}>*`,
+                    "custom-domain"
+                );
+            }
+
             return { live: true, domainInfo: formatVerificationInfo(updated) };
         }
 

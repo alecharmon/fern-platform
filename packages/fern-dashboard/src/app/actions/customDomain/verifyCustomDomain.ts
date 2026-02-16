@@ -1,7 +1,5 @@
 "use server";
 
-import { postToSlack } from "@fern-api/docs-server/slack";
-
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
@@ -131,12 +129,6 @@ export async function verifyCustomDomain({
 
     if (isSubpathDomain) {
         // For subpath domains, we skip Vercel — user will configure their own proxy
-        postToSlack(
-            "#dashboard-custom-domain-notifs",
-            `*[${orgName}]* Custom domain added (subpath/proxy): *${verification.domain}*\nUser: *<mailto:${session.user.email}|${session.user.email ?? "unknown"}>*`,
-            "custom-domain"
-        );
-
         return {
             success: true,
             verified: true,
@@ -161,13 +153,6 @@ export async function verifyCustomDomain({
         verification.id,
         verification.status,
         vercelResult.domainId
-    );
-
-    // Send Slack notification for subdomain verification (DNS records verified)
-    postToSlack(
-        "#dashboard-custom-domain-notifs",
-        `*[${orgName}]* Custom domain added (subdomain): *${verification.domain}*\nUser: *<mailto:${session.user.email}|${session.user.email ?? "unknown"}>*`,
-        "custom-domain"
     );
 
     return {
