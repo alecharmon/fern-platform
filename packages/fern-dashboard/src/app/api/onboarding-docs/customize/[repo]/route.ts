@@ -400,24 +400,21 @@ async function prepareApiSpecFiles(
     // Download and prepare API spec files in separate folders
     for (const spec of data.openApiSpecUrls) {
         try {
+            console.log(`[customize] Fetching API spec: ${spec.fileName} from ${spec.assetUrl.substring(0, 80)}...`);
             const { content, format, specType, title } = await fetchApiSpec(spec.assetUrl);
             const apiName = toApiName(spec.fileName);
-            // Use title from spec if available, otherwise derive from filename
             const displayName = title || toDisplayName(apiName);
 
-            // Determine the spec filename based on type and format
             const specFileName =
                 specType === "asyncapi"
                     ? `asyncapi.${format === "json" ? "json" : "yml"}`
                     : `openapi.${format === "json" ? "json" : "yaml"}`;
 
-            // Add spec file to apis/{api-name}/
             files.push({
                 path: `fern/apis/${apiName}/${specFileName}`,
                 content
             });
 
-            // Add generators.yml for this API
             const generatorsYml = createSingleApiGeneratorsYml(specFileName, specType);
             files.push({
                 path: `fern/apis/${apiName}/generators.yml`,
@@ -425,8 +422,14 @@ async function prepareApiSpecFiles(
             });
 
             apiInfos.push({ apiName, displayName });
+            console.log(
+                `[customize] Successfully prepared spec: ${spec.fileName} -> apis/${apiName}/${specFileName} (${specType}, ${format})`
+            );
         } catch (error) {
-            console.error(`[customize] Failed to download API spec ${spec.fileName}:`, error);
+            console.error(
+                `[customize] Failed to download API spec ${spec.fileName} from ${spec.assetUrl.substring(0, 80)}:`,
+                error
+            );
         }
     }
 
@@ -665,7 +668,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ rep
         // Step 2: Add API specs in a second commit
         // If no specs provided, use defaults to ensure API reference is always available
         const specsToUse = data.openApiSpecUrls.length > 0 ? data.openApiSpecUrls : [...DEFAULT_SPECS];
+        console.log(
+            `[customize] API specs for ${repoName}: received ${data.openApiSpecUrls.length} specs, using ${specsToUse.length} specs`,
+            specsToUse.map((s) => ({ fileName: s.fileName, urlPrefix: s.assetUrl.substring(0, 60) }))
+        );
         const apiSpecFiles = await prepareApiSpecFiles({ ...data, openApiSpecUrls: specsToUse }, tempDir);
+
+        if (!apiSpecFiles) {
+            console.warn(
+                `[customize] prepareApiSpecFiles returned null for ${repoName} - all spec downloads may have failed`
+            );
+        }
 
         if (apiSpecFiles) {
             const apiUpdateResult = await updateRepository({

@@ -36,12 +36,19 @@ export function PublishingStepClient({ organizationId }: PublishingStepClientPro
     const storedFormData = getOnboardingFormData();
 
     // Merge: use provider data for File objects, stored data for other fields
+    // For openApiSpecUrls: prefer provider if non-empty, fall back to stored data
+    // (provider resets to [] on remount, but stored data preserves the uploaded URLs)
+    const providerSpecUrls = providerFormData?.openApiSpecUrls ?? [];
+    const storedSpecUrls = storedFormData?.openApiSpecUrls ?? [];
+    const mergedSpecUrls = providerSpecUrls.length > 0 ? providerSpecUrls : storedSpecUrls;
+
     const formData = providerFormData?.docsSiteName
         ? {
               ...storedFormData,
               ...providerFormData,
               // Ensure File objects from provider are used (not the empty arrays from storage)
               openApiSpecFiles: providerFormData.openApiSpecFiles ?? [],
+              openApiSpecUrls: mergedSpecUrls,
               logoFile: providerFormData.logoFile,
               faviconFile: providerFormData.faviconFile
           }

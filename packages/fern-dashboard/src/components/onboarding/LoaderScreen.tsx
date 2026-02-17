@@ -156,6 +156,10 @@ async function performCustomization(
 ): Promise<{ commitSha?: string; docsUrl?: string }> {
     // API spec URLs are already uploaded in the API spec step
     const uploadedSpecUrls = formData.openApiSpecUrls ?? [];
+    console.log(
+        `[performCustomization] openApiSpecUrls: ${uploadedSpecUrls.length} specs`,
+        uploadedSpecUrls.map((s) => s.fileName)
+    );
 
     // Convert logo/favicon to base64 (no S3 upload needed)
     let logoData: string | null = null;
