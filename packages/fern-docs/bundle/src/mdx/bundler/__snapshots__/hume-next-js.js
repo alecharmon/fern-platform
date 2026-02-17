@@ -147,6 +147,7 @@ var Component = (() => {
                 }), "."]
               }), (0, import_jsx_runtime.jsx)(ErrorBoundary, {
                 children: (0, import_jsx_runtime.jsxs)(StepGroup, {
+                  tocDepth: "3",
                   children: [(0, import_jsx_runtime.jsx)(ErrorBoundary, {
                     children: (0, import_jsx_runtime.jsx)(Step, {
                       title: "Prerequisites",
@@ -323,6 +324,7 @@ var Component = (() => {
                 }), "."]
               }), (0, import_jsx_runtime.jsx)(ErrorBoundary, {
                 children: (0, import_jsx_runtime.jsxs)(StepGroup, {
+                  tocDepth: "3",
                   children: [(0, import_jsx_runtime.jsx)(ErrorBoundary, {
                     children: (0, import_jsx_runtime.jsx)(Step, {
                       title: "Prerequisites",
