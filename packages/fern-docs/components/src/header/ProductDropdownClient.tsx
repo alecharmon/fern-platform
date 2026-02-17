@@ -56,7 +56,7 @@ export function ProductDropdownClient({
         <>
             {/* Desktop toggle layout - only rendered when toggle theme is enabled */}
             {isToggleTheme && (
-                <div className="fern-product-selector hidden lg:flex" data-testid="product-toggle">
+                <div className="fern-product-selector hidden lg:inline-flex" data-testid="product-toggle">
                     {products.map((product) => {
                         const productHref =
                             product.href ??

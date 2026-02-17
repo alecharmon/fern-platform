@@ -21,7 +21,6 @@ ${options.scopeSelector} [data-product-switcher-theme="toggle"] .fern-product-se
   padding: 4px;
   gap: 4px;
   height: 36px;
-  display: inline-flex;
   align-items: center;
 }
 
