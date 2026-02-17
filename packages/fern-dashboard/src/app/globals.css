@@ -961,3 +961,26 @@ code:not(.code-block):not(#preview-container *) {
     animation: none;
   }
 }
+
+/* Chrome Picker custom styling */
+.chrome-picker {
+  @apply p-2 pb-0 shadow-md! border border-border rounded-xl! flex flex-col items-center;
+  @apply flex flex-col items-center;
+
+  .saturation-white, .saturation-black {
+    @apply rounded-lg!;
+  }
+
+  svg {
+    @apply ml-2! -mt-2.5!;
+  }
+
+  input {
+    @apply font-normal border-border! focus-visible:ring-ring/30;
+  }
+}
+
+.chrome-picker > div:first-child {
+  height: 120px !important;
+  @apply rounded-lg! overflow-hidden!;
+}

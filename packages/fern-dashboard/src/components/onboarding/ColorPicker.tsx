@@ -75,7 +75,7 @@ export function ColorPicker({ label, color, onColorChange }: ColorPickerProps) {
 
                 {/* Color picker popover */}
                 {isPickerOpen && (
-                    <div ref={pickerRef} className="absolute bottom-24 left-0 z-50" style={{ zIndex: 1000 }}>
+                    <div ref={pickerRef} className="absolute bottom-22 left-0 z-50" style={{ zIndex: 1000 }}>
                         <ChromePicker color={currentColor ?? "#000000"} onChange={handleColorChange} disableAlpha />
                     </div>
                 )}
