@@ -27,6 +27,7 @@ export interface LoadDocsWithUrlResponse {
     pages: Record<FernNavigation.PageId, string>;
     apis: Record<ApiDefinition.ApiDefinitionId, ApiDefinition.ApiDefinition>;
     domain: string;
+    basepath: string | undefined;
 }
 
 export async function loadDocsWithUrl(payload: LoadDocsWithUrlPayload): Promise<LoadDocsWithUrlResponse> {
@@ -51,7 +52,9 @@ export async function loadDocsWithUrl(payload: LoadDocsWithUrlPayload): Promise<
     }
     const org_id = res.body;
 
-    const domain = new URL(withDefaultProtocol(payload.domain)).host;
+    const parsedUrl = new URL(withDefaultProtocol(payload.domain));
+    const domain = parsedUrl.host;
+    const basepath = parsedUrl.pathname !== "/" ? parsedUrl.pathname : undefined;
 
     const root = FernNavigation.utils.toRootNode(docs.body, payload.isBatchStreamToggleDisabled ?? false);
 
@@ -62,7 +65,7 @@ export async function loadDocsWithUrl(payload: LoadDocsWithUrlPayload): Promise<
         ...docs.body.definition.apisV2
     };
 
-    return { org_id, root, pages, apis, domain };
+    return { org_id, root, pages, apis, domain, basepath };
 }
 
 function retrieveMarkdownFromPages(pages: Record<FernNavigation.PageId, DocsV1Read.PageContent>) {

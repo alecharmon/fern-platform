@@ -37,6 +37,7 @@ export const SEARCHABLE_ATTRIBUTES = [
 export const FILTERABLE_FACET_ATTRIBUTES = [
     "org_id",
     "domain",
+    "basepath",
     "visible_by",
     "authed",
     "node_type",
@@ -65,6 +66,12 @@ export const BaseRecordSchema = z.object({
     objectID: z.string().describe("The unique identifier of this record"),
     org_id: z.string().describe("The Fern Organization ID"),
     domain: z.string().describe("The domain where the docs instance is hosted"),
+    basepath: z
+        .string()
+        .optional()
+        .describe(
+            "The basepath of the subrepo this record belongs to (e.g. '/nemo'). Undefined for domains without basepath routing."
+        ),
     canonicalPathname: z.string().describe("The canonical pathname of the page (with leading slash)"),
     pathname: z.string().describe("The pathname of the page (with leading slash)"),
     hash: z.string().optional().describe("The anchor link on the page (with leading #)"),

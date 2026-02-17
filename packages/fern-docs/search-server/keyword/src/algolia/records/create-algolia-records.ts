@@ -14,6 +14,7 @@ interface CreateAlgoliaRecordsOptions {
     root: FernNavigation.RootNode;
     domain: string;
     org_id: string;
+    basepath?: string;
     pages: Record<FernNavigation.PageId, string>;
     apis: Record<ApiDefinition.ApiDefinitionId, ApiDefinition.ApiDefinition>;
     authed?: (node: NavigationNodePage) => boolean;
@@ -59,6 +60,7 @@ export async function createAlgoliaRecords({
     root,
     domain,
     org_id,
+    basepath,
     pages,
     apis,
     authed
@@ -111,6 +113,7 @@ export async function createAlgoliaRecords({
             parents: collector.getParents(node.id) ?? [],
             domain,
             org_id,
+            basepath,
             authed: authed?.(node) ?? false,
             versionIndexMap
         });
@@ -183,6 +186,7 @@ export async function createAlgoliaRecords({
                     parents: collector.getParents(node.id) ?? [],
                     domain,
                     org_id,
+                    basepath,
                     authed: authed?.(node) ?? false,
                     versionIndexMap
                 });
@@ -268,6 +272,7 @@ export async function* createAlgoliaRecordsStream({
     root,
     domain,
     org_id,
+    basepath,
     pages,
     apis,
     authed,
@@ -341,6 +346,7 @@ export async function* createAlgoliaRecordsStream({
             parents: collector.getParents(node.id) ?? [],
             domain,
             org_id,
+            basepath,
             authed: authed?.(node) ?? false,
             versionIndexMap
         });
@@ -421,6 +427,7 @@ export async function* createAlgoliaRecordsStream({
                     parents: collector.getParents(node.id) ?? [],
                     domain,
                     org_id,
+                    basepath,
                     authed: authed?.(node) ?? false,
                     versionIndexMap
                 });

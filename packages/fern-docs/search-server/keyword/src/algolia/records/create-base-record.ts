@@ -7,6 +7,7 @@ import type { BaseRecord } from "../types";
 interface CreateBaseRecordOptions {
     domain: string;
     org_id: string;
+    basepath?: string;
     parents: readonly FernNavigation.NavigationNodeParent[];
     node: FernNavigation.NavigationNodeWithMetadata;
     authed: boolean;
@@ -16,6 +17,7 @@ interface CreateBaseRecordOptions {
 export function createBaseRecord({
     domain,
     org_id,
+    basepath,
     parents,
     node,
     authed: isDocsSiteAuthed,
@@ -51,6 +53,7 @@ export function createBaseRecord({
         objectID: `${org_id}:${domain}:${node.id}`,
         org_id,
         domain,
+        basepath,
         canonicalPathname: slugToHref(node.canonicalSlug ?? node.slug),
         pathname: slugToHref(node.slug),
         icon: node.icon,

@@ -65,7 +65,7 @@ export async function algoliaIndexerTask(payload: AlgoliaIndexerPayload): Promis
     const algolia = algoliasearch(payload.appId, payload.writeApiKey);
 
     // load the docs
-    const { org_id, root, pages, apis, domain } = await loadDocsWithUrl(payload);
+    const { org_id, root, pages, apis, domain, basepath } = await loadDocsWithUrl(payload);
 
     // create new records (this is the target state of the index)
     // If apis is empty but there are API leaf nodes, they will be lazy-loaded
@@ -73,13 +73,22 @@ export async function algoliaIndexerTask(payload: AlgoliaIndexerPayload): Promis
         root,
         domain,
         org_id,
+        basepath,
         pages,
         apis,
         authed: payload.authed
     });
 
     // browse the existing records (what is currently in the index)
-    const existingObjectIDs = (await browseAllObjectsForDomain(algolia, domain, payload.indexName, ["objectID"]))
+    const existingObjectIDs = (
+        await browseAllObjectsForDomain(
+            algolia,
+            domain,
+            payload.indexName,
+            ["objectID"],
+            basepath != null ? [basepath] : undefined
+        )
+    )
         .map((object) => object.objectID)
         .filter((objectID): objectID is string => typeof objectID === "string");
 
