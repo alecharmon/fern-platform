@@ -1,8 +1,11 @@
 import "server-only";
 
+import { redirect } from "next/navigation";
+import { serializeSearchParams } from "@/app/(onboarding)/get-started/[orgName]/docs/serializeSearchParams";
 import { BackArrow } from "@/app/(onboarding)/get-started/BackArrow";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { redirectToLogin } from "@/app/services/auth0/redirectToLogin";
+import { getOrganizationForPostmanTeam } from "@/app/services/dal/organization";
 import { SlideLeftTransition } from "@/components/transitions/SlideLeftTransition";
 import { sanitizePrefillOrgName } from "@/utils/organization";
 import { CreateOrganizationStepClient } from "./CreateOrganizationStepClient";
@@ -46,6 +49,19 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
     const prefillOrgName = sanitizePrefillOrgName(resolvedSearchParams?.prefillOrgName);
     const postmanTeamId = resolvedSearchParams?.["postman-team-id"];
     const postmanTeamIdValue = Array.isArray(postmanTeamId) ? postmanTeamId[0] : postmanTeamId;
+
+    if (postmanTeamIdValue) {
+        const result = await getOrganizationForPostmanTeam(session.accessToken, postmanTeamIdValue);
+        if (result.success) {
+            let destination = nextHref.includes(":orgId") ? nextHref.replace(/:orgId/g, result.orgId) : nextHref;
+            const { next: _next, prefillOrgName: _prefill, ...rest } = resolvedSearchParams ?? {};
+            const queryString = serializeSearchParams(rest);
+            if (queryString.toString()) {
+                destination = `${destination}?${queryString.toString()}`;
+            }
+            redirect(destination);
+        }
+    }
 
     return (
         <>
