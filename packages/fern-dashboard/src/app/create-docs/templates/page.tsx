@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 
 interface Template {
     id: string;
@@ -19,19 +20,19 @@ const TEMPLATES: Template[] = [
         id: "classic",
         name: "Classic",
         description: "Header tabs with full page width",
-        previewUrl: "https://docs-templates-classic.docs.buildwithfern.com"
+        previewUrl: `https://docs-templates-classic.${fernCliConfig.docsDomain}`
     },
     {
         id: "minimal",
         name: "Minimal",
         description: "Sidebar-only navigation, no header",
-        previewUrl: "https://docs-templates-minimal.docs.buildwithfern.com"
+        previewUrl: `https://docs-templates-minimal.${fernCliConfig.docsDomain}`
     },
     {
         id: "products",
         name: "Products",
         description: "Multi-product docs with product switcher",
-        previewUrl: "https://docs-templates-products.docs.buildwithfern.com"
+        previewUrl: `https://docs-templates-products.${fernCliConfig.docsDomain}`
     }
 ];
 

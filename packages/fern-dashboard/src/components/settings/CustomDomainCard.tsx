@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
 import type { DocsUrl } from "@/utils/types";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { Button } from "../ui/button";
 import { AddCustomDomainModal } from "./AddCustomDomainModal";
 import { RemoveCustomDomainModal } from "./RemoveCustomDomainModal";
@@ -17,9 +18,8 @@ interface CustomDomainCardProps {
     allDomains?: string[];
 }
 
-// Check if a domain is a Fern-managed domain (*.docs.buildwithfern.com)
 function isFernManagedDomain(domain: string): boolean {
-    return domain.endsWith(".docs.buildwithfern.com");
+    return domain.endsWith(`.${fernCliConfig.docsDomain}`);
 }
 
 export function CustomDomainCard({ docsUrl, orgName, domainInfo, allDomains = [] }: CustomDomainCardProps) {

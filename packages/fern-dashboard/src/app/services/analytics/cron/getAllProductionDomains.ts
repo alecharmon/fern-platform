@@ -1,5 +1,7 @@
 import { uniq } from "es-toolkit/array";
 
+import { fernCliConfig } from "@/utils/fernCliConfig";
+
 /* eslint-disable turbo/no-undeclared-env-vars */
 /**
  * Get all production domains from the Vercel KV store or FDR
@@ -32,7 +34,7 @@ async function getDocsKvClient(): Promise<any | null> {
     }
 }
 
-const FERN_DOCS_BUILDWITHFERN_COM = "docs.buildwithfern.com";
+const FERN_DOCS_BUILDWITHFERN_COM = fernCliConfig.docsDomain;
 const FERN_DOCS_STAGING_BUILDWITHFERN_COM = "docs.staging.buildwithfern.com";
 const FERN_DOCS_DEV_BUILDWITHFERN_COM = "docs.dev.buildwithfern.com";
 

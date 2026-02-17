@@ -19,6 +19,7 @@ import {
 import { type CSSProperties, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { WizardFormData } from "@/providers/OnboardingProvider";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { cn } from "@/utils/utils";
 import { AnimatedText } from "./AnimatedText";
 import { DotMatrix } from "./DotMatrix";
@@ -206,7 +207,7 @@ export function CodeWidget({ wizardFormData, className, focusArea = "none" }: Co
                             {shouldShowDocsUrl ? (
                                 <>
                                     <AnimatedText text={wizardFormData.docsSiteUrl ?? ""} />
-                                    <span>.docs.buildwithfern.com</span>
+                                    <span>{`.${fernCliConfig.docsDomain}`}</span>
                                 </>
                             ) : null}
                         </span>

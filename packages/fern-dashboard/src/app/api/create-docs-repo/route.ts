@@ -583,7 +583,7 @@ export async function POST(req: NextRequest) {
         const description =
             sourceType === "site-to-docs" && data.sourceUrl
                 ? `Fern documentation imported from ${data.sourceUrl}`
-                : `Fern documentation for ${data.urlPrefix}.docs.buildwithfern.com`;
+                : `Fern documentation for ${data.urlPrefix}.${fernCliConfig.docsDomain}`;
 
         console.log(`Creating GitHub repo with setFernToken enabled, projectDir: ${projectDir}`);
         const result = await postGitRepository({
@@ -593,7 +593,7 @@ export async function POST(req: NextRequest) {
             description,
             isPrivate: true,
             files,
-            site: `${data.urlPrefix}.docs.buildwithfern.com`,
+            site: `${data.urlPrefix}.${fernCliConfig.docsDomain}`,
             // Automatically generate and set FERN_TOKEN as a GitHub secret
             setFernToken: {
                 workingDir: projectDir,

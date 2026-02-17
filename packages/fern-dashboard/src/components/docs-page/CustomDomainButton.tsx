@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
 import type { DocsUrl } from "@/utils/types";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { docsPermissionScope } from "../auth/authz";
 import { AuthZButton } from "../auth/authz/AuthZButton";
 import { AddCustomDomainModal } from "../settings/AddCustomDomainModal";
@@ -19,9 +20,8 @@ interface CustomDomainButtonProps {
     allDomains?: string[];
 }
 
-// Check if a domain is a Fern-managed domain (*.docs.buildwithfern.com)
 function isFernManagedDomain(domain: string): boolean {
-    return domain.endsWith(".docs.buildwithfern.com");
+    return domain.endsWith(`.${fernCliConfig.docsDomain}`);
 }
 
 export function CustomDomainButton({ docsUrl, orgName, domainInfo, allDomains = [] }: CustomDomainButtonProps) {

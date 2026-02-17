@@ -5,6 +5,7 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import type { CustomDomainInfo } from "@/app/services/domain";
 import { formatVerificationInfo, getVerificationByDocsUrl, getVerificationByDomain } from "@/app/services/domain";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 
 export interface GetCustomDomainStatusRequest {
     docsUrl: string;
@@ -35,7 +36,7 @@ export async function getCustomDomainStatus({
     if (!verification && detectedDomains.length > 0) {
         for (const domain of detectedDomains) {
             // Skip Fern-managed domains
-            if (domain.endsWith(".docs.buildwithfern.com")) {
+            if (domain.endsWith(`.${fernCliConfig.docsDomain}`)) {
                 continue;
             }
             const domainVerification = await getVerificationByDomain(domain);

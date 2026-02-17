@@ -2,10 +2,12 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 
+import { fernCliConfig } from "@/utils/fernCliConfig";
+
 const TEMPLATE_URLS: Record<string, string> = {
-    classic: "https://docs-templates-classic.docs.buildwithfern.com",
-    minimal: "https://docs-templates-minimal.docs.buildwithfern.com",
-    products: "https://docs-templates-products.docs.buildwithfern.com"
+    classic: `https://docs-templates-classic.${fernCliConfig.docsDomain}`,
+    minimal: `https://docs-templates-minimal.${fernCliConfig.docsDomain}`,
+    products: `https://docs-templates-products.${fernCliConfig.docsDomain}`
 };
 
 /**

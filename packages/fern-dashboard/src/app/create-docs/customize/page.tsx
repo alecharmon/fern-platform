@@ -12,12 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { fernCliConfig } from "@/utils/fernCliConfig";
 import { TemplatePreview } from "./TemplatePreview";
 
 const TEMPLATES = [
-    { id: "classic", name: "Classic", previewUrl: "https://docs-templates-classic.docs.buildwithfern.com" },
-    { id: "minimal", name: "Minimal", previewUrl: "https://docs-templates-minimal.docs.buildwithfern.com" },
-    { id: "products", name: "Products", previewUrl: "https://docs-templates-products.docs.buildwithfern.com" }
+    { id: "classic", name: "Classic", previewUrl: `https://docs-templates-classic.${fernCliConfig.docsDomain}` },
+    { id: "minimal", name: "Minimal", previewUrl: `https://docs-templates-minimal.${fernCliConfig.docsDomain}` },
+    { id: "products", name: "Products", previewUrl: `https://docs-templates-products.${fernCliConfig.docsDomain}` }
 ];
 
 const HEADING_FONTS = [

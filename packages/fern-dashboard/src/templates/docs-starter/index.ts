@@ -10,21 +10,25 @@ const WORKFLOW_PATHS = new Set([
     ".github/workflows/publish-docs.yml"
 ]);
 
-function applyCliSubstitutions(files: TemplateFile[]): TemplateFile[] {
-    if (fernCliConfig.npmPackage === "fern-api") {
-        return files;
-    }
+function applySubstitutions(files: TemplateFile[]): TemplateFile[] {
     return files.map((file) => {
-        if (!WORKFLOW_PATHS.has(file.path)) {
-            return file;
+        let { content } = file;
+
+        if (fernCliConfig.docsDomain !== "docs.buildwithfern.com") {
+            content = content.replace(/docs\.buildwithfern\.com/g, fernCliConfig.docsDomain);
         }
-        return {
-            ...file,
-            content: file.content
+
+        if (fernCliConfig.npmPackage !== "fern-api" && WORKFLOW_PATHS.has(file.path)) {
+            content = content
                 .replace(/npm install -g fern-api/g, `npm install -g ${fernCliConfig.npmPackage}`)
                 .replace(/run: fern /g, `run: ${fernCliConfig.cliCommand} `)
-                .replace(/\$\(fern /g, `$(${fernCliConfig.cliCommand} `)
-        };
+                .replace(/\$\(fern /g, `$(${fernCliConfig.cliCommand} `);
+        }
+
+        if (content === file.content) {
+            return file;
+        }
+        return { ...file, content };
     });
 }
 
@@ -35,7 +39,7 @@ function applyCliSubstitutions(files: TemplateFile[]): TemplateFile[] {
  * Binary files are base64 encoded.
  */
 export async function getDocsStarterTemplateFiles(): Promise<TemplateFile[]> {
-    return applyCliSubstitutions(TEMPLATE_FILES);
+    return applySubstitutions(TEMPLATE_FILES);
 }
 
 /**
@@ -59,5 +63,5 @@ export async function getEssentialTemplateFiles(): Promise<TemplateFile[]> {
         "fern/docs/assets/logo.svg"
     ];
 
-    return applyCliSubstitutions(TEMPLATE_FILES.filter((file) => essentialPaths.includes(file.path)));
+    return applySubstitutions(TEMPLATE_FILES.filter((file) => essentialPaths.includes(file.path)));
 }

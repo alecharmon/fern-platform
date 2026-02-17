@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { fernCliConfig } from "@/utils/fernCliConfig";
 
 interface DocsUrlProps {
     value: string;
@@ -102,7 +103,7 @@ export function DocsUrl({ value, onChange, onFocus, onBlur }: DocsUrlProps) {
                     className="w-full"
                 />
                 <span className="text-foreground flex items-center gap-2 whitespace-nowrap text-sm">
-                    .docs.buildwithfern.com
+                    {`.${fernCliConfig.docsDomain}`}
                     {isChecking && <Loader2Icon className="h-4 w-4 animate-spin text-gray-900" />}
                     {!isChecking && isAvailable === false && <XIcon className="h-4 w-4 text-red-600" />}
                     {!isChecking && isAvailable === true && <CheckIcon className="text-primary h-4 w-4" />}
