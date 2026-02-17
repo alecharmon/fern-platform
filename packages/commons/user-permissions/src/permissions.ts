@@ -149,34 +149,18 @@ export async function hasResourcePermission({
     forceFineGrained?: boolean;
     logger?: PermissionLogger;
 }): Promise<boolean> {
-    const log = logger || console;
-    log.warn("[hasResourcePermission] Input", {
-        sessionPermissions,
-        userId,
-        orgId,
-        permissionToCheck,
-        resourceType,
-        resourceId,
-        forceFineGrained
-    });
     // Extract org-level permissions from session
     const orgPermissions = getPermissionsFromSession({ sessionPermissions });
 
-    log.warn("[hasResourcePermission] orgPermissions:", orgPermissions);
-
     // Check org-level permission first (cascades to all resources)
     if (hasPermission(orgPermissions, permissionToCheck)) {
-        log.warn("[hasResourcePermission] Has org-level permission, returning true");
         return true;
     }
 
     // Check if fine-grained permissions are enabled (via override or session marker)
     const isFineGrainedEnabled = forceFineGrained ?? hasFineGrainPermission(sessionPermissions);
 
-    log.warn("[hasResourcePermission] isFineGrainedEnabled:", isFineGrainedEnabled);
-
     if (isFineGrainedEnabled) {
-        log.warn("[hasResourcePermission] Checking Supabase for resource-level permissions");
         // Check Supabase for resource-level permissions
         const result = await hasUserPermissionForResource({
             userId,
@@ -186,7 +170,6 @@ export async function hasResourcePermission({
             permission: permissionToCheck,
             logger
         });
-        log.warn("[hasResourcePermission] hasUserPermissionForResource returned:", result);
         return result;
     }
 

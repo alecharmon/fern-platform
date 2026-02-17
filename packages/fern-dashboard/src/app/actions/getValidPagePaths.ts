@@ -81,8 +81,6 @@ export async function getValidPagePaths(docsUrl: string): Promise<{
 
         const uniquePaths = Array.from(new Set(paths)).sort();
 
-        console.log("uniquePaths!!", uniquePaths);
-
         return { success: true, paths: uniquePaths };
     } catch (error) {
         console.error("Failed to get valid page paths", error);

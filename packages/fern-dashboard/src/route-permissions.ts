@@ -80,13 +80,6 @@ export async function checkRoutePermissions(req: NextRequest): Promise<NextRespo
         routeConfigs: ROUTE_PERMISSION_CONFIGS
     });
 
-    console.debug("[checkRoutePermissions] Permission check:", {
-        pathname,
-        orgName,
-        allowed,
-        isEnforcePermissions
-    });
-
     // If enforcement is disabled, always allow access (logging only)
     if (!isEnforcePermissions) {
         return null;

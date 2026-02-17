@@ -39,16 +39,6 @@ export function BranchInitializer({ orgName, site, owner, repo, branch, baseBran
             return;
         }
 
-        console.log("[BranchInitializer] Creating branch with params:", {
-            orgName,
-            site,
-            owner,
-            repo,
-            branch,
-            baseBranch,
-            gitUrl
-        });
-
         createBranchMutation
             .mutateAsync({
                 orgName,

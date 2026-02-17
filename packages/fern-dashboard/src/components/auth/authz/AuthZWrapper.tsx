@@ -39,20 +39,11 @@ export function AuthZWrapper({
     const authz = useAuthZ(params.orgName);
 
     if (authz.type === "loaded") {
-        const { isFineGrainedPermissionsEnabled, isEnforcePermissions } = authz.value;
+        const { isEnforcePermissions } = authz.value;
 
         if (resource) {
             const { type, id } = resource;
             const hasAccess = authz.value.hasResource(permission, type, id);
-
-            console.debug("[AuthZWrapper] Resource permission check:", {
-                permission,
-                resourceType: type,
-                resourceId: id,
-                hasAccess,
-                isFineGrainedPermissionsEnabled,
-                isEnforcePermissions
-            });
 
             // If enforcement is disabled, always allow access (logging only)
             if (!isEnforcePermissions) {
@@ -63,13 +54,6 @@ export function AuthZWrapper({
         }
 
         const hasAccess = authz.value.has(permission);
-        console.debug("[AuthZWrapper] Org-level permission check:", {
-            permission,
-            hasAccess,
-            isFineGrainedPermissionsEnabled,
-            isEnforcePermissions
-        });
-
         // If enforcement is disabled, always allow access (logging only)
         if (!isEnforcePermissions) {
             return <>{children}</>;

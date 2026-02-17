@@ -125,8 +125,6 @@ function getPermittedResourceIdsFromSession({
         }
     }
 
-    console.debug("[useAuthZ] getPermittedResourceIdsFromSession:", resourceIds);
-
     return { type: "specific", resourceIds };
 }
 
@@ -141,13 +139,6 @@ export function useAuthZ(orgName: string | undefined) {
                 const response = await DashboardApiClient.getAuthZPermissions(orgName);
                 const sessionPermissions = response.permissions;
                 const permissions = getPermissionsFromSession({ sessionPermissions });
-                console.debug("[useAuthZ] Fetched auth info:", {
-                    userId: response.userId,
-                    orgName: response.orgName,
-                    sessionPermissions,
-                    permissions
-                });
-
                 return {
                     userId: response.userId,
                     orgName: response.orgName,

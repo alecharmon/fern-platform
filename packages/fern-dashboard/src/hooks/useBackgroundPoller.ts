@@ -117,11 +117,9 @@ export function useBackgroundPoller(
     const startPolling = useCallback(() => {
         // If already polling, don't start again
         if (isPolling || intervalRef.current) {
-            console.log("[useBackgroundPoller] Already polling, skipping start");
             return;
         }
 
-        console.log("[useBackgroundPoller] Starting polling...");
         startedPollingAt.current = Date.now();
         setIsPolling(true);
 
@@ -148,7 +146,6 @@ export function useBackgroundPoller(
         }, pollingInterval);
 
         // Check immediately on start
-        console.log("[useBackgroundPoller] Performing initial check...");
         void checkCondition();
     }, [isPolling, pollingInterval, maxPollingTime, checkCondition, stopPolling]);
 

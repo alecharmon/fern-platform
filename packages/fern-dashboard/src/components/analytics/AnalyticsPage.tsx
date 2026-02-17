@@ -35,7 +35,6 @@ export default async function AnalyticsPage({
             docsUrl: baseDocsUrl,
             timeRange: TimeRange.LAST_WEEK
         });
-        console.log("Resolution data received:", resolutionData);
     } catch (error) {
         console.error("Failed to fetch resolution data:", error);
         resolutionData = {
