@@ -43,8 +43,9 @@ export function AbstractHeaderContent({
                 <div className="fern-header-logo-container">
                     <div className="flex items-center gap-2">
                         <div className="flex items-center lg:items-start">{logo}</div>
+                        {/* Desktop only: product/version selectors - use CSS to avoid hydration mismatch */}
                         {showSwitcher && (
-                            <div className="hidden lg:flex items-baseline">
+                            <div className="hidden items-baseline lg:flex">
                                 {productSelect}
                                 {versionSelect}
                             </div>
@@ -52,10 +53,23 @@ export function AbstractHeaderContent({
                     </div>
                 </div>
 
+                {/* Search bar: always render, CSS controls visibility
+                    - On mobile: always visible (Ask AI button shows, Search button hidden via its own CSS)
+                    - On desktop: visible only if showSearchBar is true */}
                 {!headerDisabled && (
-                    <div className={cn(showSearchBar ? "contents" : "contents lg:hidden")}>{searchBar}</div>
+                    <div
+                        className={cn(
+                            // Match searchBar's sizing: w-full up to 640px max
+                            // This makes wrapper behave like searchBar would as a direct flex child
+                            "w-full max-w-[640px]",
+                            !showSearchBar && "lg:hidden"
+                        )}
+                    >
+                        {searchBar}
+                    </div>
                 )}
 
+                {/* Desktop navbar */}
                 <FernButtonGroup asChild>
                     <nav className="fern-header-navbar-links hidden lg:flex" aria-label="Navbar links">
                         {navbarLinks}
@@ -65,6 +79,7 @@ export function AbstractHeaderContent({
                     </nav>
                 </FernButtonGroup>
 
+                {/* Mobile menu button */}
                 <div className="fern-header-mobile-menu-button lg:hidden">
                     <MobileMenuButton />
                 </div>

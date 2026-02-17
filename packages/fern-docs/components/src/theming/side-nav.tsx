@@ -1,7 +1,6 @@
 "use client";
 
-import { useIsDesktop } from "@fern-ui/react-commons";
-
+import React from "react";
 import { cn } from "../cn";
 import { FERN_SIDEBAR_ID, FERN_SIDEBAR_SPACER_ID } from "../constants";
 import { MobileMenu } from "./mobile-menu";
@@ -23,24 +22,29 @@ export function SidebarNav({
     "data-theme"?: string;
     isSidePanelOpen?: boolean;
 }) {
-    const isDesktop = useIsDesktop();
+    // MobileMenu uses document.getElementById in motion hooks (useTransform, useMotionValueEvent)
+    // which causes "document is not defined" errors during SSR. Only render after hydration.
+    const [isClient, setIsClient] = React.useState(false);
+    React.useEffect(() => {
+        setIsClient(true);
+    }, []);
 
-    if (isDesktop) {
-        return (
-            <DesktopMenu className={cn(className, desktopClassName)} fixed={fixed} {...props}>
+    // Use CSS-based responsive visibility instead of useIsDesktop() to avoid hydration mismatch
+    // and prevent component remounting when crossing viewport breakpoints
+    return (
+        <>
+            {/* Desktop sidebar - hidden on mobile via CSS */}
+            <DesktopMenu className={cn(className, desktopClassName, "hidden lg:block")} fixed={fixed} {...props}>
                 {children}
             </DesktopMenu>
-        );
-    }
 
-    return (
-        <MobileMenu
-            className={cn(className, mobileClassName, { hidden: isDesktop })}
-            isSidePanelOpen={isSidePanelOpen}
-            {...props}
-        >
-            {children}
-        </MobileMenu>
+            {/* Mobile sidebar drawer - only render on client due to document API usage */}
+            {isClient && (
+                <MobileMenu className={cn(className, mobileClassName)} isSidePanelOpen={isSidePanelOpen} {...props}>
+                    {children}
+                </MobileMenu>
+            )}
+        </>
     );
 }
 

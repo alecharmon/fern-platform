@@ -6,11 +6,14 @@ import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { AlgoliaSearchClientRoot, DesktopAskAiPanel, SEARCH_INDEX } from "@fern-docs/search-ui";
 import { useEventCallback } from "@fern-ui/react-commons";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { isEqual } from "es-toolkit/predicate";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { Drawer } from "vaul";
 import { z } from "zod";
+
 import { useApiRoute } from "@/components/hooks/useApiRoute";
 import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
 import { useIsSearchDialogOpen } from "@/state/search";
@@ -24,6 +27,7 @@ import {
     usePageContext,
     useSetSearchPanelResizing
 } from "@/state/search-panel";
+
 import { SearchPanelFeedback } from "./feedback/SearchPanelFeedback";
 import { generateConversationId } from "./generate-conversation-id";
 import { generateQueryId } from "./generate-query-id";
@@ -64,7 +68,8 @@ const getDefaultWidth = () => {
     return 344;
 };
 
-const widthAtom = atom(getDefaultWidth());
+// Initialize to 0 so panel doesn't flash on load. Width is set when panel opens
+const widthAtom = atom(0);
 
 export const SearchPanel = React.memo(function SearchPanel({
     domain,
@@ -97,7 +102,10 @@ export const SearchPanel = React.memo(function SearchPanel({
     }, [isOpen, width, setWidth]);
 
     React.useEffect(() => {
-        document.documentElement.style.setProperty("--ask-ai-panel-width", `${width}px`);
+        // On mobile/tablet (< md breakpoint), the drawer overlays content
+        // so don't shift the main layout
+        const isMobile = window.innerWidth < 768;
+        document.documentElement.style.setProperty("--ask-ai-panel-width", isMobile ? "0px" : `${width}px`);
     }, [width]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -213,6 +221,57 @@ export const SearchPanel = React.memo(function SearchPanel({
 
     const { apiKey, appId } = data;
 
+    const panelContent = (
+        <DesktopAskAiPanel
+            useConversationId={() => conversationIdHook}
+            useQueryId={() => queryIdHook}
+            domain={domain}
+            api={chatEndpoint}
+            headers={{
+                "X-Fern-Host": domain
+            }}
+            initialInput={initialInput}
+            setInitialInput={setInitialInput}
+            body={{ algoliaSearchKey: apiKey }}
+            onSelectHit={handleNavigate}
+            onEscapeKeyDown={() => setIsOpen(false)}
+            renderActions={({ user, assistant }, queryId) => {
+                if (!assistant) {
+                    return null;
+                }
+                const copyButton = (
+                    <CopyToClipboardButton content={assistant.content} lang={lang} className="h-8 w-8 p-0" />
+                );
+                if (hideFeedback) {
+                    return <div className="flex items-center gap-2">{copyButton}</div>;
+                }
+                return (
+                    <SearchPanelFeedback
+                        metadata={() => ({
+                            user: user?.content,
+                            assistant: assistant.content,
+                            assistantId: assistant.id,
+                            conversationId: conversationIdHook.conversationId,
+                            queryId: queryId || queryIdHook.queryId,
+                            domain
+                        })}
+                        lang={lang}
+                        copyAction={copyButton}
+                    />
+                );
+            }}
+            darkCodeEnabled={isDarkCodeEnabled}
+            className="shadow-xl"
+            onClose={() => setIsOpen(false)}
+            pageContext={pageContext}
+            onRemovePageContext={() => setPageContext(null)}
+            searchDialogOpen={searchDialogOpen}
+            panelWidth={width}
+            isSidePanelOpen={isSidePanelOpen}
+            lang={lang}
+        />
+    );
+
     return (
         <AlgoliaSearchClientRoot
             appId={appId}
@@ -223,84 +282,44 @@ export const SearchPanel = React.memo(function SearchPanel({
             authenticatedUserToken={user?.email}
             analyticsTags={["search-v2-dialog"]}
         >
-            <div
-                className={cn(
-                    "bg-background border-border-default fixed inset-y-0 right-0 z-50 flex flex-col border-l transition-all duration-500 ease-out",
-                    "max-sm:inset-0 max-sm:!w-full max-sm:border-l-0", // Full screen on mobile
-                    isOpen ? "translate-x-0" : "translate-x-full",
-                    isResizing && "transition-none" // Disable transition while resizing
-                )}
-                style={{ width: `${width}px` }}
-                // Use inert to prevent browser find (cmd+f) from searching hidden panel content
-                inert={!isOpen ? true : undefined}
-            >
-                {/* Resize Handle - Hidden on mobile */}
+            {/* Desktop: fixed side panel (no animation, appears instantly) */}
+            {isOpen && (
                 <div
                     className={cn(
-                        "absolute bottom-0 left-0 top-0 z-10 w-2 cursor-col-resize bg-transparent",
-                        "max-sm:hidden", // Hide resize handle on mobile
-                        isResizing && "bg-primary/30",
-                        "-translate-x-1 transition-transform"
+                        "bg-background border-border-default fixed inset-y-0 right-0 z-50 flex flex-col border-l",
+                        "max-md:hidden", // Hidden on mobile/tablet - use drawer instead
+                        isResizing && "transition-none"
                     )}
-                    onMouseDown={handleMouseDown}
-                    style={{ pointerEvents: isOpen ? "auto" : "none" }}
-                />
-
-                <div className="flex-1 overflow-y-auto">
-                    <DesktopAskAiPanel
-                        useConversationId={() => conversationIdHook}
-                        useQueryId={() => queryIdHook}
-                        domain={domain}
-                        api={chatEndpoint}
-                        headers={{
-                            "X-Fern-Host": domain
-                        }}
-                        initialInput={initialInput}
-                        setInitialInput={setInitialInput}
-                        body={{ algoliaSearchKey: apiKey }}
-                        onSelectHit={handleNavigate}
-                        onEscapeKeyDown={() => setIsOpen(false)}
-                        renderActions={({ user, assistant }, queryId) => {
-                            if (!assistant) {
-                                return null;
-                            }
-                            const copyButton = (
-                                <CopyToClipboardButton
-                                    content={assistant.content}
-                                    lang={lang}
-                                    className="h-8 w-8 p-0"
-                                />
-                            );
-                            if (hideFeedback) {
-                                return <div className="flex items-center gap-2">{copyButton}</div>;
-                            }
-                            return (
-                                <SearchPanelFeedback
-                                    metadata={() => ({
-                                        user: user?.content,
-                                        assistant: assistant.content,
-                                        assistantId: assistant.id,
-                                        conversationId: conversationIdHook.conversationId,
-                                        queryId: queryId || queryIdHook.queryId,
-                                        domain
-                                    })}
-                                    lang={lang}
-                                    copyAction={copyButton}
-                                />
-                            );
-                        }}
-                        darkCodeEnabled={isDarkCodeEnabled}
-                        className="shadow-xl"
-                        onClose={() => setIsOpen(false)}
-                        pageContext={pageContext}
-                        onRemovePageContext={() => setPageContext(null)}
-                        searchDialogOpen={searchDialogOpen}
-                        panelWidth={width}
-                        isSidePanelOpen={isSidePanelOpen}
-                        lang={lang}
+                    style={{ width: `${width}px` }}
+                >
+                    {/* Resize Handle */}
+                    <div
+                        className={cn(
+                            "absolute bottom-0 left-0 top-0 z-10 w-2 cursor-col-resize bg-transparent",
+                            isResizing && "bg-primary/30",
+                            "-translate-x-1 transition-transform"
+                        )}
+                        onMouseDown={handleMouseDown}
                     />
+
+                    <div className="flex-1 overflow-y-auto">{panelContent}</div>
                 </div>
-            </div>
+            )}
+
+            {/* Mobile/Tablet: bottom drawer */}
+            <Drawer.Root open={isOpen} onOpenChange={setIsOpen} noBodyStyles>
+                <Drawer.Portal>
+                    <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40 md:hidden" />
+                    <Drawer.Content className="bg-background fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl md:hidden">
+                        <Drawer.Handle className="bg-(--grayscale-a4) mx-auto mt-2 h-1.5 w-12 shrink-0 rounded-full" />
+                        <VisuallyHidden>
+                            <Drawer.Title>AI Assistant</Drawer.Title>
+                            <Drawer.Description>Ask questions about the documentation.</Drawer.Description>
+                        </VisuallyHidden>
+                        <div className="flex-1 overflow-y-auto">{panelContent}</div>
+                    </Drawer.Content>
+                </Drawer.Portal>
+            </Drawer.Root>
         </AlgoliaSearchClientRoot>
     );
 }, isEqual);

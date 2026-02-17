@@ -278,32 +278,11 @@ const DesktopAskAIChat = ({
     const [showMaximizeOption, setShowMaximizeOption] = useState(true);
     const { queryId, setQueryId } = useQueryId();
     const [messageQueryIds, setMessageQueryIds] = useState<Record<string, string>>({});
-    const [isAnimating, setIsAnimating] = useState(false);
-
     useEffect(() => {
         if (!queryId) {
             setQueryId(randomUUID());
         }
     }, [queryId, setQueryId]);
-
-    // Trigger animation every time side panel is open
-    useEffect(() => {
-        if (isSidePanelOpen === true) {
-            setIsAnimating(true);
-
-            // Reset after animation completes
-            const timer = setTimeout(() => {
-                setIsAnimating(false);
-            }, 500);
-
-            return () => {
-                clearTimeout(timer);
-            };
-        } else {
-            setIsAnimating(false);
-            return undefined;
-        }
-    }, [isSidePanelOpen]);
 
     const defaultTransportBody = useMemo(() => {
         return {
@@ -511,8 +490,7 @@ const DesktopAskAIChat = ({
                     }
                 }}
                 tabIndex={-1}
-                className={cn(isScrolled && "mask-grad-top-3", isAnimating && "slide-in-active")}
-                data-is-animating={isAnimating}
+                className={cn(isScrolled && "mask-grad-top-3")}
                 data-disable-animation={chat.status !== "ready" ? "" : undefined}
             >
                 <AskAICommandItems

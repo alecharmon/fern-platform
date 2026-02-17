@@ -359,19 +359,3 @@
   @apply transition-transform duration-250 group-data-[state=open]:rotate-180;
 }
 
-@keyframes slideInFromRight {
-  0% {
-    opacity: 0;
-    transform: translateX(3rem);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.slide-in-active {
-  animation: slideInFromRight 200ms ease-out forwards !important;
-  animation-delay: 300ms !important;
-  opacity: 0;
-}

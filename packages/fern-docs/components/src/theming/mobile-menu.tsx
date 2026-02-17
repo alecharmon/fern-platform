@@ -162,6 +162,11 @@ export function MobileMenu({
                 return;
             }
 
+            // Don't allow gesture on desktop viewports (lg breakpoint = 1024px)
+            if (window.innerWidth >= 1024) {
+                return;
+            }
+
             // Don't allow gesture if side panel is open
             if (isSidePanelOpen) {
                 return;
