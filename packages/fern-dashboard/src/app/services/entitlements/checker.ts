@@ -62,7 +62,9 @@ export function getEntitlementsChecker(): EntitlementsChecker {
             if (result.isErr() || result.value == null) {
                 return ["plan_free"];
             }
-            return result.value.products.map((p) => p.sku);
+            // Repeat each SKU by its qty so that addons with per-unit grants
+            // (e.g. addon_extra_seats with limit: 1) sum correctly.
+            return result.value.products.flatMap((p) => Array.from({ length: p.qty }, () => p.sku));
         },
         usageProvider: dashboardUsageProvider,
         usageCache: createUsageCache()

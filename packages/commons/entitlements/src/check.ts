@@ -67,7 +67,7 @@ export class EntitlementChecker {
     async used(): Promise<number> {
         const result = await this.checkerInstance.check(this.orgId, this.key);
         if (!result.entitled) {
-            return 0;
+            return result.used ?? 0;
         }
         if (result.type === "boolean") {
             return 0;
@@ -78,7 +78,7 @@ export class EntitlementChecker {
     async limit(): Promise<number> {
         const result = await this.checkerInstance.check(this.orgId, this.key);
         if (!result.entitled) {
-            return 0;
+            return result.limit ?? 0;
         }
         if (result.type === "boolean") {
             return Infinity;
@@ -122,6 +122,9 @@ class EntitlementsCheckerImpl {
         }
 
         if (grant.type === "boolean") {
+            if (!grant.enabled) {
+                return { entitled: false, reason: `${key} is not enabled for this plan` };
+            }
             return { entitled: true, type: "boolean" };
         }
 
@@ -139,7 +142,7 @@ class EntitlementsCheckerImpl {
             const limit = grant.limit;
             const remaining = Math.max(0, limit - usage);
             if (remaining <= 0) {
-                return { entitled: false, reason: `${key} limit reached (${usage}/${limit})` };
+                return { entitled: false, reason: `${key} limit reached (${usage}/${limit})`, limit, used: usage };
             }
             return { entitled: true, type: "quantity", limit, used: usage, remaining };
         }
@@ -148,7 +151,12 @@ class EntitlementsCheckerImpl {
             const allowance = grant.allowance;
             const remaining = Math.max(0, allowance - usage);
             if (remaining <= 0 && def.overagePolicy === "hard_cap") {
-                return { entitled: false, reason: `${key} allowance exhausted (${usage}/${allowance})` };
+                return {
+                    entitled: false,
+                    reason: `${key} allowance exhausted (${usage}/${allowance})`,
+                    limit: allowance,
+                    used: usage
+                };
             }
             return {
                 entitled: true,

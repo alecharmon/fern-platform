@@ -24,6 +24,7 @@ export type EntitlementDefinition =
  * the EntitlementKey union and forces usage providers to handle it.
  */
 export const ENTITLEMENT_DEFINITIONS = {
+    can_purchase_additional_seats: { type: "boolean", key: "can_purchase_additional_seats" },
     seats: { type: "quantity", key: "seats", merge: "sum" },
     docs_sites: { type: "quantity", key: "docs_sites", merge: "sum" },
     custom_domain_subpath: { type: "boolean", key: "custom_domain_subpath" }
@@ -50,7 +51,7 @@ export function isNumericEntitlementKey(key: EntitlementKey): key is NumericEnti
 // ---------------------------------------------------------------------------
 
 export type EntitlementGrant =
-    | { key: EntitlementKey; type: "boolean"; enabled: true }
+    | { key: EntitlementKey; type: "boolean"; enabled: boolean }
     | { key: EntitlementKey; type: "quantity"; limit: number }
     | { key: EntitlementKey; type: "metered"; allowance: number };
 
@@ -69,4 +70,4 @@ export type EntitlementCheckResult =
           remaining: number;
           overagePolicy: OveragePolicy;
       }
-    | { entitled: false; reason: string };
+    | { entitled: false; reason: string; limit?: number; used?: number };

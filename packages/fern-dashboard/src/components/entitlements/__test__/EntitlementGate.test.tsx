@@ -19,6 +19,7 @@ function makeEntitlements(
     overrides: Partial<Record<EntitlementKey, EntitlementCheckResult>> = {}
 ): Record<EntitlementKey, EntitlementCheckResult> {
     return {
+        can_purchase_additional_seats: denied(),
         seats: denied(),
         docs_sites: denied(),
         custom_domain_subpath: denied(),

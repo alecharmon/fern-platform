@@ -6,6 +6,10 @@
 // Re-export Stripe types that consumers need
 export type { Stripe } from "stripe";
 // -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+export { ADDON_EXTRA_SEATS_PRICE_ID, ADDON_SEAT_PRICE_DOLLARS, MAX_ADDON_SEATS } from "./constants";
+// -----------------------------------------------------------------------------
 // Database Operations - Accounts
 // -----------------------------------------------------------------------------
 export {
@@ -82,6 +86,17 @@ export {
 // Queries
 // -----------------------------------------------------------------------------
 export { type BillingPlan, getBillingPlan } from "./queries/billing-plan";
+// -----------------------------------------------------------------------------
+// Static SKUs
+// -----------------------------------------------------------------------------
+export {
+    ADDITIONAL_SEATS_SKU,
+    LEGACY_PLAN_SKU,
+    PRO_PLAN_CURRENT_SKU
+} from "./static_skus";
+export type StaticSkuModule = typeof import("./static_skus");
+
+export type StaticSku = StaticSkuModule[keyof StaticSkuModule];
 // -----------------------------------------------------------------------------
 // Stripe Client
 // -----------------------------------------------------------------------------

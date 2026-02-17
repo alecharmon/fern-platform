@@ -1,6 +1,6 @@
 "use client";
 
-import type { BillingPlan } from "@fern-platform/billing";
+import { ADDITIONAL_SEATS_SKU, type BillingPlan } from "@fern-platform/billing";
 import csharpIcon from "devicon/icons/csharp/csharp-original.svg";
 import goIcon from "devicon/icons/go/go-original-wordmark.svg";
 import kotlinIcon from "devicon/icons/kotlin/kotlin-original.svg";
@@ -11,7 +11,7 @@ import swiftIcon from "devicon/icons/swift/swift-original.svg";
 import typescriptIcon from "devicon/icons/typescript/typescript-original.svg";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { createCheckoutSession } from "@/app/actions/billing/createCheckoutSession";
@@ -20,10 +20,12 @@ import { getBillingPlanAction } from "@/app/actions/billing/getBillingPlan";
 import { syncAfterCheckout } from "@/app/actions/billing/syncAfterCheckout";
 import { createUpgradeSession } from "@/app/actions/billing/upgradeSubscription";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import { ClientEntitlementGate } from "@/components/entitlements/ClientEntitlementGate";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEntitlements } from "@/providers/EntitlementsProvider";
 import { useCurrentOrganization } from "@/state/useOrganizations";
-
+import { AddSeatsCard } from "./AddSeatsCard";
 import { type BillingCycle, getPlanIndex, type Plan, plans } from "./plans";
 
 const SDK_LANGUAGE_ICONS = [
@@ -83,6 +85,7 @@ export interface BillingInfoProps {
 export function BillingInfo({ session, showSuperUserPricing = false }: BillingInfoProps) {
     const org = useCurrentOrganization();
     const searchParams = useSearchParams();
+    const { refetch: refetchEntitlements } = useEntitlements();
     const [billingPlan, setBillingPlan] = useState<BillingPlan | null>(null);
     const [loading, setLoading] = useState(true);
     const [isOpeningPortal, setIsOpeningPortal] = useState(false);
@@ -91,6 +94,38 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
     const [useSuperUserPricing, setUseSuperUserPricing] = useState(false);
 
     const hasShownToast = useRef(false);
+    const popupRef = useRef<Window | null>(null);
+    const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Clean up popup polling on unmount
+    useEffect(() => {
+        return () => {
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+            }
+        };
+    }, []);
+
+    const handlePopupClosed = useCallback(async () => {
+        if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+        }
+        if (!org) {
+            return;
+        }
+        try {
+            await syncAfterCheckout({ orgId: org.id });
+            const result = await getBillingPlanAction(org.id);
+            if (!("error" in result)) {
+                setBillingPlan(result.plan);
+                toast.success("Upgrade successful! Your new plan is now active.");
+            }
+            refetchEntitlements();
+        } catch (error) {
+            console.error("Error syncing after checkout popup:", error);
+        }
+    }, [org, refetchEntitlements]);
 
     useEffect(() => {
         if (!org) {
@@ -100,7 +135,16 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
         const currentOrg = org;
         const isSuccess = searchParams.get("success") === "true";
         const isUpgrade = searchParams.get("upgrade") === "true";
+        const isCanceled = searchParams.get("canceled") === "true";
         const checkoutSessionId = searchParams.get("session_id") ?? undefined;
+
+        // If running inside a popup, auto-close and let the parent handle sync
+        if (window.opener != null) {
+            if (isSuccess || isUpgrade || isCanceled) {
+                window.close();
+            }
+            return;
+        }
 
         if ((isSuccess || isUpgrade) && !hasShownToast.current) {
             hasShownToast.current = true;
@@ -134,6 +178,27 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
         loadBillingPlan();
     }, [org, searchParams]);
 
+    const openInPopupOrRedirect = useCallback(
+        (url: string) => {
+            const popup = window.open(url, "stripe-checkout", "popup,width=600,height=700");
+            if (popup == null) {
+                // Popup blocked — fall back to full-page redirect
+                window.location.href = url;
+                return;
+            }
+            popupRef.current = popup;
+
+            // Poll for popup close
+            pollIntervalRef.current = setInterval(() => {
+                if (popup.closed) {
+                    popupRef.current = null;
+                    handlePopupClosed();
+                }
+            }, 500);
+        },
+        [handlePopupClosed]
+    );
+
     const handleUpgrade = async (plan: Plan) => {
         if (!org || !session.user.email) {
             return;
@@ -164,7 +229,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     console.error("Failed to create upgrade session:", result.error);
                     alert(result.error);
                 } else {
-                    window.location.href = result.url;
+                    openInPopupOrRedirect(result.url);
                 }
             } else {
                 const result = await createCheckoutSession({
@@ -179,7 +244,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     console.error("Failed to create checkout session:", result.error);
                     alert("Failed to start checkout. Please try again.");
                 } else {
-                    window.location.href = result.url;
+                    openInPopupOrRedirect(result.url);
                 }
             }
         } catch (error) {
@@ -423,6 +488,18 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     </Button>
                 </div>
             </div>
+
+            <ClientEntitlementGate required="can_purchase_additional_seats">
+                <AddSeatsCard
+                    orgId={org.id}
+                    orgName={org.name}
+                    currentAddonSeats={
+                        billingPlan?.products
+                            .filter((p) => p.kind === "addon" && p.sku === ADDITIONAL_SEATS_SKU)
+                            .reduce((sum, p) => sum + p.qty, 0) ?? 0
+                    }
+                />
+            </ClientEntitlementGate>
 
             {/* Manage Subscription Card */}
             {billingPlan?.hasSubscriptionHistory === true && (

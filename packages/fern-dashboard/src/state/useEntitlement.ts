@@ -23,6 +23,8 @@ export function useEntitlement(key: EntitlementKey) {
             isEntitled: true,
             isLoading: false,
             remaining: Infinity,
+            limit: undefined,
+            used: undefined,
             refetch
         };
     }
@@ -32,11 +34,33 @@ export function useEntitlement(key: EntitlementKey) {
 
     const remaining = result?.entitled === true ? (result.type === "boolean" ? Infinity : result.remaining) : 0;
 
+    const limit =
+        result == null
+            ? undefined
+            : result.entitled === true
+              ? result.type === "boolean"
+                  ? Infinity
+                  : result.type === "quantity"
+                    ? result.limit
+                    : result.allowance
+              : result.limit;
+
+    const used =
+        result == null
+            ? undefined
+            : result.entitled === true
+              ? result.type === "boolean"
+                  ? 0
+                  : result.used
+              : result.used;
+
     return {
         result,
         isEntitled,
         isLoading,
         remaining,
+        limit,
+        used,
         refetch
     };
 }

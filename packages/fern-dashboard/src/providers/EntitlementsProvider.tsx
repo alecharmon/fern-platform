@@ -2,23 +2,25 @@
 
 import type { EntitlementCheckResult, EntitlementKey } from "@fern-platform/entitlements";
 import { useQuery } from "@tanstack/react-query";
-import { createContext, type ReactNode, useContext, useMemo } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useMemo } from "react";
 
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { ReactQueryKey } from "../state/queryKeys";
 
+type EntitlementsData = Record<EntitlementKey, EntitlementCheckResult>;
+
 type EntitlementsContextValue = {
-    entitlements: Record<EntitlementKey, EntitlementCheckResult> | undefined;
+    entitlements: EntitlementsData | undefined;
     isLoading: boolean;
-    refetch: () => void;
+    refetch: () => Promise<EntitlementsData | undefined>;
 };
 
 const EntitlementsContext = createContext<EntitlementsContextValue>({
     entitlements: undefined,
     isLoading: true,
-    refetch: () => {}
+    refetch: () => Promise.resolve(undefined)
 });
 
 export function EntitlementsProvider({ children }: { children: ReactNode }) {
@@ -28,13 +30,18 @@ export function EntitlementsProvider({ children }: { children: ReactNode }) {
         queryFn: () => DashboardApiClient.getOrgEntitlements({ orgName })
     });
 
+    const refetch = useCallback(async () => {
+        const result = await query.refetch();
+        return result.data;
+    }, [query.refetch]);
+
     const value = useMemo(
         () => ({
             entitlements: query.data,
             isLoading: query.isLoading,
-            refetch: query.refetch
+            refetch
         }),
-        [query.data, query.isLoading, query.refetch]
+        [query.data, query.isLoading, refetch]
     );
 
     return <EntitlementsContext.Provider value={value}>{children}</EntitlementsContext.Provider>;

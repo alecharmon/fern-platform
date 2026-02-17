@@ -3,30 +3,14 @@ import { getGrantsForSkus, SKU_GRANTS } from "../grants";
 import type { EntitlementGrant } from "../types";
 
 describe("SKU grants", () => {
-    it("plan_free grants seats and docs_sites", () => {
-        const grants = SKU_GRANTS["plan_free"];
-        expect(grants).toBeDefined();
-        expect(grants).toHaveLength(2);
-        expect(grants!.find((g: EntitlementGrant) => g.key === "seats")).toEqual({
-            key: "seats",
-            type: "quantity",
-            limit: 2
-        });
-        expect(grants!.find((g: EntitlementGrant) => g.key === "docs_sites")).toEqual({
-            key: "docs_sites",
-            type: "quantity",
-            limit: 1
-        });
-    });
-
     it("getGrantsForSkus collects grants from multiple SKUs", () => {
         const grants = getGrantsForSkus(["plan_free"]);
-        expect(grants).toHaveLength(2);
+        expect(grants).toHaveLength(3);
     });
 
     it("getGrantsForSkus falls back to plan_free for unknown SKU", () => {
         const grants = getGrantsForSkus(["unknown_sku"]);
-        expect(grants).toHaveLength(2);
+        expect(grants).toHaveLength(3);
         expect(grants.find((g: EntitlementGrant) => g.key === "seats")).toEqual({
             key: "seats",
             type: "quantity",
@@ -35,14 +19,9 @@ describe("SKU grants", () => {
     });
 
     it("getGrantsForSkus combines grants from plan + addon", () => {
-        const grants = getGrantsForSkus(["2025-02-05:docs-team", "addon_extra_seats"]);
+        const grants = getGrantsForSkus(["2025-02-05:docs-team", "2025-02-10:additional-seats"]);
         const seatGrants = grants.filter((g: EntitlementGrant) => g.key === "seats");
         expect(seatGrants).toHaveLength(2);
-    });
-
-    it("plan_free does not grant custom_domain_subpath", () => {
-        const grants = SKU_GRANTS["plan_free"];
-        expect(grants!.find((g: EntitlementGrant) => g.key === "custom_domain_subpath")).toBeUndefined();
     });
 
     it("docs-team grants custom_domain_subpath", () => {
@@ -58,6 +37,16 @@ describe("SKU grants", () => {
         const grants = SKU_GRANTS["legacy:custom-enterprise"];
         expect(grants!.find((g: EntitlementGrant) => g.key === "custom_domain_subpath")).toEqual({
             key: "custom_domain_subpath",
+            type: "boolean",
+            enabled: true
+        });
+    });
+
+    it("2025-02-05:docs-team enables can_purchase_additional_seats", () => {
+        const grants = SKU_GRANTS["2025-02-05:docs-team"];
+        expect(grants).toBeDefined();
+        expect(grants!.find((g: EntitlementGrant) => g.key === "can_purchase_additional_seats")).toEqual({
+            key: "can_purchase_additional_seats",
             type: "boolean",
             enabled: true
         });

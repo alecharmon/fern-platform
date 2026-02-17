@@ -808,6 +808,7 @@ export type Database = {
                     billing_product_id: string | null;
                     kind: string | null;
                     org_id: string | null;
+                    qty: number | null;
                     sku: string | null;
                     status: string | null;
                     subscription_id: string | null;

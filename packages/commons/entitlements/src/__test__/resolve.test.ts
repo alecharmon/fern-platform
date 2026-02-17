@@ -5,24 +5,37 @@ describe("resolveEntitlements", () => {
     it("resolves single plan SKU", () => {
         const resolved = resolveEntitlements(["plan_free"]);
         expect(resolved).toEqual({
+            can_purchase_additional_seats: {
+                enabled: false,
+                type: "boolean"
+            },
             seats: { type: "quantity", limit: 2 },
             docs_sites: { type: "quantity", limit: 1 }
         });
     });
 
-    it("merges seats with sum strategy (docs-team + addon_extra_seats)", () => {
-        const resolved = resolveEntitlements(["2025-02-05:docs-team", "addon_extra_seats"]);
+    it("merges seats with sum strategy (docs-team + additional-seats)", () => {
+        const resolved = resolveEntitlements(["2025-02-05:docs-team", "2025-02-10:additional-seats"]);
         expect(resolved.seats).toEqual({ type: "quantity", limit: 6 }); // 5 + 1
     });
 
-    it("merges docs_sites with max strategy (docs-team only, no addon)", () => {
+    it("docs-team includes docs_sites", () => {
         const resolved = resolveEntitlements(["2025-02-05:docs-team"]);
         expect(resolved.docs_sites).toEqual({ type: "quantity", limit: 1 });
+    });
+
+    it("docs-team enables can_purchase_additional_seats", () => {
+        const resolved = resolveEntitlements(["2025-02-05:docs-team"]);
+        expect(resolved.can_purchase_additional_seats).toEqual({ type: "boolean", enabled: true });
     });
 
     it("falls back to plan_free for unknown SKUs", () => {
         const resolved = resolveEntitlements(["unknown"]);
         expect(resolved).toEqual({
+            can_purchase_additional_seats: {
+                enabled: false,
+                type: "boolean"
+            },
             seats: { type: "quantity", limit: 2 },
             docs_sites: { type: "quantity", limit: 1 }
         });
@@ -31,6 +44,10 @@ describe("resolveEntitlements", () => {
     it("falls back to plan_free for empty SKU list", () => {
         const resolved = resolveEntitlements([]);
         expect(resolved).toEqual({
+            can_purchase_additional_seats: {
+                enabled: false,
+                type: "boolean"
+            },
             seats: { type: "quantity", limit: 2 },
             docs_sites: { type: "quantity", limit: 1 }
         });
@@ -60,5 +77,11 @@ describe("resolveEntitlements", () => {
     it("does not resolve custom_domain_subpath for empty/unknown SKUs (free fallback)", () => {
         const resolved = resolveEntitlements([]);
         expect(resolved.custom_domain_subpath).toBeUndefined();
+    });
+
+    it("boolean OR: enabled overrides disabled across SKUs", () => {
+        // plan_free has enabled: false, docs-team has enabled: true
+        const resolved = resolveEntitlements(["plan_free", "2025-02-05:docs-team"]);
+        expect(resolved.can_purchase_additional_seats).toEqual({ type: "boolean", enabled: true });
     });
 });

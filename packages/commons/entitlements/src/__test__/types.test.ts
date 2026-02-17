@@ -3,7 +3,9 @@ import type { EntitlementCheckResult, EntitlementGrant, EntitlementKey } from ".
 
 describe("Entitlement types", () => {
     it("EntitlementKey is a union of defined keys", () => {
-        expectTypeOf<EntitlementKey>().toEqualTypeOf<"seats" | "docs_sites" | "custom_domain_subpath">();
+        expectTypeOf<EntitlementKey>().toEqualTypeOf<
+            "can_purchase_additional_seats" | "seats" | "docs_sites" | "custom_domain_subpath"
+        >();
     });
 
     it("EntitlementGrant key is constrained to EntitlementKey", () => {

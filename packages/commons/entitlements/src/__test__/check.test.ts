@@ -68,7 +68,9 @@ describe("EntitlementsChecker", () => {
         const result = await checker.check("org-1", "seats");
         expect(result).toEqual({
             entitled: false,
-            reason: "seats limit reached (2/2)"
+            reason: "seats limit reached (2/2)",
+            limit: 2,
+            used: 2
         });
     });
 
@@ -82,7 +84,9 @@ describe("EntitlementsChecker", () => {
         const result = await checker.check("org-1", "seats");
         expect(result).toEqual({
             entitled: false,
-            reason: "seats limit reached (2/2)"
+            reason: "seats limit reached (2/2)",
+            limit: 2,
+            used: 2
         });
     });
 
@@ -162,10 +166,49 @@ describe("EntitlementsChecker", () => {
     });
 });
 
+describe("boolean entitlements", () => {
+    it("returns entitled for boolean grant with enabled: true", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({}),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "can_purchase_additional_seats");
+        expect(result).toEqual({ entitled: true, type: "boolean" });
+    });
+
+    it("returns denied for boolean grant with enabled: false", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["plan_free"],
+            usageProvider: mockUsageProvider({}),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "can_purchase_additional_seats");
+        expect(result.entitled).toBe(false);
+    });
+});
+
+describe("denied result includes limit and used", () => {
+    it("should include limit and used when quantity entitlement is denied", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["plan_free"],
+            usageProvider: mockUsageProvider({ seats: 5 }),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "seats");
+        expect(result.entitled).toBe(false);
+        expect(result).toHaveProperty("limit", 2);
+        expect(result).toHaveProperty("used", 5);
+    });
+});
+
 describe("EntitlementChecker (.for())", () => {
     it("canCreate returns true when under limit", async () => {
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            getActiveSkus: async () => ["plan_free"],
             usageProvider: mockUsageProvider({ docs_sites: 0 }),
             usageCache: mockUsageCache()
         });
@@ -211,7 +254,7 @@ describe("EntitlementChecker (.for())", () => {
     it("recordCreate increments cache", async () => {
         const cache = mockUsageCache();
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            getActiveSkus: async () => ["plan_free"],
             usageProvider: mockUsageProvider({ docs_sites: 0 }),
             usageCache: cache
         });
@@ -224,7 +267,7 @@ describe("EntitlementChecker (.for())", () => {
     it("recordDelete decrements cache", async () => {
         const cache = mockUsageCache();
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            getActiveSkus: async () => ["plan_free"],
             usageProvider: mockUsageProvider({ docs_sites: 0 }),
             usageCache: cache
         });
@@ -269,7 +312,7 @@ describe("EntitlementChecker (.for())", () => {
 
     it("limit returns resolved limit", async () => {
         const checker = createEntitlementsChecker({
-            getActiveSkus: async () => ["2025-02-05:docs-team", "addon_extra_seats"],
+            getActiveSkus: async () => ["2025-02-05:docs-team", "2025-02-10:additional-seats"],
             usageProvider: mockUsageProvider({}),
             usageCache: mockUsageCache()
         });

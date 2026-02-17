@@ -827,6 +827,9 @@ importers:
 
   packages/commons/entitlements:
     dependencies:
+      '@fern-platform/billing':
+        specifier: workspace:*
+        version: link:../billing
       '@fern-platform/supabase':
         specifier: workspace:*
         version: link:../supabase-client

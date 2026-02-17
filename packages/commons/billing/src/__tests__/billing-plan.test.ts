@@ -14,10 +14,13 @@ function mockSupabaseWithProducts(products: unknown[], hasSubscription = false) 
     const mockClient = {
         from: vi.fn((table: string) => {
             if (table === "org_active_products") {
-                return {
+                // Chain: .select("*").eq("org_id", orgId).in("status", [...])
+                const builder = {
                     select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockResolvedValue({ data: products, error: null })
+                    eq: vi.fn().mockReturnThis(),
+                    in: vi.fn().mockResolvedValue({ data: products, error: null })
                 };
+                return builder;
             }
             if (table === "org_subscription") {
                 return {
@@ -56,7 +59,8 @@ describe("getBillingPlan", () => {
                     tier: "free",
                     subscription_id: "sub_1",
                     status: "active",
-                    billing_product_id: "prod_1"
+                    billing_product_id: "prod_1",
+                    qty: 1
                 },
                 {
                     org_id: "org_123",
@@ -65,7 +69,8 @@ describe("getBillingPlan", () => {
                     tier: "paid",
                     subscription_id: "sub_1",
                     status: "active",
-                    billing_product_id: "prod_2"
+                    billing_product_id: "prod_2",
+                    qty: 1
                 }
             ],
             true
@@ -79,6 +84,7 @@ describe("getBillingPlan", () => {
         expect(plan!.tier).toBe("paid"); // highest tier from products
         expect(plan!.status).toBe("active");
         expect(plan!.products).toHaveLength(2);
+        expect(plan!.products[0]!.qty).toBe(1);
         expect(plan!.subscription).toEqual({ id: "sub_1" });
         expect(plan!.hasSubscriptionHistory).toBe(true);
     });
@@ -93,7 +99,8 @@ describe("getBillingPlan", () => {
                     tier: "enterprise",
                     subscription_id: "sub_1",
                     status: "trialing",
-                    billing_product_id: "prod_1"
+                    billing_product_id: "prod_1",
+                    qty: 1
                 },
                 {
                     org_id: "org_123",
@@ -102,7 +109,8 @@ describe("getBillingPlan", () => {
                     tier: "paid",
                     subscription_id: "sub_1",
                     status: "trialing",
-                    billing_product_id: "prod_2"
+                    billing_product_id: "prod_2",
+                    qty: 1
                 }
             ],
             true
@@ -125,7 +133,8 @@ describe("getBillingPlan", () => {
                 tier: "free",
                 subscription_id: null,
                 status: "active",
-                billing_product_id: "prod_1"
+                billing_product_id: "prod_1",
+                qty: 1
             }
         ]);
 
@@ -135,5 +144,26 @@ describe("getBillingPlan", () => {
         const plan = result._unsafeUnwrap();
         expect(plan!.subscription).toBeNull();
         expect(plan!.hasSubscriptionHistory).toBe(false);
+    });
+
+    it("defaults qty to 1 when not provided by view", async () => {
+        mockSupabaseWithProducts([
+            {
+                org_id: "org_123",
+                sku: "plan_free",
+                kind: "plan",
+                tier: "free",
+                subscription_id: "sub_1",
+                status: "active",
+                billing_product_id: "prod_1",
+                qty: null
+            }
+        ]);
+
+        const result = await getBillingPlan("org_123");
+
+        expect(result.isOk()).toBe(true);
+        const plan = result._unsafeUnwrap();
+        expect(plan!.products[0]!.qty).toBe(1);
     });
 });

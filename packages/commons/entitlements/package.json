@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@fern-platform/supabase": "workspace:*",
+    "@fern-platform/billing": "workspace:*",
     "auth0": "^4.20.0"
   },
   "devDependencies": {

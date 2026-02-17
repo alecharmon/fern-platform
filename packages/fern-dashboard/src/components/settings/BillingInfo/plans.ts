@@ -19,6 +19,7 @@ import {
     SquarePen,
     Users
 } from "lucide-react";
+import { LEGACY_PLAN_SKU, PRO_PLAN_CURRENT_SKU } from "../../../../../commons/billing/dist/static_skus";
 
 export interface PlanFeature {
     icon: LucideIcon;
@@ -107,7 +108,7 @@ export const plans: Plan[] = [
             { icon: SlidersHorizontal, text: "Version and product switching" },
             { icon: FileDown, text: "PDF exports" }
         ],
-        planSkuMatcher: (sku) => sku === "2025-02-05:docs-team"
+        planSkuMatcher: (sku) => sku === PRO_PLAN_CURRENT_SKU
     },
     {
         name: "Custom",
@@ -127,7 +128,7 @@ export const plans: Plan[] = [
             { icon: MessageSquare, text: "Dedicated Slack / Teams channel" },
             { icon: ShieldCheck, text: "Security and legal review" }
         ],
-        planSkuMatcher: (sku) => sku === "legacy:custom-enterprise"
+        planSkuMatcher: (sku) => sku === LEGACY_PLAN_SKU
     }
 ];
 

@@ -64,7 +64,11 @@ export async function getProductById(id: string): Promise<Result<BillingProduct 
 export async function getOrgActiveProducts(orgId: string): Promise<Result<OrgActiveProduct[], BillingError>> {
     try {
         const client = getClient();
-        const { data, error } = await client.from("org_active_products").select("*").eq("org_id", orgId);
+        const { data, error } = await client
+            .from("org_active_products")
+            .select("*")
+            .eq("org_id", orgId)
+            .in("status", ["trialing", "active", "incomplete", "past_due"]);
 
         if (error) {
             return err(billingError("QUERY_FAILED", `Failed to get org products: ${error.message}`, error));

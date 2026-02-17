@@ -6,7 +6,7 @@ import { ENTITLEMENT_DEFINITIONS, type EntitlementDefinition, type EntitlementKe
 // ---------------------------------------------------------------------------
 
 export type ResolvedGrant =
-    | { type: "boolean"; enabled: true }
+    | { type: "boolean"; enabled: boolean }
     | { type: "quantity"; limit: number }
     | { type: "metered"; allowance: number };
 
@@ -43,7 +43,9 @@ export function resolveEntitlements(skus: string[]): ResolvedEntitlements {
         const existing = result[grant.key];
 
         if (grant.type === "boolean") {
-            result[grant.key] = { type: "boolean", enabled: true };
+            // Once enabled by any SKU, stays enabled (logical OR).
+            const prev = existing?.type === "boolean" ? existing.enabled : false;
+            result[grant.key] = { type: "boolean", enabled: prev || grant.enabled };
         } else if (grant.type === "quantity") {
             const merge = getMergeStrategy(def, "max");
             const prev = existing?.type === "quantity" ? existing.limit : 0;

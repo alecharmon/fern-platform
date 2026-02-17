@@ -3,11 +3,11 @@ import { useState } from "react";
 
 import type { Auth0Organization } from "@/app/services/auth0/types";
 import { useEntitlement } from "@/state/useEntitlement";
-import { DashboardTooltip } from "../editor/DashboardTooltip";
 import { ClientEntitlementGate } from "../entitlements/ClientEntitlementGate";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { InviteUserDialogContent } from "./InviteUserDialogContent";
+import { SeatUpsell } from "./SeatUpsell";
 
 export declare namespace InviteUserDialog {
     export interface Props {
@@ -32,14 +32,7 @@ export function InviteUserDialog({
     return (
         <ClientEntitlementGate
             required="seats"
-            fallback={
-                <DashboardTooltip content="Your plan's seat limit has been reached. Upgrade to add more members.">
-                    <Button variant="default" disabled>
-                        <Plus />
-                        Add member
-                    </Button>
-                </DashboardTooltip>
-            }
+            fallback={<SeatUpsell />}
             loading={
                 <Button variant="default" disabled>
                     <Plus />

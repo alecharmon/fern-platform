@@ -18,6 +18,7 @@ export interface BillingPlan {
         kind: "plan" | "addon";
         tier: ProductTier;
         status: string;
+        qty: number;
     }>;
     subscription: {
         id: string;
@@ -45,6 +46,7 @@ function deriveHighestTier(tiers: (string | null)[]): ProductTier {
  */
 export async function getBillingPlan(orgId: string): Promise<Result<BillingPlan | null, BillingError>> {
     const productsResult = await getOrgActiveProducts(orgId);
+
     if (productsResult.isErr()) {
         return err(productsResult.error);
     }
@@ -62,7 +64,7 @@ export async function getBillingPlan(orgId: string): Promise<Result<BillingPlan 
     }
 
     const validProducts = products.filter(
-        (p): p is typeof p & { sku: string; kind: string; tier: string; status: string } =>
+        (p): p is typeof p & { sku: string; kind: string; tier: string; status: string; qty: number | null } =>
             p.sku != null && p.kind != null && p.tier != null && p.status != null
     );
 
@@ -77,7 +79,8 @@ export async function getBillingPlan(orgId: string): Promise<Result<BillingPlan 
             sku: p.sku,
             kind: p.kind as "plan" | "addon",
             tier: p.tier as ProductTier,
-            status: p.status
+            status: p.status,
+            qty: p.qty ?? 1
         })),
         subscription: products[0]?.subscription_id ? { id: products[0].subscription_id } : null,
         hasSubscriptionHistory
