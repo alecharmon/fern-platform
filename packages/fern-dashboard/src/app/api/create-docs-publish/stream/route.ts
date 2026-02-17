@@ -16,6 +16,47 @@ interface LogEntry {
     timestamp: string;
 }
 
+async function sendPostmanSlackNotification({
+    teamId,
+    collectionId,
+    siteUrl,
+    success,
+    error
+}: {
+    teamId: string;
+    collectionId: string;
+    siteUrl: string;
+    success: boolean;
+    error?: string;
+}): Promise<void> {
+    const webhookUrl = process.env.SLACK_WEBHOOK_URL_DOCS_INCIDENTS;
+    if (!webhookUrl) {
+        console.warn("[postman-notify] SLACK_WEBHOOK_URL_DOCS_INCIDENTS not configured, skipping Slack notification");
+        return;
+    }
+
+    const status = success ? "SUCCESS" : "FAILURE";
+    const message = success
+        ? `Postman Docs Publish Notification (${status})\n• Team ID: ${teamId}\n• Collection ID: ${collectionId}\n• Site URL: https://${siteUrl}\n• Notified Postman of successful docs publish.`
+        : `Postman Docs Publish Notification (${status})\n• Team ID: ${teamId}\n• Collection ID: ${collectionId}\n• Site URL: https://${siteUrl}\n• Error: ${error ?? "Docs generation failed"}\n• Notified Postman of docs publish failure.`;
+
+    try {
+        const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: message })
+        });
+
+        if (!response.ok) {
+            console.error(`[postman-notify] Failed to send Slack notification: ${response.status} ${response.statusText}`);
+        } else {
+            console.log("[postman-notify] Slack notification sent successfully");
+        }
+    } catch (slackError) {
+        console.error("[postman-notify] Error sending Slack notification:", slackError);
+    }
+}
+
 async function notifyPostman({
     teamId,
     collectionId,
@@ -29,20 +70,32 @@ async function notifyPostman({
     success: boolean;
     error?: string;
 }): Promise<void> {
+    console.log(
+        `[postman-notify] Attempting to notify Postman: teamId=${teamId}, collectionId=${collectionId}, siteUrl=${siteUrl}, success=${success}${error ? `, error=${error}` : ""}`
+    );
+
     const installation = await getAppInstallationByTeamId(teamId);
     if (!installation) {
+        console.error(`[postman-notify] No app installation found for team ${teamId}. Cannot notify Postman.`);
         throw new Error(`No app installation found for team ${teamId}`);
     }
+    console.log(
+        `[postman-notify] Found app installation for team ${teamId}: installationId=${installation.app_installation_id}`
+    );
 
     const accessToken = await getPostmanAccessToken({
         teamId,
         installationAuthId: installation.app_installation_id,
         sharedSecret: installation.shared_secret
     });
+    console.log("[postman-notify] Successfully obtained Postman access token");
 
     const client = getPostmanFernIntegrationServiceClient({ token: accessToken });
 
     if (success) {
+        console.log(
+            `[postman-notify] Sending SUCCESS notification to Postman: publishedDocUrl=https://${siteUrl}`
+        );
         await client.putFernDocs({
             teamId,
             collectionId,
@@ -50,6 +103,9 @@ async function notifyPostman({
             publishedDocUrl: `https://${siteUrl}`
         });
     } else {
+        console.log(
+            `[postman-notify] Sending FAILURE notification to Postman: error=${error ?? "Docs generation failed"}`
+        );
         await client.putFernDocs({
             teamId,
             collectionId,
@@ -57,6 +113,10 @@ async function notifyPostman({
             error: error ?? "Docs generation failed"
         });
     }
+
+    console.log("[postman-notify] Successfully notified Postman");
+
+    await sendPostmanSlackNotification({ teamId, collectionId, siteUrl, success, error });
 }
 
 /**
@@ -313,6 +373,9 @@ export async function GET(req: NextRequest) {
                     }
 
                     if (postmanCollectionId && postmanTeamId) {
+                        console.log(
+                            `[postman-notify] Docs publish SUCCEEDED. Preparing to notify Postman: teamId=${postmanTeamId}, collectionId=${postmanCollectionId}, siteUrl=${siteUrl}`
+                        );
                         try {
                             sendEvent({
                                 type: "log",
@@ -331,13 +394,17 @@ export async function GET(req: NextRequest) {
                                 timestamp: new Date().toISOString()
                             });
                         } catch (postmanError) {
-                            console.error("Failed to notify Postman:", postmanError);
+                            console.error("[postman-notify] Failed to notify Postman of success:", postmanError);
                             sendEvent({
                                 type: "log",
                                 message: "⚠ Failed to notify Postman (non-critical)",
                                 timestamp: new Date().toISOString()
                             });
                         }
+                    } else {
+                        console.log(
+                            `[postman-notify] Skipping Postman notification: postmanCollectionId=${postmanCollectionId ?? "not set"}, postmanTeamId=${postmanTeamId ?? "not set"}`
+                        );
                     }
 
                     // Send completion event
@@ -352,6 +419,9 @@ export async function GET(req: NextRequest) {
                     });
                 } else {
                     if (postmanCollectionId && postmanTeamId) {
+                        console.log(
+                            `[postman-notify] Docs publish FAILED. Preparing to notify Postman: teamId=${postmanTeamId}, collectionId=${postmanCollectionId}, siteUrl=${siteUrl}`
+                        );
                         try {
                             await notifyPostman({
                                 teamId: postmanTeamId,
@@ -361,8 +431,12 @@ export async function GET(req: NextRequest) {
                                 error: "GitHub Actions workflow failed"
                             });
                         } catch (postmanError) {
-                            console.error("Failed to notify Postman of failure:", postmanError);
+                            console.error("[postman-notify] Failed to notify Postman of failure:", postmanError);
                         }
+                    } else {
+                        console.log(
+                            `[postman-notify] Skipping Postman failure notification: postmanCollectionId=${postmanCollectionId ?? "not set"}, postmanTeamId=${postmanTeamId ?? "not set"}`
+                        );
                     }
 
                     sendEvent({
