@@ -20,4 +20,6 @@ export interface SidebarRenderOptions {
     preResolvedIcons?: Record<FernNavigation.NodeId, ReactNode>;
     /** Files data for resolving file: prefixed icons */
     files?: Record<string, FileData>;
+    /** If true, hidden nodes are kept visible in the sidebar (used by fern-dashboard editor) */
+    showHidden?: boolean;
 }

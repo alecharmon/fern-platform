@@ -3,7 +3,7 @@
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { useNavigation } from "@fern-docs/components/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { File, GripVertical, MoreVertical, Pencil } from "lucide-react";
+import { Eye, EyeOff, File, GripVertical, MoreVertical, Pencil } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
 import { useState } from "react";
 import type { CreatePageButtonHandle } from "@/app/[orgName]/(visual-editor)/editor/[docsUrl]/[branch]/[...slug]/@sidebar/CreatePageButton";
@@ -96,12 +96,19 @@ export function SidebarSectionNodeWithMenu({
                             </DropdownMenu.Item>
                             <DropdownMenu.Item
                                 className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-100 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:hover:bg-transparent"
+                                onSelect={() => {
+                                    navigation.toggleSectionHidden(node.id, !node.hidden);
+                                    setDropdownOpen(false);
+                                }}
+                            >
+                                {node.hidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                                <span>{node.hidden ? "Show" : "Hide"}</span>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-100 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:hover:bg-transparent"
                                 onSelect={(e) => {
-                                    // Prevent default to control the dismissal
                                     e.preventDefault();
                                     setDropdownOpen(false);
-                                    // Wait for the dropdown to close before opening the popover
-                                    // to avoid UI conflicts between the two overlays
                                     setTimeout(() => {
                                         createPageButtonRef.current?.openWithSection(node.id);
                                     }, 0);

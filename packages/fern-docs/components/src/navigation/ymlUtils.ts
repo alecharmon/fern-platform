@@ -82,6 +82,18 @@ function _buildDocsYmlContentFromChanges(
                     newTitle: change.newTitle,
                     tabSlug: change.tabSlug
                 });
+            } else if (change.type === "toggle_hidden_page") {
+                _applyToggleHiddenPageOperation(config, {
+                    pageTitle: change.pageTitle,
+                    hidden: change.hidden,
+                    tabSlug: change.tabSlug
+                });
+            } else if (change.type === "toggle_hidden_section") {
+                _applyToggleHiddenSectionOperation(config, {
+                    sectionTitle: change.sectionTitle,
+                    hidden: change.hidden,
+                    tabSlug: change.tabSlug
+                });
             }
         }
 
@@ -657,10 +669,6 @@ function _applyRenamePageOperation(
     }
 }
 
-/**
- * Applies a move_node change to the docs.yml config.
- * Removes the item from its old location and inserts it at the new location.
- */
 function _applyMoveOperation(
     docsConfig: DocsYmlConfig,
     change: Extract<import("./types").NavigationChange, { type: "move_node" }>,
@@ -886,7 +894,97 @@ function _removeItemFromNavigation(
     return false;
 }
 
-/** Checks if item matches target page by path or title */
+function _applyToggleHiddenPageOperation(
+    docsConfig: DocsYmlConfig,
+    update: { pageTitle: string; hidden: boolean; tabSlug?: string }
+) {
+    const { pageTitle, hidden, tabSlug } = update;
+
+    if (!docsConfig.navigation) {
+        return;
+    }
+
+    const toggleInItems = (items: YmlNavigationItem[]): boolean => {
+        for (const item of items) {
+            if (isYmlPageItem(item) && item.page === pageTitle) {
+                if (hidden) {
+                    item.hidden = true;
+                } else {
+                    delete item.hidden;
+                }
+                return true;
+            }
+            if (item.contents) {
+                if (toggleInItems(item.contents)) {
+                    return true;
+                }
+            }
+            if (item.layout) {
+                if (toggleInItems(item.layout)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    if (tabSlug) {
+        const tabIdentifier = tabSlug.includes("/") ? tabSlug.split("/").pop() : tabSlug;
+        const tab = docsConfig.navigation.find((item) => item.tab === tabIdentifier);
+        if (tab?.layout) {
+            toggleInItems(tab.layout);
+        }
+    } else {
+        toggleInItems(docsConfig.navigation);
+    }
+}
+
+/** Toggles the hidden property on a section in the navigation structure */
+function _applyToggleHiddenSectionOperation(
+    docsConfig: DocsYmlConfig,
+    update: { sectionTitle: string; hidden: boolean; tabSlug?: string }
+) {
+    const { sectionTitle, hidden, tabSlug } = update;
+
+    if (!docsConfig.navigation) {
+        return;
+    }
+
+    const toggleInItems = (items: YmlNavigationItem[]): boolean => {
+        for (const item of items) {
+            if (isYmlSectionItem(item) && item.section === sectionTitle) {
+                if (hidden) {
+                    item.hidden = true;
+                } else {
+                    delete item.hidden;
+                }
+                return true;
+            }
+            if (item.contents) {
+                if (toggleInItems(item.contents)) {
+                    return true;
+                }
+            }
+            if (item.layout) {
+                if (toggleInItems(item.layout)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    if (tabSlug) {
+        const tabIdentifier = tabSlug.includes("/") ? tabSlug.split("/").pop() : tabSlug;
+        const tab = docsConfig.navigation.find((item) => item.tab === tabIdentifier);
+        if (tab?.layout) {
+            toggleInItems(tab.layout);
+        }
+    } else {
+        toggleInItems(docsConfig.navigation);
+    }
+}
+
 function _isMatchingPage(
     item: YmlNavigationItem,
     targetPage: string,

@@ -135,6 +135,7 @@ export default function PageSidebar({
                             loaderData={prefetchedLoaderData}
                             renderOptions={{
                                 forceClientRender: true,
+                                showHidden: true,
                                 wrapPageNode: (node, component) => (
                                     <DraggableNodeWrapper node={node} nodeType="page">
                                         <SidebarPageNodeWithMenu node={node}>{component}</SidebarPageNodeWithMenu>

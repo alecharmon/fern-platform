@@ -18,6 +18,11 @@ interface WithPrunedSidebarOpts {
      * If true, authenticated pages will not be pruned because they are discoverable
      */
     discoverable?: true;
+
+    /**
+     * If true, hidden nodes will not be pruned (used by the editor to show hidden pages)
+     */
+    showHidden?: boolean;
 }
 
 /**
@@ -56,7 +61,7 @@ function isVisible(node: FernNavigation.NavigationNode, visibleNodeIds: Set<Fern
  */
 export function pruneNavigationPredicate(
     node: FernNavigation.NavigationNode,
-    { visibleNodeIds, authed, discoverable }: WithPrunedSidebarOpts
+    { visibleNodeIds, authed, discoverable, showHidden }: WithPrunedSidebarOpts
 ): boolean {
     // prune authenticated pages (unless the discoverable flag is turned on)
     if (FernNavigation.isPage(node) && node.authed && !authed && !discoverable) {
@@ -65,7 +70,7 @@ export function pruneNavigationPredicate(
 
     // then, prune hidden nodes, unless it is the current node
     if (FernNavigation.hasMetadata(node) && node.hidden) {
-        if (isVisible(node, new Set(visibleNodeIds))) {
+        if (showHidden || isVisible(node, new Set(visibleNodeIds))) {
             return true;
         }
         return false;

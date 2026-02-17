@@ -37,7 +37,8 @@ export function SidebarRootNodeImpl({
         // when true, all unauthed pages are visible, but rendered with a LOCK button
         // so they're not actually "pruned" from the sidebar
         // TODO: move this out of a feature flag and into the navigation node metadata
-        discoverable: edgeFlags.isAuthenticatedPagesDiscoverable ? (true as const) : undefined
+        discoverable: edgeFlags.isAuthenticatedPagesDiscoverable ? (true as const) : undefined,
+        showHidden: renderOptions?.showHidden
     });
 
     const children =

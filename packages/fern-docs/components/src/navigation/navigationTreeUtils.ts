@@ -723,6 +723,324 @@ export function updatePageTitle(
     return updateNode(rootNode);
 }
 
+/** Updates the hidden property of a node by ID in the navigation tree immutably */
+export function updateNodeHidden(
+    rootNode: FernNavigation.RootNode,
+    nodeId: FernNavigation.NodeId,
+    hidden: boolean
+): FernNavigation.RootNode {
+    const updateNode = <T extends FernNavigation.NavigationNode>(node: T): T => {
+        if (node.id === nodeId && FernNavigation.hasMetadata(node)) {
+            return { ...node, hidden: hidden || undefined } as T;
+        }
+
+        switch (node.type) {
+            case "root":
+                return { ...node, child: updateNode(node.child) } as T;
+            case "unversioned":
+                return { ...node, child: updateNode(node.child) } as T;
+            case "product":
+                return { ...node, child: updateNode((node as any).child) } as T;
+            case "versioned": {
+                const versionedNode = node as any;
+                if (versionedNode.children && Array.isArray(versionedNode.children)) {
+                    return {
+                        ...node,
+                        children: versionedNode.children.map((child: any) => updateNode(child))
+                    } as T;
+                }
+                return node;
+            }
+            case "version":
+                return { ...node, child: updateNode((node as any).child) } as T;
+            case "tabbed": {
+                const tabbedNode = node as any;
+                if (tabbedNode.tabs && Array.isArray(tabbedNode.tabs)) {
+                    return {
+                        ...node,
+                        tabs: tabbedNode.tabs.map((tab: any) => updateNode(tab))
+                    } as T;
+                } else if (tabbedNode.children && Array.isArray(tabbedNode.children)) {
+                    return {
+                        ...node,
+                        children: tabbedNode.children.map((child: any) => updateNode(child))
+                    } as T;
+                } else {
+                    return node;
+                }
+            }
+            case "productgroup":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            case "sidebarRoot":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            case "sidebarGroup":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            case "section":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            case "tab":
+                return { ...node, child: updateNode(node.child) } as T;
+            case "apiPackage":
+                return {
+                    ...node,
+                    children: node.children.map((child) => updateNode(child))
+                } as T;
+            default:
+                return node;
+        }
+    };
+
+    return updateNode(rootNode);
+}
+
+/** Injects a page node into a section within the navigation tree immutably */
+export function injectPageIntoSection(
+    rootNode: FernNavigation.RootNode,
+    pageNode: FernNavigation.PageNode,
+    parentSectionId: FernNavigation.NodeId,
+    insertionMode: "atIndex" | "prepend" | "append" = "append",
+    insertionIndex?: number
+): FernNavigation.RootNode {
+    let injected = false;
+
+    const injectNode = <T extends FernNavigation.NavigationNode>(node: T): T => {
+        // If already injected, just return the node
+        if (injected) {
+            return node;
+        }
+
+        // If this is the target parent (section, sidebarGroup, or sidebarRoot), add the page
+        if (
+            (node.type === "section" || node.type === "sidebarGroup" || node.type === "sidebarRoot") &&
+            node.id === parentSectionId
+        ) {
+            injected = true;
+            const children = [...(node as any).children];
+
+            // Determine insertion position based on mode
+            let position: number;
+            if (insertionMode === "prepend") {
+                position = 0;
+            } else if (insertionMode === "atIndex" && insertionIndex !== undefined) {
+                position = Math.min(insertionIndex, children.length);
+            } else {
+                // Default to append
+                position = children.length;
+            }
+
+            // For sidebarRoot when no sidebarGroups exist, we need to create one
+            if (node.type === "sidebarRoot") {
+                const hasSidebarGroup = children.some((child: any) => child.type === "sidebarGroup");
+                if (!hasSidebarGroup) {
+                    // Create a new sidebarGroup to wrap the page
+                    const newSidebarGroup: FernNavigation.SidebarGroupNode = {
+                        type: "sidebarGroup",
+                        id: FernNavigation.NodeId(`${node.id}:sidebarGroup:0`),
+                        children: [pageNode]
+                    };
+                    children.splice(position, 0, newSidebarGroup);
+                    return { ...node, children } as T;
+                }
+            }
+
+            children.splice(position, 0, pageNode);
+            return { ...node, children } as T;
+        }
+
+        // Recursively search children
+        switch (node.type) {
+            case "root":
+                return { ...node, child: injectNode(node.child) } as T;
+            case "unversioned":
+                return { ...node, child: injectNode(node.child) } as T;
+            case "product":
+                return { ...node, child: injectNode((node as any).child) } as T;
+            case "versioned": {
+                // Versioned node has children array of version nodes
+                const versionedNode = node as any;
+                if (versionedNode.children && Array.isArray(versionedNode.children)) {
+                    return {
+                        ...node,
+                        children: versionedNode.children.map((child: any) => injectNode(child))
+                    } as T;
+                }
+                return node;
+            }
+            case "version":
+                return { ...node, child: injectNode((node as any).child) } as T;
+            case "tabbed": {
+                const tabbedNode = node as any;
+                if (tabbedNode.tabs && Array.isArray(tabbedNode.tabs)) {
+                    return {
+                        ...node,
+                        tabs: tabbedNode.tabs.map((tab: any) => injectNode(tab))
+                    } as T;
+                } else if (tabbedNode.children && Array.isArray(tabbedNode.children)) {
+                    return {
+                        ...node,
+                        children: tabbedNode.children.map((child: any) => injectNode(child))
+                    } as T;
+                } else {
+                    return node;
+                }
+            }
+            case "productgroup":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            case "sidebarRoot":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            case "sidebarGroup":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            case "section":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            case "tab":
+                return { ...node, child: injectNode(node.child) } as T;
+            case "apiPackage":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            default:
+                return node;
+        }
+    };
+
+    return injectNode(rootNode);
+}
+
+/** Injects a section node into a container within the navigation tree immutably */
+export function injectSectionIntoContainer(
+    rootNode: FernNavigation.RootNode,
+    sectionNode: FernNavigation.SectionNode,
+    parentContainerId: FernNavigation.NodeId,
+    insertionMode: "atIndex" | "prepend" | "append" = "append",
+    insertionIndex?: number
+): FernNavigation.RootNode {
+    let injected = false;
+
+    const injectNode = <T extends FernNavigation.NavigationNode>(node: T): T => {
+        // If already injected, just return the node
+        if (injected) {
+            return node;
+        }
+
+        // If this is the target parent (section, sidebarGroup, or sidebarRoot), add the section
+        if (
+            (node.type === "section" || node.type === "sidebarGroup" || node.type === "sidebarRoot") &&
+            node.id === parentContainerId
+        ) {
+            injected = true;
+            const children = [...(node as any).children];
+
+            // Determine insertion position based on mode
+            let position: number;
+            if (insertionMode === "prepend") {
+                position = 0;
+            } else if (insertionMode === "atIndex" && insertionIndex !== undefined) {
+                position = Math.min(insertionIndex, children.length);
+            } else {
+                // Default to append
+                position = children.length;
+            }
+
+            children.splice(position, 0, sectionNode);
+            return { ...node, children } as T;
+        }
+
+        // Recursively search children
+        switch (node.type) {
+            case "root":
+                return { ...node, child: injectNode(node.child) } as T;
+            case "unversioned":
+                return { ...node, child: injectNode(node.child) } as T;
+            case "product":
+                return { ...node, child: injectNode((node as any).child) } as T;
+            case "versioned": {
+                // Versioned node has children array of version nodes
+                const versionedNode = node as any;
+                if (versionedNode.children && Array.isArray(versionedNode.children)) {
+                    return {
+                        ...node,
+                        children: versionedNode.children.map((child: any) => injectNode(child))
+                    } as T;
+                }
+                return node;
+            }
+            case "version":
+                return { ...node, child: injectNode((node as any).child) } as T;
+            case "tabbed": {
+                const tabbedNode = node as any;
+                if (tabbedNode.tabs && Array.isArray(tabbedNode.tabs)) {
+                    return {
+                        ...node,
+                        tabs: tabbedNode.tabs.map((tab: any) => injectNode(tab))
+                    } as T;
+                } else if (tabbedNode.children && Array.isArray(tabbedNode.children)) {
+                    return {
+                        ...node,
+                        children: tabbedNode.children.map((child: any) => injectNode(child))
+                    } as T;
+                } else {
+                    return node;
+                }
+            }
+            case "productgroup":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            case "sidebarRoot":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            case "sidebarGroup":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            case "section":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            case "tab":
+                return { ...node, child: injectNode(node.child) } as T;
+            case "apiPackage":
+                return {
+                    ...node,
+                    children: node.children.map((child) => injectNode(child))
+                } as T;
+            default:
+                return node;
+        }
+    };
+
+    return injectNode(rootNode);
+}
+
 /**
  * Finds an existing section by title within a parent container.
  * Used to check for duplicate sections before creating a new one.

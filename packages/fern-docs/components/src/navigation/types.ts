@@ -317,6 +317,7 @@ export interface YmlNavigationItem {
     contents?: YmlNavigationItem[];
     tab?: string;
     layout?: YmlNavigationItem[];
+    hidden?: boolean;
 }
 
 /** Expected structure of a parsed docs.yml tab item */
@@ -421,45 +422,41 @@ export type NavigationChange =
       }
     | {
           type: "move_node";
-          /** The ID of the node being moved */
           nodeId: FernNavigation.NodeId;
-          /** Whether the moved node is a page or section */
           nodeType: "page" | "section";
-          /** The section/container ID the node was moved from (for YAML removal) */
           fromSectionId?: FernNavigation.NodeId | null;
-          /** The title of the source section (resolved at commit time from rootNode) */
           fromSectionTitle?: string | null;
-          /** The section/container ID the node is moved to (for YAML insertion) */
           toSectionId?: FernNavigation.NodeId | null;
-          /** The title of the target section (resolved at commit time from rootNode) */
           toSectionTitle?: string | null;
-          /** The insertion index in the target container */
           toInsertionIndex: number;
-          /** For page moves: the page entry for docs.yml manipulation */
           pageEntry?: { page: string; path: string };
-          /** For section moves: the title of the section being moved */
           sectionTitle?: string;
-          /**
-           * Ordered ancestor section titles leading to the target container.
-           * Used to walk nested sections in YAML (mirrors parentSectionPathTitles on add_page).
-           * Empty array or undefined means the target is at the root level.
-           */
           toSectionPathTitles?: string[];
-          /**
-           * Ordered ancestor section titles leading to the source (from) container.
-           * Used to scope section removal to the correct container in YAML,
-           * avoiding false matches when sections share the same title.
-           */
           fromSectionPathTitles?: string[];
           tabSlug?: string;
           createdAt: number;
-          /** Whether this change has been committed */
           committed?: boolean;
-          /**
-           * The docs.yml file path where this change should be applied.
-           * Uses normalized relative paths (see DocsYmlFilePath for convention).
-           * Examples: "docs.yml", "versions/v2.yml", "platform/docs.yml"
-           */
+          docsYmlFilePath: DocsYmlFilePath;
+      }
+    | {
+          type: "toggle_hidden_page";
+          pageId: FernNavigation.PageId;
+          nodeId: FernNavigation.NodeId;
+          pageTitle: string;
+          hidden: boolean;
+          tabSlug?: string;
+          createdAt: number;
+          committed?: boolean;
+          docsYmlFilePath: DocsYmlFilePath;
+      }
+    | {
+          type: "toggle_hidden_section";
+          sectionId: FernNavigation.NodeId;
+          sectionTitle: string;
+          hidden: boolean;
+          tabSlug?: string;
+          createdAt: number;
+          committed?: boolean;
           docsYmlFilePath: DocsYmlFilePath;
       };
 

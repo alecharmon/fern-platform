@@ -6,7 +6,7 @@ import { Button } from "@fern-docs/components/FernButtonV2";
 import { constructEditorSlug, ROOT_SLUG_ALIAS, useNavigation } from "@fern-docs/components/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Popover from "@radix-ui/react-popover";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Eye, EyeOff, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -162,6 +162,18 @@ export function SidebarPageNodeWithMenu({ node, children }: SidebarPageNodeWithM
                             >
                                 <Pencil className="size-4" />
                                 <span>Rename</span>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                                className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm outline-none hover:bg-gray-100 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:hover:bg-transparent"
+                                onSelect={() => {
+                                    if ("pageId" in node) {
+                                        navigation.togglePageHidden(node.id, node.pageId, !node.hidden);
+                                    }
+                                    setDropdownOpen(false);
+                                }}
+                            >
+                                {node.hidden ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                                <span>{node.hidden ? "Show" : "Hide"}</span>
                             </DropdownMenu.Item>
                             <DropdownMenu.Item
                                 className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 outline-none hover:bg-red-50 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed data-[disabled]:hover:bg-transparent"

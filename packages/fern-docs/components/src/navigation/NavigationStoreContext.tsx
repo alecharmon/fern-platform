@@ -86,6 +86,8 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     renameSection: NavigationStore["renameSection"];
     renamePage: NavigationStore["renamePage"];
     moveNode: NavigationStore["moveNode"];
+    togglePageHidden: NavigationStore["togglePageHidden"];
+    toggleSectionHidden: NavigationStore["toggleSectionHidden"];
     setDeletionToastCallback: NavigationStore["setDeletionToastCallback"];
     setRootNode: NavigationStore["setRootNode"];
     emitPageSaveEvent: NavigationStore["emitPageSaveEvent"];
@@ -122,6 +124,8 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         renameSection: store.renameSection.bind(store),
         renamePage: store.renamePage.bind(store),
         moveNode: store.moveNode.bind(store),
+        togglePageHidden: store.togglePageHidden.bind(store),
+        toggleSectionHidden: store.toggleSectionHidden.bind(store),
         setDeletionToastCallback: store.setDeletionToastCallback.bind(store),
         setRootNode: store.setRootNode.bind(store),
         emitPageSaveEvent: store.emitPageSaveEvent.bind(store),

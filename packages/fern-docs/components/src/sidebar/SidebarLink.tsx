@@ -158,7 +158,7 @@ const SidebarLinkInternal = React.forwardRef<HTMLAnchorElement, SidebarLinkProps
     const sharedClassName = cn(
         "fern-sidebar-link",
         `fern-sidebar-level-${depth + 1}`,
-        { "opacity-50": hidden },
+        { "opacity-50 line-through": hidden },
         depth > 0 && "nested",
         className
     );

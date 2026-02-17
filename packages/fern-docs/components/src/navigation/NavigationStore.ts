@@ -24,6 +24,7 @@ import {
     getSectionAncestorTitles,
     insertNodeIntoParent,
     moveNodeInTree,
+    updateNodeHidden,
     updatePageTitle,
     updateSectionTitle
 } from "./navigationTreeUtils";
@@ -432,14 +433,6 @@ export class NavigationStore {
         this._setStorageAndNotify();
     }
 
-    /**
-     * Moves a node (page or section) to a new position in the navigation tree.
-     * Updates both the in-memory RootNode and tracks the change for docs.yml generation.
-     *
-     * @param nodeId - The ID of the node to move
-     * @param targetParentId - The ID of the parent container to move into
-     * @param insertionIndex - The index at which to insert in the target container
-     */
     moveNode(nodeId: FernNavigation.NodeId, targetParentId: FernNavigation.NodeId, insertionIndex: number): void {
         if (!this._rootNode) {
             console.warn("[NavigationStore.moveNode] Cannot move node: rootNode not available");
@@ -560,6 +553,96 @@ export class NavigationStore {
             toInsertionIndex: ymlInsertionIndex,
             pageEntry,
             sectionTitle,
+            tabSlug,
+            docsYmlFilePath,
+            createdAt: Date.now()
+        });
+
+        this._setStorageAndNotify();
+    }
+
+    togglePageHidden(nodeId: FernNavigation.NodeId, pageId: FernNavigation.PageId, hidden: boolean): void {
+        if (!this._rootNode) {
+            console.warn("[NavigationStore.togglePageHidden] Cannot toggle hidden: rootNode not available");
+            return;
+        }
+
+        const searchResult = findPageByPageId(this._rootNode, pageId);
+
+        if (!searchResult) {
+            console.warn(`[NavigationStore.togglePageHidden] Cannot toggle hidden: pageId ${pageId} not found`);
+            return;
+        }
+
+        const { page: pageNode, tabSlug, product, version } = searchResult;
+
+        const updatedRootNode = updateNodeHidden(this._rootNode, nodeId, hidden);
+        this._rootNode = updatedRootNode;
+
+        this._navigationChanges = new Map(this._navigationChanges);
+
+        const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+            {
+                currentVersion: version,
+                currentProduct: product,
+                currentTab: tabSlug ? { slug: tabSlug } : undefined
+            },
+            this._slugToDocsYmlFilePath
+        );
+
+        const changeKey = `page-hidden-${pageId}`;
+
+        this._navigationChanges.set(changeKey, {
+            type: "toggle_hidden_page",
+            pageId,
+            nodeId,
+            pageTitle: pageNode.title,
+            hidden,
+            tabSlug,
+            docsYmlFilePath,
+            createdAt: Date.now()
+        });
+
+        this._setStorageAndNotify();
+    }
+
+    /** Toggles the hidden property of a section node */
+    toggleSectionHidden(sectionId: FernNavigation.NodeId, hidden: boolean): void {
+        if (!this._rootNode) {
+            console.warn("[NavigationStore.toggleSectionHidden] Cannot toggle hidden: rootNode not available");
+            return;
+        }
+
+        const searchResult = findSectionById(this._rootNode, sectionId);
+
+        if (!searchResult) {
+            console.warn(`[NavigationStore.toggleSectionHidden] Cannot toggle hidden: section ${sectionId} not found`);
+            return;
+        }
+
+        const { section: sectionNode, tabSlug, product, version } = searchResult;
+
+        const updatedRootNode = updateNodeHidden(this._rootNode, sectionId, hidden);
+        this._rootNode = updatedRootNode;
+
+        this._navigationChanges = new Map(this._navigationChanges);
+
+        const docsYmlFilePath = extractDocsYmlFilePathFromFoundNode(
+            {
+                currentVersion: version,
+                currentProduct: product,
+                currentTab: tabSlug ? { slug: tabSlug } : undefined
+            },
+            this._slugToDocsYmlFilePath
+        );
+
+        const changeKey = `section-hidden-${sectionId}`;
+
+        this._navigationChanges.set(changeKey, {
+            type: "toggle_hidden_section",
+            sectionId,
+            sectionTitle: sectionNode.title,
+            hidden,
             tabSlug,
             docsYmlFilePath,
             createdAt: Date.now()

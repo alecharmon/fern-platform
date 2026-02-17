@@ -35,7 +35,14 @@ export function SidebarClientRootNode({
             visibleNodeIds={visibleNodeIds}
             authState={authState}
             edgeFlags={edgeFlags}
-            renderOptions={{ forceClientRender, wrapSectionNode, wrapSectionContainer, wrapPageNode, files }}
+            renderOptions={{
+                forceClientRender,
+                wrapSectionNode,
+                wrapSectionContainer,
+                wrapPageNode,
+                files,
+                showHidden: renderOptions?.showHidden
+            }}
             lang={lang}
         />
     );
