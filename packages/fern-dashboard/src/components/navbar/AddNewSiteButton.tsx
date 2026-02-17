@@ -2,9 +2,11 @@
 
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DocsLimitReachedDialog } from "@/components/entitlements/DocsLimitReachedDialog";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { useIsSidebarCollapsed } from "@/state/sidebar-collapse";
 import { useEntitlement } from "@/state/useEntitlement";
 import { cn } from "@/utils/utils";
@@ -15,6 +17,7 @@ interface AddNewSiteButtonProps {
 }
 
 export function AddNewSiteButton({ orgName, isCreateDocsNewSiteEnabled }: AddNewSiteButtonProps) {
+    const posthog = usePostHog();
     const [isCollapsed] = useIsSidebarCollapsed();
     const { remaining } = useEntitlement("docs_sites");
     const [showLimitDialog, setShowLimitDialog] = useState(false);
@@ -35,7 +38,10 @@ export function AddNewSiteButton({ orgName, isCreateDocsNewSiteEnabled }: AddNew
             {isAtLimit ? (
                 <button
                     type="button"
-                    onClick={() => setShowLimitDialog(true)}
+                    onClick={() => {
+                        captureEvent(posthog, PosthogEventName.BILLING_LIMIT_HIT, { limitType: "docs_sites" });
+                        setShowLimitDialog(true);
+                    }}
                     className={cn(
                         "hidden md:flex",
                         "flex-1 flex-row gap-2 text-sm transition",

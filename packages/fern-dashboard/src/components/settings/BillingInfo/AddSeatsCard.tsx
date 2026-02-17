@@ -3,11 +3,13 @@
 import { ADDON_SEAT_PRICE_DOLLARS, MAX_ADDON_SEATS } from "@fern-platform/billing";
 import { Minus, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { updateAddonSeats } from "@/app/actions/billing/updateAddonSeats";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { Button } from "@/components/ui/button";
 import { useEntitlements } from "@/providers/EntitlementsProvider";
 
@@ -20,6 +22,7 @@ export function AddSeatsCard({
     orgName: Auth0OrgName;
     currentAddonSeats: number;
 }) {
+    const posthog = usePostHog();
     const { entitlements, refetch } = useEntitlements();
     const router = useRouter();
     const seatsResult = entitlements?.seats;
@@ -86,6 +89,12 @@ export function AddSeatsCard({
                 return;
             }
 
+            captureEvent(posthog, PosthogEventName.ADDON_SEATS_UPDATED, {
+                previousQuantity: currentAddonSeats,
+                newQuantity: quantity,
+                delta
+            });
+
             const verb = delta > 0 ? "Added" : "Removed";
             const count = Math.abs(delta);
             toast.success(`${verb} ${count} seat${count > 1 ? "s" : ""}.`);
@@ -135,7 +144,19 @@ export function AddSeatsCard({
         } finally {
             setIsUpdating(false);
         }
-    }, [orgId, orgName, quantity, hasChanged, delta, refetch, router, serverLimit, optimisticExtra]);
+    }, [
+        orgId,
+        orgName,
+        quantity,
+        hasChanged,
+        delta,
+        refetch,
+        router,
+        serverLimit,
+        optimisticExtra,
+        currentAddonSeats,
+        posthog
+    ]);
 
     const costDelta = delta * ADDON_SEAT_PRICE_DOLLARS;
 

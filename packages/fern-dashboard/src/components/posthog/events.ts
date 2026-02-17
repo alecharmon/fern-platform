@@ -29,7 +29,15 @@ export const PosthogEventName = {
     ONBOARDING_SDK_QUICKSTART_CLICKED: "dashboard-onboarding-sdk-quickstart-clicked",
 
     // PDF export events
-    PDF_EXPORT_CLICKED: "dashboard-pdf-export-clicked"
+    PDF_EXPORT_CLICKED: "dashboard-pdf-export-clicked",
+
+    // Billing & entitlement events
+    BILLING_LIMIT_HIT: "dashboard-billing-limit-hit",
+    UPGRADE_CTA_CLICKED: "dashboard-upgrade-cta-clicked",
+    CHECKOUT_STARTED: "dashboard-checkout-started",
+    CHECKOUT_COMPLETED: "dashboard-checkout-completed",
+    CHECKOUT_CANCELED: "dashboard-checkout-canceled",
+    ADDON_SEATS_UPDATED: "dashboard-addon-seats-updated"
 } as const;
 
 export type PosthogEventName = (typeof PosthogEventName)[keyof typeof PosthogEventName];
@@ -116,6 +124,29 @@ export type PosthogEventPayloads = {
     [PosthogEventName.PDF_EXPORT_CLICKED]: {
         orgName: string;
         docsUrl: string;
+    };
+
+    // Billing & entitlement event payloads
+    [PosthogEventName.BILLING_LIMIT_HIT]: {
+        limitType: "docs_sites" | "seats" | "custom_domain_subpath";
+    };
+    [PosthogEventName.UPGRADE_CTA_CLICKED]: {
+        source: "docs_limit_dialog" | "seat_upsell" | "custom_domain_modal" | "billing_page";
+        targetPlan?: string;
+    };
+    [PosthogEventName.CHECKOUT_STARTED]: {
+        targetPlan: string;
+        billingCycle: "monthly" | "yearly";
+        isUpgrade: boolean;
+    };
+    [PosthogEventName.CHECKOUT_COMPLETED]: {
+        plan: string;
+    };
+    [PosthogEventName.CHECKOUT_CANCELED]: Record<string, never>;
+    [PosthogEventName.ADDON_SEATS_UPDATED]: {
+        previousQuantity: number;
+        newQuantity: number;
+        delta: number;
     };
 };
 

@@ -3,12 +3,14 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { initiateCustomDomain } from "@/app/actions/customDomain";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
 import { hasSubpath } from "@/app/services/domain/validation";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { useEntitlement } from "@/state/useEntitlement";
 import type { DocsUrl } from "@/utils/types";
 import { cn } from "@/utils/utils";
@@ -34,6 +36,7 @@ export function AddCustomDomainModal({
     orgName,
     existingDomainInfo
 }: AddCustomDomainModalProps) {
+    const posthog = usePostHog();
     const router = useRouter();
     const { isEntitled: canUseSubpath } = useEntitlement("custom_domain_subpath");
     const [phase, setPhase] = useState<ModalPhase>(existingDomainInfo ? "checklist" : "enter-domain");
@@ -77,6 +80,7 @@ export function AddCustomDomainModal({
 
         const trimmedDomain = domain.trim().toLowerCase();
         if (hasSubpath(trimmedDomain) && !canUseSubpath) {
+            captureEvent(posthog, PosthogEventName.BILLING_LIMIT_HIT, { limitType: "custom_domain_subpath" });
             setError("Custom subpath domains require a Pro plan.");
             setShowUpgradeLink(true);
             setIsLoading(false);
@@ -93,6 +97,9 @@ export function AddCustomDomainModal({
             if (!result.success) {
                 setError(result.error || "Failed to initiate domain verification.");
                 if (result.requiresUpgrade) {
+                    captureEvent(posthog, PosthogEventName.BILLING_LIMIT_HIT, {
+                        limitType: "custom_domain_subpath"
+                    });
                     setShowUpgradeLink(true);
                 }
                 return;
@@ -180,7 +187,14 @@ export function AddCustomDomainModal({
                                     <span>{error}</span>
                                     {showUpgradeLink && (
                                         <Button variant="destructive" size="sm" asChild className="group">
-                                            <Link href={`/${orgName}/billing`}>
+                                            <Link
+                                                href={`/${orgName}/billing`}
+                                                onClick={() =>
+                                                    captureEvent(posthog, PosthogEventName.UPGRADE_CTA_CLICKED, {
+                                                        source: "custom_domain_modal"
+                                                    })
+                                                }
+                                            >
                                                 Upgrade
                                                 <ArrowRight className="ml-0.5 h-3.5 w-3.5 transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:translate-x-0.5" />
                                             </Link>

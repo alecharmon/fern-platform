@@ -11,6 +11,7 @@ import swiftIcon from "devicon/icons/swift/swift-original.svg";
 import typescriptIcon from "devicon/icons/typescript/typescript-original.svg";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -21,6 +22,7 @@ import { syncAfterCheckout } from "@/app/actions/billing/syncAfterCheckout";
 import { createUpgradeSession } from "@/app/actions/billing/upgradeSubscription";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { ClientEntitlementGate } from "@/components/entitlements/ClientEntitlementGate";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEntitlements } from "@/providers/EntitlementsProvider";
@@ -83,6 +85,7 @@ export interface BillingInfoProps {
 }
 
 export function BillingInfo({ session, showSuperUserPricing = false }: BillingInfoProps) {
+    const posthog = usePostHog();
     const org = useCurrentOrganization();
     const searchParams = useSearchParams();
     const { refetch: refetchEntitlements } = useEntitlements();
@@ -119,13 +122,18 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             const result = await getBillingPlanAction(org.id);
             if (!("error" in result)) {
                 setBillingPlan(result.plan);
+                if (result.plan) {
+                    captureEvent(posthog, PosthogEventName.CHECKOUT_COMPLETED, {
+                        plan: getActivePlanName(result.plan)
+                    });
+                }
                 toast.success("Upgrade successful! Your new plan is now active.");
             }
             refetchEntitlements();
         } catch (error) {
             console.error("Error syncing after checkout popup:", error);
         }
-    }, [org, refetchEntitlements]);
+    }, [org, posthog, refetchEntitlements]);
 
     useEffect(() => {
         if (!org) {
@@ -148,7 +156,13 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
 
         if ((isSuccess || isUpgrade) && !hasShownToast.current) {
             hasShownToast.current = true;
+            captureEvent(posthog, PosthogEventName.CHECKOUT_COMPLETED, { plan: "unknown" });
             toast.success("Upgrade successful! Your new plan is now active.");
+        }
+
+        if (isCanceled && !hasShownToast.current) {
+            hasShownToast.current = true;
+            captureEvent(posthog, PosthogEventName.CHECKOUT_CANCELED, {});
         }
 
         async function loadBillingPlan() {
@@ -176,7 +190,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
         }
 
         loadBillingPlan();
-    }, [org, searchParams]);
+    }, [org, searchParams, posthog]);
 
     const openInPopupOrRedirect = useCallback(
         (url: string) => {
@@ -204,6 +218,11 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             return;
         }
 
+        captureEvent(posthog, PosthogEventName.UPGRADE_CTA_CLICKED, {
+            source: "billing_page",
+            targetPlan: plan.name
+        });
+
         // Enterprise plan - redirect to contact/demo
         if (!plan.cyclePricing) {
             window.open("https://buildwithfern.com/book-demo", "_blank");
@@ -229,6 +248,11 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     console.error("Failed to create upgrade session:", result.error);
                     alert(result.error);
                 } else {
+                    captureEvent(posthog, PosthogEventName.CHECKOUT_STARTED, {
+                        targetPlan: plan.name,
+                        billingCycle,
+                        isUpgrade: true
+                    });
                     openInPopupOrRedirect(result.url);
                 }
             } else {
@@ -244,6 +268,11 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     console.error("Failed to create checkout session:", result.error);
                     alert("Failed to start checkout. Please try again.");
                 } else {
+                    captureEvent(posthog, PosthogEventName.CHECKOUT_STARTED, {
+                        targetPlan: plan.name,
+                        billingCycle,
+                        isUpgrade: false
+                    });
                     openInPopupOrRedirect(result.url);
                 }
             }
