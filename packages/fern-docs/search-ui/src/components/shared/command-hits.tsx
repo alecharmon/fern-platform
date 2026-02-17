@@ -5,6 +5,7 @@ import { Snippet } from "react-instantsearch";
 import { useInfiniteSearchHits, useSendEvent } from "../../hooks/use-search-hits";
 import type { AlgoliaRecordHit } from "../../types";
 import * as Command from "../cmdk";
+import { useSearchDialogOpen } from "../desktop/desktop-search-dialog";
 import { PageIcon } from "../icons/page";
 import { useFacetFilters } from "../search/useFacetFilters";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
@@ -179,7 +180,9 @@ function CommandGroupSearchHitTooltip({
     path,
     children
 }: PropsWithChildren<{ hit: AlgoliaRecordHit; path: string }>) {
-    const open = Command.useCommandState((state) => state.value === path);
+    const isSelected = Command.useCommandState((state) => state.value === path);
+    const dialogOpen = useSearchDialogOpen();
+    const open = isSelected && dialogOpen;
 
     if (hit._snippetResult?.content == null && hit._snippetResult?.description == null) {
         return children;

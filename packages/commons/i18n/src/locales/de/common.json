@@ -104,7 +104,9 @@
     "theme": "Design",
     "or": "oder",
     "toGoToRootSearch": "zurück zur Startsuche",
-    "toGoBack": "zurück"
+    "toGoBack": "zurück",
+    "showMoreFilters": "Mehr Filter anzeigen",
+    "showLessFilters": "Weniger Filter anzeigen"
   },
   "apiReference": {
     "apiReference": "API-Referenz",

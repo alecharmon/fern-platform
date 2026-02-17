@@ -104,7 +104,9 @@
     "theme": "Тема",
     "or": "или",
     "toGoToRootSearch": "для перехода к корневому поиску",
-    "toGoBack": "для возврата"
+    "toGoBack": "для возврата",
+    "showMoreFilters": "Показать больше фильтров",
+    "showLessFilters": "Показать меньше фильтров"
   },
   "apiReference": {
     "apiReference": "Справочник API",

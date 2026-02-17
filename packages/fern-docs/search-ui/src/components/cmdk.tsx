@@ -349,9 +349,18 @@ const Root = forwardRef<HTMLDivElement, CommandProps>((props, forwardedRef) => {
                     filterItems();
                     sort();
 
-                    // Could be initial mount, select the first item if none already selected
                     if (!state.current.value) {
                         selectFirstItem();
+                    } else if (state.current.search) {
+                        const items = getValidItems();
+                        const hasValidPrimarySelection = items.some(
+                            (item) =>
+                                item.getAttribute(VALUE_ATTR) === state.current.value &&
+                                item.getAttribute("data-disable-auto-selection") !== "true"
+                        );
+                        if (!hasValidPrimarySelection) {
+                            selectFirstItem();
+                        }
                     }
 
                     store.emit();

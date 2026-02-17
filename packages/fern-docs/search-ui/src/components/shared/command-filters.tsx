@@ -1,14 +1,16 @@
 import { Badge } from "@fern-docs/components/badges";
 import { t } from "@fern-docs/i18n";
 
-import { ListFilter } from "lucide-react";
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
+import { ChevronsDownUp, ChevronsUpDown, ListFilter } from "lucide-react";
+import { type ComponentPropsWithoutRef, forwardRef, useState } from "react";
 
 import { FACET_DISPLAY_NAME_MAP, getFacetDisplay, toFilterOptions } from "../../utils/facet-display";
 import * as Command from "../cmdk";
 import { useFacets, usePreloadFacets } from "../search/algolia-search-client";
 import { useFacetFilters } from "../search/useFacetFilters";
 import { useSearchBox } from "../search/useSearchBox";
+
+const MAX_VISIBLE_FILTERS = 3;
 
 export const CommandGroupFilters = forwardRef<
     HTMLDivElement,
@@ -18,17 +20,22 @@ export const CommandGroupFilters = forwardRef<
     const { filters, setFilters } = useFacetFilters();
     const options = toFilterOptions(useFacets(filters).facets);
     const preloadFacets = usePreloadFacets();
+    const [expanded, setExpanded] = useState(false);
 
     if (options.length <= 1) {
         return false;
     }
 
+    const hasMore = options.length > MAX_VISIBLE_FILTERS;
+    const visibleOptions = expanded ? options : options.slice(0, MAX_VISIBLE_FILTERS);
+
     return (
         <Command.Group ref={ref} heading={t(lang).search.filters} {...props}>
-            {options.map((filter) => (
+            {visibleOptions.map((filter) => (
                 <Command.Item
                     key={`${filter.facet}:"${filter.value}"`}
                     value={`filter ${filter.facet} to ${filter.value}`}
+                    data-disable-auto-selection
                     onSelect={() => {
                         setFilters((prev) => [...prev, filter]);
                         clear();
@@ -47,6 +54,28 @@ export const CommandGroupFilters = forwardRef<
                     </Badge>
                 </Command.Item>
             ))}
+            {hasMore &&
+                (expanded ? (
+                    <Command.Item
+                        value="show-less-filters"
+                        data-disable-auto-selection
+                        onSelect={() => setExpanded(false)}
+                    >
+                        <ChevronsDownUp className="size-4" />
+                        <span>{t(lang).search.showLessFilters}</span>
+                    </Command.Item>
+                ) : (
+                    <Command.Item
+                        value="show-more-filters"
+                        data-disable-auto-selection
+                        onSelect={() => setExpanded(true)}
+                    >
+                        <ChevronsUpDown className="size-4" />
+                        <span>
+                            {t(lang).search.showMoreFilters} ({options.length - MAX_VISIBLE_FILTERS})
+                        </span>
+                    </Command.Item>
+                ))}
         </Command.Group>
     );
 });

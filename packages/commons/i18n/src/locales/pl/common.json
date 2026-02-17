@@ -104,7 +104,9 @@
     "theme": "Motyw",
     "or": "lub",
     "toGoToRootSearch": "do wyszukiwania root",
-    "toGoBack": "do wyszukiwania root"
+    "toGoBack": "do wyszukiwania root",
+    "showMoreFilters": "Pokaż więcej filtrów",
+    "showLessFilters": "Pokaż mniej filtrów"
   },
   "apiReference": {
     "apiReference": "Dokumentacja API",

@@ -5,7 +5,14 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { type ComponentPropsWithoutRef, memo, type PropsWithChildren, type ReactNode } from "react";
+import {
+    type ComponentPropsWithoutRef,
+    createContext,
+    memo,
+    type PropsWithChildren,
+    type ReactNode,
+    useContext
+} from "react";
 
 import { FERN_SEARCH_DIALOG_ID, FERN_SEARCH_DIALOG_OVERLAY_ID } from "../../constants";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
@@ -94,49 +101,57 @@ export const DesktopSearchDialog = memo(
                     )}
                 </DesktopCommandAfterInput>
 
-                <AnimatePresence>
-                    {open && (
-                        <Dialog.Portal forceMount>
-                            <Dialog.Overlay forceMount asChild>
-                                <motion.div
-                                    id={FERN_SEARCH_DIALOG_OVERLAY_ID}
-                                    variants={overlayVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                    transition={transition}
-                                />
-                            </Dialog.Overlay>
+                <SearchDialogOpenContext.Provider value={open ?? true}>
+                    <AnimatePresence>
+                        {open && (
+                            <Dialog.Portal forceMount>
+                                <Dialog.Overlay forceMount asChild>
+                                    <motion.div
+                                        id={FERN_SEARCH_DIALOG_OVERLAY_ID}
+                                        variants={overlayVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="exit"
+                                        transition={transition}
+                                    />
+                                </Dialog.Overlay>
 
-                            <VisuallyHidden>
-                                <Dialog.Title>{t(lang).search.search}</Dialog.Title>
-                                <Dialog.Description>{t(lang).search.searchOurDocumentation}</Dialog.Description>
-                            </VisuallyHidden>
+                                <VisuallyHidden>
+                                    <Dialog.Title>{t(lang).search.search}</Dialog.Title>
+                                    <Dialog.Description>{t(lang).search.searchOurDocumentation}</Dialog.Description>
+                                </VisuallyHidden>
 
-                            <Dialog.Content
-                                forceMount
-                                id={FERN_SEARCH_DIALOG_ID}
-                                asChild
-                                onEscapeKeyDown={(e) => {
-                                    e.preventDefault();
-                                }}
-                            >
-                                <motion.div
-                                    variants={contentVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                    transition={transition}
+                                <Dialog.Content
+                                    forceMount
+                                    id={FERN_SEARCH_DIALOG_ID}
+                                    asChild
+                                    onEscapeKeyDown={(e) => {
+                                        e.preventDefault();
+                                    }}
                                 >
-                                    {children}
-                                </motion.div>
-                            </Dialog.Content>
-                        </Dialog.Portal>
-                    )}
-                </AnimatePresence>
+                                    <motion.div
+                                        variants={contentVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="exit"
+                                        transition={transition}
+                                    >
+                                        {children}
+                                    </motion.div>
+                                </Dialog.Content>
+                            </Dialog.Portal>
+                        )}
+                    </AnimatePresence>
+                </SearchDialogOpenContext.Provider>
             </Dialog.Root>
         );
     }
 );
 
 DesktopSearchDialog.displayName = "DesktopSearchDialog";
+
+const SearchDialogOpenContext = createContext(true);
+
+export function useSearchDialogOpen(): boolean {
+    return useContext(SearchDialogOpenContext);
+}

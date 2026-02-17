@@ -104,7 +104,9 @@
     "theme": "Tema",
     "or": "eller",
     "toGoToRootSearch": "for å gå til root søk",
-    "toGoBack": "for å gå tilbake"
+    "toGoBack": "for å gå tilbake",
+    "showMoreFilters": "Vis flere filtre",
+    "showLessFilters": "Vis færre filtre"
   },
   "apiReference": {
     "apiReference": "API-referanse",

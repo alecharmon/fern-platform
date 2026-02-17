@@ -104,7 +104,9 @@
     "theme": "테마",
     "or": "또는",
     "toGoToRootSearch": "루트 검색으로 이동",
-    "toGoBack": "뒤로 이동"
+    "toGoBack": "뒤로 이동",
+    "showMoreFilters": "필터 더 보기",
+    "showLessFilters": "필터 줄이기"
   },
   "apiReference": {
     "apiReference": "API 레퍼런스",

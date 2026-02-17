@@ -104,7 +104,9 @@
     "theme": "Temalar",
     "or": "veya",
     "toGoToRootSearch": "root aramaya git",
-    "toGoBack": "geri git"
+    "toGoBack": "geri git",
+    "showMoreFilters": "Daha fazla filtre göster",
+    "showLessFilters": "Daha az filtre göster"
   },
   "apiReference": {
     "apiReference": "API Referansı",

@@ -104,7 +104,9 @@
     "theme": "Theme",
     "or": "or",
     "toGoToRootSearch": "to go to root search",
-    "toGoBack": "to go back"
+    "toGoBack": "to go back",
+    "showMoreFilters": "Show more filters",
+    "showLessFilters": "Show less filters"
   },
   "apiReference": {
     "apiReference": "API Reference",

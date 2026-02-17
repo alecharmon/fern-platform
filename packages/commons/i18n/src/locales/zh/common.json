@@ -104,7 +104,9 @@
     "theme": "主题",
     "or": "或",
     "toGoToRootSearch": "前往根搜索",
-    "toGoBack": "返回"
+    "toGoBack": "返回",
+    "showMoreFilters": "显示更多筛选器",
+    "showLessFilters": "显示更少筛选器"
   },
   "apiReference": {
     "apiReference": "API 参考",

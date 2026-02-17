@@ -102,9 +102,11 @@
     "searchOurDocumentation": "Busca en nuestra documentación.",
     "filters": "Filtros",
     "theme": "Tema",
-    "or": "[ES] TODO: or",
-    "toGoToRootSearch": "[ES] TODO: toGoToRootSearch",
-    "toGoBack": "[ES] TODO: toGoBack"
+    "or": "o",
+    "toGoToRootSearch": "para ir a la búsqueda raíz",
+    "toGoBack": "para volver",
+    "showMoreFilters": "Mostrar más filtros",
+    "showLessFilters": "Mostrar menos filtros"
   },
   "apiReference": {
     "apiReference": "Referencia de API",

@@ -107,6 +107,8 @@ export type Translations = {
         or: string;
         toGoToRootSearch: string;
         toGoBack: string;
+        showMoreFilters: string;
+        showLessFilters: string;
     };
 
     apiReference: {

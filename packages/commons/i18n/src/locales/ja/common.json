@@ -104,7 +104,9 @@
     "theme": "テーマ",
     "or": "または",
     "toGoToRootSearch": "ルート検索に移動",
-    "toGoBack": "戻る"
+    "toGoBack": "戻る",
+    "showMoreFilters": "フィルターをもっと表示",
+    "showLessFilters": "フィルターを少なく表示"
   },
   "apiReference": {
     "apiReference": "APIリファレンス",

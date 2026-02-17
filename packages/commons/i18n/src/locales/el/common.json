@@ -104,7 +104,9 @@
     "theme": "Θέμα",
     "or": "ή",
     "toGoToRootSearch": "για να μεταβείτε στην αναζήτηση root",
-    "toGoBack": "να γυρίσω πίσω"
+    "toGoBack": "να γυρίσω πίσω",
+    "showMoreFilters": "Εμφάνιση περισσότερων φίλτρων",
+    "showLessFilters": "Εμφάνιση λιγότερων φίλτρων"
   },
   "apiReference": {
     "apiReference": "Αναφορά API",
