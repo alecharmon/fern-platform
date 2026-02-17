@@ -51,6 +51,27 @@ export async function isUserInTeam(userId: string, teamId: string): Promise<bool
     return (count ?? 0) > 0;
 }
 
+export async function getLatestOpenApiSpecByTeamId(teamId: string): Promise<PostmanCollectionOpenApiSpec | null> {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase
+        .from("postman_collection_openapi_specs")
+        .select()
+        .eq("team_id", teamId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+    if (error) {
+        if (error.code === "PGRST116") {
+            return null;
+        }
+        throw new Error(`Failed to get OpenAPI spec for team ${teamId}: ${error.message}`);
+    }
+
+    return data as PostmanCollectionOpenApiSpec;
+}
+
 export async function upsertOpenApiSpec(data: {
     teamId: string;
     userId: string;

@@ -2,6 +2,7 @@
 
 import { CircleCheckIcon, CloudUpload, CodeXmlIcon, XIcon } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
+import { PostmanLogo } from "@/components/auth/PostmanLogo";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { DEFAULT_SPECS } from "./constants";
@@ -10,9 +11,10 @@ interface OpenAPISpecsProps {
     uploadedFiles: File[];
     setUploadedFiles: (files: File[]) => void;
     validationError?: string;
+    isFromPostman?: boolean;
 }
 
-export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError }: OpenAPISpecsProps) {
+export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError, isFromPostman }: OpenAPISpecsProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [error, setError] = useState<string | null>(null);
     const effectiveDefaultSpecs = DEFAULT_SPECS;
@@ -129,7 +131,11 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError 
                     {customUploadedFiles.map((file, index) => (
                         <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3 py-3">
                             <div className="flex items-center gap-3">
-                                <CodeXmlIcon className="h-5 w-5 text-gray-900" />
+                                {isFromPostman ? (
+                                    <PostmanLogo className="h-5 w-5 text-[#FF6C37]" />
+                                ) : (
+                                    <CodeXmlIcon className="h-5 w-5 text-gray-900" />
+                                )}
                                 <span className="text-gray-1200 flex-1 text-sm">{file.name}</span>
                                 {file.size > 0 && (
                                     <span className="text-gray-900 text-xs">({(file.size / 1024).toFixed(1)} KB)</span>
@@ -146,19 +152,21 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError 
                 </div>
             )}
 
-            <div className="flex flex-col border-l border-border pl-3 py-1 text-xs gap-2">
-                <p className="text-muted-foreground">Don't have a spec? Add an example.</p>
+            {!isFromPostman && (
+                <div className="flex flex-col border-l border-border pl-3 py-1 text-xs gap-2">
+                    <p className="text-muted-foreground">Don't have a spec? Add an example.</p>
 
-                {DEFAULT_SPECS.map((spec, index) => (
-                    <DisplayDefaultSpec
-                        key={index}
-                        spec={spec}
-                        onAdd={() => handleUseDefaultSpec(index)}
-                        added={specWasAdded(spec.fileName)}
-                        onRemove={() => handleRemoveFile(spec.fileName)}
-                    />
-                ))}
-            </div>
+                    {DEFAULT_SPECS.map((spec, index) => (
+                        <DisplayDefaultSpec
+                            key={index}
+                            spec={spec}
+                            onAdd={() => handleUseDefaultSpec(index)}
+                            added={specWasAdded(spec.fileName)}
+                            onRemove={() => handleRemoveFile(spec.fileName)}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
