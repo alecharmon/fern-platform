@@ -14,9 +14,10 @@ import { useOnboarding } from "@/providers/OnboardingProvider";
 interface ApiSpecStepClientProps {
     postmanOpenApiSpec: Json | null;
     postmanCollectionId: string | null;
+    postmanTeamId: string | null;
 }
 
-export function ApiSpecStepClient({ postmanOpenApiSpec, postmanCollectionId }: ApiSpecStepClientProps) {
+export function ApiSpecStepClient({ postmanOpenApiSpec, postmanCollectionId, postmanTeamId }: ApiSpecStepClientProps) {
     const { form, formData, goToNextStep } = useOnboarding();
     const posthog = usePostHog();
     const params = useParams();
@@ -28,6 +29,15 @@ export function ApiSpecStepClient({ postmanOpenApiSpec, postmanCollectionId }: A
     useEffect(() => {
         captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_VIEWED, {});
     }, [posthog]);
+
+    useEffect(() => {
+        if (postmanCollectionId) {
+            form.setFieldValue("postmanCollectionId", postmanCollectionId);
+        }
+        if (postmanTeamId) {
+            form.setFieldValue("postmanTeamId", postmanTeamId);
+        }
+    }, [postmanCollectionId, postmanTeamId, form]);
 
     const handleFilesChange = useCallback(
         async (files: File[]) => {

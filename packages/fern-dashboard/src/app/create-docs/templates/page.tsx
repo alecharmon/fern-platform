@@ -3,6 +3,7 @@
 import { ArrowLeft, Check } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
@@ -37,6 +38,7 @@ const TEMPLATES: Template[] = [
 ];
 
 export default function TemplatesPage() {
+    const searchParams = useSearchParams();
     const [selectedTemplate, setSelectedTemplate] = useState<string>(TEMPLATES[0]!.id);
     const [slideDirection, setSlideDirection] = useState<"up" | "down">("down");
     const [loadedTemplates, setLoadedTemplates] = useState<Set<string>>(new Set());
@@ -154,7 +156,19 @@ export default function TemplatesPage() {
 
                     {/* Continue button */}
                     <Link
-                        href={`/create-docs/customize?template=${selectedTemplate}`}
+                        href={(() => {
+                            const params = new URLSearchParams();
+                            params.set("template", selectedTemplate);
+                            const collectionId = searchParams.get("collection-id");
+                            const teamId = searchParams.get("postman-team-id");
+                            if (collectionId) {
+                                params.set("collection-id", collectionId);
+                            }
+                            if (teamId) {
+                                params.set("postman-team-id", teamId);
+                            }
+                            return `/create-docs/customize?${params.toString()}`;
+                        })()}
                         className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-3 font-medium text-white transition-colors hover:bg-green-600"
                     >
                         Continue

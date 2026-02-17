@@ -10,6 +10,7 @@ import type { WizardFormData } from "@/providers/OnboardingProvider";
 import {
     getDocsCommitSha,
     getGithubRepoData,
+    getOnboardingFormData,
     getSitePublishUrl,
     saveDocsCommitSha,
     saveGithubRepoData
@@ -399,6 +400,33 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                             }
                         } catch (linkError) {
                             console.error("[LoaderScreen] Error linking repo:", linkError);
+                        }
+                    }
+
+                    const formData = getOnboardingFormData();
+                    if (formData?.postmanCollectionId && formData?.postmanTeamId && publishUrl) {
+                        try {
+                            const siteUrl = publishUrl.replace("https://", "");
+                            console.log(
+                                `[LoaderScreen] Notifying Postman: teamId=${formData.postmanTeamId}, collectionId=${formData.postmanCollectionId}, siteUrl=${siteUrl}`
+                            );
+                            const notifyResponse = await fetch("/api/onboarding-docs/postman-notify", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    teamId: formData.postmanTeamId,
+                                    collectionId: formData.postmanCollectionId,
+                                    siteUrl,
+                                    success: true
+                                })
+                            });
+                            if (notifyResponse.ok) {
+                                console.log("[LoaderScreen] Successfully notified Postman");
+                            } else {
+                                console.error("[LoaderScreen] Failed to notify Postman:", await notifyResponse.text());
+                            }
+                        } catch (notifyError) {
+                            console.error("[LoaderScreen] Error notifying Postman:", notifyError);
                         }
                     }
 

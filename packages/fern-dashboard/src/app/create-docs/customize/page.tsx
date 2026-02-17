@@ -233,8 +233,18 @@ function CustomizePageContent() {
             })
         );
 
-        // Navigate to setup page for organization selection
-        router.push("/create-docs/setup");
+        // Preserve postman query params through to the setup page
+        const setupParams = new URLSearchParams();
+        const collectionId = searchParams.get("collection-id");
+        const teamId = searchParams.get("postman-team-id");
+        if (collectionId) {
+            setupParams.set("collection-id", collectionId);
+        }
+        if (teamId) {
+            setupParams.set("postman-team-id", teamId);
+        }
+        const queryString = setupParams.toString();
+        router.push(`/create-docs/setup${queryString ? `?${queryString}` : ""}`);
     };
 
     return (

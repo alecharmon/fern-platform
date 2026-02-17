@@ -27,6 +27,9 @@ export interface WizardFormData {
     openApiSpecUrls: { fileName: string; assetUrl: string }[];
     // Tracks successful site publication - required to access complete page
     sitePublishUrl: string | null;
+    // Postman integration params (preserved from initial URL query params)
+    postmanCollectionId: string | null;
+    postmanTeamId: string | null;
 }
 
 export type OnboardingStep = "api-spec" | "details" | "publishing" | "complete";
@@ -131,7 +134,9 @@ const DEFAULT_FORM_DATA: WizardFormData = {
     existingDocsSite: "",
     openApiSpecFiles: [],
     openApiSpecUrls: [],
-    sitePublishUrl: null
+    sitePublishUrl: null,
+    postmanCollectionId: null,
+    postmanTeamId: null
 };
 
 const OnboardingContext = createContext<OnboardingContextValue | undefined>(undefined);

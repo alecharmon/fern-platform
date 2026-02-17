@@ -50,10 +50,13 @@ export default async function DocsOnboardingStep1Page({ params, searchParams }: 
 
     const postmanSpec = await fetchPostmanOpenApiSpec(resolvedSearchParams);
 
+    const postmanTeamId = resolvedSearchParams?.["postman-team-id"];
+
     return (
         <ApiSpecStepClient
             postmanOpenApiSpec={postmanSpec?.spec ?? null}
             postmanCollectionId={postmanSpec?.collectionId ?? null}
+            postmanTeamId={typeof postmanTeamId === "string" ? postmanTeamId : null}
         />
     );
 }
