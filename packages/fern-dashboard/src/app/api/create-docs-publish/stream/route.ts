@@ -48,7 +48,9 @@ async function sendPostmanSlackNotification({
         });
 
         if (!response.ok) {
-            console.error(`[postman-notify] Failed to send Slack notification: ${response.status} ${response.statusText}`);
+            console.error(
+                `[postman-notify] Failed to send Slack notification: ${response.status} ${response.statusText}`
+            );
         } else {
             console.log("[postman-notify] Slack notification sent successfully");
         }
@@ -93,9 +95,7 @@ async function notifyPostman({
     const client = getPostmanFernIntegrationServiceClient({ token: accessToken });
 
     if (success) {
-        console.log(
-            `[postman-notify] Sending SUCCESS notification to Postman: publishedDocUrl=https://${siteUrl}`
-        );
+        console.log(`[postman-notify] Sending SUCCESS notification to Postman: publishedDocUrl=https://${siteUrl}`);
         await client.putFernDocs({
             teamId,
             collectionId,
