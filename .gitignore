@@ -82,6 +82,9 @@ test-results
 
 **/*.tar.gz
 
+# Static site export output
+servers/self-hosted/site/
+
 # Local folder for dev tools
 .local
 

@@ -686,11 +686,25 @@ bun /scripts/cache-proxy/index.ts 2>&1 | tee /tmp/cache-proxy.log | add_timestam
 cache_proxy_pid=$!
 log "Cache proxy PID: $cache_proxy_pid"
 
+# Helper: curl with cache admin token (read from file written by cache proxy on startup)
+CACHE_TOKEN_FILE="/tmp/.cache-admin-token"
+cache_curl() {
+    local token=""
+    if [ -f "$CACHE_TOKEN_FILE" ]; then
+        token=$(cat "$CACHE_TOKEN_FILE")
+    fi
+    if [ -n "$token" ]; then
+        curl -H "Authorization: Bearer $token" "$@"
+    else
+        curl "$@"
+    fi
+}
+
 # Wait for cache proxy to be ready
 log "Waiting for cache proxy to start on port ${CACHE_PROXY_PORT}..."
 PROXY_ATTEMPTS=0
 MAX_PROXY_ATTEMPTS=15
-until curl -f -s --max-time 5 "http://127.0.0.1:${CACHE_PROXY_PORT}/__cache/stats" > /dev/null 2>&1; do
+until cache_curl -f -s --max-time 5 "http://127.0.0.1:${CACHE_PROXY_PORT}/__cache/stats" > /dev/null 2>&1; do
     PROXY_ATTEMPTS=$((PROXY_ATTEMPTS + 1))
     if [ $PROXY_ATTEMPTS -ge $MAX_PROXY_ATTEMPTS ]; then
         log "WARNING: Cache proxy not ready after $MAX_PROXY_ATTEMPTS attempts"
@@ -812,21 +826,39 @@ else
 fi
 
 # --------------  Start cache warmup --------------
-# Warm up the cache by fetching all pages
-# This ensures the first real user request is fast
-# Run in background - container is ready immediately, warmup is a performance optimization
-# Warmup is disabled by default, set WARMUP=true to enable
+# Warm up the cache by crawling all pages via the cache proxy's built-in warmup endpoint.
+# This ensures the first real user request is fast.
+# Run in background - container is ready immediately, warmup is a performance optimization.
+# Warmup is enabled by default, set WARMUP=false to disable.
 
-WARMUP_DEFAULT="false"
-if [ "$USE_SEEDED_DATA" = "true" ]; then
-    WARMUP_DEFAULT="true"
-fi
+WARMUP_DEFAULT="true"
 
 if [ "${WARMUP:-$WARMUP_DEFAULT}" = "true" ]; then
-    log "Starting cache warmup in background (gentle pacing, minimal CPU usage)..."
-    nice -n 19 bash /scripts/warmup.sh 2>&1 | add_timestamps &
+    log "Starting cache warmup in background via cache proxy /__cache/warmup endpoint..."
+    (
+        WARMUP_ATTEMPTS=0
+        MAX_WARMUP_ATTEMPTS=60
+        while [ "$WARMUP_ATTEMPTS" -lt "$MAX_WARMUP_ATTEMPTS" ]; do
+            WARMUP_ATTEMPTS=$((WARMUP_ATTEMPTS + 1))
+            if cache_curl -f -s --max-time 5 "http://localhost:${CACHE_PROXY_PORT}/__cache/stats" > /dev/null 2>&1; then
+                break
+            fi
+            if [ "$WARMUP_ATTEMPTS" -ge "$MAX_WARMUP_ATTEMPTS" ]; then
+                log "WARNING: Cache proxy not ready after $MAX_WARMUP_ATTEMPTS attempts, skipping warmup"
+                exit 0
+            fi
+            sleep 2
+        done
+        WARMUP_RESULT=$(cache_curl -s --max-time 600 -X POST "http://localhost:${CACHE_PROXY_PORT}/__cache/warmup" 2>&1)
+        WARMUP_EXIT=$?
+        if [ $WARMUP_EXIT -ne 0 ]; then
+            log "WARNING: Cache warmup request failed (exit code $WARMUP_EXIT)"
+        else
+            log "Cache warmup complete: $WARMUP_RESULT"
+        fi
+    ) &
     warmup_pid=$!
-    log "Warmup PID: $warmup_pid (nice 19 = lowest CPU priority)"
+    log "Warmup PID: $warmup_pid"
     log "Warmup running in background - container is ready for traffic"
 else
     log "Skipping cache warmup (WARMUP not set to true)"

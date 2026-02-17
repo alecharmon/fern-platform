@@ -275,9 +275,12 @@ export const middleware: NextMiddleware = async (request) => {
     /**
      * Rewrite /_search/* to MeiliSearch
      *
-     * SECURITY: Only allow safe search endpoints. Block access to sensitive
-     * MeiliSearch admin endpoints like /keys, /dumps, /snapshots, /tasks, etc.
-     * that could expose API keys or allow unauthorized administrative actions.
+     * SECURITY: Only allow safe, read-only search endpoints. Block access to
+     * sensitive MeiliSearch admin endpoints like /keys, /dumps, /snapshots,
+     * /tasks, etc. that could expose API keys or allow unauthorized actions.
+     *
+     * Both the PATH and HTTP METHOD are validated to prevent unauthenticated
+     * users from creating, updating, or deleting indexes via the proxy.
      */
     // Check for /_search/ or /_search at end of path (for the base endpoint)
     const searchMatch = pathname.match(/\/_search(\/|$)/);
@@ -285,10 +288,14 @@ export const middleware: NextMiddleware = async (request) => {
         const searchPath = withoutBasepath("/_search");
         // Remove "/_search" prefix and normalize by stripping leading slash for consistent regex matching
         const cleanedPath = searchPath.replace(/^\/?_search\/?/, "");
+        const method = request.method;
 
         // If cleanedPath is empty, this is a request to the base /_search endpoint
-        // Allow it through as it may be a health check or info request
+        // Only allow GET for health check or info requests
         if (cleanedPath === "") {
+            if (method !== "GET") {
+                return new NextResponse("Method Not Allowed", { status: 405 });
+            }
             const meiliUrl = `${meilisearchOrigin()}/`;
             const newHeaders = new Headers(headers);
             const meiliKey = meilisearchApiKey();
@@ -300,18 +307,19 @@ export const middleware: NextMiddleware = async (request) => {
             });
         }
 
-        // Only allow search-related endpoints
-        // - indexes - list all indexes
-        // - indexes/{indexName} - get index info
-        // - indexes/{indexName}/search - single index search
-        // - indexes/{indexName}/facet-search - facet search
-        // - multi-search - multi-index search
+        // Validate both path and HTTP method for each allowed endpoint.
+        // Only read-only operations and search queries are permitted:
+        // - GET  indexes              - list all indexes (read-only)
+        // - GET  indexes/{indexName}   - get index info (read-only)
+        // - POST indexes/{indexName}/search       - single index search
+        // - POST indexes/{indexName}/facet-search  - facet search
+        // - POST multi-search                      - multi-index search
         const isAllowedEndpoint =
-            /^indexes\/?$/.test(cleanedPath) ||
-            /^indexes\/[^/]+\/?$/.test(cleanedPath) ||
-            /^indexes\/[^/]+\/search\/?$/.test(cleanedPath) ||
-            /^indexes\/[^/]+\/facet-search\/?$/.test(cleanedPath) ||
-            /^multi-search\/?$/.test(cleanedPath);
+            (/^indexes\/?$/.test(cleanedPath) && method === "GET") ||
+            (/^indexes\/[^/]+\/?$/.test(cleanedPath) && method === "GET") ||
+            (/^indexes\/[^/]+\/search\/?$/.test(cleanedPath) && method === "POST") ||
+            (/^indexes\/[^/]+\/facet-search\/?$/.test(cleanedPath) && method === "POST") ||
+            (/^multi-search\/?$/.test(cleanedPath) && method === "POST");
 
         if (!isAllowedEndpoint) {
             return new NextResponse("Forbidden", { status: 403 });

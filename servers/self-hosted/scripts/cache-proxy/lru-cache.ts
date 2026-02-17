@@ -92,6 +92,10 @@ export class LRUCache {
         return count;
     }
 
+    entries(): IterableIterator<[string, CacheEntry]> {
+        return this.cache.entries();
+    }
+
     stats(): { size: number; maxSize: number; hits: number; misses: number; hitRate: string } {
         return {
             size: this.cache.size,

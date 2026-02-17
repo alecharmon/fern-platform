@@ -23,16 +23,20 @@ echo "  Base path:  ${BASE_PATH:-'(none - serving from root)'}"
 echo "============================================"
 echo
 
-# Step 1: Build the Next.js bundle
-echo "Step 1: Building Next.js bundle..."
-cd "$REPO_ROOT"
-
-if [ -n "$BASE_PATH" ]; then
-    echo "  Building with BASE_PATH=$BASE_PATH"
-    BASE_PATH="$BASE_PATH" pnpm docs:self-hosted-bundle:build
+# Step 1: Build the Next.js bundle (skip with SKIP_BUNDLE=1)
+if [ "${SKIP_BUNDLE:-}" = "1" ]; then
+    echo "Step 1: Skipping Next.js bundle build (SKIP_BUNDLE=1)"
 else
-    echo "  Building without BASE_PATH"
-    pnpm docs:self-hosted-bundle:build
+    echo "Step 1: Building Next.js bundle..."
+    cd "$REPO_ROOT"
+
+    if [ -n "$BASE_PATH" ]; then
+        echo "  Building with BASE_PATH=$BASE_PATH"
+        BASE_PATH="$BASE_PATH" pnpm docs:self-hosted-bundle:build
+    else
+        echo "  Building without BASE_PATH"
+        pnpm docs:self-hosted-bundle:build
+    fi
 fi
 
 echo

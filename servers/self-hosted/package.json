@@ -18,6 +18,7 @@
     "k8s:start": "sh kubernetes-example/k8s-start.sh",
     "k8s:stop": "sh kubernetes-example/k8s-delete.sh",
     "k8s:logs": "kubectl logs -f -l app=fern-docs",
+    "export:static-site": "bash scripts/export-static-site.sh",
     "perf": "tsx scripts/perf-test.ts",
     "test:self-hosted": "vitest src/__test__ --globals --config src/__test__/vitest.config.ts"
   },

@@ -40,6 +40,10 @@ export function isProxyTargetAllowed(targetHostname: string, docsDomain: string,
     if (!docsDomain && additionalDomains.length === 0) {
         return true;
     }
+    // Allow all domains when running on localhost (local development / testing)
+    if (docsDomain === "localhost" || docsDomain.startsWith("localhost:")) {
+        return true;
+    }
     // Check against docs domain
     if (docsDomain && matchesDomain(targetHostname, docsDomain)) {
         return true;

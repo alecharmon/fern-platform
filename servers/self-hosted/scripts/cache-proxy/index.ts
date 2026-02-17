@@ -17,11 +17,14 @@
  * - Test login endpoint for auth testing
  */
 
+import { writeFileSync } from "node:fs";
 import { getCacheKey, shouldBypassCache } from "./cache-utils";
 import {
     ADDITIONAL_ALLOWED_DOMAINS,
+    ADMIN_TOKEN_PATH,
     BACKEND_HOST,
     BACKEND_PORT,
+    CACHE_ADMIN_TOKEN,
     CACHE_DISABLED,
     CDN_TTL,
     DEBUG,
@@ -35,10 +38,12 @@ import {
 } from "./config";
 import { handleCorsPreflightProxy, handleCorsProxy } from "./cors-proxy";
 import { getRootDomain, isProxyTargetAllowed } from "./domain-utils";
+import { handleExportDownload, handleExportStart, handleExportStatus } from "./export";
 import { debug, log } from "./logger";
 import { cache, getCacheStatsHeaders } from "./lru-cache";
 import { handleCacheControl, proxyRequest } from "./proxy";
 import { handleTestLogin } from "./test-login";
+import { runWarmup } from "./warmup";
 
 interface WebSocketData {
     targetUrl: string;
@@ -48,7 +53,6 @@ interface WebSocketData {
 const server = Bun.serve<WebSocketData>({
     port: PROXY_PORT,
     hostname: "0.0.0.0",
-
     async fetch(req, server) {
         const url = new URL(req.url);
 
@@ -87,6 +91,26 @@ const server = Bun.serve<WebSocketData>({
 
         // Handle cache control endpoints
         if (url.pathname.startsWith("/__cache/")) {
+            const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
+            const queryToken = url.searchParams.get("token") || "";
+            if (bearer !== CACHE_ADMIN_TOKEN && queryToken !== CACHE_ADMIN_TOKEN) {
+                return Response.json({ error: "Unauthorized" }, { status: 401 });
+            }
+
+            if (url.pathname === "/__cache/export") {
+                return handleExportStart(req);
+            }
+            if (url.pathname === "/__cache/export/status") {
+                return handleExportStatus();
+            }
+            if (url.pathname === "/__cache/export/download") {
+                return handleExportDownload();
+            }
+            if (url.pathname === "/__cache/warmup" && req.method === "POST") {
+                log("Warmup triggered via API...");
+                const result = await runWarmup();
+                return Response.json(result);
+            }
             const cacheResponse = handleCacheControl(req);
             if (cacheResponse) {
                 return cacheResponse;
@@ -220,6 +244,9 @@ if (FERN_AUTH_TYPE) {
 } else {
     log("Auth-aware caching: disabled (no FERN_AUTH_TYPE configured)");
 }
+// Write the admin token to disk so export.sh (via docker exec) can read it
+writeFileSync(ADMIN_TOKEN_PATH, CACHE_ADMIN_TOKEN, { mode: 0o600 });
+log("Admin endpoints (/__cache/*): protected (token written to " + ADMIN_TOKEN_PATH + ")");
 log("Debug mode: " + (DEBUG ? "enabled" : "disabled"));
 
 // Graceful shutdown

@@ -56,11 +56,6 @@ export async function getWorkOSOrganizationDomains(orgName: string): Promise<str
 export async function getAuthEdgeConfig(currentDomain: string): Promise<AuthEdgeConfig | undefined> {
     const selfHosted = isSelfHosted();
     const local = isLocal();
-    console.log("[self-hosted-auth] getAuthEdgeConfig called", {
-        currentDomain,
-        isLocal: local,
-        isSelfHosted: selfHosted
-    });
 
     if (local) {
         return undefined;
@@ -75,16 +70,7 @@ export async function getAuthEdgeConfig(currentDomain: string): Promise<AuthEdge
 
 function getSelfHostedAuthConfig(): AuthEdgeConfig | undefined {
     const authType = process.env.FERN_AUTH_TYPE;
-    console.log("[self-hosted-auth] getSelfHostedAuthConfig called", {
-        FERN_AUTH_TYPE: authType ?? "[absent]",
-        FERN_AUTH_SECRET: process.env.FERN_AUTH_SECRET
-            ? `[set, len=${process.env.FERN_AUTH_SECRET.length}]`
-            : "[absent]",
-        JWT_SECRET_KEY: process.env.JWT_SECRET_KEY ? `[set, len=${process.env.JWT_SECRET_KEY.length}]` : "[absent]",
-        NEXT_PUBLIC_IS_SELF_HOSTED: process.env.NEXT_PUBLIC_IS_SELF_HOSTED ?? "[absent]"
-    });
     if (!authType) {
-        console.log("[self-hosted-auth] No FERN_AUTH_TYPE set, returning undefined");
         return undefined;
     }
 
@@ -152,22 +138,10 @@ function getSelfHostedAuthConfig(): AuthEdgeConfig | undefined {
             return undefined;
     }
 
-    console.log("[self-hosted-auth] Built raw config:", {
-        type: raw.type,
-        hasPassword:
-            "password" in raw && typeof raw.password === "string"
-                ? `[set, len=${(raw.password as string).length}]`
-                : "[absent]",
-        keys: Object.keys(raw)
-    });
-
     const result = AuthEdgeConfigSchema.safeParse(raw);
     if (result.success) {
-        console.log("[self-hosted-auth] Config parsed successfully, type:", result.data.type);
         return result.data;
     }
-    console.error("[self-hosted-auth] Schema validation FAILED:", result.error.message);
-    console.error("[self-hosted-auth] Schema validation issues:", JSON.stringify(result.error.issues, null, 2));
     return undefined;
 }
 

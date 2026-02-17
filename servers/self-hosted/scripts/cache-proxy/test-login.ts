@@ -11,82 +11,56 @@
  * 4. Proxy mints a valid JWT, sets fern_token cookie, redirects back to docs
  */
 
-import {
-    API_KEY_INJECTION_ENABLED,
-    FERN_AUTH_ISSUER,
-    FERN_AUTH_SECRET,
-    PROXY_PORT,
-    TEST_LOGIN_ENABLED
-} from "./config";
+import { API_KEY_INJECTION_ENABLED, FERN_AUTH_SECRET, PROXY_PORT, TEST_LOGIN_ENABLED } from "./config";
+import { mintJWT } from "./jwt-utils";
 import { log } from "./logger";
 
-function base64url(input: string): string {
-    return btoa(input).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-}
-
-async function mintTestFernJWT(secret: string, issuer: string): Promise<string> {
-    const header = { alg: "HS256", typ: "JWT" };
-    const now = Math.floor(Date.now() / 1000);
+function buildTestFernPayload(): Record<string, unknown> {
+    if (!API_KEY_INJECTION_ENABLED) {
+        return {};
+    }
 
     const rand = () => Math.random().toString(36).slice(2, 10);
-    let fernPayload: Record<string, unknown> = {};
-    if (API_KEY_INJECTION_ENABLED) {
-        fernPayload = {
-            playground: {
-                initial_state: {
+    return {
+        playground: {
+            initial_state: {
+                auth: {
+                    bearer_token: "test-bearer-" + rand()
+                }
+            },
+            env_state: {
+                prod: {
                     auth: {
-                        bearer_token: "test-bearer-" + rand()
+                        bearer_token: JSON.stringify([
+                            { "application 1": "key-" + rand() },
+                            { "application 2": "key-" + rand() }
+                        ])
                     }
                 },
-                env_state: {
-                    prod: {
-                        auth: {
-                            bearer_token: JSON.stringify([
-                                { "application 1": "key-" + rand() },
-                                { "application 2": "key-" + rand() }
-                            ])
-                        }
-                    },
-                    dev: {
-                        auth: {
-                            bearer_token: JSON.stringify([
-                                { foo: "bar-" + rand() },
-                                { biz: "bazz-" + rand() },
-                                { buzz: "bee-" + rand() }
-                            ])
-                        }
+                dev: {
+                    auth: {
+                        bearer_token: JSON.stringify([
+                            { foo: "bar-" + rand() },
+                            { biz: "bazz-" + rand() },
+                            { buzz: "bee-" + rand() }
+                        ])
                     }
                 }
             }
-        };
-    }
-
-    const payload = {
-        fern: fernPayload,
-        iat: now,
-        exp: now + 30 * 24 * 60 * 60,
-        iss: issuer || "https://buildwithfern.com"
+        }
     };
+}
 
-    const headerB64 = base64url(JSON.stringify(header));
-    const payloadB64 = base64url(JSON.stringify(payload));
-
-    const key = await crypto.subtle.importKey(
-        "raw",
-        new TextEncoder().encode(secret),
-        { name: "HMAC", hash: "SHA-256" },
-        false,
-        ["sign"]
-    );
-    const signatureBytes = new Uint8Array(
-        await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(headerB64 + "." + payloadB64))
-    );
-    const signatureB64 = btoa(String.fromCharCode(...signatureBytes))
-        .replace(/=/g, "")
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_");
-
-    return headerB64 + "." + payloadB64 + "." + signatureB64;
+async function mintTestFernJWT(): Promise<string> {
+    const token = await mintJWT({
+        fernPayload: buildTestFernPayload(),
+        expiresInSeconds: 30 * 24 * 60 * 60,
+        secret: FERN_AUTH_SECRET
+    });
+    if (!token) {
+        throw new Error("Failed to mint test JWT: no secret configured");
+    }
+    return token;
 }
 
 function fixLocalhostProtocol(url: string): string {
@@ -250,8 +224,8 @@ async function handleTestLoginPost(req: Request): Promise<Response> {
         });
     }
 
-    const token = await mintTestFernJWT(FERN_AUTH_SECRET, FERN_AUTH_ISSUER);
-    log("Test login: minted JWT (issuer=" + FERN_AUTH_ISSUER + "), action=" + action + ", redirecting to " + state);
+    const token = await mintTestFernJWT();
+    log("Test login: minted JWT, action=" + action + ", redirecting to " + state);
 
     if (action === "post") {
         const callbackUrl = redirectUri || "/api/fern-docs/auth/jwt/callback";

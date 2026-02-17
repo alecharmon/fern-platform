@@ -45,6 +45,11 @@ export const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "";
 export const OAUTH_JWT_SECRET = process.env.OAUTH_JWT_SECRET || "";
 export const EVERYONE_ROLE = "everyone";
 
+// Random token for /__cache/* admin endpoints, generated fresh each startup.
+// Written to ADMIN_TOKEN_PATH so scripts running inside the container can read it.
+export const CACHE_ADMIN_TOKEN = crypto.randomUUID();
+export const ADMIN_TOKEN_PATH = "/tmp/.cache-admin-token";
+
 // Backend origin URL for proxying requests
 export const BACKEND_ORIGIN = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
 
