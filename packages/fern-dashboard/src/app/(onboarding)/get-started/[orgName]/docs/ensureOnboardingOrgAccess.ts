@@ -3,8 +3,11 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { addUserToOrgById } from "@/app/services/auth0/management";
+import { type Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess, getOrganizationForPostmanTeam } from "@/app/services/dal/organization";
+import { isUserInTeam } from "@/app/services/postman/openapi-repository";
+import { getVenusClient } from "@/app/services/venus/getVenusClient";
 import { serializeSearchParams } from "./serializeSearchParams";
 
 const DEFAULT_NEXT_PATH = "/get-started/:orgId/docs";
@@ -57,38 +60,58 @@ export async function ensureOnboardingOrgAccess(
         redirect("/login");
     }
 
+    const postmanTeamId = searchParams?.["postman-team-id"];
+
     try {
         await assertUserHasOrganizationAccess(session.accessToken, orgName as Auth0OrgName);
         return session;
     } catch (error) {
         console.warn(`[Onboarding] User doesn't have access to org ${orgName}`, error);
 
-        // If postman-team-id is present, check if an org already exists for this team
-        const postmanTeamId = searchParams?.["postman-team-id"];
         if (postmanTeamId && typeof postmanTeamId === "string") {
             const result = await getOrganizationForPostmanTeam(session.accessToken, postmanTeamId);
 
             if (result.success) {
-                // Organization exists for this Postman team, redirect to the proper org path
-                let targetPath = requestedPath.replace(`/get-started/${orgName}`, `/get-started/${result.orgId}`);
+                const userId = Auth0UserID(session.user.sub);
+                let userInPostmanTeam = false;
 
-                // Preserve search params in the redirect
-                const queryString = serializeSearchParams(searchParams);
-                if (queryString.toString()) {
-                    targetPath = `${targetPath}?${queryString.toString()}`;
+                // We don't want to block the onboarding flow if we fail to check if the user is in the Postman team
+                try {
+                    userInPostmanTeam = await isUserInTeam(userId, postmanTeamId);
+                } catch (error) {
+                    console.error(
+                        `[Onboarding] Failed to check if user ${userId} is in Postman team ${postmanTeamId}`,
+                        error
+                    );
+                    userInPostmanTeam = false;
                 }
 
-                console.log(
-                    `[Onboarding] Found existing org ${result.orgId} for Postman team ${postmanTeamId}, redirecting to ${targetPath}`
+                if (userInPostmanTeam) {
+                    const venus = getVenusClient({ token: session.accessToken });
+                    await venus.organization.addUser({ orgId: result.orgId, userId });
+                    await addUserToOrgById(userId, result.auth0OrgId);
+
+                    console.log(
+                        `[Onboarding] Auto-added user ${userId} to org ${result.orgId} for Postman team ${postmanTeamId}`
+                    );
+
+                    // Redirect to the correct org path so the page loads with proper access
+                    let targetPath = requestedPath.replace(`/get-started/${orgName}`, `/get-started/${result.orgId}`);
+                    const queryString = serializeSearchParams(searchParams);
+                    if (queryString.toString()) {
+                        targetPath = `${targetPath}?${queryString.toString()}`;
+                    }
+                    redirect(targetPath);
+                }
+
+                console.warn(
+                    `[Onboarding] User ${session.user.sub} is not in Postman team ${postmanTeamId}, redirecting to create-org`
                 );
-                redirect(targetPath);
             }
 
-            // No existing org found, redirect to create-org with postman-team-id as prefill
             redirect(createOrgRedirect(postmanTeamId, requestedPath, searchParams));
         }
 
-        // No postman-team-id, use orgName from URL
         redirect(createOrgRedirect(orgName, requestedPath, searchParams));
     }
 }

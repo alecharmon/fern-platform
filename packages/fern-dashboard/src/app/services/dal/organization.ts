@@ -6,7 +6,7 @@ import * as auth0Management from "@/app/services/auth0/management";
 import { throwDigestibleError } from "@/utils/errors";
 import { getCurrentSession } from "../auth0/getCurrentSession";
 import { redirectToLogin } from "../auth0/redirectToLogin";
-import { Auth0OrgID, type Auth0OrgName } from "../auth0/types";
+import { Auth0OrgID, Auth0OrgName } from "../auth0/types";
 import { getVenusClient } from "../venus/getVenusClient";
 
 // Check if user has super-user permission - they have access to all orgs
@@ -77,7 +77,10 @@ export const getAuthenticatedSessionOrRedirect = cache(async (orgName: Auth0OrgN
 export async function getOrganizationForPostmanTeam(
     token: string,
     postmanTeamId: string
-): Promise<{ success: true; orgId: Auth0OrgID } | { success: false; message?: string }> {
+): Promise<
+    | { success: true; orgId: string; auth0OrgId: Auth0OrgID; orgName: Auth0OrgName }
+    | { success: false; message?: string }
+> {
     const venusToken = getTokenForVenus(token);
     if (venusToken == null) {
         return { success: false, message: "User does not have permission" };
@@ -86,7 +89,12 @@ export async function getOrganizationForPostmanTeam(
     const venusClient = getVenusClient({ token: venusToken });
     const response = await venusClient.organization.getByPostmanTeamId(postmanTeamId);
     if (response.ok) {
-        return { success: true, orgId: Auth0OrgID(response.body.organizationId) };
+        return {
+            success: true,
+            orgId: response.body.organizationId,
+            auth0OrgId: Auth0OrgID(response.body.auth0Id),
+            orgName: Auth0OrgName(response.body.displayName)
+        };
     }
     return { success: false, message: "Did not find organization for provided postman team id" };
 }
