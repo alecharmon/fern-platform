@@ -281,6 +281,111 @@ describe("toc", () => {
         ]);
     });
 
+    describe("steps toc depth", () => {
+        it("should use tocDepth attribute from StepGroup for step depth", () => {
+            const mdx = `
+# Page title
+
+<StepGroup toc={true} tocDepth="2">
+  <Step id="step-1" title="First step">
+    Step 1 content
+  </Step>
+  <Step id="step-2" title="Second step">
+    Step 2 content
+  </Step>
+</StepGroup>
+`;
+
+            const { hast } = toTree(mdx);
+            const toc = makeToc(hast);
+
+            expect(toc).toEqual([
+                {
+                    simpleString: "Page title",
+                    anchorString: "page-title",
+                    children: [
+                        {
+                            simpleString: "First step",
+                            anchorString: "step-1",
+                            children: [],
+                            featureFlags: undefined,
+                            roleRequirements: undefined
+                        },
+                        {
+                            simpleString: "Second step",
+                            anchorString: "step-2",
+                            children: [],
+                            featureFlags: undefined,
+                            roleRequirements: undefined
+                        }
+                    ]
+                }
+            ]);
+        });
+
+        it("should default to depth 3 when tocDepth is not set", () => {
+            const mdx = `
+## Page heading
+
+<StepGroup toc={true}>
+  <Step id="step-1" title="First step">
+    Step 1 content
+  </Step>
+</StepGroup>
+`;
+
+            const { hast } = toTree(mdx);
+            const toc = makeToc(hast);
+
+            expect(toc).toEqual([
+                {
+                    simpleString: "Page heading",
+                    anchorString: "page-heading",
+                    children: [
+                        {
+                            simpleString: "First step",
+                            anchorString: "step-1",
+                            children: [],
+                            featureFlags: undefined,
+                            roleRequirements: undefined
+                        }
+                    ]
+                }
+            ]);
+        });
+
+        it("should nest steps at different depths based on tocDepth", () => {
+            const mdx = `
+## Section heading
+
+<StepGroup toc={true} tocDepth="3">
+  <Step id="step-a" title="Step A">
+    Step A content
+  </Step>
+</StepGroup>
+`;
+
+            const { hast } = toTree(mdx);
+            const toc = makeToc(hast);
+
+            expect(toc).toEqual([
+                {
+                    simpleString: "Section heading",
+                    anchorString: "section-heading",
+                    children: [
+                        {
+                            simpleString: "Step A",
+                            anchorString: "step-a",
+                            children: [],
+                            featureFlags: undefined,
+                            roleRequirements: undefined
+                        }
+                    ]
+                }
+            ]);
+        });
+    });
+
     describe("role-based filtering", () => {
         it("should include role requirements for headings within If components", () => {
             const mdx = `

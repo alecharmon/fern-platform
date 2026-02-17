@@ -92,6 +92,13 @@ function migrateStepGroup(node: Hast.MdxJsxElement) {
 
     const headingRank = `h${largestRanking}`;
 
+    // store the detected heading rank on the StepGroup so toc.ts can use it for depth
+    node.attributes.push({
+        type: "mdxJsxAttribute" as const,
+        name: "tocDepth",
+        value: String(largestRanking)
+    });
+
     // group the children by steps of the largest ranking. the content following the heading will be grouped as children of that step:
     const children: Hast.MdxJsxElement[] = [];
 

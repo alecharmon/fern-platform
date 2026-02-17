@@ -68,6 +68,11 @@ export function makeToc(tree: Root, maxDepth?: number): TableOfContentsItem[] {
             );
 
             if (isTocEnabled) {
+                const tocDepthValue = node.attributes
+                    .filter(isMdxJsxAttribute)
+                    .find((attr) => attr.name === "tocDepth")?.value;
+                const tocDepth = typeof tocDepthValue === "string" ? parseInt(tocDepthValue, 10) : 3;
+
                 node.children.forEach((child) => {
                     if (child.type === "mdxJsxFlowElement" && child.name === "Step") {
                         const id = child.attributes.filter(isMdxJsxAttribute).find((attr) => attr.name === "id")?.value;
@@ -93,7 +98,7 @@ export function makeToc(tree: Root, maxDepth?: number): TableOfContentsItem[] {
                             titleText = extractedTitle;
                         }
                         headings.push({
-                            depth: 3,
+                            depth: tocDepth,
                             id,
                             title: titleText,
                             featureFlags: findFlag(parents),

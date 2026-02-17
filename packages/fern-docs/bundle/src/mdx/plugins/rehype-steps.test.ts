@@ -59,7 +59,7 @@ describe("rehype-steps", () => {
         handleSlug(tree);
 
         expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
-      "<StepGroup>
+      "<StepGroup tocDepth=\"3\">
         <Step id="step-1" title="Step 1">
           This is some content within step 1
 
@@ -92,7 +92,7 @@ describe("rehype-steps", () => {
         handleSlug(tree);
 
         expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
-      "<StepGroup>
+      "<StepGroup tocDepth=\"1\">
         <Step id="step-1" title={<>{"Step 1"}</>}>
           <p>
             This is some content within step 1
@@ -133,7 +133,7 @@ describe("rehype-steps", () => {
 
         console.log(hastToMarkdown(tree));
         expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
-      "<StepGroup>
+      "<StepGroup tocDepth=\"3\">
         <Step title={<></>}>
           Some content without a step title
         </Step>
@@ -293,9 +293,9 @@ describe("rehype-steps", () => {
         handleSlug(tree);
 
         expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
-      "<StepGroup>
+      "<StepGroup tocDepth=\"3\">
         <Step id="step-1" title="Step 1">
-          <StepGroup>
+          <StepGroup tocDepth=\"3\">
             <Step id="nested-step-1" title="Nested step 1">
               Some content within nested step 1
             </Step>
@@ -307,7 +307,7 @@ describe("rehype-steps", () => {
         </Step>
 
         <Step id="step-2" title="Step 2">
-          <StepGroup>
+          <StepGroup tocDepth=\"3\">
             <Step id="nested-step-3" title="Nested step 3">
               Some content within nested step 3
             </Step>
@@ -335,7 +335,7 @@ describe("rehype-steps", () => {
         handleSlug(tree);
 
         expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
-      "<StepGroup>
+      "<StepGroup tocDepth=\"3\">
         <Step id="install-the-fern-api-package" title={<>{"Install the "}<code>{"fern-api"}</code>{" package"}</>}>
           Run the installation command
         </Step>
@@ -365,7 +365,7 @@ describe("rehype-steps", () => {
         handleSlug(tree);
 
         expect(hastToMarkdown(tree)).toMatchInlineSnapshot(`
-      "<StepGroup>
+      "<StepGroup tocDepth=\"3\">
         <Step id="important-first-step" title={<><strong>{"Important"}</strong>{": First step"}</>}>
           This is a critical step
         </Step>
