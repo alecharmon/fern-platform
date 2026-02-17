@@ -94,7 +94,6 @@ export type PosthogEventPayloads = {
     [PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED]: {
         action: "continue" | "skip";
         specCount: number;
-        usedDefaultSpecs: boolean;
     };
     [PosthogEventName.ONBOARDING_DOCS_DETAILS_STEP_VIEWED]: Record<string, never>;
     [PosthogEventName.ONBOARDING_DOCS_DETAILS_STEP_SUBMITTED]: {

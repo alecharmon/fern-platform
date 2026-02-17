@@ -62,56 +62,25 @@ export function ApiSpecStepClient() {
         [form, orgName]
     );
 
-    const handleAddDefaultSpecs = useCallback(() => {
-        const defaultMarkerFiles = DEFAULT_SPECS.map((spec) => {
-            const fileType = spec.fileName.endsWith(".json") ? "application/json" : "application/yaml";
-            return new File([], spec.fileName, { type: fileType });
-        });
-        form.setFieldValue("openApiSpecFiles", defaultMarkerFiles);
-        // Also set the URLs for default specs (no upload needed)
-        form.setFieldValue(
-            "openApiSpecUrls",
-            DEFAULT_SPECS.map((spec) => ({
-                fileName: spec.fileName,
-                assetUrl: spec.assetUrl
-            }))
-        );
-    }, [form]);
-
-    const isUsingDefaultSpecs = useCallback((files: File[]) => {
-        if (files.length !== DEFAULT_SPECS.length) {
-            return false;
-        }
-        return files.every((file) => DEFAULT_SPECS.some((spec) => spec.fileName === file.name));
-    }, []);
-
     const hasUploadedFiles = formData.openApiSpecFiles.length > 0;
 
     const handleContinue = useCallback(async () => {
         captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED, {
             action: "continue",
-            specCount: formData.openApiSpecFiles.length,
-            usedDefaultSpecs: isUsingDefaultSpecs(formData.openApiSpecFiles)
+            specCount: formData.openApiSpecFiles.length
         });
 
         goToNextStep();
-    }, [formData.openApiSpecFiles, goToNextStep, isUsingDefaultSpecs, posthog]);
+    }, [formData.openApiSpecFiles, goToNextStep, posthog]);
 
     const handleSkip = useCallback(() => {
-        // When skipping, add default specs and proceed
-        const willUseDefaults = formData.openApiSpecFiles.length === 0;
-        if (willUseDefaults) {
-            handleAddDefaultSpecs();
-        }
-
         captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED, {
             action: "skip",
-            specCount: willUseDefaults ? DEFAULT_SPECS.length : formData.openApiSpecFiles.length,
-            usedDefaultSpecs: willUseDefaults || isUsingDefaultSpecs(formData.openApiSpecFiles)
+            specCount: 0
         });
 
         goToNextStep();
-    }, [formData.openApiSpecFiles, handleAddDefaultSpecs, goToNextStep, isUsingDefaultSpecs, posthog]);
+    }, [goToNextStep, posthog]);
 
     return (
         <OnboardingStepCard
