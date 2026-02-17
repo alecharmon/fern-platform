@@ -43,8 +43,6 @@ const dashboardUsageProvider: UsageProvider = {
             case "docs_sites":
                 // TODO: wire up to actual docs site count
                 return 0;
-            case "custom_domain_subpath":
-                return 0;
             default:
                 return 0;
         }

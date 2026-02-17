@@ -21,6 +21,7 @@ function makeEntitlements(
     return {
         seats: denied(),
         docs_sites: denied(),
+        custom_domain_subpath: denied(),
         ...overrides
     };
 }
