@@ -1,6 +1,20 @@
 import { getPostmanFernIntegrationServiceClient } from "@/app/services/postman/getPostmanFernIntegrationServiceClient";
 import { getPostmanAccessToken } from "@/app/services/postman/jwt";
 import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
+import { fernCliConfig } from "@/utils/fernCliConfig";
+
+const PROD_DOCS_DOMAIN = "docs.buildwithfern.com";
+const DEV_DOCS_DOMAIN = "docs.dev.buildwithfern.com";
+
+function normalizeSiteUrl(siteUrl: string): string {
+    if (siteUrl.includes(DEV_DOCS_DOMAIN)) {
+        return siteUrl.replace(DEV_DOCS_DOMAIN, fernCliConfig.docsDomain);
+    }
+    if (siteUrl.includes(PROD_DOCS_DOMAIN)) {
+        return siteUrl.replace(PROD_DOCS_DOMAIN, fernCliConfig.docsDomain);
+    }
+    return siteUrl;
+}
 
 interface PostmanNotificationParams {
     teamId: string;
@@ -54,8 +68,9 @@ export async function notifyPostman({
     success,
     error
 }: PostmanNotificationParams): Promise<void> {
+    const normalizedSiteUrl = normalizeSiteUrl(siteUrl);
     console.log(
-        `[postman-notify] Attempting to notify Postman: teamId=${teamId}, collectionId=${collectionId}, siteUrl=${siteUrl}, success=${success}${error ? `, error=${error}` : ""}`
+        `[postman-notify] Attempting to notify Postman: teamId=${teamId}, collectionId=${collectionId}, siteUrl=${normalizedSiteUrl} (original: ${siteUrl}), success=${success}${error ? `, error=${error}` : ""}`
     );
 
     const installation = await getAppInstallationByTeamId(teamId);
@@ -77,12 +92,14 @@ export async function notifyPostman({
     const client = getPostmanFernIntegrationServiceClient({ token: accessToken });
 
     if (success) {
-        console.log(`[postman-notify] Sending SUCCESS notification to Postman: publishedDocUrl=https://${siteUrl}`);
+        console.log(
+            `[postman-notify] Sending SUCCESS notification to Postman: publishedDocUrl=https://${normalizedSiteUrl}`
+        );
         await client.putFernDocs({
             teamId,
             collectionId,
             success: true,
-            publishedDocUrl: `https://${siteUrl}`
+            publishedDocUrl: `https://${normalizedSiteUrl}`
         });
     } else {
         console.log(
@@ -98,5 +115,5 @@ export async function notifyPostman({
 
     console.log("[postman-notify] Successfully notified Postman");
 
-    await sendPostmanSlackNotification({ teamId, collectionId, siteUrl, success, error });
+    await sendPostmanSlackNotification({ teamId, collectionId, siteUrl: normalizedSiteUrl, success, error });
 }
