@@ -5,8 +5,8 @@ import { useState } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
-import type { DocsUrl } from "@/utils/types";
 import { fernCliConfig } from "@/utils/fernCliConfig";
+import type { DocsUrl } from "@/utils/types";
 import { Button } from "../ui/button";
 import { AddCustomDomainModal } from "./AddCustomDomainModal";
 import { RemoveCustomDomainModal } from "./RemoveCustomDomainModal";
