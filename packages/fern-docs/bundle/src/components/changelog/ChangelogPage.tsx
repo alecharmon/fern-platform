@@ -6,7 +6,7 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { t } from "@fern-docs/i18n";
-import { makeToc, type TableOfContentsItem, toTree } from "@fern-docs/mdx";
+import { getFrontmatter, makeToc, type TableOfContentsItem, toTree } from "@fern-docs/mdx";
 import { compact } from "es-toolkit/compat";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
@@ -50,7 +50,8 @@ export default async function ChangelogPage({
         await Promise.all(
             compact([node.overviewPageId, ...pageIds]).map(async (pageId) => {
                 const markdown = await loader.getPage(pageId);
-                const toc = makeToc(toTree(markdown.markdown).hast);
+                const strippedContent = getFrontmatter(markdown.markdown).content;
+                const toc = makeToc(toTree(strippedContent).hast);
                 return {
                     pageId,
                     anchors: getAnchorIds(toc),

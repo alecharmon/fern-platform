@@ -26,10 +26,10 @@ export function HeaderTabsRoot({
             className={className}
             searchBar={
                 showSearchBar && (
-                    <div className="flex max-w-[640px] flex-row gap-2">
+                    <div className="flex shrink-0 max-w-[640px] flex-row gap-2">
                         <SearchV2Trigger
                             aria-label={t(lang).search.search}
-                            className="max-w-sidebar-width overflow-hidden"
+                            className="overflow-hidden"
                             isSearchInSidebar={false}
                             placeholder={searchPlaceholder}
                             lang={lang}

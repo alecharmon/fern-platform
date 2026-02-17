@@ -45,7 +45,7 @@ export function AbstractHeaderContent({
                         <div className="flex items-center lg:items-start">{logo}</div>
                         {/* Desktop only: product/version selectors - use CSS to avoid hydration mismatch */}
                         {showSwitcher && (
-                            <div className="hidden items-baseline lg:flex">
+                            <div className="fern-header-selectors">
                                 {productSelect}
                                 {versionSelect}
                             </div>

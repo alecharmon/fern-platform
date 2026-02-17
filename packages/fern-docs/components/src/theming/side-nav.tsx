@@ -34,7 +34,7 @@ export function SidebarNav({
     return (
         <>
             {/* Desktop sidebar - hidden on mobile via CSS */}
-            <DesktopMenu className={cn(className, desktopClassName, "hidden lg:block")} fixed={fixed} {...props}>
+            <DesktopMenu className={cn(className, desktopClassName, "fern-sidebar-desktop")} fixed={fixed} {...props}>
                 {children}
             </DesktopMenu>
 
