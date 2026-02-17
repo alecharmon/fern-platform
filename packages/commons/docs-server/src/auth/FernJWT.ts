@@ -53,6 +53,14 @@ export async function verifyFernJWTConfig(token: string, authConfig: AuthEdgeCon
         }
     }
 
+    if (authConfig.type === "password") {
+        const jwtSecret = process.env.JWT_SECRET_KEY;
+        if (!jwtSecret) {
+            throw new Error("JWT_SECRET_KEY is not defined");
+        }
+        return verifyFernJWT(token, jwtSecret);
+    }
+
     throw new Error("Auth config type is not supported");
 }
 

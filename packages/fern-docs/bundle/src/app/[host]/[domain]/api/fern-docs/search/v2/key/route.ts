@@ -1,4 +1,5 @@
 import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
+import { safeVerifyPasswordAuth } from "@fern-api/docs-server/auth/password-auth";
 import { algoliaAppId, algoliaSearchApikey } from "@fern-api/docs-server/env-variables";
 import { getDocsUrlMetadata } from "@fern-api/docs-server/getDocsUrlMetadata";
 import { isLocal } from "@fern-api/docs-server/isLocal";
@@ -55,7 +56,20 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     // JWT-based authentication
     const fern_token = req.headers.get("FERN_TOKEN") ?? (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
-    const user = await safeVerifyFernJWTConfig(fern_token, await getAuthEdgeConfig(domain));
+    const authEdgeConfig = await getAuthEdgeConfig(domain);
+
+    let user: Awaited<ReturnType<typeof safeVerifyFernJWTConfig>>;
+    if (authEdgeConfig?.type === "password") {
+        const jwtSecret = process.env.JWT_SECRET_KEY;
+        if (jwtSecret) {
+            const result = await safeVerifyPasswordAuth(fern_token, jwtSecret);
+            if (result.valid) {
+                user = { roles: result.roles };
+            }
+        }
+    } else {
+        user = await safeVerifyFernJWTConfig(fern_token, authEdgeConfig);
+    }
 
     const userToken = getXUserToken(req) ?? user?.api_key ?? fern_token;
 
