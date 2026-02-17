@@ -8,7 +8,10 @@ import {
     type UsageProvider
 } from "@fern-platform/entitlements";
 
-import { getAuth0ManagementClient } from "@/app/services/auth0/management";
+import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
+import { getAuth0ManagementClient, getOrganizationById } from "@/app/services/auth0/management";
+import { Auth0OrgID, Auth0OrgName } from "@/app/services/auth0/types";
+import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
 
 const FERN_EMAIL_DOMAIN = "@buildwithfern.com";
 
@@ -35,14 +38,27 @@ async function countOrgSeats(orgId: string): Promise<number> {
     return count;
 }
 
+async function countDocsSites(orgId: string): Promise<number> {
+    try {
+        const session = await getCurrentSessionOrThrow();
+        const org = await getOrganizationById(Auth0OrgID(orgId));
+        const response = await getDocsSitesForOrg({
+            token: session.accessToken,
+            orgName: Auth0OrgName(org.name)
+        });
+        return response.ok ? response.docsSites.length : 0;
+    } catch {
+        return 0;
+    }
+}
+
 const dashboardUsageProvider: UsageProvider = {
     getCurrentUsage: async (orgId, key) => {
         switch (key) {
             case "seats":
                 return countOrgSeats(orgId);
             case "docs_sites":
-                // TODO: wire up to actual docs site count
-                return 0;
+                return countDocsSites(orgId);
             default:
                 return 0;
         }

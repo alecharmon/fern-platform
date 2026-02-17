@@ -16,6 +16,7 @@ export type {
     EntitlementKey,
     EntitlementType,
     MergeStrategy,
+    NumericEntitlementKey,
     OveragePolicy
 } from "./types";
 export { ENTITLEMENT_DEFINITIONS } from "./types";

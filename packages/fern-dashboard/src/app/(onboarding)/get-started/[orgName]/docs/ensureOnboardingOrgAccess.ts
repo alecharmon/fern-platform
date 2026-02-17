@@ -3,11 +3,14 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { addUserToOrgById } from "@/app/services/auth0/management";
+import { addUserToOrgById, getOrgIdFromName } from "@/app/services/auth0/management";
 import { type Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess, getOrganizationForPostmanTeam } from "@/app/services/dal/organization";
+import { getEntitlementsChecker } from "@/app/services/entitlements/checker";
 import { isUserInTeam } from "@/app/services/postman/openapi-repository";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
+import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
+import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
 import { serializeSearchParams } from "./serializeSearchParams";
 
 const DEFAULT_NEXT_PATH = "/get-started/:orgId/docs";
@@ -64,7 +67,6 @@ export async function ensureOnboardingOrgAccess(
 
     try {
         await assertUserHasOrganizationAccess(session.accessToken, orgName as Auth0OrgName);
-        return session;
     } catch (error) {
         console.warn(`[Onboarding] User doesn't have access to org ${orgName}`, error);
 
@@ -114,4 +116,30 @@ export async function ensureOnboardingOrgAccess(
 
         redirect(createOrgRedirect(orgName, requestedPath, searchParams));
     }
+
+    // Check docs_sites entitlement (gated behind feature flag)
+    const entitlementsEnabled = await isFeatureFlagEnabledForUser(
+        PosthogFeatureFlag.ENABLE_ENTITLEMENTS,
+        session.user.sub,
+        orgName as Auth0OrgName
+    );
+    if (entitlementsEnabled) {
+        try {
+            const orgId = await getOrgIdFromName(orgName as Auth0OrgName);
+            const checker = getEntitlementsChecker();
+            const result = await checker.check(orgId, "docs_sites");
+            if (!result.entitled) {
+                redirect(`/${orgName}/billing?reason=docs_site_limit`);
+            }
+        } catch (err) {
+            // Re-throw Next.js redirects
+            if (typeof err === "object" && err !== null && "digest" in err) {
+                throw err;
+            }
+            // If entitlement check fails, allow through rather than blocking
+            console.warn(`[Onboarding] Failed to check docs_sites entitlement for ${orgName}`, err);
+        }
+    }
+
+    return session;
 }

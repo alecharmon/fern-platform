@@ -1,13 +1,16 @@
 "use client";
 
-import { ArrowLeft, Building2, Check, Globe, Loader2, Plus, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Check, Globe, Loader2, Plus, X } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useState } from "react";
 
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
-import type { Auth0Organization } from "@/app/services/auth0/types";
+import type { Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
+import { DashboardApiClient } from "@/app/services/dashboard-api/client";
+import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +44,7 @@ export default function SetupPage() {
     const searchParams = useSearchParams();
     const organizations = useOrganizations();
     const invalidateOrganizations = useInvalidateOrganizations();
+    const posthog = usePostHog();
 
     const [selectedOrgName, setSelectedOrgName] = useState<string>("");
     const [customization, setCustomization] = useState<DocsCustomization | null>(null);
@@ -49,6 +53,40 @@ export default function SetupPage() {
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
+
+    // Docs site entitlement check
+    const [isAtDocsLimit, setIsAtDocsLimit] = useState(false);
+    const entitlementsEnabled = posthog?.isFeatureEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS) ?? false;
+
+    useEffect(() => {
+        if (!selectedOrgName || !entitlementsEnabled) {
+            setIsAtDocsLimit(false);
+            return;
+        }
+
+        let cancelled = false;
+        DashboardApiClient.getOrgEntitlements({ orgName: selectedOrgName as Auth0OrgName })
+            .then((entitlements) => {
+                if (cancelled) {
+                    return;
+                }
+                const docsSites = entitlements.docs_sites;
+                if (docsSites && docsSites.entitled === false) {
+                    setIsAtDocsLimit(true);
+                } else {
+                    setIsAtDocsLimit(false);
+                }
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setIsAtDocsLimit(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [selectedOrgName, entitlementsEnabled]);
 
     // Progress state
     const [progress, setProgress] = useState<{ step: number; totalSteps: number; message: string } | null>(null);
@@ -482,6 +520,19 @@ export default function SetupPage() {
                                 </div>
                             )}
 
+                            {/* Docs site limit warning */}
+                            {isAtDocsLimit && selectedOrgName && (
+                                <div className="bg-destructive/10 text-destructive flex items-center justify-between rounded-md p-3 text-sm">
+                                    <span>Your current plan has reached its docs site limit.</span>
+                                    <Button variant="destructive" size="sm" asChild className="group">
+                                        <Link href={`/${selectedOrgName}/billing?reason=docs_site_limit`}>
+                                            Upgrade
+                                            <ArrowRight className="ml-0.5 h-3.5 w-3.5 transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:translate-x-0.5" />
+                                        </Link>
+                                    </Button>
+                                </div>
+                            )}
+
                             {/* Error display */}
                             {error && (
                                 <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
@@ -498,6 +549,7 @@ export default function SetupPage() {
                                         isCreating ||
                                         !urlPrefix ||
                                         !isUrlAvailable ||
+                                        isAtDocsLimit ||
                                         (flowType === "template" && !customization) ||
                                         (flowType === "site-to-docs" && !siteToDocsOutput)
                                     }

@@ -74,6 +74,8 @@ export function PostHogProvider({ session, children }: PostHogProvider.Props) {
         // Register organization as a super property and include it in ALL events automatically
         if (orgName) {
             posthog.register({ orgName: orgName });
+            posthog.setPersonPropertiesForFlags({ orgName: orgName });
+            posthog.reloadFeatureFlags();
         }
     }, [orgName]);
 

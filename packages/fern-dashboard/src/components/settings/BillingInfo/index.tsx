@@ -312,8 +312,18 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
         return planIndex < currentPlanIndex;
     };
 
+    const billingReason = searchParams.get("reason");
+
     return (
         <div className="flex w-full max-w-[1040px] flex-col gap-4">
+            {/* Entitlement limit banner */}
+            {billingReason === "docs_site_limit" && (
+                <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/50 dark:text-amber-200">
+                    You&apos;ve reached the docs site limit on your current plan. Upgrade to create additional docs
+                    sites.
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-foreground">Billing</h1>
