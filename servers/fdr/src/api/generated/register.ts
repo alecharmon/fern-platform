@@ -5,7 +5,6 @@ import type { LatestService as api_latest_RootService } from "./api/resources/ap
 import type { ReadService as api_v1_read_RootService } from "./api/resources/api/resources/v1/resources/read/service/ReadService";
 import type { RegisterService as api_v1_register_RootService } from "./api/resources/api/resources/v1/resources/register/service/RegisterService";
 import type { DashboardService as dashboard_RootService } from "./api/resources/dashboard/service/DashboardService";
-import type { DiffService } from "./api/resources/diff/service/DiffService";
 import type { ReadService as docs_v1_read_RootService } from "./api/resources/docs/resources/v1/resources/read/service/ReadService";
 import type { WriteService as docs_v1_write_RootService } from "./api/resources/docs/resources/v1/resources/write/service/WriteService";
 import type { ReadService as docs_v2_read_RootService } from "./api/resources/docs/resources/v2/resources/read/service/ReadService";
@@ -25,7 +24,6 @@ import type { TokensService } from "./api/resources/tokens/service/TokensService
 export function register(
     expressApp: express.Express | express.Router,
     services: {
-        diff: DiffService;
         docsCache: DocsCacheService;
         git: GitService;
         snippetsFactory: SnippetsFactoryService;
@@ -89,7 +87,6 @@ export function register(
     (expressApp as any).use("/v2/registry/docs", services.docs.v2.write._root.toRouter());
     (expressApp as any).use("/generators", services.generators._root.toRouter());
     (expressApp as any).use("/pdf-export", services.pdfExport._root.toRouter());
-    (expressApp as any).use("/registry", services.diff.toRouter());
     (expressApp as any).use("/docs-cache", services.docsCache.toRouter());
     (expressApp as any).use("/generators/cli", services.generators.cli.toRouter());
     (expressApp as any).use("/generators/versions", services.generators.versions.toRouter());

@@ -3,8 +3,6 @@ export * as commons from "./commons";
 export * from "./commons/errors";
 export * from "./commons/types";
 export * as dashboard from "./dashboard";
-export * as diff from "./diff";
-export * from "./diff/types";
 export * as docs from "./docs";
 export * as docsCache from "./docsCache";
 export * from "./docsCache/service/requests";
