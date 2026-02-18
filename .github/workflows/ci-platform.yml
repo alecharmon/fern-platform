@@ -109,6 +109,18 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
 
+      - name: Cache Docker images
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles('servers/fdr/docker-compose.test.yml') }}
+
+      - name: Pre-pull Docker images
+        run: |
+          docker pull postgres:10.3 &
+          docker pull adobe/s3mock &
+          docker pull redis &
+          wait
+
       - name: Run tests against local FDR
         run: pnpm --filter=@fern-platform/fdr test:local
         env:
