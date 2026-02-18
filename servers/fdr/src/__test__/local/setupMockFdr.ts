@@ -22,7 +22,7 @@ import { createCliRouter } from "../../controllers/generators/cliRouter";
 import { createGeneratorVersionsRouter } from "../../controllers/generators/generatorVersionsRouter";
 import { getGeneratorsRootController } from "../../controllers/generators/getGeneratorsRootController";
 import { getGitController } from "../../controllers/git/getGitController";
-import { getPdfExportController } from "../../controllers/pdf-export/getPdfExportController";
+import { createPdfExportRouter } from "../../controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "../../controllers/sdk/computeSemanticVersionRouter";
 import { getSnippetsFactoryService } from "../../controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "../../controllers/snippets/getSnippetsService";
@@ -109,8 +109,9 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
 
     const orgForUrlRouter = createGetOrganizationForUrlRouter(fdrApplication);
     const dashboardRouter = createDashboardRouter(fdrApplication);
+    const pdfExportRouter = createPdfExportRouter(fdrApplication);
     const orpcHandler = new OpenAPIHandler(
-        { ...orgForUrlRouter, ...dashboardRouter },
+        { ...orgForUrlRouter, ...dashboardRouter, ...pdfExportRouter },
         {
             interceptors: [
                 onError((error) => {
@@ -218,6 +219,17 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    app.use("/pdf-export", async (req, res, next) => {
+        const { matched } = await orpcHandler.handle(req, res, {
+            prefix: "/pdf-export",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     const docsCacheRouter = createDocsCacheRouter(fdrApplication);
     const docsCacheHandler = new OpenAPIHandler(docsCacheRouter, {
         interceptors: [
@@ -261,9 +273,6 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         templates: getTemplatesService(fdrApplication),
         generators: {
             _root: getGeneratorsRootController(fdrApplication)
-        },
-        pdfExport: {
-            _root: getPdfExportController(fdrApplication)
         },
         tokens: getTokensService(fdrApplication),
         git: getGitController(fdrApplication)

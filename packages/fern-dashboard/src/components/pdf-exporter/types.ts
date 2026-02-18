@@ -1,5 +1,3 @@
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
-
 export type ExportOptions = {
     coverTitle: string | undefined;
     coverSubtitle: string | undefined;
@@ -9,8 +7,24 @@ export type ExportOptions = {
     footerLeftTemplate: string | undefined;
     footerRightTemplate: string | undefined;
 };
-export type ExportTask = FdrAPI.pdfExport.PdfExportTask;
-export type ExportTaskStatus = FdrAPI.pdfExport.PdfExportTaskStatus;
+
+export type ExportTaskStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+
+export type ExportTask = {
+    id: string;
+    orgId: string;
+    docsUrl: string;
+    status: ExportTaskStatus;
+    options: (ExportOptions & { version: "v1" }) | undefined;
+    createdAt: string;
+    startedAt: string | undefined;
+    completedAt: string | undefined;
+    fileName: string | undefined;
+    sizeBytes: number | undefined;
+    errorMessage: string | undefined;
+    requesterName: string | undefined;
+    notifyEmails: string[] | undefined;
+};
 
 export type ExportOptionKey = keyof ExportOptions;
 export type ExportOptionSectionId = "cover" | "headersFooters";

@@ -22,7 +22,7 @@ import { createCliRouter } from "./controllers/generators/cliRouter";
 import { createGeneratorVersionsRouter } from "./controllers/generators/generatorVersionsRouter";
 import { getGeneratorsRootController } from "./controllers/generators/getGeneratorsRootController";
 import { getGitController } from "./controllers/git/getGitController";
-import { getPdfExportController } from "./controllers/pdf-export";
+import { createPdfExportRouter } from "./controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "./controllers/sdk/computeSemanticVersionRouter";
 import { getSnippetsFactoryService } from "./controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "./controllers/snippets/getSnippetsService";
@@ -77,8 +77,9 @@ async function startServer(): Promise<void> {
 
         const orgForUrlRouter = createGetOrganizationForUrlRouter(app);
         const dashboardRouter = createDashboardRouter(app);
+        const pdfExportRouter = createPdfExportRouter(app);
         const orpcHandler = new OpenAPIHandler(
-            { ...orgForUrlRouter, ...dashboardRouter },
+            { ...orgForUrlRouter, ...dashboardRouter, ...pdfExportRouter },
             {
                 interceptors: [
                     onError((error) => {
@@ -186,6 +187,17 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        expressApp.use("/pdf-export", async (req, res, next) => {
+            const { matched } = await orpcHandler.handle(req, res, {
+                prefix: "/pdf-export",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         const docsCacheRouter = createDocsCacheRouter(app);
         const docsCacheHandler = new OpenAPIHandler(docsCacheRouter, {
             interceptors: [
@@ -246,10 +258,7 @@ async function startServer(): Promise<void> {
                 _root: getGeneratorsRootController(app)
             },
             tokens: getTokensService(app),
-            git: getGitController(app),
-            pdfExport: {
-                _root: getPdfExportController(app)
-            }
+            git: getGitController(app)
         });
         app.logger.info(`Listening for requests on port ${PORT}`);
         expressApp.listen(PORT);

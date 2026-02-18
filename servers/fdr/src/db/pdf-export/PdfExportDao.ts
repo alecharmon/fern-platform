@@ -1,8 +1,11 @@
 import { assertNever } from "@fern-api/ui-core-utils";
 import type { PdfExportTask, Prisma, PrismaClient } from "@prisma/client";
 import { z } from "zod";
-import type { FernRegistry } from "../../api/generated";
-import { FernRegistry as FernRegistryApi } from "../../api/generated";
+import type {
+    PdfExportOptions,
+    PdfExportTaskStatus,
+    PdfExportTask as PdfExportTaskType
+} from "../../controllers/pdf-export";
 
 const PdfExportOptionsV1Schema = z.object({
     version: z.literal("v1"),
@@ -22,13 +25,13 @@ export interface CreatePdfExportTaskParams {
     id: string;
     orgId: string;
     docsUrl: string;
-    options?: FernRegistry.pdfExport.PdfExportOptions;
+    options?: PdfExportOptions;
     requesterName?: string;
     notifyEmails?: string[];
 }
 
 export interface UpdatePdfExportTaskStatusParams {
-    status: FernRegistry.pdfExport.PdfExportTaskStatus;
+    status: PdfExportTaskStatus;
     startedAt?: Date;
     completedAt?: Date;
     s3Key?: string;
@@ -42,13 +45,9 @@ export interface PdfExportDao {
     getTask(id: string): Promise<PdfExportTask | null>;
     listTasks(orgId: string, docsUrl: string, limit?: number): Promise<PdfExportTask[]>;
     updateTaskStatus(id: string, params: UpdatePdfExportTaskStatusParams): Promise<PdfExportTask>;
-    convertPdfExportTaskFromDb(task: PdfExportTask): FernRegistry.pdfExport.PdfExportTask;
-    convertPdfExportOptionsFromDb(
-        options: PdfExportTask["options"]
-    ): FernRegistry.pdfExport.PdfExportOptions | undefined;
-    convertPdfExportOptionsToDb(
-        opts: FernRegistry.pdfExport.PdfExportOptions | undefined
-    ): Prisma.InputJsonValue | undefined;
+    convertPdfExportTaskFromDb(task: PdfExportTask): PdfExportTaskType;
+    convertPdfExportOptionsFromDb(options: PdfExportTask["options"]): PdfExportOptions | undefined;
+    convertPdfExportOptionsToDb(opts: PdfExportOptions | undefined): Prisma.InputJsonValue | undefined;
 }
 
 export class PdfExportDaoImpl implements PdfExportDao {
@@ -105,10 +104,10 @@ export class PdfExportDaoImpl implements PdfExportDao {
         });
     }
 
-    public convertPdfExportTaskFromDb(task: PdfExportTask): FernRegistry.pdfExport.PdfExportTask {
+    public convertPdfExportTaskFromDb(task: PdfExportTask): PdfExportTaskType {
         return {
-            id: FernRegistryApi.pdfExport.PdfExportTaskId(task.id),
-            orgId: FernRegistryApi.OrgId(task.orgId),
+            id: task.id,
+            orgId: task.orgId,
             docsUrl: task.docsUrl,
             status: task.status,
             options: this.convertPdfExportOptionsFromDb(task.options),
@@ -123,9 +122,7 @@ export class PdfExportDaoImpl implements PdfExportDao {
         };
     }
 
-    public convertPdfExportOptionsFromDb(
-        options: PdfExportTask["options"]
-    ): FernRegistry.pdfExport.PdfExportOptions | undefined {
+    public convertPdfExportOptionsFromDb(options: PdfExportTask["options"]): PdfExportOptions | undefined {
         const parsed = PdfExportOptionsSchema.safeParse(options);
         if (!parsed.success) {
             return undefined;
@@ -148,9 +145,7 @@ export class PdfExportDaoImpl implements PdfExportDao {
         }
     }
 
-    public convertPdfExportOptionsToDb(
-        opts: FernRegistry.pdfExport.PdfExportOptions | undefined
-    ): Prisma.InputJsonValue | undefined {
+    public convertPdfExportOptionsToDb(opts: PdfExportOptions | undefined): Prisma.InputJsonValue | undefined {
         if (opts == null) {
             return undefined;
         }

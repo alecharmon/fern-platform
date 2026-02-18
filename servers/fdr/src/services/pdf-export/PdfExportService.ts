@@ -1,9 +1,14 @@
 import { FernEmailClient } from "@fern-platform/emails";
 import { jwtVerify } from "jose";
 import { v4 as uuidv4 } from "uuid";
-import type { FernRegistry } from "../../api/generated";
 import { UnauthorizedError } from "../../api/generated/api/resources/commons/errors";
 import type { FdrApplication } from "../../app";
+import type {
+    PdfExportDownloadResponse,
+    PdfExportOptions,
+    PdfExportTask,
+    UpdatePdfExportTaskStatusRequest
+} from "../../controllers/pdf-export";
 import { PdfExportSqsClient } from "./PdfExportSqsClient";
 import { PdfExportStorage } from "./PdfExportStorage";
 
@@ -12,7 +17,7 @@ export interface CreatePdfExportTaskParams {
     docsUrl: string;
     requesterName?: string;
     notifyEmails?: string[];
-    options?: FernRegistry.pdfExport.PdfExportOptions;
+    options?: PdfExportOptions;
 }
 
 export interface SendCompletionEmailParams {
@@ -24,15 +29,12 @@ export interface SendCompletionEmailParams {
 }
 
 export interface PdfExportService {
-    createTask(params: CreatePdfExportTaskParams): Promise<FernRegistry.pdfExport.PdfExportTask>;
-    getTask(taskId: string): Promise<FernRegistry.pdfExport.PdfExportTask | null>;
-    listTasks(orgId: string, docsUrl: string, limit?: number): Promise<FernRegistry.pdfExport.PdfExportTask[]>;
-    updateTaskStatus(
-        taskId: string,
-        params: FernRegistry.pdfExport.UpdatePdfExportTaskStatusRequest
-    ): Promise<FernRegistry.pdfExport.PdfExportTask>;
+    createTask(params: CreatePdfExportTaskParams): Promise<PdfExportTask>;
+    getTask(taskId: string): Promise<PdfExportTask | null>;
+    listTasks(orgId: string, docsUrl: string, limit?: number): Promise<PdfExportTask[]>;
+    updateTaskStatus(taskId: string, params: UpdatePdfExportTaskStatusRequest): Promise<PdfExportTask>;
     sendCompletionEmail(params: SendCompletionEmailParams): Promise<void>;
-    getDownloadUrl(taskId: string): Promise<FernRegistry.pdfExport.PdfExportDownloadResponse>;
+    getDownloadUrl(taskId: string): Promise<PdfExportDownloadResponse>;
     verifyDocsPdfExporterLambdaToken(authHeader: string | undefined): Promise<void>;
 }
 
@@ -58,7 +60,7 @@ export class PdfExportServiceImpl implements PdfExportService {
         }
     }
 
-    public async createTask(params: CreatePdfExportTaskParams): Promise<FernRegistry.pdfExport.PdfExportTask> {
+    public async createTask(params: CreatePdfExportTaskParams): Promise<PdfExportTask> {
         const taskId = `pdfexp_${uuidv4()}`;
         const task = await this.app.dao.pdfExport().createTask({
             id: taskId,
@@ -84,7 +86,7 @@ export class PdfExportServiceImpl implements PdfExportService {
         return this.app.dao.pdfExport().convertPdfExportTaskFromDb(task);
     }
 
-    public async getTask(taskId: string): Promise<FernRegistry.pdfExport.PdfExportTask | null> {
+    public async getTask(taskId: string): Promise<PdfExportTask | null> {
         const task = await this.app.dao.pdfExport().getTask(taskId);
         if (task == null) {
             return null;
@@ -92,19 +94,12 @@ export class PdfExportServiceImpl implements PdfExportService {
         return this.app.dao.pdfExport().convertPdfExportTaskFromDb(task);
     }
 
-    public async listTasks(
-        orgId: string,
-        docsUrl: string,
-        limit?: number
-    ): Promise<FernRegistry.pdfExport.PdfExportTask[]> {
+    public async listTasks(orgId: string, docsUrl: string, limit?: number): Promise<PdfExportTask[]> {
         const tasks = await this.app.dao.pdfExport().listTasks(orgId, docsUrl, limit);
         return tasks.map((task) => this.app.dao.pdfExport().convertPdfExportTaskFromDb(task));
     }
 
-    public async updateTaskStatus(
-        taskId: string,
-        params: FernRegistry.pdfExport.UpdatePdfExportTaskStatusRequest
-    ): Promise<FernRegistry.pdfExport.PdfExportTask> {
+    public async updateTaskStatus(taskId: string, params: UpdatePdfExportTaskStatusRequest): Promise<PdfExportTask> {
         const task = await this.app.dao.pdfExport().updateTaskStatus(taskId, {
             status: params.status,
             startedAt: params.startedAt != null ? new Date(params.startedAt) : undefined,
@@ -156,7 +151,7 @@ export class PdfExportServiceImpl implements PdfExportService {
         }
     }
 
-    public async getDownloadUrl(taskId: string): Promise<FernRegistry.pdfExport.PdfExportDownloadResponse> {
+    public async getDownloadUrl(taskId: string): Promise<PdfExportDownloadResponse> {
         const task = await this.app.dao.pdfExport().getTask(taskId);
         if (task == null) {
             throw new Error(`PDF export task ${taskId} not found`);

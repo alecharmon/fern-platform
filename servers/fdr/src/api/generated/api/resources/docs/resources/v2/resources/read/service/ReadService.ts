@@ -142,7 +142,7 @@ export class ReadService {
     }
 
     public toRouter(): express.Router {
-        this.router.post("/metadata-for-url",async (req, res, next) => {
+        this.router.post("/metadata-for-url", async (req, res, next) => {
             try {
                 await this.methods.getDocsUrlMetadata(
                     req as any,

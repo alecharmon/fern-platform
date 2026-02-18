@@ -11,7 +11,7 @@ export * as git from "./git/index.js";
 export * from "./git/types/index.js";
 export * as libraryDocs from "./libraryDocs/index.js";
 export * as navigation from "./navigation/index.js";
-export * as pdfExport from "./pdfExport/index.js";
+
 export * as sdks from "./sdks/index.js";
 export * from "./snippets/client/requests/index.js";
 export * as snippets from "./snippets/index.js";

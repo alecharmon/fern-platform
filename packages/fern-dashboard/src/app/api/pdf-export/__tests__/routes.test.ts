@@ -26,20 +26,20 @@ vi.mock("@fern-api/user-permissions", async (importOriginal) => {
 });
 
 vi.mock("@/app/services/fdr/getFdrClient", () => ({
-    getFdrClient: vi.fn()
+    getFdrBaseUrl: vi.fn()
 }));
 
 import { hasResourcePermission } from "@fern-api/user-permissions";
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
 import { getOrgIdFromName } from "@/app/services/auth0/management";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
-import { getFdrClient } from "@/app/services/fdr/getFdrClient";
+import { getFdrBaseUrl } from "@/app/services/fdr/getFdrClient";
 
 const mockMaybeGetCurrentSession = maybeGetCurrentSession as Mock;
 const mockAssertUserHasOrganizationAccess = assertUserHasOrganizationAccess as Mock;
 const mockGetOrgIdFromName = getOrgIdFromName as Mock;
 const mockHasResourcePermission = hasResourcePermission as Mock;
-const mockGetFdrClient = getFdrClient as Mock;
+const mockGetFdrBaseUrl = getFdrBaseUrl as Mock;
 
 describe("pdf-export API routes auth middleware", () => {
     const token = "test-token";
@@ -47,13 +47,7 @@ describe("pdf-export API routes auth middleware", () => {
     const orgName = "acme";
     const docsUrl = "acme.docs.buildwithfern.com";
 
-    const fdr = {
-        pdfExport: {
-            listTasks: vi.fn(),
-            createTask: vi.fn(),
-            getDownloadUrl: vi.fn()
-        }
-    };
+    const mockFetch = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -65,14 +59,18 @@ describe("pdf-export API routes auth middleware", () => {
         mockGetOrgIdFromName.mockResolvedValue("org_123");
         mockHasResourcePermission.mockResolvedValue(true);
 
-        fdr.pdfExport.listTasks.mockResolvedValue({ ok: true, body: { tasks: [] } });
-        fdr.pdfExport.createTask.mockResolvedValue({ ok: true, body: { id: "task_1" } });
-        fdr.pdfExport.getDownloadUrl.mockResolvedValue({
+        mockGetFdrBaseUrl.mockReturnValue("http://localhost:8080");
+        mockFetch.mockResolvedValue({
             ok: true,
-            body: { downloadUrl: "https://example.com/file.pdf", fileName: "file.pdf", sizeBytes: 123 }
+            json: async () => ({
+                tasks: [],
+                id: "task_1",
+                downloadUrl: "https://example.com/file.pdf",
+                fileName: "file.pdf",
+                sizeBytes: 123
+            })
         });
-
-        mockGetFdrClient.mockReturnValue(fdr);
+        vi.stubGlobal("fetch", mockFetch);
     });
 
     // ---- Step 1: Session validation ----

@@ -6,7 +6,6 @@ import { DocsClient } from "./api/resources/docs/client/Client.js";
 import { DocsCacheClient } from "./api/resources/docsCache/client/Client.js";
 import { GeneratorsClient } from "./api/resources/generators/client/Client.js";
 import { GitClient } from "./api/resources/git/client/Client.js";
-import { PdfExportClient } from "./api/resources/pdfExport/client/Client.js";
 import { SdksClient } from "./api/resources/sdks/client/Client.js";
 import { SnippetsClient } from "./api/resources/snippets/client/Client.js";
 import { SnippetsFactoryClient } from "./api/resources/snippetsFactory/client/Client.js";
@@ -27,7 +26,6 @@ export class FernRegistryClient {
     protected _dashboard: DashboardClient | undefined;
     protected _docs: DocsClient | undefined;
     protected _generators: GeneratorsClient | undefined;
-    protected _pdfExport: PdfExportClient | undefined;
     protected _docsCache: DocsCacheClient | undefined;
     protected _git: GitClient | undefined;
     protected _sdks: SdksClient | undefined;
@@ -54,10 +52,6 @@ export class FernRegistryClient {
 
     public get generators(): GeneratorsClient {
         return (this._generators ??= new GeneratorsClient(this._options));
-    }
-
-    public get pdfExport(): PdfExportClient {
-        return (this._pdfExport ??= new PdfExportClient(this._options));
     }
 
     public get docsCache(): DocsCacheClient {

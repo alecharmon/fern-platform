@@ -1,9 +1,8 @@
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { withAuthZPermissions } from "@/app/services/dal/authz/middleware";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
-import { getFdrClient } from "@/app/services/fdr/getFdrClient";
+import { getFdrBaseUrl } from "@/app/services/fdr/getFdrClient";
 import { docsUrlValidator, orgNameValidator } from "../../utils/validators";
 
 const GetPdfExportDownloadUrlRequestSchema = z.object({
@@ -25,13 +24,19 @@ export declare namespace getPdfExportDownloadUrl {
 export const POST = withZodValidation(
     GetPdfExportDownloadUrlRequestSchema,
     withAuthZPermissions(["view"], async (_, body, session) => {
-        const fdr = getFdrClient({ token: session.token });
-        const resp = await fdr.pdfExport.getDownloadUrl(FdrAPI.pdfExport.PdfExportTaskId(body.taskId));
+        const baseUrl = getFdrBaseUrl();
+        const resp = await fetch(`${baseUrl}/pdf-export/task/${encodeURIComponent(body.taskId)}/download-url`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${session.token}`
+            }
+        });
 
         if (!resp.ok) {
             return NextResponse.json({ error: "Failed to get download URL" }, { status: 500 });
         }
 
-        return NextResponse.json(resp.body);
+        const data = await resp.json();
+        return NextResponse.json(data);
     })
 );

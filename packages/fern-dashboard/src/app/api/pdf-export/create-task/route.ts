@@ -1,9 +1,9 @@
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { withAuthZPermissions } from "@/app/services/dal/authz/middleware";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
-import { getFdrClient } from "@/app/services/fdr/getFdrClient";
+import { getFdrBaseUrl } from "@/app/services/fdr/getFdrClient";
+import type { ExportTask } from "@/components/pdf-exporter/types";
 import { docsUrlValidator, orgNameValidator } from "../../utils/validators";
 
 const CreatePdfExportTaskRequestSchema = z.object({
@@ -26,35 +26,43 @@ export declare namespace createPdfExportTask {
     export type Request = z.infer<typeof CreatePdfExportTaskRequestSchema>;
 
     export interface Response {
-        task: FdrAPI.pdfExport.PdfExportTask;
+        task: ExportTask;
     }
 }
 
 export const POST = withZodValidation(
     CreatePdfExportTaskRequestSchema,
     withAuthZPermissions(["view", "manage-settings"], async (_req, body, session) => {
-        const fdr = getFdrClient({ token: session.token });
-        const resp = await fdr.pdfExport.createTask({
-            orgId: FdrAPI.OrgId(body.orgName),
-            docsUrl: body.docsUrl,
-            requesterName: session.name,
-            notifyEmails: session.email != null ? [session.email] : undefined,
-            options: {
-                version: "v1",
-                coverTitle: body.options?.coverTitle,
-                coverSubtitle: body.options?.coverSubtitle,
-                hideCoverFooter: body.options?.hideCoverFooter,
-                headerLeftTemplate: body.options?.headerLeftTemplate,
-                headerRightTemplate: body.options?.headerRightTemplate,
-                footerLeftTemplate: body.options?.footerLeftTemplate,
-                footerRightTemplate: body.options?.footerRightTemplate
-            }
+        const baseUrl = getFdrBaseUrl();
+        const resp = await fetch(`${baseUrl}/pdf-export/task`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.token}`
+            },
+            body: JSON.stringify({
+                orgId: body.orgName,
+                docsUrl: body.docsUrl,
+                requesterName: session.name,
+                notifyEmails: session.email != null ? [session.email] : undefined,
+                options: {
+                    version: "v1",
+                    coverTitle: body.options?.coverTitle,
+                    coverSubtitle: body.options?.coverSubtitle,
+                    hideCoverFooter: body.options?.hideCoverFooter,
+                    headerLeftTemplate: body.options?.headerLeftTemplate,
+                    headerRightTemplate: body.options?.headerRightTemplate,
+                    footerLeftTemplate: body.options?.footerLeftTemplate,
+                    footerRightTemplate: body.options?.footerRightTemplate
+                }
+            })
         });
 
         if (!resp.ok) {
             return NextResponse.json({ error: "Failed to create PDF export task" }, { status: 500 });
         }
 
-        return NextResponse.json({ task: resp.body });
+        const task = await resp.json();
+        return NextResponse.json({ task });
     })
 );
