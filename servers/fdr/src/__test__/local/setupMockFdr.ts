@@ -10,7 +10,7 @@ import type { FdrApplication, FdrConfig } from "../../app";
 import { getApiLatestService } from "../../controllers/api/getApiLatestService";
 import { getReadApiService } from "../../controllers/api/getApiReadService";
 import { getRegisterApiService } from "../../controllers/api/getRegisterApiService";
-import { getDashboardController } from "../../controllers/dashboard/getDashboardController";
+import { createDashboardRouter } from "../../controllers/dashboard/getDashboardRouter";
 import { getDocsReadService } from "../../controllers/docs/v1/getDocsReadService";
 import { getDocsWriteService } from "../../controllers/docs/v1/getDocsWriteService";
 import { getDocsReadV2Service } from "../../controllers/docs/v2/getDocsReadV2Service";
@@ -108,13 +108,17 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
     await fdrApplication.initialize();
 
     const orgForUrlRouter = createGetOrganizationForUrlRouter(fdrApplication);
-    const orgForUrlHandler = new OpenAPIHandler(orgForUrlRouter, {
-        interceptors: [
-            onError((error) => {
-                console.error("oRPC getOrganizationForUrl error:", error);
-            })
-        ]
-    });
+    const dashboardRouter = createDashboardRouter(fdrApplication);
+    const orpcHandler = new OpenAPIHandler(
+        { ...orgForUrlRouter, ...dashboardRouter },
+        {
+            interceptors: [
+                onError((error) => {
+                    console.error("oRPC error:", error);
+                })
+            ]
+        }
+    );
 
     const libraryDocsRouter = createLibraryDocsRouter(fdrApplication);
     const libraryDocsHandler = new OpenAPIHandler(libraryDocsRouter, {
@@ -126,7 +130,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
     });
 
     app.use("/v2/registry/docs", async (req, res, next) => {
-        const { matched: orgMatched } = await orgForUrlHandler.handle(req, res, {
+        const { matched: orgMatched } = await orpcHandler.handle(req, res, {
             prefix: "/v2/registry/docs",
             context: { headers: req.headers }
         });
@@ -138,6 +142,17 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
             context: { headers: req.headers }
         });
         if (libDocsMatched) {
+            return;
+        }
+        next();
+    });
+
+    app.use("/dashboard", async (req, res, next) => {
+        const { matched } = await orpcHandler.handle(req, res, {
+            prefix: "/dashboard",
+            context: { headers: req.headers }
+        });
+        if (matched) {
             return;
         }
         next();
@@ -215,10 +230,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
             _root: getPdfExportController(fdrApplication)
         },
         tokens: getTokensService(fdrApplication),
-        git: getGitController(fdrApplication),
-        dashboard: {
-            _root: getDashboardController(fdrApplication)
-        }
+        git: getGitController(fdrApplication)
     });
     const server = app.listen(port);
     console.log(`Mock FDR server running on http://localhost:${port}/`);

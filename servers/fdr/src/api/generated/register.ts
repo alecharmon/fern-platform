@@ -4,7 +4,6 @@ import type express from "express";
 import type { LatestService as api_latest_RootService } from "./api/resources/api/resources/latest/service/LatestService";
 import type { ReadService as api_v1_read_RootService } from "./api/resources/api/resources/v1/resources/read/service/ReadService";
 import type { RegisterService as api_v1_register_RootService } from "./api/resources/api/resources/v1/resources/register/service/RegisterService";
-import type { DashboardService as dashboard_RootService } from "./api/resources/dashboard/service/DashboardService";
 import type { ReadService as docs_v1_read_RootService } from "./api/resources/docs/resources/v1/resources/read/service/ReadService";
 import type { WriteService as docs_v1_write_RootService } from "./api/resources/docs/resources/v1/resources/write/service/WriteService";
 import type { ReadService as docs_v2_read_RootService } from "./api/resources/docs/resources/v2/resources/read/service/ReadService";
@@ -41,9 +40,6 @@ export function register(
                 };
             };
         };
-        dashboard: {
-            _root: dashboard_RootService;
-        };
         docs: {
             v1: {
                 read: {
@@ -76,7 +72,6 @@ export function register(
     (expressApp as any).use("/registry/api/latest", services.api.latest._root.toRouter());
     (expressApp as any).use("/registry/api", services.api.v1.read._root.toRouter());
     (expressApp as any).use("/registry/api", services.api.v1.register._root.toRouter());
-    (expressApp as any).use("/dashboard", services.dashboard._root.toRouter());
     (expressApp as any).use("/registry/docs", services.docs.v1.read._root.toRouter());
     (expressApp as any).use("/registry/docs", services.docs.v1.write._root.toRouter());
     (expressApp as any).use("/v2/registry/docs", services.docs.v2.read._root.toRouter());

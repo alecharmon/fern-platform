@@ -10,7 +10,7 @@ import { createFdrApplication } from "./app/FdrApplication";
 import { getApiLatestService } from "./controllers/api/getApiLatestService";
 import { getReadApiService } from "./controllers/api/getApiReadService";
 import { getRegisterApiService } from "./controllers/api/getRegisterApiService";
-import { getDashboardController } from "./controllers/dashboard/getDashboardController";
+import { createDashboardRouter } from "./controllers/dashboard/getDashboardRouter";
 import { getDocsReadService } from "./controllers/docs/v1/getDocsReadService";
 import { getDocsWriteService } from "./controllers/docs/v1/getDocsWriteService";
 import { getDocsReadV2Service } from "./controllers/docs/v2/getDocsReadV2Service";
@@ -76,13 +76,17 @@ async function startServer(): Promise<void> {
         await app.initialize();
 
         const orgForUrlRouter = createGetOrganizationForUrlRouter(app);
-        const orgForUrlHandler = new OpenAPIHandler(orgForUrlRouter, {
-            interceptors: [
-                onError((error) => {
-                    app.logger.error("oRPC getOrganizationForUrl error:", error);
-                })
-            ]
-        });
+        const dashboardRouter = createDashboardRouter(app);
+        const orpcHandler = new OpenAPIHandler(
+            { ...orgForUrlRouter, ...dashboardRouter },
+            {
+                interceptors: [
+                    onError((error) => {
+                        app.logger.error("oRPC error:", error);
+                    })
+                ]
+            }
+        );
 
         const libraryDocsRouter = createLibraryDocsRouter(app);
         const libraryDocsHandler = new OpenAPIHandler(libraryDocsRouter, {
@@ -94,7 +98,7 @@ async function startServer(): Promise<void> {
         });
 
         expressApp.use("/v2/registry/docs", async (req, res, next) => {
-            const { matched: orgMatched } = await orgForUrlHandler.handle(req, res, {
+            const { matched: orgMatched } = await orpcHandler.handle(req, res, {
                 prefix: "/v2/registry/docs",
                 context: { headers: req.headers }
             });
@@ -106,6 +110,17 @@ async function startServer(): Promise<void> {
                 context: { headers: req.headers }
             });
             if (libDocsMatched) {
+                return;
+            }
+            next();
+        });
+
+        expressApp.use("/dashboard", async (req, res, next) => {
+            const { matched } = await orpcHandler.handle(req, res, {
+                prefix: "/dashboard",
+                context: { headers: req.headers }
+            });
+            if (matched) {
                 return;
             }
             next();
@@ -196,9 +211,6 @@ async function startServer(): Promise<void> {
             },
             tokens: getTokensService(app),
             git: getGitController(app),
-            dashboard: {
-                _root: getDashboardController(app)
-            },
             pdfExport: {
                 _root: getPdfExportController(app)
             }
