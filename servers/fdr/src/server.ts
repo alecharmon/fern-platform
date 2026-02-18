@@ -23,7 +23,7 @@ import { createGeneratorVersionsRouter } from "./controllers/generators/generato
 import { getGeneratorsRootController } from "./controllers/generators/getGeneratorsRootController";
 import { getGitController } from "./controllers/git/getGitController";
 import { getPdfExportController } from "./controllers/pdf-export";
-import { getVersionsService } from "./controllers/sdk/getVersionsService";
+import { createComputeSemanticVersionRouter } from "./controllers/sdk/computeSemanticVersionRouter";
 import { getSnippetsFactoryService } from "./controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "./controllers/snippets/getSnippetsService";
 import { getTemplatesService } from "./controllers/snippets/getTemplatesService";
@@ -166,6 +166,26 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        const sdkVersionsRouter = createComputeSemanticVersionRouter(app);
+        const sdkVersionsHandler = new OpenAPIHandler(sdkVersionsRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC computeSemanticVersion error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/sdks", async (req, res, next) => {
+            const { matched } = await sdkVersionsHandler.handle(req, res, {
+                prefix: "/sdks",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         expressApp.use(express.json({ limit: "100mb" }));
         register(expressApp, {
             docs: {
@@ -203,9 +223,6 @@ async function startServer(): Promise<void> {
             snippetsFactory: getSnippetsFactoryService(app),
             templates: getTemplatesService(app),
             docsCache: getDocsCacheService(app),
-            sdks: {
-                versions: getVersionsService(app)
-            },
             generators: {
                 _root: getGeneratorsRootController(app)
             },

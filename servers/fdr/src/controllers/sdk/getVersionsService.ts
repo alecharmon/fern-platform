@@ -1,42 +1,9 @@
 import { getLatestTag } from "@fern-api/github";
-import semver from "semver";
 
-import {
-    FailedToComputeExistingVersion,
-    FailedToIncrementVersion,
-    type Language
-} from "../../api/generated/api/resources/sdks";
-import { VersionsService } from "../../api/generated/api/resources/sdks/resources/versions/service/VersionsService";
-import type { FdrApplication } from "../../app";
 import { getLatestVersionFromNpm, getLatestVersionFromPypi } from "./getLatestVersion";
 
-export function getVersionsService(_app: FdrApplication): VersionsService {
-    return new VersionsService({
-        computeSemanticVersion: async (req, res) => {
-            const existingVersion = await getExistingVersion({
-                githubRepository: req.body.githubRepository,
-                packageName: req.body.package,
-                language: req.body.language
-            });
-            if (existingVersion == null) {
-                throw new FailedToComputeExistingVersion();
-            }
+export type Language = "Go" | "TypeScript" | "Java" | "Python" | "Csharp" | "Ruby" | "Php" | "Swift" | "Rust";
 
-            // TODO(armando): make this more robust by factoring in api definition changes
-            const nextVersion = semver.inc(existingVersion, "patch");
-            if (nextVersion == null) {
-                throw new FailedToIncrementVersion();
-            }
-
-            return res.send({
-                version: nextVersion,
-                bump: "PATCH"
-            });
-        }
-    });
-}
-
-// NOTE: this does not handle private registries or private github repositories
 export async function getExistingVersion({
     packageName,
     language,

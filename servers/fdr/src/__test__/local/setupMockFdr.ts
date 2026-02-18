@@ -23,7 +23,7 @@ import { createGeneratorVersionsRouter } from "../../controllers/generators/gene
 import { getGeneratorsRootController } from "../../controllers/generators/getGeneratorsRootController";
 import { getGitController } from "../../controllers/git/getGitController";
 import { getPdfExportController } from "../../controllers/pdf-export/getPdfExportController";
-import { getVersionsService } from "../../controllers/sdk/getVersionsService";
+import { createComputeSemanticVersionRouter } from "../../controllers/sdk/computeSemanticVersionRouter";
 import { getSnippetsFactoryService } from "../../controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "../../controllers/snippets/getSnippetsService";
 import { getTemplatesService } from "../../controllers/snippets/getTemplatesService";
@@ -198,6 +198,26 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    const sdkVersionsRouter = createComputeSemanticVersionRouter(fdrApplication);
+    const sdkVersionsHandler = new OpenAPIHandler(sdkVersionsRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC computeSemanticVersion error:", error);
+            })
+        ]
+    });
+
+    app.use("/sdks", async (req, res, next) => {
+        const { matched } = await sdkVersionsHandler.handle(req, res, {
+            prefix: "/sdks",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     register(app, {
         docs: {
             v1: {
@@ -220,9 +240,6 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         snippetsFactory: getSnippetsFactoryService(fdrApplication),
         templates: getTemplatesService(fdrApplication),
         docsCache: getDocsCacheService(fdrApplication),
-        sdks: {
-            versions: getVersionsService(fdrApplication)
-        },
         generators: {
             _root: getGeneratorsRootController(fdrApplication)
         },

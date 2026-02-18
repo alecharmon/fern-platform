@@ -12,7 +12,6 @@ import type { DocsCacheService } from "./api/resources/docsCache/service/DocsCac
 import type { GeneratorsService as generators_RootService } from "./api/resources/generators/service/GeneratorsService";
 import type { GitService } from "./api/resources/git/service/GitService";
 import type { PdfExportService as pdfExport_RootService } from "./api/resources/pdfExport/service/PdfExportService";
-import type { VersionsService as sdks_VersionsService } from "./api/resources/sdks/resources/versions/service/VersionsService";
 import type { SnippetsService } from "./api/resources/snippets/service/SnippetsService";
 import type { SnippetsFactoryService } from "./api/resources/snippetsFactory/service/SnippetsFactoryService";
 import type { TemplatesService } from "./api/resources/templates/service/TemplatesService";
@@ -64,9 +63,6 @@ export function register(
         pdfExport: {
             _root: pdfExport_RootService;
         };
-        sdks: {
-            versions: sdks_VersionsService;
-        };
     },
 ): void {
     (expressApp as any).use("/registry/api/latest", services.api.latest._root.toRouter());
@@ -80,7 +76,6 @@ export function register(
     (expressApp as any).use("/pdf-export", services.pdfExport._root.toRouter());
     (expressApp as any).use("/docs-cache", services.docsCache.toRouter());
     (expressApp as any).use("/generators/github", services.git.toRouter());
-    (expressApp as any).use("/sdks", services.sdks.versions.toRouter());
     (expressApp as any).use("/snippets", services.snippetsFactory.toRouter());
     (expressApp as any).use("/snippets", services.snippets.toRouter());
     (expressApp as any).use("/snippet-template", services.templates.toRouter());
