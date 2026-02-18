@@ -20,7 +20,7 @@
       "dependsOn": ["compile"],
       "outputs": [".next/**", "!.next/cache/**"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "env": ["SENTRY_AUTH_TOKEN", "EMAIL_ORG_MAPPINGS", "BRANDFETCH_API_KEY"]
+      "env": ["SENTRY_AUTH_TOKEN", "EMAIL_ORG_MAPPINGS", "BRANDFETCH_API_KEY", "VERCEL_ENV"]
     },
     "dashboard:dev": {
       "dependsOn": ["^build", "^compile"],

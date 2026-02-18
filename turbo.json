@@ -11,7 +11,7 @@
     "compile": {
       "outputs": ["dist/**"],
       "dependsOn": ["^compile"],
-      "env": ["NODE_ENV", "VERCEL_ENV"]
+      "env": ["NODE_ENV"]
     },
     "check-types": {
       "dependsOn": ["^compile"]

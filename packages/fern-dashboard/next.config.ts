@@ -38,10 +38,7 @@ let nextConfig: NextConfig = {
     ],
     experimental: {
         webpackBuildWorker: true,
-        optimizePackageImports: [
-            // this will separate the `createLowlight` from the `all` import
-            "lowlight"
-        ],
+        optimizePackageImports: ["lowlight", "lucide-react", "recharts", "framer-motion", "es-toolkit", "dayjs"],
         useCache: true,
         turbo: {
             rules: {
