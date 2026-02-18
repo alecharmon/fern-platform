@@ -5,7 +5,7 @@ import { cn } from "@fern-docs/components/cn";
 import { useIsDarkCode } from "@fern-docs/components/state/dark-code";
 import { useFernUser } from "@fern-docs/components/state/fern-user";
 import { AlgoliaSearchClientRoot, DesktopAskAiPanel, SEARCH_INDEX } from "@fern-docs/search-ui";
-import { useEventCallback } from "@fern-ui/react-commons";
+import { useEventCallback, useMinWidth } from "@fern-ui/react-commons";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { isEqual } from "es-toolkit/predicate";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -90,6 +90,7 @@ export const SearchPanel = React.memo(function SearchPanel({
     const setIsResizing = useSetSearchPanelResizing();
     const searchDialogOpen = useIsSearchDialogOpen();
     const [width, setWidth] = useAtom(widthAtom);
+    const isDesktopBreakpoint = useMinWidth(768);
     const conversationIdHook = useConversationId();
     const queryIdHook = useQueryId();
 
@@ -104,9 +105,8 @@ export const SearchPanel = React.memo(function SearchPanel({
     React.useEffect(() => {
         // On mobile/tablet (< md breakpoint), the drawer overlays content
         // so don't shift the main layout
-        const isMobile = window.innerWidth < 768;
-        document.documentElement.style.setProperty("--ask-ai-panel-width", isMobile ? "0px" : `${width}px`);
-    }, [width]);
+        document.documentElement.style.setProperty("--ask-ai-panel-width", isDesktopBreakpoint ? `${width}px` : "0px");
+    }, [width, isDesktopBreakpoint]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -306,16 +306,7 @@ export const SearchPanel = React.memo(function SearchPanel({
             </div>
 
             {/* Mobile/Tablet: bottom drawer */}
-            <Drawer.Root
-                open={isOpen}
-                onOpenChange={(open) => {
-                    if (!open && window.innerWidth >= 768) {
-                        return;
-                    }
-                    setIsOpen(open);
-                }}
-                noBodyStyles
-            >
+            <Drawer.Root open={isOpen && !isDesktopBreakpoint} onOpenChange={setIsOpen} noBodyStyles>
                 <Drawer.Portal>
                     <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40 md:hidden" />
                     <Drawer.Content className="bg-background fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl md:hidden">
