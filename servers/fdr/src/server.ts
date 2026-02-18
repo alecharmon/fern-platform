@@ -17,9 +17,9 @@ import { getDocsReadV2Service } from "./controllers/docs/v2/getDocsReadV2Service
 import { getDocsWriteV2Service } from "./controllers/docs/v2/getDocsWriteV2Service";
 import { createGetOrganizationForUrlRouter } from "./controllers/docs/v2/getOrganizationForUrlRouter";
 import { getDocsCacheService } from "./controllers/docs-cache/getDocsCacheService";
+import { createGeneratorVersionsRouter } from "./controllers/generators/generatorVersionsRouter";
 import { getGeneratorsCliController } from "./controllers/generators/getGeneratorsCliController";
 import { getGeneratorsRootController } from "./controllers/generators/getGeneratorsRootController";
-import { getGeneratorsVersionsController } from "./controllers/generators/getGeneratorsVersionsController";
 import { getGitController } from "./controllers/git/getGitController";
 import { getPdfExportController } from "./controllers/pdf-export";
 import { getVersionsService } from "./controllers/sdk/getVersionsService";
@@ -94,6 +94,26 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        const generatorVersionsRouter = createGeneratorVersionsRouter(app);
+        const generatorVersionsHandler = new OpenAPIHandler(generatorVersionsRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC generatorVersions error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/generators/versions", async (req, res, next) => {
+            const { matched } = await generatorVersionsHandler.handle(req, res, {
+                prefix: "/generators/versions",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         expressApp.use(express.json({ limit: "100mb" }));
         register(expressApp, {
             docs: {
@@ -136,8 +156,7 @@ async function startServer(): Promise<void> {
             },
             generators: {
                 _root: getGeneratorsRootController(app),
-                cli: getGeneratorsCliController(app),
-                versions: getGeneratorsVersionsController(app)
+                cli: getGeneratorsCliController(app)
             },
             tokens: getTokensService(app),
             git: getGitController(app),

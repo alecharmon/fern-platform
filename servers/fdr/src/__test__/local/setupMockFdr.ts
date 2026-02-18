@@ -17,9 +17,9 @@ import { getDocsReadV2Service } from "../../controllers/docs/v2/getDocsReadV2Ser
 import { getDocsWriteV2Service } from "../../controllers/docs/v2/getDocsWriteV2Service";
 import { createGetOrganizationForUrlRouter } from "../../controllers/docs/v2/getOrganizationForUrlRouter";
 import { getDocsCacheService } from "../../controllers/docs-cache/getDocsCacheService";
+import { createGeneratorVersionsRouter } from "../../controllers/generators/generatorVersionsRouter";
 import { getGeneratorsCliController } from "../../controllers/generators/getGeneratorsCliController";
 import { getGeneratorsRootController } from "../../controllers/generators/getGeneratorsRootController";
-import { getGeneratorsVersionsController } from "../../controllers/generators/getGeneratorsVersionsController";
 import { getGitController } from "../../controllers/git/getGitController";
 import { getPdfExportController } from "../../controllers/pdf-export/getPdfExportController";
 import { getVersionsService } from "../../controllers/sdk/getVersionsService";
@@ -126,6 +126,26 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    const generatorVersionsRouter = createGeneratorVersionsRouter(fdrApplication);
+    const generatorVersionsHandler = new OpenAPIHandler(generatorVersionsRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC generatorVersions error:", error);
+            })
+        ]
+    });
+
+    app.use("/generators/versions", async (req, res, next) => {
+        const { matched } = await generatorVersionsHandler.handle(req, res, {
+            prefix: "/generators/versions",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     register(app, {
         docs: {
             v1: {
@@ -153,8 +173,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         },
         generators: {
             _root: getGeneratorsRootController(fdrApplication),
-            cli: getGeneratorsCliController(fdrApplication),
-            versions: getGeneratorsVersionsController(fdrApplication)
+            cli: getGeneratorsCliController(fdrApplication)
         },
         pdfExport: {
             _root: getPdfExportController(fdrApplication)
