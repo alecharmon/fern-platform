@@ -122,7 +122,7 @@ export class FaiReindexingSchedulerStack extends Stack {
                 logGroup,
                 streamPrefix: "fai-reindexing-delegated-worker-ec2"
             }),
-            command: ["node", "dist/worker.cjs"],
+            command: ["dist/worker.cjs"],
             // Memory reservation (soft limit for scheduling) - will be overridden dynamically
             memoryReservationMiB: 512,
             // Memory limit (hard limit - task killed if exceeded) - will be overridden dynamically
@@ -153,7 +153,7 @@ export class FaiReindexingSchedulerStack extends Stack {
                 logGroup,
                 streamPrefix: "fai-reindexing-delegated-worker-fargate"
             }),
-            command: ["node", "dist/worker.cjs"],
+            command: ["dist/worker.cjs"],
             environment: {
                 NODE_OPTIONS: "--max-old-space-size=3584",
                 FERN_DOCS_INDEX_NAME: "fern-docs"

@@ -403,10 +403,9 @@ jobs:
       - name: Test delegated worker startup
         run: |
           # Test the delegated worker entrypoint using the same command format as ECS task definition
-          # ECS uses command: ["node", "dist/worker.cjs"] which combines with the image entrypoint
-          # For Alpine images: entrypoint is empty, so this runs "node dist/worker.cjs" correctly
-          # For Chainguard images: entrypoint is ["/usr/bin/node"], so this would run "/usr/bin/node node dist/worker.cjs"
-          # which fails with "Cannot find module '/app/node'" because node tries to run a file called "node"
+          # Chainguard image has entrypoint ["/usr/bin/node"], so we pass just the script path
+          # ECS task definition uses command: ["dist/worker.cjs"] which combines with the entrypoint
+          # to run "/usr/bin/node dist/worker.cjs"
           set +e
           CONTAINER_ID=$(docker run -d \
             -e REINDEX_DOMAIN=test.docs.buildwithfern.com \
@@ -418,7 +417,7 @@ jobs:
             -e AWS_REGION=us-east-1 \
             -e AWS_ACCESS_KEY_ID=test-access-key \
             -e AWS_SECRET_ACCESS_KEY=test-secret-key \
-            fai-reindexing:local node dist/worker.cjs)
+            fai-reindexing:local dist/worker.cjs)
           echo "Started delegated worker container: $CONTAINER_ID"
           
           # Wait a few seconds for the container to start and potentially fail
