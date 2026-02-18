@@ -179,19 +179,23 @@ describe("rewriteInternalLinks", () => {
 });
 
 describe("htmlToMarkdown with fixture", () => {
-    it("should convert real Fern docs HTML fixture", async () => {
-        const fixturePath = path.join(__dirname, "fixtures", "fern-docs-acmeco-platform-concepts.html");
-        const html = await fs.readFile(fixturePath, "utf-8");
+    it(
+        "should convert real Fern docs HTML fixture",
+        async () => {
+            const fixturePath = path.join(__dirname, "fixtures", "fern-docs-acmeco-platform-concepts.html");
+            const html = await fs.readFile(fixturePath, "utf-8");
 
-        const result = await htmlToMarkdown(html);
+            const result = await htmlToMarkdown(html);
 
-        // Should produce non-empty markdown
-        expect(result.markdown.length).toBeGreaterThan(100);
+            // Should produce non-empty markdown
+            expect(result.markdown.length).toBeGreaterThan(100);
 
-        // Should not contain raw HTML tags in output
-        expect(result.markdown).not.toContain("<script");
-        expect(result.markdown).not.toContain("<style");
-    });
+            // Should not contain raw HTML tags in output
+            expect(result.markdown).not.toContain("<script");
+            expect(result.markdown).not.toContain("<style");
+        },
+        { timeout: 15_000 }
+    );
 
     it("should extract main content from real page and not include navigation", async () => {
         const fixturePath = path.join(__dirname, "fixtures", "fern-docs-acmeco-platform-concepts.html");

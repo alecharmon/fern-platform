@@ -28,3 +28,17 @@ export const FILE_METADATA_PRODUCER = "Fern PDF Generator";
 
 export const RETRY_BASE_DELAY_MS = 250;
 export const RETRY_MAX_DELAY_MS = 3_000;
+
+/**
+ * After navigation and content validation, we do a best-effort wait for
+ * `networkidle` to let remaining sub-resources (lazy images, fonts, dynamic
+ * code block highlighting, etc.) finish loading before printing.
+ *
+ * If this timeout expires, we proceed with printing anyway — the critical
+ * content is already in the DOM (confirmed by the success selector).
+ *
+ * This is deliberately much shorter than the main render timeout so that
+ * long-running background requests (analytics, prefetch, polling) don't
+ * block the entire pipeline.
+ */
+export const NETWORK_IDLE_BEST_EFFORT_TIMEOUT_MS = 15_000;

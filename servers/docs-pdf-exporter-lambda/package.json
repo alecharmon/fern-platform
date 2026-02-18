@@ -8,8 +8,8 @@
     "build": "tsup",
     "clean": "rm -rf dist",
     "dev": "tsup --watch",
-    "dev:generate-cover-pdf": "tsx src/scripts/generate-cover-pdf.ts",
-    "dev:generate-docs-pdf": "tsx src/scripts/generate-docs-pdf.ts",
+    "dev:generate-cover-pdf": "tsx scripts/generate-cover-pdf.ts",
+    "dev:generate-docs-pdf": "tsx scripts/generate-docs-pdf.ts",
     "playwright:install": "playwright install chromium",
     "start": "node dist/index.js"
   },

@@ -5,7 +5,7 @@
     "module": "ESNext",
     "lib": ["ES2022"],
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "declaration": false,
     "sourceMap": true,
     "moduleResolution": "bundler",
@@ -16,7 +16,7 @@
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": false
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
     {

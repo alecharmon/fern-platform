@@ -33,6 +33,7 @@ import {
     HEADER_FOOTER_FONT_SIZE,
     HEADER_FOOTER_INSET_PT,
     HEADER_FOOTER_TEXT_COLOR,
+    NETWORK_IDLE_BEST_EFFORT_TIMEOUT_MS,
     RETRY_BASE_DELAY_MS,
     RETRY_MAX_DELAY_MS
 } from "./constants";
@@ -72,10 +73,18 @@ const ContentPagesResponseSchema = z.object({
  */
 interface ContentValidationOptions {
     /**
-     * CSS selector that must exist for the page to be considered successfully rendered.
-     * If provided and the selector is not found, validation fails.
+     * When provided, the validator will wait for the specified CSS selector to appear in the
+     * DOM before running point-in-time error checks.
+     *
+     * Note: if this wait times out, the method throws the Playwright timeout error immediately
+     * (no additional error-UI inspection is performed in that failure path).
      */
-    successSelector?: string;
+    successCondition?: {
+        /** CSS selector that must exist for the page to be considered successfully rendered. */
+        selector: string;
+        /** Maximum time in milliseconds to wait for the selector to appear. */
+        timeoutMs: number;
+    };
 
     /**
      * Whether to check for known client-side error patterns in the page content.
@@ -206,14 +215,21 @@ export class DocsPdfExporter {
     }
 
     /**
-     * Validate that a page rendered successfully by checking for:
-     * 1. Absence of error UI elements (always checked - catches client-side hydration failures)
-     * 2. Presence of a success marker element (if configured - confirms server render succeeded)
+     * Validate that a page rendered successfully by:
+     * 1. Waiting for the success selector to appear in the DOM (if configured)
+     * 2. Checking for absence of known error UI elements (catches client-side hydration failures)
+     * 3. Verifying the success selector is actually visible (if configured)
      *
      * @throws {Error} If validation fails (retryable)
      */
     private async validatePageContent(page: Page, options: ContentValidationOptions = {}): Promise<void> {
-        const { successSelector, checkErrorPatterns = true } = options;
+        const { successCondition, checkErrorPatterns = true } = options;
+
+        if (successCondition) {
+            await page.waitForSelector(successCondition.selector, {
+                timeout: successCondition.timeoutMs
+            });
+        }
 
         if (checkErrorPatterns) {
             const errorDetails = await this.detectErrorUIElements(page);
@@ -225,15 +241,15 @@ export class DocsPdfExporter {
             }
         }
 
-        if (successSelector) {
+        if (successCondition) {
             const hasSuccessMarker = await page
-                .locator(successSelector)
+                .locator(successCondition.selector)
                 .first()
                 .isVisible()
                 .catch(() => false);
             if (!hasSuccessMarker) {
                 throw new Error(
-                    `Page content validation failed: success marker "${successSelector}" not found. ` +
+                    `Page content validation failed: success marker "${successCondition.selector}" is in the DOM but not visible. ` +
                         "The page may not have rendered correctly."
                 );
             }
@@ -484,9 +500,10 @@ export class DocsPdfExporter {
                     if (opts.initScript) {
                         await page.addInitScript(opts.initScript.fn, ...(opts.initScript.args ?? []));
                     }
+                    const timeoutMs = this.config.renderTimeoutSeconds * 1000;
                     const response = await page.goto(opts.url, {
-                        waitUntil: "networkidle",
-                        timeout: this.config.renderTimeoutSeconds * 1000
+                        waitUntil: "load",
+                        timeout: timeoutMs
                     });
 
                     if (response == null) {
@@ -505,13 +522,20 @@ export class DocsPdfExporter {
 
                     if (opts.waitForSelector) {
                         await page.waitForSelector(opts.waitForSelector, {
-                            timeout: this.config.renderTimeoutSeconds * 1000
+                            timeout: timeoutMs
                         });
                     }
 
                     if (opts.contentValidation) {
                         await this.validatePageContent(page, opts.contentValidation);
                     }
+
+                    // Best-effort wait for all sub-resources (lazy images, fonts, dynamic
+                    // highlights, etc.) to finish loading.  If this times out, we proceed
+                    // anyway — the critical content is already confirmed in the DOM above.
+                    await page
+                        .waitForLoadState("networkidle", { timeout: NETWORK_IDLE_BEST_EFFORT_TIMEOUT_MS })
+                        .catch(() => {});
 
                     rawBytes = await page.pdf({
                         printBackground: true,
@@ -764,7 +788,10 @@ export class DocsPdfExporter {
             operation: "render_cover",
             url: url.toString(),
             contentValidation: {
-                successSelector: PRINT_COVER_PAGE_SELECTOR,
+                successCondition: {
+                    selector: PRINT_COVER_PAGE_SELECTOR,
+                    timeoutMs: this.config.renderTimeoutSeconds * 1000
+                },
                 checkErrorPatterns: true
             }
         });
@@ -821,7 +848,10 @@ export class DocsPdfExporter {
                                     listTotal: pages.length
                                 },
                                 contentValidation: {
-                                    successSelector: PRINT_CONTENT_PAGE_SELECTOR,
+                                    successCondition: {
+                                        selector: PRINT_CONTENT_PAGE_SELECTOR,
+                                        timeoutMs: this.config.renderTimeoutSeconds * 1000
+                                    },
                                     checkErrorPatterns: true
                                 },
                                 compress: true
