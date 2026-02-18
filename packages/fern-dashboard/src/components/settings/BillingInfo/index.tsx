@@ -23,6 +23,7 @@ import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 import { ClientEntitlementGate } from "@/components/entitlements/ClientEntitlementGate";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
+import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEntitlements } from "@/providers/EntitlementsProvider";
@@ -91,6 +92,7 @@ export interface BillingInfoProps {
 
 export function BillingInfo({ session, showSuperUserPricing = false }: BillingInfoProps) {
     const posthog = usePostHog();
+    const entitlementEnabled = posthog?.isFeatureEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
     const org = useCurrentOrganization();
     const searchParams = useSearchParams();
     const { refetch: refetchEntitlements } = useEntitlements();
@@ -365,7 +367,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             )}
 
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h1 className="text-2xl font-bold text-foreground">Billing</h1>
                 <div className="flex items-center gap-2">
                     {/* Billing cycle toggle */}
@@ -472,8 +474,8 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             {/* SDK Banner */}
             <div className="rounded-xl border border-border bg-gray-100 p-4">
                 <h3 className="text-base font-bold text-foreground">Add SDKs that sync with your Docs</h3>
-                <div className="mt-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap items-center gap-4">
                         {SDK_LANGUAGE_ICONS.map(({ name, src, href }) => (
                             <DashboardTooltip key={name} content={name}>
                                 <a href={href} target="_blank" rel="noopener noreferrer">
@@ -502,7 +504,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                 </div>
             </div>
 
-            {!isOnFreePlan && (
+            {!isOnFreePlan && entitlementEnabled && (
                 <ClientEntitlementGate required="can_purchase_additional_seats">
                     <AddSeatsCard
                         orgId={org.id}
@@ -525,7 +527,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                             View invoices for past payments, update your billing details, or cancel your subscription.
                         </p>
                     </div>
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
                         <button
                             onClick={handleManageBilling}
                             disabled={isOpeningPortal}
