@@ -3,7 +3,7 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
-import type { EndpointDefinition } from "@fern-api/fdr-sdk/api-definition";
+import type { EndpointDefinition, EndpointId, GraphQlOperation } from "@fern-api/fdr-sdk/api-definition";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { AsyncApiYamlFormatter, OpenApiYamlFormatter } from "@fern-docs/search-utils";
@@ -210,6 +210,26 @@ export async function getMarkdownForPath(
                         contentType: "mdx"
                     };
                 }
+                if (node.type === "grpc") {
+                    const grpc = apiDefinition.endpoints[node.grpcId as unknown as EndpointId];
+                    if (grpc == null) {
+                        return undefined;
+                    }
+                    return {
+                        content: grpcDefinitionToMarkdown(grpc, node, domain, apiDefinition),
+                        contentType: "mdx"
+                    };
+                }
+                if (node.type === "graphql") {
+                    const operation = apiDefinition.graphqlOperations[node.graphqlOperationId];
+                    if (operation == null) {
+                        return undefined;
+                    }
+                    return {
+                        content: graphqlOperationToMarkdown(operation, node, domain),
+                        contentType: "mdx"
+                    };
+                }
             }
 
             const pageId = FernNavigation.getPageId(node);
@@ -400,6 +420,65 @@ export function websocketDefinitionToMarkdown(
                 typeof websocket.description === "string" ? websocket.description : undefined,
                 fullUrl ? `Reference: ${fullUrl}` : undefined,
                 ...websocketSections
+            ]
+                .filter(isNonNullish)
+                .join("\n\n");
+        },
+        {
+            "fern.docs.node.title": node.title,
+            "fern.docs.node.slug": node.slug,
+            "fern.docs.domain": domain ?? "unknown"
+        }
+    );
+}
+
+export function grpcDefinitionToMarkdown(
+    grpc: EndpointDefinition,
+    node: FernNavigation.NavigationNodePage,
+    domain?: string,
+    apiDefinition?: ApiDefinition.ApiDefinition
+): string {
+    return runSyncSpan(
+        "docs.grpcDefinitionToMarkdown",
+        () => {
+            const pageHref = slugToHref(node.canonicalSlug ?? node.slug);
+            const fullUrl = domain ? `https://${domain}${pageHref}` : undefined;
+
+            const methodType = grpc.protocol?.type === "grpc" ? grpc.protocol.methodType : undefined;
+
+            return [
+                `# ${node.title}`,
+                methodType != null ? `gRPC ${methodType}` : "gRPC",
+                typeof grpc.description === "string" ? grpc.description : undefined,
+                fullUrl ? `Reference: ${fullUrl}` : undefined
+            ]
+                .filter(isNonNullish)
+                .join("\n\n");
+        },
+        {
+            "fern.docs.node.title": node.title,
+            "fern.docs.node.slug": node.slug,
+            "fern.docs.domain": domain ?? "unknown"
+        }
+    );
+}
+
+export function graphqlOperationToMarkdown(
+    operation: GraphQlOperation,
+    node: FernNavigation.NavigationNodePage,
+    domain?: string
+): string {
+    return runSyncSpan(
+        "docs.graphqlOperationToMarkdown",
+        () => {
+            const pageHref = slugToHref(node.canonicalSlug ?? node.slug);
+            const fullUrl = domain ? `https://${domain}${pageHref}` : undefined;
+
+            return [
+                `# ${node.title}`,
+                `GraphQL ${operation.operationType}`,
+                typeof operation.description === "string" ? operation.description : undefined,
+                fullUrl ? `Reference: ${fullUrl}` : undefined
             ]
                 .filter(isNonNullish)
                 .join("\n\n");

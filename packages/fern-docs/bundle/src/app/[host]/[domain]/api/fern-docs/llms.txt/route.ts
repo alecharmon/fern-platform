@@ -203,6 +203,8 @@ async function getLlmsTxtStreaming(
         endpointId: FernNavigation.EndpointId | undefined;
         webhookId: FernNavigation.WebhookId | undefined;
         websocketId: FernNavigation.WebSocketId | undefined;
+        grpcId: FernNavigation.GrpcId | undefined;
+        graphqlOperationId: FernNavigation.GraphQlOperationId | undefined;
     }[] = [];
 
     const landingPage = getLandingPage(root);
@@ -255,6 +257,8 @@ async function getLlmsTxtStreaming(
                 endpointId: node.type === "endpoint" ? node.endpointId : undefined,
                 webhookId: node.type === "webhook" ? node.webhookId : undefined,
                 websocketId: node.type === "webSocket" ? node.webSocketId : undefined,
+                grpcId: node.type === "grpc" ? node.grpcId : undefined,
+                graphqlOperationId: node.type === "graphql" ? node.graphqlOperationId : undefined,
                 breadcrumb: parents
                     .slice(parents.findLastIndex((p) => p.type === "apiReference"))
                     .map((p) => (FernNavigation.hasMetadata(p) ? p.title : undefined))
@@ -333,7 +337,9 @@ async function getLlmsTxtStreaming(
                         new URL(
                             endpointPageInfo.endpointId != null ||
                                 endpointPageInfo.webhookId != null ||
-                                endpointPageInfo.websocketId != null
+                                endpointPageInfo.websocketId != null ||
+                                endpointPageInfo.grpcId != null ||
+                                endpointPageInfo.graphqlOperationId != null
                                 ? addLeadingSlash(`${endpointPageInfo.slug}.mdx`)
                                 : slugToHref(endpointPageInfo.slug),
                             withDefaultProtocol(domain)
