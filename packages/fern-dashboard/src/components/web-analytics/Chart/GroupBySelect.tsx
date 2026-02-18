@@ -33,7 +33,7 @@ export default function GroupBySelect({ value, onChange, disabled = false }: Gro
         <div className="flex items-center gap-1">
             <span className="text-muted-foreground text-sm">Group by</span>
             <Select value={value?.toString() ?? "1"} onValueChange={handleChange} disabled={disabled}>
-                <SelectTrigger className="border-border min-w-[120px] gap-2 bg-white px-3 py-1.5 text-sm dark:bg-transparent">
+                <SelectTrigger className="border-border gap-1.5 bg-white px-3 py-1.5 text-sm dark:bg-transparent">
                     <BarChart className="text-muted-foreground size-4" />
                     <SelectValue placeholder={selectedOption?.label ?? "Daily"} />
                 </SelectTrigger>
