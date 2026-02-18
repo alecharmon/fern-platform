@@ -1,6 +1,7 @@
 export { loadApiById } from "./fdr/lazy-load-api";
 export {
     type LoadDocsWithUrlPayload,
+    type LoadDocsWithUrlResponse,
     loadDocsWithUrl
 } from "./fdr/load-docs-with-url";
 export { endpointToMarkdown } from "./records/endpoint-to-markdown";

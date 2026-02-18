@@ -14,24 +14,39 @@ interface CreateSearchFiltersOpts {
      * If false, filters out any content that is only visible to unauthed users
      */
     authed: boolean;
+
+    /**
+     * If provided, restricts search results to records matching these basepaths.
+     * Used for basepath-routed domains where each subrepo has its own basepath.
+     * When undefined, no basepath filter is applied (backward compatible).
+     */
+    basepaths?: string[];
 }
 
 const VISIBLE_BY_FACET = "visible_by";
 const AUTHED_FACET = "authed";
 
-export function createSearchFilters({ domain, roles, authed }: CreateSearchFiltersOpts): string {
+export function createSearchFilters({ domain, roles, authed, basepaths }: CreateSearchFiltersOpts): string {
+    let filters: string;
     if (!authed) {
-        // if the user is unauthed, we only want to show content where authed=false
-        return `domain:${domain} AND ${AUTHED_FACET}:false`;
+        filters = `domain:${domain} AND ${AUTHED_FACET}:false`;
+    } else {
+        const uniqueRoles = [...new Set(roles.filter((r) => r !== EVERYONE_ROLE))];
+        const roleFilters = [
+            `${VISIBLE_BY_FACET}:${createRoleFacet([EVERYONE_ROLE])}`,
+            ...uniqueRoles.map((role) => `${VISIBLE_BY_FACET}:${createRoleFacet([role])}`)
+        ];
+        filters = `domain:${domain} AND (${roleFilters.join(" OR ")})`;
     }
 
-    // if the user is authed, we can show both content where authed=false AND authed=true
-    // Each individual role is matched independently against the record's visible_by facets.
-    const uniqueRoles = [...new Set(roles.filter((r) => r !== EVERYONE_ROLE))];
-    const roleFilters = [
-        `${VISIBLE_BY_FACET}:${createRoleFacet([EVERYONE_ROLE])}`,
-        ...uniqueRoles.map((role) => `${VISIBLE_BY_FACET}:${createRoleFacet([role])}`)
-    ];
+    if (basepaths != null && basepaths.length > 0) {
+        if (basepaths.length === 1) {
+            filters += ` AND basepath:${basepaths[0]}`;
+        } else {
+            const basepathFilter = basepaths.map((bp) => `basepath:${bp}`).join(" OR ");
+            filters += ` AND (${basepathFilter})`;
+        }
+    }
 
-    return `domain:${domain} AND (${roleFilters.join(" OR ")})`;
+    return filters;
 }

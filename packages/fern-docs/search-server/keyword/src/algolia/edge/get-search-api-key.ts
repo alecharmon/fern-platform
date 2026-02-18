@@ -38,6 +38,12 @@ interface GetSearchApiKeyOptions {
      * User token
      */
     userToken: string | undefined;
+
+    /**
+     * If provided, restricts search results to records matching these basepaths.
+     * Used for basepath-routed domains to scope search by hierarchical prefix.
+     */
+    basepaths?: string[];
 }
 
 export async function getSearchApiKey({
@@ -47,12 +53,13 @@ export async function getSearchApiKey({
     authed,
     expiresInSeconds,
     searchIndex,
-    userToken
+    userToken,
+    basepaths
 }: GetSearchApiKeyOptions): Promise<string> {
     return await generateSecuredApiKey({
         parentApiKey,
         restrictions: {
-            filters: createSearchFilters({ domain, roles, authed }) + " AND NOT type:navigation",
+            filters: createSearchFilters({ domain, roles, authed, basepaths }) + " AND NOT type:navigation",
             validUntil: Math.floor(Date.now() / 1_000) + expiresInSeconds,
             restrictIndices: [searchIndex],
             userToken

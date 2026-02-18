@@ -7,7 +7,7 @@ import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { selectFirst } from "@fern-api/docs-server/utils/selectFirst";
 import { validateApiKeyBelongsToOrg } from "@fern-api/docs-server/venus/validateApiKeyBelongsToOrg";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
-import { COOKIE_FERN_TOKEN, withoutStaging } from "@fern-api/docs-utils";
+import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH, withoutStaging } from "@fern-api/docs-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import {
     DEFAULT_SEARCH_API_KEY_EXPIRATION_SECONDS,
@@ -16,6 +16,7 @@ import {
 } from "@fern-docs/search-keyword/edge";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
+import { getBasepathRoutes } from "../../../../../../../../server/getBasepathRoutes";
 
 export const maxDuration = 10;
 
@@ -73,6 +74,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const userToken = getXUserToken(req) ?? user?.api_key ?? fern_token;
 
+    const basepaths = await getBasepathsForSearchKey(req, domain);
+
     const apiKey = await getSearchApiKey({
         parentApiKey: algoliaSearchApikey(),
         domain: withoutStaging(domain),
@@ -80,7 +83,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         authed: user != null,
         expiresInSeconds: DEFAULT_SEARCH_API_KEY_EXPIRATION_SECONDS,
         searchIndex: SEARCH_INDEX,
-        userToken
+        userToken,
+        basepaths
     });
 
     return NextResponse.json(
@@ -128,6 +132,8 @@ async function handleApiKeyAuth(
             .filter((role) => role.length > 0);
     }
 
+    const basepaths = await getBasepathsForSearchKey(_req, domain);
+
     const searchKey = await getSearchApiKey({
         parentApiKey: algoliaSearchApikey(),
         domain: withoutStaging(domain),
@@ -135,7 +141,8 @@ async function handleApiKeyAuth(
         authed: true,
         expiresInSeconds: DEFAULT_SEARCH_API_KEY_EXPIRATION_SECONDS * 30,
         searchIndex: SEARCH_INDEX,
-        userToken: apiKey
+        userToken: apiKey,
+        basepaths
     });
 
     return NextResponse.json(
@@ -155,4 +162,27 @@ async function handleApiKeyAuth(
 
 function getXUserToken(req: NextRequest): string | undefined {
     return selectFirst(req.headers.get("X-User-Token"));
+}
+
+async function getBasepathsForSearchKey(req: NextRequest, domain: string): Promise<string[] | undefined> {
+    const currentBasepath = req.headers.get(HEADER_X_FERN_BASEPATH);
+    if (!currentBasepath || currentBasepath === "/") {
+        return undefined;
+    }
+
+    const allBasepaths = await getBasepathRoutes(domain);
+    if (!allBasepaths) {
+        return undefined;
+    }
+
+    const normalizedCurrent = currentBasepath.startsWith("/") ? currentBasepath : `/${currentBasepath}`;
+    const matchingBasepaths = allBasepaths
+        .map((bp) => (bp.startsWith("/") ? bp : `/${bp}`))
+        .filter((bp) => bp === normalizedCurrent || bp.startsWith(`${normalizedCurrent}/`));
+
+    console.log(
+        `[getBasepathsForSearchKey] domain=${domain} currentBasepath=${normalizedCurrent} allBasepaths=[${allBasepaths.join(", ")}] matchingBasepaths=[${matchingBasepaths.join(", ")}]`
+    );
+
+    return matchingBasepaths.length > 0 ? matchingBasepaths : undefined;
 }

@@ -3,7 +3,7 @@ import { track } from "@fern-api/docs-server/analytics/posthog";
 import { algoliaAppId, algoliaWriteApiKey, fdrEnvironment, fernToken_admin } from "@fern-api/docs-server/env-variables";
 import { Gate, withBasicTokenAnonymous } from "@fern-api/docs-server/withRbac";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
-import { slugToHref, withoutStaging } from "@fern-api/docs-utils";
+import { HEADER_X_FERN_BASEPATH, slugToHref, withoutStaging } from "@fern-api/docs-utils";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { algoliaIndexerTask, algoliaIndexSettingsTask, SEARCH_INDEX } from "@fern-docs/search-keyword";
 import { type NextRequest, NextResponse } from "next/server";
@@ -16,6 +16,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     const domain = getDocsDomainEdge(req);
+    const basepath = req.headers.get(HEADER_X_FERN_BASEPATH);
+    const indexerDomain =
+        basepath && basepath !== "/" ? `${withoutStaging(domain)}${basepath}` : withoutStaging(domain);
+    console.log(`[algolia reindex] Indexing domain=${indexerDomain} (basepath=${basepath ?? "none"})`);
 
     try {
         const metadata = await getDocsUrlMetadata(domain);
@@ -48,7 +52,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             indexName: SEARCH_INDEX,
             environment: fdrEnvironment(),
             fernToken: fernToken_admin(),
-            domain: withoutStaging(domain),
+            domain: indexerDomain,
             authed: (node) => {
                 if (authEdgeConfig == null) {
                     return false;

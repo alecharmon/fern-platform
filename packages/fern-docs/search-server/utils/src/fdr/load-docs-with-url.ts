@@ -1,4 +1,14 @@
-import { ApiDefinition, type DocsV1Read, FdrClient, FernNavigation } from "@fern-api/fdr-sdk";
+import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import {
+    ApiDefinition,
+    type DocsV1Read,
+    type DocsV2Read,
+    type FdrAPI,
+    FdrClient,
+    FernNavigation
+} from "@fern-api/fdr-sdk";
+import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { mapValues } from "es-toolkit/object";
 
@@ -31,6 +41,39 @@ export interface LoadDocsWithUrlResponse {
 }
 
 export async function loadDocsWithUrl(payload: LoadDocsWithUrlPayload): Promise<LoadDocsWithUrlResponse> {
+    const parsedUrl = new URL(withDefaultProtocol(payload.domain));
+    const domain = parsedUrl.host;
+    const basepath = parsedUrl.pathname !== "/" ? parsedUrl.pathname : undefined;
+
+    let docsBody: DocsV2Read.LoadDocsForUrlResponse;
+    if (basepath != null) {
+        const s3Response = await loadDocsDefinitionFromS3(domain, basepath);
+        if (s3Response != null) {
+            console.log(`[loadDocsWithUrl] Loaded docs from S3 for ${domain}${basepath}`);
+            docsBody = s3Response;
+        } else {
+            console.warn(`[loadDocsWithUrl] S3 load failed for ${domain}${basepath}, falling back to FDR API`);
+            docsBody = await loadDocsFromFdr(payload);
+        }
+    } else {
+        docsBody = await loadDocsFromFdr(payload);
+    }
+
+    const org_id = docsBody.orgId;
+
+    const root = FernNavigation.utils.toRootNode(docsBody, payload.isBatchStreamToggleDisabled ?? false);
+
+    const pages = retrieveMarkdownFromPages(docsBody.definition.pages);
+
+    const apis = {
+        ...mapValues(docsBody.definition.apis, (api) => ApiDefinition.ApiDefinitionV1ToLatest.from(api).migrate()),
+        ...docsBody.definition.apisV2
+    };
+
+    return { org_id, root, pages, apis, domain, basepath };
+}
+
+async function loadDocsFromFdr(payload: LoadDocsWithUrlPayload): Promise<DocsV2Read.LoadDocsForUrlResponse> {
     const client = new FdrClient({
         environment: payload.environment,
         token: payload.fernToken
@@ -43,29 +86,50 @@ export async function loadDocsWithUrl(payload: LoadDocsWithUrlPayload): Promise<
     if (!docs.ok) {
         throw new Error(`Failed to get docs for ${payload.domain}: ${docs.error.error}`);
     }
+    return docs.body;
+}
 
-    const res = await client.docs.v2.read.getOrganizationForUrl({
-        url: ApiDefinition.Url(payload.domain)
-    });
-    if (!res.ok) {
-        throw new Error(`Failed to get org for ${payload.domain}: ${res.error.error}`);
+async function loadDocsDefinitionFromS3(
+    domain: string,
+    basepath: string
+): Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse | undefined> {
+    const bucketName = process.env.DOCS_DEFINITION_S3_BUCKET_NAME;
+    if (!bucketName) {
+        console.error("[loadDocsDefinitionFromS3] DOCS_DEFINITION_S3_BUCKET_NAME env variable is not set");
+        return undefined;
     }
-    const org_id = res.body;
+    const s3Key = getS3KeyForV1DocsDefinition(domain, basepath);
+    console.log(`[loadDocsDefinitionFromS3] Loading docs from S3: bucket=${bucketName} key=${s3Key}`);
 
-    const parsedUrl = new URL(withDefaultProtocol(payload.domain));
-    const domain = parsedUrl.host;
-    const basepath = parsedUrl.pathname !== "/" ? parsedUrl.pathname : undefined;
+    try {
+        const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+        const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
-    const root = FernNavigation.utils.toRootNode(docs.body, payload.isBatchStreamToggleDisabled ?? false);
+        if (!accessKeyId || !secretAccessKey) {
+            console.error("[loadDocsDefinitionFromS3] AWS credentials not found, skipping S3 load");
+            return undefined;
+        }
 
-    const pages = retrieveMarkdownFromPages(docs.body.definition.pages);
+        const s3Client = new S3Client({
+            region: process.env.AWS_REGION || "us-east-1",
+            credentials: { accessKeyId, secretAccessKey }
+        });
 
-    const apis = {
-        ...mapValues(docs.body.definition.apis, (api) => ApiDefinition.ApiDefinitionV1ToLatest.from(api).migrate()),
-        ...docs.body.definition.apisV2
-    };
+        const signedUrl = await getSignedUrl(s3Client, new GetObjectCommand({ Bucket: bucketName, Key: s3Key }), {
+            expiresIn: 3600
+        });
 
-    return { org_id, root, pages, apis, domain, basepath };
+        const response = await fetch(signedUrl);
+        if (!response.ok) {
+            console.error(`[loadDocsDefinitionFromS3] S3 fetch failed: ${response.status}`);
+            return undefined;
+        }
+
+        return (await response.json()) as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
+    } catch (error) {
+        console.error("[loadDocsDefinitionFromS3] Error loading from S3:", error);
+        return undefined;
+    }
 }
 
 function retrieveMarkdownFromPages(pages: Record<FernNavigation.PageId, DocsV1Read.PageContent>) {
