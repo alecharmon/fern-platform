@@ -18,8 +18,8 @@ import { getDocsWriteV2Service } from "./controllers/docs/v2/getDocsWriteV2Servi
 import { createLibraryDocsRouter } from "./controllers/docs/v2/getLibraryDocsRouter";
 import { createGetOrganizationForUrlRouter } from "./controllers/docs/v2/getOrganizationForUrlRouter";
 import { getDocsCacheService } from "./controllers/docs-cache/getDocsCacheService";
+import { createCliRouter } from "./controllers/generators/cliRouter";
 import { createGeneratorVersionsRouter } from "./controllers/generators/generatorVersionsRouter";
-import { getGeneratorsCliController } from "./controllers/generators/getGeneratorsCliController";
 import { getGeneratorsRootController } from "./controllers/generators/getGeneratorsRootController";
 import { getGitController } from "./controllers/git/getGitController";
 import { getPdfExportController } from "./controllers/pdf-export";
@@ -111,6 +111,26 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        const cliRouter = createCliRouter(app);
+        const cliHandler = new OpenAPIHandler(cliRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC CLI error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/generators/cli", async (req, res, next) => {
+            const { matched } = await cliHandler.handle(req, res, {
+                prefix: "/generators/cli",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         const generatorVersionsRouter = createGeneratorVersionsRouter(app);
         const generatorVersionsHandler = new OpenAPIHandler(generatorVersionsRouter, {
             interceptors: [
@@ -172,8 +192,7 @@ async function startServer(): Promise<void> {
                 versions: getVersionsService(app)
             },
             generators: {
-                _root: getGeneratorsRootController(app),
-                cli: getGeneratorsCliController(app)
+                _root: getGeneratorsRootController(app)
             },
             tokens: getTokensService(app),
             git: getGitController(app),
