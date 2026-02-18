@@ -34,20 +34,6 @@ RUN git clone --depth 1 --branch RELEASE.2025-10-15T17-29-55Z https://github.com
 # This commit already uses golang.org/x/crypto v0.45.0
 RUN go install -v github.com/minio/mc@4f6310723f43b117ca2ab746c6533949d777a5bb
 
-# Build Buf CLI v1.64.0 from source with patched Go to fix CVE-2025-61729
-# Explicitly upgrade go-chi/chi to v5.2.4 to fix GHSA-mqqf-5wvp-8fh8 (open redirect in RedirectSlashes middleware)
-# Use GOPROXY=direct to bypass module proxy caching and ensure fresh downloads
-# Clear module cache and explicitly download the correct version before building
-# Clone, update dependencies, and build from source
-RUN git clone --depth 1 --branch v1.64.0 https://github.com/bufbuild/buf.git /tmp/buf && \
-    cd /tmp/buf && \
-    go clean -modcache && \
-    GOPROXY=direct go get github.com/go-chi/chi/v5@v5.2.4 && \
-    GOPROXY=direct go mod download && \
-    go mod tidy && \
-    go build -mod=mod -o $GOPATH/bin/buf ./cmd/buf && \
-    rm -rf /tmp/buf
-
 # Build protoc-gen-openapi for converting protobuf specs to OpenAPI
 # Required by Fern CLI when processing protobuf-based API specs
 # Clone, update google.golang.org/protobuf to fix GHSA-8r3f-844c-mc37 (infinite loop in protojson.Unmarshal), and build from source
@@ -124,6 +110,10 @@ ENV MINIO_VOLUMES="/data" \
 # ----------- End MINIO setup  -----------
 
 # ----------- Start MeiliSearch setup -----------
+# NOTE: CVE-2026-25541 (Rust bytes crate integer overflow) affects MeiliSearch.
+# The fix (bytes 1.11.1) is merged on MeiliSearch main (PR #6142) but not yet
+# in a release (v1.35.1 still uses bytes 1.11.0). This CVE will be resolved
+# automatically when the next MeiliSearch release ships (install script pulls latest).
 RUN log "Installing MeiliSearch..." && \
     apk add --no-cache curl bash strace 2>&1 | add-timestamps && \
     bash -c 'for i in {1..6}; do curl -L https://install.meilisearch.com 2>&1 | sh | add-timestamps && break || { log "MeiliSearch install failed, retrying ($i/6)..."; sleep 10; }; done' && \
@@ -132,8 +122,9 @@ RUN log "Installing MeiliSearch..." && \
 # ----------- End MeiliSearch setup -----------
 
 # ----------- Start Buf CLI setup -----------
-# Copy Buf CLI from build stage (built with patched Go to fix CVE-2025-61729)
-COPY --from=go-builder /go/bin/buf /usr/local/bin/buf
+# Install Buf CLI via npm (pre-built binary)
+RUN log "Installing Buf CLI..." && \
+    npm install -g @bufbuild/buf 2>&1 | add-timestamps
 # Copy protoc-gen-openapi for converting protobuf specs to OpenAPI (required by Fern CLI)
 COPY --from=go-builder /go/bin/protoc-gen-openapi /usr/local/bin/protoc-gen-openapi
 
@@ -186,12 +177,11 @@ RUN log "Installing Bun..." && \
 # ----------- End Bun setup -----------
 
 # ----------- Start npm vulnerability patches preparation -----------
-# Prepare patches for glob, brace-expansion, tar, bytes, and ajv vulnerabilities
+# Prepare patches for glob, brace-expansion, tar, and ajv vulnerabilities
 # These patches will be applied by Dockerfile.self_hosted to all directories
 # glob 10.x -> 10.5.0, glob 11.x -> 11.1.0 (fixes GHSA-5j98-mcp5-4vw2)
 # brace-expansion 2.0.x -> 2.0.2 (fixes GHSA-v6h2-p8h4-qcjw)
 # tar 7.x (<7.5.8) -> 7.5.8 (fixes CVE-2026-26960)
-# bytes 1.x (<1.11.1) -> 1.11.1 (fixes CVE-2026-25541)
 # ajv 8.x (<8.18.0) -> 8.18.0 (fixes CVE-2025-69873)
 RUN log "Preparing npm vulnerability patches..." && \
     cd /tmp && \
@@ -199,16 +189,14 @@ RUN log "Preparing npm vulnerability patches..." && \
     npm-real pack glob@11.1.0 2>&1 | add-timestamps && \
     npm-real pack brace-expansion@2.0.2 2>&1 | add-timestamps && \
     npm-real pack tar@7.5.8 2>&1 | add-timestamps && \
-    npm-real pack bytes@1.11.1 2>&1 | add-timestamps && \
     npm-real pack ajv@8.18.0 2>&1 | add-timestamps && \
-    mkdir -p /tmp/patches/glob-10 /tmp/patches/glob-11 /tmp/patches/brace-expansion /tmp/patches/tar /tmp/patches/bytes /tmp/patches/ajv && \
+    mkdir -p /tmp/patches/glob-10 /tmp/patches/glob-11 /tmp/patches/brace-expansion /tmp/patches/tar /tmp/patches/ajv && \
     tar -xzf glob-10.5.0.tgz -C /tmp/patches/glob-10 && \
     tar -xzf glob-11.1.0.tgz -C /tmp/patches/glob-11 && \
     tar -xzf brace-expansion-2.0.2.tgz -C /tmp/patches/brace-expansion && \
     tar -xzf tar-7.5.8.tgz -C /tmp/patches/tar && \
-    tar -xzf bytes-1.11.1.tgz -C /tmp/patches/bytes && \
     tar -xzf ajv-8.18.0.tgz -C /tmp/patches/ajv && \
-    rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz bytes-*.tgz ajv-*.tgz
+    rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz ajv-*.tgz
 
 # Patches are kept in /tmp/patches for use by Dockerfile.self_hosted
 # ----------- End npm vulnerability patches preparation -----------
