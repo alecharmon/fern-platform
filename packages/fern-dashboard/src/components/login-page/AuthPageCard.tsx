@@ -38,7 +38,6 @@ export async function AuthPageCard({
     const { FERN_CI_AUTOMATED_TESTING, redirect_on_login } = resolvedSearchParams;
     const shouldShowCITestLogin =
         !!process.env.FERN_CI_AUTOMATED_TESTING && FERN_CI_AUTOMATED_TESTING === process.env.FERN_CI_AUTOMATED_TESTING;
-    const isNonProductionEnv = process.env.VERCEL_ENV !== "production";
     const isPrimaryButtons = buttonVariant === "default";
 
     return (
@@ -77,13 +76,11 @@ export async function AuthPageCard({
                         buttonProps={isPrimaryButtons ? { variant: "default" } : undefined}
                         logoVariant={isPrimaryButtons ? "white" : "filled"}
                     />
-                    {isNonProductionEnv && (
-                        <PostmanLoginButton
-                            returnTo={redirect_on_login}
-                            buttonProps={isPrimaryButtons ? { variant: "default" } : undefined}
-                            logoVariant={isPrimaryButtons ? "white" : "colorful"}
-                        />
-                    )}
+                    <PostmanLoginButton
+                        returnTo={redirect_on_login}
+                        buttonProps={isPrimaryButtons ? { variant: "default" } : undefined}
+                        logoVariant={isPrimaryButtons ? "white" : "colorful"}
+                    />
                 </div>
                 {!showEmailForm && (
                     <div className="mt-4 text-center text-sm text-gray-900">

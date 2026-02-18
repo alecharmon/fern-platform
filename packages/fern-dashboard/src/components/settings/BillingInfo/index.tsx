@@ -531,14 +531,14 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                         <button
                             onClick={handleManageBilling}
                             disabled={isOpeningPortal}
-                            className="flex h-8 items-center justify-center rounded-md border border-border bg-white px-2 text-xs text-gray-1100 shadow-sm hover:bg-secondary disabled:opacity-60"
+                            className="flex h-8 items-center justify-center rounded-md border border-border bg-card px-2 text-xs text-gray-1100 shadow-sm hover:bg-secondary disabled:opacity-60"
                         >
                             {isOpeningPortal ? "Opening..." : "View invoices"}
                         </button>
                         <button
                             onClick={handleManageBilling}
                             disabled={isOpeningPortal}
-                            className="flex h-8 items-center justify-center rounded-md border border-border bg-white px-2 text-xs text-gray-1100 shadow-sm hover:bg-secondary disabled:opacity-60"
+                            className="flex h-8 items-center justify-center rounded-md border border-border bg-card px-2 text-xs text-gray-1100 shadow-sm hover:bg-secondary disabled:opacity-60"
                         >
                             {isOpeningPortal ? "Opening..." : "View billing portal"}
                         </button>
