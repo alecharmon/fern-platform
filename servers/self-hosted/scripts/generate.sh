@@ -638,9 +638,9 @@ PORT=3001 \
 NEXT_PUBLIC_FDR_ORIGIN_PORT=8080 \
 NEXT_PUBLIC_FDR_ORIGIN="http://localhost:8080" \
 NEXT_PUBLIC_FDR_LAMBDA_ORIGIN="http://localhost:8080" \
-NEXT_PUBLIC_MINIO_BUCKET_HOST="http://localhost:9000" \
-NEXT_PUBLIC_MINIO_ACCESS_KEY="minioadmin" \
-NEXT_PUBLIC_MINIO_SECRET_KEY="minioadmin" \
+MINIO_BUCKET_HOST="http://localhost:9000" \
+MINIO_ACCESS_KEY="minioadmin" \
+MINIO_SECRET_KEY="minioadmin" \
 NEXT_PUBLIC_FILES_ORIGIN="http://localhost:9000/${MINIO_BUCKET_NAME}" \
 NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
@@ -670,6 +670,7 @@ log "Calling meilisearch reindex endpoint..."
 REINDEX_URL="http://127.0.0.1:3001${NEXT_PUBLIC_BASE_PATH:-}/api/fern-docs/search/v2/reindex/meilisearch"
 REINDEX_RESPONSE=$(curl -s --max-time 600 \
     -H "x-fern-host: ${NEXT_PUBLIC_DOCS_DOMAIN_URL}" \
+    -H "Authorization: Bearer ${MEILI_MASTER_KEY}" \
     -H "Accept: application/json" \
     -X GET "$REINDEX_URL" 2>&1)
 REINDEX_EXIT=$?

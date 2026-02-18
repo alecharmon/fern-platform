@@ -29,6 +29,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json("meilisearch indexing is only accessible in self-hosted mode", { status: 400 });
     }
 
+    const expectedKey = meilisearchApiKey();
+    const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    if (!bearer || bearer !== expectedKey) {
+        return NextResponse.json("Unauthorized", { status: 401 });
+    }
+
     // Load domain from request
     const domain = getDocsDomainEdge(req);
 

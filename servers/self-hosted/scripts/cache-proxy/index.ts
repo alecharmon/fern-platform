@@ -130,6 +130,12 @@ const server = Bun.serve<WebSocketData>({
             }
         }
 
+        // Block /_local/ — this is an internal route that redirects to FDR (localhost:8080).
+        // It should never be exposed externally as it leaks internal service addresses.
+        if (url.pathname.startsWith("/_local/")) {
+            return new Response("Forbidden", { status: 403 });
+        }
+
         // Handle CORS proxy requests
         if (url.pathname.startsWith("/__proxy/")) {
             if (req.method === "OPTIONS") {

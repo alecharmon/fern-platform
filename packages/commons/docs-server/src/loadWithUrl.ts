@@ -139,7 +139,8 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
         }
 
         const response = await loadDocsDefinitionFromMinIO({
-            domain: process.env.NEXT_PUBLIC_MINIO_BUCKET_HOST ?? "http://localhost:9000",
+            domain:
+                process.env.MINIO_BUCKET_HOST ?? process.env.NEXT_PUBLIC_MINIO_BUCKET_HOST ?? "http://localhost:9000",
             docsBucketName
         });
 

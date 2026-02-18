@@ -690,6 +690,105 @@ export async function testSearchEndpoint(
 }
 
 /**
+ * Test that _files path traversal attempts are blocked with 400.
+ * The middleware rejects any _files path containing ".." to prevent escaping the MinIO bucket.
+ */
+export async function testFilesPathTraversalBlocked(
+    containerId: string,
+    docsEndpoint: string = "http://localhost:3000"
+): Promise<void> {
+    const traversalPaths = [
+        "/_files/..%09/some-domain/",
+        "/_files/../etc/passwd",
+        "/_files/..%2f..%2f",
+        "/_files/foo/../../bar"
+    ];
+
+    for (const path of traversalPaths) {
+        const { stdout: httpCode } = await execa("docker", [
+            "exec",
+            containerId,
+            "curl",
+            "-s",
+            "-o",
+            "/dev/null",
+            "-w",
+            "%{http_code}",
+            "--path-as-is",
+            `${docsEndpoint}${path}`
+        ]);
+
+        if (httpCode !== "400") {
+            throw new Error(
+                `Path traversal attempt ${path} should return 400 but returned ${httpCode}. ` +
+                    `This is a security issue - _files paths with ".." should be rejected.`
+            );
+        }
+    }
+}
+
+/**
+ * Test that a real file can be downloaded via the /_files/ endpoint.
+ * Lists files from MinIO, picks one, and verifies it can be fetched through the middleware.
+ */
+export async function testFilesDownload(
+    containerId: string,
+    docsEndpoint: string = "http://localhost:3000"
+): Promise<void> {
+    const { stdout: containerUid } = await execa("docker", ["exec", containerId, "id", "-u"]);
+    const uid = containerUid.trim();
+
+    const { stdout: fileList } = await execa("docker", [
+        "exec",
+        "-e",
+        `MC_CONFIG_DIR=/tmp/mc-config-${uid}`,
+        containerId,
+        "mc",
+        "ls",
+        "--recursive",
+        "minio"
+    ]);
+
+    const lines = fileList.trim().split("\n").filter(Boolean);
+    if (lines.length === 0) {
+        throw new Error("No files found in MinIO — cannot test _files download");
+    }
+
+    const firstLine = lines[0]!;
+    const objectPath = firstLine.trim().split(/\s+/).pop();
+    if (!objectPath) {
+        throw new Error(`Could not parse object path from mc ls output: ${firstLine}`);
+    }
+
+    const filesUrl = `${docsEndpoint}/_files/${objectPath}`;
+    const { stdout: httpCode } = await execa("docker", [
+        "exec",
+        containerId,
+        "curl",
+        "-s",
+        "-o",
+        "/dev/null",
+        "-w",
+        "%{http_code}",
+        "-L",
+        filesUrl
+    ]);
+
+    if (httpCode !== "200") {
+        throw new Error(
+            `Failed to download file via _files endpoint. URL: ${filesUrl}, HTTP status: ${httpCode}. ` +
+                `Expected 200 for a file that exists in MinIO.`
+        );
+    }
+
+    const { stdout: content } = await execa("docker", ["exec", containerId, "curl", "-s", "-L", filesUrl]);
+
+    if (!content || content.length === 0) {
+        throw new Error(`File download returned empty content. URL: ${filesUrl}`);
+    }
+}
+
+/**
  * Test that sensitive MeiliSearch endpoints are blocked by the middleware
  * The middleware should return 403 for endpoints like /keys, /dumps, /tasks, etc.
  */

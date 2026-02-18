@@ -36,9 +36,10 @@ export function matchesDomain(targetHostname: string, allowedDomain: string): bo
  * Returns true if the target domain matches or is a subdomain of any allowed root domain.
  */
 export function isProxyTargetAllowed(targetHostname: string, docsDomain: string, additionalDomains: string[]): boolean {
-    // If no docs domain is configured, allow all (backward compatibility)
+    // If no allowed domains are configured, fail closed — reject all proxy requests
+    // to prevent the CORS proxy from becoming an open SSRF relay.
     if (!docsDomain && additionalDomains.length === 0) {
-        return true;
+        return false;
     }
     // Allow all domains when running on localhost (local development / testing)
     if (docsDomain === "localhost" || docsDomain.startsWith("localhost:")) {

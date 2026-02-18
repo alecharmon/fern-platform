@@ -240,6 +240,12 @@ export const middleware: NextMiddleware = async (request) => {
         const filePath = pathname.replace("https:/", "https://"); // pathnames normalize urls, so we need restore the protocol //
         const removeBase = filePath.replace(/(.*)_files\//, ""); // clean all content before and including file marker
 
+        // SECURITY: Reject path traversal attempts (e.g. "..%09/", "../", "..%2f")
+        // Check the decoded path for any ".." segments that could escape the bucket
+        if (removeBase.includes("..")) {
+            return new NextResponse("Bad Request", { status: 400 });
+        }
+
         // Extract the first path segment (should be the domain)
         const firstSegment = removeBase.split("/")[0];
 

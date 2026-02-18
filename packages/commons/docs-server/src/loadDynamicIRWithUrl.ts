@@ -30,7 +30,10 @@ export const loadDynamicIRWithUrl = cache(
 
         if (isSelfHosted()) {
             try {
-                const minioEndpoint = process.env.NEXT_PUBLIC_MINIO_BUCKET_HOST ?? "http://localhost:9000";
+                const minioEndpoint =
+                    process.env.MINIO_BUCKET_HOST ??
+                    process.env.NEXT_PUBLIC_MINIO_BUCKET_HOST ??
+                    "http://localhost:9000";
                 const response = await loadDynamicIRFromMinIO(orgId, apiName, snippetsConfig, minioEndpoint);
                 if (response != null && Object.keys(response).length > 0) {
                     return response;

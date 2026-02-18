@@ -11,6 +11,8 @@ import {
     testDocsUIAccessible,
     testDocsUIElements,
     testExternalCallsBlocked,
+    testFilesDownload,
+    testFilesPathTraversalBlocked,
     testFrontendCacheWorking,
     testSearchEndpoint,
     testSearchSensitiveEndpointsBlocked,
@@ -222,6 +224,22 @@ describe("Custom components support", () => {
 
         await testCustomComponentsPage(containerId);
     });
+});
+
+describe("File serving via _files endpoint", () => {
+    it("path traversal attempts are blocked with 400", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testFilesPathTraversalBlocked(containerId);
+    });
+
+    it("can download a real file from MinIO", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testFilesDownload(containerId);
+    }, 60000);
 });
 
 describe("MeiliSearch search functionality", () => {

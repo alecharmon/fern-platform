@@ -16,8 +16,8 @@ export const loadDynamicIRFromMinIO = cache(
     ): Promise<DynamicIRsByLanguage | undefined> => {
         const dynamicIRsByLanguage: DynamicIRsByLanguage = {};
 
-        const accessKeyId = process.env.NEXT_PUBLIC_MINIO_ACCESS_KEY;
-        const secretAccessKey = process.env.NEXT_PUBLIC_MINIO_SECRET_KEY;
+        const accessKeyId = process.env.MINIO_ACCESS_KEY ?? process.env.NEXT_PUBLIC_MINIO_ACCESS_KEY;
+        const secretAccessKey = process.env.MINIO_SECRET_KEY ?? process.env.NEXT_PUBLIC_MINIO_SECRET_KEY;
         const bucketName =
             process.env.NEXT_PUBLIC_DYNAMIC_IR_BUCKET_NAME ??
             process.env.MINIO_BUCKET_NAME ??
