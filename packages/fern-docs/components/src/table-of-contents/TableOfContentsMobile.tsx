@@ -43,7 +43,7 @@ export function TableOfContentsMobile({ tableOfContents, lang, className }: Tabl
     }
 
     return (
-        <div className={cn("toc-mobile xl:hidden", className)}>
+        <div className={cn("toc-mobile xl:hidden hidden", className)}>
             <DropdownMenu.Root modal={false} open={isOpen} onOpenChange={handleOpenChange}>
                 <DropdownMenu.Trigger asChild>
                     <button
