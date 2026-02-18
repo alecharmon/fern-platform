@@ -3,7 +3,6 @@
 import { ADDITIONAL_SEATS_SKU, type BillingPlan } from "@fern-platform/billing";
 import csharpIcon from "devicon/icons/csharp/csharp-original.svg";
 import goIcon from "devicon/icons/go/go-original-wordmark.svg";
-import kotlinIcon from "devicon/icons/kotlin/kotlin-original.svg";
 import pythonIcon from "devicon/icons/python/python-original.svg";
 import rubyIcon from "devicon/icons/ruby/ruby-original.svg";
 import rustIcon from "devicon/icons/rust/rust-original.svg";
@@ -21,6 +20,7 @@ import { getBillingPlanAction } from "@/app/actions/billing/getBillingPlan";
 import { syncAfterCheckout } from "@/app/actions/billing/syncAfterCheckout";
 import { createUpgradeSession } from "@/app/actions/billing/upgradeSubscription";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 import { ClientEntitlementGate } from "@/components/entitlements/ClientEntitlementGate";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { Button } from "@/components/ui/button";
@@ -28,17 +28,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEntitlements } from "@/providers/EntitlementsProvider";
 import { useCurrentOrganization } from "@/state/useOrganizations";
 import { AddSeatsCard } from "./AddSeatsCard";
+import { PlanCard } from "./PlanCard";
 import { type BillingCycle, getPlanIndex, type Plan, plans } from "./plans";
 
 const SDK_LANGUAGE_ICONS = [
-    { name: "TypeScript", src: typescriptIcon },
-    { name: "Python", src: pythonIcon },
-    { name: "Go", src: goIcon },
-    { name: "Ruby", src: rubyIcon },
-    { name: "C#", src: csharpIcon },
-    { name: "Kotlin", src: kotlinIcon },
-    { name: "Swift", src: swiftIcon },
-    { name: "Rust", src: rustIcon }
+    {
+        name: "TypeScript",
+        src: typescriptIcon,
+        href: "https://buildwithfern.com/learn/sdks/generators/typescript/quickstart"
+    },
+    { name: "Python", src: pythonIcon, href: "https://buildwithfern.com/learn/sdks/generators/python/quickstart" },
+    { name: "Go", src: goIcon, href: "https://buildwithfern.com/learn/sdks/generators/go/quickstart" },
+    { name: "Ruby", src: rubyIcon, href: "https://buildwithfern.com/learn/sdks/generators/ruby/quickstart" },
+    { name: "C#", src: csharpIcon, href: "https://buildwithfern.com/learn/sdks/generators/csharp/quickstart" },
+    // { name: "Kotlin", src: kotlinIcon, href: "https://buildwithfern.com/learn/sdks/generators/kotlin/quickstart" },
+    { name: "Swift", src: swiftIcon, href: "https://buildwithfern.com/learn/sdks/generators/swift/quickstart" },
+    { name: "Rust", src: rustIcon, href: "https://buildwithfern.com/learn/sdks/generators/rust/quickstart" }
 ];
 
 function BillingCardSkeleton() {
@@ -117,21 +122,21 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
         if (!org) {
             return;
         }
+        const syncToastId = toast.info("Syncing your subscription...");
         try {
             await syncAfterCheckout({ orgId: org.id });
             const result = await getBillingPlanAction(org.id);
             if (!("error" in result)) {
                 setBillingPlan(result.plan);
-                if (result.plan) {
-                    captureEvent(posthog, PosthogEventName.CHECKOUT_COMPLETED, {
-                        plan: getActivePlanName(result.plan)
-                    });
-                }
-                toast.success("Upgrade successful! Your new plan is now active.");
+                captureEvent(posthog, PosthogEventName.CHECKOUT_COMPLETED, {
+                    plan: result.plan?.planSku ?? "unknown_sku"
+                });
             }
             refetchEntitlements();
+            toast.success("Upgrade successful! Your new plan is now active.", { id: syncToastId });
         } catch (error) {
             console.error("Error syncing after checkout popup:", error);
+            toast.dismiss(syncToastId);
         }
     }, [org, posthog, refetchEntitlements]);
 
@@ -154,22 +159,13 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             return;
         }
 
-        if ((isSuccess || isUpgrade) && !hasShownToast.current) {
-            hasShownToast.current = true;
-            captureEvent(posthog, PosthogEventName.CHECKOUT_COMPLETED, { plan: "unknown" });
-            toast.success("Upgrade successful! Your new plan is now active.");
-        }
-
-        if (isCanceled && !hasShownToast.current) {
-            hasShownToast.current = true;
-            captureEvent(posthog, PosthogEventName.CHECKOUT_CANCELED, {});
-        }
-
         async function loadBillingPlan() {
+            let syncToastId: string | number | undefined;
             try {
                 // If returning from checkout/upgrade, sync billing data immediately
                 // so we don't have to wait for the webhook
                 if (isSuccess || isUpgrade) {
+                    syncToastId = toast.info("Syncing your subscription...");
                     await syncAfterCheckout({
                         orgId: currentOrg.id,
                         checkoutSessionId
@@ -182,8 +178,22 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                 } else {
                     setBillingPlan(result.plan);
                 }
+
+                if ((isSuccess || isUpgrade) && !hasShownToast.current) {
+                    hasShownToast.current = true;
+                    toast.success("Upgrade successful! Your new plan is now active.", { id: syncToastId });
+                    captureEvent(posthog, PosthogEventName.CHECKOUT_CANCELED, {});
+                } else if (syncToastId != null) {
+                    captureEvent(posthog, PosthogEventName.CHECKOUT_CANCELED, {});
+
+                    toast.dismiss(syncToastId);
+                }
             } catch (error) {
                 console.error("Error loading billing plan:", error);
+
+                if (syncToastId != null) {
+                    toast.dismiss(syncToastId);
+                }
             } finally {
                 setLoading(false);
             }
@@ -223,16 +233,16 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             targetPlan: plan.name
         });
 
-        // Enterprise plan - redirect to contact/demo
-        if (!plan.cyclePricing) {
+        // Static-priced plans (free/enterprise) - redirect to contact/demo
+        if (plan.pricing.type === "static") {
             window.open("https://buildwithfern.com/book-demo", "_blank");
             return;
         }
 
         const priceIds =
-            useSuperUserPricing && plan.superUserPriceIds
-                ? plan.superUserPriceIds
-                : plan.cyclePricing[billingCycle].priceIds;
+            useSuperUserPricing && plan.pricing.superUserPriceIds
+                ? plan.pricing.superUserPriceIds
+                : plan.pricing.cycles[billingCycle].priceIds;
 
         setUpgradingToPlan(plan.name);
         try {
@@ -321,7 +331,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     <Skeleton className="h-8 w-48" />
                     <Skeleton className="h-9 w-28 rounded-md" />
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4 md:flex-row">
                     {[1, 2, 3].map((i) => (
                         <BillingCardSkeleton key={i} />
                     ))}
@@ -335,6 +345,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
     const currentPlanIndex = getPlanIndex(currentPlanName);
 
     const isOnFreePlan = currentPlanName === "hobby";
+    const hasTrialAvailable = isOnFreePlan && billingPlan?.hasSubscriptionHistory !== true;
 
     const isDowngrade = (planName: string): boolean => {
         const planIndex = getPlanIndex(planName);
@@ -344,7 +355,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
     const billingReason = searchParams.get("reason");
 
     return (
-        <div className="flex w-full max-w-[1040px] flex-col gap-4">
+        <div className="flex w-full max-w-[1200px] flex-col gap-4">
             {/* Entitlement limit banner */}
             {billingReason === "docs_site_limit" && (
                 <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/50 dark:text-amber-200">
@@ -400,113 +411,62 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     </div>
                 </div>
             </div>
-            <p className="text-sm text-gray-1000">Get started for free with a 14 day trial. No credit card required.</p>
 
-            {/* Plan Cards */}
-            <div className="flex gap-4">
-                {plans.map((plan) => {
-                    const isActivePlan = plan.name.toLowerCase() === currentPlanName;
-                    const isPlanDowngrade = isDowngrade(plan.name);
-                    const isHighlighted = plan.tier === "paid";
-                    const isDisabled = isActivePlan || isPlanDowngrade || upgradingToPlan === plan.name;
+            {/* Plan Cards + View all features wrapper */}
+            <div
+                className={`flex flex-col gap-4 rounded-[20px] ${isOnFreePlan ? "border border-gray-500 p-4" : ""}`}
+                style={
+                    isOnFreePlan
+                        ? {
+                              background:
+                                  "linear-gradient(180deg, var(--color-gray-100) 0%, var(--color-gray-300) 100%)"
+                          }
+                        : undefined
+                }
+            >
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    {plans.map((plan, index) => {
+                        const cardStatus =
+                            plan.name.toLowerCase() === currentPlanName
+                                ? ({ status: "current" } as const)
+                                : isDowngrade(plan.name)
+                                  ? ({
+                                        status: "downgrade",
+                                        isDowngrading: isOpeningPortal,
+                                        onDowngrade: handleManageBilling
+                                    } as const)
+                                  : ({
+                                        status: "upgradable",
+                                        isUpgrading: upgradingToPlan === plan.name,
+                                        isNextTier: index === currentPlanIndex + 1,
+                                        onUpgrade: handleUpgrade
+                                    } as const);
 
-                    // Resolve display pricing: super-user free override, cycle-specific, or static
-                    const isSuperUserFree = useSuperUserPricing && plan.superUserPriceIds != null;
-                    const cyclePricing = plan.cyclePricing?.[billingCycle];
-                    const displayPrice = isSuperUserFree ? "$0" : (cyclePricing?.displayPrice ?? plan.price);
-                    const displayPeriod = isSuperUserFree ? "/mo" : (cyclePricing?.period ?? plan.period);
-
-                    return (
-                        <div
-                            key={plan.name}
-                            className={`relative flex flex-1 flex-col gap-4 overflow-hidden rounded-2xl p-4 ${
-                                isHighlighted && isOnFreePlan ? "border-2 border-transparent" : "border border-gray-600"
-                            }`}
-                        >
-                            {/* Background */}
-                            <div
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-0 rounded-2xl bg-card"
+                        return (
+                            <PlanCard
+                                key={plan.name}
+                                plan={plan}
+                                cardStatus={cardStatus}
+                                isOnFreePlan={isOnFreePlan}
+                                hasTrialAvailable={hasTrialAvailable}
+                                billingCycle={billingCycle}
+                                useSuperUserPricing={useSuperUserPricing}
                             />
-                            {/* Gradient border for highlighted non-active plan */}
-                            {isHighlighted && isOnFreePlan && (
-                                <div
-                                    aria-hidden="true"
-                                    className="pointer-events-none absolute inset-0 z-10 rounded-2xl"
-                                    style={{
-                                        padding: "2px",
-                                        background: "linear-gradient(to bottom, #a7bff7, #34d399)",
-                                        WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                                        WebkitMaskComposite: "xor",
-                                        maskComposite: "exclude"
-                                    }}
-                                />
-                            )}
+                        );
+                    })}
+                </div>
 
-                            {/* Plan name */}
-                            <h3 className="relative z-10 text-base font-bold text-foreground">{plan.name}</h3>
-
-                            {/* Pricing */}
-                            <div className="relative z-10 flex flex-col gap-2">
-                                <p className="text-xl font-bold text-foreground">
-                                    {displayPrice}
-                                    {displayPeriod && <span className="text-base font-bold">{displayPeriod}</span>}
-                                </p>
-                            </div>
-
-                            {/* Description */}
-                            <p className="relative z-10 text-sm text-gray-1100">{plan.description}</p>
-
-                            {/* CTA Button */}
-                            <div className="relative z-10">
-                                {isActivePlan ? (
-                                    <button
-                                        disabled
-                                        className="flex h-10 w-full items-center justify-center rounded-lg border border-gray-400 bg-card px-4 py-3 text-sm text-foreground shadow-sm"
-                                    >
-                                        Current plan
-                                    </button>
-                                ) : isPlanDowngrade ? (
-                                    <button
-                                        disabled
-                                        className="flex h-10 w-full items-center justify-center rounded-lg border border-gray-400 bg-card px-4 py-3 text-sm text-gray-1000 shadow-sm"
-                                    >
-                                        Included
-                                    </button>
-                                ) : plan.buttonStyle === "primary" ? (
-                                    <button
-                                        onClick={() => !isDisabled && handleUpgrade(plan)}
-                                        disabled={isDisabled}
-                                        className="flex h-9 w-full items-center justify-center rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-60"
-                                    >
-                                        {upgradingToPlan === plan.name ? "Loading..." : plan.buttonText}
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => !isDisabled && handleUpgrade(plan)}
-                                        disabled={isDisabled}
-                                        className="flex h-10 w-full items-center justify-center rounded-lg border border-gray-400 bg-card px-4 py-3 text-sm text-foreground shadow-sm hover:bg-secondary disabled:opacity-60"
-                                    >
-                                        {upgradingToPlan === plan.name ? "Loading..." : plan.buttonText}
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Features */}
-                            <div className="relative z-10 flex flex-col gap-2">
-                                {plan.featureHeader && (
-                                    <span className="text-sm text-gray-1000">{plan.featureHeader}</span>
-                                )}
-                                {plan.features.map((feature, index) => (
-                                    <div key={index} className="flex items-center gap-2">
-                                        <feature.icon className="size-5 shrink-0 text-gray-1000" />
-                                        <span className="text-sm text-gray-1000">{feature.text}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    );
-                })}
+                {/* View all features link */}
+                <div className="flex items-center justify-center">
+                    <a
+                        href="https://buildwithfern.com/pricing"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex h-10 items-center justify-center rounded-lg border border-gray-400 bg-card px-4 py-3 text-sm text-foreground shadow-sm hover:bg-secondary"
+                    >
+                        View all features
+                    </a>
+                </div>
             </div>
 
             {/* SDK Banner */}
@@ -514,31 +474,47 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                 <h3 className="text-base font-bold text-foreground">Add SDKs that sync with your Docs</h3>
                 <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        {SDK_LANGUAGE_ICONS.map(({ name, src }) => (
-                            <Image key={name} src={src} alt={name} width={16} height={16} />
+                        {SDK_LANGUAGE_ICONS.map(({ name, src, href }) => (
+                            <DashboardTooltip key={name} content={name}>
+                                <a href={href} target="_blank" rel="noopener noreferrer">
+                                    <Image src={src} alt={name} width={16} height={16} />
+                                </a>
+                            </DashboardTooltip>
                         ))}
                     </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open("https://buildwithfern.com/book-demo", "_blank")}
-                    >
-                        Contact sales
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <a
+                            href="https://buildwithfern.com/learn/sdks/overview/how-it-works"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-gray-1000 underline"
+                        >
+                            Learn more
+                        </a>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open("https://buildwithfern.com/book-demo", "_blank")}
+                        >
+                            Contact sales
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            <ClientEntitlementGate required="can_purchase_additional_seats">
-                <AddSeatsCard
-                    orgId={org.id}
-                    orgName={org.name}
-                    currentAddonSeats={
-                        billingPlan?.products
-                            .filter((p) => p.kind === "addon" && p.sku === ADDITIONAL_SEATS_SKU)
-                            .reduce((sum, p) => sum + p.qty, 0) ?? 0
-                    }
-                />
-            </ClientEntitlementGate>
+            {!isOnFreePlan && (
+                <ClientEntitlementGate required="can_purchase_additional_seats">
+                    <AddSeatsCard
+                        orgId={org.id}
+                        orgName={org.name}
+                        currentAddonSeats={
+                            billingPlan?.products
+                                .filter((p) => p.kind === "addon" && p.sku === ADDITIONAL_SEATS_SKU)
+                                .reduce((sum, p) => sum + p.qty, 0) ?? 0
+                        }
+                    />
+                </ClientEntitlementGate>
+            )}
 
             {/* Manage Subscription Card */}
             {billingPlan?.hasSubscriptionHistory === true && (

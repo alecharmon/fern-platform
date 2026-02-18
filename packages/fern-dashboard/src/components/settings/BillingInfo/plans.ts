@@ -1,28 +1,28 @@
 import type { ProductTier } from "@fern-platform/billing";
-import type { LucideIcon } from "lucide-react";
 import {
-    ChartNoAxesCombined,
     Code,
     FileDown,
     Fingerprint,
     Globe,
-    Layers,
+    GlobeLock,
+    Languages,
     Lock,
     LockOpen,
     MessageSquare,
-    Paintbrush,
     Server,
-    ShieldCheck,
     SlidersHorizontal,
     Sparkles,
     SquareM,
     SquarePen,
     Users
 } from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
 import { LEGACY_PLAN_SKU, PRO_PLAN_CURRENT_SKU } from "../../../../../commons/billing/dist/static_skus";
 
+export type PlanFeatureIcon = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>;
+
 export interface PlanFeature {
-    icon: LucideIcon;
+    icon: PlanFeatureIcon;
     text: string;
 }
 
@@ -31,24 +31,25 @@ export type BillingCycle = "monthly" | "yearly";
 export interface CyclePricing {
     displayPrice: string;
     period: string;
+    subtitle: string;
     /** Stripe price IDs for this billing cycle */
     priceIds: string[];
 }
+
+export type PlanPricing =
+    | { type: "static"; displayPrice: string; period: string; subtitle: string }
+    | { type: "cycle"; cycles: Record<BillingCycle, CyclePricing>; superUserPriceIds?: string[] };
 
 export interface Plan {
     name: string;
     /** The billing package tier this plan maps to */
     tier: ProductTier;
-    /** Default display price (used when no cyclePricing or for static plans) */
-    price: string;
-    period: string;
     description: string;
     buttonText: string;
+    /** Button text shown when user is eligible for a free trial */
+    trialButtonText?: string;
     buttonStyle: "primary" | "outline";
-    /** Cycle-specific pricing with Stripe price IDs. null = no checkout (free/enterprise). */
-    cyclePricing: Record<BillingCycle, CyclePricing> | null;
-    /** Super-user-only: free pricing override with a $0 Stripe price ID */
-    superUserPriceIds?: string[];
+    pricing: PlanPricing;
     /** Optional header shown above features, e.g. "Everything in Hobby" */
     featureHeader?: string;
     features: PlanFeature[];
@@ -63,70 +64,71 @@ export const plans: Plan[] = [
     {
         name: "Hobby",
         tier: "free",
-        price: "$0",
-        period: "",
-        description: "For individuals getting started.",
+        description: "For individuals",
         buttonText: "Get started",
         buttonStyle: "outline",
-        cyclePricing: null,
+        pricing: { type: "static", displayPrice: "$0", period: "/mo", subtitle: "free forever" },
         features: [
-            { icon: SquareM, text: "Markdown Guides and API reference" },
-            { icon: Code, text: "Interactive API explorer" },
-            { icon: SquarePen, text: "Web editor" },
-            { icon: Globe, text: "Custom domain" },
-            { icon: ChartNoAxesCombined, text: "Built-in analytics" },
-            { icon: Sparkles, text: "AI-powered search" }
+            { icon: Users, text: "2 team members" },
+            { icon: Sparkles, text: "250 AI credits" },
+            { icon: Globe, text: "Custom domain (docs.example.com)" },
+            { icon: SquareM, text: "Guides, API references, and changelogs" },
+            { icon: Code, text: "API explorer" },
+            { icon: SquarePen, text: "Web editor" }
         ],
         planSkuMatcher: (sku) => sku === undefined
     },
     {
-        name: "Professional",
+        name: "Pro",
         tier: "paid",
-        price: "$200",
-        period: "/mo",
-        description: "For small teams.",
+        description: "For small teams",
         buttonText: "Upgrade",
+        trialButtonText: "Start 14-day trial",
         buttonStyle: "primary",
-        cyclePricing: {
-            monthly: {
-                displayPrice: "$200",
-                period: "/mo",
-                priceIds: ["price_1SxVS3FYKJHzTJV9tzJ6f5c0"]
+        pricing: {
+            type: "cycle",
+            cycles: {
+                monthly: {
+                    displayPrice: "$200",
+                    period: "/mo",
+                    subtitle: "billed monthly",
+                    priceIds: ["price_1SxVS3FYKJHzTJV9tzJ6f5c0"]
+                },
+                yearly: {
+                    displayPrice: "$150",
+                    period: "/mo",
+                    subtitle: "billed yearly",
+                    priceIds: ["price_1SxVS3FYKJHzTJV9j6eSH7GZ"]
+                }
             },
-            yearly: {
-                displayPrice: "$150",
-                period: "/mo",
-                priceIds: ["price_1SxVS3FYKJHzTJV9j6eSH7GZ"]
-            }
+            superUserPriceIds: ["price_1SxYXdFYKJHzTJV9khP7EqTH"]
         },
-        superUserPriceIds: ["price_1SxYXdFYKJHzTJV9khP7EqTH"],
         featureHeader: "Everything in Hobby, plus:",
         features: [
-            { icon: Layers, text: "Multiple API specs" },
-            { icon: Users, text: "Team collaboration" },
-            { icon: Lock, text: "Password-protected docs" },
+            { icon: Users, text: "5 team members (+$20 per additional member)" },
+            { icon: Sparkles, text: "1,000 AI credits" },
+            { icon: Globe, text: "Custom subpath (example.com/docs)" },
             { icon: SlidersHorizontal, text: "Version and product switching" },
+            { icon: Lock, text: "Password-protected docs" },
             { icon: FileDown, text: "PDF exports" }
         ],
         planSkuMatcher: (sku) => sku === PRO_PLAN_CURRENT_SKU
     },
     {
-        name: "Custom",
+        name: "Enterprise",
         tier: "enterprise",
-        price: "Custom",
-        period: "",
-        description: "For scaling teams.",
+        description: "For scaling teams and enterprises",
         buttonText: "Contact sales",
         buttonStyle: "outline",
-        cyclePricing: null,
-        featureHeader: "Everything in Professional, plus:",
+        pricing: { type: "static", displayPrice: "Tailored pricing", period: "", subtitle: "billed yearly" },
+        featureHeader: "Everything in Pro, plus:",
         features: [
             { icon: Fingerprint, text: "Visitor authentication (JWT, SSO)" },
             { icon: LockOpen, text: "Role-based access control (RBAC)" },
+            { icon: Languages, text: "Translated content" },
             { icon: Server, text: "Self-hosting" },
-            { icon: Paintbrush, text: "Enterprise SSO" },
-            { icon: MessageSquare, text: "Dedicated Slack / Teams channel" },
-            { icon: ShieldCheck, text: "Security and legal review" }
+            { icon: GlobeLock, text: "Enterprise SSO" },
+            { icon: MessageSquare, text: "Dedicated Slack / Teams channel" }
         ],
         planSkuMatcher: (sku) => sku === LEGACY_PLAN_SKU
     }
