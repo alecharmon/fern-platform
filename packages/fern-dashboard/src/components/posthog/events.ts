@@ -17,8 +17,6 @@ export const PosthogEventName = {
     CREATE_ORGANIZATION_STEP_VIEWED: "dashboard-create-organization-step-viewed",
     ORGANIZATION_CREATED: "dashboard-organization-created",
     ONBOARDING_PRODUCT_SELECTED: "dashboard-onboarding-product-selected",
-    ONBOARDING_DOCS_BRANDING_STEP_VIEWED: "dashboard-onboarding-docs-branding-step-viewed",
-    ONBOARDING_DOCS_BRANDING_STEP_COMPLETED: "dashboard-onboarding-docs-branding-step-completed",
     ONBOARDING_DOCS_API_SPEC_STEP_VIEWED: "dashboard-onboarding-docs-api-spec-step-viewed",
     ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED: "dashboard-onboarding-docs-api-spec-step-completed",
     ONBOARDING_DOCS_DETAILS_STEP_VIEWED: "dashboard-onboarding-docs-details-step-viewed",
@@ -90,13 +88,6 @@ export type PosthogEventPayloads = {
     };
     [PosthogEventName.ONBOARDING_PRODUCT_SELECTED]: {
         product: "docs" | "sdk";
-    };
-    [PosthogEventName.ONBOARDING_DOCS_BRANDING_STEP_VIEWED]: Record<string, never>;
-    [PosthogEventName.ONBOARDING_DOCS_BRANDING_STEP_COMPLETED]: {
-        action: "continue" | "skip";
-        hasExistingDocsSite: boolean;
-        hasLogoUrl: boolean;
-        hasPrimaryColor: boolean;
     };
     [PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_VIEWED]: Record<string, never>;
     [PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED]: {
