@@ -17,7 +17,7 @@ import { getDocsReadV2Service } from "./controllers/docs/v2/getDocsReadV2Service
 import { getDocsWriteV2Service } from "./controllers/docs/v2/getDocsWriteV2Service";
 import { createLibraryDocsRouter } from "./controllers/docs/v2/getLibraryDocsRouter";
 import { createGetOrganizationForUrlRouter } from "./controllers/docs/v2/getOrganizationForUrlRouter";
-import { getDocsCacheService } from "./controllers/docs-cache/getDocsCacheService";
+import { createDocsCacheRouter } from "./controllers/docs-cache/docsCacheRouter";
 import { createCliRouter } from "./controllers/generators/cliRouter";
 import { createGeneratorVersionsRouter } from "./controllers/generators/generatorVersionsRouter";
 import { getGeneratorsRootController } from "./controllers/generators/getGeneratorsRootController";
@@ -186,6 +186,26 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        const docsCacheRouter = createDocsCacheRouter(app);
+        const docsCacheHandler = new OpenAPIHandler(docsCacheRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC docsCache error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/docs-cache", async (req, res, next) => {
+            const { matched } = await docsCacheHandler.handle(req, res, {
+                prefix: "/docs-cache",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         expressApp.use(express.json({ limit: "100mb" }));
         register(expressApp, {
             docs: {
@@ -222,7 +242,6 @@ async function startServer(): Promise<void> {
             snippets: getSnippetsService(app),
             snippetsFactory: getSnippetsFactoryService(app),
             templates: getTemplatesService(app),
-            docsCache: getDocsCacheService(app),
             generators: {
                 _root: getGeneratorsRootController(app)
             },

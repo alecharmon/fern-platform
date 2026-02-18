@@ -4,8 +4,6 @@ export * from "./commons/errors";
 export * from "./commons/types";
 export * as dashboard from "./dashboard";
 export * as docs from "./docs";
-export * as docsCache from "./docsCache";
-export * from "./docsCache/service/requests";
 export * as generators from "./generators";
 export * as git from "./git";
 export * from "./git/errors";

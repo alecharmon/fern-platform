@@ -8,7 +8,6 @@ import type { ReadService as docs_v1_read_RootService } from "./api/resources/do
 import type { WriteService as docs_v1_write_RootService } from "./api/resources/docs/resources/v1/resources/write/service/WriteService";
 import type { ReadService as docs_v2_read_RootService } from "./api/resources/docs/resources/v2/resources/read/service/ReadService";
 import type { WriteService as docs_v2_write_RootService } from "./api/resources/docs/resources/v2/resources/write/service/WriteService";
-import type { DocsCacheService } from "./api/resources/docsCache/service/DocsCacheService";
 import type { GeneratorsService as generators_RootService } from "./api/resources/generators/service/GeneratorsService";
 import type { GitService } from "./api/resources/git/service/GitService";
 import type { PdfExportService as pdfExport_RootService } from "./api/resources/pdfExport/service/PdfExportService";
@@ -20,7 +19,6 @@ import type { TokensService } from "./api/resources/tokens/service/TokensService
 export function register(
     expressApp: express.Express | express.Router,
     services: {
-        docsCache: DocsCacheService;
         git: GitService;
         snippetsFactory: SnippetsFactoryService;
         snippets: SnippetsService;
@@ -74,7 +72,6 @@ export function register(
     (expressApp as any).use("/v2/registry/docs", services.docs.v2.write._root.toRouter());
     (expressApp as any).use("/generators", services.generators._root.toRouter());
     (expressApp as any).use("/pdf-export", services.pdfExport._root.toRouter());
-    (expressApp as any).use("/docs-cache", services.docsCache.toRouter());
     (expressApp as any).use("/generators/github", services.git.toRouter());
     (expressApp as any).use("/snippets", services.snippetsFactory.toRouter());
     (expressApp as any).use("/snippets", services.snippets.toRouter());
