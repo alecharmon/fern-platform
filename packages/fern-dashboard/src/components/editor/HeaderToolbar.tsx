@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpLeft } from "lucide-react";
+import { ArrowUpLeft, Cog } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
@@ -11,6 +11,7 @@ import { useDevMode } from "@/providers/DevModeProvider";
 import { useIsPreviewMode } from "@/providers/EditorPreviewProvider";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
 import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useThemingPanel } from "@/providers/ThemingPanelProvider";
 import type { DocsUrl } from "@/utils/types";
 import { ProfileImage } from "../layout/ProfileImage";
 import { Button } from "../ui/button";
@@ -32,7 +33,8 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
     const isEditingDisabled = useEditingDisabled();
     const { owner, repo, baseBranch } = useGitHubRepo();
     const { isPreviewMode } = useIsPreviewMode();
-    const { isDevModeDisabled } = useDevMode();
+    const { isDevModeDisabled, setPanelOpen } = useDevMode();
+    const { isThemingPanelOpen, setThemingPanelOpen } = useThemingPanel();
     const orgName = useOrgName();
 
     const [showRocketButton, setShowRocketButton] = useState(false);
@@ -67,6 +69,14 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
         setShowCelebrationModal(true);
     }, []);
 
+    const handleThemingToggle = useCallback(() => {
+        const next = !isThemingPanelOpen;
+        setThemingPanelOpen(next);
+        if (next) {
+            setPanelOpen(false);
+        }
+    }, [isThemingPanelOpen, setThemingPanelOpen, setPanelOpen]);
+
     return (
         <>
             <div className="bg-background flex h-(--header-toolbar-height-mobile) flex-wrap items-center justify-center gap-2 border-b border-gray-500 px-2 py-2 shadow-sm md:h-(--header-toolbar-height) md:py-1">
@@ -100,6 +110,16 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
                             name={name}
                             className="ring-primary border-3 size-[34px] border-white ring-2"
                         />
+                    </DashboardTooltip>
+                    <DashboardTooltip content="Docs settings" hideInnerSpan>
+                        <Button
+                            variant={isThemingPanelOpen ? "default" : "ghost"}
+                            size="iconSm"
+                            className="pointer-events-auto hidden md:flex"
+                            onClick={handleThemingToggle}
+                        >
+                            <Cog className="size-4" />
+                        </Button>
                     </DashboardTooltip>
                 </div>
                 <div className="flex items-center justify-end gap-2 sm:flex-1 sm:shrink-0">

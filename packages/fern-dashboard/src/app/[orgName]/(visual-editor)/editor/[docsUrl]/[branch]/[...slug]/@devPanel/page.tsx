@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 import { WarningValidationToast } from "@/components/editor/EditorToasts";
+import { PanelCardBody, PanelShell } from "@/components/editor/PanelShell";
 import { defineAppTheme } from "@/components/editor/theme-utils";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -234,7 +235,7 @@ export default function DevPanel() {
                         </div>
 
                         {/* Editor content */}
-                        <div className="border-1 rounded-b-none border-b-0 bg-background border-border relative flex min-h-0 flex-1 flex-col rounded-2xl shadow-lg">
+                        <PanelCardBody>
                             {files.map((file) => (
                                 <TabsContent
                                     key={file.path}
@@ -254,21 +255,21 @@ export default function DevPanel() {
                                     </div>
                                 </TabsContent>
                             ))}
-                        </div>
+                        </PanelCardBody>
                     </Tabs>
                 ) : (
-                    <>
-                        {/* Empty state header */}
-                        <div className="text-muted-foreground flex items-center justify-center gap-2 pb-3 pt-4">
-                            <Code2 className="size-4" />
-                            <h3 className="text-sm font-medium">Dev Mode</h3>
-                        </div>
-                        <div className="border-1 rounded-b-none border-b-0 bg-background border-border relative flex flex-1 flex-col overflow-hidden rounded-2xl shadow-lg">
-                            <div className="flex flex-1 items-center justify-center py-4 text-muted-foreground">
-                                <p className="text-sm">No files to display</p>
+                    <PanelShell
+                        header={
+                            <div className="text-muted-foreground flex items-center justify-center gap-2 pb-3 pt-4">
+                                <Code2 className="size-4" />
+                                <h3 className="text-sm font-medium">Dev Mode</h3>
                             </div>
+                        }
+                    >
+                        <div className="flex flex-1 items-center justify-center py-4 text-muted-foreground">
+                            <p className="text-sm">No files to display</p>
                         </div>
-                    </>
+                    </PanelShell>
                 )}
 
                 {/* Reset/Update buttons - only show for editable files */}

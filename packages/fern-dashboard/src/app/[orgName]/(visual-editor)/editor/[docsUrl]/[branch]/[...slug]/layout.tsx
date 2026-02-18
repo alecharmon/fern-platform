@@ -21,6 +21,7 @@ import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor
 import { EditorStatusNotification } from "@/components/editor/EditorStatusNotification";
 import { PreviewContainerProvider } from "@/components/editor/PreviewContainerProvider";
 import { ResizablePanelsWrapper } from "@/components/editor/ResizablePanelsWrapper";
+import { ThemingStyleOverrides } from "@/components/editor/ThemingStyleOverrides";
 import { UnsupportedApiFormatNotification } from "@/components/editor/UnsupportedApiFormatNotification";
 import { EditorRoutingProvider } from "@/providers/EditorRoutingContext";
 import { FileResolverProvider } from "@/providers/FileResolverContext";
@@ -39,7 +40,8 @@ export default async function VisualEditorPreviewLayout({
     productSelect,
     sidebar,
     logo,
-    devPanel
+    devPanel,
+    configPanel
 }: Readonly<{
     params: Promise<{
         orgName: Auth0OrgName;
@@ -53,6 +55,7 @@ export default async function VisualEditorPreviewLayout({
     sidebar: React.ReactNode;
     logo: React.ReactNode;
     devPanel: React.ReactNode;
+    configPanel: React.ReactNode;
 }>) {
     const { orgName, docsUrl, branch } = await params;
 
@@ -121,6 +124,7 @@ export default async function VisualEditorPreviewLayout({
                                             }}
                                         >
                                             <PreviewContainerProvider>
+                                                <ThemingStyleOverrides />
                                                 <EditorLinkInterceptor />
                                                 {/* Wrapper divs mirror document structure (html > body) for CSS scoping */}
                                                 <div data-fern-html="">
@@ -248,6 +252,7 @@ export default async function VisualEditorPreviewLayout({
                                     </div>
                                 }
                                 right={devPanel}
+                                configPanel={configPanel}
                             />
                         </RootNodeProvider>
                     </FernThemeProvider>

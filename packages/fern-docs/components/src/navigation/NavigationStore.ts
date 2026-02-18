@@ -68,6 +68,7 @@ export class NavigationStore {
     private _lastCommittedHash?: string;
     private _version: number;
     private _openApiPendingChanges: Map<string, OpenApiPendingChange>;
+    private _docsYmlConfigModifiedFiles: Set<string>;
 
     private _storage?: NavigationStorage;
     private _hydrated = false;
@@ -100,6 +101,7 @@ export class NavigationStore {
         this._lastCommittedHash = this._latestSnapshot.lastCommittedHash;
         this._version = this._latestSnapshot.version;
         this._openApiPendingChanges = this._latestSnapshot.openApiPendingChanges ?? new Map();
+        this._docsYmlConfigModifiedFiles = new Set();
     }
 
     // GETTERS
@@ -143,6 +145,11 @@ export class NavigationStore {
     /** Returns pending OpenAPI spec changes */
     get openApiPendingChanges(): Map<string, OpenApiPendingChange> {
         return this._openApiPendingChanges;
+    }
+
+    /** Returns the set of docs.yml files that have been directly modified (e.g. color config changes) */
+    get docsYmlConfigModifiedFiles(): Set<string> {
+        return this._docsYmlConfigModifiedFiles;
     }
 
     /** Returns all changed, deleted, and commit-ready files */
@@ -190,6 +197,16 @@ export class NavigationStore {
                 console.error("Failed to generate docs.yml:", error);
                 // Don't throw - changes are tracked but docs.yml generation failed
                 // This may happen when base content is not yet loaded
+            }
+        }
+
+        // Include docs.yml files that were directly modified (e.g. color config changes)
+        for (const filePath of this._docsYmlConfigModifiedFiles) {
+            if (!changedFiles[filePath] && this._docsYmlBaseContent) {
+                const content = this._docsYmlBaseContent.get(filePath);
+                if (content) {
+                    changedFiles[filePath] = content;
+                }
             }
         }
 
@@ -1397,6 +1414,25 @@ export class NavigationStore {
             });
         }
         this._openApiPendingChanges = committed;
+        this._setStorageAndNotify();
+    }
+
+    // DOCS.YML CONFIG CHANGES
+    // --------------------------------------------------------------------------
+
+    getDocsYmlContent(filePath: string): string | null {
+        if (!this._docsYmlBaseContent) {
+            return null;
+        }
+        return this._docsYmlBaseContent.get(filePath) ?? null;
+    }
+
+    updateDocsYmlContent(filePath: string, content: string): void {
+        if (!this._docsYmlBaseContent) {
+            this._docsYmlBaseContent = new Map();
+        }
+        this._docsYmlBaseContent.set(filePath, content);
+        this._docsYmlConfigModifiedFiles.add(filePath);
         this._setStorageAndNotify();
     }
 

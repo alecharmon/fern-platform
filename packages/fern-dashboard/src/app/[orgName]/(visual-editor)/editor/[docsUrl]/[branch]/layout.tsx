@@ -16,6 +16,7 @@ import { BranchProvider } from "@/providers/BranchContext";
 import { CurrentPageProvider } from "@/providers/CurrentPageContext";
 import { DevModeProvider } from "@/providers/DevModeProvider";
 import { EditorProvider } from "@/providers/EditorContext";
+import { ThemingPanelProvider } from "@/providers/ThemingPanelProvider";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 
@@ -50,11 +51,13 @@ export default async function EditorLayout({
                                 <CurrentPageProvider>
                                     <ClientMDXProvider>
                                         <DevModeProvider>
-                                            <EditorProvider>
-                                                <NeedsSetupBanner docsUrl={docsUrl} orgName={orgName} />
-                                                <HeaderToolbar session={session} docsUrl={docsUrl} />
-                                                {children}
-                                            </EditorProvider>
+                                            <ThemingPanelProvider>
+                                                <EditorProvider>
+                                                    <NeedsSetupBanner docsUrl={docsUrl} orgName={orgName} />
+                                                    <HeaderToolbar session={session} docsUrl={docsUrl} />
+                                                    {children}
+                                                </EditorProvider>
+                                            </ThemingPanelProvider>
                                         </DevModeProvider>
                                     </ClientMDXProvider>
                                 </CurrentPageProvider>

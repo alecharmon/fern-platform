@@ -101,6 +101,9 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     resetOpenApiChange: NavigationStore["resetOpenApiChange"];
     clearOpenApiChanges: NavigationStore["clearOpenApiChanges"];
     commitOpenApiChanges: NavigationStore["commitOpenApiChanges"];
+    getDocsYmlContent: NavigationStore["getDocsYmlContent"];
+    updateDocsYmlContent: NavigationStore["updateDocsYmlContent"];
+    docsYmlConfigModifiedFiles: NavigationStore["docsYmlConfigModifiedFiles"];
 };
 
 function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSnapshot): NavigationSnapshotWithMethods {
@@ -138,7 +141,10 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         updateOpenApiChange: store.updateOpenApiChange.bind(store),
         resetOpenApiChange: store.resetOpenApiChange.bind(store),
         clearOpenApiChanges: store.clearOpenApiChanges.bind(store),
-        commitOpenApiChanges: store.commitOpenApiChanges.bind(store)
+        commitOpenApiChanges: store.commitOpenApiChanges.bind(store),
+        getDocsYmlContent: store.getDocsYmlContent.bind(store),
+        updateDocsYmlContent: store.updateDocsYmlContent.bind(store),
+        docsYmlConfigModifiedFiles: store.docsYmlConfigModifiedFiles
     };
 }
 
