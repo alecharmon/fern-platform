@@ -96,7 +96,7 @@ export function EmailLoginForm({
                     <span>{isSubmitting ? "Authenticating..." : submitLabel}</span>
                     {hasMounted && isLastUsed ? (
                         <Kbd className="justify-self-end -mr-1" useBodyFont>
-                            last used
+                            Last used
                         </Kbd>
                     ) : (
                         <div aria-hidden="true" />

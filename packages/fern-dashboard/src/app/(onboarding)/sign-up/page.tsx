@@ -18,8 +18,10 @@ export default async function SignUpCardSlot({ searchParams }: SignUpPageProps) 
         <AuthPageCard
             searchParams={searchParams}
             headerText="Create a Fern account"
+            subtitle="Get started for free, no credit card required."
             buttonLabelPrefix="Sign up with"
-            emailSubmitLabel="Sign up"
+            showEmailForm={false}
+            buttonVariant="default"
             belowFormText="Already have an account?"
             belowFormLinkText="Log in"
             belowFormLinkHref="/login"

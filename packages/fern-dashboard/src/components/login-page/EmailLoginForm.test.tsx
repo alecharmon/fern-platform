@@ -34,13 +34,13 @@ describe("EmailLoginForm", () => {
         vi.restoreAllMocks();
     });
 
-    it("shows 'last used' badge when enterprise-sso was the last used login method", async () => {
+    it("shows 'Last used' badge when enterprise-sso was the last used login method", async () => {
         localStorage.setItem(LAST_USED_LOGIN_KEY, "enterprise-sso");
 
         render(<EmailLoginForm />);
 
         await waitFor(() => {
-            expect(screen.getByText("last used")).toBeDefined();
+            expect(screen.getByText("Last used")).toBeDefined();
         });
     });
 
@@ -54,10 +54,10 @@ describe("EmailLoginForm", () => {
             expect(screen.getByRole("button", { name: /continue/i })).toBeDefined();
         });
 
-        expect(screen.queryByText("last used")).toBeNull();
+        expect(screen.queryByText("Last used")).toBeNull();
     });
 
-    it("does not show 'last used' badge when github was the last used login method", async () => {
+    it("does not show 'Last used' badge when github was the last used login method", async () => {
         localStorage.setItem(LAST_USED_LOGIN_KEY, "github");
 
         render(<EmailLoginForm />);
@@ -66,10 +66,10 @@ describe("EmailLoginForm", () => {
             expect(screen.getByRole("button", { name: /continue/i })).toBeDefined();
         });
 
-        expect(screen.queryByText("last used")).toBeNull();
+        expect(screen.queryByText("Last used")).toBeNull();
     });
 
-    it("does not show 'last used' badge when no previous login method exists", async () => {
+    it("does not show 'Last used' badge when no previous login method exists", async () => {
         // localStorage is already cleared in beforeEach
 
         render(<EmailLoginForm />);
@@ -78,7 +78,7 @@ describe("EmailLoginForm", () => {
             expect(screen.getByRole("button", { name: /continue/i })).toBeDefined();
         });
 
-        expect(screen.queryByText("last used")).toBeNull();
+        expect(screen.queryByText("Last used")).toBeNull();
     });
 
     it("saves 'enterprise-sso' to localStorage after successful form submission", async () => {

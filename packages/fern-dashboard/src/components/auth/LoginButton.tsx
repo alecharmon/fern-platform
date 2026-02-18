@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { cn } from "@/utils/utils";
+
 import { Button } from "../ui/button";
 import { Kbd } from "../ui/kbd";
 import { GithubLogo } from "./GithubLogo";
@@ -57,13 +59,15 @@ export const GoogleLoginButton = ({
     additionalParams,
     buttonProps,
     children,
-    labelPrefix = "Continue with"
+    labelPrefix = "Continue with",
+    logoVariant = "colorful"
 }: {
     returnTo?: string;
     additionalParams?: Record<string, string>;
     buttonProps?: React.ComponentProps<typeof Button>;
     children?: React.ReactNode;
     labelPrefix?: string;
+    logoVariant?: "colorful" | "white";
 }) => {
     const [isLastUsed, setIsLastUsed] = useState(false);
     const [showRecommended, setShowRecommended] = useState(false);
@@ -82,33 +86,36 @@ export const GoogleLoginButton = ({
     }, []);
 
     return (
-        <BaseLoginButton
-            connection="google-oauth2"
-            returnTo={returnTo}
-            additionalParams={additionalParams}
-            buttonProps={buttonProps}
-        >
-            {children ?? (
-                <div className="w-full grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
-                    <div aria-hidden="true" />
-                    <div className="flex items-center gap-2 justify-self-center">
-                        <GoogleLogo />
-                        <span>{labelPrefix} Google</span>
+        <div className="relative">
+            {hasMounted && isLastUsed ? (
+                <Kbd
+                    className="absolute left-1/2 -translate-x-1/2 top-[-14px] w-max bg-background text-foreground dark:text-foreground border border-border shadow-xs"
+                    useBodyFont
+                >
+                    Last used
+                </Kbd>
+            ) : hasMounted && showRecommended ? (
+                <Kbd
+                    className="absolute left-1/2 -translate-x-1/2 top-[-14px] w-max bg-background text-foreground dark:text-foreground border border-border shadow-xs"
+                    useBodyFont
+                >
+                    Recommended
+                </Kbd>
+            ) : null}
+            <BaseLoginButton
+                connection="google-oauth2"
+                returnTo={returnTo}
+                additionalParams={additionalParams}
+                buttonProps={{ variant: "outline", ...buttonProps, className: cn("w-full", buttonProps?.className) }}
+            >
+                {children ?? (
+                    <div className="flex items-center gap-2 justify-center">
+                        <GoogleLogo variant={logoVariant} />
+                        <span>{labelPrefix ? `${labelPrefix} ` : ""}Google</span>
                     </div>
-                    {hasMounted && isLastUsed ? (
-                        <Kbd className="justify-self-end -mr-1" useBodyFont>
-                            last used
-                        </Kbd>
-                    ) : hasMounted && showRecommended ? (
-                        <Kbd className="justify-self-end -mr-1" useBodyFont>
-                            recommended
-                        </Kbd>
-                    ) : (
-                        <div aria-hidden="true" />
-                    )}
-                </div>
-            )}
-        </BaseLoginButton>
+                )}
+            </BaseLoginButton>
+        </div>
     );
 };
 
@@ -118,13 +125,15 @@ export const GithubLoginButton = ({
     additionalParams,
     buttonProps,
     children,
-    labelPrefix = "Continue with"
+    labelPrefix = "Continue with",
+    logoVariant = "filled"
 }: {
     returnTo?: string;
     additionalParams?: Record<string, string>;
     buttonProps?: React.ComponentProps<typeof Button>;
     children?: React.ReactNode;
     labelPrefix?: string;
+    logoVariant?: "filled" | "white";
 }) => {
     const [isLastUsed, setIsLastUsed] = useState(false);
     const hasMounted = useHasMounted();
@@ -139,45 +148,46 @@ export const GithubLoginButton = ({
     }, []);
 
     return (
-        <BaseLoginButton
-            connection="github"
-            returnTo={returnTo}
-            additionalParams={additionalParams}
-            buttonProps={buttonProps}
-        >
-            {children ?? (
-                <div className="w-full grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
-                    <div aria-hidden="true" />
-                    <div className="flex items-center gap-2 justify-self-center">
-                        <GithubLogo />
-                        <span>{labelPrefix} GitHub</span>
+        <div className="relative">
+            {hasMounted && isLastUsed ? (
+                <Kbd
+                    className="absolute left-1/2 -translate-x-1/2 top-[-14px] w-max bg-background text-foreground dark:text-foreground border border-border shadow-xs"
+                    useBodyFont
+                >
+                    Last used
+                </Kbd>
+            ) : null}
+            <BaseLoginButton
+                connection="github"
+                returnTo={returnTo}
+                additionalParams={additionalParams}
+                buttonProps={{ variant: "outline", ...buttonProps, className: cn("w-full", buttonProps?.className) }}
+            >
+                {children ?? (
+                    <div className="flex items-center gap-2 justify-center">
+                        <GithubLogo variant={logoVariant} />
+                        <span>{labelPrefix ? `${labelPrefix} ` : ""}GitHub</span>
                     </div>
-                    {hasMounted && isLastUsed ? (
-                        <Kbd className="justify-self-end" useBodyFont>
-                            last used
-                        </Kbd>
-                    ) : (
-                        <div aria-hidden="true" />
-                    )}
-                </div>
-            )}
-        </BaseLoginButton>
+                )}
+            </BaseLoginButton>
+        </div>
     );
 };
 
-// Postman Login Button
 export const PostmanLoginButton = ({
     returnTo,
     additionalParams,
     buttonProps,
     children,
-    labelPrefix = "Continue with"
+    labelPrefix = "",
+    logoVariant = "colorful"
 }: {
     returnTo?: string;
     additionalParams?: Record<string, string>;
     buttonProps?: React.ComponentProps<typeof Button>;
     children?: React.ReactNode;
     labelPrefix?: string;
+    logoVariant?: "colorful" | "white";
 }) => {
     const [isLastUsed, setIsLastUsed] = useState(false);
     const hasMounted = useHasMounted();
@@ -192,29 +202,29 @@ export const PostmanLoginButton = ({
     }, []);
 
     return (
-        <BaseLoginButton
-            connection="postman"
-            returnTo={returnTo}
-            additionalParams={additionalParams}
-            buttonProps={buttonProps}
-        >
-            {children ?? (
-                <div className="w-full grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
-                    <div aria-hidden="true" />
-                    <div className="flex items-center gap-2 justify-self-center">
-                        <PostmanLogo width={20} height={20} />
-                        <span>{labelPrefix} Postman</span>
+        <div className="relative">
+            {hasMounted && isLastUsed ? (
+                <Kbd
+                    className="absolute left-1/2 -translate-x-1/2 top-[-14px] w-max bg-background text-foreground dark:text-foreground border border-border shadow-xs"
+                    useBodyFont
+                >
+                    Last used
+                </Kbd>
+            ) : null}
+            <BaseLoginButton
+                connection="postman"
+                returnTo={returnTo}
+                additionalParams={additionalParams}
+                buttonProps={{ variant: "outline", ...buttonProps, className: cn("w-full", buttonProps?.className) }}
+            >
+                {children ?? (
+                    <div className="flex items-center gap-2 justify-center">
+                        <PostmanLogo variant={logoVariant} />
+                        <span>{labelPrefix ? `${labelPrefix} ` : ""}Postman</span>
                     </div>
-                    {hasMounted && isLastUsed ? (
-                        <Kbd className="justify-self-end" useBodyFont>
-                            last used
-                        </Kbd>
-                    ) : (
-                        <div aria-hidden="true" />
-                    )}
-                </div>
-            )}
-        </BaseLoginButton>
+                )}
+            </BaseLoginButton>
+        </div>
     );
 };
 

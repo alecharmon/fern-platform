@@ -11,8 +11,11 @@ type AuthPageCardSearchParams = {
 
 interface AuthPageCardProps {
     headerText: string;
+    subtitle?: string;
     buttonLabelPrefix: string;
     emailSubmitLabel?: string;
+    showEmailForm?: boolean;
+    buttonVariant?: "default" | "outline";
     belowFormText: string;
     belowFormLinkText: string;
     belowFormLinkHref: string;
@@ -21,8 +24,11 @@ interface AuthPageCardProps {
 
 export async function AuthPageCard({
     headerText,
+    subtitle,
     buttonLabelPrefix,
     emailSubmitLabel,
+    showEmailForm = true,
+    buttonVariant = "outline",
     belowFormText,
     belowFormLinkText,
     belowFormLinkHref,
@@ -32,29 +38,61 @@ export async function AuthPageCard({
     const { FERN_CI_AUTOMATED_TESTING, redirect_on_login } = resolvedSearchParams;
     const shouldShowCITestLogin =
         !!process.env.FERN_CI_AUTOMATED_TESTING && FERN_CI_AUTOMATED_TESTING === process.env.FERN_CI_AUTOMATED_TESTING;
+    const isNonProductionEnv = process.env.VERCEL_ENV !== "production";
+    const isPrimaryButtons = buttonVariant === "default";
 
     return (
         <>
             <div className="px-4 flex w-full max-w-[400px] flex-col items-stretch md:mx-auto">
-                <div className="mb-8 text-center text-xl font-bold">{headerText}</div>
-                {shouldShowCITestLogin && <CITestLoginForm redirectOnLogin={redirect_on_login} />}
-                <div className="flex flex-col gap-2">
-                    <GoogleLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
-                    <GithubLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
-                    <PostmanLoginButton returnTo={redirect_on_login} labelPrefix={buttonLabelPrefix} />
+                <div className="mb-2 text-center text-xl font-bold">{headerText}</div>
+                {subtitle && <div className="mb-8 text-center text-sm text-gray-1000">{subtitle}</div>}
+                {!subtitle && <div className="mb-6" />}
+                {showEmailForm && (
+                    <>
+                        {shouldShowCITestLogin && <CITestLoginForm redirectOnLogin={redirect_on_login} />}
+                        <EmailLoginForm redirectOnLogin={redirect_on_login} submitLabel={emailSubmitLabel} />
+                        <div className="mt-4 text-center text-sm text-gray-900">
+                            {belowFormText}{" "}
+                            <Link href={belowFormLinkHref} className="fern-link" prefetch>
+                                {belowFormLinkText}
+                            </Link>
+                        </div>
+                        <div className="flex items-center gap-3 my-6">
+                            <div className="h-px flex-1 bg-border" />
+                            <span className="text-sm text-gray-900">Or log in with</span>
+                            <div className="h-px flex-1 bg-border" />
+                        </div>
+                    </>
+                )}
+                <div className="grid grid-cols-3 gap-2 pt-2">
+                    <GoogleLoginButton
+                        returnTo={redirect_on_login}
+                        labelPrefix=""
+                        buttonProps={isPrimaryButtons ? { variant: "default" } : undefined}
+                        logoVariant={isPrimaryButtons ? "white" : "colorful"}
+                    />
+                    <GithubLoginButton
+                        returnTo={redirect_on_login}
+                        labelPrefix=""
+                        buttonProps={isPrimaryButtons ? { variant: "default" } : undefined}
+                        logoVariant={isPrimaryButtons ? "white" : "filled"}
+                    />
+                    {isNonProductionEnv && (
+                        <PostmanLoginButton
+                            returnTo={redirect_on_login}
+                            buttonProps={isPrimaryButtons ? { variant: "default" } : undefined}
+                            logoVariant={isPrimaryButtons ? "white" : "colorful"}
+                        />
+                    )}
                 </div>
-                <div className="flex items-center gap-3 my-6">
-                    <div className="h-px flex-1 bg-border" />
-                    <span className="text-sm text-gray-900">or</span>
-                    <div className="h-px flex-1 bg-border" />
-                </div>
-                <EmailLoginForm redirectOnLogin={redirect_on_login} submitLabel={emailSubmitLabel} />
-                <div className="mt-4 text-center text-sm text-gray-900">
-                    {belowFormText}{" "}
-                    <Link href={belowFormLinkHref} className="fern-link" prefetch>
-                        {belowFormLinkText}
-                    </Link>
-                </div>
+                {!showEmailForm && (
+                    <div className="mt-4 text-center text-sm text-gray-900">
+                        {belowFormText}{" "}
+                        <Link href={belowFormLinkHref} className="fern-link" prefetch>
+                            {belowFormLinkText}
+                        </Link>
+                    </div>
+                )}
             </div>
             <div className="absolute bottom-16 left-0 right-0 mx-auto px-4 text-center text-xs text-gray-900 md:max-w-[400px]">
                 By continuing, you agree to Fern&apos;s{" "}
