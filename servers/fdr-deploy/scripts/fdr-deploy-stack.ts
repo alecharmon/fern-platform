@@ -306,6 +306,7 @@ export class FdrDeployStack extends Stack {
                     LIBRARY_DOCS_S3_BUCKET_REGION: libraryDocsBucket.stack.region,
                     PDF_EXPORT_S3_BUCKET_NAME: pdfExportBucket.bucketName,
                     PDF_EXPORT_S3_BUCKET_REGION: pdfExportBucket.stack.region,
+                    RESEND_API_KEY: getEnvironmentVariableOrThrow("RESEND_API_KEY"),
                     PDF_EXPORT_SQS_QUEUE_URL: pdfExportQueue.queueUrl,
                     PDF_EXPORT_SQS_REGION: Stack.of(this).region,
                     PDF_EXPORT_JWT_SECRET_KEY: getEnvironmentVariableOrThrow("PDF_EXPORT_JWT_SECRET_KEY"),

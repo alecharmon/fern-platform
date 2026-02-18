@@ -13,6 +13,10 @@ export interface CreatePdfExportTaskRequest {
     orgId: FernRegistry.OrgId;
     /** The domain of the documentation site (e.g., "docs.example.com"). */
     docsUrl: string;
+    /** Display name of the user who requested the export (used in notification emails). */
+    requesterName?: string;
+    /** Email addresses to notify when the export is complete. */
+    notifyEmails?: string[];
     /** Options for customizing the PDF export. */
     options?: FernRegistry.pdfExport.PdfExportOptions;
 }

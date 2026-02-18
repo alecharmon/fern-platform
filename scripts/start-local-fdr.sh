@@ -96,6 +96,8 @@ export PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT=http://localhost:9001
 export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test
 
+export RESEND_API_KEY=dummy
+
 # PDF export (SQS + internal callbacks)
 export PDF_EXPORT_SQS_REGION=us-east-1
 export PDF_EXPORT_SQS_QUEUE_URL=http://localhost:4566/000000000000/pdf-export-queue.fifo

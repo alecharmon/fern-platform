@@ -24,6 +24,12 @@ service:
             docsUrl:
               type: string
               docs: The domain of the documentation site (e.g., "docs.example.com").
+            requesterName:
+              type: optional<string>
+              docs: Display name of the user who requested the export (used in notification emails).
+            notifyEmails:
+              type: optional<list<string>>
+              docs: Email addresses to notify when the export is complete.
             options:
               type: optional<PdfExportOptions>
               docs: Options for customizing the PDF export.
@@ -157,6 +163,8 @@ types:
       fileName: optional<string>
       sizeBytes: optional<integer>
       errorMessage: optional<string>
+      requesterName: optional<string>
+      notifyEmails: optional<list<string>>
 
   ListPdfExportTasksResponse:
     properties:

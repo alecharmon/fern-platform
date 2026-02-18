@@ -30,6 +30,8 @@ const PDF_EXPORT_S3_BUCKET_NAME_ENV_VAR = "PDF_EXPORT_S3_BUCKET_NAME";
 const PDF_EXPORT_S3_BUCKET_REGION_ENV_VAR = "PDF_EXPORT_S3_BUCKET_REGION";
 const PDF_EXPORT_S3_URL_OVERRIDE_ENV_VAR = "PDF_EXPORT_S3_URL_OVERRIDE";
 
+const RESEND_API_KEY_ENV_VAR = "RESEND_API_KEY";
+
 const PDF_EXPORT_SQS_QUEUE_URL_ENV_VAR = "PDF_EXPORT_SQS_QUEUE_URL";
 const PDF_EXPORT_SQS_REGION_ENV_VAR = "PDF_EXPORT_SQS_REGION";
 const PDF_EXPORT_CALLBACK_BASE_URL_ENV_VAR = "PDF_EXPORT_CALLBACK_BASE_URL";
@@ -95,6 +97,7 @@ export interface FdrConfig {
     applicationEnvironment: string;
     /** Set of org IDs to check CLI permissions for, or "*" to check all orgs */
     cliPermissionCheckOrgIds: Set<string> | "*";
+    resendApiKey?: string;
 }
 
 function getSelfHostedS3Config(): S3Config {
@@ -132,7 +135,8 @@ function getConfigForLocalMode(): FdrConfig {
         redisClusteringEnabled: false,
         applicationEnvironment: "local",
         cdnPublicDocsUrl: "_files",
-        cliPermissionCheckOrgIds: parseOrgIdsList(process.env[CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR])
+        cliPermissionCheckOrgIds: parseOrgIdsList(process.env[CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR]),
+        resendApiKey: process.env[RESEND_API_KEY_ENV_VAR]
     };
 }
 
@@ -190,7 +194,8 @@ export function getConfig(): FdrConfig {
         redisClusteringEnabled: process.env[REDIS_CLUSTERING_ENABLED_ENV_VAR] === "true",
         applicationEnvironment: getEnvironmentVariableOrThrow(APPLICATION_ENVIRONMENT_ENV_VAR),
         cdnPublicDocsUrl: getEnvironmentVariableOrThrow(PUBLIC_DOCS_CDN_URL),
-        cliPermissionCheckOrgIds: parseOrgIdsList(process.env[CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR])
+        cliPermissionCheckOrgIds: parseOrgIdsList(process.env[CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR]),
+        resendApiKey: process.env[RESEND_API_KEY_ENV_VAR]
     };
 }
 

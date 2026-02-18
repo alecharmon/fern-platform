@@ -17,4 +17,6 @@ export interface PdfExportTask {
     fileName: string | undefined;
     sizeBytes: number | undefined;
     errorMessage: string | undefined;
+    requesterName: string | undefined;
+    notifyEmails: string[] | undefined;
 }

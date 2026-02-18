@@ -5,5 +5,7 @@ import type * as FernRegistry from "../../../../index";
 export interface CreatePdfExportTaskRequest {
     orgId: FernRegistry.OrgId;
     docsUrl: string;
+    requesterName?: string;
+    notifyEmails?: string[];
     options?: FernRegistry.pdfExport.PdfExportOptions;
 }

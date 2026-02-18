@@ -12,6 +12,10 @@ export interface ApiSessionData {
     userId: Auth0UserID;
     permissions: string[];
     orgId?: string;
+    /** The authenticated user's display name (from Auth0 profile). */
+    name?: string;
+    /** The authenticated user's email address (from Auth0 profile). */
+    email?: string;
 }
 
 export async function maybeGetCurrentSession(req: NextRequest): Promise<MaybeErrorResponse<ApiSessionData>> {
@@ -23,7 +27,9 @@ export async function maybeGetCurrentSession(req: NextRequest): Promise<MaybeErr
             const decodedToken = jwt.decode(token) as any;
             const permissions: string[] = decodedToken?.permissions ?? [];
             const orgId = typeof decodedToken?.org_id === "string" ? (decodedToken.org_id as string) : undefined;
-            return { data: { token, userId, permissions, orgId } };
+            const name = typeof decodedToken?.name === "string" ? (decodedToken.name as string) : undefined;
+            const email = typeof decodedToken?.email === "string" ? (decodedToken.email as string) : undefined;
+            return { data: { token, userId, permissions, orgId, name, email } };
         }
 
         // I think auth0 uses cookies to get the current session?
@@ -33,7 +39,9 @@ export async function maybeGetCurrentSession(req: NextRequest): Promise<MaybeErr
                 token: sessionData.accessToken,
                 userId: sessionData.user.sub,
                 permissions: sessionData.permissions ?? [],
-                orgId: sessionData.orgId
+                orgId: sessionData.orgId,
+                name: sessionData.user.name,
+                email: sessionData.user.email
             }
         };
     } catch (e) {

@@ -2,7 +2,13 @@ import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { FdrConfig } from "../../app/FdrConfig";
 
-const PRESIGNED_URL_EXPIRY_SECONDS = 3600; // 1 hour
+const UPLOAD_URL_EXPIRY_SECONDS = 60 * 60; // 1 hour
+const DOWNLOAD_URL_EXPIRY_SECONDS = 12 * 60 * 60; // 12 hours
+
+export interface PresignedDownloadUrl {
+    url: string;
+    expiresInSeconds: number;
+}
 
 export class PdfExportStorage {
     private s3Client: S3Client;
@@ -22,14 +28,15 @@ export class PdfExportStorage {
         });
     }
 
-    public async getPresignedDownloadUrl(s3Key: string): Promise<string> {
+    public async getPresignedDownloadUrl(s3Key: string): Promise<PresignedDownloadUrl> {
         const command = new GetObjectCommand({
             Bucket: this.bucketName,
             Key: s3Key
         });
-        return getSignedUrl(this.s3Client, command, {
-            expiresIn: PRESIGNED_URL_EXPIRY_SECONDS
+        const url = await getSignedUrl(this.s3Client, command, {
+            expiresIn: DOWNLOAD_URL_EXPIRY_SECONDS
         });
+        return { url, expiresInSeconds: DOWNLOAD_URL_EXPIRY_SECONDS };
     }
 
     public async getPresignedUploadUrl(s3Key: string): Promise<string> {
@@ -39,7 +46,7 @@ export class PdfExportStorage {
             ContentType: "application/pdf"
         });
         return getSignedUrl(this.s3Client, command, {
-            expiresIn: PRESIGNED_URL_EXPIRY_SECONDS
+            expiresIn: UPLOAD_URL_EXPIRY_SECONDS
         });
     }
 

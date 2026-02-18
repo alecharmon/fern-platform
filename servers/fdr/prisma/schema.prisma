@@ -123,18 +123,20 @@ enum LibraryDocsGenerationStatus {
 
 // PDF Export Tasks
 model PdfExportTask {
-  id           String              @id
-  orgId        String
-  docsUrl      String
-  status       PdfExportTaskStatus @default(PENDING)
-  options      Json? // DocsPdfGenerateOptions from frontend
-  createdAt    DateTime            @default(now())
-  startedAt    DateTime?
-  completedAt  DateTime?
-  s3Key        String? // S3 key where the PDF is stored
-  fileName     String?
-  sizeBytes    Int?
-  errorMessage String?
+  id            String              @id
+  orgId         String
+  docsUrl       String
+  status        PdfExportTaskStatus @default(PENDING)
+  options       Json? // DocsPdfGenerateOptions from frontend
+  createdAt     DateTime            @default(now())
+  startedAt     DateTime?
+  completedAt   DateTime?
+  s3Key         String? // S3 key where the PDF is stored
+  fileName      String?
+  sizeBytes     Int?
+  errorMessage  String?
+  requesterName String? // Display name of the user who requested the export
+  notifyEmails  String[] // Email addresses to notify when the export completes
 
   @@index([orgId, docsUrl])
   @@index([status])

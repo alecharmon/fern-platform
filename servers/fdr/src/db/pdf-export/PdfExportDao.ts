@@ -23,6 +23,8 @@ export interface CreatePdfExportTaskParams {
     orgId: string;
     docsUrl: string;
     options?: FernRegistry.pdfExport.PdfExportOptions;
+    requesterName?: string;
+    notifyEmails?: string[];
 }
 
 export interface UpdatePdfExportTaskStatusParams {
@@ -59,6 +61,10 @@ export class PdfExportDaoImpl implements PdfExportDao {
                 id: params.id,
                 orgId: params.orgId,
                 docsUrl: params.docsUrl,
+                ...(params.requesterName != null ? { requesterName: params.requesterName } : {}),
+                ...(params.notifyEmails != null && params.notifyEmails.length > 0
+                    ? { notifyEmails: params.notifyEmails }
+                    : {}),
                 ...(options !== undefined ? { options } : {}),
                 status: "PENDING"
             }
@@ -111,7 +117,9 @@ export class PdfExportDaoImpl implements PdfExportDao {
             completedAt: task.completedAt?.toISOString(),
             fileName: task.fileName ?? undefined,
             sizeBytes: task.sizeBytes ?? undefined,
-            errorMessage: task.errorMessage ?? undefined
+            errorMessage: task.errorMessage ?? undefined,
+            requesterName: task.requesterName ?? undefined,
+            notifyEmails: task.notifyEmails
         };
     }
 

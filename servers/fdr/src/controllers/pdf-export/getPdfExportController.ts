@@ -15,6 +15,8 @@ export function getPdfExportController(app: FdrApplication): PdfExportService {
             const task = await app.services.pdfExport.createTask({
                 orgId: req.body.orgId,
                 docsUrl: req.body.docsUrl,
+                requesterName: req.body.requesterName,
+                notifyEmails: req.body.notifyEmails,
                 options: req.body.options
             });
             return res.send(task);
@@ -50,11 +52,20 @@ export function getPdfExportController(app: FdrApplication): PdfExportService {
 
         updateTask: async (req, res) => {
             await app.services.pdfExport.verifyDocsPdfExporterLambdaToken(req.headers.authorization);
-            const task = await app.services.pdfExport.getTask(req.params.taskId);
-            if (task == null) {
+            const prevTask = await app.services.pdfExport.getTask(req.params.taskId);
+            if (prevTask == null) {
                 throw new PdfExportTaskNotFoundError();
             }
             const updatedTask = await app.services.pdfExport.updateTaskStatus(req.params.taskId, req.body);
+            if (prevTask.status !== "COMPLETED" && updatedTask.status === "COMPLETED") {
+                await app.services.pdfExport.sendCompletionEmail({
+                    taskId: req.params.taskId,
+                    docsUrl: updatedTask.docsUrl,
+                    completedAt: updatedTask.completedAt,
+                    requesterName: updatedTask.requesterName,
+                    notifyEmails: updatedTask.notifyEmails
+                });
+            }
             return res.send(updatedTask);
         },
 

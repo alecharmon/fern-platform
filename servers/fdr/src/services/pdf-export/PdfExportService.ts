@@ -1,3 +1,4 @@
+import { FernEmailClient } from "@fern-platform/emails";
 import { jwtVerify } from "jose";
 import { v4 as uuidv4 } from "uuid";
 import type { FernRegistry } from "../../api/generated";
@@ -9,7 +10,17 @@ import { PdfExportStorage } from "./PdfExportStorage";
 export interface CreatePdfExportTaskParams {
     orgId: string;
     docsUrl: string;
+    requesterName?: string;
+    notifyEmails?: string[];
     options?: FernRegistry.pdfExport.PdfExportOptions;
+}
+
+export interface SendCompletionEmailParams {
+    taskId: string;
+    docsUrl: string;
+    completedAt?: string;
+    requesterName?: string;
+    notifyEmails?: string[];
 }
 
 export interface PdfExportService {
@@ -20,6 +31,7 @@ export interface PdfExportService {
         taskId: string,
         params: FernRegistry.pdfExport.UpdatePdfExportTaskStatusRequest
     ): Promise<FernRegistry.pdfExport.PdfExportTask>;
+    sendCompletionEmail(params: SendCompletionEmailParams): Promise<void>;
     getDownloadUrl(taskId: string): Promise<FernRegistry.pdfExport.PdfExportDownloadResponse>;
     verifyDocsPdfExporterLambdaToken(authHeader: string | undefined): Promise<void>;
 }
@@ -30,10 +42,20 @@ const encoder = new TextEncoder();
 export class PdfExportServiceImpl implements PdfExportService {
     private storage: PdfExportStorage;
     private sqsClient: PdfExportSqsClient;
+    private emailClient: FernEmailClient | undefined;
 
-    constructor(private readonly app: FdrApplication) {
+    public constructor(private readonly app: FdrApplication) {
         this.storage = new PdfExportStorage(app.config);
         this.sqsClient = new PdfExportSqsClient(app.config.pdfExportSqs);
+        if (app.config.resendApiKey != null) {
+            this.emailClient = new FernEmailClient({
+                resendApiKey: app.config.resendApiKey,
+                fromEmailAddress: "Fern <no-reply@updates.buildwithfern.com>"
+            });
+        } else {
+            this.emailClient = undefined;
+            this.app.logger.info("RESEND_API_KEY not set; PDF export completion emails will be skipped.");
+        }
     }
 
     public async createTask(params: CreatePdfExportTaskParams): Promise<FernRegistry.pdfExport.PdfExportTask> {
@@ -42,6 +64,8 @@ export class PdfExportServiceImpl implements PdfExportService {
             id: taskId,
             orgId: params.orgId,
             docsUrl: params.docsUrl,
+            requesterName: params.requesterName,
+            notifyEmails: params.notifyEmails,
             options: params.options
         });
 
@@ -77,7 +101,7 @@ export class PdfExportServiceImpl implements PdfExportService {
         return tasks.map((task) => this.app.dao.pdfExport().convertPdfExportTaskFromDb(task));
     }
 
-    async updateTaskStatus(
+    public async updateTaskStatus(
         taskId: string,
         params: FernRegistry.pdfExport.UpdatePdfExportTaskStatusRequest
     ): Promise<FernRegistry.pdfExport.PdfExportTask> {
@@ -93,6 +117,45 @@ export class PdfExportServiceImpl implements PdfExportService {
         return this.app.dao.pdfExport().convertPdfExportTaskFromDb(task);
     }
 
+    /**
+     * Generates a download URL and sends the completion notification email.
+     */
+    public async sendCompletionEmail(params: SendCompletionEmailParams): Promise<void> {
+        if (this.emailClient == null) {
+            return;
+        }
+
+        const userFirstName = params.requesterName?.split(/\s+/)[0] ?? "there";
+        const s3Key = this.storage.getS3KeyForTask(params.taskId, params.docsUrl);
+        const download = await this.storage.getPresignedDownloadUrl(s3Key);
+
+        if (params.notifyEmails == null || params.notifyEmails.length === 0) {
+            return;
+        }
+
+        try {
+            await this.emailClient.sendEmail({
+                to: params.notifyEmails,
+                template: {
+                    type: "pdf-export-complete",
+                    props: {
+                        userFirstName,
+                        docsSiteUrl: params.docsUrl,
+                        exportTimestamp: params.completedAt != null ? new Date(params.completedAt) : undefined,
+                        downloadUrl: download.url,
+                        downloadUrlExpiresInHours: Math.floor(download.expiresInSeconds / 3600)
+                    }
+                }
+            });
+        } catch (e) {
+            this.app.logger.error("Failed to send PDF export completion email", {
+                taskId: params.taskId,
+                toEmails: params.notifyEmails,
+                error: e instanceof Error ? e.message : String(e)
+            });
+        }
+    }
+
     public async getDownloadUrl(taskId: string): Promise<FernRegistry.pdfExport.PdfExportDownloadResponse> {
         const task = await this.app.dao.pdfExport().getTask(taskId);
         if (task == null) {
@@ -103,10 +166,10 @@ export class PdfExportServiceImpl implements PdfExportService {
             throw new Error(`PDF export task ${taskId} is not completed`);
         }
 
-        const downloadUrl = await this.storage.getPresignedDownloadUrl(task.s3Key);
+        const download = await this.storage.getPresignedDownloadUrl(task.s3Key);
 
         return {
-            downloadUrl,
+            downloadUrl: download.url,
             fileName: task.fileName ?? `${task.docsUrl.replace(/\./g, "-")}.pdf`,
             sizeBytes: task.sizeBytes ?? 0
         };

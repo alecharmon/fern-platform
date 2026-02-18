@@ -37,6 +37,8 @@ export const POST = withZodValidation(
         const resp = await fdr.pdfExport.createTask({
             orgId: FdrAPI.OrgId(body.orgName),
             docsUrl: body.docsUrl,
+            requesterName: session.name,
+            notifyEmails: session.email != null ? [session.email] : undefined,
             options: {
                 version: "v1",
                 coverTitle: body.options?.coverTitle,
