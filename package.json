@@ -241,10 +241,11 @@
       "elliptic": "npm:@soatok/elliptic-to-noble@9999.0.0",
       "fast-xml-parser": "^5.3.4",
       "qs": "^6.14.2",
-      "tar": "^7.5.7",
+      "tar": "^7.5.8",
       "vite": "^6.4.1",
       "webpack-bundle-analyzer>ws": "^7.5.10",
-      "ajv@>=8.0.0 <8.18.0": "8.18.0"
+      "ajv@>=8.0.0 <8.18.0": "8.18.0",
+      "bytes@>=1.0.0 <1.11.1": "1.11.1"
     }
   },
   "nextBundleAnalysis": {

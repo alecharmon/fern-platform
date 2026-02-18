@@ -101,10 +101,11 @@ EXPOSE 16686
 
 # ----------- End Jaeger setup -----------
 
-# ----------- Start npm vulnerability patches -----------
+# -----------  Start npm vulnerability patches -----------
 # Apply patches to ALL node_modules directories (system and app-specific)
 # The base image has patches prepared in /tmp/patches/
-# Patches: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0, brace-expansion 2.0.x -> 2.0.2, tar 7.x (<7.5.7) -> 7.5.7
+# Patches: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0, brace-expansion 2.0.x -> 2.0.2,
+#          tar 7.x (<7.5.8) -> 7.5.8, bytes <1.11.1 -> 1.11.1, ajv 8.x (<8.18.0) -> 8.18.0
 RUN log "Applying npm vulnerability patches to all node_modules..." && \
     for root in /usr/local/lib/node_modules /usr/lib/node_modules /opt/buf-modules /tmp/npm-global/lib/node_modules /fdr /nextapp; do \
         if [ -d "$root" ]; then \
@@ -127,15 +128,29 @@ RUN log "Applying npm vulnerability patches to all node_modules..." && \
             find "$root" -path "*/node_modules/tar/package.json" -o -path "*/dist/node_modules/tar/package.json" 2>/dev/null | while read -r pkg; do \
                 dir=$(dirname "$pkg"); \
                 version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
-                if echo "$version" | grep -qE "^7\.[0-4]\." || echo "$version" | grep -qE "^7\.5\.[0-6]$"; then \
-                    rm -rf "$dir" && cp -r /tmp/patches/tar/package "$dir" && log "Patched tar $version -> 7.5.7 at $dir"; \
+                if echo "$version" | grep -qE "^7\.[0-4]\." || echo "$version" | grep -qE "^7\.5\.[0-7]$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/tar/package "$dir" && log "Patched tar $version -> 7.5.8 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/bytes/package.json" -o -path "*/dist/node_modules/bytes/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -qE "^1\.(([0-9]|10)\..*|11\.0)$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/bytes/package "$dir" && log "Patched bytes $version -> 1.11.1 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/ajv/package.json" -o -path "*/dist/node_modules/ajv/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -qE "^8\.(1[0-7])\." || echo "$version" | grep -qE "^8\.[0-9]\." ; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/ajv/package "$dir" && log "Patched ajv $version -> 8.18.0 at $dir"; \
                 fi; \
             done; \
         fi; \
     done && \
     rm -rf /tmp/patches
 
-# ----------- End npm vulnerability patches -----------
+# -----------  End npm vulnerability patches -----------
 
 # ----------- Setup for non-root execution -----------
 # Ensure /tmp directory has proper permissions (sticky bit + world writable)
