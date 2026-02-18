@@ -91,6 +91,11 @@ const server = Bun.serve<WebSocketData>({
 
         // Handle cache control endpoints
         if (url.pathname.startsWith("/__cache/")) {
+            // Health endpoint: no auth required so K8s probes and readiness.sh can reach it
+            if (url.pathname === "/__cache/health") {
+                return Response.json({ status: "ok", timestamp: new Date().toISOString() });
+            }
+
             const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
             const queryToken = url.searchParams.get("token") || "";
             if (bearer !== CACHE_ADMIN_TOKEN && queryToken !== CACHE_ADMIN_TOKEN) {

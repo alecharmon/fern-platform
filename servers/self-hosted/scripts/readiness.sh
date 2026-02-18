@@ -120,8 +120,8 @@ if ! check_docs_generation; then
     FAILED=1
 fi
 
-# Check Cache Proxy stats endpoint (confirms proxy is running)
-if ! check_http_endpoint "http://localhost:3000/__cache/stats" "Cache Proxy"; then
+# Check Cache Proxy health endpoint (confirms proxy is running)
+if ! check_http_endpoint "http://localhost:3000/__cache/health" "Cache Proxy"; then
     FAILED=1
 fi
 
