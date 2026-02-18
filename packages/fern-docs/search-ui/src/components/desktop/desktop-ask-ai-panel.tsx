@@ -284,6 +284,14 @@ const DesktopAskAIChat = ({
         }
     }, [queryId, setQueryId]);
 
+    useEffect(() => {
+        if (isSidePanelOpen) {
+            requestAnimationFrame(() => {
+                inputRef.current?.focus();
+            });
+        }
+    }, [isSidePanelOpen]);
+
     const defaultTransportBody = useMemo(() => {
         return {
             ...body,

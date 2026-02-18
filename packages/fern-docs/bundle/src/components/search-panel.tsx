@@ -282,29 +282,28 @@ export const SearchPanel = React.memo(function SearchPanel({
             authenticatedUserToken={user?.email}
             analyticsTags={["search-v2-dialog"]}
         >
-            {/* Desktop: fixed side panel (no animation, appears instantly) */}
-            {isOpen && (
+            {/* Desktop: fixed side panel (always mounted to preserve chat history) */}
+            <div
+                className={cn(
+                    "bg-background border-border-default fixed inset-y-0 right-0 z-50 flex flex-col border-l",
+                    "max-md:hidden", // Hidden on mobile/tablet - use drawer instead
+                    isResizing && "transition-none",
+                    !isOpen && "hidden"
+                )}
+                style={{ width: `${width}px` }}
+            >
+                {/* Resize Handle */}
                 <div
                     className={cn(
-                        "bg-background border-border-default fixed inset-y-0 right-0 z-50 flex flex-col border-l",
-                        "max-md:hidden", // Hidden on mobile/tablet - use drawer instead
-                        isResizing && "transition-none"
+                        "absolute bottom-0 left-0 top-0 z-10 w-2 cursor-col-resize bg-transparent",
+                        isResizing && "bg-primary/30",
+                        "-translate-x-1 transition-transform"
                     )}
-                    style={{ width: `${width}px` }}
-                >
-                    {/* Resize Handle */}
-                    <div
-                        className={cn(
-                            "absolute bottom-0 left-0 top-0 z-10 w-2 cursor-col-resize bg-transparent",
-                            isResizing && "bg-primary/30",
-                            "-translate-x-1 transition-transform"
-                        )}
-                        onMouseDown={handleMouseDown}
-                    />
+                    onMouseDown={handleMouseDown}
+                />
 
-                    <div className="flex-1 overflow-y-auto">{panelContent}</div>
-                </div>
-            )}
+                <div className="flex-1 overflow-y-auto">{panelContent}</div>
+            </div>
 
             {/* Mobile/Tablet: bottom drawer */}
             <Drawer.Root
