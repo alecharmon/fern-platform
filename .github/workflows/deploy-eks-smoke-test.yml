@@ -170,18 +170,12 @@ jobs:
           
           echo "All health checks passed!"
 
-      - name: Update service to LoadBalancer type
+      - name: Get LoadBalancer URL
         id: loadbalancer
         run: |
-          echo "Updating service to LoadBalancer type for external access..."
+          echo "Retrieving LoadBalancer URL..."
           
-          # Patch the service to use LoadBalancer type with internet-facing scheme
-          kubectl patch service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} \
-            -p '{"metadata": {"annotations": {"service.beta.kubernetes.io/aws-load-balancer-scheme": "internet-facing"}}, "spec": {"type": "LoadBalancer"}}'
-          
-          echo "Waiting for LoadBalancer to be provisioned..."
-          
-          # Wait for the LoadBalancer hostname to be assigned
+          # Wait for the LoadBalancer hostname to be assigned (may already exist)
           for i in {1..30}; do
             LB_HOSTNAME=$(kubectl get service ${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} \
               -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
