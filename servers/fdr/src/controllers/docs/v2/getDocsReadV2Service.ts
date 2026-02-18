@@ -87,18 +87,6 @@ export function getDocsReadV2Service(app: FdrApplication): DocsV2ReadService {
             });
             return res.send(response);
         },
-        getOrganizationForUrl: async (req, res) => {
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
-                orgId: "fern"
-            });
-            const parsedUrl = ParsedBaseUrl.parse(req.body.url);
-            const orgId = await app.dao.docsV2().getOrgIdForDocsUrl(parsedUrl.toURL());
-            if (orgId == null) {
-                throw new DocsV2Read.DomainNotRegisteredError();
-            }
-            return res.send(orgId);
-        },
         getDocsConfigById: async (req, res) => {
             try {
                 // if the auth header belongs to fern, return the docs definition

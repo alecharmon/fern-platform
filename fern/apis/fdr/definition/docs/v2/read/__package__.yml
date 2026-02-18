@@ -13,19 +13,7 @@ service:
   audiences:
     - read
   endpoints:
-    getOrganizationForUrl:
-      method: POST
-      path: /organization-for-url
-      request:
-        name: GetOrganizationForUrlRequest
-        body:
-          properties:
-            url: rootCommons.Url
-      response: rootCommons.OrgId
-      errors:
-        - DomainNotRegisteredError
-    
-    getDocsUrlMetadata: 
+    getDocsUrlMetadata:
       method: POST
       path: /metadata-for-url
       audiences:

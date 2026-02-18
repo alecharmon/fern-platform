@@ -1,9 +1,10 @@
 import { FdrClient } from "@fern-api/fdr-sdk";
+import { OpenAPIHandler } from "@orpc/openapi/node";
+import { onError } from "@orpc/server";
 import { PrismaClient } from "@prisma/client";
 import { execa } from "execa";
 import express from "express";
 import type http from "http";
-
 import { register } from "../../api";
 import type { FdrApplication, FdrConfig } from "../../app";
 import { getApiLatestService } from "../../controllers/api/getApiLatestService";
@@ -15,6 +16,7 @@ import { getDocsReadService } from "../../controllers/docs/v1/getDocsReadService
 import { getDocsWriteService } from "../../controllers/docs/v1/getDocsWriteService";
 import { getDocsReadV2Service } from "../../controllers/docs/v2/getDocsReadV2Service";
 import { getDocsWriteV2Service } from "../../controllers/docs/v2/getDocsWriteV2Service";
+import { createGetOrganizationForUrlRouter } from "../../controllers/docs/v2/getOrganizationForUrlRouter";
 import { getDocsCacheService } from "../../controllers/docs-cache/getDocsCacheService";
 import { getGeneratorsCliController } from "../../controllers/generators/getGeneratorsCliController";
 import { getGeneratorsRootController } from "../../controllers/generators/getGeneratorsRootController";
@@ -104,6 +106,27 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
     });
     const app = express();
     await fdrApplication.initialize();
+
+    const orgForUrlRouter = createGetOrganizationForUrlRouter(fdrApplication);
+    const orgForUrlHandler = new OpenAPIHandler(orgForUrlRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC getOrganizationForUrl error:", error);
+            })
+        ]
+    });
+
+    app.use("/v2/registry/docs", async (req, res, next) => {
+        const { matched } = await orgForUrlHandler.handle(req, res, {
+            prefix: "/v2/registry/docs",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     register(app, {
         docs: {
             v1: {

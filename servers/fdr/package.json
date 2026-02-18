@@ -32,6 +32,8 @@
     "test:update": "vitest --run src/** --globals -u"
   },
   "dependencies": {
+    "@orpc/openapi": "^1.13.5",
+    "@orpc/server": "^1.13.5",
     "@prisma/client": "5.13.0",
     "jose": "catalog:"
   },
@@ -44,7 +46,6 @@
     "@babel/preset-env": "^7.26.0",
     "@babel/preset-typescript": "^7.26.0",
     "@fern-api/docs-pdf": "workspace:*",
-    "@fern-platform/emails": "workspace:*",
     "@fern-api/fdr-lambda-sdk": "workspace:*",
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/github": "workspace:*",
@@ -57,6 +58,7 @@
     "@fern-fern/fern-docs-sdk": "0.0.5",
     "@fern-fern/revalidation-sdk": "0.0.9",
     "@fern-platform/configs": "workspace:*",
+    "@fern-platform/emails": "workspace:*",
     "@sentry/cli": "^2.31.0",
     "@sentry/node": "7.114.0",
     "@sentry/profiling-node": "7.114.0",

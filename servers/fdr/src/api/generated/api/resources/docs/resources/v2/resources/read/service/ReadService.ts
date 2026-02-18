@@ -5,15 +5,6 @@ import * as errors from "../../../../../../../../errors/index";
 import type * as FernRegistry from "../../../../../../../index";
 
 export interface ReadServiceMethods {
-    getOrganizationForUrl(
-        req: express.Request<never, FernRegistry.OrgId, FernRegistry.docs.v2.read.GetOrganizationForUrlRequest, never>,
-        res: {
-            send: (responseBody: FernRegistry.OrgId) => Promise<void>;
-            cookie: (cookie: string, value: string, options?: express.CookieOptions) => void;
-            locals: any;
-        },
-        next: express.NextFunction,
-    ): void | Promise<void>;
     getDocsUrlMetadata(
         req: express.Request<
             never,
@@ -151,40 +142,7 @@ export class ReadService {
     }
 
     public toRouter(): express.Router {
-        this.router.post("/organization-for-url", async (req, res, next) => {
-            try {
-                await this.methods.getOrganizationForUrl(
-                    req as any,
-                    {
-                        send: async (responseBody) => {
-                            res.json(responseBody);
-                        },
-                        cookie: res.cookie.bind(res),
-                        locals: res.locals,
-                    },
-                    next,
-                );
-                if (!res.writableEnded) {
-                    next();
-                }
-            } catch (error) {
-                if (error instanceof errors.FernRegistryError) {
-                    switch (error.errorName) {
-                        case "DomainNotRegisteredError":
-                            break;
-                        default:
-                            console.warn(
-                                `Endpoint 'getOrganizationForUrl' unexpectedly threw ${error.constructor.name}. If this was intentional, please add ${error.constructor.name} to the endpoint's errors list in your Fern Definition.`,
-                            );
-                    }
-                    await error.send(res);
-                } else {
-                    res.status(500).json("Internal Server Error");
-                }
-                next(error);
-            }
-        });
-        this.router.post("/metadata-for-url", async (req, res, next) => {
+        this.router.post("/metadata-for-url",async (req, res, next) => {
             try {
                 await this.methods.getDocsUrlMetadata(
                     req as any,

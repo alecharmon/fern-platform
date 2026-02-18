@@ -1,8 +1,9 @@
+import { OpenAPIHandler } from "@orpc/openapi/node";
+import { onError } from "@orpc/server";
 import compression from "compression";
 import cors from "cors";
 import express from "express";
 import { Agent, setGlobalDispatcher } from "undici";
-
 import { register } from "./api";
 import { getConfig } from "./app";
 import { createFdrApplication } from "./app/FdrApplication";
@@ -15,6 +16,7 @@ import { getDocsReadService } from "./controllers/docs/v1/getDocsReadService";
 import { getDocsWriteService } from "./controllers/docs/v1/getDocsWriteService";
 import { getDocsReadV2Service } from "./controllers/docs/v2/getDocsReadV2Service";
 import { getDocsWriteV2Service } from "./controllers/docs/v2/getDocsWriteV2Service";
+import { createGetOrganizationForUrlRouter } from "./controllers/docs/v2/getOrganizationForUrlRouter";
 import { getDocsCacheService } from "./controllers/docs-cache/getDocsCacheService";
 import { getGeneratorsCliController } from "./controllers/generators/getGeneratorsCliController";
 import { getGeneratorsRootController } from "./controllers/generators/getGeneratorsRootController";
@@ -72,6 +74,27 @@ void startServer();
 async function startServer(): Promise<void> {
     try {
         await app.initialize();
+
+        const orgForUrlRouter = createGetOrganizationForUrlRouter(app);
+        const orgForUrlHandler = new OpenAPIHandler(orgForUrlRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC getOrganizationForUrl error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/v2/registry/docs", async (req, res, next) => {
+            const { matched } = await orgForUrlHandler.handle(req, res, {
+                prefix: "/v2/registry/docs",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         expressApp.use(express.json({ limit: "100mb" }));
         register(expressApp, {
             docs: {
