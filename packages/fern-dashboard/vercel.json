@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "pnpm install && pnpm exec playwright install chromium",
+  "installCommand": "pnpm install --filter @fern-dashboard/ui...",
   "buildCommand": "pnpm turbo dashboard:build",
   "devCommand": "pnpm turbo dashboard:dev",
   "git": {

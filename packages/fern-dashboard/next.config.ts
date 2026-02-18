@@ -7,8 +7,9 @@ import type { NextConfig } from "next";
 import withRspack from "next-rspack";
 import webpack from "webpack";
 
-const isRspackEnabled = process.env.NODE_ENV === "development";
-const isSentryEnabled = process.env.NODE_ENV === "production";
+const isVercelPreview = process.env.VERCEL_ENV === "preview";
+const isRspackEnabled = process.env.NODE_ENV === "development" || isVercelPreview;
+const isSentryEnabled = process.env.NODE_ENV === "production" && !isVercelPreview;
 
 const CSP_HEADER = `
   default-src 'self';
@@ -24,7 +25,7 @@ const CSP_HEADER = `
 `.replace(/\n/g, "");
 
 let nextConfig: NextConfig = {
-    productionBrowserSourceMaps: true,
+    productionBrowserSourceMaps: !isVercelPreview,
     outputFileTracingExcludes: {
         "./": ["**/*.map"]
     },
@@ -256,7 +257,7 @@ let nextConfig: NextConfig = {
     skipTrailingSlashRedirect: true
 };
 
-// only use rspack in development
+// use rspack in development and preview builds for faster compilation
 if (isRspackEnabled) {
     nextConfig = withRspack(nextConfig);
 }
@@ -277,7 +278,7 @@ if (isSentryEnabled) {
         // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
         // Upload a larger set of source maps for prettier stack traces (increases build time)
-        widenClientFileUpload: true,
+        widenClientFileUpload: !isVercelPreview,
 
         // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
         // This can increase your server load as well as your hosting bill.
