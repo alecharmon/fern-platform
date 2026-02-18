@@ -36,7 +36,9 @@ export function DocsSitesList({ docsSitesData, orgName, isCreateDocsNewSiteEnabl
                         href={`/${currentOrgName}/docs/${site.urlParam}`}
                         className={cn(
                             "flex items-center gap-2 px-3 py-2 text-sm rounded-md transition",
-                            isSiteSelected ? "bg-green-50 text-primary font-medium" : "hover:bg-gray-100 text-gray-900"
+                            isSiteSelected
+                                ? "bg-green-50 dark:bg-green-900/20 text-primary font-medium"
+                                : "hover:bg-gray-100 dark:hover:bg-accent text-gray-900"
                         )}
                         onClick={onItemClick}
                     >
@@ -53,7 +55,7 @@ export function DocsSitesList({ docsSitesData, orgName, isCreateDocsNewSiteEnabl
                     }}
                     className={cn(
                         "flex items-center gap-2 px-3 py-2 text-sm rounded-md transition",
-                        "hover:bg-gray-100 text-gray-900"
+                        "hover:bg-gray-100 dark:hover:bg-accent text-gray-900"
                     )}
                 >
                     <PlusIcon className="h-4 w-4" />
@@ -68,7 +70,7 @@ export function DocsSitesList({ docsSitesData, orgName, isCreateDocsNewSiteEnabl
                     }
                     className={cn(
                         "flex items-center gap-2 px-3 py-2 text-sm rounded-md transition",
-                        "hover:bg-gray-100 text-gray-900"
+                        "hover:bg-gray-100 dark:hover:bg-accent text-gray-900"
                     )}
                     target={isCreateDocsNewSiteEnabled ? "_self" : "_blank"}
                     onClick={onItemClick}
