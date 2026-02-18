@@ -15,6 +15,7 @@ import { getDocsReadService } from "./controllers/docs/v1/getDocsReadService";
 import { getDocsWriteService } from "./controllers/docs/v1/getDocsWriteService";
 import { getDocsReadV2Service } from "./controllers/docs/v2/getDocsReadV2Service";
 import { getDocsWriteV2Service } from "./controllers/docs/v2/getDocsWriteV2Service";
+import { createLibraryDocsRouter } from "./controllers/docs/v2/getLibraryDocsRouter";
 import { createGetOrganizationForUrlRouter } from "./controllers/docs/v2/getOrganizationForUrlRouter";
 import { getDocsCacheService } from "./controllers/docs-cache/getDocsCacheService";
 import { createGeneratorVersionsRouter } from "./controllers/generators/generatorVersionsRouter";
@@ -83,12 +84,28 @@ async function startServer(): Promise<void> {
             ]
         });
 
+        const libraryDocsRouter = createLibraryDocsRouter(app);
+        const libraryDocsHandler = new OpenAPIHandler(libraryDocsRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC libraryDocs error:", error);
+                })
+            ]
+        });
+
         expressApp.use("/v2/registry/docs", async (req, res, next) => {
-            const { matched } = await orgForUrlHandler.handle(req, res, {
+            const { matched: orgMatched } = await orgForUrlHandler.handle(req, res, {
                 prefix: "/v2/registry/docs",
                 context: { headers: req.headers }
             });
-            if (matched) {
+            if (orgMatched) {
+                return;
+            }
+            const { matched: libDocsMatched } = await libraryDocsHandler.handle(req, res, {
+                prefix: "/v2/registry/docs",
+                context: { headers: req.headers }
+            });
+            if (libDocsMatched) {
                 return;
             }
             next();

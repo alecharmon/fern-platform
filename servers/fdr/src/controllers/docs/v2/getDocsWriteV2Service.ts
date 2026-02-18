@@ -16,12 +16,8 @@ import { DocsRegistrationIdNotFound } from "../../../api/generated/api/resources
 import { DomainNotRegisteredError } from "../../../api/generated/api/resources/docs/resources/v2/resources/read";
 import {
     CannotDeleteNonPreviewSiteError,
-    InvalidCustomDomainError,
-    LibraryDocsGenerationNotCompleteError,
-    LibraryDocsJobNotFoundError,
-    UnsupportedLanguageError
+    InvalidCustomDomainError
 } from "../../../api/generated/api/resources/docs/resources/v2/resources/write/errors";
-import { LibraryDocsJobId } from "../../../api/generated/api/resources/docs/resources/v2/resources/write/types/LibraryDocsJobId";
 import type { FdrApplication } from "../../../app";
 import type { S3DocsFileInfo } from "../../../services/s3";
 import { ParsedBaseUrl } from "../../../util/ParsedBaseUrl";
@@ -546,71 +542,6 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
             }
 
             return res.send();
-        },
-
-        // Library Documentation Generation Endpoints
-        startLibraryDocsGeneration: async (req, res) => {
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
-                orgId: req.body.orgId
-            });
-
-            // TODO(paarthfern): Validate GitHub URL
-            const githubUrl = req.body.githubUrl;
-
-            // Validate language
-            const language = req.body.language;
-            if (language !== "PYTHON" && language !== "CPP") {
-                throw new UnsupportedLanguageError(`Unsupported language: ${language}. Supported: PYTHON, CPP`);
-            }
-
-            // Currently only Python is implemented
-            if (language !== "PYTHON") {
-                throw new UnsupportedLanguageError(
-                    `Language ${language} is not yet implemented. Currently supported: PYTHON`
-                );
-            }
-
-            const jobId = await app.services.libraryDocs.startGeneration({
-                orgId: req.body.orgId,
-                githubUrl,
-                language,
-                config: req.body.config
-            });
-
-            return res.send({ jobId: LibraryDocsJobId(jobId) });
-        },
-
-        getLibraryDocsGenerationStatus: async (req, res) => {
-            const status = await app.services.libraryDocs.getStatus(req.params.jobId);
-
-            if (status == null) {
-                throw new LibraryDocsJobNotFoundError();
-            }
-
-            return res.send(status);
-        },
-
-        getLibraryDocsResult: async (req, res) => {
-            // First check if job exists
-            const status = await app.services.libraryDocs.getStatus(req.params.jobId);
-            if (status == null) {
-                throw new LibraryDocsJobNotFoundError();
-            }
-
-            // Check if completed
-            if (status.status !== "COMPLETED") {
-                throw new LibraryDocsGenerationNotCompleteError(
-                    `Job ${req.params.jobId} is not complete. Current status: ${status.status}`
-                );
-            }
-
-            const result = await app.services.libraryDocs.getResult(req.params.jobId);
-            if (result == null) {
-                throw new LibraryDocsGenerationNotCompleteError(`Result not available for job ${req.params.jobId}`);
-            }
-
-            return res.send(result);
         }
     });
 }

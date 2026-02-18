@@ -189,49 +189,6 @@ service:
         - rootCommons.UnauthorizedError
         - CannotDeleteNonPreviewSiteError
 
-    # Library Documentation Generation Endpoints
-    startLibraryDocsGeneration:
-      auth: true
-      method: POST
-      path: /library-docs/generate
-      docs: Start async documentation generation for a library from source code.
-      request:
-        name: StartLibraryDocsGenerationRequest
-        body:
-          properties:
-            orgId: rootCommons.OrgId
-            githubUrl: rootCommons.Url
-            language: LibraryLanguage
-            config: optional<LibraryDocsConfig>
-      response: StartLibraryDocsGenerationResponse
-      errors:
-        - rootCommons.UnauthorizedError
-        - rootCommons.UserNotInOrgError
-        - InvalidGithubUrlError
-        - UnsupportedLanguageError
-
-    getLibraryDocsGenerationStatus:
-      auth: true
-      method: GET
-      path: /library-docs/status/{jobId}
-      docs: Get the status of a documentation generation job.
-      path-parameters:
-        jobId: LibraryDocsJobId
-      response: LibraryDocsGenerationStatus
-      errors:
-        - LibraryDocsJobNotFoundError
-
-    getLibraryDocsResult:
-      auth: true
-      method: GET
-      path: /library-docs/result/{jobId}
-      docs: Get the result of a completed documentation generation job.
-      path-parameters:
-        jobId: LibraryDocsJobId
-      response: LibraryDocsResult
-      errors:
-        - LibraryDocsJobNotFoundError
-        - LibraryDocsGenerationNotCompleteError
 
 types:
   FilePathWithHash:

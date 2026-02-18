@@ -6,5 +6,4 @@ export { SetDocsUrlMetadataRequest } from "./SetDocsUrlMetadataRequest";
 export { SetIsArchivedRequest } from "./SetIsArchivedRequest";
 export { StartDocsPreviewRegisterRequestV2 } from "./StartDocsPreviewRegisterRequestV2";
 export { StartDocsRegisterRequestV2 } from "./StartDocsRegisterRequestV2";
-export { StartLibraryDocsGenerationRequest } from "./StartLibraryDocsGenerationRequest";
 export { TransferDomainOwnershipRequest } from "./TransferDomainOwnershipRequest";
