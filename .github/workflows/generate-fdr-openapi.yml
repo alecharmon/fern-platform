@@ -1,0 +1,35 @@
+name: Generate FDR OpenAPI Spec
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - "servers/fdr/**"
+
+jobs:
+  generate-openapi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Generate OpenAPI spec
+        run: pnpm --filter=@fern-platform/fdr generate:openapi
+
+      - name: Check for OpenAPI spec changes
+        run: |
+          if git diff --exit-code servers/fdr/openapi.json; then
+            echo "OpenAPI spec is up to date."
+          else
+            echo "::error::OpenAPI spec is out of date. Please run 'pnpm --filter=@fern-platform/fdr generate:openapi' and commit the changes."
+            exit 1
+          fi
+
+      - name: Upload OpenAPI spec
+        uses: actions/upload-artifact@v4
+        with:
+          name: fdr-openapi-spec
+          path: servers/fdr/openapi.json
